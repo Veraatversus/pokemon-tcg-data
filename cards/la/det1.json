@@ -1,0 +1,1002 @@
+[
+    {
+        "id": "gum_1",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Basic Stage"
+        ],
+        "types": [
+            "Grass"
+        ],
+        "hp": 60,
+        "Release Date": "2019-03-29T17:00:00.0000000Z",
+        "Craftable Date": "2019-03-29 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Bulbasaur",
+        "evolvesInto": [
+            "Ivysaur"
+        ],
+        "name": "Bulbasaur",
+        "rarity": "Common",
+        "attacks": [
+            {
+                "name": "Encontrar un Amigo",
+                "text": "Busca en tu baraja 1 Pokémon grass, enséñalo y ponlo en tu mano. Después, baraja las cartas de tu baraja.",
+                "cost": "G",
+                "damage": "",
+                "convertedEnergyCost": 1
+            }
+        ],
+        "abilities": [],
+        "weaknesses": [
+            {
+                "type": "Fire",
+                "amount": "×2"
+            }
+        ],
+        "number": "1",
+        "regulationMark": "SM",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless"
+        ],
+        "convertedRetreatCost": 1,
+        "images": {
+            "small": "https://images.pokedata.ovh/la/gum/1.webp",
+            "large": "https://images.pokedata.ovh/la/gum/1_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "gum_2",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Stage 2"
+        ],
+        "types": [
+            "Grass"
+        ],
+        "hp": 140,
+        "Release Date": "2019-03-29T17:00:00.0000000Z",
+        "Craftable Date": "2019-03-29 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Lotad",
+        "name": "Ludicolo",
+        "rarity": "Rare",
+        "attacks": [
+            {
+                "name": "Pega y Corre",
+                "text": "Cambia este Pokémon por 1 de tus Pokémon en Banca.",
+                "cost": "GCC",
+                "damage": "70",
+                "convertedEnergyCost": 3
+            }
+        ],
+        "abilities": [
+            {
+                "name": "[Ability] Servicio de Mesa",
+                "text": "Una vez durante tu turno <i>(antes de tu ataque)</i>, puedes curar 30 puntos de daño a 1 de tus Pokémon."
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Fire",
+                "amount": "×2"
+            }
+        ],
+        "number": "2",
+        "regulationMark": "SM",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 3,
+        "images": {
+            "small": "https://images.pokedata.ovh/la/gum/2.webp",
+            "large": "https://images.pokedata.ovh/la/gum/2_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "gum_3",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Basic Stage"
+        ],
+        "types": [
+            "Grass"
+        ],
+        "hp": 50,
+        "Release Date": "2019-03-29T17:00:00.0000000Z",
+        "Craftable Date": "2019-03-29 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Morelull",
+        "evolvesInto": [
+            "Shiinotic"
+        ],
+        "name": "Morelull",
+        "rarity": "Common",
+        "attacks": [
+            {
+                "name": "Espora Soporífera",
+                "text": "El Pokémon Activo de tu rival pasa a estar Dormido.",
+                "cost": "G",
+                "damage": "10",
+                "convertedEnergyCost": 1
+            }
+        ],
+        "abilities": [],
+        "weaknesses": [
+            {
+                "type": "Fire",
+                "amount": "×2"
+            }
+        ],
+        "number": "3",
+        "regulationMark": "SM",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless"
+        ],
+        "convertedRetreatCost": 1,
+        "images": {
+            "small": "https://images.pokedata.ovh/la/gum/3.webp",
+            "large": "https://images.pokedata.ovh/la/gum/3_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "gum_4",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Basic Stage"
+        ],
+        "types": [
+            "Fire"
+        ],
+        "hp": 60,
+        "Release Date": "2019-03-29T17:00:00.0000000Z",
+        "Craftable Date": "2019-03-29 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "",
+        "evolvesInto": [
+            "Charmeleon"
+        ],
+        "name": "Charmander",
+        "rarity": "Common",
+        "attacks": [
+            {
+                "name": "Carga Descuidada",
+                "text": "Este Pokémon se hace 10 puntos de daño a sí mismo.",
+                "cost": "C",
+                "damage": "20",
+                "convertedEnergyCost": 1
+            }
+        ],
+        "abilities": [],
+        "weaknesses": [
+            {
+                "type": "Water",
+                "amount": "×2"
+            }
+        ],
+        "number": "4",
+        "regulationMark": "SM",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless"
+        ],
+        "convertedRetreatCost": 1,
+        "images": {
+            "small": "https://images.pokedata.ovh/la/gum/4.webp",
+            "large": "https://images.pokedata.ovh/la/gum/4_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "gum_5",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Stage 2"
+        ],
+        "types": [
+            "Fire"
+        ],
+        "hp": 180,
+        "Release Date": "2019-03-29T17:00:00.0000000Z",
+        "Craftable Date": "2019-03-29 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "",
+        "name": "Charizard",
+        "rarity": "RareUltra",
+        "attacks": [
+            {
+                "name": "Cuchillada",
+                "text": "",
+                "cost": "RCC",
+                "damage": "70",
+                "convertedEnergyCost": 3
+            },
+            {
+                "name": "Placaje Salvaje",
+                "text": "Este Pokémon se hace 50 puntos de daño a sí mismo.",
+                "cost": "RCCC",
+                "damage": "180",
+                "convertedEnergyCost": 4
+            }
+        ],
+        "abilities": [],
+        "weaknesses": [
+            {
+                "type": "Water",
+                "amount": "×2"
+            }
+        ],
+        "number": "5",
+        "regulationMark": "SM",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 3,
+        "images": {
+            "small": "https://images.pokedata.ovh/la/gum/5.webp",
+            "large": "https://images.pokedata.ovh/la/gum/5_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "gum_6",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Stage 1"
+        ],
+        "types": [
+            "Fire"
+        ],
+        "hp": 120,
+        "Release Date": "2019-03-29T17:00:00.0000000Z",
+        "Craftable Date": "2019-03-29 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Growlithe",
+        "evolvesInto": [
+            "Arcanine BREAK"
+        ],
+        "name": "Arcanine",
+        "rarity": "Rare",
+        "attacks": [
+            {
+                "name": "Colmillo Afilado",
+                "text": "",
+                "cost": "RCC",
+                "damage": "90",
+                "convertedEnergyCost": 3
+            }
+        ],
+        "abilities": [
+            {
+                "name": "[Ability] Guardia de Seguridad",
+                "text": "Mientras este Pokémon sea tu Pokémon Activo, los ataques de tu rival hacen 30 puntos de daño menos a todos tus Pokémon <i>(después de aplicar Debilidad y Resistencia)</i>."
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Water",
+                "amount": "×2"
+            }
+        ],
+        "number": "6",
+        "regulationMark": "SM",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 3,
+        "images": {
+            "small": "https://images.pokedata.ovh/la/gum/6.webp",
+            "large": "https://images.pokedata.ovh/la/gum/6_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "gum_7",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Basic Stage"
+        ],
+        "types": [
+            "Water"
+        ],
+        "hp": 80,
+        "Release Date": "2019-03-29T17:00:00.0000000Z",
+        "Craftable Date": "2019-03-29 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Psyduck",
+        "evolvesInto": [
+            "Golduck"
+        ],
+        "name": "Psyduck",
+        "rarity": "Common",
+        "attacks": [
+            {
+                "name": "Pánico",
+                "text": "Este Pokémon pasa a estar Confundido.",
+                "cost": "W",
+                "damage": "10",
+                "convertedEnergyCost": 1
+            }
+        ],
+        "abilities": [],
+        "weaknesses": [
+            {
+                "type": "Grass",
+                "amount": "×2"
+            }
+        ],
+        "number": "7",
+        "regulationMark": "SM",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 3,
+        "images": {
+            "small": "https://images.pokedata.ovh/la/gum/7.webp",
+            "large": "https://images.pokedata.ovh/la/gum/7_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "gum_8",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Basic Stage"
+        ],
+        "types": [
+            "Water"
+        ],
+        "hp": 30,
+        "Release Date": "2019-03-29T17:00:00.0000000Z",
+        "Craftable Date": "2019-03-29 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Magikarp",
+        "evolvesInto": [
+            "Dark Gyarados",
+            "Gyarados",
+            "Gyarados ex",
+            "Gyarados-GX"
+        ],
+        "name": "Magikarp",
+        "rarity": "Common",
+        "attacks": [
+            {
+                "name": "Permanecer Inmóvil",
+                "text": "Cura 10 puntos de daño a este Pokémon.",
+                "cost": "W",
+                "damage": "",
+                "convertedEnergyCost": 1
+            }
+        ],
+        "abilities": [],
+        "weaknesses": [
+            {
+                "type": "Lightning",
+                "amount": "×2"
+            }
+        ],
+        "number": "8",
+        "regulationMark": "SM",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless"
+        ],
+        "convertedRetreatCost": 1,
+        "images": {
+            "small": "https://images.pokedata.ovh/la/gum/8.webp",
+            "large": "https://images.pokedata.ovh/la/gum/8_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "gum_9",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Stage 2"
+        ],
+        "types": [
+            "Water"
+        ],
+        "hp": 140,
+        "Release Date": "2019-03-29T17:00:00.0000000Z",
+        "Craftable Date": "2019-03-29 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Froakie",
+        "evolvesInto": [
+            "Greninja BREAK"
+        ],
+        "name": "Greninja",
+        "rarity": "RareUltra",
+        "attacks": [
+            {
+                "name": "Shuriken Furiosos",
+                "text": "Este ataque hace 50 puntos de daño a 2 de los Pokémon de tu rival. <i>(No apliques Debilidad y Resistencia a los Pokémon en Banca)</i>.",
+                "cost": "WW",
+                "damage": "",
+                "convertedEnergyCost": 2
+            }
+        ],
+        "abilities": [
+            {
+                "name": "[Ability] Evasión Jutsu",
+                "text": "Si se inflige cualquier daño a este Pokémon por ataques, lanza 1 moneda. Si sale cara, evita ese daño."
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Grass",
+                "amount": "×2"
+            }
+        ],
+        "number": "9",
+        "regulationMark": "SM",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless"
+        ],
+        "convertedRetreatCost": 1,
+        "images": {
+            "small": "https://images.pokedata.ovh/la/gum/9.webp",
+            "large": "https://images.pokedata.ovh/la/gum/9_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "gum_10",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Basic Stage"
+        ],
+        "types": [
+            "Lightning"
+        ],
+        "hp": 90,
+        "Release Date": "2019-03-29T17:00:00.0000000Z",
+        "Craftable Date": "2019-03-29 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Detetive Pikachu",
+        "name": "Detective Pikachu",
+        "rarity": "Rare",
+        "attacks": [
+            {
+                "name": "Explorar",
+                "text": "Tu rival enseña las cartas de su mano.",
+                "cost": "L",
+                "damage": "",
+                "convertedEnergyCost": 1
+            },
+            {
+                "name": "Ataque Sorpresa",
+                "text": "Lanza 1 moneda. Si sale cruz, este ataque no hace nada.",
+                "cost": "CCC",
+                "damage": "80",
+                "convertedEnergyCost": 3
+            }
+        ],
+        "abilities": [],
+        "weaknesses": [
+            {
+                "type": "Fighting",
+                "amount": "×2"
+            }
+        ],
+        "number": "10",
+        "regulationMark": "SM",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 2,
+        "images": {
+            "small": "https://images.pokedata.ovh/la/gum/10.webp",
+            "large": "https://images.pokedata.ovh/la/gum/10_hires.webp"
+        },
+        "resistances": [
+            {
+                "type": "Metal",
+                "amount": "--20"
+            }
+        ]
+    },
+    {
+        "id": "gum_11",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Basic Stage"
+        ],
+        "types": [
+            "Psychic"
+        ],
+        "hp": 80,
+        "Release Date": "2019-03-29T17:00:00.0000000Z",
+        "Craftable Date": "2019-03-29 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Mr. Mime",
+        "name": "Mr. Mime",
+        "rarity": "Rare",
+        "attacks": [
+            {
+                "name": "Malabarismo",
+                "text": "Lanza 4 monedas. Este ataque hace 20 puntos de daño por cada cara.",
+                "cost": "PC",
+                "damage": "20Ã",
+                "convertedEnergyCost": 2
+            }
+        ],
+        "abilities": [
+            {
+                "name": "[Ability] Pantomima",
+                "text": "Cuando juegues este Pokémon de tu mano a tu Banca durante tu turno, puedes cambiar 1 de tus cartas de Premio que están boca abajo por la primera carta de tu baraja."
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Psychic",
+                "amount": "×2"
+            }
+        ],
+        "number": "11",
+        "regulationMark": "SM",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless"
+        ],
+        "convertedRetreatCost": 1,
+        "images": {
+            "small": "https://images.pokedata.ovh/la/gum/11.webp",
+            "large": "https://images.pokedata.ovh/la/gum/11_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "gum_12",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Basic Stage"
+        ],
+        "types": [
+            "Psychic"
+        ],
+        "hp": 130,
+        "Release Date": "2019-03-29T17:00:00.0000000Z",
+        "Craftable Date": "2019-03-29 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Mewtwo",
+        "name": "Mewtwo",
+        "rarity": "RareUltra",
+        "attacks": [
+            {
+                "name": "Secuestro Psíquico",
+                "text": "Elige 1 de los ataques del Pokémon Activo de tu rival. Ese Pokémon no puede usar ese ataque durante el próximo turno de tu rival.",
+                "cost": "PC",
+                "damage": "30",
+                "convertedEnergyCost": 2
+            },
+            {
+                "name": "Quiebre Quemadura",
+                "text": "Descarta 2 Energías psychic de este Pokémon.",
+                "cost": "PPC",
+                "damage": "130",
+                "convertedEnergyCost": 3
+            }
+        ],
+        "abilities": [],
+        "weaknesses": [
+            {
+                "type": "Psychic",
+                "amount": "×2"
+            }
+        ],
+        "number": "12",
+        "regulationMark": "SM",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 2,
+        "images": {
+            "small": "https://images.pokedata.ovh/la/gum/12.webp",
+            "large": "https://images.pokedata.ovh/la/gum/12_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "gum_13",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Stage 2"
+        ],
+        "types": [
+            "Fighting"
+        ],
+        "hp": 160,
+        "Release Date": "2019-03-29T17:00:00.0000000Z",
+        "Craftable Date": "2019-03-29 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Machop",
+        "evolvesInto": [
+            "Machamp BREAK"
+        ],
+        "name": "Machamp",
+        "rarity": "Rare",
+        "attacks": [
+            {
+                "name": "Dirigir el Tráfico",
+                "text": "Mira las 5 primeras cartas de tu baraja y vuelve a ponerlas en la parte superior de tu baraja en el orden que quieras.",
+                "cost": "F",
+                "damage": "",
+                "convertedEnergyCost": 1
+            },
+            {
+                "name": "Tajo Cruzado",
+                "text": "Lanza 1 moneda. Si sale cara, este ataque hace 60 puntos de daño más.",
+                "cost": "FF",
+                "damage": "80+",
+                "convertedEnergyCost": 2
+            }
+        ],
+        "abilities": [],
+        "weaknesses": [
+            {
+                "type": "Psychic",
+                "amount": "×2"
+            }
+        ],
+        "number": "13",
+        "regulationMark": "SM",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 2,
+        "images": {
+            "small": "https://images.pokedata.ovh/la/gum/13.webp",
+            "large": "https://images.pokedata.ovh/la/gum/13_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "gum_14",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Basic Stage"
+        ],
+        "types": [
+            "Fairy"
+        ],
+        "hp": 60,
+        "Release Date": "2019-03-29T17:00:00.0000000Z",
+        "Craftable Date": "2019-03-29 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Jigglypuff",
+        "evolvesInto": [
+            "Wigglytuff",
+            "Wigglytuff ex",
+            "Wigglytuff-GX"
+        ],
+        "name": "Jigglypuff",
+        "rarity": "Common",
+        "attacks": [
+            {
+                "name": "Melodía Curativa",
+                "text": "Cura 10 puntos de daño a cada uno de tus Pokémon.",
+                "cost": "Y",
+                "damage": "",
+                "convertedEnergyCost": 1
+            }
+        ],
+        "abilities": [],
+        "weaknesses": [
+            {
+                "type": "Metal",
+                "amount": "×2"
+            }
+        ],
+        "number": "14",
+        "regulationMark": "SM",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless"
+        ],
+        "convertedRetreatCost": 1,
+        "images": {
+            "small": "https://images.pokedata.ovh/la/gum/14.webp",
+            "large": "https://images.pokedata.ovh/la/gum/14_hires.webp"
+        },
+        "resistances": [
+            {
+                "type": "Dark",
+                "amount": "--20"
+            }
+        ]
+    },
+    {
+        "id": "gum_15",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Basic Stage"
+        ],
+        "types": [
+            "Fairy"
+        ],
+        "hp": 70,
+        "Release Date": "2019-03-29T17:00:00.0000000Z",
+        "Craftable Date": "2019-03-29 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Snubbull",
+        "evolvesInto": [
+            "Granbull"
+        ],
+        "name": "Snubbull",
+        "rarity": "Common",
+        "attacks": [
+            {
+                "name": "Carantoña",
+                "text": "Lanza 1 moneda. Si sale cara, este ataque hace 30 puntos de daño más.",
+                "cost": "CC",
+                "damage": "10+",
+                "convertedEnergyCost": 2
+            }
+        ],
+        "abilities": [],
+        "weaknesses": [
+            {
+                "type": "Metal",
+                "amount": "×2"
+            }
+        ],
+        "number": "15",
+        "regulationMark": "SM",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 2,
+        "images": {
+            "small": "https://images.pokedata.ovh/la/gum/15.webp",
+            "large": "https://images.pokedata.ovh/la/gum/15_hires.webp"
+        },
+        "resistances": [
+            {
+                "type": "Dark",
+                "amount": "--20"
+            }
+        ]
+    },
+    {
+        "id": "gum_16",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Basic Stage"
+        ],
+        "types": [
+            "Colorless"
+        ],
+        "hp": 100,
+        "Release Date": "2019-03-29T17:00:00.0000000Z",
+        "Craftable Date": "2019-03-29 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Lickitung",
+        "evolvesInto": [
+            "Lickilicky"
+        ],
+        "name": "Lickitung",
+        "rarity": "Common",
+        "attacks": [
+            {
+                "name": "Lengüetazo Incesante",
+                "text": "Lanza 1 moneda hasta que salga cruz. Este ataque hace 20 puntos de daño por cada cara.",
+                "cost": "CC",
+                "damage": "20Ã",
+                "convertedEnergyCost": 2
+            }
+        ],
+        "abilities": [],
+        "weaknesses": [
+            {
+                "type": "Fighting",
+                "amount": "×2"
+            }
+        ],
+        "number": "16",
+        "regulationMark": "SM",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 3,
+        "images": {
+            "small": "https://images.pokedata.ovh/la/gum/16.webp",
+            "large": "https://images.pokedata.ovh/la/gum/16_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "gum_17",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Basic Stage"
+        ],
+        "types": [
+            "Colorless"
+        ],
+        "hp": 60,
+        "Release Date": "2019-03-29T17:00:00.0000000Z",
+        "Craftable Date": "2019-03-29 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Ditto",
+        "name": "Ditto",
+        "rarity": "RareUltra",
+        "attacks": [
+            {
+                "name": "Copietear",
+                "text": "Elige 1 de los ataques de los Pokémon de tu rival y úsalo para este ataque. Si este Pokémon no tiene la Energía necesaria para usar ese ataque, este ataque no hace nada.",
+                "cost": "C",
+                "damage": "",
+                "convertedEnergyCost": 1
+            }
+        ],
+        "abilities": [],
+        "weaknesses": [
+            {
+                "type": "Fighting",
+                "amount": "×2"
+            }
+        ],
+        "number": "17",
+        "regulationMark": "SM",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless"
+        ],
+        "convertedRetreatCost": 1,
+        "images": {
+            "small": "https://images.pokedata.ovh/la/gum/17.webp",
+            "large": "https://images.pokedata.ovh/la/gum/17_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "gum_18",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Stage 2"
+        ],
+        "types": [
+            "Colorless"
+        ],
+        "hp": 180,
+        "Release Date": "2019-03-29T17:00:00.0000000Z",
+        "Craftable Date": "2019-03-29 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Slakoth",
+        "name": "Slaking",
+        "rarity": "Rare",
+        "attacks": [
+            {
+                "name": "Arrojar",
+                "text": "Tu rival cambia su Pokémon Activo por 1 de sus Pokémon en Banca.",
+                "cost": "CCCC",
+                "damage": "150",
+                "convertedEnergyCost": 4
+            }
+        ],
+        "abilities": [],
+        "weaknesses": [
+            {
+                "type": "Fighting",
+                "amount": "×2"
+            }
+        ],
+        "number": "18",
+        "regulationMark": "SM",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless",
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 4,
+        "images": {
+            "small": "https://images.pokedata.ovh/la/gum/18.webp",
+            "large": "https://images.pokedata.ovh/la/gum/18_hires.webp"
+        },
+        "resistances": []
+    }
+]
