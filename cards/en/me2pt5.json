@@ -1,6 +1,6 @@
 [
     {
-        "id": "me2-5-12",
+        "id": "me2pt5-12",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -53,7 +53,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-22",
+        "id": "me2pt5-22",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -106,7 +106,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-3",
+        "id": "me2pt5-3",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -163,7 +163,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-42",
+        "id": "me2pt5-42",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -216,7 +216,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-52",
+        "id": "me2pt5-52",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -277,7 +277,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-62",
+        "id": "me2pt5-62",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -336,7 +336,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-72",
+        "id": "me2pt5-72",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -392,7 +392,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-82",
+        "id": "me2pt5-82",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -451,7 +451,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-92",
+        "id": "me2pt5-92",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -505,7 +505,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-10",
+        "id": "me2pt5-10",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -557,7 +557,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-112",
+        "id": "me2pt5-112",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -610,7 +610,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-122",
+        "id": "me2pt5-122",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -669,7 +669,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-132",
+        "id": "me2pt5-132",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2"
@@ -725,7 +725,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-142",
+        "id": "me2pt5-142",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -779,7 +779,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-152",
+        "id": "me2pt5-152",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2"
@@ -833,7 +833,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-162",
+        "id": "me2pt5-162",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -880,7 +880,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-172",
+        "id": "me2pt5-172",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -933,7 +933,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-182",
+        "id": "me2pt5-182",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -985,7 +985,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-192",
+        "id": "me2pt5-192",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -1040,7 +1040,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-202",
+        "id": "me2pt5-202",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -1092,7 +1092,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-212",
+        "id": "me2pt5-212",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -1148,7 +1148,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-22",
+        "id": "me2pt5-22",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -1199,7 +1199,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-232",
+        "id": "me2pt5-232",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -1253,7 +1253,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-242",
+        "id": "me2pt5-242",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -1310,7 +1310,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-252",
+        "id": "me2pt5-252",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -1361,7 +1361,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-26",
+        "id": "me2pt5-26",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -1418,7 +1418,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-272",
+        "id": "me2pt5-272",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -1478,7 +1478,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-282",
+        "id": "me2pt5-282",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -1536,7 +1536,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-292",
+        "id": "me2pt5-292",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -1589,7 +1589,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-302",
+        "id": "me2pt5-302",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -1644,7 +1644,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-31",
+        "id": "me2pt5-31",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -1698,7 +1698,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-322",
+        "id": "me2pt5-322",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -1759,7 +1759,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-332",
+        "id": "me2pt5-332",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -1818,7 +1818,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-342",
+        "id": "me2pt5-342",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -1871,7 +1871,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-352",
+        "id": "me2pt5-352",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -1927,7 +1927,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-362",
+        "id": "me2pt5-362",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -1979,7 +1979,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-372",
+        "id": "me2pt5-372",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -2039,7 +2039,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-38",
+        "id": "me2pt5-38",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -2095,7 +2095,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-392",
+        "id": "me2pt5-392",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -2152,7 +2152,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-402",
+        "id": "me2pt5-402",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -2209,7 +2209,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-412",
+        "id": "me2pt5-412",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -2261,7 +2261,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-422",
+        "id": "me2pt5-422",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -2315,7 +2315,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-43",
+        "id": "me2pt5-43",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -2368,7 +2368,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-442",
+        "id": "me2pt5-442",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -2428,7 +2428,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-452",
+        "id": "me2pt5-452",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -2484,7 +2484,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-462",
+        "id": "me2pt5-462",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -2539,7 +2539,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-47",
+        "id": "me2pt5-47",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -2597,7 +2597,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-48",
+        "id": "me2pt5-48",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -2656,7 +2656,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-492",
+        "id": "me2pt5-492",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -2716,7 +2716,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-502",
+        "id": "me2pt5-502",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -2776,7 +2776,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-512",
+        "id": "me2pt5-512",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -2834,7 +2834,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-522",
+        "id": "me2pt5-522",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -2886,7 +2886,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-532",
+        "id": "me2pt5-532",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -2941,7 +2941,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-542",
+        "id": "me2pt5-542",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -2998,7 +2998,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-552",
+        "id": "me2pt5-552",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -3059,7 +3059,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-562",
+        "id": "me2pt5-562",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -3118,7 +3118,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-57",
+        "id": "me2pt5-57",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -3174,7 +3174,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-58",
+        "id": "me2pt5-58",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -3224,7 +3224,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-592",
+        "id": "me2pt5-592",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -3274,7 +3274,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-602",
+        "id": "me2pt5-602",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -3333,7 +3333,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-61",
+        "id": "me2pt5-61",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -3392,7 +3392,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-622",
+        "id": "me2pt5-622",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -3442,7 +3442,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-632",
+        "id": "me2pt5-632",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -3494,7 +3494,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-642",
+        "id": "me2pt5-642",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -3548,7 +3548,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-652",
+        "id": "me2pt5-652",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -3602,7 +3602,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-662",
+        "id": "me2pt5-662",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2"
@@ -3658,7 +3658,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-672",
+        "id": "me2pt5-672",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -3714,7 +3714,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-68",
+        "id": "me2pt5-68",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -3771,7 +3771,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-692",
+        "id": "me2pt5-692",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -3825,7 +3825,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-70",
+        "id": "me2pt5-70",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -3882,7 +3882,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-712",
+        "id": "me2pt5-712",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -3940,7 +3940,7 @@
         ]
     },
     {
-        "id": "me2-5-722",
+        "id": "me2pt5-722",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -4000,7 +4000,7 @@
         ]
     },
     {
-        "id": "me2-5-73",
+        "id": "me2pt5-73",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -4058,7 +4058,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-742",
+        "id": "me2pt5-742",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -4111,7 +4111,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-752",
+        "id": "me2pt5-752",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -4168,7 +4168,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-76",
+        "id": "me2pt5-76",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -4224,7 +4224,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-772",
+        "id": "me2pt5-772",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -4281,7 +4281,7 @@
         ]
     },
     {
-        "id": "me2-5-782",
+        "id": "me2pt5-782",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -4344,7 +4344,7 @@
         ]
     },
     {
-        "id": "me2-5-79",
+        "id": "me2pt5-79",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -4406,7 +4406,7 @@
         ]
     },
     {
-        "id": "me2-5-802",
+        "id": "me2pt5-802",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -4458,7 +4458,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-812",
+        "id": "me2pt5-812",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -4510,7 +4510,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-822",
+        "id": "me2pt5-822",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2"
@@ -4564,7 +4564,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-832",
+        "id": "me2pt5-832",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -4624,7 +4624,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-84",
+        "id": "me2pt5-84",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -4680,7 +4680,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-852",
+        "id": "me2pt5-852",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -4738,7 +4738,7 @@
         ]
     },
     {
-        "id": "me2-5-862",
+        "id": "me2pt5-862",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -4792,7 +4792,7 @@
         ]
     },
     {
-        "id": "me2-5-872",
+        "id": "me2pt5-872",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -4856,7 +4856,7 @@
         ]
     },
     {
-        "id": "me2-5-882",
+        "id": "me2pt5-882",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -4924,7 +4924,7 @@
         ]
     },
     {
-        "id": "me2-5-89",
+        "id": "me2pt5-89",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -4988,7 +4988,7 @@
         ]
     },
     {
-        "id": "me2-5-902",
+        "id": "me2pt5-902",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -5047,7 +5047,7 @@
         ]
     },
     {
-        "id": "me2-5-912",
+        "id": "me2pt5-912",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -5108,7 +5108,7 @@
         ]
     },
     {
-        "id": "me2-5-922",
+        "id": "me2pt5-922",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -5169,7 +5169,7 @@
         ]
     },
     {
-        "id": "me2-5-932",
+        "id": "me2pt5-932",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -5221,7 +5221,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-942",
+        "id": "me2pt5-942",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -5278,7 +5278,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-952",
+        "id": "me2pt5-952",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -5337,7 +5337,7 @@
         ]
     },
     {
-        "id": "me2-5-962",
+        "id": "me2pt5-962",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -5400,7 +5400,7 @@
         ]
     },
     {
-        "id": "me2-5-972",
+        "id": "me2pt5-972",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -5452,7 +5452,7 @@
         ]
     },
     {
-        "id": "me2-5-982",
+        "id": "me2pt5-982",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -5513,7 +5513,7 @@
         ]
     },
     {
-        "id": "me2-5-992",
+        "id": "me2pt5-992",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -5572,7 +5572,7 @@
         ]
     },
     {
-        "id": "me2-5-1002",
+        "id": "me2pt5-1002",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -5624,7 +5624,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1012",
+        "id": "me2pt5-1012",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -5678,7 +5678,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1022",
+        "id": "me2pt5-1022",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -5734,7 +5734,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1032",
+        "id": "me2pt5-1032",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -5794,7 +5794,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1042",
+        "id": "me2pt5-1042",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -5843,7 +5843,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1052",
+        "id": "me2pt5-1052",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -5897,7 +5897,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1062",
+        "id": "me2pt5-1062",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -5946,7 +5946,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-107",
+        "id": "me2pt5-107",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -6005,7 +6005,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1082",
+        "id": "me2pt5-1082",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -6063,7 +6063,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1092",
+        "id": "me2pt5-1092",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -6116,7 +6116,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1102",
+        "id": "me2pt5-1102",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -6174,7 +6174,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-111",
+        "id": "me2pt5-111",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -6230,7 +6230,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1122",
+        "id": "me2pt5-1122",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -6286,7 +6286,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-113",
+        "id": "me2pt5-113",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -6345,7 +6345,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-114",
+        "id": "me2pt5-114",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -6403,7 +6403,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1152",
+        "id": "me2pt5-1152",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -6456,7 +6456,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-116",
+        "id": "me2pt5-116",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -6512,7 +6512,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1172",
+        "id": "me2pt5-1172",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -6569,7 +6569,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1182",
+        "id": "me2pt5-1182",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -6623,7 +6623,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1192",
+        "id": "me2pt5-1192",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -6684,7 +6684,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1202",
+        "id": "me2pt5-1202",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2"
@@ -6743,7 +6743,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-121",
+        "id": "me2pt5-121",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -6802,7 +6802,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1222",
+        "id": "me2pt5-1222",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -6860,7 +6860,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1232",
+        "id": "me2pt5-1232",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -6912,7 +6912,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1242",
+        "id": "me2pt5-1242",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -6966,7 +6966,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-125",
+        "id": "me2pt5-125",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -7023,7 +7023,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1262",
+        "id": "me2pt5-1262",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -7087,7 +7087,7 @@
         ]
     },
     {
-        "id": "me2-5-1272",
+        "id": "me2pt5-1272",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -7148,7 +7148,7 @@
         ]
     },
     {
-        "id": "me2-5-1282",
+        "id": "me2pt5-1282",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -7200,7 +7200,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1292",
+        "id": "me2pt5-1292",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -7257,7 +7257,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1302",
+        "id": "me2pt5-1302",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -7309,7 +7309,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1312",
+        "id": "me2pt5-1312",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -7369,7 +7369,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1322",
+        "id": "me2pt5-1322",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2"
@@ -7426,7 +7426,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1332",
+        "id": "me2pt5-1332",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -7476,7 +7476,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1342",
+        "id": "me2pt5-1342",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -7530,7 +7530,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-135",
+        "id": "me2pt5-135",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -7587,7 +7587,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1362",
+        "id": "me2pt5-1362",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -7640,7 +7640,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-137",
+        "id": "me2pt5-137",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -7697,7 +7697,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1382",
+        "id": "me2pt5-1382",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -7755,7 +7755,7 @@
         ]
     },
     {
-        "id": "me2-5-139",
+        "id": "me2pt5-139",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -7817,7 +7817,7 @@
         ]
     },
     {
-        "id": "me2-5-1402",
+        "id": "me2pt5-1402",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -7875,7 +7875,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1412",
+        "id": "me2pt5-1412",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -7932,7 +7932,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-142",
+        "id": "me2pt5-142",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -7987,7 +7987,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1432",
+        "id": "me2pt5-1432",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -8041,7 +8041,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1442",
+        "id": "me2pt5-1442",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -8102,7 +8102,7 @@
         ]
     },
     {
-        "id": "me2-5-145",
+        "id": "me2pt5-145",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -8166,7 +8166,7 @@
         ]
     },
     {
-        "id": "me2-5-1462",
+        "id": "me2pt5-1462",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -8223,7 +8223,7 @@
         ]
     },
     {
-        "id": "me2-5-1472",
+        "id": "me2pt5-1472",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -8280,7 +8280,7 @@
         ]
     },
     {
-        "id": "me2-5-1482",
+        "id": "me2pt5-1482",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2"
@@ -8341,7 +8341,7 @@
         ]
     },
     {
-        "id": "me2-5-149",
+        "id": "me2pt5-149",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -8403,7 +8403,7 @@
         ]
     },
     {
-        "id": "me2-5-1502",
+        "id": "me2pt5-1502",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -8456,7 +8456,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1512",
+        "id": "me2pt5-1512",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -8517,7 +8517,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-152",
+        "id": "me2pt5-152",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -8574,7 +8574,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1532",
+        "id": "me2pt5-1532",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -8630,7 +8630,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1542",
+        "id": "me2pt5-1542",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -8688,7 +8688,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1552",
+        "id": "me2pt5-1552",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -8746,7 +8746,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1562",
+        "id": "me2pt5-1562",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -8807,7 +8807,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1572",
+        "id": "me2pt5-1572",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -8864,7 +8864,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1582",
+        "id": "me2pt5-1582",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -8923,7 +8923,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1592",
+        "id": "me2pt5-1592",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -8981,7 +8981,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-160",
+        "id": "me2pt5-160",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -9039,7 +9039,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1612",
+        "id": "me2pt5-1612",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -9098,7 +9098,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-162",
+        "id": "me2pt5-162",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -9156,7 +9156,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1632",
+        "id": "me2pt5-1632",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -9207,7 +9207,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-164",
+        "id": "me2pt5-164",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -9260,7 +9260,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1652",
+        "id": "me2pt5-1652",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -9312,7 +9312,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1662",
+        "id": "me2pt5-1662",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -9368,7 +9368,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-167",
+        "id": "me2pt5-167",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -9425,7 +9425,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1682",
+        "id": "me2pt5-1682",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -9490,7 +9490,7 @@
         ]
     },
     {
-        "id": "me2-5-1692",
+        "id": "me2pt5-1692",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -9555,7 +9555,7 @@
         ]
     },
     {
-        "id": "me2-5-1702",
+        "id": "me2pt5-1702",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -9617,7 +9617,7 @@
         ]
     },
     {
-        "id": "me2-5-1712",
+        "id": "me2pt5-1712",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -9676,7 +9676,7 @@
         ]
     },
     {
-        "id": "me2-5-172",
+        "id": "me2pt5-172",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -9734,7 +9734,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1732",
+        "id": "me2pt5-1732",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -9792,7 +9792,7 @@
         ]
     },
     {
-        "id": "me2-5-1742",
+        "id": "me2pt5-1742",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -9854,7 +9854,7 @@
         ]
     },
     {
-        "id": "me2-5-1752",
+        "id": "me2pt5-1752",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -9910,7 +9910,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1762",
+        "id": "me2pt5-1762",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -9967,7 +9967,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-1772",
+        "id": "me2pt5-1772",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -10022,7 +10022,7 @@
         ]
     },
     {
-        "id": "me2-5-1782",
+        "id": "me2pt5-1782",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -10079,7 +10079,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-179",
+        "id": "me2pt5-179",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -10138,7 +10138,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-180",
+        "id": "me2pt5-180",
         "supertype": "Pokémon",
         "subtypes": [
             "Supporter"
@@ -10174,7 +10174,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-181",
+        "id": "me2pt5-181",
         "supertype": "Trainer",
         "subtypes": [
             "Tool"
@@ -10202,7 +10202,7 @@
         }
     },
     {
-        "id": "me2-5-182",
+        "id": "me2pt5-182",
         "supertype": "Pokémon",
         "subtypes": [
             "Supporter"
@@ -10238,7 +10238,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-183",
+        "id": "me2pt5-183",
         "supertype": "Pokémon",
         "subtypes": [
             "Supporter"
@@ -10274,7 +10274,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-184",
+        "id": "me2pt5-184",
         "supertype": "Trainer",
         "subtypes": [
             "Item"
@@ -10303,7 +10303,7 @@
         }
     },
     {
-        "id": "me2-5-185",
+        "id": "me2pt5-185",
         "supertype": "Pokémon",
         "subtypes": [
             "Supporter"
@@ -10339,7 +10339,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-186",
+        "id": "me2pt5-186",
         "supertype": "Trainer",
         "subtypes": [
             "Tool"
@@ -10367,7 +10367,7 @@
         }
     },
     {
-        "id": "me2-5-187",
+        "id": "me2pt5-187",
         "supertype": "Trainer",
         "subtypes": [
             "Item"
@@ -10396,7 +10396,7 @@
         }
     },
     {
-        "id": "me2-5-188",
+        "id": "me2pt5-188",
         "supertype": "Trainer",
         "subtypes": [
             "Stadium"
@@ -10424,7 +10424,7 @@
         }
     },
     {
-        "id": "me2-5-189",
+        "id": "me2pt5-189",
         "supertype": "Trainer",
         "subtypes": [
             "Item"
@@ -10453,7 +10453,7 @@
         }
     },
     {
-        "id": "me2-5-190",
+        "id": "me2pt5-190",
         "supertype": "Pokémon",
         "subtypes": [
             "Supporter"
@@ -10489,7 +10489,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-191",
+        "id": "me2pt5-191",
         "supertype": "Trainer",
         "subtypes": [
             "Tool"
@@ -10517,7 +10517,7 @@
         }
     },
     {
-        "id": "me2-5-192",
+        "id": "me2pt5-192",
         "supertype": "Pokémon",
         "subtypes": [
             "Supporter",
@@ -10554,7 +10554,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-193",
+        "id": "me2pt5-193",
         "supertype": "Trainer",
         "subtypes": [
             "Item"
@@ -10583,7 +10583,7 @@
         }
     },
     {
-        "id": "me2-5-194",
+        "id": "me2pt5-194",
         "supertype": "Trainer",
         "subtypes": [
             "Stadium"
@@ -10611,7 +10611,7 @@
         }
     },
     {
-        "id": "me2-5-195",
+        "id": "me2pt5-195",
         "supertype": "Trainer",
         "subtypes": [
             "Item",
@@ -10641,7 +10641,7 @@
         }
     },
     {
-        "id": "me2-5-196",
+        "id": "me2pt5-196",
         "supertype": "Trainer",
         "subtypes": [
             "Item"
@@ -10670,7 +10670,7 @@
         }
     },
     {
-        "id": "me2-5-197",
+        "id": "me2pt5-197",
         "supertype": "Trainer",
         "subtypes": [
             "Stadium"
@@ -10698,7 +10698,7 @@
         }
     },
     {
-        "id": "me2-5-198",
+        "id": "me2pt5-198",
         "supertype": "Trainer",
         "subtypes": [
             "Item"
@@ -10727,7 +10727,7 @@
         }
     },
     {
-        "id": "me2-5-199",
+        "id": "me2pt5-199",
         "supertype": "Trainer",
         "subtypes": [
             "Item"
@@ -10756,7 +10756,7 @@
         }
     },
     {
-        "id": "me2-5-200",
+        "id": "me2pt5-200",
         "supertype": "Pokémon",
         "subtypes": [
             "Supporter"
@@ -10792,7 +10792,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-201",
+        "id": "me2pt5-201",
         "supertype": "Pokémon",
         "subtypes": [
             "Supporter"
@@ -10828,7 +10828,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-202",
+        "id": "me2pt5-202",
         "supertype": "Pokémon",
         "subtypes": [
             "Supporter"
@@ -10864,7 +10864,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-203",
+        "id": "me2pt5-203",
         "supertype": "Trainer",
         "subtypes": [
             "Stadium"
@@ -10892,7 +10892,7 @@
         }
     },
     {
-        "id": "me2-5-204",
+        "id": "me2pt5-204",
         "supertype": "Pokémon",
         "subtypes": [
             "Supporter"
@@ -10928,7 +10928,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-205",
+        "id": "me2pt5-205",
         "supertype": "Trainer",
         "subtypes": [
             "Item"
@@ -10957,7 +10957,7 @@
         }
     },
     {
-        "id": "me2-5-206",
+        "id": "me2pt5-206",
         "supertype": "Trainer",
         "subtypes": [
             "Tool"
@@ -10985,7 +10985,7 @@
         }
     },
     {
-        "id": "me2-5-207",
+        "id": "me2pt5-207",
         "supertype": "Pokémon",
         "subtypes": [
             "Supporter"
@@ -11021,7 +11021,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-208",
+        "id": "me2pt5-208",
         "supertype": "Pokémon",
         "subtypes": [
             "Supporter"
@@ -11057,7 +11057,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-209",
+        "id": "me2pt5-209",
         "supertype": "Trainer",
         "subtypes": [
             "Item"
@@ -11086,7 +11086,7 @@
         }
     },
     {
-        "id": "me2-5-210",
+        "id": "me2pt5-210",
         "supertype": "Trainer",
         "subtypes": [
             "Stadium"
@@ -11114,7 +11114,7 @@
         }
     },
     {
-        "id": "me2-5-211",
+        "id": "me2pt5-211",
         "supertype": "Trainer",
         "subtypes": [
             "Tool"
@@ -11142,7 +11142,7 @@
         }
     },
     {
-        "id": "me2-5-212",
+        "id": "me2pt5-212",
         "supertype": "Trainer",
         "subtypes": [
             "Item"
@@ -11171,7 +11171,7 @@
         }
     },
     {
-        "id": "me2-5-213",
+        "id": "me2pt5-213",
         "supertype": "Trainer",
         "subtypes": [
             "Item"
@@ -11200,7 +11200,7 @@
         }
     },
     {
-        "id": "me2-5-214",
+        "id": "me2pt5-214",
         "supertype": "Pokémon",
         "subtypes": [
             "Supporter"
@@ -11236,7 +11236,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-215",
+        "id": "me2pt5-215",
         "supertype": "Pokémon",
         "subtypes": [
             "Supporter"
@@ -11272,7 +11272,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-216",
+        "id": "me2pt5-216",
         "supertype": "Energy",
         "subtypes": [
             "Special Energy"
@@ -11300,7 +11300,7 @@
         }
     },
     {
-        "id": "me2-5-217",
+        "id": "me2pt5-217",
         "supertype": "Energy",
         "subtypes": [
             "Special Energy"
@@ -11328,7 +11328,7 @@
         }
     },
     {
-        "id": "me2-5-218",
+        "id": "me2pt5-218",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -11384,7 +11384,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-219",
+        "id": "me2pt5-219",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2"
@@ -11440,7 +11440,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-220",
+        "id": "me2pt5-220",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2"
@@ -11494,7 +11494,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-221",
+        "id": "me2pt5-221",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -11541,7 +11541,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-222",
+        "id": "me2pt5-222",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -11598,7 +11598,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-223",
+        "id": "me2pt5-223",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -11658,7 +11658,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-224",
+        "id": "me2pt5-224",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -11714,7 +11714,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-225",
+        "id": "me2pt5-225",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -11766,7 +11766,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-226",
+        "id": "me2pt5-226",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -11823,7 +11823,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-227",
+        "id": "me2pt5-227",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -11878,7 +11878,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-228",
+        "id": "me2pt5-228",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -11934,7 +11934,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-229",
+        "id": "me2pt5-229",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -11988,7 +11988,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-230",
+        "id": "me2pt5-230",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2"
@@ -12044,7 +12044,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-231",
+        "id": "me2pt5-231",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -12102,7 +12102,7 @@
         ]
     },
     {
-        "id": "me2-5-232",
+        "id": "me2pt5-232",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -12162,7 +12162,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-233",
+        "id": "me2pt5-233",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -12220,7 +12220,7 @@
         ]
     },
     {
-        "id": "me2-5-234",
+        "id": "me2pt5-234",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -12281,7 +12281,7 @@
         ]
     },
     {
-        "id": "me2-5-235",
+        "id": "me2pt5-235",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2"
@@ -12335,7 +12335,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-236",
+        "id": "me2pt5-236",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -12392,7 +12392,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-237",
+        "id": "me2pt5-237",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -12455,7 +12455,7 @@
         ]
     },
     {
-        "id": "me2-5-238",
+        "id": "me2pt5-238",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -12507,7 +12507,7 @@
         ]
     },
     {
-        "id": "me2-5-239",
+        "id": "me2pt5-239",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -12561,7 +12561,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-240",
+        "id": "me2pt5-240",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -12617,7 +12617,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-241",
+        "id": "me2pt5-241",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -12666,7 +12666,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-242",
+        "id": "me2pt5-242",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -12723,7 +12723,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-243",
+        "id": "me2pt5-243",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -12780,7 +12780,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-244",
+        "id": "me2pt5-244",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -12830,7 +12830,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-245",
+        "id": "me2pt5-245",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2"
@@ -12887,7 +12887,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-246",
+        "id": "me2pt5-246",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -12948,7 +12948,7 @@
         ]
     },
     {
-        "id": "me2-5-247",
+        "id": "me2pt5-247",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -13007,7 +13007,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-248",
+        "id": "me2pt5-248",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1"
@@ -13065,7 +13065,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-249",
+        "id": "me2pt5-249",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -13127,7 +13127,7 @@
         ]
     },
     {
-        "id": "me2-5-250",
+        "id": "me2pt5-250",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage"
@@ -13186,7 +13186,7 @@
         ]
     },
     {
-        "id": "me2-5-251",
+        "id": "me2pt5-251",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -13243,7 +13243,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-252",
+        "id": "me2pt5-252",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -13301,7 +13301,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-253",
+        "id": "me2pt5-253",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -13359,7 +13359,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-254",
+        "id": "me2pt5-254",
         "supertype": "Pokémon",
         "subtypes": [
             "Supporter"
@@ -13395,7 +13395,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-255",
+        "id": "me2pt5-255",
         "supertype": "Pokémon",
         "subtypes": [
             "Supporter"
@@ -13431,7 +13431,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-256",
+        "id": "me2pt5-256",
         "supertype": "Pokémon",
         "subtypes": [
             "Supporter"
@@ -13467,7 +13467,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-257",
+        "id": "me2pt5-257",
         "supertype": "Pokémon",
         "subtypes": [
             "Supporter"
@@ -13503,7 +13503,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-258",
+        "id": "me2pt5-258",
         "supertype": "Pokémon",
         "subtypes": [
             "Supporter"
@@ -13539,7 +13539,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-259",
+        "id": "me2pt5-259",
         "supertype": "Trainer",
         "subtypes": [
             "Tool"
@@ -13567,7 +13567,7 @@
         }
     },
     {
-        "id": "me2-5-260",
+        "id": "me2pt5-260",
         "supertype": "Trainer",
         "subtypes": [
             "Item"
@@ -13596,7 +13596,7 @@
         }
     },
     {
-        "id": "me2-5-261",
+        "id": "me2pt5-261",
         "supertype": "Trainer",
         "subtypes": [
             "Stadium"
@@ -13624,7 +13624,7 @@
         }
     },
     {
-        "id": "me2-5-262",
+        "id": "me2pt5-262",
         "supertype": "Trainer",
         "subtypes": [
             "Item",
@@ -13654,7 +13654,7 @@
         }
     },
     {
-        "id": "me2-5-263",
+        "id": "me2pt5-263",
         "supertype": "Trainer",
         "subtypes": [
             "Item"
@@ -13683,7 +13683,7 @@
         }
     },
     {
-        "id": "me2-5-264",
+        "id": "me2pt5-264",
         "supertype": "Trainer",
         "subtypes": [
             "Item"
@@ -13712,7 +13712,7 @@
         }
     },
     {
-        "id": "me2-5-265",
+        "id": "me2pt5-265",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -13770,7 +13770,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-266",
+        "id": "me2pt5-266",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -13829,7 +13829,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-267",
+        "id": "me2pt5-267",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -13885,7 +13885,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-268",
+        "id": "me2pt5-268",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -13941,7 +13941,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-269",
+        "id": "me2pt5-269",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -13998,7 +13998,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-270",
+        "id": "me2pt5-270",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -14055,7 +14055,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-271",
+        "id": "me2pt5-271",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -14112,7 +14112,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-272",
+        "id": "me2pt5-272",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -14164,7 +14164,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-273",
+        "id": "me2pt5-273",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -14218,7 +14218,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-274",
+        "id": "me2pt5-274",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -14271,7 +14271,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-275",
+        "id": "me2pt5-275",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -14329,7 +14329,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-276",
+        "id": "me2pt5-276",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -14379,7 +14379,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-277",
+        "id": "me2pt5-277",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -14435,7 +14435,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-278",
+        "id": "me2pt5-278",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -14494,7 +14494,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-279",
+        "id": "me2pt5-279",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -14551,7 +14551,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-280",
+        "id": "me2pt5-280",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -14607,7 +14607,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-281",
+        "id": "me2pt5-281",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -14669,7 +14669,7 @@
         ]
     },
     {
-        "id": "me2-5-282",
+        "id": "me2pt5-282",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -14725,7 +14725,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-283",
+        "id": "me2pt5-283",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -14781,7 +14781,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-284",
+        "id": "me2pt5-284",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -14838,7 +14838,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-285",
+        "id": "me2pt5-285",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -14895,7 +14895,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-286",
+        "id": "me2pt5-286",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 1",
@@ -14952,7 +14952,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-287",
+        "id": "me2pt5-287",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -15009,7 +15009,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-288",
+        "id": "me2pt5-288",
         "supertype": "Pokémon",
         "subtypes": [
             "Basic Stage",
@@ -15064,7 +15064,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-289",
+        "id": "me2pt5-289",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -15127,7 +15127,7 @@
         ]
     },
     {
-        "id": "me2-5-290",
+        "id": "me2pt5-290",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -15184,7 +15184,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-291",
+        "id": "me2pt5-291",
         "supertype": "Pokémon",
         "subtypes": [
             "Supporter"
@@ -15220,7 +15220,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-292",
+        "id": "me2pt5-292",
         "supertype": "Pokémon",
         "subtypes": [
             "Supporter"
@@ -15256,7 +15256,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-293",
+        "id": "me2pt5-293",
         "supertype": "Pokémon",
         "subtypes": [
             "Supporter"
@@ -15292,7 +15292,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-294",
+        "id": "me2pt5-294",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
@@ -15343,7 +15343,7 @@
         "resistances": []
     },
     {
-        "id": "me2-5-295",
+        "id": "me2pt5-295",
         "supertype": "Pokémon",
         "subtypes": [
             "Stage 2",
