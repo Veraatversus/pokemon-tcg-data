@@ -3018,4 +3018,24 @@
       "logo": "https://images.pokemontcg.io/me2/logo.png"
     }
   }
+  ,
+  {
+    "id": "me2pt5",
+    "name": "Ascended Heroes",
+    "series": "Mega Evolution",
+    "printedTotal": 131,
+    "total": 225,
+    "legalities": {
+      "unlimited": "Legal",
+      "standard": "Legal",
+      "expanded": "Legal"
+    },
+    "ptcgoCode": "ASC",
+    "releaseDate": "2026/01/30",
+    "updatedAt": "2025/01/29 19:00:00",
+    "images": {
+      "symbol": "https://images.pokemontcg.io/me25/symbol.png",
+      "logo": "https://images.pokemontcg.io/me25/logo.png"
+    }
+  }
 ]
