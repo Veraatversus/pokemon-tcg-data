@@ -5,13 +5,22 @@
 [![Ko-Fi](https://img.shields.io/badge/Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/Z8Z25AVR)
 
 
-This is the data found within the [Pokémon TCG API](https://pokemontcg.io/). Currently, the raw JSON files for all the card information can be found here.
+This is a fork of the data found within the [Pokémon TCG API](https://pokemontcg.io/). Currently, the raw JSON files for all the card information can be found here.
 
-If you find this data useful, consider donating via one of the links above. All donations are greatly appreciated!
+**🔄 Automatische Synchronisation:** Dieses Repository wird täglich automatisch mit dem [Original-Repository](https://github.com/PokemonTCG/pokemon-tcg-data) synchronisiert.
+
+**🌐 GitHub Pages:** Die Daten sind auch über GitHub Pages verfügbar: [https://veraatversus.github.io/pokemon-tcg-data/](https://veraatversus.github.io/pokemon-tcg-data/)
+
+If you find this data useful, consider donating via one of the links above to support the original project. All donations are greatly appreciated!
 
 # Downloading the data
 
-The easiest way to stay up to date and interact with the data is via the [Pokémon TCG API](http://pokemontcg.io/) and one of the associated SDKs. Otherwise, feel free to clone this repository or download a zip from the releases.
+The easiest way to stay up to date and interact with the data is via the [Pokémon TCG API](http://pokemontcg.io/) and one of the associated SDKs. 
+
+**Alternative Möglichkeiten:**
+- **GitHub Pages:** Direkter Zugriff auf JSON-Dateien über [https://veraatversus.github.io/pokemon-tcg-data/](https://veraatversus.github.io/pokemon-tcg-data/)
+- **Git Clone:** `git clone https://github.com/Veraatversus/pokemon-tcg-data.git`
+- **Download:** Download als ZIP vom `release` Branch (stabile Version)
 
 # Version 1 and 2 Data
 
@@ -31,12 +40,34 @@ ruby v2_to_v1.rb
 
 This will output all of the card data into `/cards/en/v1`.
 
+# Branch Structure
+
+Dieses Repository verwendet eine strukturierte Branch-Strategie:
+
+- **`main`** - Hauptbranch, synchronisiert mit dem upstream Repository
+- **`release`** - Stabiler Branch für GitHub Pages Deployment
+- **`feature/*`** - Feature-Branches für neue Funktionen
+
+📖 **Ausführliche Dokumentation:** Siehe [WORKFLOW_DOCUMENTATION.md](WORKFLOW_DOCUMENTATION.md) für Details zu Workflows und Branch-Strategie.
+
+# Automated Workflows
+
+- **🔄 Sync with Upstream:** Täglich um 2:00 UTC automatische Synchronisation mit dem Original-Repository
+- **🔀 Merge to Release:** Automatisches Merge von `main` zu `release` bei Updates
+- **🚀 Deploy Pages:** Automatisches Deployment zu GitHub Pages bei `release` Updates
+
+Alle Workflows können auch manuell über GitHub Actions getriggert werden.
+
 # Contributing
 
-Please contribute when you see missing and/or incorrect data. I'll try to review all pull requests relatively quickly so that I can push updates at night.
+Please contribute when you see missing and/or incorrect data.
 
-1. Fork it ( https://github.com/[my-github-username]/pokemon-tcg-data/fork )
-2. Create your feature branch (git checkout -b my-new-feature)
+**For this fork:**
+1. Fork it ( https://github.com/Veraatversus/pokemon-tcg-data/fork )
+2. Create your feature branch (git checkout -b feature/my-new-feature)
 3. Commit your changes (git commit -am 'Add some feature')
-4. Push to the branch (git push origin my-new-feature)
-5. Create a new Pull Request
+4. Push to the branch (git push origin feature/my-new-feature)
+5. Create a new Pull Request **against the `main` branch**
+
+**For the original project:**
+- Please contribute directly to [PokemonTCG/pokemon-tcg-data](https://github.com/PokemonTCG/pokemon-tcg-data)
