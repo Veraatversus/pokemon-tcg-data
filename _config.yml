@@ -1,0 +1,12 @@
+# GitHub Pages Configuration
+theme: 
+include:
+  - .htaccess
+  - _pages
+  - cards
+  - decks
+  - sets
+exclude:
+  - .gitmodules.swp
+  - v2_to_v1.rb
+  - README.md
