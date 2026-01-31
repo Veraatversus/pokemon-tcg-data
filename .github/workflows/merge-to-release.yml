@@ -9,7 +9,7 @@ on:
 jobs:
   merge:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -17,16 +17,16 @@ jobs:
           ref: release
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Configure Git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-      
+
       - name: Merge main into release
         run: |
           git fetch origin main
-          
+
           # Try to merge main into release
           if git merge origin/main --no-edit; then
             echo "Successfully merged main into release"
@@ -36,7 +36,7 @@ jobs:
             git merge --abort
             exit 1
           fi
-      
+
       - name: Create issue on merge conflict
         if: failure()
         uses: actions/github-script@v7
@@ -47,16 +47,16 @@ jobs:
               repo: context.repo.repo,
               title: '🔀 Release Merge Conflict - Manual Resolution Required',
               body: `The automated merge from main to release branch encountered a conflict.
-              
+
               **Action Required:**
               Please manually merge main into release and resolve any conflicts.
-              
+
               **Steps:**
               1. \`git checkout release\`
               2. \`git merge main\`
               3. Resolve conflicts
               4. \`git push origin release\`
-              
+
               The GitHub Pages deployment will automatically update once this is resolved.`,
               labels: ['release-merge', 'manual-action-required']
             });
