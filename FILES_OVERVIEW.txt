@@ -1,0 +1,65 @@
+# Datei-Übersicht - Neue Dateien
+
+## GitHub Actions Workflows
+├── .github/
+│   ├── workflows/
+│   │   ├── sync-upstream.yml       [WORKFLOW] Synchronisiert mit upstream Repository
+│   │   ├── merge-to-release.yml    [WORKFLOW] Merged main zu release
+│   │   └── deploy-pages.yml        [WORKFLOW] Deployed zu GitHub Pages
+│   └── ISSUE_TEMPLATE/
+│       └── workflow-failure.md     [TEMPLATE] Issue-Template für Workflow-Fehler
+
+## Dokumentation
+├── README.md                       [UPDATED] Aktualisiert mit neuen Features
+├── SETUP.md                        [DOC] Schritt-für-Schritt Setup-Anleitung ⭐ WICHTIG!
+├── QUICKSTART.md                   [DOC] Schnellreferenz für tägliche Aufgaben
+├── WORKFLOW_DOCUMENTATION.md       [DOC] Detaillierte Workflow-Dokumentation
+├── ARCHITECTURE.md                 [DOC] Visuelle Architektur-Diagramme
+└── SUMMARY.md                      [DOC] Zusammenfassung dieses PRs
+
+## GitHub Pages
+├── index.html                      [WEB] Landing-Page für GitHub Pages
+├── _config.yml                     [CONFIG] Jekyll-Konfiguration
+└── .nojekyll                       [CONFIG] Deaktiviert Jekyll-Processing
+
+## Workflow-Kette
+
+┌─────────────────────────────────────────┐
+│  1. Sync with Upstream (täglich 2 UTC) │
+│     sync-upstream.yml                   │
+└──────────────────┬──────────────────────┘
+                   │ main Branch
+                   ▼
+┌─────────────────────────────────────────┐
+│  2. Merge to Release (automatisch)      │
+│     merge-to-release.yml                │
+└──────────────────┬──────────────────────┘
+                   │ release Branch
+                   ▼
+┌─────────────────────────────────────────┐
+│  3. Deploy Pages (automatisch)          │
+│     deploy-pages.yml                    │
+└──────────────────┬──────────────────────┘
+                   │
+                   ▼
+           GitHub Pages ��
+
+## Dokumentations-Hierarchie
+
+SETUP.md ⭐
+  ↓ (Nach Setup lesen)
+QUICKSTART.md
+  ↓ (Bei Bedarf vertiefen)
+WORKFLOW_DOCUMENTATION.md
+ARCHITECTURE.md
+
+## Wichtige Hinweise
+
+⭐ SETUP.md MUSS nach dem Merge durchgeführt werden!
+   - Release Branch erstellen
+   - GitHub Pages aktivieren
+   - Erste Synchronisation testen
+
+📖 Alle Dokumentation ist auf Deutsch
+🔄 Automatische Updates täglich um 2:00 UTC
+🌐 GitHub Pages URL: https://veraatversus.github.io/pokemon-tcg-data/
