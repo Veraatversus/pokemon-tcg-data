@@ -171,44 +171,17 @@ var USER_LOCK_TIMEOUT_MS = 30 * 1000;
 /** @var {boolean} Flag zur Verhinderung rekursiver Trigger */
 var isScriptEditing = false;
 
-/**
- * @fileoverview Dieses Skript verwaltet Pokémon-Kartensammlungen in Google Sheets.
- * Es verwendet externe APIs (pokemontcg.io und TCGDex), um Kartendaten abzurufen und anzuzeigen.
- * Funktionen umfassen:
- * - Abrufen und Speichern von Set-Informationen.
- * - Suchen und Anzeigen von Karten für ein ausgewähltes Set.
- * - Aktualisieren des Sammlungsstatus von Karten.
- * - Generierung von UI-Elementen (Menüs, Checkboxen, Links).
- * - Debugging-Funktionen.
- */
+// ============================================================================
+// SEKTION: UI & MENÜ-FUNKTIONEN
+// ============================================================================
 
 /**
- * Erstellt das benutzerdefinierte Menü in der Google Tabelle, wenn diese geöffnet wird.
- * Dieses Menü bietet Zugriff auf alle Hauptfunktionen des Pokémon TCG Trackers.
+ * Erstellt das benutzerdefinierte Menü beim Öffnen der Tabelle.
+ * Bietet Zugriff auf alle Hauptfunktionen des Pokemon TCG Trackers.
+ * 
+ * @function onOpen
+ * @memberof UI
  */
-
-/*
-function onOpen() {
-  const ui = SpreadsheetApp.getUi(); // Holt die Benutzeroberfläche der Tabelle.
-  ui.createMenu('Pokémon TCG Tracker') // Erstellt ein neues Menü mit dem Namen 'Pokémon TCG Tracker'.
-    .addItem('▶️ Funktionen Sidebar öffnen', 'openCustomSidebar') // Menüpunkt zum Öffnen des Sidebars.
-    .addSeparator() // Fügt eine Trennlinie im Menü hinzu.
-    .addItem('1. Setup & Sets importieren', 'setupAndImportAllSets') // Menüpunkt zum Einrichten und Importieren aller Sets.
-    .addItem('2. Karten für Set importieren (Raster)', 'promptAndPopulateCardsForSet') // Menüpunkt zum Importieren von Karten für ein spezifisches Set.
-    .addItem('3. Sammlungsübersicht aktualisieren', 'updateCollectionSummary') // Menüpunkt zum manuellen Aktualisieren der Sammlungsübersicht.
-    .addItem('4. Alle Karten aktualisieren (Raster)', 'updateAllCardSheets') // Menüpunkt zum Aktualisieren aller Kartenblätter.
-    .addSeparator() // Fügt eine Trennlinie im Menü hinzu.
-    .addItem('5. Sortier-Trigger installieren', 'installSortTrigger') // Menüpunkt zum Installieren eines automatischen Sortier-Triggers.
-    .addItem('6. Alle Set-Blätter manuell sortieren', 'manualSortAllSheets') // Menüpunkt zum manuellen Sortieren aller Set-Blätter.
-    .addItem('7. Aktuelles Set-Blatt sortieren', 'manualSortCurrentSheet') // Menüpunkt zum manuellen Sortieren des aktuell geöffneten Set-Blattes.
-    .addSeparator() // Fügt eine Trennlinie im Menü hinzu.
-    .addItem('8. Aktuelles Set löschen', 'deleteCurrentSet') // Menüpunkt zum Löschen des aktuell geöffneten Sets und seiner Daten.
-    .addItem('9. Sortier-Trigger deinstallieren', 'uninstallSortTrigger') // Menüpunkt zum Deinstallieren des automatischen Sortier-Triggers.
-    .addItem('10. Alle persistenten Daten löschen', 'deleteAllPersistentData') // Menüpunkt zum unwiderruflich Löschen aller gespeicherten Daten.
-    .addItem('Debug: onEdit() ausführen', 'debugOnEdit') // Debug-Menüpunkt zum Simulieren eines onEdit-Events.
-    .addToUi(); // Zeigt das Menü in der Tabelle an.
-}
-*/
 function onOpen() {
   const ui = SpreadsheetApp.getUi(); // Holt die Benutzeroberfläche der Tabelle.
 
@@ -246,11 +219,24 @@ function onOpen() {
     .addToUi();
 }
 
+// ============================================================================
+// SEKTION: STRING- & ID-NORMALISIERUNG
+// ============================================================================
+
 /**
- * Normalisiert einen String, indem er in Kleinbuchstaben umgewandelt und Leerzeichen sowie Sonderzeichen entfernt werden.
- * Dies ist nützlich für den Abgleich von Set-Namen aus verschiedenen APIs.
- * @param {string} str Der zu normalisierende String.
- * @returns {string} Der normalisierte String.
+ * Normalisiert einen String durch Kleinschreibung und Entfernung von Sonderzeichen.
+ * 
+ * Verwendet für:
+ * - Set-Namen-Abgleich zwischen APIs
+ * - Konsistente String-Vergleiche
+ * 
+ * @function normalizeString
+ * @param {string} str - Der zu normalisierende String
+ * @returns {string} Normalisierter String (nur Kleinbuchstaben und Zahlen)
+ * 
+ * @example
+ * normalizeString("Base Set") // returns "baseset"
+ * normalizeString("Sword & Shield") // returns "swordshield"
  */
 function normalizeString(str) {
   if (str === null || typeof str === 'undefined') {
@@ -260,12 +246,21 @@ function normalizeString(str) {
 }
 
 /**
- * Normalisiert eine Set-ID für den Abgleich zwischen verschiedenen APIs.
- * Entfernt führende Nullen in numerischen Teilen und ersetzt '.' durch 'pt', falls nicht bereits geschehen.
- * Außerdem ersetzt es ' ' durch '-' und entfernt andere Sonderzeichen.
- * Beispiel: "sv08.5" wird zu "sv8pt5", "Base Set" wird zu "baseset".
- * @param {string} setId Die zu normalisierende Set-ID.
- * @returns {string} Die normalisierte Set-ID.
+ * Normalisiert eine Set-ID für API-übergreifenden Abgleich.
+ * 
+ * Transformationen:
+ * - Entfernt führende Nullen in Zahlen ("sv08" → "sv8")
+ * - Ersetzt "." durch "pt" bei Versionsnummern ("sv8.5" → "sv8pt5")
+ * - Ersetzt Leerzeichen durch Bindestriche ("Base Set" → "base-set")
+ * - Entfernt Sonderzeichen
+ * 
+ * @function normalizeSetId
+ * @param {string} setId - Die zu normalisierende Set-ID
+ * @returns {string} Normalisierte Set-ID
+ * 
+ * @example
+ * normalizeSetId("sv08.5") // returns "sv8pt5"
+ * normalizeSetId("Base Set") // returns "baseset"
  */
 function normalizeSetId(setId) {
   if (!setId) return "";
@@ -290,12 +285,19 @@ function normalizeSetId(setId) {
 }
 
 /**
- * Normalisiert eine Kartennummer, indem führende Nullen aus dem numerischen Teil entfernt werden.
- * Dies ist entscheidend, um Konsistenz zwischen TCGDex (die oft führende Nullen hat) und
- * pokemontcg.io (die oft keine hat) herzustellen und korrekte Lookups in gespeicherten Daten zu ermöglichen.
- * Beispiel: "sv10-001" wird zu "sv10-1", "XY005" wird zu "XY5".
- * @param {string} cardNumber Die zu normalisierende Kartennummer.
- * @returns {string} Die normalisierte Kartennummer.
+ * Normalisiert eine Kartennummer durch Entfernung führender Nullen.
+ * 
+ * Wichtig für konsistente Lookups zwischen TCGDex (mit Nullen) und
+ * pokemontcg.io (ohne Nullen).
+ * 
+ * @function normalizeCardNumber
+ * @param {string} cardNumber - Die zu normalisierende Kartennummer
+ * @returns {string} Normalisierte Kartennummer ohne führende Nullen
+ * 
+ * @example
+ * normalizeCardNumber("sv10-001") // returns "sv10-1"
+ * normalizeCardNumber("XY005") // returns "XY5"
+ * normalizeCardNumber("007a") // returns "7a"
  */
 function normalizeCardNumber(cardNumber) {
   if (!cardNumber) return "";
@@ -321,11 +323,17 @@ function normalizeCardNumber(cardNumber) {
 }
 
 
+// ============================================================================
+// SEKTION: API-ZUGRIFF & DATEN-ABRUF
+// ============================================================================
+
 /**
- * Ruft Daten von einer externen API ab.
- * Implementiert eine einfache Ratenbegrenzung, um Überlastung zu vermeiden.
- * @param {string} url Die URL der API-Anfrage.
- * @returns {Object|null} Das geparste JSON-Antwortobjekt oder null bei einem Fehler.
+ * Ruft Daten von einer externen API ab (Legacy-Funktion).
+ * 
+ * @deprecated Verwenden Sie stattdessen {@link fetchApiData}
+ * @function fetchData
+ * @param {string} url - Die URL der API-Anfrage
+ * @returns {Object|null} Geparste JSON-Antwort oder null bei Fehler
  */
 function fetchData(url) {
   try {
@@ -343,11 +351,21 @@ function fetchData(url) {
 }
 
 /**
- * Hilfsfunktion zum Abrufen von Daten von einer externen API.
- * Behandelt HTTP-Fehler und JSON-Parsing-Fehler.
- * @param {string} url Der URL des API-Endpunkts.
- * @param {string} errorMessagePrefix Der Präfix für Fehlermeldungen, die im UI angezeigt werden.
- * @returns {object|null} Das geparste JSON-Objekt oder null im Fehlerfall.
+ * Ruft Daten von einer externen API ab mit Fehlerbehandlung.
+ * 
+ * Features:
+ * - Automatische HTTP-Fehlerbehandlung
+ * - JSON-Parsing mit Error-Handling
+ * - Logging für Debugging
+ * - Spezial-Logging für TCGDex-Antworten
+ * 
+ * @function fetchApiData
+ * @param {string} url - URL des API-Endpunkts
+ * @param {string} errorMessagePrefix - Präfix für Fehlermeldungen im Log
+ * @returns {Object|null} Geparste JSON-Daten oder null bei Fehler
+ * 
+ * @example
+ * const sets = fetchApiData(`${TCGDEX_BASE_URL}sets`, "Fehler beim Laden der Sets");
  */
 function fetchApiData(url, errorMessagePrefix) {
   const ui = SpreadsheetApp.getUi(); // Holt die Benutzeroberfläche der Tabelle.
@@ -374,11 +392,29 @@ function fetchApiData(url, errorMessagePrefix) {
 }
 
 /**
- * Hilfsfunktion zum Laden der Kartendaten für ein Set (TCGDex oder pokemontcg.io).
- * @param {string} setId Die Set-ID (pokemontcg.io ID oder TCGDex-only ID).
- * @param {string} setName Der Name des Sets für Logging.
- * @param {Array<object>} tcgdexAllSets Liste aller TCGDex Sets für Matching.
- * @returns {{allCards: Array, cardmarketData: Object, tcgdexDetailedSet: Object|null, pokemontcgDetailedSet: Object|null}} Objekt mit Kartendaten.
+ * Lädt und kombiniert Kartendaten aus verschiedenen Quellen.
+ * 
+ * Unterstützt:
+ * - TCGDex-only Sets (deutsche Karten ohne pokemontcg.io Daten)
+ * - pokemontcg.io Sets mit TCGDex-Anreicherung (deutsche Namen/Bilder)
+ * 
+ * Prozess:
+ * 1. Erkennt Set-Typ (TCGDex-only vs. pokemontcg.io)
+ * 2. Lädt Kartendaten von primärer Quelle
+ * 3. Merged deutsche TCGDex-Daten wenn verfügbar
+ * 4. Normalisiert Kartennummern für konsistente IDs
+ * 5. Extrahiert Cardmarket-URLs
+ * 
+ * @function loadCardsForSet
+ * @param {string} setId - Set-ID (pokemontcg.io oder TCGDEX-prefixed)
+ * @param {string} setName - Name des Sets für Logging
+ * @param {Array<Object>} tcgdexAllSets - Liste aller TCGDex Sets für Matching
+ * @returns {{allCards: Array<Object>, cardmarketData: Object, tcgdexDetailedSet: Object|null, pokemontcgDetailedSet: Object|null}}
+ * @throws {Error} Wenn Kartendaten nicht geladen werden können
+ * 
+ * @example
+ * const data = loadCardsForSet("sv08", "Surging Sparks", allTcgdexSets);
+ * console.log(data.allCards.length); // Anzahl der Karten
  */
 function loadCardsForSet(setId, setName, tcgdexAllSets) {
   let allCards = [];
@@ -453,12 +489,30 @@ function loadCardsForSet(setId, setName, tcgdexAllSets) {
   return { allCards, cardmarketData, tcgdexDetailedSet, pokemontcgDetailedSet };
 }
 
+// ============================================================================
+// SEKTION: SET-MATCHING (pokemontcg.io <-> TCGDex)
+// ============================================================================
+
 /**
- * Hilfsfunktion zum Finden eines passenden TCGDex-Sets basierend auf pokemontcg.io Set-Daten.
- * Verwendet eine mehrstufige Strategie für eine robuste Zuordnung.
- * @param {object} pokemontcgIoSet Das pokemontcg.io Set-Objekt.
- * @param {Array<object>} allTcgdexSets Eine Liste aller TCGDex Set-Objekte.
- * @returns {object|null} Das passende TCGDex Set-Objekt oder null, wenn keines gefunden wird.
+ * Findet ein passendes TCGDex-Set zu einem pokemontcg.io Set.
+ * 
+ * Matching-Strategie (nach Priorität):
+ * 1. Custom Mappings (vordefinierte ID-Zuordnungen)
+ * 2. Direkte ID-Übereinstimmung
+ * 3. Normalisierte ID-Übereinstimmung
+ * 4. PTCGO Code Match (Abkürzungen)
+ * 5. Normalisierter Name Match (exakt und partiell)
+ * 
+ * @function findMatchingTcgdexSet
+ * @param {Object} pokemontcgIoSet - Das pokemontcg.io Set-Objekt
+ * @param {Array<Object>} allTcgdexSets - Liste aller TCGDex Set-Objekte
+ * @returns {Object|null} Passendes TCGDex Set oder null
+ * 
+ * @example
+ * const tcgdexSet = findMatchingTcgdexSet(
+ *   { id: 'sv08', name: 'Surging Sparks', ptcgoCode: 'SPS' },
+ *   allTcgdexSets
+ * );
  */
 function findMatchingTcgdexSet(pokemontcgIoSet, allTcgdexSets) {
   if (!pokemontcgIoSet || !allTcgdexSets) {
@@ -562,9 +616,16 @@ function findMatchingTcgdexSet(pokemontcgIoSet, allTcgdexSets) {
 }
 
 
+// ============================================================================
+// SEKTION: PROPERTIES SERVICE - Datenspeicherung
+// ============================================================================
+
 /**
- * Ruft die gespeicherten Set-Daten aus den Skripteigenschaften ab.
- * @returns {Array<Object>} Eine Liste von Set-Objekten.
+ * Ruft gespeicherte Set-Daten aus ScriptProperties ab.
+ * 
+ * @deprecated Diese Funktion wird nicht mehr aktiv verwendet
+ * @function getStoredSets
+ * @returns {Array<Object>} Liste gespeicherter Set-Objekte
  */
 function getStoredSets() {
   const properties = PropertiesService.getScriptProperties();
@@ -592,11 +653,22 @@ function openCustomSidebar() {
   SpreadsheetApp.getUi().showSidebar(html); // Zeigt das Sidebar an.
 }
 
+// ============================================================================
+// SEKTION: SHEET-SETUP & INITIALISIERUNG
+// ============================================================================
+
 /**
- * Initialisiert die grundlegende Struktur der Google Tabelle.
- * Diese Funktion erstellt die Blätter "Sets Overview" und "Collection Summary" falls sie nicht existieren,
- * setzt deren Kopfzeilen, friert die erste Zeile ein und passt Spaltenbreiten an.
- * Sie löscht KEINE bestehenden Daten in diesen Blättern.
+ * Initialisiert die Basis-Struktur der Google Tabelle.
+ * 
+ * Erstellt und konfiguriert:
+ * - "Sets Overview" Blatt mit Headern und Checkboxen
+ * - "Collection Summary" Blatt mit Statistiken
+ * - Frozen Rows, Spaltenbreiten und Formatierung
+ * 
+ * Diese Funktion ist idempotent - sie kann mehrfach ausgeführt werden
+ * ohne bestehende Daten zu zerstören.
+ * 
+ * @function setupSheets
  */
 function setupSheets() {
   const ss = SpreadsheetApp.getActiveSpreadsheet(); // Holt das aktive Spreadsheet.
@@ -723,16 +795,21 @@ function extractIdFromHyperlink(cellValue) {
 }
 
 /**
- * Hilfsfunktion zum sicheren Parsen von JSON-Daten aus ScriptProperties.
- * @param {string} key Der Schlüssel der Eigenschaft.
- * @param {object} defaultValue Der Standardwert, wenn die Eigenschaft nicht existiert oder ungültig ist.
- * @returns {object} Das geparste Objekt oder der Standardwert.
+ * Lädt und parst JSON-Daten aus ScriptProperties sicher.
+ * 
+ * @function getScriptPropertiesData
+ * @param {string} key - Schlüssel der Property
+ * @param {Object} [defaultValue={}] - Rückgabewert bei Fehler oder fehlenden Daten
+ * @returns {Object} Geparste Daten oder Standardwert
+ * 
+ * @example
+ * const collected = getScriptPropertiesData('collectedCardsData', {});
  */
 function getScriptPropertiesData(key, defaultValue = {}) {
-  const scriptProperties = PropertiesService.getScriptProperties(); // Holt den PropertiesService.
-  const data = scriptProperties.getProperty(key); // Holt die Eigenschaft anhand des Schlüssels.
+  const scriptProperties = PropertiesService.getScriptProperties();
+  const data = scriptProperties.getProperty(key);
   try {
-    return data ? JSON.parse(data) : defaultValue; // Parst JSON oder gibt Standardwert zurück.
+    return data ? JSON.parse(data) : defaultValue;
   } catch (e) {
     Logger.log(`Fehler beim Parsen der Eigenschaft '${key}': ${e.message}. Verwende Standardwert.`);
     return defaultValue;
@@ -740,9 +817,14 @@ function getScriptPropertiesData(key, defaultValue = {}) {
 }
 
 /**
- * Hilfsfunktion zum sicheren Speichern von JSON-Daten in ScriptProperties.
- * @param {string} key Der Schlüssel der Eigenschaft.
- * @param {object} data Das zu speichernde Objekt.
+ * Speichert ein Objekt als JSON in ScriptProperties.
+ * 
+ * @function setScriptPropertiesData
+ * @param {string} key - Schlüssel der Property
+ * @param {Object} data - Zu speicherndes Objekt
+ * 
+ * @example
+ * setScriptPropertiesData('collectedCardsData', { sv08: { '1': {g: true, rh: false} } });
  */
 function setScriptPropertiesData(key, data) {
   const scriptProperties = PropertiesService.getScriptProperties(); // Holt den PropertiesService.
@@ -750,12 +832,23 @@ function setScriptPropertiesData(key, data) {
 }
 
 
+// ============================================================================
+// SEKTION: SORTIERUNG & VERGLEICH
+// ============================================================================
+
 /**
- * Implementiert eine natürliche Sortierung für Strings, die Zahlen enthalten (z.B. "GG2" vor "GG10").
- * Dies ist wichtig für die korrekte Sortierung von Kartennummern, die alphanumerische Teile haben.
- * @param {string} a Erster zu vergleichender String.
- * @param {string} b Zweiter zu vergleichender String.
- * @returns {number} Vergleichsergebnis (-1, 0, 1).
+ * Natürliche Sortierung für alphanumerische Strings.
+ * 
+ * Sortiert "GG2" vor "GG10" (nicht "GG10" vor "GG2").
+ * Verwendet die native localeCompare-Funktion mit numeric-Option.
+ * 
+ * @function naturalSort
+ * @param {string|number} a - Erster Vergleichswert
+ * @param {string|number} b - Zweiter Vergleichswert
+ * @returns {number} -1, 0, oder 1 für Sortierreihenfolge
+ * 
+ * @example
+ * ["GG10", "GG2", "GG1"].sort(naturalSort) // ["GG1", "GG2", "GG10"]
  */
 function naturalSort(a, b) {
   // Sicherstellen, dass beide Inputs Strings sind
@@ -1015,9 +1108,17 @@ function populateSetsOverview() {
 }
 
 /**
- * Hauptfunktion für die Erstkonfiguration und den Import aller Sets.
- * Ruft `setupSheets` auf, um die grundlegende Tabellenstruktur zu erstellen,
- * und `populateSetsOverview`, um die Set-Liste zu füllen.
+ * Haupt-Setup-Funktion: Initialisiert Tabelle und importiert alle Sets.
+ * 
+ * Workflow:
+ * 1. Erstellt/prüft Basis-Sheet-Struktur (setupSheets)
+ * 2. Lädt und füllt Sets-Übersicht (populateSetsOverview)
+ * 3. Installiert notwendige Trigger (installAllTriggers)
+ * 
+ * Diese Funktion sollte beim ersten Setup und bei kompletten Updates
+ * verwendet werden.
+ * 
+ * @function setupAndImportAllSets
  */
 function setupAndImportAllSets() {
   setupSheets(); // Stellt sicher, dass die Basisblätter existieren und Header korrekt sind.
@@ -1131,12 +1232,25 @@ function updateSetsOverviewRowAfterCardImport(setIdToMatchInOverview, pokemontcg
   }
 }
 
+// ============================================================================
+// SEKTION: KARTEN-IMPORT & SET-VERWALTUNG
+// ============================================================================
+
 /**
- * Ruft alle Karten für ein gegebenes pokemontcg.io Set ab und berücksichtigt dabei die Paginierung.
- * @param {string} pokemontcgSetId Die pokemontcg.io Set ID.
- * @param {string} setName Der Name des Sets (für Logging).
- * @returns {Array<Object>} Eine Liste aller Karten des Sets.
- * @throws {Error} Wenn keine Karten abgerufen werden können.
+ * Ruft alle Karten eines pokemontcg.io Sets mit Paginierung ab.
+ * 
+ * Die API limitiert Antworten auf 250 Karten pro Seite.
+ * Diese Funktion sammelt automatisch alle Seiten.
+ * 
+ * @function fetchAllPokemontcgIoCards
+ * @param {string} pokemontcgSetId - Die pokemontcg.io Set-ID
+ * @param {string} setName - Name des Sets für Logging
+ * @returns {Array<Object>} Liste aller Karten, sortiert nach Nummer
+ * @throws {Error} Wenn keine Karten gefunden werden
+ * 
+ * @example
+ * const cards = fetchAllPokemontcgIoCards("sv08", "Surging Sparks");
+ * console.log(`Geladen: ${cards.length} Karten`);
  */
 function fetchAllPokemontcgIoCards(pokemontcgSetId, setName) {
   let allPokemontcgCards = [];
@@ -1192,11 +1306,24 @@ function fetchAllPokemontcgIoCards(pokemontcgSetId, setName) {
 
 
 /**
- * Importiert Karten für ein spezifisches Set, wobei pokemontcg.io die Grundlage bildet
- * und TCGDex zur Ergänzung deutscher Werte verwendet wird.
- * Speichert die gemergten Daten im PropertiesService zwischen und rendert sie dann im entsprechenden Blatt.
- * Diese Funktion behandelt nun auch den Import von TCGDex-Only Sets.
- * @param {string} setIdFromOverview Die Set-ID aus der "Sets Overview" (pokemontcg.io set.id oder TCGDex-only ID).
+ * Importiert und rendert Karten für ein spezifisches Set.
+ * 
+ * Hauptfunktion für den Set-Import:
+ * 1. Prüft/erstellt Set-Blatt
+ * 2. Lädt Kartendaten (loadCardsForSet)
+ * 3. Aktualisiert Sets Overview
+ * 4. Rendert Karten im Grid (renderAndSortCardsInSheet)
+ * 5. Aktualisiert Collection Summary
+ * 
+ * Unterstützt sowohl pokemontcg.io als auch TCGDex-only Sets.
+ * 
+ * @function populateCardsForSet
+ * @param {string} setIdFromOverview - Set-ID aus "Sets Overview" (pokemontcg.io oder TCGDEX-prefixed)
+ * @throws {Error} Bei fehlenden Daten oder Blatt-Konflikten
+ * 
+ * @example
+ * populateCardsForSet("sv08"); // pokemontcg.io Set
+ * populateCardsForSet("TCGDEX-ex03"); // TCGDex-only Set
  */
 function populateCardsForSet(setIdFromOverview) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -1261,14 +1388,29 @@ function populateCardsForSet(setIdFromOverview) {
 }
 
 
+// ============================================================================
+// SEKTION: KARTEN-RENDERING & GRID-LAYOUT
+// ============================================================================
+
 /**
- * Rendert und sortiert Karten im angegebenen Blatt basierend auf den übergebenen Daten.
- * Dieser Algorithmus ist der zentrale Punkt für die Anzeige und Sortierung von Karten.
- *
- * @param {GoogleAppsScript.Spreadsheet.Sheet} cardSheet Das Blatt, in dem die Karten gerendert werden sollen.
- * @param {string} setId Die Set-ID (pokemontcg.io ID oder TCGDex-only ID).
- * @param {Array<Object>} allCards Die Liste der zusammengeführten Kartendaten.
- * @param {Object} pokemontcgIoCardData Die Map der Cardmarket- und Image-URLs von pokemontcg.io (leer für TCGDex-only Sets).
+ * Rendert und sortiert Karten in einem Set-Blatt im Grid-Layout.
+ * 
+ * Zentraler Rendering-Algorithmus:
+ * 1. Sortiert Karten nach Sammlungsstatus (ungesammelt zuerst)
+ * 2. Leert bestehendes Sheet-Layout
+ * 3. Erstellt Header mit Statistiken
+ * 4. Rendert Karten in Grid-Formation (5 pro Reihe)
+ * 5. Setzt Checkboxen, Bilder und Cardmarket-Links
+ * 6. Wendet Farb-Coding an (grün=collected, blau=RH)
+ * 
+ * @function renderAndSortCardsInSheet
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} cardSheet - Ziel-Blatt für Rendering
+ * @param {string} setId - Set-ID (pokemontcg.io oder TCGDEX-prefixed)
+ * @param {Array<Object>} allCards - Liste der zu rendernden Karten
+ * @param {Object} pokemontcgIoCardData - Cardmarket-URLs (leer für TCGDex-only)
+ * 
+ * @example
+ * renderAndSortCardsInSheet(sheet, "sv08", cards, cardmarketData);
  */
 function renderAndSortCardsInSheet(cardSheet, setId, allCards, pokemontcgIoCardData) {
   // Stellen Sie sicher, dass allCards ein Array ist und keine leeren Elemente enthält,
@@ -1593,9 +1735,14 @@ function renderAndSortCardsInSheet(cardSheet, setId, allCards, pokemontcgIoCardD
 }
 
 /**
- * Hilfsfunktion zum Abrufen der offiziellen Abkürzung eines Sets aus der Sets Overview.
- * @param {string} setId Die Set-ID (pokemontcg.io ID oder TCGDex-only ID).
- * @returns {string} Die offizielle Abkürzung oder ein leerer String, wenn nicht gefunden.
+ * Holt die offizielle Abkürzung eines Sets aus "Sets Overview".
+ * 
+ * @function getOfficialAbbreviationFromOverview
+ * @param {string} setId - Set-ID (pokemontcg.io oder TCGDEX-prefixed)
+ * @returns {string} Offizielle Abkürzung oder leerer String
+ * 
+ * @example
+ * const abbr = getOfficialAbbreviationFromOverview("sv08"); // "SPS"
  */
 function getOfficialAbbreviationFromOverview(setId) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -1640,9 +1787,21 @@ function promptAndPopulateCardsForSet() {
   }
 }
 
+// ============================================================================
+// SEKTION: SAMMLUNGS-UPDATES & STATISTIKEN
+// ============================================================================
+
 /**
- * Aktualisiert die Sammlungsstatistiken im Blatt "Collection Summary".
- * Liest die Zusammenfassungsdaten aus den Kopfzeilen der einzelnen Set-Blätter.
+ * Aktualisiert die Sammlungsstatistiken im "Collection Summary" Blatt.
+ * 
+ * Liest Header-Daten von allen Set-Blättern und erstellt eine
+ * zusammenfassende Übersicht:
+ * - Gesamtzahl Karten pro Set
+ * - Gesammelte normale Karten
+ * - Gesammelte Reverse Holo Karten
+ * - Abschluss-Prozentsatz
+ * 
+ * @function updateCollectionSummary
  */
 function updateCollectionSummary() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -1785,10 +1944,28 @@ function updateAllCardSheets() {
   ui.alert("Aktualisierung abgeschlossen", `${processedCount}/${setsData.length} Sets verarbeitet.`, ui.ButtonSet.OK);
 }
 
+// ============================================================================
+// SEKTION: EVENT-HANDLER (onEdit)
+// ============================================================================
+
 /**
- * Wird bei jeder Zellbearbeitung ausgeführt.
- * Speichert den Status von Checkboxen, aktualisiert die Formatierung und die Kopfzeile des Set-Blattes.
- * @param {GoogleAppsScript.Events.Sheets.SheetChangeEvent} e Das Ereignisobjekt, das die Bearbeitungsinformationen enthält.
+ * Haupt-Event-Handler für Zellbearbeitungen.
+ * 
+ * Koordiniert alle Sheet-Änderungen:
+ * - Checkbox-Aktivierungen in Übersichtsblättern
+ * - Karten-Sammlungsstatus-Änderungen (G/RH Checkboxen)
+ * - Bild-URL-Änderungen
+ * - Set-Import/Reimport-Trigger
+ * - Sortier-Trigger
+ * 
+ * Features:
+ * - Lock-basierte Synchronisation (verhindert Race Conditions)
+ * - Duplikats-Erkennung für Benutzer-Clicks
+ * - Rekursions-Schutz (isScriptEditing Flag)
+ * - Detailliertes Logging
+ * 
+ * @function handleOnEdit
+ * @param {GoogleAppsScript.Events.Sheets.SheetChangeEvent} e - Edit-Event-Objekt
  */
 function handleOnEdit(e) {
   // 1. Check if this is a script-initiated edit (recursive call)
@@ -1816,6 +1993,10 @@ function handleOnEdit(e) {
 
     // Robust check for user-initiated check (true from false)
     const isUserInitiatedCheckActual = isUserInitiatedCheck(value, e.oldValue);
+    
+    // Define variables for logging
+    const isNewValueTrueActual = (value === true || (typeof value === 'string' && value.toLowerCase() === 'true'));
+    const wasOldValueTrueActual = (e.oldValue === true || (typeof e.oldValue === 'string' && e.oldValue.toLowerCase() === 'true'));
 
     // Only apply duplicate check for user-initiated checkbox activations
     if (isUserInitiatedCheckActual) {
@@ -1975,10 +2156,18 @@ function updateSetSheetHeaderSummary(sheet, setId, collectedCount, reverseHoloCo
 }
 
 /**
- * Hilfsfunktion: Behandelt Änderungen an der G-Checkbox
- * @param {Object} cardData Das Kartenobjekt mit g/rh Status
- * @param {boolean} isChecked Der neue Checkbox-Status
- * @param {GoogleAppsScript.Spreadsheet.Range} rhCheckboxCell Die RH-Checkbox-Zelle
+ * Behandelt G-Checkbox-Änderungen (Normal-Sammlung).
+ * 
+ * Logik:
+ * - Bei Aktivierung: Setzt g=true und aktiviert RH-Checkbox
+ * - Bei Deaktivierung: Setzt g=false UND rh=false
+ * - RH-Abhängigkeit: RH-Validation nur aktiv wenn G=true
+ * - Farb-Coding: Weiß (deaktiviert) → Standard (aktiv)
+ * 
+ * @function handleGCheckboxChange
+ * @param {Object} cardData - Kartenobjekt mit g/rh Status
+ * @param {boolean} isChecked - Neuer Checkbox-Status
+ * @param {GoogleAppsScript.Spreadsheet.Range} rhCheckboxCell - RH-Checkbox-Zelle
  * @returns {boolean} True wenn Daten geändert wurden
  */
 function handleGCheckboxChange(cardData, isChecked, rhCheckboxCell) {
@@ -2004,10 +2193,18 @@ function handleGCheckboxChange(cardData, isChecked, rhCheckboxCell) {
 }
 
 /**
- * Hilfsfunktion: Behandelt Änderungen an der RH-Checkbox
- * @param {Object} cardData Das Kartenobjekt mit g/rh Status
- * @param {boolean} isChecked Der neue Checkbox-Status
- * @param {GoogleAppsScript.Spreadsheet.Range} rhCheckboxCell Die RH-Checkbox-Zelle
+ * Behandelt RH-Checkbox-Änderungen (Reverse Holo).
+ * 
+ * Logik:
+ * - Kann nur aktiviert werden wenn g=true
+ * - Bei Versuch RH ohne G zu aktivieren: Auto-Reset zu false
+ * - Validierung: Prüft G-Status vor Update
+ * - Farb-Coding: Blau wenn beide gesetzt
+ * 
+ * @function handleRHCheckboxChange
+ * @param {Object} cardData - Kartenobjekt mit g/rh Status
+ * @param {boolean} isChecked - Neuer Checkbox-Status
+ * @param {GoogleAppsScript.Spreadsheet.Range} rhCheckboxCell - RH-Checkbox-Zelle
  * @returns {boolean} True wenn Daten geändert wurden
  */
 function handleRHCheckboxChange(cardData, isChecked, rhCheckboxCell) {
@@ -2025,16 +2222,27 @@ function handleRHCheckboxChange(cardData, isChecked, rhCheckboxCell) {
 }
 
 /**
- * Verarbeitet die Bearbeitung von G-/RH-Checkboxen oder Bildzellen auf einem Set-Blatt.
- * Aktualisiert den Status im PropertiesService und die UI des betroffenen Kartenblocks.
- * Die `SpreadsheetApp.flush()`-Aufrufe wurden konsolidiert, um die Leistung zu verbessern.
- *
- * @param {GoogleAppsScript.Events.Sheets.SheetChangeEvent} e Das Ereignisobjekt.
- * @param {string} rawCardId Der rohe Wert der Karten-ID-Zelle (wird intern normalisiert).
- * @param {string} setId Die Set-ID des aktuellen Blattes.
- * @param {boolean} isGCheckbox True, wenn die G-Checkbox bearbeitet wurde.
- * @param {boolean} isRHCheckbox True, wenn die RH-Checkbox bearbeitet wurde.
- * @param {boolean} isImageCell True, wenn die Bildzelle bearbeitet wurde.
+ * Verarbeitet Karten-Daten-Änderungen (Checkboxen & Bilder).
+ * 
+ * Behandelt drei Arten von Änderungen:
+ * 1. G-Checkbox: Normal gesammelt Status
+ * 2. RH-Checkbox: Reverse Holo Status (nur wenn G=true)
+ * 3. Bild-Zelle: Custom Image URLs
+ * 
+ * Logik:
+ * - G-Checkbox: Bei Deaktivierung wird RH automatisch deaktiviert
+ * - RH-Checkbox: Kann nur aktiviert werden wenn G=true
+ * - Bild-Änderungen: Speichert custom IMAGE() Formeln
+ * - Header-Update: Aktualisiert Statistiken bei jeder Änderung
+ * - Farb-Coding: Wendet Hintergrundfarben basierend auf Status an
+ * 
+ * @function processCardDataEdit
+ * @param {GoogleAppsScript.Events.Sheets.SheetChangeEvent} e - Event-Objekt
+ * @param {string} rawCardId - Rohe Karten-ID aus Zelle
+ * @param {string} setId - Set-ID des Blattes
+ * @param {boolean} isGCheckbox - True wenn G-Checkbox bearbeitet
+ * @param {boolean} isRHCheckbox - True wenn RH-Checkbox bearbeitet
+ * @param {boolean} isImageCell - True wenn Bildzelle bearbeitet
  */
 function processCardDataEdit(e, rawCardId, setId, isGCheckbox, isRHCheckbox, isImageCell) {
   const range = e.range;
@@ -2495,9 +2703,27 @@ function createTimeTrigger(intervalType, frequency, hour) {
   return confirmationMessage;
 }
 
+// ============================================================================
+// SEKTION: TRIGGER-MANAGEMENT
+// ============================================================================
+
 /**
- * Installiert einen Zeit-Trigger, der die Funktion `sortAllSheetsTrigger` mit wählbarer Frequenz ausführt.
- * Der Benutzer kann zwischen minütlichen, täglichen, stündlichen oder wöchentlichen Intervallen wählen.
+ * Installiert periodischen Sortier-Trigger mit konfigurierbaren Intervallen.
+ * 
+ * Unterstützte Intervalle:
+ * - Minütlich: Sortiert alle X Minuten
+ * - Stündlich: Sortiert alle X Stunden
+ * - Täglich: Sortiert täglich zur angegebenen Uhrzeit
+ * - Wöchentlich: Sortiert wöchentlich zur angegebenen Uhrzeit
+ * 
+ * Workflow:
+ * 1. Löscht bestehende sortAllSheetsTrigger-Trigger
+ * 2. Fragt Benutzer nach Intervalltyp
+ * 3. Fragt nach Frequenz (z.B. "alle 3 Stunden")
+ * 4. Bei täglich/wöchentlich: Fragt nach Uhrzeit
+ * 5. Erstellt Trigger mit createTimeTrigger()
+ * 
+ * @function installSortTrigger
  */
 function installSortTrigger() {
   const ui = SpreadsheetApp.getUi();
@@ -2633,9 +2859,31 @@ function uninstallAllTriggers() {
 
 
 /**
- * Diese Funktion wird durch einen Zeit-Trigger ausgeführt.
- * Sie durchläuft alle importierten Set-Blätter, sortiert deren Karten neu
- * und aktualisiert anschließend die Sammlungsübersicht.
+ * Trigger-Callback: Sortiert alle importierten Set-Blätter automatisch.
+ * 
+ * Ausgeführt durch:
+ * - Zeit-basierte Trigger (installiert via installSortTrigger)
+ * - Periodische Ausführung (minütlich/stündlich/täglich/wöchentlich)
+ * 
+ * Workflow:
+ * 1. Lädt alle Sets aus "Sets Overview"
+ * 2. Iteriert über jedes Set
+ * 3. Prüft ob Sheet existiert und Set-ID übereinstimmt
+ * 4. Lädt Karten mit prepareCardsForSorting()
+ * 5. Rendert mit renderAndSortCardsInSheet()
+ * 6. Speichert Sortier-Zeitstempel
+ * 7. Aktualisiert Collection Summary
+ * 
+ * Performance:
+ * - 100ms Sleep zwischen Sets (API-Rate-Limiting)
+ * - Detailliertes Logging
+ * - Error-Handling pro Set (Fehler blockieren nicht andere Sets)
+ * 
+ * @function sortAllSheetsTrigger
+ * 
+ * @see installSortTrigger
+ * @see prepareCardsForSorting
+ * @see renderAndSortCardsInSheet
  */
 function sortAllSheetsTrigger() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -2687,8 +2935,27 @@ function sortAllSheetsTrigger() {
 }
 
 /**
- * Sortiert alle vorhandenen Set-Blätter manuell neu.
- * Erfordert eine Bestätigung des Benutzers und aktualisiert anschließend die Sammlungsübersicht.
+ * Sortiert alle Set-Blätter manuell (User-initiiert).
+ * 
+ * Unterschied zu sortAllSheetsTrigger:
+ * - Erfordert Bestätigung via Dialog
+ * - Zeigt Toast-Notifications (Progress & Completion)
+ * - Von Menü-Option aufrufbar
+ * - Keine automatische Trigger-Löschung
+ * 
+ * Workflow:
+ * 1. Prüft ob Sets vorhanden
+ * 2. Bestätigt via Dialog (YES/NO)
+ * 3. Sortiert alle Sets (identisch zu sortAllSheetsTrigger)
+ * 4. Zeigt Erfolgs-Toast
+ * 5. Aktualisiert Collection Summary
+ * 
+ * Use Cases:
+ * - Manuelle Neuordnung nach Sammlungsänderungen
+ * - Test von Sortier-Algorithmus
+ * - Update nach Import-Problemen
+ * 
+ * @function manualSortAllSheets
  */
 function manualSortAllSheets() {
   const ui = SpreadsheetApp.getUi();
@@ -2750,8 +3017,31 @@ function manualSortAllSheets() {
 }
 
 /**
- * Sortiert das aktuell geöffnete Set-Blatt manuell neu.
- * Prüft, ob es sich um ein Set-Blatt handelt und aktualisiert anschließend die Sammlungsübersicht.
+ * Sortiert nur das aktuell geöffnete Set-Blatt.
+ * 
+ * Unterschied zu manualSortAllSheets:
+ * - Sortiert nur ein einzelnes Set (schneller)
+ * - Keine Bestätigungs-Dialog erforderlich
+ * - Ideal für schnelle Updates nach Änderungen
+ * 
+ * Validierung:
+ * - Prüft ob aktuelles Sheet ein Set-Blatt ist
+ * - Lehnt Overview/Summary-Blätter ab
+ * - Prüft Set-ID in Zelle A1 (Notiz)
+ * 
+ * Workflow:
+ * 1. Extrahiert Set-ID aus A1-Notiz
+ * 2. Lädt Karten mit prepareCardsForSorting()
+ * 3. Rendert mit renderAndSortCardsInSheet()
+ * 4. Speichert Sortier-Zeitstempel
+ * 5. Aktualisiert Collection Summary
+ * 
+ * Use Cases:
+ * - Schnelles Re-Sorting nach manuellen Änderungen
+ * - Test einzelner Sets
+ * - Korrektur von Import-Fehlern
+ * 
+ * @function manualSortCurrentSheet
  */
 function manualSortCurrentSheet() {
   const ui = SpreadsheetApp.getUi();
@@ -2828,11 +3118,32 @@ function getSetSheetAndIdForCurrentSheet() {
   return { setId: setId, setName: sheetName, sheet: currentSheet };
 }
 
+// ============================================================================
+// SEKTION: LÖSCHFUNKTIONEN & BEREINIGUNG
+// ============================================================================
+
 /**
- * Löscht das aktuell geöffnete Set-Blatt und alle zugehörigen persistenten Daten
- * (gesammelte Daten, benutzerdefinierte Bild-URLs und Cardmarket-URLs).
- * Erfordert eine Bestätigung des Benutzers und aktualisiert anschließend die Sammlungsübersicht.
- * Diese Funktion behandelt nun auch das Löschen von TCGDex-Only Set-Blättern.
+ * Löscht das aktuell geöffnete Set komplett.
+ * 
+ * Bereinigt:
+ * - Set-Blatt aus Spreadsheet
+ * - Set-Eintrag aus "Sets Overview" (Status update)
+ * - Alle Kartendaten (collectedCardsData)
+ * - Custom-Bilder (customImageUrls)
+ * - Cardmarket-URLs (pokemontcgIoCardmarketUrls)
+ * - Import-Status (importedSetsStatus)
+ * 
+ * Sicherheit:
+ * - Schützt spezielle Blätter via getSetSheetAndIdForCurrentSheet()
+ * - Bestätigt Löschung per Dialog (YES/NO)
+ * - Aktualisiert Collection Summary nach Löschung
+ * - Detailliertes Error-Handling mit Logging
+ * 
+ * Unterstützt:
+ * - Pokemontcg.io Sets (mit Cardmarket-URLs)
+ * - TCGDex-Only Sets (ohne Cardmarket-URLs)
+ * 
+ * @function deleteCurrentSet
  */
 function deleteCurrentSet() {
   const ui = SpreadsheetApp.getUi();
@@ -2901,8 +3212,22 @@ function deleteCurrentSet() {
 }
 
 /**
- * Deinstalliert alle Zeit-Trigger, die mit der Funktion `sortAllSheetsTrigger` verbunden sind.
- * Erfordert eine Bestätigung des Benutzers.
+ * Deinstalliert alle periodischen Sortier-Trigger.
+ * 
+ * Entfernt:
+ * - Alle Zeit-Trigger für "sortAllSheetsTrigger"
+ * 
+ * Sicherheit:
+ * - Bestätigung per Dialog (YES/NO)
+ * - Bestätigung nach erfolgreicher Deinstallation
+ * - Log-Eintrag für jeden entfernten Trigger
+ * 
+ * Use Case:
+ * - Trigger-Bereinigung
+ * - Änderung der Sortier-Strategie
+ * - Performance-Optimierung
+ * 
+ * @function uninstallSortTrigger
  */
 function uninstallSortTrigger() {
   const ui = SpreadsheetApp.getUi();
@@ -2936,8 +3261,32 @@ function uninstallSortTrigger() {
 }
 
 /**
- * Löscht alle persistenten Daten (im PropertiesService gespeichert) und leert die Übersichtsblätter.
- * Dieser Vorgang ist unwiderruflich und erfordert eine doppelte Bestätigung des Benutzers.
+ * Löscht alle persistenten Daten und setzt Spreadsheet zurück.
+ * 
+ * ACHTUNG: Destruktive Operation!
+ * 
+ * Entfernt:
+ * - Alle Properties (collectedCardsData, customImageUrls, etc.)
+ * - Alle Set-Blätter (außer Overview & Summary)
+ * - Inhalte von "Sets Overview" & "Collection Summary"
+ * - Alle installierten Trigger (Sort-Trigger & onEdit-Trigger)
+ * 
+ * Workflow:
+ * 1. Erste Bestätigung (YES/NO)
+ * 2. Zweite Sicherheitsabfrage (YES/NO)
+ * 3. Deinstalliert alle Trigger
+ * 4. Löscht alle Properties
+ * 5. Entfernt alle Set-Blätter
+ * 6. Leert Overview & Summary
+ * 7. Führt setupSheets() aus (Neuinitialisierung)
+ * 
+ * Sicherheit:
+ * - Doppelte Bestätigung erforderlich
+ * - Detailliertes Logging jeder Löschung
+ * - Error-Handling mit Fallback
+ * - Toast-Notifications für Benutzer-Feedback
+ * 
+ * @function deleteAllPersistentData
  */
 function deleteAllPersistentData() {
   const ui = SpreadsheetApp.getUi();
