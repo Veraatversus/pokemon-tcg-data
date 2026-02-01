@@ -1,0 +1,111 @@
+/* Tablet and smaller */
+@media (max-width: 1200px) {
+  .card-row {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .card-row {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+  }
+  
+  .app-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+
+  .header-right {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .progress-info {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .progress-bar {
+    width: 150px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  .card-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .card-block {
+    padding: 10px;
+  }
+
+  .card-name {
+    font-size: 11px;
+    min-height: 28px;
+  }
+
+  .checkbox-label {
+    font-size: 11px;
+    padding: 3px;
+  }
+  
+  .app-nav {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .progress-info {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .progress-bar {
+    width: 100%;
+  }
+
+  .app-header h1 {
+    font-size: 20px;
+  }
+
+  .auth-box {
+    padding: 40px 20px;
+  }
+
+  .auth-box h1 {
+    font-size: 28px;
+  }
+}
+
+/* Extra small mobile */
+@media (max-width: 480px) {
+  .card-row {
+    grid-template-columns: 1fr;
+  }
+
+  .app-header {
+    padding: 15px;
+  }
+
+  .app-nav {
+    padding: 10px 15px;
+  }
+
+  .cards-container {
+    padding: 15px;
+  }
+}
+
+/* Landscape mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .card-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
