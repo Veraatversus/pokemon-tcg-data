@@ -2962,6 +2962,7 @@
     }
   },
   {
+<<<<<<< HEAD
     "id": "mep",
     "name": "Mega Evolution Black Star Promos",
     "series": "Mega Evolution",
@@ -2981,6 +2982,8 @@
     }
   },
   {
+=======
+>>>>>>> upstream/master
     "id": "me1",
     "name": "Mega Evolution",
     "series": "Mega Evolution",
@@ -3017,13 +3020,21 @@
       "symbol": "https://images.pokemontcg.io/me2/symbol.png",
       "logo": "https://images.pokemontcg.io/me2/logo.png"
     }
+<<<<<<< HEAD
   }
   ,
+=======
+  },
+>>>>>>> upstream/master
   {
     "id": "me2pt5",
     "name": "Ascended Heroes",
     "series": "Mega Evolution",
+<<<<<<< HEAD
     "printedTotal": 131,
+=======
+    "printedTotal": 217,
+>>>>>>> upstream/master
     "total": 295,
     "legalities": {
       "unlimited": "Legal",
@@ -3032,10 +3043,17 @@
     },
     "ptcgoCode": "ASC",
     "releaseDate": "2026/01/30",
+<<<<<<< HEAD
     "updatedAt": "2025/01/29 19:00:00",
     "images": {
       "symbol": "https://images.pokemontcg.io/me25/symbol.png",
       "logo": "https://images.pokemontcg.io/me25/logo.png"
+=======
+    "updatedAt": "2026/01/30 15:00:00",
+    "images": {
+      "symbol": "https://images.scrydex.com/pokemon/me2pt5-symbol/symbol",
+      "logo": "https://images.scrydex.com/pokemon/me2pt5-logo/logo"
+>>>>>>> upstream/master
     }
   }
 ]
