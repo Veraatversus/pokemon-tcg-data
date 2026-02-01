@@ -14,7 +14,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: master
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -36,8 +36,8 @@ jobs:
         run: |
           # Get the latest commit from upstream main/master
           UPSTREAM_BRANCH="master"
-          if git rev-parse --verify upstream/main >/dev/null 2>&1; then
-            UPSTREAM_BRANCH="main"
+          if git rev-parse --verify upstream/master >/dev/null 2>&1; then
+            UPSTREAM_BRANCH="master"
           fi
 
           UPSTREAM_COMMIT=$(git rev-parse upstream/$UPSTREAM_BRANCH)
@@ -63,7 +63,7 @@ jobs:
           # Try to merge upstream changes
           if git merge upstream/$UPSTREAM_BRANCH --no-edit; then
             echo "Successfully merged upstream changes"
-            git push origin main
+            git push origin master
           else
             echo "Merge conflict detected. Creating an issue for manual resolution."
             git merge --abort
