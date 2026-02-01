@@ -1,0 +1,52 @@
+.auth-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+}
+
+.auth-box {
+  background: white;
+  padding: 60px 40px;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 400px;
+  animation: slideUp 0.5s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auth-box h1 {
+  font-size: 32px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.auth-box p {
+  color: #666;
+  margin-bottom: 30px;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.auth-box .btn-primary {
+  width: 100%;
+  justify-content: center;
+  padding: 15px 30px;
+  font-size: 16px;
+}
+
+.auth-box .btn-primary svg {
+  width: 24px;
+  height: 24px;
+}
