@@ -190,9 +190,10 @@ function onOpen() {
     //.addItem('▶️ Sidebar öffnen', 'openCustomSidebar')
     //.addSeparator()
 
-    // --- Import & Daten (Schritt 1 & 2) ---
-    .addItem('1. Sets-Liste laden (Setup)', 'setupAndImportAllSets')
-    .addItem('2. Einzelnes Set hinzufügen', 'promptAndPopulateCardsForSet')
+    // --- Import & Daten ---
+    .addItem('📥 Sets-Liste laden (Setup)', 'setupAndImportAllSets')
+    .addItem('➕ Einzelnes Set hinzufügen', 'promptAndPopulateCardsForSet')
+    .addItem('🔃 Aktuelles Set reimportieren', 'reimportCurrentSet')
     .addSeparator()
 
     // --- Aktualisierung & Statistik ---
@@ -1787,6 +1788,70 @@ function promptAndPopulateCardsForSet() {
   }
 }
 
+/**
+ * Reimportiert die Karten des aktuell geöffneten Set-Blattes.
+ * 
+ * Workflow:
+ * 1. Ermittelt Set-ID aus aktuellem Blatt (Notiz in A1)
+ * 2. Bestätigt Reimport per Dialog (YES/NO)
+ * 3. Löscht alte Kartendaten aus Properties
+ * 4. Importiert Karten neu via populateCardsForSet()
+ * 5. Zeigt Erfolgs- oder Fehler-Toast
+ * 
+ * Use Cases:
+ * - Daten-Refresh nach API-Änderungen
+ * - Behebung von Import-Fehlern
+ * - Aktualisierung von Cardmarket-URLs
+ * 
+ * @function reimportCurrentSet
+ */
+function reimportCurrentSet() {
+  const ui = SpreadsheetApp.getUi();
+  const currentSetInfo = getSetSheetAndIdForCurrentSheet();
+  
+  if (!currentSetInfo) {
+    // Fehler wird bereits in getSetSheetAndIdForCurrentSheet gezeigt
+    return;
+  }
+
+  const { setId, setName } = currentSetInfo;
+
+  // Bestätigung anfordern
+  const response = ui.alert(
+    "Set reimportieren bestätigen",
+    `Möchten Sie das Set "${setName}" wirklich reimportieren? Die vorhandenen Kartendaten werden aktualisiert.`,
+    ui.ButtonSet.YES_NO
+  );
+
+  if (response !== ui.Button.YES) {
+    SpreadsheetApp.getActive().toast("Reimport abgebrochen.", "ℹ️ Abgebrochen", 2);
+    return;
+  }
+
+  try {
+    SpreadsheetApp.getActive().toast(`Reimportiere Set "${setName}"...`, "🔄 In Arbeit", 5);
+    
+    // Lösche alte Kartendaten aus Properties für dieses Set
+    const collectedCardsData = getScriptPropertiesData('collectedCardsData');
+    const customImageUrls = getScriptPropertiesData('customImageUrls');
+    const cardDataKey = `cardData_${setId}`;
+    
+    // Behalte Sammlungs-Status, lösche aber alte Kartendaten
+    PropertiesService.getScriptProperties().deleteProperty(cardDataKey);
+    Logger.log(`Alte Kartendaten für Set ${setId} gelöscht.`);
+    
+    // Reimportiere Karten
+    populateCardsForSet(setId);
+    
+    SpreadsheetApp.getActive().toast(`Set "${setName}" erfolgreich reimportiert.`, "✅ Fertig", 3);
+    Logger.log(`Set ${setName} (ID: ${setId}) erfolgreich reimportiert.`);
+    
+  } catch (error) {
+    Logger.log(`Fehler beim Reimportieren von Set ${setName}: ${error.message} \nStack: ${error.stack}`);
+    ui.alert("Reimport-Fehler", `Fehler beim Reimportieren von Set "${setName}": ${error.message}. Details im Log.`, ui.ButtonSet.OK);
+  }
+}
+
 // ============================================================================
 // SEKTION: SAMMLUNGS-UPDATES & STATISTIKEN
 // ============================================================================
@@ -1985,8 +2050,11 @@ function handleOnEdit(e) {
     return;
   }
 
-  // 3. Persistent check for duplicate user-initiated events (using PropertiesService)
+  // Setze flag HIER um sicherzustellen, dass es IMMER zurückgesetzt wird
+  isScriptEditing = true;
+  
   try {
+    // 3. Persistent check for duplicate user-initiated events (using PropertiesService)
     const properties = PropertiesService.getScriptProperties();
     const range = e.range;
     const value = e.value; // Store the original value from event
@@ -2004,23 +2072,23 @@ function handleOnEdit(e) {
       if (lastProcessedEditStr) {
         const lastProcessedEdit = JSON.parse(lastProcessedEditStr);
         const currentTime = Date.now();
-        // Check if same cell, same value, and within a short time frame (e.g., 500 ms)
-        // Corrected typo here: getA1notation -> getA1Notation
+        const timeDiff = currentTime - lastProcessedEdit.timestamp;
+        
+        // Check if same cell, same value, and within 60 seconds (Google triggers can be delayed by Locks)
         if (lastProcessedEdit.range === range.getA1Notation() &&
-          (lastProcessedEdit.value === true || (typeof lastProcessedEdit.value === 'string' && lastProcessedEdit.value.toLowerCase() === 'true')) && // Ensure old one was also 'true' activation
-          (currentTime - lastProcessedEdit.timestamp < 1000)) { // 1 second threshold
-          Logger.log("[handleOnEdit] Duplicate user-initiated trigger detected based on PropertiesService (same cell, same true value, recent). Ignoring.");
-          // Clear the flag to prevent future legitimate clicks from being blocked by a stale duplicate entry
+          (lastProcessedEdit.value === true || (typeof lastProcessedEdit.value === 'string' && lastProcessedEdit.value.toLowerCase() === 'true')) &&
+          (timeDiff < 60000)) { // 60 second threshold to catch lock-delayed duplicate triggers
+          Logger.log(`[handleOnEdit] Duplicate user-initiated trigger detected (same cell, same true value, ${timeDiff}ms ago). Ignoring.`);
+          return; // Exit early - DO NOT clear the flag yet!
+        } else if (timeDiff > 60000) {
+          // Clear stale entries older than 60 seconds
+          Logger.log(`[handleOnEdit] Clearing stale lastProcessedEdit (${timeDiff}ms old).`);
           properties.deleteProperty('lastProcessedEdit');
-          return; // Exit early
         }
       }
       // If not a duplicate, store this user-initiated activation
+      Logger.log(`[handleOnEdit] Storing lastProcessedEdit for range ${range.getA1Notation()}`);
       properties.setProperty('lastProcessedEdit', JSON.stringify({ range: range.getA1Notation(), value: e.value, timestamp: Date.now() }));
-    } else {
-      // If it's not a user-initiated activation (e.g. script resetting, or user unchecking), clear the flag
-      // This is important so the NEXT user-initiated activation is not blocked by a stale flag.
-      properties.deleteProperty('lastProcessedEdit');
     }
 
     // 4. Proceed with main logic. All sheet modifications must be wrapped by try/finally with isScriptEditing = true/false
@@ -2029,10 +2097,6 @@ function handleOnEdit(e) {
 
     Logger.log(`[handleOnEdit] Triggered on sheet: ${sheetName}, range: ${range.getA1Notation()}, value: ${e.value} (type: ${typeof e.value}), oldValue: ${e.oldValue} (type: ${typeof e.oldValue})`);
     Logger.log(`[handleOnEdit] isNewValueTrueActual: ${isNewValueTrueActual}, wasOldValueTrueActual: ${wasOldValueTrueActual}, isUserInitiatedCheckActual: ${isUserInitiatedCheckActual}`);
-
-    // Set `isScriptEditing` before calling any sub-function that might modify the sheet.
-    // The sub-functions should then NOT set/reset this flag themselves.
-    isScriptEditing = true; // IMPORTANT: Set here for all subsequent calls within this execution.
 
     try { // This inner try block encapsulates the sheet modifications and ensures isScriptEditing reset.
       // --- Special handling for header checkboxes in Overview and Summary sheets ---
@@ -2101,8 +2165,13 @@ function handleOnEdit(e) {
         }
       }
     } finally {
-      isScriptEditing = false; // Ensure the flag is reset after this execution path.
+      // Stelle sicher dass isScriptEditing nur hier in diesem try/finally Block zurückgesetzt wird
+      // und NICHT in der äußeren finally, um Verwirrung zu vermeiden
+      isScriptEditing = false;
     }
+  } catch (error) {
+    Logger.log(`[handleOnEdit] Unexpected error: ${error.message} \nStack: ${error.stack}`);
+    isScriptEditing = false; // Reset flag on error
   } finally {
     if (lock && lock.hasLock()) {
       lock.releaseLock();
@@ -2164,6 +2233,8 @@ function updateSetSheetHeaderSummary(sheet, setId, collectedCount, reverseHoloCo
  * - RH-Abhängigkeit: RH-Validation nur aktiv wenn G=true
  * - Farb-Coding: Weiß (deaktiviert) → Standard (aktiv)
  * 
+ * WICHTIG: Wird NUR in onEdit-Kontext aufgerufen (isScriptEditing=true)
+ * 
  * @function handleGCheckboxChange
  * @param {Object} cardData - Kartenobjekt mit g/rh Status
  * @param {boolean} isChecked - Neuer Checkbox-Status
@@ -2179,6 +2250,7 @@ function handleGCheckboxChange(cardData, isChecked, rhCheckboxCell) {
     // Wenn G deaktiviert wird, deaktiviere auch RH
     if (cardData.rh) {
       cardData.rh = false;
+      // isScriptEditing ist true, daher triggert setValue nicht recursiv
       rhCheckboxCell.setValue(false);
     }
     rhCheckboxCell.clearDataValidations();
@@ -2235,6 +2307,9 @@ function handleRHCheckboxChange(cardData, isChecked, rhCheckboxCell) {
  * - Bild-Änderungen: Speichert custom IMAGE() Formeln
  * - Header-Update: Aktualisiert Statistiken bei jeder Änderung
  * - Farb-Coding: Wendet Hintergrundfarben basierend auf Status an
+ * 
+ * WICHTIG: Diese Funktion wird NUR in onEdit-Kontext aufgerufen,
+ * wo isScriptEditing bereits true ist. Die flush() wird am Ende aufgerufen.
  * 
  * @function processCardDataEdit
  * @param {GoogleAppsScript.Events.Sheets.SheetChangeEvent} e - Event-Objekt
@@ -2352,7 +2427,6 @@ function onImportCheckboxEdit(e, isUserInitiatedCheck) { // Added isUserInitiate
     Logger.log(`[onImportCheckboxEdit] ERROR: Set ID is null or empty for row ${e.range.getRow()}. Resetting checkbox.`);
     range.setValue(false);
     range.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
-    SpreadsheetApp.flush();
     ui.alert("Fehler", "Konnte Set-ID nicht finden. Import abgebrochen.", ui.ButtonSet.OK);
     return;
   }
@@ -2361,9 +2435,12 @@ function onImportCheckboxEdit(e, isUserInitiatedCheck) { // Added isUserInitiate
 
   if (isUserInitiatedCheck) {
     Logger.log(`[onImportCheckboxEdit] User explicitly checked the box. Proceeding with import logic.`);
+    
+    // WICHTIG: Setze checkbox zu false OHNE flush() um keinen rekursiven onEdit zu triggern
     range.setValue(false);
     range.clearDataValidations();
-    SpreadsheetApp.flush();
+    range.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
+    // KEIN flush() hier!
 
     try {
       SpreadsheetApp.getActive().toast(`Importiere Set "${setName}"...`, "🔄 Import", 5);
@@ -2372,6 +2449,7 @@ function onImportCheckboxEdit(e, isUserInitiatedCheck) { // Added isUserInitiate
       importedSetsStatus[setId] = true;
       setScriptPropertiesData('importedSetsStatus', importedSetsStatus);
 
+      // Setze checkbox zu true NACH dem erfolgreichen Import
       range.setValue(true);
       range.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox(true).build());
       SpreadsheetApp.getActive().toast(`Set "${setId}" wurde erfolgreich importiert.`, '✅ Importiert', 3);
@@ -2385,7 +2463,6 @@ function onImportCheckboxEdit(e, isUserInitiatedCheck) { // Added isUserInitiate
       ui.alert("Importfehler", `Fehler beim Importieren von Set "${setName}": ${error.message}. Die Checkbox wird zurückgesetzt.`, ui.ButtonSet.OK);
     } finally {
       // isScriptEditing is managed by handleOnEdit's try/finally block
-      SpreadsheetApp.flush();
       Logger.log(`[onImportCheckboxEdit] Finally block executed.`);
     }
   } else if (!isUserInitiatedCheck && (e.value === false || (typeof e.value === 'string' && e.value.toLowerCase() === 'false')) &&
@@ -2397,7 +2474,6 @@ function onImportCheckboxEdit(e, isUserInitiatedCheck) { // Added isUserInitiate
       Logger.log(`[onImportCheckboxEdit] Set sheet for ${setId} exists. Reverting checkbox to true.`);
       range.setValue(true);
       ui.alert("Aktion nicht erlaubt", "Diese Checkbox kann nicht manuell deaktiviert werden, solange das Set-Blatt existiert. Löschen Sie das Set über das Menü 'Aktuelles Set löschen', um es zu entfernen.", ui.ButtonSet.OK);
-      SpreadsheetApp.flush();
     } else {
       Logger.log(`[onImportCheckboxEdit] Set sheet for ${setId} does not exist or note mismatch. Allowing unchecking.`);
       importedSetsStatus[setId] = false;
@@ -2405,7 +2481,6 @@ function onImportCheckboxEdit(e, isUserInitiatedCheck) { // Added isUserInitiate
       range.setValue(false);
       range.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
       SpreadsheetApp.getActive().toast(`Set "${setId}" als nicht importiert markiert.`, 'ℹ️ Status aktualisiert', 3);
-      SpreadsheetApp.flush();
     }
   } else {
     // This is the case where the script sets the value, and it's not a user-initiated check.
@@ -2477,16 +2552,17 @@ function onReimportCheckboxEdit(e, isUserInitiatedCheck) { // Added isUserInitia
     Logger.log(`[onReimportCheckboxEdit] ERROR: Set ID is null or empty for row ${e.range.getRow()}. Resetting checkbox.`);
     range.setValue(false);
     range.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
-    SpreadsheetApp.flush();
     ui.alert("Fehler", "Konnte Set-ID nicht finden. Re-Import abgebrochen.", ui.ButtonSet.OK);
     return;
   }
 
   if (isUserInitiatedCheck) {
     Logger.log(`[onReimportCheckboxEdit] User explicitly checked the box. Proceeding with re-import logic.`);
+    // WICHTIG: Setze checkbox zu false OHNE flush() um keinen rekursiven onEdit zu triggern
     range.setValue(false);
     range.clearDataValidations();
-    SpreadsheetApp.flush();
+    range.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
+    // KEIN flush() hier!
 
     try {
       SpreadsheetApp.getActive().toast(`Importiere Set "${setName}" neu...`, "🔄 Re-Import", 5);
@@ -2499,19 +2575,12 @@ function onReimportCheckboxEdit(e, isUserInitiatedCheck) { // Added isUserInitia
     } catch (error) {
       Logger.log(`[onReimportCheckboxEdit] ERROR during re-import for Set ${setName} (${setId}): ${error.message}\nStack: ${error.stack}`);
       ui.alert("Re-Import Fehler", `Fehler beim Re-Import von Set "${setName}": ${error.message}.`, ui.ButtonSet.OK);
-    } finally {
-      // isScriptEditing is managed by handleOnEdit's try/finally block
-      range.setValue(false);
-      range.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
-      SpreadsheetApp.flush();
-      Logger.log(`[onReimportCheckboxEdit] Finally block executed.`);
     }
   } else if (!isUserInitiatedCheck && (e.value === false || (typeof e.value === 'string' && e.value.toLowerCase() === 'false')) &&
     (e.oldValue === true || (typeof e.oldValue === 'string' && e.oldValue.toLowerCase() === 'true'))) {
     Logger.log(`[onReimportCheckboxEdit] User attempted to uncheck the box. Reverting to checked state.`);
     range.setValue(true);
     ui.alert("Aktion nicht erlaubt", "Diese Checkbox kann nicht manuell deaktiviert werden. Sie dient zum Auslösen eines Re-Imports und wird automatisch zurückgesetzt.", ui.ButtonSet.OK);
-    SpreadsheetApp.flush();
   } else {
     // This is the case where the script sets the value.
     Logger.log(`[onReimportCheckboxEdit] Not a user-initiated change, and not a user uncheck. Ignoring.`);
@@ -2583,16 +2652,35 @@ function isUserInitiatedCheck(newValue, oldValue) {
 
 /**
  * Hilfsfunktion: Setzt eine Checkbox zurück
+ * 
+ * WICHTIG: Diese Funktion wird NICHT in onEdit-Kontext aufgerufen,
+ * sondern nur durch Menü-Funktionen. Sie setzt das isScriptEditing Flag
+ * um zu verhindern, dass das Reset selbst einen onEdit-Trigger auslöst.
+ * 
  * @param {GoogleAppsScript.Spreadsheet.Range} range Die Checkbox-Zelle
  */
 function resetCheckbox(range) {
-  range.setValue(false);
-  range.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
-  SpreadsheetApp.flush();
+  if (!isScriptEditing) {
+    isScriptEditing = true;
+  }
+  try {
+    range.setValue(false);
+    range.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
+    SpreadsheetApp.flush();
+  } finally {
+    if (!isScriptEditing) {
+      isScriptEditing = false;
+    }
+  }
 }
 
 /**
  * Hilfsfunktion: Allgemeine Checkbox-Handler-Logik für Header-Checkboxen
+ * 
+ * WICHTIG: Diese Funktion wird NUR in onEdit-Kontext aufgerufen,
+ * wo isScriptEditing bereits true ist. setValue() triggert daher
+ * keinen rekursiven onEdit-Trigger aus.
+ * 
  * @param {GoogleAppsScript.Events.Sheets.SheetChangeEvent} e Das Event-Objekt
  * @param {boolean} isUserInitiatedCheck Ob vom Benutzer initiiert
  * @param {string} actionName Name der Aktion für Logging
@@ -2606,15 +2694,17 @@ function handleHeaderCheckbox(e, isUserInitiatedCheck, actionName, actionFunctio
   Logger.log(`[${actionName}] Entered for sheet: ${sheet.getName()}, range: ${range.getA1Notation()}, isUserInitiatedCheck: ${isUserInitiatedCheck}`);
 
   if (!isUserInitiatedCheck) {
-    Logger.log(`[${actionName}] Not a user-initiated check. Resetting checkbox.`);
-    resetCheckbox(range);
+    Logger.log(`[${actionName}] Not a user-initiated check. Ignoring trigger.`);
     return;
   }
 
   Logger.log(`[${actionName}] User explicitly checked the box. Proceeding with action.`);
+  
+  // Setze checkbox zu false (wir sind bereits in isScriptEditing=true Kontext)
   range.setValue(false);
   range.clearDataValidations();
-  SpreadsheetApp.flush();
+  range.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
+  // Kein Flush hier! Das würde einen zusätzlichen onEdit-Trigger auslösen
 
   try {
     actionFunction();
@@ -2622,22 +2712,24 @@ function handleHeaderCheckbox(e, isUserInitiatedCheck, actionName, actionFunctio
   } catch (error) {
     Logger.log(`[${actionName}] ERROR: ${error.message}\nStack: ${error.stack}`);
     ui.alert("Fehler", `Fehler bei ${actionName}: ${error.message}.`, ui.ButtonSet.OK);
-  } finally {
-    range.setValue(false);
-    range.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
-    SpreadsheetApp.flush();
-    Logger.log(`[${actionName}] Finally block executed.`);
   }
 }
 
 
 /**
  * Hilfsfunktion: Setzt den Checkbox-Status und die Data Validation in einem Range
+ * 
+ * WICHTIG: Diese Funktion wird NUR in onEdit-Kontext aufgerufen,
+ * wo isScriptEditing bereits true ist. Sie setzt daher den Wert
+ * und löst keinen rekursiven onEdit-Trigger aus.
+ * 
  * @param {GoogleAppsScript.Spreadsheet.Range} range Der zu setzende Bereich
  * @param {boolean} value Der Wert für die Checkbox
  * @param {boolean} isReadonly Wenn true, wird die Checkbox auf readonly gesetzt
  */
 function setCheckboxState(range, value, isReadonly = false) {
+  // Setze setValue() NUR wenn isScriptEditing true ist (wir sind in onEdit-Kontext)
+  // Dadurch wird der onEdit-Trigger vom setValue nicht erneut ausgelöst
   range.setValue(value);
   if (isReadonly) {
     range.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox(true).build());
