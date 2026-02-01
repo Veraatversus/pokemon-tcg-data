@@ -1,13 +1,44 @@
-// Global Constants
-// Use Veras Api
+/**
+ * @fileoverview Pokemon TCG Collection Tracker für Google Sheets
+ * 
+ * Dieses Skript verwaltet eine Pokemon-Kartensammlung in Google Sheets.
+ * Es integriert Daten von pokemontcg.io und TCGDex APIs, um Kartendaten
+ * in deutscher Sprache anzuzeigen und den Sammlungsfortschritt zu tracken.
+ * 
+ * Hauptfunktionalitäten:
+ * - Import und Verwaltung von Pokemon TCG Sets
+ * - Anzeige von Karten in einem Grid-Layout
+ * - Tracking von normalen und Reverse Holo Karten
+ * - Automatische und manuelle Sortierung
+ * - Sammlungsstatistiken und Fortschrittsanzeige
+ * 
+ * @author Pokemon TCG Tracker
+ * @version 3.0
+ */
+
+// ============================================================================
+// GLOBALE KONSTANTEN - API Konfiguration
+// ============================================================================
+
+/** @const {boolean} Verwendung der Vera API anstelle der Standard-APIs */
 const UseVeraApi = true;
-const VeraApiLanguage = "en"
+
+/** @const {string} Spracheinstellung für die Vera API */
+const VeraApiLanguage = "en";
+
+/** @const {string} Basis-URL für Vera's Pokemon TCG Daten */
 const VTCG_BASE_URL = "https://veraatversus.github.io/pokemon-tcg-data/";
+
+/** @const {string} Basis-URL für TCGDex API (deutsche Kartendaten) */
 const TCGDEX_BASE_URL = "https://api.tcgdex.net/v2/de/";
+
+/** @const {string} Basis-URL für pokemontcg.io API */
 const PTCG_BASE_URL = "https://api.pokemontcg.io/v2/";
-// Verzögerung in Millisekunden zwischen API-Aufrufen, um Ratenbegrenzungen zu vermeiden.
+
+/** @const {number} Verzögerung in ms zwischen API-Aufrufen (Rate Limiting) */
 const API_DELAY_MS = 50;
-// Die ID des aktuell aktiven Spreadsheets, global zugänglich gemacht.
+
+/** @const {string} Die ID des aktiven Google Spreadsheets */
 const spreadsheetId = SpreadsheetApp.getActiveSpreadsheet().getId();
 
 // Globale Konstante für spezifische ID-Mappings zwischen pokemontcg.io und TCGDex,
@@ -29,61 +60,115 @@ const CUSTOM_SET_ID_MAPPINGS = {
 };
 
 
-// --- GRID LAYOUT CONSTANTS ---
-// Anzahl der Karten, die nebeneinander in einer Reihe im Raster angezeigt werden.
+// ============================================================================
+// GRID LAYOUT KONSTANTEN - Kartenanzeige
+// ============================================================================
+
+/** @const {number} Anzahl der Karten pro Reihe im Grid-Layout */
 const CARDS_PER_ROW_IN_GRID = 5;
-// Anzahl der Spalten, die jeder Kartenblock im Raster einnimmt (z.B. für ID, Name, Bild, Checkboxen).
+
+/** @const {number} Spaltenbreite eines Kartenblocks (ID, Name, Bild, Checkboxen) */
 const CARD_BLOCK_WIDTH_COLS = 3;
-// Anzahl der Zeilen, die jeder Kartenblock im Raster einnimmt (z.B. für ID/Name, Bild, Checkboxen/Link + Abstand).
+
+/** @const {number} Zeilenhöhe eines Kartenblocks (ID/Name, Bild, Checkboxen, Spacer) */
 const CARD_BLOCK_HEIGHT_ROWS = 4;
 
-// Detaillierte Höhen für die einzelne Zeilen innerhalb eines Kartenblocks.
-const ROW_HEIGHT_ID_NAME = 25; // Höhe für die Zeile mit ID und Name der Karte.
-const ROW_HEIGHT_IMAGE = 240; // Höhe für die Zeile mit dem Kartenbild.
-const ROW_HEIGHT_CHECKS_LINK = 30; // Höhe für die Zeile mit Checkboxen und Link.
-const ROW_HEIGHT_SPACER = 10; // Höhe für die Abstandshalter-Zeile zwischen den Kartenblöcken.
+// --- Zeilenhöhen innerhalb eines Kartenblocks ---
+/** @const {number} Höhe der ID/Name-Zeile in Pixeln */
+const ROW_HEIGHT_ID_NAME = 25;
 
-// Detaillierte Breiten für die einzelnen Spalten innerhalb eines 3-Spalten-Kartenblocks.
-const COLUMN_WIDTH_CARD_COL1 = 40; // Breite für die erste Spalte des Blocks (z.B. Karten-ID, G-Checkbox).
-const COLUMN_WIDTH_CARD_COL2 = 40; // Breite für die zweite Spalte des Blocks (z.B. Name, RH-Checkbox).
-const COLUMN_WIDTH_CARD_COL3 = 100; // Breite für die dritte Spalte des Blocks (z.B. Name Fortsetzung, Cardmarket-Link).
+/** @const {number} Höhe der Bild-Zeile in Pixeln */
+const ROW_HEIGHT_IMAGE = 240;
 
-// Farben für die Formatierung gesammelter Karten.
-const COLLECTED_COLOR = "#D9EAD3"; // Hellgrün für normal gesammelte Karten.
-const REVERSE_HOL_COLLECTED_COLOR = "#D0E0F0"; // Hellblau für gesammelte Reverse Holo Karten.
+/** @const {number} Höhe der Checkbox/Link-Zeile in Pixeln */
+const ROW_HEIGHT_CHECKS_LINK = 30;
 
-// --- HEADER LAYOUT CONSTANTS FOR SET SHEETS ---
-// Anzahl der Kopfzeilen, die auf jedem Set-Blatt vor den Kartendaten angezeigt werden.
+/** @const {number} Höhe der Spacer-Zeile zwischen Kartenblöcken */
+const ROW_HEIGHT_SPACER = 10;
+
+// --- Spaltenbreiten innerhalb eines Kartenblocks ---
+/** @const {number} Breite der ersten Spalte (Karten-ID, G-Checkbox) */
+const COLUMN_WIDTH_CARD_COL1 = 40;
+
+/** @const {number} Breite der zweiten Spalte (Name, RH-Checkbox) */
+const COLUMN_WIDTH_CARD_COL2 = 40;
+
+/** @const {number} Breite der dritten Spalte (Name Fortsetzung, Cardmarket-Link) */
+const COLUMN_WIDTH_CARD_COL3 = 100;
+
+// --- Farben für Sammlungsstatus ---
+/** @const {string} Hintergrundfarbe für normal gesammelte Karten (Hellgrün) */
+const COLLECTED_COLOR = "#D9EAD3";
+
+/** @const {string} Hintergrundfarbe für Reverse Holo Karten (Hellblau) */
+const REVERSE_HOL_COLLECTED_COLOR = "#D0E0F0";
+
+// ============================================================================
+// SHEET STRUKTUR KONSTANTEN - Layout und Positionen
+// ============================================================================
+
+// --- Set Sheet Header ---
+/** @const {number} Anzahl der Header-Zeilen auf Set-Blättern */
 const SET_SHEET_HEADER_ROWS = 2;
-// Höhe für jede Kopfzeile auf einem Set-Blatt.
+
+/** @const {number} Höhe der Header-Zeilen auf Set-Blättern */
 const SET_SHEET_HEADER_ROW_HEIGHT = 25;
 
-// --- NEW CONSTANTS FOR IMPORTED CHECKBOX ---
-const IMPORTED_CHECKBOX_COL_INDEX = 9; // Spalte I in "Sets Overview"
+/** @const {number} Zeile der Sortier-Checkbox auf Set-Blättern */
+const SORT_SET_CHECKBOX_ROW = 1;
 
-// --- NEW CONSTANTS FOR SORT CHECKBOXES ---
-const SORT_SET_CHECKBOX_ROW = 1; // Sortier-Checkbox ist in Zeile 1 auf Set-Blättern
-const SORT_SET_CHECKBOX_COL_OFFSET = CARDS_PER_ROW_IN_GRID * CARD_BLOCK_WIDTH_COLS; // Letzte Spalte der Rasterbreite
+/** @const {number} Spalten-Offset für Sortier-Checkbox (nach Grid) */
+const SORT_SET_CHECKBOX_COL_OFFSET = CARDS_PER_ROW_IN_GRID * CARD_BLOCK_WIDTH_COLS;
 
-// --- NEUE HEADER KONSTANTEN FÜR OVERVIEW UND SUMMARY SHEETS ---
-const OVERVIEW_HEADER_ROWS = 2; // "Sets Overview" wird 2 Kopfzeilen haben (Zeile 1 für Titel/Checkbox, Zeile 2 für Zusammenfassung)
+// --- Sets Overview Sheet ---
+/** @const {number} Anzahl der Header-Zeilen in "Sets Overview" */
+const OVERVIEW_HEADER_ROWS = 2;
+
+/** @const {number} Zeile für Titel in "Sets Overview" */
 const OVERVIEW_TITLE_ROW = 1;
+
+/** @const {number} Zeile für Zusammenfassung in "Sets Overview" */
 const OVERVIEW_SUMMARY_ROW = 2;
-const REIMPORT_CHECKBOX_COL_INDEX = 10; // Spalte J für "Neu importieren" Checkbox (Daten-Spalte)
-const OVERVIEW_REFRESH_CHECKBOX_COL = 10; // NEU: Spalte J für "Übersicht aktualisieren" Checkbox (Header-Checkbox)
-const OVERVIEW_DATA_START_ROW = OVERVIEW_HEADER_ROWS + 1; // Daten beginnen nach den 2 Kopfzeilen (Zeile 3)
 
-const SUMMARY_HEADER_ROWS = 2; // "Collection Summary" wird 2 Kopfzeilen haben (Zeile 1 für Titel/Checkbox, Zeile 2 für Zusammenfassung)
+/** @const {number} Erste Datenzeile in "Sets Overview" */
+const OVERVIEW_DATA_START_ROW = OVERVIEW_HEADER_ROWS + 1;
+
+/** @const {number} Spalte für "Importiert" Checkbox (Spalte I) */
+const IMPORTED_CHECKBOX_COL_INDEX = 9;
+
+/** @const {number} Spalte für "Neu importieren" Checkbox (Spalte J) */
+const REIMPORT_CHECKBOX_COL_INDEX = 10;
+
+/** @const {number} Spalte für "Übersicht aktualisieren" Header-Checkbox */
+const OVERVIEW_REFRESH_CHECKBOX_COL = 10;
+
+// --- Collection Summary Sheet ---
+/** @const {number} Anzahl der Header-Zeilen in "Collection Summary" */
+const SUMMARY_HEADER_ROWS = 2;
+
+/** @const {number} Zeile für Titel in "Collection Summary" */
 const SUMMARY_TITLE_ROW = 1;
+
+/** @const {number} Zeile für Zusammenfassung in "Collection Summary" */
 const SUMMARY_SUMMARY_ROW = 2;
-const COLLECTION_SUMMARY_DATA_COLS = 6; // NEU: Anzahl der Datenspalten in der Collection Summary (A-F)
-const SUMMARY_SORT_CHECKBOX_COL = 7; // NEU: Spalte G für "Alle Sets sortieren" Checkbox (Header-Checkbox)
-const SUMMARY_DATA_START_ROW = SUMMARY_HEADER_ROWS + 1; // Daten beginnen nach den 2 Kopfzeilen (Zeile 3)
 
-// Timeout für den LockService, um Race Conditions zu vermeiden.
-var USER_LOCK_TIMEOUT_MS = 30 * 1000; // 30 Sekunden
+/** @const {number} Erste Datenzeile in "Collection Summary" */
+const SUMMARY_DATA_START_ROW = SUMMARY_HEADER_ROWS + 1;
 
-// Globales Flag, um rekursive Trigger durch Skriptänderungen zu verhindern
+/** @const {number} Anzahl der Datenspalten in "Collection Summary" (A-F) */
+const COLLECTION_SUMMARY_DATA_COLS = 6;
+
+/** @const {number} Spalte für "Alle Sets sortieren" Header-Checkbox (Spalte G) */
+const SUMMARY_SORT_CHECKBOX_COL = 7;
+
+// ============================================================================
+// GLOBALE VARIABLEN - Skript-Status
+// ============================================================================
+
+/** @var {number} Timeout für LockService in Millisekunden (30 Sekunden) */
+var USER_LOCK_TIMEOUT_MS = 30 * 1000;
+
+/** @var {boolean} Flag zur Verhinderung rekursiver Trigger */
 var isScriptEditing = false;
 
 /**
@@ -286,6 +371,86 @@ function fetchApiData(url, errorMessagePrefix) {
     // ui.alert(`${errorMessagePrefix} Fehler: ${e.message}. Details im Log.`); // Deaktiviert, da dies in Schleifen zu viele Popups verursachen kann
     return null;
   }
+}
+
+/**
+ * Hilfsfunktion zum Laden der Kartendaten für ein Set (TCGDex oder pokemontcg.io).
+ * @param {string} setId Die Set-ID (pokemontcg.io ID oder TCGDex-only ID).
+ * @param {string} setName Der Name des Sets für Logging.
+ * @param {Array<object>} tcgdexAllSets Liste aller TCGDex Sets für Matching.
+ * @returns {{allCards: Array, cardmarketData: Object, tcgdexDetailedSet: Object|null, pokemontcgDetailedSet: Object|null}} Objekt mit Kartendaten.
+ */
+function loadCardsForSet(setId, setName, tcgdexAllSets) {
+  let allCards = [];
+  let cardmarketData = {};
+  let tcgdexDetailedSet = null;
+  let pokemontcgDetailedSet = null;
+
+  const isTcgdexOnlySet = setId.startsWith('TCGDEX-');
+
+  if (isTcgdexOnlySet) {
+    const tcgdexActualSetId = setId.substring('TCGDEX-'.length);
+    tcgdexDetailedSet = fetchApiData(`${TCGDEX_BASE_URL}sets/${tcgdexActualSetId}`, `Fehler beim Laden der TCGDex Karten für ${setName}`);
+    
+    if (tcgdexDetailedSet && tcgdexDetailedSet.cards) {
+      allCards = tcgdexDetailedSet.cards.map(card => ({
+        number: normalizeCardNumber(card.localId || card.id),
+        name: card.name,
+        images: { small: card.image ? `${card.image}/low.jpg` : null },
+        cardmarket: { url: card.links?.cardmarket }
+      }));
+      allCards.sort((a, b) => naturalSort(a.number || "", b.number || ""));
+    }
+  } else {
+    // pokemontcg.io Set
+    const pokemontcgSetId = setId;
+    
+    if (UseVeraApi) {
+      pokemontcgDetailedSet = fetchApiData(`${VTCG_BASE_URL}sets/${VeraApiLanguage}.json`, `Fehler beim Laden der pokemontcg.io Set-Daten für ${setName}`)?.find(set => set.id === setId);
+    } else {
+      const response = fetchApiData(`${PTCG_BASE_URL}sets/${pokemontcgSetId}`, `Fehler beim Laden der pokemontcg.io Set-Daten für ${setName}`);
+      pokemontcgDetailedSet = response?.data;
+    }
+
+    if (!pokemontcgDetailedSet) {
+      throw new Error(`Konnte pokemontcg.io Set-Daten für "${setName}" nicht abrufen.`);
+    }
+
+    let pokemontcgCards = fetchAllPokemontcgIoCards(pokemontcgSetId, setName);
+    const matchingTcgdexSet = findMatchingTcgdexSet(pokemontcgDetailedSet, tcgdexAllSets || []);
+    
+    let tcgdexCardsMap = new Map();
+    if (matchingTcgdexSet) {
+      tcgdexDetailedSet = fetchApiData(`${TCGDEX_BASE_URL}sets/${matchingTcgdexSet.id}`, `Fehler beim Laden der TCGDex Karten für ${setName}`);
+      if (tcgdexDetailedSet && tcgdexDetailedSet.cards) {
+        tcgdexDetailedSet.cards.forEach(card => tcgdexCardsMap.set(normalizeCardNumber(card.localId || card.id), card));
+      }
+    }
+
+    allCards = pokemontcgCards.map(pokemontcgCard => {
+      const mergedCard = { ...pokemontcgCard };
+      const tcgdexCard = tcgdexCardsMap.get(normalizeCardNumber(pokemontcgCard.number));
+
+      if (tcgdexCard) {
+        if (tcgdexCard.name) mergedCard.name = tcgdexCard.name;
+        if (tcgdexCard.image) mergedCard.images = { small: `${tcgdexCard.image}/low.jpg` };
+        if (tcgdexCard.description) {
+          mergedCard.rules = [tcgdexCard.description];
+          mergedCard.flavorText = tcgdexCard.description;
+        }
+      }
+      return mergedCard;
+    });
+
+    pokemontcgCards.forEach(card => {
+      if (card.cardmarket?.url) {
+        cardmarketData[normalizeCardNumber(card.number)] = { cardmarketUrl: card.cardmarket.url };
+      }
+    });
+    setScriptPropertiesData(`pokemontcgIoCardmarketUrls_${pokemontcgSetId}`, cardmarketData);
+  }
+
+  return { allCards, cardmarketData, tcgdexDetailedSet, pokemontcgDetailedSet };
 }
 
 /**
@@ -1072,126 +1237,22 @@ function populateCardsForSet(setIdFromOverview) {
 
   SpreadsheetApp.getActive().toast(`Lade Daten für Set "${setNameInSheet}"...`, "🔄 In Bearbeitung", 5);
 
-  let allCards = [];
-  let pokemontcgIoCardmarketData = {};
-  let tcgdexDetailedSetDataForOverview = null; // Für updateSetsOverviewRowAfterCardImport
-  let pokemontcgDetailedSetDataForOverview = null; // Für updateSetsOverviewRowAfterCardImport
-
-  const isTcgdexOnlySet = setIdFromOverview.startsWith('TCGDEX-');
-
-  if (isTcgdexOnlySet) {
-    const tcgdexActualSetId = setIdFromOverview.substring('TCGDEX-'.length);
-    tcgdexDetailedSetDataForOverview = fetchApiData(`${TCGDEX_BASE_URL}sets/${tcgdexActualSetId}`, `Fehler beim Laden der detaillierten TCGDex Set-Daten für ${setNameInSheet}`);
-
-    if (tcgdexDetailedSetDataForOverview && tcgdexDetailedSetDataForOverview.cards) {
-      allCards = tcgdexDetailedSetDataForOverview.cards.map(card => {
-        let smallImage = null;
-        if (card.image) {
-          smallImage = `${card.image}/low.jpg`;
-        }
-        return {
-          number: normalizeCardNumber(card.localId || card.id), // Normalisiere die Kartennummer von TCGDex
-          name: card.name,
-          images: { small: smallImage },
-          cardmarket: { url: card.links?.cardmarket } // TCGDex has a 'links.cardmarket' property
-        };
-      });
-      // AllCards müssen hier sortiert werden, damit naturalSort auch in der PropertyService-Speicherung korrekt ist.
-      allCards.sort((a, b) => naturalSort(a.number || "", b.number || ""));
-      Logger.log(`Geladen ${allCards.length} TCGDex-only Karten für Set ${setNameInSheet}.`);
-    } else {
-      const errorMessage = `Konnte TCGDex Karten für Set "${setNameInSheet}" (ID: ${tcgdexActualSetId}) nicht abrufen.`;
-      // KEIN UI.ALERT HIER, da die aufrufende Funktion den Alert übernimmt.
-      Logger.log(errorMessage);
-      throw new Error(errorMessage);
-    }
-    cardSheet.getRange(1, 1).setNote(`Set ID: ${setIdFromOverview}`); // Store the TCGDEX-ID in the note
-  } else {
-    // Existing pokemontcg.io logic
-    const pokemontcgSetId = extractIdFromHyperlink(overviewSetRow[0]);
-    let pokemontcgSetInfo = null;
-    if (UseVeraApi) {
-
-      pokemontcgDetailedSetDataForOverview = fetchApiData(`${VTCG_BASE_URL}sets/${VeraApiLanguage}.json`, `Fehler beim Laden der detaillierten ${pokemontcgDetailedSetDataForOverview} Set-Daten für ${setNameInSheet}`)?.find(set => set.id === setIdFromOverview);
-
-      //pokemontcgDetailedSetDataForOverview.data = fetchApiData(`${VTCG_BASE_URL}cards/${VeraApiLanguage}/${pokemontcgSetId}.json`, `Fehler beim Laden der detaillierten ${pokemontcgDetailedSetDataForOverview} Set-Daten für ${setNameInSheet}`);
-
-      if (!pokemontcgDetailedSetDataForOverview) {
-        const errorMessage = `Konnte detaillierte pokemontcg.io Set-Daten für Set "${setNameInSheet}" (ID: ${pokemontcgSetId}) nicht abrufen oder API-Problem.`;
-        // KEIN UI.ALERT HIER, da die aufrufende Funktion den Alert übernimmt.
-        Logger.log(errorMessage);
-        throw new Error(errorMessage);
-      }
-      pokemontcgSetInfo = pokemontcgDetailedSetDataForOverview;
-    }
-    else {
-      pokemontcgDetailedSetDataForOverview = fetchApiData(`${PTCG_BASE_URL}sets/${pokemontcgSetId}`, `Fehler beim Laden der detaillierten pokemontcg.io Set-Daten für ${setNameInSheet}`);
-
-      if (!pokemontcgDetailedSetDataForOverview || !pokemontcgDetailedSetDataForOverview.data) {
-        const errorMessage = `Konnte detaillierte pokemontcg.io Set-Daten für Set "${setNameInSheet}" (ID: ${pokemontcgSetId}) nicht abrufen oder API-Problem.`;
-        // KEIN UI.ALERT HIER, da die aufrufende Funktion den Alert übernimmt.
-        Logger.log(errorMessage);
-        throw new Error(errorMessage);
-      }
-      pokemontcgSetInfo = pokemontcgDetailedSetDataForOverview.data;
-    }
-
-
-
-
-    // Fetch all pokemontcg.io cards using pagination helper
-    let pokemontcgCards = fetchAllPokemontcgIoCards(pokemontcgSetId, setNameInSheet);
-
-    const tcgdexAllSets = fetchApiData(`${TCGDEX_BASE_URL}sets`, "Fehler beim Laden der TCGDex Sets für Kartenimport");
-    const matchingTcgdexSet = findMatchingTcgdexSet(pokemontcgSetInfo, tcgdexAllSets || []);
-    let tcgdexCardsMap = new Map();
-    if (matchingTcgdexSet) {
-      const tcgdexSetId = matchingTcgdexSet.id;
-      // Get detailed TCGDex set data for overview update
-      tcgdexDetailedSetDataForOverview = fetchApiData(`${TCGDEX_BASE_URL}sets/${tcgdexSetId}`, `Fehler beim Laden der TCGDex Karten für Set ${setNameInSheet} (${tcgdexSetId})`);
-      if (tcgdexDetailedSetDataForOverview && tcgdexDetailedSetDataForOverview.cards) {
-        // Normalisiere die TCGDex-Kartennummer, bevor sie als Schlüssel in der Map gespeichert wird
-        tcgdexDetailedSetDataForOverview.cards.forEach(card => tcgdexCardsMap.set(normalizeCardNumber(card.localId || card.id), card));
-      }
-    }
-
-    allCards = pokemontcgCards.map(pokemontcgCard => {
-      const mergedCard = { ...pokemontcgCard };
-      // Normalisiere die pokemontcg.io Kartennummer für den Lookup in der TCGDex Map
-      const tcgdexCard = tcgdexCardsMap.get(normalizeCardNumber(pokemontcgCard.number));
-
-      // If TCGDex card data exists, prioritize German name and image
-      if (tcgdexCard) {
-        if (tcgdexCard.name) mergedCard.name = tcgdexCard.name;
-        let smallImage = mergedCard.images?.small || null; // Behalte bestehendes Bild, falls TCGDex keines hat
-        if (tcgdexCard.image) {
-          smallImage = `${tcgdexCard.image}/low.jpg`; // Append /low.jpg for TCGDex images
-        }
-        mergedCard.images = { small: smallImage };
-
-        if (tcgdexCard.description) {
-          mergedCard.rules = [tcgdexCard.description];
-          mergedCard.flavorText = tcgdexCard.description;
-        }
-      }
-      return mergedCard;
-    });
-
-    pokemontcgCards.forEach(card => {
-      if (card.cardmarket?.url) {
-        // OPTIMIERUNG: Entferne das Speichern der imageUrl hier
-        pokemontcgIoCardmarketData[normalizeCardNumber(card.number)] = { cardmarketUrl: card.cardmarket.url };
-      }
-    });
-    setScriptPropertiesData(`pokemontcgIoCardmarketUrls_${pokemontcgSetId}`, pokemontcgIoCardmarketData);
-    cardSheet.getRange(1, 1).setNote(`Set ID: ${pokemontcgSetId}`); // Store the pokemontcg.io ID in the note
+  const tcgdexAllSets = fetchApiData(`${TCGDEX_BASE_URL}sets`, "Fehler beim Laden der TCGDex Sets für Kartenimport");
+  const cardData = loadCardsForSet(setIdFromOverview, setNameInSheet, tcgdexAllSets);
+  
+  const { allCards, cardmarketData, tcgdexDetailedSet, pokemontcgDetailedSet } = cardData;
+  
+  if (allCards.length === 0) {
+    throw new Error(`Keine Karten für Set "${setNameInSheet}" gefunden.`);
   }
+  
+  cardSheet.getRange(1, 1).setNote(`Set ID: ${setIdFromOverview}`);
 
   // Update Sets Overview row
-  updateSetsOverviewRowAfterCardImport(setIdFromOverview, pokemontcgDetailedSetDataForOverview?.data, tcgdexDetailedSetDataForOverview, cardSheet);
+  updateSetsOverviewRowAfterCardImport(setIdFromOverview, pokemontcgDetailedSet, tcgdexDetailedSet, cardSheet);
 
   // Render and sort cards
-  renderAndSortCardsInSheet(cardSheet, setIdFromOverview, allCards, pokemontcgIoCardmarketData);
+  renderAndSortCardsInSheet(cardSheet, setIdFromOverview, allCards, cardmarketData);
 
   // Update Collection Summary
   updateCollectionSummary();
@@ -1754,9 +1815,7 @@ function handleOnEdit(e) {
     const value = e.value; // Store the original value from event
 
     // Robust check for user-initiated check (true from false)
-    const isNewValueTrueActual = (value === true || (typeof value === 'string' && value.toLowerCase() === 'true'));
-    const wasOldValueTrueActual = (e.oldValue === true || (typeof e.oldValue === 'string' && e.oldValue.toLowerCase() === 'true'));
-    const isUserInitiatedCheckActual = (isNewValueTrueActual && !wasOldValueTrueActual); // User-initiated activate of checkbox
+    const isUserInitiatedCheckActual = isUserInitiatedCheck(value, e.oldValue);
 
     // Only apply duplicate check for user-initiated checkbox activations
     if (isUserInitiatedCheckActual) {
@@ -1872,6 +1931,100 @@ function handleOnEdit(e) {
 }
 
 /**
+ * Hilfsfunktion: Zählt gesammelte Karten für ein Set
+ * @param {Object} collectedCardsData Das gesammelte Karten-Objekt für ein Set
+ * @returns {{collectedCount: number, reverseHoloCount: number}} Zählergebnisse
+ */
+function countCollectedCards(collectedCardsData) {
+  let collectedCount = 0;
+  let reverseHoloCount = 0;
+  
+  for (const cardId in collectedCardsData) {
+    if (collectedCardsData.hasOwnProperty(cardId)) {
+      if (collectedCardsData[cardId].g) collectedCount++;
+      if (collectedCardsData[cardId].rh) reverseHoloCount++;
+    }
+  }
+  
+  return { collectedCount, reverseHoloCount };
+}
+
+/**
+ * Hilfsfunktion: Aktualisiert die Header-Zusammenfassung eines Set-Blattes
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet Das Set-Blatt
+ * @param {string} setId Die Set-ID
+ * @param {number} collectedCount Anzahl der gesammelten Karten
+ * @param {number} reverseHoloCount Anzahl der RH-Karten
+ */
+function updateSetSheetHeaderSummary(sheet, setId, collectedCount, reverseHoloCount) {
+  const headerSummaryText = sheet.getRange(2, 1).getValue();
+  const totalMatch = headerSummaryText.match(/Gesamtzahl Karten:\s*(\d+)/);
+  const totalCards = totalMatch ? parseInt(totalMatch[1]) : 0;
+  
+  const completionPercentage = (totalCards > 0) ? collectedCount / totalCards : 0;
+  const officialAbbreviation = getOfficialAbbreviationFromOverview(setId);
+  
+  const headerSummaryRange = sheet.getRange(2, 1, 1, SORT_SET_CHECKBOX_COL_OFFSET);
+  headerSummaryRange.setValue(
+    `Gesamtzahl Karten: ${totalCards} | ` +
+    `Gesammelte Karten: ${collectedCount} | ` +
+    `Gesammelte RH Karten: ${reverseHoloCount} | ` +
+    `Abschluss-Prozentsatz: ${completionPercentage.toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 0 })} | ` +
+    `Abkürzung: ${officialAbbreviation}`
+  );
+}
+
+/**
+ * Hilfsfunktion: Behandelt Änderungen an der G-Checkbox
+ * @param {Object} cardData Das Kartenobjekt mit g/rh Status
+ * @param {boolean} isChecked Der neue Checkbox-Status
+ * @param {GoogleAppsScript.Spreadsheet.Range} rhCheckboxCell Die RH-Checkbox-Zelle
+ * @returns {boolean} True wenn Daten geändert wurden
+ */
+function handleGCheckboxChange(cardData, isChecked, rhCheckboxCell) {
+  if (cardData.g === isChecked) return false;
+  
+  cardData.g = isChecked;
+  
+  if (!isChecked) {
+    // Wenn G deaktiviert wird, deaktiviere auch RH
+    if (cardData.rh) {
+      cardData.rh = false;
+      rhCheckboxCell.setValue(false);
+    }
+    rhCheckboxCell.clearDataValidations();
+    rhCheckboxCell.setFontColor('#FFFFFF');
+  } else {
+    // Wenn G aktiviert wird, aktiviere RH-Validierung
+    rhCheckboxCell.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
+    rhCheckboxCell.setFontColor(null);
+  }
+  
+  return true;
+}
+
+/**
+ * Hilfsfunktion: Behandelt Änderungen an der RH-Checkbox
+ * @param {Object} cardData Das Kartenobjekt mit g/rh Status
+ * @param {boolean} isChecked Der neue Checkbox-Status
+ * @param {GoogleAppsScript.Spreadsheet.Range} rhCheckboxCell Die RH-Checkbox-Zelle
+ * @returns {boolean} True wenn Daten geändert wurden
+ */
+function handleRHCheckboxChange(cardData, isChecked, rhCheckboxCell) {
+  if (!cardData.g && isChecked) {
+    // RH kann nicht aktiviert werden wenn G nicht gesetzt ist
+    rhCheckboxCell.setValue(false);
+    cardData.rh = false;
+    return false;
+  }
+  
+  if (cardData.rh === isChecked) return false;
+  
+  cardData.rh = isChecked;
+  return true;
+}
+
+/**
  * Verarbeitet die Bearbeitung von G-/RH-Checkboxen oder Bildzellen auf einem Set-Blatt.
  * Aktualisiert den Status im PropertiesService und die UI des betroffenen Kartenblocks.
  * Die `SpreadsheetApp.flush()`-Aufrufe wurden konsolidiert, um die Leistung zu verbessern.
@@ -1886,149 +2039,87 @@ function handleOnEdit(e) {
 function processCardDataEdit(e, rawCardId, setId, isGCheckbox, isRHCheckbox, isImageCell) {
   const range = e.range;
   const sheet = range.getSheet();
-  const ui = SpreadsheetApp.getUi();
-
   const cardId = normalizeCardNumber(String(rawCardId));
 
   let collectedCardsData = getScriptPropertiesData('collectedCardsData');
   let customImageUrls = getScriptPropertiesData('customImageUrls');
 
-  let dataModified = false; // Ob die zugrunde liegenden Daten geändert wurden.
-  let uiNeedsUpdate = false; // Ob UI-Elemente neu gezeichnet oder formatiert werden müssen.
+  let dataModified = false;
+  let uiNeedsUpdate = false;
 
-  // Initialisiere verschachtelte Objekte, falls sie nicht existieren.
-  if (!collectedCardsData[setId]) {
-    collectedCardsData[setId] = {};
-  }
-  if (!collectedCardsData[setId][cardId]) {
-    collectedCardsData[setId][cardId] = { g: false, rh: false };
-  }
-  if (!customImageUrls[setId]) {
-    customImageUrls[setId] = {};
-  }
+  // Initialisiere verschachtelte Objekte
+  if (!collectedCardsData[setId]) collectedCardsData[setId] = {};
+  if (!collectedCardsData[setId][cardId]) collectedCardsData[setId][cardId] = { g: false, rh: false };
+  if (!customImageUrls[setId]) customImageUrls[setId] = {};
 
-  // Berechne die Startkoordinaten des Kartenblocks für spätere UI-Updates.
+  // Berechne Kartenblock-Koordinaten
   const cardBlockStartCol = Math.floor((range.getColumn() - 1) / CARD_BLOCK_WIDTH_COLS) * CARD_BLOCK_WIDTH_COLS + 1;
   const cardBlockStartRow = SET_SHEET_HEADER_ROWS + Math.floor((range.getRow() - (SET_SHEET_HEADER_ROWS + 1)) / CARD_BLOCK_HEIGHT_ROWS) * CARD_BLOCK_HEIGHT_ROWS + 1;
-  const actualRhCheckboxCell = sheet.getRange(cardBlockStartRow + 2, cardBlockStartCol + 1);
+  const rhCheckboxCell = sheet.getRange(cardBlockStartRow + 2, cardBlockStartCol + 1);
   const cardBlockRange = sheet.getRange(cardBlockStartRow, cardBlockStartCol, 3, CARD_BLOCK_WIDTH_COLS);
 
-  // --- Bildzellen-Logik ---
+  // Bildzellen-Logik
   if (isImageCell) {
     const newFormula = range.getFormula();
     Logger.log(`[processCardDataEdit] Image cell edited. New formula: "${newFormula}".`);
+    
     if (newFormula && newFormula.toString().startsWith('=IMAGE(') && newFormula.toString().endsWith(')')) {
       if (customImageUrls[setId][cardId] !== newFormula) {
         customImageUrls[setId][cardId] = newFormula;
         dataModified = true;
-        uiNeedsUpdate = true; // Bild wurde möglicherweise geändert
-        Logger.log(`[processCardDataEdit] Custom image URL for card ${cardId} in Set ${setId} updated to: ${newFormula}`);
+        uiNeedsUpdate = true;
+        Logger.log(`[processCardDataEdit] Custom image URL for card ${cardId} updated.`);
       }
     } else {
-      // Wenn die Formel entfernt oder geändert wurde, lösche den benutzerdefinierten URL.
       if (customImageUrls[setId].hasOwnProperty(cardId)) {
         delete customImageUrls[setId][cardId];
         dataModified = true;
-        uiNeedsUpdate = true; // Bild wurde möglicherweise geändert
-        if (Object.keys(customImageUrls[setId]).length === 0) {
-          delete customImageUrls[setId];
-        }
-        Logger.log(`[processCardDataEdit] Custom image URL for card ${cardId} in Set ${setId} deleted.`);
+        uiNeedsUpdate = true;
+        if (Object.keys(customImageUrls[setId]).length === 0) delete customImageUrls[setId];
+        Logger.log(`[processCardDataEdit] Custom image URL for card ${cardId} deleted.`);
       }
     }
     setScriptPropertiesData('customImageUrls', customImageUrls);
   }
 
-  // --- Checkbox-Logik (G und RH) ---
+  // Checkbox-Logik
   if (isGCheckbox || isRHCheckbox) {
     Logger.log(`[processCardDataEdit] Checkbox edited.`);
     const isChecked = (e.value === true || (typeof e.value === 'string' && e.value.toLowerCase() === 'true'));
+    const cardData = collectedCardsData[setId][cardId];
 
     if (isGCheckbox) {
-      if (collectedCardsData[setId][cardId].g !== isChecked) {
-        collectedCardsData[setId][cardId].g = isChecked;
+      const changed = handleGCheckboxChange(cardData, isChecked, rhCheckboxCell);
+      if (changed) {
         dataModified = true;
         uiNeedsUpdate = true;
-        Logger.log(`[processCardDataEdit] G-Checkbox for card ${cardId} in set ${setId} changed to: ${isChecked}`);
-
-        // Wenn G deaktiviert wird, deaktiviere auch RH und entferne RH-Validierung/Formatierung.
-        if (!isChecked) {
-          if (collectedCardsData[setId][cardId].rh) {
-            collectedCardsData[setId][cardId].rh = false;
-            actualRhCheckboxCell.setValue(false); // Setze Wert in UI
-            // dataModified ist bereits true
-            Logger.log(`[processCardDataEdit] RH-Checkbox for card ${cardId} in set ${setId} deactivated because G-checkbox was deactivated.`);
-          }
-          actualRhCheckboxCell.clearDataValidations();
-          actualRhCheckboxCell.setFontColor('#FFFFFF'); // Macht den RH-Haken unsichtbar, wenn G nicht gesetzt ist.
-        } else {
-          // Wenn G aktiviert wird, füge RH-Validierung/Formatierung hinzu.
-          actualRhCheckboxCell.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
-          actualRhCheckboxCell.setFontColor(null); // Standard-Schriftfarbe
-        }
+        Logger.log(`[processCardDataEdit] G-Checkbox for card ${cardId} changed to: ${isChecked}`);
       }
     } else if (isRHCheckbox) {
-      const gChecked = collectedCardsData[setId][cardId].g; // Aktueller G-Status
-      if (!gChecked && isChecked) {
-        // Wenn G nicht gesammelt ist, kann RH nicht gesammelt werden. Setze RH zurück auf false in UI.
-        actualRhCheckboxCell.setValue(false);
-        collectedCardsData[setId][cardId].rh = false;
-        // dataModified wird hier nicht auf true gesetzt, da keine gültige Datenänderung erfolgte.
-        Logger.log(`[processCardDataEdit] Attempt to activate RH-checkbox for uncollected card ${cardId} was rejected.`);
-      } else {
-        if (collectedCardsData[setId][cardId].rh !== isChecked) {
-          collectedCardsData[setId][cardId].rh = isChecked;
-          dataModified = true;
-          uiNeedsUpdate = true;
-          Logger.log(`[processCardDataEdit] RH-checkbox for card ${cardId} in set ${setId} changed to: ${isChecked}`);
-        }
+      const changed = handleRHCheckboxChange(cardData, isChecked, rhCheckboxCell);
+      if (changed) {
+        dataModified = true;
+        uiNeedsUpdate = true;
+        Logger.log(`[processCardDataEdit] RH-Checkbox for card ${cardId} changed to: ${isChecked}`);
       }
     }
+    
     setScriptPropertiesData('collectedCardsData', collectedCardsData);
   }
 
-  // --- Aktualisiere Kopfzeile und Hintergrundfarbe nur, wenn Daten geändert wurden oder UI-Update nötig ist ---
+  // UI-Updates nur wenn nötig
   if (dataModified || uiNeedsUpdate) {
-    let currentCollectedCount = 0;
-    let currentReverseHoloCount = 0;
-    // Zähle gesammelte Karten für das aktuelle Set neu.
-    for (const cId in collectedCardsData[setId]) {
-      if (collectedCardsData[setId].hasOwnProperty(cId)) {
-        if (collectedCardsData[setId][cId].g) {
-          currentCollectedCount++;
-        }
-        if (collectedCardsData[setId][cId].rh) {
-          currentReverseHoloCount++;
-        }
-      }
-    }
-
-    const headerSummaryText = sheet.getRange(2, 1).getValue();
-    const totalMatch = headerSummaryText.match(/Gesamtzahl Karten:\s*(\d+)/);
-    const currentTotalCardsInSet = totalMatch ? parseInt(totalMatch[1]) : 0;
-
-    const currentCompletionPercentage = (currentTotalCardsInSet > 0) ? currentCollectedCount / currentTotalCardsInSet : 0;
-
-    const headerSummaryRange = sheet.getRange(2, 1, 1, SORT_SET_CHECKBOX_COL_OFFSET);
-    const officialAbbreviation = getOfficialAbbreviationFromOverview(setId);
-
-    headerSummaryRange.setValue(
-      `Gesamtzahl Karten: ${currentTotalCardsInSet} | ` +
-      `Gesammelte Karten: ${currentCollectedCount} | ` +
-      `Gesammelte RH Karten: ${currentReverseHoloCount} | ` +
-      `Abschluss-Prozentsatz: ${currentCompletionPercentage.toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 0 })} | ` +
-      `Abkürzung: ${officialAbbreviation}`
-    );
+    const { collectedCount, reverseHoloCount } = countCollectedCards(collectedCardsData[setId]);
+    updateSetSheetHeaderSummary(sheet, setId, collectedCount, reverseHoloCount);
     Logger.log(`[processCardDataEdit] Header summary for set ${setId} updated.`);
 
-    // Wende Hintergrundfarbe basierend auf dem gesammelten Status an.
-    const blockColor = collectedCardsData[setId][cardId].rh ? REVERSE_HOL_COLLECTED_COLOR : (collectedCardsData[setId][cardId].g ? COLLECTED_COLOR : null);
+    // Wende Hintergrundfarbe an
+    const blockColor = collectedCardsData[setId][cardId].rh ? REVERSE_HOL_COLLECTED_COLOR : 
+                       (collectedCardsData[setId][cardId].g ? COLLECTED_COLOR : null);
     cardBlockRange.setBackground(blockColor);
     Logger.log(`[processCardDataEdit] Applied color ${blockColor} to range ${cardBlockRange.getA1Notation()}.`);
   }
 
-  // Konsolidierter flush() am Ende der Funktion.
-  // Dies sorgt dafür, dass alle UI-Änderungen auf einmal angewendet werden.
   SpreadsheetApp.flush();
 }
 
@@ -2051,7 +2142,8 @@ function onImportCheckboxEdit(e, isUserInitiatedCheck) { // Added isUserInitiate
 
   if (!setId) {
     Logger.log(`[onImportCheckboxEdit] ERROR: Set ID is null or empty for row ${e.range.getRow()}. Resetting checkbox.`);
-    resetCheckboxToDefault(range);
+    range.setValue(false);
+    range.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
     SpreadsheetApp.flush();
     ui.alert("Fehler", "Konnte Set-ID nicht finden. Import abgebrochen.", ui.ButtonSet.OK);
     return;
@@ -2061,7 +2153,9 @@ function onImportCheckboxEdit(e, isUserInitiatedCheck) { // Added isUserInitiate
 
   if (isUserInitiatedCheck) {
     Logger.log(`[onImportCheckboxEdit] User explicitly checked the box. Proceeding with import logic.`);
-    prepareCheckboxAction(range);
+    range.setValue(false);
+    range.clearDataValidations();
+    SpreadsheetApp.flush();
 
     try {
       SpreadsheetApp.getActive().toast(`Importiere Set "${setName}"...`, "🔄 Import", 5);
@@ -2070,34 +2164,38 @@ function onImportCheckboxEdit(e, isUserInitiatedCheck) { // Added isUserInitiate
       importedSetsStatus[setId] = true;
       setScriptPropertiesData('importedSetsStatus', importedSetsStatus);
 
-      setCheckboxChecked(range);
+      range.setValue(true);
+      range.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox(true).build());
       SpreadsheetApp.getActive().toast(`Set "${setId}" wurde erfolgreich importiert.`, '✅ Importiert', 3);
       Logger.log(`[onImportCheckboxEdit] Import process completed successfully for ${setId}.`);
     } catch (error) {
       Logger.log(`[onImportCheckboxEdit] ERROR during import for Set ${setName} (${setId}): ${error.message}\nStack: ${error.stack}`);
       importedSetsStatus[setId] = false;
       setScriptPropertiesData('importedSetsStatus', importedSetsStatus);
-      resetCheckboxToDefault(range);
+      range.setValue(false);
+      range.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
       ui.alert("Importfehler", `Fehler beim Importieren von Set "${setName}": ${error.message}. Die Checkbox wird zurückgesetzt.`, ui.ButtonSet.OK);
     } finally {
       // isScriptEditing is managed by handleOnEdit's try/finally block
       SpreadsheetApp.flush();
       Logger.log(`[onImportCheckboxEdit] Finally block executed.`);
     }
-  } else if (isUserUncheckEvent(e, isUserInitiatedCheck)) {
+  } else if (!isUserInitiatedCheck && (e.value === false || (typeof e.value === 'string' && e.value.toLowerCase() === 'false')) &&
+    (e.oldValue === true || (typeof e.oldValue === 'string' && e.oldValue.toLowerCase() === 'true'))) {
     Logger.log(`[onImportCheckboxEdit] User attempted to uncheck the box (non-user initiated check).`);
     const setSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(setName);
 
     if (setSheet && setSheet.getRange(1, 1).getNote() === `Set ID: ${setId}`) {
       Logger.log(`[onImportCheckboxEdit] Set sheet for ${setId} exists. Reverting checkbox to true.`);
-      setCheckboxChecked(range);
+      range.setValue(true);
       ui.alert("Aktion nicht erlaubt", "Diese Checkbox kann nicht manuell deaktiviert werden, solange das Set-Blatt existiert. Löschen Sie das Set über das Menü 'Aktuelles Set löschen', um es zu entfernen.", ui.ButtonSet.OK);
       SpreadsheetApp.flush();
     } else {
       Logger.log(`[onImportCheckboxEdit] Set sheet for ${setId} does not exist or note mismatch. Allowing unchecking.`);
       importedSetsStatus[setId] = false;
       setScriptPropertiesData('importedSetsStatus', importedSetsStatus);
-      resetCheckboxToDefault(range);
+      range.setValue(false);
+      range.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
       SpreadsheetApp.getActive().toast(`Set "${setId}" als nicht importiert markiert.`, 'ℹ️ Status aktualisiert', 3);
       SpreadsheetApp.flush();
     }
@@ -2115,7 +2213,7 @@ function onImportCheckboxEdit(e, isUserInitiatedCheck) { // Added isUserInitiate
  * @param {GoogleAppsScript.Events.Sheets.SheetChangeEvent} e Das Ereignisobjekt.
  * @param {boolean} isUserInitiatedCheck Gibt an, ob der Klick vom Benutzer ausgelöst wurde (TRUE von FALSE).
  */
-function onSortSetCheckboxEdit(e, isUserInitiatedCheck) { // Added isUserInitiatedCheck parameter
+function onSortSetCheckboxEdit(e, isUserInitiatedCheck) {
   const range = e.range;
   const sheet = range.getSheet();
   const ui = SpreadsheetApp.getUi();
@@ -2124,8 +2222,7 @@ function onSortSetCheckboxEdit(e, isUserInitiatedCheck) { // Added isUserInitiat
 
   if (!isUserInitiatedCheck) {
     Logger.log(`[onSortSetCheckboxEdit] Not a user-initiated check. Resetting checkbox to false.`);
-    resetCheckboxToDefault(range);
-    SpreadsheetApp.flush();
+    resetCheckbox(range);
     return;
   }
 
@@ -2138,28 +2235,17 @@ function onSortSetCheckboxEdit(e, isUserInitiatedCheck) { // Added isUserInitiat
 
   if (!setId) {
     Logger.log(`[onSortSetCheckboxEdit] ERROR: Set ID not found in note for sheet "${sheet.getName()}".`);
-    resetCheckboxToDefault(range);
+    resetCheckbox(range);
     ui.alert("Fehler", "Konnte Set-ID nicht finden. Sortierung abgebrochen.", ui.ButtonSet.OK);
-    SpreadsheetApp.flush();
     return;
   }
 
-  Logger.log(`[onSortSetCheckboxEdit] User explicitly checked the box. Proceeding with sort logic.`);
-  prepareCheckboxAction(range);
-
-  try {
+  handleHeaderCheckbox(e, isUserInitiatedCheck, 'onSortSetCheckboxEdit', () => {
     SpreadsheetApp.getActive().toast(`Sortiere Set "${sheet.getName()}"...`, "🔄 Sortieren", 5);
     Logger.log(`[onSortSetCheckboxEdit] Calling manualSortCurrentSheet().`);
     manualSortCurrentSheet();
     SpreadsheetApp.getActive().toast(`Sortierung für Set "${sheet.getName()}" abgeschlossen.`, "✅ Fertig", 3);
-    Logger.log(`[onSortSetCheckboxEdit] Sort process completed successfully for ${setId}.`);
-  } catch (error) {
-    Logger.log(`[onSortSetCheckboxEdit] ERROR during sort for Set ${sheet.getName()} (${setId}): ${error.message}\nStack: ${error.stack}`);
-    ui.alert("Sortierfehler", `Fehler beim Sortieren von Set "${sheet.getName()}": ${error.message}.`, ui.ButtonSet.OK);
-  } finally {
-    finalizeCheckboxAction(range);
-    Logger.log(`[onSortSetCheckboxEdit] Finally block executed.`);
-  }
+  });
 }
 
 /**
@@ -2181,7 +2267,8 @@ function onReimportCheckboxEdit(e, isUserInitiatedCheck) { // Added isUserInitia
 
   if (!setId) {
     Logger.log(`[onReimportCheckboxEdit] ERROR: Set ID is null or empty for row ${e.range.getRow()}. Resetting checkbox.`);
-    resetCheckboxToDefault(range);
+    range.setValue(false);
+    range.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
     SpreadsheetApp.flush();
     ui.alert("Fehler", "Konnte Set-ID nicht finden. Re-Import abgebrochen.", ui.ButtonSet.OK);
     return;
@@ -2189,7 +2276,9 @@ function onReimportCheckboxEdit(e, isUserInitiatedCheck) { // Added isUserInitia
 
   if (isUserInitiatedCheck) {
     Logger.log(`[onReimportCheckboxEdit] User explicitly checked the box. Proceeding with re-import logic.`);
-    prepareCheckboxAction(range);
+    range.setValue(false);
+    range.clearDataValidations();
+    SpreadsheetApp.flush();
 
     try {
       SpreadsheetApp.getActive().toast(`Importiere Set "${setName}" neu...`, "🔄 Re-Import", 5);
@@ -2204,12 +2293,15 @@ function onReimportCheckboxEdit(e, isUserInitiatedCheck) { // Added isUserInitia
       ui.alert("Re-Import Fehler", `Fehler beim Re-Import von Set "${setName}": ${error.message}.`, ui.ButtonSet.OK);
     } finally {
       // isScriptEditing is managed by handleOnEdit's try/finally block
-      finalizeCheckboxAction(range);
+      range.setValue(false);
+      range.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
+      SpreadsheetApp.flush();
       Logger.log(`[onReimportCheckboxEdit] Finally block executed.`);
     }
-  } else if (isUserUncheckEvent(e, isUserInitiatedCheck)) {
+  } else if (!isUserInitiatedCheck && (e.value === false || (typeof e.value === 'string' && e.value.toLowerCase() === 'false')) &&
+    (e.oldValue === true || (typeof e.oldValue === 'string' && e.oldValue.toLowerCase() === 'true'))) {
     Logger.log(`[onReimportCheckboxEdit] User attempted to uncheck the box. Reverting to checked state.`);
-    setCheckboxChecked(range);
+    range.setValue(true);
     ui.alert("Aktion nicht erlaubt", "Diese Checkbox kann nicht manuell deaktiviert werden. Sie dient zum Auslösen eines Re-Imports und wird automatisch zurückgesetzt.", ui.ButtonSet.OK);
     SpreadsheetApp.flush();
   } else {
@@ -2224,39 +2316,13 @@ function onReimportCheckboxEdit(e, isUserInitiatedCheck) { // Added isUserInitia
  * @param {GoogleAppsScript.Events.Sheets.SheetChangeEvent} e Das Ereignisobjekt.
  * @param {boolean} isUserInitiatedCheck Gibt an, ob der Klick vom Benutzer ausgelöst wurde (TRUE von FALSE).
  */
-function onRefreshOverviewCheckboxEdit(e, isUserInitiatedCheck) { // Added isUserInitiatedCheck parameter
-  const range = e.range;
-  const sheet = range.getSheet();
-  const ui = SpreadsheetApp.getUi();
-
-  Logger.log(`[onRefreshOverviewCheckboxEdit] Entered for sheet: ${sheet.getName()}, range: ${range.getA1Notation()}, isUserInitiatedCheck: ${isUserInitiatedCheck}`);
-
-  if (isUserInitiatedCheck) {
-    Logger.log(`[onRefreshOverviewCheckboxEdit] User explicitly checked the box. Proceeding with refresh logic.`);
-    prepareCheckboxAction(range);
-
-    try {
-      SpreadsheetApp.getActive().toast(`Aktualisiere Sets Overview...`, "🔄 Aktualisieren", 5);
-      Logger.log(`[onRefreshOverviewCheckboxEdit] Calling setupAndImportAllSets().`);
-      setupAndImportAllSets();
-      SpreadsheetApp.getActive().toast(`Sets Overview aktualisiert.`, "✅ Fertig", 3);
-      Logger.log(`[onRefreshOverviewCheckboxEdit] Refresh process completed successfully.`);
-    } catch (error) {
-      Logger.log(`[onRefreshOverviewCheckboxEdit] ERROR during refresh: ${error.message}\nStack: ${error.stack}`);
-      ui.alert("Aktualisierungsfehler", `Fehler beim Aktualisieren der Sets Overview: ${error.message}.`, ui.ButtonSet.OK);
-    } finally {
-      finalizeCheckboxAction(range);
-      Logger.log(`[onRefreshOverviewCheckboxEdit] Finally block executed.`);
-    }
-  } else if (isUserUncheckEvent(e, isUserInitiatedCheck)) {
-    Logger.log(`[onRefreshOverviewCheckboxEdit] User attempted to uncheck the box. Reverting to checked state.`);
-    setCheckboxChecked(range);
-    ui.alert("Aktion nicht erlaubt", "Diese Checkbox kann nicht manuell deaktiviert werden. Sie dient zum Auslösen einer Aktualisierung und wird automatisch zurückgesetzt.", ui.ButtonSet.OK);
-    SpreadsheetApp.flush();
-  } else {
-    // This is the case where the script sets the value.
-    Logger.log(`[onRefreshOverviewCheckboxEdit] Not a user-initiated change, and not a user uncheck. Ignoring.`);
-  }
+function onRefreshOverviewCheckboxEdit(e, isUserInitiatedCheck) {
+  handleHeaderCheckbox(e, isUserInitiatedCheck, 'onRefreshOverviewCheckboxEdit', () => {
+    SpreadsheetApp.getActive().toast(`Aktualisiere Sets Overview...`, "🔄 Aktualisieren", 5);
+    Logger.log(`[onRefreshOverviewCheckboxEdit] Calling setupAndImportAllSets().`);
+    setupAndImportAllSets();
+    SpreadsheetApp.getActive().toast(`Sets Overview aktualisiert.`, "✅ Fertig", 3);
+  });
 }
 
 /**
@@ -2265,39 +2331,13 @@ function onRefreshOverviewCheckboxEdit(e, isUserInitiatedCheck) { // Added isUse
  * @param {GoogleAppsScript.Events.Sheets.SheetChangeEvent} e Das Ereignisobjekt.
  * @param {boolean} isUserInitiatedCheck Gibt an, ob der Klick vom Benutzer ausgelöst wurde (TRUE von FALSE).
  */
-function onSortAllSetsCheckboxEdit(e, isUserInitiatedCheck) { // Added isUserInitiatedCheck parameter
-  const range = e.range;
-  const sheet = range.getSheet();
-  const ui = SpreadsheetApp.getUi();
-
-  Logger.log(`[onSortAllSetsCheckboxEdit] Entered for sheet: ${sheet.getName()}, range: ${range.getA1Notation()}, isUserInitiatedCheck: ${isUserInitiatedCheck}`);
-
-  if (isUserInitiatedCheck) {
-    Logger.log(`[onSortAllSetsCheckboxEdit] User explicitly checked the box. Proceeding with sort all sets logic.`);
-    prepareCheckboxAction(range);
-
-    try {
-      SpreadsheetApp.getActive().toast("Alle Sets sortieren...", "🔄 Sortieren", 10);
-      Logger.log(`[onSortAllSetsCheckboxEdit] Calling manualSortAllSheets().`);
-      manualSortAllSheets();
-      SpreadsheetApp.getActive().toast("Alle Sets sortiert.", "✅ Fertig", 8);
-      Logger.log(`[onSortAllSetsCheckboxEdit] Sort all sets process completed successfully.`);
-    } catch (error) {
-      Logger.log(`[onSortAllSetsCheckboxEdit] ERROR during sort all sets: ${error.message}\nStack: ${error.stack}`);
-      ui.alert("Sortierfehler", `Fehler beim Sortieren aller Sets: ${error.message}.`, ui.ButtonSet.OK);
-    } finally {
-      finalizeCheckboxAction(range);
-      Logger.log(`[onSortAllSetsCheckboxEdit] Finally block executed.`);
-    }
-  } else if (isUserUncheckEvent(e, isUserInitiatedCheck)) {
-    Logger.log(`[onSortAllSetsCheckboxEdit] User attempted to uncheck the box. Reverting to checked state.`);
-    setCheckboxChecked(range);
-    ui.alert("Aktion nicht erlaubt", "Diese Checkbox kann nicht manuell deaktiviert werden. Sie dient zum Auslösen einer Aktualisierung und wird automatisch zurückgesetzt.", ui.ButtonSet.OK);
-    SpreadsheetApp.flush();
-  } else {
-    // This is the case where the script sets the value.
-    Logger.log(`[onSortAllSetsCheckboxEdit] Not a user-initiated change, and not a user uncheck. Ignoring.`);
-  }
+function onSortAllSetsCheckboxEdit(e, isUserInitiatedCheck) {
+  handleHeaderCheckbox(e, isUserInitiatedCheck, 'onSortAllSetsCheckboxEdit', () => {
+    SpreadsheetApp.getActive().toast("Alle Sets sortieren...", "🔄 Sortieren", 10);
+    Logger.log(`[onSortAllSetsCheckboxEdit] Calling manualSortAllSheets().`);
+    manualSortAllSheets();
+    SpreadsheetApp.getActive().toast("Alle Sets sortiert.", "✅ Fertig", 8);
+  });
 }
 
 /**
@@ -2322,87 +2362,138 @@ function triggerSortAllSets() {
 
 
 /**
- * Hilfsfunktion zum Anwenden der Checkbox-Validierung auf einen bestimmten Bereich.
- * @param {GoogleAppsScript.Spreadsheet.Range} range Der Bereich, auf den die Validierung angewendet werden soll.
+ * Hilfsfunktion: Prüft ob eine Änderung vom Benutzer initiiert wurde (false -> true)
+ * @param {any} newValue Der neue Wert
+ * @param {any} oldValue Der alte Wert
+ * @returns {boolean} True wenn Benutzer die Checkbox aktiviert hat
  */
-function applyCheckboxValidation(range) {
-  const rule = SpreadsheetApp.newDataValidation().requireCheckbox().build();
-  range.setDataValidation(rule);
+function isUserInitiatedCheck(newValue, oldValue) {
+  const isNewValueTrue = (newValue === true || (typeof newValue === 'string' && newValue.toLowerCase() === 'true'));
+  const wasOldValueTrue = (oldValue === true || (typeof oldValue === 'string' && oldValue.toLowerCase() === 'true'));
+  return isNewValueTrue && !wasOldValueTrue;
 }
 
 /**
- * Setzt eine Checkbox auf FALSE und stellt die Standard-Validierung wieder her.
- * @param {GoogleAppsScript.Spreadsheet.Range} range
+ * Hilfsfunktion: Setzt eine Checkbox zurück
+ * @param {GoogleAppsScript.Spreadsheet.Range} range Die Checkbox-Zelle
  */
-function resetCheckboxToDefault(range) {
+function resetCheckbox(range) {
   range.setValue(false);
-  applyCheckboxValidation(range);
-}
-
-/**
- * Setzt eine Checkbox auf TRUE und stellt die Standard-Validierung wieder her.
- * @param {GoogleAppsScript.Spreadsheet.Range} range
- */
-function setCheckboxChecked(range) {
-  range.setValue(true);
-  range.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox(true).build());
-}
-
-/**
- * Bereitet eine Checkbox-Aktion vor, damit sie nicht erneut triggert.
- * @param {GoogleAppsScript.Spreadsheet.Range} range
- */
-function prepareCheckboxAction(range) {
-  range.setValue(false);
-  range.clearDataValidations();
+  range.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
   SpreadsheetApp.flush();
 }
 
 /**
- * Stellt Checkbox-Status nach einer Aktion wieder her.
- * @param {GoogleAppsScript.Spreadsheet.Range} range
+ * Hilfsfunktion: Allgemeine Checkbox-Handler-Logik für Header-Checkboxen
+ * @param {GoogleAppsScript.Events.Sheets.SheetChangeEvent} e Das Event-Objekt
+ * @param {boolean} isUserInitiatedCheck Ob vom Benutzer initiiert
+ * @param {string} actionName Name der Aktion für Logging
+ * @param {Function} actionFunction Die auszuführende Funktion
  */
-function finalizeCheckboxAction(range) {
-  resetCheckboxToDefault(range);
-  SpreadsheetApp.flush();
-}
+function handleHeaderCheckbox(e, isUserInitiatedCheck, actionName, actionFunction) {
+  const range = e.range;
+  const sheet = range.getSheet();
+  const ui = SpreadsheetApp.getUi();
 
-/**
- * Prüft, ob ein OnEdit-Ereignis einem Nutzer-Uncheck entspricht.
- * @param {GoogleAppsScript.Events.Sheets.SheetChangeEvent} e
- * @param {boolean} isUserInitiatedCheck
- * @returns {boolean}
- */
-function isUserUncheckEvent(e, isUserInitiatedCheck) {
-  return !isUserInitiatedCheck && isCheckboxValueFalse(e.value) && isCheckboxValueTrue(e.oldValue);
-}
+  Logger.log(`[${actionName}] Entered for sheet: ${sheet.getName()}, range: ${range.getA1Notation()}, isUserInitiatedCheck: ${isUserInitiatedCheck}`);
 
-/**
- * Prüft, ob ein Checkboxwert TRUE ist (boolean oder String).
- * @param {any} value
- * @returns {boolean}
- */
-function isCheckboxValueTrue(value) {
-  return value === true || (typeof value === 'string' && value.toLowerCase() === 'true');
-}
+  if (!isUserInitiatedCheck) {
+    Logger.log(`[${actionName}] Not a user-initiated check. Resetting checkbox.`);
+    resetCheckbox(range);
+    return;
+  }
 
-/**
- * Prüft, ob ein Checkboxwert FALSE ist (boolean oder String).
- * @param {any} value
- * @returns {boolean}
- */
-function isCheckboxValueFalse(value) {
-  return value === false || (typeof value === 'string' && value.toLowerCase() === 'false');
-}
-
-/**
- * Hilfsfunktion zum Entfernen der Datenvalidierung von einem bestimmten Bereich.
- * @param {GoogleAppsScript.Spreadsheet.Range} range Der Bereich, von dem die Validierung entfernt werden soll.
- */
-function removeDataValidation(range) {
+  Logger.log(`[${actionName}] User explicitly checked the box. Proceeding with action.`);
+  range.setValue(false);
   range.clearDataValidations();
+  SpreadsheetApp.flush();
+
+  try {
+    actionFunction();
+    Logger.log(`[${actionName}] Action completed successfully.`);
+  } catch (error) {
+    Logger.log(`[${actionName}] ERROR: ${error.message}\nStack: ${error.stack}`);
+    ui.alert("Fehler", `Fehler bei ${actionName}: ${error.message}.`, ui.ButtonSet.OK);
+  } finally {
+    range.setValue(false);
+    range.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
+    SpreadsheetApp.flush();
+    Logger.log(`[${actionName}] Finally block executed.`);
+  }
 }
 
+
+/**
+ * Hilfsfunktion: Setzt den Checkbox-Status und die Data Validation in einem Range
+ * @param {GoogleAppsScript.Spreadsheet.Range} range Der zu setzende Bereich
+ * @param {boolean} value Der Wert für die Checkbox
+ * @param {boolean} isReadonly Wenn true, wird die Checkbox auf readonly gesetzt
+ */
+function setCheckboxState(range, value, isReadonly = false) {
+  range.setValue(value);
+  if (isReadonly) {
+    range.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox(true).build());
+  } else {
+    range.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
+  }
+}
+
+/**
+ * Hilfsfunktion: Lädt und bereitet Kartendaten für Sortierung vor
+ * @param {string} setId Die Set-ID (pokemontcg.io oder TCGDex-only)
+ * @param {string} setName Name des Sets
+ * @param {Array<object>} tcgdexAllSets Liste aller TCGDex Sets
+ * @returns {{allCards: Array, cardmarketData: Object}} Vorbereitete Kartendaten
+ */
+function prepareCardsForSorting(setId, setName, tcgdexAllSets) {
+  const cardData = loadCardsForSet(setId, setName, tcgdexAllSets);
+  const { allCards, cardmarketData } = cardData;
+  
+  if (!setId.startsWith('TCGDEX-')) {
+    // Für pokemontcg.io Sets: lade gespeicherte Cardmarket-URLs
+    const storedCardmarketData = getScriptPropertiesData(`pokemontcgIoCardmarketUrls_${setId}`, {});
+    return { allCards, cardmarketData: storedCardmarketData };
+  }
+  
+  return { allCards, cardmarketData };
+}
+
+/**
+ * Hilfsfunktion zum Installieren eines Zeit-Triggers mit den gegebenen Parametern
+ * @param {string} intervalType Art des Intervalls ('minütlich', 'täglich', 'stündlich', 'wöchentlich')
+ * @param {number} frequency Frequenz des Triggers
+ * @param {number|null} hour Stunde für tägliche/wöchentliche Trigger
+ */
+function createTimeTrigger(intervalType, frequency, hour) {
+  let triggerBuilder = ScriptApp.newTrigger("sortAllSheetsTrigger").timeBased();
+
+  switch (intervalType) {
+    case 'minütlich':
+      triggerBuilder = triggerBuilder.everyMinutes(frequency);
+      break;
+    case 'täglich':
+      triggerBuilder = triggerBuilder.everyDays(frequency).atHour(hour !== null ? hour : 0);
+      break;
+    case 'stündlich':
+      triggerBuilder = triggerBuilder.everyHours(frequency);
+      break;
+    case 'wöchentlich':
+      triggerBuilder = triggerBuilder.everyWeeks(frequency).atHour(hour !== null ? hour : 0);
+      break;
+  }
+
+  triggerBuilder.create();
+  
+  let confirmationMessage = `Der Sortier-Trigger wurde erfolgreich installiert: ${intervalType}`;
+  if (frequency > 1) {
+    confirmationMessage += ` (alle ${frequency} ${intervalType.slice(0, -2)}en)`;
+  }
+  if (hour !== null && (intervalType === 'täglich' || intervalType === 'wöchentlich')) {
+    confirmationMessage += ` um ${hour}:00 Uhr`;
+  }
+  
+  return confirmationMessage;
+}
 
 /**
  * Installiert einen Zeit-Trigger, der die Funktion `sortAllSheetsTrigger` mit wählbarer Frequenz ausführt.
@@ -2469,53 +2560,11 @@ function installSortTrigger() {
 
     if (isNaN(hour) || hour < 0 || hour > 23) {
       ui.alert("Error", "Ungültige Uhrzeit. Bitte geben Sie eine Zahl zwischen 0 und 23 ein.", ui.ButtonSet.OK);
+      return;
     }
   }
 
-  let triggerBuilder = ScriptApp.newTrigger("sortAllSheetsTrigger").timeBased();
-
-  switch (intervalType) {
-    case 'minütlich':
-      triggerBuilder = triggerBuilder.everyMinutes(frequency);
-      break;
-    case 'täglich':
-      triggerBuilder = triggerBuilder.everyDays(frequency);
-      if (hour !== null) {
-        triggerBuilder = triggerBuilder.atHour(hour);
-      } else {
-        triggerBuilder = triggerBuilder.atHour(0);
-        Logger.log("Warnung: Täglichem Trigger wurde keine Stunde zugewiesen, Standard auf 0:00 Uhr gesetzt.");
-      }
-      break;
-    case 'stündlich':
-      triggerBuilder = triggerBuilder.everyHours(frequency);
-      break;
-    case 'wöchentlich':
-      triggerBuilder = triggerBuilder.everyWeeks(frequency);
-      if (hour !== null) {
-        triggerBuilder = triggerBuilder.atHour(hour);
-      } else {
-        triggerBuilder = triggerBuilder.atHour(0);
-        Logger.log("Warnung: Wöchentlichem Trigger wurde keine Stunde zugewiesen, Standard auf 0:00 Uhr gesetzt.");
-      }
-      break;
-  }
-
-  triggerBuilder.create();
-
-  let confirmationMessage = `Der Sortier-Trigger wurde erfolgreich installiert: ${intervalType}`;
-  if (frequency > 1) {
-    confirmationMessage += ` (alle ${intervalType.slice(0, -2)}en)`;
-  }
-  if (hour !== null && (intervalType === 'täglich' || intervalType === 'wöchentlich')) {
-    confirmationMessage += ` um ${hour}:00 Uhr`;
-  } else if (intervalType === 'stündlich') {
-    confirmationMessage += ` (startet zu jeder vollen Stunde)`;
-  } else if (intervalType === 'minütlich') {
-    confirmationMessage += ` (startet zu jeder vollen Minute)`;
-  }
-  confirmationMessage += ".";
-
+  const confirmationMessage = createTimeTrigger(intervalType, frequency, hour);
   ui.alert('Sortier-Trigger installiert.', confirmationMessage, ui.ButtonSet.OK);
   Logger.log(confirmationMessage);
 }
@@ -2613,81 +2662,14 @@ function sortAllSheetsTrigger() {
       try {
         Logger.log(`Sortiere Blatt: ${setName} (Set ID: ${setId})`);
 
-        let allCardsForSort = [];
-        let pokemontcgIoCardmarketDataForSort = {};
-
-        if (setId.startsWith('TCGDEX-')) {
-          const tcgdexActualSetId = setId.substring('TCGDEX-'.length);
-          const tcgdexSetDetails = fetchApiData(`${TCGDEX_BASE_URL}sets/${tcgdexActualSetId}`, `Fehler beim Laden der TCGDex Karten für Sortierung von Set ${setName}`);
-          if (tcgdexSetDetails && tcgdexSetDetails.cards) {
-            allCardsForSort = tcgdexSetDetails.cards.map(card => {
-              let smallImage = null;
-              if (card.image) {
-                smallImage = `${card.image}/low.jpg`;
-              }
-              return {
-                number: normalizeCardNumber(card.localId || card.id), // Normalisiere die Kartennummer von TCGDex
-                name: card.name,
-                images: { small: smallImage },
-                cardmarket: { url: card.links?.cardmarket }
-              };
-            });
-            allCardsForSort.sort((a, b) => naturalSort(a.number || "", b.number || ""));
-          } else {
-            Logger.log(`sortAllSheetsTrigger: Konnte TCGDex Karten für Set ${setId} nicht laden. Überspringe Sortierung für dieses Set.`);
-            return;
-          }
-        } else {
-          // pokemontcg.io based set logic
-          const pokemontcgSetId = setId; // For pokemontcg.io sets, setId is the actual pokemontcg.io ID
-
-          allCardsForSort = fetchAllPokemontcgIoCards(pokemontcgSetId, setName); // Use the new pagination helper
-
-          let tcgdexCardsMap = new Map();
-          // To find matchingTcgdexSet, we need at least pokemontcg.io ID and name
-          const pokemontcgSetInfoForSort = { id: pokemontcgSetId, name: setName, ptcgoCode: getOfficialAbbreviationFromOverview(pokemontcgSetId) };
-
-          const matchingTcgdexSet = findMatchingTcgdexSet(pokemontcgSetInfoForSort, tcgdexAllSets || []);
-
-          if (matchingTcgdexSet) {
-            const tcgdexSetDetails = fetchApiData(`${TCGDEX_BASE_URL}sets/${matchingTcgdexSet.id}`, `Fehler beim Laden der TCGDex Karten für Sortierung von Set ${setName} (${matchingTcgdexSet.id})`);
-            if (tcgdexSetDetails && tcgdexSetDetails.cards) {
-              // Normalisiere die TCGDex-Kartennummer, bevor sie als Schlüssel in der Map gespeichert wird
-              tcgdexSetDetails.cards.forEach(card => {
-                tcgdexCardsMap.set(normalizeCardNumber(card.localId || card.id), card);
-              });
-            }
-          } else {
-            Logger.log(`[sortAllSheetsTrigger] Kein passendes TCGDex Set für pokemontcg.io Set ${pokemontcgSetId} gefunden. Deutsche Kartendaten werden fehlen.`);
-          }
-
-          const mergedCardsForSort = allCardsForSort.map(pokemontcgCard => {
-            const mergedCard = { ...pokemontcgCard };
-            // Normalisiere die pokemontcg.io Kartennummer für den Lookup in der TCGDex Map
-            const tcgdexCard = tcgdexCardsMap.get(normalizeCardNumber(pokemontcgCard.number));
-            if (tcgdexCard) {
-              if (tcgdexCard.name) {
-                mergedCard.name = tcgdexCard.name;
-              }
-              let smallImage = mergedCard.images?.small || null;
-              if (tcgdexCard.image) {
-                smallImage = `${tcgdexCard.image}/low.jpg`;
-              }
-              mergedCard.images = { small: smallImage };
-              if (tcgdexCard.description) {
-                mergedCard.rules = [tcgdexCard.description];
-                mergedCard.flavorText = tcgdexCard.description;
-              }
-            }
-            return mergedCard;
-          });
-          allCardsForSort = mergedCardsForSort; // Update allCardsForSort with merged data
-
-          // OPTIMIERUNG: `imageUrl` hier nicht mehr speichern
-          pokemontcgIoCardmarketDataForSort = getScriptPropertiesData(`pokemontcgIoCardmarketUrls_${pokemontcgSetId}`, {});
+        const { allCards, cardmarketData } = prepareCardsForSorting(setId, setName, tcgdexAllSets);
+        
+        if (allCards.length === 0) {
+          Logger.log(`sortAllSheetsTrigger: Keine Karten für Set ${setId} gefunden. Überspringe.`);
+          return;
         }
 
-        renderAndSortCardsInSheet(sheet, setId, allCardsForSort, pokemontcgIoCardmarketDataForSort);
+        renderAndSortCardsInSheet(sheet, setId, allCards, cardmarketData);
         PropertiesService.getScriptProperties().setProperty(`lastSortTime_${setId}`, new Date().getTime().toString());
 
       } catch (e) {
@@ -2741,80 +2723,14 @@ function manualSortAllSheets() {
     if (sheet && sheet.getRange(1, 1).getNote() === `Set ID: ${setId}`) {
       SpreadsheetApp.getActive().toast(`Sortiere Set ${i + 1}/${setsData.length}: ${setName}`, "🔄 In Arbeit", 5);
       try {
-        let allCardsForSort = [];
-        let pokemontcgIoCardmarketDataForSort = {};
-
-        if (setId.startsWith('TCGDEX-')) {
-          const tcgdexActualSetId = setId.substring('TCGDEX-'.length);
-          const tcgdexSetDetails = fetchApiData(`${TCGDEX_BASE_URL}sets/${tcgdexActualSetId}`, `Fehler beim Laden der TCGDex Karten für Sortierung von Set ${setName}`);
-          if (tcgdexSetDetails && tcgdexSetDetails.cards) {
-            allCardsForSort = tcgdexSetDetails.cards.map(card => {
-              let smallImage = null;
-              if (card.image) {
-                smallImage = `${card.image}/low.jpg`;
-              }
-              return {
-                number: normalizeCardNumber(card.localId || card.id), // Normalisiere die Kartennummer von TCGDex
-                name: card.name,
-                images: { small: smallImage },
-                cardmarket: { url: card.links?.cardmarket }
-              };
-            });
-            allCardsForSort.sort((a, b) => naturalSort(a.number || "", b.number || ""));
-          } else {
-            Logger.log(`manualSortAllSheets: Konnte TCGDex Karten für Set ${setId} nicht laden. Überspringe Sortierung für dieses Set.`);
-            continue;
-          }
-        } else {
-          // pokemontcg.io based set logic
-          const pokemontcgSetId = setId;
-
-          allCardsForSort = fetchAllPokemontcgIoCards(pokemontcgSetId, setName); // Use the new pagination helper
-
-          let tcgdexCardsMap = new Map();
-          const pokemontcgSetInfoForSort = { id: pokemontcgSetId, name: setName, ptcgoCode: getOfficialAbbreviationFromOverview(pokemontcgSetId) };
-
-          const matchingTcgdexSet = findMatchingTcgdexSet(pokemontcgSetInfoForSort, tcgdexAllSets || []);
-
-          if (matchingTcgdexSet) {
-            const tcgdexSetDetails = fetchApiData(`${TCGDEX_BASE_URL}sets/${matchingTcgdexSet.id}`, `Fehler beim Laden der TCGDex Karten für Sortierung von Set ${setName} (${matchingTcgdexSet.id})`);
-            if (tcgdexSetDetails && tcgdexSetDetails.cards) {
-              // Normalisiere die TCGDex-Kartennummer, bevor sie als Schlüssel in der Map gespeichert wird
-              tcgdexSetDetails.cards.forEach(card => {
-                tcgdexCardsMap.set(normalizeCardNumber(card.localId || card.id), card);
-              });
-            }
-          } else {
-            Logger.log(`[manualSortAllSheets] Kein passendes TCGDex Set für pokemontcg.io Set ${pokemontcgSetId} gefunden. Deutsche Kartendaten werden fehlen.`);
-          }
-
-          const mergedCardsForSort = allCardsForSort.map(pokemontcgCard => {
-            const mergedCard = { ...pokemontcgCard };
-            // Normalisiere die pokemontcg.io Kartennummer für den Lookup in der TCGDex Map
-            const tcgdexCard = tcgdexCardsMap.get(normalizeCardNumber(pokemontcgCard.number));
-            if (tcgdexCard) {
-              if (tcgdexCard.name) {
-                mergedCard.name = tcgdexCard.name;
-              }
-              let smallImage = mergedCard.images?.small || null;
-              if (tcgdexCard.image) {
-                smallImage = `${tcgdexCard.image}/low.jpg`;
-              }
-              mergedCard.images = { small: smallImage };
-              if (tcgdexCard.description) {
-                mergedCard.rules = [tcgdexCard.description];
-                mergedCard.flavorText = tcgdexCard.description;
-              }
-            }
-            return mergedCard;
-          });
-          allCardsForSort = mergedCardsForSort; // Update allCardsForSort with merged data
-
-          // OPTIMIERUNG: `imageUrl` hier nicht mehr speichern
-          pokemontcgIoCardmarketDataForSort = getScriptPropertiesData(`pokemontcgIoCardmarketUrls_${pokemontcgSetId}`, {});
+        const { allCards, cardmarketData } = prepareCardsForSorting(setId, setName, tcgdexAllSets);
+        
+        if (allCards.length === 0) {
+          Logger.log(`manualSortAllSheets: Keine Karten für Set ${setId} gefunden. Überspringe.`);
+          continue;
         }
-        renderAndSortCardsInSheet(sheet, setId, allCardsForSort, pokemontcgIoCardmarketDataForSort);
 
+        renderAndSortCardsInSheet(sheet, setId, allCards, cardmarketData);
         PropertiesService.getScriptProperties().setProperty(`lastSortTime_${setId}`, new Date().getTime().toString());
         processedCount++;
         Utilities.sleep(100);
@@ -2862,83 +2778,15 @@ function manualSortCurrentSheet() {
 
   SpreadsheetApp.getActive().toast(`Sortiere aktuelles Set "${sheetName}" neu...`, "🔄 Sortieren", 3);
   try {
-    let allCardsForSort = [];
-    let pokemontcgIoCardmarketDataForSort = {};
     const tcgdexAllSets = fetchApiData(`${TCGDEX_BASE_URL}sets`, "Fehler beim Laden der TCGDex Sets für Sortierung (aktuelles Blatt)");
-
-
-    if (setId.startsWith('TCGDEX-')) {
-      const tcgdexActualSetId = setId.substring('TCGDEX-'.length);
-      const tcgdexSetDetails = fetchApiData(`${TCGDEX_BASE_URL}sets/${tcgdexActualSetId}`, `Fehler beim Laden der TCGDex Karten für Sortierung von Set ${sheetName}`);
-      if (tcgdexSetDetails && tcgdexSetDetails.cards) {
-        allCardsForSort = tcgdexSetDetails.cards.map(card => {
-          let smallImage = null;
-          if (card.image) {
-            smallImage = `${card.image}/low.jpg`;
-          }
-          return {
-            number: normalizeCardNumber(card.localId || card.id), // Normalisiere die Kartennummer von TCGDex
-            name: card.name,
-            images: { small: smallImage },
-            cardmarket: { url: card.links?.cardmarket }
-          };
-        });
-        allCardsForSort.sort((a, b) => naturalSort(a.number || "", b.number || ""));
-      } else {
-        Logger.log(`manualSortCurrentSheet: Konnte TCGDex Karten für Set ${setId} nicht laden. Überspringe Sortierung für dieses Set.`);
-        ui.alert("Fehler", `Konnte Karten für Set "${sheetName}" nicht laden. Sortierung abgebrochen.`, SpreadsheetApp.getUi().ButtonSet.OK);
-        return;
-      }
-    } else {
-      // pokemontcg.io based set logic
-      const pokemontcgSetId = setId;
-
-      allCardsForSort = fetchAllPokemontcgIoCards(pokemontcgSetId, sheetName); // Use the new pagination helper
-
-      let tcgdexCardsMap = new Map();
-      const pokemontcgSetInfoForSort = { id: pokemontcgSetId, name: sheetName, ptcgoCode: getOfficialAbbreviationFromOverview(pokemontcgSetId) };
-
-      const matchingTcgdexSet = findMatchingTcgdexSet(pokemontcgSetInfoForSort, tcgdexAllSets || []);
-
-      if (matchingTcgdexSet) {
-        const tcgdexSetDetails = fetchApiData(`${TCGDEX_BASE_URL}sets/${matchingTcgdexSet.id}`, `Fehler beim Laden der TCGDex Karten für Sortierung von Set ${sheetName} (${matchingTcgdexSet.id})`);
-        if (tcgdexSetDetails && tcgdexSetDetails.cards) {
-          // Normalisiere die TCGDex-Kartennummer, bevor sie als Schlüssel in der Map gespeichert wird
-          tcgdexSetDetails.cards.forEach(card => {
-            tcgdexCardsMap.set(normalizeCardNumber(card.localId || card.id), card);
-          });
-        }
-      } else {
-        Logger.log(`[manualSortCurrentSheet] Kein passendes TCGDex Set für pokemontcg.io Set ${pokemontcgSetId} gefunden. Deutsche Kartendaten werden fehlen.`);
-      }
-
-      const mergedCardsForSort = allCardsForSort.map(pokemontcgCard => {
-        const mergedCard = { ...pokemontcgCard };
-        // Normalisiere die pokemontcg.io Kartennummer für den Lookup in der TCGDex Map
-        const tcgdexCard = tcgdexCardsMap.get(normalizeCardNumber(pokemontcgCard.number));
-        if (tcgdexCard) {
-          if (tcgdexCard.name) {
-            mergedCard.name = tcgdexCard.name;
-          }
-          let smallImage = mergedCard.images?.small || null;
-          if (tcgdexCard.image) {
-            smallImage = `${tcgdexCard.image}/low.jpg`;
-          }
-          mergedCard.images = { small: smallImage };
-          if (tcgdexCard.description) {
-            mergedCard.rules = [tcgdexCard.description];
-            mergedCard.flavorText = tcgdexCard.description;
-          }
-        }
-        return mergedCard;
-      });
-      allCardsForSort = mergedCardsForSort; // Update allCardsForSort with merged data
-
-      // OPTIMIERUNG: `imageUrl` hier nicht mehr speichern
-      pokemontcgIoCardmarketDataForSort = getScriptPropertiesData(`pokemontcgIoCardmarketUrls_${pokemontcgSetId}`, {});
+    const { allCards, cardmarketData } = prepareCardsForSorting(setId, sheetName, tcgdexAllSets);
+    
+    if (allCards.length === 0) {
+      ui.alert("Fehler", `Konnte Karten für Set "${sheetName}" nicht laden. Sortierung abgebrochen.`, ui.ButtonSet.OK);
+      return;
     }
 
-    renderAndSortCardsInSheet(currentSheet, setId, allCardsForSort, pokemontcgIoCardmarketDataForSort);
+    renderAndSortCardsInSheet(currentSheet, setId, allCards, cardmarketData);
     PropertiesService.getScriptProperties().setProperty(`lastSortTime_${setId}`, new Date().getTime().toString());
 
     updateCollectionSummary();
@@ -2948,7 +2796,7 @@ function manualSortCurrentSheet() {
   }
   catch (error) {
     Logger.log(`Fehler beim Neusortieren des aktuellen Sets ${sheetName}: ${error.message} \nStack: ${error.stack}`);
-    ui.alert("Error", `Fehler beim Neusortieren des aktuellen Sets "${sheetName}": ${error.message}. Details im Log.`, SpreadsheetApp.getUi().ButtonSet.OK);
+    ui.alert("Error", `Fehler beim Neusortieren des aktuellen Sets "${sheetName}": ${error.message}. Details im Log.`, ui.ButtonSet.OK);
   }
 }
 
