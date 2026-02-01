@@ -3,214 +3,466 @@
   <head>
     <base target="_top">
     <style>
+      * {
+        box-sizing: border-box;
+      }
+      
       body {
-        font-family: Arial, sans-serif;
-        padding: 15px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        padding: 0;
         margin: 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #333;
+        min-height: 100vh;
       }
       
-      h2 {
-        margin-top: 0;
-        text-align: center;
-        font-size: 22px;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-      }
-      
-      .stats-box {
-        background: rgba(255,255,255,0.15);
-        border-radius: 10px;
+      .container {
         padding: 15px;
-        margin-bottom: 20px;
-        backdrop-filter: blur(10px);
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
       }
       
-      .stat-item {
+      .header {
+        background: rgba(255,255,255,0.95);
+        padding: 15px;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        text-align: center;
+      }
+      
+      h1 {
+        margin: 0;
+        font-size: 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      
+      .version-tag {
+        font-size: 11px;
+        color: #999;
+        margin-top: 5px;
+      }
+      
+      /* STATISTIK SECTION */
+      .stats-container {
+        background: rgba(255,255,255,0.95);
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      }
+      
+      .stats-title {
+        font-weight: bold;
+        margin-bottom: 12px;
+        font-size: 14px;
+        color: #667eea;
         display: flex;
-        justify-content: space-between;
-        padding: 8px 0;
-        border-bottom: 1px solid rgba(255,255,255,0.2);
+        align-items: center;
+        gap: 8px;
       }
       
-      .stat-item:last-child {
-        border-bottom: none;
+      .stat-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+      
+      .stat-card {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        padding: 12px;
+        border-radius: 8px;
+        text-align: center;
+        border: 1px solid rgba(102, 126, 234, 0.2);
       }
       
       .stat-label {
-        font-weight: bold;
+        font-size: 11px;
+        color: #999;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
       
       .stat-value {
-        font-size: 18px;
+        font-size: 22px;
+        font-weight: bold;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-top: 4px;
+      }
+      
+      .progress-section {
+        margin-top: 12px;
+      }
+      
+      .progress-label {
+        font-size: 12px;
+        font-weight: 600;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 6px;
+        color: #667eea;
       }
       
       .progress-bar {
         width: 100%;
-        height: 25px;
-        background: rgba(255,255,255,0.2);
-        border-radius: 12px;
+        height: 28px;
+        background: rgba(0,0,0,0.05);
+        border-radius: 14px;
         overflow: hidden;
-        margin: 10px 0;
+        border: 1px solid rgba(102, 126, 234, 0.2);
       }
       
       .progress-fill {
         height: 100%;
         background: linear-gradient(90deg, #4CAF50, #8BC34A);
-        transition: width 0.5s ease;
+        transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: bold;
-        font-size: 14px;
+        font-size: 12px;
+        color: white;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      }
+      
+      /* BUTTONS SECTION */
+      .button-section {
+        background: rgba(255,255,255,0.95);
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      }
+      
+      .section-title {
+        font-weight: bold;
+        margin-bottom: 12px;
+        font-size: 13px;
+        color: #667eea;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      
+      .button-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      
+      .btn-small {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        cursor: pointer;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        line-height: 1;
+      }
+      
+      .btn-small:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      }
+      
+      .btn-small:active {
+        transform: translateY(0);
       }
       
       .button-group {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
       }
       
-      button {
-        background: rgba(255,255,255,0.9);
+      .btn-large {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         border: none;
-        padding: 12px 20px;
+        padding: 12px 16px;
         border-radius: 8px;
-        font-size: 14px;
+        font-size: 13px;
         cursor: pointer;
-        font-weight: bold;
-        color: #667eea;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 8px;
       }
       
-      button:hover {
-        background: white;
+      .btn-large:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
       }
       
-      button:active {
+      .btn-large:active {
         transform: translateY(0);
       }
       
       .emoji {
-        font-size: 18px;
-        margin-right: 8px;
+        font-size: 16px;
       }
       
       .loading {
         text-align: center;
         padding: 20px;
         font-style: italic;
+        color: #999;
       }
       
-      .version {
-        text-align: center;
+      .error {
+        background: #ffebee;
+        color: #c62828;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        border-left: 3px solid #c62828;
+      }
+      
+      .divider {
+        height: 1px;
+        background: rgba(0,0,0,0.1);
+        margin: 8px 0;
+      }
+      
+      .refresh-btn {
+        background: rgba(102, 126, 234, 0.1);
+        border: 1px solid rgba(102, 126, 234, 0.3);
+        padding: 6px 12px;
+        border-radius: 6px;
         font-size: 11px;
-        opacity: 0.7;
-        margin-top: 20px;
+        cursor: pointer;
+        color: #667eea;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-block;
+        margin-top: 10px;
+      }
+      
+      .refresh-btn:hover {
+        background: rgba(102, 126, 234, 0.2);
+      }
+      
+      .last-update {
+        font-size: 10px;
+        color: #999;
+        text-align: center;
+        margin-top: 8px;
       }
     </style>
   </head>
   <body>
-    <h2>🎴 Pokémon TCG Tracker</h2>
-    
-    <div class="stats-box" id="stats">
-      <div class="loading">Lade Statistiken...</div>
+    <div class="container">
+      <!-- HEADER -->
+      <div class="header">
+        <h1>🎴 Pokémon TCG Tracker</h1>
+        <div class="version-tag">Version 3.0.0</div>
+      </div>
+      
+      <!-- STATISTIKEN -->
+      <div class="stats-container">
+        <div class="stats-title">📊 Deine Sammlung</div>
+        <div id="stats" class="loading">Lade Statistiken...</div>
+      </div>
+      
+      <!-- SCHNELLZUGRIFF -->
+      <div class="button-section">
+        <div class="section-title">⚡ Schnellzugriff</div>
+        <div class="button-group">
+          <button class="btn-large" onclick="promptAndPopulateCardsForSet()">
+            <span class="emoji">➕</span>Neues Set hinzufügen
+          </button>
+          <button class="btn-large" onclick="updateCollectionSummary()">
+            <span class="emoji">♻️</span>Statistik aktualisieren
+          </button>
+          <button class="btn-large" onclick="searchCard()">
+            <span class="emoji">🔎</span>Karte suchen
+          </button>
+          <button class="btn-large" onclick="manualSortCurrentSheet()">
+            <span class="emoji">🗂️</span>Set sortieren
+          </button>
+        </div>
+      </div>
+      
+      <!-- WEITERE AKTIONEN -->
+      <div class="button-section">
+        <div class="section-title">📁 Weitere Aktionen</div>
+        <div class="button-grid">
+          <button class="btn-small" onclick="exportCollectionToCSV()">
+            <span class="emoji">📤</span>CSV exportieren
+          </button>
+          <button class="btn-small" onclick="triggerCsvImport()">
+            <span class="emoji">📥</span>CSV importieren
+          </button>
+          <button class="btn-small" onclick="showQuickStats()">
+            <span class="emoji">📈</span>Quick Stats
+          </button>
+          <button class="btn-small" onclick="filterCollectionSummary()">
+            <span class="emoji">🎯</span>Filtern
+          </button>
+          <button class="btn-small" onclick="bulkEditSet()">
+            <span class="emoji">✏️</span>Bulk-Edit
+          </button>
+        </div>
+      </div>
     </div>
-    
-    <div class="button-group">
-      <button onclick="setupAndImportAllSets()">
-        <span class="emoji">📥</span>Sets-Liste laden
-      </button>
-      <button onclick="promptAndPopulateCardsForSet()">
-        <span class="emoji">➕</span>Set hinzufügen
-      </button>
-      <button onclick="updateCollectionSummary()">
-        <span class="emoji">📊</span>Statistik aktualisieren
-      </button>
-      <button onclick="exportCollectionToCSV()">
-        <span class="emoji">📤</span>Als CSV exportieren
-      </button>
-      <button onclick="manualSortCurrentSheet()">
-        <span class="emoji">🗂️</span>Aktuelles Set sortieren
-      </button>
-    </div>
-    
-    <div class="version">Version 3.0.0</div>
+
+    <input type="file" id="csvFileInput" accept=".csv,text/csv" style="display:none" />
     
     <script>
       // Lade Statistiken beim Start
-      google.script.run
-        .withSuccessHandler(displayStats)
-        .withFailureHandler(showError)
-        .getSidebarStats();
+      reloadStats();
+      
+      // Reload alle 10 Sekunden für Live-Updates
+      setInterval(reloadStats, 10000);
+      
+      function reloadStats() {
+        google.script.run
+          .withSuccessHandler(displayStats)
+          .withFailureHandler(showError)
+          .getSidebarStats();
+      }
       
       function displayStats(stats) {
         const statsBox = document.getElementById('stats');
         const completion = stats.totalCards > 0 ? (stats.collectedCards / stats.totalCards * 100) : 0;
+        const rhPercent = stats.collectedCards > 0 ? (stats.reverseHoloCards / stats.collectedCards * 100) : 0;
         
         statsBox.innerHTML = `
-          <div class="stat-item">
-            <span class="stat-label">Gesamtkarten:</span>
-            <span class="stat-value">${stats.totalCards}</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">Gesammelt:</span>
-            <span class="stat-value">${stats.collectedCards}</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">RH Karten:</span>
-            <span class="stat-value">${stats.reverseHoloCards}</span>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" style="width: ${completion}%">
-              ${completion.toFixed(1)}%
+          <div class="stat-grid">
+            <div class="stat-card">
+              <div class="stat-label">Gesamtkarten</div>
+              <div class="stat-value">${stats.totalCards}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Gesammelt</div>
+              <div class="stat-value">${stats.collectedCards}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Sets Gesamt</div>
+              <div class="stat-value">${stats.totalSets}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Abgeschlossen</div>
+              <div class="stat-value">${stats.completedSets}</div>
             </div>
           </div>
-          <div class="stat-item">
-            <span class="stat-label">Sets gesamt:</span>
-            <span class="stat-value">${stats.totalSets}</span>
+          
+          <div class="progress-section">
+            <div class="progress-label">
+              <span>Sammlung abgeschlossen</span>
+              <span>${completion.toFixed(1)}%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${completion}%"></div>
+            </div>
           </div>
-          <div class="stat-item">
-            <span class="stat-label">Abgeschlossen:</span>
-            <span class="stat-value">${stats.completedSets}</span>
+          
+          <div class="divider"></div>
+          
+          <div class="progress-section">
+            <div class="progress-label">
+              <span>Reverse Holo im Bestand</span>
+              <span>${stats.reverseHoloCards} (${rhPercent.toFixed(1)}%)</span>
+            </div>
           </div>
+          
+          <button class="refresh-btn" onclick="reloadStats()">🔄 Manuell aktualisieren</button>
+          <div class="last-update" id="timestamp"></div>
         `;
+        
+        // Zeige Uhrzeit der letzten Aktualisierung
+        const now = new Date();
+        document.getElementById('timestamp').textContent = 
+          `Aktualisiert: ${now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`;
       }
       
       function showError(error) {
         document.getElementById('stats').innerHTML = 
-          '<div class="loading">⚠️ Fehler beim Laden</div>';
+          '<div class="error">⚠️ Fehler beim Laden der Statistiken</div>';
       }
       
       // Button-Handler
-      function setupAndImportAllSets() {
-        google.script.run.setupAndImportAllSets();
-      }
-      
       function promptAndPopulateCardsForSet() {
         google.script.run.promptAndPopulateCardsForSet();
+        setTimeout(reloadStats, 3000);
       }
       
       function updateCollectionSummary() {
         google.script.run.updateCollectionSummary();
-        // Statistiken nach 2 Sekunden neu laden
-        setTimeout(() => {
-          google.script.run
-            .withSuccessHandler(displayStats)
-            .getSidebarStats();
-        }, 2000);
+        setTimeout(reloadStats, 2000);
       }
       
       function exportCollectionToCSV() {
         google.script.run.exportCollectionToCSV();
       }
+
+      function triggerCsvImport() {
+        const input = document.getElementById('csvFileInput');
+        if (input) {
+          input.value = '';
+          input.click();
+        }
+      }
       
       function manualSortCurrentSheet() {
         google.script.run.manualSortCurrentSheet();
+      }
+      
+      function searchCard() {
+        google.script.run.searchCard();
+      }
+      
+      function showQuickStats() {
+        google.script.run.showQuickStats();
+      }
+      
+      function filterCollectionSummary() {
+        google.script.run.filterCollectionSummary();
+      }
+      
+      function bulkEditSet() {
+        google.script.run.bulkEditSet();
+        setTimeout(reloadStats, 2000);
+      }
+
+      // CSV Import Handler
+      const csvFileInput = document.getElementById('csvFileInput');
+      if (csvFileInput) {
+        csvFileInput.addEventListener('change', function(event) {
+          const file = event.target.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            google.script.run
+              .withSuccessHandler(function() {
+                alert('CSV-Import gestartet.');
+                setTimeout(reloadStats, 3000);
+              })
+              .withFailureHandler(function(err) {
+                alert(err && err.message ? err.message : err);
+              })
+              .importCollectionFromCSV(e.target.result);
+          };
+          reader.readAsText(file);
+        });
       }
     </script>
   </body>
