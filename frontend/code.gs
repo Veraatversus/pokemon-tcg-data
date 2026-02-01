@@ -83,8 +83,21 @@ const SUMMARY_DATA_START_ROW = SUMMARY_HEADER_ROWS + 1; // Daten beginnen nach d
 // Timeout für den LockService, um Race Conditions zu vermeiden.
 var USER_LOCK_TIMEOUT_MS = 30 * 1000; // 30 Sekunden
 
-// Globales Flag, um rekursive Trigger durch Skriptänderungen zu verhindern
-var isScriptEditing = false;
+// Konstante für Event-Tracking in PropertiesService (ersetzt globales Flag)
+const LAST_PROCESSED_EVENT_PROPERTY = 'lastProcessedEvent';
+
+// --- SHEET NAMES CONSTANTS ---
+const SETS_OVERVIEW_SHEET_NAME = "Sets Overview";
+const COLLECTION_SUMMARY_SHEET_NAME = "Collection Summary";
+
+// --- STRING PREFIXES & SUFFIXES CONSTANTS ---
+const TCGDEX_SET_PREFIX = "TCGDEX-";
+const SET_ID_NOTE_PREFIX = "Set ID: ";
+
+// --- UI MESSAGE CONSTANTS ---
+const TOAST_DURATION_SHORT = 3; // Sekunden
+const TOAST_DURATION_MEDIUM = 5; // Sekunden
+const TOAST_DURATION_LONG = 10; // Sekunden
 
 /**
  * @fileoverview Dieses Skript verwaltet Pokémon-Kartensammlungen in Google Sheets.
@@ -101,29 +114,6 @@ var isScriptEditing = false;
  * Erstellt das benutzerdefinierte Menü in der Google Tabelle, wenn diese geöffnet wird.
  * Dieses Menü bietet Zugriff auf alle Hauptfunktionen des Pokémon TCG Trackers.
  */
-
-/*
-function onOpen() {
-  const ui = SpreadsheetApp.getUi(); // Holt die Benutzeroberfläche der Tabelle.
-  ui.createMenu('Pokémon TCG Tracker') // Erstellt ein neues Menü mit dem Namen 'Pokémon TCG Tracker'.
-    .addItem('▶️ Funktionen Sidebar öffnen', 'openCustomSidebar') // Menüpunkt zum Öffnen des Sidebars.
-    .addSeparator() // Fügt eine Trennlinie im Menü hinzu.
-    .addItem('1. Setup & Sets importieren', 'setupAndImportAllSets') // Menüpunkt zum Einrichten und Importieren aller Sets.
-    .addItem('2. Karten für Set importieren (Raster)', 'promptAndPopulateCardsForSet') // Menüpunkt zum Importieren von Karten für ein spezifisches Set.
-    .addItem('3. Sammlungsübersicht aktualisieren', 'updateCollectionSummary') // Menüpunkt zum manuellen Aktualisieren der Sammlungsübersicht.
-    .addItem('4. Alle Karten aktualisieren (Raster)', 'updateAllCardSheets') // Menüpunkt zum Aktualisieren aller Kartenblätter.
-    .addSeparator() // Fügt eine Trennlinie im Menü hinzu.
-    .addItem('5. Sortier-Trigger installieren', 'installSortTrigger') // Menüpunkt zum Installieren eines automatischen Sortier-Triggers.
-    .addItem('6. Alle Set-Blätter manuell sortieren', 'manualSortAllSheets') // Menüpunkt zum manuellen Sortieren aller Set-Blätter.
-    .addItem('7. Aktuelles Set-Blatt sortieren', 'manualSortCurrentSheet') // Menüpunkt zum manuellen Sortieren des aktuell geöffneten Set-Blattes.
-    .addSeparator() // Fügt eine Trennlinie im Menü hinzu.
-    .addItem('8. Aktuelles Set löschen', 'deleteCurrentSet') // Menüpunkt zum Löschen des aktuell geöffneten Sets und seiner Daten.
-    .addItem('9. Sortier-Trigger deinstallieren', 'uninstallSortTrigger') // Menüpunkt zum Deinstallieren des automatischen Sortier-Triggers.
-    .addItem('10. Alle persistenten Daten löschen', 'deleteAllPersistentData') // Menüpunkt zum unwiderruflich Löschen aller gespeicherten Daten.
-    .addItem('Debug: onEdit() ausführen', 'debugOnEdit') // Debug-Menüpunkt zum Simulieren eines onEdit-Events.
-    .addToUi(); // Zeigt das Menü in der Tabelle an.
-}
-*/
 function onOpen() {
   const ui = SpreadsheetApp.getUi(); // Holt die Benutzeroberfläche der Tabelle.
 
@@ -289,6 +279,73 @@ function fetchApiData(url, errorMessagePrefix) {
 }
 
 /**
+ * Zentrale Funktion für Benachrichtigungen an den Benutzer.
+ * Vereinheitlicht Toast- und Alert-Meldungen mit konsistenter Formatierung und Dauer.
+ * @param {string} type - Typ der Benachrichtigung: 'toast-short', 'toast-medium', 'toast-long', 'alert-info', 'alert-error'
+ * @param {string} title - Titel der Benachrichtigung (bei Alerts) oder Message (bei Toasts)
+ * @param {string} [message] - Zusätzliche Nachricht (nur für Alerts)
+ */
+function notifyUser(type, title, message = '') {
+  const ui = SpreadsheetApp.getUi();
+  
+  const toastConfig = {
+    'toast-short': { duration: TOAST_DURATION_SHORT },
+    'toast-medium': { duration: TOAST_DURATION_MEDIUM },
+    'toast-long': { duration: TOAST_DURATION_LONG }
+  };
+  
+  if (type.startsWith('toast-')) {
+    if (toastConfig[type]) {
+      SpreadsheetApp.getActive().toast(title, '✅', toastConfig[type].duration);
+    }
+  } else if (type === 'alert-error') {
+    ui.alert('❌ Fehler', title + (message ? `\n${message}` : ''), ui.ButtonSet.OK);
+  } else if (type === 'alert-info') {
+    ui.alert('ℹ️ Information', title + (message ? `\n${message}` : ''), ui.ButtonSet.OK);
+  } else if (type === 'alert-confirm') {
+    return ui.alert(title, message, ui.ButtonSet.YES_NO) === ui.Button.YES;
+  }
+}
+
+/**
+ * Generiert eine eindeutige Event-ID basierend auf Blatt, Bereich und Timestamp.
+ * Wird verwendet, um doppelte Event-Verarbeitung zu vermeiden.
+ * @param {GoogleAppsScript.Events.Sheets.SheetChangeEvent} e Das Edit-Event
+ * @returns {string} Eindeutige Event-ID
+ */
+function generateEventId(e) {
+  return `${e.source.getId()}_${e.range.getSheet().getSheetId()}_${e.range.getA1Notation()}_${e.range.getValue()}_${new Date().getTime()}`;
+}
+
+/**
+ * Prüft, ob ein Event bereits verarbeitet wurde (verhindert Race Conditions).
+ * @param {GoogleAppsScript.Events.Sheets.SheetChangeEvent} e Das Edit-Event
+ * @returns {boolean} True wenn Event bereits verarbeitet, False wenn neu
+ */
+function isEventAlreadyProcessed(e) {
+  const properties = PropertiesService.getScriptProperties();
+  const lastEvent = properties.getProperty(LAST_PROCESSED_EVENT_PROPERTY);
+  const eventKey = `${e.range.getSheet().getSheetId()}_${e.range.getA1Notation()}_${e.range.getValue()}`;
+  
+  if (lastEvent) {
+    const lastEventData = JSON.parse(lastEvent);
+    // Prüfe ob Event weniger als 1 Sekunde alt ist (verhindert Duplikate)
+    if (lastEventData.key === eventKey && (new Date().getTime() - lastEventData.timestamp) < 1000) {
+      Logger.log(`[isEventAlreadyProcessed] Event was already processed recently. Skipping.`);
+      return true;
+    }
+  }
+  
+  // Speichere diesen Event als den letzten
+  properties.setProperty(LAST_PROCESSED_EVENT_PROPERTY, JSON.stringify({
+    key: eventKey,
+    timestamp: new Date().getTime()
+  }));
+  
+  return false;
+}
+
+/**
  * Hilfsfunktion zum Finden eines passenden TCGDex-Sets basierend auf pokemontcg.io Set-Daten.
  * Verwendet eine mehrstufige Strategie für eine robuste Zuordnung.
  * @param {object} pokemontcgIoSet Das pokemontcg.io Set-Objekt.
@@ -417,6 +474,53 @@ function storeSets(sets) {
 }
 
 /**
+ * Ruft TCGDex Sets mit Caching ab (TTL: 24 Stunden).
+ * Reduziert API-Aufrufe und verbessert Performance bei wiederholten Anfragen.
+ * @param {string} cacheKey Der Schlüssel für Caching
+ * @returns {Array<Object>|null} Array von TCGDex Sets oder null bei Fehler
+ */
+function getTcgdexSetsWithCache(cacheKey = 'tcgdexSetsCache') {
+  const properties = PropertiesService.getScriptProperties();
+  const cacheData = properties.getProperty(cacheKey);
+  const now = new Date().getTime();
+  const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 Stunden in Millisekunden
+  
+  if (cacheData) {
+    const cached = JSON.parse(cacheData);
+    // Prüfe ob Cache noch gültig ist
+    if (cached.timestamp && (now - cached.timestamp) < CACHE_TTL) {
+      Logger.log(`[getTcgdexSetsWithCache] Using cached TCGDex Sets (${Math.round((now - cached.timestamp) / 1000 / 60)} minutes old)`);
+      return cached.data;
+    }
+  }
+  
+  // Cache expired oder nicht vorhanden - fetch new data
+  Logger.log(`[getTcgdexSetsWithCache] Cache miss or expired. Fetching fresh TCGDex Sets...`);
+  const tcgdexSets = fetchApiData(`${TCGDEX_BASE_URL}sets`, "Fehler beim Laden der TCGDex Sets");
+  
+  if (tcgdexSets) {
+    // Speichere neuen Cache mit Timestamp
+    properties.setProperty(cacheKey, JSON.stringify({
+      data: tcgdexSets,
+      timestamp: now
+    }));
+    Logger.log(`[getTcgdexSetsWithCache] Cached TCGDex Sets for next 24 hours`);
+  }
+  
+  return tcgdexSets;
+}
+
+/**
+ * Leert den TCGDex Sets Cache (z.B. manuell zu Testzwecken).
+ * @param {string} cacheKey Der Schlüssel des zu leerenden Caches
+ */
+function clearTcgdexSetsCache(cacheKey = 'tcgdexSetsCache') {
+  const properties = PropertiesService.getScriptProperties();
+  properties.deleteProperty(cacheKey);
+  Logger.log(`[clearTcgdexSetsCache] Cache cleared`);
+}
+
+/**
  * Öffnet ein benutzerdefiniertes Sidebar in der Google Tabelle.
  * Dieses Sidebar enthält Schaltflächen, um verschiedene Funktionen des Skripts auszulösen.
  */
@@ -437,9 +541,9 @@ function setupSheets() {
   const ss = SpreadsheetApp.getActiveSpreadsheet(); // Holt das aktive Spreadsheet.
 
   // --- Sets Overview Sheet Setup ---
-  let setsSheet = ss.getSheetByName("Sets Overview");
+  let setsSheet = ss.getSheetByName(SETS_OVERVIEW_SHEET_NAME);
   if (!setsSheet) {
-    setsSheet = ss.insertSheet("Sets Overview", 0); // Erstellt das Blatt an erster Position.
+    setsSheet = ss.insertSheet(SETS_OVERVIEW_SHEET_NAME, 0); // Erstellt das Blatt an erster Position.
   }
   // Sicherstellen, dass genügend Kopfzeilen vorhanden sind.
   if (setsSheet.getMaxRows() < OVERVIEW_HEADER_ROWS) {
@@ -487,9 +591,9 @@ function setupSheets() {
 
 
   // --- Collection Summary Sheet Setup ---
-  let summarySheet = ss.getSheetByName("Collection Summary");
+  let summarySheet = ss.getSheetByName(COLLECTION_SUMMARY_SHEET_NAME);
   if (!summarySheet) {
-    summarySheet = ss.insertSheet("Collection Summary"); // Erstellt das Blatt.
+    summarySheet = ss.insertSheet(COLLECTION_SUMMARY_SHEET_NAME); // Erstellt das Blatt.
   }
   // Sicherstellen, dass genügend Kopfzeilen vorhanden sind.
   if (summarySheet.getMaxRows() < SUMMARY_HEADER_ROWS) {
@@ -601,25 +705,18 @@ function naturalSort(a, b) {
   return stringA.localeCompare(stringB, undefined, { numeric: true, sensitivity: 'base' });
 }
 
-
 /**
- * Importiert alle Sets, wobei pokemontcg.io die primäre Quelle ist
- * und TCGDex zur Ergänzung deutscher Werte verwendet wird, falls verfügbar.
- * Füllt die "Sets Overview"-Tabelle und bewahrt dabei manuell bearbeitete Felder.
- * Diese Funktion behandelt nun auch Sets, die nur in TCGDex oder nur in pokemontcg.io existieren.
+ * Liest bestehende Set-Daten, um Benutzerbearbeitungen beizubehalten.
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} setsSheet
+ * @returns {Map<string, {serie: string, releaseDate: string, abbreviation: string, logo: string, symbol: string}>}
  */
-function populateSetsOverview() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const setsSheet = ss.getSheetByName("Sets Overview");
-  const ui = SpreadsheetApp.getUi();
-
-  // 1. Bestehende Daten lesen, um Benutzerbearbeitungen zu erhalten.
+function getExistingSetsMap(setsSheet) {
   const lastExistingRow = setsSheet.getLastRow();
   const numExistingDataRows = Math.max(0, lastExistingRow - OVERVIEW_DATA_START_ROW);
   const existingSetsData = numExistingDataRows > 0 ?
     setsSheet.getRange(OVERVIEW_DATA_START_ROW + 1, 1, numExistingDataRows, setsSheet.getMaxColumns()).getValues() : [];
 
-  const existingSetMap = new Map(); // Map<pokemontcg.io Set ID or TCGDex-only ID, { serie: string, releaseDate: string, abbreviation: string }>
+  const existingSetMap = new Map();
   if (existingSetsData.length > 0) {
     for (let i = 0; i < existingSetsData.length; i++) {
       const row = existingSetsData[i];
@@ -627,37 +724,41 @@ function populateSetsOverview() {
       const serie = row[4];
       const releaseDate = row[5];
       const abbreviation = row[7];
-      // SetLogo (Index 2), SetSymbol (Index 3)
-      // Bilder und Symbole sollen beibehalten werden, daher lesen wir sie hier auch.
       const existingLogo = row[2];
       const existingSymbol = row[3];
       existingSetMap.set(setId, { serie: serie, releaseDate: releaseDate, abbreviation: abbreviation, logo: existingLogo, symbol: existingSymbol });
     }
   }
 
-  // SCHRITT 1: Sets von pokemontcg.io abrufen (Primärquelle)
-  let pokemontcgIoResponse = null;
-  let pokemontcgIoSets = null;
+  return existingSetMap;
+}
+
+/**
+ * Lädt alle pokemontcg.io Sets basierend auf der Konfiguration.
+ * @returns {Array<Object>}
+ */
+function fetchPokemontcgSets() {
   if (UseVeraApi) {
-    pokemontcgIoResponse = fetchApiData(`${VTCG_BASE_URL}sets/${VeraApiLanguage}.json`, "Beim Laden der pokemontcg.io Sets");
-    pokemontcgIoSets = pokemontcgIoResponse || [];
-  }
-  else {
-    pokemontcgIoResponse = fetchApiData(`${PTCG_BASE_URL}sets", "Beim Laden der pokemontcg.io Sets`);
-    pokemontcgIoSets = pokemontcgIoResponse?.data || [];
+    const pokemontcgIoResponse = fetchApiData(`${VTCG_BASE_URL}sets/${VeraApiLanguage}.json`, "Beim Laden der pokemontcg.io Sets");
+    return pokemontcgIoResponse || [];
   }
 
-  // SCHRITT 2: Sets von TCGDex abrufen
-  const tcgdexSetsResponse = fetchApiData(`${TCGDEX_BASE_URL}sets`, "Beim Laden der TCGDex Sets");
-  const tcgdexAllSets = tcgdexSetsResponse || [];
+  const pokemontcgIoResponse = fetchApiData(`${PTCG_BASE_URL}sets`, "Beim Laden der pokemontcg.io Sets");
+  return pokemontcgIoResponse?.data || [];
+}
 
-  const combinedSetsMap = new Map(); // Map<Unique ID (pokemontcg.io ID or TCGDex-only ID), { pokemontcgData, tcgdexData, isOnlyTcgdex }>
+/**
+ * Erstellt eine kombinierte Liste aus pokemontcg.io Sets und TCGDex-only Sets.
+ * @param {Array<Object>} pokemontcgIoSets
+ * @param {Array<Object>} tcgdexAllSets
+ * @returns {Array<Object>} Kombinierte, sortierte Set-Liste
+ */
+function buildCombinedSetsList(pokemontcgIoSets, tcgdexAllSets) {
+  const combinedSetsMap = new Map();
 
-  // SCHRITT 3: pokemontcg.io Sets verarbeiten und TCGDex-Matches finden
+  // pokemontcg.io Sets verarbeiten und TCGDex-Matches finden
   pokemontcgIoSets.forEach(pokemontcgIoSet => {
     const tcgdexMatch = findMatchingTcgdexSet(pokemontcgIoSet, tcgdexAllSets);
-
-    // Nutze die pokemontcg.io ID als primären Schlüssel
     combinedSetsMap.set(pokemontcgIoSet.id, {
       pokemontcgData: pokemontcgIoSet,
       tcgdexData: tcgdexMatch,
@@ -665,13 +766,10 @@ function populateSetsOverview() {
     });
   });
 
-  // SCHRITT 4: TCGDex-only Sets hinzufügen
+  // TCGDex-only Sets hinzufügen
   tcgdexAllSets.forEach(tcgdexSet => {
-    // Prüfe, ob dieses TCGDex-set bereits einem pokemontcg.io Set zugeordnet wurde
     let foundInCombined = false;
-    for (const [key, mergedData] of combinedSetsMap.entries()) {
-      // Wenn das gemergte Objekt pokemontcg.io Daten UND ein passendes tcgdexData hat,
-      // und diese tcgdexData mit dem aktuellen tcgdexSet übereinstimmt, dann ist es bereits abgedeckt.
+    for (const mergedData of combinedSetsMap.values()) {
       if (mergedData.pokemontcgData && mergedData.tcgdexData && mergedData.tcgdexData.id === tcgdexSet.id) {
         foundInCombined = true;
         break;
@@ -679,9 +777,8 @@ function populateSetsOverview() {
     }
 
     if (!foundInCombined) {
-      // Dieses TCGDex-Set wurde keinem pokemontcg.io-Set zugeordnet, also ist es TCGDex-only
-      combinedSetsMap.set(`TCGDEX-${tcgdexSet.id}`, { // Verwende eindeutigen Schlüssel
-        pokemontcgData: null, // Keine pokemontcg.io Daten
+      combinedSetsMap.set(`${TCGDEX_SET_PREFIX}${tcgdexSet.id}`, {
+        pokemontcgData: null,
         tcgdexData: tcgdexSet,
         isOnlyTcgdex: true
       });
@@ -690,20 +787,16 @@ function populateSetsOverview() {
 
   const allSetsForOverview = Array.from(combinedSetsMap.values());
 
-  // Sortierung: Zuerst nach pokemontcg.io sets (falls vorhanden, nach Release Date absteigend), dann TCGDex-only
   allSetsForOverview.sort((a, b) => {
-    // Priorisiere pokemontcg.io Sets
     if (a.pokemontcgData && !b.pokemontcgData) return -1;
     if (!a.pokemontcgData && b.pokemontcgData) return 1;
 
-    // Wenn beide pokemontcg.io Sets sind, sortiere nach Release Date (neueste zuerst)
     if (a.pokemontcgData && b.pokemontcgData) {
       const dateA = new Date(a.pokemontcgData.releaseDate || 0);
       const dateB = new Date(b.pokemontcgData.releaseDate || 0);
       return dateB - dateA;
     }
 
-    // Wenn beide TCGDex-only sind, sortiere nach TCGDex Release Date (neueste zuerst)
     if (a.tcgdexData && b.tcgdexData) {
       const dateA = new Date(a.tcgdexData.releaseDate || 0);
       const dateB = new Date(b.tcgdexData.releaseDate || 0);
@@ -712,92 +805,87 @@ function populateSetsOverview() {
     return 0;
   });
 
-  let allSetsOverviewData = [];
-  let importedCount = 0;
-  const importedSetsStatus = getScriptPropertiesData('importedSetsStatus', {});
+  return allSetsForOverview;
+}
 
-  allSetsForOverview.forEach(setEntry => {
-    const pokemontcgIoSet = setEntry.pokemontcgData;
-    const tcgdexSet = setEntry.tcgdexData;
-    const isOnlyTcgdex = setEntry.isOnlyTcgdex;
+/**
+ * Baut eine einzelne Zeile für die Sets Overview auf.
+ * @param {Object} setEntry
+ * @param {Map} existingSetMap
+ * @param {GoogleAppsScript.Spreadsheet.Spreadsheet} ss
+ * @returns {{rowValues: Array<any>, actualSetIdForSheetNote: string, isSetImported: boolean}}
+ */
+function buildSetOverviewRow(setEntry, existingSetMap, ss) {
+  const pokemontcgIoSet = setEntry.pokemontcgData;
+  const tcgdexSet = setEntry.tcgdexData;
+  const isOnlyTcgdex = setEntry.isOnlyTcgdex;
 
-    let setIdDisplayValue;
-    let finalSetName;
-    let finalSerie;
-    let finalReleaseDate;
-    let finalTotalCards;
-    let finalAbbreviation;
-    let imagesLogo = "";
-    let imagesSymbol = "";
-    let actualSetIdForSheetNote; // Die ID, die wirklich in der Blattnotiz gespeichert wird
+  let setIdDisplayValue;
+  let finalSetName;
+  let finalSerie;
+  let finalReleaseDate;
+  let finalTotalCards;
+  let finalAbbreviation;
+  let imagesLogo = "";
+  let imagesSymbol = "";
+  let actualSetIdForSheetNote;
 
-    // Bestimme die primäre ID für die Anzeige und Blatt-Verknüpfung
-    if (pokemontcgIoSet) {
-      setIdDisplayValue = pokemontcgIoSet.id;
-      actualSetIdForSheetNote = pokemontcgIoSet.id;
-    } else { // TCGDex-only Set
-      setIdDisplayValue = `TCGDEX-${tcgdexSet.id}`;
-      actualSetIdForSheetNote = `TCGDEX-${tcgdexSet.id}`; // Dies ist die ID, die wir in der Blattnotiz verwenden
+  if (pokemontcgIoSet) {
+    setIdDisplayValue = pokemontcgIoSet.id;
+    actualSetIdForSheetNote = pokemontcgIoSet.id;
+  } else {
+    setIdDisplayValue = `${TCGDEX_SET_PREFIX}${tcgdexSet.id}`;
+    actualSetIdForSheetNote = `${TCGDEX_SET_PREFIX}${tcgdexSet.id}`;
+  }
+
+  if (pokemontcgIoSet) {
+    finalSetName = pokemontcgIoSet.name;
+    finalSerie = pokemontcgIoSet.series || "";
+    finalReleaseDate = pokemontcgIoSet.releaseDate || "";
+    finalTotalCards = pokemontcgIoSet.total || 0;
+    finalAbbreviation = pokemontcgIoSet.ptcgoCode || pokemontcgIoSet.id || "";
+    imagesLogo = pokemontcgIoSet.images?.logo ? `=IMAGE("${pokemontcgIoSet.images.logo}"; 1)` : "";
+    imagesSymbol = pokemontcgIoSet.images?.symbol ? `=IMAGE("${pokemontcgIoSet.images.symbol}"; 1)` : "";
+
+    if (tcgdexSet) {
+      if (tcgdexSet.name) finalSetName = tcgdexSet.name;
+      if (tcgdexSet.serie?.name) finalSerie = tcgdexSet.serie.name;
+      if (tcgdexSet.cardCount?.official) finalTotalCards = tcgdexSet.cardCount.official;
+      if (tcgdexSet.releaseDate) finalReleaseDate = tcgdexSet.releaseDate;
     }
+  } else if (isOnlyTcgdex && tcgdexSet) {
+    finalSetName = tcgdexSet.name || "Unbekannter Name";
+    finalSerie = tcgdexSet.serie?.name || "";
+    finalReleaseDate = tcgdexSet.releaseDate || "";
+    finalTotalCards = tcgdexSet.cardCount?.official || tcgdexSet.cardCount?.total || 0;
+    finalAbbreviation = tcgdexSet.abbreviation?.official || "";
+    imagesLogo = tcgdexSet.logo ? `=IMAGE("${tcgdexSet.logo}"; 1)` : "";
+    imagesSymbol = tcgdexSet.symbol ? `=IMAGE("${tcgdexSet.symbol}"; 1)` : "";
+  } else {
+    Logger.log("populateSetsOverview: Unerwarteter Set-Eintrag (weder pokemontcg.io noch TCGDex-only mit Daten). Überspringe.");
+    return null;
+  }
 
-    // Bestimme den Namen und andere Metadaten
-    if (pokemontcgIoSet) {
-      finalSetName = pokemontcgIoSet.name;
-      finalSerie = pokemontcgIoSet.series || "";
-      finalReleaseDate = pokemontcgIoSet.releaseDate || "";
-      finalTotalCards = pokemontcgIoSet.total || 0;
-      finalAbbreviation = pokemontcgIoSet.ptcgoCode || pokemontcgIoSet.id || "";
-      imagesLogo = pokemontcgIoSet.images?.logo ? `=IMAGE("${pokemontcgIoSet.images.logo}"; 1)` : "";
-      imagesSymbol = pokemontcgIoSet.images?.symbol ? `=IMAGE("${pokemontcgIoSet.images.symbol}"; 1)` : "";
+  let isSetImported = false;
+  const cardSheet = ss.getSheetByName(finalSetName);
+  if (cardSheet && cardSheet.getRange(1, 1).getNote() === `${SET_ID_NOTE_PREFIX}${actualSetIdForSheetNote}`) {
+    const sheetId = cardSheet.getSheetId();
+    const sheetUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit#gid=${sheetId}`;
+    setIdDisplayValue = `=HYPERLINK("${sheetUrl}"; "${actualSetIdForSheetNote}")`;
+    isSetImported = true;
+  }
 
-      if (tcgdexSet) { // Pokemontcg.io Set mit TCGDex Match: Priorisiere TCGDex-Informationen für deutsche Werte
-        if (tcgdexSet.name) finalSetName = tcgdexSet.name;
-        if (tcgdexSet.serie?.name) finalSerie = tcgdexSet.serie.name;
-        if (tcgdexSet.cardCount?.official) finalTotalCards = tcgdexSet.cardCount.official;
-        // Auch das Erscheinungsdatum von TCGDex bevorzugen, falls vorhanden
-        if (tcgdexSet.releaseDate) finalReleaseDate = tcgdexSet.releaseDate;
-      }
-    } else if (isOnlyTcgdex && tcgdexSet) {
-      // TCGDex-only Set: Verwende nur TCGDex Daten
-      finalSetName = tcgdexSet.name || "Unbekannter Name";
-      finalSerie = tcgdexSet.serie?.name || "";
-      finalReleaseDate = tcgdexSet.releaseDate || "";
-      finalTotalCards = tcgdexSet.cardCount?.official || tcgdexSet.cardCount?.total || 0;
-      finalAbbreviation = tcgdexSet.abbreviation?.official || "";
-      imagesLogo = tcgdexSet.logo ? `=IMAGE("${tcgdexSet.logo}"; 1)` : "";
-      imagesSymbol = tcgdexSet.symbol ? `=IMAGE("${tcgdexSet.symbol}"; 1)` : "";
-    } else {
-      Logger.log("populateSetsOverview: Unerwarteter Set-Eintrag (weder pokemontcg.io noch TCGDex-only mit Daten). Überspringe.");
-      return;
-    }
+  const existingData = existingSetMap.get(actualSetIdForSheetNote);
+  if (existingData) {
+    finalSerie = (existingData.serie && existingData.serie !== "") ? existingData.serie : finalSerie;
+    finalReleaseDate = (existingData.releaseDate && existingData.releaseDate !== "") ? existingData.releaseDate : finalReleaseDate;
+    finalAbbreviation = (existingData.abbreviation && existingData.abbreviation !== "") ? existingData.abbreviation : finalAbbreviation;
+    imagesLogo = (existingData.logo && existingData.logo.toString().startsWith("=IMAGE(")) ? existingData.logo : imagesLogo;
+    imagesSymbol = (existingData.symbol && existingData.symbol.toString().startsWith("=IMAGE(")) ? existingData.symbol : imagesSymbol;
+  }
 
-    // Prüfe den Importstatus und erstelle Hyperlink, falls Blatt existiert
-    let isSetImported = false;
-    let cardSheet = ss.getSheetByName(finalSetName); // Name des Blattes
-    if (cardSheet && cardSheet.getRange(1, 1).getNote() === `Set ID: ${actualSetIdForSheetNote}`) {
-      const sheetId = cardSheet.getSheetId();
-      const sheetUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit#gid=${sheetId}`;
-      setIdDisplayValue = `=HYPERLINK("${sheetUrl}"; "${actualSetIdForSheetNote}")`;
-      isSetImported = true;
-    }
-
-    // Bestehende Benutzerbearbeitungen beibehalten (Serie, Erscheinungsdatum, Abkürzung)
-    const existingData = existingSetMap.get(actualSetIdForSheetNote);
-    if (existingData) {
-      finalSerie = (existingData.serie && existingData.serie !== "") ? existingData.serie : finalSerie;
-      finalReleaseDate = (existingData.releaseDate && existingData.releaseDate !== "") ? existingData.releaseDate : finalReleaseDate;
-      finalAbbreviation = (existingData.abbreviation && existingData.abbreviation !== "") ? existingData.abbreviation : finalAbbreviation;
-      // NEU: Bestehende Bilder/Symbole erhalten bleiben
-      imagesLogo = (existingData.logo && existingData.logo.toString().startsWith("=IMAGE(")) ? existingData.logo : imagesLogo;
-      imagesSymbol = (existingData.symbol && existingData.symbol.toString().startsWith("=IMAGE(")) ? existingData.symbol : imagesSymbol;
-    }
-
-    importedSetsStatus[actualSetIdForSheetNote] = isSetImported;
-    if (isSetImported) {
-      importedCount++;
-    }
-
-    allSetsOverviewData.push([
+  return {
+    rowValues: [
       setIdDisplayValue,
       finalSetName,
       imagesLogo,
@@ -807,8 +895,46 @@ function populateSetsOverview() {
       finalTotalCards,
       finalAbbreviation,
       isSetImported,
-      false // "Neu importieren"-Checkbox
-    ]);
+      false
+    ],
+    actualSetIdForSheetNote: actualSetIdForSheetNote,
+    isSetImported: isSetImported
+  };
+}
+
+
+/**
+ * Importiert alle Sets, wobei pokemontcg.io die primäre Quelle ist
+ * und TCGDex zur Ergänzung deutscher Werte verwendet wird, falls verfügbar.
+ * Füllt die "Sets Overview"-Tabelle und bewahrt dabei manuell bearbeitete Felder.
+ * Diese Funktion behandelt nun auch Sets, die nur in TCGDex oder nur in pokemontcg.io existieren.
+ */
+function populateSetsOverview() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const setsSheet = ss.getSheetByName(SETS_OVERVIEW_SHEET_NAME);
+  const ui = SpreadsheetApp.getUi();
+
+  const existingSetMap = getExistingSetsMap(setsSheet);
+  const pokemontcgIoSets = fetchPokemontcgSets();
+  const tcgdexAllSets = getTcgdexSetsWithCache() || [];
+  const allSetsForOverview = buildCombinedSetsList(pokemontcgIoSets, tcgdexAllSets || []);
+
+  const allSetsOverviewData = [];
+  let importedCount = 0;
+  const importedSetsStatus = getScriptPropertiesData('importedSetsStatus', {});
+
+  allSetsForOverview.forEach(setEntry => {
+    const rowData = buildSetOverviewRow(setEntry, existingSetMap, ss);
+    if (!rowData) {
+      return;
+    }
+
+    importedSetsStatus[rowData.actualSetIdForSheetNote] = rowData.isSetImported;
+    if (rowData.isSetImported) {
+      importedCount++;
+    }
+
+    allSetsOverviewData.push(rowData.rowValues);
   });
 
   setScriptPropertiesData('importedSetsStatus', importedSetsStatus);
@@ -1077,7 +1203,7 @@ function populateCardsForSet(setIdFromOverview) {
   let tcgdexDetailedSetDataForOverview = null; // Für updateSetsOverviewRowAfterCardImport
   let pokemontcgDetailedSetDataForOverview = null; // Für updateSetsOverviewRowAfterCardImport
 
-  const isTcgdexOnlySet = setIdFromOverview.startsWith('TCGDEX-');
+  const isTcgdexOnlySet = setIdFromOverview.startsWith(TCGDEX_SET_PREFIX);
 
   if (isTcgdexOnlySet) {
     const tcgdexActualSetId = setIdFromOverview.substring('TCGDEX-'.length);
@@ -1142,7 +1268,7 @@ function populateCardsForSet(setIdFromOverview) {
     // Fetch all pokemontcg.io cards using pagination helper
     let pokemontcgCards = fetchAllPokemontcgIoCards(pokemontcgSetId, setNameInSheet);
 
-    const tcgdexAllSets = fetchApiData(`${TCGDEX_BASE_URL}sets`, "Fehler beim Laden der TCGDex Sets für Kartenimport");
+    const tcgdexAllSets = getTcgdexSetsWithCache();
     const matchingTcgdexSet = findMatchingTcgdexSet(pokemontcgSetInfo, tcgdexAllSets || []);
     let tcgdexCardsMap = new Map();
     if (matchingTcgdexSet) {
@@ -1462,7 +1588,7 @@ function renderAndSortCardsInSheet(cardSheet, setId, allCards, pokemontcgIoCardD
       formulas[checksAndLinkSheetRow][startSheetCol + 2] = `=HYPERLINK("${storedCardmarketUrl}"; "CM")`;
     } else {
       // Fallback: If no direct Cardmarket URL, try constructing one using pokemontcg.io card ID (if applicable)
-      if (card.id && !setId.startsWith('TCGDEX-')) { // Only if it's a pokemontcg.io card and has a global ID
+      if (card.id && !setId.startsWith(TCGDEX_SET_PREFIX)) { // Only if it's a pokemontcg.io card and has a global ID
         //Sample https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&category=51&searchString=CRZ+GG02
         // const genericCardmarketUrl = `https://www.cardmarket.com/en/Pokemon/Products/Singles?idCategory=1&idProduct=${card.id}`;
         const genericCardmarketUrl = `https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=${officialAbbreviation}+${card.number}`;
@@ -1725,14 +1851,14 @@ function updateAllCardSheets() {
 }
 
 /**
- * Wird bei jeder Zellbearbeitung ausgeführt.
+ * Wird bei jeder Zellbearbeitung ausgeführt (onEdit-Trigger).
  * Speichert den Status von Checkboxen, aktualisiert die Formatierung und die Kopfzeile des Set-Blattes.
  * @param {GoogleAppsScript.Events.Sheets.SheetChangeEvent} e Das Ereignisobjekt, das die Bearbeitungsinformationen enthält.
  */
 function handleOnEdit(e) {
-  // 1. Check if this is a script-initiated edit (recursive call)
-  if (isScriptEditing) {
-    Logger.log("[handleOnEdit] Script is already performing an edit. Ignoring this recursive trigger.");
+  // 1. Check if this event was already processed (prevents race conditions)
+  if (isEventAlreadyProcessed(e)) {
+    Logger.log("[handleOnEdit] Event was already processed. Ignoring duplicate.");
     return;
   }
 
@@ -1747,9 +1873,8 @@ function handleOnEdit(e) {
     return;
   }
 
-  // 3. Persistent check for duplicate user-initiated events (using PropertiesService)
+  // 3. Determine if this is a user-initiated checkbox activation (true from false)
   try {
-    const properties = PropertiesService.getScriptProperties();
     const range = e.range;
     const value = e.value; // Store the original value from event
 
@@ -1758,50 +1883,22 @@ function handleOnEdit(e) {
     const wasOldValueTrueActual = (e.oldValue === true || (typeof e.oldValue === 'string' && e.oldValue.toLowerCase() === 'true'));
     const isUserInitiatedCheckActual = (isNewValueTrueActual && !wasOldValueTrueActual); // User-initiated activate of checkbox
 
-    // Only apply duplicate check for user-initiated checkbox activations
-    if (isUserInitiatedCheckActual) {
-      const lastProcessedEditStr = properties.getProperty('lastProcessedEdit');
-      if (lastProcessedEditStr) {
-        const lastProcessedEdit = JSON.parse(lastProcessedEditStr);
-        const currentTime = Date.now();
-        // Check if same cell, same value, and within a short time frame (e.g., 500 ms)
-        // Corrected typo here: getA1notation -> getA1Notation
-        if (lastProcessedEdit.range === range.getA1Notation() &&
-          (lastProcessedEdit.value === true || (typeof lastProcessedEdit.value === 'string' && lastProcessedEdit.value.toLowerCase() === 'true')) && // Ensure old one was also 'true' activation
-          (currentTime - lastProcessedEdit.timestamp < 1000)) { // 1 second threshold
-          Logger.log("[handleOnEdit] Duplicate user-initiated trigger detected based on PropertiesService (same cell, same true value, recent). Ignoring.");
-          // Clear the flag to prevent future legitimate clicks from being blocked by a stale duplicate entry
-          properties.deleteProperty('lastProcessedEdit');
-          return; // Exit early
-        }
-      }
-      // If not a duplicate, store this user-initiated activation
-      properties.setProperty('lastProcessedEdit', JSON.stringify({ range: range.getA1Notation(), value: e.value, timestamp: Date.now() }));
-    } else {
-      // If it's not a user-initiated activation (e.g. script resetting, or user unchecking), clear the flag
-      // This is important so the NEXT user-initiated activation is not blocked by a stale flag.
-      properties.deleteProperty('lastProcessedEdit');
-    }
-
-    // 4. Proceed with main logic. All sheet modifications must be wrapped by try/finally with isScriptEditing = true/false
+    // 4. Proceed with main logic
     const sheet = range.getSheet();
     const sheetName = sheet.getName();
 
     Logger.log(`[handleOnEdit] Triggered on sheet: ${sheetName}, range: ${range.getA1Notation()}, value: ${e.value} (type: ${typeof e.value}), oldValue: ${e.oldValue} (type: ${typeof e.oldValue})`);
     Logger.log(`[handleOnEdit] isNewValueTrueActual: ${isNewValueTrueActual}, wasOldValueTrueActual: ${wasOldValueTrueActual}, isUserInitiatedCheckActual: ${isUserInitiatedCheckActual}`);
 
-    // Set `isScriptEditing` before calling any sub-function that might modify the sheet.
-    // The sub-functions should then NOT set/reset this flag themselves.
-    isScriptEditing = true; // IMPORTANT: Set here for all subsequent calls within this execution.
+    try { // This try block encapsulates the sheet modifications
 
-    try { // This inner try block encapsulates the sheet modifications and ensures isScriptEditing reset.
       // --- Special handling for header checkboxes in Overview and Summary sheets ---
-      if (sheetName === "Sets Overview" && range.getColumn() === OVERVIEW_REFRESH_CHECKBOX_COL && range.getRow() === OVERVIEW_TITLE_ROW) {
+      if (sheetName === SETS_OVERVIEW_SHEET_NAME && range.getColumn() === OVERVIEW_REFRESH_CHECKBOX_COL && range.getRow() === OVERVIEW_TITLE_ROW) {
         Logger.log(`[handleOnEdit] Detected 'Sets Overview' refresh checkbox edit.`);
         onRefreshOverviewCheckboxEdit(e, isUserInitiatedCheckActual); // Pass isUserInitiatedCheckActual
         return;
       }
-      if (sheetName === "Collection Summary" && range.getColumn() === SUMMARY_SORT_CHECKBOX_COL && range.getRow() === SUMMARY_TITLE_ROW) {
+      if (sheetName === COLLECTION_SUMMARY_SHEET_NAME && range.getColumn() === SUMMARY_SORT_CHECKBOX_COL && range.getRow() === SUMMARY_TITLE_ROW) {
         Logger.log(`[handleOnEdit] Detected 'Collection Summary' sort all sets checkbox edit.`);
         onSortAllSetsCheckboxEdit(e, isUserInitiatedCheckActual); // Pass isUserInitiatedCheckActual
         return;
@@ -2030,6 +2127,108 @@ function processCardDataEdit(e, rawCardId, setId, isGCheckbox, isRHCheckbox, isI
   // Konsolidierter flush() am Ende der Funktion.
   // Dies sorgt dafür, dass alle UI-Änderungen auf einmal angewendet werden.
   SpreadsheetApp.flush();
+}
+
+/**
+ * Konfigurationsbasierte Checkbox-Handler-Verwaltung.
+ * Maps verschiedene Checkboxen zu ihren Aktions-Funktionen für konsistente Fehlerbehandlung.
+ */
+const CHECKBOX_HANDLER_CONFIG = {
+  // Format: column_index -> { actionName, action, requiresSetId, requiresConfirm, toastMessage }
+  [IMPORTED_CHECKBOX_COL_INDEX]: {
+    actionName: 'import',
+    action: function(setId, setName, sheet) { populateCardsForSet(setId); },
+    requiresSetId: true,
+    toastMessage: (name) => `Set "${name}" wurde erfolgreich importiert.`
+  },
+  [REIMPORT_CHECKBOX_COL_INDEX]: {
+    actionName: 'reimport',
+    action: function(setId, setName, sheet) { populateCardsForSet(setId); },
+    requiresSetId: true,
+    toastMessage: (name) => `Set "${name}" wurde neu importiert.`
+  },
+  [SORT_SET_CHECKBOX_COL_OFFSET]: {
+    actionName: 'sort-set',
+    action: function(setId, setName, sheet) { manualSortCurrentSheet(); },
+    requiresSetId: true,
+    toastMessage: (name) => `Sortierung für Set abgeschlossen.`
+  },
+  [OVERVIEW_REFRESH_CHECKBOX_COL]: {
+    actionName: 'refresh-overview',
+    action: function() { populateSetsOverview(); },
+    requiresSetId: false,
+    toastMessage: () => `Sets-Übersicht aktualisiert.`
+  },
+  [SUMMARY_SORT_CHECKBOX_COL]: {
+    actionName: 'sort-all',
+    action: function() { manualSortAllSheets(); },
+    requiresSetId: false,
+    toastMessage: () => `Alle Sets sortiert.`
+  }
+};
+
+/**
+ * Generischer Checkbox-Handler-Wrapper für konsistente Fehlerbehandlung.
+ * Vereinheitlicht die Logik über alle Checkbox-Handler hinweg.
+ * @param {GoogleAppsScript.Events.Sheets.SheetChangeEvent} e Das Ereignisobjekt
+ * @param {boolean} isUserInitiatedCheck Ob Benutzer die Checkbox aktiviert hat
+ * @param {Object} handlerConfig Die Handler-Konfiguration für diese Checkbox
+ */
+function handleCheckboxAction(e, isUserInitiatedCheck, handlerConfig) {
+  const range = e.range;
+  const sheet = range.getSheet();
+  const ui = SpreadsheetApp.getUi();
+  
+  if (!isUserInitiatedCheck) {
+    Logger.log(`[${handlerConfig.actionName}] Not user-initiated. Resetting checkbox.`);
+    setCheckboxState(range, 'false');
+    SpreadsheetApp.flush();
+    return;
+  }
+
+  let setId = null;
+  let setName = null;
+  
+  if (handlerConfig.requiresSetId) {
+    // Extract Set ID from row
+    if (sheet.getName() === SETS_OVERVIEW_SHEET_NAME) {
+      setId = extractIdFromHyperlink(sheet.getRange(e.range.getRow(), 1).getValue());
+      setName = sheet.getRange(e.range.getRow(), 2).getValue();
+    } else {
+      const setIdNote = sheet.getRange(1, 1).getNote();
+      if (setIdNote && setIdNote.startsWith(SET_ID_NOTE_PREFIX)) {
+        setId = setIdNote.substring(SET_ID_NOTE_PREFIX.length);
+        setName = sheet.getName();
+      }
+    }
+    
+    if (!setId) {
+      Logger.log(`[${handlerConfig.actionName}] ERROR: No Set ID found.`);
+      setCheckboxState(range, 'false');
+      notifyUser('alert-error', 'Fehler', 'Konnte Set-ID nicht finden. Aktion abgebrochen.');
+      return;
+    }
+  }
+
+  setCheckboxState(range, 'prepare');
+  
+  try {
+    const toastMsg = handlerConfig.toastMessage(setName || 'Operation');
+    SpreadsheetApp.getActive().toast(toastMsg, '🔄', TOAST_DURATION_MEDIUM);
+    Logger.log(`[${handlerConfig.actionName}] Executing action for ${setId || 'global'}`);
+    
+    handlerConfig.action(setId, setName, sheet);
+    
+    setCheckboxState(range, 'true');
+    notifyUser('toast-short', toastMsg);
+    Logger.log(`[${handlerConfig.actionName}] Action completed successfully.`);
+  } catch (error) {
+    Logger.log(`[${handlerConfig.actionName}] ERROR: ${error.message}\nStack: ${error.stack}`);
+    setCheckboxState(range, 'false');
+    notifyUser('alert-error', 'Fehler bei ' + handlerConfig.actionName, error.message);
+  } finally {
+    SpreadsheetApp.flush();
+  }
 }
 
 /**
@@ -2322,8 +2521,38 @@ function triggerSortAllSets() {
 
 
 /**
+ * Zentrale Checkbox-State-Verwaltungsfunktion.
+ * Handhabt alle Checkbox-Zustand-Änderungen mit konsistenter Validierung.
+ * @param {GoogleAppsScript.Spreadsheet.Range} range Der Checkbox-Bereich
+ * @param {string} state - 'true', 'false', 'clear', oder 'prepare'
+ */
+function setCheckboxState(range, state) {
+  const checkboxValidation = SpreadsheetApp.newDataValidation().requireCheckbox().build();
+  
+  switch(state) {
+    case 'true':
+      range.setValue(true);
+      range.setDataValidation(checkboxValidation);
+      break;
+    case 'false':
+      range.setValue(false);
+      range.setDataValidation(checkboxValidation);
+      break;
+    case 'clear':
+      range.clearDataValidations();
+      break;
+    case 'prepare':
+      range.setValue(false);
+      range.clearDataValidations();
+      SpreadsheetApp.flush();
+      break;
+  }
+}
+
+/**
  * Hilfsfunktion zum Anwenden der Checkbox-Validierung auf einen bestimmten Bereich.
  * @param {GoogleAppsScript.Spreadsheet.Range} range Der Bereich, auf den die Validierung angewendet werden soll.
+ * @deprecated Nutze stattdessen setCheckboxState(range, 'true') oder setCheckboxState(range, 'false')
  */
 function applyCheckboxValidation(range) {
   const rule = SpreadsheetApp.newDataValidation().requireCheckbox().build();
@@ -2333,37 +2562,37 @@ function applyCheckboxValidation(range) {
 /**
  * Setzt eine Checkbox auf FALSE und stellt die Standard-Validierung wieder her.
  * @param {GoogleAppsScript.Spreadsheet.Range} range
+ * @deprecated Nutze stattdessen setCheckboxState(range, 'false')
  */
 function resetCheckboxToDefault(range) {
-  range.setValue(false);
-  applyCheckboxValidation(range);
+  setCheckboxState(range, 'false');
 }
 
 /**
  * Setzt eine Checkbox auf TRUE und stellt die Standard-Validierung wieder her.
  * @param {GoogleAppsScript.Spreadsheet.Range} range
+ * @deprecated Nutze stattdessen setCheckboxState(range, 'true')
  */
 function setCheckboxChecked(range) {
-  range.setValue(true);
-  range.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox(true).build());
+  setCheckboxState(range, 'true');
 }
 
 /**
  * Bereitet eine Checkbox-Aktion vor, damit sie nicht erneut triggert.
  * @param {GoogleAppsScript.Spreadsheet.Range} range
+ * @deprecated Nutze stattdessen setCheckboxState(range, 'prepare')
  */
 function prepareCheckboxAction(range) {
-  range.setValue(false);
-  range.clearDataValidations();
-  SpreadsheetApp.flush();
+  setCheckboxState(range, 'prepare');
 }
 
 /**
  * Stellt Checkbox-Status nach einer Aktion wieder her.
  * @param {GoogleAppsScript.Spreadsheet.Range} range
+ * @deprecated Nutze stattdessen setCheckboxState(range, 'false')
  */
 function finalizeCheckboxAction(range) {
-  resetCheckboxToDefault(range);
+  setCheckboxState(range, 'false');
   SpreadsheetApp.flush();
 }
 
@@ -2603,7 +2832,7 @@ function sortAllSheetsTrigger() {
 
   Logger.log(`Starte automatische Sortierung für ${setsData.length} Sets...`);
 
-  const tcgdexAllSets = fetchApiData(`${TCGDEX_BASE_URL}sets`, "Fehler beim Laden der TCGDex Sets für automatische Sortierung");
+  const tcgdexAllSets = getTcgdexSetsWithCache();
 
   setsData.forEach(([setIdRaw, setName]) => {
     const setId = extractIdFromHyperlink(setIdRaw); // Dies ist die pokemontcg.io Set ID oder TCGDex-only ID
@@ -2616,8 +2845,8 @@ function sortAllSheetsTrigger() {
         let allCardsForSort = [];
         let pokemontcgIoCardmarketDataForSort = {};
 
-        if (setId.startsWith('TCGDEX-')) {
-          const tcgdexActualSetId = setId.substring('TCGDEX-'.length);
+        if (setId.startsWith(TCGDEX_SET_PREFIX)) {
+          const tcgdexActualSetId = setId.substring(TCGDEX_SET_PREFIX.length);
           const tcgdexSetDetails = fetchApiData(`${TCGDEX_BASE_URL}sets/${tcgdexActualSetId}`, `Fehler beim Laden der TCGDex Karten für Sortierung von Set ${setName}`);
           if (tcgdexSetDetails && tcgdexSetDetails.cards) {
             allCardsForSort = tcgdexSetDetails.cards.map(card => {
@@ -2726,7 +2955,7 @@ function manualSortAllSheets() {
   let processedCount = 0;
   SpreadsheetApp.getActive().toast(`Starte manuelle Sortierung für ${setsData.length} Sets...`, "🔄 In Arbeit", 10);
 
-  const tcgdexAllSets = fetchApiData(`${TCGDEX_BASE_URL}sets`, "Fehler beim Laden der TCGDex Sets für manuelle Sortierung");
+  const tcgdexAllSets = getTcgdexSetsWithCache();
 
   for (let i = 0; i < setsData.length; i++) {
     const setId = extractIdFromHyperlink(setsData[i][0]);
@@ -2842,9 +3071,9 @@ function manualSortCurrentSheet() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const currentSheet = ss.getActiveSheet();
   const sheetName = currentSheet.getName();
-  const setsSheet = ss.getSheetByName("Sets Overview");
+  const setsSheet = ss.getSheetByName(SETS_OVERVIEW_SHEET_NAME);
 
-  if (sheetName === "Sets Overview" || sheetName === "Collection Summary") {
+  if (sheetName === SETS_OVERVIEW_SHEET_NAME || sheetName === COLLECTION_SUMMARY_SHEET_NAME) {
     ui.alert("Error", "Dies ist kein Karten-Set-Blatt. Bitte wechseln Sie zu einem Set-Blatt, um diese Funktion zu nutzen.", ui.ButtonSet.OK);
     return;
   }
@@ -2864,7 +3093,7 @@ function manualSortCurrentSheet() {
   try {
     let allCardsForSort = [];
     let pokemontcgIoCardmarketDataForSort = {};
-    const tcgdexAllSets = fetchApiData(`${TCGDEX_BASE_URL}sets`, "Fehler beim Laden der TCGDex Sets für Sortierung (aktuelles Blatt)");
+    const tcgdexAllSets = getTcgdexSetsWithCache();
 
 
     if (setId.startsWith('TCGDEX-')) {
@@ -2962,7 +3191,7 @@ function getSetSheetAndIdForCurrentSheet() {
   const currentSheet = ss.getActiveSheet();
   const sheetName = currentSheet.getName();
 
-  if (sheetName === "Sets Overview" || sheetName === "Collection Summary") {
+  if (sheetName === SETS_OVERVIEW_SHEET_NAME || sheetName === COLLECTION_SUMMARY_SHEET_NAME) {
     ui.alert("Error", "Dies ist kein Karten-Set-Blatt. Bitte wechseln Sie zu einem Set-Blatt, um diese Funktion zu nutzen.", ui.ButtonSet.OK);
     return null;
   }
