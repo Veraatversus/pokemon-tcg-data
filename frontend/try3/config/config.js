@@ -2,7 +2,6 @@ export const CONFIG = {
   // Google API Configuration
   // TODO: Replace with your actual credentials from Google Cloud Console
   CLIENT_ID: 'REDACTED_GOOGLE_CLIENT_ID',
-  API_KEY: 'REDACTED_PLACEHOLDER', // Optional for public sheets
   DISCOVERY_DOCS: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
   SCOPES: 'https://www.googleapis.com/auth/spreadsheets',
 
