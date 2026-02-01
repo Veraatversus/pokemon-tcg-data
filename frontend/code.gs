@@ -706,6 +706,119 @@ function naturalSort(a, b) {
 }
 
 /**
+ * Bereitet Karten für die Sortierung vor (inkl. Sammelstatus) und sortiert sie.
+ * @param {Array<Object>} allCards
+ * @param {Object} currentSetCollectedData
+ * @returns {Array<Object>}
+ */
+function buildCardsForSorting(allCards, currentSetCollectedData) {
+  const cardsForSorting = allCards.map(card => {
+    const cardNumberOrId = normalizeCardNumber(card.number || card.id);
+    const status = currentSetCollectedData[cardNumberOrId] || { g: false, rh: false };
+    return { ...card, g: status.g, rh: status.rh, displayId: cardNumberOrId };
+  });
+
+  cardsForSorting.sort((a, b) => {
+    if (a.g !== b.g) {
+      return a.g ? 1 : -1;
+    }
+    if (a.rh !== b.rh) {
+      return a.rh ? 1 : -1;
+    }
+    return naturalSort(a.displayId, b.displayId);
+  });
+
+  return cardsForSorting;
+}
+
+/**
+ * Baut Header und Layout des Set-Blatts auf und gibt Grid-Dimensionen zurück.
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} cardSheet
+ * @param {string} setId
+ * @param {Array<Object>} cardsForSorting
+ * @returns {{totalRowsForCards: number, totalColsNeeded: number}}
+ */
+function updateSetSheetHeaderAndGrid(cardSheet, setId, cardsForSorting) {
+  let collectedCount = 0;
+  let reverseHoloCount = 0;
+  cardsForSorting.forEach(card => {
+    if (card.g) {
+      collectedCount++;
+    }
+    if (card.rh) {
+      reverseHoloCount++;
+    }
+  });
+  const totalCardsInSet = cardsForSorting.length;
+  const completionPercentage = (totalCardsInSet > 0) ? collectedCount / totalCardsInSet : 0;
+  const officialAbbreviation = getOfficialAbbreviationFromOverview(setId);
+
+  for (let i = 1; i <= SET_SHEET_HEADER_ROWS; i++) {
+    cardSheet.setRowHeight(i, SET_SHEET_HEADER_ROW_HEIGHT);
+  }
+
+  const headerNameIdRange = cardSheet.getRange(1, 1, 1, SORT_SET_CHECKBOX_COL_OFFSET - 1);
+  headerNameIdRange.setValue(`${cardSheet.getName()} (Set-ID: ${extractIdFromHyperlink(setId)})`);
+  headerNameIdRange.merge();
+  headerNameIdRange.setHorizontalAlignment("center");
+  headerNameIdRange.setVerticalAlignment("middle");
+  headerNameIdRange.setFontWeight("bold");
+  headerNameIdRange.setBackground("#E0E0E0");
+
+  const sortCheckboxRange = cardSheet.getRange(SORT_SET_CHECKBOX_ROW, SORT_SET_CHECKBOX_COL_OFFSET);
+  sortCheckboxRange.setValue(false);
+  sortCheckboxRange.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
+  sortCheckboxRange.setHorizontalAlignment("center");
+  sortCheckboxRange.setVerticalAlignment("middle");
+  sortCheckboxRange.setBackground("#E0E0E0");
+
+  const headerSummaryRange = cardSheet.getRange(2, 1, 1, SORT_SET_CHECKBOX_COL_OFFSET);
+  headerSummaryRange.setValue(
+    `Gesamtzahl Karten: ${totalCardsInSet} | ` +
+    `Gesammelte Karten: ${collectedCount} | ` +
+    `Gesammelte RH Karten: ${reverseHoloCount} | ` +
+    `Abschluss-Prozentsatz: ${completionPercentage.toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 0 })} | ` +
+    `Abkürzung: ${officialAbbreviation}`
+  );
+  headerSummaryRange.merge();
+  headerSummaryRange.setHorizontalAlignment("center");
+  headerSummaryRange.setVerticalAlignment("middle");
+  headerSummaryRange.setFontWeight("bold");
+  headerSummaryRange.setBackground("#EFEFEF");
+
+  cardSheet.getRange(1, 1).setNote(`${SET_ID_NOTE_PREFIX}${setId}`);
+
+  const totalColsNeeded = CARDS_PER_ROW_IN_GRID * CARD_BLOCK_WIDTH_COLS;
+  for (let i = 0; i < CARDS_PER_ROW_IN_GRID; i++) {
+    const baseCol = 1 + i * CARD_BLOCK_WIDTH_COLS;
+    cardSheet.setColumnWidth(baseCol, COLUMN_WIDTH_CARD_COL1);
+    cardSheet.setColumnWidth(baseCol + 1, COLUMN_WIDTH_CARD_COL2);
+    cardSheet.setColumnWidth(baseCol + 2, COLUMN_WIDTH_CARD_COL3);
+  }
+  if (cardSheet.getMaxColumns() > totalColsNeeded) {
+    cardSheet.deleteColumns(totalColsNeeded + 1, cardSheet.getMaxColumns() - totalColsNeeded);
+  }
+
+  const numCards = cardsForSorting.length;
+  const totalRowsForCards = Math.ceil(numCards / CARDS_PER_ROW_IN_GRID) * CARD_BLOCK_HEIGHT_ROWS;
+  const totalRowsNeeded = SET_SHEET_HEADER_ROWS + totalRowsForCards;
+
+  if (cardSheet.getMaxRows() > totalRowsNeeded) {
+    cardSheet.deleteRows(totalRowsNeeded + 1, cardSheet.getMaxRows() - totalRowsNeeded);
+  }
+
+  for (let i = 0; i < totalRowsForCards / CARD_BLOCK_HEIGHT_ROWS; i++) {
+    const startSheetRow = SET_SHEET_HEADER_ROWS + 1 + i * CARD_BLOCK_HEIGHT_ROWS;
+    cardSheet.setRowHeight(startSheetRow, ROW_HEIGHT_ID_NAME);
+    cardSheet.setRowHeight(startSheetRow + 1, ROW_HEIGHT_IMAGE);
+    cardSheet.setRowHeight(startSheetRow + 2, ROW_HEIGHT_CHECKS_LINK);
+    cardSheet.setRowHeight(startSheetRow + 3, ROW_HEIGHT_SPACER);
+  }
+
+  return { totalRowsForCards, totalColsNeeded };
+}
+
+/**
  * Liest bestehende Set-Daten, um Benutzerbearbeitungen beizubehalten.
  * @param {GoogleAppsScript.Spreadsheet.Sheet} setsSheet
  * @returns {Map<string, {serie: string, releaseDate: string, abbreviation: string, logo: string, symbol: string}>}
@@ -997,7 +1110,7 @@ function setupAndImportAllSets() {
  */
 function updateSetsOverviewRowAfterCardImport(setIdToMatchInOverview, pokemontcgDetailedSetData = null, tcgdexDetailedSetData = null, cardSheet) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const setsSheet = ss.getSheetByName("Sets Overview");
+  const setsSheet = ss.getSheetByName(SETS_OVERVIEW_SHEET_NAME);
   const ui = SpreadsheetApp.getUi(); // Added for potential alerts.
 
   const lastExistingRow = setsSheet.getLastRow();
@@ -1161,7 +1274,7 @@ function fetchAllPokemontcgIoCards(pokemontcgSetId, setName) {
  */
 function populateCardsForSet(setIdFromOverview) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const setsSheet = ss.getSheetByName("Sets Overview");
+  const setsSheet = ss.getSheetByName(SETS_OVERVIEW_SHEET_NAME);
   const ui = SpreadsheetApp.getUi();
 
   const lastExistingOverviewRow = setsSheet.getLastRow();
@@ -1206,7 +1319,7 @@ function populateCardsForSet(setIdFromOverview) {
   const isTcgdexOnlySet = setIdFromOverview.startsWith(TCGDEX_SET_PREFIX);
 
   if (isTcgdexOnlySet) {
-    const tcgdexActualSetId = setIdFromOverview.substring('TCGDEX-'.length);
+    const tcgdexActualSetId = setIdFromOverview.substring(TCGDEX_SET_PREFIX.length);
     tcgdexDetailedSetDataForOverview = fetchApiData(`${TCGDEX_BASE_URL}sets/${tcgdexActualSetId}`, `Fehler beim Laden der detaillierten TCGDex Set-Daten für ${setNameInSheet}`);
 
     if (tcgdexDetailedSetDataForOverview && tcgdexDetailedSetDataForOverview.cards) {
@@ -1370,29 +1483,8 @@ function renderAndSortCardsInSheet(cardSheet, setId, allCards, pokemontcgIoCardD
   const customImageUrls = getScriptPropertiesData('customImageUrls');
   const currentSetCustomImageUrls = customImageUrls[setId] || {};
 
-  // Schritt 1: Karten mit ihrem gesammelten Status für die Sortierung erweitern.
-  const cardsForSorting = allCards.map(card => {
-    // Verwende card.number für pokemontcg.io Sets, und card.localId/card.id für TCGDex-only Sets, die zu 'number' gemappt wurden.
-    const cardNumberOrId = normalizeCardNumber(card.number || card.id);
-    const status = currentSetCollectedData[cardNumberOrId] || { g: false, rh: false };
-    return { ...card, g: status.g, rh: status.rh, displayId: cardNumberOrId };
-  });
-
-  // Schritt 2: Karten sortieren.
-  cardsForSorting.sort((a, b) => {
-    // Ungesammelte Karten zuerst (false kommt vor true).
-    if (a.g !== b.g) {
-      return a.g ? 1 : -1;
-    }
-
-    // Zusätzliche Sortierung nach RH, wenn G gleich ist.
-    if (a.rh !== b.rh) {
-      return a.rh ? 1 : -1;
-    }
-
-    // Wenn G und RH gleich sind, dann nach natürlicher Kartennummer sortieren.
-    return naturalSort(a.displayId, b.displayId);
-  });
+  // Schritt 1: Karten mit Sammelstatus erweitern und sortieren.
+  const cardsForSorting = buildCardsForSorting(allCards, currentSetCollectedData);
 
   // Schritt 3: Blatt leeren.
   const lastRow = cardSheet.getLastRow();
@@ -1403,85 +1495,10 @@ function renderAndSortCardsInSheet(cardSheet, setId, allCards, pokemontcgIoCardD
     dataRange.clear(); // clear() löscht Inhalt, Formate, Datenvalidierungen und Merges
   }
 
-  // --- Kopfzeilen zu Set-Blatt hinzufügen ---
-  let collectedCount = 0;
-  let reverseHoloCount = 0;
-  cardsForSorting.forEach(card => {
-    if (card.g) {
-      collectedCount++;
-    }
-    if (card.rh) {
-      reverseHoloCount++;
-    }
-  });
-  const totalCardsInSet = cardsForSorting.length;
-  const completionPercentage = (totalCardsInSet > 0) ? collectedCount / totalCardsInSet : 0;
-
-  const officialAbbreviation = getOfficialAbbreviationFromOverview(setId);
-
-  for (let i = 1; i <= SET_SHEET_HEADER_ROWS; i++) {
-    cardSheet.setRowHeight(i, SET_SHEET_HEADER_ROW_HEIGHT);
-  }
-
-  const headerNameIdRange = cardSheet.getRange(1, 1, 1, SORT_SET_CHECKBOX_COL_OFFSET - 1);
-  headerNameIdRange.setValue(`${cardSheet.getName()} (Set-ID: ${extractIdFromHyperlink(setId)})`); // Zeigt die reine ID an
-  headerNameIdRange.merge();
-  headerNameIdRange.setHorizontalAlignment("center");
-  headerNameIdRange.setVerticalAlignment("middle");
-  headerNameIdRange.setFontWeight("bold");
-  headerNameIdRange.setBackground("#E0E0E0");
-
-  const sortCheckboxRange = cardSheet.getRange(SORT_SET_CHECKBOX_ROW, SORT_SET_CHECKBOX_COL_OFFSET);
-  sortCheckboxRange.setValue(false);
-  sortCheckboxRange.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
-  sortCheckboxRange.setHorizontalAlignment("center");
-  sortCheckboxRange.setVerticalAlignment("middle");
-  sortCheckboxRange.setBackground("#E0E0E0");
-
-  const headerSummaryRange = cardSheet.getRange(2, 1, 1, SORT_SET_CHECKBOX_COL_OFFSET);
-  headerSummaryRange.setValue(
-    `Gesamtzahl Karten: ${totalCardsInSet} | ` +
-    `Gesammelte Karten: ${collectedCount} | ` +
-    `Gesammelte RH Karten: ${reverseHoloCount} | ` +
-    `Abschluss-Prozentsatz: ${completionPercentage.toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 0 })} | ` +
-    `Abkürzung: ${officialAbbreviation}`
-  );
-  headerSummaryRange.merge();
-  headerSummaryRange.setHorizontalAlignment("center");
-  headerSummaryRange.setVerticalAlignment("middle");
-  headerSummaryRange.setFontWeight("bold");
-  headerSummaryRange.setBackground("#EFEFEF");
-
-  cardSheet.getRange(1, 1).setNote(`Set ID: ${setId}`); // Speichert die vollständige ID (z.B. TCGDEX-ex03)
-
-  const totalColsNeeded = CARDS_PER_ROW_IN_GRID * CARD_BLOCK_WIDTH_COLS;
-  for (let i = 0; i < CARDS_PER_ROW_IN_GRID; i++) {
-    const baseCol = 1 + i * CARD_BLOCK_WIDTH_COLS;
-    cardSheet.setColumnWidth(baseCol, COLUMN_WIDTH_CARD_COL1);
-    cardSheet.setColumnWidth(baseCol + 1, COLUMN_WIDTH_CARD_COL2);
-    cardSheet.setColumnWidth(baseCol + 2, COLUMN_WIDTH_CARD_COL3);
-  }
-  // Stelle sicher, dass keine unnötigen Spalten am Ende existieren
-  if (cardSheet.getMaxColumns() > totalColsNeeded) {
-    cardSheet.deleteColumns(totalColsNeeded + 1, cardSheet.getMaxColumns() - totalColsNeeded);
-  }
-
-  const numCards = cardsForSorting.length;
-  const totalRowsForCards = Math.ceil(numCards / CARDS_PER_ROW_IN_GRID) * CARD_BLOCK_HEIGHT_ROWS;
-  const totalRowsNeeded = SET_SHEET_HEADER_ROWS + totalRowsForCards;
-
-  // Löscht überschüssige Zeilen, falls vorhanden.
-  if (cardSheet.getMaxRows() > totalRowsNeeded) {
-    cardSheet.deleteRows(totalRowsNeeded + 1, cardSheet.getMaxRows() - totalRowsNeeded);
-  }
-  // Setze Zeilenhöhen für die Kartenblöcke
-  for (let i = 0; i < totalRowsForCards / CARD_BLOCK_HEIGHT_ROWS; i++) {
-    const startSheetRow = SET_SHEET_HEADER_ROWS + 1 + i * CARD_BLOCK_HEIGHT_ROWS;
-    cardSheet.setRowHeight(startSheetRow, ROW_HEIGHT_ID_NAME);
-    cardSheet.setRowHeight(startSheetRow + 1, ROW_HEIGHT_IMAGE);
-    cardSheet.setRowHeight(startSheetRow + 2, ROW_HEIGHT_CHECKS_LINK);
-    cardSheet.setRowHeight(startSheetRow + 3, ROW_HEIGHT_SPACER);
-  }
+  // --- Kopfzeilen und Grid-Layout setzen ---
+  const gridInfo = updateSetSheetHeaderAndGrid(cardSheet, setId, cardsForSorting);
+  const totalRowsForCards = gridInfo.totalRowsForCards;
+  const totalColsNeeded = gridInfo.totalColsNeeded;
 
 
   const values = Array(totalRowsForCards).fill(0).map(() => Array(totalColsNeeded).fill(''));
@@ -2811,6 +2828,84 @@ function uninstallAllTriggers() {
   }
 }
 
+/**
+ * Lädt und merged Karten-Daten für Sortierung, inklusive TCGDex Ergänzungen.
+ * @param {string} setId Set-ID (pokemontcg.io ID oder TCGDex-only ID)
+ * @param {string} setName Set-Name
+ * @param {Array<Object>} tcgdexAllSets Alle TCGDex Sets (optional)
+ * @returns {{allCardsForSort: Array<Object>, pokemontcgIoCardmarketDataForSort: Object}|null}
+ */
+function loadCardsForSort(setId, setName, tcgdexAllSets) {
+  let allCardsForSort = [];
+  let pokemontcgIoCardmarketDataForSort = {};
+
+  if (setId.startsWith(TCGDEX_SET_PREFIX)) {
+    const tcgdexActualSetId = setId.substring(TCGDEX_SET_PREFIX.length);
+    const tcgdexSetDetails = fetchApiData(`${TCGDEX_BASE_URL}sets/${tcgdexActualSetId}`, `Fehler beim Laden der TCGDex Karten für Sortierung von Set ${setName}`);
+    if (tcgdexSetDetails && tcgdexSetDetails.cards) {
+      allCardsForSort = tcgdexSetDetails.cards.map(card => {
+        let smallImage = null;
+        if (card.image) {
+          smallImage = `${card.image}/low.jpg`;
+        }
+        return {
+          number: normalizeCardNumber(card.localId || card.id),
+          name: card.name,
+          images: { small: smallImage },
+          cardmarket: { url: card.links?.cardmarket }
+        };
+      });
+      allCardsForSort.sort((a, b) => naturalSort(a.number || "", b.number || ""));
+    } else {
+      Logger.log(`loadCardsForSort: Konnte TCGDex Karten für Set ${setId} nicht laden.`);
+      return null;
+    }
+  } else {
+    const pokemontcgSetId = setId;
+    allCardsForSort = fetchAllPokemontcgIoCards(pokemontcgSetId, setName);
+
+    let tcgdexCardsMap = new Map();
+    const pokemontcgSetInfoForSort = { id: pokemontcgSetId, name: setName, ptcgoCode: getOfficialAbbreviationFromOverview(pokemontcgSetId) };
+    const matchingTcgdexSet = findMatchingTcgdexSet(pokemontcgSetInfoForSort, tcgdexAllSets || []);
+
+    if (matchingTcgdexSet) {
+      const tcgdexSetDetails = fetchApiData(`${TCGDEX_BASE_URL}sets/${matchingTcgdexSet.id}`, `Fehler beim Laden der TCGDex Karten für Sortierung von Set ${setName} (${matchingTcgdexSet.id})`);
+      if (tcgdexSetDetails && tcgdexSetDetails.cards) {
+        tcgdexSetDetails.cards.forEach(card => {
+          tcgdexCardsMap.set(normalizeCardNumber(card.localId || card.id), card);
+        });
+      }
+    } else {
+      Logger.log(`[loadCardsForSort] Kein passendes TCGDex Set für pokemontcg.io Set ${pokemontcgSetId} gefunden.`);
+    }
+
+    const mergedCardsForSort = allCardsForSort.map(pokemontcgCard => {
+      const mergedCard = { ...pokemontcgCard };
+      const tcgdexCard = tcgdexCardsMap.get(normalizeCardNumber(pokemontcgCard.number));
+      if (tcgdexCard) {
+        if (tcgdexCard.name) {
+          mergedCard.name = tcgdexCard.name;
+        }
+        let smallImage = mergedCard.images?.small || null;
+        if (tcgdexCard.image) {
+          smallImage = `${tcgdexCard.image}/low.jpg`;
+        }
+        mergedCard.images = { small: smallImage };
+        if (tcgdexCard.description) {
+          mergedCard.rules = [tcgdexCard.description];
+          mergedCard.flavorText = tcgdexCard.description;
+        }
+      }
+      return mergedCard;
+    });
+
+    allCardsForSort = mergedCardsForSort;
+    pokemontcgIoCardmarketDataForSort = getScriptPropertiesData(`pokemontcgIoCardmarketUrls_${pokemontcgSetId}`, {});
+  }
+
+  return { allCardsForSort, pokemontcgIoCardmarketDataForSort };
+}
+
 
 /**
  * Diese Funktion wird durch einen Zeit-Trigger ausgeführt.
@@ -2819,7 +2914,7 @@ function uninstallAllTriggers() {
  */
 function sortAllSheetsTrigger() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const setsSheet = ss.getSheetByName("Sets Overview");
+  const setsSheet = ss.getSheetByName(SETS_OVERVIEW_SHEET_NAME);
   if (!setsSheet || setsSheet.getLastRow() < OVERVIEW_DATA_START_ROW) {
     Logger.log("sortAllSheetsTrigger: Keine Sets im 'Sets Overview' gefunden. Überspringe Sortierung.");
     return;
@@ -2838,85 +2933,17 @@ function sortAllSheetsTrigger() {
     const setId = extractIdFromHyperlink(setIdRaw); // Dies ist die pokemontcg.io Set ID oder TCGDex-only ID
 
     const sheet = ss.getSheetByName(setName);
-    if (sheet && sheet.getRange(1, 1).getNote() === `Set ID: ${setId}`) {
+    if (sheet && sheet.getRange(1, 1).getNote() === `${SET_ID_NOTE_PREFIX}${setId}`) {
       try {
         Logger.log(`Sortiere Blatt: ${setName} (Set ID: ${setId})`);
 
-        let allCardsForSort = [];
-        let pokemontcgIoCardmarketDataForSort = {};
-
-        if (setId.startsWith(TCGDEX_SET_PREFIX)) {
-          const tcgdexActualSetId = setId.substring(TCGDEX_SET_PREFIX.length);
-          const tcgdexSetDetails = fetchApiData(`${TCGDEX_BASE_URL}sets/${tcgdexActualSetId}`, `Fehler beim Laden der TCGDex Karten für Sortierung von Set ${setName}`);
-          if (tcgdexSetDetails && tcgdexSetDetails.cards) {
-            allCardsForSort = tcgdexSetDetails.cards.map(card => {
-              let smallImage = null;
-              if (card.image) {
-                smallImage = `${card.image}/low.jpg`;
-              }
-              return {
-                number: normalizeCardNumber(card.localId || card.id), // Normalisiere die Kartennummer von TCGDex
-                name: card.name,
-                images: { small: smallImage },
-                cardmarket: { url: card.links?.cardmarket }
-              };
-            });
-            allCardsForSort.sort((a, b) => naturalSort(a.number || "", b.number || ""));
-          } else {
-            Logger.log(`sortAllSheetsTrigger: Konnte TCGDex Karten für Set ${setId} nicht laden. Überspringe Sortierung für dieses Set.`);
-            return;
-          }
-        } else {
-          // pokemontcg.io based set logic
-          const pokemontcgSetId = setId; // For pokemontcg.io sets, setId is the actual pokemontcg.io ID
-
-          allCardsForSort = fetchAllPokemontcgIoCards(pokemontcgSetId, setName); // Use the new pagination helper
-
-          let tcgdexCardsMap = new Map();
-          // To find matchingTcgdexSet, we need at least pokemontcg.io ID and name
-          const pokemontcgSetInfoForSort = { id: pokemontcgSetId, name: setName, ptcgoCode: getOfficialAbbreviationFromOverview(pokemontcgSetId) };
-
-          const matchingTcgdexSet = findMatchingTcgdexSet(pokemontcgSetInfoForSort, tcgdexAllSets || []);
-
-          if (matchingTcgdexSet) {
-            const tcgdexSetDetails = fetchApiData(`${TCGDEX_BASE_URL}sets/${matchingTcgdexSet.id}`, `Fehler beim Laden der TCGDex Karten für Sortierung von Set ${setName} (${matchingTcgdexSet.id})`);
-            if (tcgdexSetDetails && tcgdexSetDetails.cards) {
-              // Normalisiere die TCGDex-Kartennummer, bevor sie als Schlüssel in der Map gespeichert wird
-              tcgdexSetDetails.cards.forEach(card => {
-                tcgdexCardsMap.set(normalizeCardNumber(card.localId || card.id), card);
-              });
-            }
-          } else {
-            Logger.log(`[sortAllSheetsTrigger] Kein passendes TCGDex Set für pokemontcg.io Set ${pokemontcgSetId} gefunden. Deutsche Kartendaten werden fehlen.`);
-          }
-
-          const mergedCardsForSort = allCardsForSort.map(pokemontcgCard => {
-            const mergedCard = { ...pokemontcgCard };
-            // Normalisiere die pokemontcg.io Kartennummer für den Lookup in der TCGDex Map
-            const tcgdexCard = tcgdexCardsMap.get(normalizeCardNumber(pokemontcgCard.number));
-            if (tcgdexCard) {
-              if (tcgdexCard.name) {
-                mergedCard.name = tcgdexCard.name;
-              }
-              let smallImage = mergedCard.images?.small || null;
-              if (tcgdexCard.image) {
-                smallImage = `${tcgdexCard.image}/low.jpg`;
-              }
-              mergedCard.images = { small: smallImage };
-              if (tcgdexCard.description) {
-                mergedCard.rules = [tcgdexCard.description];
-                mergedCard.flavorText = tcgdexCard.description;
-              }
-            }
-            return mergedCard;
-          });
-          allCardsForSort = mergedCardsForSort; // Update allCardsForSort with merged data
-
-          // OPTIMIERUNG: `imageUrl` hier nicht mehr speichern
-          pokemontcgIoCardmarketDataForSort = getScriptPropertiesData(`pokemontcgIoCardmarketUrls_${pokemontcgSetId}`, {});
+        const sortData = loadCardsForSort(setId, setName, tcgdexAllSets);
+        if (!sortData) {
+          Logger.log(`sortAllSheetsTrigger: Konnte Karten für Set ${setId} nicht laden. Überspringe Sortierung.`);
+          return;
         }
 
-        renderAndSortCardsInSheet(sheet, setId, allCardsForSort, pokemontcgIoCardmarketDataForSort);
+        renderAndSortCardsInSheet(sheet, setId, sortData.allCardsForSort, sortData.pokemontcgIoCardmarketDataForSort);
         PropertiesService.getScriptProperties().setProperty(`lastSortTime_${setId}`, new Date().getTime().toString());
 
       } catch (e) {
@@ -2940,7 +2967,7 @@ function sortAllSheetsTrigger() {
 function manualSortAllSheets() {
   const ui = SpreadsheetApp.getUi();
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const setsSheet = ss.getSheetByName("Sets Overview");
+  const setsSheet = ss.getSheetByName(SETS_OVERVIEW_SHEET_NAME);
 
   if (!setsSheet || setsSheet.getLastRow() < OVERVIEW_DATA_START_ROW) {
     ui.alert("Error", "Keine Sets im 'Sets Overview' gefunden. Bitte importieren Sie zuerst Sets.", ui.ButtonSet.OK);
@@ -2967,82 +2994,15 @@ function manualSortAllSheets() {
     }
 
     const sheet = ss.getSheetByName(setName);
-    if (sheet && sheet.getRange(1, 1).getNote() === `Set ID: ${setId}`) {
+    if (sheet && sheet.getRange(1, 1).getNote() === `${SET_ID_NOTE_PREFIX}${setId}`) {
       SpreadsheetApp.getActive().toast(`Sortiere Set ${i + 1}/${setsData.length}: ${setName}`, "🔄 In Arbeit", 5);
       try {
-        let allCardsForSort = [];
-        let pokemontcgIoCardmarketDataForSort = {};
-
-        if (setId.startsWith('TCGDEX-')) {
-          const tcgdexActualSetId = setId.substring('TCGDEX-'.length);
-          const tcgdexSetDetails = fetchApiData(`${TCGDEX_BASE_URL}sets/${tcgdexActualSetId}`, `Fehler beim Laden der TCGDex Karten für Sortierung von Set ${setName}`);
-          if (tcgdexSetDetails && tcgdexSetDetails.cards) {
-            allCardsForSort = tcgdexSetDetails.cards.map(card => {
-              let smallImage = null;
-              if (card.image) {
-                smallImage = `${card.image}/low.jpg`;
-              }
-              return {
-                number: normalizeCardNumber(card.localId || card.id), // Normalisiere die Kartennummer von TCGDex
-                name: card.name,
-                images: { small: smallImage },
-                cardmarket: { url: card.links?.cardmarket }
-              };
-            });
-            allCardsForSort.sort((a, b) => naturalSort(a.number || "", b.number || ""));
-          } else {
-            Logger.log(`manualSortAllSheets: Konnte TCGDex Karten für Set ${setId} nicht laden. Überspringe Sortierung für dieses Set.`);
-            continue;
-          }
-        } else {
-          // pokemontcg.io based set logic
-          const pokemontcgSetId = setId;
-
-          allCardsForSort = fetchAllPokemontcgIoCards(pokemontcgSetId, setName); // Use the new pagination helper
-
-          let tcgdexCardsMap = new Map();
-          const pokemontcgSetInfoForSort = { id: pokemontcgSetId, name: setName, ptcgoCode: getOfficialAbbreviationFromOverview(pokemontcgSetId) };
-
-          const matchingTcgdexSet = findMatchingTcgdexSet(pokemontcgSetInfoForSort, tcgdexAllSets || []);
-
-          if (matchingTcgdexSet) {
-            const tcgdexSetDetails = fetchApiData(`${TCGDEX_BASE_URL}sets/${matchingTcgdexSet.id}`, `Fehler beim Laden der TCGDex Karten für Sortierung von Set ${setName} (${matchingTcgdexSet.id})`);
-            if (tcgdexSetDetails && tcgdexSetDetails.cards) {
-              // Normalisiere die TCGDex-Kartennummer, bevor sie als Schlüssel in der Map gespeichert wird
-              tcgdexSetDetails.cards.forEach(card => {
-                tcgdexCardsMap.set(normalizeCardNumber(card.localId || card.id), card);
-              });
-            }
-          } else {
-            Logger.log(`[manualSortAllSheets] Kein passendes TCGDex Set für pokemontcg.io Set ${pokemontcgSetId} gefunden. Deutsche Kartendaten werden fehlen.`);
-          }
-
-          const mergedCardsForSort = allCardsForSort.map(pokemontcgCard => {
-            const mergedCard = { ...pokemontcgCard };
-            // Normalisiere die pokemontcg.io Kartennummer für den Lookup in der TCGDex Map
-            const tcgdexCard = tcgdexCardsMap.get(normalizeCardNumber(pokemontcgCard.number));
-            if (tcgdexCard) {
-              if (tcgdexCard.name) {
-                mergedCard.name = tcgdexCard.name;
-              }
-              let smallImage = mergedCard.images?.small || null;
-              if (tcgdexCard.image) {
-                smallImage = `${tcgdexCard.image}/low.jpg`;
-              }
-              mergedCard.images = { small: smallImage };
-              if (tcgdexCard.description) {
-                mergedCard.rules = [tcgdexCard.description];
-                mergedCard.flavorText = tcgdexCard.description;
-              }
-            }
-            return mergedCard;
-          });
-          allCardsForSort = mergedCardsForSort; // Update allCardsForSort with merged data
-
-          // OPTIMIERUNG: `imageUrl` hier nicht mehr speichern
-          pokemontcgIoCardmarketDataForSort = getScriptPropertiesData(`pokemontcgIoCardmarketUrls_${pokemontcgSetId}`, {});
+        const sortData = loadCardsForSort(setId, setName, tcgdexAllSets);
+        if (!sortData) {
+          Logger.log(`manualSortAllSheets: Konnte Karten für Set ${setId} nicht laden. Überspringe Sortierung.`);
+          continue;
         }
-        renderAndSortCardsInSheet(sheet, setId, allCardsForSort, pokemontcgIoCardmarketDataForSort);
+        renderAndSortCardsInSheet(sheet, setId, sortData.allCardsForSort, sortData.pokemontcgIoCardmarketDataForSort);
 
         PropertiesService.getScriptProperties().setProperty(`lastSortTime_${setId}`, new Date().getTime().toString());
         processedCount++;
@@ -3091,83 +3051,15 @@ function manualSortCurrentSheet() {
 
   SpreadsheetApp.getActive().toast(`Sortiere aktuelles Set "${sheetName}" neu...`, "🔄 Sortieren", 3);
   try {
-    let allCardsForSort = [];
-    let pokemontcgIoCardmarketDataForSort = {};
     const tcgdexAllSets = getTcgdexSetsWithCache();
-
-
-    if (setId.startsWith('TCGDEX-')) {
-      const tcgdexActualSetId = setId.substring('TCGDEX-'.length);
-      const tcgdexSetDetails = fetchApiData(`${TCGDEX_BASE_URL}sets/${tcgdexActualSetId}`, `Fehler beim Laden der TCGDex Karten für Sortierung von Set ${sheetName}`);
-      if (tcgdexSetDetails && tcgdexSetDetails.cards) {
-        allCardsForSort = tcgdexSetDetails.cards.map(card => {
-          let smallImage = null;
-          if (card.image) {
-            smallImage = `${card.image}/low.jpg`;
-          }
-          return {
-            number: normalizeCardNumber(card.localId || card.id), // Normalisiere die Kartennummer von TCGDex
-            name: card.name,
-            images: { small: smallImage },
-            cardmarket: { url: card.links?.cardmarket }
-          };
-        });
-        allCardsForSort.sort((a, b) => naturalSort(a.number || "", b.number || ""));
-      } else {
-        Logger.log(`manualSortCurrentSheet: Konnte TCGDex Karten für Set ${setId} nicht laden. Überspringe Sortierung für dieses Set.`);
-        ui.alert("Fehler", `Konnte Karten für Set "${sheetName}" nicht laden. Sortierung abgebrochen.`, SpreadsheetApp.getUi().ButtonSet.OK);
-        return;
-      }
-    } else {
-      // pokemontcg.io based set logic
-      const pokemontcgSetId = setId;
-
-      allCardsForSort = fetchAllPokemontcgIoCards(pokemontcgSetId, sheetName); // Use the new pagination helper
-
-      let tcgdexCardsMap = new Map();
-      const pokemontcgSetInfoForSort = { id: pokemontcgSetId, name: sheetName, ptcgoCode: getOfficialAbbreviationFromOverview(pokemontcgSetId) };
-
-      const matchingTcgdexSet = findMatchingTcgdexSet(pokemontcgSetInfoForSort, tcgdexAllSets || []);
-
-      if (matchingTcgdexSet) {
-        const tcgdexSetDetails = fetchApiData(`${TCGDEX_BASE_URL}sets/${matchingTcgdexSet.id}`, `Fehler beim Laden der TCGDex Karten für Sortierung von Set ${sheetName} (${matchingTcgdexSet.id})`);
-        if (tcgdexSetDetails && tcgdexSetDetails.cards) {
-          // Normalisiere die TCGDex-Kartennummer, bevor sie als Schlüssel in der Map gespeichert wird
-          tcgdexSetDetails.cards.forEach(card => {
-            tcgdexCardsMap.set(normalizeCardNumber(card.localId || card.id), card);
-          });
-        }
-      } else {
-        Logger.log(`[manualSortCurrentSheet] Kein passendes TCGDex Set für pokemontcg.io Set ${pokemontcgSetId} gefunden. Deutsche Kartendaten werden fehlen.`);
-      }
-
-      const mergedCardsForSort = allCardsForSort.map(pokemontcgCard => {
-        const mergedCard = { ...pokemontcgCard };
-        // Normalisiere die pokemontcg.io Kartennummer für den Lookup in der TCGDex Map
-        const tcgdexCard = tcgdexCardsMap.get(normalizeCardNumber(pokemontcgCard.number));
-        if (tcgdexCard) {
-          if (tcgdexCard.name) {
-            mergedCard.name = tcgdexCard.name;
-          }
-          let smallImage = mergedCard.images?.small || null;
-          if (tcgdexCard.image) {
-            smallImage = `${tcgdexCard.image}/low.jpg`;
-          }
-          mergedCard.images = { small: smallImage };
-          if (tcgdexCard.description) {
-            mergedCard.rules = [tcgdexCard.description];
-            mergedCard.flavorText = tcgdexCard.description;
-          }
-        }
-        return mergedCard;
-      });
-      allCardsForSort = mergedCardsForSort; // Update allCardsForSort with merged data
-
-      // OPTIMIERUNG: `imageUrl` hier nicht mehr speichern
-      pokemontcgIoCardmarketDataForSort = getScriptPropertiesData(`pokemontcgIoCardmarketUrls_${pokemontcgSetId}`, {});
+    const sortData = loadCardsForSort(setId, sheetName, tcgdexAllSets);
+    if (!sortData) {
+      Logger.log(`manualSortCurrentSheet: Konnte Karten für Set ${setId} nicht laden. Sortierung abgebrochen.`);
+      ui.alert("Fehler", `Konnte Karten für Set "${sheetName}" nicht laden. Sortierung abgebrochen.`, SpreadsheetApp.getUi().ButtonSet.OK);
+      return;
     }
 
-    renderAndSortCardsInSheet(currentSheet, setId, allCardsForSort, pokemontcgIoCardmarketDataForSort);
+    renderAndSortCardsInSheet(currentSheet, setId, sortData.allCardsForSort, sortData.pokemontcgIoCardmarketDataForSort);
     PropertiesService.getScriptProperties().setProperty(`lastSortTime_${setId}`, new Date().getTime().toString());
 
     updateCollectionSummary();
@@ -3198,8 +3090,8 @@ function getSetSheetAndIdForCurrentSheet() {
 
   const setIdNote = currentSheet.getRange(1, 1).getNote();
   let setId = null;
-  if (setIdNote && setIdNote.startsWith('Set ID: ')) {
-    setId = setIdNote.substring('Set ID: '.length);
+  if (setIdNote && setIdNote.startsWith(SET_ID_NOTE_PREFIX)) {
+    setId = setIdNote.substring(SET_ID_NOTE_PREFIX.length);
   }
 
   if (!setId) {
@@ -3218,7 +3110,7 @@ function getSetSheetAndIdForCurrentSheet() {
 function deleteCurrentSet() {
   const ui = SpreadsheetApp.getUi();
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const setsSheet = ss.getSheetByName("Sets Overview");
+  const setsSheet = ss.getSheetByName(SETS_OVERVIEW_SHEET_NAME);
 
   const currentSetInfo = getSetSheetAndIdForCurrentSheet();
   if (!currentSetInfo) return;
