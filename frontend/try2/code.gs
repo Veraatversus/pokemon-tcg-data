@@ -1448,6 +1448,13 @@ function populateCardsForSet(setIdFromOverview) {
  * @param {Array<Object>} allCards Die Liste der zusammengeführten Kartendaten.
  * @param {Object} pokemontcgIoCardData Die Map der Cardmarket- und Image-URLs von pokemontcg.io (leer für TCGDex-only Sets).
  */
+/**
+ * Rendert Karten in einem Set-Blatt, sortiert nach Sammelstatus und Kartennummer.
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} cardSheet
+ * @param {string} setId
+ * @param {Array<Object>} allCards
+ * @param {Object} pokemontcgIoCardData
+ */
 function renderAndSortCardsInSheet(cardSheet, setId, allCards, pokemontcgIoCardData) {
   // Stellen Sie sicher, dass allCards ein Array ist und keine leeren Elemente enthält,
   // bevor Sie es verarbeiten, um den Fehler "Bereich muss mindestens 1 Zeile enthalten" zu vermeiden.
