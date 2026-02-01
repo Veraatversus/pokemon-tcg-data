@@ -2,8 +2,9 @@
 // Use Veras Api
 const UseVeraApi = true;
 const VeraApiLanguage = "en"
-// Basis-URL für die TCGDex API in deutscher Sprache.
+const VTCG_BASE_URL = "https://veraatversus.github.io/pokemon-tcg-data/";
 const TCGDEX_BASE_URL = "https://api.tcgdex.net/v2/de/";
+const PTCG_BASE_URL = "https://api.pokemontcg.io/v2/";
 // Verzögerung in Millisekunden zwischen API-Aufrufen, um Ratenbegrenzungen zu vermeiden.
 const API_DELAY_MS = 50;
 // Die ID des aktuell aktiven Spreadsheets, global zugänglich gemacht.
@@ -638,11 +639,11 @@ function populateSetsOverview() {
   let pokemontcgIoResponse = null;
   let pokemontcgIoSets = null;
   if (UseVeraApi) {
-    pokemontcgIoResponse = fetchApiData(`https://veraatversus.github.io/pokemon-tcg-data/sets/${VeraApiLanguage}.json`, "Beim Laden der pokemontcg.io Sets");
+    pokemontcgIoResponse = fetchApiData(`${VTCG_BASE_URL}sets/${VeraApiLanguage}.json`, "Beim Laden der pokemontcg.io Sets");
     pokemontcgIoSets = pokemontcgIoResponse || [];
   }
   else {
-    pokemontcgIoResponse = fetchApiData("https://api.pokemontcg.io/v2/sets", "Beim Laden der pokemontcg.io Sets");
+    pokemontcgIoResponse = fetchApiData(`${PTCG_BASE_URL}sets", "Beim Laden der pokemontcg.io Sets`);
     pokemontcgIoSets = pokemontcgIoResponse?.data || [];
   }
 
@@ -745,7 +746,7 @@ function populateSetsOverview() {
       finalSerie = pokemontcgIoSet.series || "";
       finalReleaseDate = pokemontcgIoSet.releaseDate || "";
       finalTotalCards = pokemontcgIoSet.total || 0;
-      finalAbbreviation = pokemontcgIoSet.ptcgoCode || "";
+      finalAbbreviation = pokemontcgIoSet.ptcgoCode || pokemontcgIoSet.id || "";
       imagesLogo = pokemontcgIoSet.images?.logo ? `=IMAGE("${pokemontcgIoSet.images.logo}"; 1)` : "";
       imagesSymbol = pokemontcgIoSet.images?.symbol ? `=IMAGE("${pokemontcgIoSet.images.symbol}"; 1)` : "";
 
@@ -926,7 +927,7 @@ function updateSetsOverviewRowAfterCardImport(setIdToMatchInOverview, pokemontcg
       currentValues[1] = String(pokemontcgDetailedSetData.name || currentValues[1] || "");
       currentValues[4] = String(pokemontcgDetailedSetData.series || currentValues[4] || "");
       currentValues[5] = String(pokemontcgDetailedSetData.releaseDate || currentValues[5] || "");
-      currentValues[7] = String(pokemontcgDetailedSetData.ptcgoCode || currentValues[7] || "");
+      currentValues[7] = String(pokemontcgDetailedSetData.ptcgoCode || pokemontcgDetailedSetData.id ||currentValues[7] || "");
       currentValues[6] = Number(pokemontcgDetailedSetData.total || currentValues[6] || 0);
       // Set Logo und Symbol NICHT überschreiben
     }
@@ -983,7 +984,7 @@ function fetchAllPokemontcgIoCards(pokemontcgSetId, setName) {
   while (morePages) {
     let pokemontcgIoApiUrl = null;
     if (UseVeraApi) {
-      pokemontcgIoApiUrl = `https://veraatversus.github.io/pokemon-tcg-data/cards/${VeraApiLanguage}/${pokemontcgSetId}.json`;
+      pokemontcgIoApiUrl = `${VTCG_BASE_URL}cards/${VeraApiLanguage}/${pokemontcgSetId}.json`;
 
       const pokemontcgCardsResponse = fetchApiData(pokemontcgIoApiUrl, `Fehler beim Laden der ${pokemontcgIoApiUrl} Karten für Set ${setName}`);
 
@@ -995,7 +996,7 @@ function fetchAllPokemontcgIoCards(pokemontcgSetId, setName) {
       }
     }
     else {
-      pokemontcgIoApiUrl = `https://api.pokemontcg.io/v2/cards?q=set.id:${pokemontcgSetId}&page=${page}&pageSize=${pageSize}`;
+      pokemontcgIoApiUrl = `${PTCG_BASE_URL}cards?q=set.id:${pokemontcgSetId}&page=${page}&pageSize=${pageSize}`;
       Logger.log(`[fetchAllPokemontcgIoCards] Fetching page ${page} from: ${pokemontcgIoApiUrl}`);
 
       const pokemontcgCardsResponse = fetchApiData(pokemontcgIoApiUrl, `Fehler beim Laden der ${pokemontcgIoApiUrl} Karten für Set ${setName}`);
@@ -1111,9 +1112,9 @@ function populateCardsForSet(setIdFromOverview) {
     let pokemontcgSetInfo = null;
     if (UseVeraApi) {
 
-      pokemontcgDetailedSetDataForOverview = fetchApiData(`https://veraatversus.github.io/pokemon-tcg-data/sets/${VeraApiLanguage}.json`, `Fehler beim Laden der detaillierten ${pokemontcgDetailedSetDataForOverview} Set-Daten für ${setNameInSheet}`)?.find(set => set.id === setIdFromOverview);
+      pokemontcgDetailedSetDataForOverview = fetchApiData(`${VTCG_BASE_URL}sets/${VeraApiLanguage}.json`, `Fehler beim Laden der detaillierten ${pokemontcgDetailedSetDataForOverview} Set-Daten für ${setNameInSheet}`)?.find(set => set.id === setIdFromOverview);
 
-      //pokemontcgDetailedSetDataForOverview.data = fetchApiData(`https://veraatversus.github.io/pokemon-tcg-data/cards/${VeraApiLanguage}/${pokemontcgSetId}.json`, `Fehler beim Laden der detaillierten ${pokemontcgDetailedSetDataForOverview} Set-Daten für ${setNameInSheet}`);
+      //pokemontcgDetailedSetDataForOverview.data = fetchApiData(`${VTCG_BASE_URL}cards/${VeraApiLanguage}/${pokemontcgSetId}.json`, `Fehler beim Laden der detaillierten ${pokemontcgDetailedSetDataForOverview} Set-Daten für ${setNameInSheet}`);
 
       if (!pokemontcgDetailedSetDataForOverview) {
         const errorMessage = `Konnte detaillierte pokemontcg.io Set-Daten für Set "${setNameInSheet}" (ID: ${pokemontcgSetId}) nicht abrufen oder API-Problem.`;
@@ -1124,7 +1125,7 @@ function populateCardsForSet(setIdFromOverview) {
       pokemontcgSetInfo = pokemontcgDetailedSetDataForOverview;
     }
     else {
-      pokemontcgDetailedSetDataForOverview = fetchApiData(`https://api.pokemontcg.io/v2/sets/${pokemontcgSetId}`, `Fehler beim Laden der detaillierten pokemontcg.io Set-Daten für ${setNameInSheet}`);
+      pokemontcgDetailedSetDataForOverview = fetchApiData(`${PTCG_BASE_URL}sets/${pokemontcgSetId}`, `Fehler beim Laden der detaillierten pokemontcg.io Set-Daten für ${setNameInSheet}`);
 
       if (!pokemontcgDetailedSetDataForOverview || !pokemontcgDetailedSetDataForOverview.data) {
         const errorMessage = `Konnte detaillierte pokemontcg.io Set-Daten für Set "${setNameInSheet}" (ID: ${pokemontcgSetId}) nicht abrufen oder API-Problem.`;
@@ -1457,11 +1458,14 @@ function renderAndSortCardsInSheet(cardSheet, setId, allCards, pokemontcgIoCardD
     const storedCardmarketUrl = pokemontcgIoCardData?.[cardIdToUse]?.cardmarketUrl || card.cardmarket?.url;
 
     if (storedCardmarketUrl) {
+      //if (false) {
       formulas[checksAndLinkSheetRow][startSheetCol + 2] = `=HYPERLINK("${storedCardmarketUrl}"; "CM")`;
     } else {
       // Fallback: If no direct Cardmarket URL, try constructing one using pokemontcg.io card ID (if applicable)
       if (card.id && !setId.startsWith('TCGDEX-')) { // Only if it's a pokemontcg.io card and has a global ID
-        const genericCardmarketUrl = `https://www.cardmarket.com/en/Pokemon/Products/Singles?idCategory=1&idProduct=${card.id}`;
+        //Sample https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&category=51&searchString=CRZ+GG02
+        // const genericCardmarketUrl = `https://www.cardmarket.com/en/Pokemon/Products/Singles?idCategory=1&idProduct=${card.id}`;
+        const genericCardmarketUrl = `https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=${officialAbbreviation}+${card.number}`;
         formulas[checksAndLinkSheetRow][startSheetCol + 2] = `=HYPERLINK("${genericCardmarketUrl}"; "CM")`;
       } else {
         values[checksAndLinkSheetRow][startSheetCol + 2] = "CM (Link fehlt)";
