@@ -168,6 +168,15 @@ const SUMMARY_SORT_CHECKBOX_COL = 7;
 /** @var {number} Timeout für LockService in Millisekunden (30 Sekunden) */
 var USER_LOCK_TIMEOUT_MS = 30 * 1000;
 
+/** @const {string} Script Version */
+const SCRIPT_VERSION = "3.0.0";
+
+/** @const {number} API Cache Duration (1 Stunde) */
+const API_CACHE_DURATION_MS = 3600000;
+
+/** @const {number} Maximale API Retry-Versuche */
+const API_MAX_RETRIES = 3;
+
 /** @var {boolean} Flag zur Verhinderung rekursiver Trigger */
 var isScriptEditing = false;
 
@@ -187,13 +196,14 @@ function onOpen() {
 
   ui.createMenu('Pokémon TCG Tracker')
     // --- Hauptnavigation ---
-    //.addItem('▶️ Sidebar öffnen', 'openCustomSidebar')
-    //.addSeparator()
+    .addItem('▶️ Sidebar öffnen', 'openCustomSidebar')
+    .addSeparator()
 
     // --- Import & Daten ---
     .addItem('📥 Sets-Liste laden (Setup)', 'setupAndImportAllSets')
     .addItem('➕ Einzelnes Set hinzufügen', 'promptAndPopulateCardsForSet')
-    .addItem('🔃 Aktuelles Set reimportieren', 'reimportCurrentSet')
+    .addItem('� Mehrere Sets importieren (Batch)', 'batchImportSets')
+    .addItem('�🔃 Aktuelles Set reimportieren', 'reimportCurrentSet')
     .addSeparator()
 
     // --- Aktualisierung & Statistik ---
@@ -210,6 +220,11 @@ function onOpen() {
       .addItem('Deaktivieren (Trigger entfernen)', 'uninstallSortTrigger'))
     .addSeparator()
 
+    // --- Export & Backup ---
+    .addItem('📤 Sammlung exportieren (CSV)', 'exportCollectionToCSV')
+    .addItem('💾 Backup wiederherstellen', 'restoreFromBackup')
+    .addSeparator()
+
     // --- Verwaltung / Gefahr ---
     .addItem('🗑️ Aktuelles Set löschen', 'deleteCurrentSet')
     .addItem('⚠️ Komplett-Reset (Alle Daten löschen)', 'deleteAllPersistentData')
@@ -218,6 +233,60 @@ function onOpen() {
     // --- Entwicklung ---
     .addItem('🐞 Debug: onEdit testen', 'debugOnEdit')
     .addToUi();
+}
+
+/**
+ * Öffnet die Custom Sidebar mit Schnellzugriff und Statistiken.
+ * 
+ * @function openCustomSidebar
+ */
+function openCustomSidebar() {
+  const html = HtmlService.createHtmlOutputFromFile('sidebar')
+    .setTitle('Pokémon TCG Tracker')
+    .setWidth(300);
+  SpreadsheetApp.getUi().showSidebar(html);
+}
+
+/**
+ * Gibt Statistiken für die Sidebar zurück.
+ * 
+ * @function getSidebarStats
+ * @returns {Object} Statistik-Objekt
+ */
+function getSidebarStats() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const summarySheet = ss.getSheetByName("Collection Summary");
+  
+  let stats = {
+    totalCards: 0,
+    collectedCards: 0,
+    reverseHoloCards: 0,
+    totalSets: 0,
+    completedSets: 0
+  };
+  
+  if (!summarySheet || summarySheet.getLastRow() < SUMMARY_DATA_START_ROW + 1) {
+    return stats;
+  }
+  
+  try {
+    const numRows = summarySheet.getLastRow() - SUMMARY_DATA_START_ROW;
+    if (numRows > 0) {
+      const data = summarySheet.getRange(SUMMARY_DATA_START_ROW + 1, 1, numRows, 5).getValues();
+      
+      stats.totalSets = data.length;
+      data.forEach(row => {
+        stats.totalCards += row[1] || 0;
+        stats.collectedCards += row[2] || 0;
+        stats.reverseHoloCards += row[3] || 0;
+        if (row[4] >= 1.0) stats.completedSets++;
+      });
+    }
+  } catch (e) {
+    Logger.log(`Fehler beim Laden der Sidebar-Statistiken: ${e.message}`);
+  }
+  
+  return stats;
 }
 
 // ============================================================================
@@ -393,6 +462,65 @@ function fetchApiData(url, errorMessagePrefix) {
 }
 
 /**
+ * Lädt TCGDex Sets-Liste mit Caching (1 Stunde).
+ * 
+ * Cache-Strategie:
+ * - Speichert TCGDex Sets für 1 Stunde in Properties
+ * - Reduziert API-Calls bei häufigen Sortier-Operationen
+ * - Cache wird automatisch invalidiert nach Ablauf
+ * 
+ * @function loadTcgdexSetsWithCache
+ * @returns {Array<Object>} Liste aller TCGDex Sets
+ */
+function loadTcgdexSetsWithCache() {
+  const cacheKey = 'cachedTcgdexSets';
+  const cacheTimestampKey = 'cachedTcgdexSetsTimestamp';
+  const properties = PropertiesService.getScriptProperties();
+  
+  const cachedTimestamp = properties.getProperty(cacheTimestampKey);
+  const now = Date.now();
+  
+  // Prüfe ob Cache gültig ist
+  if (cachedTimestamp && (now - parseInt(cachedTimestamp)) < API_CACHE_DURATION_MS) {
+    const cached = properties.getProperty(cacheKey);
+    if (cached) {
+      const age = Math.round((now - parseInt(cachedTimestamp)) / 1000);
+      Logger.log(`[TCGDex Cache] Hit - ${age}s alt`);
+      return JSON.parse(cached);
+    }
+  }
+  
+  // Cache abgelaufen oder nicht vorhanden - neu laden
+  Logger.log('[TCGDex Cache] Miss - lade von API');
+  const sets = fetchApiData(`${TCGDEX_BASE_URL}sets`, "Fehler beim Laden der TCGDex Sets");
+  
+  if (sets) {
+    try {
+      properties.setProperty(cacheKey, JSON.stringify(sets));
+      properties.setProperty(cacheTimestampKey, now.toString());
+      Logger.log(`[TCGDex Cache] ${sets.length} Sets gespeichert`);
+    } catch (e) {
+      Logger.log(`[TCGDex Cache] Speichern fehlgeschlagen: ${e.message}`);
+    }
+  }
+  
+  return sets || [];
+}
+
+/**
+ * Löscht den TCGDex Sets Cache.
+ * Sollte beim Setup/Import aufgerufen werden.
+ * 
+ * @function clearTcgdexCache
+ */
+function clearTcgdexCache() {
+  const properties = PropertiesService.getScriptProperties();
+  properties.deleteProperty('cachedTcgdexSets');
+  properties.deleteProperty('cachedTcgdexSetsTimestamp');
+  Logger.log('[TCGDex Cache] Gelöscht');
+}
+
+/**
  * Lädt und kombiniert Kartendaten aus verschiedenen Quellen.
  * 
  * Unterstützt:
@@ -490,6 +618,61 @@ function loadCardsForSet(setId, setName, tcgdexAllSets) {
   return { allCards, cardmarketData, tcgdexDetailedSet, pokemontcgDetailedSet };
 }
 
+/**
+ * Lädt TCGDex Sets-Liste mit Caching (1 Stunde).
+ * 
+ * Cache-Strategie:
+ * - Speichert TCGDex Sets für 1 Stunde in Properties
+ * - Reduziert API-Calls bei häufigen Sortier-Operationen
+ * - Cache wird bei Setup neu geladen
+ * 
+ * @function loadTcgdexSetsWithCache
+ * @returns {Array<Object>} Liste aller TCGDex Sets
+ */
+function loadTcgdexSetsWithCache() {
+  const cacheKey = 'cachedTcgdexSets';
+  const cacheTimestampKey = 'cachedTcgdexSetsTimestamp';
+  const properties = PropertiesService.getScriptProperties();
+  
+  const cachedTimestamp = properties.getProperty(cacheTimestampKey);
+  const now = Date.now();
+  
+  // Prüfe ob Cache gültig ist
+  if (cachedTimestamp && (now - parseInt(cachedTimestamp)) < API_CACHE_DURATION_MS) {
+    const cached = properties.getProperty(cacheKey);
+    if (cached) {
+      Logger.log(`[TCGDex Cache] Hit - ${Math.round((now - parseInt(cachedTimestamp)) / 1000)}s alt`);
+      return JSON.parse(cached);
+    }
+  }
+  
+  // Cache abgelaufen oder nicht vorhanden - neu laden
+  Logger.log('[TCGDex Cache] Miss - lade von API');
+  const sets = fetchApiData(`${TCGDEX_BASE_URL}sets`, "Fehler beim Laden der TCGDex Sets");
+  
+  // Speichere im Cache
+  try {
+    properties.setProperty(cacheKey, JSON.stringify(sets));
+    properties.setProperty(cacheTimestampKey, now.toString());
+    Logger.log(`[TCGDex Cache] ${sets.length} Sets gespeichert`);
+  } catch (e) {
+    Logger.log(`[TCGDex Cache] Speichern fehlgeschlagen: ${e.message}`);
+  }
+  
+  return sets;
+}
+
+/**
+ * Löscht den TCGDex Sets Cache.
+ * Sollte beim Setup aufgerufen werden.
+ */
+function clearTcgdexCache() {
+  const properties = PropertiesService.getScriptProperties();
+  properties.deleteProperty('cachedTcgdexSets');
+  properties.deleteProperty('cachedTcgdexSetsTimestamp');
+  Logger.log('[TCGDex Cache] Gelöscht');
+}
+
 // ============================================================================
 // SEKTION: SET-MATCHING (pokemontcg.io <-> TCGDex)
 // ============================================================================
@@ -516,6 +699,11 @@ function loadCardsForSet(setId, setName, tcgdexAllSets) {
  * );
  */
 function findMatchingTcgdexSet(pokemontcgIoSet, allTcgdexSets) {
+  // Nutze gecachte TCGDex Sets falls nicht übergeben
+  if (!allTcgdexSets) {
+    allTcgdexSets = loadTcgdexSetsWithCache();
+  }
+  
   if (!pokemontcgIoSet || !allTcgdexSets) {
     return null;
   }
@@ -1122,6 +1310,7 @@ function populateSetsOverview() {
  * @function setupAndImportAllSets
  */
 function setupAndImportAllSets() {
+  clearTcgdexCache(); // Cache invalidieren für frische Daten
   setupSheets(); // Stellt sicher, dass die Basisblätter existieren und Header korrekt sind.
   populateSetsOverview(); // Füllt die Sets-Übersicht und bewahrt bestehende Daten.
   installAllTriggers(); // Installiert alle notwendigen Trigger automatisch
@@ -1955,8 +2144,21 @@ function updateCollectionSummary() {
   }
 
   const overallCompletion = (totalCardsAcrossAllSets > 0) ? totalCollectedCardsAllSets / totalCardsAcrossAllSets : 0;
+  
+  // Erweiterte Statistiken
+  const totalSets = summaryData.length;
+  const completedSets = summaryData.filter(row => row[4] >= 1.0).length;
+  const inProgressSets = summaryData.filter(row => row[4] > 0 && row[4] < 1.0).length;
+  const notStartedSets = summaryData.filter(row => row[4] === 0).length;
+  const avgCompletion = totalSets > 0 ? summaryData.reduce((sum, row) => sum + row[4], 0) / totalSets : 0;
+  
   summarySheet.getRange(SUMMARY_SUMMARY_ROW, 1).setValue(
     `Gesamtzahl Karten (alle Sets): ${totalCardsAcrossAllSets} | Gesammelte Karten: ${totalCollectedCardsAllSets} | Gesammelte RH Karten: ${totalCollectedRHCardsAllSets} | Gesamtabschluss: ${overallCompletion.toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 0 })}`
+  );
+  
+  // Zusätzliche Statistik-Zeile
+  summarySheet.getRange(SUMMARY_SUMMARY_ROW + 1, 1).setValue(
+    `📊 Sets: ${totalSets} gesamt | ✅ ${completedSets} abgeschlossen | 🔄 ${inProgressSets} in Arbeit | ⭕ ${notStartedSets} nicht begonnen | Ø Fortschritt: ${avgCompletion.toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 1 })}`
   );
 }
 
@@ -1982,19 +2184,35 @@ function updateAllCardSheets() {
     setsSheet.getRange(OVERVIEW_DATA_START_ROW + 1, 1, numExistingOverviewDataRows, 2).getValues() : [];
 
   let processedCount = 0;
+  const startTime = Date.now();
   SpreadsheetApp.getActive().toast(`Starte Aktualisierung für ${setsData.length} Sets...`, "🔄 In Arbeit", 10);
 
   for (let i = 0; i < setsData.length; i++) {
-    const setIdFromOverview = extractIdFromHyperlink(setsData[i][0]); // This is the pokemontcg.io Set ID or TCGDex-only ID
-    const setName = setsData[i][1]; // Name des Blattes
+    const setIdFromOverview = extractIdFromHyperlink(setsData[i][0]);
+    const setName = setsData[i][1];
 
     if (!setIdFromOverview || !setName) {
       Logger.log(`Überspringe Zeile ${i + OVERVIEW_DATA_START_ROW + 1} in Sets Overview: Fehlende Set ID oder Name.`);
       continue;
     }
-    SpreadsheetApp.getActive().toast(`Aktualisiere Set ${i + 1}/${setsData.length}: ${setName}`, "🔄 In Arbeit", 5);
+    
+    // Berechne Fortschritt und ETA
+    const progress = Math.round(((i + 1) / setsData.length) * 100);
+    const elapsed = Date.now() - startTime;
+    const avgTimePerSet = elapsed / (i + 1);
+    const remaining = (setsData.length - i - 1) * avgTimePerSet;
+    const etaMinutes = Math.round(remaining / 60000);
+    const etaSeconds = Math.round((remaining % 60000) / 1000);
+    const etaText = etaMinutes > 0 ? `~${etaMinutes}min ${etaSeconds}s` : `~${etaSeconds}s`;
+    
+    SpreadsheetApp.getActive().toast(
+      `Set ${i + 1}/${setsData.length} (${progress}%) - ${setName}\nVerbleibende Zeit: ${etaText}`, 
+      "🔄 Importiere", 
+      5
+    );
+    
     try {
-      populateCardsForSet(setIdFromOverview); // Übergibt pokemontcg.io Set ID oder TCGDex-only ID
+      populateCardsForSet(setIdFromOverview);
       processedCount++;
       if (i < setsData.length - 1) Utilities.sleep(API_DELAY_MS + 1000);
     } catch (e) {
@@ -3387,7 +3605,7 @@ function deleteAllPersistentData() {
 
   const firstResponse = ui.alert(
     "ALLE DATEN LÖSCHEN BESTÄTIGEN",
-    "Möchten Sie wirklich ALLE persistenten Daten (gesammelte Karten, benutzerdefinierte Bilder, gecachte Set-Daten) unwiderruflich löschen? Dies kann NICHT rückgängig gemacht werden.",
+    "Möchten Sie wirklich ALLE persistenten Daten (gesammelte Karten, benutzerdefinierte Bilder, gecachte Set-Daten) unwiderruflich löschen? Ein Backup wird erstellt.",
     ui.ButtonSet.YES_NO
   );
 
@@ -3398,7 +3616,7 @@ function deleteAllPersistentData() {
 
   const secondResponse = ui.alert(
     "LETZTE BESTÄTIGUNG: ALLE DATEN LÖSCHEN",
-    "Sind Sie ABSOLUT SICHER? Alle Daten werden unwiderruflich gelöscht.",
+    "Sind Sie ABSOLUT SICHER? Ein Backup wird erstellt, aber alle aktuellen Sheets werden gelöscht.",
     ui.ButtonSet.YES_NO
   );
 
@@ -3408,6 +3626,17 @@ function deleteAllPersistentData() {
   }
 
   try {
+    // Backup erstellen
+    SpreadsheetApp.getActive().toast("Erstelle Backup...", "🔄 Backup", 3);
+    const timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyyMMdd_HHmmss");
+    const backupKey = `backup_${timestamp}`;
+    const allData = scriptProperties.getProperties();
+    scriptProperties.setProperty(backupKey, JSON.stringify({
+      timestamp: timestamp,
+      data: allData
+    }));
+    Logger.log(`Backup erstellt: ${backupKey} (${Object.keys(allData).length} Properties)`);
+    
     SpreadsheetApp.getActive().toast("Lösche alle persistenten Daten...", "🔄 In Arbeit", 5);
     Logger.log("Starte Löschen aller persistenten Daten.");
 
@@ -3448,6 +3677,265 @@ function deleteAllPersistentData() {
   }
 }
 
+/**
+ * Stellt Daten aus einem Backup wieder her.
+ * 
+ * Features:
+ * - Listet verfügbare Backups auf
+ * - Stellt ausgewähltes Backup wieder her
+ * - Validiert Backup-Daten vor Wiederherstellung
+ * 
+ * @function restoreFromBackup
+ */
+function restoreFromBackup() {
+  const ui = SpreadsheetApp.getUi();
+  const scriptProperties = PropertiesService.getScriptProperties();
+  const allKeys = scriptProperties.getKeys();
+  const backupKeys = allKeys.filter(key => key.startsWith('backup_'));
+  
+  if (backupKeys.length === 0) {
+    ui.alert('ℹ️ Info', 'Keine Backups gefunden.', ui.ButtonSet.OK);
+    return;
+  }
+  
+  // Liste Backups auf
+  const backupList = backupKeys.map(key => {
+    const timestamp = key.replace('backup_', '');
+    return `${timestamp}`;
+  }).join('\\n');
+  
+  const response = ui.prompt(
+    'Backup wiederherstellen',
+    `Verfügbare Backups:\\n${backupList}\\n\\nGeben Sie den Zeitstempel ein (z.B. 20260201_143055):`,
+    ui.ButtonSet.OK_CANCEL
+  );
+  
+  if (response.getSelectedButton() !== ui.Button.OK) {
+    return;
+  }
+  
+  const selectedTimestamp = response.getResponseText().trim();
+  const backupKey = `backup_${selectedTimestamp}`;
+  
+  if (!backupKeys.includes(backupKey)) {
+    ui.alert('❌ Fehler', 'Backup nicht gefunden.', ui.ButtonSet.OK);
+    return;
+  }
+  
+  try {
+    SpreadsheetApp.getActive().toast('Stelle Backup wieder her...', '🔄 In Arbeit', 5);
+    const backupJson = scriptProperties.getProperty(backupKey);
+    const backup = JSON.parse(backupJson);
+    
+    // Stelle Daten wieder her (außer Backup-Keys selbst)
+    Object.keys(backup.data).forEach(key => {
+      if (!key.startsWith('backup_')) {
+        scriptProperties.setProperty(key, backup.data[key]);
+      }
+    });
+    
+    Logger.log(`Backup ${selectedTimestamp} wiederhergestellt: ${Object.keys(backup.data).length} Properties`);
+    SpreadsheetApp.getActive().toast('Backup erfolgreich wiederhergestellt!', '✅ Fertig', 5);
+  } catch (error) {
+    Logger.log(`Fehler bei Wiederherstellung: ${error.message}`);
+    ui.alert(`Fehler: ${error.message}`);
+  }
+}
+
+/**
+ * Exportiert die gesamte Sammlung als CSV-Datei.
+ * 
+ * Format: Set,CardNumber,CardName,Normal,ReverseHolo
+ * 
+ * Features:
+ * - Durchläuft alle Set-Sheets
+ * - Sammelt Karten-Daten und Sammlung-Status
+ * - Generiert Download-Link für CSV
+ * 
+ * @function exportCollectionToCSV
+ */
+function exportCollectionToCSV() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ui = SpreadsheetApp.getUi();
+  const scriptProperties = PropertiesService.getScriptProperties();
+  
+  try {
+    SpreadsheetApp.getActive().toast('Exportiere Sammlung...', '📤 Export', 5);
+    
+    // CSV Header
+    let csvContent = 'Set,SetName,CardNumber,CardName,Normal,ReverseHolo\\n';
+    let totalCards = 0;
+    
+    // Durchlaufe alle Sheets außer Spezialblätter
+    const sheets = ss.getSheets();
+    for (const sheet of sheets) {
+      const sheetName = sheet.getName();
+      if (sheetName === 'Sets Overview' || sheetName === 'Collection Summary') {
+        continue;
+      }
+      
+      // Extrahiere Set-ID aus Sheet-Name
+      const setId = sheetName;
+      
+      // Lade Sammlung-Daten
+      const collectedData = getScriptPropertiesData(setId);
+      const customImageUrls = getScriptPropertiesData(`${setId}_customImageUrls`) || {};
+      
+      // Lies Karten aus Sheet
+      const lastRow = sheet.getLastRow();
+      if (lastRow < CARD_DATA_START_ROW + 1) {
+        continue; // Keine Karten
+      }
+      
+      const numRows = lastRow - CARD_DATA_START_ROW;
+      const data = sheet.getRange(CARD_DATA_START_ROW + 1, 1, numRows, 10).getValues();
+      
+      for (const row of data) {
+        const cardNumber = row[COL_CARD_NUMBER];
+        const cardName = row[COL_CARD_NAME];
+        
+        if (!cardNumber) continue; // Leere Zeile
+        
+        const normalCollected = collectedData && collectedData[cardNumber] && collectedData[cardNumber].normal ? '1' : '0';
+        const reverseHoloCollected = collectedData && collectedData[cardNumber] && collectedData[cardNumber].reverseHolo ? '1' : '0';
+        
+        // Escape CSV-Felder mit Kommas/Anführungszeichen
+        const escapeCsv = (field) => {
+          if (!field) return '';
+          const str = String(field);
+          if (str.includes(',') || str.includes('\"') || str.includes('\\n')) {
+            return `\"${str.replace(/\"/g, '\"\"')}\"`;
+          }
+          return str;
+        };
+        
+        csvContent += `${escapeCsv(setId)},${escapeCsv(sheetName)},${escapeCsv(cardNumber)},${escapeCsv(cardName)},${normalCollected},${reverseHoloCollected}\\n`;
+        totalCards++;
+      }
+    }
+    
+    // Erstelle Blob und Download-Info
+    const timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyyMMdd_HHmmss');
+    const fileName = `Pokemon_Collection_${timestamp}.csv`;
+    const blob = Utilities.newBlob(csvContent, 'text/csv', fileName);
+    
+    // Zeige Download-Dialog
+    const htmlOutput = HtmlService.createHtmlOutput(
+      `<h3>CSV Export erfolgreich!</h3>
+      <p>Karten exportiert: <strong>${totalCards}</strong></p>
+      <p><a href=\"${DriveApp.createFile(blob).getDownloadUrl()}\" target=\"_blank\">📥 ${fileName} herunterladen</a></p>
+      <p><em>Hinweis: Die Datei wurde in Ihr Google Drive hochgeladen.</em></p>
+      <script>
+        setTimeout(function() {
+          google.script.host.close();
+        }, 10000);
+      </script>`
+    ).setWidth(400).setHeight(250);
+    
+    ui.showModalDialog(htmlOutput, '📤 CSV Export');
+    
+    Logger.log(`CSV Export abgeschlossen: ${totalCards} Karten exportiert`);
+    SpreadsheetApp.getActive().toast(`${totalCards} Karten exportiert!`, '✅ Fertig', 5);
+    
+  } catch (error) {
+    Logger.log(`Fehler beim CSV-Export: ${error.message}`);
+    ui.alert(`Fehler beim Export: ${error.message}`);
+  }
+}
+
+/**
+ * Batch-Import: Importiert mehrere Sets auf einmal.
+ * 
+ * Features:
+ * - Dialog für Set-ID Eingabe (kommasepariert)
+ * - Fortschrittsanzeige mit ETA
+ * - Fehlertoleranz (einzelne Sets können fehlschlagen)
+ * 
+ * @function batchImportSets
+ */
+function batchImportSets() {
+  const ui = SpreadsheetApp.getUi();
+  
+  const response = ui.prompt(
+    '📦 Batch-Import',
+    'Geben Sie Set-IDs ein (kommasepariert):\\n\\nBeispiel: base1, base2, base3',
+    ui.ButtonSet.OK_CANCEL
+  );
+  
+  if (response.getSelectedButton() !== ui.Button.OK) {
+    return;
+  }
+  
+  const input = response.getResponseText().trim();
+  if (!input) {
+    ui.alert('❌ Fehler', 'Keine Set-IDs eingegeben.', ui.ButtonSet.OK);
+    return;
+  }
+  
+  // Parse Set-IDs
+  const setIds = input.split(',').map(id => id.trim()).filter(id => id.length > 0);
+  
+  if (setIds.length === 0) {
+    ui.alert('❌ Fehler', 'Keine gültigen Set-IDs gefunden.', ui.ButtonSet.OK);
+    return;
+  }
+  
+  // Bestätigung
+  const confirmResponse = ui.alert(
+    'Batch-Import starten?',
+    `${setIds.length} Set(s) werden importiert:\\n${setIds.join(', ')}\\n\\nFortfahren?`,
+    ui.ButtonSet.YES_NO
+  );
+  
+  if (confirmResponse !== ui.Button.YES) {
+    return;
+  }
+  
+  // Import durchführen
+  let successCount = 0;
+  let failedSets = [];
+  const startTime = Date.now();
+  
+  for (let i = 0; i < setIds.length; i++) {
+    const setId = setIds[i];
+    
+    // Fortschritt berechnen
+    const progress = Math.round(((i + 1) / setIds.length) * 100);
+    const elapsed = Date.now() - startTime;
+    const avgTimePerSet = elapsed / (i + 1);
+    const remaining = (setIds.length - i - 1) * avgTimePerSet;
+    const etaMinutes = Math.round(remaining / 60000);
+    const etaSeconds = Math.round((remaining % 60000) / 1000);
+    const etaText = etaMinutes > 0 ? `~${etaMinutes}min ${etaSeconds}s` : `~${etaSeconds}s`;
+    
+    SpreadsheetApp.getActive().toast(
+      `Set ${i + 1}/${setIds.length} (${progress}%) - ${setId}\\nVerbleibende Zeit: ${etaText}`,
+      '📦 Batch-Import',
+      5
+    );
+    
+    try {
+      populateCardsForSet(setId);
+      successCount++;
+      Utilities.sleep(API_DELAY_MS + 500);
+    } catch (error) {
+      Logger.log(`Batch-Import: Fehler bei Set ${setId}: ${error.message}`);
+      failedSets.push(setId);
+    }
+  }
+  
+  // Aktualisiere Übersichten
+  populateSetsOverview();
+  updateCollectionSummary();
+  
+  // Ergebnis anzeigen
+  const resultMsg = failedSets.length > 0 
+    ? `${successCount}/${setIds.length} Sets erfolgreich importiert.\\n\\nFehlgeschlagen: ${failedSets.join(', ')}`
+    : `Alle ${successCount} Sets erfolgreich importiert!`;
+  
+  SpreadsheetApp.getActive().toast(resultMsg, '✅ Batch-Import abgeschlossen', 10);
+  ui.alert('Batch-Import abgeschlossen', resultMsg, ui.ButtonSet.OK);
+}
 /**
  * Simuliert ein Event-Objekt für Testzwecke und ruft `handleOnEdit()` auf.
  * Nützlich zum Debuggen der `handleOnEdit`-Funktion ohne tatsächliche Bearbeitung der Zelle.
