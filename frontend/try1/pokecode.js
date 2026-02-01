@@ -247,7 +247,8 @@ function onOpen() {
   // 💾 Export & Backup
   const backupMenu = ui.createMenu('💾 Export & Backup');
   backupMenu.addItem('📤 CSV exportieren', 'exportCollectionToCSV');
-  backupMenu.addItem('♻️ Backup wiederherstellen', 'restoreFromBackup');
+  backupMenu.addItem('📥 CSV importieren (Export-Datei)', 'showCsvImportDialog');
+  backupMenu.addItem('♻️ Script-Backup wiederherstellen', 'restoreFromBackup');
   mainMenu.addSubMenu(backupMenu);
 
   // ⚠️ Verwaltung
@@ -259,6 +260,7 @@ function onOpen() {
   // 🐞 Entwicklung
   const devMenu = ui.createMenu('🐞 Entwicklung');
   devMenu.addItem('🧪 onEdit testen', 'debugOnEdit');
+  devMenu.addItem('📋 Logs anzeigen', 'showLogs');
   mainMenu.addSubMenu(devMenu);
 
   mainMenu.addToUi();
@@ -2277,10 +2279,10 @@ function reimportCurrentSet() {
   const { setId, setName } = currentSetInfo;
 
   // Bestätigung anfordern
-  const response = ui.alert(
-    "Set reimportieren bestätigen",
-    `Möchten Sie das Set "${setName}" wirklich reimportieren? Die vorhandenen Kartendaten werden aktualisiert.`,
-    ui.ButtonSet.YES_NO
+  const response = ui.prompt(
+    'Script-Backup wiederherstellen',
+    `Diese Funktion stellt Script-Backups wieder her (nicht CSV).\n\nVerfügbare Backups:\n${backupList}\n\nGeben Sie den Zeitstempel ein (z.B. 20260201_143055):`,
+    ui.ButtonSet.OK_CANCEL
   );
 
   if (response !== ui.Button.YES) {
@@ -3916,6 +3918,10 @@ function deleteAllPersistentData() {
 
     const allKeys = scriptProperties.getKeys();
     allKeys.forEach(key => {
+      if (key.startsWith('backup_')) {
+        Logger.log(`Backup-Property behalten: ${key}`);
+        return;
+      }
       scriptProperties.deleteProperty(key);
       Logger.log(`Gelöschte Property: ${key}`);
     });
@@ -3943,7 +3949,7 @@ function deleteAllPersistentData() {
     SpreadsheetApp.getActive().toast('Alle persistenten Daten erfolgreich gelöscht.', '✅ Fertig', 5);
     Logger.log("Alle persistenten Daten erfolgreich gelöscht.");
   } catch (error) {
-    Logger.log(`Fehler beim Löschen aller persistenten Daten: ${error.message} \nStack: ${e.stack}`);
+    Logger.log(`Fehler beim Löschen aller persistenten Daten: ${error.message} \nStack: ${error.stack}`);
     ui.alert("Error", `Fehler beim Löschen aller persistenten Daten: ${error.message}. Details im Log.`, SpreadsheetApp.getUi().ButtonSet.OK);
   }
 }
@@ -3973,11 +3979,11 @@ function restoreFromBackup() {
   const backupList = backupKeys.map(key => {
     const timestamp = key.replace('backup_', '');
     return `${timestamp}`;
-  }).join('\\n');
+  }).join('\n');
   
   const response = ui.prompt(
-    'Backup wiederherstellen',
-    `Verfügbare Backups:\\n${backupList}\\n\\nGeben Sie den Zeitstempel ein (z.B. 20260201_143055):`,
+    'Script-Backup wiederherstellen',
+    `Diese Funktion stellt Script-Backups wieder her (nicht CSV).\n\nVerfügbare Backups:\n${backupList}\n\nGeben Sie den Zeitstempel ein (z.B. 20260201_143055):`,
     ui.ButtonSet.OK_CANCEL
   );
   
@@ -4128,7 +4134,7 @@ function exportCollectionToCSV() {
     SpreadsheetApp.getActive().toast('Exportiere Sammlung...', '📤 Export', 5);
     
     // CSV Header
-    let csvContent = 'Set,SetName,CardNumber,CardName,Normal,ReverseHolo\\n';
+    let csvContent = 'Set,SetName,CardNumber,CardName,Normal,ReverseHolo\n';
     let totalCards = 0;
     
     // Durchlaufe alle Sheets außer Spezialblätter
@@ -4139,12 +4145,19 @@ function exportCollectionToCSV() {
         continue;
       }
       
-      // Extrahiere Set-ID aus Sheet-Name
-      const setId = sheetName;
+      // Extrahiere technische Set-ID aus der Note in A1 (Format: "Set ID: xyz")
+      const noteText = sheet.getRange(1, 1).getNote() || '';
+      let setId = sheetName; // Fallback
       
-      // Lade Sammlung-Daten
-      const collectedData = getScriptPropertiesData(setId);
-      const customImageUrls = getScriptPropertiesData(`${setId}_customImageUrls`) || {};
+      if (noteText.startsWith('Set ID: ')) {
+        setId = noteText.substring('Set ID: '.length).trim();
+      } else {
+        Logger.log(`CSV Export: Warnung - Keine Set ID Note gefunden für Sheet "${sheetName}". Verwende Sheet-Namen.`);
+      }
+      
+      // Lade Sammlung-Daten für dieses Set
+      const allCollectedData = getScriptPropertiesData('collectedCardsData', {});
+      const collectedData = allCollectedData[setId] || {};
       
       // Lies Karten aus Sheet
       const lastRow = sheet.getLastRow();
@@ -4153,29 +4166,95 @@ function exportCollectionToCSV() {
       }
       
       const numRows = lastRow - CARD_DATA_START_ROW;
-      const data = sheet.getRange(CARD_DATA_START_ROW + 1, 1, numRows, 10).getValues();
+      const range = sheet.getRange(CARD_DATA_START_ROW + 1, 1, numRows, 10);
+      const rawValues = range.getValues();
+      const displayValues = range.getDisplayValues();
       
-      for (const row of data) {
-        const cardNumber = row[COL_CARD_NUMBER];
-        const cardName = row[COL_CARD_NAME];
+      // DIAGNOSTIC: Check if COL_CARD_NUMBER is actually a checkbox column
+      if (displayValues.length > 0) {
+        const col0Values = displayValues.slice(0, Math.min(3, displayValues.length)).map(r => r[0]);
+        const col0HasBoolean = col0Values.some(v => typeof v === 'boolean');
+        const col0HasString = col0Values.some(v => typeof v === 'string' && v.length > 0);
         
-        if (!cardNumber) continue; // Leere Zeile
+        if (col0HasBoolean && !col0HasString) {
+          Logger.log(`CSV Export: ⚠️ CRITICAL: Column 0 contains booleans (checkboxes), not card numbers!`);
+          Logger.log(`CSV Export: Column 0 values sample: ${JSON.stringify(col0Values)}`);
+          Logger.log(`CSV Export: This suggests column indices are WRONG. Need to find actual card number column.`);
+        }
+      }
+      
+      Logger.log(`CSV Export: Sheet "${sheetName}". Range A${CARD_DATA_START_ROW + 1}:J${lastRow}. Rows: ${numRows}`);
+      if (rawValues.length > 0) {
+        Logger.log(`CSV Export: Raw values row 1: ${JSON.stringify(rawValues[0].slice(0, 5))}`);
+        Logger.log(`CSV Export: Display values row 1: ${JSON.stringify(displayValues[0].slice(0, 5))}`);
+      }
+      
+      // Debug: Log ALL columns for first row to understand structure
+      if (displayValues.length > 0) {
+        Logger.log(`CSV Export: Sheet "${sheetName}" has ${displayValues.length} rows. First row ALL columns: ${JSON.stringify(displayValues[0])}`);
+        Logger.log(`CSV Export: Column types - [0]=${typeof displayValues[0][0]}, [1]=${typeof displayValues[0][1]}, [2]=${typeof displayValues[0][2]}, [3]=${typeof displayValues[0][3]}, [4]=${typeof displayValues[0][4]}`);
+        Logger.log(`CSV Export: RAW Col0=${JSON.stringify(rawValues[0][0])}, RAW Col1=${JSON.stringify(rawValues[0][1])}, RAW Col2=${JSON.stringify(rawValues[0][2])}, RAW Col3=${JSON.stringify(rawValues[0][3])}`);
         
-        const normalCollected = collectedData && collectedData[cardNumber] && collectedData[cardNumber].normal ? '1' : '0';
-        const reverseHoloCollected = collectedData && collectedData[cardNumber] && collectedData[cardNumber].reverseHolo ? '1' : '0';
-        
-        // Escape CSV-Felder mit Kommas/Anführungszeichen
-        const escapeCsv = (field) => {
-          if (!field) return '';
-          const str = String(field);
-          if (str.includes(',') || str.includes('\"') || str.includes('\\n')) {
-            return `\"${str.replace(/\"/g, '\"\"')}\"`;
+        // Diagnose: Which column contains actual card numbers (should be string or number, not boolean)?
+        let actualCardNumberCol = -1;
+        let actualCardNameCol = -1;
+        for (let c = 0; c < Math.min(10, displayValues[0].length); c++) {
+          const val = displayValues[0][c];
+          const valStr = String(val).toLowerCase();
+          Logger.log(`CSV Export: Column ${c}: value="${val}" type=${typeof val} is_boolean=${typeof val === 'boolean'}`);
+          // Find numeric or string that looks like card number
+          if (!actualCardNumberCol && val && typeof val !== 'boolean' && /^[0-9A-Za-z]/.test(String(val))) {
+            actualCardNumberCol = c;
+            Logger.log(`CSV Export: Identified column ${c} as potential CardNumber column (value: ${val})`);
           }
-          return str;
-        };
+        }
+      }
+      
+      // Escape CSV-Felder mit Kommas/Anführungszeichen
+      const escapeCsv = (field) => {
+        if (!field) return '';
+        const str = String(field);
+        if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+      };
+      
+      // Sheet-Layout ist ein 2-Spalten-Grid mit Trennungen:
+      // Col 0: Card1 Number, Col 1: Card1 Name, Col 2: Empty
+      // Col 3: Card2 Number, Col 4: Card2 Name, Col 5: Empty, etc.
+      // Pro Zeile können bis zu 5 Karten sein (Spalten 0-9)
+      Logger.log(`CSV Export: Processing sheet "${sheetName}" with grid layout (cards at cols 0,3,6,9; names at cols 1,4,7,10)`);
+      
+      for (let rowIdx = 0; rowIdx < displayValues.length; rowIdx++) {
+        const row = displayValues[rowIdx];
         
-        csvContent += `${escapeCsv(setId)},${escapeCsv(sheetName)},${escapeCsv(cardNumber)},${escapeCsv(cardName)},${normalCollected},${reverseHoloCollected}\\n`;
-        totalCards++;
+        // Verarbeite 2-Spalten-Grid: (CardNum, CardName) alle 3 Spalten
+        // Mögliche Positionen: (0,1), (3,4), (6,7), (9,10)
+        for (let cardIndex = 0; cardIndex < 5; cardIndex++) {
+          const colNum = cardIndex * 3;      // 0, 3, 6, 9, 12
+          const colName = cardIndex * 3 + 1; // 1, 4, 7, 10, 13
+          
+          if (colNum >= row.length) break; // Keine weiteren Spalten
+          
+          const cardNumber = row[colNum];
+          const cardName = row[colName];
+          
+          if (!cardNumber) continue; // Leere Kartennummer = keine Karte
+          
+          // Debug-Logging für erste Karte
+          if (rowIdx === 0 && cardIndex === 0) {
+            Logger.log(`CSV Export: First card from grid. Row 0, CardIndex 0: Number="${cardNumber}", Name="${cardName}"`);
+          }
+          
+          const cardId = normalizeCardNumber(String(cardNumber));
+          const cardStatus = collectedData[cardId] || { g: false, rh: false };
+          const normalCollected = cardStatus.g ? '1' : '0';
+          const reverseHoloCollected = cardStatus.rh ? '1' : '0';
+          
+          csvContent += `${escapeCsv(setId)},${escapeCsv(sheetName)},${escapeCsv(cardNumber)},${escapeCsv(cardName)},${normalCollected},${reverseHoloCollected}\n`;
+          totalCards++;
+        }
       }
     }
     
@@ -4188,7 +4267,7 @@ function exportCollectionToCSV() {
     const htmlOutput = HtmlService.createHtmlOutput(
       `<h3>CSV Export erfolgreich!</h3>
       <p>Karten exportiert: <strong>${totalCards}</strong></p>
-      <p><a href=\"${DriveApp.createFile(blob).getDownloadUrl()}\" target=\"_blank\">📥 ${fileName} herunterladen</a></p>
+      <p><a href="${DriveApp.createFile(blob).getDownloadUrl()}" target="_blank">📥 ${fileName} herunterladen</a></p>
       <p><em>Hinweis: Die Datei wurde in Ihr Google Drive hochgeladen.</em></p>
       <script>
         setTimeout(function() {
@@ -4206,6 +4285,442 @@ function exportCollectionToCSV() {
     Logger.log(`Fehler beim CSV-Export: ${error.message}`);
     ui.alert(`Fehler beim Export: ${error.message}`);
   }
+}
+
+/**
+ * Öffnet einen Dialog zum CSV-Import.
+ * 
+ * @function showCsvImportDialog
+ */
+function showCsvImportDialog() {
+  const htmlOutput = HtmlService.createHtmlOutput(
+    `<div style="font-family:Arial,sans-serif; padding:12px;">
+      <h3>CSV Import</h3>
+      <p>Wählen Sie eine CSV-Datei aus dem Export aus.</p>
+      <input type="file" id="csvFile" accept=".csv,text/csv" />
+      <div style="margin-top:12px; display:flex; gap:8px;">
+        <button onclick="importCsv()" style="padding:6px 12px;">Importieren</button>
+        <button onclick="google.script.host.close()" style="padding:6px 12px;">Abbrechen</button>
+      </div>
+      <p style="font-size:12px; color:#666; margin-top:10px;">Format: Set,SetName,CardNumber,CardName,Normal,ReverseHolo</p>
+      <script>
+        function importCsv() {
+          const fileInput = document.getElementById('csvFile');
+          const file = fileInput.files[0];
+          if (!file) {
+            alert('Bitte eine CSV-Datei auswählen.');
+            return;
+          }
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            google.script.run
+              .withSuccessHandler(function() { google.script.host.close(); })
+              .withFailureHandler(function(err) { alert(err && err.message ? err.message : err); })
+              .importCollectionFromCSV(e.target.result);
+          };
+          reader.readAsText(file);
+        }
+      </script>
+    </div>`
+  ).setWidth(420).setHeight(240);
+
+  SpreadsheetApp.getUi().showModalDialog(htmlOutput, '📥 CSV Import');
+}
+
+/**
+ * Importiert die Sammlung aus einer CSV-Datei (Export-Format).
+ * 
+ * Erwartetes Format:
+ * Set,SetName,CardNumber,CardName,Normal,ReverseHolo
+ * 
+ * Features:
+ * - Validiert Header
+ * - Setzt collectedCardsData entsprechend
+ * - Aktualisiert Übersichten
+ * 
+ * @function importCollectionFromCSV
+ * @param {string} csvContent - CSV-Inhalt als String
+ */
+function importCollectionFromCSV(csvContent) {
+  const ui = SpreadsheetApp.getUi();
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  try {
+    if (!csvContent || typeof csvContent !== 'string') {
+      ui.alert('❌ Fehler', 'CSV-Inhalt fehlt oder ist ungültig.', ui.ButtonSet.OK);
+      return;
+    }
+
+    let rows = [];
+    try {
+      rows = Utilities.parseCsv(csvContent);
+    } catch (e) {
+      Logger.log(`CSV Parse Fehler (Utilities): ${e.message}. Versuche Fallback.`);
+      rows = parseCsvFallback(csvContent);
+    }
+
+    if (!rows || rows.length === 0) {
+      ui.alert('❌ Fehler', 'CSV-Datei ist leer oder konnte nicht gelesen werden.', ui.ButtonSet.OK);
+      Logger.log(`CSV Import: Keine Zeilen geparst. csvContent Länge: ${csvContent ? csvContent.length : 0}`);
+      return;
+    }
+
+    if (rows.length < 2) {
+      ui.alert('❌ Fehler', `CSV enthält nur ${rows.length} Zeile(n), mindestens 2 erforderlich (Header + mindestens eine Datenzeile).`, ui.ButtonSet.OK);
+      Logger.log(`CSV Import: Zu wenig Zeilen. Geparste Zeilen: ${rows.length}`);
+      return;
+    }
+
+    const header = rows[0].map(h => String(h || '').trim().replace(/^\uFEFF/, ''));
+    const expected = ['Set', 'SetName', 'CardNumber', 'CardName', 'Normal', 'ReverseHolo'];
+    const headerOk = expected.every((col, i) => header[i] === col);
+    if (!headerOk) {
+      const actualHeader = header.join(' | ');
+      ui.alert('❌ Fehler', `CSV-Header ungültig.\n\nGefunden: ${actualHeader}\n\nErwartet: Set | SetName | CardNumber | CardName | Normal | ReverseHolo`, ui.ButtonSet.OK);
+      Logger.log(`CSV Header Fehler. Gefunden: [${header}], Erwartet: [${expected}]`);
+      return;
+    }
+
+    const modeResponse = ui.alert(
+      'CSV Import',
+      'Vorhandene Daten überschreiben?\n\nJA = CSV überschreibt bestehende Werte\nNEIN = CSV ergänzt nur (keine Löschung)',
+      ui.ButtonSet.YES_NO
+    );
+
+    const overwriteMode = modeResponse === ui.Button.YES;
+
+    SpreadsheetApp.getActive().toast('Importiere CSV...', '📥 Import', 5);
+
+    const collectedCardsData = getScriptPropertiesData('collectedCardsData', {});
+    const touchedSets = new Set();
+    const unknownSets = new Set();
+    const invalidSets = new Set();
+    let importedRows = 0;
+    let updatedCards = 0;
+    let invalidRows = 0;
+    let unknownCards = 0;
+
+    // Cache Set-Sheets und Card-IDs
+    // WICHTIG: Durchsuche alle Sheets und baue Set-ID-Mapping aus Notes auf
+    const setSheetMap = new Map(); // setId -> sheet
+    const cardIdSetMap = new Map(); // setId -> Set<cardId>
+    Logger.log(`CSV Import: Starting to build set cache from all sheets`);
+    
+    const allSheets = ss.getSheets();
+    const setIdToSheetMap = new Map(); // Erstelle zuerst ein Map von allen Sheets
+    
+    for (const sheet of allSheets) {
+      const sheetName = sheet.getName();
+      if (sheetName === 'Sets Overview' || sheetName === 'Collection Summary') {
+        continue;
+      }
+      
+      // Lese Set-ID aus Note
+      const noteText = sheet.getRange(1, 1).getNote() || '';
+      let setId = sheetName; // Fallback zu Sheet-Name
+      
+      if (noteText.startsWith('Set ID: ')) {
+        setId = noteText.substring('Set ID: '.length).trim();
+      }
+      
+      Logger.log(`CSV Import: Found sheet "${sheetName}" with Set ID: "${setId}"`);
+      setIdToSheetMap.set(setId, sheet);
+    }
+    
+    // Nun durchsuche die CSV-Zeilen nach benötigten Set-IDs
+    const neededSetIds = new Set();
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      if (!row || row.length < 6) continue;
+      const setId = String(row[0] || '').trim();
+      if (setId) neededSetIds.add(setId);
+    }
+    
+    // Lade die benötigten Set-IDs in Cache
+    for (const setId of neededSetIds) {
+      if (setSheetMap.has(setId)) continue; // Bereits gecacht
+      
+      const sheet = setIdToSheetMap.get(setId);
+      if (!sheet) {
+        Logger.log(`CSV Import: Set sheet not found: ${setId}`);
+        unknownSets.add(setId);
+        continue;
+      }
+      
+      const cardIdSet = getCardIdSetFromSheet(sheet);
+      setSheetMap.set(setId, sheet);
+      cardIdSetMap.set(setId, cardIdSet);
+      Logger.log(`CSV Import: Cached ${setId} with ${cardIdSet.size} cards`);
+    }
+
+    Logger.log(`CSV Import: Set cache built. Sets: ${setSheetMap.size}, Unknown: ${unknownSets.size}, Invalid: ${invalidSets.size}. Sheets available: ${setIdToSheetMap.size}`);
+
+    let hasLoggedFirstRow = false;
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      if (!row || row.length < 6) {
+        Logger.log(`CSV Data Row ${i}: Skipped (too short). Row: ${row ? JSON.stringify(row) : 'null'}`);
+        continue;
+      }
+
+      // CSV-Spalten: Set(0), SetName(1), CardNumber(2), CardName(3), Normal(4), ReverseHolo(5)
+      const setId = String(row[0] || '').trim();
+      const rawCardNumber = String(row[2] || '').trim();  // Spalte 2 = CardNumber in CSV
+      const cardNumber = normalizeCardNumber(rawCardNumber);
+      
+      // Debug erste Kartenzelle
+      if (i === 2 && !hasLoggedFirstRow) {
+        Logger.log(`CSV Import: First data row. ROW=${JSON.stringify(row.slice(0, 6))}. setId=${setId}, rawCardNumber=${rawCardNumber}, normalized=${cardNumber}`);
+        hasLoggedFirstRow = true;
+      }
+      
+      if (!setId || !cardNumber) {
+        Logger.log(`CSV Data Row ${i}: Skipped (empty setId or cardNumber). setId=${setId}, raw=${rawCardNumber}, normalized=${cardNumber}`);
+        invalidRows++;
+        continue;
+      }
+
+      if (!setSheetMap.has(setId)) {
+        Logger.log(`CSV Data Row ${i}: Set not in cache: ${setId}`);
+        unknownSets.add(setId);
+        continue;
+      }
+
+      const normalParsed = parseCsvBoolean(row[4]);
+      const reverseParsed = parseCsvBoolean(row[5]);
+      if (normalParsed === null || reverseParsed === null) {
+        Logger.log(`CSV Data Row ${i}: Invalid boolean values. Normal=${row[4]}, ReverseHolo=${row[5]}`);
+        invalidRows++;
+        continue;
+      }
+
+      const normalizedNormal = normalParsed || reverseParsed;
+      const normalizedReverse = reverseParsed && normalizedNormal;
+
+      const cardIdSet = cardIdSetMap.get(setId);
+      if (cardIdSet && !cardIdSet.has(cardNumber)) {
+        Logger.log(`CSV Data Row ${i}: Card not in set. Set=${setId}, Card=${cardNumber}. Available: ${Array.from(cardIdSet).slice(0, 5).join(', ')}...`);
+        unknownCards++;
+        continue;
+      }
+
+      if (!collectedCardsData[setId]) collectedCardsData[setId] = {};
+      if (!collectedCardsData[setId][cardNumber]) collectedCardsData[setId][cardNumber] = { g: false, rh: false };
+
+      const before = JSON.stringify(collectedCardsData[setId][cardNumber]);
+
+      if (overwriteMode) {
+        collectedCardsData[setId][cardNumber].g = normalizedNormal;
+        collectedCardsData[setId][cardNumber].rh = normalizedReverse;
+      } else {
+        if (normalizedNormal) collectedCardsData[setId][cardNumber].g = true;
+        if (normalizedReverse) collectedCardsData[setId][cardNumber].rh = true;
+      }
+
+      const after = JSON.stringify(collectedCardsData[setId][cardNumber]);
+      if (before !== after) {
+        updatedCards++;
+        Logger.log(`CSV Data Row ${i}: Updated ${setId}/${cardNumber}. Before: ${before}, After: ${after}`);
+      }
+
+      touchedSets.add(setId);
+      importedRows++;
+    }
+    
+    Logger.log(`CSV Import: Processing complete. Imported=${importedRows}, Updated=${updatedCards}, Invalid=${invalidRows}, Unknown Cards=${unknownCards}, Unknown Sets=${unknownSets.size}`);
+
+    setScriptPropertiesData('collectedCardsData', collectedCardsData);
+
+    // UI für betroffene Sets aktualisieren
+    touchedSets.forEach(setId => {
+      const sheet = ss.getSheetByName(setId);
+      if (!sheet) return;
+      try {
+        const setCollectedData = collectedCardsData[setId] || {};
+        applyCollectedDataToSetSheet(setId, sheet, setCollectedData);
+        const counts = countCollectedCards(setCollectedData);
+        updateSetSheetHeaderSummary(sheet, setId, counts.collectedCount, counts.reverseHoloCount);
+      } catch (e) {
+        Logger.log(`CSV Import UI-Update Fehler für Set ${setId}: ${e.message}`);
+      }
+    });
+
+    updateCollectionSummary();
+
+    const resultParts = [
+      `Zeilen verarbeitet: ${importedRows}`,
+      `Karten aktualisiert: ${updatedCards}`,
+      `Ungültige Zeilen: ${invalidRows}`,
+      `Unbekannte Karten: ${unknownCards}`
+    ];
+    if (unknownSets.size > 0) {
+      resultParts.push(`Unbekannte Sets: ${Array.from(unknownSets).slice(0, 10).join(', ')}${unknownSets.size > 10 ? '…' : ''}`);
+    }
+    if (invalidSets.size > 0) {
+      resultParts.push(`Ungültige Set-Sheets: ${Array.from(invalidSets).slice(0, 10).join(', ')}${invalidSets.size > 10 ? '…' : ''}`);
+    }
+
+    // Speichere Log-Zusammenfassung
+    const userProperties = PropertiesService.getUserProperties();
+    const logSummary = `[${new Date().toLocaleTimeString('de-DE')}] CSV Import\n${resultParts.join('\n')}\n\n` + 
+                       (userProperties.getProperty('recentLogs') || '').substring(0, 1000);
+    userProperties.setProperty('recentLogs', logSummary);
+
+    SpreadsheetApp.getActive().toast('CSV-Import abgeschlossen', '✅ Fertig', 5);
+    ui.alert('CSV-Import abgeschlossen', resultParts.join('\n'), ui.ButtonSet.OK);
+  } catch (error) {
+    Logger.log(`Fehler beim CSV-Import: ${error.message}`);
+    ui.alert(`Fehler beim CSV-Import: ${error.message}`);
+  }
+}
+
+/**
+ * Wendet gesammelte Karten-Daten auf ein Set-Blatt an.
+ * 
+ * @function applyCollectedDataToSetSheet
+ * @param {string} setId - Set-ID
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet - Set-Blatt
+ * @param {Object} setCollectedData - Gesammelte Daten für das Set
+ */
+function applyCollectedDataToSetSheet(setId, sheet, setCollectedData) {
+  if (!sheet) return;
+  const lastRow = sheet.getLastRow();
+  if (lastRow < SET_SHEET_HEADER_ROWS + 1) return;
+
+  const maxBlocks = Math.ceil((lastRow - SET_SHEET_HEADER_ROWS) / CARD_BLOCK_HEIGHT_ROWS);
+
+  for (let gridRowIndex = 0; gridRowIndex < maxBlocks; gridRowIndex++) {
+    const startSheetRow = SET_SHEET_HEADER_ROWS + 1 + gridRowIndex * CARD_BLOCK_HEIGHT_ROWS;
+    if (startSheetRow > lastRow) break;
+
+    for (let gridColIndex = 0; gridColIndex < CARDS_PER_ROW_IN_GRID; gridColIndex++) {
+      const startSheetCol = 1 + gridColIndex * CARD_BLOCK_WIDTH_COLS;
+      const cardIdValue = sheet.getRange(startSheetRow, startSheetCol).getValue();
+      if (!cardIdValue) continue;
+
+      const cardId = normalizeCardNumber(String(cardIdValue));
+      const status = setCollectedData[cardId] || { g: false, rh: false };
+
+      const gCell = sheet.getRange(startSheetRow + 2, startSheetCol);
+      const rhCell = sheet.getRange(startSheetRow + 2, startSheetCol + 1);
+
+      gCell.setValue(!!status.g);
+      if (status.g) {
+        rhCell.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
+        rhCell.setValue(!!status.rh);
+      } else {
+        rhCell.setDataValidation(null);
+        rhCell.setValue(false);
+      }
+
+      const blockColor = status.rh ? REVERSE_HOL_COLLECTED_COLOR : (status.g ? COLLECTED_COLOR : null);
+      sheet.getRange(startSheetRow, startSheetCol, 3, CARD_BLOCK_WIDTH_COLS).setBackground(blockColor);
+    }
+  }
+}
+
+/**
+ * Liest alle Kartennummern aus einem Set-Grid.
+ * 
+ * @function getCardIdsFromSetSheet
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet - Set-Blatt
+ * @returns {string[]} Liste normalisierter Kartennummern
+ */
+function getCardIdsFromSetSheet(sheet) {
+  if (!sheet) return [];
+  const lastRow = sheet.getLastRow();
+  if (lastRow < SET_SHEET_HEADER_ROWS + 1) return [];
+
+  const totalColsNeeded = CARDS_PER_ROW_IN_GRID * CARD_BLOCK_WIDTH_COLS;
+  const numRows = lastRow - SET_SHEET_HEADER_ROWS;
+  const values = sheet.getRange(SET_SHEET_HEADER_ROWS + 1, 1, numRows, totalColsNeeded).getValues();
+  const cardIds = [];
+
+  for (let r = 0; r < values.length; r += CARD_BLOCK_HEIGHT_ROWS) {
+    for (let c = 0; c < totalColsNeeded; c += CARD_BLOCK_WIDTH_COLS) {
+      const raw = values[r][c];
+      if (!raw) continue;
+      cardIds.push(normalizeCardNumber(String(raw)));
+    }
+  }
+
+  return cardIds;
+}
+
+/**
+ * Erstellt ein Set für schnelle Card-ID Lookups.
+ * 
+ * @function getCardIdSetFromSheet
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet - Set-Blatt
+ * @returns {Set<string>} Set normalisierter Kartennummern
+ */
+function getCardIdSetFromSheet(sheet) {
+  return new Set(getCardIdsFromSetSheet(sheet));
+}
+
+/**
+ * Parst CSV-Boolean-Werte robust.
+ * 
+ * @function parseCsvBoolean
+ * @param {string} value - CSV-Wert
+ * @returns {boolean|null} true/false oder null bei ungültigem Wert
+ */
+function parseCsvBoolean(value) {
+  const v = String(value ?? '').trim().toLowerCase();
+  if (v === '' || v === '0' || v === 'false') return false;
+  if (v === '1' || v === 'true') return true;
+  return null;
+}
+
+/**
+ * Fallback CSV-Parser (manual line-by-line mit Quoted String Support).
+ * 
+ * @function parseCsvFallback
+ * @param {string} csvContent - CSV-String
+ * @returns {Array<Array<string>>} Geparste Zeilen
+ */
+function parseCsvFallback(csvContent) {
+  if (!csvContent) return [];
+  
+  const rows = [];
+  const lines = csvContent.split(/\r?\n/);
+  
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    
+    const row = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      const nextChar = line[i + 1];
+      
+      if (char === '"') {
+        if (inQuotes && nextChar === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        row.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    
+    if (current || row.length > 0) {
+      row.push(current.trim());
+    }
+    
+    if (row.length > 0) {
+      rows.push(row);
+    }
+  }
+  
+  return rows;
 }
 
 /**
@@ -4359,74 +4874,59 @@ function bulkEditSet() {
     }
     const collectedData = allCollectionData[setId];
     
-    // Lade alle Kartennummern aus dem Sheet
-    const lastRow = sheet.getLastRow();
-    if (lastRow < CARD_DATA_START_ROW + 1) {
+    const cardIds = getCardIdsFromSetSheet(sheet);
+    if (cardIds.length === 0) {
       ui.alert('ℹ️ Info', 'Keine Karten im Sheet gefunden.', ui.ButtonSet.OK);
       return;
     }
     
-    const numRows = lastRow - CARD_DATA_START_ROW;
-    const data = sheet.getRange(CARD_DATA_START_ROW + 1, 1, numRows, 1).getValues();
-    
     let changedCount = 0;
     
-    for (const row of data) {
-      const cardNumber = row[0];
-      if (!cardNumber) continue;
-      
-      if (!collectedData[cardNumber]) {
-        collectedData[cardNumber] = { g: false, rh: false };
+    for (const cardId of cardIds) {
+      if (!collectedData[cardId]) {
+        collectedData[cardId] = { g: false, rh: false };
       }
       
       switch(action) {
         case '1': // Alle Normal markieren
-          if (!collectedData[cardNumber].g) {
-            collectedData[cardNumber].g = true;
+          if (!collectedData[cardId].g) {
+            collectedData[cardId].g = true;
             changedCount++;
           }
           break;
-        case '2': // Alle RH markieren
-          if (!collectedData[cardNumber].rh) {
-            collectedData[cardNumber].rh = true;
+        case '2': // Alle RH markieren (impliziert Normal)
+          if (!collectedData[cardId].g || !collectedData[cardId].rh) {
+            collectedData[cardId].g = true;
+            collectedData[cardId].rh = true;
             changedCount++;
           }
           break;
         case '3': // Beide markieren
-          let changed = false;
-          if (!collectedData[cardNumber].g) {
-            collectedData[cardNumber].g = true;
-            changed = true;
+          if (!collectedData[cardId].g || !collectedData[cardId].rh) {
+            collectedData[cardId].g = true;
+            collectedData[cardId].rh = true;
+            changedCount++;
           }
-          if (!collectedData[cardNumber].rh) {
-            collectedData[cardNumber].rh = true;
-            changed = true;
-          }
-          if (changed) changedCount++;
           break;
-        case '4': // Alle Normal entfernen
-          if (collectedData[cardNumber].g) {
-            collectedData[cardNumber].g = false;
+        case '4': // Alle Normal entfernen (impliziert RH entfernen)
+          if (collectedData[cardId].g || collectedData[cardId].rh) {
+            collectedData[cardId].g = false;
+            collectedData[cardId].rh = false;
             changedCount++;
           }
           break;
         case '5': // Alle RH entfernen
-          if (collectedData[cardNumber].rh) {
-            collectedData[cardNumber].rh = false;
+          if (collectedData[cardId].rh) {
+            collectedData[cardId].rh = false;
             changedCount++;
           }
           break;
         case '6': // Alle entfernen
-          let removed = false;
-          if (collectedData[cardNumber].g) {
-            collectedData[cardNumber].g = false;
-            removed = true;
+          if (collectedData[cardId].g || collectedData[cardId].rh) {
+            collectedData[cardId].g = false;
+            collectedData[cardId].rh = false;
+            changedCount++;
           }
-          if (collectedData[cardNumber].rh) {
-            collectedData[cardNumber].rh = false;
-            removed = true;
-          }
-          if (removed) changedCount++;
           break;
         default:
           ui.alert('❌ Fehler', 'Ungültige Auswahl.', ui.ButtonSet.OK);
@@ -4441,30 +4941,9 @@ function bulkEditSet() {
     Logger.log(`Bulk-Edit: ${changedCount} Karten geändert für Set ${setId}`);
     Logger.log(`Gespeicherte Daten: ${JSON.stringify(collectedData).substring(0, 200)}`);
     
-    // Aktualisiere nur die Checkboxen direkt ohne Re-Render
-    // Das ist schneller und verliert keine Karten
-    for (let i = 0; i < data.length; i++) {
-      const cardNumber = data[i][0];
-      if (!cardNumber) continue;
-      
-      const hasG = collectedData[cardNumber]?.g || false;
-      const hasRH = collectedData[cardNumber]?.rh || false;
-      
-      // Finde die Checkbox-Zellen für diese Karte
-      const cardRowStart = CARD_DATA_START_ROW + 1 + i;
-      // G-Checkbox ist typischerweise in Spalte 2, RH in Spalte 3
-      if (hasG) {
-        sheet.getRange(cardRowStart, 2).setValue(true);
-      } else {
-        sheet.getRange(cardRowStart, 2).setValue(false);
-      }
-      if (hasRH) {
-        sheet.getRange(cardRowStart, 3).setValue(true);
-      } else {
-        sheet.getRange(cardRowStart, 3).setValue(false);
-      }
-    }
-    
+    applyCollectedDataToSetSheet(setId, sheet, collectedData);
+    const counts = countCollectedCards(collectedData);
+    updateSetSheetHeaderSummary(sheet, setId, counts.collectedCount, counts.reverseHoloCount);
     updateCollectionSummary();
     
     SpreadsheetApp.getActive().toast(`${changedCount} Karte(n) geändert!`, '✅ Fertig', 5);
@@ -4552,4 +5031,59 @@ function debugOnEdit() {
     Logger.log(`[debugOnEdit] FEHLER bei der Ausführung von handleOnEdit() im Debug-Modus: ${error.message} \nStack: ${error.stack}`);
     ui.alert("Fehler", `Fehler beim Ausführen von handleOnEdit() im Debug-Modus: ${error.message}. Details im Log.`, SpreadsheetApp.getUi().ButtonSet.OK);
   }
+}
+
+/**
+ * Zeigt aktuelle Logs in einem Dialog an.
+ * 
+ * @function showLogs
+ */
+function showLogs() {
+  const ui = SpreadsheetApp.getUi();
+  
+  try {
+    // Aktuell gibt es keine native Log-Export-Funktion in Apps Script
+    // Daher zeigen wir eine Anleitung
+    const htmlOutput = HtmlService.createHtmlOutput(`
+      <div style="font-family:Arial,sans-serif; padding:15px; line-height:1.6;">
+        <h2>📋 Logs anzeigen</h2>
+        
+        <p><strong>Option 1: Apps Script Editor (einfach)</strong></p>
+        <ol>
+          <li>Öffne <strong>Erweiterungen → Apps Script</strong></li>
+          <li>Klicke auf die <strong>Ausführungs-Protokoll</strong> (Uhr-Symbol)</li>
+          <li>Wähle die aktuelle Ausführung</li>
+          <li>Siehst du alle Log-Einträge</li>
+        </ol>
+        
+        <p><strong>Option 2: Inline Log-Anzeige (aktuell läuft)</strong></p>
+        <p>Der letzte CSV-Import hat diese Logs produziert:</p>
+        
+        <pre style="background:#f5f5f5; padding:10px; border-radius:5px; overflow-x:auto; max-height:400px; border:1px solid #ddd;">
+${getRecentLogs()}
+        </pre>
+        
+        <p style="font-size:12px; color:#666; margin-top:15px;">
+          <strong>💡 Tipp:</strong> Nach jedem Import/Export werden Logs automatisch geschrieben. 
+          Nutze die Apps Script Console für detaillierte Debugging-Infos.
+        </p>
+      </div>
+    `).setWidth(600).setHeight(500);
+    
+    ui.showModalDialog(htmlOutput, '📋 Logs anzeigen');
+  } catch (error) {
+    ui.alert('Fehler', `Fehler beim Anzeigen der Logs: ${error.message}`, ui.ButtonSet.OK);
+  }
+}
+
+/**
+ * Liest die letzten Logs aus einer lokalen Property.
+ * 
+ * @function getRecentLogs
+ * @returns {string} Die Logs
+ */
+function getRecentLogs() {
+  const userProperties = PropertiesService.getUserProperties();
+  const logs = userProperties.getProperty('recentLogs') || 'Keine Logs vorhanden. Führe einen Import/Export durch.';
+  return logs;
 }
