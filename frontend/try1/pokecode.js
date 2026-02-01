@@ -142,6 +142,19 @@ const REIMPORT_CHECKBOX_COL_INDEX = 10;
 /** @const {number} Spalte für "Übersicht aktualisieren" Header-Checkbox */
 const OVERVIEW_REFRESH_CHECKBOX_COL = 10;
 
+// --- Set Sheets - Kartendaten Spalten ---
+/** @const {number} Zeile, ab der Kartendaten beginnen (nach Header) */
+const CARD_DATA_START_ROW = SET_SHEET_HEADER_ROWS;
+
+/** @const {number} Spaltenindex für Kartennummer (0-basiert) */
+const COL_CARD_NUMBER = 0;
+
+/** @const {number} Spaltenindex für Kartenname (0-basiert) */
+const COL_CARD_NAME = 1;
+
+/** @const {number} Spaltenindex für Kartenbild (0-basiert) */
+const COL_CARD_IMAGE = 2;
+
 // --- Collection Summary Sheet ---
 /** @const {number} Anzahl der Header-Zeilen in "Collection Summary" */
 const SUMMARY_HEADER_ROWS = 2;
@@ -192,59 +205,226 @@ var isScriptEditing = false;
  * @memberof UI
  */
 function onOpen() {
-  const ui = SpreadsheetApp.getUi(); // Holt die Benutzeroberfläche der Tabelle.
+  const ui = SpreadsheetApp.getUi();
+  const mainMenu = ui.createMenu('🎮 Pokémon TCG Tracker');
 
-  ui.createMenu('Pokémon TCG Tracker')
-    // --- Hauptnavigation ---
-    .addItem('▶️ Sidebar öffnen', 'openCustomSidebar')
-    .addSeparator()
+  // Hauptnavigation
+  mainMenu.addItem('📱 Sidebar öffnen', 'openCustomSidebar');
+  mainMenu.addSeparator();
 
-    // --- Import & Daten ---
-    .addItem('📥 Sets-Liste laden (Setup)', 'setupAndImportAllSets')
-    .addItem('➕ Einzelnes Set hinzufügen', 'promptAndPopulateCardsForSet')
-    .addItem('� Mehrere Sets importieren (Batch)', 'batchImportSets')
-    .addItem('�🔃 Aktuelles Set reimportieren', 'reimportCurrentSet')
-    .addSeparator()
+  // 📥 Import & Verwaltung
+  const importMenu = ui.createMenu('📥 Import & Verwaltung');
+  importMenu.addItem('🚀 Setup: Alle Sets laden', 'setupAndImportAllSets');
+  importMenu.addItem('➕ Einzelnes Set hinzufügen', 'promptAndPopulateCardsForSet');
+  importMenu.addItem('📦 Mehrere Sets (Batch)', 'batchImportSets');
+  importMenu.addItem('🔃 Aktuelles Set reimportieren', 'reimportCurrentSet');
+  mainMenu.addSubMenu(importMenu);
 
-    // --- Aktualisierung & Statistik ---
-    .addItem('📊 Sammlungs-Statistik aktualisieren', 'updateCollectionSummary')
-    .addItem('🔄 Alle Sets neu laden (Langsam!)', 'updateAllCardSheets')
-    .addSeparator()
+  // 🔍 Suche & Filter
+  const searchMenu = ui.createMenu('🔍 Suche & Filter');
+  searchMenu.addItem('🔎 Karte suchen', 'searchCard');
+  searchMenu.addItem('🎯 Sammlung filtern', 'filterCollectionSummary');
+  mainMenu.addSubMenu(searchMenu);
 
-    // --- Sortierung ---
-    .addItem('🗂️ Aktuelles Set sortieren', 'manualSortCurrentSheet')
-    .addItem('🗂️ Alle Sets sortieren', 'manualSortAllSheets')
-    // Trigger in ein Untermenü, da man sie selten ändert
-    .addSubMenu(ui.createMenu('⚙️ Auto-Sortierung')
-      .addItem('Aktivieren (Trigger installieren)', 'installSortTrigger')
-      .addItem('Deaktivieren (Trigger entfernen)', 'uninstallSortTrigger'))
-    .addSeparator()
+  // 📊 Statistik & Anzeige
+  const statsMenu = ui.createMenu('📊 Statistik & Anzeige');
+  statsMenu.addItem('📈 Quick-Stats', 'showQuickStats');
+  statsMenu.addItem('♻️ Statistik aktualisieren', 'updateCollectionSummary');
+  statsMenu.addItem('🔄 Alle Sets neu laden', 'updateAllCardSheets');
+  mainMenu.addSubMenu(statsMenu);
 
-    // --- Export & Backup ---
-    .addItem('📤 Sammlung exportieren (CSV)', 'exportCollectionToCSV')
-    .addItem('💾 Backup wiederherstellen', 'restoreFromBackup')
-    .addSeparator()
+  // 🗂️ Sortierung & Bearbeitung
+  const sortMenu = ui.createMenu('🗂️ Sortierung & Bearbeitung');
+  sortMenu.addItem('↗️ Set sortieren', 'manualSortCurrentSheet');
+  sortMenu.addItem('↗️ Alle Sets sortieren', 'manualSortAllSheets');
+  sortMenu.addItem('✏️ Bulk-Edit', 'bulkEditSet');
+  const autoSortMenu = ui.createMenu('⚙️ Auto-Sortierung');
+  autoSortMenu.addItem('✅ Aktivieren', 'installSortTrigger');
+  autoSortMenu.addItem('❌ Deaktivieren', 'uninstallSortTrigger');
+  sortMenu.addSubMenu(autoSortMenu);
+  mainMenu.addSubMenu(sortMenu);
 
-    // --- Verwaltung / Gefahr ---
-    .addItem('🗑️ Aktuelles Set löschen', 'deleteCurrentSet')
-    .addItem('⚠️ Komplett-Reset (Alle Daten löschen)', 'deleteAllPersistentData')
-    .addSeparator()
+  // 💾 Export & Backup
+  const backupMenu = ui.createMenu('💾 Export & Backup');
+  backupMenu.addItem('📤 CSV exportieren', 'exportCollectionToCSV');
+  backupMenu.addItem('♻️ Backup wiederherstellen', 'restoreFromBackup');
+  mainMenu.addSubMenu(backupMenu);
 
-    // --- Entwicklung ---
-    .addItem('🐞 Debug: onEdit testen', 'debugOnEdit')
-    .addToUi();
+  // ⚠️ Verwaltung
+  const adminMenu = ui.createMenu('⚠️ Verwaltung');
+  adminMenu.addItem('🗑️ Set löschen', 'deleteCurrentSet');
+  adminMenu.addItem('💥 ALLE LÖSCHEN', 'deleteAllPersistentData');
+  mainMenu.addSubMenu(adminMenu);
+
+  // 🐞 Entwicklung
+  const devMenu = ui.createMenu('🐞 Entwicklung');
+  devMenu.addItem('🧪 onEdit testen', 'debugOnEdit');
+  mainMenu.addSubMenu(devMenu);
+
+  mainMenu.addToUi();
 }
 
 /**
- * Öffnet die Custom Sidebar mit Schnellzugriff und Statistiken.
+ * Filtert Collection Summary nach Abschlussstatus.
  * 
- * @function openCustomSidebar
+ * @function filterCollectionSummary
  */
-function openCustomSidebar() {
-  const html = HtmlService.createHtmlOutputFromFile('sidebar')
-    .setTitle('Pokémon TCG Tracker')
-    .setWidth(300);
-  SpreadsheetApp.getUi().showSidebar(html);
+function filterCollectionSummary() {
+  const ui = SpreadsheetApp.getUi();
+  
+  const response = ui.prompt(
+    '🔍 Sammlung filtern',
+    'Filter auswählen:\n1 = Abgeschlossen (100%)\n2 = In Arbeit (1-99%)\n3 = Nicht begonnen (0%)\n4 = Alle anzeigen\n\nGeben Sie eine Zahl ein:',
+    ui.ButtonSet.OK_CANCEL
+  );
+  
+  if (response.getSelectedButton() !== ui.Button.OK) {
+    return;
+  }
+  
+  const filterChoice = response.getResponseText().trim();
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const summarySheet = ss.getSheetByName('Collection Summary');
+  
+  if (!summarySheet || summarySheet.getLastRow() < SUMMARY_DATA_START_ROW + 1) {
+    ui.alert('ℹ️ Info', 'Keine Daten zum Filtern gefunden.', ui.ButtonSet.OK);
+    return;
+  }
+  
+  const numRows = summarySheet.getLastRow() - SUMMARY_DATA_START_ROW;
+  
+  // Entferne vorhandene Filter
+  const filter = summarySheet.getFilter();
+  if (filter) {
+    filter.remove();
+  }
+  
+  // Erstelle neuen Filter
+  const range = summarySheet.getRange(SUMMARY_DATA_START_ROW + 1, 1, numRows, 7);
+  const newFilter = range.createFilter();
+  
+  // Wende Filter an (Spalte 5 = Completion %)
+  switch(filterChoice) {
+    case '1': // Abgeschlossen
+      newFilter.setColumnFilterCriteria(5, SpreadsheetApp.newFilterCriteria()
+        .whenNumberEqualTo(1)
+        .build());
+      SpreadsheetApp.getActive().toast('Filter: Abgeschlossene Sets', '✅ Gefiltert', 3);
+      break;
+    case '2': // In Arbeit
+      newFilter.setColumnFilterCriteria(5, SpreadsheetApp.newFilterCriteria()
+        .whenNumberBetween(0.01, 0.99)
+        .build());
+      SpreadsheetApp.getActive().toast('Filter: Sets in Arbeit', '🔄 Gefiltert', 3);
+      break;
+    case '3': // Nicht begonnen
+      newFilter.setColumnFilterCriteria(5, SpreadsheetApp.newFilterCriteria()
+        .whenNumberEqualTo(0)
+        .build());
+      SpreadsheetApp.getActive().toast('Filter: Nicht begonnene Sets', '⭕ Gefiltert', 3);
+      break;
+    case '4': // Alle
+      newFilter.remove();
+      SpreadsheetApp.getActive().toast('Filter entfernt', 'ℹ️ Alle anzeigen', 3);
+      break;
+    default:
+      ui.alert('❌ Fehler', 'Ungültige Auswahl. Bitte 1-4 eingeben.', ui.ButtonSet.OK);
+      return;
+  }
+}
+
+/**
+ * Sucht nach einer Karte über alle Sets hinweg.
+ * 
+ * @function searchCard
+ */
+function searchCard() {
+  const ui = SpreadsheetApp.getUi();
+  
+  const response = ui.prompt(
+    '🔍 Karte suchen',
+    'Geben Sie den Kartennamen oder die Nummer ein:',
+    ui.ButtonSet.OK_CANCEL
+  );
+  
+  if (response.getSelectedButton() !== ui.Button.OK) {
+    return;
+  }
+  
+  const searchTerm = response.getResponseText().trim().toLowerCase();
+  if (!searchTerm) {
+    return;
+  }
+  
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheets = ss.getSheets();
+  const results = [];
+  
+  SpreadsheetApp.getActive().toast('Suche läuft...', '🔍 Suchen', 3);
+  
+  // Durchsuche alle Set-Sheets
+  for (const sheet of sheets) {
+    const sheetName = sheet.getName();
+    if (sheetName === 'Sets Overview' || sheetName === 'Collection Summary') {
+      continue;
+    }
+    
+    const lastRow = sheet.getLastRow();
+    if (lastRow < CARD_DATA_START_ROW + 1) {
+      continue;
+    }
+    
+    const numRows = lastRow - CARD_DATA_START_ROW;
+    const data = sheet.getRange(CARD_DATA_START_ROW + 1, 1, numRows, 10).getValues();
+    
+    for (let i = 0; i < data.length; i++) {
+      const cardNumber = data[i][COL_CARD_NUMBER];
+      const cardName = data[i][COL_CARD_NAME];
+      
+      if (!cardNumber) continue;
+      
+      const numberMatch = String(cardNumber).toLowerCase().includes(searchTerm);
+      const nameMatch = String(cardName).toLowerCase().includes(searchTerm);
+      
+      if (numberMatch || nameMatch) {
+        results.push({
+          set: sheetName,
+          number: cardNumber,
+          name: cardName,
+          row: CARD_DATA_START_ROW + 2 + i
+        });
+      }
+    }
+  }
+  
+  // Zeige Ergebnisse
+  if (results.length === 0) {
+    ui.alert('🔍 Suchergebnis', `Keine Karten gefunden für: "${searchTerm}"`, ui.ButtonSet.OK);
+    return;
+  }
+  
+  // Erstelle Ergebnis-String
+  let resultText = `${results.length} Karte(n) gefunden:\n\n`;
+  results.slice(0, 20).forEach((result, i) => {
+    resultText += `${i + 1}. ${result.set} - #${result.number} ${result.name}\n`;
+  });
+  
+  if (results.length > 20) {
+    resultText += `\n... und ${results.length - 20} weitere`;
+  }
+  
+  ui.alert('🔍 Suchergebnis', resultText, ui.ButtonSet.OK);
+  
+  // Springe zum ersten Ergebnis
+  if (results.length > 0) {
+    const firstResult = results[0];
+    const sheet = ss.getSheetByName(firstResult.set);
+    if (sheet) {
+      ss.setActiveSheet(sheet);
+      sheet.setActiveRange(sheet.getRange(firstResult.row, 1));
+      SpreadsheetApp.getActive().toast(`Springe zu: ${firstResult.name}`, '✅ Gefunden', 3);
+    }
+  }
 }
 
 /**
@@ -1949,6 +2129,97 @@ function getOfficialAbbreviationFromOverview(setId) {
   return currentSetRow ? currentSetRow[7] : ""; // Abkürzung ist in der 8. Spalte (Index 7).
 }
 
+
+/**
+ * Zeigt schnelle Statistiken für das aktuelle Set an.
+ * 
+ * @function showQuickStats
+ */
+function showQuickStats() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getActiveSheet();
+  const ui = SpreadsheetApp.getUi();
+  
+  const sheetName = sheet.getName();
+  if (sheetName === 'Sets Overview' || sheetName === 'Collection Summary') {
+    ui.alert('ℹ️ Info', 'Bitte wechseln Sie zu einem Set-Sheet.', ui.ButtonSet.OK);
+    return;
+  }
+  
+  const setIdNote = sheet.getRange(1, 1).getNote();
+  if (!setIdNote || !setIdNote.startsWith('Set ID: ')) {
+    ui.alert('❌ Fehler', 'Kein gültiges Set-Sheet.', ui.ButtonSet.OK);
+    return;
+  }
+  
+  const setId = setIdNote.substring('Set ID: '.length);
+  
+  try {
+    // Lade Sammlung-Daten
+    const collectedData = getScriptPropertiesData(setId) || {};
+    
+    // Zähle Karten - Lese direkt aus dem Sheet-Header
+    const headerRow = sheet.getRange(2, 1).getValue();
+    if (!headerRow) {
+      ui.alert('ℹ️ Info', 'Keine Karten im Set.', ui.ButtonSet.OK);
+      return;
+    }
+    
+    // Parse Header: "Gesamtzahl Karten: X | ..." 
+    const totalMatch = headerRow.match(/Gesamtzahl Karten:\s*(\d+)/);
+    const collectedMatch = headerRow.match(/Gesammelte Karten:\s*(\d+)/);
+    const rhMatch = headerRow.match(/Gesammelte RH Karten:\s*(\d+)/);
+    
+    const totalCards = totalMatch ? parseInt(totalMatch[1]) : 0;
+    const normalCollected = collectedMatch ? parseInt(collectedMatch[1]) : 0;
+    const rhCollected = rhMatch ? parseInt(rhMatch[1]) : 0;
+    
+    if (totalCards === 0) {
+      ui.alert('ℹ️ Info', 'Keine Karten im Set.', ui.ButtonSet.OK);
+      return;
+    }
+    
+    // Zähle fehlende Karten
+    const lastRow = sheet.getLastRow();
+    let missingCards = [];
+    
+    if (lastRow > CARD_DATA_START_ROW + 1) {
+      const numRows = lastRow - CARD_DATA_START_ROW;
+      const data = sheet.getRange(CARD_DATA_START_ROW + 1, 1, numRows, 2).getValues();
+      
+      for (const row of data) {
+        const cardNumber = row[0];
+        if (!cardNumber) continue;
+        
+        const hasNormal = collectedData[cardNumber]?.normal || false;
+        if (!hasNormal) {
+          missingCards.push(cardNumber);
+        }
+      }
+    }
+    
+    const completion = totalCards > 0 ? (normalCollected / totalCards * 100) : 0;
+    const bothCollected = Math.min(normalCollected, rhCollected);
+    const missingText = missingCards.length > 0 ? 
+      `\n\nFehlende Karten (${missingCards.length}):\n${missingCards.slice(0, 10).join(', ')}${missingCards.length > 10 ? '...' : ''}` : 
+      '\n\n✅ Alle Normal-Karten gesammelt!';
+    
+    ui.alert(
+      `📊 Statistik: ${sheetName}`,
+      `Set-ID: ${setId}\n\n` +
+      `Gesamtkarten: ${totalCards}\n` +
+      `Normal gesammelt: ${normalCollected} (${completion.toFixed(1)}%)\n` +
+      `RH gesammelt: ${rhCollected}\n` +
+      `Beide gesammelt: ${bothCollected}\n` +
+      `Fehlend: ${totalCards - normalCollected}${missingText}`,
+      ui.ButtonSet.OK
+    );
+    
+  } catch (error) {
+    Logger.log(`Quick-Stats Fehler: ${error.message}`);
+    ui.alert('Fehler', `Statistik-Abruf fehlgeschlagen: ${error.message}`, ui.ButtonSet.OK);
+  }
+}
 
 /**
  * Fordert den Benutzer zur Eingabe einer Set-ID auf und importiert dann die Karten für dieses Set.
@@ -3743,6 +4014,100 @@ function restoreFromBackup() {
 }
 
 /**
+ * Sucht nach einer Karte über alle Sets hinweg.
+ * 
+ * @function searchCard
+ */
+function searchCard() {
+  const ui = SpreadsheetApp.getUi();
+  
+  const response = ui.prompt(
+    '🔍 Karte suchen',
+    'Geben Sie den Kartennamen oder die Nummer ein:',
+    ui.ButtonSet.OK_CANCEL
+  );
+  
+  if (response.getSelectedButton() !== ui.Button.OK) {
+    return;
+  }
+  
+  const searchTerm = response.getResponseText().trim().toLowerCase();
+  if (!searchTerm) {
+    return;
+  }
+  
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheets = ss.getSheets();
+  const results = [];
+  
+  SpreadsheetApp.getActive().toast('Suche läuft...', '🔍 Suchen', 3);
+  
+  // Durchsuche alle Set-Sheets
+  for (const sheet of sheets) {
+    const sheetName = sheet.getName();
+    if (sheetName === 'Sets Overview' || sheetName === 'Collection Summary') {
+      continue;
+    }
+    
+    const lastRow = sheet.getLastRow();
+    if (lastRow < CARD_DATA_START_ROW + 1) {
+      continue;
+    }
+    
+    const numRows = lastRow - CARD_DATA_START_ROW;
+    const data = sheet.getRange(CARD_DATA_START_ROW + 1, 1, numRows, 10).getValues();
+    
+    for (let i = 0; i < data.length; i++) {
+      const cardNumber = data[i][COL_CARD_NUMBER];
+      const cardName = data[i][COL_CARD_NAME];
+      
+      if (!cardNumber) continue;
+      
+      const numberMatch = String(cardNumber).toLowerCase().includes(searchTerm);
+      const nameMatch = String(cardName).toLowerCase().includes(searchTerm);
+      
+      if (numberMatch || nameMatch) {
+        results.push({
+          set: sheetName,
+          number: cardNumber,
+          name: cardName,
+          row: CARD_DATA_START_ROW + 2 + i
+        });
+      }
+    }
+  }
+  
+  // Zeige Ergebnisse
+  if (results.length === 0) {
+    ui.alert('🔍 Suchergebnis', `Keine Karten gefunden für: "${searchTerm}"`, ui.ButtonSet.OK);
+    return;
+  }
+  
+  // Erstelle Ergebnis-String
+  let resultText = `${results.length} Karte(n) gefunden:\n\n`;
+  results.slice(0, 20).forEach((result, i) => {
+    resultText += `${i + 1}. ${result.set} - #${result.number} ${result.name}\n`;
+  });
+  
+  if (results.length > 20) {
+    resultText += `\n... und ${results.length - 20} weitere`;
+  }
+  
+  ui.alert('🔍 Suchergebnis', resultText, ui.ButtonSet.OK);
+  
+  // Springe zum ersten Ergebnis
+  if (results.length > 0) {
+    const firstResult = results[0];
+    const sheet = ss.getSheetByName(firstResult.set);
+    if (sheet) {
+      ss.setActiveSheet(sheet);
+      sheet.setActiveRange(sheet.getRange(firstResult.row, 1));
+      SpreadsheetApp.getActive().toast(`Springe zu: ${firstResult.name}`, '✅ Gefunden', 3);
+    }
+  }
+}
+
+/**
  * Exportiert die gesamte Sammlung als CSV-Datei.
  * 
  * Format: Set,CardNumber,CardName,Normal,ReverseHolo
@@ -3936,6 +4301,181 @@ function batchImportSets() {
   SpreadsheetApp.getActive().toast(resultMsg, '✅ Batch-Import abgeschlossen', 10);
   ui.alert('Batch-Import abgeschlossen', resultMsg, ui.ButtonSet.OK);
 }
+
+/**
+ * Bulk-Edit: Markiert alle Karten eines Sets als gesammelt/nicht gesammelt.
+ * 
+ * @function bulkEditSet
+ */
+function bulkEditSet() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getActiveSheet();
+  const ui = SpreadsheetApp.getUi();
+  
+  // Prüfe ob aktuelles Sheet ein Set-Sheet ist
+  const sheetName = sheet.getName();
+  if (sheetName === 'Sets Overview' || sheetName === 'Collection Summary') {
+    ui.alert('❌ Fehler', 'Bitte wechseln Sie zu einem Set-Sheet.', ui.ButtonSet.OK);
+    return;
+  }
+  
+  const setIdNote = sheet.getRange(1, 1).getNote();
+  if (!setIdNote || !setIdNote.startsWith('Set ID: ')) {
+    ui.alert('❌ Fehler', 'Kein gültiges Set-Sheet.', ui.ButtonSet.OK);
+    return;
+  }
+  
+  const setId = setIdNote.substring('Set ID: '.length);
+  
+  const response = ui.prompt(
+    '✏️ Bulk-Edit',
+    'Aktion auswählen:\n1 = Alle Normal markieren\n2 = Alle RH markieren\n3 = Beide markieren\n4 = Alle Normal entfernen\n5 = Alle RH entfernen\n6 = Alle entfernen\n\nGeben Sie eine Zahl ein:',
+    ui.ButtonSet.OK_CANCEL
+  );
+  
+  if (response.getSelectedButton() !== ui.Button.OK) {
+    return;
+  }
+  
+  const action = response.getResponseText().trim();
+  
+  const confirmResponse = ui.alert(
+    'Bulk-Edit bestätigen',
+    `Möchten Sie wirklich alle Karten in "${sheetName}" ändern?\nDies kann nicht rückgängig gemacht werden!`,
+    ui.ButtonSet.YES_NO
+  );
+  
+  if (confirmResponse !== ui.Button.YES) {
+    return;
+  }
+  
+  try {
+    SpreadsheetApp.getActive().toast('Bulk-Edit läuft...', '✏️ In Arbeit', 5);
+    
+    // Lade aktuelle Sammlung-Daten
+    const allCollectionData = getScriptPropertiesData('collectedCardsData') || {};
+    if (!allCollectionData[setId]) {
+      allCollectionData[setId] = {};
+    }
+    const collectedData = allCollectionData[setId];
+    
+    // Lade alle Kartennummern aus dem Sheet
+    const lastRow = sheet.getLastRow();
+    if (lastRow < CARD_DATA_START_ROW + 1) {
+      ui.alert('ℹ️ Info', 'Keine Karten im Sheet gefunden.', ui.ButtonSet.OK);
+      return;
+    }
+    
+    const numRows = lastRow - CARD_DATA_START_ROW;
+    const data = sheet.getRange(CARD_DATA_START_ROW + 1, 1, numRows, 1).getValues();
+    
+    let changedCount = 0;
+    
+    for (const row of data) {
+      const cardNumber = row[0];
+      if (!cardNumber) continue;
+      
+      if (!collectedData[cardNumber]) {
+        collectedData[cardNumber] = { g: false, rh: false };
+      }
+      
+      switch(action) {
+        case '1': // Alle Normal markieren
+          if (!collectedData[cardNumber].g) {
+            collectedData[cardNumber].g = true;
+            changedCount++;
+          }
+          break;
+        case '2': // Alle RH markieren
+          if (!collectedData[cardNumber].rh) {
+            collectedData[cardNumber].rh = true;
+            changedCount++;
+          }
+          break;
+        case '3': // Beide markieren
+          let changed = false;
+          if (!collectedData[cardNumber].g) {
+            collectedData[cardNumber].g = true;
+            changed = true;
+          }
+          if (!collectedData[cardNumber].rh) {
+            collectedData[cardNumber].rh = true;
+            changed = true;
+          }
+          if (changed) changedCount++;
+          break;
+        case '4': // Alle Normal entfernen
+          if (collectedData[cardNumber].g) {
+            collectedData[cardNumber].g = false;
+            changedCount++;
+          }
+          break;
+        case '5': // Alle RH entfernen
+          if (collectedData[cardNumber].rh) {
+            collectedData[cardNumber].rh = false;
+            changedCount++;
+          }
+          break;
+        case '6': // Alle entfernen
+          let removed = false;
+          if (collectedData[cardNumber].g) {
+            collectedData[cardNumber].g = false;
+            removed = true;
+          }
+          if (collectedData[cardNumber].rh) {
+            collectedData[cardNumber].rh = false;
+            removed = true;
+          }
+          if (removed) changedCount++;
+          break;
+        default:
+          ui.alert('❌ Fehler', 'Ungültige Auswahl.', ui.ButtonSet.OK);
+          return;
+      }
+    }
+    
+    // Speichere Änderungen unter korrektem Key
+    allCollectionData[setId] = collectedData;
+    setScriptPropertiesData('collectedCardsData', allCollectionData);
+    
+    Logger.log(`Bulk-Edit: ${changedCount} Karten geändert für Set ${setId}`);
+    Logger.log(`Gespeicherte Daten: ${JSON.stringify(collectedData).substring(0, 200)}`);
+    
+    // Aktualisiere nur die Checkboxen direkt ohne Re-Render
+    // Das ist schneller und verliert keine Karten
+    for (let i = 0; i < data.length; i++) {
+      const cardNumber = data[i][0];
+      if (!cardNumber) continue;
+      
+      const hasG = collectedData[cardNumber]?.g || false;
+      const hasRH = collectedData[cardNumber]?.rh || false;
+      
+      // Finde die Checkbox-Zellen für diese Karte
+      const cardRowStart = CARD_DATA_START_ROW + 1 + i;
+      // G-Checkbox ist typischerweise in Spalte 2, RH in Spalte 3
+      if (hasG) {
+        sheet.getRange(cardRowStart, 2).setValue(true);
+      } else {
+        sheet.getRange(cardRowStart, 2).setValue(false);
+      }
+      if (hasRH) {
+        sheet.getRange(cardRowStart, 3).setValue(true);
+      } else {
+        sheet.getRange(cardRowStart, 3).setValue(false);
+      }
+    }
+    
+    updateCollectionSummary();
+    
+    SpreadsheetApp.getActive().toast(`${changedCount} Karte(n) geändert!`, '✅ Fertig', 5);
+    ui.alert('Bulk-Edit abgeschlossen', `${changedCount} Karte(n) wurden geändert.`, ui.ButtonSet.OK);
+    
+  } catch (error) {
+    Logger.log(`Bulk-Edit Fehler: ${error.message}\nStack: ${error.stack}`);
+    ui.alert('Fehler', `Bulk-Edit fehlgeschlagen: ${error.message}`, ui.ButtonSet.OK);
+  }
+}
+
 /**
  * Simuliert ein Event-Objekt für Testzwecke und ruft `handleOnEdit()` auf.
  * Nützlich zum Debuggen der `handleOnEdit`-Funktion ohne tatsächliche Bearbeitung der Zelle.
