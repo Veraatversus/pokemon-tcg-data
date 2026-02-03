@@ -16,11 +16,13 @@ export function setLoading(show, message = 'Loading...') {
 /**
  * Show/Hide empty state
  */
-export function setEmptyState(show) {
+export function setEmptyState(show, message = 'Wähle ein Set aus, um die Karten anzuzeigen') {
   const emptyState = document.getElementById('empty-state');
   const cardsContainer = document.getElementById('cards-container');
+  const messageElement = emptyState.querySelector('p');
   
   if (show) {
+    if (messageElement) messageElement.textContent = message;
     emptyState.style.display = 'block';
     cardsContainer.style.display = 'none';
   } else {
@@ -47,12 +49,12 @@ export function renderSetSelector(sets) {
 /**
  * Render Cards Grid
  */
-export function renderCardsGrid(cards) {
+export function renderCardsGrid(cards, emptyMessage) {
   const container = document.getElementById('cards-container');
   container.innerHTML = '';
 
   if (cards.length === 0) {
-    setEmptyState(true);
+    setEmptyState(true, emptyMessage || 'Keine Karten gefunden');
     return;
   }
 
@@ -98,7 +100,8 @@ function createCardElement(card) {
       <img src="${card.imageUrl}" 
            alt="${card.name}" 
            loading="lazy" 
-           onerror="this.src='assets/images/card-placeholder.png'">
+           onerror="this.style.display='none'">
+      <div class="image-fallback" style="display:none;">📷</div>
     </div>
     <div class="card-checkboxes">
       <label class="checkbox-label">
@@ -107,21 +110,32 @@ function createCardElement(card) {
                ${card.collected ? 'checked' : ''}>
         <span>Normal</span>
       </label>
-      <label class="checkbox-label">
+      <label class="checkbox-label" ${!card.collected ? 'style="display:none"' : ''}>
         <input type="checkbox" 
                class="checkbox-reverse" 
                ${card.reverseHolo ? 'checked' : ''}>
         <span>Reverse Holo</span>
       </label>
+      ${card.cardmarketLink ? `<a href="${card.cardmarketLink}" target="_blank" class="cardmarket-link" title="Cardmarket">🛒</a>` : ''}
     </div>
   `;
 
   // Add event listeners
   const normalCheckbox = cardDiv.querySelector('.checkbox-normal');
   const reverseCheckbox = cardDiv.querySelector('.checkbox-reverse');
+  const reverseLabel = reverseCheckbox.closest('.checkbox-label');
 
   normalCheckbox.addEventListener('change', (e) => {
-    onCheckboxChange(card, 'normal', e.target.checked);
+    const checked = e.target.checked;
+    onCheckboxChange(card, 'normal', checked);
+    // Show/hide RH checkbox based on Normal checkbox
+    if (reverseLabel) {
+      reverseLabel.style.display = checked ? '' : 'none';
+      if (!checked && reverseCheckbox.checked) {
+        reverseCheckbox.checked = false;
+        onCheckboxChange(card, 'reverseHolo', false);
+      }
+    }
   });
 
   reverseCheckbox.addEventListener('change', (e) => {
@@ -150,12 +164,13 @@ export function updateCardState(cardId, type, checked) {
  */
 export function updateProgressInfo(progress) {
   const progressInfo = document.getElementById('progress-info');
+  const percentage = Number.isFinite(progress.percentage) ? progress.percentage : 0;
   progressInfo.innerHTML = `
     <span class="progress-text">
-      <strong>${progress.collected} / ${progress.total}</strong> (${progress.percentage}%)
+      <strong>${progress.collected} / ${progress.total}</strong> (${percentage}%)
     </span>
     <div class="progress-bar">
-      <div class="progress-fill" style="width: ${progress.percentage}%"></div>
+      <div class="progress-fill" style="width: ${percentage}%"></div>
     </div>
   `;
 }
@@ -169,18 +184,49 @@ export function displayUserInfo(email) {
 }
 
 /**
+ * Update stats bar
+ */
+export function updateStatsBar(stats) {
+  const statsBar = document.getElementById('stats-bar');
+  statsBar.innerHTML = `
+    <span><strong>Angezeigt:</strong> ${stats.visible} / ${stats.total}</span>
+    <span><strong>Gesammelt:</strong> ${stats.collected}</span>
+    <span><strong>Reverse Holo:</strong> ${stats.reverseHolo}</span>
+    <span><strong>Fehlend:</strong> ${stats.missing}</span>
+  `;
+}
+
+/**
  * Show error message
  */
 export function showError(message) {
-  alert('❌ ' + message);
+  showToast(message, 'error');
 }
 
 /**
  * Show success message
  */
 export function showSuccess(message) {
-  console.log('✅ ' + message);
-  // Could be enhanced with a toast notification
+  showToast(message, 'success');
+}
+
+/**
+ * Toasts
+ */
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(10px)';
+    setTimeout(() => toast.remove(), 200);
+  }, 2500);
 }
 
 // Callback (set by app.js)

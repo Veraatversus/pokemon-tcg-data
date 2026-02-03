@@ -2,11 +2,24 @@ import { CONFIG } from '../config/config.js';
 import * as Auth from './auth.js';
 import * as SheetsAPI from './sheets-api.js';
 import * as UI from './ui.js';
+import * as Modals from './modals.js';
+import * as Analytics from './analytics.js';
+import * as Errors from './errors.js';
 import { Set, Card } from './models.js';
 import { cache } from './cache.js';
+import { extractImageURL, extractCardmarketLink } from './sheets-api.js';
+import { initZoom } from './zoom.js';
+import * as SpreadsheetSelector from './spreadsheet-selector.js';
 
 let currentSet = null;
 let allSets = [];
+let searchDebounce = null;
+
+const filterState = {
+  search: '',
+  filter: 'all',
+  sort: 'number-asc'
+};
 
 /**
  * Initialize Application
@@ -16,13 +29,26 @@ async function init() {
   console.log('Version: Try3 - Google Sheets API Frontend');
 
   try {
-    // Initialize Google APIs
-    await Auth.initializeGapi();
-    Auth.initializeGis(handleAuthSuccess);
+    // Setup global error handlers
+    Errors.setupGlobalErrorHandlers();
 
-    // Set callbacks
+    // Initialize spreadsheet selector
+    SpreadsheetSelector.initSpreadsheetSelector();
+
+    // Validate configuration
+    Errors.validateConfig();
+
+    // Set callbacks first
     Auth.setAuthCallbacks(onSignIn, onSignOut);
     UI.setCheckboxCallback(handleCheckboxChange);
+
+    // Initialize Google APIs and check for existing session
+    const autoLoggedIn = await Auth.initAuth();
+    
+    // Only initialize GIS if not auto-logged in
+    if (!autoLoggedIn) {
+      Auth.initializeGis(handleAuthSuccess);
+    }
 
     // Setup event listeners
     setupEventListeners();
@@ -30,7 +56,8 @@ async function init() {
     console.log('✅ App initialized successfully');
   } catch (error) {
     console.error('❌ Initialization error:', error);
-    UI.showError('Initialisierung fehlgeschlagen. Bitte Seite neu laden.');
+    Errors.handleError(error, 'init');
+    UI.showError(error.message || 'Initialisierung fehlgeschlagen. Bitte Seite neu laden.');
   }
 }
 
@@ -56,7 +83,19 @@ function handleAuthSuccess() {
  */
 async function onSignIn() {
   console.log('User signed in');
+  
+  // Show main container and hide auth screen
+  document.getElementById('auth-container').style.display = 'none';
+  document.getElementById('main-container').style.display = 'block';
+  
+  const email = Auth.getUserEmail();
+  if (email) {
+    UI.displayUserInfo(email);
+  }
+  
   await loadSets();
+  
+  // Zoom will be initialized when cards are loaded
 }
 
 /**
@@ -85,6 +124,14 @@ async function loadSets() {
     console.log('📦 Using cached sets');
     allSets = cached;
     UI.renderSetSelector(allSets);
+    UI.setEmptyState(true);
+    UI.updateStatsBar({
+      visible: 0,
+      total: 0,
+      collected: 0,
+      reverseHolo: 0,
+      missing: 0
+    });
     return;
   }
 
@@ -93,27 +140,36 @@ async function loadSets() {
   try {
     console.log('📥 Loading sets from Google Sheets...');
     
-    // Read Sets Overview sheet
-    const data = await SheetsAPI.readSheet(`${CONFIG.SHEETS.OVERVIEW}!A3:Z1000`);
+    // Read Sets Overview sheet (data starts at row 4, row 3 is header)
+    const data = await SheetsAPI.readSheet(`${CONFIG.SHEETS.OVERVIEW}!A4:Z1000`);
     
     allSets = data
       .filter(row => row[0]) // Filter empty rows
       .map(row => new Set({
-        id: row[0],
-        name: row[1],
-        series: row[2],
-        total: parseInt(row[3]) || 0,
-        releaseDate: row[4],
-        sheetName: row[1]
+        id: row[0],                  // Col A: Set ID
+        name: row[1],                // Col B: Set Name
+        series: row[4] || '',        // Col E: Serie
+        total: parseInt(row[6]) || 0, // Col G: Gesamtzahl Karten
+        releaseDate: row[5] || '',   // Col F: Erscheinungsdatum
+        sheetName: row[1]            // Col B: Set Name ist der Tab-Name in Sheets!
       }));
 
     // Cache the sets
     cache.set('allSets', allSets);
 
     UI.renderSetSelector(allSets);
+    UI.setEmptyState(true);
+    UI.updateStatsBar({
+      visible: 0,
+      total: 0,
+      collected: 0,
+      reverseHolo: 0,
+      missing: 0
+    });
     console.log(`✅ Loaded ${allSets.length} sets`);
   } catch (error) {
     console.error('❌ Error loading sets:', error);
+    Errors.handleError(error, 'loadSets');
     UI.showError('Fehler beim Laden der Sets. Bitte versuche es erneut.');
   } finally {
     UI.setLoading(false);
@@ -130,8 +186,7 @@ async function loadSetCards(setId) {
   if (cached) {
     console.log(`📦 Using cached cards for set: ${setId}`);
     currentSet = cached;
-    UI.renderCardsGrid(currentSet.cards);
-    UI.updateProgressInfo(currentSet.getProgress());
+    applyFiltersAndRender();
     return;
   }
 
@@ -158,17 +213,112 @@ async function loadSetCards(setId) {
     // Cache the set
     cache.set(cacheKey, currentSet);
 
-    UI.renderCardsGrid(set.cards);
-    UI.updateProgressInfo(set.getProgress());
+    applyFiltersAndRender();
+    
+    // Initialize zoom controls after first cards are loaded
+    if (!window._zoomInitialized) {
+      initZoom('cards-container');
+      window._zoomInitialized = true;
+    }
     
     console.log(`✅ Loaded ${cards.length} cards`);
     UI.showSuccess(`${cards.length} Karten geladen`);
   } catch (error) {
     console.error('❌ Error loading cards:', error);
+    Errors.handleError(error, 'loadSetCards');
     UI.showError('Fehler beim Laden der Karten. Bitte versuche es erneut.');
   } finally {
     UI.setLoading(false);
   }
+}
+
+/**
+ * Apply filters, sorting, and render
+ */
+function applyFiltersAndRender() {
+  if (!currentSet) {
+    UI.setEmptyState(true);
+    UI.updateStatsBar({
+      visible: 0,
+      total: 0,
+      collected: 0,
+      reverseHolo: 0,
+      missing: 0
+    });
+    return;
+  }
+
+  const filtered = getFilteredCards(currentSet.cards);
+  UI.renderCardsGrid(filtered, 'Keine Karten für den aktuellen Filter gefunden');
+  UI.updateProgressInfo(currentSet.getProgress());
+  UI.updateStatsBar(getStats(currentSet.cards, filtered));
+}
+
+/**
+ * Filter and sort cards
+ */
+function getFilteredCards(cards) {
+  const search = filterState.search.trim().toLowerCase();
+  let result = cards;
+
+  if (search) {
+    result = result.filter(card => {
+      const numberMatch = String(card.number).toLowerCase().includes(search);
+      const nameMatch = String(card.name).toLowerCase().includes(search);
+      return numberMatch || nameMatch;
+    });
+  }
+
+  switch (filterState.filter) {
+    case 'collected':
+      result = result.filter(card => card.collected || card.reverseHolo);
+      break;
+    case 'missing':
+      result = result.filter(card => !card.collected && !card.reverseHolo);
+      break;
+    case 'reverse':
+      result = result.filter(card => card.reverseHolo);
+      break;
+    default:
+      break;
+  }
+
+  const sorted = [...result];
+  switch (filterState.sort) {
+    case 'number-desc':
+      sorted.sort((a, b) => compareNumbers(b.number, a.number));
+      break;
+    case 'name-asc':
+      sorted.sort((a, b) => String(a.name).localeCompare(String(b.name), 'de', { numeric: true }));
+      break;
+    case 'name-desc':
+      sorted.sort((a, b) => String(b.name).localeCompare(String(a.name), 'de', { numeric: true }));
+      break;
+    case 'number-asc':
+    default:
+      sorted.sort((a, b) => compareNumbers(a.number, b.number));
+      break;
+  }
+
+  return sorted;
+}
+
+function compareNumbers(a, b) {
+  return String(a).localeCompare(String(b), 'de', { numeric: true, sensitivity: 'base' });
+}
+
+function getStats(allCards, visibleCards) {
+  const collected = allCards.filter(card => card.collected).length;
+  const reverseHolo = allCards.filter(card => card.reverseHolo).length;
+  const missing = allCards.filter(card => !card.collected && !card.reverseHolo).length;
+
+  return {
+    visible: visibleCards.length,
+    total: allCards.length,
+    collected,
+    reverseHolo,
+    missing
+  };
 }
 
 /**
@@ -186,15 +336,25 @@ function parseCardsFromGrid(data, sheetName) {
       const baseCol = col * BLOCK_WIDTH;
       
       // Extract card data from grid
+      // Row 0: Col 1 = Card ID, Col 2 = Card Name, Col 3 = Card Name
       const numberRow = row;
       const imageRow = row + 1;
       const checkboxRow = row + 2;
 
       if (numberRow >= data.length || !data[numberRow]) break;
 
-      const cardNumber = data[numberRow][baseCol];
-      const cardName = data[numberRow][baseCol + 1];
-      const imageUrl = data[imageRow] ? data[imageRow][baseCol] : '';
+      const cardNumber = data[numberRow][baseCol];  // Col 1: Card ID
+      const cardName = data[numberRow][baseCol + 1] || data[numberRow][baseCol + 2];  // Col 2 or Col 3: Card Name
+      
+      // Extract image URL from IMAGE formula
+      const imageFormula = data[imageRow] ? data[imageRow][baseCol] : '';
+      const imageUrl = extractImageURL(imageFormula);
+      
+      // Cardmarket Link in Col 3 of checkbox row - extract from HYPERLINK formula
+      const cardmarketFormula = data[checkboxRow] ? data[checkboxRow][baseCol + 2] : '';
+      const cardmarketLink = extractCardmarketLink(cardmarketFormula);
+      
+      // Checkboxes: Col 1 = Normal (always visible), Col 2 = RH (conditional)
       const normalChecked = data[checkboxRow] ? 
         (data[checkboxRow][baseCol] === 'TRUE' || data[checkboxRow][baseCol] === true) : false;
       const reverseHoloChecked = data[checkboxRow] ? 
@@ -206,6 +366,7 @@ function parseCardsFromGrid(data, sheetName) {
           number: cardNumber,
           name: cardName || 'Unknown Card',
           imageUrl: imageUrl || '',
+          cardmarketLink: cardmarketLink || '',
           collected: normalChecked,
           reverseHolo: reverseHoloChecked,
           row: checkboxRow + 1, // 1-indexed
@@ -242,6 +403,7 @@ async function handleCheckboxChange(card, type, checked) {
     // Update UI
     UI.updateCardState(card.id, type, checked);
     UI.updateProgressInfo(currentSet.getProgress());
+    applyFiltersAndRender();
     
     // Invalidate cache
     cache.clear(`set_${currentSet.id}`);
@@ -250,6 +412,7 @@ async function handleCheckboxChange(card, type, checked) {
     UI.showSuccess('Gespeichert!');
   } catch (error) {
     console.error('❌ Error updating checkbox:', error);
+    Errors.handleError(error, 'handleCheckboxChange');
     UI.showError('Fehler beim Speichern. Bitte versuche es erneut.');
     
     // Reload to sync state
@@ -278,11 +441,26 @@ function setupEventListeners() {
   document.getElementById('set-selector').addEventListener('change', (e) => {
     if (e.target.value) {
       loadSetCards(e.target.value);
+      document.getElementById('set-details-btn').style.display = 'block';
     } else {
       document.getElementById('cards-container').innerHTML = '';
       UI.setEmptyState(true);
       currentSet = null;
+      document.getElementById('set-details-btn').style.display = 'none';
+      UI.updateStatsBar({
+        visible: 0,
+        total: 0,
+        collected: 0,
+        reverseHolo: 0,
+        missing: 0
+      });
     }
+  });
+
+  // Change spreadsheet button
+  document.getElementById('change-spreadsheet-btn').addEventListener('click', () => {
+    const currentId = SpreadsheetSelector.getCurrentSpreadsheetId();
+    SpreadsheetSelector.showSpreadsheetSelector(currentId);
   });
 
   // Refresh button
@@ -294,6 +472,55 @@ function setupEventListeners() {
       cache.clear('allSets');
       loadSets();
     }
+  });
+
+  // Analytics button
+  const analyticsBtn = document.getElementById('analytics-btn');
+  if (analyticsBtn) {
+    analyticsBtn.addEventListener('click', () => {
+      const analyticsContent = Analytics.createAnalyticsModal(allSets);
+      Modals.showModal('📈 Sammlungs-Statistiken', analyticsContent);
+    });
+  }
+
+  // Set Details button
+  const setDetailsBtn = document.getElementById('set-details-btn');
+  if (setDetailsBtn) {
+    setDetailsBtn.addEventListener('click', () => {
+      if (currentSet) {
+        Modals.showSetDetailsModal(currentSet);
+      }
+    });
+  }
+
+  // Search input
+  const searchInput = document.getElementById('search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      clearTimeout(searchDebounce);
+      filterState.search = e.target.value;
+      searchDebounce = setTimeout(() => applyFiltersAndRender(), 200);
+    });
+  }
+
+  // Sort selector
+  const sortSelector = document.getElementById('sort-selector');
+  if (sortSelector) {
+    sortSelector.addEventListener('change', (e) => {
+      filterState.sort = e.target.value;
+      applyFiltersAndRender();
+    });
+  }
+
+  // Filter buttons
+  const filterButtons = document.querySelectorAll('.filter-btn');
+  filterButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      filterState.filter = btn.dataset.filter || 'all';
+      applyFiltersAndRender();
+    });
   });
 }
 
