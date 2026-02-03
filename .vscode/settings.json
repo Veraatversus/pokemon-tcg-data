@@ -1,0 +1,12 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^powershell -Command \"Get-ChildItem -Path 'e:\\\\Proggn\\\\Projects\\\\GitRepos\\\\poke-tcg\\\\frontend\\\\try3' -Recurse -File \\| Where-Object \\{\\$_\\.Extension -in '\\.md', '\\.html', '\\.js', '\\.css', '\\.json'\\} \\| Measure-Object \\| Select-Object Count\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cd e:\\\\Proggn\\\\Projects\\\\GitRepos\\\\poke-tcg\\\\frontend\\\\try3; python -m http\\.server 8000$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}

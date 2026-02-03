@@ -62,6 +62,20 @@
     align-items: stretch;
   }
 
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .toolbar-left {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-group {
+    justify-content: flex-start;
+  }
+
   .progress-info {
     flex-direction: column;
     align-items: stretch;
@@ -100,6 +114,10 @@
 
   .cards-container {
     padding: 15px;
+  }
+
+  .stats-bar {
+    gap: 10px;
   }
 }
 

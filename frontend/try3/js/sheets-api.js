@@ -1,20 +1,96 @@
 import { CONFIG } from '../config/config.js';
 
 /**
+ * Extract image URL from IMAGE formula
+ * Handles format: =IMAGE("https://...; 1)
+ * @param {string} formulaOrValue - IMAGE formula or direct URL
+ * @returns {string|null} - Extracted URL or null
+ */
+export function extractImageURL(formulaOrValue) {
+  if (!formulaOrValue) return null;
+  
+  const str = String(formulaOrValue).trim();
+  
+  // Match IMAGE("url"; 1) pattern (with semicolon as separator in German locale)
+  const match = str.match(/IMAGE\("([^"]+)"/);
+  if (match && match[1]) {
+    return match[1];
+  }
+  
+  // Check if it's already a URL
+  if (str.startsWith('http')) {
+    return str;
+  }
+  
+  return null;
+}
+
+/**
+ * Extract cardmarket link from HYPERLINK formula
+ * Handles format: =HYPERLINK("https://..."; "CM")
+ * @param {string} formulaOrValue - HYPERLINK formula
+ * @returns {string|null} - Extracted URL or null
+ */
+export function extractCardmarketLink(formulaOrValue) {
+  if (!formulaOrValue) return null;
+  
+  const str = String(formulaOrValue).trim();
+  
+  // Match HYPERLINK("url"; "text") pattern
+  const match = str.match(/HYPERLINK\("([^"]+)"/);
+  if (match && match[1]) {
+    return match[1];
+  }
+  
+  // Check if it's already a URL
+  if (str.startsWith('http')) {
+    return str;
+  }
+  
+  return null;
+}
+
+/**
+ * API Error Handler
+ */
+function handleAPIError(error, context) {
+  console.error(`[${context}] API Error:`, error);
+
+  if (error.status === 401) {
+    throw new Error('Authentifizierung erforderlich. Bitte melden Sie sich erneut an.');
+  } else if (error.status === 403) {
+    throw new Error('Zugriff verweigert. Überprüfen Sie die Freigabeeinstellungen der Tabelle.');
+  } else if (error.status === 404) {
+    throw new Error('Ressource nicht gefunden. Überprüfen Sie die Spreadsheet-ID.');
+  } else if (error.status >= 500) {
+    throw new Error('Google Sheets API-Fehler. Bitte versuchen Sie es später erneut.');
+  }
+
+  throw error;
+}
+
+/**
  * Read data from Google Sheets
  * @param {string} range - A1 notation range (e.g., "Sets Overview!A1:Z100")
  * @returns {Promise<Array>} - 2D array of cell values
  */
 export async function readSheet(range) {
   try {
+    if (!range) throw new Error('Range ist erforderlich');
+    
+    // Get spreadsheet ID dynamically
+    const spreadsheetId = window.getCurrentSpreadsheetId ? window.getCurrentSpreadsheetId() : CONFIG.SPREADSHEET_ID;
+    if (!spreadsheetId) throw new Error('Spreadsheet-ID nicht konfiguriert');
+
     const response = await gapi.client.sheets.spreadsheets.values.get({
-      spreadsheetId: CONFIG.SPREADSHEET_ID,
+      spreadsheetId: spreadsheetId,
       range: range,
+      valueRenderOption: 'FORMULA' // Get formulas as text, not calculated values
     });
+    
     return response.result.values || [];
   } catch (error) {
-    console.error('Error reading sheet:', error);
-    throw error;
+    handleAPIError(error, `readSheet(${range})`);
   }
 }
 
@@ -25,8 +101,14 @@ export async function readSheet(range) {
  */
 export async function writeSheet(range, values) {
   try {
+    if (!range) throw new Error('Range ist erforderlich');
+    if (!values) throw new Error('Values sind erforderlich');
+
+    // Get spreadsheet ID dynamically
+    const spreadsheetId = window.getCurrentSpreadsheetId ? window.getCurrentSpreadsheetId() : CONFIG.SPREADSHEET_ID;
+
     const response = await gapi.client.sheets.spreadsheets.values.update({
-      spreadsheetId: CONFIG.SPREADSHEET_ID,
+      spreadsheetId: spreadsheetId,
       range: range,
       valueInputOption: 'USER_ENTERED',
       resource: {
@@ -35,8 +117,7 @@ export async function writeSheet(range, values) {
     });
     return response.result;
   } catch (error) {
-    console.error('Error writing to sheet:', error);
-    throw error;
+    handleAPIError(error, `writeSheet(${range})`);
   }
 }
 
@@ -47,14 +128,15 @@ export async function writeSheet(range, values) {
  */
 export async function batchReadSheet(ranges) {
   try {
+    if (!ranges || ranges.length === 0) throw new Error('Ranges sind erforderlich');
+
     const response = await gapi.client.sheets.spreadsheets.values.batchGet({
       spreadsheetId: CONFIG.SPREADSHEET_ID,
       ranges: ranges,
     });
     return response.result.valueRanges;
   } catch (error) {
-    console.error('Error batch reading:', error);
-    throw error;
+    handleAPIError(error, `batchReadSheet(${ranges.length} ranges)`);
   }
 }
 

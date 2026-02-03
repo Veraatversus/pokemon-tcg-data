@@ -16,6 +16,26 @@ export async function initializeGapi() {
       });
       gapiInited = true;
       console.log('GAPI initialized');
+      
+      // Restore token from localStorage if exists
+      const savedToken = localStorage.getItem('gapi_token');
+      if (savedToken) {
+        try {
+          const token = JSON.parse(savedToken);
+          // Check if token is still valid (not expired)
+          if (token.expires_at && Date.now() < token.expires_at) {
+            gapi.client.setToken(token);
+            console.log('✅ Token restored from localStorage');
+          } else {
+            console.log('⚠️ Token expired, clearing...');
+            localStorage.removeItem('gapi_token');
+          }
+        } catch (error) {
+          console.error('Error restoring token:', error);
+          localStorage.removeItem('gapi_token');
+        }
+      }
+      
       resolve();
     });
   });
@@ -51,6 +71,16 @@ export function handleAuthClick() {
       throw (resp);
     }
     console.log('Auth successful');
+    
+    // Save token to localStorage for persistence
+    const token = gapi.client.getToken();
+    if (token) {
+      // Add expiration timestamp (typically 1 hour)
+      token.expires_at = Date.now() + (3600 * 1000);
+      localStorage.setItem('gapi_token', JSON.stringify(token));
+      console.log('✅ Token saved to localStorage');
+    }
+    
     await onSignIn();
   };
 
@@ -71,6 +101,7 @@ export function handleSignoutClick() {
   if (token !== null) {
     google.accounts.oauth2.revoke(token.access_token);
     gapi.client.setToken('');
+    localStorage.removeItem('gapi_token');
     console.log('Signed out');
     onSignOut();
   }
@@ -90,19 +121,11 @@ export function getUserEmail() {
   const token = gapi.client.getToken();
   if (token && token.access_token) {
     try {
-      // Decode JWT token to get user info
-      const base64Url = token.access_token.split('.')[1];
-      if (!base64Url) return 'User';
-      
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
-      
-      const payload = JSON.parse(jsonPayload);
-      return payload.email || 'User';
+      // OAuth tokens are not JWTs, we can't decode them
+      // Return a placeholder or try to get from Google API
+      return 'User';
     } catch (error) {
-      console.error('Error decoding token:', error);
+      console.error('Error getting user info:', error);
       return 'User';
     }
   }
@@ -116,4 +139,22 @@ let onSignOut = () => {};
 export function setAuthCallbacks(signIn, signOut) {
   onSignIn = signIn;
   onSignOut = signOut;
+}
+
+/**
+ * Initialize authentication and check for existing session
+ */
+export async function initAuth() {
+  await initializeGapi();
+  
+  // Check if user is already authenticated (token exists)
+  if (isAuthenticated()) {
+    console.log('✅ User already authenticated, auto-login...');
+    // Trigger onSignIn without showing auth popup
+    await onSignIn();
+    return true;
+  }
+  
+  console.log('⚠️ No valid token found, user needs to login');
+  return false;
 }

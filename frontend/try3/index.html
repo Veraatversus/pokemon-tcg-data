@@ -11,6 +11,9 @@
   <link rel="stylesheet" href="css/grid.css">
   <link rel="stylesheet" href="css/auth.css">
   <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/modals.css">
+  <link rel="stylesheet" href="css/analytics.css">
+  <link rel="stylesheet" href="css/zoom.css">
 </head>
 <body>
   <div id="app">
@@ -39,6 +42,7 @@
           <h1>🎴 Pokémon TCG Collection</h1>
         </div>
         <div class="header-right">
+          <button id="change-spreadsheet-btn" class="btn-icon" title="Tabelle wechseln">📊 Tabelle</button>
           <div id="user-info" class="user-info"></div>
           <button id="signout-button" class="btn-secondary">Sign Out</button>
         </div>
@@ -49,11 +53,47 @@
         <button id="refresh-button" class="btn-icon" title="Refresh">
           🔄 Refresh
         </button>
+        <button id="analytics-btn" class="btn-icon" title="Analytics">
+          📈 Statistiken
+        </button>
         <select id="set-selector" class="set-selector">
           <option value="">Select Set...</option>
         </select>
+        <button id="set-details-btn" class="btn-icon" title="Set-Details" style="display:none;">
+          📊 Details
+        </button>
         <div id="progress-info" class="progress-info"></div>
       </nav>
+
+      <!-- Toolbar: Search, Sort, Filters -->
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <input
+            id="search-input"
+            class="search-input"
+            type="text"
+            placeholder="Suche nach Name oder Nummer"
+            aria-label="Suche nach Name oder Nummer"
+          >
+          <select id="sort-selector" class="sort-selector" aria-label="Sortierung">
+            <option value="number-asc">Nummer (aufsteigend)</option>
+            <option value="number-desc">Nummer (absteigend)</option>
+            <option value="name-asc">Name (A–Z)</option>
+            <option value="name-desc">Name (Z–A)</option>
+          </select>
+        </div>
+        <div class="toolbar-right">
+          <div class="filter-group" role="group" aria-label="Filter">
+            <button class="filter-btn active" data-filter="all" type="button">Alle</button>
+            <button class="filter-btn" data-filter="collected" type="button">Gesammelt</button>
+            <button class="filter-btn" data-filter="missing" type="button">Fehlend</button>
+            <button class="filter-btn" data-filter="reverse" type="button">Reverse Holo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Bar -->
+      <div id="stats-bar" class="stats-bar"></div>
 
       <!-- Loading Indicator -->
       <div id="loading" class="loading" style="display:none;">
@@ -70,6 +110,12 @@
       </div>
     </div>
   </div>
+
+  <!-- Modals -->
+  <div id="modal-container" class="modal-container"></div>
+
+  <!-- Toasts -->
+  <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
 
   <!-- Google API Client Libraries -->
   <script src="https://apis.google.com/js/api.js"></script>
