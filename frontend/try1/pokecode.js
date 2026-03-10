@@ -4592,12 +4592,24 @@ function importCollectionFromCSV(csvContent) {
     if (unknownSets.size > 0) {
       const unknownList = Array.from(unknownSets).join(', ');
       ui.alert('⚠️ Unbekannte Sets',
-               `Die CSV enthält Einträge für Sets, die derzeit nicht in der "Sets Overview" vorhanden sind:\n${unknownList}\n\nDie Übersicht wird jetzt aktualisiert.`,
+               `Die CSV enthält Einträge für Sets, die derzeit nicht in der "Sets Overview" vorhanden sind:\n${unknownList}\n\nDie Übersicht wird jetzt aktualisiert. Anschließend werden fehlende Set-Blätter automatisch erzeugt.`,
                ui.ButtonSet.OK);
       try {
         populateSetsOverview();
       } catch (e) {
         Logger.log(`Fehler beim Aktualisieren der Sets-Übersicht nach CSV-Import: ${e.message}`);
+      }
+
+      // Erstelle fehlende Set-Blätter automatisch
+      for (const setId of unknownSets) {
+        try {
+          Logger.log(`CSV Import: Versuche automatisches Erzeugen / Importieren von Set ${setId}`);
+          populateCardsForSet(setId);
+          touchedSets.add(setId);
+        } catch (e) {
+          Logger.log(`CSV Import: Fehler beim automatischen Import von Set ${setId}: ${e.message}`);
+          // Wenn populateCardsForSet scheitert, setzen wir das Set weiterhin auf unbekannt; der Nutzer muss es manuell importieren.
+        }
       }
     } else {
       // auch ohne unbekannte Sets bringt ein Update keine Nachteile und stellt sicher, dass
