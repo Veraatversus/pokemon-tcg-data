@@ -4371,6 +4371,14 @@ function importCollectionFromCSV(csvContent) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
   try {
+    // Make sure the overview/summary sheets are present so updates later don't fail.
+    // setupSheets is idempotent and safe even if already run earlier.
+    try {
+      setupSheets();
+    } catch (err) {
+      Logger.log(`CSV Import: setupSheets() Fehler – ${err.message}`);
+    }
+
     if (!csvContent || typeof csvContent !== 'string') {
       ui.alert('❌ Fehler', 'CSV-Inhalt fehlt oder ist ungültig.', ui.ButtonSet.OK);
       return;
@@ -4565,11 +4573,44 @@ function importCollectionFromCSV(csvContent) {
         applyCollectedDataToSetSheet(setId, sheet, setCollectedData);
         const counts = countCollectedCards(setCollectedData);
         updateSetSheetHeaderSummary(sheet, setId, counts.collectedCount, counts.reverseHoloCount);
+
+        // die zugehörige Zeile in der Sets-Übersicht anpassen wie es ein Import-Checkbox-Trigger täte
+        try {
+          updateSetsOverviewRowAfterCardImport(setId, null, null, sheet);
+        } catch (ignored) {
+          // falls etwas schiefgeht (z.B. Übersicht existiert noch nicht), ignorieren
+        }
       } catch (e) {
         Logger.log(`CSV Import UI-Update Fehler für Set ${setId}: ${e.message}`);
       }
     });
 
+    // Zusammenfassung neu berechnen (wird normalerweise durch Trigger erledigt)
+    updateCollectionSummary();
+
+    // Falls unbekannte Sets auftauchen, weisen wir den Benutzer hin und aktualisieren die Übersicht
+    if (unknownSets.size > 0) {
+      const unknownList = Array.from(unknownSets).join(', ');
+      ui.alert('⚠️ Unbekannte Sets',
+               `Die CSV enthält Einträge für Sets, die derzeit nicht in der "Sets Overview" vorhanden sind:\n${unknownList}\n\nDie Übersicht wird jetzt aktualisiert.`,
+               ui.ButtonSet.OK);
+      try {
+        populateSetsOverview();
+      } catch (e) {
+        Logger.log(`Fehler beim Aktualisieren der Sets-Übersicht nach CSV-Import: ${e.message}`);
+      }
+    } else {
+      // auch ohne unbekannte Sets bringt ein Update keine Nachteile und stellt sicher, dass
+      // Abkürzungen/Hyperlinks etc. aktuell sind
+      try {
+        populateSetsOverview();
+      } catch (e) {
+        Logger.log(`Fehler beim Aktualisieren der Sets-Übersicht nach CSV-Import: ${e.message}`);
+      }
+    }
+
+    // wenn wir die Übersicht erneuert haben, in seltenen Fällen nochmals die Sammlung
+    // zusammenfassen, damit Abkürzungen aus der Übersicht einfließen
     updateCollectionSummary();
 
     const resultParts = [
