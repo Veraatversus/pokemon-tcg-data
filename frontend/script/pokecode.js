@@ -1651,31 +1651,73 @@ function populateCardsForSet(setIdFromOverview) {
 
   // Verbesserte Logik für das Erstellen/Wiederverwenden von Blättern
   if (cardSheet) {
-    const sheetNote = cardSheet.getRange(1, 1).getNote();
+    const sheetNote = cardSheet.getRange(1, 1).getNote() || "";
     const expectedNote = `Set ID: ${setIdFromOverview}`;
+    
+    // DEBUG: Diagnostiziere die aktuelle Situation
+    Logger.log(`[populateCardsForSet] Blatt "${setNameInSheet}" found. sheetNote="${sheetNote}", expectedNote="${expectedNote}"`);
     
     // Prüfe auf Migrations-Szenario: TCGdex-only zu regulärer API
     // (Wenn Set ursprünglich als TCGDEX-{ID} importiert wurde, jetzt aber in Haupt-API verfügbar ist)
     let isMigrationCase = false;
-    if (sheetNote.startsWith('Set ID: TCGDEX-') && !setIdFromOverview.startsWith('TCGDEX-')) {
+    if (sheetNote && sheetNote.startsWith('Set ID: TCGDEX-') && !setIdFromOverview.startsWith('TCGDEX-')) {
       const oldTcgdexId = sheetNote.substring('Set ID: '.length); // z.B. "TCGDEX-me2pt5"
       const normalizedOldId = oldTcgdexId.substring('TCGDEX-'.length); // z.B. "me2pt5"
       const normalizedNewId = setIdFromOverview; // z.B. "me2pt5"
+      
+      Logger.log(`[Migration Check] oldTcgdexId="${oldTcgdexId}", normalizedOldId="${normalizedOldId}", normalizedNewId="${normalizedNewId}"`);
       
       if (normalizedOldId === normalizedNewId) {
         isMigrationCase = true;
         Logger.log(`[Migration] TCGdex-only Set wird aktualisiert: ${oldTcgdexId} → ${setIdFromOverview}`);
         cardSheet.getRange(1, 1).setNote(expectedNote);
         SpreadsheetApp.getActive().toast(`♻️ Set "${setNameInSheet}" wird von TCGdex-only zu regulärer API migriert...`, "Migration in Bearbeitung", 3);
+      } else {
+        Logger.log(`[Migration Check] IDs stimmen nicht überein: "${normalizedOldId}" ≠ "${normalizedNewId}"`);
       }
+    } else if (!sheetNote || sheetNote.trim() === "") {
+      Logger.log(`[populateCardsForSet] WARNUNG: Blatt "${setNameInSheet}" hat keine Notiz in A1. Dies könnte ein beschädigtes Blatt sein.`);
     }
     
     if (sheetNote !== expectedNote && !isMigrationCase) {
-      // Wenn Blatt existiert, aber nicht zu diesem Set gehört
-      const errorMessage = `Das Tabellenblatt mit dem Namen "${setNameInSheet}" existiert bereits, ist aber nicht dem Set mit der ID "${setIdFromOverview}" zugeordnet. Bitte löschen oder benennen Sie das Blatt "${setNameInSheet}" um, bevor Sie fortfahren, oder stellen Sie sicher, dass die Notiz in A1 des Blattes korrekt ist ("Set ID: ${setIdFromOverview}").`;
-      // KEIN UI.ALERT HIER, da die aufrufende Funktion den Alert übernimmt.
-      Logger.log(errorMessage);
-      throw new Error(errorMessage); // Fehler werfen für korrekten Abbruch
+      // NOTFALL-FIX: Versuche noch einmal eine "tiefere" Migration für alte Blätter
+      // Falls die Notiz völlig falsch ist, versuche eine manuelle Korrektur
+      if (sheetNote.includes('TCGDEX-')) {
+        Logger.log(`[Notfall-Migration] Versuche manuelle Migration für "${setNameInSheet}" mit alter Notiz: "${sheetNote}"`);
+        
+        try {
+          // Extrahiere die Set-ID aus der alten Notiz (könnte verschiedene Formate sein)
+          const possibleOldId = sheetNote.replace('Set ID: ', '').trim();
+          if (possibleOldId.includes('TCGDEX-')) {
+            const normalizedFromOld = possibleOldId.substring('TCGDEX-'.length);
+            if (normalizedFromOld === setIdFromOverview) {
+              Logger.log(`[Notfall-Migration] Manuelle Korrektur erfolgreich: "${possibleOldId}" → "${setIdFromOverview}"`);
+              cardSheet.getRange(1, 1).setNote(expectedNote);
+              isMigrationCase = true;
+              // Migriere auch PropertiesService-Daten
+              const oldCardmarketKey = `pokemontcgIoCardmarketUrls_${possibleOldId}`;
+              const newCardmarketKey = `pokemontcgIoCardmarketUrls_${setIdFromOverview}`;
+              const cardmarketData = getScriptPropertiesData(oldCardmarketKey, null);
+              if (cardmarketData) {
+                setScriptPropertiesData(newCardmarketKey, cardmarketData);
+                PropertiesService.getScriptProperties().deleteProperty(oldCardmarketKey);
+                Logger.log(`[Notfall-Migration] Cardmarket-URLs migriert`);
+              }
+            }
+          }
+        } catch (migrationError) {
+          Logger.log(`[Notfall-Migration] Fehler bei manueller Migration: ${migrationError.message}`);
+        }
+      }
+      
+      // Wenn trotz Notfall-Fix immer noch kein Match, dann werfe Fehler
+      if (sheetNote !== expectedNote && !isMigrationCase) {
+        // Wenn Blatt existiert, aber nicht zu diesem Set gehört
+        const errorMessage = `Das Tabellenblatt mit dem Namen "${setNameInSheet}" existiert bereits, ist aber nicht dem Set mit der ID "${setIdFromOverview}" zugeordnet. Bitte löschen oder benennen Sie das Blatt "${setNameInSheet}" um, bevor Sie fortfahren, oder stellen Sie sicher, dass die Notiz in A1 des Blattes korrekt ist ("Set ID: ${setIdFromOverview}"). (Aktuelle Notiz: "${sheetNote}")`;
+        // KEIN UI.ALERT HIER, da die aufrufende Funktion den Alert übernimmt.
+        Logger.log(errorMessage);
+        throw new Error(errorMessage); // Fehler werfen für korrekten Abbruch
+      }
     }
     // Wenn cardSheet existiert und die Notiz übereinstimmt, wird es wiederverwendet.
   } else {
@@ -5310,6 +5352,7 @@ function migrateLegacyTcgdexSetIds() {
   const properties = PropertiesService.getScriptProperties();
   let importedSetsStatus = getScriptPropertiesData('importedSetsStatus', {});
   let migrationCount = 0;
+  let sheetsChecked = 0;
 
   // Durchsuche alle Blätter nach alten TCGdex-only Set-IDs
   const allSheets = ss.getSheets();
@@ -5322,14 +5365,20 @@ function migrateLegacyTcgdexSetIds() {
       continue;
     }
     
+    sheetsChecked++;
+    
     try {
       const noteCell = sheet.getRange(1, 1);
-      const note = noteCell.getNote();
+      const note = noteCell.getNote() || "";
+      
+      Logger.log(`[migrateLegacyTcgdexSetIds] Prüfe Blatt "${sheetName}": Notiz = "${note}"`);
       
       // Prüfe, ob die Notiz mit "Set ID: TCGDEX-" beginnt (alte Format)
-      if (note.startsWith('Set ID: TCGDEX-')) {
+      if (note && note.startsWith('Set ID: TCGDEX-')) {
         const oldSetId = note.substring('Set ID: '.length); // z.B. "TCGDEX-me2pt5"
         const normalizedSetId = oldSetId.substring('TCGDEX-'.length); // z.B. "me2pt5"
+        
+        Logger.log(`[migrateLegacyTcgdexSetIds] MIGRATION DETECTED: "${oldSetId}" → "${normalizedSetId}"`);
         
         // Prüfe, ob bereits ein neueres Blatt mit normalisierter ID existiert
         // und ob dieses Blatt noch mit der alten ID in importedSetsStatus ist
@@ -5355,6 +5404,22 @@ function migrateLegacyTcgdexSetIds() {
           Logger.log(`[Migration] Cardmarket-URLs migriert: "${oldCardmarketKey}" → "${newCardmarketKey}"`);
         }
         
+        // Migriere Collected Cards Data (wenn vorhanden)
+        const oldCollectedKey = `collectedCardsData_${oldSetId}`;
+        const newCollectedKey = `collectedCardsData_${normalizedSetId}`;
+        const collectedData = getScriptPropertiesData(oldCollectedKey, null);
+        if (collectedData) {
+          // Hinweis: collectedCardsData wird unter gesamter Struktur gespeichert, nicht pro Set
+          // Daher sicherstellen, dass die Set-Daten übertragen werden
+          let allCollectedData = getScriptPropertiesData('collectedCardsData', {});
+          if (allCollectedData[oldSetId] && !allCollectedData[normalizedSetId]) {
+            allCollectedData[normalizedSetId] = allCollectedData[oldSetId];
+            delete allCollectedData[oldSetId];
+            setScriptPropertiesData('collectedCardsData', allCollectedData);
+            Logger.log(`[Migration] Collected Cards Data migriert für "${normalizedSetId}"`);
+          }
+        }
+        
         // Migriere Grafikdaten (wenn vorhanden)
         const oldImageDataKey = `setImageData_${oldSetId}`;
         const newImageDataKey = `setImageData_${normalizedSetId}`;
@@ -5374,7 +5439,7 @@ function migrateLegacyTcgdexSetIds() {
   // Speichere aktualisierte importedSetsStatus
   if (migrationCount > 0) {
     setScriptPropertiesData('importedSetsStatus', importedSetsStatus);
-    SpreadsheetApp.getActive().toast(`✅ ${migrationCount} TCGdex-only Set(s) migriert`, "Migration abgeschlossen", 3);
-    Logger.log(`[Migration] Insgesamt ${migrationCount} Set(s) migriert`);
   }
+  
+  Logger.log(`[migrateLegacyTcgdexSetIds] Abgeschlossen: ${sheetsChecked} Blätter geprüft, ${migrationCount} migriert`);
 }
