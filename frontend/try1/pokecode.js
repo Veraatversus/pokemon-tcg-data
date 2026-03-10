@@ -4432,6 +4432,7 @@ function importCollectionFromCSV(csvContent) {
     let updatedCards = 0;
     let invalidRows = 0;
     let unknownCards = 0;
+    const unknownSamples = []; // keep examples for diagnostics
 
     // Cache Set-Sheets und Card-IDs
     // WICHTIG: Durchsuche alle Sheets und baue Set-ID-Mapping aus Notes auf
@@ -4565,6 +4566,9 @@ function importCollectionFromCSV(csvContent) {
       const cardIdSet = cardIdSetMap.get(setId);
       if (cardIdSet && !cardIdSet.has(cardNumber)) {
         Logger.log(`CSV Data Row ${i}: Card not in set. Set=${setId}, Card=${cardNumber}. Available: ${Array.from(cardIdSet).slice(0, 5).join(', ')}...`);
+        if (unknownSamples.length < 10) {
+          unknownSamples.push({row:i, setId:setId, cardNumber:cardNumber, cardIdSetSize: cardIdSet.size, cardIdSetSample: Array.from(cardIdSet).slice(0,5)});
+        }
         unknownCards++;
         continue;
       }
@@ -4663,6 +4667,15 @@ function importCollectionFromCSV(csvContent) {
       `Ungültige Zeilen: ${invalidRows}`,
       `Unbekannte Karten: ${unknownCards}`
     ];
+
+    // debugging info for unknown cards
+    if (unknownSamples.length > 0) {
+      resultParts.push(`
+Beispiele für nicht erkannte Karten (max 10):`);
+      unknownSamples.forEach(s => {
+        resultParts.push(`Row ${s.row}: Set=${s.setId}, Card="${s.cardNumber}" (sheet had ${s.cardIdSetSize} entries, sample: ${s.cardIdSetSample.join(', ')})`);
+      });
+    }
     if (unknownSets.size > 0) {
       resultParts.push(`Unbekannte Sets: ${Array.from(unknownSets).slice(0, 10).join(', ')}${unknownSets.size > 10 ? '…' : ''}`);
     }
