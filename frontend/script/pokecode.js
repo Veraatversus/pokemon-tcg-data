@@ -1823,6 +1823,16 @@ function renderAndSortCardsInSheet(cardSheet, setId, allCards, pokemontcgIoCardD
   const collectedCardsData = getScriptPropertiesData('collectedCardsData');
   let currentSetCollectedData = collectedCardsData[setId] || {};
 
+  // Fallback für migrierte Sets: wenn unter neuer ID nichts vorhanden ist,
+  // aber unter alter TCGDEX-Notation noch Daten liegen, verwende diese.
+  if (Object.keys(currentSetCollectedData).length === 0 && !setId.startsWith('TCGDEX-')) {
+    const legacySetId = `TCGDEX-${setId}`;
+    if (collectedCardsData[legacySetId] && Object.keys(collectedCardsData[legacySetId]).length > 0) {
+      currentSetCollectedData = collectedCardsData[legacySetId];
+      Logger.log(`[renderAndSortCardsInSheet] Nutze Legacy-Sammlungsdaten aus ${legacySetId} für ${setId}.`);
+    }
+  }
+
   const customImageUrls = getScriptPropertiesData('customImageUrls');
   const currentSetCustomImageUrls = customImageUrls[setId] || {};
 
@@ -1864,37 +1874,11 @@ function renderAndSortCardsInSheet(cardSheet, setId, allCards, pokemontcgIoCardD
     return naturalSort(a.displayId, b.displayId);
   });
 
-  // Schritt 3: BACKUP DER EXISTIERENDEN CHECKBOXEN VOR DEM LEEREN
-  // Dies ist eine Sicherheitsmaßnahme, falls die collectedCardsData verloren gehen
-  const existingCheckboxBackup = {};
+  // Schritt 3: Blatt leeren.
   const lastRow = cardSheet.getLastRow();
   if (lastRow > SET_SHEET_HEADER_ROWS) {
-    // Lese existierende Daten, um Checkboxen zu sichern
-    for (let i = SET_SHEET_HEADER_ROWS + 1; i <= lastRow; i++) {
-      const idCell = cardSheet.getRange(i, 1).getValue();
-      const checkboxCell = cardSheet.getRange(i, 3).getValue();
-      const rhCheckboxCell = cardSheet.getRange(i, 4).getValue();
-      
-      // Nur speichern, wenn wir eine Kartennummer haben und etwas gesammelt wurde
-      if (idCell && (checkboxCell || rhCheckboxCell)) {
-        const normalizedId = normalizeCardNumber(idCell);
-        existingCheckboxBackup[normalizedId] = {
-          g: checkboxCell === true || checkboxCell === "TRUE",
-          rh: rhCheckboxCell === true || rhCheckboxCell === "TRUE"
-        };
-      }
-    }
-    
-    // MERGE BACKUP mit currentSetCollectedData, falls Lücken vorhanden sind
-    if (Object.keys(existingCheckboxBackup).length > 0) {
-      const merged = { ...existingCheckboxBackup, ...currentSetCollectedData };
-      currentSetCollectedData = merged;
-      if (Object.keys(existingCheckboxBackup).length > 0) {
-        Logger.log(`[renderAndSortCardsInSheet] ${Object.keys(existingCheckboxBackup).length} Checkboxen aus Blatt ${setId} gesichert`);
-      }
-    }
-    
-    // Blatt leeren
+    // Sicherstellen, dass der gesamte relevante Bereich vollständig geleert wird,
+    // um bestehende Merges und Formatierungen zu entfernen.
     const dataRange = cardSheet.getRange(SET_SHEET_HEADER_ROWS + 1, 1, lastRow - SET_SHEET_HEADER_ROWS, cardSheet.getMaxColumns());
     dataRange.clear(); // clear() löscht Inhalt, Formate, Datenvalidierungen und Merges
   }
@@ -2161,13 +2145,6 @@ function renderAndSortCardsInSheet(cardSheet, setId, allCards, pokemontcgIoCardD
   rangesForBorders.forEach(range => {
     range.setBorder(true, true, true, true, true, true, "#BDBDBD", SpreadsheetApp.BorderStyle.SOLID_MEDIUM);
   });
-
-  // PERSISTIERUNGS-LOGIK: Speichere die aktuellen Sammlungsdaten zurück in PropertiesService
-  // Dies stellt sicher, dass beim nächsten Sortier-Durchlauf die Daten nicht verloren gehen
-  const collectedCardsDataToSave = getScriptPropertiesData('collectedCardsData');
-  collectedCardsDataToSave[setId] = currentSetCollectedData;
-  setScriptPropertiesData('collectedCardsData', collectedCardsDataToSave);
-  Logger.log(`[renderAndSortCardsInSheet] Sammlungsdaten für Set ${setId} gespeichert (${Object.keys(currentSetCollectedData).length} Karten mit Status)`);
 }
 
 /**
