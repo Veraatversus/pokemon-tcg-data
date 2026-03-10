@@ -7,7 +7,7 @@
 
 This is a fork of the data found within the [Pokémon TCG API](https://pokemontcg.io/). Currently, the raw JSON files for all the card information can be found here.
 
-**🔄 Automatische Synchronisation:** Dieses Repository wird täglich automatisch mit dem [Original-Repository](https://github.com/PokemonTCG/pokemon-tcg-data) synchronisiert.
+**🔄 Automatische Synchronisation:** Dieses Repository wird täglich automatisch mit dem Fork-Parent [JulienGitHub/pokemon-tcg-data](https://github.com/JulienGitHub/pokemon-tcg-data) synchronisiert (und folgt damit weiterhin der Originaldatenbasis).
 
 **🌐 GitHub Pages:** Die Daten sind auch über GitHub Pages verfügbar: [https://veraatversus.github.io/pokemon-tcg-data/](https://veraatversus.github.io/pokemon-tcg-data/)
 
@@ -44,7 +44,8 @@ This will output all of the card data into `/cards/en/v1`.
 
 Dieses Repository verwendet eine strukturierte Branch-Strategie:
 
-- **`main`** - Hauptbranch, synchronisiert mit dem upstream Repository
+- **`master`** - Spiegel-Branch, synchronisiert mit dem upstream Repository
+- **`dev`** - Standard-Entwicklungsbranch für eigene Änderungen
 - **`release`** - Stabiler Branch für GitHub Pages Deployment
 - **`feature/*`** - Feature-Branches für neue Funktionen
 
@@ -53,7 +54,7 @@ Dieses Repository verwendet eine strukturierte Branch-Strategie:
 # Automated Workflows
 
 - **🔄 Sync with Upstream:** Täglich um 2:00 UTC automatische Synchronisation mit dem Original-Repository
-- **🔀 Merge to Release:** Automatisches Merge von `main` zu `release` bei Updates
+- **🔀 Merge to Release:** Automatisches Merge von `dev` zu `release` bei Updates
 - **🚀 Deploy Pages:** Automatisches Deployment zu GitHub Pages bei `release` Updates
 
 Alle Workflows können auch manuell über GitHub Actions getriggert werden.
@@ -67,7 +68,7 @@ Please contribute when you see missing and/or incorrect data.
 2. Create your feature branch (git checkout -b feature/my-new-feature)
 3. Commit your changes (git commit -am 'Add some feature')
 4. Push to the branch (git push origin feature/my-new-feature)
-5. Create a new Pull Request **against the `main` branch**
+5. Create a new Pull Request **against the `dev` branch**
 
 **For the original project:**
 - Please contribute directly to [PokemonTCG/pokemon-tcg-data](https://github.com/PokemonTCG/pokemon-tcg-data)

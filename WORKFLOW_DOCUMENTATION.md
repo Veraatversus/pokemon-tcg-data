@@ -8,8 +8,13 @@ Dieses Repository verwendet eine strukturierte Branch-Strategie, um automatische
 
 ### 🔵 `master` Branch (upstream)
 - **Zweck:** Spiegel des Original‑Repositories; wird automatisch vom upstream aktualisiert
-- **Updates:** Läuft täglich oder manuell durch den Sync‑Workflow gegen PokemonTCG/pokemon-tcg-data
+- **Updates:** Läuft täglich oder manuell durch den Sync‑Workflow gegen JulienGitHub/pokemon-tcg-data
 - **Verwendung:** Darf **nicht** für eigene Änderungen verwendet werden; dient nur zur Übernahme von upstream-Inhalten
+
+### 🟣 `dev` Branch (Default)
+- **Zweck:** Standard-Branch für Entwicklung und Pull Requests
+- **Updates:** Erhält eigene Änderungen und automatische Übernahmen aus `master`
+- **Verwendung:** Basis für `feature/*` Branches und Merge-Quelle für `release`
 
 ### 🟢 `release` Branch
 - **Zweck:** Stabiler Branch für GitHub Pages Deployment
@@ -24,7 +29,7 @@ Dieses Repository verwendet eine strukturierte Branch-Strategie, um automatische
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  Upstream Repository (PokemonTCG/pokemon-tcg-data)      │
+│  Upstream Repository (JulienGitHub/pokemon-tcg-data)    │
 └────────────────────┬────────────────────────────────────┘
                      │ Automatische Synchronisation
                      │ (täglich um 2:00 UTC + manuell)
@@ -68,7 +73,7 @@ Dieses Repository verwendet eine strukturierte Branch-Strategie, um automatische
 
 **Ablauf:**
 1. Checkout des `master` Branches
-2. Hinzufügen des upstream Remotes (PokemonTCG/pokemon-tcg-data)
+2. Hinzufügen des upstream Remotes (JulienGitHub/pokemon-tcg-data)
 3. Abrufen der neuesten Änderungen vom Upstream
 4. Überprüfung auf Updates
 5. Merge der upstream Änderungen in `master`
@@ -132,7 +137,7 @@ git checkout master
 git pull origin master
 
 # 2. Upstream hinzufügen (falls noch nicht vorhanden)
-git remote add upstream https://github.com/PokemonTCG/pokemon-tcg-data.git
+git remote add upstream https://github.com/JulienGitHub/pokemon-tcg-data.git
 
 # 3. Upstream Änderungen abrufen
 git fetch upstream
@@ -251,7 +256,7 @@ git remote set-url upstream <neue-upstream-url>
 
 ## Best Practices
 
-1. **Nie direkt in `release` pushen** - Alle Änderungen sollten über `main` erfolgen
+1. **Nie direkt in `release` pushen** - Alle Änderungen sollten über `dev` erfolgen
 2. **Feature Branches verwenden** - Für alle Änderungen Feature Branches erstellen
 3. **Pull Requests nutzen** - Immer Pull Requests für Code Reviews verwenden
 4. **Workflows testen** - Workflows manuell triggern um sie zu testen
@@ -279,6 +284,7 @@ uses: actions/checkout@v4
 ## Support und Dokumentation
 
 - **GitHub Issues:** Für Bugs und Feature Requests
+- **Fork-Parent (Workflow Upstream):** [JulienGitHub/pokemon-tcg-data](https://github.com/JulienGitHub/pokemon-tcg-data)
 - **Original Repository:** [PokemonTCG/pokemon-tcg-data](https://github.com/PokemonTCG/pokemon-tcg-data)
 - **GitHub Pages:** [https://veraatversus.github.io/pokemon-tcg-data/](https://veraatversus.github.io/pokemon-tcg-data/)
 
