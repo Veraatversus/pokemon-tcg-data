@@ -1657,8 +1657,9 @@ function populateCardsForSet(setIdFromOverview) {
 
   // Verbesserte Logik für das Erstellen/Wiederverwenden von Blättern
   if (cardSheet) {
-    const sheetNote = cardSheet.getRange(1, 1).getNote() || "";
+    let sheetNote = cardSheet.getRange(1, 1).getNote() || "";
     const expectedNote = `Set ID: ${setIdFromOverview}`;
+    const noteSetId = sheetNote.startsWith('Set ID: ') ? sheetNote.substring('Set ID: '.length).trim() : '';
     
     // DEBUG: Diagnostiziere die aktuelle Situation
     Logger.log(`[populateCardsForSet] Blatt "${setNameInSheet}" found. sheetNote="${sheetNote}", expectedNote="${expectedNote}"`);
@@ -1683,6 +1684,57 @@ function populateCardsForSet(setIdFromOverview) {
       }
     } else if (!sheetNote || sheetNote.trim() === "") {
       Logger.log(`[populateCardsForSet] WARNUNG: Blatt "${setNameInSheet}" hat keine Notiz in A1. Dies könnte ein beschädigtes Blatt sein.`);
+    }
+
+    // Allgemeine Alias-Migration (z.B. "me02.5" -> "me2pt5"), auch ohne TCGDEX-Präfix
+    // Wenn normalisierte IDs übereinstimmen, migriere automatisch auf die erwartete ID.
+    if (!isMigrationCase && noteSetId) {
+      const normalizedNoteId = normalizeSetId(noteSetId.replace(/^TCGDEX-/i, ''));
+      const normalizedTargetId = normalizeSetId(setIdFromOverview.replace(/^TCGDEX-/i, ''));
+
+      if (normalizedNoteId && normalizedNoteId === normalizedTargetId && noteSetId !== setIdFromOverview) {
+        Logger.log(`[Alias-Migration] Blatt "${setNameInSheet}": "${noteSetId}" -> "${setIdFromOverview}"`);
+
+        cardSheet.getRange(1, 1).setNote(expectedNote);
+        isMigrationCase = true;
+
+        const scriptProperties = PropertiesService.getScriptProperties();
+
+        // importedSetsStatus migrieren
+        const importedSetsStatus = getScriptPropertiesData('importedSetsStatus', {});
+        if (importedSetsStatus[noteSetId]) {
+          importedSetsStatus[setIdFromOverview] = true;
+          delete importedSetsStatus[noteSetId];
+          setScriptPropertiesData('importedSetsStatus', importedSetsStatus);
+        }
+
+        // collectedCardsData / customImageUrls migrieren
+        const collectedCardsData = getScriptPropertiesData('collectedCardsData', {});
+        if (collectedCardsData[noteSetId] && !collectedCardsData[setIdFromOverview]) {
+          collectedCardsData[setIdFromOverview] = collectedCardsData[noteSetId];
+          delete collectedCardsData[noteSetId];
+          setScriptPropertiesData('collectedCardsData', collectedCardsData);
+        }
+
+        const customImageUrls = getScriptPropertiesData('customImageUrls', {});
+        if (customImageUrls[noteSetId] && !customImageUrls[setIdFromOverview]) {
+          customImageUrls[setIdFromOverview] = customImageUrls[noteSetId];
+          delete customImageUrls[noteSetId];
+          setScriptPropertiesData('customImageUrls', customImageUrls);
+        }
+
+        // Cardmarket-Key migrieren
+        const oldCardmarketKey = `pokemontcgIoCardmarketUrls_${noteSetId}`;
+        const newCardmarketKey = `pokemontcgIoCardmarketUrls_${setIdFromOverview}`;
+        const cardmarketData = getScriptPropertiesData(oldCardmarketKey, null);
+        if (cardmarketData) {
+          setScriptPropertiesData(newCardmarketKey, cardmarketData);
+          scriptProperties.deleteProperty(oldCardmarketKey);
+        }
+
+        // Lokale Variable aktualisieren, damit nachfolgende Prüfungen den neuen Zustand sehen
+        sheetNote = cardSheet.getRange(1, 1).getNote() || "";
+      }
     }
     
     if (sheetNote !== expectedNote && !isMigrationCase) {
