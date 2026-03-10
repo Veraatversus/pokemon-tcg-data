@@ -41,7 +41,6 @@ jobs:
       - name: Check for updates
         id: check
         run: |
-          # Get the latest commit from upstream main/master
           UPSTREAM_BRANCH="master"
           if git rev-parse --verify upstream/master >/dev/null 2>&1; then
             UPSTREAM_BRANCH="master"
@@ -74,23 +73,24 @@ jobs:
             echo "Successfully merged upstream changes into master"
             git push origin master
 
-            # propagate these updates into dev branch (and thereby into release via downstream workflow)
+            # propagate these updates into dev branch
             if git show-ref --verify --quiet refs/heads/dev; then
               git checkout dev
             else
               git checkout -b dev origin/dev
             fi
 
-            if git merge master --no-edit; then
+            # Prefer master changes if conflicts happen while updating dev
+            if git merge -X theirs master --no-edit; then
               echo "Successfully merged master into dev"
               git push origin dev
             else
               echo "Conflict merging master into dev" >&2
               git merge --abort
               echo "dev_merge_conflict=true" >> $GITHUB_OUTPUT
+              exit 1
             fi
 
-            # switching back to master for next actions
             git checkout master
           else
             echo "Merge conflict detected. Creating an issue for manual resolution."
