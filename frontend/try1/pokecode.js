@@ -336,100 +336,6 @@ function filterCollectionSummary() {
 }
 
 /**
- * Sucht nach einer Karte über alle Sets hinweg.
- * 
- * @function searchCard
- */
-function searchCard() {
-  const ui = SpreadsheetApp.getUi();
-  
-  const response = ui.prompt(
-    '🔍 Karte suchen',
-    'Geben Sie den Kartennamen oder die Nummer ein:',
-    ui.ButtonSet.OK_CANCEL
-  );
-  
-  if (response.getSelectedButton() !== ui.Button.OK) {
-    return;
-  }
-  
-  const searchTerm = response.getResponseText().trim().toLowerCase();
-  if (!searchTerm) {
-    return;
-  }
-  
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheets = ss.getSheets();
-  const results = [];
-  
-  SpreadsheetApp.getActive().toast('Suche läuft...', '🔍 Suchen', 3);
-  
-  // Durchsuche alle Set-Sheets
-  for (const sheet of sheets) {
-    const sheetName = sheet.getName();
-    if (sheetName === 'Sets Overview' || sheetName === 'Collection Summary') {
-      continue;
-    }
-    
-    const lastRow = sheet.getLastRow();
-    if (lastRow < CARD_DATA_START_ROW + 1) {
-      continue;
-    }
-    
-    const numRows = lastRow - CARD_DATA_START_ROW;
-    const data = sheet.getRange(CARD_DATA_START_ROW + 1, 1, numRows, 10).getValues();
-    
-    for (let i = 0; i < data.length; i++) {
-      const cardNumber = data[i][COL_CARD_NUMBER];
-      const cardName = data[i][COL_CARD_NAME];
-      
-      if (!cardNumber) continue;
-      
-      const numberMatch = String(cardNumber).toLowerCase().includes(searchTerm);
-      const nameMatch = String(cardName).toLowerCase().includes(searchTerm);
-      
-      if (numberMatch || nameMatch) {
-        results.push({
-          set: sheetName,
-          number: cardNumber,
-          name: cardName,
-          row: CARD_DATA_START_ROW + 2 + i
-        });
-      }
-    }
-  }
-  
-  // Zeige Ergebnisse
-  if (results.length === 0) {
-    ui.alert('🔍 Suchergebnis', `Keine Karten gefunden für: "${searchTerm}"`, ui.ButtonSet.OK);
-    return;
-  }
-  
-  // Erstelle Ergebnis-String
-  let resultText = `${results.length} Karte(n) gefunden:\n\n`;
-  results.slice(0, 20).forEach((result, i) => {
-    resultText += `${i + 1}. ${result.set} - #${result.number} ${result.name}\n`;
-  });
-  
-  if (results.length > 20) {
-    resultText += `\n... und ${results.length - 20} weitere`;
-  }
-  
-  ui.alert('🔍 Suchergebnis', resultText, ui.ButtonSet.OK);
-  
-  // Springe zum ersten Ergebnis
-  if (results.length > 0) {
-    const firstResult = results[0];
-    const sheet = ss.getSheetByName(firstResult.set);
-    if (sheet) {
-      ss.setActiveSheet(sheet);
-      sheet.setActiveRange(sheet.getRange(firstResult.row, 1));
-      SpreadsheetApp.getActive().toast(`Springe zu: ${firstResult.name}`, '✅ Gefunden', 3);
-    }
-  }
-}
-
-/**
  * Gibt Statistiken für die Sidebar zurück.
  * 
  * @function getSidebarStats
@@ -4073,6 +3979,9 @@ function searchCard() {
   
   SpreadsheetApp.getActive().toast('Suche läuft...', '🔍 Suchen', 3);
   
+  // Dynamisch berechnete Spaltenanzahl basierend auf Grid-Konstanten
+  const numCols = CARDS_PER_ROW_IN_GRID * CARD_BLOCK_WIDTH_COLS;
+  
   // Durchsuche alle Set-Sheets
   for (const sheet of sheets) {
     const sheetName = sheet.getName();
@@ -4086,24 +3995,30 @@ function searchCard() {
     }
     
     const numRows = lastRow - CARD_DATA_START_ROW;
-    const data = sheet.getRange(CARD_DATA_START_ROW + 1, 1, numRows, 10).getValues();
+    const data = sheet.getRange(CARD_DATA_START_ROW + 1, 1, numRows, numCols).getValues();
     
     for (let i = 0; i < data.length; i++) {
-      const cardNumber = data[i][COL_CARD_NUMBER];
-      const cardName = data[i][COL_CARD_NAME];
-      
-      if (!cardNumber) continue;
-      
-      const numberMatch = String(cardNumber).toLowerCase().includes(searchTerm);
-      const nameMatch = String(cardName).toLowerCase().includes(searchTerm);
-      
-      if (numberMatch || nameMatch) {
-        results.push({
-          set: sheetName,
-          number: cardNumber,
-          name: cardName,
-          row: CARD_DATA_START_ROW + 2 + i
-        });
+      const row = data[i];
+      for (let block = 0; block < CARDS_PER_ROW_IN_GRID; block++) {
+        const colOffset = block * CARD_BLOCK_WIDTH_COLS;
+        if (colOffset >= row.length) break;
+        
+        const cardNumber = row[colOffset];
+        const cardName = row[colOffset + 1];
+        
+        if (!cardNumber) continue;
+        
+        const numberMatch = String(cardNumber).toLowerCase().includes(searchTerm);
+        const nameMatch = String(cardName).toLowerCase().includes(searchTerm);
+        
+        if (numberMatch || nameMatch) {
+          results.push({
+            set: sheetName,
+            number: cardNumber,
+            name: cardName,
+            row: CARD_DATA_START_ROW + 2 + i
+          });
+        }
       }
     }
   }
@@ -4191,7 +4106,8 @@ function exportCollectionToCSV() {
       }
       
       const numRows = lastRow - CARD_DATA_START_ROW;
-      const range = sheet.getRange(CARD_DATA_START_ROW + 1, 1, numRows, 10);
+      const numCols = CARDS_PER_ROW_IN_GRID * CARD_BLOCK_WIDTH_COLS;
+      const range = sheet.getRange(CARD_DATA_START_ROW + 1, 1, numRows, numCols);
       const rawValues = range.getValues();
       const displayValues = range.getDisplayValues();
       
@@ -4245,20 +4161,19 @@ function exportCollectionToCSV() {
         return str;
       };
       
-      // Sheet-Layout ist ein 2-Spalten-Grid mit Trennungen:
-      // Col 0: Card1 Number, Col 1: Card1 Name, Col 2: Empty
-      // Col 3: Card2 Number, Col 4: Card2 Name, Col 5: Empty, etc.
-      // Pro Zeile können bis zu 5 Karten sein (Spalten 0-9)
-      Logger.log(`CSV Export: Processing sheet "${sheetName}" with grid layout (cards at cols 0,3,6,9; names at cols 1,4,7,10)`);
+      // Sheet-Layout basiert auf einem wiederholten Kartenblock im Grid.
+      // Wir berechnen die Anzahl der möglichen Spalten dynamisch, damit Änderungen
+      // an CARDS_PER_ROW_IN_GRID oder CARD_BLOCK_WIDTH_COLS automatisch übernommen werden.
+      const maxCols = CARDS_PER_ROW_IN_GRID * CARD_BLOCK_WIDTH_COLS;
+      Logger.log(`CSV Export: Processing sheet "${sheetName}" with grid layout. maxCols=${maxCols}`);
       
       for (let rowIdx = 0; rowIdx < displayValues.length; rowIdx++) {
         const row = displayValues[rowIdx];
         
-        // Verarbeite 2-Spalten-Grid: (CardNum, CardName) alle 3 Spalten
-        // Mögliche Positionen: (0,1), (3,4), (6,7), (9,10)
-        for (let cardIndex = 0; cardIndex < 5; cardIndex++) {
-          const colNum = cardIndex * 3;      // 0, 3, 6, 9, 12
-          const colName = cardIndex * 3 + 1; // 1, 4, 7, 10, 13
+        // Iteriere pro Kartenblock im Grid
+        for (let cardIndex = 0; cardIndex < CARDS_PER_ROW_IN_GRID; cardIndex++) {
+          const colNum = cardIndex * CARD_BLOCK_WIDTH_COLS;
+          const colName = colNum + 1;
           
           if (colNum >= row.length) break; // Keine weiteren Spalten
           
