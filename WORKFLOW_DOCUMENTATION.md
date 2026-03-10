@@ -73,7 +73,8 @@ Dieses Repository verwendet eine strukturierte Branch-Strategie, um automatische
 4. Überprüfung auf Updates
 5. Merge der upstream Änderungen in `master`
 6. Push zu origin/master
-7. Triggern des "Merge to Release" Workflows
+7. (optional) Triggern des "Merge to Release" Workflows — in der neuen Struktur passiert dies automatisch,
+   weil der nächste Schritt das Zusammenführen in `dev` auslöst.
 
 **Bei Konflikten:**
 - Workflow schlägt fehl

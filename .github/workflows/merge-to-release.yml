@@ -23,13 +23,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Merge main into release
+      - name: Merge dev into release
         run: |
           git fetch origin dev
 
           # Try to merge dev into release
           if git merge origin/dev --no-edit; then
-            echo "Successfully merged main into release"
+            echo "Successfully merged dev into release"
             git push origin release
           else
             echo "Merge conflict detected. Creating an issue for manual resolution."
@@ -46,14 +46,14 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: '🔀 Release Merge Conflict - Manual Resolution Required',
-              body: `The automated merge from main to release branch encountered a conflict.
+              body: `The automated merge from dev to release branch encountered a conflict.
 
               **Action Required:**
-              Please manually merge main into release and resolve any conflicts.
+              Please manually merge dev into release and resolve any conflicts.
 
               **Steps:**
               1. \`git checkout release\`
-              2. \`git merge main\`
+              2. \`git merge dev\`
               3. Resolve conflicts
               4. \`git push origin release\`
 
