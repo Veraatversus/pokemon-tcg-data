@@ -56,7 +56,9 @@ const CUSTOM_SET_ID_MAPPINGS = {
   "sm35": "sm3.5",
   "sm75": "sm7.5",
   "swsh35": "swsh3.5",
-  "swsh45": "swsh4.5"
+  "swsh45": "swsh4.5",
+  "zsv10pt5": "sv10.5b",
+  "rsv10pt5": "sv10.5w"
 };
 
 
@@ -171,8 +173,10 @@ const SUMMARY_DATA_START_ROW = SUMMARY_HEADER_ROWS + 1;
 /** @const {number} Anzahl der Datenspalten in "Collection Summary" (A-F) */
 const COLLECTION_SUMMARY_DATA_COLS = 6;
 
-/** @const {number} Spalte für "Alle Sets sortieren" Header-Checkbox (Spalte G) */
-const SUMMARY_SORT_CHECKBOX_COL = 7;
+/** @const {number} Spalte für Header-Checkbox in "Collection Summary" (Spalte G)
+ * Früher sortierte sie alle Sets, jetzt löst sie eine Statistik-Aktualisierung aus.
+ */
+const SUMMARY_SORT_CHECKBOX_COL = 7; // keine Änderung des Werts erforderlich
 
 // ============================================================================
 // GLOBALE VARIABLEN - Skript-Status
@@ -217,6 +221,7 @@ function onOpen() {
   importMenu.addItem('🚀 Setup: Alle Sets laden', 'setupAndImportAllSets');
   importMenu.addItem('➕ Einzelnes Set hinzufügen', 'promptAndPopulateCardsForSet');
   importMenu.addItem('📦 Mehrere Sets (Batch)', 'batchImportSets');
+  importMenu.addItem('🌐 Alle Sets importieren (alle)', 'importAllSetsFromOverview');
   importMenu.addItem('🔃 Aktuelles Set reimportieren', 'reimportCurrentSet');
   mainMenu.addSubMenu(importMenu);
 
@@ -230,13 +235,13 @@ function onOpen() {
   const statsMenu = ui.createMenu('📊 Statistik & Anzeige');
   statsMenu.addItem('📈 Quick-Stats', 'showQuickStats');
   statsMenu.addItem('♻️ Statistik aktualisieren', 'updateCollectionSummary');
-  statsMenu.addItem('🔄 Alle Sets neu laden', 'updateAllCardSheets');
+  statsMenu.addItem('🔄 Importierte Sets neu laden', 'updateAllCardSheets');
   mainMenu.addSubMenu(statsMenu);
 
   // 🗂️ Sortierung & Bearbeitung
   const sortMenu = ui.createMenu('🗂️ Sortierung & Bearbeitung');
   sortMenu.addItem('↗️ Set sortieren', 'manualSortCurrentSheet');
-  sortMenu.addItem('↗️ Alle Sets sortieren', 'manualSortAllSheets');
+  sortMenu.addItem('↗️ Alle Sets sortieren', 'manualSortAllSheets'); // menüeintrag bleibt bestehen, Checkbox agiert nun anders
   sortMenu.addItem('✏️ Bulk-Edit', 'bulkEditSet');
   const autoSortMenu = ui.createMenu('⚙️ Auto-Sortierung');
   autoSortMenu.addItem('✅ Aktivieren', 'installSortTrigger');
@@ -256,6 +261,12 @@ function onOpen() {
   adminMenu.addItem('🗑️ Set löschen', 'deleteCurrentSet');
   adminMenu.addItem('💥 ALLE LÖSCHEN', 'deleteAllPersistentData');
   mainMenu.addSubMenu(adminMenu);
+
+    // 🔧 Migration
+    const migrateMenu = ui.createMenu('🔧 Migration');
+    migrateMenu.addItem('🔄 Persistente Daten aus Blättern wiederherstellen', 'rebuildPersistentDataFromSheets');
+    migrateMenu.addItem('🔀 TCGdex-IDs migrieren', 'migrateLegacyTcgdexSetIds');
+    mainMenu.addSubMenu(migrateMenu);
 
   // 🐞 Entwicklung
   const devMenu = ui.createMenu('🐞 Entwicklung');
@@ -332,100 +343,6 @@ function filterCollectionSummary() {
     default:
       ui.alert('❌ Fehler', 'Ungültige Auswahl. Bitte 1-4 eingeben.', ui.ButtonSet.OK);
       return;
-  }
-}
-
-/**
- * Sucht nach einer Karte über alle Sets hinweg.
- * 
- * @function searchCard
- */
-function searchCard() {
-  const ui = SpreadsheetApp.getUi();
-  
-  const response = ui.prompt(
-    '🔍 Karte suchen',
-    'Geben Sie den Kartennamen oder die Nummer ein:',
-    ui.ButtonSet.OK_CANCEL
-  );
-  
-  if (response.getSelectedButton() !== ui.Button.OK) {
-    return;
-  }
-  
-  const searchTerm = response.getResponseText().trim().toLowerCase();
-  if (!searchTerm) {
-    return;
-  }
-  
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheets = ss.getSheets();
-  const results = [];
-  
-  SpreadsheetApp.getActive().toast('Suche läuft...', '🔍 Suchen', 3);
-  
-  // Durchsuche alle Set-Sheets
-  for (const sheet of sheets) {
-    const sheetName = sheet.getName();
-    if (sheetName === 'Sets Overview' || sheetName === 'Collection Summary') {
-      continue;
-    }
-    
-    const lastRow = sheet.getLastRow();
-    if (lastRow < CARD_DATA_START_ROW + 1) {
-      continue;
-    }
-    
-    const numRows = lastRow - CARD_DATA_START_ROW;
-    const data = sheet.getRange(CARD_DATA_START_ROW + 1, 1, numRows, 10).getValues();
-    
-    for (let i = 0; i < data.length; i++) {
-      const cardNumber = data[i][COL_CARD_NUMBER];
-      const cardName = data[i][COL_CARD_NAME];
-      
-      if (!cardNumber) continue;
-      
-      const numberMatch = String(cardNumber).toLowerCase().includes(searchTerm);
-      const nameMatch = String(cardName).toLowerCase().includes(searchTerm);
-      
-      if (numberMatch || nameMatch) {
-        results.push({
-          set: sheetName,
-          number: cardNumber,
-          name: cardName,
-          row: CARD_DATA_START_ROW + 2 + i
-        });
-      }
-    }
-  }
-  
-  // Zeige Ergebnisse
-  if (results.length === 0) {
-    ui.alert('🔍 Suchergebnis', `Keine Karten gefunden für: "${searchTerm}"`, ui.ButtonSet.OK);
-    return;
-  }
-  
-  // Erstelle Ergebnis-String
-  let resultText = `${results.length} Karte(n) gefunden:\n\n`;
-  results.slice(0, 20).forEach((result, i) => {
-    resultText += `${i + 1}. ${result.set} - #${result.number} ${result.name}\n`;
-  });
-  
-  if (results.length > 20) {
-    resultText += `\n... und ${results.length - 20} weitere`;
-  }
-  
-  ui.alert('🔍 Suchergebnis', resultText, ui.ButtonSet.OK);
-  
-  // Springe zum ersten Ergebnis
-  if (results.length > 0) {
-    const firstResult = results[0];
-    const sheet = ss.getSheetByName(firstResult.set);
-    if (sheet) {
-      ss.setActiveSheet(sheet);
-      sheet.setActiveRange(sheet.getRange(firstResult.row, 1));
-      SpreadsheetApp.getActive().toast(`Springe zu: ${firstResult.name}`, '✅ Gefunden', 3);
-    }
   }
 }
 
@@ -537,6 +454,88 @@ function normalizeSetId(setId) {
 }
 
 /**
+ * Liefert mögliche Alias-Varianten einer Set-ID (inkl. Custom Mappings vor/zurück).
+ *
+ * @param {string} setId - Eingabe-ID (z.B. "TCGDEX-sv10.5b" oder "zsv10pt5")
+ * @returns {Array<string>} Eindeutige Kandidaten-IDs
+ */
+function buildSetIdAliasCandidates(setId) {
+  if (!setId) return [];
+
+  const raw = String(setId).trim();
+  const unprefixed = raw.replace(/^TCGDEX-/i, '');
+  const candidates = new Set([raw, unprefixed]);
+
+  const baseKeys = [raw.toLowerCase(), unprefixed.toLowerCase()];
+
+  // Direkte Custom-Mappings (pokemontcg -> tcgdex)
+  baseKeys.forEach(key => {
+    const mapped = CUSTOM_SET_ID_MAPPINGS[key];
+    if (mapped) candidates.add(mapped);
+  });
+
+  // Reverse Custom-Mappings (tcgdex -> pokemontcg)
+  const normalizedBase = normalizeSetId(unprefixed);
+  for (const [pokeId, tcgdexId] of Object.entries(CUSTOM_SET_ID_MAPPINGS)) {
+    if (
+      String(tcgdexId).toLowerCase() === unprefixed.toLowerCase() ||
+      normalizeSetId(tcgdexId) === normalizedBase
+    ) {
+      candidates.add(pokeId);
+    }
+  }
+
+  return Array.from(candidates).filter(Boolean);
+}
+
+/**
+ * Prüft, ob zwei Set-IDs als gleiches Set gelten (Normalisierung + Custom Mapping).
+ *
+ * @param {string} setIdA
+ * @param {string} setIdB
+ * @returns {boolean}
+ */
+function areSetIdsEquivalent(setIdA, setIdB) {
+  if (!setIdA || !setIdB) return false;
+  if (String(setIdA).trim().toLowerCase() === String(setIdB).trim().toLowerCase()) return true;
+
+  const aNorm = new Set(
+    buildSetIdAliasCandidates(setIdA).map(id => normalizeSetId(String(id).replace(/^TCGDEX-/i, '')))
+  );
+  const bNorm = buildSetIdAliasCandidates(setIdB).map(id => normalizeSetId(String(id).replace(/^TCGDEX-/i, '')));
+
+  return bNorm.some(n => aNorm.has(n));
+}
+
+/**
+ * Löst eine Set-ID auf eine kanonische Ziel-ID auf Basis eines Normalized->Canonical-Mappings auf.
+ * Berücksichtigt Custom-Mappings und TCGDEX-Präfixe.
+ *
+ * @param {string} inputSetId
+ * @param {Map<string,string>} normalizedToCanonicalMap
+ * @param {Set<string>} [canonicalSetIds]
+ * @returns {string|null}
+ */
+function resolveCanonicalSetIdFromMap(inputSetId, normalizedToCanonicalMap, canonicalSetIds = null) {
+  const aliases = buildSetIdAliasCandidates(inputSetId);
+
+  if (canonicalSetIds) {
+    for (const alias of aliases) {
+      if (canonicalSetIds.has(alias)) return alias;
+    }
+  }
+
+  for (const alias of aliases) {
+    const normalizedAlias = normalizeSetId(String(alias).replace(/^TCGDEX-/i, ''));
+    if (normalizedToCanonicalMap.has(normalizedAlias)) {
+      return normalizedToCanonicalMap.get(normalizedAlias);
+    }
+  }
+
+  return null;
+}
+
+/**
  * Normalisiert eine Kartennummer durch Entfernung führender Nullen.
  * 
  * Wichtig für konsistente Lookups zwischen TCGDex (mit Nullen) und
@@ -620,7 +619,14 @@ function fetchData(url) {
  * const sets = fetchApiData(`${TCGDEX_BASE_URL}sets`, "Fehler beim Laden der Sets");
  */
 function fetchApiData(url, errorMessagePrefix) {
-  const ui = SpreadsheetApp.getUi(); // Holt die Benutzeroberfläche der Tabelle.
+  // `getUi()` is not available in trigger time-driven contexts; wrap in try/catch
+  let ui = null;
+  try {
+    ui = SpreadsheetApp.getUi(); // Holt die Benutzeroberfläche der Tabelle.
+  } catch (err) {
+    // Running in a non-interactive context (e.g. time trigger) – UI not accessible
+    ui = null;
+  }
   try {
     const options = { 'muteHttpExceptions': true }; // Unterdrückt HTTP-Ausnahmen, um sie manuell zu behandeln.
     const res = UrlFetchApp.fetch(url, options); // Führt den HTTP-Request aus.
@@ -1085,6 +1091,9 @@ function setupSheets() {
   overviewDataHeadersRange.setFontWeight("bold");
   overviewDataHeadersRange.setBorder(true, true, true, true, true, true, "#888888", SpreadsheetApp.BorderStyle.SOLID);
 
+  // MIGRATIONS-SCHRITT: Migriere alte TCGdex-only Set-IDs zu neuen pokemontcg.io IDs
+  migrateLegacyTcgdexSetIds();
+
   setsSheet.setFrozenRows(OVERVIEW_HEADER_ROWS); // Friert die neuen Kopfzeilen ein.
   setsSheet.setColumnWidth(3, 50); // Spaltenbreite für Set Logo (C).
   setsSheet.setColumnWidth(4, 50); // Spaltenbreite für Set Symbol (D).
@@ -1110,12 +1119,13 @@ function setupSheets() {
   summarySheet.getRange(SUMMARY_TITLE_ROW, 1).setValue("Pokémon TCG Sammlungsübersicht");
   summarySheet.getRange(SUMMARY_TITLE_ROW, 1).setHorizontalAlignment("center").setVerticalAlignment("middle").setFontWeight("bold").setBackground("#D9D9D9");
 
-  // "Alle Sets sortieren" Checkbox in "Collection Summary" (Zeile 1, Spalte G)
+  // Header-Checkbox in "Collection Summary" (Zeile 1, Spalte G)
+  // Früher: "Alle Sets sortieren". Jetzt dient sie zur Aktualisierung der Statistik.
   const sortAllCheckboxRange = summarySheet.getRange(SUMMARY_TITLE_ROW, SUMMARY_SORT_CHECKBOX_COL);
   sortAllCheckboxRange.setValue(false);
   sortAllCheckboxRange.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
-  sortAllCheckboxRange.setHorizontalAlignment("center").setVerticalAlignment("middle").setBackground("#D9D9D9"); // Gleicher Hintergrund wie Titel
-  sortAllCheckboxRange.setNote("Klicken Sie hier, um die Sammlungsübersicht zu aktualisieren."); // ANPASSUNG: Notiz aktualisiert
+  sortAllCheckboxRange.setHorizontalAlignment("center").setVerticalAlignment("middle").setBackground("#D9D9D9");
+  sortAllCheckboxRange.setNote("Klicken Sie hier, um die Sammlungsübersicht zu aktualisieren.");
 
   // Zusammenfassungszeile für "Collection Summary" (Zeile 2)
   // Merge-Bereich erstreckt sich über alle Daten-Spalten UND die Checkbox-Spalte (bis G), um bündig zu sein.
@@ -1292,6 +1302,19 @@ function populateSetsOverview() {
       tcgdexData: tcgdexMatch,
       isOnlyTcgdex: false
     });
+    
+    // MIGRATION: Wenn dieses Set früher als TCGdex-only mit Präfix existierte, übernehme die bestehenden Daten
+    const oldTcgdexKey = `TCGDEX-${tcgdexMatch?.id || pokemontcgIoSet.id}`;
+    if (existingSetMap.has(oldTcgdexKey)) {
+      const oldData = existingSetMap.get(oldTcgdexKey);
+      // Nur Labels übernehmen, nicht die neue pokemontcg.io Seite-Daten
+      if (!existingSetMap.has(pokemontcgIoSet.id)) {
+        existingSetMap.set(pokemontcgIoSet.id, oldData);
+      }
+      // Alte TCGdex-Eintrags löschen, damit sie nicht erneut hinzugefügt werden
+      existingSetMap.delete(oldTcgdexKey);
+      Logger.log(`[Migration] Übernahme von TCGdex-only Set "${oldTcgdexKey}" zu "${pokemontcgIoSet.id}"`);
+    }
   });
 
   // SCHRITT 4: TCGDex-only Sets hinzufügen
@@ -1344,6 +1367,106 @@ function populateSetsOverview() {
   let allSetsOverviewData = [];
   let importedCount = 0;
   const importedSetsStatus = getScriptPropertiesData('importedSetsStatus', {});
+
+  // Vorab: vorhandene Set-Blätter erkennen und ggf. alte/alias Set-IDs auf kanonische IDs migrieren.
+  const scriptProperties = PropertiesService.getScriptProperties();
+  let collectedCardsData = getScriptPropertiesData('collectedCardsData', {});
+  let customImageUrls = getScriptPropertiesData('customImageUrls', {});
+  let collectedChanged = false;
+  let customImagesChanged = false;
+  let importedStatusChanged = false;
+
+  const canonicalSetIds = new Set();
+  const normalizedToCanonical = new Map();
+  allSetsForOverview.forEach(entry => {
+    const canonicalId = entry.pokemontcgData ? entry.pokemontcgData.id : `TCGDEX-${entry.tcgdexData.id}`;
+    canonicalSetIds.add(canonicalId);
+
+    const aliasCandidates = buildSetIdAliasCandidates(canonicalId);
+    aliasCandidates.forEach(aliasId => {
+      const normalizedId = normalizeSetId(String(aliasId).replace(/^TCGDEX-/i, ''));
+      if (!normalizedToCanonical.has(normalizedId)) {
+        normalizedToCanonical.set(normalizedId, canonicalId);
+      } else {
+        // Bevorzuge reguläre (nicht-TCGDEX) IDs als Ziel bei Kollisionen.
+        const existing = normalizedToCanonical.get(normalizedId);
+        if (existing.startsWith('TCGDEX-') && !canonicalId.startsWith('TCGDEX-')) {
+          normalizedToCanonical.set(normalizedId, canonicalId);
+        }
+      }
+    });
+  });
+
+  const importedSheetBySetId = {};
+  const allSheets = ss.getSheets();
+  allSheets.forEach(sheet => {
+    const name = sheet.getName();
+    if (name === 'Sets Overview' || name === 'Collection Summary') return;
+
+    const note = sheet.getRange(1, 1).getNote() || '';
+    if (!note.startsWith('Set ID: ')) return;
+
+    const noteSetId = note.substring('Set ID: '.length).trim();
+    const canonicalId = resolveCanonicalSetIdFromMap(noteSetId, normalizedToCanonical, canonicalSetIds);
+
+    if (!canonicalId) return;
+
+    // Notiz und assoziierte Property-Keys auf kanonische ID migrieren.
+    if (noteSetId !== canonicalId) {
+      sheet.getRange(1, 1).setNote(`Set ID: ${canonicalId}`);
+      Logger.log(`[populateSetsOverview] Alias-Migration im Set-Blatt "${name}": ${noteSetId} -> ${canonicalId}`);
+
+      if (importedSetsStatus[noteSetId]) {
+        importedSetsStatus[canonicalId] = true;
+        delete importedSetsStatus[noteSetId];
+        importedStatusChanged = true;
+      }
+
+      if (collectedCardsData[noteSetId]) {
+        if (!collectedCardsData[canonicalId]) {
+          collectedCardsData[canonicalId] = collectedCardsData[noteSetId];
+        } else {
+          collectedCardsData[canonicalId] = { ...collectedCardsData[noteSetId], ...collectedCardsData[canonicalId] };
+        }
+        delete collectedCardsData[noteSetId];
+        collectedChanged = true;
+      }
+
+      if (customImageUrls[noteSetId]) {
+        if (!customImageUrls[canonicalId]) {
+          customImageUrls[canonicalId] = customImageUrls[noteSetId];
+        } else {
+          customImageUrls[canonicalId] = { ...customImageUrls[noteSetId], ...customImageUrls[canonicalId] };
+        }
+        delete customImageUrls[noteSetId];
+        customImagesChanged = true;
+      }
+
+      const oldCardmarketKey = `pokemontcgIoCardmarketUrls_${noteSetId}`;
+      const newCardmarketKey = `pokemontcgIoCardmarketUrls_${canonicalId}`;
+      const oldCardmarketData = getScriptPropertiesData(oldCardmarketKey, null);
+      const existingCardmarketData = getScriptPropertiesData(newCardmarketKey, null);
+      if (oldCardmarketData && !existingCardmarketData) {
+        setScriptPropertiesData(newCardmarketKey, oldCardmarketData);
+      }
+      if (oldCardmarketData) {
+        scriptProperties.deleteProperty(oldCardmarketKey);
+      }
+    }
+
+    if (!importedSheetBySetId[canonicalId]) {
+      importedSheetBySetId[canonicalId] = sheet;
+    } else {
+      Logger.log(`[populateSetsOverview] Mehrere Blätter für ${canonicalId} erkannt. Verwende erstes Blatt: "${importedSheetBySetId[canonicalId].getName()}"`);
+    }
+
+    importedSetsStatus[canonicalId] = true;
+    importedStatusChanged = true;
+  });
+
+  if (collectedChanged) setScriptPropertiesData('collectedCardsData', collectedCardsData);
+  if (customImagesChanged) setScriptPropertiesData('customImageUrls', customImageUrls);
+  if (importedStatusChanged) setScriptPropertiesData('importedSetsStatus', importedSetsStatus);
 
   allSetsForOverview.forEach(setEntry => {
     const pokemontcgIoSet = setEntry.pokemontcgData;
@@ -1402,8 +1525,17 @@ function populateSetsOverview() {
 
     // Prüfe den Importstatus und erstelle Hyperlink, falls Blatt existiert
     let isSetImported = false;
-    let cardSheet = ss.getSheetByName(finalSetName); // Name des Blattes
-    if (cardSheet && cardSheet.getRange(1, 1).getNote() === `Set ID: ${actualSetIdForSheetNote}`) {
+    let cardSheet = importedSheetBySetId[actualSetIdForSheetNote] || null;
+
+    // Fallback: älteres Verhalten über Blattname + exakte Notiz
+    if (!cardSheet) {
+      const byNameSheet = ss.getSheetByName(finalSetName);
+      if (byNameSheet && byNameSheet.getRange(1, 1).getNote() === `Set ID: ${actualSetIdForSheetNote}`) {
+        cardSheet = byNameSheet;
+      }
+    }
+
+    if (cardSheet) {
       const sheetId = cardSheet.getSheetId();
       const sheetUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit#gid=${sheetId}`;
       setIdDisplayValue = `=HYPERLINK("${sheetUrl}"; "${actualSetIdForSheetNote}")`;
@@ -1719,13 +1851,122 @@ function populateCardsForSet(setIdFromOverview) {
 
   // Verbesserte Logik für das Erstellen/Wiederverwenden von Blättern
   if (cardSheet) {
-    const sheetNote = cardSheet.getRange(1, 1).getNote();
-    if (sheetNote !== `Set ID: ${setIdFromOverview}`) {
-      // Wenn Blatt existiert, aber nicht zu diesem Set gehört
-      const errorMessage = `Das Tabellenblatt mit dem Namen "${setNameInSheet}" existiert bereits, ist aber nicht dem Set mit der ID "${setIdFromOverview}" zugeordnet. Bitte löschen oder benennen Sie das Blatt "${setNameInSheet}" um, bevor Sie fortfahren, oder stellen Sie sicher, dass die Notiz in A1 des Blattes korrekt ist ("Set ID: ${setIdFromOverview}").`;
-      // KEIN UI.ALERT HIER, da die aufrufende Funktion den Alert übernimmt.
-      Logger.log(errorMessage);
-      throw new Error(errorMessage); // Fehler werfen für korrekten Abbruch
+    let sheetNote = cardSheet.getRange(1, 1).getNote() || "";
+    const expectedNote = `Set ID: ${setIdFromOverview}`;
+    const noteSetId = sheetNote.startsWith('Set ID: ') ? sheetNote.substring('Set ID: '.length).trim() : '';
+    
+    // DEBUG: Diagnostiziere die aktuelle Situation
+    Logger.log(`[populateCardsForSet] Blatt "${setNameInSheet}" found. sheetNote="${sheetNote}", expectedNote="${expectedNote}"`);
+    
+    // Prüfe auf Migrations-Szenario: TCGdex-only zu regulärer API
+    // (Wenn Set ursprünglich als TCGDEX-{ID} importiert wurde, jetzt aber in Haupt-API verfügbar ist)
+    let isMigrationCase = false;
+    if (sheetNote && sheetNote.startsWith('Set ID: TCGDEX-') && !setIdFromOverview.startsWith('TCGDEX-')) {
+      const oldTcgdexId = sheetNote.substring('Set ID: '.length); // z.B. "TCGDEX-me2pt5"
+      const normalizedOldId = oldTcgdexId.substring('TCGDEX-'.length); // z.B. "me2pt5"
+      const normalizedNewId = setIdFromOverview; // z.B. "me2pt5"
+      
+      Logger.log(`[Migration Check] oldTcgdexId="${oldTcgdexId}", normalizedOldId="${normalizedOldId}", normalizedNewId="${normalizedNewId}"`);
+      
+      if (areSetIdsEquivalent(normalizedOldId, normalizedNewId)) {
+        isMigrationCase = true;
+        Logger.log(`[Migration] TCGdex-only Set wird aktualisiert: ${oldTcgdexId} → ${setIdFromOverview}`);
+        cardSheet.getRange(1, 1).setNote(expectedNote);
+        SpreadsheetApp.getActive().toast(`♻️ Set "${setNameInSheet}" wird von TCGdex-only zu regulärer API migriert...`, "Migration in Bearbeitung", 3);
+      } else {
+        Logger.log(`[Migration Check] IDs stimmen nicht überein: "${normalizedOldId}" ≠ "${normalizedNewId}"`);
+      }
+    } else if (!sheetNote || sheetNote.trim() === "") {
+      Logger.log(`[populateCardsForSet] WARNUNG: Blatt "${setNameInSheet}" hat keine Notiz in A1. Dies könnte ein beschädigtes Blatt sein.`);
+    }
+
+    // Allgemeine Alias-Migration (z.B. "me02.5" -> "me2pt5"), auch ohne TCGDEX-Präfix
+    // Wenn normalisierte IDs übereinstimmen, migriere automatisch auf die erwartete ID.
+    if (!isMigrationCase && noteSetId) {
+      if (areSetIdsEquivalent(noteSetId, setIdFromOverview) && noteSetId !== setIdFromOverview) {
+        Logger.log(`[Alias-Migration] Blatt "${setNameInSheet}": "${noteSetId}" -> "${setIdFromOverview}"`);
+
+        cardSheet.getRange(1, 1).setNote(expectedNote);
+        isMigrationCase = true;
+
+        const scriptProperties = PropertiesService.getScriptProperties();
+
+        // importedSetsStatus migrieren
+        const importedSetsStatus = getScriptPropertiesData('importedSetsStatus', {});
+        if (importedSetsStatus[noteSetId]) {
+          importedSetsStatus[setIdFromOverview] = true;
+          delete importedSetsStatus[noteSetId];
+          setScriptPropertiesData('importedSetsStatus', importedSetsStatus);
+        }
+
+        // collectedCardsData / customImageUrls migrieren
+        const collectedCardsData = getScriptPropertiesData('collectedCardsData', {});
+        if (collectedCardsData[noteSetId] && !collectedCardsData[setIdFromOverview]) {
+          collectedCardsData[setIdFromOverview] = collectedCardsData[noteSetId];
+          delete collectedCardsData[noteSetId];
+          setScriptPropertiesData('collectedCardsData', collectedCardsData);
+        }
+
+        const customImageUrls = getScriptPropertiesData('customImageUrls', {});
+        if (customImageUrls[noteSetId] && !customImageUrls[setIdFromOverview]) {
+          customImageUrls[setIdFromOverview] = customImageUrls[noteSetId];
+          delete customImageUrls[noteSetId];
+          setScriptPropertiesData('customImageUrls', customImageUrls);
+        }
+
+        // Cardmarket-Key migrieren
+        const oldCardmarketKey = `pokemontcgIoCardmarketUrls_${noteSetId}`;
+        const newCardmarketKey = `pokemontcgIoCardmarketUrls_${setIdFromOverview}`;
+        const cardmarketData = getScriptPropertiesData(oldCardmarketKey, null);
+        if (cardmarketData) {
+          setScriptPropertiesData(newCardmarketKey, cardmarketData);
+          scriptProperties.deleteProperty(oldCardmarketKey);
+        }
+
+        // Lokale Variable aktualisieren, damit nachfolgende Prüfungen den neuen Zustand sehen
+        sheetNote = cardSheet.getRange(1, 1).getNote() || "";
+      }
+    }
+    
+    if (sheetNote !== expectedNote && !isMigrationCase) {
+      // NOTFALL-FIX: Versuche noch einmal eine "tiefere" Migration für alte Blätter
+      // Falls die Notiz völlig falsch ist, versuche eine manuelle Korrektur
+      if (sheetNote.includes('TCGDEX-')) {
+        Logger.log(`[Notfall-Migration] Versuche manuelle Migration für "${setNameInSheet}" mit alter Notiz: "${sheetNote}"`);
+        
+        try {
+          // Extrahiere die Set-ID aus der alten Notiz (könnte verschiedene Formate sein)
+          const possibleOldId = sheetNote.replace('Set ID: ', '').trim();
+          if (possibleOldId.includes('TCGDEX-')) {
+            const normalizedFromOld = possibleOldId.substring('TCGDEX-'.length);
+            if (areSetIdsEquivalent(normalizedFromOld, setIdFromOverview)) {
+              Logger.log(`[Notfall-Migration] Manuelle Korrektur erfolgreich: "${possibleOldId}" → "${setIdFromOverview}"`);
+              cardSheet.getRange(1, 1).setNote(expectedNote);
+              isMigrationCase = true;
+              // Migriere auch PropertiesService-Daten
+              const oldCardmarketKey = `pokemontcgIoCardmarketUrls_${possibleOldId}`;
+              const newCardmarketKey = `pokemontcgIoCardmarketUrls_${setIdFromOverview}`;
+              const cardmarketData = getScriptPropertiesData(oldCardmarketKey, null);
+              if (cardmarketData) {
+                setScriptPropertiesData(newCardmarketKey, cardmarketData);
+                PropertiesService.getScriptProperties().deleteProperty(oldCardmarketKey);
+                Logger.log(`[Notfall-Migration] Cardmarket-URLs migriert`);
+              }
+            }
+          }
+        } catch (migrationError) {
+          Logger.log(`[Notfall-Migration] Fehler bei manueller Migration: ${migrationError.message}`);
+        }
+      }
+      
+      // Wenn trotz Notfall-Fix immer noch kein Match, dann werfe Fehler
+      if (sheetNote !== expectedNote && !isMigrationCase) {
+        // Wenn Blatt existiert, aber nicht zu diesem Set gehört
+        const errorMessage = `Das Tabellenblatt mit dem Namen "${setNameInSheet}" existiert bereits, ist aber nicht dem Set mit der ID "${setIdFromOverview}" zugeordnet. Bitte löschen oder benennen Sie das Blatt "${setNameInSheet}" um, bevor Sie fortfahren, oder stellen Sie sicher, dass die Notiz in A1 des Blattes korrekt ist ("Set ID: ${setIdFromOverview}"). (Aktuelle Notiz: "${sheetNote}")`;
+        // KEIN UI.ALERT HIER, da die aufrufende Funktion den Alert übernimmt.
+        Logger.log(errorMessage);
+        throw new Error(errorMessage); // Fehler werfen für korrekten Abbruch
+      }
     }
     // Wenn cardSheet existiert und die Notiz übereinstimmt, wird es wiederverwendet.
   } else {
@@ -1735,6 +1976,21 @@ function populateCardsForSet(setIdFromOverview) {
   }
 
   SpreadsheetApp.getActive().toast(`Lade Daten für Set "${setNameInSheet}"...`, "🔄 In Bearbeitung", 5);
+
+  // Wenn Migration durchgeführt wurde, Alte TCGdex-ID aus importedSetsStatus entfernen
+  const isMigrationCase = cardSheet.getRange(1, 1).getNote() === `Set ID: ${setIdFromOverview}` && 
+                          (setIdFromOverview.startsWith('TCGDEX-') ? false : true); // War es vor kurzem eine TCGdex-ID?
+  
+  if (isMigrationCase && !setIdFromOverview.startsWith('TCGDEX-')) {
+    // Versuche, alte TCGdex-Präfix-ID aus importedSetsStatus zu entfernen
+    const oldTcgdexId = `TCGDEX-${setIdFromOverview}`;
+    const importedSetsStatus = getScriptPropertiesData('importedSetsStatus', {});
+    if (importedSetsStatus[oldTcgdexId]) {
+      delete importedSetsStatus[oldTcgdexId];
+      setScriptPropertiesData('importedSetsStatus', importedSetsStatus);
+      Logger.log(`[Migration] Entferne alte TCGdex-ID aus importedSetsStatus: ${oldTcgdexId}`);
+    }
+  }
 
   const tcgdexAllSets = fetchApiData(`${TCGDEX_BASE_URL}sets`, "Fehler beim Laden der TCGDex Sets für Kartenimport");
   const cardData = loadCardsForSet(setIdFromOverview, setNameInSheet, tcgdexAllSets);
@@ -1753,6 +2009,17 @@ function populateCardsForSet(setIdFromOverview) {
   // Render and sort cards
   renderAndSortCardsInSheet(cardSheet, setIdFromOverview, allCards, cardmarketData);
 
+  // Registriere Set als "bekannt importiert" – leerer {} verhindert falschen TCGDEX-Fallback
+  // bei Sets, bei denen noch nichts gesammelt wurde.
+  {
+    const _ccd = getScriptPropertiesData('collectedCardsData');
+    if (_ccd[setIdFromOverview] === undefined) {
+      _ccd[setIdFromOverview] = {};
+      setScriptPropertiesData('collectedCardsData', _ccd);
+      Logger.log(`[populateCardsForSet] Set ${setIdFromOverview} als bekannt in collectedCardsData registriert.`);
+    }
+  }
+
   // Update Collection Summary
   updateCollectionSummary();
 
@@ -1763,6 +2030,51 @@ function populateCardsForSet(setIdFromOverview) {
 // ============================================================================
 // SEKTION: KARTEN-RENDERING & GRID-LAYOUT
 // ============================================================================
+
+/**
+ * Extrahiert Sammelstatus (G/RH) aus einem bereits gerenderten Set-Blatt.
+ *
+ * Wird genutzt, wenn persistente Daten für ein Set fehlen, aber im Sheet
+ * bereits Checkbox-Zustände vorhanden sind (z. B. Migration alter Tabellen).
+ *
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} cardSheet - Set-Blatt
+ * @returns {Object} Map: { [cardId]: { g: boolean, rh: boolean } }
+ */
+function extractCollectedDataFromSheet(cardSheet) {
+  const result = {};
+  const lastRow = cardSheet.getLastRow();
+  if (lastRow <= SET_SHEET_HEADER_ROWS) return result;
+
+  const dataRows = lastRow - SET_SHEET_HEADER_ROWS;
+  const totalCols = CARDS_PER_ROW_IN_GRID * CARD_BLOCK_WIDTH_COLS;
+  const values = cardSheet.getRange(SET_SHEET_HEADER_ROWS + 1, 1, dataRows, totalCols).getValues();
+
+  const toBoolean = v => v === true || String(v).toLowerCase() === 'true';
+
+  for (let rowBlock = 0; rowBlock * CARD_BLOCK_HEIGHT_ROWS < dataRows; rowBlock++) {
+    for (let colBlock = 0; colBlock < CARDS_PER_ROW_IN_GRID; colBlock++) {
+      const br = rowBlock * CARD_BLOCK_HEIGHT_ROWS;
+      const bc = colBlock * CARD_BLOCK_WIDTH_COLS;
+      if (br >= dataRows) break;
+
+      const rawId = String(values[br][bc] || '').trim();
+      if (!rawId) continue;
+
+      const checkRow = br + 2;
+      if (checkRow >= dataRows) continue;
+
+      const cardId = normalizeCardNumber(rawId);
+      const g = toBoolean(values[checkRow][bc]);
+      const rh = toBoolean(values[checkRow][bc + 1]);
+
+      if (g || rh) {
+        result[cardId] = { g, rh };
+      }
+    }
+  }
+
+  return result;
+}
 
 /**
  * Rendert und sortiert Karten in einem Set-Blatt im Grid-Layout.
@@ -1814,16 +2126,50 @@ function renderAndSortCardsInSheet(cardSheet, setId, allCards, pokemontcgIoCardD
   }
 
   const collectedCardsData = getScriptPropertiesData('collectedCardsData');
-  const currentSetCollectedData = collectedCardsData[setId] || {};
+
+  // Auto-Recover: Wenn für dieses Set noch keine persistente Struktur existiert,
+  // versuche vorhandene Checkbox-Zustände direkt aus dem Sheet zu übernehmen.
+  if (collectedCardsData[setId] === undefined) {
+    const recovered = extractCollectedDataFromSheet(cardSheet);
+    collectedCardsData[setId] = recovered;
+    setScriptPropertiesData('collectedCardsData', collectedCardsData);
+    Logger.log(`[renderAndSortCardsInSheet] Auto-Recover für ${setId}: ${Object.keys(recovered).length} Karten aus Sheet übernommen.`);
+  }
+
+  let currentSetCollectedData = collectedCardsData[setId] || {};
+
+  // Fallback für migrierte Sets: wenn unter neuer ID nichts vorhanden ist,
+  // aber unter alter TCGDEX-Notation noch Daten liegen, verwende diese.
+  if (Object.keys(currentSetCollectedData).length === 0 && !setId.startsWith('TCGDEX-')) {
+    const legacySetId = `TCGDEX-${setId}`;
+    if (collectedCardsData[legacySetId] && Object.keys(collectedCardsData[legacySetId]).length > 0) {
+      currentSetCollectedData = collectedCardsData[legacySetId];
+      Logger.log(`[renderAndSortCardsInSheet] Nutze Legacy-Sammlungsdaten aus ${legacySetId} für ${setId}.`);
+    }
+  }
 
   const customImageUrls = getScriptPropertiesData('customImageUrls');
   const currentSetCustomImageUrls = customImageUrls[setId] || {};
+
+  // DEBUG: Überprüfe, ob collectedCardsData für dieses Set leer ist (DIAGNOSTIC)
+  if (Object.keys(currentSetCollectedData).length === 0 && collectedCardsData[setId] === undefined) {
+    Logger.log(`[renderAndSortCardsInSheet] WARNUNG: Keine Sammlungsdaten für Set ${setId} gefunden. Dies könnte bei mehreren Sets sortieren auftreten.`);
+  }
 
   // Schritt 1: Karten mit ihrem gesammelten Status für die Sortierung erweitern.
   const cardsForSorting = allCards.map(card => {
     // Verwende card.number für pokemontcg.io Sets, und card.localId/card.id für TCGDex-only Sets, die zu 'number' gemappt wurden.
     const cardNumberOrId = normalizeCardNumber(card.number || card.id);
-    const status = currentSetCollectedData[cardNumberOrId] || { g: false, rh: false };
+    const unnormalizedCardId = card.number || card.id; // Fallback für nicht normalisierte Kartennummern
+    
+    // Versuche zuerst die normalisierte Version, dann als Fallback die unnormalisierte
+    let status = currentSetCollectedData[cardNumberOrId] || currentSetCollectedData[unnormalizedCardId] || { g: false, rh: false };
+    
+    // DEBUG LOG: Falls beide Keys nicht gefunden wurden, log dies
+    if (!currentSetCollectedData[cardNumberOrId] && !currentSetCollectedData[unnormalizedCardId] && Object.keys(currentSetCollectedData).length > 0) {
+      Logger.log(`[renderAndSortCardsInSheet] Kartennummer-Mismatch für ${cardNumberOrId} (unnormalisiert: ${unnormalizedCardId}). Verfügbare Keys: ${JSON.stringify(Object.keys(currentSetCollectedData).slice(0, 5))}`);
+    }
+    
     return { ...card, g: status.g, rh: status.rh, displayId: cardNumberOrId };
   });
 
@@ -2061,6 +2407,16 @@ function renderAndSortCardsInSheet(cardSheet, setId, allCards, pokemontcgIoCardD
   });
 
   if (totalRowsForCards > 0) {
+    // make sure sheet is big enough to hold the grid
+    const requiredRows = SET_SHEET_HEADER_ROWS + totalRowsForCards;
+    if (cardSheet.getMaxRows() < requiredRows) {
+      cardSheet.insertRowsAfter(cardSheet.getMaxRows(), requiredRows - cardSheet.getMaxRows());
+    }
+    const requiredCols = totalColsNeeded;
+    if (cardSheet.getMaxColumns() < requiredCols) {
+      cardSheet.insertColumnsAfter(cardSheet.getMaxColumns(), requiredCols - cardSheet.getMaxColumns());
+    }
+
     const fullRange = cardSheet.getRange(SET_SHEET_HEADER_ROWS + 1, 1, totalRowsForCards, totalColsNeeded);
     fullRange.setValues(values);
     fullRange.setBackgrounds(backgrounds);
@@ -2441,7 +2797,65 @@ function updateCollectionSummary() {
  */
 function updateAllCardSheets() {
   const ui = SpreadsheetApp.getUi();
-  const response = ui.alert("Alle Kartenblätter aktualisieren (Raster)", "Dieser Vorgang kann sehr lange dauern! Bestehende Checkbox-Markierungen in den Sets bleiben erhalten.\n\nMöchten Sie wirklich fortfahren?", ui.ButtonSet.YES_NO);
+  const response = ui.alert("Importierte Kartenblätter aktualisieren (Raster)", "Es werden nur bereits importierte Sets neu geladen. Bestehende Checkbox-Markierungen bleiben erhalten.\n\nMöchten Sie wirklich fortfahren?", ui.ButtonSet.YES_NO);
+  if (response !== ui.Button.YES) return;
+
+  const importedSets = getImportedSetsFromSheets();
+  if (importedSets.length === 0) {
+    ui.alert("Info", "Keine importierten Sets gefunden.", ui.ButtonSet.OK);
+    return;
+  }
+
+  let processedCount = 0;
+  const startTime = Date.now();
+  SpreadsheetApp.getActive().toast(`Starte Aktualisierung für ${importedSets.length} importierte Sets...`, "🔄 In Arbeit", 10);
+
+  for (let i = 0; i < importedSets.length; i++) {
+    const { setId: setIdFromOverview, setName } = importedSets[i];
+    
+    // Berechne Fortschritt und ETA
+    const progress = Math.round(((i + 1) / importedSets.length) * 100);
+    const elapsed = Date.now() - startTime;
+    const avgTimePerSet = elapsed / (i + 1);
+    const remaining = (importedSets.length - i - 1) * avgTimePerSet;
+    const etaMinutes = Math.round(remaining / 60000);
+    const etaSeconds = Math.round((remaining % 60000) / 1000);
+    const etaText = etaMinutes > 0 ? `~${etaMinutes}min ${etaSeconds}s` : `~${etaSeconds}s`;
+    
+    SpreadsheetApp.getActive().toast(
+      `Set ${i + 1}/${setsData.length} (${progress}%) - ${setName}\nVerbleibende Zeit: ${etaText}`, 
+      "🔄 Importiere", 
+      5
+    );
+    
+    try {
+      populateCardsForSet(setIdFromOverview);
+      processedCount++;
+      if (i < importedSets.length - 1) Utilities.sleep(API_DELAY_MS + 1000);
+    } catch (e) {
+      Logger.log(`Kritischer Fehler beim Aktualisieren von Set ${setName} (ID: ${setIdFromOverview}): ${e.message} \nStack: ${e.stack}`);
+      SpreadsheetApp.getUi().alert(`Fehler bei Set ${setName}`, `Fehler: ${e.message}. Details im Log. Das Update wird mit dem nächsten Set fortgesetzt.`);
+    }
+  }
+
+  populateSetsOverview();
+  updateCollectionSummary();
+  SpreadsheetApp.getActive().toast(`Importierte Kartenblätter aktualisiert. Sammlungsübersicht wurde aktualisiert.`, "✅ Fertig", 10);
+  ui.alert("Aktualisierung abgeschlossen", `${processedCount}/${importedSets.length} importierte Sets verarbeitet.`, ui.ButtonSet.OK);
+}
+
+/**
+ * Importiert/aktualisiert alle Sets aus der Sets-Overview (inkl. bisher nicht importierter Sets).
+ *
+ * @function importAllSetsFromOverview
+ */
+function importAllSetsFromOverview() {
+  const ui = SpreadsheetApp.getUi();
+  const response = ui.alert(
+    "Alle Sets importieren",
+    "Dieser Vorgang importiert wirklich ALLE Sets aus der Übersicht (auch bisher nicht importierte) und kann sehr lange dauern.\n\nMöchten Sie fortfahren?",
+    ui.ButtonSet.YES_NO
+  );
   if (response !== ui.Button.YES) return;
 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -2458,7 +2872,7 @@ function updateAllCardSheets() {
 
   let processedCount = 0;
   const startTime = Date.now();
-  SpreadsheetApp.getActive().toast(`Starte Aktualisierung für ${setsData.length} Sets...`, "🔄 In Arbeit", 10);
+  SpreadsheetApp.getActive().toast(`Starte Vollimport für ${setsData.length} Sets...`, "🔄 In Arbeit", 10);
 
   for (let i = 0; i < setsData.length; i++) {
     const setIdFromOverview = extractIdFromHyperlink(setsData[i][0]);
@@ -2468,8 +2882,7 @@ function updateAllCardSheets() {
       Logger.log(`Überspringe Zeile ${i + OVERVIEW_DATA_START_ROW + 1} in Sets Overview: Fehlende Set ID oder Name.`);
       continue;
     }
-    
-    // Berechne Fortschritt und ETA
+
     const progress = Math.round(((i + 1) / setsData.length) * 100);
     const elapsed = Date.now() - startTime;
     const avgTimePerSet = elapsed / (i + 1);
@@ -2477,27 +2890,27 @@ function updateAllCardSheets() {
     const etaMinutes = Math.round(remaining / 60000);
     const etaSeconds = Math.round((remaining % 60000) / 1000);
     const etaText = etaMinutes > 0 ? `~${etaMinutes}min ${etaSeconds}s` : `~${etaSeconds}s`;
-    
+
     SpreadsheetApp.getActive().toast(
-      `Set ${i + 1}/${setsData.length} (${progress}%) - ${setName}\nVerbleibende Zeit: ${etaText}`, 
-      "🔄 Importiere", 
+      `Set ${i + 1}/${setsData.length} (${progress}%) - ${setName}\nVerbleibende Zeit: ${etaText}`,
+      "🌐 Importiere alle",
       5
     );
-    
+
     try {
       populateCardsForSet(setIdFromOverview);
       processedCount++;
       if (i < setsData.length - 1) Utilities.sleep(API_DELAY_MS + 1000);
     } catch (e) {
-      Logger.log(`Kritischer Fehler beim Aktualisieren von Set ${setName} (ID: ${setIdFromOverview}): ${e.message} \nStack: ${e.stack}`);
-      SpreadsheetApp.getUi().alert(`Fehler bei Set ${setName}`, `Fehler: ${e.message}. Details im Log. Das Update wird mit dem nächsten Set fortgesetzt.`);
+      Logger.log(`Kritischer Fehler beim Vollimport von Set ${setName} (ID: ${setIdFromOverview}): ${e.message} \nStack: ${e.stack}`);
+      SpreadsheetApp.getUi().alert(`Fehler bei Set ${setName}`, `Fehler: ${e.message}. Details im Log. Der Import wird mit dem nächsten Set fortgesetzt.`);
     }
   }
 
   populateSetsOverview();
   updateCollectionSummary();
-  SpreadsheetApp.getActive().toast(`Alle Kartenblätter aktualisiert. Sammlungsübersicht wurde aktualisiert.`, "✅ Fertig", 10);
-  ui.alert("Aktualisierung abgeschlossen", `${processedCount}/${setsData.length} Sets verarbeitet.`, ui.ButtonSet.OK);
+  SpreadsheetApp.getActive().toast(`Vollimport abgeschlossen. Sammlungsübersicht wurde aktualisiert.`, "✅ Fertig", 10);
+  ui.alert("Vollimport abgeschlossen", `${processedCount}/${setsData.length} Sets verarbeitet.`, ui.ButtonSet.OK);
 }
 
 // ============================================================================
@@ -2530,14 +2943,17 @@ function handleOnEdit(e) {
     return;
   }
 
-  // 2. Acquire a lock to prevent concurrent user operations
-  var lock = LockService.getUserLock();
+  // 2. Acquire a global script lock to serialize edits from *all* users.
+  //    User locks only cover the current account; script lock ensures only one
+  //    trigger runs at a time, preventing duplicate API calls from different users.
+  var lock = LockService.getScriptLock();
   try {
     lock.waitLock(USER_LOCK_TIMEOUT_MS);
   } catch (err) {
-    // Show user-friendly message for lock contention
-    SpreadsheetApp.getUi().alert("Operation blockiert", "Eine andere Operation wird gerade ausgeführt. Bitte versuchen Sie es gleich noch einmal.", SpreadsheetApp.getUi().ButtonSet.OK);
-    Logger.log("Could not obtain lock after %s seconds. Aborting handleOnEdit. Error: %s", USER_LOCK_TIMEOUT_MS / 1000, err.message);
+    // Silent early exit (no alert) since another execution is already running;
+    // the duplicate-detection further down will catch repeats if this run is
+    // triggered after the first one completes.
+    Logger.log("[handleOnEdit] Could not obtain script lock after %s seconds. Skipping execution.", USER_LOCK_TIMEOUT_MS / 1000);
     return;
   }
 
@@ -2570,19 +2986,12 @@ function handleOnEdit(e) {
           (lastProcessedEdit.value === true || (typeof lastProcessedEdit.value === 'string' && lastProcessedEdit.value.toLowerCase() === 'true')) &&
           (timeDiff < 60000)) { // 60 second threshold to catch lock-delayed duplicate triggers
           Logger.log(`[handleOnEdit] Duplicate user-initiated trigger detected (same cell, same true value, ${timeDiff}ms ago). Ignoring.`);
-          return; // Exit early - DO NOT clear the flag yet!
-        } else if (timeDiff > 60000) {
-          // Clear stale entries older than 60 seconds
-          Logger.log(`[handleOnEdit] Clearing stale lastProcessedEdit (${timeDiff}ms old).`);
-          properties.deleteProperty('lastProcessedEdit');
+          // reset flag before exiting so future edits are handled normally
+          isScriptEditing = false;
+          return;
         }
       }
-      // If not a duplicate, store this user-initiated activation
-      Logger.log(`[handleOnEdit] Storing lastProcessedEdit for range ${range.getA1Notation()}`);
-      properties.setProperty('lastProcessedEdit', JSON.stringify({ range: range.getA1Notation(), value: e.value, timestamp: Date.now() }));
     }
-
-    // 4. Proceed with main logic. All sheet modifications must be wrapped by try/finally with isScriptEditing = true/false
     const sheet = range.getSheet();
     const sheetName = sheet.getName();
 
@@ -2878,18 +3287,23 @@ function processCardDataEdit(e, rawCardId, setId, isGCheckbox, isRHCheckbox, isI
       }
     }
     
+    // Speicher minimieren: Eintrag löschen wenn nichts gesammelt
+    if (!cardData.g && !cardData.rh) {
+      delete collectedCardsData[setId][cardId];
+    }
+    // Set-Ebene absichtlich NICHT löschen – leerer {} Eintrag = "bekannt importiert"
     setScriptPropertiesData('collectedCardsData', collectedCardsData);
   }
 
   // UI-Updates nur wenn nötig
   if (dataModified || uiNeedsUpdate) {
-    const { collectedCount, reverseHoloCount } = countCollectedCards(collectedCardsData[setId]);
+    const { collectedCount, reverseHoloCount } = countCollectedCards(collectedCardsData[setId] || {});
     updateSetSheetHeaderSummary(sheet, setId, collectedCount, reverseHoloCount);
     Logger.log(`[processCardDataEdit] Header summary for set ${setId} updated.`);
 
-    // Wende Hintergrundfarbe an
-    const blockColor = collectedCardsData[setId][cardId].rh ? REVERSE_HOL_COLLECTED_COLOR : 
-                       (collectedCardsData[setId][cardId].g ? COLLECTED_COLOR : null);
+    // Wende Hintergrundfarbe an (nutze cardData-Referenz, die auch nach delete noch gültig ist)
+    const blockColor = cardData.rh ? REVERSE_HOL_COLLECTED_COLOR :
+                       (cardData.g ? COLLECTED_COLOR : null);
     cardBlockRange.setBackground(blockColor);
     Logger.log(`[processCardDataEdit] Applied color ${blockColor} to range ${cardBlockRange.getA1Notation()}.`);
   }
@@ -2926,6 +3340,14 @@ function onImportCheckboxEdit(e, isUserInitiatedCheck) { // Added isUserInitiate
 
   if (isUserInitiatedCheck) {
     Logger.log(`[onImportCheckboxEdit] User explicitly checked the box. Proceeding with import logic.`);
+
+    // guard: if we already imported this set earlier, skip doing it again
+    if (importedSetsStatus[setId]) {
+      Logger.log(`[onImportCheckboxEdit] Set ${setId} already marked as imported; skipping re-import.`);
+      // ensure checkbox shows true and leave it alone
+      range.setValue(true);
+      return;
+    }
     
     // WICHTIG: Setze checkbox zu false OHNE flush() um keinen rekursiven onEdit zu triggern
     range.setValue(false);
@@ -3101,10 +3523,12 @@ function onRefreshOverviewCheckboxEdit(e, isUserInitiatedCheck) {
  */
 function onSortAllSetsCheckboxEdit(e, isUserInitiatedCheck) {
   handleHeaderCheckbox(e, isUserInitiatedCheck, 'onSortAllSetsCheckboxEdit', () => {
-    SpreadsheetApp.getActive().toast("Alle Sets sortieren...", "🔄 Sortieren", 10);
-    Logger.log(`[onSortAllSetsCheckboxEdit] Calling manualSortAllSheets().`);
-    manualSortAllSheets();
-    SpreadsheetApp.getActive().toast("Alle Sets sortiert.", "✅ Fertig", 8);
+    // obwohl der Funktionsname auf 'SortAllSets' referenziert, aktualisieren wir nun
+    // lediglich die Sammlung-Statistik. Der Menüeintrag bleibt unverändert.
+    SpreadsheetApp.getActive().toast("Statistik aktualisieren...", "🔄 Aktualisieren", 10);
+    Logger.log(`[onSortAllSetsCheckboxEdit] Calling updateCollectionSummary().`);
+    updateCollectionSummary();
+    SpreadsheetApp.getActive().toast("Statistik aktualisiert.", "✅ Fertig", 8);
   });
 }
 
@@ -3250,12 +3674,71 @@ function prepareCardsForSorting(setId, setName, tcgdexAllSets) {
 }
 
 /**
+ * Liefert eine Liste der aktuell importierten Sets basierend auf vorhandenen Tabellenblättern.
+ * Jedes Element enthält {setId, setName}. Nur Blätter mit einer gültigen "Set ID:"-Notiz
+ * in Zelle A1 werden berücksichtigt. Diese Methode ist deutlich effizienter als das
+ * Durchlaufen der kompletten "Sets Overview" Tabelle und vermeidet das Sortieren
+ * von noch nicht importierten Sets.
+ *
+ * @returns {Array<{setId:string,setName:string}>}
+ */
+function getImportedSetsFromSheets() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheets = ss.getSheets();
+  const imported = [];
+  sheets.forEach(sheet => {
+    const name = sheet.getName();
+    if (name === 'Sets Overview' || name === 'Collection Summary') return;
+    const note = sheet.getRange(1, 1).getNote();
+    if (note && note.startsWith('Set ID: ')) {
+      const setId = note.substring('Set ID: '.length);
+      if (setId) {
+        imported.push({ setId, setName: name });
+      }
+    }
+  });
+  return imported;
+}
+
+/**
+ * Liefert eine Liste der aktuell importierten Sets basierend auf vorhandenen Tabellenblättern.
+ * Jedes Element enthält {setId, setName}. Nur Blätter mit einer gültigen "Set ID:"-Notiz
+ * in Zelle A1 werden berücksichtigt. Diese Methode ist deutlich effizienter als das
+ * Durchlaufen der kompletten "Sets Overview" Tabelle und vermeidet das Sortieren
+ * von noch nicht importierten Sets.
+ *
+ * @returns {Array<{setId:string,setName:string}>}
+ */
+function getImportedSetsFromSheets() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheets = ss.getSheets();
+  const imported = [];
+  sheets.forEach(sheet => {
+    const name = sheet.getName();
+    if (name === 'Sets Overview' || name === 'Collection Summary') return;
+    const note = sheet.getRange(1, 1).getNote();
+    if (note && note.startsWith('Set ID: ')) {
+      const setId = note.substring('Set ID: '.length);
+      if (setId) {
+        imported.push({ setId, setName: name });
+      }
+    }
+  });
+  return imported;
+}
+
+/**
  * Hilfsfunktion zum Installieren eines Zeit-Triggers mit den gegebenen Parametern
  * @param {string} intervalType Art des Intervalls ('minütlich', 'täglich', 'stündlich', 'wöchentlich')
  * @param {number} frequency Frequenz des Triggers
  * @param {number|null} hour Stunde für tägliche/wöchentliche Trigger
  */
 function createTimeTrigger(intervalType, frequency, hour) {
+  const props = PropertiesService.getScriptProperties();
+  if (props.getProperty('sortTriggerInstalled') === 'true') {
+    return 'Ein Sortier-Trigger ist bereits installiert. Bitte löschen Sie zuerst vorhandene Trigger, bevor Sie einen neuen erstellen.';
+  }
+
   let triggerBuilder = ScriptApp.newTrigger("sortAllSheetsTrigger").timeBased();
 
   switch (intervalType) {
@@ -3274,7 +3757,8 @@ function createTimeTrigger(intervalType, frequency, hour) {
   }
 
   triggerBuilder.create();
-  
+  props.setProperty('sortTriggerInstalled','true');
+
   let confirmationMessage = `Der Sortier-Trigger wurde erfolgreich installiert: ${intervalType}`;
   if (frequency > 1) {
     confirmationMessage += ` (alle ${frequency} ${intervalType.slice(0, -2)}en)`;
@@ -3317,6 +3801,8 @@ function installSortTrigger() {
       ScriptApp.deleteTrigger(triggers[i]);
     }
   }
+  // clear global installation flag so another user can install later if desired
+  PropertiesService.getScriptProperties().deleteProperty('sortTriggerInstalled');
 
   const typeResponse = ui.prompt(
     'Sortier-Trigger installieren',
@@ -3469,25 +3955,32 @@ function uninstallAllTriggers() {
  * @see renderAndSortCardsInSheet
  */
 function sortAllSheetsTrigger() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const setsSheet = ss.getSheetByName("Sets Overview");
-  if (!setsSheet || setsSheet.getLastRow() < OVERVIEW_DATA_START_ROW) {
-    Logger.log("sortAllSheetsTrigger: Keine Sets im 'Sets Overview' gefunden. Überspringe Sortierung.");
+  // prevent multiple simultaneous executions (duplicate triggers or overlapping runs)
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(1000)) { // wait up to 1 second
+    Logger.log('sortAllSheetsTrigger: another instance is running, aborting duplicate call');
+    return;
+  }
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const imported = getImportedSetsFromSheets();
+  if (imported.length === 0) {
+    Logger.log("sortAllSheetsTrigger: Keine importierten Set-Blätter gefunden. Überspringe Sortierung.");
     return;
   }
 
-  const lastExistingOverviewRow = setsSheet.getLastRow();
-  const numExistingOverviewDataRows = Math.max(0, lastExistingOverviewRow - OVERVIEW_DATA_START_ROW);
-  const setsData = numExistingOverviewDataRows > 0 ?
-    setsSheet.getRange(OVERVIEW_DATA_START_ROW + 1, 1, numExistingOverviewDataRows, 2).getValues() : [];
-
-  Logger.log(`Starte automatische Sortierung für ${setsData.length} Sets...`);
+  Logger.log(`Starte automatische Sortierung für ${imported.length} importierte Sets...`);
 
   const tcgdexAllSets = fetchApiData(`${TCGDEX_BASE_URL}sets`, "Fehler beim Laden der TCGDex Sets für automatische Sortierung");
 
-  setsData.forEach(([setIdRaw, setName]) => {
-    const setId = extractIdFromHyperlink(setIdRaw); // Dies ist die pokemontcg.io Set ID oder TCGDex-only ID
+  const startTime = Date.now();
+  const MAX_DURATION = 5 * 60 * 1000; // Sicherheitsabbruch bei 5 Minuten
 
+  imported.forEach(({setId, setName}, idx) => {
+    if (Date.now() - startTime > MAX_DURATION) {
+      Logger.log(`sortAllSheetsTrigger: Zeitlimit erreicht nach ${idx} Sets, beende Trigger.`);
+      return; // exit this iteration, the lock release will follow
+    }
     const sheet = ss.getSheetByName(setName);
     if (sheet && sheet.getRange(1, 1).getNote() === `Set ID: ${setId}`) {
       try {
@@ -3515,6 +4008,9 @@ function sortAllSheetsTrigger() {
 
   updateCollectionSummary();
   Logger.log("Sammlungsübersicht nach Trigger-Sortierung aktualisiert.");
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 /**
@@ -3543,38 +4039,35 @@ function sortAllSheetsTrigger() {
 function manualSortAllSheets() {
   const ui = SpreadsheetApp.getUi();
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const setsSheet = ss.getSheetByName("Sets Overview");
 
-  if (!setsSheet || setsSheet.getLastRow() < OVERVIEW_DATA_START_ROW) {
-    ui.alert("Error", "Keine Sets im 'Sets Overview' gefunden. Bitte importieren Sie zuerst Sets.", ui.ButtonSet.OK);
+  const imported = getImportedSetsFromSheets();
+  if (imported.length === 0) {
+    ui.alert("Info", "Keine importierten Sets gefunden. Bitte importieren Sie zuerst Sets.", ui.ButtonSet.OK);
     return;
   }
 
-  const lastExistingOverviewRow = setsSheet.getLastRow();
-  const numExistingOverviewDataRows = Math.max(0, lastExistingOverviewRow - OVERVIEW_DATA_START_ROW);
-  const setsData = numExistingOverviewDataRows > 0 ?
-    setsSheet.getRange(OVERVIEW_DATA_START_ROW + 1, 1, numExistingOverviewDataRows, 2).getValues() : [];
-
   let processedCount = 0;
-  SpreadsheetApp.getActive().toast(`Starte manuelle Sortierung für ${setsData.length} Sets...`, "🔄 In Arbeit", 10);
+  SpreadsheetApp.getActive().toast(`Starte manuelle Sortierung für ${imported.length} importierte Sets...`, "🔄 In Arbeit", 10);
 
   const tcgdexAllSets = fetchApiData(`${TCGDEX_BASE_URL}sets`, "Fehler beim Laden der TCGDex Sets für manuelle Sortierung");
 
-  for (let i = 0; i < setsData.length; i++) {
-    const setId = extractIdFromHyperlink(setsData[i][0]);
-    const setName = setsData[i][1];
+  const startTime = Date.now();
+  const MAX_DURATION = 5 * 60 * 1000; // 5 Minuten Sicherheitsgrenze
 
-    if (!setId || !setName) {
-      Logger.log(`Überspringe Zeile ${i + OVERVIEW_DATA_START_ROW + 1} in Sets Overview: Fehlende Set ID oder Name.`);
-      continue;
+  for (let i = 0; i < imported.length; i++) {
+    // beende frühzeitig wenn wir uns dem Timeout nähern
+    if (Date.now() - startTime > MAX_DURATION) {
+      Logger.log(`manualSortAllSheets: Zeitlimit erreicht nach ${i} Sets, abgebrochen.`);
+      ui.alert("Zeitlimit erreicht", `Sortierung wurde nach ${i} Sets abgebrochen, weil das Zeitlimit erreicht wurde. Bitte erneut ausführen.`, ui.ButtonSet.OK);
+      break;
     }
+    const { setId, setName } = imported[i];
 
     const sheet = ss.getSheetByName(setName);
     if (sheet && sheet.getRange(1, 1).getNote() === `Set ID: ${setId}`) {
-      SpreadsheetApp.getActive().toast(`Sortiere Set ${i + 1}/${setsData.length}: ${setName}`, "🔄 In Arbeit", 5);
+      SpreadsheetApp.getActive().toast(`Sortiere Set ${i + 1}/${imported.length}: ${setName}`, "🔄 In Arbeit", 5);
       try {
         const { allCards, cardmarketData } = prepareCardsForSorting(setId, setName, tcgdexAllSets);
-        
         if (allCards.length === 0) {
           Logger.log(`manualSortAllSheets: Keine Karten für Set ${setId} gefunden. Überspringe.`);
           continue;
@@ -3595,8 +4088,8 @@ function manualSortAllSheets() {
   updateCollectionSummary();
   Logger.log("Sammlungsübersicht nach manueller Sortierung aller Blätter aktualisiert.");
 
-  SpreadsheetApp.getActive().toast(`Manuelle Sortierung abgeschlossen. ${processedCount}/${setsData.length} Sets verarbeitet.`, "✅ Fertig", 10);
-  ui.alert("Manuelle Sortierung abgeschlossen", `${processedCount}/${setsData.length} Sets wurden sortiert.`, ui.ButtonSet.OK);
+  SpreadsheetApp.getActive().toast(`Manuelle Sortierung abgeschlossen. ${processedCount}/${imported.length} Sets verarbeitet.`, "✅ Fertig", 10);
+  ui.alert("Manuelle Sortierung abgeschlossen", `${processedCount}/${imported.length} Sets wurden sortiert.`, ui.ButtonSet.OK);
 }
 
 /**
@@ -4048,6 +4541,9 @@ function searchCard() {
   
   SpreadsheetApp.getActive().toast('Suche läuft...', '🔍 Suchen', 3);
   
+  // Dynamisch berechnete Spaltenanzahl basierend auf Grid-Konstanten
+  const numCols = CARDS_PER_ROW_IN_GRID * CARD_BLOCK_WIDTH_COLS;
+  
   // Durchsuche alle Set-Sheets
   for (const sheet of sheets) {
     const sheetName = sheet.getName();
@@ -4061,24 +4557,30 @@ function searchCard() {
     }
     
     const numRows = lastRow - CARD_DATA_START_ROW;
-    const data = sheet.getRange(CARD_DATA_START_ROW + 1, 1, numRows, 10).getValues();
+    const data = sheet.getRange(CARD_DATA_START_ROW + 1, 1, numRows, numCols).getValues();
     
     for (let i = 0; i < data.length; i++) {
-      const cardNumber = data[i][COL_CARD_NUMBER];
-      const cardName = data[i][COL_CARD_NAME];
-      
-      if (!cardNumber) continue;
-      
-      const numberMatch = String(cardNumber).toLowerCase().includes(searchTerm);
-      const nameMatch = String(cardName).toLowerCase().includes(searchTerm);
-      
-      if (numberMatch || nameMatch) {
-        results.push({
-          set: sheetName,
-          number: cardNumber,
-          name: cardName,
-          row: CARD_DATA_START_ROW + 2 + i
-        });
+      const row = data[i];
+      for (let block = 0; block < CARDS_PER_ROW_IN_GRID; block++) {
+        const colOffset = block * CARD_BLOCK_WIDTH_COLS;
+        if (colOffset >= row.length) break;
+        
+        const cardNumber = row[colOffset];
+        const cardName = row[colOffset + 1];
+        
+        if (!cardNumber) continue;
+        
+        const numberMatch = String(cardNumber).toLowerCase().includes(searchTerm);
+        const nameMatch = String(cardName).toLowerCase().includes(searchTerm);
+        
+        if (numberMatch || nameMatch) {
+          results.push({
+            set: sheetName,
+            number: cardNumber,
+            name: cardName,
+            row: CARD_DATA_START_ROW + 2 + i
+          });
+        }
       }
     }
   }
@@ -4166,7 +4668,8 @@ function exportCollectionToCSV() {
       }
       
       const numRows = lastRow - CARD_DATA_START_ROW;
-      const range = sheet.getRange(CARD_DATA_START_ROW + 1, 1, numRows, 10);
+      const numCols = CARDS_PER_ROW_IN_GRID * CARD_BLOCK_WIDTH_COLS;
+      const range = sheet.getRange(CARD_DATA_START_ROW + 1, 1, numRows, numCols);
       const rawValues = range.getValues();
       const displayValues = range.getDisplayValues();
       
@@ -4220,20 +4723,19 @@ function exportCollectionToCSV() {
         return str;
       };
       
-      // Sheet-Layout ist ein 2-Spalten-Grid mit Trennungen:
-      // Col 0: Card1 Number, Col 1: Card1 Name, Col 2: Empty
-      // Col 3: Card2 Number, Col 4: Card2 Name, Col 5: Empty, etc.
-      // Pro Zeile können bis zu 5 Karten sein (Spalten 0-9)
-      Logger.log(`CSV Export: Processing sheet "${sheetName}" with grid layout (cards at cols 0,3,6,9; names at cols 1,4,7,10)`);
+      // Sheet-Layout basiert auf einem wiederholten Kartenblock im Grid.
+      // Wir berechnen die Anzahl der möglichen Spalten dynamisch, damit Änderungen
+      // an CARDS_PER_ROW_IN_GRID oder CARD_BLOCK_WIDTH_COLS automatisch übernommen werden.
+      const maxCols = CARDS_PER_ROW_IN_GRID * CARD_BLOCK_WIDTH_COLS;
+      Logger.log(`CSV Export: Processing sheet "${sheetName}" with grid layout. maxCols=${maxCols}`);
       
       for (let rowIdx = 0; rowIdx < displayValues.length; rowIdx++) {
         const row = displayValues[rowIdx];
         
-        // Verarbeite 2-Spalten-Grid: (CardNum, CardName) alle 3 Spalten
-        // Mögliche Positionen: (0,1), (3,4), (6,7), (9,10)
-        for (let cardIndex = 0; cardIndex < 5; cardIndex++) {
-          const colNum = cardIndex * 3;      // 0, 3, 6, 9, 12
-          const colName = cardIndex * 3 + 1; // 1, 4, 7, 10, 13
+        // Iteriere pro Kartenblock im Grid
+        for (let cardIndex = 0; cardIndex < CARDS_PER_ROW_IN_GRID; cardIndex++) {
+          const colNum = cardIndex * CARD_BLOCK_WIDTH_COLS;
+          const colName = colNum + 1;
           
           if (colNum >= row.length) break; // Keine weiteren Spalten
           
@@ -4346,6 +4848,14 @@ function importCollectionFromCSV(csvContent) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
   try {
+    // Make sure the overview/summary sheets are present so updates later don't fail.
+    // setupSheets is idempotent and safe even if already run earlier.
+    try {
+      setupSheets();
+    } catch (err) {
+      Logger.log(`CSV Import: setupSheets() Fehler – ${err.message}`);
+    }
+
     if (!csvContent || typeof csvContent !== 'string') {
       ui.alert('❌ Fehler', 'CSV-Inhalt fehlt oder ist ungültig.', ui.ButtonSet.OK);
       return;
@@ -4399,6 +4909,7 @@ function importCollectionFromCSV(csvContent) {
     let updatedCards = 0;
     let invalidRows = 0;
     let unknownCards = 0;
+    const unknownSamples = []; // keep examples for diagnostics
 
     // Cache Set-Sheets und Card-IDs
     // WICHTIG: Durchsuche alle Sheets und baue Set-ID-Mapping aus Notes auf
@@ -4427,6 +4938,14 @@ function importCollectionFromCSV(csvContent) {
       setIdToSheetMap.set(setId, sheet);
     }
     
+    // Vorab: bringe die Übersicht in einen aktuellen Zustand – so haben wir immer
+    // eine chance, fehlende Sets direkt anzulegen, falls sie in der CSV auftauchen.
+    try {
+      populateSetsOverview();
+    } catch (e) {
+      Logger.log(`CSV Import: Fehler beim Vorab-Update der Übersicht: ${e.message}`);
+    }
+
     // Nun durchsuche die CSV-Zeilen nach benötigten Set-IDs
     const neededSetIds = new Set();
     for (let i = 1; i < rows.length; i++) {
@@ -4442,7 +4961,7 @@ function importCollectionFromCSV(csvContent) {
       
       const sheet = setIdToSheetMap.get(setId);
       if (!sheet) {
-        Logger.log(`CSV Import: Set sheet not found: ${setId}`);
+        Logger.log(`CSV Import: Set sheet not gefunden (noch) für: ${setId}`);
         unknownSets.add(setId);
         continue;
       }
@@ -4481,9 +5000,33 @@ function importCollectionFromCSV(csvContent) {
       }
 
       if (!setSheetMap.has(setId)) {
-        Logger.log(`CSV Data Row ${i}: Set not in cache: ${setId}`);
-        unknownSets.add(setId);
-        continue;
+        Logger.log(`CSV Data Row ${i}: Set not in cache: ${setId} – versuche automatischen Import`);
+        // aktualisiere Übersicht in der Hoffnung, dass das Set dort auftaucht
+        try {
+          populateSetsOverview();
+        } catch (e) {
+          Logger.log(`CSV Import: Fehler beim refresh der Übersicht vor Import von ${setId}: ${e.message}`);
+        }
+        try {
+          populateCardsForSet(setId);
+          Logger.log(`CSV Import: Automatisches Erzeugen/Import des Sets ${setId} erfolgreich`);
+        } catch (e) {
+          Logger.log(`CSV Import: Automatischer Import von ${setId} schlug fehl: ${e.message}`);
+          unknownSets.add(setId);
+          continue;
+        }
+        // ziehe neu erstelltes Blatt in den Cache
+        const newSheet = ss.getSheets().find(s => s.getRange(1,1).getNote() === `Set ID: ${setId}`);
+        if (newSheet) {
+          const cardIdSet = getCardIdSetFromSheet(newSheet);
+          setSheetMap.set(setId, newSheet);
+          cardIdSetMap.set(setId, cardIdSet);
+          Logger.log(`CSV Import: ${setId} nach automatischem Import gecacht (${cardIdSet.size} Karten)`);
+        } else {
+          Logger.log(`CSV Import: Sheet nach Import von ${setId} nicht gefunden, markiere als unbekannt.`);
+          unknownSets.add(setId);
+          continue;
+        }
       }
 
       const normalParsed = parseCsvBoolean(row[4]);
@@ -4500,6 +5043,9 @@ function importCollectionFromCSV(csvContent) {
       const cardIdSet = cardIdSetMap.get(setId);
       if (cardIdSet && !cardIdSet.has(cardNumber)) {
         Logger.log(`CSV Data Row ${i}: Card not in set. Set=${setId}, Card=${cardNumber}. Available: ${Array.from(cardIdSet).slice(0, 5).join(', ')}...`);
+        if (unknownSamples.length < 10) {
+          unknownSamples.push({row:i, setId:setId, cardNumber:cardNumber, cardIdSetSize: cardIdSet.size, cardIdSetSample: Array.from(cardIdSet).slice(0,5)});
+        }
         unknownCards++;
         continue;
       }
@@ -4540,11 +5086,56 @@ function importCollectionFromCSV(csvContent) {
         applyCollectedDataToSetSheet(setId, sheet, setCollectedData);
         const counts = countCollectedCards(setCollectedData);
         updateSetSheetHeaderSummary(sheet, setId, counts.collectedCount, counts.reverseHoloCount);
+
+        // die zugehörige Zeile in der Sets-Übersicht anpassen wie es ein Import-Checkbox-Trigger täte
+        try {
+          updateSetsOverviewRowAfterCardImport(setId, null, null, sheet);
+        } catch (ignored) {
+          // falls etwas schiefgeht (z.B. Übersicht existiert noch nicht), ignorieren
+        }
       } catch (e) {
         Logger.log(`CSV Import UI-Update Fehler für Set ${setId}: ${e.message}`);
       }
     });
 
+    // Zusammenfassung neu berechnen (wird normalerweise durch Trigger erledigt)
+    updateCollectionSummary();
+
+    // Falls unbekannte Sets auftauchen, weisen wir den Benutzer hin und aktualisieren die Übersicht
+    if (unknownSets.size > 0) {
+      const unknownList = Array.from(unknownSets).join(', ');
+      ui.alert('⚠️ Unbekannte Sets',
+               `Die CSV enthält Einträge für Sets, die derzeit nicht in der "Sets Overview" vorhanden sind:\n${unknownList}\n\nDie Übersicht wird jetzt aktualisiert. Anschließend werden fehlende Set-Blätter automatisch erzeugt.`,
+               ui.ButtonSet.OK);
+      try {
+        populateSetsOverview();
+      } catch (e) {
+        Logger.log(`Fehler beim Aktualisieren der Sets-Übersicht nach CSV-Import: ${e.message}`);
+      }
+
+      // Erstelle fehlende Set-Blätter automatisch
+      for (const setId of unknownSets) {
+        try {
+          Logger.log(`CSV Import: Versuche automatisches Erzeugen / Importieren von Set ${setId}`);
+          populateCardsForSet(setId);
+          touchedSets.add(setId);
+        } catch (e) {
+          Logger.log(`CSV Import: Fehler beim automatischen Import von Set ${setId}: ${e.message}`);
+          // Wenn populateCardsForSet scheitert, setzen wir das Set weiterhin auf unbekannt; der Nutzer muss es manuell importieren.
+        }
+      }
+    } else {
+      // auch ohne unbekannte Sets bringt ein Update keine Nachteile und stellt sicher, dass
+      // Abkürzungen/Hyperlinks etc. aktuell sind
+      try {
+        populateSetsOverview();
+      } catch (e) {
+        Logger.log(`Fehler beim Aktualisieren der Sets-Übersicht nach CSV-Import: ${e.message}`);
+      }
+    }
+
+    // wenn wir die Übersicht erneuert haben, in seltenen Fällen nochmals die Sammlung
+    // zusammenfassen, damit Abkürzungen aus der Übersicht einfließen
     updateCollectionSummary();
 
     const resultParts = [
@@ -4553,6 +5144,15 @@ function importCollectionFromCSV(csvContent) {
       `Ungültige Zeilen: ${invalidRows}`,
       `Unbekannte Karten: ${unknownCards}`
     ];
+
+    // debugging info for unknown cards
+    if (unknownSamples.length > 0) {
+      resultParts.push(`
+Beispiele für nicht erkannte Karten (max 10):`);
+      unknownSamples.forEach(s => {
+        resultParts.push(`Row ${s.row}: Set=${s.setId}, Card="${s.cardNumber}" (sheet had ${s.cardIdSetSize} entries, sample: ${s.cardIdSetSample.join(', ')})`);
+      });
+    }
     if (unknownSets.size > 0) {
       resultParts.push(`Unbekannte Sets: ${Array.from(unknownSets).slice(0, 10).join(', ')}${unknownSets.size > 10 ? '…' : ''}`);
     }
@@ -5086,4 +5686,330 @@ function getRecentLogs() {
   const userProperties = PropertiesService.getUserProperties();
   const logs = userProperties.getProperty('recentLogs') || 'Keine Logs vorhanden. Führe einen Import/Export durch.';
   return logs;
+}
+/**
+ * Migriert alte TCGdex-only Set-IDs (mit TCGDEX- Präfix) zu neuen pokemontcg.io IDs.
+ * Wird während Setup aufgerufen, um sicherzustellen, dass Sets korrekt aktualisiert werden,
+ * wenn sie von TCGdex-only zu regulären API-Sets übergehen.
+ * 
+ * Migrations-Logik:
+ * - Überprüft alle Blätter nach alten TCGdex-präfix Noten (Set ID: TCGDEX-...)
+ * - Sucht nach entsprechenden Blättern ohne Präfix
+ * - Aktualisiert importedSetsStatus und andere PropertiesService-Daten
+ * - Aktualisiert Blattnoten zu neuen IDs
+ * 
+ * @function migrateLegacyTcgdexSetIds
+ * @throws {Error} Bei kritischen Fehlern während der Migration
+ */
+function migrateLegacyTcgdexSetIds() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const properties = PropertiesService.getScriptProperties();
+  let importedSetsStatus = getScriptPropertiesData('importedSetsStatus', {});
+  let allCollectedData = getScriptPropertiesData('collectedCardsData', {});
+  let allCustomImageUrls = getScriptPropertiesData('customImageUrls', {});
+  let migrationCount = 0;
+  let sheetsChecked = 0;
+  let importedStatusChanged = false;
+  let collectedDataChanged = false;
+  let customImageChanged = false;
+
+  // Nur zu pokemontcg.io migrieren, wenn dort ein echtes Set existiert.
+  let pokemontcgIoSets = [];
+  if (UseVeraApi) {
+    const pokemontcgIoResponse = fetchApiData(`${VTCG_BASE_URL}sets/${VeraApiLanguage}.json`, "Beim Laden der pokemontcg.io Sets für Migration");
+    pokemontcgIoSets = pokemontcgIoResponse || [];
+  } else {
+    const pokemontcgIoResponse = fetchApiData(`${PTCG_BASE_URL}sets`, "Beim Laden der pokemontcg.io Sets für Migration");
+    pokemontcgIoSets = pokemontcgIoResponse?.data || [];
+  }
+
+  const normalizedToCanonicalPokemontcgId = new Map();
+  const canonicalPokemontcgSetIds = new Set();
+  pokemontcgIoSets.forEach(set => {
+    canonicalPokemontcgSetIds.add(set.id);
+    const aliasCandidates = buildSetIdAliasCandidates(set.id);
+    aliasCandidates.forEach(aliasId => {
+      const normalized = normalizeSetId(String(aliasId).replace(/^TCGDEX-/i, ''));
+      if (!normalizedToCanonicalPokemontcgId.has(normalized)) {
+        normalizedToCanonicalPokemontcgId.set(normalized, set.id);
+      }
+    });
+  });
+
+  // Durchsuche alle Blätter nach alten TCGdex-only Set-IDs
+  const allSheets = ss.getSheets();
+  
+  for (const sheet of allSheets) {
+    const sheetName = sheet.getName();
+    
+    // Ignoriere spezielle Blätter
+    if (sheetName === "Sets Overview" || sheetName === "Collection Summary") {
+      continue;
+    }
+    
+    sheetsChecked++;
+    
+    try {
+      const noteCell = sheet.getRange(1, 1);
+      const note = noteCell.getNote() || "";
+      
+      Logger.log(`[migrateLegacyTcgdexSetIds] Prüfe Blatt "${sheetName}": Notiz = "${note}"`);
+      
+      if (!note || !note.startsWith('Set ID: ')) {
+        continue;
+      }
+
+      const oldSetId = note.substring('Set ID: '.length).trim();
+      const targetSetId = resolveCanonicalSetIdFromMap(oldSetId, normalizedToCanonicalPokemontcgId, canonicalPokemontcgSetIds);
+
+      // Nur migrieren, wenn es wirklich ein passendes pokemontcg.io Set gibt.
+      if (!targetSetId) {
+        Logger.log(`[migrateLegacyTcgdexSetIds] Skip "${sheetName}": "${oldSetId}" bleibt unverändert (kein passendes pokemontcg.io Set).`);
+        continue;
+      }
+
+      if (oldSetId === targetSetId) {
+        continue;
+      }
+
+      Logger.log(`[migrateLegacyTcgdexSetIds] MIGRATION DETECTED: "${oldSetId}" → "${targetSetId}"`);
+
+      noteCell.setNote(`Set ID: ${targetSetId}`);
+      migrationCount++;
+
+      // importedSetsStatus migrieren
+      if (importedSetsStatus[oldSetId]) {
+        importedSetsStatus[targetSetId] = true;
+        delete importedSetsStatus[oldSetId];
+        importedStatusChanged = true;
+      } else if (!importedSetsStatus[targetSetId]) {
+        importedSetsStatus[targetSetId] = true;
+        importedStatusChanged = true;
+      }
+
+      // collectedCardsData migrieren (Merge: Zielwerte haben Vorrang)
+      if (allCollectedData[oldSetId]) {
+        if (!allCollectedData[targetSetId]) {
+          allCollectedData[targetSetId] = allCollectedData[oldSetId];
+        } else {
+          allCollectedData[targetSetId] = { ...allCollectedData[oldSetId], ...allCollectedData[targetSetId] };
+        }
+        delete allCollectedData[oldSetId];
+        collectedDataChanged = true;
+      }
+
+      // customImageUrls migrieren
+      if (allCustomImageUrls[oldSetId]) {
+        if (!allCustomImageUrls[targetSetId]) {
+          allCustomImageUrls[targetSetId] = allCustomImageUrls[oldSetId];
+        } else {
+          allCustomImageUrls[targetSetId] = { ...allCustomImageUrls[oldSetId], ...allCustomImageUrls[targetSetId] };
+        }
+        delete allCustomImageUrls[oldSetId];
+        customImageChanged = true;
+      }
+
+      // Cardmarket-URLs migrieren
+      const oldCardmarketKey = `pokemontcgIoCardmarketUrls_${oldSetId}`;
+      const newCardmarketKey = `pokemontcgIoCardmarketUrls_${targetSetId}`;
+      const oldCardmarketData = getScriptPropertiesData(oldCardmarketKey, null);
+      const newCardmarketData = getScriptPropertiesData(newCardmarketKey, null);
+      if (oldCardmarketData && !newCardmarketData) {
+        setScriptPropertiesData(newCardmarketKey, oldCardmarketData);
+      }
+      if (oldCardmarketData) {
+        properties.deleteProperty(oldCardmarketKey);
+      }
+    } catch (e) {
+      Logger.log(`[Migration] Fehler beim Überprüfen von Blatt "${sheetName}": ${e.message}`);
+      // Fortsetzen mit nächstem Blatt, nicht abbrechen
+    }
+  }
+  
+  if (collectedDataChanged) {
+    setScriptPropertiesData('collectedCardsData', allCollectedData);
+  }
+  if (customImageChanged) {
+    setScriptPropertiesData('customImageUrls', allCustomImageUrls);
+  }
+
+  // Speichere aktualisierte importedSetsStatus
+  if (importedStatusChanged || migrationCount > 0) {
+    setScriptPropertiesData('importedSetsStatus', importedSetsStatus);
+  }
+  
+  Logger.log(`[migrateLegacyTcgdexSetIds] Abgeschlossen: ${sheetsChecked} Blätter geprüft, ${migrationCount} migriert`);
+}
+
+/**
+ * Liest Checkbox-Zustände aus allen vorhandenen Set-Blättern und baut collectedCardsData
+ * in den Script-Properties neu auf.
+ *
+ * Gedacht für die Migration einer alten Tabelle ohne persistente Daten:
+ * - Checkbox-Häkchen im Sheet = Quelle der Wahrheit
+ * - TCGdex-only Sets (Notiz "Set ID: TCGDEX-xxx") werden dabei direkt migriert
+ * - Bestehende persistente Daten werden mit Sheet-Daten zusammengeführt
+ *   (Sheet gewinnt bei Konflikten)
+ *
+ * @function rebuildPersistentDataFromSheets
+ */
+function rebuildPersistentDataFromSheets() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ui = SpreadsheetApp.getUi();
+
+  const confirm = ui.alert(
+    '🔄 Persistente Daten aus Blättern wiederherstellen',
+    'Diese Funktion liest alle Checkbox-Zustände aus den vorhandenen Set-Blättern und ' +
+    'speichert sie in den Script-Properties.\n\n' +
+    'Vorhandene Sammeldaten werden mit den Sheet-Daten zusammengeführt (Sheet hat Vorrang).\n' +
+    'TCGdex-only Sets (TCGDEX-...) werden automatisch migriert.\n\n' +
+    'Fortfahren?',
+    ui.ButtonSet.YES_NO
+  );
+  if (confirm !== ui.Button.YES) return;
+
+  const properties = PropertiesService.getScriptProperties();
+  let importedSetsStatus = getScriptPropertiesData('importedSetsStatus', {});
+  let collectedCardsData = getScriptPropertiesData('collectedCardsData', {});
+
+  // Für Migrationen: nur auf echte pokemontcg.io Set-IDs migrieren.
+  let pokemontcgIoSets = [];
+  if (UseVeraApi) {
+    const pokemontcgIoResponse = fetchApiData(`${VTCG_BASE_URL}sets/${VeraApiLanguage}.json`, "Beim Laden der pokemontcg.io Sets für Wiederherstellung");
+    pokemontcgIoSets = pokemontcgIoResponse || [];
+  } else {
+    const pokemontcgIoResponse = fetchApiData(`${PTCG_BASE_URL}sets`, "Beim Laden der pokemontcg.io Sets für Wiederherstellung");
+    pokemontcgIoSets = pokemontcgIoResponse?.data || [];
+  }
+
+  const normalizedToCanonicalPokemontcgId = new Map();
+  const canonicalPokemontcgSetIds = new Set();
+  pokemontcgIoSets.forEach(set => {
+    canonicalPokemontcgSetIds.add(set.id);
+    const aliasCandidates = buildSetIdAliasCandidates(set.id);
+    aliasCandidates.forEach(aliasId => {
+      const normalized = normalizeSetId(String(aliasId).replace(/^TCGDEX-/i, ''));
+      if (!normalizedToCanonicalPokemontcgId.has(normalized)) {
+        normalizedToCanonicalPokemontcgId.set(normalized, set.id);
+      }
+    });
+  });
+
+  let setsProcessed = 0;
+  let cardsCollected = 0;
+  let setsSkipped = 0;
+  let tcgdexMigrated = 0;
+
+  for (const sheet of ss.getSheets()) {
+    const sheetName = sheet.getName();
+    if (sheetName === 'Sets Overview' || sheetName === 'Collection Summary') continue;
+
+    try {
+      let note = sheet.getRange(1, 1).getNote() || '';
+
+      // --- Set-ID-Migration (mapping-aware): nur wenn es ein echtes pokemontcg.io Zielset gibt ---
+      if (note.startsWith('Set ID: ')) {
+        const oldId = note.substring('Set ID: '.length).trim();
+        const targetSetId = resolveCanonicalSetIdFromMap(oldId, normalizedToCanonicalPokemontcgId, canonicalPokemontcgSetIds);
+
+        if (targetSetId && oldId !== targetSetId) {
+          sheet.getRange(1, 1).setNote(`Set ID: ${targetSetId}`);
+          note = `Set ID: ${targetSetId}`;
+
+          if (collectedCardsData[oldId]) {
+            if (!collectedCardsData[targetSetId]) collectedCardsData[targetSetId] = {};
+            Object.assign(collectedCardsData[targetSetId], collectedCardsData[oldId]);
+            delete collectedCardsData[oldId];
+          }
+
+          if (importedSetsStatus[oldId]) {
+            importedSetsStatus[targetSetId] = true;
+            delete importedSetsStatus[oldId];
+          }
+
+          const oldCmKey = `pokemontcgIoCardmarketUrls_${oldId}`;
+          const newCmKey = `pokemontcgIoCardmarketUrls_${targetSetId}`;
+          const cmData = getScriptPropertiesData(oldCmKey, null);
+          if (cmData) {
+            setScriptPropertiesData(newCmKey, cmData);
+            properties.deleteProperty(oldCmKey);
+          }
+
+          tcgdexMigrated++;
+          Logger.log(`[rebuildPersistentDataFromSheets] Set-ID migriert: ${oldId} → ${targetSetId}`);
+        }
+      }
+
+      if (!note.startsWith('Set ID: ')) {
+        Logger.log(`[rebuildPersistentDataFromSheets] Überspringe "${sheetName}": keine Set-ID-Notiz`);
+        setsSkipped++;
+        continue;
+      }
+
+      const setId = note.substring('Set ID: '.length).trim();
+
+      // Als importiert markieren + Sentinel anlegen
+      importedSetsStatus[setId] = true;
+      if (!collectedCardsData[setId]) collectedCardsData[setId] = {};
+
+      // --- Checkbox-Zustände aus Sheet lesen ---
+      const lastRow = sheet.getLastRow();
+      if (lastRow <= SET_SHEET_HEADER_ROWS) {
+        setsProcessed++;
+        continue; // Leeres Sheet
+      }
+
+      const dataRows = lastRow - SET_SHEET_HEADER_ROWS;
+      const totalCols = CARDS_PER_ROW_IN_GRID * CARD_BLOCK_WIDTH_COLS;
+      // Alles in einem Aufruf lesen (effizient)
+      const vals = sheet.getRange(SET_SHEET_HEADER_ROWS + 1, 1, dataRows, totalCols).getValues();
+
+      for (let rowBlock = 0; rowBlock * CARD_BLOCK_HEIGHT_ROWS < dataRows; rowBlock++) {
+        for (let colBlock = 0; colBlock < CARDS_PER_ROW_IN_GRID; colBlock++) {
+          const br = rowBlock * CARD_BLOCK_HEIGHT_ROWS;  // offset in vals[]
+          const bc = colBlock * CARD_BLOCK_WIDTH_COLS;
+          if (br >= dataRows) break;
+
+          const rawId = String(vals[br][bc] || '').trim();
+          if (!rawId) continue;
+          const cardId = normalizeCardNumber(rawId);
+
+          const checkRow = br + 2;
+          if (checkRow >= dataRows) continue;
+
+          const toBoolean = v => v === true || String(v).toLowerCase() === 'true';
+          const g  = toBoolean(vals[checkRow][bc]);
+          const rh = toBoolean(vals[checkRow][bc + 1]);
+
+          if (g || rh) {
+            // Sheet-Daten überschreiben persistente Daten (Sheet = Quelle der Wahrheit)
+            collectedCardsData[setId][cardId] = { g, rh };
+            cardsCollected++;
+          } else {
+            // Eintrag entfernen wenn nichts gesammelt (Cleanup)
+            delete collectedCardsData[setId][cardId];
+          }
+        }
+      }
+
+      setsProcessed++;
+      Logger.log(`[rebuildPersistentDataFromSheets] "${setId}": ${Object.keys(collectedCardsData[setId]).length} gesammelte Karten`);
+
+    } catch (err) {
+      Logger.log(`[rebuildPersistentDataFromSheets] FEHLER bei "${sheetName}": ${err.message}`);
+      setsSkipped++;
+    }
+  }
+
+  setScriptPropertiesData('collectedCardsData', collectedCardsData);
+  setScriptPropertiesData('importedSetsStatus', importedSetsStatus);
+
+  ui.alert(
+    '✅ Wiederherstellung abgeschlossen',
+    `Sets verarbeitet:  ${setsProcessed}\n` +
+    `Karten wiederhergestellt:  ${cardsCollected}\n` +
+    `TCGdex-Sets migriert:  ${tcgdexMigrated}\n` +
+    `Übersprungen:  ${setsSkipped}`,
+    ui.ButtonSet.OK
+  );
 }
