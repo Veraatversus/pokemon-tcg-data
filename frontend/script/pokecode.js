@@ -1000,6 +1000,9 @@ function setupSheets() {
   overviewDataHeadersRange.setFontWeight("bold");
   overviewDataHeadersRange.setBorder(true, true, true, true, true, true, "#888888", SpreadsheetApp.BorderStyle.SOLID);
 
+  // MIGRATIONS-SCHRITT: Migriere alte TCGdex-only Set-IDs zu neuen pokemontcg.io IDs
+  migrateLegacyTcgdexSetIds();
+
   setsSheet.setFrozenRows(OVERVIEW_HEADER_ROWS); // Friert die neuen Kopfzeilen ein.
   setsSheet.setColumnWidth(3, 50); // Spaltenbreite für Set Logo (C).
   setsSheet.setColumnWidth(4, 50); // Spaltenbreite für Set Symbol (D).
@@ -1208,6 +1211,19 @@ function populateSetsOverview() {
       tcgdexData: tcgdexMatch,
       isOnlyTcgdex: false
     });
+    
+    // MIGRATION: Wenn dieses Set früher als TCGdex-only mit Präfix existierte, übernehme die bestehenden Daten
+    const oldTcgdexKey = `TCGDEX-${tcgdexMatch?.id || pokemontcgIoSet.id}`;
+    if (existingSetMap.has(oldTcgdexKey)) {
+      const oldData = existingSetMap.get(oldTcgdexKey);
+      // Nur Labels übernehmen, nicht die neue pokemontcg.io Seite-Daten
+      if (!existingSetMap.has(pokemontcgIoSet.id)) {
+        existingSetMap.set(pokemontcgIoSet.id, oldData);
+      }
+      // Alte TCGdex-Eintrags löschen, damit sie nicht erneut hinzugefügt werden
+      existingSetMap.delete(oldTcgdexKey);
+      Logger.log(`[Migration] Übernahme von TCGdex-only Set "${oldTcgdexKey}" zu "${pokemontcgIoSet.id}"`);
+    }
   });
 
   // SCHRITT 4: TCGDex-only Sets hinzufügen
@@ -1636,7 +1652,25 @@ function populateCardsForSet(setIdFromOverview) {
   // Verbesserte Logik für das Erstellen/Wiederverwenden von Blättern
   if (cardSheet) {
     const sheetNote = cardSheet.getRange(1, 1).getNote();
-    if (sheetNote !== `Set ID: ${setIdFromOverview}`) {
+    const expectedNote = `Set ID: ${setIdFromOverview}`;
+    
+    // Prüfe auf Migrations-Szenario: TCGdex-only zu regulärer API
+    // (Wenn Set ursprünglich als TCGDEX-{ID} importiert wurde, jetzt aber in Haupt-API verfügbar ist)
+    let isMigrationCase = false;
+    if (sheetNote.startsWith('Set ID: TCGDEX-') && !setIdFromOverview.startsWith('TCGDEX-')) {
+      const oldTcgdexId = sheetNote.substring('Set ID: '.length); // z.B. "TCGDEX-me2pt5"
+      const normalizedOldId = oldTcgdexId.substring('TCGDEX-'.length); // z.B. "me2pt5"
+      const normalizedNewId = setIdFromOverview; // z.B. "me2pt5"
+      
+      if (normalizedOldId === normalizedNewId) {
+        isMigrationCase = true;
+        Logger.log(`[Migration] TCGdex-only Set wird aktualisiert: ${oldTcgdexId} → ${setIdFromOverview}`);
+        cardSheet.getRange(1, 1).setNote(expectedNote);
+        SpreadsheetApp.getActive().toast(`♻️ Set "${setNameInSheet}" wird von TCGdex-only zu regulärer API migriert...`, "Migration in Bearbeitung", 3);
+      }
+    }
+    
+    if (sheetNote !== expectedNote && !isMigrationCase) {
       // Wenn Blatt existiert, aber nicht zu diesem Set gehört
       const errorMessage = `Das Tabellenblatt mit dem Namen "${setNameInSheet}" existiert bereits, ist aber nicht dem Set mit der ID "${setIdFromOverview}" zugeordnet. Bitte löschen oder benennen Sie das Blatt "${setNameInSheet}" um, bevor Sie fortfahren, oder stellen Sie sicher, dass die Notiz in A1 des Blattes korrekt ist ("Set ID: ${setIdFromOverview}").`;
       // KEIN UI.ALERT HIER, da die aufrufende Funktion den Alert übernimmt.
@@ -1651,6 +1685,21 @@ function populateCardsForSet(setIdFromOverview) {
   }
 
   SpreadsheetApp.getActive().toast(`Lade Daten für Set "${setNameInSheet}"...`, "🔄 In Bearbeitung", 5);
+
+  // Wenn Migration durchgeführt wurde, Alte TCGdex-ID aus importedSetsStatus entfernen
+  const isMigrationCase = cardSheet.getRange(1, 1).getNote() === `Set ID: ${setIdFromOverview}` && 
+                          (setIdFromOverview.startsWith('TCGDEX-') ? false : true); // War es vor kurzem eine TCGdex-ID?
+  
+  if (isMigrationCase && !setIdFromOverview.startsWith('TCGDEX-')) {
+    // Versuche, alte TCGdex-Präfix-ID aus importedSetsStatus zu entfernen
+    const oldTcgdexId = `TCGDEX-${setIdFromOverview}`;
+    const importedSetsStatus = getScriptPropertiesData('importedSetsStatus', {});
+    if (importedSetsStatus[oldTcgdexId]) {
+      delete importedSetsStatus[oldTcgdexId];
+      setScriptPropertiesData('importedSetsStatus', importedSetsStatus);
+      Logger.log(`[Migration] Entferne alte TCGdex-ID aus importedSetsStatus: ${oldTcgdexId}`);
+    }
+  }
 
   const tcgdexAllSets = fetchApiData(`${TCGDEX_BASE_URL}sets`, "Fehler beim Laden der TCGDex Sets für Kartenimport");
   const cardData = loadCardsForSet(setIdFromOverview, setNameInSheet, tcgdexAllSets);
@@ -5194,4 +5243,91 @@ function getRecentLogs() {
   const userProperties = PropertiesService.getUserProperties();
   const logs = userProperties.getProperty('recentLogs') || 'Keine Logs vorhanden. Führe einen Import/Export durch.';
   return logs;
+}
+/**
+ * Migriert alte TCGdex-only Set-IDs (mit TCGDEX- Präfix) zu neuen pokemontcg.io IDs.
+ * Wird während Setup aufgerufen, um sicherzustellen, dass Sets korrekt aktualisiert werden,
+ * wenn sie von TCGdex-only zu regulären API-Sets übergehen.
+ * 
+ * Migrations-Logik:
+ * - Überprüft alle Blätter nach alten TCGdex-präfix Noten (Set ID: TCGDEX-...)
+ * - Sucht nach entsprechenden Blättern ohne Präfix
+ * - Aktualisiert importedSetsStatus und andere PropertiesService-Daten
+ * - Aktualisiert Blattnoten zu neuen IDs
+ * 
+ * @function migrateLegacyTcgdexSetIds
+ * @throws {Error} Bei kritischen Fehlern während der Migration
+ */
+function migrateLegacyTcgdexSetIds() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const properties = PropertiesService.getScriptProperties();
+  let importedSetsStatus = getScriptPropertiesData('importedSetsStatus', {});
+  let migrationCount = 0;
+
+  // Durchsuche alle Blätter nach alten TCGdex-only Set-IDs
+  const allSheets = ss.getSheets();
+  
+  for (const sheet of allSheets) {
+    const sheetName = sheet.getName();
+    
+    // Ignoriere spezielle Blätter
+    if (sheetName === "Sets Overview" || sheetName === "Collection Summary") {
+      continue;
+    }
+    
+    try {
+      const noteCell = sheet.getRange(1, 1);
+      const note = noteCell.getNote();
+      
+      // Prüfe, ob die Notiz mit "Set ID: TCGDEX-" beginnt (alte Format)
+      if (note.startsWith('Set ID: TCGDEX-')) {
+        const oldSetId = note.substring('Set ID: '.length); // z.B. "TCGDEX-me2pt5"
+        const normalizedSetId = oldSetId.substring('TCGDEX-'.length); // z.B. "me2pt5"
+        
+        // Prüfe, ob bereits ein neueres Blatt mit normalisierter ID existiert
+        // und ob dieses Blatt noch mit der alten ID in importedSetsStatus ist
+        if (importedSetsStatus[oldSetId]) {
+          // Update importedSetsStatus: alte ID → neue ID
+          importedSetsStatus[normalizedSetId] = true;
+          delete importedSetsStatus[oldSetId];
+          Logger.log(`[Migration] importedSetsStatus aktualisiert: "${oldSetId}" → "${normalizedSetId}"`);
+          migrationCount++;
+        }
+        
+        // Aktualisiere die Blattnotiz zu neuer ID
+        noteCell.setNote(`Set ID: ${normalizedSetId}`);
+        Logger.log(`[Migration] Blatt "${sheetName}" Notiz aktualisiert: "${oldSetId}" → "${normalizedSetId}"`);
+        
+        // Migriere assoziierte PropertiesService-Daten (z.B. Cardmarket-URLs)
+        const oldCardmarketKey = `pokemontcgIoCardmarketUrls_${oldSetId}`;
+        const newCardmarketKey = `pokemontcgIoCardmarketUrls_${normalizedSetId}`;
+        const cardmarketData = getScriptPropertiesData(oldCardmarketKey, null);
+        if (cardmarketData) {
+          setScriptPropertiesData(newCardmarketKey, cardmarketData);
+          properties.deleteProperty(oldCardmarketKey);
+          Logger.log(`[Migration] Cardmarket-URLs migriert: "${oldCardmarketKey}" → "${newCardmarketKey}"`);
+        }
+        
+        // Migriere Grafikdaten (wenn vorhanden)
+        const oldImageDataKey = `setImageData_${oldSetId}`;
+        const newImageDataKey = `setImageData_${normalizedSetId}`;
+        const imageData = getScriptPropertiesData(oldImageDataKey, null);
+        if (imageData) {
+          setScriptPropertiesData(newImageDataKey, imageData);
+          properties.deleteProperty(oldImageDataKey);
+          Logger.log(`[Migration] Grafikdaten migriert: "${oldImageDataKey}" → "${newImageDataKey}"`);
+        }
+      }
+    } catch (e) {
+      Logger.log(`[Migration] Fehler beim Überprüfen von Blatt "${sheetName}": ${e.message}`);
+      // Fortsetzen mit nächstem Blatt, nicht abbrechen
+    }
+  }
+  
+  // Speichere aktualisierte importedSetsStatus
+  if (migrationCount > 0) {
+    setScriptPropertiesData('importedSetsStatus', importedSetsStatus);
+    SpreadsheetApp.getActive().toast(`✅ ${migrationCount} TCGdex-only Set(s) migriert`, "Migration abgeschlossen", 3);
+    Logger.log(`[Migration] Insgesamt ${migrationCount} Set(s) migriert`);
+  }
 }
