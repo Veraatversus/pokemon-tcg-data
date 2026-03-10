@@ -4460,6 +4460,14 @@ function importCollectionFromCSV(csvContent) {
       setIdToSheetMap.set(setId, sheet);
     }
     
+    // Vorab: bringe die Übersicht in einen aktuellen Zustand – so haben wir immer
+    // eine chance, fehlende Sets direkt anzulegen, falls sie in der CSV auftauchen.
+    try {
+      populateSetsOverview();
+    } catch (e) {
+      Logger.log(`CSV Import: Fehler beim Vorab-Update der Übersicht: ${e.message}`);
+    }
+
     // Nun durchsuche die CSV-Zeilen nach benötigten Set-IDs
     const neededSetIds = new Set();
     for (let i = 1; i < rows.length; i++) {
@@ -4475,7 +4483,7 @@ function importCollectionFromCSV(csvContent) {
       
       const sheet = setIdToSheetMap.get(setId);
       if (!sheet) {
-        Logger.log(`CSV Import: Set sheet not found: ${setId}`);
+        Logger.log(`CSV Import: Set sheet not gefunden (noch) für: ${setId}`);
         unknownSets.add(setId);
         continue;
       }
@@ -4514,9 +4522,33 @@ function importCollectionFromCSV(csvContent) {
       }
 
       if (!setSheetMap.has(setId)) {
-        Logger.log(`CSV Data Row ${i}: Set not in cache: ${setId}`);
-        unknownSets.add(setId);
-        continue;
+        Logger.log(`CSV Data Row ${i}: Set not in cache: ${setId} – versuche automatischen Import`);
+        // aktualisiere Übersicht in der Hoffnung, dass das Set dort auftaucht
+        try {
+          populateSetsOverview();
+        } catch (e) {
+          Logger.log(`CSV Import: Fehler beim refresh der Übersicht vor Import von ${setId}: ${e.message}`);
+        }
+        try {
+          populateCardsForSet(setId);
+          Logger.log(`CSV Import: Automatisches Erzeugen/Import des Sets ${setId} erfolgreich`);
+        } catch (e) {
+          Logger.log(`CSV Import: Automatischer Import von ${setId} schlug fehl: ${e.message}`);
+          unknownSets.add(setId);
+          continue;
+        }
+        // ziehe neu erstelltes Blatt in den Cache
+        const newSheet = ss.getSheets().find(s => s.getRange(1,1).getNote() === `Set ID: ${setId}`);
+        if (newSheet) {
+          const cardIdSet = getCardIdSetFromSheet(newSheet);
+          setSheetMap.set(setId, newSheet);
+          cardIdSetMap.set(setId, cardIdSet);
+          Logger.log(`CSV Import: ${setId} nach automatischem Import gecacht (${cardIdSet.size} Karten)`);
+        } else {
+          Logger.log(`CSV Import: Sheet nach Import von ${setId} nicht gefunden, markiere als unbekannt.`);
+          unknownSets.add(setId);
+          continue;
+        }
       }
 
       const normalParsed = parseCsvBoolean(row[4]);
