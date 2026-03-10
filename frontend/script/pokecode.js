@@ -221,6 +221,7 @@ function onOpen() {
   importMenu.addItem('🚀 Setup: Alle Sets laden', 'setupAndImportAllSets');
   importMenu.addItem('➕ Einzelnes Set hinzufügen', 'promptAndPopulateCardsForSet');
   importMenu.addItem('📦 Mehrere Sets (Batch)', 'batchImportSets');
+  importMenu.addItem('🌐 Alle Sets importieren (alle)', 'importAllSetsFromOverview');
   importMenu.addItem('🔃 Aktuelles Set reimportieren', 'reimportCurrentSet');
   mainMenu.addSubMenu(importMenu);
 
@@ -234,7 +235,7 @@ function onOpen() {
   const statsMenu = ui.createMenu('📊 Statistik & Anzeige');
   statsMenu.addItem('📈 Quick-Stats', 'showQuickStats');
   statsMenu.addItem('♻️ Statistik aktualisieren', 'updateCollectionSummary');
-  statsMenu.addItem('🔄 Alle Sets neu laden', 'updateAllCardSheets');
+  statsMenu.addItem('🔄 Importierte Sets neu laden', 'updateAllCardSheets');
   mainMenu.addSubMenu(statsMenu);
 
   // 🗂️ Sortierung & Bearbeitung
@@ -2796,7 +2797,65 @@ function updateCollectionSummary() {
  */
 function updateAllCardSheets() {
   const ui = SpreadsheetApp.getUi();
-  const response = ui.alert("Alle Kartenblätter aktualisieren (Raster)", "Dieser Vorgang kann sehr lange dauern! Bestehende Checkbox-Markierungen in den Sets bleiben erhalten.\n\nMöchten Sie wirklich fortfahren?", ui.ButtonSet.YES_NO);
+  const response = ui.alert("Importierte Kartenblätter aktualisieren (Raster)", "Es werden nur bereits importierte Sets neu geladen. Bestehende Checkbox-Markierungen bleiben erhalten.\n\nMöchten Sie wirklich fortfahren?", ui.ButtonSet.YES_NO);
+  if (response !== ui.Button.YES) return;
+
+  const importedSets = getImportedSetsFromSheets();
+  if (importedSets.length === 0) {
+    ui.alert("Info", "Keine importierten Sets gefunden.", ui.ButtonSet.OK);
+    return;
+  }
+
+  let processedCount = 0;
+  const startTime = Date.now();
+  SpreadsheetApp.getActive().toast(`Starte Aktualisierung für ${importedSets.length} importierte Sets...`, "🔄 In Arbeit", 10);
+
+  for (let i = 0; i < importedSets.length; i++) {
+    const { setId: setIdFromOverview, setName } = importedSets[i];
+    
+    // Berechne Fortschritt und ETA
+    const progress = Math.round(((i + 1) / importedSets.length) * 100);
+    const elapsed = Date.now() - startTime;
+    const avgTimePerSet = elapsed / (i + 1);
+    const remaining = (importedSets.length - i - 1) * avgTimePerSet;
+    const etaMinutes = Math.round(remaining / 60000);
+    const etaSeconds = Math.round((remaining % 60000) / 1000);
+    const etaText = etaMinutes > 0 ? `~${etaMinutes}min ${etaSeconds}s` : `~${etaSeconds}s`;
+    
+    SpreadsheetApp.getActive().toast(
+      `Set ${i + 1}/${setsData.length} (${progress}%) - ${setName}\nVerbleibende Zeit: ${etaText}`, 
+      "🔄 Importiere", 
+      5
+    );
+    
+    try {
+      populateCardsForSet(setIdFromOverview);
+      processedCount++;
+      if (i < importedSets.length - 1) Utilities.sleep(API_DELAY_MS + 1000);
+    } catch (e) {
+      Logger.log(`Kritischer Fehler beim Aktualisieren von Set ${setName} (ID: ${setIdFromOverview}): ${e.message} \nStack: ${e.stack}`);
+      SpreadsheetApp.getUi().alert(`Fehler bei Set ${setName}`, `Fehler: ${e.message}. Details im Log. Das Update wird mit dem nächsten Set fortgesetzt.`);
+    }
+  }
+
+  populateSetsOverview();
+  updateCollectionSummary();
+  SpreadsheetApp.getActive().toast(`Importierte Kartenblätter aktualisiert. Sammlungsübersicht wurde aktualisiert.`, "✅ Fertig", 10);
+  ui.alert("Aktualisierung abgeschlossen", `${processedCount}/${importedSets.length} importierte Sets verarbeitet.`, ui.ButtonSet.OK);
+}
+
+/**
+ * Importiert/aktualisiert alle Sets aus der Sets-Overview (inkl. bisher nicht importierter Sets).
+ *
+ * @function importAllSetsFromOverview
+ */
+function importAllSetsFromOverview() {
+  const ui = SpreadsheetApp.getUi();
+  const response = ui.alert(
+    "Alle Sets importieren",
+    "Dieser Vorgang importiert wirklich ALLE Sets aus der Übersicht (auch bisher nicht importierte) und kann sehr lange dauern.\n\nMöchten Sie fortfahren?",
+    ui.ButtonSet.YES_NO
+  );
   if (response !== ui.Button.YES) return;
 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -2813,7 +2872,7 @@ function updateAllCardSheets() {
 
   let processedCount = 0;
   const startTime = Date.now();
-  SpreadsheetApp.getActive().toast(`Starte Aktualisierung für ${setsData.length} Sets...`, "🔄 In Arbeit", 10);
+  SpreadsheetApp.getActive().toast(`Starte Vollimport für ${setsData.length} Sets...`, "🔄 In Arbeit", 10);
 
   for (let i = 0; i < setsData.length; i++) {
     const setIdFromOverview = extractIdFromHyperlink(setsData[i][0]);
@@ -2823,8 +2882,7 @@ function updateAllCardSheets() {
       Logger.log(`Überspringe Zeile ${i + OVERVIEW_DATA_START_ROW + 1} in Sets Overview: Fehlende Set ID oder Name.`);
       continue;
     }
-    
-    // Berechne Fortschritt und ETA
+
     const progress = Math.round(((i + 1) / setsData.length) * 100);
     const elapsed = Date.now() - startTime;
     const avgTimePerSet = elapsed / (i + 1);
@@ -2832,27 +2890,27 @@ function updateAllCardSheets() {
     const etaMinutes = Math.round(remaining / 60000);
     const etaSeconds = Math.round((remaining % 60000) / 1000);
     const etaText = etaMinutes > 0 ? `~${etaMinutes}min ${etaSeconds}s` : `~${etaSeconds}s`;
-    
+
     SpreadsheetApp.getActive().toast(
-      `Set ${i + 1}/${setsData.length} (${progress}%) - ${setName}\nVerbleibende Zeit: ${etaText}`, 
-      "🔄 Importiere", 
+      `Set ${i + 1}/${setsData.length} (${progress}%) - ${setName}\nVerbleibende Zeit: ${etaText}`,
+      "🌐 Importiere alle",
       5
     );
-    
+
     try {
       populateCardsForSet(setIdFromOverview);
       processedCount++;
       if (i < setsData.length - 1) Utilities.sleep(API_DELAY_MS + 1000);
     } catch (e) {
-      Logger.log(`Kritischer Fehler beim Aktualisieren von Set ${setName} (ID: ${setIdFromOverview}): ${e.message} \nStack: ${e.stack}`);
-      SpreadsheetApp.getUi().alert(`Fehler bei Set ${setName}`, `Fehler: ${e.message}. Details im Log. Das Update wird mit dem nächsten Set fortgesetzt.`);
+      Logger.log(`Kritischer Fehler beim Vollimport von Set ${setName} (ID: ${setIdFromOverview}): ${e.message} \nStack: ${e.stack}`);
+      SpreadsheetApp.getUi().alert(`Fehler bei Set ${setName}`, `Fehler: ${e.message}. Details im Log. Der Import wird mit dem nächsten Set fortgesetzt.`);
     }
   }
 
   populateSetsOverview();
   updateCollectionSummary();
-  SpreadsheetApp.getActive().toast(`Alle Kartenblätter aktualisiert. Sammlungsübersicht wurde aktualisiert.`, "✅ Fertig", 10);
-  ui.alert("Aktualisierung abgeschlossen", `${processedCount}/${setsData.length} Sets verarbeitet.`, ui.ButtonSet.OK);
+  SpreadsheetApp.getActive().toast(`Vollimport abgeschlossen. Sammlungsübersicht wurde aktualisiert.`, "✅ Fertig", 10);
+  ui.alert("Vollimport abgeschlossen", `${processedCount}/${setsData.length} Sets verarbeitet.`, ui.ButtonSet.OK);
 }
 
 // ============================================================================
