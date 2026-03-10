@@ -2,12 +2,14 @@ export const CONFIG = {
   // Google API Configuration
   // TODO: Replace with your actual credentials from Google Cloud Console
   CLIENT_ID: 'REDACTED_GOOGLE_CLIENT_ID',
+  API_KEY: 'REDACTED_GOOGLE_API_KEY', // Add your API Key from Google Cloud Console
   DISCOVERY_DOCS: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
-  SCOPES: 'https://www.googleapis.com/auth/spreadsheets',
+  SCOPES: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.readonly',
 
-  // Google Sheets Configuration
-  // TODO: Replace with your actual Spreadsheet ID
-  SPREADSHEET_ID: '1RepZ5n-45tou-9vu20l8ffErT4TfBaLDdyY8BwxQDsI',
+  // Google Sheets Configuration - dynamisch aus localStorage geladen
+  get SPREADSHEET_ID() {
+    return localStorage.getItem('pokemon_tcg_spreadsheet_id') || '1RepZ5n-45tou-9vu20l8ffErT4TfBaLDdyY8BwxQDsI';
+  },
   
   // Sheet Names (adjust if your sheets have different names)
   SHEETS: {

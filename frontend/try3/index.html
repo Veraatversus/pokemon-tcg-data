@@ -14,6 +14,10 @@
   <link rel="stylesheet" href="css/modals.css">
   <link rel="stylesheet" href="css/analytics.css">
   <link rel="stylesheet" href="css/zoom.css">
+  <link rel="stylesheet" href="css/phase1-styles.css">
+  <link rel="stylesheet" href="css/phase2-styles.css">
+  <link rel="stylesheet" href="css/phase3-styles.css">
+  <link rel="stylesheet" href="css/set-management.css">
 </head>
 <body>
   <div id="app">
@@ -42,6 +46,7 @@
           <h1>🎴 Pokémon TCG Collection</h1>
         </div>
         <div class="header-right">
+          <button id="setup-btn" class="btn-icon" title="Setup - Wähle Spreadsheet und Script ID">⚙️ Setup</button>
           <button id="change-spreadsheet-btn" class="btn-icon" title="Tabelle wechseln">📊 Tabelle</button>
           <div id="user-info" class="user-info"></div>
           <button id="signout-button" class="btn-secondary">Sign Out</button>
@@ -88,6 +93,15 @@
             <button class="filter-btn" data-filter="collected" type="button">Gesammelt</button>
             <button class="filter-btn" data-filter="missing" type="button">Fehlend</button>
             <button class="filter-btn" data-filter="reverse" type="button">Reverse Holo</button>
+            <button class="filter-btn" data-bulk="selectAll" type="button" title="Alle wählen">✅ Alle</button>
+            <button class="filter-btn" data-bulk="deselectAll" type="button" title="Alle abwählen">❌ Keine</button>
+            <!-- Phase 2 Controls -->
+            <button class="filter-btn" data-cardmarket="prices" type="button" title="Preise anzeigen">💰 Preise</button>
+            <button class="filter-btn" data-action="export" type="button" title="Sammlung exportieren">📤 Export</button>
+            <button class="filter-btn" data-action="import" type="button" title="Sammlung importieren">📥 Import</button>
+            <button class="filter-btn" data-action="analytics" type="button" title="Analytics Dashboard">📊 Analytics</button>
+            <button class="filter-btn" data-action="settings" type="button" title="Einstellungen">⚙️ Einstellungen</button>
+            <button id="manage-sets-btn" class="filter-btn" type="button" title="Set Verwaltung">📚 Sets</button>
           </div>
         </div>
       </div>

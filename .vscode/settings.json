@@ -7,6 +7,18 @@
         "/^cd e:\\\\Proggn\\\\Projects\\\\GitRepos\\\\poke-tcg\\\\frontend\\\\try3; python -m http\\.server 8000$/": {
             "approve": true,
             "matchCommandLine": true
+        },
+        "/^cd e:\\\\Proggn\\\\Projects\\\\GitRepos\\\\poke-tcg\\\\frontend\\\\try3 ; python -m http\\.server 8000$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^python -m http\\.server 8000$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^node -c e:\\\\Proggn\\\\Projects\\\\GitRepos\\\\poke-tcg\\\\frontend\\\\try3\\\\js\\\\script-selector\\.js$/": {
+            "approve": true,
+            "matchCommandLine": true
         }
     }
 }
