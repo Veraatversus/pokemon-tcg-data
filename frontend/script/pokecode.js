@@ -171,8 +171,10 @@ const SUMMARY_DATA_START_ROW = SUMMARY_HEADER_ROWS + 1;
 /** @const {number} Anzahl der Datenspalten in "Collection Summary" (A-F) */
 const COLLECTION_SUMMARY_DATA_COLS = 6;
 
-/** @const {number} Spalte für "Alle Sets sortieren" Header-Checkbox (Spalte G) */
-const SUMMARY_SORT_CHECKBOX_COL = 7;
+/** @const {number} Spalte für Header-Checkbox in "Collection Summary" (Spalte G)
+ * Früher sortierte sie alle Sets, jetzt löst sie eine Statistik-Aktualisierung aus.
+ */
+const SUMMARY_SORT_CHECKBOX_COL = 7; // keine Änderung des Werts erforderlich
 
 // ============================================================================
 // GLOBALE VARIABLEN - Skript-Status
@@ -236,7 +238,7 @@ function onOpen() {
   // 🗂️ Sortierung & Bearbeitung
   const sortMenu = ui.createMenu('🗂️ Sortierung & Bearbeitung');
   sortMenu.addItem('↗️ Set sortieren', 'manualSortCurrentSheet');
-  sortMenu.addItem('↗️ Alle Sets sortieren', 'manualSortAllSheets');
+  sortMenu.addItem('↗️ Alle Sets sortieren', 'manualSortAllSheets'); // menüeintrag bleibt bestehen, Checkbox agiert nun anders
   sortMenu.addItem('✏️ Bulk-Edit', 'bulkEditSet');
   const autoSortMenu = ui.createMenu('⚙️ Auto-Sortierung');
   autoSortMenu.addItem('✅ Aktivieren', 'installSortTrigger');
@@ -1023,12 +1025,13 @@ function setupSheets() {
   summarySheet.getRange(SUMMARY_TITLE_ROW, 1).setValue("Pokémon TCG Sammlungsübersicht");
   summarySheet.getRange(SUMMARY_TITLE_ROW, 1).setHorizontalAlignment("center").setVerticalAlignment("middle").setFontWeight("bold").setBackground("#D9D9D9");
 
-  // "Alle Sets sortieren" Checkbox in "Collection Summary" (Zeile 1, Spalte G)
+  // Header-Checkbox in "Collection Summary" (Zeile 1, Spalte G)
+  // Früher: "Alle Sets sortieren". Jetzt dient sie zur Aktualisierung der Statistik.
   const sortAllCheckboxRange = summarySheet.getRange(SUMMARY_TITLE_ROW, SUMMARY_SORT_CHECKBOX_COL);
   sortAllCheckboxRange.setValue(false);
   sortAllCheckboxRange.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
-  sortAllCheckboxRange.setHorizontalAlignment("center").setVerticalAlignment("middle").setBackground("#D9D9D9"); // Gleicher Hintergrund wie Titel
-  sortAllCheckboxRange.setNote("Klicken Sie hier, um die Sammlungsübersicht zu aktualisieren."); // ANPASSUNG: Notiz aktualisiert
+  sortAllCheckboxRange.setHorizontalAlignment("center").setVerticalAlignment("middle").setBackground("#D9D9D9");
+  sortAllCheckboxRange.setNote("Klicken Sie hier, um die Sammlungsübersicht zu aktualisieren.");
 
   // Zusammenfassungszeile für "Collection Summary" (Zeile 2)
   // Merge-Bereich erstreckt sich über alle Daten-Spalten UND die Checkbox-Spalte (bis G), um bündig zu sein.
@@ -3028,10 +3031,12 @@ function onRefreshOverviewCheckboxEdit(e, isUserInitiatedCheck) {
  */
 function onSortAllSetsCheckboxEdit(e, isUserInitiatedCheck) {
   handleHeaderCheckbox(e, isUserInitiatedCheck, 'onSortAllSetsCheckboxEdit', () => {
-    SpreadsheetApp.getActive().toast("Alle Sets sortieren...", "🔄 Sortieren", 10);
-    Logger.log(`[onSortAllSetsCheckboxEdit] Calling manualSortAllSheets().`);
-    manualSortAllSheets();
-    SpreadsheetApp.getActive().toast("Alle Sets sortiert.", "✅ Fertig", 8);
+    // obwohl der Funktionsname auf 'SortAllSets' referenziert, aktualisieren wir nun
+    // lediglich die Sammlung-Statistik. Der Menüeintrag bleibt unverändert.
+    SpreadsheetApp.getActive().toast("Statistik aktualisieren...", "🔄 Aktualisieren", 10);
+    Logger.log(`[onSortAllSetsCheckboxEdit] Calling updateCollectionSummary().`);
+    updateCollectionSummary();
+    SpreadsheetApp.getActive().toast("Statistik aktualisiert.", "✅ Fertig", 8);
   });
 }
 
