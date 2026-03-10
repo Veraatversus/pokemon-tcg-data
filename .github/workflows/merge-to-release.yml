@@ -31,8 +31,8 @@ jobs:
         run: |
           git fetch origin dev
 
-          # Try to merge dev into release
-          if git merge origin/dev --no-edit; then
+          # Keep release aligned with dev: prefer dev content on conflicts
+          if git merge -X theirs origin/dev --no-edit; then
             echo "Successfully merged dev into release"
             git push origin release
           else
