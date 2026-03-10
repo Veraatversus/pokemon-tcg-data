@@ -1760,6 +1760,17 @@ function populateCardsForSet(setIdFromOverview) {
   // Render and sort cards
   renderAndSortCardsInSheet(cardSheet, setIdFromOverview, allCards, cardmarketData);
 
+  // Registriere Set als "bekannt importiert" – leerer {} verhindert falschen TCGDEX-Fallback
+  // bei Sets, bei denen noch nichts gesammelt wurde.
+  {
+    const _ccd = getScriptPropertiesData('collectedCardsData');
+    if (_ccd[setIdFromOverview] === undefined) {
+      _ccd[setIdFromOverview] = {};
+      setScriptPropertiesData('collectedCardsData', _ccd);
+      Logger.log(`[populateCardsForSet] Set ${setIdFromOverview} als bekannt in collectedCardsData registriert.`);
+    }
+  }
+
   // Update Collection Summary
   updateCollectionSummary();
 
@@ -2915,18 +2926,23 @@ function processCardDataEdit(e, rawCardId, setId, isGCheckbox, isRHCheckbox, isI
       }
     }
     
+    // Speicher minimieren: Eintrag löschen wenn nichts gesammelt
+    if (!cardData.g && !cardData.rh) {
+      delete collectedCardsData[setId][cardId];
+    }
+    // Set-Ebene absichtlich NICHT löschen – leerer {} Eintrag = "bekannt importiert"
     setScriptPropertiesData('collectedCardsData', collectedCardsData);
   }
 
   // UI-Updates nur wenn nötig
   if (dataModified || uiNeedsUpdate) {
-    const { collectedCount, reverseHoloCount } = countCollectedCards(collectedCardsData[setId]);
+    const { collectedCount, reverseHoloCount } = countCollectedCards(collectedCardsData[setId] || {});
     updateSetSheetHeaderSummary(sheet, setId, collectedCount, reverseHoloCount);
     Logger.log(`[processCardDataEdit] Header summary for set ${setId} updated.`);
 
-    // Wende Hintergrundfarbe an
-    const blockColor = collectedCardsData[setId][cardId].rh ? REVERSE_HOL_COLLECTED_COLOR : 
-                       (collectedCardsData[setId][cardId].g ? COLLECTED_COLOR : null);
+    // Wende Hintergrundfarbe an (nutze cardData-Referenz, die auch nach delete noch gültig ist)
+    const blockColor = cardData.rh ? REVERSE_HOL_COLLECTED_COLOR :
+                       (cardData.g ? COLLECTED_COLOR : null);
     cardBlockRange.setBackground(blockColor);
     Logger.log(`[processCardDataEdit] Applied color ${blockColor} to range ${cardBlockRange.getA1Notation()}.`);
   }
