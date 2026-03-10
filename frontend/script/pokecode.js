@@ -56,7 +56,9 @@ const CUSTOM_SET_ID_MAPPINGS = {
   "sm35": "sm3.5",
   "sm75": "sm7.5",
   "swsh35": "swsh3.5",
-  "swsh45": "swsh4.5"
+  "swsh45": "swsh4.5",
+  "zsv10pt5": "sv10.5b",
+  "rsv10pt5": "sv10.5w"
 };
 
 
@@ -448,6 +450,88 @@ function normalizeSetId(setId) {
   });
 
   return normalized;
+}
+
+/**
+ * Liefert mögliche Alias-Varianten einer Set-ID (inkl. Custom Mappings vor/zurück).
+ *
+ * @param {string} setId - Eingabe-ID (z.B. "TCGDEX-sv10.5b" oder "zsv10pt5")
+ * @returns {Array<string>} Eindeutige Kandidaten-IDs
+ */
+function buildSetIdAliasCandidates(setId) {
+  if (!setId) return [];
+
+  const raw = String(setId).trim();
+  const unprefixed = raw.replace(/^TCGDEX-/i, '');
+  const candidates = new Set([raw, unprefixed]);
+
+  const baseKeys = [raw.toLowerCase(), unprefixed.toLowerCase()];
+
+  // Direkte Custom-Mappings (pokemontcg -> tcgdex)
+  baseKeys.forEach(key => {
+    const mapped = CUSTOM_SET_ID_MAPPINGS[key];
+    if (mapped) candidates.add(mapped);
+  });
+
+  // Reverse Custom-Mappings (tcgdex -> pokemontcg)
+  const normalizedBase = normalizeSetId(unprefixed);
+  for (const [pokeId, tcgdexId] of Object.entries(CUSTOM_SET_ID_MAPPINGS)) {
+    if (
+      String(tcgdexId).toLowerCase() === unprefixed.toLowerCase() ||
+      normalizeSetId(tcgdexId) === normalizedBase
+    ) {
+      candidates.add(pokeId);
+    }
+  }
+
+  return Array.from(candidates).filter(Boolean);
+}
+
+/**
+ * Prüft, ob zwei Set-IDs als gleiches Set gelten (Normalisierung + Custom Mapping).
+ *
+ * @param {string} setIdA
+ * @param {string} setIdB
+ * @returns {boolean}
+ */
+function areSetIdsEquivalent(setIdA, setIdB) {
+  if (!setIdA || !setIdB) return false;
+  if (String(setIdA).trim().toLowerCase() === String(setIdB).trim().toLowerCase()) return true;
+
+  const aNorm = new Set(
+    buildSetIdAliasCandidates(setIdA).map(id => normalizeSetId(String(id).replace(/^TCGDEX-/i, '')))
+  );
+  const bNorm = buildSetIdAliasCandidates(setIdB).map(id => normalizeSetId(String(id).replace(/^TCGDEX-/i, '')));
+
+  return bNorm.some(n => aNorm.has(n));
+}
+
+/**
+ * Löst eine Set-ID auf eine kanonische Ziel-ID auf Basis eines Normalized->Canonical-Mappings auf.
+ * Berücksichtigt Custom-Mappings und TCGDEX-Präfixe.
+ *
+ * @param {string} inputSetId
+ * @param {Map<string,string>} normalizedToCanonicalMap
+ * @param {Set<string>} [canonicalSetIds]
+ * @returns {string|null}
+ */
+function resolveCanonicalSetIdFromMap(inputSetId, normalizedToCanonicalMap, canonicalSetIds = null) {
+  const aliases = buildSetIdAliasCandidates(inputSetId);
+
+  if (canonicalSetIds) {
+    for (const alias of aliases) {
+      if (canonicalSetIds.has(alias)) return alias;
+    }
+  }
+
+  for (const alias of aliases) {
+    const normalizedAlias = normalizeSetId(String(alias).replace(/^TCGDEX-/i, ''));
+    if (normalizedToCanonicalMap.has(normalizedAlias)) {
+      return normalizedToCanonicalMap.get(normalizedAlias);
+    }
+  }
+
+  return null;
 }
 
 /**
@@ -1297,16 +1381,19 @@ function populateSetsOverview() {
     const canonicalId = entry.pokemontcgData ? entry.pokemontcgData.id : `TCGDEX-${entry.tcgdexData.id}`;
     canonicalSetIds.add(canonicalId);
 
-    const normalizedId = normalizeSetId(canonicalId.replace(/^TCGDEX-/i, ''));
-    if (!normalizedToCanonical.has(normalizedId)) {
-      normalizedToCanonical.set(normalizedId, canonicalId);
-    } else {
-      // Bevorzuge reguläre (nicht-TCGDEX) IDs als Ziel bei Kollisionen.
-      const existing = normalizedToCanonical.get(normalizedId);
-      if (existing.startsWith('TCGDEX-') && !canonicalId.startsWith('TCGDEX-')) {
+    const aliasCandidates = buildSetIdAliasCandidates(canonicalId);
+    aliasCandidates.forEach(aliasId => {
+      const normalizedId = normalizeSetId(String(aliasId).replace(/^TCGDEX-/i, ''));
+      if (!normalizedToCanonical.has(normalizedId)) {
         normalizedToCanonical.set(normalizedId, canonicalId);
+      } else {
+        // Bevorzuge reguläre (nicht-TCGDEX) IDs als Ziel bei Kollisionen.
+        const existing = normalizedToCanonical.get(normalizedId);
+        if (existing.startsWith('TCGDEX-') && !canonicalId.startsWith('TCGDEX-')) {
+          normalizedToCanonical.set(normalizedId, canonicalId);
+        }
       }
-    }
+    });
   });
 
   const importedSheetBySetId = {};
@@ -1319,14 +1406,7 @@ function populateSetsOverview() {
     if (!note.startsWith('Set ID: ')) return;
 
     const noteSetId = note.substring('Set ID: '.length).trim();
-    const normalizedNoteId = normalizeSetId(noteSetId.replace(/^TCGDEX-/i, ''));
-
-    let canonicalId = null;
-    if (canonicalSetIds.has(noteSetId)) {
-      canonicalId = noteSetId;
-    } else if (normalizedToCanonical.has(normalizedNoteId)) {
-      canonicalId = normalizedToCanonical.get(normalizedNoteId);
-    }
+    const canonicalId = resolveCanonicalSetIdFromMap(noteSetId, normalizedToCanonical, canonicalSetIds);
 
     if (!canonicalId) return;
 
@@ -1787,7 +1867,7 @@ function populateCardsForSet(setIdFromOverview) {
       
       Logger.log(`[Migration Check] oldTcgdexId="${oldTcgdexId}", normalizedOldId="${normalizedOldId}", normalizedNewId="${normalizedNewId}"`);
       
-      if (normalizedOldId === normalizedNewId) {
+      if (areSetIdsEquivalent(normalizedOldId, normalizedNewId)) {
         isMigrationCase = true;
         Logger.log(`[Migration] TCGdex-only Set wird aktualisiert: ${oldTcgdexId} → ${setIdFromOverview}`);
         cardSheet.getRange(1, 1).setNote(expectedNote);
@@ -1802,10 +1882,7 @@ function populateCardsForSet(setIdFromOverview) {
     // Allgemeine Alias-Migration (z.B. "me02.5" -> "me2pt5"), auch ohne TCGDEX-Präfix
     // Wenn normalisierte IDs übereinstimmen, migriere automatisch auf die erwartete ID.
     if (!isMigrationCase && noteSetId) {
-      const normalizedNoteId = normalizeSetId(noteSetId.replace(/^TCGDEX-/i, ''));
-      const normalizedTargetId = normalizeSetId(setIdFromOverview.replace(/^TCGDEX-/i, ''));
-
-      if (normalizedNoteId && normalizedNoteId === normalizedTargetId && noteSetId !== setIdFromOverview) {
+      if (areSetIdsEquivalent(noteSetId, setIdFromOverview) && noteSetId !== setIdFromOverview) {
         Logger.log(`[Alias-Migration] Blatt "${setNameInSheet}": "${noteSetId}" -> "${setIdFromOverview}"`);
 
         cardSheet.getRange(1, 1).setNote(expectedNote);
@@ -1861,7 +1938,7 @@ function populateCardsForSet(setIdFromOverview) {
           const possibleOldId = sheetNote.replace('Set ID: ', '').trim();
           if (possibleOldId.includes('TCGDEX-')) {
             const normalizedFromOld = possibleOldId.substring('TCGDEX-'.length);
-            if (normalizedFromOld === setIdFromOverview) {
+            if (areSetIdsEquivalent(normalizedFromOld, setIdFromOverview)) {
               Logger.log(`[Notfall-Migration] Manuelle Korrektur erfolgreich: "${possibleOldId}" → "${setIdFromOverview}"`);
               cardSheet.getRange(1, 1).setNote(expectedNote);
               isMigrationCase = true;
@@ -5589,11 +5666,16 @@ function migrateLegacyTcgdexSetIds() {
   }
 
   const normalizedToCanonicalPokemontcgId = new Map();
+  const canonicalPokemontcgSetIds = new Set();
   pokemontcgIoSets.forEach(set => {
-    const normalized = normalizeSetId(set.id);
-    if (!normalizedToCanonicalPokemontcgId.has(normalized)) {
-      normalizedToCanonicalPokemontcgId.set(normalized, set.id);
-    }
+    canonicalPokemontcgSetIds.add(set.id);
+    const aliasCandidates = buildSetIdAliasCandidates(set.id);
+    aliasCandidates.forEach(aliasId => {
+      const normalized = normalizeSetId(String(aliasId).replace(/^TCGDEX-/i, ''));
+      if (!normalizedToCanonicalPokemontcgId.has(normalized)) {
+        normalizedToCanonicalPokemontcgId.set(normalized, set.id);
+      }
+    });
   });
 
   // Durchsuche alle Blätter nach alten TCGdex-only Set-IDs
@@ -5620,8 +5702,7 @@ function migrateLegacyTcgdexSetIds() {
       }
 
       const oldSetId = note.substring('Set ID: '.length).trim();
-      const normalizedOldId = normalizeSetId(oldSetId.replace(/^TCGDEX-/i, ''));
-      const targetSetId = normalizedToCanonicalPokemontcgId.get(normalizedOldId);
+      const targetSetId = resolveCanonicalSetIdFromMap(oldSetId, normalizedToCanonicalPokemontcgId, canonicalPokemontcgSetIds);
 
       // Nur migrieren, wenn es wirklich ein passendes pokemontcg.io Set gibt.
       if (!targetSetId) {
@@ -5733,6 +5814,29 @@ function rebuildPersistentDataFromSheets() {
   let importedSetsStatus = getScriptPropertiesData('importedSetsStatus', {});
   let collectedCardsData = getScriptPropertiesData('collectedCardsData', {});
 
+  // Für Migrationen: nur auf echte pokemontcg.io Set-IDs migrieren.
+  let pokemontcgIoSets = [];
+  if (UseVeraApi) {
+    const pokemontcgIoResponse = fetchApiData(`${VTCG_BASE_URL}sets/${VeraApiLanguage}.json`, "Beim Laden der pokemontcg.io Sets für Wiederherstellung");
+    pokemontcgIoSets = pokemontcgIoResponse || [];
+  } else {
+    const pokemontcgIoResponse = fetchApiData(`${PTCG_BASE_URL}sets`, "Beim Laden der pokemontcg.io Sets für Wiederherstellung");
+    pokemontcgIoSets = pokemontcgIoResponse?.data || [];
+  }
+
+  const normalizedToCanonicalPokemontcgId = new Map();
+  const canonicalPokemontcgSetIds = new Set();
+  pokemontcgIoSets.forEach(set => {
+    canonicalPokemontcgSetIds.add(set.id);
+    const aliasCandidates = buildSetIdAliasCandidates(set.id);
+    aliasCandidates.forEach(aliasId => {
+      const normalized = normalizeSetId(String(aliasId).replace(/^TCGDEX-/i, ''));
+      if (!normalizedToCanonicalPokemontcgId.has(normalized)) {
+        normalizedToCanonicalPokemontcgId.set(normalized, set.id);
+      }
+    });
+  });
+
   let setsProcessed = 0;
   let cardsCollected = 0;
   let setsSkipped = 0;
@@ -5745,39 +5849,37 @@ function rebuildPersistentDataFromSheets() {
     try {
       let note = sheet.getRange(1, 1).getNote() || '';
 
-      // --- TCGdex-Migration: Notiz aktualisieren + Daten umbenennen ---
-      if (note.startsWith('Set ID: TCGDEX-')) {
-        const oldId = note.substring('Set ID: '.length);        // "TCGDEX-me2pt5"
-        const newId = oldId.substring('TCGDEX-'.length);         // "me2pt5"
+      // --- Set-ID-Migration (mapping-aware): nur wenn es ein echtes pokemontcg.io Zielset gibt ---
+      if (note.startsWith('Set ID: ')) {
+        const oldId = note.substring('Set ID: '.length).trim();
+        const targetSetId = resolveCanonicalSetIdFromMap(oldId, normalizedToCanonicalPokemontcgId, canonicalPokemontcgSetIds);
 
-        sheet.getRange(1, 1).setNote(`Set ID: ${newId}`);
-        note = `Set ID: ${newId}`;
+        if (targetSetId && oldId !== targetSetId) {
+          sheet.getRange(1, 1).setNote(`Set ID: ${targetSetId}`);
+          note = `Set ID: ${targetSetId}`;
 
-        // collectedCardsData-Schlüssel migrieren
-        if (collectedCardsData[oldId]) {
-          if (!collectedCardsData[newId]) collectedCardsData[newId] = {};
-          // Merge: alte Daten als Basis, Sheet-Daten überschreiben später
-          Object.assign(collectedCardsData[newId], collectedCardsData[oldId]);
-          delete collectedCardsData[oldId];
+          if (collectedCardsData[oldId]) {
+            if (!collectedCardsData[targetSetId]) collectedCardsData[targetSetId] = {};
+            Object.assign(collectedCardsData[targetSetId], collectedCardsData[oldId]);
+            delete collectedCardsData[oldId];
+          }
+
+          if (importedSetsStatus[oldId]) {
+            importedSetsStatus[targetSetId] = true;
+            delete importedSetsStatus[oldId];
+          }
+
+          const oldCmKey = `pokemontcgIoCardmarketUrls_${oldId}`;
+          const newCmKey = `pokemontcgIoCardmarketUrls_${targetSetId}`;
+          const cmData = getScriptPropertiesData(oldCmKey, null);
+          if (cmData) {
+            setScriptPropertiesData(newCmKey, cmData);
+            properties.deleteProperty(oldCmKey);
+          }
+
+          tcgdexMigrated++;
+          Logger.log(`[rebuildPersistentDataFromSheets] Set-ID migriert: ${oldId} → ${targetSetId}`);
         }
-
-        // importedSetsStatus migrieren
-        if (importedSetsStatus[oldId]) {
-          importedSetsStatus[newId] = true;
-          delete importedSetsStatus[oldId];
-        }
-
-        // Cardmarket-URLs migrieren
-        const oldCmKey = `pokemontcgIoCardmarketUrls_${oldId}`;
-        const newCmKey = `pokemontcgIoCardmarketUrls_${newId}`;
-        const cmData = getScriptPropertiesData(oldCmKey, null);
-        if (cmData) {
-          setScriptPropertiesData(newCmKey, cmData);
-          properties.deleteProperty(oldCmKey);
-        }
-
-        tcgdexMigrated++;
-        Logger.log(`[rebuildPersistentDataFromSheets] TCGdex migriert: ${oldId} → ${newId}`);
       }
 
       if (!note.startsWith('Set ID: ')) {
