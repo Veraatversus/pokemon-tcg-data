@@ -3263,6 +3263,11 @@ function prepareCardsForSorting(setId, setName, tcgdexAllSets) {
  * @param {number|null} hour Stunde für tägliche/wöchentliche Trigger
  */
 function createTimeTrigger(intervalType, frequency, hour) {
+  const props = PropertiesService.getScriptProperties();
+  if (props.getProperty('sortTriggerInstalled') === 'true') {
+    return 'Ein Sortier-Trigger ist bereits installiert. Bitte löschen Sie zuerst vorhandene Trigger, bevor Sie einen neuen erstellen.';
+  }
+
   let triggerBuilder = ScriptApp.newTrigger("sortAllSheetsTrigger").timeBased();
 
   switch (intervalType) {
@@ -3281,7 +3286,8 @@ function createTimeTrigger(intervalType, frequency, hour) {
   }
 
   triggerBuilder.create();
-  
+  props.setProperty('sortTriggerInstalled','true');
+
   let confirmationMessage = `Der Sortier-Trigger wurde erfolgreich installiert: ${intervalType}`;
   if (frequency > 1) {
     confirmationMessage += ` (alle ${frequency} ${intervalType.slice(0, -2)}en)`;
@@ -3324,6 +3330,8 @@ function installSortTrigger() {
       ScriptApp.deleteTrigger(triggers[i]);
     }
   }
+  // clear global installation flag so another user can install later if desired
+  PropertiesService.getScriptProperties().deleteProperty('sortTriggerInstalled');
 
   const typeResponse = ui.prompt(
     'Sortier-Trigger installieren',
@@ -3476,7 +3484,14 @@ function uninstallAllTriggers() {
  * @see renderAndSortCardsInSheet
  */
 function sortAllSheetsTrigger() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  // prevent multiple simultaneous executions (duplicate triggers or overlapping runs)
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(1000)) { // wait up to 1 second
+    Logger.log('sortAllSheetsTrigger: another instance is running, aborting duplicate call');
+    return;
+  }
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
   const setsSheet = ss.getSheetByName("Sets Overview");
   if (!setsSheet || setsSheet.getLastRow() < OVERVIEW_DATA_START_ROW) {
     Logger.log("sortAllSheetsTrigger: Keine Sets im 'Sets Overview' gefunden. Überspringe Sortierung.");
@@ -3522,6 +3537,9 @@ function sortAllSheetsTrigger() {
 
   updateCollectionSummary();
   Logger.log("Sammlungsübersicht nach Trigger-Sortierung aktualisiert.");
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 /**
