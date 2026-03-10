@@ -3,7 +3,7 @@ name: Merge to Release
 on:
   push:
     branches:
-      - main
+      - dev   # personal working branch
   workflow_dispatch: # Allow manual trigger
 
 jobs:
@@ -25,10 +25,10 @@ jobs:
 
       - name: Merge main into release
         run: |
-          git fetch origin main
+          git fetch origin dev
 
-          # Try to merge main into release
-          if git merge origin/main --no-edit; then
+          # Try to merge dev into release
+          if git merge origin/dev --no-edit; then
             echo "Successfully merged main into release"
             git push origin release
           else

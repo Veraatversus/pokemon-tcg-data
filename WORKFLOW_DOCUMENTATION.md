@@ -6,19 +6,19 @@ Dieses Repository verwendet eine strukturierte Branch-Strategie, um automatische
 
 ## Branch-Struktur
 
-### 🔵 `main` Branch
-- **Zweck:** Hauptentwicklungsbranch, der mit dem upstream Repository synchronisiert wird
-- **Updates:** Erhält automatisch Updates vom Original-Repository (PokemonTCG/pokemon-tcg-data)
-- **Verwendung:** Basis für alle Feature-Branches und Pull Requests
+### 🔵 `master` Branch (upstream)
+- **Zweck:** Spiegel des Original‑Repositories; wird automatisch vom upstream aktualisiert
+- **Updates:** Läuft täglich oder manuell durch den Sync‑Workflow gegen PokemonTCG/pokemon-tcg-data
+- **Verwendung:** Darf **nicht** für eigene Änderungen verwendet werden; dient nur zur Übernahme von upstream-Inhalten
 
 ### 🟢 `release` Branch
 - **Zweck:** Stabiler Branch für GitHub Pages Deployment
-- **Updates:** Wird automatisch mit Änderungen aus `main` aktualisiert
+- **Updates:** Wird automatisch mit Änderungen aus `dev` aktualisiert
 - **Verwendung:** Dient als Quelle für GitHub Pages
 
 ### 🟡 `feature/*` Branches
 - **Zweck:** Entwicklung neuer Features oder Änderungen
-- **Verwendung:** Temporäre Branches für Pull Requests gegen `main`
+- **Verwendung:** Temporäre Branches für Pull Requests gegen `dev` (der persönliche Arbeitsbranch)
 
 ## Workflow-Diagramm
 
@@ -30,9 +30,16 @@ Dieses Repository verwendet eine strukturierte Branch-Strategie, um automatische
                      │ (täglich um 2:00 UTC + manuell)
                      ▼
 ┌─────────────────────────────────────────────────────────┐
-│  main Branch                                             │
+│  master Branch                                           │
 │  - Empfängt Updates vom Upstream                        │
-│  - Basis für Pull Requests                              │
+│  - Wird nur als Referenz benutzt                        │
+└────────────────────┬────────────────────────────────────┘
+                     │ Optionaler Merge
+                     ▼
+┌─────────────────────────────────────────────────────────┐
+│  dev Branch (eigene Basis)                              │
+│  - Ableitung von release als Ausgangspunkt             │
+│  - Hier werden Features zusammengeführt                │
 └────────────────────┬────────────────────────────────────┘
                      │ Automatisches Merge
                      │ (bei jedem Push + manuell)
@@ -60,12 +67,12 @@ Dieses Repository verwendet eine strukturierte Branch-Strategie, um automatische
 - Manuell über GitHub Actions UI
 
 **Ablauf:**
-1. Checkout des `main` Branches
+1. Checkout des `master` Branches
 2. Hinzufügen des upstream Remotes (PokemonTCG/pokemon-tcg-data)
 3. Abrufen der neuesten Änderungen vom Upstream
 4. Überprüfung auf Updates
-5. Merge der upstream Änderungen in `main`
-6. Push zu origin/main
+5. Merge der upstream Änderungen in `master`
+6. Push zu origin/master
 7. Triggern des "Merge to Release" Workflows
 
 **Bei Konflikten:**
@@ -76,12 +83,12 @@ Dieses Repository verwendet eine strukturierte Branch-Strategie, um automatische
 ### 2. 🔀 Merge to Release (`merge-to-release.yml`)
 
 **Trigger:**
-- Bei jedem Push zum `main` Branch
+- Bei jedem Push zum `dev` Branch (persönlicher Entwicklungszweig)
 - Manuell über GitHub Actions UI
 
 **Ablauf:**
 1. Checkout des `release` Branches
-2. Merge von `main` in `release`
+2. Merge von `dev` in `release`
 3. Push zu origin/release
 4. Automatisches Triggern des GitHub Pages Deployments
 
@@ -109,7 +116,7 @@ Dieses Repository verwendet eine strukturierte Branch-Strategie, um automatische
 1. Gehe zu "Actions" im GitHub Repository
 2. Wähle den gewünschten Workflow aus der Liste
 3. Klicke auf "Run workflow"
-4. Wähle den Branch (meist `main`)
+4. Wähle den Branch (meist `dev` für Merge‑Workflows oder `master` für Sync)
 5. Klicke auf "Run workflow"
 
 ### Konfliktlösung
@@ -119,8 +126,8 @@ Dieses Repository verwendet eine strukturierte Branch-Strategie, um automatische
 ```bash
 # 1. Lokales Repository aktualisieren
 git fetch origin
-git checkout main
-git pull origin main
+git checkout master
+git pull origin master
 
 # 2. Upstream hinzufügen (falls noch nicht vorhanden)
 git remote add upstream https://github.com/PokemonTCG/pokemon-tcg-data.git
@@ -135,7 +142,7 @@ git merge upstream/master
 # 5. Commit und Push
 git add .
 git commit -m "Resolve merge conflict with upstream"
-git push origin main
+git push origin master
 ```
 
 #### Release Merge Konflikt
@@ -146,8 +153,8 @@ git fetch origin
 git checkout release
 git pull origin release
 
-# 2. Main Branch mergen
-git merge origin/main
+# 2. Upstream (master) Branch mergen
+git merge origin/master
 # Konflikte manuell in den betroffenen Dateien lösen
 
 # 3. Commit und Push
@@ -166,8 +173,8 @@ git push origin release
 
 2. **Feature Branch erstellen:**
    ```bash
-   git checkout main
-   git pull origin main
+   git checkout dev
+   git pull origin dev
    git checkout -b feature/meine-aenderung
    ```
 
@@ -180,7 +187,7 @@ git push origin release
 
 4. **Pull Request erstellen:**
    - Gehe zu GitHub
-   - Erstelle einen Pull Request gegen den `main` Branch
+   - Erstelle einen Pull Request gegen den `dev` Branch
    - Beschreibe deine Änderungen
 
 ## Konfiguration
@@ -192,7 +199,7 @@ git push origin release
    - Source: "GitHub Actions"
 
 2. **Branch Protection Rules (empfohlen):**
-   - Schütze `main` und `release` Branches
+   - Schütze `master` und `release` Branches
    - Require pull request reviews
    - Require status checks to pass
 
