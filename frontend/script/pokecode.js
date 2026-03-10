@@ -2443,14 +2443,17 @@ function handleOnEdit(e) {
     return;
   }
 
-  // 2. Acquire a lock to prevent concurrent user operations
-  var lock = LockService.getUserLock();
+  // 2. Acquire a global script lock to serialize edits from *all* users.
+  //    User locks only cover the current account; script lock ensures only one
+  //    trigger runs at a time, preventing duplicate API calls from different users.
+  var lock = LockService.getScriptLock();
   try {
     lock.waitLock(USER_LOCK_TIMEOUT_MS);
   } catch (err) {
-    // Show user-friendly message for lock contention
-    SpreadsheetApp.getUi().alert("Operation blockiert", "Eine andere Operation wird gerade ausgeführt. Bitte versuchen Sie es gleich noch einmal.", SpreadsheetApp.getUi().ButtonSet.OK);
-    Logger.log("Could not obtain lock after %s seconds. Aborting handleOnEdit. Error: %s", USER_LOCK_TIMEOUT_MS / 1000, err.message);
+    // Silent early exit (no alert) since another execution is already running;
+    // the duplicate-detection further down will catch repeats if this run is
+    // triggered after the first one completes.
+    Logger.log("[handleOnEdit] Could not obtain script lock after %s seconds. Skipping execution.", USER_LOCK_TIMEOUT_MS / 1000);
     return;
   }
 
@@ -2483,19 +2486,9 @@ function handleOnEdit(e) {
           (lastProcessedEdit.value === true || (typeof lastProcessedEdit.value === 'string' && lastProcessedEdit.value.toLowerCase() === 'true')) &&
           (timeDiff < 60000)) { // 60 second threshold to catch lock-delayed duplicate triggers
           Logger.log(`[handleOnEdit] Duplicate user-initiated trigger detected (same cell, same true value, ${timeDiff}ms ago). Ignoring.`);
-          return; // Exit early - DO NOT clear the flag yet!
-        } else if (timeDiff > 60000) {
-          // Clear stale entries older than 60 seconds
-          Logger.log(`[handleOnEdit] Clearing stale lastProcessedEdit (${timeDiff}ms old).`);
-          properties.deleteProperty('lastProcessedEdit');
-        }
-      }
-      // If not a duplicate, store this user-initiated activation
-      Logger.log(`[handleOnEdit] Storing lastProcessedEdit for range ${range.getA1Notation()}`);
-      properties.setProperty('lastProcessedEdit', JSON.stringify({ range: range.getA1Notation(), value: e.value, timestamp: Date.now() }));
-    }
-
-    // 4. Proceed with main logic. All sheet modifications must be wrapped by try/finally with isScriptEditing = true/false
+          // reset flag before exiting so future edits are handled normally
+          isScriptEditing = false;
+          return;
     const sheet = range.getSheet();
     const sheetName = sheet.getName();
 
@@ -2839,6 +2832,14 @@ function onImportCheckboxEdit(e, isUserInitiatedCheck) { // Added isUserInitiate
 
   if (isUserInitiatedCheck) {
     Logger.log(`[onImportCheckboxEdit] User explicitly checked the box. Proceeding with import logic.`);
+
+    // guard: if we already imported this set earlier, skip doing it again
+    if (importedSetsStatus[setId]) {
+      Logger.log(`[onImportCheckboxEdit] Set ${setId} already marked as imported; skipping re-import.`);
+      // ensure checkbox shows true and leave it alone
+      range.setValue(true);
+      return;
+    }
     
     // WICHTIG: Setze checkbox zu false OHNE flush() um keinen rekursiven onEdit zu triggern
     range.setValue(false);
