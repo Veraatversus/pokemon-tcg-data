@@ -1974,6 +1974,16 @@ function renderAndSortCardsInSheet(cardSheet, setId, allCards, pokemontcgIoCardD
   });
 
   if (totalRowsForCards > 0) {
+    // make sure sheet is big enough to hold the grid
+    const requiredRows = SET_SHEET_HEADER_ROWS + totalRowsForCards;
+    if (cardSheet.getMaxRows() < requiredRows) {
+      cardSheet.insertRowsAfter(cardSheet.getMaxRows(), requiredRows - cardSheet.getMaxRows());
+    }
+    const requiredCols = totalColsNeeded;
+    if (cardSheet.getMaxColumns() < requiredCols) {
+      cardSheet.insertColumnsAfter(cardSheet.getMaxColumns(), requiredCols - cardSheet.getMaxColumns());
+    }
+
     const fullRange = cardSheet.getRange(SET_SHEET_HEADER_ROWS + 1, 1, totalRowsForCards, totalColsNeeded);
     fullRange.setValues(values);
     fullRange.setBackgrounds(backgrounds);
