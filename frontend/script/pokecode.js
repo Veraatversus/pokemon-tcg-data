@@ -1283,6 +1283,110 @@ function populateSetsOverview() {
   let importedCount = 0;
   const importedSetsStatus = getScriptPropertiesData('importedSetsStatus', {});
 
+  // Vorab: vorhandene Set-Blätter erkennen und ggf. alte/alias Set-IDs auf kanonische IDs migrieren.
+  const scriptProperties = PropertiesService.getScriptProperties();
+  let collectedCardsData = getScriptPropertiesData('collectedCardsData', {});
+  let customImageUrls = getScriptPropertiesData('customImageUrls', {});
+  let collectedChanged = false;
+  let customImagesChanged = false;
+  let importedStatusChanged = false;
+
+  const canonicalSetIds = new Set();
+  const normalizedToCanonical = new Map();
+  allSetsForOverview.forEach(entry => {
+    const canonicalId = entry.pokemontcgData ? entry.pokemontcgData.id : `TCGDEX-${entry.tcgdexData.id}`;
+    canonicalSetIds.add(canonicalId);
+
+    const normalizedId = normalizeSetId(canonicalId.replace(/^TCGDEX-/i, ''));
+    if (!normalizedToCanonical.has(normalizedId)) {
+      normalizedToCanonical.set(normalizedId, canonicalId);
+    } else {
+      // Bevorzuge reguläre (nicht-TCGDEX) IDs als Ziel bei Kollisionen.
+      const existing = normalizedToCanonical.get(normalizedId);
+      if (existing.startsWith('TCGDEX-') && !canonicalId.startsWith('TCGDEX-')) {
+        normalizedToCanonical.set(normalizedId, canonicalId);
+      }
+    }
+  });
+
+  const importedSheetBySetId = {};
+  const allSheets = ss.getSheets();
+  allSheets.forEach(sheet => {
+    const name = sheet.getName();
+    if (name === 'Sets Overview' || name === 'Collection Summary') return;
+
+    const note = sheet.getRange(1, 1).getNote() || '';
+    if (!note.startsWith('Set ID: ')) return;
+
+    const noteSetId = note.substring('Set ID: '.length).trim();
+    const normalizedNoteId = normalizeSetId(noteSetId.replace(/^TCGDEX-/i, ''));
+
+    let canonicalId = null;
+    if (canonicalSetIds.has(noteSetId)) {
+      canonicalId = noteSetId;
+    } else if (normalizedToCanonical.has(normalizedNoteId)) {
+      canonicalId = normalizedToCanonical.get(normalizedNoteId);
+    }
+
+    if (!canonicalId) return;
+
+    // Notiz und assoziierte Property-Keys auf kanonische ID migrieren.
+    if (noteSetId !== canonicalId) {
+      sheet.getRange(1, 1).setNote(`Set ID: ${canonicalId}`);
+      Logger.log(`[populateSetsOverview] Alias-Migration im Set-Blatt "${name}": ${noteSetId} -> ${canonicalId}`);
+
+      if (importedSetsStatus[noteSetId]) {
+        importedSetsStatus[canonicalId] = true;
+        delete importedSetsStatus[noteSetId];
+        importedStatusChanged = true;
+      }
+
+      if (collectedCardsData[noteSetId]) {
+        if (!collectedCardsData[canonicalId]) {
+          collectedCardsData[canonicalId] = collectedCardsData[noteSetId];
+        } else {
+          collectedCardsData[canonicalId] = { ...collectedCardsData[noteSetId], ...collectedCardsData[canonicalId] };
+        }
+        delete collectedCardsData[noteSetId];
+        collectedChanged = true;
+      }
+
+      if (customImageUrls[noteSetId]) {
+        if (!customImageUrls[canonicalId]) {
+          customImageUrls[canonicalId] = customImageUrls[noteSetId];
+        } else {
+          customImageUrls[canonicalId] = { ...customImageUrls[noteSetId], ...customImageUrls[canonicalId] };
+        }
+        delete customImageUrls[noteSetId];
+        customImagesChanged = true;
+      }
+
+      const oldCardmarketKey = `pokemontcgIoCardmarketUrls_${noteSetId}`;
+      const newCardmarketKey = `pokemontcgIoCardmarketUrls_${canonicalId}`;
+      const oldCardmarketData = getScriptPropertiesData(oldCardmarketKey, null);
+      const existingCardmarketData = getScriptPropertiesData(newCardmarketKey, null);
+      if (oldCardmarketData && !existingCardmarketData) {
+        setScriptPropertiesData(newCardmarketKey, oldCardmarketData);
+      }
+      if (oldCardmarketData) {
+        scriptProperties.deleteProperty(oldCardmarketKey);
+      }
+    }
+
+    if (!importedSheetBySetId[canonicalId]) {
+      importedSheetBySetId[canonicalId] = sheet;
+    } else {
+      Logger.log(`[populateSetsOverview] Mehrere Blätter für ${canonicalId} erkannt. Verwende erstes Blatt: "${importedSheetBySetId[canonicalId].getName()}"`);
+    }
+
+    importedSetsStatus[canonicalId] = true;
+    importedStatusChanged = true;
+  });
+
+  if (collectedChanged) setScriptPropertiesData('collectedCardsData', collectedCardsData);
+  if (customImagesChanged) setScriptPropertiesData('customImageUrls', customImageUrls);
+  if (importedStatusChanged) setScriptPropertiesData('importedSetsStatus', importedSetsStatus);
+
   allSetsForOverview.forEach(setEntry => {
     const pokemontcgIoSet = setEntry.pokemontcgData;
     const tcgdexSet = setEntry.tcgdexData;
@@ -1340,8 +1444,17 @@ function populateSetsOverview() {
 
     // Prüfe den Importstatus und erstelle Hyperlink, falls Blatt existiert
     let isSetImported = false;
-    let cardSheet = ss.getSheetByName(finalSetName); // Name des Blattes
-    if (cardSheet && cardSheet.getRange(1, 1).getNote() === `Set ID: ${actualSetIdForSheetNote}`) {
+    let cardSheet = importedSheetBySetId[actualSetIdForSheetNote] || null;
+
+    // Fallback: älteres Verhalten über Blattname + exakte Notiz
+    if (!cardSheet) {
+      const byNameSheet = ss.getSheetByName(finalSetName);
+      if (byNameSheet && byNameSheet.getRange(1, 1).getNote() === `Set ID: ${actualSetIdForSheetNote}`) {
+        cardSheet = byNameSheet;
+      }
+    }
+
+    if (cardSheet) {
       const sheetId = cardSheet.getSheetId();
       const sheetUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit#gid=${sheetId}`;
       setIdDisplayValue = `=HYPERLINK("${sheetUrl}"; "${actualSetIdForSheetNote}")`;
