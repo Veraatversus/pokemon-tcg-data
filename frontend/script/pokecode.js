@@ -2489,6 +2489,9 @@ function handleOnEdit(e) {
           // reset flag before exiting so future edits are handled normally
           isScriptEditing = false;
           return;
+        }
+      }
+    }
     const sheet = range.getSheet();
     const sheetName = sheet.getName();
 
