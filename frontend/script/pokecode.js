@@ -3164,6 +3164,60 @@ function prepareCardsForSorting(setId, setName, tcgdexAllSets) {
 }
 
 /**
+ * Liefert eine Liste der aktuell importierten Sets basierend auf vorhandenen Tabellenblättern.
+ * Jedes Element enthält {setId, setName}. Nur Blätter mit einer gültigen "Set ID:"-Notiz
+ * in Zelle A1 werden berücksichtigt. Diese Methode ist deutlich effizienter als das
+ * Durchlaufen der kompletten "Sets Overview" Tabelle und vermeidet das Sortieren
+ * von noch nicht importierten Sets.
+ *
+ * @returns {Array<{setId:string,setName:string}>}
+ */
+function getImportedSetsFromSheets() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheets = ss.getSheets();
+  const imported = [];
+  sheets.forEach(sheet => {
+    const name = sheet.getName();
+    if (name === 'Sets Overview' || name === 'Collection Summary') return;
+    const note = sheet.getRange(1, 1).getNote();
+    if (note && note.startsWith('Set ID: ')) {
+      const setId = note.substring('Set ID: '.length);
+      if (setId) {
+        imported.push({ setId, setName: name });
+      }
+    }
+  });
+  return imported;
+}
+
+/**
+ * Liefert eine Liste der aktuell importierten Sets basierend auf vorhandenen Tabellenblättern.
+ * Jedes Element enthält {setId, setName}. Nur Blätter mit einer gültigen "Set ID:"-Notiz
+ * in Zelle A1 werden berücksichtigt. Diese Methode ist deutlich effizienter als das
+ * Durchlaufen der kompletten "Sets Overview" Tabelle und vermeidet das Sortieren
+ * von noch nicht importierten Sets.
+ *
+ * @returns {Array<{setId:string,setName:string}>}
+ */
+function getImportedSetsFromSheets() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheets = ss.getSheets();
+  const imported = [];
+  sheets.forEach(sheet => {
+    const name = sheet.getName();
+    if (name === 'Sets Overview' || name === 'Collection Summary') return;
+    const note = sheet.getRange(1, 1).getNote();
+    if (note && note.startsWith('Set ID: ')) {
+      const setId = note.substring('Set ID: '.length);
+      if (setId) {
+        imported.push({ setId, setName: name });
+      }
+    }
+  });
+  return imported;
+}
+
+/**
  * Hilfsfunktion zum Installieren eines Zeit-Triggers mit den gegebenen Parametern
  * @param {string} intervalType Art des Intervalls ('minütlich', 'täglich', 'stündlich', 'wöchentlich')
  * @param {number} frequency Frequenz des Triggers
@@ -3399,24 +3453,24 @@ function sortAllSheetsTrigger() {
   }
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const setsSheet = ss.getSheetByName("Sets Overview");
-  if (!setsSheet || setsSheet.getLastRow() < OVERVIEW_DATA_START_ROW) {
-    Logger.log("sortAllSheetsTrigger: Keine Sets im 'Sets Overview' gefunden. Überspringe Sortierung.");
+  const imported = getImportedSetsFromSheets();
+  if (imported.length === 0) {
+    Logger.log("sortAllSheetsTrigger: Keine importierten Set-Blätter gefunden. Überspringe Sortierung.");
     return;
   }
 
-  const lastExistingOverviewRow = setsSheet.getLastRow();
-  const numExistingOverviewDataRows = Math.max(0, lastExistingOverviewRow - OVERVIEW_DATA_START_ROW);
-  const setsData = numExistingOverviewDataRows > 0 ?
-    setsSheet.getRange(OVERVIEW_DATA_START_ROW + 1, 1, numExistingOverviewDataRows, 2).getValues() : [];
-
-  Logger.log(`Starte automatische Sortierung für ${setsData.length} Sets...`);
+  Logger.log(`Starte automatische Sortierung für ${imported.length} importierte Sets...`);
 
   const tcgdexAllSets = fetchApiData(`${TCGDEX_BASE_URL}sets`, "Fehler beim Laden der TCGDex Sets für automatische Sortierung");
 
-  setsData.forEach(([setIdRaw, setName]) => {
-    const setId = extractIdFromHyperlink(setIdRaw); // Dies ist die pokemontcg.io Set ID oder TCGDex-only ID
+  const startTime = Date.now();
+  const MAX_DURATION = 5 * 60 * 1000; // Sicherheitsabbruch bei 5 Minuten
 
+  imported.forEach(({setId, setName}, idx) => {
+    if (Date.now() - startTime > MAX_DURATION) {
+      Logger.log(`sortAllSheetsTrigger: Zeitlimit erreicht nach ${idx} Sets, beende Trigger.`);
+      return; // exit this iteration, the lock release will follow
+    }
     const sheet = ss.getSheetByName(setName);
     if (sheet && sheet.getRange(1, 1).getNote() === `Set ID: ${setId}`) {
       try {
@@ -3475,38 +3529,35 @@ function sortAllSheetsTrigger() {
 function manualSortAllSheets() {
   const ui = SpreadsheetApp.getUi();
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const setsSheet = ss.getSheetByName("Sets Overview");
 
-  if (!setsSheet || setsSheet.getLastRow() < OVERVIEW_DATA_START_ROW) {
-    ui.alert("Error", "Keine Sets im 'Sets Overview' gefunden. Bitte importieren Sie zuerst Sets.", ui.ButtonSet.OK);
+  const imported = getImportedSetsFromSheets();
+  if (imported.length === 0) {
+    ui.alert("Info", "Keine importierten Sets gefunden. Bitte importieren Sie zuerst Sets.", ui.ButtonSet.OK);
     return;
   }
 
-  const lastExistingOverviewRow = setsSheet.getLastRow();
-  const numExistingOverviewDataRows = Math.max(0, lastExistingOverviewRow - OVERVIEW_DATA_START_ROW);
-  const setsData = numExistingOverviewDataRows > 0 ?
-    setsSheet.getRange(OVERVIEW_DATA_START_ROW + 1, 1, numExistingOverviewDataRows, 2).getValues() : [];
-
   let processedCount = 0;
-  SpreadsheetApp.getActive().toast(`Starte manuelle Sortierung für ${setsData.length} Sets...`, "🔄 In Arbeit", 10);
+  SpreadsheetApp.getActive().toast(`Starte manuelle Sortierung für ${imported.length} importierte Sets...`, "🔄 In Arbeit", 10);
 
   const tcgdexAllSets = fetchApiData(`${TCGDEX_BASE_URL}sets`, "Fehler beim Laden der TCGDex Sets für manuelle Sortierung");
 
-  for (let i = 0; i < setsData.length; i++) {
-    const setId = extractIdFromHyperlink(setsData[i][0]);
-    const setName = setsData[i][1];
+  const startTime = Date.now();
+  const MAX_DURATION = 5 * 60 * 1000; // 5 Minuten Sicherheitsgrenze
 
-    if (!setId || !setName) {
-      Logger.log(`Überspringe Zeile ${i + OVERVIEW_DATA_START_ROW + 1} in Sets Overview: Fehlende Set ID oder Name.`);
-      continue;
+  for (let i = 0; i < imported.length; i++) {
+    // beende frühzeitig wenn wir uns dem Timeout nähern
+    if (Date.now() - startTime > MAX_DURATION) {
+      Logger.log(`manualSortAllSheets: Zeitlimit erreicht nach ${i} Sets, abgebrochen.`);
+      ui.alert("Zeitlimit erreicht", `Sortierung wurde nach ${i} Sets abgebrochen, weil das Zeitlimit erreicht wurde. Bitte erneut ausführen.`, ui.ButtonSet.OK);
+      break;
     }
+    const { setId, setName } = imported[i];
 
     const sheet = ss.getSheetByName(setName);
     if (sheet && sheet.getRange(1, 1).getNote() === `Set ID: ${setId}`) {
-      SpreadsheetApp.getActive().toast(`Sortiere Set ${i + 1}/${setsData.length}: ${setName}`, "🔄 In Arbeit", 5);
+      SpreadsheetApp.getActive().toast(`Sortiere Set ${i + 1}/${imported.length}: ${setName}`, "🔄 In Arbeit", 5);
       try {
         const { allCards, cardmarketData } = prepareCardsForSorting(setId, setName, tcgdexAllSets);
-        
         if (allCards.length === 0) {
           Logger.log(`manualSortAllSheets: Keine Karten für Set ${setId} gefunden. Überspringe.`);
           continue;
@@ -3527,8 +3578,8 @@ function manualSortAllSheets() {
   updateCollectionSummary();
   Logger.log("Sammlungsübersicht nach manueller Sortierung aller Blätter aktualisiert.");
 
-  SpreadsheetApp.getActive().toast(`Manuelle Sortierung abgeschlossen. ${processedCount}/${setsData.length} Sets verarbeitet.`, "✅ Fertig", 10);
-  ui.alert("Manuelle Sortierung abgeschlossen", `${processedCount}/${setsData.length} Sets wurden sortiert.`, ui.ButtonSet.OK);
+  SpreadsheetApp.getActive().toast(`Manuelle Sortierung abgeschlossen. ${processedCount}/${imported.length} Sets verarbeitet.`, "✅ Fertig", 10);
+  ui.alert("Manuelle Sortierung abgeschlossen", `${processedCount}/${imported.length} Sets wurden sortiert.`, ui.ButtonSet.OK);
 }
 
 /**
