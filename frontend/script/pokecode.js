@@ -5570,8 +5570,31 @@ function migrateLegacyTcgdexSetIds() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const properties = PropertiesService.getScriptProperties();
   let importedSetsStatus = getScriptPropertiesData('importedSetsStatus', {});
+  let allCollectedData = getScriptPropertiesData('collectedCardsData', {});
+  let allCustomImageUrls = getScriptPropertiesData('customImageUrls', {});
   let migrationCount = 0;
   let sheetsChecked = 0;
+  let importedStatusChanged = false;
+  let collectedDataChanged = false;
+  let customImageChanged = false;
+
+  // Nur zu pokemontcg.io migrieren, wenn dort ein echtes Set existiert.
+  let pokemontcgIoSets = [];
+  if (UseVeraApi) {
+    const pokemontcgIoResponse = fetchApiData(`${VTCG_BASE_URL}sets/${VeraApiLanguage}.json`, "Beim Laden der pokemontcg.io Sets für Migration");
+    pokemontcgIoSets = pokemontcgIoResponse || [];
+  } else {
+    const pokemontcgIoResponse = fetchApiData(`${PTCG_BASE_URL}sets`, "Beim Laden der pokemontcg.io Sets für Migration");
+    pokemontcgIoSets = pokemontcgIoResponse?.data || [];
+  }
+
+  const normalizedToCanonicalPokemontcgId = new Map();
+  pokemontcgIoSets.forEach(set => {
+    const normalized = normalizeSetId(set.id);
+    if (!normalizedToCanonicalPokemontcgId.has(normalized)) {
+      normalizedToCanonicalPokemontcgId.set(normalized, set.id);
+    }
+  });
 
   // Durchsuche alle Blätter nach alten TCGdex-only Set-IDs
   const allSheets = ss.getSheets();
@@ -5592,62 +5615,71 @@ function migrateLegacyTcgdexSetIds() {
       
       Logger.log(`[migrateLegacyTcgdexSetIds] Prüfe Blatt "${sheetName}": Notiz = "${note}"`);
       
-      // Prüfe, ob die Notiz mit "Set ID: TCGDEX-" beginnt (alte Format)
-      if (note && note.startsWith('Set ID: TCGDEX-')) {
-        const oldSetId = note.substring('Set ID: '.length); // z.B. "TCGDEX-me2pt5"
-        const normalizedSetId = oldSetId.substring('TCGDEX-'.length); // z.B. "me2pt5"
-        
-        Logger.log(`[migrateLegacyTcgdexSetIds] MIGRATION DETECTED: "${oldSetId}" → "${normalizedSetId}"`);
-        
-        // Prüfe, ob bereits ein neueres Blatt mit normalisierter ID existiert
-        // und ob dieses Blatt noch mit der alten ID in importedSetsStatus ist
-        if (importedSetsStatus[oldSetId]) {
-          // Update importedSetsStatus: alte ID → neue ID
-          importedSetsStatus[normalizedSetId] = true;
-          delete importedSetsStatus[oldSetId];
-          Logger.log(`[Migration] importedSetsStatus aktualisiert: "${oldSetId}" → "${normalizedSetId}"`);
-          migrationCount++;
+      if (!note || !note.startsWith('Set ID: ')) {
+        continue;
+      }
+
+      const oldSetId = note.substring('Set ID: '.length).trim();
+      const normalizedOldId = normalizeSetId(oldSetId.replace(/^TCGDEX-/i, ''));
+      const targetSetId = normalizedToCanonicalPokemontcgId.get(normalizedOldId);
+
+      // Nur migrieren, wenn es wirklich ein passendes pokemontcg.io Set gibt.
+      if (!targetSetId) {
+        Logger.log(`[migrateLegacyTcgdexSetIds] Skip "${sheetName}": "${oldSetId}" bleibt unverändert (kein passendes pokemontcg.io Set).`);
+        continue;
+      }
+
+      if (oldSetId === targetSetId) {
+        continue;
+      }
+
+      Logger.log(`[migrateLegacyTcgdexSetIds] MIGRATION DETECTED: "${oldSetId}" → "${targetSetId}"`);
+
+      noteCell.setNote(`Set ID: ${targetSetId}`);
+      migrationCount++;
+
+      // importedSetsStatus migrieren
+      if (importedSetsStatus[oldSetId]) {
+        importedSetsStatus[targetSetId] = true;
+        delete importedSetsStatus[oldSetId];
+        importedStatusChanged = true;
+      } else if (!importedSetsStatus[targetSetId]) {
+        importedSetsStatus[targetSetId] = true;
+        importedStatusChanged = true;
+      }
+
+      // collectedCardsData migrieren (Merge: Zielwerte haben Vorrang)
+      if (allCollectedData[oldSetId]) {
+        if (!allCollectedData[targetSetId]) {
+          allCollectedData[targetSetId] = allCollectedData[oldSetId];
+        } else {
+          allCollectedData[targetSetId] = { ...allCollectedData[oldSetId], ...allCollectedData[targetSetId] };
         }
-        
-        // Aktualisiere die Blattnotiz zu neuer ID
-        noteCell.setNote(`Set ID: ${normalizedSetId}`);
-        Logger.log(`[Migration] Blatt "${sheetName}" Notiz aktualisiert: "${oldSetId}" → "${normalizedSetId}"`);
-        
-        // Migriere assoziierte PropertiesService-Daten (z.B. Cardmarket-URLs)
-        const oldCardmarketKey = `pokemontcgIoCardmarketUrls_${oldSetId}`;
-        const newCardmarketKey = `pokemontcgIoCardmarketUrls_${normalizedSetId}`;
-        const cardmarketData = getScriptPropertiesData(oldCardmarketKey, null);
-        if (cardmarketData) {
-          setScriptPropertiesData(newCardmarketKey, cardmarketData);
-          properties.deleteProperty(oldCardmarketKey);
-          Logger.log(`[Migration] Cardmarket-URLs migriert: "${oldCardmarketKey}" → "${newCardmarketKey}"`);
+        delete allCollectedData[oldSetId];
+        collectedDataChanged = true;
+      }
+
+      // customImageUrls migrieren
+      if (allCustomImageUrls[oldSetId]) {
+        if (!allCustomImageUrls[targetSetId]) {
+          allCustomImageUrls[targetSetId] = allCustomImageUrls[oldSetId];
+        } else {
+          allCustomImageUrls[targetSetId] = { ...allCustomImageUrls[oldSetId], ...allCustomImageUrls[targetSetId] };
         }
-        
-        // Migriere Collected Cards Data (wenn vorhanden)
-        const oldCollectedKey = `collectedCardsData_${oldSetId}`;
-        const newCollectedKey = `collectedCardsData_${normalizedSetId}`;
-        const collectedData = getScriptPropertiesData(oldCollectedKey, null);
-        if (collectedData) {
-          // Hinweis: collectedCardsData wird unter gesamter Struktur gespeichert, nicht pro Set
-          // Daher sicherstellen, dass die Set-Daten übertragen werden
-          let allCollectedData = getScriptPropertiesData('collectedCardsData', {});
-          if (allCollectedData[oldSetId] && !allCollectedData[normalizedSetId]) {
-            allCollectedData[normalizedSetId] = allCollectedData[oldSetId];
-            delete allCollectedData[oldSetId];
-            setScriptPropertiesData('collectedCardsData', allCollectedData);
-            Logger.log(`[Migration] Collected Cards Data migriert für "${normalizedSetId}"`);
-          }
-        }
-        
-        // Migriere Grafikdaten (wenn vorhanden)
-        const oldImageDataKey = `setImageData_${oldSetId}`;
-        const newImageDataKey = `setImageData_${normalizedSetId}`;
-        const imageData = getScriptPropertiesData(oldImageDataKey, null);
-        if (imageData) {
-          setScriptPropertiesData(newImageDataKey, imageData);
-          properties.deleteProperty(oldImageDataKey);
-          Logger.log(`[Migration] Grafikdaten migriert: "${oldImageDataKey}" → "${newImageDataKey}"`);
-        }
+        delete allCustomImageUrls[oldSetId];
+        customImageChanged = true;
+      }
+
+      // Cardmarket-URLs migrieren
+      const oldCardmarketKey = `pokemontcgIoCardmarketUrls_${oldSetId}`;
+      const newCardmarketKey = `pokemontcgIoCardmarketUrls_${targetSetId}`;
+      const oldCardmarketData = getScriptPropertiesData(oldCardmarketKey, null);
+      const newCardmarketData = getScriptPropertiesData(newCardmarketKey, null);
+      if (oldCardmarketData && !newCardmarketData) {
+        setScriptPropertiesData(newCardmarketKey, oldCardmarketData);
+      }
+      if (oldCardmarketData) {
+        properties.deleteProperty(oldCardmarketKey);
       }
     } catch (e) {
       Logger.log(`[Migration] Fehler beim Überprüfen von Blatt "${sheetName}": ${e.message}`);
@@ -5655,8 +5687,15 @@ function migrateLegacyTcgdexSetIds() {
     }
   }
   
+  if (collectedDataChanged) {
+    setScriptPropertiesData('collectedCardsData', allCollectedData);
+  }
+  if (customImageChanged) {
+    setScriptPropertiesData('customImageUrls', allCustomImageUrls);
+  }
+
   // Speichere aktualisierte importedSetsStatus
-  if (migrationCount > 0) {
+  if (importedStatusChanged || migrationCount > 0) {
     setScriptPropertiesData('importedSetsStatus', importedSetsStatus);
   }
   
