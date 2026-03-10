@@ -620,7 +620,14 @@ function fetchData(url) {
  * const sets = fetchApiData(`${TCGDEX_BASE_URL}sets`, "Fehler beim Laden der Sets");
  */
 function fetchApiData(url, errorMessagePrefix) {
-  const ui = SpreadsheetApp.getUi(); // Holt die Benutzeroberfläche der Tabelle.
+  // `getUi()` is not available in trigger time-driven contexts; wrap in try/catch
+  let ui = null;
+  try {
+    ui = SpreadsheetApp.getUi(); // Holt die Benutzeroberfläche der Tabelle.
+  } catch (err) {
+    // Running in a non-interactive context (e.g. time trigger) – UI not accessible
+    ui = null;
+  }
   try {
     const options = { 'muteHttpExceptions': true }; // Unterdrückt HTTP-Ausnahmen, um sie manuell zu behandeln.
     const res = UrlFetchApp.fetch(url, options); // Führt den HTTP-Request aus.
