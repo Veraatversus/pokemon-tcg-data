@@ -69,8 +69,8 @@ jobs:
           UPSTREAM_BRANCH=${{ steps.check.outputs.upstream_branch }}
           echo "dev_merge_conflict=false" >> $GITHUB_OUTPUT
 
-          # Try to merge upstream changes
-          if git merge upstream/$UPSTREAM_BRANCH --no-edit; then
+          # Keep master mirror-like: prefer upstream on content conflicts
+          if git merge -X theirs upstream/$UPSTREAM_BRANCH --no-edit; then
             echo "Successfully merged upstream changes into master"
             git push origin master
 
