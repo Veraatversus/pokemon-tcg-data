@@ -1789,6 +1789,51 @@ function populateCardsForSet(setIdFromOverview) {
 // ============================================================================
 
 /**
+ * Extrahiert Sammelstatus (G/RH) aus einem bereits gerenderten Set-Blatt.
+ *
+ * Wird genutzt, wenn persistente Daten für ein Set fehlen, aber im Sheet
+ * bereits Checkbox-Zustände vorhanden sind (z. B. Migration alter Tabellen).
+ *
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} cardSheet - Set-Blatt
+ * @returns {Object} Map: { [cardId]: { g: boolean, rh: boolean } }
+ */
+function extractCollectedDataFromSheet(cardSheet) {
+  const result = {};
+  const lastRow = cardSheet.getLastRow();
+  if (lastRow <= SET_SHEET_HEADER_ROWS) return result;
+
+  const dataRows = lastRow - SET_SHEET_HEADER_ROWS;
+  const totalCols = CARDS_PER_ROW_IN_GRID * CARD_BLOCK_WIDTH_COLS;
+  const values = cardSheet.getRange(SET_SHEET_HEADER_ROWS + 1, 1, dataRows, totalCols).getValues();
+
+  const toBoolean = v => v === true || String(v).toLowerCase() === 'true';
+
+  for (let rowBlock = 0; rowBlock * CARD_BLOCK_HEIGHT_ROWS < dataRows; rowBlock++) {
+    for (let colBlock = 0; colBlock < CARDS_PER_ROW_IN_GRID; colBlock++) {
+      const br = rowBlock * CARD_BLOCK_HEIGHT_ROWS;
+      const bc = colBlock * CARD_BLOCK_WIDTH_COLS;
+      if (br >= dataRows) break;
+
+      const rawId = String(values[br][bc] || '').trim();
+      if (!rawId) continue;
+
+      const checkRow = br + 2;
+      if (checkRow >= dataRows) continue;
+
+      const cardId = normalizeCardNumber(rawId);
+      const g = toBoolean(values[checkRow][bc]);
+      const rh = toBoolean(values[checkRow][bc + 1]);
+
+      if (g || rh) {
+        result[cardId] = { g, rh };
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
  * Rendert und sortiert Karten in einem Set-Blatt im Grid-Layout.
  * 
  * Zentraler Rendering-Algorithmus:
@@ -1838,6 +1883,16 @@ function renderAndSortCardsInSheet(cardSheet, setId, allCards, pokemontcgIoCardD
   }
 
   const collectedCardsData = getScriptPropertiesData('collectedCardsData');
+
+  // Auto-Recover: Wenn für dieses Set noch keine persistente Struktur existiert,
+  // versuche vorhandene Checkbox-Zustände direkt aus dem Sheet zu übernehmen.
+  if (collectedCardsData[setId] === undefined) {
+    const recovered = extractCollectedDataFromSheet(cardSheet);
+    collectedCardsData[setId] = recovered;
+    setScriptPropertiesData('collectedCardsData', collectedCardsData);
+    Logger.log(`[renderAndSortCardsInSheet] Auto-Recover für ${setId}: ${Object.keys(recovered).length} Karten aus Sheet übernommen.`);
+  }
+
   let currentSetCollectedData = collectedCardsData[setId] || {};
 
   // Fallback für migrierte Sets: wenn unter neuer ID nichts vorhanden ist,
