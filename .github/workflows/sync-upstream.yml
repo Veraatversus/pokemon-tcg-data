@@ -69,8 +69,8 @@ jobs:
           UPSTREAM_BRANCH=${{ steps.check.outputs.upstream_branch }}
           echo "dev_merge_conflict=false" >> $GITHUB_OUTPUT
 
-          # Try to merge upstream changes
-          if git merge upstream/$UPSTREAM_BRANCH --no-edit; then
+          # Keep master mirror-like: prefer upstream on content conflicts
+          if git merge -X theirs upstream/$UPSTREAM_BRANCH --no-edit; then
             echo "Successfully merged upstream changes into master"
             git push origin master
 
@@ -125,16 +125,15 @@ jobs:
               5. \`git push origin master\`
 
               6. Optionally merge master into dev and push:
-                 ```sh
+                 \`\`\`sh
                  git checkout dev
                  git merge master
                  git push origin dev
-                 ```
+                 \`\`\`
 
               **Upstream Repository:** https://github.com/${process.env.UPSTREAM_REPO}
 
-              Once resolved, updates to `dev` will automatically be merged into `release` and deployed.`,
+              Once resolved, updates to \`dev\` will automatically be merged into \`release\` and deployed.`,
               labels: ['upstream-sync', 'manual-action-required']
             });
             console.log('Created issue:', issue.data.number);
-
