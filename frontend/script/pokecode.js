@@ -259,6 +259,12 @@ function onOpen() {
   adminMenu.addItem('💥 ALLE LÖSCHEN', 'deleteAllPersistentData');
   mainMenu.addSubMenu(adminMenu);
 
+    // 🔧 Migration
+    const migrateMenu = ui.createMenu('🔧 Migration');
+    migrateMenu.addItem('🔄 Persistente Daten aus Blättern wiederherstellen', 'rebuildPersistentDataFromSheets');
+    migrateMenu.addItem('🔀 TCGdex-IDs migrieren', 'migrateLegacyTcgdexSetIds');
+    mainMenu.addSubMenu(migrateMenu);
+
   // 🐞 Entwicklung
   const devMenu = ui.createMenu('🐞 Entwicklung');
   devMenu.addItem('🧪 onEdit testen', 'debugOnEdit');
@@ -5435,4 +5441,156 @@ function migrateLegacyTcgdexSetIds() {
   }
   
   Logger.log(`[migrateLegacyTcgdexSetIds] Abgeschlossen: ${sheetsChecked} Blätter geprüft, ${migrationCount} migriert`);
+}
+
+/**
+ * Liest Checkbox-Zustände aus allen vorhandenen Set-Blättern und baut collectedCardsData
+ * in den Script-Properties neu auf.
+ *
+ * Gedacht für die Migration einer alten Tabelle ohne persistente Daten:
+ * - Checkbox-Häkchen im Sheet = Quelle der Wahrheit
+ * - TCGdex-only Sets (Notiz "Set ID: TCGDEX-xxx") werden dabei direkt migriert
+ * - Bestehende persistente Daten werden mit Sheet-Daten zusammengeführt
+ *   (Sheet gewinnt bei Konflikten)
+ *
+ * @function rebuildPersistentDataFromSheets
+ */
+function rebuildPersistentDataFromSheets() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ui = SpreadsheetApp.getUi();
+
+  const confirm = ui.alert(
+    '🔄 Persistente Daten aus Blättern wiederherstellen',
+    'Diese Funktion liest alle Checkbox-Zustände aus den vorhandenen Set-Blättern und ' +
+    'speichert sie in den Script-Properties.\n\n' +
+    'Vorhandene Sammeldaten werden mit den Sheet-Daten zusammengeführt (Sheet hat Vorrang).\n' +
+    'TCGdex-only Sets (TCGDEX-...) werden automatisch migriert.\n\n' +
+    'Fortfahren?',
+    ui.ButtonSet.YES_NO
+  );
+  if (confirm !== ui.Button.YES) return;
+
+  const properties = PropertiesService.getScriptProperties();
+  let importedSetsStatus = getScriptPropertiesData('importedSetsStatus', {});
+  let collectedCardsData = getScriptPropertiesData('collectedCardsData', {});
+
+  let setsProcessed = 0;
+  let cardsCollected = 0;
+  let setsSkipped = 0;
+  let tcgdexMigrated = 0;
+
+  for (const sheet of ss.getSheets()) {
+    const sheetName = sheet.getName();
+    if (sheetName === 'Sets Overview' || sheetName === 'Collection Summary') continue;
+
+    try {
+      let note = sheet.getRange(1, 1).getNote() || '';
+
+      // --- TCGdex-Migration: Notiz aktualisieren + Daten umbenennen ---
+      if (note.startsWith('Set ID: TCGDEX-')) {
+        const oldId = note.substring('Set ID: '.length);        // "TCGDEX-me2pt5"
+        const newId = oldId.substring('TCGDEX-'.length);         // "me2pt5"
+
+        sheet.getRange(1, 1).setNote(`Set ID: ${newId}`);
+        note = `Set ID: ${newId}`;
+
+        // collectedCardsData-Schlüssel migrieren
+        if (collectedCardsData[oldId]) {
+          if (!collectedCardsData[newId]) collectedCardsData[newId] = {};
+          // Merge: alte Daten als Basis, Sheet-Daten überschreiben später
+          Object.assign(collectedCardsData[newId], collectedCardsData[oldId]);
+          delete collectedCardsData[oldId];
+        }
+
+        // importedSetsStatus migrieren
+        if (importedSetsStatus[oldId]) {
+          importedSetsStatus[newId] = true;
+          delete importedSetsStatus[oldId];
+        }
+
+        // Cardmarket-URLs migrieren
+        const oldCmKey = `pokemontcgIoCardmarketUrls_${oldId}`;
+        const newCmKey = `pokemontcgIoCardmarketUrls_${newId}`;
+        const cmData = getScriptPropertiesData(oldCmKey, null);
+        if (cmData) {
+          setScriptPropertiesData(newCmKey, cmData);
+          properties.deleteProperty(oldCmKey);
+        }
+
+        tcgdexMigrated++;
+        Logger.log(`[rebuildPersistentDataFromSheets] TCGdex migriert: ${oldId} → ${newId}`);
+      }
+
+      if (!note.startsWith('Set ID: ')) {
+        Logger.log(`[rebuildPersistentDataFromSheets] Überspringe "${sheetName}": keine Set-ID-Notiz`);
+        setsSkipped++;
+        continue;
+      }
+
+      const setId = note.substring('Set ID: '.length).trim();
+
+      // Als importiert markieren + Sentinel anlegen
+      importedSetsStatus[setId] = true;
+      if (!collectedCardsData[setId]) collectedCardsData[setId] = {};
+
+      // --- Checkbox-Zustände aus Sheet lesen ---
+      const lastRow = sheet.getLastRow();
+      if (lastRow <= SET_SHEET_HEADER_ROWS) {
+        setsProcessed++;
+        continue; // Leeres Sheet
+      }
+
+      const dataRows = lastRow - SET_SHEET_HEADER_ROWS;
+      const totalCols = CARDS_PER_ROW_IN_GRID * CARD_BLOCK_WIDTH_COLS;
+      // Alles in einem Aufruf lesen (effizient)
+      const vals = sheet.getRange(SET_SHEET_HEADER_ROWS + 1, 1, dataRows, totalCols).getValues();
+
+      for (let rowBlock = 0; rowBlock * CARD_BLOCK_HEIGHT_ROWS < dataRows; rowBlock++) {
+        for (let colBlock = 0; colBlock < CARDS_PER_ROW_IN_GRID; colBlock++) {
+          const br = rowBlock * CARD_BLOCK_HEIGHT_ROWS;  // offset in vals[]
+          const bc = colBlock * CARD_BLOCK_WIDTH_COLS;
+          if (br >= dataRows) break;
+
+          const rawId = String(vals[br][bc] || '').trim();
+          if (!rawId) continue;
+          const cardId = normalizeCardNumber(rawId);
+
+          const checkRow = br + 2;
+          if (checkRow >= dataRows) continue;
+
+          const toBoolean = v => v === true || String(v).toLowerCase() === 'true';
+          const g  = toBoolean(vals[checkRow][bc]);
+          const rh = toBoolean(vals[checkRow][bc + 1]);
+
+          if (g || rh) {
+            // Sheet-Daten überschreiben persistente Daten (Sheet = Quelle der Wahrheit)
+            collectedCardsData[setId][cardId] = { g, rh };
+            cardsCollected++;
+          } else {
+            // Eintrag entfernen wenn nichts gesammelt (Cleanup)
+            delete collectedCardsData[setId][cardId];
+          }
+        }
+      }
+
+      setsProcessed++;
+      Logger.log(`[rebuildPersistentDataFromSheets] "${setId}": ${Object.keys(collectedCardsData[setId]).length} gesammelte Karten`);
+
+    } catch (err) {
+      Logger.log(`[rebuildPersistentDataFromSheets] FEHLER bei "${sheetName}": ${err.message}`);
+      setsSkipped++;
+    }
+  }
+
+  setScriptPropertiesData('collectedCardsData', collectedCardsData);
+  setScriptPropertiesData('importedSetsStatus', importedSetsStatus);
+
+  ui.alert(
+    '✅ Wiederherstellung abgeschlossen',
+    `Sets verarbeitet:  ${setsProcessed}\n` +
+    `Karten wiederhergestellt:  ${cardsCollected}\n` +
+    `TCGdex-Sets migriert:  ${tcgdexMigrated}\n` +
+    `Übersprungen:  ${setsSkipped}`,
+    ui.ButtonSet.OK
+  );
 }
