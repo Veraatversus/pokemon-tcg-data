@@ -1821,7 +1821,7 @@ function renderAndSortCardsInSheet(cardSheet, setId, allCards, pokemontcgIoCardD
   }
 
   const collectedCardsData = getScriptPropertiesData('collectedCardsData');
-  const currentSetCollectedData = collectedCardsData[setId] || {};
+  let currentSetCollectedData = collectedCardsData[setId] || {};
 
   const customImageUrls = getScriptPropertiesData('customImageUrls');
   const currentSetCustomImageUrls = customImageUrls[setId] || {};
