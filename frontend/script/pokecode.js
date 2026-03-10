@@ -1784,11 +1784,25 @@ function renderAndSortCardsInSheet(cardSheet, setId, allCards, pokemontcgIoCardD
   const customImageUrls = getScriptPropertiesData('customImageUrls');
   const currentSetCustomImageUrls = customImageUrls[setId] || {};
 
+  // DEBUG: Überprüfe, ob collectedCardsData für dieses Set leer ist (DIAGNOSTIC)
+  if (Object.keys(currentSetCollectedData).length === 0 && collectedCardsData[setId] === undefined) {
+    Logger.log(`[renderAndSortCardsInSheet] WARNUNG: Keine Sammlungsdaten für Set ${setId} gefunden. Dies könnte bei mehreren Sets sortieren auftreten.`);
+  }
+
   // Schritt 1: Karten mit ihrem gesammelten Status für die Sortierung erweitern.
   const cardsForSorting = allCards.map(card => {
     // Verwende card.number für pokemontcg.io Sets, und card.localId/card.id für TCGDex-only Sets, die zu 'number' gemappt wurden.
     const cardNumberOrId = normalizeCardNumber(card.number || card.id);
-    const status = currentSetCollectedData[cardNumberOrId] || { g: false, rh: false };
+    const unnormalizedCardId = card.number || card.id; // Fallback für nicht normalisierte Kartennummern
+    
+    // Versuche zuerst die normalisierte Version, dann als Fallback die unnormalisierte
+    let status = currentSetCollectedData[cardNumberOrId] || currentSetCollectedData[unnormalizedCardId] || { g: false, rh: false };
+    
+    // DEBUG LOG: Falls beide Keys nicht gefunden wurden, log dies
+    if (!currentSetCollectedData[cardNumberOrId] && !currentSetCollectedData[unnormalizedCardId] && Object.keys(currentSetCollectedData).length > 0) {
+      Logger.log(`[renderAndSortCardsInSheet] Kartennummer-Mismatch für ${cardNumberOrId} (unnormalisiert: ${unnormalizedCardId}). Verfügbare Keys: ${JSON.stringify(Object.keys(currentSetCollectedData).slice(0, 5))}`);
+    }
+    
     return { ...card, g: status.g, rh: status.rh, displayId: cardNumberOrId };
   });
 
@@ -1808,11 +1822,37 @@ function renderAndSortCardsInSheet(cardSheet, setId, allCards, pokemontcgIoCardD
     return naturalSort(a.displayId, b.displayId);
   });
 
-  // Schritt 3: Blatt leeren.
+  // Schritt 3: BACKUP DER EXISTIERENDEN CHECKBOXEN VOR DEM LEEREN
+  // Dies ist eine Sicherheitsmaßnahme, falls die collectedCardsData verloren gehen
+  const existingCheckboxBackup = {};
   const lastRow = cardSheet.getLastRow();
   if (lastRow > SET_SHEET_HEADER_ROWS) {
-    // Sicherstellen, dass der gesamte relevante Bereich vollständig geleert wird,
-    // um bestehende Merges und Formatierungen zu entfernen.
+    // Lese existierende Daten, um Checkboxen zu sichern
+    for (let i = SET_SHEET_HEADER_ROWS + 1; i <= lastRow; i++) {
+      const idCell = cardSheet.getRange(i, 1).getValue();
+      const checkboxCell = cardSheet.getRange(i, 3).getValue();
+      const rhCheckboxCell = cardSheet.getRange(i, 4).getValue();
+      
+      // Nur speichern, wenn wir eine Kartennummer haben und etwas gesammelt wurde
+      if (idCell && (checkboxCell || rhCheckboxCell)) {
+        const normalizedId = normalizeCardNumber(idCell);
+        existingCheckboxBackup[normalizedId] = {
+          g: checkboxCell === true || checkboxCell === "TRUE",
+          rh: rhCheckboxCell === true || rhCheckboxCell === "TRUE"
+        };
+      }
+    }
+    
+    // MERGE BACKUP mit currentSetCollectedData, falls Lücken vorhanden sind
+    if (Object.keys(existingCheckboxBackup).length > 0) {
+      const merged = { ...existingCheckboxBackup, ...currentSetCollectedData };
+      currentSetCollectedData = merged;
+      if (Object.keys(existingCheckboxBackup).length > 0) {
+        Logger.log(`[renderAndSortCardsInSheet] ${Object.keys(existingCheckboxBackup).length} Checkboxen aus Blatt ${setId} gesichert`);
+      }
+    }
+    
+    // Blatt leeren
     const dataRange = cardSheet.getRange(SET_SHEET_HEADER_ROWS + 1, 1, lastRow - SET_SHEET_HEADER_ROWS, cardSheet.getMaxColumns());
     dataRange.clear(); // clear() löscht Inhalt, Formate, Datenvalidierungen und Merges
   }
@@ -2079,6 +2119,13 @@ function renderAndSortCardsInSheet(cardSheet, setId, allCards, pokemontcgIoCardD
   rangesForBorders.forEach(range => {
     range.setBorder(true, true, true, true, true, true, "#BDBDBD", SpreadsheetApp.BorderStyle.SOLID_MEDIUM);
   });
+
+  // PERSISTIERUNGS-LOGIK: Speichere die aktuellen Sammlungsdaten zurück in PropertiesService
+  // Dies stellt sicher, dass beim nächsten Sortier-Durchlauf die Daten nicht verloren gehen
+  const collectedCardsDataToSave = getScriptPropertiesData('collectedCardsData');
+  collectedCardsDataToSave[setId] = currentSetCollectedData;
+  setScriptPropertiesData('collectedCardsData', collectedCardsDataToSave);
+  Logger.log(`[renderAndSortCardsInSheet] Sammlungsdaten für Set ${setId} gespeichert (${Object.keys(currentSetCollectedData).length} Karten mit Status)`);
 }
 
 /**
