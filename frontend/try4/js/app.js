@@ -28,6 +28,19 @@ import {
   loadSnapshots
 } from './collection-versioning.js';
 import { initCommandPalette } from './command-palette.js';
+import {
+  loadFavorites, saveFavorites, toggleFavorite, isFavorite,
+  loadSearchHistory, addSearchHistory, clearSearchHistory,
+  createCollectionSnapshot, generateCollectionReport,
+  loadSettings, saveSettings, updateSetting,
+  applyQuickFilters, calculateCollectionStats,
+  generateSmartRecommendations, getSyncStatus, setSyncStatus
+} from './enhanced-features.js';
+import {
+  initQuickFiltersUI, createSearchHistoryWidget, createStatisticsPanel,
+  createExportDialog, createSettingsPanel, createShortcutsOverlay,
+  createBulkActionsToolbar
+} from './ui-components.js';
 
 // ══════════════════════════════════════════════════════════════════════════
 // DOM-REFERENZEN
@@ -1101,6 +1114,7 @@ function createDashSetCard(set, summary) {
       <div class="dash-card-actions">
         ${set.imported 
           ? `<button class="btn-secondary dash-view-btn" type="button" title="Ansehen">👁️</button>
+             <button class="btn-secondary dash-favorite-btn" type="button" title="Favorit">${isFavorite(set.setId) ? '⭐' : '☆'}</button>
              <button class="btn-secondary dash-delete-btn" type="button" title="Löschen">🗑️</button>`
           : `<button class="btn-primary dash-import-btn" type="button">➕ Importieren</button>`}
       </div>
@@ -1128,6 +1142,16 @@ function createDashSetCard(set, summary) {
     deleteButton.addEventListener('click', async (event) => {
       event.stopPropagation();
       await deleteSetFromCollection(set);
+    });
+  }
+
+  const favoriteButton = card.querySelector('.dash-favorite-btn');
+  if (favoriteButton) {
+    favoriteButton.addEventListener('click', async (event) => {
+      event.stopPropagation();
+      const isFav = toggleFavorite(set.setId);
+      favoriteButton.textContent = isFav ? '⭐' : '☆';
+      showToast(isFav ? `${set.setName} zu Favoriten hinzugefügt` : `${set.setName} aus Favoriten entfernt`, 'success', 2000);
     });
   }
 
@@ -2541,6 +2565,44 @@ async function bootstrap() {
   initSortControl();
   initSearch();
   
+  // Initialize Quick Filters
+  try {
+    initQuickFiltersUI();
+    window.addEventListener('quick-filters-changed', (e) => {
+      renderDashboard();
+    });
+    console.log('✅ Quick Filters initialized');
+  } catch (err) {
+    console.warn('⚠️ Quick Filters init failed:', err);
+  }
+
+  // Store search history globally
+  window.SEARCH_HISTORY = loadSearchHistory();
+  
+  // Clear search history on event
+  window.addEventListener('clear-search-history', () => {
+    clearSearchHistory();
+    window.SEARCH_HISTORY = [];
+    showToast('Suchverlauf gelöscht', 'success', 2000);
+  });
+  
+  // Initialize Shortcuts Overlay
+  try {
+    const shortcutsOverlay = createShortcutsOverlay();
+    document.body.appendChild(shortcutsOverlay);
+    
+    // ? key to show shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '?' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+        shortcutsOverlay.classList.remove('hidden');
+        e.preventDefault();
+      }
+    });
+    console.log('✅ Shortcuts overlay initialized');
+  } catch (err) {
+    console.warn('⚠️ Shortcuts overlay init failed:', err);
+  }
+  
   // Initialize Command Palette with handlers
   const commandHandlers = {
     'sync': async () => {
@@ -2588,10 +2650,38 @@ async function bootstrap() {
       showToast('Snapshots: ' + (loadSnapshots() || []).length + ' verfügbar', 'info', 3000);
     },
     'settings': () => {
-      showToast('Einstellungen-Dialog öffnet sich...', 'info', 2000);
+      const currentSettings = loadSettings();
+      const settingsPanel = createSettingsPanel(currentSettings, (updated) => {
+        saveSettings(updated);
+        showToast('Einstellungen gespeichert', 'success', 2000);
+        window.location.reload();
+      });
+      
+      const dialog = document.createElement('dialog');
+      dialog.className = 'ss-dialog';
+      dialog.style.cssText = 'width: 90vw; max-width: 400px;';
+      dialog.innerHTML = '<h2>⚙️ Einstellungen</h2>';
+      dialog.appendChild(settingsPanel);
+      document.body.appendChild(dialog);
+      dialog.showModal();
+      
+      dialog.addEventListener('close', () => dialog.remove());
+    },
+    'export-collection': async () => {
+      if (!state.collection || !state.sets.length) {
+        showToast('Keine Sammlung zum Exportieren', 'error', 3000);
+        return;
+      }
+      
+      const report = generateCollectionReport(state.collection, state.sets);
+      const dialog = createExportDialog(report);
+      document.body.appendChild(dialog);
+      dialog.showModal();
+      
+      dialog.addEventListener('close', () => dialog.remove());
     },
     'help': () => {
-      showToast('Verfügbare Befehle: import, health-check, backup, parity, search, snapshots, settings', 'info', 5000);
+      showToast('Verfügbare Befehle: import, health-check, backup, parity, search, snapshots, settings, export', 'info', 5000);
     }
   };
   
