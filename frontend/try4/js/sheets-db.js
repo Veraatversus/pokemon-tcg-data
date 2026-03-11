@@ -107,9 +107,45 @@ async function resolveSheetNames() {
     (name) => name.includes('setting') || name.includes('einstellung')
   ) || CONFIG.SHEETS.SETTINGS;
 
-  resolvedSheetsCache = { overview: overview || CONFIG.SHEETS.OVERVIEW, summary: summary || null, settings };
+  resolvedSheetsCache = {
+    overview: overview || titles[0] || CONFIG.SHEETS.OVERVIEW,
+    summary: summary || null,
+    settings,
+    titles
+  };
   console.log('[resolveSheetNames]', resolvedSheetsCache);
   return resolvedSheetsCache;
+}
+
+function isInvalidRangeError(err) {
+  const message = String(err?.result?.error?.message || err?.message || '').toLowerCase();
+  return err?.status === 400 || message.includes('invalid_argument') || message.includes('unable to parse range');
+}
+
+async function getOverviewRows(sheets) {
+  const primaryRange = buildRange(sheets.overview, 'A3:J');
+  try {
+    return await getFormulas(primaryRange);
+  } catch (err) {
+    if (!isInvalidRangeError(err) || !Array.isArray(sheets.titles) || sheets.titles.length === 0) {
+      throw err;
+    }
+
+    const alternatives = sheets.titles.filter((title) => title !== sheets.overview);
+    for (const title of alternatives) {
+      try {
+        const rows = await getFormulas(buildRange(title, 'A3:J'));
+        sheets.overview = title;
+        resolvedSheetsCache = sheets;
+        console.log('[getOverviewRows] fallback overview selected:', title);
+        return rows;
+      } catch {
+        // nächstes Blatt probieren
+      }
+    }
+
+    throw err;
+  }
 }
 
 async function getValues(range, renderOption = 'UNFORMATTED_VALUE') {
@@ -158,7 +194,7 @@ async function putValues(range, values) {
  */
 export async function listImportedSets() {
   const sheets = await resolveSheetNames();
-  const rows = await getFormulas(buildRange(sheets.overview, 'A3:J'));
+  const rows = await getOverviewRows(sheets);
   return rows
     .map((row) => ({
       setId:       extractDisplayTextFromHyperlink(row[0]),
@@ -179,7 +215,7 @@ export async function listImportedSets() {
  */
 export async function listSetsOverviewData() {
   const sheets = await resolveSheetNames();
-  const rows = await getFormulas(buildRange(sheets.overview, 'A3:J'));
+  const rows = await getOverviewRows(sheets);
   return rows
     .filter((row) => row[0])  // Mindestens eine ID
     .map((row) => ({
