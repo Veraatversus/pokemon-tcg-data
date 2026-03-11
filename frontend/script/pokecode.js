@@ -1170,9 +1170,10 @@ function setupSheets() {
 
   // Zusammenfassungszeile für "Collection Summary" (Zeile 2)
   // Merge-Bereich erstreckt sich über alle Daten-Spalten UND die Checkbox-Spalte (bis G), um bündig zu sein.
-  setsSheet.getRange(OVERVIEW_SUMMARY_ROW, 1, 1, OVERVIEW_REFRESH_CHECKBOX_COL).merge();
+  const summarySummaryRange = summarySheet.getRange(SUMMARY_SUMMARY_ROW, 1, 1, SUMMARY_SORT_CHECKBOX_COL); // A2:G2
+  summarySummaryRange.merge();
   summarySheet.getRange(SUMMARY_SUMMARY_ROW, 1).setValue("Lade Sammlungsstatistiken...");
-  summarySheet.getRange(SUMMARY_SUMMARY_ROW, 1).setHorizontalAlignment("center").setVerticalAlignment("middle").setFontWeight("bold").setBackground("#EFEFEF");
+  summarySummaryRange.setHorizontalAlignment("center").setVerticalAlignment("middle").setFontWeight("bold").setBackground("#EFEFEF");
 
 
   // Setzt oder aktualisiert die Kopfzeilen für die Sammlungsdaten (beginnend nach den neuen Headern, Zeile 3).
