@@ -258,13 +258,16 @@ export async function loadCardsForSetCompat({
   allCards = primaryCards.map((primaryCard) => {
     const number = normalizeCardNumber(primaryCard.number);
     const tcgdexCard = tcgdexCardsMap.get(number);
+    const generatedTcgdexImage = tcgdexCard
+      ? resolveTcgdexImageUrl(matchingTcgdexSet?.id || tcgdexId, tcgdexCard)
+      : null;
 
     const mergedCard = {
       number,
       name: tcgdexCard?.name || primaryCard.name,
-      image: tcgdexCard
-        ? resolveTcgdexImageUrl(matchingTcgdexSet?.id || tcgdexId, tcgdexCard)
-        : (primaryCard.images?.small || `https://images.pokemontcg.io/${pokemontcgSetId}/${number}.png`),
+      image: generatedTcgdexImage
+        || primaryCard.images?.small
+        || `https://images.pokemontcg.io/${pokemontcgSetId}/${number}.png`,
       cardmarketUrl: tcgdexCard?.links?.cardmarket || primaryCard.cardmarket?.url || null,
       rarity: primaryCard.rarity || tcgdexCard?.rarity || ''
     };
