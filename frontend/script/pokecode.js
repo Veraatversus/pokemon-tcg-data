@@ -2551,53 +2551,77 @@ function showQuickStats() {
   const setId = setIdNote.substring('Set ID: '.length);
   
   try {
-    // Lade Sammlung-Daten
-    const collectedData = getScriptPropertiesData(setId) || {};
-    
-    // Zähle Karten - Lese direkt aus dem Sheet-Header
-    const headerRow = sheet.getRange(2, 1).getValue();
-    if (!headerRow) {
+    // Lade Sammlung-Daten (korrekte Struktur: collectedCardsData[setId][cardId])
+    const collectedCardsData = getScriptPropertiesData('collectedCardsData', {});
+    let currentSetCollectedData = collectedCardsData[setId] || {};
+
+    // Extrahiere Karten-IDs aus dem Grid (nur ID-Zeilen, keine Bild-/Checkbox-Zellen)
+    const lastRow = sheet.getLastRow();
+    if (lastRow <= SET_SHEET_HEADER_ROWS) {
       ui.alert('ℹ️ Info', 'Keine Karten im Set.', ui.ButtonSet.OK);
       return;
     }
-    
-    // Parse Header: "Gesamtzahl Karten: X | ..." 
-    const totalMatch = headerRow.match(/Gesamtzahl Karten:\s*(\d+)/);
-    const collectedMatch = headerRow.match(/Gesammelte Karten:\s*(\d+)/);
-    const rhMatch = headerRow.match(/Gesammelte RH Karten:\s*(\d+)/);
-    
-    const totalCards = totalMatch ? parseInt(totalMatch[1]) : 0;
-    const normalCollected = collectedMatch ? parseInt(collectedMatch[1]) : 0;
-    const rhCollected = rhMatch ? parseInt(rhMatch[1]) : 0;
-    
+
+    // Falls keine gespeicherten Daten vorhanden sind, versuche Recovery aus Sheet-Checkboxen
+    if (Object.keys(currentSetCollectedData).length === 0) {
+      currentSetCollectedData = extractCollectedDataFromSheet(sheet);
+    }
+
+    const dataRows = lastRow - SET_SHEET_HEADER_ROWS;
+    const totalCols = CARDS_PER_ROW_IN_GRID * CARD_BLOCK_WIDTH_COLS;
+    const values = sheet.getRange(SET_SHEET_HEADER_ROWS + 1, 1, dataRows, totalCols).getValues();
+
+    const cardEntries = [];
+    for (let rowBlock = 0; rowBlock * CARD_BLOCK_HEIGHT_ROWS < dataRows; rowBlock++) {
+      for (let colBlock = 0; colBlock < CARDS_PER_ROW_IN_GRID; colBlock++) {
+        const br = rowBlock * CARD_BLOCK_HEIGHT_ROWS;
+        const bc = colBlock * CARD_BLOCK_WIDTH_COLS;
+        if (br >= dataRows) break;
+
+        const rawId = String(values[br][bc] || '').trim();
+        if (!rawId) continue;
+
+        cardEntries.push({
+          rawId,
+          normalizedId: normalizeCardNumber(rawId)
+        });
+      }
+    }
+
+    const seen = new Set();
+    const uniqueEntries = [];
+    for (const entry of cardEntries) {
+      if (seen.has(entry.normalizedId)) continue;
+      seen.add(entry.normalizedId);
+      uniqueEntries.push(entry);
+    }
+
+    const totalCards = uniqueEntries.length;
     if (totalCards === 0) {
       ui.alert('ℹ️ Info', 'Keine Karten im Set.', ui.ButtonSet.OK);
       return;
     }
-    
-    // Zähle fehlende Karten
-    const lastRow = sheet.getLastRow();
-    let missingCards = [];
-    
-    if (lastRow > CARD_DATA_START_ROW + 1) {
-      const numRows = lastRow - CARD_DATA_START_ROW;
-      const data = sheet.getRange(CARD_DATA_START_ROW + 1, 1, numRows, 2).getValues();
-      
-      for (const row of data) {
-        const cardNumber = row[0];
-        if (!cardNumber) continue;
-        
-        const hasNormal = collectedData[cardNumber]?.normal || false;
-        if (!hasNormal) {
-          missingCards.push(cardNumber);
-        }
-      }
-    }
-    
+
+    let normalCollected = 0;
+    let rhCollected = 0;
+    let bothCollected = 0;
+    const missingCards = [];
+
+    uniqueEntries.forEach(entry => {
+      const status = currentSetCollectedData[entry.normalizedId] || currentSetCollectedData[entry.rawId] || { g: false, rh: false };
+      const hasG = status.g === true;
+      const hasRh = status.rh === true;
+
+      if (hasG) normalCollected++;
+      if (hasRh) rhCollected++;
+      if (hasG && hasRh) bothCollected++;
+      if (!hasG) missingCards.push(entry.rawId);
+    });
+
     const completion = totalCards > 0 ? (normalCollected / totalCards * 100) : 0;
-    const bothCollected = Math.min(normalCollected, rhCollected);
+    const previewLimit = 20;
     const missingText = missingCards.length > 0 ? 
-      `\n\nFehlende Karten (${missingCards.length}):\n${missingCards.slice(0, 10).join(', ')}${missingCards.length > 10 ? '...' : ''}` : 
+      `\n\nFehlende Karten (${missingCards.length}):\n${missingCards.slice(0, previewLimit).join(', ')}${missingCards.length > previewLimit ? `\n… +${missingCards.length - previewLimit} weitere` : ''}` : 
       '\n\n✅ Alle Normal-Karten gesammelt!';
     
     ui.alert(
@@ -2607,7 +2631,7 @@ function showQuickStats() {
       `Normal gesammelt: ${normalCollected} (${completion.toFixed(1)}%)\n` +
       `RH gesammelt: ${rhCollected}\n` +
       `Beide gesammelt: ${bothCollected}\n` +
-      `Fehlend: ${totalCards - normalCollected}${missingText}`,
+      `Fehlend: ${missingCards.length}${missingText}`,
       ui.ButtonSet.OK
     );
     
