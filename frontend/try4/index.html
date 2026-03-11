@@ -108,6 +108,18 @@
     </div>
   </div>
 
+  <section id="job-panel" class="job-panel hidden" aria-live="polite">
+    <div class="job-head">
+      <strong id="job-title">Hintergrund-Job</strong>
+      <button id="btn-job-cancel" class="btn-secondary" type="button">Abbrechen</button>
+    </div>
+    <div class="job-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div id="job-progress-fill" class="job-progress-fill"></div>
+    </div>
+    <p id="job-status-text" class="job-status-text">Bereit</p>
+    <ul id="job-history" class="job-history"></ul>
+  </section>
+
   <!-- App-Views -->
   <div id="app-views">
 

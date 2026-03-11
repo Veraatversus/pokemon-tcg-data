@@ -28,6 +28,12 @@ const dom = {
   loadingText:      document.getElementById('loading-text'),
   toastContainer:   document.getElementById('toast-container'),
   globalStatus:     document.getElementById('global-status'),
+  jobPanel:         document.getElementById('job-panel'),
+  jobTitle:         document.getElementById('job-title'),
+  jobStatusText:    document.getElementById('job-status-text'),
+  jobProgressFill:  document.getElementById('job-progress-fill'),
+  jobHistory:       document.getElementById('job-history'),
+  btnJobCancel:     document.getElementById('btn-job-cancel'),
   // Spreadsheet-Dialog
   dialog:           document.getElementById('dialog-spreadsheet'),
   dialogInput:      document.getElementById('input-spreadsheet-id'),
@@ -135,7 +141,61 @@ const state = {
   lightboxIndex: 0,
   searchCache:  new Map(),
   batchSelection: new Set(),
+  activeJob: null,
 };
+
+function startJob(title, totalSteps = 0) {
+  const job = {
+    id: Date.now(),
+    title,
+    totalSteps: Math.max(0, Number(totalSteps) || 0),
+    current: 0,
+    cancelled: false,
+    startedAt: Date.now()
+  };
+  state.activeJob = job;
+  dom.jobPanel?.classList.remove('hidden');
+  if (dom.jobTitle) dom.jobTitle.textContent = title;
+  if (dom.jobStatusText) dom.jobStatusText.textContent = 'Gestartet…';
+  if (dom.jobProgressFill) dom.jobProgressFill.style.width = '0%';
+  if (dom.btnJobCancel) dom.btnJobCancel.disabled = false;
+  return job;
+}
+
+function pushJobHistory(text) {
+  if (!dom.jobHistory) return;
+  const item = document.createElement('li');
+  item.textContent = text;
+  dom.jobHistory.prepend(item);
+  while (dom.jobHistory.children.length > 30) {
+    dom.jobHistory.removeChild(dom.jobHistory.lastChild);
+  }
+}
+
+function updateJob(job, current, text) {
+  if (!job || state.activeJob?.id !== job.id) return;
+  job.current = Math.max(0, Number(current) || 0);
+  const pct = job.totalSteps > 0 ? Math.min(100, Math.round((job.current / job.totalSteps) * 100)) : 0;
+  if (dom.jobProgressFill) dom.jobProgressFill.style.width = `${pct}%`;
+  if (dom.jobStatusText) dom.jobStatusText.textContent = text || `${job.current}/${job.totalSteps}`;
+}
+
+function finishJob(job, summary, isError = false) {
+  if (!job || state.activeJob?.id !== job.id) return;
+  if (dom.jobStatusText) dom.jobStatusText.textContent = summary;
+  if (dom.btnJobCancel) dom.btnJobCancel.disabled = true;
+  if (dom.jobProgressFill && job.totalSteps > 0) {
+    dom.jobProgressFill.style.width = isError ? dom.jobProgressFill.style.width : '100%';
+  }
+  pushJobHistory(`${new Date().toLocaleTimeString('de-DE')} • ${job.title}: ${summary}`);
+  state.activeJob = null;
+}
+
+function assertJobNotCancelled(job) {
+  if (job?.cancelled) {
+    throw new Error('Vorgang abgebrochen.');
+  }
+}
 
 // ══════════════════════════════════════════════════════════════════════════
 // UI-HELFER
@@ -549,11 +609,14 @@ async function importSetsSequential(sets, options = {}) {
 
   let done = 0;
   let failed = 0;
+  const job = startJob('Import', validSets.length);
   setLoading(true, 'Import läuft…');
   try {
     for (let index = 0; index < validSets.length; index++) {
+      assertJobNotCancelled(job);
       const set = validSets[index];
       setGlobalStatus(`Importiere ${index + 1}/${validSets.length}: ${set.setName}`);
+      updateJob(job, index, `Importiere ${index + 1}/${validSets.length}: ${set.setName}`);
       try {
         const cards = await fetchMergedCards(set.setId);
         await importSetIntoCollection(set, cards);
@@ -565,6 +628,11 @@ async function importSetsSequential(sets, options = {}) {
         failed++;
       }
     }
+    updateJob(job, validSets.length, `Import abgeschlossen: ${done} erfolgreich, ${failed} Fehler`);
+    finishJob(job, `Import abgeschlossen (${done}/${validSets.length})`, failed > 0);
+  } catch (err) {
+    finishJob(job, err.message || 'Import abgebrochen', true);
+    throw err;
   } finally {
     setLoading(false);
   }
@@ -882,11 +950,14 @@ async function runDataHealthCheck({ autoFix = false } = {}) {
     errors: []
   };
   const mismatchSets = [];
+  const job = startJob(autoFix ? 'Datencheck + Auto-Fix' : 'Datencheck', state.sets.length);
 
   try {
     for (let index = 0; index < state.sets.length; index++) {
+      assertJobNotCancelled(job);
       const set = state.sets[index];
       setGlobalStatus(`Datencheck ${index + 1}/${state.sets.length}: ${set.setName}`);
+      updateJob(job, index, `Datencheck ${index + 1}/${state.sets.length}: ${set.setName}`);
       try {
         const [apiCards, sheetMap] = await Promise.all([
           fetchMergedCards(set.setId),
@@ -909,11 +980,16 @@ async function runDataHealthCheck({ autoFix = false } = {}) {
         report.errors.push({ setId: set.setId, setName: set.setName, error: err.message });
       }
     }
+    updateJob(job, state.sets.length, `Datencheck beendet: ${report.mismatches.length} Abweichungen`);
+  } catch (err) {
+    finishJob(job, err.message || 'Datencheck abgebrochen', true);
+    throw err;
   } finally {
     setLoading(false);
   }
 
   if (!report.mismatches.length && !report.errors.length) {
+    finishJob(job, 'Keine Abweichungen gefunden', false);
     showToast(`Datencheck ok: ${report.checkedSets} Sets geprüft, keine Abweichungen.`, 'success', 4500);
     return;
   }
@@ -927,14 +1003,21 @@ async function runDataHealthCheck({ autoFix = false } = {}) {
   downloadJson(`poke_data_health_${stamp}.json`, report);
   showToast(`Datencheck fertig: ${report.mismatches.length} Abweichungen, ${report.errors.length} Fehler. Report exportiert.`, 'error', 6500);
 
-  if (!autoFix || !mismatchSets.length) return;
+  if (!autoFix || !mismatchSets.length) {
+    finishJob(job, `Datencheck abgeschlossen (${report.mismatches.length} Abweichungen)`, true);
+    return;
+  }
 
   const confirmText = `${mismatchSets.length} Set${mismatchSets.length === 1 ? '' : 's'} mit Abweichungen automatisch reimportieren?`;
   const ok = window.confirm(confirmText);
-  if (!ok) return;
+  if (!ok) {
+    finishJob(job, 'Auto-Fix abgebrochen', true);
+    return;
+  }
 
   const uniqueSets = Array.from(new Map(mismatchSets.map((set) => [set.setId, set])).values());
   await importSetsSequential(uniqueSets, { successMessage: '{count} Mismatch-Set(s) automatisch repariert.' });
+  finishJob(job, `Auto-Fix ausgeführt (${uniqueSets.length} Sets)`, false);
 }
 
 function parseBackupPayload(rawText) {
@@ -1049,6 +1132,12 @@ function initDashboardControls() {
   dom.btnExportSummaryCsv?.addEventListener('click', exportCollectionSummaryCsv);
   dom.btnDataHealthCheck?.addEventListener('click', () => runDataHealthCheck({ autoFix: false }));
   dom.btnDataHealthAutofix?.addEventListener('click', () => runDataHealthCheck({ autoFix: true }));
+  dom.btnJobCancel?.addEventListener('click', () => {
+    if (!state.activeJob) return;
+    state.activeJob.cancelled = true;
+    if (dom.btnJobCancel) dom.btnJobCancel.disabled = true;
+    if (dom.jobStatusText) dom.jobStatusText.textContent = 'Abbruch angefordert…';
+  });
 }
 
 // ══════════════════════════════════════════════════════════════════════════

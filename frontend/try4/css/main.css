@@ -100,6 +100,55 @@ body {
   flex: 1;
 }
 
+.job-panel {
+  margin: 10px 16px 0;
+  padding: 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.job-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.job-progress-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+
+body.dark .job-progress-bar {
+  background: #334155;
+}
+
+.job-progress-fill {
+  width: 0;
+  height: 100%;
+  background: var(--color-primary);
+  transition: width 0.2s ease;
+}
+
+.job-status-text {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+.job-history {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  max-height: 120px;
+  overflow: auto;
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
 /* ══════════════════════════════════════════════════════════════════════════
    Buttons & Inputs (global)
    ══════════════════════════════════════════════════════════════════════════ */
