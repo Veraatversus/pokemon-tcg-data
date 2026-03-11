@@ -262,11 +262,11 @@ function onOpen() {
   adminMenu.addItem('💥 ALLE LÖSCHEN', 'deleteAllPersistentData');
   mainMenu.addSubMenu(adminMenu);
 
-    // 🔧 Migration
-    const migrateMenu = ui.createMenu('🔧 Migration');
-    migrateMenu.addItem('🔄 Persistente Daten aus Blättern wiederherstellen', 'rebuildPersistentDataFromSheets');
-    migrateMenu.addItem('🔀 TCGdex-IDs migrieren', 'migrateLegacyTcgdexSetIds');
-    mainMenu.addSubMenu(migrateMenu);
+  // 🔧 Migration (vorerst deaktiviert, da automatisch getriggert)
+  // const migrateMenu = ui.createMenu('🔧 Migration');
+  // migrateMenu.addItem('🔄 Persistente Daten aus Blättern wiederherstellen', 'rebuildPersistentDataFromSheets');
+  // migrateMenu.addItem('🔀 TCGdex-IDs migrieren', 'migrateLegacyTcgdexSetIds');
+  // mainMenu.addSubMenu(migrateMenu);
 
   // 🐞 Entwicklung
   const devMenu = ui.createMenu('🐞 Entwicklung');
