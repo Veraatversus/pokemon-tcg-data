@@ -795,6 +795,26 @@ function loadCardsForSet(setId, setName, tcgdexAllSets) {
       return mergedCard;
     });
 
+    if (tcgdexDetailedSet && tcgdexDetailedSet.cards) {
+      const existingCardNumbers = new Set(
+        pokemontcgCards.map(card => normalizeCardNumber(card.number))
+      );
+
+      tcgdexDetailedSet.cards.forEach(tcgdexCard => {
+        const normalizedTcgdexNumber = normalizeCardNumber(tcgdexCard.localId || tcgdexCard.id);
+        if (!existingCardNumbers.has(normalizedTcgdexNumber)) {
+          allCards.push({
+            number: normalizedTcgdexNumber,
+            name: tcgdexCard.name,
+            images: { small: tcgdexCard.image ? `${tcgdexCard.image}/low.jpg` : null },
+            cardmarket: { url: tcgdexCard.links?.cardmarket }
+          });
+        }
+      });
+    }
+
+    allCards.sort((a, b) => naturalSort(a.number || "", b.number || ""));
+
     pokemontcgCards.forEach(card => {
       if (card.cardmarket?.url) {
         cardmarketData[normalizeCardNumber(card.number)] = { cardmarketUrl: card.cardmarket.url };
@@ -2823,7 +2843,7 @@ function updateAllCardSheets() {
     const etaText = etaMinutes > 0 ? `~${etaMinutes}min ${etaSeconds}s` : `~${etaSeconds}s`;
     
     SpreadsheetApp.getActive().toast(
-      `Set ${i + 1}/${setsData.length} (${progress}%) - ${setName}\nVerbleibende Zeit: ${etaText}`, 
+      `Set ${i + 1}/${importedSets.length} (${progress}%) - ${setName}\nVerbleibende Zeit: ${etaText}`, 
       "🔄 Importiere", 
       5
     );
