@@ -2,7 +2,8 @@ import { CONFIG } from './config.js';
 import { naturalSort } from './utils.js';
 import {
   loadCardsForSetCompat,
-  combineSetsForOverviewCompat
+  combineSetsForOverviewCompat,
+  fetchAllPrimaryCardsForSet
 } from './pokecode-compat.js';
 
 // ── Interne Hilfsfunktionen ──────────────────────────────────────
@@ -240,6 +241,7 @@ export async function runPokecodeParityCheck({ setIds = [], maxSets = 10 } = {})
   const checkedSetIds = (Array.isArray(setIds) && setIds.length ? setIds : defaultIds).slice(0, maxSets);
 
   const cardMismatches = [];
+  const tcgdexOnlyUnionSummary = [];
   for (const setId of checkedSetIds) {
     const primarySet = await resolvePrimarySetForId(setId, primarySets);
     const adapterCards = await fetchMergedCards(setId);
@@ -278,6 +280,34 @@ export async function runPokecodeParityCheck({ setIds = [], maxSets = 10 } = {})
         compatCount: right.length
       });
     }
+
+    const isTcgdexOnlySet = String(setId).startsWith('TCGDEX-');
+    if (!isTcgdexOnlySet && primarySet) {
+      let primaryCards = [];
+      try {
+        primaryCards = await fetchAllPrimaryCardsForSet({
+          setId,
+          setName: primarySet?.name || setId,
+          useVeraApi: CONFIG.USE_VERA_API,
+          veraBaseUrl: CONFIG.APIS.VERA_BASE,
+          veraLanguage: CONFIG.VERA_API_LANGUAGE,
+          pokemontcgBaseUrl: CONFIG.APIS.POKEMONTCG,
+          fetchJson
+        });
+      } catch {
+        primaryCards = [];
+      }
+
+      const primaryNumbers = new Set((primaryCards || []).map((card) => String(card?.number || '').trim()));
+      const compatExtras = (compat.allCards || []).filter((card) => !primaryNumbers.has(String(card?.number || '').trim()));
+      tcgdexOnlyUnionSummary.push({
+        setId,
+        primaryCount: primaryCards.length,
+        compatCount: (compat.allCards || []).length,
+        tcgdexOnlyExtraCount: compatExtras.length,
+        tcgdexOnlyExtraNumbers: compatExtras.map((card) => String(card?.number || ''))
+      });
+    }
   }
 
   return {
@@ -287,6 +317,7 @@ export async function runPokecodeParityCheck({ setIds = [], maxSets = 10 } = {})
     overviewChecked: overviewAdapter.length,
     overviewMismatches,
     cardMismatches,
+    tcgdexOnlyUnionSummary,
     ok: overviewMismatches.length === 0 && cardMismatches.length === 0
   };
 }

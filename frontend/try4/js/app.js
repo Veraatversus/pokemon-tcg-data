@@ -327,6 +327,12 @@ function getQueueBuilderActionsCatalog() {
       label: 'Datencheck-Report exportieren',
       description: 'Erstellt Konsistenzreport als JSON',
       action: () => runDataHealthCheck({ autoFix: false })
+    },
+    {
+      id: 'pokecode-parity-test',
+      label: 'Pokecode-Parity-Test',
+      description: 'Vergleicht Adapter/Compat und exportiert einen Parity-Report',
+      action: () => runPokecodeParityTest({ skipPrompt: true, maxSets: 10 })
     }
   ];
 }
@@ -1518,10 +1524,15 @@ async function runDataHealthCheck({ autoFix = false } = {}) {
   finishJob(job, `Auto-Fix ausgeführt (${uniqueSets.length} Sets)`, false);
 }
 
-async function runPokecodeParityTest() {
-  const input = window.prompt('Wie viele Sets sollen geprüft werden? (Standard: 10)', '10');
-  const parsed = Number.parseInt(String(input || '10'), 10);
-  const maxSets = Number.isFinite(parsed) && parsed > 0 ? Math.min(parsed, 50) : 10;
+async function runPokecodeParityTest({ skipPrompt = false, maxSets: presetMaxSets = null } = {}) {
+  let maxSets = 10;
+  if (Number.isFinite(presetMaxSets) && presetMaxSets > 0) {
+    maxSets = Math.min(Number(presetMaxSets), 50);
+  } else if (!skipPrompt) {
+    const input = window.prompt('Wie viele Sets sollen geprüft werden? (Standard: 10)', '10');
+    const parsed = Number.parseInt(String(input || '10'), 10);
+    maxSets = Number.isFinite(parsed) && parsed > 0 ? Math.min(parsed, 50) : 10;
+  }
 
   setLoading(true, 'Pokecode-Parity-Test läuft…');
   setGlobalStatus(`Parity-Test läuft (max. ${maxSets} Sets)…`);
