@@ -249,12 +249,12 @@ function onOpen() {
   sortMenu.addSubMenu(autoSortMenu);
   mainMenu.addSubMenu(sortMenu);
 
-  // 💾 Export & Backup
-  const backupMenu = ui.createMenu('💾 Export & Backup');
-  backupMenu.addItem('📤 CSV exportieren', 'exportCollectionToCSV');
-  backupMenu.addItem('📥 CSV importieren (Export-Datei)', 'showCsvImportDialog');
-  backupMenu.addItem('♻️ Script-Backup wiederherstellen', 'restoreFromBackup');
-  mainMenu.addSubMenu(backupMenu);
+  // 💾 Export & Backup (vorerst deaktiviert)
+  // const backupMenu = ui.createMenu('💾 Export & Backup');
+  // backupMenu.addItem('📤 CSV exportieren', 'exportCollectionToCSV');
+  // backupMenu.addItem('📥 CSV importieren (Export-Datei)', 'showCsvImportDialog');
+  // backupMenu.addItem('♻️ Script-Backup wiederherstellen', 'restoreFromBackup');
+  // mainMenu.addSubMenu(backupMenu);
 
   // ⚠️ Verwaltung
   const adminMenu = ui.createMenu('⚠️ Verwaltung');
