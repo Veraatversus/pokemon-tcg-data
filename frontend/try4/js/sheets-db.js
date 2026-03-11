@@ -6,6 +6,15 @@ import {
   colToA1
 } from './utils.js';
 
+function quoteSheetName(sheetName) {
+  const name = String(sheetName ?? '').replace(/'/g, "''");
+  return `'${name}'`;
+}
+
+function buildRange(sheetName, a1Range) {
+  return `${quoteSheetName(sheetName)}!${a1Range}`;
+}
+
 async function getValues(range, renderOption = 'UNFORMATTED_VALUE') {
   try {
     if (!gapi?.client?.sheets?.spreadsheets?.values?.get) {
@@ -51,7 +60,7 @@ async function putValues(range, values) {
  * @returns {Promise<Array<{setId, setName, series, releaseDate, totalCards, ptcgoCode, imported}>>}
  */
 export async function listImportedSets() {
-  const rows = await getFormulas(`${CONFIG.SHEETS.OVERVIEW}!A3:J`);
+  const rows = await getFormulas(buildRange(CONFIG.SHEETS.OVERVIEW, 'A3:J'));
   return rows
     .map((row) => ({
       setId:       extractDisplayTextFromHyperlink(row[0]),
@@ -71,7 +80,7 @@ export async function listImportedSets() {
  * @returns {Promise<Array<{setId, setName, series, releaseDate, totalCards, ptcgoCode, imported}>>}
  */
 export async function listSetsOverviewData() {
-  const rows = await getFormulas(`${CONFIG.SHEETS.OVERVIEW}!A3:J`);
+  const rows = await getFormulas(buildRange(CONFIG.SHEETS.OVERVIEW, 'A3:J'));
   return rows
     .filter((row) => row[0])  // Mindestens eine ID
     .map((row) => ({
@@ -92,7 +101,7 @@ export async function listSetsOverviewData() {
  * @returns {Promise<Array<{setName, total, collected, rh, percent, ptcgoCode}>>}
  */
 export async function readSummarySheet() {
-  const rows = await getValues(`${CONFIG.SHEETS.SUMMARY}!A4:G`);
+  const rows = await getValues(buildRange(CONFIG.SHEETS.SUMMARY, 'A4:G'));
   return rows
     .filter((row) => row[0])
     .map((row) => ({
@@ -116,7 +125,7 @@ export async function readSetCollectionMap(setSheetName) {
   const totalCols = CONFIG.GRID.CARDS_PER_ROW * CONFIG.GRID.BLOCK_WIDTH;
   const endColumn = String.fromCharCode(64 + totalCols);
   // UNFORMATTED_VALUE liefert Boolean-Checkboxen als true/false statt "TRUE"/"FALSE"
-  const values = await getValues(`${setSheetName}!A3:${endColumn}2000`);
+  const values = await getValues(buildRange(setSheetName, `A3:${endColumn}2000`));
 
   const map = new Map();
   for (let rowBlock = 0; rowBlock < values.length; rowBlock += CONFIG.GRID.BLOCK_HEIGHT) {
@@ -146,7 +155,7 @@ export async function readSetCollectionMap(setSheetName) {
 }
 
 export async function updateCellBoolean(sheetName, row, col, value) {
-  const a1 = `${sheetName}!${colToA1(col)}${row}`;
+  const a1 = buildRange(sheetName, `${colToA1(col)}${row}`);
   await putValues(a1, [[Boolean(value)]]);
 }
 
@@ -165,13 +174,13 @@ export async function ensureSettingsSheet() {
         requests: [{ addSheet: { properties: { title: CONFIG.SHEETS.SETTINGS } } }]
       }
     });
-    await putValues(`${CONFIG.SHEETS.SETTINGS}!A1:B1`, [['key', 'value']]);
+    await putValues(buildRange(CONFIG.SHEETS.SETTINGS, 'A1:B1'), [['key', 'value']]);
   }
 }
 
 export async function readSettings() {
   await ensureSettingsSheet();
-  const rows = await getValues(`${CONFIG.SHEETS.SETTINGS}!A2:B`);
+  const rows = await getValues(buildRange(CONFIG.SHEETS.SETTINGS, 'A2:B'));
   const settings = {};
   rows.forEach((r) => {
     if (r[0]) settings[r[0]] = r[1] || '';
@@ -181,13 +190,13 @@ export async function readSettings() {
 
 export async function writeSetting(key, value) {
   await ensureSettingsSheet();
-  const keys = await getValues(`${CONFIG.SHEETS.SETTINGS}!A2:A`);
+  const keys = await getValues(buildRange(CONFIG.SHEETS.SETTINGS, 'A2:A'));
   const existingIndex = keys.findIndex((r) => r[0] === key);
 
   if (existingIndex >= 0) {
-    await putValues(`${CONFIG.SHEETS.SETTINGS}!B${existingIndex + 2}`, [[value]]);
+    await putValues(buildRange(CONFIG.SHEETS.SETTINGS, `B${existingIndex + 2}`), [[value]]);
   } else {
     const nextRow = keys.length + 2;
-    await putValues(`${CONFIG.SHEETS.SETTINGS}!A${nextRow}:B${nextRow}`, [[key, value]]);
+    await putValues(buildRange(CONFIG.SHEETS.SETTINGS, `A${nextRow}:B${nextRow}`), [[key, value]]);
   }
 }
