@@ -803,12 +803,18 @@ function loadCardsForSet(setId, setName, tcgdexAllSets) {
       tcgdexDetailedSet.cards.forEach(tcgdexCard => {
         const normalizedTcgdexNumber = normalizeCardNumber(tcgdexCard.localId || tcgdexCard.id);
         if (!existingCardNumbers.has(normalizedTcgdexNumber)) {
+          const tcgdexCardmarketUrl = tcgdexCard.links?.cardmarket || null;
           allCards.push({
+            id: tcgdexCard.id,
             number: normalizedTcgdexNumber,
             name: tcgdexCard.name,
             images: { small: tcgdexCard.image ? `${tcgdexCard.image}/low.jpg` : null },
-            cardmarket: { url: tcgdexCard.links?.cardmarket }
+            cardmarket: { url: tcgdexCardmarketUrl }
           });
+
+          if (tcgdexCardmarketUrl) {
+            cardmarketData[normalizedTcgdexNumber] = { cardmarketUrl: tcgdexCardmarketUrl };
+          }
         }
       });
     }
@@ -3684,7 +3690,7 @@ function prepareCardsForSorting(setId, setName, tcgdexAllSets) {
   if (!setId.startsWith('TCGDEX-')) {
     // Für pokemontcg.io Sets: lade gespeicherte Cardmarket-URLs
     const storedCardmarketData = getScriptPropertiesData(`pokemontcgIoCardmarketUrls_${setId}`, {});
-    return { allCards, cardmarketData: storedCardmarketData };
+    return { allCards, cardmarketData: { ...storedCardmarketData, ...cardmarketData } };
   }
   
   return { allCards, cardmarketData };
