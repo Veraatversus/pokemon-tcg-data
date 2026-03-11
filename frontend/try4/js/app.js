@@ -118,6 +118,7 @@ const state = {
 function setGlobalStatus(text) {
   if (dom.globalStatus) dom.globalStatus.textContent = text;
   if (dom.status)       dom.status.textContent = text;
+  console.info('[Status]', text);
 }
 
 function setLoading(show, text = 'Lade\u2026') {
@@ -237,11 +238,11 @@ function updateSpreadsheetInfoBar() {
 }
 
 function initSpreadsheetDialog() {
-  dom.btnDialogSave.addEventListener('click', () => {
-    const id = extractSpreadsheetId(dom.dialogInput.value.trim());
+  dom.dialog?.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !dom.btnDialogCancel.hidden) dom.dialog.close(); });
+  dom.btnDialogSave?.addEventListener('click', () => {
+    const id = extractSpreadsheetId(dom.dialogInput?.value?.trim());
     if (!id) {
-      dom.dialogError.textContent = 'Ung\u00fcltige Spreadsheet-ID oder URL.';
-      dom.dialogError.classList.remove('hidden');
+      if (dom.dialogError) { dom.dialogError.textContent = 'Ung\u00fcltige Spreadsheet-ID oder URL.'; dom.dialogError.classList.remove('hidden'); }
       return;
     }
     CONFIG.SPREADSHEET_ID = id;
@@ -249,7 +250,7 @@ function initSpreadsheetDialog() {
     updateSpreadsheetInfoBar();
     loadSets();
   });
-  dom.btnDialogCancel.addEventListener('click', () => dom.dialog.close());
+  dom.btnDialogCancel?.addEventListener('click', () => dom.dialog?.close());
   dom.btnChangeSheet?.addEventListener('click', () => openSpreadsheetDialog(false));
 }
 
@@ -260,6 +261,7 @@ async function loadSets() {
   setLoading(true, 'Lade Sets\u2026');
   try {
     const sets = await listImportedSets();
+    if (!Array.isArray(sets)) throw new Error('Ungültiges Sets-Format');
     state.sets = sets;
 
     // ── Set-Selector mit Serien-Gruppen ──
@@ -311,8 +313,10 @@ async function loadSets() {
       handleRouteChange();
     }
   } catch (err) {
+    console.error('[loadSets]', err);
     showToast(`Fehler beim Laden der Sets: ${err.message}`, 'error');
     setGlobalStatus('Sets konnten nicht geladen werden.');
+    state.sets = [];
   } finally {
     setLoading(false);
   }
@@ -394,7 +398,8 @@ async function renderDashboard() {
       dom.dashboardGrid.appendChild(grid);
     }
   } catch (err) {
-    dom.dashboardGrid.innerHTML = `<p class="empty-state">\u2715 Fehler: ${err.message}</p>`;
+    console.error('[renderDashboard]', err);
+    dom.dashboardGrid.innerHTML = `<p class="empty-state">\u2715 Fehler beim Laden der \u00dcbersicht</p>`;
     showToast(`Dashboard: ${err.message}`, 'error');
   }
 }
@@ -443,8 +448,13 @@ function initDashboardControls() {
 async function renderStats() {
   dom.statsContent.innerHTML = '<p class="loading-placeholder">Lade Statistiken\u2026</p>';
   try {
-    if (!state.summaryData) state.summaryData = await readSummarySheet().catch(() => []);
-    const data = state.summaryData || [];
+    if (!state.summaryData) {
+      state.summaryData = await readSummarySheet().catch((err) => {
+        console.warn('[renderStats] readSummarySheet error:', err.message);
+        return [];
+      });
+    }
+    const data = Array.isArray(state.summaryData) ? state.summaryData : [];
 
     let totalCards = 0, totalCollected = 0, totalRh = 0, completedSets = 0;
     data.forEach((row) => {
@@ -511,7 +521,8 @@ async function renderStats() {
         </div>
       </div>`;
   } catch (err) {
-    dom.statsContent.innerHTML = `<p class="empty-state">\u2715 Fehler: ${err.message}</p>`;
+    console.error('[renderStats]', err);
+    dom.statsContent.innerHTML = `<p class="empty-state">\u2715 Fehler beim Laden der Statistiken</p>`;
   }
 }
 
@@ -533,35 +544,35 @@ async function runSearch() {
   dom.searchResults.innerHTML = '<p class="loading-placeholder">Suche\u2026</p>';
   const results = [];
   for (const set of setsToSearch) {
-    const cacheKey = `cards_${set.setId}`;
-    let cards;
-    if (state.searchCache.has(set.setId))  cards = state.searchCache.get(set.setId);
-    else if (cache.has(cacheKey))          cards = cache.get(cacheKey), state.searchCache.set(set.setId, cards);
-    else {
-      try {
+    try {
+      const cacheKey = `cards_${set.setId}`;
+      let cards;
+      if (state.searchCache.has(set.setId))  cards = state.searchCache.get(set.setId);
+      else if (cache.has(cacheKey))          cards = cache.get(cacheKey), state.searchCache.set(set.setId, cards);
+      else {
         cards = await fetchMergedCards(set.setId);
         cache.set(cacheKey, cards, CONFIG.CACHE_TTL_MS);
         state.searchCache.set(set.setId, cards);
-      } catch { continue; }
-    }
-    let dbMap = new Map();
-    const dbCacheKey = `db_${set.setId}`;
-    if (cache.has(dbCacheKey)) dbMap = cache.get(dbCacheKey);
-    else {
-      try {
+      }
+      let dbMap = new Map();
+      const dbCacheKey = `db_${set.setId}`;
+      if (cache.has(dbCacheKey)) dbMap = cache.get(dbCacheKey);
+      else {
         dbMap = await readSetCollectionMap(set.setName);
         cache.set(dbCacheKey, dbMap, CONFIG.CACHE_TTL_MS);
-      } catch { /* ignore */ }
-    }
-    cards.forEach((card) => {
-      if ((card.name || '').toLowerCase().includes(query) || (card.number || '').toLowerCase().includes(query)) {
-        results.push({ card, set, dbMap });
       }
-    });
-    if (results.length >= 200) break;
+      cards.forEach((card) => {
+        if ((card.name || '').toLowerCase().includes(query) || (card.number || '').toLowerCase().includes(query)) {
+          results.push({ card, set, dbMap });
+        }
+      });
+      if (results.length >= 200) break;
+    } catch (err) {
+      console.warn('[runSearch] error for set', set.setId, err);
+    }
   }
   if (!results.length) {
-    dom.searchResults.innerHTML = `<p class="empty-state">Keine Karten f\u00fcr \u201e${query}\u201c gefunden.</p>`;
+    dom.searchResults.innerHTML = `<p class="empty-state">Keine Karten f\u00fcr \u201e${query}\u201c gefunden (durchsucht: ${setsToSearch.length} Sets).</p>`;
     return;
   }
   dom.searchResults.innerHTML = `<p class="search-result-count">${results.length} Ergebnis${results.length !== 1 ? 'se' : ''}</p>`;
@@ -855,6 +866,7 @@ function initLightbox() {
   });
 
   dom.lightboxDialog.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape')     closeLightbox();
     if (e.key === 'ArrowLeft')  dom.btnLightboxPrev.click();
     if (e.key === 'ArrowRight') dom.btnLightboxNext.click();
     if (e.key === ' ')          { e.preventDefault(); dom.lightboxGCheck.click(); }
@@ -921,27 +933,34 @@ async function bulkUpdate(g, rh) {
   if (!state.bulkSelected.size) { showToast('Keine Karten ausgew\u00e4hlt.', 'info'); return; }
   setLoading(true, 'Massenaktion\u2026');
   let updated = 0, errors = 0;
-  for (const key of state.bulkSelected) {
-    const db = state.dbMap.get(key);
-    if (!db?.gCell) continue;
-    try {
-      await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, g);
-      db.g = g;
-      if (db.rhCell) {
-        const newRh = g && rh;
-        await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, newRh);
-        db.rh = newRh;
+  try {
+    for (const key of state.bulkSelected) {
+      const db = state.dbMap.get(key);
+      if (!db?.gCell) continue;
+      try {
+        await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, g);
+        db.g = g;
+        if (db.rhCell) {
+          const newRh = g && rh;
+          await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, newRh);
+          db.rh = newRh;
+        }
+        const article = dom.cards.querySelector(`[data-card-id="${key}"]`);
+        if (article) updateCardState(article, db);
+        updated++;
+      } catch (err) {
+        console.warn('[bulkUpdate] error for key', key, err);
+        errors++;
       }
-      const article = dom.cards.querySelector(`[data-card-id="${key}"]`);
-      if (article) updateCardState(article, db);
-      updated++;
-    } catch { errors++; }
+    }
+  } finally {
+    setLoading(false);
   }
-  setLoading(false);
   updateStats(); applyFilter();
   state.summaryData = null;
   toggleBulkMode(false);
-  showToast(errors > 0 ? `${updated} aktualisiert, ${errors} Fehler.` : `${updated} Karten aktualisiert.`, errors > 0 ? 'error' : 'success');
+  const msg = errors > 0 ? `${updated} aktualisiert, ${errors} Fehler.` : `${updated} Karten aktualisiert.`;
+  showToast(msg, errors > 0 ? 'error' : 'success', errors > 0 ? 5000 : 3000);
 }
 
 function initBulkEdit() {
@@ -975,8 +994,6 @@ function exportMissingCards() {
 // ══════════════════════════════════════════════════════════════════════════
 // TASTATURNAVIGATION
 // ══════════════════════════════════════════════════════════════════════════
-let focusedCardIndex = -1;
-
 function initKeyboardNav() {
   document.addEventListener('keydown', (e) => {
     if (dom.viewSet.classList.contains('hidden')) return;
@@ -988,10 +1005,12 @@ function initKeyboardNav() {
     if (!articles.length) return;
 
     const cols = Math.max(1, Math.floor(dom.cards.offsetWidth / 170));
-    if (e.key === 'ArrowRight') { e.preventDefault(); focusedCardIndex = Math.min((focusedCardIndex < 0 ? -1 : focusedCardIndex) + 1, articles.length - 1); }
-    else if (e.key === 'ArrowLeft')  { e.preventDefault(); focusedCardIndex = Math.max(focusedCardIndex - 1, 0); }
-    else if (e.key === 'ArrowDown')  { e.preventDefault(); focusedCardIndex = Math.min(focusedCardIndex + cols, articles.length - 1); }
-    else if (e.key === 'ArrowUp')    { e.preventDefault(); focusedCardIndex = Math.max(focusedCardIndex - cols, 0); }
+    let newIndex = focusedCardIndex;
+    
+    if (e.key === 'ArrowRight') { e.preventDefault(); newIndex = Math.min((focusedCardIndex < 0 ? -1 : focusedCardIndex) + 1, articles.length - 1); }
+    else if (e.key === 'ArrowLeft')  { e.preventDefault(); newIndex = Math.max(focusedCardIndex - 1, 0); }
+    else if (e.key === 'ArrowDown')  { e.preventDefault(); newIndex = Math.min(focusedCardIndex + cols, articles.length - 1); }
+    else if (e.key === 'ArrowUp')    { e.preventDefault(); newIndex = Math.max(focusedCardIndex - cols, 0); }
     else if (e.key === ' ' || e.key === 'Enter') {
       e.preventDefault();
       articles[focusedCardIndex]?.querySelector('input[data-type="g"]:not(:disabled)')?.click();
@@ -1003,9 +1022,13 @@ function initKeyboardNav() {
       return;
     } else return;
 
-    if (focusedCardIndex < 0) focusedCardIndex = 0;
-    articles[focusedCardIndex]?.focus();
-    articles[focusedCardIndex]?.scrollIntoView({ block: 'nearest' });
+    if (newIndex < 0) newIndex = 0;
+    focusedCardIndex = newIndex;
+    const target = articles[focusedCardIndex];
+    if (target) {
+      target.focus();
+      target.scrollIntoView({ block: 'nearest' });
+    }
   });
 
   dom.cards.addEventListener('focus', (e) => {
@@ -1064,8 +1087,12 @@ async function loadCurrentSet(forceRefresh = false) {
     setGlobalStatus(`${selected.setName}: ${cards.length} Karten.`);
     if (!forceRefresh) showToast(`${selected.setName} geladen`, 'success', 2000);
   } catch (err) {
-    showToast(`Fehler: ${err.message}`, 'error');
+    console.error('[loadCurrentSet]', err);
+    showToast(`Fehler beim Laden: ${err.message}`, 'error');
     setGlobalStatus('Fehler beim Laden.');
+    state.cards = [];
+    state.dbMap = new Map();
+    setEmptyState(true);
   } finally {
     setLoading(false);
   }
