@@ -8,6 +8,7 @@ import {
   readSettings,
   writeSetting,
   importSetIntoCollection,
+  syncOverviewWithApiSets,
 } from './sheets-db.js';
 import { fetchMergedCards, fetchAllAvailableSets } from './pokemon-api.js';
 import { normalizeCardNumber } from './utils.js';
@@ -45,6 +46,10 @@ const dom = {
   dashFilter:       document.getElementById('dash-filter'),
   dashSeriesFilter: document.getElementById('dash-series-filter'),
   dashSort:         document.getElementById('dash-sort'),
+  btnOverviewSync:  document.getElementById('btn-overview-sync'),
+  btnImportBatch:   document.getElementById('btn-import-batch'),
+  btnImportAll:     document.getElementById('btn-import-all-missing'),
+  btnReimportCurrent: document.getElementById('btn-reimport-current'),
   dashboardGrid:    document.getElementById('dashboard-grid'),
   // Set detail – sidebar
   selector:         document.getElementById('set-selector'),
@@ -513,11 +518,118 @@ async function importSetFromOverview(set) {
   }
 }
 
+function getSetById(setId) {
+  return state.allSets.find((set) => set.setId === setId) || state.sets.find((set) => set.setId === setId) || null;
+}
+
+async function importSetsSequential(sets, options = {}) {
+  const { successMessage = 'Import abgeschlossen.' } = options;
+  const validSets = (sets || []).filter((set) => set?.setId && set?.setName);
+  if (!validSets.length) {
+    showToast('Keine passenden Sets gefunden.', 'info');
+    return;
+  }
+
+  let done = 0;
+  let failed = 0;
+  setLoading(true, 'Import läuft…');
+  try {
+    for (let index = 0; index < validSets.length; index++) {
+      const set = validSets[index];
+      setGlobalStatus(`Importiere ${index + 1}/${validSets.length}: ${set.setName}`);
+      try {
+        const cards = await fetchMergedCards(set.setId);
+        await importSetIntoCollection(set, cards);
+        cache.del(`cards_${set.setId}`);
+        cache.del(`db_${set.setId}`);
+        done++;
+      } catch (err) {
+        console.warn('[importSetsSequential] import failed for', set.setId, err);
+        failed++;
+      }
+    }
+  } finally {
+    setLoading(false);
+  }
+
+  state.summaryData = null;
+  await loadSets();
+
+  if (failed > 0) {
+    showToast(`${done} importiert, ${failed} fehlgeschlagen.`, 'error', 6000);
+  } else {
+    showToast(successMessage.replace('{count}', String(done)), 'success', 3500);
+  }
+}
+
+async function syncOverviewFromApi() {
+  setLoading(true, 'Synchronisiere Overview…');
+  try {
+    const apiSets = await fetchAllAvailableSets();
+    const importedIds = new Set(state.sets.map((set) => set.setId));
+    await syncOverviewWithApiSets(apiSets, importedIds);
+    await loadSets();
+    showToast(`Overview synchronisiert (${apiSets.length} Sets).`, 'success');
+  } catch (err) {
+    console.error('[syncOverviewFromApi]', err);
+    showToast(`Overview-Sync fehlgeschlagen: ${err.message}`, 'error', 5000);
+  } finally {
+    setLoading(false);
+  }
+}
+
+async function importAllMissingSets() {
+  const missing = state.allSets.filter((set) => !set.imported);
+  if (!missing.length) {
+    showToast('Alle Sets sind bereits importiert.', 'info');
+    return;
+  }
+  const ok = window.confirm(`${missing.length} Sets importieren? Dieser Vorgang kann einige Minuten dauern.`);
+  if (!ok) return;
+  await importSetsSequential(missing, { successMessage: '{count} Sets importiert.' });
+}
+
+async function batchImportByPrompt() {
+  const input = window.prompt('Set-IDs eingeben (Komma, Leerzeichen oder neue Zeilen getrennt):\nBeispiel: base1, sv1, swsh9');
+  if (!input) return;
+  const ids = Array.from(new Set(
+    input.split(/[\s,;]+/).map((value) => value.trim()).filter(Boolean)
+  ));
+  if (!ids.length) return;
+
+  const targetSets = ids.map((id) => getSetById(id)).filter(Boolean);
+  if (!targetSets.length) {
+    showToast('Keine der angegebenen Set-IDs wurde gefunden.', 'error');
+    return;
+  }
+
+  await importSetsSequential(targetSets, { successMessage: '{count} Sets per Batch importiert.' });
+}
+
+async function reimportCurrentSetFromApi() {
+  if (!state.currentSet) {
+    showToast('Kein aktuelles Set geladen.', 'info');
+    return;
+  }
+  const set = getSetById(state.currentSet.setId) || state.currentSet;
+  const ok = window.confirm(`Set „${set.setName}“ neu importieren? Vorhandene Sammel-Checks bleiben erhalten.`);
+  if (!ok) return;
+
+  await importSetsSequential([set], { successMessage: 'Set erfolgreich reimportiert.' });
+  dom.selector.value = set.setId;
+  navigate(`set/${set.setId}`);
+  await loadCurrentSet(true);
+}
+
 function initDashboardControls() {
   let debounce;
   dom.dashFilter.addEventListener('input', () => { clearTimeout(debounce); debounce = setTimeout(renderDashboard, 200); });
   dom.dashSeriesFilter.addEventListener('change', renderDashboard);
   dom.dashSort.addEventListener('change', renderDashboard);
+  dom.btnOverviewSync?.addEventListener('click', syncOverviewFromApi);
+  dom.btnImportBatch?.addEventListener('click', batchImportByPrompt);
+  dom.btnImportAll?.addEventListener('click', importAllMissingSets);
+  dom.btnReimportCurrent?.addEventListener('click', reimportCurrentSetFromApi);
 }
 
 // ══════════════════════════════════════════════════════════════════════════

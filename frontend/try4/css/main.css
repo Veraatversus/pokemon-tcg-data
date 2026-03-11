@@ -490,6 +490,18 @@ body.dark .card img { background: #0f172a; }
 
 .dash-filter-input { min-width: 200px; padding: 7px 10px; }
 
+.dashboard-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.dashboard-actions button {
+  font-size: 12px;
+  padding: 7px 10px;
+}
+
 .dash-series-group { margin-bottom: 28px; }
 .dash-series-group h3 {
   font-size: 13px;

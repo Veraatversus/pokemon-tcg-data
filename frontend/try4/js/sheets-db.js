@@ -317,7 +317,7 @@ async function ensureSetSheet(sheetName) {
   return createRes.result?.replies?.[0]?.addSheet?.properties || null;
 }
 
-function buildCardGridValues(cards) {
+function buildCardGridValues(cards, existingMap = new Map()) {
   const cols = CONFIG.GRID.CARDS_PER_ROW * CONFIG.GRID.BLOCK_WIDTH;
   const blocks = Math.max(1, Math.ceil(cards.length / CONFIG.GRID.CARDS_PER_ROW));
   const rows = blocks * CONFIG.GRID.BLOCK_HEIGHT;
@@ -332,15 +332,16 @@ function buildCardGridValues(cards) {
     values[baseRow][baseCol] = toSafeCellString(card.number);
     values[baseRow][baseCol + 1] = toSafeCellString(card.name);
     values[baseRow + 1][baseCol + 2] = toSafeCellString(card.image);
-    values[baseRow + 2][baseCol] = false;
-    values[baseRow + 2][baseCol + 1] = false;
+    const existing = existingMap.get(normalizeCardNumber(card.number));
+    values[baseRow + 2][baseCol] = Boolean(existing?.g);
+    values[baseRow + 2][baseCol + 1] = Boolean(existing?.rh && existing?.g);
     values[baseRow + 2][baseCol + 2] = toSafeCellString(card.cardmarketUrl);
   });
 
   return values;
 }
 
-async function upsertOverviewEntry(setMeta) {
+async function upsertOverviewEntry(setMeta, imported = true) {
   const sheets = await resolveSheetNames();
   const overviewRange = buildRange(sheets.overview, 'A3:J');
   const rows = await getFormulas(overviewRange).catch(() => []);
@@ -359,7 +360,57 @@ async function upsertOverviewEntry(setMeta) {
     targetRow = Math.max(4, 3 + rows.length);
   }
 
-  await putValues(buildRange(sheets.overview, `A${targetRow}:J${targetRow}`), buildOverviewRowValues(setMeta, true));
+  await putValues(buildRange(sheets.overview, `A${targetRow}:J${targetRow}`), buildOverviewRowValues(setMeta, imported));
+}
+
+export async function upsertOverviewSet(setMeta, imported = false) {
+  await upsertOverviewEntry(setMeta, imported);
+}
+
+export async function syncOverviewWithApiSets(sets, importedSetIds = []) {
+  const normalizedImported = new Set(Array.from(importedSetIds).map((id) => toSafeCellString(id).toLowerCase()));
+  const sheets = await resolveSheetNames();
+  const rows = await getOverviewRows(sheets).catch(() => []);
+
+  const rowBySetId = new Map();
+  rows.forEach((row, index) => {
+    const setId = toSafeCellString(extractDisplayTextFromHyperlink(row[0])).toLowerCase();
+    if (!setId) return;
+    rowBySetId.set(setId, {
+      rowIndex: 3 + index,
+      imported: toBoolean(row[CONFIG.GRID.IMPORTED_COL_INDEX - 1])
+    });
+  });
+
+  const appendValues = [];
+  const updates = [];
+  const uniqueSets = new Map();
+  (sets || []).forEach((set) => {
+    const key = toSafeCellString(set?.setId).toLowerCase();
+    if (key) uniqueSets.set(key, set);
+  });
+
+  uniqueSets.forEach((set, key) => {
+    const existing = rowBySetId.get(key);
+    const imported = normalizedImported.has(key) || Boolean(existing?.imported);
+    const rowValues = buildOverviewRowValues(set, imported)[0];
+
+    if (existing) {
+      updates.push({ rowIndex: existing.rowIndex, rowValues });
+    } else {
+      appendValues.push(rowValues);
+    }
+  });
+
+  for (const update of updates) {
+    await putValues(buildRange(sheets.overview, `A${update.rowIndex}:J${update.rowIndex}`), [update.rowValues]);
+  }
+
+  if (appendValues.length) {
+    const start = Math.max(4, 3 + rows.length);
+    const end = start + appendValues.length - 1;
+    await putValues(buildRange(sheets.overview, `A${start}:J${end}`), appendValues);
+  }
 }
 
 /**
@@ -379,7 +430,8 @@ export async function importSetIntoCollection(setMeta, cards) {
   const sheetName = toSafeCellString(setMeta.setName);
   await ensureSetSheet(sheetName);
 
-  const gridValues = buildCardGridValues(cards);
+  const existingMap = await readSetCollectionMap(sheetName).catch(() => new Map());
+  const gridValues = buildCardGridValues(cards, existingMap);
   const endColumnIndex = CONFIG.GRID.CARDS_PER_ROW * CONFIG.GRID.BLOCK_WIDTH;
   const endColumn = colToA1(endColumnIndex);
   const endRow = 2 + gridValues.length;
