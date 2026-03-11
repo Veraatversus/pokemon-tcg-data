@@ -17,6 +17,20 @@
   <!-- Toast-Container -->
   <div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
 
+  <!-- Spreadsheet-Setup-Dialog -->
+  <dialog id="dialog-spreadsheet" class="ss-dialog">
+    <h2>Google Spreadsheet verknüpfen</h2>
+    <p>Bitte die ID oder URL des Google Sheets eingeben, das als Datenbank genutzt werden soll.</p>
+    <label for="input-spreadsheet-id">Spreadsheet-ID oder URL</label>
+    <input id="input-spreadsheet-id" type="text" class="ss-input"
+           placeholder="https://docs.google.com/spreadsheets/d/… oder nur die ID" />
+    <p id="dialog-error" class="dialog-error hidden"></p>
+    <div class="dialog-actions">
+      <button id="btn-dialog-cancel" class="btn-secondary">Abbrechen</button>
+      <button id="btn-dialog-save">Verbinden</button>
+    </div>
+  </dialog>
+
   <header class="topbar">
     <h1>🎴 Pokémon TCG Tracker</h1>
     <div class="auth-actions">
@@ -44,6 +58,13 @@
         <button id="btn-refresh" disabled>Neu laden</button>
       </div>
       <p id="status" class="status">Nicht angemeldet.</p>
+
+      <!-- Verbundenes Spreadsheet -->
+      <div id="spreadsheet-info" class="spreadsheet-info hidden">
+        <span class="ss-label">Tabelle:</span>
+        <a id="spreadsheet-link" href="#" target="_blank" rel="noopener noreferrer" class="ss-link">–</a>
+        <button id="btn-change-spreadsheet" class="btn-icon" title="Anderes Spreadsheet wählen">✏️</button>
+      </div>
 
       <!-- Fortschrittsanzeige -->
       <section id="stats-section" class="stats-section hidden">

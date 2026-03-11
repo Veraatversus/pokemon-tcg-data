@@ -1,8 +1,16 @@
+const SPREADSHEET_ID_KEY = 'poke_tcg_spreadsheet_id';
+
 export const CONFIG = {
   // ── Google API ──────────────────────────────────────────────
-  GOOGLE_CLIENT_ID: 'REDACTED_PLACEHOLDER.apps.googleusercontent.com',
-  GOOGLE_API_KEY: 'REDACTED_PLACEHOLDER',
-  SPREADSHEET_ID: 'REDACTED_PLACEHOLDER',
+  GOOGLE_CLIENT_ID: 'REDACTED_GOOGLE_CLIENT_ID',
+  GOOGLE_API_KEY: 'REDACTED_GOOGLE_API_KEY',
+  get SPREADSHEET_ID() {
+    return localStorage.getItem(SPREADSHEET_ID_KEY) || '';
+  },
+  set SPREADSHEET_ID(id) {
+    if (id) localStorage.setItem(SPREADSHEET_ID_KEY, id);
+    else    localStorage.removeItem(SPREADSHEET_ID_KEY);
+  },
   DISCOVERY_DOCS: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
   SCOPES: 'https://www.googleapis.com/auth/spreadsheets',
 

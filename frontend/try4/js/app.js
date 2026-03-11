@@ -13,28 +13,38 @@ import { CONFIG } from './config.js';
 
 // ── DOM-Referenzen ────────────────────────────────────────────────────────────
 const dom = {
-  login:          document.getElementById('btn-login'),
-  logout:         document.getElementById('btn-logout'),
-  selector:       document.getElementById('set-selector'),
-  load:           document.getElementById('btn-load'),
-  refresh:        document.getElementById('btn-refresh'),
-  status:         document.getElementById('status'),
-  cards:          document.getElementById('cards'),
-  loadingOverlay: document.getElementById('loading-overlay'),
-  loadingText:    document.getElementById('loading-text'),
-  emptyState:     document.getElementById('empty-state'),
-  statsSection:   document.getElementById('stats-section'),
-  filterSection:  document.getElementById('filter-section'),
-  progressFill:   document.getElementById('progress-fill'),
-  progressText:   document.getElementById('progress-text'),
-  statTotal:      document.getElementById('stat-total'),
-  statCollected:  document.getElementById('stat-collected'),
-  statRh:         document.getElementById('stat-rh'),
-  statMissing:    document.getElementById('stat-missing'),
-  toastContainer: document.getElementById('toast-container'),
-  setLogoWrap:    document.getElementById('set-logo-wrap'),
-  setLogo:        document.getElementById('set-logo'),
-  setSymbol:      document.getElementById('set-symbol'),
+  login:              document.getElementById('btn-login'),
+  logout:             document.getElementById('btn-logout'),
+  selector:           document.getElementById('set-selector'),
+  load:               document.getElementById('btn-load'),
+  refresh:            document.getElementById('btn-refresh'),
+  status:             document.getElementById('status'),
+  cards:              document.getElementById('cards'),
+  loadingOverlay:     document.getElementById('loading-overlay'),
+  loadingText:        document.getElementById('loading-text'),
+  emptyState:         document.getElementById('empty-state'),
+  statsSection:       document.getElementById('stats-section'),
+  filterSection:      document.getElementById('filter-section'),
+  progressFill:       document.getElementById('progress-fill'),
+  progressText:       document.getElementById('progress-text'),
+  statTotal:          document.getElementById('stat-total'),
+  statCollected:      document.getElementById('stat-collected'),
+  statRh:             document.getElementById('stat-rh'),
+  statMissing:        document.getElementById('stat-missing'),
+  toastContainer:     document.getElementById('toast-container'),
+  setLogoWrap:        document.getElementById('set-logo-wrap'),
+  setLogo:            document.getElementById('set-logo'),
+  setSymbol:          document.getElementById('set-symbol'),
+  // Spreadsheet-Dialog
+  dialog:             document.getElementById('dialog-spreadsheet'),
+  dialogInput:        document.getElementById('input-spreadsheet-id'),
+  dialogError:        document.getElementById('dialog-error'),
+  btnDialogSave:      document.getElementById('btn-dialog-save'),
+  btnDialogCancel:    document.getElementById('btn-dialog-cancel'),
+  // Spreadsheet-Info
+  spreadsheetInfo:    document.getElementById('spreadsheet-info'),
+  spreadsheetLink:    document.getElementById('spreadsheet-link'),
+  btnChangeSheet:     document.getElementById('btn-change-spreadsheet'),
 };
 
 // ── App-State ─────────────────────────────────────────────────────────────────
@@ -449,6 +459,7 @@ function resetToLoggedOut() {
   dom.statsSection.classList.add('hidden');
   dom.filterSection.classList.add('hidden');
   dom.setLogoWrap.classList.add('hidden');
+  dom.spreadsheetInfo.classList.add('hidden');
   setEmptyState(true);
   setStatus('Abgemeldet.');
 }

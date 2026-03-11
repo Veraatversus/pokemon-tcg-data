@@ -260,6 +260,54 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 /* ── Utility ─────────────────────────────────────────────────────────────── */
 .hidden { display: none !important; }
 
+/* ── Spreadsheet-Info (Sidebar) ─────────────────────────────────────────── */
+.spreadsheet-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 6px 8px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+.ss-label { color: var(--color-muted); white-space: nowrap; }
+.ss-link  { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            font-size: 11px; color: var(--color-primary); }
+.btn-icon { padding: 2px 6px; font-size: 13px; border-radius: 4px; background: none;
+            border: 1px solid var(--color-border); cursor: pointer; flex-shrink: 0; line-height: 1; }
+.btn-icon:hover { background: #e5e7eb; }
+
+/* ── Spreadsheet-Dialog (<dialog>) ──────────────────────────────────────── */
+.ss-dialog {
+  width: min(480px, 92vw);
+  padding: 24px;
+  border: none;
+  border-radius: var(--radius);
+  box-shadow: 0 8px 32px rgba(0,0,0,.18);
+}
+.ss-dialog::backdrop { background: rgba(0,0,0,.45); }
+.ss-dialog h2           { margin: 0 0 8px; font-size: 17px; }
+.ss-dialog > p          { margin: 0 0 12px; font-size: 14px; color: var(--color-muted); }
+.ss-dialog label        { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+
+.ss-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+  margin-bottom: 4px;
+}
+.ss-input:focus { outline: 2px solid var(--color-primary); border-color: transparent; }
+
+.dialog-error   { color: var(--color-error); font-size: 13px; margin: 4px 0 8px; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+.btn-secondary  { background: #f3f4f6; color: var(--color-text); }
+.btn-secondary:hover { background: #e5e7eb; }
+
 /* ── Responsive (≤ 768 px) ───────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .layout {
