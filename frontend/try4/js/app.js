@@ -78,6 +78,8 @@ const dom = {
   queueBuilderSelected: document.getElementById('queue-builder-selected'),
   queuePresetSelect: document.getElementById('queue-preset-select'),
   btnQueuePresetSave: document.getElementById('btn-queue-preset-save'),
+  btnQueuePresetRename: document.getElementById('btn-queue-preset-rename'),
+  btnQueuePresetDuplicate: document.getElementById('btn-queue-preset-duplicate'),
   btnQueuePresetDelete: document.getElementById('btn-queue-preset-delete'),
   btnQueuePresetExport: document.getElementById('btn-queue-preset-export'),
   btnQueuePresetImport: document.getElementById('btn-queue-preset-import'),
@@ -392,6 +394,54 @@ function deleteSelectedQueuePreset() {
   showToast(`Preset gelöscht: ${presetName}`, 'info', 2500);
 }
 
+function renameSelectedQueuePreset() {
+  const idx = Number(dom.queuePresetSelect?.value ?? '-1');
+  if (!Number.isInteger(idx) || idx < 0 || idx >= state.queuePresets.length) {
+    showToast('Bitte ein Preset auswählen.', 'info');
+    return;
+  }
+  const preset = state.queuePresets[idx];
+  const newName = window.prompt('Neuer Name:', preset.name);
+  if (newName === null) return;
+  const trimmedName = newName.trim();
+  if (!trimmedName) return;
+  const collision = state.queuePresets.findIndex((p, i) => i !== idx && p.name.toLowerCase() === trimmedName.toLowerCase());
+  if (collision >= 0) {
+    showToast(`Name „${trimmedName}" wird bereits verwendet.`, 'error', 3500);
+    return;
+  }
+  preset.name = trimmedName;
+  persistQueuePresets();
+  renderQueuePresetSelect();
+  dom.queuePresetSelect.value = String(idx);
+  showToast(`Preset umbenannt: ${trimmedName}`, 'success', 2500);
+}
+
+function duplicateSelectedQueuePreset() {
+  const idx = Number(dom.queuePresetSelect?.value ?? '-1');
+  if (!Number.isInteger(idx) || idx < 0 || idx >= state.queuePresets.length) {
+    showToast('Bitte ein Preset auswählen.', 'info');
+    return;
+  }
+  const preset = state.queuePresets[idx];
+  const defaultName = `${preset.name} (Kopie)`;
+  const newName = window.prompt('Name der Kopie:', defaultName);
+  if (newName === null) return;
+  const trimmedName = newName.trim();
+  if (!trimmedName) return;
+  const collision = state.queuePresets.findIndex((p) => p.name.toLowerCase() === trimmedName.toLowerCase());
+  if (collision >= 0) {
+    showToast(`Name „${trimmedName}" wird bereits verwendet.`, 'error', 3500);
+    return;
+  }
+  const copy = { name: trimmedName, actionIds: [...preset.actionIds] };
+  state.queuePresets.splice(idx + 1, 0, copy);
+  persistQueuePresets();
+  renderQueuePresetSelect();
+  dom.queuePresetSelect.value = String(idx + 1);
+  showToast(`Preset dupliziert: ${trimmedName}`, 'success', 2500);
+}
+
 function applySelectedQueuePreset() {
   const idx = Number(dom.queuePresetSelect?.value ?? '-1');
   if (!Number.isInteger(idx) || idx < 0 || idx >= state.queuePresets.length) {
@@ -593,6 +643,8 @@ function initQueueBuilderDialog() {
   dom.btnQueueBuilderCancel?.addEventListener('click', () => dom.queueBuilderDialog?.close());
   dom.queuePresetSelect?.addEventListener('change', applySelectedQueuePreset);
   dom.btnQueuePresetSave?.addEventListener('click', saveCurrentQueuePreset);
+  dom.btnQueuePresetRename?.addEventListener('click', renameSelectedQueuePreset);
+  dom.btnQueuePresetDuplicate?.addEventListener('click', duplicateSelectedQueuePreset);
   dom.btnQueuePresetDelete?.addEventListener('click', deleteSelectedQueuePreset);
   dom.btnQueuePresetExport?.addEventListener('click', exportQueuePresetsJson);
   dom.btnQueuePresetImport?.addEventListener('click', () => dom.queuePresetFileInput?.click());
