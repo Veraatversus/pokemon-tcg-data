@@ -47,12 +47,66 @@ async function fetchTcgdexSet(tcgdexId) {
   }
 }
 
+let tcgdexSetsCache = null;
+
+async function fetchTcgdexSets() {
+  if (tcgdexSetsCache) return tcgdexSetsCache;
+  try {
+    const sets = await fetchJson(`${CONFIG.APIS.TCGDEX_DE}/sets`);
+    tcgdexSetsCache = Array.isArray(sets) ? sets : [];
+  } catch {
+    tcgdexSetsCache = [];
+  }
+  return tcgdexSetsCache;
+}
+
 /**
  * Gibt die TCGDex-ID zu einer pokemontcg.io-ID zurück.
  * Fällt auf die originale ID zurück wenn kein Mapping existiert.
  */
 function toTcgdexId(pokemontcgId) {
   return CONFIG.CUSTOM_SET_ID_MAPPINGS[pokemontcgId] ?? pokemontcgId;
+}
+
+function normalizeSetId(setId) {
+  if (!setId) return '';
+  let normalized = String(setId).toLowerCase().trim();
+  normalized = normalized.replace(/(\d+)\.(\d+)/g, (_match, p1, p2) => `${parseInt(p1, 10)}pt${parseInt(p2, 10)}`);
+  normalized = normalized.replace(/\s+/g, '-');
+  normalized = normalized.replace(/[^a-z0-9-]/g, '');
+  normalized = normalized.replace(/([a-z-]+)(\d+)/g, (_match, prefix, numberPart) => `${prefix}${parseInt(numberPart, 10)}`);
+  return normalized;
+}
+
+function buildSetIdAliasCandidates(setId) {
+  if (!setId) return [];
+  const raw = String(setId).trim();
+  const unprefixed = raw.replace(/^TCGDEX-/i, '');
+  const candidates = new Set([raw, unprefixed]);
+
+  const mapped = CONFIG.CUSTOM_SET_ID_MAPPINGS[unprefixed.toLowerCase()];
+  if (mapped) candidates.add(mapped);
+
+  const normalizedBase = normalizeSetId(unprefixed);
+  for (const [pokeId, tcgdexId] of Object.entries(CONFIG.CUSTOM_SET_ID_MAPPINGS || {})) {
+    if (String(tcgdexId).toLowerCase() === unprefixed.toLowerCase() || normalizeSetId(tcgdexId) === normalizedBase) {
+      candidates.add(pokeId);
+      candidates.add(tcgdexId);
+    }
+  }
+
+  return Array.from(candidates).filter(Boolean);
+}
+
+function findMatchingTcgdexSetId(pokemontcgSetId, tcgdexSets) {
+  const aliases = buildSetIdAliasCandidates(pokemontcgSetId);
+  const aliasNorm = new Set(aliases.map((id) => normalizeSetId(String(id).replace(/^TCGDEX-/i, ''))));
+
+  const exact = (tcgdexSets || []).find((set) => aliases.some((alias) => String(set?.id || '').toLowerCase() === String(alias).toLowerCase()));
+  if (exact?.id) return exact.id;
+
+  const normalized = (tcgdexSets || []).find((set) => aliasNorm.has(normalizeSetId(set?.id)));
+  return normalized?.id || null;
 }
 
 function toNumber(value) {
@@ -148,13 +202,15 @@ export async function fetchMergedCards(setId) {
   }
 
   // ─ Regulares Set: Vera-API oder pokemontcg.io + TCGDex-Merge ───
-  const tcgdexId = toTcgdexId(setId);
+  const mappedTcgdexId = toTcgdexId(setId);
+  const tcgdexSets = await fetchTcgdexSets();
+  const matchingTcgdexId = findMatchingTcgdexSetId(mappedTcgdexId, tcgdexSets) || mappedTcgdexId;
 
   // Beide Quellen parallel laden
   const [veraCards, ptcgCards, tcgdexSet] = await Promise.all([
     CONFIG.USE_VERA_API ? fetchVeraCards(setId) : Promise.resolve(null),
     CONFIG.USE_VERA_API ? Promise.resolve(null) : fetchPokemontcgCards(setId),
-    fetchTcgdexSet(tcgdexId)
+    fetchTcgdexSet(matchingTcgdexId)
   ]);
 
   // Falls Vera-API erfolgreich war, keine pokemontcg.io-Anfrage nötig
@@ -186,7 +242,7 @@ export async function fetchMergedCards(setId) {
       number,
       name: tcgdexCard?.name || card.name,
       image: tcgdexCard
-        ? tcgdexImageOrFallback(setId, tcgdexCard)
+        ? tcgdexImageOrFallback(matchingTcgdexId, tcgdexCard)
         : (card.images?.small || `https://images.pokemontcg.io/${setId}/${number}.png`),
       cardmarketUrl
     };
@@ -200,7 +256,7 @@ export async function fetchMergedCards(setId) {
     merged.push({
       number,
       name: tcgdexCard.name,
-      image: tcgdexImageOrFallback(setId, tcgdexCard),
+      image: tcgdexImageOrFallback(matchingTcgdexId, tcgdexCard),
       cardmarketUrl: tcgdexCard.links?.cardmarket || null
     });
   });

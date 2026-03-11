@@ -16,6 +16,8 @@ function buildRange(sheetName, a1Range) {
 }
 
 let resolvedSheetsCache = null;
+let schemaEnsuredPromise = null;
+const dbRowsCache = new Map();
 
 const DB_SHEETS = {
   sets: 'db_sets',
@@ -165,16 +167,26 @@ async function getOverviewRows(sheets) {
 }
 
 async function getValues(range, renderOption = 'UNFORMATTED_VALUE') {
+  const maxRetries = 4;
   try {
     if (!gapi?.client?.sheets?.spreadsheets?.values?.get) {
       throw new Error('Sheets API nicht initialisiert – bitte melden Sie sich an');
     }
-    const response = await gapi.client.sheets.spreadsheets.values.get({
-      spreadsheetId: CONFIG.SPREADSHEET_ID,
-      range,
-      valueRenderOption: renderOption
-    });
-    return response.result.values || [];
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const response = await gapi.client.sheets.spreadsheets.values.get({
+          spreadsheetId: CONFIG.SPREADSHEET_ID,
+          range,
+          valueRenderOption: renderOption
+        });
+        return response.result.values || [];
+      } catch (err) {
+        if (err?.status !== 429 || attempt >= maxRetries) throw err;
+        const delay = 200 * Math.pow(2, attempt);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+    return [];
   } catch (err) {
     console.error('[getValues]', err);
     throw err;
@@ -187,16 +199,26 @@ async function getFormulas(range) {
 }
 
 async function putValues(range, values) {
+  const maxRetries = 4;
   try {
     if (!gapi?.client?.sheets?.spreadsheets?.values?.update) {
       throw new Error('Sheets API nicht initialisiert – bitte melden Sie sich an');
     }
-    await gapi.client.sheets.spreadsheets.values.update({
-      spreadsheetId: CONFIG.SPREADSHEET_ID,
-      range,
-      valueInputOption: 'USER_ENTERED',
-      resource: { values }
-    });
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        await gapi.client.sheets.spreadsheets.values.update({
+          spreadsheetId: CONFIG.SPREADSHEET_ID,
+          range,
+          valueInputOption: 'USER_ENTERED',
+          resource: { values }
+        });
+        return;
+      } catch (err) {
+        if (err?.status !== 429 || attempt >= maxRetries) throw err;
+        const delay = 200 * Math.pow(2, attempt);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
   } catch (err) {
     console.error('[putValues]', err);
     throw err;
@@ -221,6 +243,7 @@ async function addSheet(title) {
     }
   });
   resolvedSheetsCache = null;
+  dbRowsCache.clear();
 }
 
 function buildDataRange(sheetName, columnCount, startRow = 2, endRow = 200000) {
@@ -244,13 +267,24 @@ async function ensureSheetWithHeader(sheetName, header) {
 }
 
 async function ensureNormalizedSchema() {
-  await ensureSheetWithHeader(DB_SHEETS.sets, DB_HEADERS.sets);
-  await ensureSheetWithHeader(DB_SHEETS.cards, DB_HEADERS.cards);
-  await ensureSheetWithHeader(DB_SHEETS.collection, DB_HEADERS.collection);
+  if (!schemaEnsuredPromise) {
+    schemaEnsuredPromise = (async () => {
+      await ensureSheetWithHeader(DB_SHEETS.sets, DB_HEADERS.sets);
+      await ensureSheetWithHeader(DB_SHEETS.cards, DB_HEADERS.cards);
+      await ensureSheetWithHeader(DB_SHEETS.collection, DB_HEADERS.collection);
+    })();
+  }
+  await schemaEnsuredPromise;
 }
 
-async function readDbRows(sheetName, columnCount) {
-  return getValues(buildDataRange(sheetName, columnCount, 2, 200000)).catch(() => []);
+async function readDbRows(sheetName, columnCount, force = false) {
+  const key = `${sheetName}:${columnCount}`;
+  if (!force && dbRowsCache.has(key)) {
+    return dbRowsCache.get(key);
+  }
+  const rows = await getValues(buildDataRange(sheetName, columnCount, 2, 200000)).catch(() => []);
+  dbRowsCache.set(key, rows);
+  return rows;
 }
 
 async function rewriteDbRows(sheetName, columnCount, rows) {
@@ -259,6 +293,17 @@ async function rewriteDbRows(sheetName, columnCount, rows) {
   const endRow = rows.length + 1;
   const endCol = colToA1(columnCount);
   await putValues(buildRange(sheetName, `A2:${endCol}${endRow}`), rows);
+  dbRowsCache.set(`${sheetName}:${columnCount}`, rows);
+}
+
+async function appendDbRows(sheetName, columnCount, rows) {
+  if (!Array.isArray(rows) || rows.length === 0) return;
+  const existing = await readDbRows(sheetName, columnCount);
+  const start = existing.length + 2;
+  const end = start + rows.length - 1;
+  const endCol = colToA1(columnCount);
+  await putValues(buildRange(sheetName, `A${start}:${endCol}${end}`), rows);
+  dbRowsCache.set(`${sheetName}:${columnCount}`, [...existing, ...rows]);
 }
 
 function toSafeCellString(value) {
@@ -294,10 +339,13 @@ async function upsertDbSet(setMeta, imported = false) {
     const existingImported = toBoolean(rows[existingIndex][8]);
     target[8] = Boolean(imported || existingImported);
     await putValues(buildRange(DB_SHEETS.sets, `A${rowNo}:${colToA1(DB_HEADERS.sets.length)}${rowNo}`), [target]);
+    rows[existingIndex] = target;
   } else {
     const rowNo = rows.length + 2;
     await putValues(buildRange(DB_SHEETS.sets, `A${rowNo}:${colToA1(DB_HEADERS.sets.length)}${rowNo}`), [target]);
+    rows.push(target);
   }
+  dbRowsCache.set(`${DB_SHEETS.sets}:${DB_HEADERS.sets.length}`, rows);
 }
 
 async function resolveSetIdFromName(setSheetName) {
@@ -315,8 +363,6 @@ async function resolveSetIdFromName(setSheetName) {
 
 async function writeDbCardsForSet(setId, cards) {
   await ensureNormalizedSchema();
-  const rows = await readDbRows(DB_SHEETS.cards, DB_HEADERS.cards.length);
-  const otherRows = rows.filter((row) => toSafeCellString(row[0]).toLowerCase() !== setId.toLowerCase());
   const setRows = cards.map((card) => [
     setId,
     toSafeCellString(card.number),
@@ -327,13 +373,11 @@ async function writeDbCardsForSet(setId, cards) {
     toSafeCellString(card.rarity),
     nowIso()
   ]);
-  await rewriteDbRows(DB_SHEETS.cards, DB_HEADERS.cards.length, [...otherRows, ...setRows]);
+  await appendDbRows(DB_SHEETS.cards, DB_HEADERS.cards.length, setRows);
 }
 
 async function writeDbCollectionForSet(setId, cards, existingMap = new Map()) {
   await ensureNormalizedSchema();
-  const rows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length);
-  const otherRows = rows.filter((row) => toSafeCellString(row[0]).toLowerCase() !== setId.toLowerCase());
   const setRows = cards.map((card) => {
     const key = normalizeCardNumber(card.number);
     const existing = existingMap.get(key);
@@ -341,7 +385,7 @@ async function writeDbCollectionForSet(setId, cards, existingMap = new Map()) {
     const rh = Boolean(existing?.rh && g);
     return [setId, toSafeCellString(card.number), g, rh, nowIso()];
   });
-  await rewriteDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, [...otherRows, ...setRows]);
+  await appendDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, setRows);
 }
 
 /**
@@ -419,11 +463,17 @@ export async function readSummarySheet() {
       });
     });
 
-    const agg = new Map();
+    const latestPerCard = new Map();
     collectionRows.forEach((row) => {
       const setId = toSafeCellString(row[0]);
       const cardId = toSafeCellString(row[1]);
       if (!setId || !cardId) return;
+      latestPerCard.set(`${setId}::${cardId}`, row);
+    });
+
+    const agg = new Map();
+    latestPerCard.forEach((row) => {
+      const setId = toSafeCellString(row[0]);
       if (!agg.has(setId)) agg.set(setId, { total: 0, collected: 0, rh: 0 });
       const bucket = agg.get(setId);
       const g = toBoolean(row[2]);
@@ -551,30 +601,21 @@ export async function syncOverviewWithApiSets(sets, importedSetIds = []) {
     dbById.set(key, row);
   });
 
-  const mergedDb = new Map();
-  (sets || []).forEach((set) => {
+  for (const set of (sets || [])) {
     const key = toSafeCellString(set?.setId).toLowerCase();
-    if (!key) return;
+    if (!key) continue;
     const existing = dbById.get(key) || [];
-    mergedDb.set(key, [
-      toSafeCellString(set.setId),
-      toSafeCellString(set.setName),
-      toSafeCellString(set.series),
-      toSafeCellString(set.releaseDate),
-      Number(set.totalCards) || 0,
-      toSafeCellString(set.ptcgoCode),
-      toSafeCellString(set.logoUrl),
-      toSafeCellString(set.symbolUrl),
-      Boolean(normalizedImported.has(key) || toBoolean(existing[8])),
-      nowIso()
-    ]);
-  });
-
-  dbById.forEach((existing, key) => {
-    if (!mergedDb.has(key)) mergedDb.set(key, existing);
-  });
-
-  await rewriteDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length, Array.from(mergedDb.values()));
+    await upsertDbSet({
+      setId: set.setId,
+      setName: set.setName,
+      series: set.series,
+      releaseDate: set.releaseDate,
+      totalCards: set.totalCards,
+      ptcgoCode: set.ptcgoCode,
+      logoUrl: set.logoUrl,
+      symbolUrl: set.symbolUrl
+    }, Boolean(normalizedImported.has(key) || toBoolean(existing[8])));
+  }
 
   const sheets = await resolveSheetNames();
   const rows = await getOverviewRows(sheets).catch(() => []);
@@ -652,7 +693,13 @@ export async function importSetIntoCollection(setMeta, cards) {
 async function readLegacySetCollectionMap(setSheetName) {
   const totalCols = CONFIG.GRID.CARDS_PER_ROW * CONFIG.GRID.BLOCK_WIDTH;
   const endColumn = colToA1(totalCols);
-  const values = await getValues(buildRange(setSheetName, `A3:${endColumn}2000`));
+  let values = [];
+  try {
+    values = await getValues(buildRange(setSheetName, `A3:${endColumn}2000`));
+  } catch (err) {
+    if (isInvalidRangeError(err)) return new Map();
+    throw err;
+  }
 
   const map = new Map();
   for (let rowBlock = 0; rowBlock < values.length; rowBlock += CONFIG.GRID.BLOCK_HEIGHT) {
@@ -718,12 +765,10 @@ export async function readSetCollectionMap(setSheetName) {
     nowIso()
   ]);
 
-  const existingRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length);
-  const otherRows = existingRows.filter((row) => toSafeCellString(row[0]).toLowerCase() !== setId.toLowerCase());
-  await rewriteDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, [...otherRows, ...legacyRows]);
+  await appendDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, legacyRows);
 
   const migrated = new Map();
-  const refreshed = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length);
+  const refreshed = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
   refreshed.forEach((row, index) => {
     if (toSafeCellString(row[0]).toLowerCase() !== setId.toLowerCase()) return;
     const displayId = toSafeCellString(row[1]);
