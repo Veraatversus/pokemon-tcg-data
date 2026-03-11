@@ -609,6 +609,47 @@ body.dark .card img { background: #0f172a; }
   background: rgba(37, 99, 235, 0.08);
 }
 
+.queue-selected-list {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  min-height: 44px;
+  max-height: 200px;
+  overflow: auto;
+}
+
+.queue-selected-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px;
+  border-bottom: 1px solid var(--color-border);
+  cursor: grab;
+  background: var(--color-surface);
+}
+
+.queue-selected-item:last-child {
+  border-bottom: none;
+}
+
+.queue-selected-item.drag-over {
+  outline: 2px solid var(--color-primary);
+}
+
+.queue-selected-label {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.queue-selected-empty {
+  padding: 10px;
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
 .dash-series-group { margin-bottom: 28px; }
 .dash-series-group h3 {
   font-size: 13px;

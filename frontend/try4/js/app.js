@@ -75,6 +75,7 @@ const dom = {
   btnQueueClear: document.getElementById('btn-queue-clear'),
   queueBuilderDialog: document.getElementById('dialog-queue-builder'),
   queueBuilderList: document.getElementById('queue-builder-list'),
+  queueBuilderSelected: document.getElementById('queue-builder-selected'),
   queuePresetSelect: document.getElementById('queue-preset-select'),
   btnQueuePresetSave: document.getElementById('btn-queue-preset-save'),
   btnQueuePresetDelete: document.getElementById('btn-queue-preset-delete'),
@@ -160,6 +161,7 @@ const state = {
   queueRunning: false,
   queueCancelRequested: false,
   queueBuilderSelection: [],
+  queueBuilderSequence: [],
   queuePresets: [],
 };
 
@@ -353,7 +355,7 @@ function renderQueuePresetSelect() {
 }
 
 function saveCurrentQueuePreset() {
-  if (!state.queueBuilderSelection.length) {
+  if (!state.queueBuilderSequence.length) {
     showToast('Keine Aktionen für Preset ausgewählt.', 'info');
     return;
   }
@@ -363,7 +365,7 @@ function saveCurrentQueuePreset() {
   if (!trimmedName) return;
 
   const existingIndex = state.queuePresets.findIndex((preset) => preset.name.toLowerCase() === trimmedName.toLowerCase());
-  const payload = { name: trimmedName, actionIds: [...state.queueBuilderSelection] };
+  const payload = { name: trimmedName, actionIds: [...state.queueBuilderSequence] };
   if (existingIndex >= 0) {
     state.queuePresets[existingIndex] = payload;
   } else {
@@ -397,7 +399,8 @@ function applySelectedQueuePreset() {
   }
   const preset = state.queuePresets[idx];
   const validIds = new Set(getQueueBuilderActionsCatalog().map((action) => action.id));
-  state.queueBuilderSelection = preset.actionIds.filter((id) => validIds.has(id));
+  state.queueBuilderSequence = preset.actionIds.filter((id) => validIds.has(id));
+  state.queueBuilderSelection = [...state.queueBuilderSequence];
   renderQueueBuilder();
 }
 
@@ -453,6 +456,78 @@ function mergeQueuePresets(importedPresets) {
   return { added, updated };
 }
 
+function moveQueueAction(sourceId, targetId) {
+  const sourceIndex = state.queueBuilderSequence.indexOf(sourceId);
+  const targetIndex = state.queueBuilderSequence.indexOf(targetId);
+  if (sourceIndex < 0 || targetIndex < 0 || sourceIndex === targetIndex) return;
+  const [item] = state.queueBuilderSequence.splice(sourceIndex, 1);
+  state.queueBuilderSequence.splice(targetIndex, 0, item);
+}
+
+function renderQueueBuilderSelected(catalog) {
+  if (!dom.queueBuilderSelected) return;
+  dom.queueBuilderSelected.innerHTML = '';
+
+  if (!state.queueBuilderSequence.length) {
+    const empty = document.createElement('li');
+    empty.className = 'queue-selected-empty';
+    empty.textContent = 'Noch keine Aktion ausgewählt.';
+    dom.queueBuilderSelected.appendChild(empty);
+    return;
+  }
+
+  const byId = new Map(catalog.map((item) => [item.id, item]));
+  state.queueBuilderSequence.forEach((actionId, index) => {
+    const item = byId.get(actionId);
+    if (!item) return;
+
+    const li = document.createElement('li');
+    li.className = 'queue-selected-item';
+    li.draggable = true;
+    li.dataset.actionId = actionId;
+
+    const label = document.createElement('span');
+    label.className = 'queue-selected-label';
+    label.textContent = `${index + 1}. ${item.label}`;
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'btn-secondary';
+    removeBtn.textContent = 'Entfernen';
+    removeBtn.addEventListener('click', () => {
+      state.queueBuilderSelection = state.queueBuilderSelection.filter((id) => id !== actionId);
+      state.queueBuilderSequence = state.queueBuilderSequence.filter((id) => id !== actionId);
+      renderQueueBuilder();
+    });
+
+    li.addEventListener('dragstart', (event) => {
+      event.dataTransfer?.setData('text/plain', actionId);
+      event.dataTransfer.effectAllowed = 'move';
+    });
+
+    li.addEventListener('dragover', (event) => {
+      event.preventDefault();
+      li.classList.add('drag-over');
+    });
+
+    li.addEventListener('dragleave', () => {
+      li.classList.remove('drag-over');
+    });
+
+    li.addEventListener('drop', (event) => {
+      event.preventDefault();
+      li.classList.remove('drag-over');
+      const sourceId = event.dataTransfer?.getData('text/plain');
+      if (!sourceId) return;
+      moveQueueAction(sourceId, actionId);
+      renderQueueBuilder();
+    });
+
+    li.append(label, removeBtn);
+    dom.queueBuilderSelected.appendChild(li);
+  });
+}
+
 function renderQueueBuilder() {
   const catalog = getQueueBuilderActionsCatalog();
   dom.queueBuilderList.innerHTML = '';
@@ -470,9 +545,14 @@ function renderQueueBuilder() {
         if (!state.queueBuilderSelection.includes(item.id)) {
           state.queueBuilderSelection.push(item.id);
         }
+        if (!state.queueBuilderSequence.includes(item.id)) {
+          state.queueBuilderSequence.push(item.id);
+        }
       } else {
         state.queueBuilderSelection = state.queueBuilderSelection.filter((id) => id !== item.id);
+        state.queueBuilderSequence = state.queueBuilderSequence.filter((id) => id !== item.id);
       }
+      renderQueueBuilderSelected(catalog);
     });
 
     const main = document.createElement('div');
@@ -490,10 +570,12 @@ function renderQueueBuilder() {
   });
 
   dom.queueBuilderList.appendChild(fragment);
+  renderQueueBuilderSelected(catalog);
 }
 
 function openQueueBuilderDialog() {
   state.queueBuilderSelection = [];
+  state.queueBuilderSequence = [];
   if (!state.queuePresets.length) {
     state.queuePresets = loadQueuePresetsFromStorage();
   }
@@ -538,7 +620,11 @@ function initQueueBuilderDialog() {
 
   dom.btnQueueBuilderAdd?.addEventListener('click', () => {
     const catalog = getQueueBuilderActionsCatalog();
-    const selected = catalog.filter((item) => state.queueBuilderSelection.includes(item.id));
+    const byId = new Map(catalog.map((item) => [item.id, item]));
+    const selected = state.queueBuilderSequence
+      .map((id) => byId.get(id))
+      .filter(Boolean);
+
     if (!selected.length) {
       showToast('Bitte mindestens eine Aktion wählen.', 'info');
       return;
@@ -546,7 +632,7 @@ function initQueueBuilderDialog() {
 
     selected.forEach((item) => enqueueAction(item.label, item.action));
     dom.queueBuilderDialog.close();
-    showToast(`${selected.length} Aktion(en) zur Queue hinzugefügt.`, 'success', 3000);
+    showToast(`${selected.length} Aktion(en) in Reihenfolge zur Queue hinzugefügt.`, 'success', 3000);
   });
 }
 
