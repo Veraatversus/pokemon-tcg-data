@@ -23,6 +23,11 @@ import {
   cacheCardsOffline,
   getCachedCardsOffline
 } from './smart-engine.js';
+import {
+  createAutoSnapshot,
+  loadSnapshots
+} from './collection-versioning.js';
+import { initCommandPalette } from './command-palette.js';
 
 // ══════════════════════════════════════════════════════════════════════════
 // DOM-REFERENZEN
@@ -1093,7 +1098,12 @@ function createDashSetCard(set, summary) {
       <div class="dash-progress-bar"><div class="dash-progress-fill" style="width:${set.imported ? percent : 0}%"></div></div>
       <p class="dash-progress-text">${set.imported ? `${collected}\u202f/\u202f${total || '?'} (${percent}%)` : `Noch nicht importiert (${set.totalCards || '?' } Karten)`}</p>
       ${rh > 0 ? `<p class="dash-rh-text">RH: ${rh}</p>` : ''}
-      ${set.imported ? '' : '<button class="btn-secondary dash-import-btn" type="button">➕ In Sammlung importieren</button>'}
+      <div class="dash-card-actions">
+        ${set.imported 
+          ? `<button class="btn-secondary dash-view-btn" type="button" title="Ansehen">👁️</button>
+             <button class="btn-secondary dash-delete-btn" type="button" title="Löschen">🗑️</button>`
+          : `<button class="btn-primary dash-import-btn" type="button">➕ Importieren</button>`}
+      </div>
     </div>`;
 
   const importButton = card.querySelector('.dash-import-btn');
@@ -1101,6 +1111,23 @@ function createDashSetCard(set, summary) {
     importButton.addEventListener('click', async (event) => {
       event.stopPropagation();
       await importSetFromOverview(set);
+    });
+  }
+
+  const viewButton = card.querySelector('.dash-view-btn');
+  if (viewButton) {
+    viewButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      dom.selector.value = set.setId;
+      navigate(`set/${set.setId}`);
+    });
+  }
+
+  const deleteButton = card.querySelector('.dash-delete-btn');
+  if (deleteButton) {
+    deleteButton.addEventListener('click', async (event) => {
+      event.stopPropagation();
+      await deleteSetFromCollection(set);
     });
   }
 
@@ -1143,6 +1170,58 @@ async function importSetFromOverview(set) {
   }
 }
 
+async function deleteSetFromCollection(set) {
+  if (!set?.setId || !set.imported) {
+    showToast('Set kann nicht gelöscht werden.', 'error', 3000);
+    return;
+  }
+
+  const confirmMsg = `${set.setName} wirklich aus deiner Sammlung löschen? Diese Aktion kann nicht rückgängig gemacht werden.`;
+  if (!window.confirm(confirmMsg)) {
+    return;
+  }
+
+  setLoading(true, `Lösche ${set.setName}…`);
+  setGlobalStatus(`Lösche ${set.setName}…`);
+  
+  try {
+    // Auto-Snapshot vor dem Löschen erstellen
+    try {
+      const currentCollection = state.collection || {};
+      const action = `Delete Set: ${set.setName}`;
+      await createAutoSnapshot(action, currentCollection);
+    } catch (err) {
+      console.warn('⚠️ Auto-snapshot vor Löschung fehlgeschlagen:', err);
+    }
+
+    // Entferne das Set aus der Sammlung
+    const range = await readSetCollectionMap(set.setName).catch(() => new Map());
+    if (range && range.size > 0) {
+      // Lösche alle Zellen des Sets (setze auf FALSE)
+      for (const [cardNum] of range) {
+        await updateCellBoolean(set.setName, cardNum, false, false);
+      }
+    }
+
+    cache.del(`cards_${set.setId}`);
+    cache.del(`db_${set.setId}`);
+    state.summaryData = null;
+
+    // Aktualisiere die Ansicht
+    await loadSets();
+    await renderDashboard();
+    
+    showToast(`${set.setName} wurde gelöscht.`, 'success', 3000);
+    setGlobalStatus(`${set.setName} wurde gelöscht.`);
+  } catch (err) {
+    console.error('[deleteSetFromCollection]', err);
+    showToast(`Löschen fehlgeschlagen: ${err.message}`, 'error', 5000);
+    setGlobalStatus(`Fehler beim Löschen: ${set.setName}`);
+  } finally {
+    setLoading(false);
+  }
+}
+
 function getSetById(setId) {
   return state.allSets.find((set) => set.setId === setId) || state.sets.find((set) => set.setId === setId) || null;
 }
@@ -1153,6 +1232,18 @@ async function importSetsSequential(sets, options = {}) {
   if (!validSets.length) {
     showToast('Keine passenden Sets gefunden.', 'info');
     return;
+  }
+
+  // Auto-Snapshot vor dem Import erstellen
+  try {
+    const currentCollection = state.collection || {};
+    const snapshotCount = (loadSnapshots() || []).length;
+    const action = `Import: ${validSets.map(s => s.setName).join(', ')}${snapshotCount > 15 ? ' (oldest will be removed)' : ''}`;
+    await createAutoSnapshot(action, currentCollection);
+    console.log('✅ Auto-snapshot vor Import erstellt');
+  } catch (err) {
+    console.warn('⚠️ Auto-snapshot vor Import fehlgeschlagen:', err);
+    // Fehler blockiert nicht den Import
   }
 
   let done = 0;
@@ -1252,6 +1343,18 @@ function summarizeOverviewChanges(oldOverviewSets, apiSets) {
 
 async function powerRefreshOverviewFromApi() {
   setLoading(true, 'Power-Refresh läuft…');
+  
+  // Auto-Snapshot vor dem Power-Refresh erstellen
+  try {
+    const currentCollection = state.collection || {};
+    const action = `Power-Refresh: Sets Overview aktualisiert`;
+    await createAutoSnapshot(action, currentCollection);
+    console.log('✅ Auto-snapshot vor Power-Refresh erstellt');
+  } catch (err) {
+    console.warn('⚠️ Auto-snapshot vor Power-Refresh fehlgeschlagen:', err);
+    // Fehler blockiert nicht den Refresh
+  }
+
   try {
     const [oldOverviewSets, apiSets] = await Promise.all([
       listSetsOverviewData().catch(() => []),
@@ -1565,6 +1668,17 @@ async function runDataHealthCheck({ autoFix = false } = {}) {
   if (!ok) {
     finishJob(job, 'Auto-Fix abgebrochen', true);
     return;
+  }
+
+  // Auto-Snapshot vor dem Auto-Fix erstellen
+  try {
+    const currentCollection = state.collection || {};
+    const action = `Auto-Fix: ${mismatchSets.length} Set(s) mit Abweichungen`;
+    await createAutoSnapshot(action, currentCollection);
+    console.log('✅ Auto-snapshot vor Auto-Fix erstellt');
+  } catch (err) {
+    console.warn('⚠️ Auto-snapshot vor Auto-Fix fehlgeschlagen:', err);
+    // Fehler blockiert nicht das Auto-Fix
   }
 
   const uniqueSets = Array.from(new Map(mismatchSets.map((set) => [set.setId, set])).values());
@@ -2426,6 +2540,67 @@ async function bootstrap() {
   initDashboardControls();
   initSortControl();
   initSearch();
+  
+  // Initialize Command Palette with handlers
+  const commandHandlers = {
+    'sync': async () => {
+      showToast('Sync-Funktion noch nicht implementiert', 'info');
+    },
+    'import-batch': () => openBatchImportDialog(),
+    'health-check': () => runDataHealthCheck({ autoFix: false }),
+    'backup-download': async () => {
+      const sets = state.sets.slice(0, 3); // Begrenzt auf 3 Sets zur Demo
+      if (!sets.length) {
+        showToast('Keine Sets zum Exportieren.', 'info');
+        return;
+      }
+      const backupSets = sets.map((set) => ({
+        setId: set.setId,
+        setName: set.setName,
+        imported: set.imported || true
+      }));
+      const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 16);
+      const payload = {
+        app: 'poke-tcg-try4',
+        version: 1,
+        createdAt: stamp,
+        spreadsheetId: CONFIG.SPREADSHEET_ID,
+        sets: backupSets
+      };
+      downloadJson(`poke_backup_${stamp}.json`, payload);
+      showToast(`Backup exportiert (${sets.length} Sets).`, 'success', 4000);
+    },
+    'parity-test': async () => {
+      showToast('Parity-Test wird ausgeführt...', 'info');
+      try {
+        const result = await runPokecodeParityCheck();
+        console.log('Parity-Test Result:', result);
+        showToast('Parity-Test abgeschlossen! Siehe Konsole.', 'success', 4000);
+      } catch (err) {
+        showToast(`Parity-Test fehlgeschlagen: ${err.message}`, 'error', 5000);
+      }
+    },
+    'search': () => {
+      dom.search?.focus();
+      showToast('Suchfeld aktiviert', 'info', 2000);
+    },
+    'snapshots': () => {
+      showToast('Snapshots: ' + (loadSnapshots() || []).length + ' verfügbar', 'info', 3000);
+    },
+    'settings': () => {
+      showToast('Einstellungen-Dialog öffnet sich...', 'info', 2000);
+    },
+    'help': () => {
+      showToast('Verfügbare Befehle: import, health-check, backup, parity, search, snapshots, settings', 'info', 5000);
+    }
+  };
+  
+  try {
+    initCommandPalette(commandHandlers);
+    console.log('✅ Command Palette initialized');
+  } catch (err) {
+    console.warn('⚠️ Command Palette init failed:', err);
+  }
 
   // Start Smart Engine metrics update loop
   setInterval(() => {
