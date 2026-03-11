@@ -17,6 +17,18 @@ function buildRange(sheetName, a1Range) {
 
 let resolvedSheetsCache = null;
 
+const DB_SHEETS = {
+  sets: 'db_sets',
+  cards: 'db_cards',
+  collection: 'db_collection'
+};
+
+const DB_HEADERS = {
+  sets: ['setId', 'setName', 'series', 'releaseDate', 'totalCards', 'ptcgoCode', 'logoUrl', 'symbolUrl', 'imported', 'updatedAt'],
+  cards: ['setId', 'cardId', 'number', 'name', 'imageUrl', 'cardmarketUrl', 'rarity', 'updatedAt'],
+  collection: ['setId', 'cardId', 'g', 'rh', 'updatedAt']
+};
+
 function normalizeName(value) {
   return String(value ?? '').trim().toLowerCase();
 }
@@ -191,25 +203,155 @@ async function putValues(range, values) {
   }
 }
 
+async function listSheetTitles() {
+  const meta = await gapi.client.sheets.spreadsheets.get({
+    spreadsheetId: CONFIG.SPREADSHEET_ID,
+    fields: 'sheets(properties(title))'
+  });
+  return (meta.result.sheets || [])
+    .map((sheet) => sheet.properties?.title)
+    .filter(Boolean);
+}
+
+async function addSheet(title) {
+  await gapi.client.sheets.spreadsheets.batchUpdate({
+    spreadsheetId: CONFIG.SPREADSHEET_ID,
+    resource: {
+      requests: [{ addSheet: { properties: { title } } }]
+    }
+  });
+  resolvedSheetsCache = null;
+}
+
+function buildDataRange(sheetName, columnCount, startRow = 2, endRow = 200000) {
+  const endColumn = colToA1(Math.max(1, columnCount));
+  return buildRange(sheetName, `A${startRow}:${endColumn}${endRow}`);
+}
+
+async function ensureSheetWithHeader(sheetName, header) {
+  const titles = await listSheetTitles();
+  if (!titles.includes(sheetName)) {
+    await addSheet(sheetName);
+    await putValues(buildRange(sheetName, `A1:${colToA1(header.length)}1`), [header]);
+    return;
+  }
+
+  const existingHeader = await getValues(buildRange(sheetName, `A1:${colToA1(header.length)}1`)).catch(() => []);
+  const hasHeader = Array.isArray(existingHeader[0]) && existingHeader[0].some((value) => String(value ?? '').trim() !== '');
+  if (!hasHeader) {
+    await putValues(buildRange(sheetName, `A1:${colToA1(header.length)}1`), [header]);
+  }
+}
+
+async function ensureNormalizedSchema() {
+  await ensureSheetWithHeader(DB_SHEETS.sets, DB_HEADERS.sets);
+  await ensureSheetWithHeader(DB_SHEETS.cards, DB_HEADERS.cards);
+  await ensureSheetWithHeader(DB_SHEETS.collection, DB_HEADERS.collection);
+}
+
+async function readDbRows(sheetName, columnCount) {
+  return getValues(buildDataRange(sheetName, columnCount, 2, 200000)).catch(() => []);
+}
+
+async function rewriteDbRows(sheetName, columnCount, rows) {
+  await clearValues(buildDataRange(sheetName, columnCount, 2, 200000));
+  if (rows.length === 0) return;
+  const endRow = rows.length + 1;
+  const endCol = colToA1(columnCount);
+  await putValues(buildRange(sheetName, `A2:${endCol}${endRow}`), rows);
+}
+
+function toSafeCellString(value) {
+  return String(value ?? '').trim();
+}
+
+function nowIso() {
+  return new Date().toISOString();
+}
+
+async function upsertDbSet(setMeta, imported = false) {
+  await ensureNormalizedSchema();
+  const setId = toSafeCellString(setMeta?.setId);
+  if (!setId) return;
+
+  const rows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length);
+  const target = [
+    setId,
+    toSafeCellString(setMeta?.setName),
+    toSafeCellString(setMeta?.series),
+    toSafeCellString(setMeta?.releaseDate),
+    Number(setMeta?.totalCards) || 0,
+    toSafeCellString(setMeta?.ptcgoCode),
+    toSafeCellString(setMeta?.logoUrl),
+    toSafeCellString(setMeta?.symbolUrl),
+    Boolean(imported),
+    nowIso()
+  ];
+
+  const existingIndex = rows.findIndex((row) => toSafeCellString(row[0]).toLowerCase() === setId.toLowerCase());
+  if (existingIndex >= 0) {
+    const rowNo = existingIndex + 2;
+    const existingImported = toBoolean(rows[existingIndex][8]);
+    target[8] = Boolean(imported || existingImported);
+    await putValues(buildRange(DB_SHEETS.sets, `A${rowNo}:${colToA1(DB_HEADERS.sets.length)}${rowNo}`), [target]);
+  } else {
+    const rowNo = rows.length + 2;
+    await putValues(buildRange(DB_SHEETS.sets, `A${rowNo}:${colToA1(DB_HEADERS.sets.length)}${rowNo}`), [target]);
+  }
+}
+
+async function resolveSetIdFromName(setSheetName) {
+  await ensureNormalizedSchema();
+  const rows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length);
+  const normalizedName = toSafeCellString(setSheetName).toLowerCase();
+  const direct = rows.find((row) => toSafeCellString(row[1]).toLowerCase() === normalizedName);
+  if (direct?.[0]) return toSafeCellString(direct[0]);
+
+  const sheets = await resolveSheetNames();
+  const overviewRows = await getOverviewRows(sheets).catch(() => []);
+  const legacy = overviewRows.find((row) => toSafeCellString(row[1]).toLowerCase() === normalizedName);
+  return legacy?.[0] ? toSafeCellString(extractDisplayTextFromHyperlink(legacy[0])) : '';
+}
+
+async function writeDbCardsForSet(setId, cards) {
+  await ensureNormalizedSchema();
+  const rows = await readDbRows(DB_SHEETS.cards, DB_HEADERS.cards.length);
+  const otherRows = rows.filter((row) => toSafeCellString(row[0]).toLowerCase() !== setId.toLowerCase());
+  const setRows = cards.map((card) => [
+    setId,
+    toSafeCellString(card.number),
+    toSafeCellString(card.number),
+    toSafeCellString(card.name),
+    toSafeCellString(card.image),
+    toSafeCellString(card.cardmarketUrl),
+    toSafeCellString(card.rarity),
+    nowIso()
+  ]);
+  await rewriteDbRows(DB_SHEETS.cards, DB_HEADERS.cards.length, [...otherRows, ...setRows]);
+}
+
+async function writeDbCollectionForSet(setId, cards, existingMap = new Map()) {
+  await ensureNormalizedSchema();
+  const rows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length);
+  const otherRows = rows.filter((row) => toSafeCellString(row[0]).toLowerCase() !== setId.toLowerCase());
+  const setRows = cards.map((card) => {
+    const key = normalizeCardNumber(card.number);
+    const existing = existingMap.get(key);
+    const g = Boolean(existing?.g);
+    const rh = Boolean(existing?.rh && g);
+    return [setId, toSafeCellString(card.number), g, rh, nowIso()];
+  });
+  await rewriteDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, [...otherRows, ...setRows]);
+}
+
 /**
  * Gibt alle importierten Sets aus dem "Sets Overview"-Sheet zurück.
  * Liest Spalten A–J (Formeln für HYPERLINK-IDs nötig).
  * @returns {Promise<Array<{setId, setName, series, releaseDate, totalCards, ptcgoCode, imported}>>}
  */
 export async function listImportedSets() {
-  const sheets = await resolveSheetNames();
-  const rows = await getOverviewRows(sheets);
-  return rows
-    .map((row) => ({
-      setId:       extractDisplayTextFromHyperlink(row[0]),
-      setName:     row[1] || '',
-      series:      row[4] || '',
-      releaseDate: row[5] || '',
-      totalCards:  row[6] ? Number(row[6]) : 0,
-      ptcgoCode:   row[7] || '',
-      imported:    toBoolean(row[CONFIG.GRID.IMPORTED_COL_INDEX - 1])
-    }))
-    .filter((item) => item.setId && item.setName && item.imported);
+  const all = await listSetsOverviewData();
+  return all.filter((item) => item.setId && item.setName && item.imported);
 }
 
 /**
@@ -218,6 +360,26 @@ export async function listImportedSets() {
  * @returns {Promise<Array<{setId, setName, series, releaseDate, totalCards, ptcgoCode, imported}>>}
  */
 export async function listSetsOverviewData() {
+  await ensureNormalizedSchema();
+  const dbRows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length);
+  const dbSets = dbRows
+    .filter((row) => row[0])
+    .map((row) => ({
+      setId: toSafeCellString(row[0]),
+      setName: toSafeCellString(row[1]),
+      series: toSafeCellString(row[2]),
+      releaseDate: toSafeCellString(row[3]),
+      totalCards: Number(row[4]) || 0,
+      ptcgoCode: toSafeCellString(row[5]),
+      logoUrl: toSafeCellString(row[6]),
+      symbolUrl: toSafeCellString(row[7]),
+      imported: toBoolean(row[8])
+    }))
+    .filter((item) => item.setId && item.setName);
+  if (dbSets.length > 0) {
+    return dbSets;
+  }
+
   const sheets = await resolveSheetNames();
   const rows = await getOverviewRows(sheets);
   return rows
@@ -240,6 +402,59 @@ export async function listSetsOverviewData() {
  * @returns {Promise<Array<{setName, total, collected, rh, percent, ptcgoCode}>>}
  */
 export async function readSummarySheet() {
+  await ensureNormalizedSchema();
+  const setRows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length);
+  const collectionRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length);
+
+  if (setRows.length > 0 || collectionRows.length > 0) {
+    const setsById = new Map();
+    setRows.forEach((row) => {
+      const setId = toSafeCellString(row[0]);
+      if (!setId) return;
+      setsById.set(setId, {
+        setName: toSafeCellString(row[1]),
+        ptcgoCode: toSafeCellString(row[5]),
+        imported: toBoolean(row[8]),
+        totalMeta: Number(row[4]) || 0
+      });
+    });
+
+    const agg = new Map();
+    collectionRows.forEach((row) => {
+      const setId = toSafeCellString(row[0]);
+      const cardId = toSafeCellString(row[1]);
+      if (!setId || !cardId) return;
+      if (!agg.has(setId)) agg.set(setId, { total: 0, collected: 0, rh: 0 });
+      const bucket = agg.get(setId);
+      const g = toBoolean(row[2]);
+      const rh = toBoolean(row[3]) && g;
+      bucket.total += 1;
+      if (g) bucket.collected += 1;
+      if (rh) bucket.rh += 1;
+    });
+
+    const result = [];
+    for (const [setId, meta] of setsById.entries()) {
+      if (!meta.imported) continue;
+      const counts = agg.get(setId) || { total: 0, collected: 0, rh: 0 };
+      const total = counts.total || meta.totalMeta || 0;
+      const collected = counts.collected || 0;
+      const rh = counts.rh || 0;
+      result.push({
+        setName: meta.setName,
+        total,
+        collected,
+        rh,
+        percent: total > 0 ? Math.round((collected / total) * 10000) / 100 : 0,
+        ptcgoCode: meta.ptcgoCode
+      });
+    }
+
+    if (result.length > 0) {
+      return result.sort((a, b) => a.setName.localeCompare(b.setName));
+    }
+  }
+
   const sheets = await resolveSheetNames();
   if (!sheets.summary) {
     return [];
@@ -273,10 +488,6 @@ function extractImageUrl(value) {
   return '';
 }
 
-function toSafeCellString(value) {
-  return String(value ?? '').trim();
-}
-
 function buildOverviewRowValues(setMeta, imported = false) {
   return [[
     toSafeCellString(setMeta.setId),
@@ -300,52 +511,9 @@ async function clearValues(range) {
   });
 }
 
-async function ensureSetSheet(sheetName) {
-  const meta = await gapi.client.sheets.spreadsheets.get({
-    spreadsheetId: CONFIG.SPREADSHEET_ID,
-    fields: 'sheets(properties(sheetId,title))'
-  });
-
-  const existing = (meta.result.sheets || []).find(
-    (sheet) => sheet.properties?.title === sheetName
-  );
-  if (existing) return existing.properties;
-
-  const createRes = await gapi.client.sheets.spreadsheets.batchUpdate({
-    spreadsheetId: CONFIG.SPREADSHEET_ID,
-    resource: {
-      requests: [{ addSheet: { properties: { title: sheetName } } }]
-    }
-  });
-
-  return createRes.result?.replies?.[0]?.addSheet?.properties || null;
-}
-
-function buildCardGridValues(cards, existingMap = new Map()) {
-  const cols = CONFIG.GRID.CARDS_PER_ROW * CONFIG.GRID.BLOCK_WIDTH;
-  const blocks = Math.max(1, Math.ceil(cards.length / CONFIG.GRID.CARDS_PER_ROW));
-  const rows = blocks * CONFIG.GRID.BLOCK_HEIGHT;
-  const values = Array.from({ length: rows }, () => Array(cols).fill(''));
-
-  cards.forEach((card, index) => {
-    const blockRow = Math.floor(index / CONFIG.GRID.CARDS_PER_ROW);
-    const blockCol = index % CONFIG.GRID.CARDS_PER_ROW;
-    const baseRow = blockRow * CONFIG.GRID.BLOCK_HEIGHT;
-    const baseCol = blockCol * CONFIG.GRID.BLOCK_WIDTH;
-
-    values[baseRow][baseCol] = toSafeCellString(card.number);
-    values[baseRow][baseCol + 1] = toSafeCellString(card.name);
-    values[baseRow + 1][baseCol + 2] = toSafeCellString(card.image);
-    const existing = existingMap.get(normalizeCardNumber(card.number));
-    values[baseRow + 2][baseCol] = Boolean(existing?.g);
-    values[baseRow + 2][baseCol + 1] = Boolean(existing?.rh && existing?.g);
-    values[baseRow + 2][baseCol + 2] = toSafeCellString(card.cardmarketUrl);
-  });
-
-  return values;
-}
-
 async function upsertOverviewEntry(setMeta, imported = true) {
+  await upsertDbSet(setMeta, imported);
+
   const sheets = await resolveSheetNames();
   const overviewRange = buildRange(sheets.overview, 'A3:J');
   const rows = await getFormulas(overviewRange).catch(() => []);
@@ -372,7 +540,42 @@ export async function upsertOverviewSet(setMeta, imported = false) {
 }
 
 export async function syncOverviewWithApiSets(sets, importedSetIds = []) {
+  await ensureNormalizedSchema();
   const normalizedImported = new Set(Array.from(importedSetIds).map((id) => toSafeCellString(id).toLowerCase()));
+
+  const dbRows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length);
+  const dbById = new Map();
+  dbRows.forEach((row) => {
+    const key = toSafeCellString(row[0]).toLowerCase();
+    if (!key) return;
+    dbById.set(key, row);
+  });
+
+  const mergedDb = new Map();
+  (sets || []).forEach((set) => {
+    const key = toSafeCellString(set?.setId).toLowerCase();
+    if (!key) return;
+    const existing = dbById.get(key) || [];
+    mergedDb.set(key, [
+      toSafeCellString(set.setId),
+      toSafeCellString(set.setName),
+      toSafeCellString(set.series),
+      toSafeCellString(set.releaseDate),
+      Number(set.totalCards) || 0,
+      toSafeCellString(set.ptcgoCode),
+      toSafeCellString(set.logoUrl),
+      toSafeCellString(set.symbolUrl),
+      Boolean(normalizedImported.has(key) || toBoolean(existing[8])),
+      nowIso()
+    ]);
+  });
+
+  dbById.forEach((existing, key) => {
+    if (!mergedDb.has(key)) mergedDb.set(key, existing);
+  });
+
+  await rewriteDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length, Array.from(mergedDb.values()));
+
   const sheets = await resolveSheetNames();
   const rows = await getOverviewRows(sheets).catch(() => []);
 
@@ -431,30 +634,24 @@ export async function importSetIntoCollection(setMeta, cards) {
     throw new Error(`Keine Karten für Set ${setMeta.setId} gefunden.`);
   }
 
-  const sheetName = toSafeCellString(setMeta.setName);
-  await ensureSetSheet(sheetName);
+  const setId = toSafeCellString(setMeta.setId);
+  const setName = toSafeCellString(setMeta.setName);
 
-  const existingMap = await readSetCollectionMap(sheetName).catch(() => new Map());
-  const gridValues = buildCardGridValues(cards, existingMap);
-  const endColumnIndex = CONFIG.GRID.CARDS_PER_ROW * CONFIG.GRID.BLOCK_WIDTH;
-  const endColumn = colToA1(endColumnIndex);
-  const endRow = 2 + gridValues.length;
-
-  await putValues(buildRange(sheetName, 'A1:B1'), [[setMeta.setId, setMeta.setName]]);
-  await clearValues(buildRange(sheetName, `A3:${endColumn}5000`));
-  await putValues(buildRange(sheetName, `A3:${endColumn}${endRow}`), gridValues);
+  const existingMap = await readSetCollectionMap(setName).catch(() => new Map());
+  await upsertDbSet({ ...setMeta, setId, setName }, true);
+  await writeDbCardsForSet(setId, cards);
+  await writeDbCollectionForSet(setId, cards, existingMap);
 
   await upsertOverviewEntry({
     ...setMeta,
-    setName: sheetName,
+    setName,
     totalCards: Number(setMeta.totalCards) || cards.length
   });
 }
 
-export async function readSetCollectionMap(setSheetName) {
+async function readLegacySetCollectionMap(setSheetName) {
   const totalCols = CONFIG.GRID.CARDS_PER_ROW * CONFIG.GRID.BLOCK_WIDTH;
-  const endColumn = String.fromCharCode(64 + totalCols);
-  // UNFORMATTED_VALUE liefert Boolean-Checkboxen als true/false statt "TRUE"/"FALSE"
+  const endColumn = colToA1(totalCols);
   const values = await getValues(buildRange(setSheetName, `A3:${endColumn}2000`));
 
   const map = new Map();
@@ -480,12 +677,78 @@ export async function readSetCollectionMap(setSheetName) {
       });
     }
   }
-
   return map;
 }
 
+export async function readSetCollectionMap(setSheetName) {
+  await ensureNormalizedSchema();
+  const setId = await resolveSetIdFromName(setSheetName);
+  if (!setId) return new Map();
+
+  const values = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length);
+
+  const map = new Map();
+  values.forEach((row, index) => {
+    if (toSafeCellString(row[0]).toLowerCase() !== setId.toLowerCase()) return;
+    const displayId = toSafeCellString(row[1]);
+    if (!displayId) return;
+    const normalizedId = normalizeCardNumber(displayId);
+    const g = toBoolean(row[2]);
+    const rh = toBoolean(row[3]) && g;
+    const rowNo = index + 2;
+    map.set(normalizedId, {
+      displayId,
+      g,
+      rh,
+      gCell: { row: rowNo, col: 3 },
+      rhCell: { row: rowNo, col: 4 }
+    });
+  });
+
+  if (map.size > 0) return map;
+
+  const legacy = await readLegacySetCollectionMap(setSheetName).catch(() => new Map());
+  if (legacy.size === 0) return map;
+
+  const legacyRows = Array.from(legacy.values()).map((entry) => [
+    setId,
+    toSafeCellString(entry.displayId),
+    Boolean(entry.g),
+    Boolean(entry.rh && entry.g),
+    nowIso()
+  ]);
+
+  const existingRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length);
+  const otherRows = existingRows.filter((row) => toSafeCellString(row[0]).toLowerCase() !== setId.toLowerCase());
+  await rewriteDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, [...otherRows, ...legacyRows]);
+
+  const migrated = new Map();
+  const refreshed = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length);
+  refreshed.forEach((row, index) => {
+    if (toSafeCellString(row[0]).toLowerCase() !== setId.toLowerCase()) return;
+    const displayId = toSafeCellString(row[1]);
+    if (!displayId) return;
+    const normalizedId = normalizeCardNumber(displayId);
+    const g = toBoolean(row[2]);
+    const rh = toBoolean(row[3]) && g;
+    const rowNo = index + 2;
+    migrated.set(normalizedId, {
+      displayId,
+      g,
+      rh,
+      gCell: { row: rowNo, col: 3 },
+      rhCell: { row: rowNo, col: 4 }
+    });
+  });
+
+  return migrated;
+}
+
 export async function updateCellBoolean(sheetName, row, col, value) {
-  const a1 = buildRange(sheetName, `${colToA1(col)}${row}`);
+  await ensureNormalizedSchema();
+  const useNormalizedCollection = Number(row) >= 2 && (Number(col) === 3 || Number(col) === 4);
+  const targetSheet = useNormalizedCollection ? DB_SHEETS.collection : sheetName;
+  const a1 = buildRange(targetSheet, `${colToA1(col)}${row}`);
   await putValues(a1, [[Boolean(value)]]);
 }
 
