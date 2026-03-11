@@ -62,6 +62,7 @@ const dom = {
   btnReimportAllImported: document.getElementById('btn-reimport-all-imported'),
   btnExportSummaryCsv: document.getElementById('btn-export-summary-csv'),
   btnDataHealthCheck: document.getElementById('btn-data-health-check'),
+  btnDataHealthAutofix: document.getElementById('btn-data-health-autofix'),
   btnExportBackup: document.getElementById('btn-export-backup'),
   btnImportBackup: document.getElementById('btn-import-backup'),
   backupFileInput: document.getElementById('input-backup-file'),
@@ -867,7 +868,7 @@ async function exportCollectionBackup() {
   }
 }
 
-async function runDataHealthCheck() {
+async function runDataHealthCheck({ autoFix = false } = {}) {
   if (!state.sets.length) {
     showToast('Keine importierten Sets für Datencheck.', 'info');
     return;
@@ -880,6 +881,7 @@ async function runDataHealthCheck() {
     mismatches: [],
     errors: []
   };
+  const mismatchSets = [];
 
   try {
     for (let index = 0; index < state.sets.length; index++) {
@@ -894,6 +896,7 @@ async function runDataHealthCheck() {
         const apiCount = Array.isArray(apiCards) ? apiCards.length : 0;
         const sheetCount = sheetMap instanceof Map ? sheetMap.size : 0;
         if (apiCount !== sheetCount) {
+          mismatchSets.push(set);
           report.mismatches.push({
             setId: set.setId,
             setName: set.setName,
@@ -923,6 +926,15 @@ async function runDataHealthCheck() {
   const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
   downloadJson(`poke_data_health_${stamp}.json`, report);
   showToast(`Datencheck fertig: ${report.mismatches.length} Abweichungen, ${report.errors.length} Fehler. Report exportiert.`, 'error', 6500);
+
+  if (!autoFix || !mismatchSets.length) return;
+
+  const confirmText = `${mismatchSets.length} Set${mismatchSets.length === 1 ? '' : 's'} mit Abweichungen automatisch reimportieren?`;
+  const ok = window.confirm(confirmText);
+  if (!ok) return;
+
+  const uniqueSets = Array.from(new Map(mismatchSets.map((set) => [set.setId, set])).values());
+  await importSetsSequential(uniqueSets, { successMessage: '{count} Mismatch-Set(s) automatisch repariert.' });
 }
 
 function parseBackupPayload(rawText) {
@@ -1035,7 +1047,8 @@ function initDashboardControls() {
   dom.btnReimportCurrent?.addEventListener('click', reimportCurrentSetFromApi);
   dom.btnReimportAllImported?.addEventListener('click', reimportAllImportedSets);
   dom.btnExportSummaryCsv?.addEventListener('click', exportCollectionSummaryCsv);
-  dom.btnDataHealthCheck?.addEventListener('click', runDataHealthCheck);
+  dom.btnDataHealthCheck?.addEventListener('click', () => runDataHealthCheck({ autoFix: false }));
+  dom.btnDataHealthAutofix?.addEventListener('click', () => runDataHealthCheck({ autoFix: true }));
 }
 
 // ══════════════════════════════════════════════════════════════════════════
