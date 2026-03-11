@@ -280,6 +280,13 @@
   <dialog id="dialog-queue-builder" class="ss-dialog batch-dialog">
     <h2>Queue Builder</h2>
     <p>Wähle Aktionen in Ausführungsreihenfolge aus.</p>
+    <div class="batch-dialog-actions-top">
+      <select id="queue-preset-select" class="full-width-select">
+        <option value="">Preset laden…</option>
+      </select>
+      <button id="btn-queue-preset-save" class="btn-secondary" type="button">Preset speichern</button>
+      <button id="btn-queue-preset-delete" class="btn-secondary" type="button">Preset löschen</button>
+    </div>
     <div id="queue-builder-list" class="batch-list"></div>
     <div class="dialog-actions">
       <button id="btn-queue-builder-cancel" class="btn-secondary" type="button">Abbrechen</button>

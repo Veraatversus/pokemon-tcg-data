@@ -75,6 +75,9 @@ const dom = {
   btnQueueClear: document.getElementById('btn-queue-clear'),
   queueBuilderDialog: document.getElementById('dialog-queue-builder'),
   queueBuilderList: document.getElementById('queue-builder-list'),
+  queuePresetSelect: document.getElementById('queue-preset-select'),
+  btnQueuePresetSave: document.getElementById('btn-queue-preset-save'),
+  btnQueuePresetDelete: document.getElementById('btn-queue-preset-delete'),
   btnQueueBuilderCancel: document.getElementById('btn-queue-builder-cancel'),
   btnQueueBuilderAdd: document.getElementById('btn-queue-builder-add'),
   btnExportBackup: document.getElementById('btn-export-backup'),
@@ -154,7 +157,10 @@ const state = {
   queueRunning: false,
   queueCancelRequested: false,
   queueBuilderSelection: [],
+  queuePresets: [],
 };
+
+const QUEUE_PRESETS_STORAGE_KEY = 'poke_try4_queue_presets_v1';
 
 function startJob(title, totalSteps = 0) {
   const job = {
@@ -315,6 +321,83 @@ function getQueueBuilderActionsCatalog() {
   ];
 }
 
+function loadQueuePresetsFromStorage() {
+  try {
+    const raw = localStorage.getItem(QUEUE_PRESETS_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((item) => item && typeof item.name === 'string' && Array.isArray(item.actionIds))
+      .map((item) => ({ name: item.name, actionIds: item.actionIds }));
+  } catch {
+    return [];
+  }
+}
+
+function persistQueuePresets() {
+  localStorage.setItem(QUEUE_PRESETS_STORAGE_KEY, JSON.stringify(state.queuePresets));
+}
+
+function renderQueuePresetSelect() {
+  if (!dom.queuePresetSelect) return;
+  dom.queuePresetSelect.innerHTML = '<option value="">Preset laden…</option>';
+  state.queuePresets.forEach((preset, index) => {
+    const option = document.createElement('option');
+    option.value = String(index);
+    option.textContent = preset.name;
+    dom.queuePresetSelect.appendChild(option);
+  });
+}
+
+function saveCurrentQueuePreset() {
+  if (!state.queueBuilderSelection.length) {
+    showToast('Keine Aktionen für Preset ausgewählt.', 'info');
+    return;
+  }
+  const name = window.prompt('Preset-Name:');
+  if (!name) return;
+  const trimmedName = name.trim();
+  if (!trimmedName) return;
+
+  const existingIndex = state.queuePresets.findIndex((preset) => preset.name.toLowerCase() === trimmedName.toLowerCase());
+  const payload = { name: trimmedName, actionIds: [...state.queueBuilderSelection] };
+  if (existingIndex >= 0) {
+    state.queuePresets[existingIndex] = payload;
+  } else {
+    state.queuePresets.push(payload);
+  }
+  persistQueuePresets();
+  renderQueuePresetSelect();
+  showToast(`Preset gespeichert: ${trimmedName}`, 'success', 2500);
+}
+
+function deleteSelectedQueuePreset() {
+  const idx = Number(dom.queuePresetSelect?.value ?? '-1');
+  if (!Number.isInteger(idx) || idx < 0 || idx >= state.queuePresets.length) {
+    showToast('Bitte ein Preset auswählen.', 'info');
+    return;
+  }
+  const presetName = state.queuePresets[idx].name;
+  const ok = window.confirm(`Preset „${presetName}“ löschen?`);
+  if (!ok) return;
+  state.queuePresets.splice(idx, 1);
+  persistQueuePresets();
+  renderQueuePresetSelect();
+  if (dom.queuePresetSelect) dom.queuePresetSelect.value = '';
+  showToast(`Preset gelöscht: ${presetName}`, 'info', 2500);
+}
+
+function applySelectedQueuePreset() {
+  const idx = Number(dom.queuePresetSelect?.value ?? '-1');
+  if (!Number.isInteger(idx) || idx < 0 || idx >= state.queuePresets.length) {
+    return;
+  }
+  const preset = state.queuePresets[idx];
+  const validIds = new Set(getQueueBuilderActionsCatalog().map((action) => action.id));
+  state.queueBuilderSelection = preset.actionIds.filter((id) => validIds.has(id));
+  renderQueueBuilder();
+}
+
 function renderQueueBuilder() {
   const catalog = getQueueBuilderActionsCatalog();
   dom.queueBuilderList.innerHTML = '';
@@ -356,13 +439,24 @@ function renderQueueBuilder() {
 
 function openQueueBuilderDialog() {
   state.queueBuilderSelection = [];
+  if (!state.queuePresets.length) {
+    state.queuePresets = loadQueuePresetsFromStorage();
+  }
+  renderQueuePresetSelect();
+  if (dom.queuePresetSelect) dom.queuePresetSelect.value = '';
   renderQueueBuilder();
   dom.queueBuilderDialog.showModal();
 }
 
 function initQueueBuilderDialog() {
+  state.queuePresets = loadQueuePresetsFromStorage();
+  renderQueuePresetSelect();
+
   dom.btnQueueBuilder?.addEventListener('click', openQueueBuilderDialog);
   dom.btnQueueBuilderCancel?.addEventListener('click', () => dom.queueBuilderDialog?.close());
+  dom.queuePresetSelect?.addEventListener('change', applySelectedQueuePreset);
+  dom.btnQueuePresetSave?.addEventListener('click', saveCurrentQueuePreset);
+  dom.btnQueuePresetDelete?.addEventListener('click', deleteSelectedQueuePreset);
   dom.btnQueueBuilderAdd?.addEventListener('click', () => {
     const catalog = getQueueBuilderActionsCatalog();
     const selected = catalog.filter((item) => state.queueBuilderSelection.includes(item.id));
