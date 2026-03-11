@@ -2618,6 +2618,8 @@ function showQuickStats() {
       if (!hasG) missingCards.push(entry.rawId);
     });
 
+    missingCards.sort((a, b) => naturalSort(String(a || ""), String(b || "")));
+
     const completion = totalCards > 0 ? (normalCollected / totalCards * 100) : 0;
     const previewLimit = 20;
     const missingText = missingCards.length > 0 ? 
