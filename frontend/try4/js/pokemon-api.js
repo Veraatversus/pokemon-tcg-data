@@ -374,7 +374,9 @@ export async function fetchAllAvailableSets() {
     combined.push({
       ...model,
       setName: tcgdexMatch?.name || model.setName,
-      releaseDate: model.releaseDate || tcgdexMatch?.releaseDate || '',
+      series: tcgdexMatch?.serie?.name || model.series,
+      releaseDate: tcgdexMatch?.releaseDate || model.releaseDate || '',
+      totalCards: toNumber(tcgdexMatch?.cardCount?.official) || model.totalCards,
       ptcgoCode: model.ptcgoCode || tcgdexMatch?.abbreviation?.official || ''
     });
   });
@@ -384,8 +386,8 @@ export async function fetchAllAvailableSets() {
     combined.push({
       setId: `TCGDEX-${tcgdexSet.id}`,
       setName: tcgdexSet.name || tcgdexSet.en?.name || tcgdexSet.id,
-      logoUrl: '',
-      symbolUrl: '',
+      logoUrl: tcgdexSet.logo || '',
+      symbolUrl: tcgdexSet.symbol || '',
       series: tcgdexSet.serie?.name || '',
       releaseDate: tcgdexSet.releaseDate || '',
       totalCards: toNumber(tcgdexSet?.cardCount?.official) || toNumber(tcgdexSet?.cardCount?.total),
