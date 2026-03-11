@@ -1566,3 +1566,278 @@ body.dark .stats-series-bar { background: #334155; }
   color: var(--color-muted);
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   SOCIAL FEATURES - WISHLISTS, SHARING, RATINGS
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Wishlist Items */
+.wishlist-item {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  background: var(--color-surface);
+  transition: all 0.2s;
+}
+
+.wishlist-item:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+}
+
+.wishlist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Rating Stars */
+.rating-star {
+  font-size: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.3;
+  transition: all 0.2s;
+  display: inline-block;
+}
+
+.rating-star:hover {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+/* Trading Log */
+.trading-log-item {
+  border-left: 4px solid var(--color-primary);
+  padding: 12px;
+  background: var(--color-bg);
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.trading-log-type {
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.trading-log-details {
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.trading-log-timestamp {
+  font-size: 12px;
+  color: var(--color-muted);
+  margin-top: 6px;
+}
+
+/* Achievement Badge */
+.achievement-badge {
+  border: 2px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  background: var(--color-surface);
+  transition: all 0.2s;
+}
+
+.achievement-badge.unlocked {
+  border-color: var(--color-primary);
+  background: var(--color-bg);
+}
+
+.achievement-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.achievement-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.achievement-name {
+  font-weight: bold;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.achievement-desc {
+  font-size: 11px;
+  color: var(--color-muted);
+}
+
+/* Sharing Panel */
+.share-link-container {
+  background: var(--color-bg);
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.share-link-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 12px;
+  resize: none;
+}
+
+.share-link-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* Rating Widget */
+.rating-widget {
+  background: var(--color-surface);
+  padding: 16px;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+.rating-stars-container {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.rating-review-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 13px;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.rating-save-btn {
+  margin-top: 12px;
+  padding: 10px 16px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.rating-save-btn:hover {
+  background: var(--color-primary-h);
+}
+
+/* Rating Statistics */
+.rating-stats {
+  background: var(--color-surface);
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.rating-stat-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.rating-stat-label {
+  width: 30px;
+  font-size: 12px;
+}
+
+.rating-stat-bar-fill {
+  flex: 1;
+  height: 20px;
+  background: var(--color-bg);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.rating-stat-bar-value {
+  height: 100%;
+  background: var(--color-primary);
+  transition: width 0.3s;
+}
+
+.rating-stat-count {
+  width: 30px;
+  text-align: right;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* CSV Export Panel */
+.csv-preview {
+  width: 100%;
+  height: 200px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 11px;
+  background: var(--color-bg);
+  resize: none;
+}
+
+/* Modal Dialog Improvements */
+dialog.ss-dialog {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+dialog.ss-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Responsive Adjustments for Social Features */
+@media (max-width: 768px) {
+  .rating-stats {
+    font-size: 12px;
+  }
+
+  .achievement-badge {
+    padding: 12px;
+  }
+
+  .achievement-icon {
+    font-size: 24px;
+  }
+
+  .share-link-buttons {
+    flex-direction: column;
+  }
+
+  .share-link-buttons button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  dialog.ss-dialog {
+    width: 95vw !important;
+    max-width: 95vw !important;
+  }
+
+  .rating-stars-container {
+    gap: 8px;
+  }
+
+  .rating-star {
+    font-size: 20px;
+  }
+
+  .achievement-badge {
+    padding: 10px;
+  }
+}
+
+

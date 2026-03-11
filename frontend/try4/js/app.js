@@ -46,6 +46,20 @@ import {
   generateCollectionInsights, generateSetComparison,
   NotificationManager, PerformanceTracker
 } from './advanced-tools.js';
+import {
+  loadWishlists, addTradeLog, getTradingLog, checkAchievementsProgress,
+  importCollectionFromCSV, GestureController, rateSet, getAllRatings
+} from './social-features.js';
+import {
+  createWishlistPanel, createSharingDialog, createTradingLogPanel,
+  createAchievementsPanel, createCSVExportPanel, createSetRatingWidget,
+  createRatingStatsWidget
+} from './social-ui.js';
+import {
+  VoiceCommandRecognizer, GestureRecognizer, downloadJson, downloadCsv,
+  createLocalBackup, getLocalBackups, restoreLocalBackup, deleteLocalBackup,
+  generateAdvancedStatistics, generateCollectionInsights
+} from './advanced-features.js';
 
 // ══════════════════════════════════════════════════════════════════════════
 // DOM-REFERENZEN
@@ -2549,6 +2563,107 @@ async function loadCurrentSet(forceRefresh = false) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
+// VOICE COMMANDS INITIALIZATION
+// ══════════════════════════════════════════════════════════════════════════
+function initVoiceCommands() {
+  try {
+    const voiceRecognizer = new VoiceCommandRecognizer((command) => {
+      console.log('✅ Voice command received:', command);
+      if (command === 'search-set') {
+        dom.search?.focus();
+        showToast('🎤 Searching...', 'info', 2000);
+      } else if (command === 'show-collection') {
+        navigate('dashboard');
+        showToast('🎤 Showing collection', 'info', 2000);
+      } else if (command === 'show-stats') {
+        showToast('🎤 Opening statistics', 'info', 2000);
+      } else if (command === 'settings') {
+        commandHandlers['settings']();
+      } else if (command === 'wishlists') {
+        commandHandlers['wishlists']?.();
+      }
+    });
+
+    // Add voice button to header
+    if (!document.getElementById('voice-btn')) {
+      const voiceBtn = document.createElement('button');
+      voiceBtn.id = 'voice-btn';
+      voiceBtn.textContent = '🎤';
+      voiceBtn.style.cssText = `
+        padding: 8px 12px; 
+        background: var(--color-primary); 
+        color: white; 
+        border: none; 
+        border-radius: 4px; 
+        cursor: pointer;
+        font-size: 14px;
+      `;
+
+      if (voiceRecognizer.isSupported()) {
+        voiceBtn.addEventListener('click', () => {
+          if (voiceRecognizer.isListening) {
+            voiceRecognizer.stop();
+            voiceBtn.style.background = 'var(--color-primary)';
+            showToast('🎤 Stopped listening', 'info', 2000);
+          } else {
+            voiceRecognizer.start();
+            voiceBtn.style.background = '#ff6b6b';
+            showToast('🎤 Listening...', 'info', 2000);
+          }
+        });
+
+        dom.headerActions?.appendChild(voiceBtn);
+        console.log('✅ Voice commands enabled');
+      } else {
+        voiceBtn.disabled = true;
+        voiceBtn.title = 'Speech Recognition not supported';
+        voiceBtn.style.opacity = '0.5';
+      }
+    }
+  } catch (err) {
+    console.warn('⚠️ Voice commands init failed:', err);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// GESTURE CONTROLS INITIALIZATION
+// ══════════════════════════════════════════════════════════════════════════
+function initGestureControls() {
+  try {
+    const gestureRecognizer = new GestureRecognizer(document.body, (gesture, data) => {
+      console.log('👆 Gesture detected:', gesture, data);
+
+      if (gesture === 'swipe-right') {
+        navigate('dashboard');
+        showToast('👆 Swiped right', 'info', 1000);
+      } else if (gesture === 'swipe-left') {
+        // Navigate to next set or next view
+        showToast('👆 Swiped left', 'info', 1000);
+      } else if (gesture === 'swipe-up') {
+        // Scroll up or show last set
+        showToast('👆 Swiped up', 'info', 1000);
+      } else if (gesture === 'swipe-down') {
+        // Pull to refresh
+        if (state.currentSet) {
+          loadCurrentSet(true);
+          showToast('👆 Refreshing...', 'info', 1000);
+        }
+      } else if (gesture === 'longpress') {
+        // Show context menu
+        console.log('Long press at:', data);
+      } else if (gesture === 'pinch') {
+        // Zoom in/out
+        console.log('Pinch scale:', data.scale);
+      }
+    });
+
+    console.log('✅ Gesture controls initialized');
+  } catch (err) {
+    console.warn('⚠️ Gesture controls init failed:', err);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
 // BOOTSTRAP
 // ══════════════════════════════════════════════════════════════════════════
 async function bootstrap() {
@@ -2564,6 +2679,8 @@ async function bootstrap() {
   initBackupImportExport();
   initQueueBuilderDialog();
   initLightbox();
+  initVoiceCommands();
+  initGestureControls();
   initBulkEdit();
   initKeyboardNav();
   initDashboardControls();
@@ -2687,6 +2804,121 @@ async function bootstrap() {
     },
     'help': () => {
       showToast('Verfügbare Befehle: import, health-check, backup, parity, search, snapshots, settings, export', 'info', 5000);
+    },
+    'wishlists': () => {
+      const panel = createWishlistPanel();
+      const dialog = document.createElement('dialog');
+      dialog.className = 'ss-dialog';
+      dialog.style.cssText = 'width: 90vw; max-width: 600px;';
+      dialog.appendChild(panel);
+      document.body.appendChild(dialog);
+      dialog.showModal();
+      dialog.addEventListener('close', () => dialog.remove());
+    },
+    'share-collection': () => {
+      if (!state.allSets || state.allSets.length === 0) {
+        showToast('Keine Collection zum Teilen', 'error');
+        return;
+      }
+      const collectionData = {}; // Würde hier echte Collection-Daten laden
+      const panel = createSharingDialog(collectionData, state.allSets);
+      const dialog = document.createElement('dialog');
+      dialog.className = 'ss-dialog';
+      dialog.style.cssText = 'width: 90vw; max-width: 600px;';
+      dialog.appendChild(panel);
+      document.body.appendChild(dialog);
+      dialog.showModal();
+      dialog.addEventListener('close', () => dialog.remove());
+    },
+    'trading-log': () => {
+      const panel = createTradingLogPanel();
+      const dialog = document.createElement('dialog');
+      dialog.className = 'ss-dialog';
+      dialog.style.cssText = 'width: 90vw; max-width: 700px;';
+      dialog.appendChild(panel);
+      document.body.appendChild(dialog);
+      dialog.showModal();
+      dialog.addEventListener('close', () => dialog.remove());
+    },
+    'achievements': async () => {
+      const stats = calculateCollectionStats(state.summaryData || []);
+      const panel = createAchievementsPanel(stats);
+      const dialog = document.createElement('dialog');
+      dialog.className = 'ss-dialog';
+      dialog.style.cssText = 'width: 90vw; max-width: 600px;';
+      dialog.appendChild(panel);
+      document.body.appendChild(dialog);
+      dialog.showModal();
+      dialog.addEventListener('close', () => dialog.remove());
+    },
+    'csv-export': () => {
+      if (!state.allSets || state.allSets.length === 0) {
+        showToast('Keine Sets zum Exportieren', 'error');
+        return;
+      }
+      const collectionData = {}; // Würde echte Collection-Daten laden
+      const panel = createCSVExportPanel(collectionData, state.allSets);
+      const dialog = document.createElement('dialog');
+      dialog.className = 'ss-dialog';
+      dialog.style.cssText = 'width: 90vw; max-width: 600px;';
+      dialog.appendChild(panel);
+      document.body.appendChild(dialog);
+      dialog.showModal();
+      dialog.addEventListener('close', () => dialog.remove());
+    },
+    'voice': () => {
+      showToast('🎤 Sprachsteuerung aktiviert - Sag einen Befehl', 'info', 3000);
+    },
+    'local-backup': () => {
+      try {
+        const backupData = {
+          sets: state.allSets,
+          imported: state.sets,
+          timestamp: new Date().toISOString()
+        };
+        const backupKey = createLocalBackup(backupData, `Backup ${new Date().toLocaleDateString()}`);
+        if (backupKey) {
+          showToast('💾 Lokale Sicherung erstellt', 'success', 3000);
+        } else {
+          showToast('Sicherung fehlgeschlagen', 'error');
+        }
+      } catch (err) {
+        showToast(`Sicherungsfehler: ${err.message}`, 'error');
+      }
+    },
+    'show-backups': () => {
+      const backups = getLocalBackups();
+      if (backups.length === 0) {
+        showToast('Keine lokalen Sicherungen gefunden', 'info');
+        return;
+      }
+
+      const list = document.createElement('div');
+      list.style.cssText = 'max-height: 400px; overflow-y: auto;';
+
+      backups.forEach((backup) => {
+        const item = document.createElement('div');
+        item.style.cssText = 'padding: 12px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center;';
+        item.innerHTML = `
+          <div>
+            <strong>${backup.name}</strong><br/>
+            <small style="color: var(--color-muted);">${new Date(backup.timestamp).toLocaleString('de-DE')}</small>
+          </div>
+          <button style="padding: 6px 12px; background: var(--color-primary); color: white; border: none; border-radius: 4px; cursor: pointer;">
+            Wiederherstellen
+          </button>
+        `;
+        list.appendChild(item);
+      });
+
+      const dialog = document.createElement('dialog');
+      dialog.className = 'ss-dialog';
+      dialog.style.cssText = 'width: 90vw; max-width: 500px;';
+      dialog.innerHTML = '<h3>💾 Lokale Sicherungen</h3>';
+      dialog.appendChild(list);
+      document.body.appendChild(dialog);
+      dialog.showModal();
+      dialog.addEventListener('close', () => dialog.remove());
     }
   };
   
