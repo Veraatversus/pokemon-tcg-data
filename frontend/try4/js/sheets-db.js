@@ -7,12 +7,20 @@ import {
 } from './utils.js';
 
 async function getValues(range, renderOption = 'UNFORMATTED_VALUE') {
-  const response = await gapi.client.sheets.spreadsheets.values.get({
-    spreadsheetId: CONFIG.SPREADSHEET_ID,
-    range,
-    valueRenderOption: renderOption
-  });
-  return response.result.values || [];
+  try {
+    if (!gapi?.client?.sheets?.spreadsheets?.values?.get) {
+      throw new Error('Sheets API nicht initialisiert – bitte melden Sie sich an');
+    }
+    const response = await gapi.client.sheets.spreadsheets.values.get({
+      spreadsheetId: CONFIG.SPREADSHEET_ID,
+      range,
+      valueRenderOption: renderOption
+    });
+    return response.result.values || [];
+  } catch (err) {
+    console.error('[getValues]', err);
+    throw err;
+  }
 }
 
 // Formeln müssen mit FORMULA gelesen werden (z.B. HYPERLINK in Overview)
@@ -21,12 +29,20 @@ async function getFormulas(range) {
 }
 
 async function putValues(range, values) {
-  await gapi.client.sheets.spreadsheets.values.update({
-    spreadsheetId: CONFIG.SPREADSHEET_ID,
-    range,
-    valueInputOption: 'USER_ENTERED',
-    resource: { values }
-  });
+  try {
+    if (!gapi?.client?.sheets?.spreadsheets?.values?.update) {
+      throw new Error('Sheets API nicht initialisiert – bitte melden Sie sich an');
+    }
+    await gapi.client.sheets.spreadsheets.values.update({
+      spreadsheetId: CONFIG.SPREADSHEET_ID,
+      range,
+      valueInputOption: 'USER_ENTERED',
+      resource: { values }
+    });
+  } catch (err) {
+    console.error('[putValues]', err);
+    throw err;
+  }
 }
 
 /**
