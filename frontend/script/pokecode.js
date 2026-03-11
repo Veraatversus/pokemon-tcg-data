@@ -2673,10 +2673,11 @@ function reimportCurrentSet() {
   const { setId, setName } = currentSetInfo;
 
   // Bestätigung anfordern
-  const response = ui.prompt(
-    'Script-Backup wiederherstellen',
-    `Diese Funktion stellt Script-Backups wieder her (nicht CSV).\n\nVerfügbare Backups:\n${backupList}\n\nGeben Sie den Zeitstempel ein (z.B. 20260201_143055):`,
-    ui.ButtonSet.OK_CANCEL
+  const response = ui.alert(
+    'Aktuelles Set reimportieren',
+    `Möchten Sie das Set "${setName}" jetzt neu importieren?\n\n` +
+    `Die Karten werden aus den APIs neu geladen. Ihr Sammlungsstatus (Checkboxen) bleibt erhalten.`,
+    ui.ButtonSet.YES_NO
   );
 
   if (response !== ui.Button.YES) {
@@ -2688,8 +2689,6 @@ function reimportCurrentSet() {
     SpreadsheetApp.getActive().toast(`Reimportiere Set "${setName}"...`, "🔄 In Arbeit", 5);
     
     // Lösche alte Kartendaten aus Properties für dieses Set
-    const collectedCardsData = getScriptPropertiesData('collectedCardsData');
-    const customImageUrls = getScriptPropertiesData('customImageUrls');
     const cardDataKey = `cardData_${setId}`;
     
     // Behalte Sammlungs-Status, lösche aber alte Kartendaten
