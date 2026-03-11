@@ -1,13 +1,15 @@
 import { initAuth, signIn, signOut, isSignedIn } from './auth.js';
 import {
   listImportedSets,
+  listSetsOverviewData,
   readSetCollectionMap,
   updateCellBoolean,
   readSummarySheet,
   readSettings,
   writeSetting,
+  importSetIntoCollection,
 } from './sheets-db.js';
-import { fetchMergedCards } from './pokemon-api.js';
+import { fetchMergedCards, fetchAllAvailableSets } from './pokemon-api.js';
 import { normalizeCardNumber } from './utils.js';
 import * as cache from './cache.js';
 import { CONFIG } from './config.js';
@@ -100,6 +102,7 @@ const dom = {
 const state = {
   loggedIn:     false,
   sets:         [],
+  allSets:      [],
   summaryData:  null,
   currentSet:   null,
   dbMap:        new Map(),
@@ -260,13 +263,41 @@ function initSpreadsheetDialog() {
 async function loadSets() {
   setLoading(true, 'Lade Sets\u2026');
   try {
-    const sets = await listImportedSets();
-    if (!Array.isArray(sets)) throw new Error('Ungültiges Sets-Format');
-    state.sets = sets;
+    const [importedSets, overviewSets, apiSets] = await Promise.all([
+      listImportedSets(),
+      listSetsOverviewData().catch(() => []),
+      fetchAllAvailableSets().catch(() => [])
+    ]);
 
-    // ── Set-Selector mit Serien-Gruppen ──
+    if (!Array.isArray(importedSets)) throw new Error('Ungültiges Sets-Format');
+    state.sets = importedSets;
+
+    const importedById = new Map(importedSets.map((set) => [set.setId, set]));
+    const overviewById = new Map((overviewSets || []).map((set) => [set.setId, set]));
+    const mergedMap = new Map();
+
+    (apiSets || []).forEach((set) => {
+      mergedMap.set(set.setId, {
+        ...set,
+        imported: Boolean(importedById.get(set.setId)?.imported || overviewById.get(set.setId)?.imported)
+      });
+    });
+
+    (overviewSets || []).forEach((set) => {
+      if (!mergedMap.has(set.setId)) {
+        mergedMap.set(set.setId, { ...set, imported: Boolean(set.imported) });
+      }
+    });
+
+    importedSets.forEach((set) => {
+      const current = mergedMap.get(set.setId) || {};
+      mergedMap.set(set.setId, { ...current, ...set, imported: true });
+    });
+
+    state.allSets = Array.from(mergedMap.values());
+
     dom.selector.innerHTML = '<option value="">Bitte w\u00e4hlen\u2026</option>';
-    const seriesMap = buildSeriesMap(sets);
+    const seriesMap = buildSeriesMap(importedSets);
     seriesMap.forEach((setsArr, seriesName) => {
       const group = document.createElement('optgroup');
       group.label = seriesName;
@@ -283,18 +314,16 @@ async function loadSets() {
     dom.load.disabled     = false;
     dom.refresh.disabled  = false;
 
-    // ── Dashboard-Serien-Filter ──
     dom.dashSeriesFilter.innerHTML = '<option value="">Alle Serien</option>';
-    seriesMap.forEach((_, name) => {
+    buildSeriesMap(state.allSets).forEach((_, name) => {
       const opt = document.createElement('option');
       opt.value = name;
       opt.textContent = name;
       dom.dashSeriesFilter.appendChild(opt);
     });
 
-    // ── Suchfeld-Set-Filter ──
     dom.searchSetFilter.innerHTML = '<option value="">Alle Sets</option>';
-    sets.forEach((set) => {
+    importedSets.forEach((set) => {
       const opt = document.createElement('option');
       opt.value = set.setId;
       opt.textContent = set.setName;
@@ -304,7 +333,7 @@ async function loadSets() {
     const settings = await readSettings();
     if (settings.lastSetId) dom.selector.value = settings.lastSetId;
 
-    setGlobalStatus(`${sets.length} Sets geladen.`);
+    setGlobalStatus(`${importedSets.length} von ${state.allSets.length} Sets geladen.`);
     dom.mainNav.classList.remove('hidden');
 
     if (!window.location.hash || window.location.hash === '#') {
@@ -317,6 +346,7 @@ async function loadSets() {
     showToast(`Fehler beim Laden der Sets: ${err.message}`, 'error');
     setGlobalStatus('Sets konnten nicht geladen werden.');
     state.sets = [];
+    state.allSets = [];
   } finally {
     setLoading(false);
   }
@@ -344,7 +374,7 @@ async function renderDashboard() {
     const summaryByName = new Map();
     (state.summaryData || []).forEach((row) => summaryByName.set(row.setName, row));
 
-    let sets = [...state.sets];
+    let sets = [...state.allSets];
     const filterText = dom.dashFilter.value.toLowerCase().trim();
     if (filterText) {
       sets = sets.filter(
@@ -387,14 +417,20 @@ async function renderDashboard() {
         section.appendChild(h3);
         const grid = document.createElement('div');
         grid.className = 'dash-sets-row';
-        setsArr.forEach((set) => grid.appendChild(createDashSetCard(set, summaryByName.get(set.setName))));
+        setsArr.forEach((set) => {
+          const summary = summaryByName.get(set.setName) || summaryByName.get(set.setId);
+          grid.appendChild(createDashSetCard(set, summary));
+        });
         section.appendChild(grid);
         dom.dashboardGrid.appendChild(section);
       });
     } else {
       const grid = document.createElement('div');
       grid.className = 'dash-sets-row';
-      sets.forEach((set) => grid.appendChild(createDashSetCard(set, summaryByName.get(set.setName))));
+      sets.forEach((set) => {
+        const summary = summaryByName.get(set.setName) || summaryByName.get(set.setId);
+        grid.appendChild(createDashSetCard(set, summary));
+      });
       dom.dashboardGrid.appendChild(grid);
     }
   } catch (err) {
@@ -407,6 +443,7 @@ async function renderDashboard() {
 function createDashSetCard(set, summary) {
   const card = document.createElement('div');
   card.className = 'dash-set-card';
+  card.classList.toggle('not-imported', !set.imported);
   const total     = summary?.total     ?? 0;
   const collected = summary?.collected ?? 0;
   const rh        = summary?.rh        ?? 0;
@@ -423,16 +460,57 @@ function createDashSetCard(set, summary) {
     <div class="dash-set-info">
       <p class="dash-set-name">${set.setName}</p>
       <p class="dash-set-series">${set.series || ''}</p>
-      <div class="dash-progress-bar"><div class="dash-progress-fill" style="width:${percent}%"></div></div>
-      <p class="dash-progress-text">${collected}\u202f/\u202f${total || '?'} (${percent}%)</p>
+      <div class="dash-progress-bar"><div class="dash-progress-fill" style="width:${set.imported ? percent : 0}%"></div></div>
+      <p class="dash-progress-text">${set.imported ? `${collected}\u202f/\u202f${total || '?'} (${percent}%)` : `Noch nicht importiert (${set.totalCards || '?' } Karten)`}</p>
       ${rh > 0 ? `<p class="dash-rh-text">RH: ${rh}</p>` : ''}
+      ${set.imported ? '' : '<button class="btn-secondary dash-import-btn" type="button">➕ In Sammlung importieren</button>'}
     </div>`;
 
+  const importButton = card.querySelector('.dash-import-btn');
+  if (importButton) {
+    importButton.addEventListener('click', async (event) => {
+      event.stopPropagation();
+      await importSetFromOverview(set);
+    });
+  }
+
   card.addEventListener('click', () => {
+    if (!set.imported) return;
     dom.selector.value = set.setId;
     navigate(`set/${set.setId}`);
   });
   return card;
+}
+
+async function importSetFromOverview(set) {
+  if (!set?.setId) return;
+  if (set.imported) {
+    dom.selector.value = set.setId;
+    navigate(`set/${set.setId}`);
+    return;
+  }
+
+  setLoading(true, `Importiere ${set.setName}…`);
+  setGlobalStatus(`Importiere ${set.setName}…`);
+  try {
+    const cards = await fetchMergedCards(set.setId);
+    await importSetIntoCollection(set, cards);
+    cache.del(`cards_${set.setId}`);
+    cache.del(`db_${set.setId}`);
+    state.summaryData = null;
+
+    await loadSets();
+    dom.selector.value = set.setId;
+    navigate(`set/${set.setId}`);
+    await loadCurrentSet(true);
+    showToast(`${set.setName} wurde importiert.`, 'success', 3000);
+  } catch (err) {
+    console.error('[importSetFromOverview]', err);
+    showToast(`Import fehlgeschlagen: ${err.message}`, 'error', 5000);
+    setGlobalStatus(`Import fehlgeschlagen: ${set.setName}`);
+  } finally {
+    setLoading(false);
+  }
 }
 
 function initDashboardControls() {
@@ -1174,7 +1252,7 @@ async function onLoginSuccess() {
 }
 
 function resetToLoggedOut() {
-  state.loggedIn = false; state.sets = []; state.currentSet = null;
+  state.loggedIn = false; state.sets = []; state.allSets = []; state.currentSet = null;
   state.dbMap = new Map(); state.cards = []; state.summaryData = null;
   dom.cards.innerHTML = '';
   dom.selector.innerHTML = '<option value="">Bitte w\u00e4hlen\u2026</option>';

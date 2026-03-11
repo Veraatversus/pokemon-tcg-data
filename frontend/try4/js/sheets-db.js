@@ -262,8 +262,137 @@ export async function readSummarySheet() {
 /** Hilfsfunktion: Extrahiert die URL aus einer =IMAGE("...") Formel. */
 function extractImageUrl(value) {
   if (!value) return '';
-  const match = /=IMAGE\("([^"]+)"/.exec(String(value));
-  return match ? match[1] : '';
+  const text = String(value);
+  const match = /=IMAGE\("([^"]+)"/.exec(text);
+  if (match) return match[1];
+  if (/^https?:\/\//i.test(text)) return text;
+  return '';
+}
+
+function toSafeCellString(value) {
+  return String(value ?? '').trim();
+}
+
+function buildOverviewRowValues(setMeta, imported = false) {
+  return [[
+    toSafeCellString(setMeta.setId),
+    toSafeCellString(setMeta.setName),
+    toSafeCellString(setMeta.logoUrl),
+    toSafeCellString(setMeta.symbolUrl),
+    toSafeCellString(setMeta.series),
+    toSafeCellString(setMeta.releaseDate),
+    Number(setMeta.totalCards) || 0,
+    toSafeCellString(setMeta.ptcgoCode),
+    Boolean(imported),
+    false
+  ]];
+}
+
+async function clearValues(range) {
+  if (!gapi?.client?.sheets?.spreadsheets?.values?.clear) return;
+  await gapi.client.sheets.spreadsheets.values.clear({
+    spreadsheetId: CONFIG.SPREADSHEET_ID,
+    range
+  });
+}
+
+async function ensureSetSheet(sheetName) {
+  const meta = await gapi.client.sheets.spreadsheets.get({
+    spreadsheetId: CONFIG.SPREADSHEET_ID,
+    fields: 'sheets(properties(sheetId,title))'
+  });
+
+  const existing = (meta.result.sheets || []).find(
+    (sheet) => sheet.properties?.title === sheetName
+  );
+  if (existing) return existing.properties;
+
+  const createRes = await gapi.client.sheets.spreadsheets.batchUpdate({
+    spreadsheetId: CONFIG.SPREADSHEET_ID,
+    resource: {
+      requests: [{ addSheet: { properties: { title: sheetName } } }]
+    }
+  });
+
+  return createRes.result?.replies?.[0]?.addSheet?.properties || null;
+}
+
+function buildCardGridValues(cards) {
+  const cols = CONFIG.GRID.CARDS_PER_ROW * CONFIG.GRID.BLOCK_WIDTH;
+  const blocks = Math.max(1, Math.ceil(cards.length / CONFIG.GRID.CARDS_PER_ROW));
+  const rows = blocks * CONFIG.GRID.BLOCK_HEIGHT;
+  const values = Array.from({ length: rows }, () => Array(cols).fill(''));
+
+  cards.forEach((card, index) => {
+    const blockRow = Math.floor(index / CONFIG.GRID.CARDS_PER_ROW);
+    const blockCol = index % CONFIG.GRID.CARDS_PER_ROW;
+    const baseRow = blockRow * CONFIG.GRID.BLOCK_HEIGHT;
+    const baseCol = blockCol * CONFIG.GRID.BLOCK_WIDTH;
+
+    values[baseRow][baseCol] = toSafeCellString(card.number);
+    values[baseRow][baseCol + 1] = toSafeCellString(card.name);
+    values[baseRow + 1][baseCol + 2] = toSafeCellString(card.image);
+    values[baseRow + 2][baseCol] = false;
+    values[baseRow + 2][baseCol + 1] = false;
+    values[baseRow + 2][baseCol + 2] = toSafeCellString(card.cardmarketUrl);
+  });
+
+  return values;
+}
+
+async function upsertOverviewEntry(setMeta) {
+  const sheets = await resolveSheetNames();
+  const overviewRange = buildRange(sheets.overview, 'A3:J');
+  const rows = await getFormulas(overviewRange).catch(() => []);
+  const normalizedTargetId = toSafeCellString(setMeta.setId).toLowerCase();
+
+  let targetRow = -1;
+  for (let index = 0; index < rows.length; index++) {
+    const rowSetId = extractDisplayTextFromHyperlink(rows[index]?.[0]);
+    if (toSafeCellString(rowSetId).toLowerCase() === normalizedTargetId) {
+      targetRow = 3 + index;
+      break;
+    }
+  }
+
+  if (targetRow < 0) {
+    targetRow = Math.max(4, 3 + rows.length);
+  }
+
+  await putValues(buildRange(sheets.overview, `A${targetRow}:J${targetRow}`), buildOverviewRowValues(setMeta, true));
+}
+
+/**
+ * Importiert ein Set in die Sammlung:
+ * - trägt/aktualisiert das Set in der Overview
+ * - erstellt (falls nötig) das Set-Blatt
+ * - schreibt das Karten-Grid gemäß pokecode-Schema
+ */
+export async function importSetIntoCollection(setMeta, cards) {
+  if (!setMeta?.setId || !setMeta?.setName) {
+    throw new Error('Set-Metadaten unvollständig (setId/setName fehlen).');
+  }
+  if (!Array.isArray(cards) || cards.length === 0) {
+    throw new Error(`Keine Karten für Set ${setMeta.setId} gefunden.`);
+  }
+
+  const sheetName = toSafeCellString(setMeta.setName);
+  await ensureSetSheet(sheetName);
+
+  const gridValues = buildCardGridValues(cards);
+  const endColumnIndex = CONFIG.GRID.CARDS_PER_ROW * CONFIG.GRID.BLOCK_WIDTH;
+  const endColumn = colToA1(endColumnIndex);
+  const endRow = 2 + gridValues.length;
+
+  await putValues(buildRange(sheetName, 'A1:B1'), [[setMeta.setId, setMeta.setName]]);
+  await clearValues(buildRange(sheetName, `A3:${endColumn}5000`));
+  await putValues(buildRange(sheetName, `A3:${endColumn}${endRow}`), gridValues);
+
+  await upsertOverviewEntry({
+    ...setMeta,
+    setName: sheetName,
+    totalCards: Number(setMeta.totalCards) || cards.length
+  });
 }
 
 export async function readSetCollectionMap(setSheetName) {

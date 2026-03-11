@@ -522,6 +522,10 @@ body.dark .card img { background: #0f172a; }
 }
 .dash-set-card.complete    { background: var(--color-complete); }
 .dash-set-card.in-progress { border-left: 3px solid var(--color-primary); }
+.dash-set-card.not-imported {
+  border-style: dashed;
+  cursor: default;
+}
 
 .dash-set-logo-wrap {
   height: 52px;
@@ -559,6 +563,13 @@ body.dark .dash-progress-bar { background: #334155; }
   transition: width 0.4s ease;
 }
 .dash-progress-text { margin: 0; font-size: 11px; color: var(--color-muted); }
+
+.dash-import-btn {
+  margin-top: 8px;
+  width: 100%;
+  font-size: 12px;
+  padding: 7px 8px;
+}
 
 /* ══════════════════════════════════════════════════════════════════════════
    Statistiken-View

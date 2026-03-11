@@ -55,6 +55,53 @@ function toTcgdexId(pokemontcgId) {
   return CONFIG.CUSTOM_SET_ID_MAPPINGS[pokemontcgId] ?? pokemontcgId;
 }
 
+function toNumber(value) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function mapSetToOverviewModel(set) {
+  const id = String(set?.id || '').trim();
+  if (!id) return null;
+  const totalCards =
+    toNumber(set?.total) ||
+    toNumber(set?.printedTotal) ||
+    toNumber(set?.cardCount?.total) ||
+    toNumber(set?.cardCount?.official);
+
+  return {
+    setId: id,
+    setName: set?.name || id,
+    logoUrl: set?.images?.logo || set?.logo || '',
+    symbolUrl: set?.images?.symbol || set?.symbol || '',
+    series: set?.series || '',
+    releaseDate: set?.releaseDate || set?.release_date || '',
+    totalCards,
+    ptcgoCode: set?.ptcgoCode || set?.code || ''
+  };
+}
+
+async function fetchVeraSets() {
+  const url = `${CONFIG.APIS.VERA_BASE}/sets/${CONFIG.VERA_API_LANGUAGE}.json`;
+  const data = await fetchJson(url);
+  return Array.isArray(data) ? data : [];
+}
+
+async function fetchPokemontcgSets() {
+  let page = 1;
+  const pageSize = 250;
+  const all = [];
+  while (true) {
+    const url = `${CONFIG.APIS.POKEMONTCG}/sets?page=${page}&pageSize=${pageSize}&orderBy=releaseDate`;
+    const response = await fetchJson(url);
+    const sets = response?.data || [];
+    if (!sets.length) break;
+    all.push(...sets);
+    page += 1;
+  }
+  return all;
+}
+
 /**
  * Gibt die beste Bild-URL für eine TCGDex-Karte zurück.
  * Priorität: TCGDex .image → Pokemontcg.io CDN-URL
@@ -159,4 +206,29 @@ export async function fetchMergedCards(setId) {
   });
 
   return naturalSort(merged, 'number');
+}
+
+/**
+ * Lädt alle verfügbaren Sets für das Dashboard-Overview.
+ * Priorität: Vera-API, Fallback: pokemontcg.io.
+ * @returns {Promise<Array<{setId, setName, logoUrl, symbolUrl, series, releaseDate, totalCards, ptcgoCode}>>}
+ */
+export async function fetchAllAvailableSets() {
+  let sourceSets = [];
+  if (CONFIG.USE_VERA_API) {
+    try {
+      sourceSets = await fetchVeraSets();
+    } catch (err) {
+      console.warn('[fetchAllAvailableSets] Vera sets failed, fallback to pokemontcg.io', err);
+      sourceSets = await fetchPokemontcgSets();
+    }
+  } else {
+    sourceSets = await fetchPokemontcgSets();
+  }
+
+  const mapped = sourceSets
+    .map(mapSetToOverviewModel)
+    .filter(Boolean);
+
+  return naturalSort(mapped, (set) => `${set.series || ''} ${set.releaseDate || ''} ${set.setName || ''}`);
 }
