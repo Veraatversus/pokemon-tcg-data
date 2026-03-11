@@ -23,6 +23,44 @@ function gapiLoadClient() {
   });
 }
 
+  const GAPI_TIMEOUT_MS = 10000;
+
+  function gapiLoadClient() {
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error('gapi.load client timeout after ' + GAPI_TIMEOUT_MS + 'ms'));
+      }, GAPI_TIMEOUT_MS);
+
+      try {
+        if (!gapi || !gapi.load) {
+          clearTimeout(timeout);
+          throw new Error('gapi or gapi.load not available');
+        }
+      
+        console.log('[gapiLoadClient] calling gapi.load...');
+        gapi.load('client', () => {
+          clearTimeout(timeout);
+          try {
+            console.log('[gapiLoadClient] gapi.load callback fired');
+            gapi.client.init({}).then(() => {
+              console.log('[gapiLoadClient] gapi.client.init success');
+              resolve();
+            }).catch((error) => {
+              console.error('[gapiLoadClient init error]', error);
+              reject(error);
+            });
+          } catch (error) {
+            console.error('[gapiLoadClient callback]', error);
+            reject(error);
+          }
+        });
+      } catch (err) {
+        clearTimeout(timeout);
+        console.error('[gapiLoadClient setup]', err);
+        reject(err);
+      }
+    });
+  }
 /** Lädt die Sheets-Discovery-Docs und setzt den gespeicherten Token in den Client. */
 export async function loadDiscoveryDocs() {
   try {
@@ -86,21 +124,37 @@ async function tryRestoreToken() {
  * @returns {Promise<boolean>} true wenn Auto-Login erfolgreich war
  */
 export async function initAuth() {
-  await gapiLoadClient();
-  gapiInited = true;
+  try {
+    console.log('[initAuth] start');
+    console.log('[initAuth] checking globals:', { gapi: !!typeof gapi !== 'undefined', google: !!typeof google !== 'undefined' });
+    
+    console.log('[initAuth] loading gapi.client...');
+    await gapiLoadClient();
+    console.log('[initAuth] gapi.client loaded');
+    gapiInited = true;
 
-  tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: CONFIG.GOOGLE_CLIENT_ID,
-    scope: CONFIG.SCOPES,
-    callback: () => {}  // wird pro Request überschrieben
-  });
-  gisInited = true;
+    console.log('[initAuth] initializing gis tokenClient...');
+    if (!google?.accounts?.oauth2) {
+      throw new Error('google.accounts.oauth2 not initialized');
+    }
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: CONFIG.GOOGLE_CLIENT_ID,
+      scope: CONFIG.SCOPES,
+      callback: () => {}  // wird pro Request überschrieben
+    });
+    console.log('[initAuth] tokenClient created');
+    gisInited = true;
 
-  // Auto-Login aus localStorage
-  const restored = await tryRestoreToken();
-  return restored;
+    console.log('[initAuth] attempting restore from localStorage...');
+    const restored = await tryRestoreToken();
+    console.log('[initAuth] restore result:', restored);
+    console.log('[initAuth] complete');
+    return restored;
+  } catch (err) {
+    console.error('[initAuth] failed:', err);
+    throw err;
+  }
 }
-
 /**
  * Öffnet den OAuth-Consent-Dialog (nur wenn nicht schon angemeldet).
  * @returns {Promise<boolean>}
@@ -121,7 +175,6 @@ export function signIn() {
         } catch (discErr) {
           console.warn('[signIn] Discovery load failed, continuing:', discErr);
         }
-        resolve(true);
       } catch (err) {
         console.error('[signIn]', err);
         resolve(false);
