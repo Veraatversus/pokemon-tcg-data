@@ -3297,6 +3297,7 @@ function processCardDataEdit(e, rawCardId, setId, isGCheckbox, isRHCheckbox, isI
   if (!collectedCardsData[setId]) collectedCardsData[setId] = {};
   if (!collectedCardsData[setId][cardId]) collectedCardsData[setId][cardId] = { g: false, rh: false };
   if (!customImageUrls[setId]) customImageUrls[setId] = {};
+  const cardData = collectedCardsData[setId][cardId];
 
   // Berechne Kartenblock-Koordinaten
   const cardBlockStartCol = Math.floor((range.getColumn() - 1) / CARD_BLOCK_WIDTH_COLS) * CARD_BLOCK_WIDTH_COLS + 1;
@@ -3332,7 +3333,6 @@ function processCardDataEdit(e, rawCardId, setId, isGCheckbox, isRHCheckbox, isI
   if (isGCheckbox || isRHCheckbox) {
     Logger.log(`[processCardDataEdit] Checkbox edited.`);
     const isChecked = (e.value === true || (typeof e.value === 'string' && e.value.toLowerCase() === 'true'));
-    const cardData = collectedCardsData[setId][cardId];
 
     if (isGCheckbox) {
       const changed = handleGCheckboxChange(cardData, isChecked, rhCheckboxCell);
@@ -3364,9 +3364,9 @@ function processCardDataEdit(e, rawCardId, setId, isGCheckbox, isRHCheckbox, isI
     updateSetSheetHeaderSummary(sheet, setId, collectedCount, reverseHoloCount);
     Logger.log(`[processCardDataEdit] Header summary for set ${setId} updated.`);
 
-    // Wende Hintergrundfarbe an (nutze cardData-Referenz, die auch nach delete noch gültig ist)
-    const blockColor = cardData.rh ? REVERSE_HOL_COLLECTED_COLOR :
-                       (cardData.g ? COLLECTED_COLOR : null);
+    const persistedCardData = (collectedCardsData[setId] && collectedCardsData[setId][cardId]) || { g: false, rh: false };
+    const blockColor = persistedCardData.rh ? REVERSE_HOL_COLLECTED_COLOR :
+                       (persistedCardData.g ? COLLECTED_COLOR : null);
     cardBlockRange.setBackground(blockColor);
     Logger.log(`[processCardDataEdit] Applied color ${blockColor} to range ${cardBlockRange.getA1Notation()}.`);
   }
