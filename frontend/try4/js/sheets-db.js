@@ -15,6 +15,62 @@ function buildRange(sheetName, a1Range) {
   return `${quoteSheetName(sheetName)}!${a1Range}`;
 }
 
+let resolvedSheetsCache = null;
+
+function normalizeName(value) {
+  return String(value ?? '').trim().toLowerCase();
+}
+
+function pickSheetTitle(titles, preferred, aliases, matcher) {
+  const normalizedPreferred = normalizeName(preferred);
+  const exact = titles.find((title) => normalizeName(title) === normalizedPreferred);
+  if (exact) return exact;
+
+  const normalizedAliases = aliases.map(normalizeName);
+  const aliasHit = titles.find((title) => normalizedAliases.includes(normalizeName(title)));
+  if (aliasHit) return aliasHit;
+
+  return titles.find((title) => matcher(normalizeName(title))) || null;
+}
+
+async function resolveSheetNames() {
+  if (resolvedSheetsCache) return resolvedSheetsCache;
+
+  const meta = await gapi.client.sheets.spreadsheets.get({
+    spreadsheetId: CONFIG.SPREADSHEET_ID,
+    fields: 'sheets(properties(title))'
+  });
+
+  const titles = (meta.result.sheets || [])
+    .map((sheet) => sheet.properties?.title)
+    .filter(Boolean);
+
+  const overview = pickSheetTitle(
+    titles,
+    CONFIG.SHEETS.OVERVIEW,
+    ['Set Overview', 'Pokémon TCG Sets Übersicht', 'Pokemon TCG Sets Übersicht', 'Sets Übersicht'],
+    (name) => (name.includes('set') || name.includes('sets')) && (name.includes('overview') || name.includes('übersicht'))
+  ) || titles[0] || CONFIG.SHEETS.OVERVIEW;
+
+  const summary = pickSheetTitle(
+    titles,
+    CONFIG.SHEETS.SUMMARY,
+    ['Summary', 'Collection', 'Sammlungsübersicht'],
+    (name) => name.includes('summary') || name.includes('zusammenfassung') || name.includes('sammlung')
+  ) || CONFIG.SHEETS.SUMMARY;
+
+  const settings = pickSheetTitle(
+    titles,
+    CONFIG.SHEETS.SETTINGS,
+    ['Settings', 'WebApp Setting', 'Einstellungen'],
+    (name) => name.includes('setting') || name.includes('einstellung')
+  ) || CONFIG.SHEETS.SETTINGS;
+
+  resolvedSheetsCache = { overview, summary, settings };
+  console.log('[resolveSheetNames]', resolvedSheetsCache);
+  return resolvedSheetsCache;
+}
+
 async function getValues(range, renderOption = 'UNFORMATTED_VALUE') {
   try {
     if (!gapi?.client?.sheets?.spreadsheets?.values?.get) {
@@ -60,7 +116,8 @@ async function putValues(range, values) {
  * @returns {Promise<Array<{setId, setName, series, releaseDate, totalCards, ptcgoCode, imported}>>}
  */
 export async function listImportedSets() {
-  const rows = await getFormulas(buildRange(CONFIG.SHEETS.OVERVIEW, 'A3:J'));
+  const sheets = await resolveSheetNames();
+  const rows = await getFormulas(buildRange(sheets.overview, 'A3:J'));
   return rows
     .map((row) => ({
       setId:       extractDisplayTextFromHyperlink(row[0]),
@@ -80,7 +137,8 @@ export async function listImportedSets() {
  * @returns {Promise<Array<{setId, setName, series, releaseDate, totalCards, ptcgoCode, imported}>>}
  */
 export async function listSetsOverviewData() {
-  const rows = await getFormulas(buildRange(CONFIG.SHEETS.OVERVIEW, 'A3:J'));
+  const sheets = await resolveSheetNames();
+  const rows = await getFormulas(buildRange(sheets.overview, 'A3:J'));
   return rows
     .filter((row) => row[0])  // Mindestens eine ID
     .map((row) => ({
@@ -101,7 +159,8 @@ export async function listSetsOverviewData() {
  * @returns {Promise<Array<{setName, total, collected, rh, percent, ptcgoCode}>>}
  */
 export async function readSummarySheet() {
-  const rows = await getValues(buildRange(CONFIG.SHEETS.SUMMARY, 'A4:G'));
+  const sheets = await resolveSheetNames();
+  const rows = await getValues(buildRange(sheets.summary, 'A4:G'));
   return rows
     .filter((row) => row[0])
     .map((row) => ({
@@ -160,11 +219,12 @@ export async function updateCellBoolean(sheetName, row, col, value) {
 }
 
 export async function ensureSettingsSheet() {
+  const sheets = await resolveSheetNames();
   const sheetMeta = await gapi.client.sheets.spreadsheets.get({
     spreadsheetId: CONFIG.SPREADSHEET_ID
   });
   const exists = (sheetMeta.result.sheets || []).some(
-    (s) => s.properties?.title === CONFIG.SHEETS.SETTINGS
+    (s) => s.properties?.title === sheets.settings
   );
 
   if (!exists) {
@@ -174,13 +234,16 @@ export async function ensureSettingsSheet() {
         requests: [{ addSheet: { properties: { title: CONFIG.SHEETS.SETTINGS } } }]
       }
     });
-    await putValues(buildRange(CONFIG.SHEETS.SETTINGS, 'A1:B1'), [['key', 'value']]);
+    resolvedSheetsCache = null;
+    const refreshed = await resolveSheetNames();
+    await putValues(buildRange(refreshed.settings, 'A1:B1'), [['key', 'value']]);
   }
 }
 
 export async function readSettings() {
   await ensureSettingsSheet();
-  const rows = await getValues(buildRange(CONFIG.SHEETS.SETTINGS, 'A2:B'));
+  const sheets = await resolveSheetNames();
+  const rows = await getValues(buildRange(sheets.settings, 'A2:B'));
   const settings = {};
   rows.forEach((r) => {
     if (r[0]) settings[r[0]] = r[1] || '';
@@ -190,13 +253,14 @@ export async function readSettings() {
 
 export async function writeSetting(key, value) {
   await ensureSettingsSheet();
-  const keys = await getValues(buildRange(CONFIG.SHEETS.SETTINGS, 'A2:A'));
+  const sheets = await resolveSheetNames();
+  const keys = await getValues(buildRange(sheets.settings, 'A2:A'));
   const existingIndex = keys.findIndex((r) => r[0] === key);
 
   if (existingIndex >= 0) {
-    await putValues(buildRange(CONFIG.SHEETS.SETTINGS, `B${existingIndex + 2}`), [[value]]);
+    await putValues(buildRange(sheets.settings, `B${existingIndex + 2}`), [[value]]);
   } else {
     const nextRow = keys.length + 2;
-    await putValues(buildRange(CONFIG.SHEETS.SETTINGS, `A${nextRow}:B${nextRow}`), [[key, value]]);
+    await putValues(buildRange(sheets.settings, `A${nextRow}:B${nextRow}`), [[key, value]]);
   }
 }
