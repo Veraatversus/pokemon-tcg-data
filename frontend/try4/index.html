@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pokémon TCG Tracker</title>
+  <link rel="stylesheet" href="./css/main.css" />
+</head>
+<body>
+
+  <!-- Lade-Overlay -->
+  <div id="loading-overlay" class="loading-overlay hidden" role="status" aria-live="polite">
+    <div class="spinner"></div>
+    <p id="loading-text">Lade…</p>
+  </div>
+
+  <!-- Toast-Container -->
+  <div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+  <header class="topbar">
+    <h1>🎴 Pokémon TCG Tracker</h1>
+    <div class="auth-actions">
+      <button id="btn-login">Google Login</button>
+      <button id="btn-logout" disabled>Logout</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- Linke Sidebar -->
+    <aside class="panel sidebar">
+      <h2>Set wählen</h2>
+      <div class="row">
+        <label for="set-selector">Set</label>
+        <select id="set-selector" disabled>
+          <option value="">Bitte wählen…</option>
+        </select>
+      </div>
+      <div id="set-logo-wrap" class="set-logo-wrap hidden">
+        <img id="set-logo" src="" alt="Set-Logo" class="set-logo" />
+        <img id="set-symbol" src="" alt="Set-Symbol" class="set-symbol" />
+      </div>
+      <div class="row">
+        <button id="btn-load" disabled>Laden</button>
+        <button id="btn-refresh" disabled>Neu laden</button>
+      </div>
+      <p id="status" class="status">Nicht angemeldet.</p>
+
+      <!-- Fortschrittsanzeige -->
+      <section id="stats-section" class="stats-section hidden">
+        <h3>Sammlung</h3>
+        <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div id="progress-fill" class="progress-fill"></div>
+        </div>
+        <p id="progress-text" class="progress-text">0 / 0 (0&nbsp;%)</p>
+        <ul class="stats-list">
+          <li>Gesamt: <strong id="stat-total">0</strong></li>
+          <li>Normal: <strong id="stat-collected">0</strong></li>
+          <li>RH: <strong id="stat-rh">0</strong></li>
+          <li>Fehlend: <strong id="stat-missing">0</strong></li>
+        </ul>
+      </section>
+
+      <!-- Filter-Buttons -->
+      <section id="filter-section" class="filter-section hidden">
+        <h3>Filter</h3>
+        <div class="filter-buttons">
+          <button class="filter-btn active" data-filter="all">Alle</button>
+          <button class="filter-btn" data-filter="missing">Fehlend</button>
+          <button class="filter-btn" data-filter="collected">Gesammelt</button>
+        </div>
+      </section>
+    </aside>
+
+    <!-- Karten-Bereich -->
+    <section class="panel cards-panel">
+      <!-- Empty-State -->
+      <div id="empty-state" class="empty-state hidden">
+        <p>🗃️ Kein Set geladen. Bitte ein Set auswählen und auf „Laden“ klicken.</p>
+      </div>
+      <!-- Karten-Grid -->
+      <div id="cards" class="cards" role="list"></div>
+    </section>
+  </main>
+
+  <script src="https://apis.google.com/js/api.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

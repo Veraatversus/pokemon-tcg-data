@@ -1,0 +1,125 @@
+import { CONFIG } from './config.js';
+
+const STORAGE_KEY = 'poke_tcg_tracker_token';
+
+let tokenClient = null;
+let accessToken = null;
+let gapiInited = false;
+let gisInited = false;
+
+// ── GAPI helpers ──────────────────────────────────────────────────────────────
+
+function gapiLoadClient() {
+  return new Promise((resolve, reject) => {
+    gapi.load('client', async () => {
+      try {
+        await gapi.client.init({ apiKey: CONFIG.GOOGLE_API_KEY });
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    });
+  });
+}
+
+/** Lädt die Sheets-Discovery-Docs und setzt den gespeicherten Token in den Client. */
+export async function loadDiscoveryDocs() {
+  await gapi.client.load(CONFIG.DISCOVERY_DOCS[0]);
+}
+
+// ── Token-Persistenz (localStorage) ──────────────────────────────────────────
+
+function saveToken(tokenResponse) {
+  const expiresIn = parseInt(tokenResponse.expires_in ?? 3600, 10);
+  const data = {
+    token: tokenResponse.access_token,
+    expires_at: Date.now() + expiresIn * 1000 - 60_000  // 1 Min. Puffer
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  accessToken = tokenResponse.access_token;
+  gapi.client.setToken(tokenResponse);
+}
+
+function clearToken() {
+  localStorage.removeItem(STORAGE_KEY);
+  accessToken = null;
+  gapi.client.setToken(null);
+}
+
+/** Versucht einen gespeicherten Token zu laden. Gibt true zurück wenn erfolgreich. */
+async function tryRestoreToken() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    if (!data?.token || !data?.expires_at) return false;
+    if (Date.now() >= data.expires_at) {
+      localStorage.removeItem(STORAGE_KEY);
+      return false;
+    }
+    accessToken = data.token;
+    gapi.client.setToken({ access_token: data.token });
+    await loadDiscoveryDocs();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// ── Öffentliche API ───────────────────────────────────────────────────────────
+
+/**
+ * Initialisiert GAPI und GIS. Versucht anschließend, den gespeicherten Token
+ * automatisch wiederherzustellen (Auto-Login).
+ * @returns {Promise<boolean>} true wenn Auto-Login erfolgreich war
+ */
+export async function initAuth() {
+  await gapiLoadClient();
+  gapiInited = true;
+
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CONFIG.GOOGLE_CLIENT_ID,
+    scope: CONFIG.SCOPES,
+    callback: () => {}  // wird pro Request überschrieben
+  });
+  gisInited = true;
+
+  // Auto-Login aus localStorage
+  const restored = await tryRestoreToken();
+  return restored;
+}
+
+/**
+ * Öffnet den OAuth-Consent-Dialog (nur wenn nicht schon angemeldet).
+ * @returns {Promise<boolean>}
+ */
+export function signIn() {
+  if (!gapiInited || !gisInited) return Promise.resolve(false);
+  return new Promise((resolve) => {
+    tokenClient.callback = async (response) => {
+      if (response.error) { resolve(false); return; }
+      try {
+        saveToken(response);
+        await loadDiscoveryDocs();
+        resolve(true);
+      } catch {
+        resolve(false);
+      }
+    };
+    // prompt='' → kein Consent wenn Token noch gültig; prompt='consent' → immer
+    tokenClient.requestAccessToken({ prompt: accessToken ? '' : 'consent' });
+  });
+}
+
+/** Widerruft den Token und löscht alle gespeicherten Daten. */
+export function signOut() {
+  if (accessToken) {
+    google.accounts.oauth2.revoke(accessToken, () => {});
+  }
+  clearToken();
+}
+
+/** @returns {boolean} */
+export function isSignedIn() {
+  return Boolean(accessToken);
+}
