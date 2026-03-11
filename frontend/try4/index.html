@@ -31,77 +31,201 @@
     </div>
   </dialog>
 
+  <!-- Lightbox-Dialog -->
+  <dialog id="dialog-lightbox" class="lightbox-dialog">
+    <button id="btn-lightbox-close" class="lightbox-close" title="Schließen (Esc)">✕</button>
+    <button id="btn-lightbox-prev" class="lightbox-nav lightbox-prev" title="Vorherige (←)" disabled>‹</button>
+    <button id="btn-lightbox-next" class="lightbox-nav lightbox-next" title="Nächste (→)" disabled>›</button>
+    <div class="lightbox-content">
+      <div class="lightbox-img-wrap">
+        <img id="lightbox-img" src="" alt="" />
+      </div>
+      <div class="lightbox-meta">
+        <h3 id="lightbox-title"></h3>
+        <p id="lightbox-subtitle"></p>
+        <p id="lightbox-counter" class="lightbox-counter"></p>
+        <a id="lightbox-cm-link" href="#" target="_blank" rel="noopener noreferrer"
+           class="lightbox-cm-link hidden">🛒 Cardmarket</a>
+        <div class="lightbox-checks">
+          <label class="lightbox-check-label">
+            <input type="checkbox" id="lightbox-g-check" />
+            <span>Normal (G)</span>
+          </label>
+          <label class="lightbox-check-label">
+            <input type="checkbox" id="lightbox-rh-check" />
+            <span>Reverse Holo (RH)</span>
+          </label>
+        </div>
+        <p class="lightbox-hint">← → navigieren &nbsp;|&nbsp; Leertaste = G togglen &nbsp;|&nbsp; Esc schließen</p>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Header -->
   <header class="topbar">
     <h1>🎴 Pokémon TCG Tracker</h1>
-    <div class="auth-actions">
+    <nav class="main-nav hidden" id="main-nav">
+      <a href="#dashboard" class="nav-link active" data-view="dashboard">Dashboard</a>
+      <a href="#set" class="nav-link" data-view="set" id="nav-set-link">Set-Ansicht</a>
+      <a href="#stats" class="nav-link" data-view="stats">Statistiken</a>
+      <a href="#search" class="nav-link" data-view="search">Suche</a>
+    </nav>
+    <div class="header-actions">
+      <button id="btn-dark-mode" class="btn-icon" title="Dark Mode umschalten">🌙</button>
       <button id="btn-login">Google Login</button>
       <button id="btn-logout" disabled>Logout</button>
     </div>
   </header>
 
-  <main class="layout">
-    <!-- Linke Sidebar -->
-    <aside class="panel sidebar">
-      <h2>Set wählen</h2>
-      <div class="row">
-        <label for="set-selector">Set</label>
-        <select id="set-selector" disabled>
-          <option value="">Bitte wählen…</option>
-        </select>
-      </div>
-      <div id="set-logo-wrap" class="set-logo-wrap hidden">
-        <img id="set-logo" src="" alt="Set-Logo" class="set-logo" />
-        <img id="set-symbol" src="" alt="Set-Symbol" class="set-symbol" />
-      </div>
-      <div class="row">
-        <button id="btn-load" disabled>Laden</button>
-        <button id="btn-refresh" disabled>Neu laden</button>
-      </div>
-      <p id="status" class="status">Nicht angemeldet.</p>
+  <!-- Status-Leiste -->
+  <div class="status-bar">
+    <p id="global-status" class="global-status">Bereit.</p>
+    <!-- Verbundenes Spreadsheet -->
+    <div id="spreadsheet-info" class="spreadsheet-info hidden">
+      <span class="ss-label">📊</span>
+      <a id="spreadsheet-link" href="#" target="_blank" rel="noopener noreferrer" class="ss-link">–</a>
+      <button id="btn-change-spreadsheet" class="btn-icon" title="Anderes Spreadsheet wählen">✏️</button>
+    </div>
+  </div>
 
-      <!-- Verbundenes Spreadsheet -->
-      <div id="spreadsheet-info" class="spreadsheet-info hidden">
-        <span class="ss-label">Tabelle:</span>
-        <a id="spreadsheet-link" href="#" target="_blank" rel="noopener noreferrer" class="ss-link">–</a>
-        <button id="btn-change-spreadsheet" class="btn-icon" title="Anderes Spreadsheet wählen">✏️</button>
-      </div>
+  <!-- App-Views -->
+  <div id="app-views">
 
-      <!-- Fortschrittsanzeige -->
-      <section id="stats-section" class="stats-section hidden">
-        <h3>Sammlung</h3>
-        <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-          <div id="progress-fill" class="progress-fill"></div>
+    <!-- ── VIEW: Dashboard ── -->
+    <div id="view-dashboard" class="view">
+      <div class="view-header">
+        <h2>Meine Sammlung</h2>
+        <div class="view-controls">
+          <input id="dash-filter" type="search" placeholder="Set suchen…" class="dash-filter-input" />
+          <select id="dash-series-filter">
+            <option value="">Alle Serien</option>
+          </select>
+          <select id="dash-sort">
+            <option value="series-date">Serie / Datum</option>
+            <option value="completion">Vollständigkeit</option>
+            <option value="name">Name A–Z</option>
+          </select>
         </div>
-        <p id="progress-text" class="progress-text">0 / 0 (0&nbsp;%)</p>
-        <ul class="stats-list">
-          <li>Gesamt: <strong id="stat-total">0</strong></li>
-          <li>Normal: <strong id="stat-collected">0</strong></li>
-          <li>RH: <strong id="stat-rh">0</strong></li>
-          <li>Fehlend: <strong id="stat-missing">0</strong></li>
-        </ul>
-      </section>
-
-      <!-- Filter-Buttons -->
-      <section id="filter-section" class="filter-section hidden">
-        <h3>Filter</h3>
-        <div class="filter-buttons">
-          <button class="filter-btn active" data-filter="all">Alle</button>
-          <button class="filter-btn" data-filter="missing">Fehlend</button>
-          <button class="filter-btn" data-filter="collected">Gesammelt</button>
-        </div>
-      </section>
-    </aside>
-
-    <!-- Karten-Bereich -->
-    <section class="panel cards-panel">
-      <!-- Empty-State -->
-      <div id="empty-state" class="empty-state hidden">
-        <p>🗃️ Kein Set geladen. Bitte ein Set auswählen und auf „Laden“ klicken.</p>
       </div>
-      <!-- Karten-Grid -->
-      <div id="cards" class="cards" role="list"></div>
-    </section>
-  </main>
+      <div id="dashboard-grid" class="dashboard-grid">
+        <p class="empty-state">Bitte anmelden.</p>
+      </div>
+    </div>
+
+    <!-- ── VIEW: Set-Detail ── -->
+    <div id="view-set" class="view view-with-sidebar hidden">
+
+      <!-- Sidebar -->
+      <aside class="panel sidebar">
+        <h2>Set wählen</h2>
+        <div class="row">
+          <label for="set-selector">Set</label>
+          <select id="set-selector" disabled>
+            <option value="">Bitte wählen…</option>
+          </select>
+        </div>
+        <div id="set-logo-wrap" class="set-logo-wrap hidden">
+          <img id="set-logo" src="" alt="Set-Logo" class="set-logo" />
+          <img id="set-symbol" src="" alt="Set-Symbol" class="set-symbol" />
+        </div>
+        <div class="row">
+          <button id="btn-load" disabled>Laden</button>
+          <button id="btn-refresh" disabled>🔄 Neu laden</button>
+        </div>
+        <p id="status" class="status">Nicht angemeldet.</p>
+
+        <!-- Fortschrittsanzeige -->
+        <section id="stats-section" class="stats-section hidden">
+          <h3>Sammlung</h3>
+          <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div id="progress-fill" class="progress-fill"></div>
+          </div>
+          <p id="progress-text" class="progress-text">0 / 0 (0&nbsp;%)</p>
+          <ul class="stats-list">
+            <li>Gesamt: <strong id="stat-total">0</strong></li>
+            <li>Normal: <strong id="stat-collected">0</strong></li>
+            <li>RH: <strong id="stat-rh">0</strong></li>
+            <li>Fehlend: <strong id="stat-missing">0</strong></li>
+          </ul>
+        </section>
+
+        <!-- Filter-Buttons -->
+        <section id="filter-section" class="filter-section hidden">
+          <h3>Filter</h3>
+          <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">Alle</button>
+            <button class="filter-btn" data-filter="missing">Fehlend</button>
+            <button class="filter-btn" data-filter="collected">Gesammelt</button>
+          </div>
+        </section>
+
+        <!-- Sortierung -->
+        <section class="sort-section hidden" id="sort-section">
+          <h3>Sortierung</h3>
+          <select id="card-sort" class="full-width-select">
+            <option value="number">Nach Nummer</option>
+            <option value="name">Nach Name</option>
+            <option value="status">Nach Status</option>
+          </select>
+        </section>
+      </aside>
+
+      <!-- Karten-Bereich -->
+      <section class="panel cards-panel">
+        <!-- Toolbar -->
+        <div class="set-toolbar" id="set-toolbar">
+          <button id="btn-bulk-edit" class="btn-secondary">☑ Mehrfach-Auswahl</button>
+          <button id="btn-missing-export" class="btn-secondary">📋 Fehlende exportieren</button>
+        </div>
+
+        <!-- Bulk-Edit-Toolbar -->
+        <div id="bulk-toolbar" class="bulk-toolbar hidden">
+          <span id="bulk-count" class="bulk-count">0 ausgewählt</span>
+          <button id="btn-bulk-mark-g" class="btn-success">✅ Als G markieren</button>
+          <button id="btn-bulk-mark-rh" class="btn-primary">🔵 Als RH markieren</button>
+          <button id="btn-bulk-unmark" class="btn-secondary">☐ Markierung entfernen</button>
+          <button id="btn-bulk-cancel" class="btn-danger">✕ Abbrechen</button>
+        </div>
+
+        <!-- Empty-State -->
+        <div id="empty-state" class="empty-state">
+          <p>🗃️ Kein Set geladen. Bitte ein Set auswählen und auf „Laden" klicken.</p>
+          <p class="empty-hint">Tipp: Pfeiltasten navigieren, Leertaste = G togglen, I = Bild-Zoom</p>
+        </div>
+        <!-- Karten-Grid -->
+        <div id="cards" class="cards hidden" role="list"></div>
+      </section>
+    </div>
+
+    <!-- ── VIEW: Statistiken ── -->
+    <div id="view-stats" class="view hidden">
+      <div class="view-header">
+        <h2>📊 Sammlungsstatistiken</h2>
+      </div>
+      <div id="stats-content" class="stats-content">
+        <p class="empty-state">Statistiken werden geladen…</p>
+      </div>
+    </div>
+
+    <!-- ── VIEW: Suche ── -->
+    <div id="view-search" class="view hidden">
+      <div class="view-header">
+        <h2>🔍 Kartensuche</h2>
+        <div class="view-controls">
+          <input id="search-input" type="search" placeholder="Kartenname oder Nummer eingeben…"
+                 class="search-main-input" autofocus />
+          <select id="search-set-filter">
+            <option value="">Alle Sets</option>
+          </select>
+        </div>
+      </div>
+      <p class="search-hint">Sucht in allen importierten Sets. Ergebnisse erscheinen automatisch.</p>
+      <div id="search-results" class="cards search-results">
+        <p class="empty-state">Suchbegriff oben eingeben.</p>
+      </div>
+    </div>
+
+  </div><!-- /#app-views -->
 
   <script src="https://apis.google.com/js/api.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
