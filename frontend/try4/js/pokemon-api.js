@@ -212,7 +212,10 @@ function tcgdexImageOrFallback(pokemontcgSetId, tcgdexCard) {
   if (tcgdexCard?.image) return `${tcgdexCard.image}/low.jpg`;
   const cardNo = normalizeCardNumber(tcgdexCard?.localId || tcgdexCard?.id || '');
   if (!cardNo) return null;
-  return `https://images.pokemontcg.io/${pokemontcgSetId}/${cardNo}.png`;
+  if (pokemontcgSetId) {
+    return `https://assets.tcgdex.net/de/${encodeURIComponent(pokemontcgSetId)}/${encodeURIComponent(cardNo)}/low.webp`;
+  }
+  return null;
 }
 
 // ── Öffentliche API ────────────────────────────────────────────────
@@ -307,14 +310,21 @@ export async function fetchMergedCards(setId) {
       tcgdexCard?.links?.cardmarket ||
       card.cardmarket?.url ||
       null;
-    return {
+    const mergedCard = {
       number,
       name: tcgdexCard?.name || card.name,
       image: tcgdexCard
         ? tcgdexImageOrFallback(matchingTcgdexId, tcgdexCard)
         : (card.images?.small || `https://images.pokemontcg.io/${setId}/${number}.png`),
-      cardmarketUrl
+      cardmarketUrl,
+      rarity: card.rarity || tcgdexCard?.rarity || ''
     };
+
+    if (tcgdexCard?.description) {
+      mergedCard.rules = [tcgdexCard.description];
+      mergedCard.flavorText = tcgdexCard.description;
+    }
+    return mergedCard;
   });
 
   // TCGDex-only Karten als Union anhängen (z.B. neue DE-exklusive Promo-Karten)
@@ -325,8 +335,9 @@ export async function fetchMergedCards(setId) {
     merged.push({
       number,
       name: tcgdexCard.name,
-      image: tcgdexImageOrFallback(matchingTcgdexId, tcgdexCard),
-      cardmarketUrl: tcgdexCard.links?.cardmarket || null
+      image: tcgdexImageOrFallback(matchingTcgdexId, tcgdexCard) || `https://images.pokemontcg.io/${setId}/${number}.png`,
+      cardmarketUrl: tcgdexCard.links?.cardmarket || null,
+      rarity: tcgdexCard?.rarity || ''
     });
   });
 
