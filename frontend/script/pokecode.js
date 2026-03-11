@@ -817,12 +817,13 @@ function loadCardsForSet(setId, setName, tcgdexAllSets) {
         const normalizedTcgdexNumber = normalizeCardNumber(tcgdexCard.localId || tcgdexCard.id);
         if (!existingCardNumbers.has(normalizedTcgdexNumber)) {
           const tcgdexCardmarketUrl = tcgdexCard.links?.cardmarket || null;
+          const tcgdexImageUrl = tcgdexCard?.image ? `${tcgdexCard.image}/low.jpg` : null;
           const pokemontcgImageUrl = `https://images.pokemontcg.io/${pokemontcgSetId}/${normalizedTcgdexNumber}.png`;
           allCards.push({
             id: tcgdexCard.id,
             number: normalizedTcgdexNumber,
             name: tcgdexCard.name,
-            images: { small: pokemontcgImageUrl },
+            images: { small: tcgdexImageUrl || pokemontcgImageUrl },
             cardmarket: { url: tcgdexCardmarketUrl }
           });
 
