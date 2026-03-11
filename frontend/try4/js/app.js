@@ -55,6 +55,7 @@ const dom = {
   dashSeriesFilter: document.getElementById('dash-series-filter'),
   dashSort:         document.getElementById('dash-sort'),
   btnOverviewSync:  document.getElementById('btn-overview-sync'),
+  btnOverviewPowerRefresh: document.getElementById('btn-overview-power-refresh'),
   btnImportBatch:   document.getElementById('btn-import-batch'),
   btnImportAll:     document.getElementById('btn-import-all-missing'),
   btnReimportCurrent: document.getElementById('btn-reimport-current'),
@@ -592,6 +593,76 @@ async function syncOverviewFromApi() {
   }
 }
 
+function normalizeComparable(value) {
+  return String(value ?? '').trim();
+}
+
+function summarizeOverviewChanges(oldOverviewSets, apiSets) {
+  const oldById = new Map((oldOverviewSets || []).map((set) => [set.setId, set]));
+  const fields = ['setName', 'logoUrl', 'symbolUrl', 'series', 'releaseDate', 'totalCards', 'ptcgoCode'];
+
+  let added = 0;
+  let changed = 0;
+  let unchanged = 0;
+  const changedSets = [];
+
+  for (const apiSet of (apiSets || [])) {
+    const prev = oldById.get(apiSet.setId);
+    if (!prev) {
+      added++;
+      continue;
+    }
+
+    const changedFields = fields.filter((field) =>
+      normalizeComparable(prev[field]) !== normalizeComparable(apiSet[field])
+    );
+
+    if (changedFields.length > 0) {
+      changed++;
+      changedSets.push({ setId: apiSet.setId, setName: apiSet.setName, changedFields });
+    } else {
+      unchanged++;
+    }
+  }
+
+  return { added, changed, unchanged, changedSets };
+}
+
+async function powerRefreshOverviewFromApi() {
+  setLoading(true, 'Power-Refresh läuft…');
+  try {
+    const [oldOverviewSets, apiSets] = await Promise.all([
+      listSetsOverviewData().catch(() => []),
+      fetchAllAvailableSets()
+    ]);
+
+    const report = summarizeOverviewChanges(oldOverviewSets, apiSets);
+    const importedIds = new Set(state.sets.map((set) => set.setId));
+    await syncOverviewWithApiSets(apiSets, importedIds);
+    await loadSets();
+
+    const msg = `Power-Refresh: +${report.added} neu, ${report.changed} geändert, ${report.unchanged} unverändert.`;
+    setGlobalStatus(msg);
+    showToast(msg, 'success', 5000);
+
+    if (report.changedSets.length) {
+      console.group('[PowerRefresh] geänderte Sets');
+      report.changedSets.slice(0, 50).forEach((entry) => {
+        console.log(`${entry.setId} (${entry.setName}): ${entry.changedFields.join(', ')}`);
+      });
+      if (report.changedSets.length > 50) {
+        console.log(`…und ${report.changedSets.length - 50} weitere`);
+      }
+      console.groupEnd();
+    }
+  } catch (err) {
+    console.error('[powerRefreshOverviewFromApi]', err);
+    showToast(`Power-Refresh fehlgeschlagen: ${err.message}`, 'error', 6000);
+  } finally {
+    setLoading(false);
+  }
+}
+
 async function importAllMissingSets() {
   const missing = state.allSets.filter((set) => !set.imported);
   if (!missing.length) {
@@ -899,6 +970,7 @@ function initDashboardControls() {
   dom.dashSeriesFilter.addEventListener('change', renderDashboard);
   dom.dashSort.addEventListener('change', renderDashboard);
   dom.btnOverviewSync?.addEventListener('click', syncOverviewFromApi);
+  dom.btnOverviewPowerRefresh?.addEventListener('click', powerRefreshOverviewFromApi);
   dom.btnImportBatch?.addEventListener('click', openBatchImportDialog);
   dom.btnImportAll?.addEventListener('click', importAllMissingSets);
   dom.btnReimportCurrent?.addEventListener('click', reimportCurrentSetFromApi);
