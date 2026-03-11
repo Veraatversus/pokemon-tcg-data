@@ -738,6 +738,18 @@ function loadCardsForSet(setId, setName, tcgdexAllSets) {
   let cardmarketData = {};
   let tcgdexDetailedSet = null;
   let pokemontcgDetailedSet = null;
+  const TCGDEX_ASSETS_BASE_URL = "https://assets.tcgdex.net/de";
+  
+  const resolveTcgdexImageUrl = (tcgdexSetId, tcgdexCard) => {
+    if (tcgdexCard?.image) {
+      return `${tcgdexCard.image}/low.jpg`;
+    }
+    const localId = normalizeCardNumber(tcgdexCard?.localId || tcgdexCard?.id || "");
+    if (!tcgdexSetId || !localId) {
+      return null;
+    }
+    return `${TCGDEX_ASSETS_BASE_URL}/${encodeURIComponent(tcgdexSetId)}/${encodeURIComponent(localId)}/low.webp`;
+  };
 
   const isTcgdexOnlySet = setId.startsWith('TCGDEX-');
 
@@ -749,7 +761,7 @@ function loadCardsForSet(setId, setName, tcgdexAllSets) {
       allCards = tcgdexDetailedSet.cards.map(card => ({
         number: normalizeCardNumber(card.localId || card.id),
         name: card.name,
-        images: { small: card.image ? `${card.image}/low.jpg` : null },
+        images: { small: resolveTcgdexImageUrl(tcgdexActualSetId, card) },
         cardmarket: { url: card.links?.cardmarket }
       }));
       allCards.sort((a, b) => naturalSort(a.number || "", b.number || ""));
@@ -786,7 +798,8 @@ function loadCardsForSet(setId, setName, tcgdexAllSets) {
 
       if (tcgdexCard) {
         if (tcgdexCard.name) mergedCard.name = tcgdexCard.name;
-        if (tcgdexCard.image) mergedCard.images = { small: `${tcgdexCard.image}/low.jpg` };
+        const tcgdexImageUrl = resolveTcgdexImageUrl(matchingTcgdexSet?.id, tcgdexCard);
+        if (tcgdexImageUrl) mergedCard.images = { small: tcgdexImageUrl };
         if (tcgdexCard.description) {
           mergedCard.rules = [tcgdexCard.description];
           mergedCard.flavorText = tcgdexCard.description;
@@ -808,7 +821,7 @@ function loadCardsForSet(setId, setName, tcgdexAllSets) {
             id: tcgdexCard.id,
             number: normalizedTcgdexNumber,
             name: tcgdexCard.name,
-            images: { small: tcgdexCard.image ? `${tcgdexCard.image}/low.jpg` : null },
+            images: { small: resolveTcgdexImageUrl(matchingTcgdexSet?.id, tcgdexCard) },
             cardmarket: { url: tcgdexCardmarketUrl }
           });
 
