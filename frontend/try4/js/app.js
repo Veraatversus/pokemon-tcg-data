@@ -60,6 +60,9 @@ const dom = {
   btnReimportCurrent: document.getElementById('btn-reimport-current'),
   btnReimportAllImported: document.getElementById('btn-reimport-all-imported'),
   btnExportSummaryCsv: document.getElementById('btn-export-summary-csv'),
+  btnExportBackup: document.getElementById('btn-export-backup'),
+  btnImportBackup: document.getElementById('btn-import-backup'),
+  backupFileInput: document.getElementById('input-backup-file'),
   dashboardGrid:    document.getElementById('dashboard-grid'),
   // Set detail – sidebar
   selector:         document.getElementById('set-selector'),
@@ -741,6 +744,138 @@ async function exportCollectionSummaryCsv() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   showToast('Summary als CSV exportiert.', 'success');
+}
+
+function downloadJson(filename, payload) {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = Object.assign(document.createElement('a'), { href: url, download: filename });
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+async function exportCollectionBackup() {
+  if (!state.sets.length) {
+    showToast('Keine importierten Sets für Backup vorhanden.', 'info');
+    return;
+  }
+
+  setLoading(true, 'Erstelle Backup…');
+  try {
+    const backupSets = [];
+    for (let index = 0; index < state.sets.length; index++) {
+      const set = state.sets[index];
+      setGlobalStatus(`Backup ${index + 1}/${state.sets.length}: ${set.setName}`);
+      const dbMap = await readSetCollectionMap(set.setName).catch(() => new Map());
+      const cards = [];
+      for (const [cardId, db] of dbMap.entries()) {
+        if (!db?.g && !db?.rh) continue;
+        cards.push({ cardId, g: Boolean(db?.g), rh: Boolean(db?.rh) });
+      }
+      backupSets.push({ setId: set.setId, setName: set.setName, cards });
+    }
+
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const payload = {
+      app: 'poke-tcg-try4',
+      version: 1,
+      createdAt: new Date().toISOString(),
+      spreadsheetId: CONFIG.SPREADSHEET_ID,
+      sets: backupSets
+    };
+    downloadJson(`poke_collection_backup_${stamp}.json`, payload);
+    showToast(`Backup exportiert (${backupSets.length} Sets).`, 'success', 4000);
+  } catch (err) {
+    console.error('[exportCollectionBackup]', err);
+    showToast(`Backup-Export fehlgeschlagen: ${err.message}`, 'error', 5000);
+  } finally {
+    setLoading(false);
+  }
+}
+
+function parseBackupPayload(rawText) {
+  const parsed = JSON.parse(rawText);
+  if (!parsed || typeof parsed !== 'object') throw new Error('Ungültiges Backup-Format.');
+  if (!Array.isArray(parsed.sets)) throw new Error('Backup enthält keine Set-Daten.');
+  return parsed;
+}
+
+async function applyCollectionBackup(payload) {
+  const sets = payload.sets || [];
+  if (!sets.length) {
+    showToast('Backup enthält keine Sets.', 'info');
+    return;
+  }
+
+  const byId = new Map(state.sets.map((set) => [set.setId, set]));
+  let updated = 0;
+  let skipped = 0;
+
+  setLoading(true, 'Spiele Backup ein…');
+  try {
+    for (let setIndex = 0; setIndex < sets.length; setIndex++) {
+      const backupSet = sets[setIndex];
+      const liveSet = byId.get(backupSet.setId);
+      if (!liveSet) {
+        skipped++;
+        continue;
+      }
+
+      setGlobalStatus(`Backup ${setIndex + 1}/${sets.length}: ${liveSet.setName}`);
+      const liveMap = await readSetCollectionMap(liveSet.setName).catch(() => new Map());
+      const snapshotByCard = new Map((backupSet.cards || []).map((entry) => [normalizeCardNumber(entry.cardId), entry]));
+
+      for (const [cardId, db] of liveMap.entries()) {
+        if (!db?.gCell || !db?.rhCell) continue;
+        const target = snapshotByCard.get(cardId) || { g: false, rh: false };
+        const targetG = Boolean(target.g);
+        const targetRh = Boolean(target.g && target.rh);
+
+        if (Boolean(db.g) !== targetG) {
+          await updateCellBoolean(liveSet.setName, db.gCell.row, db.gCell.col, targetG);
+          db.g = targetG;
+          updated++;
+        }
+        if (Boolean(db.rh) !== targetRh) {
+          await updateCellBoolean(liveSet.setName, db.rhCell.row, db.rhCell.col, targetRh);
+          db.rh = targetRh;
+          updated++;
+        }
+      }
+    }
+  } finally {
+    setLoading(false);
+  }
+
+  state.summaryData = null;
+  if (state.currentSet) {
+    await loadCurrentSet(true).catch(() => {});
+  }
+  showToast(`Backup eingespielt. Änderungen: ${updated}, übersprungen: ${skipped}.`, skipped ? 'info' : 'success', 5000);
+}
+
+function initBackupImportExport() {
+  dom.btnExportBackup?.addEventListener('click', exportCollectionBackup);
+  dom.btnImportBackup?.addEventListener('click', () => dom.backupFileInput?.click());
+
+  dom.backupFileInput?.addEventListener('change', async () => {
+    const file = dom.backupFileInput.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const payload = parseBackupPayload(text);
+      const ok = window.confirm(`Backup mit ${payload.sets.length} Sets einspielen?`);
+      if (!ok) return;
+      await applyCollectionBackup(payload);
+    } catch (err) {
+      console.error('[initBackupImportExport]', err);
+      showToast(`Backup-Import fehlgeschlagen: ${err.message}`, 'error', 6000);
+    } finally {
+      dom.backupFileInput.value = '';
+    }
+  });
 }
 
 async function reimportCurrentSetFromApi() {
@@ -1435,6 +1570,7 @@ async function bootstrap() {
   initFilterButtons();
   initSpreadsheetDialog();
   initBatchImportDialog();
+  initBackupImportExport();
   initLightbox();
   initBulkEdit();
   initKeyboardNav();
