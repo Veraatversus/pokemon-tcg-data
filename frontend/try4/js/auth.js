@@ -9,58 +9,44 @@ let gisInited = false;
 
 // ── GAPI helpers ──────────────────────────────────────────────────────────────
 
+const GAPI_TIMEOUT_MS = 10000;
+
 function gapiLoadClient() {
   return new Promise((resolve, reject) => {
-    gapi.load('client', async () => {
-      try {
-        // Init ohne apiKey/Discovery – wird nach Login gemacht
-        await gapi.client.init({});
-        resolve();
-      } catch (error) {
-        reject(error);
+    const timeout = setTimeout(() => {
+      reject(new Error('gapi.load client timeout after ' + GAPI_TIMEOUT_MS + 'ms'));
+    }, GAPI_TIMEOUT_MS);
+
+    try {
+      if (!gapi || !gapi.load) {
+        clearTimeout(timeout);
+        throw new Error('gapi or gapi.load not available');
       }
-    });
+
+      console.log('[gapiLoadClient] calling gapi.load...');
+      gapi.load('client', () => {
+        clearTimeout(timeout);
+        try {
+          console.log('[gapiLoadClient] gapi.load callback fired');
+          gapi.client.init({}).then(() => {
+            console.log('[gapiLoadClient] gapi.client.init success');
+            resolve();
+          }).catch((error) => {
+            console.error('[gapiLoadClient init error]', error);
+            reject(error);
+          });
+        } catch (error) {
+          console.error('[gapiLoadClient callback]', error);
+          reject(error);
+        }
+      });
+    } catch (err) {
+      clearTimeout(timeout);
+      console.error('[gapiLoadClient setup]', err);
+      reject(err);
+    }
   });
 }
-
-  const GAPI_TIMEOUT_MS = 10000;
-
-  function gapiLoadClient() {
-    return new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        reject(new Error('gapi.load client timeout after ' + GAPI_TIMEOUT_MS + 'ms'));
-      }, GAPI_TIMEOUT_MS);
-
-      try {
-        if (!gapi || !gapi.load) {
-          clearTimeout(timeout);
-          throw new Error('gapi or gapi.load not available');
-        }
-      
-        console.log('[gapiLoadClient] calling gapi.load...');
-        gapi.load('client', () => {
-          clearTimeout(timeout);
-          try {
-            console.log('[gapiLoadClient] gapi.load callback fired');
-            gapi.client.init({}).then(() => {
-              console.log('[gapiLoadClient] gapi.client.init success');
-              resolve();
-            }).catch((error) => {
-              console.error('[gapiLoadClient init error]', error);
-              reject(error);
-            });
-          } catch (error) {
-            console.error('[gapiLoadClient callback]', error);
-            reject(error);
-          }
-        });
-      } catch (err) {
-        clearTimeout(timeout);
-        console.error('[gapiLoadClient setup]', err);
-        reject(err);
-      }
-    });
-  }
 /** Lädt die Sheets-Discovery-Docs und setzt den gespeicherten Token in den Client. */
 export async function loadDiscoveryDocs() {
   try {
@@ -126,7 +112,10 @@ async function tryRestoreToken() {
 export async function initAuth() {
   try {
     console.log('[initAuth] start');
-    console.log('[initAuth] checking globals:', { gapi: !!typeof gapi !== 'undefined', google: !!typeof google !== 'undefined' });
+    console.log('[initAuth] checking globals:', {
+      gapi: typeof gapi !== 'undefined',
+      google: typeof google !== 'undefined'
+    });
     
     console.log('[initAuth] loading gapi.client...');
     await gapiLoadClient();
@@ -175,6 +164,7 @@ export function signIn() {
         } catch (discErr) {
           console.warn('[signIn] Discovery load failed, continuing:', discErr);
         }
+        resolve(true);
       } catch (err) {
         console.error('[signIn]', err);
         resolve(false);
