@@ -6,15 +6,20 @@
  */
 
 const COMMANDS = [
-  { id: 'cmd-sync', label: '🔄 Sync Overview', desc: 'Aktualisiert Set-Übersicht', category: 'API', hotkey: null },
-  { id: 'cmd-import-batch', label: '📦 Batch-Import', desc: 'Multiple Sets importieren', category: 'Import', hotkey: null },
-  { id: 'cmd-health', label: '🩺 Datencheck', desc: 'Sucht nach Inkonsistenzen', category: 'Maintenance', hotkey: null },
-  { id: 'cmd-backup', label: '💾 Backup exportieren', desc: 'Sichert Daten lokal', category: 'Backup', hotkey: 'Shift+B' },
-  { id: 'cmd-parity', label: '🧪 Parity-Test', desc: 'Vergleicht Adapter/Compat', category: 'Testing', hotkey: null },
-  { id: 'cmd-search', label: '🔍 Search', desc: 'Fuzzy-Suche für Karten/Sets', category: 'Navigation', hotkey: '/' },
-  { id: 'cmd-snapshots', label: '📸 Snapshots', desc: 'Collection-Versionen', category: 'Versioning', hotkey: null },
-  { id: 'cmd-settings', label: '⚙️ Settings', desc: 'App-Einstellungen', category: 'System', hotkey: null },
-  { id: 'cmd-help', label: '❓ Keyboard Help', desc: 'Shortcuts anzeigen', category: 'Help', hotkey: '?' }
+  { id: 'sync', label: '🔄 Sync Overview', desc: 'Aktualisiert Set-Übersicht', category: 'API', hotkey: null },
+  { id: 'import-batch', label: '📦 Batch-Import', desc: 'Mehrere Sets importieren', category: 'Import', hotkey: null },
+  { id: 'health-check', label: '🩺 Datencheck', desc: 'Sucht nach Inkonsistenzen', category: 'Maintenance', hotkey: null },
+  { id: 'backup-download', label: '💾 Backup exportieren', desc: 'Sichert Daten lokal', category: 'Backup', hotkey: 'Shift+B' },
+  { id: 'parity-test', label: '🧪 Parity-Test', desc: 'Vergleicht Adapter/Compat', category: 'Testing', hotkey: null },
+  { id: 'search', label: '🔍 Suche', desc: 'Fuzzy-Suche für Karten/Sets', category: 'Navigation', hotkey: '/' },
+  { id: 'settings', label: '⚙️ Einstellungen', desc: 'App-Einstellungen', category: 'System', hotkey: null },
+  { id: 'snapshots', label: '📸 Snapshots', desc: 'Collection-Versionen', category: 'Versioning', hotkey: null },
+  { id: 'marketplace', label: '💱 Trading Marketplace', desc: 'Handelsangebote & Matches', category: 'Trading', hotkey: null },
+  { id: 'wanted', label: '🎯 Gesuchte Karten', desc: 'Wanted-Liste verwalten', category: 'Trading', hotkey: null },
+  { id: 'collection-value', label: '💰 Kollektionswert', desc: 'Wertschätzung deiner Sammlung', category: 'Analytics', hotkey: null },
+  { id: 'ml-recommendations', label: '🧠 ML-Empfehlungen', desc: 'KI-basierte Set-Priorisierung', category: 'AI', hotkey: null },
+  { id: 'live-dashboard', label: '📊 Live Dashboard', desc: 'Realtime KPIs & Health', category: 'Analytics', hotkey: null },
+  { id: 'help', label: '❓ Keyboard Help', desc: 'Shortcuts anzeigen', category: 'Help', hotkey: '?' }
 ];
 
 let paletteOpen = false;
@@ -54,7 +59,7 @@ export function initCommandPalette(commandHandlers = {}) {
     // Custom hotkeys
     if (e.shiftKey && e.key === 'B') {
       e.preventDefault();
-      commandHandlers['cmd-backup']?.();
+      commandHandlers['backup-download']?.();
     }
   });
 

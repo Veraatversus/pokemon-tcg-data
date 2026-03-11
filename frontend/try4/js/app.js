@@ -3,6 +3,7 @@ import {
   listImportedSets,
   listSetsOverviewData,
   readSetCollectionMap,
+  ensureCollectionEntry,
   updateCellBoolean,
   readSummarySheet,
   readSettings,
@@ -58,9 +59,47 @@ import {
 import {
   VoiceCommandRecognizer, GestureRecognizer, downloadJson, downloadCsv,
   createLocalBackup, getLocalBackups, restoreLocalBackup, deleteLocalBackup,
-  generateAdvancedStatistics, generateCollectionInsights
+  generateAdvancedStatistics
 } from './advanced-features.js';
+import {
+  createUserProfile, getUserProfile, updateUserProfile,
+  createPublicShare, getSharedCollection, followUser, unfollowUser,
+  isFollowing, getFollowers, addReview, getReviewsForShare,
+  getTrendingCollections, searchPublicCollections, getCollectionsByUser,
+  checkCollectionBadges, getCommunityStats, createUserProfile as createProfile
+} from './community-features.js';
+import {
+  createUserProfileCard, createSharedCollectionCard, createCommunityTrendingPanel,
+  createReviewsPanel, createCommunitySearchPanel, createCommunityStatsBanner
 
+} from './community-ui.js';
+import {
+  detectCardRarity, detectCardType, getCardEstimatedValue,
+  calculateCollectionValue, applyCardFilters,
+  getCardsByRarity, getCardsByType, getRareCards,
+  getCollectionValueStats, getAvailableRarities, getAvailableTypes
+} from './card-filters.js';
+import {
+  getWantedCards, addWantedCard, removeWantedCard, isCardWanted,
+  getWantedCardsByPriority, createTradeOffer, getTradeOffers,
+  updateTradeOffer, acceptTradeOffer, deleteTradeOffer,
+  findMatchingTrades, recordTradeCompletion, getTradeHistory,
+  getUserTradeStats, generateTradeSuggestions, getTradePlaceSummary,
+  TRADE_STATUS
+} from './trading-system.js';
+import {
+  createWantedCardsPanel, createTradeMarketplacePanel,
+  createTradeStatsCard, createTradeSuggestionsPanel,
+  createTradeHistoryPanel
+} from './trading-ui.js';
+import {
+  generateMLSetRecommendations,
+  summarizeMLRecommendations
+} from './ml-recommendations.js';
+import {
+  initRealtimeSync,
+  buildCollectionUpdateEvent
+} from './realtime-sync.js';
 // ══════════════════════════════════════════════════════════════════════════
 // DOM-REFERENZEN
 // ══════════════════════════════════════════════════════════════════════════
@@ -106,6 +145,7 @@ const dom = {
   dashFilter:       document.getElementById('dash-filter'),
   dashSeriesFilter: document.getElementById('dash-series-filter'),
   dashSort:         document.getElementById('dash-sort'),
+  recentSets:       document.getElementById('recent-sets'),
   btnOverviewSync:  document.getElementById('btn-overview-sync'),
   btnOverviewPowerRefresh: document.getElementById('btn-overview-power-refresh'),
   btnImportBatch:   document.getElementById('btn-import-batch'),
@@ -120,6 +160,7 @@ const dom = {
   btnQueueBuilder: document.getElementById('btn-queue-builder'),
   btnQueueRun: document.getElementById('btn-queue-run'),
   btnQueueClear: document.getElementById('btn-queue-clear'),
+  btnDashboardCompact: document.getElementById('btn-dashboard-compact'),
   queueBuilderDialog: document.getElementById('dialog-queue-builder'),
   queueBuilderList: document.getElementById('queue-builder-list'),
   queueBuilderSelected: document.getElementById('queue-builder-selected'),
@@ -212,11 +253,193 @@ const state = {
   queueBuilderSelection: [],
   queueBuilderSequence: [],
   queuePresets: [],
+  recentSets: [],
+  dashboardView: 'all',
+  dashboardDensity: 'comfortable',
+  dashboardVirtualCount: 180,
+  quickFilters: {
+    completed: false,
+    inProgress: false,
+    notImported: false,
+    favoritesOnly: false,
+  },
+  realtimeClientId: null,
+  realtime: null,
 };
 
 let focusedCardIndex = -1;
 
 const QUEUE_PRESETS_STORAGE_KEY = 'poke_try4_queue_presets_v1';
+const DASHBOARD_PREFS_STORAGE_KEY = 'poke_try4_dashboard_prefs_v1';
+const RECENT_SETS_STORAGE_KEY = 'poke_try4_recent_sets_v1';
+const DASHBOARD_VIRTUAL_PAGE_SIZE = 180;
+const DASHBOARD_VIRTUAL_THRESHOLD = 220;
+
+function loadRecentSets() {
+  try {
+    const raw = localStorage.getItem(RECENT_SETS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((item) => item && item.setId)
+      .map((item) => ({
+        setId: String(item.setId),
+        setName: String(item.setName || item.setId),
+        at: Number(item.at) || Date.now()
+      }))
+      .slice(0, 8);
+  } catch (err) {
+    console.warn('[loadRecentSets]', err);
+    return [];
+  }
+}
+
+function saveRecentSets() {
+  try {
+    localStorage.setItem(RECENT_SETS_STORAGE_KEY, JSON.stringify(state.recentSets || []));
+  } catch (err) {
+    console.warn('[saveRecentSets]', err);
+  }
+}
+
+function renderRecentSets() {
+  if (!dom.recentSets) return;
+  const recent = Array.isArray(state.recentSets) ? state.recentSets : [];
+  if (!state.loggedIn || recent.length === 0) {
+    dom.recentSets.classList.add('hidden');
+    dom.recentSets.innerHTML = '';
+    return;
+  }
+
+  const labelsById = new Map((state.allSets || []).map((set) => [set.setId, set.setName || set.setId]));
+  dom.recentSets.innerHTML = recent
+    .map((entry) => {
+      const label = labelsById.get(entry.setId) || entry.setName || entry.setId;
+      return `<button class="recent-set-chip" type="button" data-set-id="${entry.setId}" title="${label}">${label}</button>`;
+    })
+    .join('');
+  dom.recentSets.classList.remove('hidden');
+
+  dom.recentSets.querySelectorAll('.recent-set-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const setId = chip.dataset.setId;
+      if (!setId) return;
+      dom.selector.value = setId;
+      navigate(`set/${setId}`);
+    });
+  });
+}
+
+function markSetAsRecent(setMeta) {
+  if (!setMeta?.setId) return;
+  const normalizedId = String(setMeta.setId);
+  const normalizedName = String(setMeta.setName || normalizedId);
+  const next = [
+    { setId: normalizedId, setName: normalizedName, at: Date.now() },
+    ...(state.recentSets || []).filter((entry) => String(entry.setId) !== normalizedId)
+  ].slice(0, 8);
+
+  state.recentSets = next;
+  saveRecentSets();
+  renderRecentSets();
+}
+
+function resetDashboardVirtualization() {
+  state.dashboardVirtualCount = DASHBOARD_VIRTUAL_PAGE_SIZE;
+}
+
+function createDashboardVirtualFooter(total, visible) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'dashboard-virtual-footer';
+  const remaining = Math.max(0, total - visible);
+
+  wrapper.innerHTML = `
+    <p>Zeige ${visible} von ${total} Sets${remaining > 0 ? ` • ${remaining} weitere` : ''}</p>
+    <div class="dashboard-virtual-actions">
+      <button class="btn-secondary" type="button" data-action="more">Mehr laden (+${DASHBOARD_VIRTUAL_PAGE_SIZE})</button>
+      <button class="btn-secondary" type="button" data-action="all">Alle laden</button>
+    </div>
+  `;
+
+  wrapper.querySelector('[data-action="more"]')?.addEventListener('click', () => {
+    state.dashboardVirtualCount = Math.min(total, (state.dashboardVirtualCount || DASHBOARD_VIRTUAL_PAGE_SIZE) + DASHBOARD_VIRTUAL_PAGE_SIZE);
+    renderDashboard();
+  });
+  wrapper.querySelector('[data-action="all"]')?.addEventListener('click', () => {
+    state.dashboardVirtualCount = total;
+    renderDashboard();
+  });
+
+  return wrapper;
+}
+
+function initSheetsWriteFeedback() {
+  window.addEventListener('sheets-write-retry', (event) => {
+    const details = event?.detail || {};
+    const retryLabel = `${details.attempt || '?'} / ${details.maxRetries || '?'}`;
+    const waitSeconds = Math.max(1, Math.ceil((Number(details.delayMs) || 0) / 1000));
+    const message = `Sheets-Write Retry ${retryLabel} (warte ${waitSeconds}s)`;
+    setGlobalStatus(message);
+    if (state.activeJob) {
+      updateJob(state.activeJob, state.activeJob.current, message);
+    }
+  });
+
+  window.addEventListener('sheets-write-failed', (event) => {
+    const details = event?.detail || {};
+    const message = `Sheets-Write fehlgeschlagen (${details.status || 'unbekannt'}): ${details.range || 'Range unbekannt'}`;
+    setGlobalStatus(message);
+    if (state.activeJob) {
+      updateJob(state.activeJob, state.activeJob.current, message);
+    }
+  });
+}
+
+function loadDashboardPreferences() {
+  try {
+    const raw = localStorage.getItem(DASHBOARD_PREFS_STORAGE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+
+    const allowedViews = new Set(['all', 'imported', 'not-imported', 'favorites']);
+    if (allowedViews.has(parsed?.dashboardView)) {
+      state.dashboardView = parsed.dashboardView;
+    }
+
+    const allowedDensities = new Set(['comfortable', 'compact', 'logos']);
+    if (allowedDensities.has(parsed?.dashboardDensity)) {
+      state.dashboardDensity = parsed.dashboardDensity;
+    } else if (typeof parsed?.dashboardCompact === 'boolean') {
+      state.dashboardDensity = parsed.dashboardCompact ? 'compact' : 'comfortable';
+    }
+
+    if (parsed?.quickFilters && typeof parsed.quickFilters === 'object') {
+      state.quickFilters = {
+        ...state.quickFilters,
+        completed: Boolean(parsed.quickFilters.completed),
+        inProgress: Boolean(parsed.quickFilters.inProgress),
+        notImported: Boolean(parsed.quickFilters.notImported),
+        favoritesOnly: Boolean(parsed.quickFilters.favoritesOnly),
+      };
+    }
+  } catch (err) {
+    console.warn('[loadDashboardPreferences]', err);
+  }
+}
+
+function saveDashboardPreferences() {
+  try {
+    const payload = {
+      dashboardView: state.dashboardView,
+      dashboardDensity: state.dashboardDensity,
+      quickFilters: state.quickFilters,
+    };
+    localStorage.setItem(DASHBOARD_PREFS_STORAGE_KEY, JSON.stringify(payload));
+  } catch (err) {
+    console.warn('[saveDashboardPreferences]', err);
+  }
+}
 
 function startJob(title, totalSteps = 0) {
   const job = {
@@ -765,6 +988,21 @@ function showToast(message, type = 'info', durationMs = 3000) {
   setTimeout(() => el.remove(), durationMs);
 }
 
+function getErrorMessage(err, fallback = 'Unbekannter Fehler') {
+  if (!err) return fallback;
+  if (err instanceof Error && err.message) return err.message;
+  if (typeof err === 'string' && err.trim()) return err.trim();
+  if (err?.result?.error?.message) return String(err.result.error.message);
+  if (err?.error?.message) return String(err.error.message);
+  if (err?.statusText) return String(err.statusText);
+  try {
+    const serialized = JSON.stringify(err);
+    return serialized && serialized !== '{}' ? serialized : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 function setEmptyState(show) {
   dom.emptyState.classList.toggle('hidden', !show);
   dom.cards.classList.toggle('hidden', show);
@@ -813,9 +1051,13 @@ function handleRouteChange() {
   switch (view) {
     case 'set':
       showView('set');
-      if (params[0] && dom.selector.value !== params[0]) {
-        dom.selector.value = params[0];
-        loadCurrentSet(false);
+      if (params[0]) {
+        if (dom.selector.value !== params[0]) {
+          dom.selector.value = params[0];
+        }
+        if (!state.currentSet || state.currentSet.setId !== params[0]) {
+          loadCurrentSet(false);
+        }
       }
       break;
     case 'stats':
@@ -923,6 +1165,8 @@ async function loadSets() {
     });
 
     state.allSets = Array.from(mergedMap.values());
+    resetDashboardVirtualization();
+    renderRecentSets();
 
     dom.selector.innerHTML = '<option value="">Bitte w\u00e4hlen\u2026</option>';
     const seriesMap = buildSeriesMap(importedSets);
@@ -975,6 +1219,7 @@ async function loadSets() {
     setGlobalStatus('Sets konnten nicht geladen werden.');
     state.sets = [];
     state.allSets = [];
+    renderRecentSets();
   } finally {
     setLoading(false);
   }
@@ -1029,12 +1274,76 @@ async function renderRecommendations() {
   }
 }
 
+function renderMLRecommendationsWidget() {
+  try {
+    if (!state.sets?.length || !state.summaryData?.length) return;
+
+    const recommendations = generateMLSetRecommendations(
+      state.summaryData || [],
+      state.allSets || state.sets,
+      5
+    );
+
+    if (!recommendations.length) return;
+
+    const summary = summarizeMLRecommendations(recommendations);
+    const container = document.createElement('div');
+    container.className = 'ml-recommendations-widget';
+    container.style.cssText = 'grid-column: 1 / -1; padding: 16px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-bg-secondary); margin-bottom: 16px;';
+
+    container.innerHTML = `
+      <div style="font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+        <span>🧠 ML Set-Empfehlungen</span>
+        <small style="color: var(--color-muted);">Confidence bis ${summary.topConfidence}%</small>
+      </div>
+      ${recommendations.map((item) => `
+        <div style="padding: 10px; margin: 6px 0; border-left: 3px solid var(--color-primary); background: var(--color-bg); border-radius: 4px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+          <div>
+            <div style="font-weight: 600;">${item.setName} (${item.completion}%)</div>
+            <div style="font-size: 12px; color: var(--color-muted);">${item.reasons.join(' • ')}</div>
+          </div>
+          <span style="background: var(--color-primary); color: white; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap;">${item.confidence}%</span>
+        </div>
+      `).join('')}
+    `;
+
+    const dashboard = document.getElementById('dashboard-grid');
+    if (!dashboard) return;
+
+    const existing = dashboard.querySelector('.ml-recommendations-widget');
+    if (existing) {
+      existing.replaceWith(container);
+    } else {
+      dashboard.insertBefore(container, dashboard.firstChild);
+    }
+  } catch (err) {
+    console.warn('[renderMLRecommendationsWidget]', err);
+  }
+}
+
 // ══════════════════════════════════════════════════════════════════════════
 // DASHBOARD
 // ══════════════════════════════════════════════════════════════════════════
 async function renderDashboard() {
   dom.dashboardGrid.innerHTML = '<p class="loading-placeholder">Lade \u00dcbersicht\u2026</p>';
   try {
+    const activeDashboardView = state.dashboardView || 'all';
+    const density = state.dashboardDensity || 'comfortable';
+    dom.viewDashboard?.classList.toggle('compact-dashboard', density === 'compact');
+    dom.viewDashboard?.classList.toggle('logos-dashboard', density === 'logos');
+    document.querySelectorAll('.dashboard-view-tab').forEach((button) => {
+      const isActive = button.dataset.dashboardView === activeDashboardView;
+      button.classList.toggle('active', isActive);
+      button.setAttribute('aria-selected', String(isActive));
+    });
+    if (dom.btnDashboardCompact) {
+      const densityLabel = density === 'comfortable' ? 'Komfort' : density === 'compact' ? 'Kompakt' : 'Nur Logos';
+      dom.btnDashboardCompact.classList.toggle('active', density !== 'comfortable');
+      dom.btnDashboardCompact.setAttribute('aria-pressed', String(density !== 'comfortable'));
+      dom.btnDashboardCompact.textContent = densityLabel;
+      dom.btnDashboardCompact.title = `Ansichtsdichte: ${densityLabel} (klicken zum Wechseln)`;
+    }
+
     if (!state.summaryData) {
       state.summaryData = await readSummarySheet().catch(() => []);
     }
@@ -1053,6 +1362,41 @@ async function renderDashboard() {
     }
     const seriesFilter = dom.dashSeriesFilter.value;
     if (seriesFilter) sets = sets.filter((s) => (s.series || 'Andere') === seriesFilter);
+
+    if (activeDashboardView === 'imported') {
+      sets = sets.filter((set) => Boolean(set.imported));
+    } else if (activeDashboardView === 'not-imported') {
+      sets = sets.filter((set) => !set.imported);
+    } else if (activeDashboardView === 'favorites') {
+      sets = sets.filter((set) => isFavorite(set.setId));
+    }
+
+    const quickFilters = state.quickFilters || {};
+    const hasStatusQuickFilter = Boolean(
+      quickFilters.completed || quickFilters.inProgress || quickFilters.notImported
+    );
+
+    if (quickFilters.favoritesOnly) {
+      sets = sets.filter((set) => isFavorite(set.setId));
+    }
+
+    if (hasStatusQuickFilter) {
+      sets = sets.filter((set) => {
+        if (!set.imported) {
+          return Boolean(quickFilters.notImported);
+        }
+
+        const summary = summaryByName.get(set.setName) || summaryByName.get(set.setId);
+        const total = Number(summary?.total ?? set.totalCards ?? 0);
+        const collected = Number(summary?.collected ?? 0);
+        const isCompleted = total > 0 && collected >= total;
+        const isInProgress = collected > 0 && !isCompleted;
+
+        return (quickFilters.completed && isCompleted)
+          || (quickFilters.inProgress && isInProgress)
+          || (quickFilters.notImported && !set.imported);
+      });
+    }
 
     const sortBy = dom.dashSort.value;
     if (sortBy === 'name') {
@@ -1074,8 +1418,14 @@ async function renderDashboard() {
 
     dom.dashboardGrid.innerHTML = '';
 
+    const shouldVirtualize = sets.length > DASHBOARD_VIRTUAL_THRESHOLD;
+    const visibleCount = shouldVirtualize
+      ? Math.min(sets.length, Math.max(DASHBOARD_VIRTUAL_PAGE_SIZE, state.dashboardVirtualCount || DASHBOARD_VIRTUAL_PAGE_SIZE))
+      : sets.length;
+    const visibleSets = shouldVirtualize ? sets.slice(0, visibleCount) : sets;
+
     if (sortBy === 'series-date') {
-      const seriesMap = buildSeriesMap(sets);
+      const seriesMap = buildSeriesMap(visibleSets);
       seriesMap.forEach((setsArr, seriesName) => {
         const section = document.createElement('section');
         section.className = 'dash-series-group';
@@ -1094,12 +1444,19 @@ async function renderDashboard() {
     } else {
       const grid = document.createElement('div');
       grid.className = 'dash-sets-row';
-      sets.forEach((set) => {
+      visibleSets.forEach((set) => {
         const summary = summaryByName.get(set.setName) || summaryByName.get(set.setId);
         grid.appendChild(createDashSetCard(set, summary));
       });
       dom.dashboardGrid.appendChild(grid);
     }
+
+    if (shouldVirtualize) {
+      dom.dashboardGrid.appendChild(createDashboardVirtualFooter(sets.length, visibleSets.length));
+    }
+
+    await renderRecommendations();
+    renderMLRecommendationsWidget();
   } catch (err) {
     console.error('[renderDashboard]', err);
     dom.dashboardGrid.innerHTML = `<p class="empty-state">\u2715 Fehler beim Laden der \u00dcbersicht</p>`;
@@ -1200,13 +1557,15 @@ async function importSetFromOverview(set) {
     state.summaryData = null;
 
     await loadSets();
+    markSetAsRecent(set);
     dom.selector.value = set.setId;
     navigate(`set/${set.setId}`);
     await loadCurrentSet(true);
     showToast(`${set.setName} wurde importiert.`, 'success', 3000);
   } catch (err) {
     console.error('[importSetFromOverview]', err);
-    showToast(`Import fehlgeschlagen: ${err.message}`, 'error', 5000);
+    const reason = getErrorMessage(err);
+    showToast(`Import fehlgeschlagen: ${reason}`, 'error', 5000);
     setGlobalStatus(`Import fehlgeschlagen: ${set.setName}`);
   } finally {
     setLoading(false);
@@ -1313,7 +1672,7 @@ async function importSetsSequential(sets, options = {}) {
     updateJob(job, validSets.length, `Import abgeschlossen: ${done} erfolgreich, ${failed} Fehler`);
     finishJob(job, `Import abgeschlossen (${done}/${validSets.length})`, failed > 0);
   } catch (err) {
-    finishJob(job, err.message || 'Import abgebrochen', true);
+    finishJob(job, getErrorMessage(err, 'Import abgebrochen'), true);
     throw err;
   } finally {
     setLoading(false);
@@ -1583,16 +1942,6 @@ async function exportCollectionSummaryCsv() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   showToast('Summary als CSV exportiert.', 'success');
-}
-
-function downloadJson(filename, payload) {
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = Object.assign(document.createElement('a'), { href: url, download: filename });
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
 }
 
 async function exportCollectionBackup() {
@@ -1868,9 +2217,40 @@ async function reimportCurrentSetFromApi() {
 
 function initDashboardControls() {
   let debounce;
-  dom.dashFilter.addEventListener('input', () => { clearTimeout(debounce); debounce = setTimeout(renderDashboard, 200); });
-  dom.dashSeriesFilter.addEventListener('change', () => { renderDashboard(); renderRecommendations(); });
-  dom.dashSort.addEventListener('change', () => { renderDashboard(); renderRecommendations(); });
+  dom.dashFilter.addEventListener('input', () => {
+    resetDashboardVirtualization();
+    clearTimeout(debounce);
+    debounce = setTimeout(renderDashboard, 200);
+  });
+  dom.dashSeriesFilter.addEventListener('change', () => {
+    resetDashboardVirtualization();
+    renderDashboard();
+    renderRecommendations();
+  });
+  dom.dashSort.addEventListener('change', () => {
+    resetDashboardVirtualization();
+    renderDashboard();
+    renderRecommendations();
+  });
+  document.querySelectorAll('.dashboard-view-tab').forEach((button) => {
+    if (!button.dataset.dashboardView) return;
+    button.addEventListener('click', () => {
+      const view = button.dataset.dashboardView || 'all';
+      if (state.dashboardView === view) return;
+      state.dashboardView = view;
+      resetDashboardVirtualization();
+      saveDashboardPreferences();
+      renderDashboard();
+    });
+  });
+  dom.btnDashboardCompact?.addEventListener('click', () => {
+    const order = ['comfortable', 'compact', 'logos'];
+    const currentIndex = order.indexOf(state.dashboardDensity || 'comfortable');
+    const nextIndex = currentIndex < 0 ? 0 : (currentIndex + 1) % order.length;
+    state.dashboardDensity = order[nextIndex];
+    saveDashboardPreferences();
+    renderDashboard();
+  });
   dom.btnOverviewSync?.addEventListener('click', syncOverviewFromApi);
   dom.btnOverviewPowerRefresh?.addEventListener('click', powerRefreshOverviewFromApi);
   dom.btnImportBatch?.addEventListener('click', openBatchImportDialog);
@@ -2169,7 +2549,14 @@ function renderCards() {
 }
 
 function createCardElement(card, key, db, index) {
-  const isEditable = Boolean(db?.gCell && db?.rhCell);
+  const dbEntry = db || {
+    displayId: card.number,
+    g: false,
+    rh: false,
+    gCell: null,
+    rhCell: null
+  };
+  const isEditable = Boolean(state.currentSet?.setName);
   const article = document.createElement('article');
   article.className = 'card';
   article.dataset.cardId    = key;
@@ -2177,8 +2564,8 @@ function createCardElement(card, key, db, index) {
   article.setAttribute('role', 'listitem');
   article.setAttribute('tabindex', '-1');
 
-  if (db?.rh)     article.classList.add('reverse');
-  else if (db?.g) article.classList.add('collected');
+  if (dbEntry?.rh)     article.classList.add('reverse');
+  else if (dbEntry?.g) article.classList.add('collected');
 
   // Image wrap (click → lightbox)
   const imgWrap = document.createElement('div');
@@ -2201,18 +2588,24 @@ function createCardElement(card, key, db, index) {
   titleDiv.textContent = `${card.number} \u2013 ${card.name || 'Unbekannt'}`;
 
   const checksDiv = document.createElement('div'); checksDiv.className = 'checks';
-  checksDiv.append(makeCheckbox('G', 'g', db?.g ?? false, !isEditable), makeCheckbox('RH', 'rh', db?.rh ?? false, !isEditable || !db?.g));
+  checksDiv.append(
+    makeCheckbox('G', 'g', dbEntry?.g ?? false, !isEditable),
+    makeCheckbox('RH', 'rh', dbEntry?.rh ?? false, !isEditable || !dbEntry?.g || !dbEntry?.rhCell)
+  );
   meta.append(titleDiv, checksDiv);
 
   if (card.cardmarketUrl) {
+    const isFallbackCardmarket = isGeneratedCardmarketSearchUrl(card.cardmarketUrl);
     const cm = document.createElement('a');
     cm.href = card.cardmarketUrl; cm.target = '_blank'; cm.rel = 'noopener noreferrer';
-    cm.className = 'card-cm-link'; cm.textContent = '\uD83D\uDED2 CM';
+    cm.className = `card-cm-link${isFallbackCardmarket ? ' card-cm-link-fallback' : ''}`;
+    cm.textContent = '\uD83D\uDED2 CM';
+    cm.title = isFallbackCardmarket ? 'Generierter Cardmarket-Suchlink' : 'Cardmarket-Produktseite';
     meta.appendChild(cm);
   }
 
   article.append(imgWrap, meta);
-  if (isEditable) attachCheckboxListeners(article, db, key);
+  if (isEditable) attachCheckboxListeners(article, dbEntry, key);
 
   // Bulk-Klick auf Artikel
   article.addEventListener('click', (e) => {
@@ -2223,6 +2616,11 @@ function createCardElement(card, key, db, index) {
   });
 
   return article;
+}
+
+function isGeneratedCardmarketSearchUrl(url) {
+  const value = String(url || '').trim().toLowerCase();
+  return value.includes('cardmarket.com') && value.includes('/products/search') && value.includes('searchstring=');
 }
 
 function makeCheckbox(labelText, type, checked, disabled) {
@@ -2237,21 +2635,35 @@ function attachCheckboxListeners(article, db, key) {
   const gInput  = article.querySelector('input[data-type="g"]');
   const rhInput = article.querySelector('input[data-type="rh"]');
 
+  async function ensureDbEntry() {
+    if (db?.gCell && db?.rhCell) return db;
+    const ensured = await ensureCollectionEntry(state.currentSet.setName, db?.displayId || key);
+    db.g = Boolean(db?.g);
+    db.rh = Boolean(db?.rh && db?.g);
+    db.gCell = ensured.gCell;
+    db.rhCell = ensured.rhCell;
+    db.displayId = ensured.displayId || db.displayId || key;
+    state.dbMap.set(key, db);
+    return db;
+  }
+
   gInput.addEventListener('change', async () => {
     if (state.bulkMode) { gInput.checked = !gInput.checked; return; }
     const checked = gInput.checked;
     try {
+      await ensureDbEntry();
       await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, checked);
       db.g = checked;
-      if (!checked) {
+      if (!checked && db?.rhCell) {
         await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, false);
         db.rh = false; rhInput.checked = false; rhInput.disabled = true;
       } else {
-        rhInput.disabled = false;
+        rhInput.disabled = !db?.rhCell;
       }
       updateCardState(article, db);
       updateStats(); applyFilter();
       state.summaryData = null;
+      broadcastRealtimeCardUpdate(key, db);
     } catch (err) {
       showToast(`Speichern fehlgeschlagen: ${err.message}`, 'error');
       gInput.checked = !checked;
@@ -2260,13 +2672,15 @@ function attachCheckboxListeners(article, db, key) {
 
   rhInput.addEventListener('change', async () => {
     if (state.bulkMode) { rhInput.checked = !rhInput.checked; return; }
-    if (!db.g) { rhInput.checked = false; return; }
+    if (!db.g || !db?.rhCell) { rhInput.checked = false; return; }
     const checked = rhInput.checked;
     try {
+      await ensureDbEntry();
       await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, checked);
       db.rh = checked;
       updateCardState(article, db);
       state.summaryData = null;
+      broadcastRealtimeCardUpdate(key, db);
     } catch (err) {
       showToast(`Speichern fehlgeschlagen: ${err.message}`, 'error');
       rhInput.checked = !checked;
@@ -2281,6 +2695,49 @@ function updateCardState(article, db) {
     const idx = parseInt(article.dataset.cardIndex);
     if (state.lightboxIndex === idx) renderLightbox(idx);
   }
+}
+
+function broadcastRealtimeCardUpdate(cardNumber, db) {
+  if (!state.realtime || !state.currentSet) return;
+  state.realtime.publish(
+    buildCollectionUpdateEvent({
+      setId: state.currentSet.setId,
+      setName: state.currentSet.setName,
+      cardNumber,
+      g: Boolean(db?.g),
+      rh: Boolean(db?.rh),
+      actor: 'local-user'
+    })
+  );
+}
+
+function applyIncomingRealtimeUpdate(payload) {
+  if (!payload || payload.type !== 'collection-update' || !state.currentSet) return;
+
+  const isSameSet =
+    payload.setId === state.currentSet.setId ||
+    payload.setName === state.currentSet.setName;
+  if (!isSameSet) return;
+
+  const key = normalizeCardNumber(payload.cardNumber);
+  const db = state.dbMap.get(key);
+  if (!db) return;
+
+  db.g = Boolean(payload.g);
+  db.rh = Boolean(payload.g && payload.rh);
+
+  const article = dom.cards.querySelector(`[data-card-id="${key}"]`);
+  if (article) updateCardState(article, db);
+
+  if (dom.lightboxDialog.open) {
+    const card = state.cards[state.lightboxIndex];
+    const lightboxKey = card ? normalizeCardNumber(card.number) : null;
+    if (lightboxKey && lightboxKey === key) renderLightbox(state.lightboxIndex);
+  }
+
+  updateStats();
+  state.summaryData = null;
+  showToast(`🔄 Live-Update empfangen: #${payload.cardNumber}`, 'info', 2000);
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -2301,19 +2758,29 @@ function renderLightbox(index) {
   const card = state.cards[index];
   if (!card) return;
   const key = normalizeCardNumber(card.number);
-  const db  = state.dbMap.get(key);
+  const db  = state.dbMap.get(key) || { displayId: card.number, g: false, rh: false, gCell: null, rhCell: null };
   dom.lightboxImg.src              = card.image || '';
   dom.lightboxImg.alt              = card.name  || key;
   dom.lightboxTitle.textContent    = card.name  || 'Unbekannt';
   dom.lightboxSubtitle.textContent = `#${card.number}`;
   dom.lightboxCounter.textContent  = `${index + 1}\u202f/\u202f${state.cards.length}`;
-  if (card.cardmarketUrl) { dom.lightboxCmLink.href = card.cardmarketUrl; dom.lightboxCmLink.classList.remove('hidden'); }
-  else dom.lightboxCmLink.classList.add('hidden');
-  const isEditable              = Boolean(db?.gCell && db?.rhCell);
+  if (card.cardmarketUrl) {
+    const isFallbackCardmarket = isGeneratedCardmarketSearchUrl(card.cardmarketUrl);
+    dom.lightboxCmLink.href = card.cardmarketUrl;
+    dom.lightboxCmLink.textContent = '🛒 Cardmarket';
+    dom.lightboxCmLink.title = isFallbackCardmarket ? 'Generierter Cardmarket-Suchlink' : 'Cardmarket-Produktseite';
+    dom.lightboxCmLink.classList.toggle('lightbox-cm-link-fallback', isFallbackCardmarket);
+    dom.lightboxCmLink.classList.remove('hidden');
+  } else {
+    dom.lightboxCmLink.classList.add('hidden');
+    dom.lightboxCmLink.classList.remove('lightbox-cm-link-fallback');
+  }
+  const hasGCell                = Boolean(db?.gCell);
+  const hasRhCell               = Boolean(db?.rhCell);
   dom.lightboxGCheck.checked    = db?.g  ?? false;
-  dom.lightboxGCheck.disabled   = !isEditable;
+  dom.lightboxGCheck.disabled   = !Boolean(state.currentSet?.setName);
   dom.lightboxRhCheck.checked   = db?.rh ?? false;
-  dom.lightboxRhCheck.disabled  = !isEditable || !db?.g;
+  dom.lightboxRhCheck.disabled  = !hasRhCell || !db?.g;
   dom.btnLightboxPrev.disabled  = index === 0;
   dom.btnLightboxNext.disabled  = index === state.cards.length - 1;
 }
@@ -2340,18 +2807,23 @@ function initLightbox() {
     const card = state.cards[state.lightboxIndex];
     if (!card) return;
     const key = normalizeCardNumber(card.number);
-    const db  = state.dbMap.get(key);
-    if (!db?.gCell) return;
+    const db  = state.dbMap.get(key) || { displayId: card.number, g: false, rh: false, gCell: null, rhCell: null };
+    if (!db?.gCell) {
+      const ensured = await ensureCollectionEntry(state.currentSet.setName, db?.displayId || key);
+      db.gCell = ensured.gCell;
+      db.rhCell = ensured.rhCell;
+      state.dbMap.set(key, db);
+    }
     try {
       if (isG) {
         await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, checked);
         db.g = checked;
-        if (!checked) {
+        if (!checked && db?.rhCell) {
           await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, false);
           db.rh = false;
         }
       } else {
-        if (!db.g) return;
+        if (!db.g || !db?.rhCell) return;
         await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, checked);
         db.rh = checked;
       }
@@ -2360,6 +2832,7 @@ function initLightbox() {
       if (article) updateCardState(article, db);
       updateStats();
       state.summaryData = null;
+      broadcastRealtimeCardUpdate(key, db);
     } catch (err) {
       showToast(`Fehler: ${err.message}`, 'error');
       renderLightbox(state.lightboxIndex); // revert UI
@@ -2411,6 +2884,7 @@ async function bulkUpdate(g, rh) {
         }
         const article = dom.cards.querySelector(`[data-card-id="${key}"]`);
         if (article) updateCardState(article, db);
+        broadcastRealtimeCardUpdate(key, db);
         updated++;
       } catch (err) {
         console.warn('[bulkUpdate] error for key', key, err);
@@ -2548,6 +3022,7 @@ async function loadCurrentSet(forceRefresh = false) {
 
     renderCards();
     await writeSetting('lastSetId', setId);
+    markSetAsRecent(selected);
     setGlobalStatus(`${selected.setName}: ${cards.length} Karten.`);
     if (!forceRefresh) showToast(`${selected.setName} geladen`, 'success', 2000);
   } catch (err) {
@@ -2667,6 +3142,9 @@ function initGestureControls() {
 // BOOTSTRAP
 // ══════════════════════════════════════════════════════════════════════════
 async function bootstrap() {
+  loadDashboardPreferences();
+  state.recentSets = loadRecentSets();
+
   try {
     await initSmartEngine();
   } catch (err) {
@@ -2684,13 +3162,32 @@ async function bootstrap() {
   initBulkEdit();
   initKeyboardNav();
   initDashboardControls();
+  initSheetsWriteFeedback();
   initSortControl();
   initSearch();
+
+  try {
+    state.realtimeClientId = localStorage.getItem('poke-realtime-client-id') || `client_${Date.now()}`;
+    localStorage.setItem('poke-realtime-client-id', state.realtimeClientId);
+    state.realtime = initRealtimeSync({
+      clientId: state.realtimeClientId,
+      onEvent: applyIncomingRealtimeUpdate
+    });
+    console.log('✅ Realtime sync initialized');
+  } catch (err) {
+    console.warn('⚠️ Realtime sync init failed:', err);
+  }
   
   // Initialize Quick Filters
   try {
-    initQuickFiltersUI();
+    initQuickFiltersUI(state.quickFilters);
     window.addEventListener('quick-filters-changed', (e) => {
+      state.quickFilters = {
+        ...state.quickFilters,
+        ...(e?.detail || {})
+      };
+      resetDashboardVirtualization();
+      saveDashboardPreferences();
       renderDashboard();
     });
     console.log('✅ Quick Filters initialized');
@@ -2919,9 +3416,349 @@ async function bootstrap() {
       document.body.appendChild(dialog);
       dialog.showModal();
       dialog.addEventListener('close', () => dialog.remove());
+    },
+    'community': () => {
+      const container = document.createElement('div');
+      container.style.cssText = 'max-height: 80vh; overflow-y: auto; padding: 20px;';
+
+      const banner = createCommunityStatsBanner();
+      const trending = createCommunityTrendingPanel();
+      const search = createCommunitySearchPanel();
+
+      container.appendChild(banner);
+      container.appendChild(trending);
+      container.appendChild(search);
+
+      const dialog = document.createElement('dialog');
+      dialog.className = 'ss-dialog';
+      dialog.style.cssText = 'width: 90vw; max-width: 900px;';
+      dialog.appendChild(container);
+      document.body.appendChild(dialog);
+      dialog.showModal();
+      dialog.addEventListener('close', () => dialog.remove());
+    },
+    'profile': () => {
+      // Generate or get current user ID (in real app, from auth)
+      const userId = localStorage.getItem('poke-user-id') || 'user_' + Date.now();
+      localStorage.setItem('poke-user-id', userId);
+
+      let profile = getUserProfile(userId);
+      if (!profile) {
+        profile = createUserProfile('collector', 'Pokémon Sammler', 'Meine Pokémon TCG Collection');
+        localStorage.setItem('poke-user-id', profile.userId);
+      }
+
+      const card = createUserProfileCard(profile.userId, profile.userId);
+
+      const dialog = document.createElement('dialog');
+      dialog.className = 'ss-dialog';
+      dialog.style.cssText = 'width: 90vw; max-width: 500px;';
+      dialog.appendChild(card);
+      document.body.appendChild(dialog);
+      dialog.showModal();
+      dialog.addEventListener('close', () => dialog.remove());
+    },
+    'publish-collection': () => {
+      if (!state.allSets || state.allSets.length === 0) {
+        showToast('Keine Sets zum Veröffentlichen', 'error');
+        return;
+      }
+
+      const userId = localStorage.getItem('poke-user-id') || 'user_' + Date.now();
+      const collectionData = {}; // Würde echte Collection laden
+
+      const form = document.createElement('div');
+      form.style.cssText = 'padding: 20px;';
+
+      const titleEl = document.createElement('input');
+      titleEl.type = 'text';
+      titleEl.placeholder = 'Collection-Titel';
+      titleEl.value = 'Meine Pokémon Collection';
+      titleEl.style.cssText = 'width: 100%; padding: 10px; border: 1px solid var(--color-border); border-radius: 6px; margin-bottom: 12px;';
+
+      const descEl = document.createElement('textarea');
+      descEl.placeholder = 'Beschreibung...';
+      descEl.style.cssText = 'width: 100%; padding: 10px; border: 1px solid var(--color-border); border-radius: 6px; margin-bottom: 12px; min-height: 100px;';
+
+      const publishBtn = document.createElement('button');
+      publishBtn.textContent = '🌍 Veröffentlichen';
+      publishBtn.style.cssText = `
+        width: 100%;
+        padding: 12px;
+        background: var(--color-primary);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+      `;
+
+      publishBtn.addEventListener('click', () => {
+        const share = createPublicShare(userId, collectionData, state.allSets, titleEl.value, descEl.value);
+        if (share) {
+          showToast('✅ Collection veröffentlicht!', 'success', 3000);
+          publishBtn.textContent = '✅ Veröffentlicht!';
+          setTimeout(() => dialog.close(), 1500);
+        } else {
+          showToast('Fehler beim Veröffentlichen', 'error');
+        }
+      });
+
+      form.appendChild(titleEl);
+      form.appendChild(descEl);
+      form.appendChild(publishBtn);
+
+      const dialog = document.createElement('dialog');
+      dialog.className = 'ss-dialog';
+      dialog.style.cssText = 'width: 90vw; max-width: 500px;';
+      dialog.innerHTML = '<h3>🌍 Collection veröffentlichen</h3>';
+      dialog.appendChild(form);
+      document.body.appendChild(dialog);
+      dialog.showModal();
+      dialog.addEventListener('close', () => dialog.remove());
+    },
+    'trending': () => {
+      const trending = getTrendingCollections(20);
+
+      const container = document.createElement('div');
+      container.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; padding: 20px;';
+
+      if (trending.length === 0) {
+        container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--color-muted);">Noch keine Collections veröffentlicht</p>';
+      } else {
+        trending.forEach((share) => {
+          const card = createSharedCollectionCard(share);
+          container.appendChild(card);
+        });
+      }
+
+      const dialog = document.createElement('dialog');
+      dialog.className = 'ss-dialog';
+      dialog.style.cssText = 'width: 90vw; max-width: 1000px; max-height: 80vh; overflow-y: auto;';
+      dialog.innerHTML = '<h3 style="padding: 20px; margin: 0; border-bottom: 1px solid var(--color-border);">🔥 Trending Collections</h3>';
+      dialog.appendChild(container);
+      document.body.appendChild(dialog);
+  
+      dialog.showModal();
+      dialog.addEventListener('close', () => dialog.remove());
+    },
+    'marketplace': () => {
+      const dialog = document.createElement('dialog');
+      dialog.className = 'ss-dialog';
+      dialog.style.cssText = 'width: 90vw; max-width: 1200px; max-height: 80vh; overflow-y: auto;';
+      
+      const container = document.createElement('div');
+      container.style.cssText = 'padding: 20px;';
+      
+      const statsCard = createTradeStatsCard('current-user');
+      const marketplace = createTradeMarketplacePanel();
+      const suggestions = createTradeSuggestionsPanel('current-user', []);
+      
+      container.appendChild(statsCard);
+      container.appendChild(marketplace);
+      container.appendChild(suggestions);
+      
+      dialog.innerHTML = '<h3 style="padding: 20px 20px 0 20px; margin: 0; border-bottom: 1px solid var(--color-border);">💱 Trading Marketplace</h3>';
+      dialog.appendChild(container);
+      document.body.appendChild(dialog);
+      dialog.showModal();
+      dialog.addEventListener('close', () => dialog.remove());
+    },
+    'wanted': () => {
+      const dialog = document.createElement('dialog');
+      dialog.className = 'ss-dialog';
+      
+      const container = document.createElement('div');
+      container.style.cssText = 'padding: 20px;';
+      container.appendChild(createWantedCardsPanel());
+      
+      dialog.innerHTML = '<h3 style="padding: 20px 20px 0 20px; margin: 0; border-bottom: 1px solid var(--color-border);">🎯 Gesuchte Karten</h3>';
+      dialog.appendChild(container);
+      document.body.appendChild(dialog);
+      dialog.showModal();
+      dialog.addEventListener('close', () => dialog.remove());
+    },
+    'rarity': () => {
+      const dialog = document.createElement('dialog');
+      dialog.className = 'ss-dialog';
+      
+      const availableRarities = getAvailableRarities();
+      
+      const container = document.createElement('div');
+      container.style.cssText = 'padding: 20px;';
+      
+      const header = document.createElement('div');
+      header.style.cssText = 'margin-bottom: 20px;';
+      header.innerHTML = '<h4>Verfügbare Raritäten</h4>';
+      container.appendChild(header);
+      
+      const grid = document.createElement('div');
+      grid.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px;';
+      
+      availableRarities.forEach((rarity) => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-secondary';
+        btn.style.cssText = 'padding: 12px; cursor: pointer;';
+        btn.textContent = `${rarity.emoji} ${rarity.name}`;
+        btn.addEventListener('click', () => {
+          console.log(`Filtere nach Raritär: ${rarity.id}`);
+        });
+        grid.appendChild(btn);
+      });
+      
+      container.appendChild(grid);
+      
+      dialog.innerHTML = '<h3 style="padding: 20px 20px 0 20px; margin: 0; border-bottom: 1px solid var(--color-border);">✨ Raritätsfilter</h3>';
+      dialog.appendChild(container);
+      document.body.appendChild(dialog);
+      dialog.showModal();
+      dialog.addEventListener('close', () => dialog.remove());
+    },
+    'collection-value': () => {
+      const dialog = document.createElement('dialog');
+      dialog.className = 'ss-dialog';
+      
+      const container = document.createElement('div');
+      container.style.cssText = 'padding: 20px;';
+      
+      // Placeholder - würde in vollständiger Integration die echten Cards verwenden
+      const stats = getCollectionValueStats([]);
+      
+      const info = document.createElement('div');
+      info.style.cssText = 'background: var(--bg-secondary); padding: 16px; border-radius: 8px; text-align: center;';
+      info.innerHTML = `
+        <h3>Kollektionswert</h3>
+        <div style="font-size: 2em; font-weight: bold; color: var(--color-success); margin: 10px 0;">
+          €${stats.totalValue?.toFixed(2) || '0.00'}
+        </div>
+        <div style="color: var(--text-secondary);">
+          <p>Karten: ${stats.cardCount || 0}</p>
+          <p>Durchschnittswert: €${stats.averageValue?.toFixed(2) || '0.00'}</p>
+        </div>
+      `;
+      
+      container.appendChild(info);
+      
+      dialog.innerHTML = '<h3 style="padding: 20px 20px 0 20px; margin: 0; border-bottom: 1px solid var(--color-border);">💰 Kollektionswert</h3>';
+      dialog.appendChild(container);
+      document.body.appendChild(dialog);
+      dialog.showModal();
+      dialog.addEventListener('close', () => dialog.remove());
+    },
+    'ml-recommendations': () => {
+      const recommendations = generateMLSetRecommendations(
+        state.summaryData || [],
+        state.allSets || state.sets,
+        10
+      );
+
+      if (!recommendations.length) {
+        showToast('Keine ML-Empfehlungen verfügbar', 'info');
+        return;
+      }
+
+      const dialog = document.createElement('dialog');
+      dialog.className = 'ss-dialog';
+      dialog.style.cssText = 'width: 90vw; max-width: 900px; max-height: 80vh; overflow-y: auto;';
+
+      const summary = summarizeMLRecommendations(recommendations);
+      const container = document.createElement('div');
+      container.style.cssText = 'padding: 20px; display: grid; gap: 10px;';
+
+      const header = document.createElement('div');
+      header.style.cssText = 'padding: 12px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-bg-secondary);';
+      header.innerHTML = `
+        <div style="font-weight: 700;">${summary.headline}</div>
+        <div style="color: var(--color-muted); font-size: 13px;">Top Confidence: ${summary.topConfidence}% • Ø Completion: ${summary.averageCompletion}%</div>
+      `;
+      container.appendChild(header);
+
+      recommendations.forEach((item, index) => {
+        const row = document.createElement('div');
+        row.style.cssText = 'padding: 12px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-bg-secondary); display: flex; justify-content: space-between; gap: 10px;';
+        row.innerHTML = `
+          <div>
+            <div style="font-weight: 600;">${index + 1}. ${item.setName} <span style="color: var(--color-muted); font-weight: 400;">(${item.setId})</span></div>
+            <div style="font-size: 13px; color: var(--color-muted);">Serie: ${item.series} • Fortschritt: ${item.collected}/${item.total} (${item.completion}%)</div>
+            <div style="font-size: 13px; margin-top: 4px;">${item.reasons.join(' • ')}</div>
+          </div>
+          <div style="align-self: center; background: var(--color-primary); color: white; border-radius: 999px; padding: 6px 12px; font-weight: 700;">${item.confidence}%</div>
+        `;
+        container.appendChild(row);
+      });
+
+      dialog.innerHTML = '<h3 style="padding: 20px 20px 0 20px; margin: 0; border-bottom: 1px solid var(--color-border);">🧠 ML-Empfehlungen</h3>';
+      dialog.appendChild(container);
+      document.body.appendChild(dialog);
+      dialog.showModal();
+      dialog.addEventListener('close', () => dialog.remove());
+    },
+    'live-dashboard': () => {
+      const dialog = document.createElement('dialog');
+      dialog.className = 'ss-dialog';
+      dialog.style.cssText = 'width: 90vw; max-width: 900px; max-height: 80vh; overflow-y: auto;';
+
+      const body = document.createElement('div');
+      body.style.cssText = 'padding: 20px; display: grid; gap: 12px;';
+
+      const headline = document.createElement('div');
+      headline.style.cssText = 'padding: 12px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-bg-secondary);';
+      body.appendChild(headline);
+
+      const metricsGrid = document.createElement('div');
+      metricsGrid.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;';
+      body.appendChild(metricsGrid);
+
+      const refreshUI = () => {
+        const metrics = getEngineMetrics();
+        const market = getTradePlaceSummary();
+        const summaryRows = state.summaryData || [];
+        const totals = summaryRows.reduce((acc, row) => {
+          acc.total += Number(row.total || 0);
+          acc.collected += Number(row.collected || 0);
+          acc.rh += Number(row.rh || 0);
+          return acc;
+        }, { total: 0, collected: 0, rh: 0 });
+
+        const progress = totals.total > 0 ? Math.round((totals.collected / totals.total) * 100) : 0;
+
+        headline.innerHTML = `
+          <div style="font-weight: 700;">📡 Live Dashboard</div>
+          <div style="color: var(--color-muted); font-size: 13px;">Aktualisiert: ${new Date().toLocaleTimeString('de-DE')}</div>
+        `;
+
+        const cards = [
+          ['Status', metrics.status === 'online' ? '🟢 Online' : '🔴 Offline'],
+          ['Cache Hit Rate', `${metrics.cacheHitRate}%`],
+          ['Gesamtfortschritt', `${progress}%`],
+          ['Gesammelt', `${totals.collected} / ${totals.total}`],
+          ['Reverse Holos', `${totals.rh}`],
+          ['Aktive Angebote', `${market.activeOffers || 0}`],
+          ['Gesuchte Karten', `${market.totalWantedCards || 0}`],
+          ['Queue', `${(metrics.syncQueue || []).length}`]
+        ];
+
+        metricsGrid.innerHTML = cards.map(([label, value]) => `
+          <div style="padding: 12px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-bg-secondary);">
+            <div style="font-size: 12px; color: var(--color-muted);">${label}</div>
+            <div style="font-size: 20px; font-weight: 700; margin-top: 4px;">${value}</div>
+          </div>
+        `).join('');
+      };
+
+      refreshUI();
+      const timer = setInterval(refreshUI, 3000);
+
+      dialog.innerHTML = '<h3 style="padding: 20px 20px 0 20px; margin: 0; border-bottom: 1px solid var(--color-border);">📊 Advanced Live Dashboard</h3>';
+      dialog.appendChild(body);
+      document.body.appendChild(dialog);
+      dialog.showModal();
+      dialog.addEventListener('close', () => {
+        clearInterval(timer);
+        dialog.remove();
+      });
     }
   };
-  
   try {
     initCommandPalette(commandHandlers);
     console.log('✅ Command Palette initialized');
@@ -2979,6 +3816,11 @@ async function bootstrap() {
     });
 
     dom.selector.addEventListener('change', () => {
+      const setId = dom.selector.value;
+      if (setId) {
+        navigate(`set/${setId}`);
+        return;
+      }
       state.currentSet = null; state.cards = []; state.dbMap = new Map();
       dom.cards.innerHTML = '';
       dom.statsSection.classList.add('hidden');
@@ -3002,6 +3844,7 @@ async function bootstrap() {
 async function onLoginSuccess() {
   state.loggedIn = true;
   dom.login.disabled = true; dom.logout.disabled = false;
+  renderRecentSets();
   if (!CONFIG.SPREADSHEET_ID) { openSpreadsheetDialog(true); setLoading(false); return; }
   updateSpreadsheetInfoBar();
   await loadSets();
@@ -3020,6 +3863,7 @@ function resetToLoggedOut() {
   dom.setLogoWrap.classList.add('hidden');
   dom.spreadsheetInfo.classList.add('hidden');
   dom.mainNav.classList.add('hidden');
+  renderRecentSets();
   setEmptyState(true);
   setGlobalStatus('Abgemeldet.');
   showView('dashboard');

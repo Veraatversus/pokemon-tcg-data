@@ -14,6 +14,7 @@
   <meta name="apple-mobile-web-app-title" content="Pokémon TCG Tracker" />
   <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect fill='%231f2937' width='180' height='180' rx='40'/%3E%3Ctext x='90' y='120' font-size='100' text-anchor='middle' fill='%23fff' dominant-baseline='middle'%3E🎴%3C/text%3E%3C/svg%3E" />
   <link rel="stylesheet" href="./css/main.css" />
+  <link rel="stylesheet" href="./css/trading-marketplace.css" />
 </head>
 <body>
 
@@ -97,6 +98,7 @@
       <a href="#stats" class="nav-link" data-view="stats">Statistiken</a>
       <a href="#search" class="nav-link" data-view="search">Suche</a>
     </nav>
+    <div id="recent-sets" class="recent-sets hidden" aria-label="Zuletzt bearbeitete Sets"></div>
     <div class="header-actions">
       <button id="btn-dark-mode" class="btn-icon" title="Dark Mode umschalten">🌙</button>
       <button id="btn-login">Google Login</button>
@@ -149,27 +151,52 @@
             <option value="name">Name A–Z</option>
           </select>
         </div>
-        <div class="dashboard-actions">
-          <button id="btn-overview-sync" class="btn-secondary" type="button">🔄 Overview sync</button>
-          <button id="btn-overview-power-refresh" class="btn-secondary" type="button">⚡ Power-Refresh</button>
-          <button id="btn-import-batch" class="btn-secondary" type="button">📦 Batch-Import</button>
-          <button id="btn-import-all-missing" class="btn-secondary" type="button">🌐 Alle fehlenden importieren</button>
-          <button id="btn-reimport-current" class="btn-secondary" type="button">♻️ Aktuelles Set reimportieren</button>
-          <button id="btn-reimport-all-imported" class="btn-secondary" type="button">🔁 Alle importierten aktualisieren</button>
-          <button id="btn-export-summary-csv" class="btn-secondary" type="button">📤 Sammlung CSV</button>
-          <button id="btn-data-health-check" class="btn-secondary" type="button">🩺 Datencheck</button>
-          <button id="btn-data-health-autofix" class="btn-secondary" type="button">🛠️ Datencheck + Auto-Fix</button>
-           <button id="dashboard-action-parity" class="btn btn-secondary" type="button">
-             🧪 Pokecode-Parity-Test
-           </button>
-          <button id="btn-queue-autofix-refresh" class="btn-secondary" type="button">🧩 Queue: Auto-Fix → Refresh</button>
-          <button id="btn-queue-builder" class="btn-secondary" type="button">🧱 Queue Builder</button>
-          <button id="btn-queue-run" class="btn-secondary" type="button">▶️ Queue starten</button>
-          <button id="btn-queue-clear" class="btn-secondary" type="button">🗑️ Queue leeren</button>
-          <button id="btn-export-backup" class="btn-secondary" type="button">💾 Backup exportieren</button>
-          <button id="btn-import-backup" class="btn-secondary" type="button">📥 Backup importieren</button>
-          <input id="input-backup-file" type="file" accept="application/json" class="hidden" />
+        <div id="dashboard-view-tabs" class="dashboard-view-tabs" role="tablist" aria-label="Dashboard-Ansicht">
+          <button class="dashboard-view-tab active" type="button" data-dashboard-view="all" aria-selected="true">Alle</button>
+          <button class="dashboard-view-tab" type="button" data-dashboard-view="imported" aria-selected="false">Importiert</button>
+          <button class="dashboard-view-tab" type="button" data-dashboard-view="not-imported" aria-selected="false">Nicht importiert</button>
+          <button class="dashboard-view-tab" type="button" data-dashboard-view="favorites" aria-selected="false">Favoriten</button>
+          <button id="btn-dashboard-compact" class="dashboard-view-tab" type="button" aria-pressed="false" title="Ansichtsdichte wechseln">Komfort</button>
         </div>
+        <details class="dashboard-tools">
+          <summary>🧰 Tools</summary>
+          <div class="dashboard-actions">
+            <section class="dashboard-tools-group" aria-label="Import und Synchronisation">
+              <h3>Import & Sync</h3>
+              <div class="dashboard-tools-buttons">
+                <button id="btn-overview-sync" class="btn-secondary" type="button">🔄 Overview sync</button>
+                <button id="btn-overview-power-refresh" class="btn-secondary" type="button">⚡ Power-Refresh</button>
+                <button id="btn-import-batch" class="btn-secondary" type="button">📦 Batch-Import</button>
+                <button id="btn-import-all-missing" class="btn-secondary" type="button">🌐 Alle fehlenden importieren</button>
+                <button id="btn-reimport-current" class="btn-secondary" type="button">♻️ Aktuelles Set reimportieren</button>
+                <button id="btn-reimport-all-imported" class="btn-secondary" type="button">🔁 Alle importierten aktualisieren</button>
+              </div>
+            </section>
+
+            <section class="dashboard-tools-group" aria-label="Queue und Automatisierung">
+              <h3>Queue & Automatisierung</h3>
+              <div class="dashboard-tools-buttons">
+                <button id="btn-queue-autofix-refresh" class="btn-secondary" type="button">🧩 Queue: Auto-Fix → Refresh</button>
+                <button id="btn-queue-builder" class="btn-secondary" type="button">🧱 Queue Builder</button>
+                <button id="btn-queue-run" class="btn-secondary" type="button">▶️ Queue starten</button>
+                <button id="btn-queue-clear" class="btn-secondary" type="button">🗑️ Queue leeren</button>
+              </div>
+            </section>
+
+            <section class="dashboard-tools-group" aria-label="Diagnose und Backup">
+              <h3>Diagnose & Backup</h3>
+              <div class="dashboard-tools-buttons">
+                <button id="btn-export-summary-csv" class="btn-secondary" type="button">📤 Sammlung CSV</button>
+                <button id="btn-data-health-check" class="btn-secondary" type="button">🩺 Datencheck</button>
+                <button id="btn-data-health-autofix" class="btn-secondary" type="button">🛠️ Datencheck + Auto-Fix</button>
+                <button id="dashboard-action-parity" class="btn btn-secondary" type="button">🧪 Pokecode-Parity-Test</button>
+                <button id="btn-export-backup" class="btn-secondary" type="button">💾 Backup exportieren</button>
+                <button id="btn-import-backup" class="btn-secondary" type="button">📥 Backup importieren</button>
+              </div>
+            </section>
+            <input id="input-backup-file" type="file" accept="application/json" class="hidden" />
+          </div>
+        </details>
       </div>
       <div id="quick-filters-container"></div>
       <div id="dashboard-grid" class="dashboard-grid">
@@ -254,7 +281,7 @@
 
         <!-- Empty-State -->
         <div id="empty-state" class="empty-state">
-          <p>🗃️ Kein Set geladen. Bitte ein Set auswählen und auf „Laden" klicken.</p>
+          <p>🗃️ Kein Set geladen. Bitte ein Set auswählen.</p>
           <p class="empty-hint">Tipp: Pfeiltasten navigieren, Leertaste = G togglen, I = Bild-Zoom</p>
         </div>
         <!-- Karten-Grid -->

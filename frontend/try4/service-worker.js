@@ -2,7 +2,7 @@
 // SERVICE WORKER - Offline Support & Caching
 // ══════════════════════════════════════════════════════════════════════════
 
-const CACHE_NAME = 'poke-tcg-v1';
+const CACHE_NAME = 'poke-tcg-v2';
 const RUNTIME_CACHE = 'poke-tcg-runtime';
 const IMAGE_CACHE = 'poke-tcg-images';
 
@@ -10,6 +10,7 @@ const STATIC_ASSETS = [
   './',
   './index.html',
   './css/main.css',
+  './css/trading-marketplace.css',
   './js/app.js',
   './js/auth.js',
   './js/sheets-db.js',
@@ -22,7 +23,17 @@ const STATIC_ASSETS = [
   './js/command-palette.js',
   './js/enhanced-features.js',
   './js/ui-components.js',
-  './js/advanced-tools.js'
+  './js/advanced-tools.js',
+  './js/social-features.js',
+  './js/social-ui.js',
+  './js/advanced-features.js',
+  './js/community-features.js',
+  './js/community-ui.js',
+  './js/card-filters.js',
+  './js/trading-system.js',
+  './js/trading-ui.js',
+  './js/ml-recommendations.js',
+  './js/realtime-sync.js'
 ];
 
 // Install event: cache static assets
@@ -102,9 +113,12 @@ self.addEventListener('fetch', (event) => {
         fetch(request)
           .then((response) => {
             if (response && response.status === 200) {
+              const responseToCache = response.clone();
               const cache_name = request.url.includes('api') ? RUNTIME_CACHE : CACHE_NAME;
               caches.open(cache_name).then((cache) => {
-                cache.put(request, response.clone());
+                cache.put(request, responseToCache).catch((err) => {
+                  console.warn('[SW] cache.put failed:', err);
+                });
               });
             }
             return response;
@@ -138,8 +152,11 @@ self.addEventListener('fetch', (event) => {
 
         return fetch(request).then((response) => {
           if (response && response.status === 200) {
+            const responseToCache = response.clone();
             caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, response.clone());
+              cache.put(request, responseToCache).catch((err) => {
+                console.warn('[SW] cache.put failed:', err);
+              });
             });
           }
           return response;

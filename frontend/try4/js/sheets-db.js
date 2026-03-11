@@ -210,6 +210,18 @@ async function getFormulas(range) {
   return getValues(range, 'FORMULA');
 }
 
+function isRetryableWriteError(err) {
+  const status = Number(err?.status || err?.result?.error?.code || 0);
+  if ([429, 500, 502, 503, 504].includes(status)) return true;
+  const message = String(err?.result?.error?.message || err?.message || '').toLowerCase();
+  return message.includes('timeout') || message.includes('temporar') || message.includes('rate limit');
+}
+
+function emitWriteEvent(type, detail) {
+  if (typeof window === 'undefined' || !window.dispatchEvent || typeof CustomEvent === 'undefined') return;
+  window.dispatchEvent(new CustomEvent(type, { detail }));
+}
+
 async function putValues(range, values) {
   const maxRetries = 6;
   try {
@@ -226,12 +238,24 @@ async function putValues(range, values) {
         });
         return;
       } catch (err) {
-        if (err?.status !== 429 || attempt >= maxRetries) throw err;
+        if (!isRetryableWriteError(err) || attempt >= maxRetries) throw err;
         const delay = Math.min(10000, 500 * Math.pow(2, attempt)) + Math.floor(Math.random() * 150);
+        emitWriteEvent('sheets-write-retry', {
+          range,
+          attempt: attempt + 1,
+          maxRetries,
+          delayMs: delay,
+          status: Number(err?.status || err?.result?.error?.code || 0) || null
+        });
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
   } catch (err) {
+    emitWriteEvent('sheets-write-failed', {
+      range,
+      status: Number(err?.status || err?.result?.error?.code || 0) || null,
+      message: String(err?.result?.error?.message || err?.message || 'Unbekannter Fehler')
+    });
     console.error('[putValues]', err);
     throw err;
   }
@@ -314,8 +338,59 @@ async function appendDbRows(sheetName, columnCount, rows) {
   const start = existing.length + 2;
   const end = start + rows.length - 1;
   const endCol = colToA1(columnCount);
+  await ensureSheetCapacity(sheetName, end, columnCount);
   await putValues(buildRange(sheetName, `A${start}:${endCol}${end}`), rows);
   dbRowsCache.set(`${sheetName}:${columnCount}`, [...existing, ...rows]);
+}
+
+async function ensureSheetCapacity(sheetName, requiredRows, requiredCols) {
+  const meta = await gapi.client.sheets.spreadsheets.get({
+    spreadsheetId: CONFIG.SPREADSHEET_ID,
+    fields: 'sheets(properties(sheetId,title,gridProperties(rowCount,columnCount)))'
+  });
+
+  const sheet = (meta.result.sheets || []).find(
+    (entry) => normalizeName(entry?.properties?.title) === normalizeName(sheetName)
+  );
+
+  if (!sheet?.properties?.sheetId) {
+    throw new Error(`Sheet nicht gefunden: ${sheetName}`);
+  }
+
+  const sheetId = sheet.properties.sheetId;
+  const currentRows = Number(sheet.properties?.gridProperties?.rowCount) || 0;
+  const currentCols = Number(sheet.properties?.gridProperties?.columnCount) || 0;
+  const targetRows = Math.max(0, Number(requiredRows) || 0);
+  const targetCols = Math.max(0, Number(requiredCols) || 0);
+  const requests = [];
+
+  if (targetRows > currentRows) {
+    requests.push({
+      appendDimension: {
+        sheetId,
+        dimension: 'ROWS',
+        length: targetRows - currentRows
+      }
+    });
+  }
+
+  if (targetCols > currentCols) {
+    requests.push({
+      appendDimension: {
+        sheetId,
+        dimension: 'COLUMNS',
+        length: targetCols - currentCols
+      }
+    });
+  }
+
+  if (requests.length > 0) {
+    await gapi.client.sheets.spreadsheets.batchUpdate({
+      spreadsheetId: CONFIG.SPREADSHEET_ID,
+      resource: { requests }
+    });
+    dbRowsCache.delete(`${sheetName}:${targetCols}`);
+  }
 }
 
 function toSafeCellString(value) {
@@ -810,6 +885,58 @@ export async function readSetCollectionMap(setSheetName) {
   });
 
   return migrated;
+}
+
+export async function ensureCollectionEntry(setSheetName, cardNumber) {
+  await ensureNormalizedSchema();
+  const setId = await resolveSetIdFromName(setSheetName);
+  if (!setId) {
+    throw new Error(`Set-ID für „${setSheetName}“ konnte nicht aufgelöst werden.`);
+  }
+
+  const normalizedCard = normalizeCardNumber(cardNumber);
+  const currentRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
+
+  const existingIndex = currentRows.findIndex((row) => {
+    const rowSetId = toSafeCellString(row[0]).toLowerCase();
+    const rowCard = normalizeCardNumber(toSafeCellString(row[1]));
+    return rowSetId === setId.toLowerCase() && rowCard === normalizedCard;
+  });
+
+  if (existingIndex >= 0) {
+    const rowNo = existingIndex + 2;
+    return {
+      displayId: toSafeCellString(currentRows[existingIndex][1]) || toSafeCellString(cardNumber),
+      g: toBoolean(currentRows[existingIndex][2]),
+      rh: toBoolean(currentRows[existingIndex][3]),
+      gCell: { row: rowNo, col: 3 },
+      rhCell: { row: rowNo, col: 4 }
+    };
+  }
+
+  await appendDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, [
+    [setId, toSafeCellString(cardNumber), false, false, nowIso()]
+  ]);
+
+  const refreshedRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
+  const newIndex = refreshedRows.findIndex((row) => {
+    const rowSetId = toSafeCellString(row[0]).toLowerCase();
+    const rowCard = normalizeCardNumber(toSafeCellString(row[1]));
+    return rowSetId === setId.toLowerCase() && rowCard === normalizedCard;
+  });
+
+  if (newIndex < 0) {
+    throw new Error(`Collection-Eintrag für Karte ${cardNumber} konnte nicht erstellt werden.`);
+  }
+
+  const rowNo = newIndex + 2;
+  return {
+    displayId: toSafeCellString(refreshedRows[newIndex][1]) || toSafeCellString(cardNumber),
+    g: toBoolean(refreshedRows[newIndex][2]),
+    rh: toBoolean(refreshedRows[newIndex][3]),
+    gCell: { row: rowNo, col: 3 },
+    rhCell: { row: rowNo, col: 4 }
+  };
 }
 
 export async function updateCellBoolean(sheetName, row, col, value) {

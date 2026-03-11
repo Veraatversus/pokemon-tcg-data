@@ -2,7 +2,7 @@
 // QUICK FILTERS & UI ENHANCEMENTS MODULE
 // ══════════════════════════════════════════════════════════════════════════
 
-export function initQuickFiltersUI() {
+export function initQuickFiltersUI(initialState = {}) {
   const filterContainer = document.getElementById('quick-filters-container');
   if (!filterContainer) return;
 
@@ -13,24 +13,57 @@ export function initQuickFiltersUI() {
     { id: 'filter-favorites', label: '⭐ Favoriten', key: 'favoritesOnly' }
   ];
 
-  filterContainer.innerHTML = filters
-    .map(f => `<button class="quick-filter-btn" data-filter="${f.key}" id="${f.id}" type="button">${f.label}</button>`)
-    .join('');
+  filterContainer.innerHTML = `
+    <div class="quick-filters-toolbar" role="toolbar" aria-label="Schnellfilter">
+      <span class="quick-filters-label">Schnellfilter:</span>
+      <div class="quick-filters-buttons">
+        ${filters
+          .map((f) => `<button class="quick-filter-btn" data-filter="${f.key}" id="${f.id}" type="button" aria-pressed="false">${f.label}</button>`)
+          .join('')}
+      </div>
+      <button class="quick-filter-reset btn-secondary" type="button">Zurücksetzen</button>
+    </div>
+  `;
 
   // Store active filters
   const activeFilters = {};
-  filters.forEach(f => activeFilters[f.key] = false);
+  filters.forEach((f) => {
+    activeFilters[f.key] = Boolean(initialState?.[f.key]);
+  });
+
+  const syncButtons = () => {
+    filterContainer.querySelectorAll('.quick-filter-btn').forEach((btn) => {
+      const key = btn.dataset.filter;
+      const isActive = Boolean(activeFilters[key]);
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-pressed', String(isActive));
+    });
+  };
+
+  syncButtons();
 
   filterContainer.addEventListener('click', (e) => {
     const btn = e.target.closest('.quick-filter-btn');
-    if (!btn) return;
+    if (btn) {
+      const filterKey = btn.dataset.filter;
+      activeFilters[filterKey] = !activeFilters[filterKey];
+      syncButtons();
 
-    const filterKey = btn.dataset.filter;
-    activeFilters[filterKey] = !activeFilters[filterKey];
-    btn.classList.toggle('active', activeFilters[filterKey]);
+      // Dispatch custom event for the main app to listen to
+      window.dispatchEvent(new CustomEvent('quick-filters-changed', { detail: { ...activeFilters } }));
+      return;
+    }
+
+    const resetBtn = e.target.closest('.quick-filter-reset');
+    if (!resetBtn) return;
+
+    Object.keys(activeFilters).forEach((key) => {
+      activeFilters[key] = false;
+    });
+    syncButtons();
 
     // Dispatch custom event for the main app to listen to
-    window.dispatchEvent(new CustomEvent('quick-filters-changed', { detail: activeFilters }));
+    window.dispatchEvent(new CustomEvent('quick-filters-changed', { detail: { ...activeFilters } }));
   });
 
   return { container: filterContainer, activeFilters };

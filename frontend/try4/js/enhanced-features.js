@@ -19,7 +19,14 @@ const MAX_FAVORITES = 999;
 export function loadFavorites() {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.favorites);
-    return data ? JSON.parse(data) : new Set();
+    if (!data) return new Set();
+    const parsed = JSON.parse(data);
+    if (parsed instanceof Set) return parsed;
+    if (Array.isArray(parsed)) return new Set(parsed);
+    if (parsed && typeof parsed === 'object') {
+      return new Set(Object.keys(parsed).filter((key) => Boolean(parsed[key])));
+    }
+    return new Set();
   } catch (err) {
     console.warn('Failed to load favorites:', err);
     return new Set();
