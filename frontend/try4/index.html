@@ -101,6 +101,10 @@
   <!-- Status-Leiste -->
   <div class="status-bar">
     <p id="global-status" class="global-status">Bereit.</p>
+    <div id="engine-metrics" class="engine-metrics hidden" style="font-size: 11px; color: #666; margin-left: auto; padding-right: 12px; display: flex; gap: 16px; align-items: center;">
+      <span title="Cache Hit Rate">📦 <span id="metric-cache-rate">–</span>%</span>
+      <span title="API Status">🔗 <span id="metric-api-status">online</span></span>
+    </div>
     <!-- Verbundenes Spreadsheet -->
     <div id="spreadsheet-info" class="spreadsheet-info hidden">
       <span class="ss-label">📊</span>

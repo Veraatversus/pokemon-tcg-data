@@ -14,6 +14,15 @@ import { fetchMergedCards, fetchAllAvailableSets, runPokecodeParityCheck } from 
 import { normalizeCardNumber } from './utils.js';
 import * as cache from './cache.js';
 import { CONFIG } from './config.js';
+import {
+  initSmartEngine,
+  startAutoHealing,
+  generateCollectionReccommendations,
+  fuzzySearch,
+  getEngineMetrics,
+  cacheCardsOffline,
+  getCachedCardsOffline
+} from './smart-engine.js';
 
 // ══════════════════════════════════════════════════════════════════════════
 // DOM-REFERENZEN
@@ -944,6 +953,45 @@ function buildSeriesMap(sets) {
   return map;
 }
 
+async function renderRecommendations() {
+  try {
+    if (!state.sets.length || !state.summaryData?.length) return;
+    const recommendations = generateCollectionReccommendations(
+      state.allSets || state.sets,
+      state.importedSets || state.sets,
+      state.summaryData
+    );
+    if (!recommendations.length) return;
+
+    const container = document.createElement('div');
+    container.className = 'recommendations-widget';
+    container.style.cssText = 'grid-column: 1 / -1; padding: 16px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-bg-secondary); margin-bottom: 16px;';
+    container.innerHTML = `
+      <div style="font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+        <span>💡</span> Intelligente Empfehlungen
+      </div>
+      ${recommendations
+        .map(
+          (rec) => `
+        <div style="padding: 8px; margin: 4px 0; border-left: 3px solid ${rec.priority === 'high' ? '#ff6b6b' : '#ffd43b'}; background: var(--color-bg); border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 14px;">${rec.message}</span>
+          ${rec.cardsRemaining ? `<span style="background: var(--color-primary); color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">${rec.cardsRemaining}</span>` : ''}
+        </div>
+      `
+        )
+        .join('')}
+    `;
+    const dashboard = document.getElementById('dashboard-grid');
+    if (dashboard) {
+      const existing = dashboard.querySelector('.recommendations-widget');
+      if (existing) existing.replaceWith(container);
+      else dashboard.insertBefore(container, dashboard.firstChild);
+    }
+  } catch (err) {
+    console.warn('[renderRecommendations]', err);
+  }
+}
+
 // ══════════════════════════════════════════════════════════════════════════
 // DASHBOARD
 // ══════════════════════════════════════════════════════════════════════════
@@ -1664,8 +1712,8 @@ async function reimportCurrentSetFromApi() {
 function initDashboardControls() {
   let debounce;
   dom.dashFilter.addEventListener('input', () => { clearTimeout(debounce); debounce = setTimeout(renderDashboard, 200); });
-  dom.dashSeriesFilter.addEventListener('change', renderDashboard);
-  dom.dashSort.addEventListener('change', renderDashboard);
+  dom.dashSeriesFilter.addEventListener('change', () => { renderDashboard(); renderRecommendations(); });
+  dom.dashSort.addEventListener('change', () => { renderDashboard(); renderRecommendations(); });
   dom.btnOverviewSync?.addEventListener('click', syncOverviewFromApi);
   dom.btnOverviewPowerRefresh?.addEventListener('click', powerRefreshOverviewFromApi);
   dom.btnImportBatch?.addEventListener('click', openBatchImportDialog);
@@ -2361,6 +2409,11 @@ async function loadCurrentSet(forceRefresh = false) {
 // BOOTSTRAP
 // ══════════════════════════════════════════════════════════════════════════
 async function bootstrap() {
+  try {
+    await initSmartEngine();
+  } catch (err) {
+    console.warn('Smart Engine init:', err);
+  }
   initDarkMode();
   initFilterButtons();
   initSpreadsheetDialog();
@@ -2373,6 +2426,23 @@ async function bootstrap() {
   initDashboardControls();
   initSortControl();
   initSearch();
+
+  // Start Smart Engine metrics update loop
+  setInterval(() => {
+    try {
+      const metrics = getEngineMetrics();
+      const metricsEl = document.getElementById('engine-metrics');
+      if (metricsEl) {
+        metricsEl.classList.remove('hidden');
+        const rateEl = document.getElementById('metric-cache-rate');
+        const statusEl = document.getElementById('metric-api-status');
+        if (rateEl) rateEl.textContent = metrics.cacheHitRate;
+        if (statusEl) statusEl.textContent = metrics.status === 'online' ? '🟢 online' : '🔴 offline';
+      }
+    } catch (err) {
+      console.warn('[metrics update]', err);
+    }
+  }, 5000);
 
   document.querySelectorAll('.nav-link').forEach((link) => {
     link.addEventListener('click', (e) => { e.preventDefault(); navigate(link.dataset.view); });
