@@ -502,6 +502,52 @@ body.dark .card img { background: #0f172a; }
   padding: 7px 10px;
 }
 
+.batch-dialog {
+  width: min(680px, 95vw);
+}
+
+.batch-dialog-actions-top {
+  display: flex;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.batch-list {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  max-height: 340px;
+  overflow: auto;
+  background: var(--color-bg);
+  padding: 6px;
+}
+
+.batch-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.batch-item:hover {
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.batch-item-main {
+  display: grid;
+  gap: 2px;
+}
+
+.batch-item-title {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.batch-item-sub {
+  font-size: 11px;
+  color: var(--color-muted);
+}
+
 .dash-series-group { margin-bottom: 28px; }
 .dash-series-group h3 {
   font-size: 13px;

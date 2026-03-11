@@ -34,6 +34,14 @@ const dom = {
   dialogError:      document.getElementById('dialog-error'),
   btnDialogSave:    document.getElementById('btn-dialog-save'),
   btnDialogCancel:  document.getElementById('btn-dialog-cancel'),
+  batchDialog:      document.getElementById('dialog-batch-import'),
+  batchSearchInput: document.getElementById('batch-search-input'),
+  batchList:        document.getElementById('batch-list'),
+  batchInfo:        document.getElementById('batch-selection-info'),
+  btnBatchSelectVisible: document.getElementById('btn-batch-select-visible'),
+  btnBatchClearSelection: document.getElementById('btn-batch-clear-selection'),
+  btnBatchCancel:   document.getElementById('btn-batch-cancel'),
+  btnBatchImportSelected: document.getElementById('btn-batch-import-selected'),
   spreadsheetInfo:  document.getElementById('spreadsheet-info'),
   spreadsheetLink:  document.getElementById('spreadsheet-link'),
   btnChangeSheet:   document.getElementById('btn-change-spreadsheet'),
@@ -50,6 +58,8 @@ const dom = {
   btnImportBatch:   document.getElementById('btn-import-batch'),
   btnImportAll:     document.getElementById('btn-import-all-missing'),
   btnReimportCurrent: document.getElementById('btn-reimport-current'),
+  btnReimportAllImported: document.getElementById('btn-reimport-all-imported'),
+  btnExportSummaryCsv: document.getElementById('btn-export-summary-csv'),
   dashboardGrid:    document.getElementById('dashboard-grid'),
   // Set detail – sidebar
   selector:         document.getElementById('set-selector'),
@@ -118,6 +128,7 @@ const state = {
   bulkSelected: new Set(),
   lightboxIndex: 0,
   searchCache:  new Map(),
+  batchSelection: new Set(),
 };
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -589,21 +600,147 @@ async function importAllMissingSets() {
   await importSetsSequential(missing, { successMessage: '{count} Sets importiert.' });
 }
 
-async function batchImportByPrompt() {
-  const input = window.prompt('Set-IDs eingeben (Komma, Leerzeichen oder neue Zeilen getrennt):\nBeispiel: base1, sv1, swsh9');
-  if (!input) return;
-  const ids = Array.from(new Set(
-    input.split(/[\s,;]+/).map((value) => value.trim()).filter(Boolean)
-  ));
-  if (!ids.length) return;
+function getBatchCandidates() {
+  return state.allSets.filter((set) => !set.imported);
+}
 
-  const targetSets = ids.map((id) => getSetById(id)).filter(Boolean);
-  if (!targetSets.length) {
-    showToast('Keine der angegebenen Set-IDs wurde gefunden.', 'error');
+function updateBatchInfo() {
+  const selected = state.batchSelection.size;
+  dom.batchInfo.classList.remove('hidden');
+  dom.batchInfo.textContent = `${selected} Set${selected === 1 ? '' : 's'} ausgewählt`;
+}
+
+function renderBatchDialogList() {
+  const query = (dom.batchSearchInput.value || '').trim().toLowerCase();
+  const sets = getBatchCandidates().filter((set) => {
+    if (!query) return true;
+    return [set.setId, set.setName, set.series].some((field) => String(field || '').toLowerCase().includes(query));
+  });
+
+  dom.batchList.innerHTML = '';
+  if (!sets.length) {
+    dom.batchList.innerHTML = '<p class="empty-state">Keine passenden Sets gefunden.</p>';
+    updateBatchInfo();
     return;
   }
 
-  await importSetsSequential(targetSets, { successMessage: '{count} Sets per Batch importiert.' });
+  const fragment = document.createDocumentFragment();
+  sets.forEach((set) => {
+    const row = document.createElement('label');
+    row.className = 'batch-item';
+
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.checked = state.batchSelection.has(set.setId);
+    input.addEventListener('change', () => {
+      if (input.checked) state.batchSelection.add(set.setId);
+      else state.batchSelection.delete(set.setId);
+      updateBatchInfo();
+    });
+
+    const main = document.createElement('div');
+    main.className = 'batch-item-main';
+
+    const title = document.createElement('span');
+    title.className = 'batch-item-title';
+    title.textContent = `${set.setId} — ${set.setName}`;
+
+    const sub = document.createElement('span');
+    sub.className = 'batch-item-sub';
+    sub.textContent = `${set.series || 'Serie unbekannt'} • ${set.totalCards || '?'} Karten`;
+
+    main.append(title, sub);
+    row.append(input, main);
+    fragment.appendChild(row);
+  });
+
+  dom.batchList.appendChild(fragment);
+  updateBatchInfo();
+}
+
+function openBatchImportDialog() {
+  state.batchSelection.clear();
+  dom.batchSearchInput.value = '';
+  renderBatchDialogList();
+  dom.batchDialog.showModal();
+}
+
+function initBatchImportDialog() {
+  dom.batchSearchInput?.addEventListener('input', renderBatchDialogList);
+
+  dom.btnBatchSelectVisible?.addEventListener('click', () => {
+    const checkboxes = dom.batchList.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach((checkbox) => {
+      checkbox.checked = true;
+      const label = checkbox.closest('.batch-item')?.querySelector('.batch-item-title')?.textContent || '';
+      const setId = label.split(' — ')[0] || '';
+      if (setId) state.batchSelection.add(setId);
+    });
+    updateBatchInfo();
+  });
+
+  dom.btnBatchClearSelection?.addEventListener('click', () => {
+    state.batchSelection.clear();
+    renderBatchDialogList();
+  });
+
+  dom.btnBatchCancel?.addEventListener('click', () => dom.batchDialog?.close());
+
+  dom.btnBatchImportSelected?.addEventListener('click', async () => {
+    const selectedIds = Array.from(state.batchSelection);
+    if (!selectedIds.length) {
+      showToast('Bitte mindestens ein Set auswählen.', 'info');
+      return;
+    }
+    dom.batchDialog.close();
+    const targetSets = selectedIds.map((id) => getSetById(id)).filter(Boolean);
+    await importSetsSequential(targetSets, { successMessage: '{count} Sets per Batch importiert.' });
+  });
+}
+
+async function reimportAllImportedSets() {
+  if (!state.sets.length) {
+    showToast('Keine importierten Sets vorhanden.', 'info');
+    return;
+  }
+  const ok = window.confirm(`${state.sets.length} importierte Sets neu laden? Bestehende Sammel-Checks bleiben erhalten.`);
+  if (!ok) return;
+  await importSetsSequential(state.sets, { successMessage: '{count} importierte Sets aktualisiert.' });
+}
+
+async function exportCollectionSummaryCsv() {
+  const rows = state.summaryData && Array.isArray(state.summaryData)
+    ? state.summaryData
+    : await readSummarySheet().catch(() => []);
+  if (!rows.length) {
+    showToast('Keine Summary-Daten zum Export vorhanden.', 'info');
+    return;
+  }
+
+  const csvRows = [
+    'Set,Total,Collected,RH,Percent,PTCGO',
+    ...rows.map((row) => [
+      row.setName,
+      row.total,
+      row.collected,
+      row.rh,
+      row.percent,
+      row.ptcgoCode || ''
+    ].map((value) => `"${String(value ?? '').replace(/"/g, '""')}"`).join(','))
+  ];
+
+  const blob = new Blob(['\uFEFF' + csvRows.join('\n')], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const stamp = new Date().toISOString().slice(0, 10);
+  const a = Object.assign(document.createElement('a'), {
+    href: url,
+    download: `sammlung_summary_${stamp}.csv`
+  });
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Summary als CSV exportiert.', 'success');
 }
 
 async function reimportCurrentSetFromApi() {
@@ -627,9 +764,11 @@ function initDashboardControls() {
   dom.dashSeriesFilter.addEventListener('change', renderDashboard);
   dom.dashSort.addEventListener('change', renderDashboard);
   dom.btnOverviewSync?.addEventListener('click', syncOverviewFromApi);
-  dom.btnImportBatch?.addEventListener('click', batchImportByPrompt);
+  dom.btnImportBatch?.addEventListener('click', openBatchImportDialog);
   dom.btnImportAll?.addEventListener('click', importAllMissingSets);
   dom.btnReimportCurrent?.addEventListener('click', reimportCurrentSetFromApi);
+  dom.btnReimportAllImported?.addEventListener('click', reimportAllImportedSets);
+  dom.btnExportSummaryCsv?.addEventListener('click', exportCollectionSummaryCsv);
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -1295,6 +1434,7 @@ async function bootstrap() {
   initDarkMode();
   initFilterButtons();
   initSpreadsheetDialog();
+  initBatchImportDialog();
   initLightbox();
   initBulkEdit();
   initKeyboardNav();

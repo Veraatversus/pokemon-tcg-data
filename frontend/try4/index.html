@@ -33,6 +33,24 @@
     </div>
   </dialog>
 
+  <!-- Batch-Import-Dialog -->
+  <dialog id="dialog-batch-import" class="ss-dialog batch-dialog">
+    <h2>Batch-Import</h2>
+    <p>Mehrere Sets auswählen und in einem Lauf importieren.</p>
+    <label for="batch-search-input">Filter</label>
+    <input id="batch-search-input" type="search" class="ss-input" placeholder="Set-ID, Name oder Serie…" />
+    <div class="batch-dialog-actions-top">
+      <button id="btn-batch-select-visible" class="btn-secondary" type="button">Sichtbare auswählen</button>
+      <button id="btn-batch-clear-selection" class="btn-secondary" type="button">Auswahl leeren</button>
+    </div>
+    <div id="batch-list" class="batch-list"></div>
+    <p id="batch-selection-info" class="dialog-error hidden"></p>
+    <div class="dialog-actions">
+      <button id="btn-batch-cancel" class="btn-secondary" type="button">Abbrechen</button>
+      <button id="btn-batch-import-selected" type="button">Ausgewählte importieren</button>
+    </div>
+  </dialog>
+
   <!-- Lightbox-Dialog -->
   <dialog id="dialog-lightbox" class="lightbox-dialog">
     <button id="btn-lightbox-close" class="lightbox-close" title="Schließen (Esc)">✕</button>
@@ -113,6 +131,8 @@
           <button id="btn-import-batch" class="btn-secondary" type="button">📦 Batch-Import</button>
           <button id="btn-import-all-missing" class="btn-secondary" type="button">🌐 Alle fehlenden importieren</button>
           <button id="btn-reimport-current" class="btn-secondary" type="button">♻️ Aktuelles Set reimportieren</button>
+          <button id="btn-reimport-all-imported" class="btn-secondary" type="button">🔁 Alle importierten aktualisieren</button>
+          <button id="btn-export-summary-csv" class="btn-secondary" type="button">📤 Sammlung CSV</button>
         </div>
       </div>
       <div id="dashboard-grid" class="dashboard-grid">
