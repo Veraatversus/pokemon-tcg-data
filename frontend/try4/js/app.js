@@ -61,6 +61,7 @@ const dom = {
   btnReimportCurrent: document.getElementById('btn-reimport-current'),
   btnReimportAllImported: document.getElementById('btn-reimport-all-imported'),
   btnExportSummaryCsv: document.getElementById('btn-export-summary-csv'),
+  btnDataHealthCheck: document.getElementById('btn-data-health-check'),
   btnExportBackup: document.getElementById('btn-export-backup'),
   btnImportBackup: document.getElementById('btn-import-backup'),
   backupFileInput: document.getElementById('input-backup-file'),
@@ -866,6 +867,64 @@ async function exportCollectionBackup() {
   }
 }
 
+async function runDataHealthCheck() {
+  if (!state.sets.length) {
+    showToast('Keine importierten Sets für Datencheck.', 'info');
+    return;
+  }
+
+  setLoading(true, 'Datencheck läuft…');
+  const report = {
+    createdAt: new Date().toISOString(),
+    checkedSets: state.sets.length,
+    mismatches: [],
+    errors: []
+  };
+
+  try {
+    for (let index = 0; index < state.sets.length; index++) {
+      const set = state.sets[index];
+      setGlobalStatus(`Datencheck ${index + 1}/${state.sets.length}: ${set.setName}`);
+      try {
+        const [apiCards, sheetMap] = await Promise.all([
+          fetchMergedCards(set.setId),
+          readSetCollectionMap(set.setName)
+        ]);
+
+        const apiCount = Array.isArray(apiCards) ? apiCards.length : 0;
+        const sheetCount = sheetMap instanceof Map ? sheetMap.size : 0;
+        if (apiCount !== sheetCount) {
+          report.mismatches.push({
+            setId: set.setId,
+            setName: set.setName,
+            apiCount,
+            sheetCount,
+            delta: sheetCount - apiCount
+          });
+        }
+      } catch (err) {
+        report.errors.push({ setId: set.setId, setName: set.setName, error: err.message });
+      }
+    }
+  } finally {
+    setLoading(false);
+  }
+
+  if (!report.mismatches.length && !report.errors.length) {
+    showToast(`Datencheck ok: ${report.checkedSets} Sets geprüft, keine Abweichungen.`, 'success', 4500);
+    return;
+  }
+
+  console.group('[DataHealthCheck] Bericht');
+  if (report.mismatches.length) console.table(report.mismatches);
+  if (report.errors.length) console.table(report.errors);
+  console.groupEnd();
+
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  downloadJson(`poke_data_health_${stamp}.json`, report);
+  showToast(`Datencheck fertig: ${report.mismatches.length} Abweichungen, ${report.errors.length} Fehler. Report exportiert.`, 'error', 6500);
+}
+
 function parseBackupPayload(rawText) {
   const parsed = JSON.parse(rawText);
   if (!parsed || typeof parsed !== 'object') throw new Error('Ungültiges Backup-Format.');
@@ -976,6 +1035,7 @@ function initDashboardControls() {
   dom.btnReimportCurrent?.addEventListener('click', reimportCurrentSetFromApi);
   dom.btnReimportAllImported?.addEventListener('click', reimportAllImportedSets);
   dom.btnExportSummaryCsv?.addEventListener('click', exportCollectionSummaryCsv);
+  dom.btnDataHealthCheck?.addEventListener('click', runDataHealthCheck);
 }
 
 // ══════════════════════════════════════════════════════════════════════════
