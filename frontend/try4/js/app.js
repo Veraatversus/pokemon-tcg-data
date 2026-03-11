@@ -69,6 +69,9 @@ const dom = {
   btnExportSummaryCsv: document.getElementById('btn-export-summary-csv'),
   btnDataHealthCheck: document.getElementById('btn-data-health-check'),
   btnDataHealthAutofix: document.getElementById('btn-data-health-autofix'),
+  btnQueueAutofixRefresh: document.getElementById('btn-queue-autofix-refresh'),
+  btnQueueRun: document.getElementById('btn-queue-run'),
+  btnQueueClear: document.getElementById('btn-queue-clear'),
   btnExportBackup: document.getElementById('btn-export-backup'),
   btnImportBackup: document.getElementById('btn-import-backup'),
   backupFileInput: document.getElementById('input-backup-file'),
@@ -142,6 +145,9 @@ const state = {
   searchCache:  new Map(),
   batchSelection: new Set(),
   activeJob: null,
+  queuedActions: [],
+  queueRunning: false,
+  queueCancelRequested: false,
 };
 
 function startJob(title, totalSteps = 0) {
@@ -194,6 +200,65 @@ function finishJob(job, summary, isError = false) {
 function assertJobNotCancelled(job) {
   if (job?.cancelled) {
     throw new Error('Vorgang abgebrochen.');
+  }
+}
+
+function updateQueueUiState() {
+  const queued = state.queuedActions.length;
+  if (dom.btnQueueRun) dom.btnQueueRun.disabled = state.queueRunning || queued === 0;
+  if (dom.btnQueueClear) dom.btnQueueClear.disabled = state.queueRunning || queued === 0;
+}
+
+function enqueueAction(label, action) {
+  state.queuedActions.push({ id: Date.now() + Math.random(), label, action });
+  pushJobHistory(`${new Date().toLocaleTimeString('de-DE')} • Queue hinzugefügt: ${label}`);
+  updateQueueUiState();
+}
+
+function clearQueuedActions() {
+  const count = state.queuedActions.length;
+  state.queuedActions = [];
+  updateQueueUiState();
+  if (count > 0) showToast(`Queue geleert (${count} entfernt).`, 'info');
+}
+
+async function runQueuedActions() {
+  if (state.queueRunning || state.queuedActions.length === 0) return;
+  state.queueRunning = true;
+  state.queueCancelRequested = false;
+  updateQueueUiState();
+  dom.jobPanel?.classList.remove('hidden');
+  if (dom.jobTitle) dom.jobTitle.textContent = 'Job Queue';
+
+  try {
+    while (state.queuedActions.length > 0) {
+      if (state.queueCancelRequested) {
+        pushJobHistory(`${new Date().toLocaleTimeString('de-DE')} • Queue abgebrochen`);
+        break;
+      }
+      const next = state.queuedActions.shift();
+      updateQueueUiState();
+      if (dom.jobStatusText) dom.jobStatusText.textContent = `Queue: ${next.label}`;
+      pushJobHistory(`${new Date().toLocaleTimeString('de-DE')} • Queue startet: ${next.label}`);
+      try {
+        await next.action();
+      } catch (err) {
+        pushJobHistory(`${new Date().toLocaleTimeString('de-DE')} • Queue-Fehler: ${next.label} (${err.message})`);
+        showToast(`Queue gestoppt: ${next.label} – ${err.message}`, 'error', 6000);
+        break;
+      }
+    }
+  } finally {
+    const remaining = state.queuedActions.length;
+    state.queueRunning = false;
+    state.queueCancelRequested = false;
+    updateQueueUiState();
+    if (remaining === 0) {
+      if (dom.jobStatusText) dom.jobStatusText.textContent = 'Queue beendet';
+      showToast('Queue abgearbeitet.', 'success', 3000);
+    } else {
+      if (dom.jobStatusText) dom.jobStatusText.textContent = `Queue gestoppt (${remaining} offen)`;
+    }
   }
 }
 
@@ -1132,12 +1197,26 @@ function initDashboardControls() {
   dom.btnExportSummaryCsv?.addEventListener('click', exportCollectionSummaryCsv);
   dom.btnDataHealthCheck?.addEventListener('click', () => runDataHealthCheck({ autoFix: false }));
   dom.btnDataHealthAutofix?.addEventListener('click', () => runDataHealthCheck({ autoFix: true }));
+  dom.btnQueueAutofixRefresh?.addEventListener('click', () => {
+    enqueueAction('Datencheck + Auto-Fix', () => runDataHealthCheck({ autoFix: true }));
+    enqueueAction('Power-Refresh Overview', () => powerRefreshOverviewFromApi());
+    showToast('Queue-Preset hinzugefügt (Auto-Fix → Refresh).', 'info', 3000);
+  });
+  dom.btnQueueRun?.addEventListener('click', runQueuedActions);
+  dom.btnQueueClear?.addEventListener('click', clearQueuedActions);
   dom.btnJobCancel?.addEventListener('click', () => {
-    if (!state.activeJob) return;
-    state.activeJob.cancelled = true;
+    if (state.activeJob) {
+      state.activeJob.cancelled = true;
+    }
+    if (state.queueRunning) {
+      state.queueCancelRequested = true;
+    }
+    if (!state.activeJob && !state.queueRunning) return;
     if (dom.btnJobCancel) dom.btnJobCancel.disabled = true;
     if (dom.jobStatusText) dom.jobStatusText.textContent = 'Abbruch angefordert…';
   });
+
+  updateQueueUiState();
 }
 
 // ══════════════════════════════════════════════════════════════════════════
