@@ -13,7 +13,8 @@ function gapiLoadClient() {
   return new Promise((resolve, reject) => {
     gapi.load('client', async () => {
       try {
-        await gapi.client.init({ apiKey: CONFIG.GOOGLE_API_KEY });
+        // Init ohne apiKey/Discovery – wird nach Login gemacht
+        await gapi.client.init({});
         resolve();
       } catch (error) {
         reject(error);
@@ -24,7 +25,13 @@ function gapiLoadClient() {
 
 /** Lädt die Sheets-Discovery-Docs und setzt den gespeicherten Token in den Client. */
 export async function loadDiscoveryDocs() {
-  await gapi.client.load(CONFIG.DISCOVERY_DOCS[0]);
+  try {
+    await gapi.client.load(CONFIG.DISCOVERY_DOCS[0]);
+  } catch (err) {
+    console.error('[loadDiscoveryDocs]', err);
+    // Falls Discovery fehlschlägt, trotzdem weitermachen – API funktioniert ohne auch
+    throw err;
+  }
 }
 
 // ── Token-Persistenz (localStorage) ──────────────────────────────────────────
@@ -59,9 +66,14 @@ async function tryRestoreToken() {
     }
     accessToken = data.token;
     gapi.client.setToken({ access_token: data.token });
-    await loadDiscoveryDocs();
+    try {
+      await loadDiscoveryDocs();
+    } catch (err) {
+      console.warn('[tryRestoreToken] Discovery load failed but continuing', err);
+    }
     return true;
-  } catch {
+  } catch (err) {
+    console.error('[tryRestoreToken]', err);
     return false;
   }
 }
@@ -97,16 +109,24 @@ export function signIn() {
   if (!gapiInited || !gisInited) return Promise.resolve(false);
   return new Promise((resolve) => {
     tokenClient.callback = async (response) => {
-      if (response.error) { resolve(false); return; }
+      if (response.error) {
+        console.error('[signIn callback] error:', response.error);
+        resolve(false);
+        return;
+      }
       try {
         saveToken(response);
-        await loadDiscoveryDocs();
+        try {
+          await loadDiscoveryDocs();
+        } catch (discErr) {
+          console.warn('[signIn] Discovery load failed, continuing:', discErr);
+        }
         resolve(true);
-      } catch {
+      } catch (err) {
+        console.error('[signIn]', err);
         resolve(false);
       }
     };
-    // prompt='' → kein Consent wenn Token noch gültig; prompt='consent' → immer
     tokenClient.requestAccessToken({ prompt: accessToken ? '' : 'consent' });
   });
 }
