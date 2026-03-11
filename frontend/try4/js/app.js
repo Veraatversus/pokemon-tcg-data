@@ -41,6 +41,11 @@ import {
   createExportDialog, createSettingsPanel, createShortcutsOverlay,
   createBulkActionsToolbar
 } from './ui-components.js';
+import {
+  AdvancedSearch, SyncIndicator, CardCollectionTools,
+  generateCollectionInsights, generateSetComparison,
+  NotificationManager, PerformanceTracker
+} from './advanced-tools.js';
 
 // ══════════════════════════════════════════════════════════════════════════
 // DOM-REFERENZEN
@@ -2793,5 +2798,74 @@ bootstrap().catch((err) => {
   console.error(err);
   setGlobalStatus(`Fehler: ${err.message}`);
   setLoading(false);
+});
+
+// ══════════════════════════════════════════════════════════════════════════
+// SERVICE WORKER REGISTRATION
+// ══════════════════════════════════════════════════════════════════════════
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      const registration = await navigator.serviceWorker.register('./service-worker.js', {
+        scope: './'
+      });
+      console.log('✅ Service Worker registered:', registration);
+      
+      // Check for updates periodically
+      setInterval(() => {
+        registration.update().catch(err => console.warn('SW update check failed:', err));
+      }, 60000); // Check every minute
+      
+      // Handle controller change (new SW ready)
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        showToast('🔄 App wurde aktualisiert', 'success', 3000);
+      });
+      
+      // Listen for messages from Service Worker
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data.type === 'sync-complete') {
+          showToast('✅ Daten synchronisiert', 'success', 2000);
+        }
+      });
+    } catch (err) {
+      console.warn('Service Worker registration failed:', err);
+    }
+  });
+}
+
+// PWA Install Prompt Handler
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  
+  // Show install button
+  const installBtn = document.createElement('button');
+  installBtn.className = 'btn-primary';
+  installBtn.textContent = '📱 App installieren';
+  installBtn.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 100;';
+  
+  installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      if (choice.outcome === 'accepted') {
+        showToast('✅ App installiert!', 'success', 3000);
+      }
+      deferredPrompt = null;
+    }
+  });
+  
+  // Only show if not already installed
+  if (document.body && !navigator.standalone) {
+    document.body.appendChild(installBtn);
+  }
+});
+
+// Handle app installed event
+window.addEventListener('appinstalled', () => {
+  console.log('✅ PWA installfiert');
+  showToast('🎉 App erfolgreich installiert!', 'success', 4000);
 });
 
