@@ -74,6 +74,10 @@ async function detectOverviewByContent(titles) {
 async function resolveSheetNames() {
   if (resolvedSheetsCache) return resolvedSheetsCache;
 
+  if (!gapi?.client?.sheets?.spreadsheets?.get) {
+    throw new Error('Sheets API nicht initialisiert – bitte zuerst anmelden.');
+  }
+
   const meta = await gapi.client.sheets.spreadsheets.get({
     spreadsheetId: CONFIG.SPREADSHEET_ID,
     fields: 'sheets(properties(title))'

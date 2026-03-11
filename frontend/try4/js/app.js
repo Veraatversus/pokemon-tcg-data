@@ -167,6 +167,8 @@ const state = {
   queuePresets: [],
 };
 
+let focusedCardIndex = -1;
+
 const QUEUE_PRESETS_STORAGE_KEY = 'poke_try4_queue_presets_v1';
 
 function startJob(title, totalSteps = 0) {
@@ -1139,6 +1141,10 @@ async function importSetsSequential(sets, options = {}) {
 }
 
 async function syncOverviewFromApi() {
+  if (!isSignedIn()) {
+    showToast('Bitte zuerst anmelden.', 'info');
+    return;
+  }
   setLoading(true, 'Synchronisiere Overview…');
   try {
     const apiSets = await fetchAllAvailableSets();
