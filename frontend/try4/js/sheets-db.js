@@ -33,6 +33,44 @@ function pickSheetTitle(titles, preferred, aliases, matcher) {
   return titles.find((title) => matcher(normalizeName(title))) || null;
 }
 
+function looksLikeSetId(value) {
+  const text = String(value ?? '').trim().toLowerCase();
+  if (!text) return false;
+  if (text.startsWith('=hyperlink(')) {
+    const display = extractDisplayTextFromHyperlink(text);
+    return /^[a-z]+\d+[a-z0-9.]*$/.test(String(display ?? '').trim().toLowerCase());
+  }
+  return /^[a-z]+\d+[a-z0-9.]*$/.test(text);
+}
+
+function scoreOverviewRows(rows) {
+  let score = 0;
+  for (const row of rows) {
+    if (!row || row.length === 0) continue;
+    const idCell = row[0];
+    const nameCell = row[1];
+    const seriesCell = row[4];
+    if (looksLikeSetId(idCell)) score += 3;
+    if (String(nameCell ?? '').trim()) score += 1;
+    if (String(seriesCell ?? '').trim()) score += 1;
+  }
+  return score;
+}
+
+async function detectOverviewByContent(titles) {
+  let best = { title: null, score: -1 };
+  for (const title of titles) {
+    try {
+      const rows = await getFormulas(buildRange(title, 'A3:J'));
+      const score = scoreOverviewRows(rows.slice(0, 80));
+      if (score > best.score) best = { title, score };
+    } catch {
+      // Blatt passt nicht für dieses Schema – ignorieren
+    }
+  }
+  return best.score > 0 ? best.title : null;
+}
+
 async function resolveSheetNames() {
   if (resolvedSheetsCache) return resolvedSheetsCache;
 
@@ -45,19 +83,22 @@ async function resolveSheetNames() {
     .map((sheet) => sheet.properties?.title)
     .filter(Boolean);
 
-  const overview = pickSheetTitle(
+  let overview = pickSheetTitle(
     titles,
     CONFIG.SHEETS.OVERVIEW,
     ['Set Overview', 'Pokémon TCG Sets Übersicht', 'Pokemon TCG Sets Übersicht', 'Sets Übersicht'],
     (name) => (name.includes('set') || name.includes('sets')) && (name.includes('overview') || name.includes('übersicht'))
-  ) || titles[0] || CONFIG.SHEETS.OVERVIEW;
+  );
+  if (!overview) {
+    overview = await detectOverviewByContent(titles);
+  }
 
   const summary = pickSheetTitle(
     titles,
     CONFIG.SHEETS.SUMMARY,
     ['Summary', 'Collection', 'Sammlungsübersicht'],
     (name) => name.includes('summary') || name.includes('zusammenfassung') || name.includes('sammlung')
-  ) || CONFIG.SHEETS.SUMMARY;
+  );
 
   const settings = pickSheetTitle(
     titles,
@@ -66,7 +107,7 @@ async function resolveSheetNames() {
     (name) => name.includes('setting') || name.includes('einstellung')
   ) || CONFIG.SHEETS.SETTINGS;
 
-  resolvedSheetsCache = { overview, summary, settings };
+  resolvedSheetsCache = { overview: overview || CONFIG.SHEETS.OVERVIEW, summary: summary || null, settings };
   console.log('[resolveSheetNames]', resolvedSheetsCache);
   return resolvedSheetsCache;
 }
@@ -160,7 +201,16 @@ export async function listSetsOverviewData() {
  */
 export async function readSummarySheet() {
   const sheets = await resolveSheetNames();
-  const rows = await getValues(buildRange(sheets.summary, 'A4:G'));
+  if (!sheets.summary) {
+    return [];
+  }
+  let rows = [];
+  try {
+    rows = await getValues(buildRange(sheets.summary, 'A4:G'));
+  } catch (err) {
+    console.warn('[readSummarySheet] Summary sheet not readable, returning empty summary', err);
+    return [];
+  }
   return rows
     .filter((row) => row[0])
     .map((row) => ({
