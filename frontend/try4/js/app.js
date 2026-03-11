@@ -10,7 +10,7 @@ import {
   importSetIntoCollection,
   syncOverviewWithApiSets,
 } from './sheets-db.js';
-import { fetchMergedCards, fetchAllAvailableSets } from './pokemon-api.js';
+import { fetchMergedCards, fetchAllAvailableSets, runPokecodeParityCheck } from './pokemon-api.js';
 import { normalizeCardNumber } from './utils.js';
 import * as cache from './cache.js';
 import { CONFIG } from './config.js';
@@ -69,6 +69,7 @@ const dom = {
   btnExportSummaryCsv: document.getElementById('btn-export-summary-csv'),
   btnDataHealthCheck: document.getElementById('btn-data-health-check'),
   btnDataHealthAutofix: document.getElementById('btn-data-health-autofix'),
+  btnParityCheck: document.getElementById('dashboard-action-parity'),
   btnQueueAutofixRefresh: document.getElementById('btn-queue-autofix-refresh'),
   btnQueueBuilder: document.getElementById('btn-queue-builder'),
   btnQueueRun: document.getElementById('btn-queue-run'),
@@ -1517,6 +1518,40 @@ async function runDataHealthCheck({ autoFix = false } = {}) {
   finishJob(job, `Auto-Fix ausgeführt (${uniqueSets.length} Sets)`, false);
 }
 
+async function runPokecodeParityTest() {
+  const input = window.prompt('Wie viele Sets sollen geprüft werden? (Standard: 10)', '10');
+  const parsed = Number.parseInt(String(input || '10'), 10);
+  const maxSets = Number.isFinite(parsed) && parsed > 0 ? Math.min(parsed, 50) : 10;
+
+  setLoading(true, 'Pokecode-Parity-Test läuft…');
+  setGlobalStatus(`Parity-Test läuft (max. ${maxSets} Sets)…`);
+  const job = startJob('Pokecode-Parity-Test', maxSets);
+
+  try {
+    const report = await runPokecodeParityCheck({ maxSets });
+    updateJob(job, report.checkedSetCount || 0, `Parity-Test beendet: ${report.ok ? 'OK' : 'Abweichungen gefunden'}`);
+    finishJob(job, report.ok ? 'Parity-Test erfolgreich' : 'Parity-Test mit Abweichungen', !report.ok);
+
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    downloadJson(`poke_parity_report_${stamp}.json`, report);
+
+    if (report.ok) {
+      showToast(`Parity-Test OK (${report.checkedSetCount} Sets, keine Abweichungen). Report exportiert.`, 'success', 5000);
+    } else {
+      showToast(`Parity-Test fertig: ${report.overviewMismatches.length} Overview- und ${report.cardMismatches.length} Karten-Abweichungen. Report exportiert.`, 'error', 7000);
+      console.group('[ParityTest] Abweichungen');
+      if (report.overviewMismatches.length) console.table(report.overviewMismatches);
+      if (report.cardMismatches.length) console.table(report.cardMismatches);
+      console.groupEnd();
+    }
+  } catch (err) {
+    finishJob(job, err?.message || 'Parity-Test fehlgeschlagen', true);
+    throw err;
+  } finally {
+    setLoading(false);
+  }
+}
+
 function parseBackupPayload(rawText) {
   const parsed = JSON.parse(rawText);
   if (!parsed || typeof parsed !== 'object') throw new Error('Ungültiges Backup-Format.');
@@ -1629,6 +1664,10 @@ function initDashboardControls() {
   dom.btnExportSummaryCsv?.addEventListener('click', exportCollectionSummaryCsv);
   dom.btnDataHealthCheck?.addEventListener('click', () => runDataHealthCheck({ autoFix: false }));
   dom.btnDataHealthAutofix?.addEventListener('click', () => runDataHealthCheck({ autoFix: true }));
+  dom.btnParityCheck?.addEventListener('click', () => runPokecodeParityTest().catch((err) => {
+    console.error('[runPokecodeParityTest]', err);
+    showToast(`Parity-Test fehlgeschlagen: ${err.message}`, 'error', 6000);
+  }));
   dom.btnQueueAutofixRefresh?.addEventListener('click', () => {
     enqueueAction('Datencheck + Auto-Fix', () => runDataHealthCheck({ autoFix: true }));
     enqueueAction('Power-Refresh Overview', () => powerRefreshOverviewFromApi());

@@ -36,6 +36,20 @@ async function fetchPokemontcgSet(setId) {
   }
 }
 
+async function resolvePrimarySetForId(setId, primarySets = null) {
+  if (String(setId).startsWith('TCGDEX-')) return null;
+  if (Array.isArray(primarySets)) {
+    const hit = primarySets.find((set) => String(set?.id || '').toLowerCase() === String(setId).toLowerCase());
+    if (hit) return hit;
+  }
+  if (CONFIG.USE_VERA_API) {
+    const veraSets = await fetchVeraSets().catch(() => []);
+    const hit = veraSets.find((set) => String(set?.id || '').toLowerCase() === String(setId).toLowerCase());
+    if (hit) return hit;
+  }
+  return fetchPokemontcgSet(setId);
+}
+
 function toNumber(value) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
@@ -170,4 +184,109 @@ export async function fetchAllAvailableSets() {
     if (dateA !== dateB) return dateB - dateA;
     return naturalSort(a.setName || '', b.setName || '');
   });
+}
+
+export async function runPokecodeParityCheck({ setIds = [], maxSets = 10 } = {}) {
+  const tcgdexSets = await fetchTcgdexSets();
+  let primarySets = [];
+  if (CONFIG.USE_VERA_API) {
+    primarySets = await fetchVeraSets().catch(async () => fetchPokemontcgSets());
+  } else {
+    primarySets = await fetchPokemontcgSets();
+  }
+
+  const overviewAdapter = await fetchAllAvailableSets();
+  const overviewCompat = combineSetsForOverviewCompat({
+    primarySets,
+    tcgdexSets,
+    customMappings: CONFIG.CUSTOM_SET_ID_MAPPINGS,
+    mapPrimarySetToOverviewModel: mapSetToOverviewModel,
+    toNumber
+  }).sort((a, b) => {
+    const aIsTcgdexOnly = String(a.setId).startsWith('TCGDEX-');
+    const bIsTcgdexOnly = String(b.setId).startsWith('TCGDEX-');
+    if (!aIsTcgdexOnly && bIsTcgdexOnly) return -1;
+    if (aIsTcgdexOnly && !bIsTcgdexOnly) return 1;
+    const dateA = new Date(a.releaseDate || 0).getTime();
+    const dateB = new Date(b.releaseDate || 0).getTime();
+    if (dateA !== dateB) return dateB - dateA;
+    return naturalSort(a.setName || '', b.setName || '');
+  });
+
+  const normalizeOverview = (set) => ({
+    setId: String(set?.setId || ''),
+    setName: String(set?.setName || ''),
+    series: String(set?.series || ''),
+    releaseDate: String(set?.releaseDate || ''),
+    totalCards: Number(set?.totalCards) || 0,
+    ptcgoCode: String(set?.ptcgoCode || ''),
+    logoUrl: String(set?.logoUrl || ''),
+    symbolUrl: String(set?.symbolUrl || '')
+  });
+
+  const adapterMap = new Map(overviewAdapter.map((set) => [String(set.setId), normalizeOverview(set)]));
+  const compatMap = new Map(overviewCompat.map((set) => [String(set.setId), normalizeOverview(set)]));
+  const allOverviewIds = new Set([...adapterMap.keys(), ...compatMap.keys()]);
+  const overviewMismatches = [];
+  allOverviewIds.forEach((id) => {
+    const left = adapterMap.get(id);
+    const right = compatMap.get(id);
+    if (!left || !right || JSON.stringify(left) !== JSON.stringify(right)) {
+      overviewMismatches.push({ setId: id, adapter: left || null, compat: right || null });
+    }
+  });
+
+  const defaultIds = overviewAdapter.map((set) => set.setId).filter((id) => !String(id).startsWith('TCGDEX-')).slice(0, maxSets);
+  const checkedSetIds = (Array.isArray(setIds) && setIds.length ? setIds : defaultIds).slice(0, maxSets);
+
+  const cardMismatches = [];
+  for (const setId of checkedSetIds) {
+    const primarySet = await resolvePrimarySetForId(setId, primarySets);
+    const adapterCards = await fetchMergedCards(setId);
+    const compat = await loadCardsForSetCompat({
+      setId,
+      setName: primarySet?.name || setId,
+      useVeraApi: CONFIG.USE_VERA_API,
+      primarySet,
+      tcgdexSets,
+      customMappings: CONFIG.CUSTOM_SET_ID_MAPPINGS,
+      apis: {
+        veraBase: CONFIG.APIS.VERA_BASE,
+        veraLanguage: CONFIG.VERA_API_LANGUAGE,
+        pokemontcgBase: CONFIG.APIS.POKEMONTCG,
+        tcgdexBase: CONFIG.APIS.TCGDEX_DE
+      },
+      fetchJson
+    });
+
+    const normalizeCards = (cards) => (cards || []).map((card) => ({
+      number: String(card?.number || ''),
+      name: String(card?.name || ''),
+      image: String(card?.image || ''),
+      cardmarketUrl: String(card?.cardmarketUrl || ''),
+      rarity: String(card?.rarity || ''),
+      rules: Array.isArray(card?.rules) ? card.rules : [],
+      flavorText: String(card?.flavorText || '')
+    })).sort((a, b) => naturalSort(a.number, b.number));
+
+    const left = normalizeCards(adapterCards);
+    const right = normalizeCards(compat.allCards);
+    if (JSON.stringify(left) !== JSON.stringify(right)) {
+      cardMismatches.push({
+        setId,
+        adapterCount: left.length,
+        compatCount: right.length
+      });
+    }
+  }
+
+  return {
+    createdAt: new Date().toISOString(),
+    checkedSetCount: checkedSetIds.length,
+    checkedSetIds,
+    overviewChecked: overviewAdapter.length,
+    overviewMismatches,
+    cardMismatches,
+    ok: overviewMismatches.length === 0 && cardMismatches.length === 0
+  };
 }
