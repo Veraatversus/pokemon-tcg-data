@@ -1,5 +1,4 @@
 import { initAuth, signIn, signOut, isSignedIn } from './auth.js';
-import { initAuth, signIn, signOut, isSignedIn } from './auth.js';
 import {
   listImportedSets,
   readSetCollectionMap,
