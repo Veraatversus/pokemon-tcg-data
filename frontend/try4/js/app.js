@@ -70,8 +70,13 @@ const dom = {
   btnDataHealthCheck: document.getElementById('btn-data-health-check'),
   btnDataHealthAutofix: document.getElementById('btn-data-health-autofix'),
   btnQueueAutofixRefresh: document.getElementById('btn-queue-autofix-refresh'),
+  btnQueueBuilder: document.getElementById('btn-queue-builder'),
   btnQueueRun: document.getElementById('btn-queue-run'),
   btnQueueClear: document.getElementById('btn-queue-clear'),
+  queueBuilderDialog: document.getElementById('dialog-queue-builder'),
+  queueBuilderList: document.getElementById('queue-builder-list'),
+  btnQueueBuilderCancel: document.getElementById('btn-queue-builder-cancel'),
+  btnQueueBuilderAdd: document.getElementById('btn-queue-builder-add'),
   btnExportBackup: document.getElementById('btn-export-backup'),
   btnImportBackup: document.getElementById('btn-import-backup'),
   backupFileInput: document.getElementById('input-backup-file'),
@@ -148,6 +153,7 @@ const state = {
   queuedActions: [],
   queueRunning: false,
   queueCancelRequested: false,
+  queueBuilderSelection: [],
 };
 
 function startJob(title, totalSteps = 0) {
@@ -260,6 +266,115 @@ async function runQueuedActions() {
       if (dom.jobStatusText) dom.jobStatusText.textContent = `Queue gestoppt (${remaining} offen)`;
     }
   }
+}
+
+function getQueueBuilderActionsCatalog() {
+  return [
+    {
+      id: 'overview-sync',
+      label: 'Overview sync',
+      description: 'Abgleich der Overview-Liste mit API-Sets',
+      action: () => syncOverviewFromApi()
+    },
+    {
+      id: 'power-refresh',
+      label: 'Power-Refresh Overview',
+      description: 'Overview-Update mit Änderungsreport',
+      action: () => powerRefreshOverviewFromApi()
+    },
+    {
+      id: 'health-check',
+      label: 'Datencheck',
+      description: 'Prüft importierte Sets auf API/Sheet-Mismatch',
+      action: () => runDataHealthCheck({ autoFix: false })
+    },
+    {
+      id: 'health-autofix',
+      label: 'Datencheck + Auto-Fix',
+      description: 'Datencheck mit optionalem Reimport betroffener Sets',
+      action: () => runDataHealthCheck({ autoFix: true })
+    },
+    {
+      id: 'reimport-all',
+      label: 'Alle importierten aktualisieren',
+      description: 'Reimport aller bereits importierten Sets',
+      action: () => reimportAllImportedSets()
+    },
+    {
+      id: 'export-summary-csv',
+      label: 'Summary CSV exportieren',
+      description: 'Export der Sammlung als CSV-Datei',
+      action: () => exportCollectionSummaryCsv()
+    },
+    {
+      id: 'data-health-report',
+      label: 'Datencheck-Report exportieren',
+      description: 'Erstellt Konsistenzreport als JSON',
+      action: () => runDataHealthCheck({ autoFix: false })
+    }
+  ];
+}
+
+function renderQueueBuilder() {
+  const catalog = getQueueBuilderActionsCatalog();
+  dom.queueBuilderList.innerHTML = '';
+  const fragment = document.createDocumentFragment();
+
+  catalog.forEach((item, index) => {
+    const row = document.createElement('label');
+    row.className = 'queue-builder-item';
+
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.checked = state.queueBuilderSelection.includes(item.id);
+    input.addEventListener('change', () => {
+      if (input.checked) {
+        if (!state.queueBuilderSelection.includes(item.id)) {
+          state.queueBuilderSelection.push(item.id);
+        }
+      } else {
+        state.queueBuilderSelection = state.queueBuilderSelection.filter((id) => id !== item.id);
+      }
+    });
+
+    const main = document.createElement('div');
+    main.className = 'batch-item-main';
+    const title = document.createElement('span');
+    title.className = 'batch-item-title';
+    title.textContent = `${index + 1}. ${item.label}`;
+    const sub = document.createElement('span');
+    sub.className = 'batch-item-sub';
+    sub.textContent = item.description;
+    main.append(title, sub);
+
+    row.append(input, main);
+    fragment.appendChild(row);
+  });
+
+  dom.queueBuilderList.appendChild(fragment);
+}
+
+function openQueueBuilderDialog() {
+  state.queueBuilderSelection = [];
+  renderQueueBuilder();
+  dom.queueBuilderDialog.showModal();
+}
+
+function initQueueBuilderDialog() {
+  dom.btnQueueBuilder?.addEventListener('click', openQueueBuilderDialog);
+  dom.btnQueueBuilderCancel?.addEventListener('click', () => dom.queueBuilderDialog?.close());
+  dom.btnQueueBuilderAdd?.addEventListener('click', () => {
+    const catalog = getQueueBuilderActionsCatalog();
+    const selected = catalog.filter((item) => state.queueBuilderSelection.includes(item.id));
+    if (!selected.length) {
+      showToast('Bitte mindestens eine Aktion wählen.', 'info');
+      return;
+    }
+
+    selected.forEach((item) => enqueueAction(item.label, item.action));
+    dom.queueBuilderDialog.close();
+    showToast(`${selected.length} Aktion(en) zur Queue hinzugefügt.`, 'success', 3000);
+  });
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -1884,6 +1999,7 @@ async function bootstrap() {
   initSpreadsheetDialog();
   initBatchImportDialog();
   initBackupImportExport();
+  initQueueBuilderDialog();
   initLightbox();
   initBulkEdit();
   initKeyboardNav();

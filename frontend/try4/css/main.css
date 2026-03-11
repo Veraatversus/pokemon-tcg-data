@@ -597,6 +597,18 @@ body.dark .card img { background: #0f172a; }
   color: var(--color-muted);
 }
 
+.queue-builder-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.queue-builder-item:hover {
+  background: rgba(37, 99, 235, 0.08);
+}
+
 .dash-series-group { margin-bottom: 28px; }
 .dash-series-group h3 {
   font-size: 13px;
