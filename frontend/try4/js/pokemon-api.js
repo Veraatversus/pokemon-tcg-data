@@ -1,5 +1,10 @@
 import { CONFIG } from './config.js';
 import { normalizeCardNumber, naturalSort } from './utils.js';
+import {
+  normalizeSetId,
+  buildSetIdAliasCandidates,
+  findMatchingTcgdexSet
+} from './pokecode-compat.js';
 
 // ── Interne Hilfsfunktionen ──────────────────────────────────────
 
@@ -7,11 +12,6 @@ async function fetchJson(url) {
   const response = await fetch(url);
   if (!response.ok) throw new Error(`API Fehler ${response.status}: ${url}`);
   return response.json();
-}
-
-function normalizeString(str) {
-  if (str === null || typeof str === 'undefined') return '';
-  return String(str).toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
 /**
@@ -66,84 +66,16 @@ async function fetchTcgdexSets() {
   return tcgdexSetsCache;
 }
 
-function normalizeSetId(setId) {
-  if (!setId) return '';
-  let normalized = String(setId).toLowerCase().trim();
-  normalized = normalized.replace(/(\d+)\.(\d+)/g, (_match, p1, p2) => `${parseInt(p1, 10)}pt${parseInt(p2, 10)}`);
-  normalized = normalized.replace(/\s+/g, '-');
-  normalized = normalized.replace(/[^a-z0-9-]/g, '');
-  normalized = normalized.replace(/([a-z-]+)(\d+)/g, (_match, prefix, numberPart) => `${prefix}${parseInt(numberPart, 10)}`);
-  return normalized;
-}
-
 /**
  * Gibt die TCGDex-ID zu einer pokemontcg.io-ID zurück.
  * Fällt auf die originale ID zurück wenn kein Mapping existiert.
  */
 function toTcgdexId(pokemontcgId) {
-  return CONFIG.CUSTOM_SET_ID_MAPPINGS?.[pokemontcgId] ?? pokemontcgId;
-}
-
-function findMatchingTcgdexSet(primarySet, allTcgdexSets) {
-  if (!primarySet || !Array.isArray(allTcgdexSets)) return null;
-
-  const byAbbreviation = new Map();
-  const byName = new Map();
-  const byId = new Map();
-  const byNormalizedId = new Map();
-
-  allTcgdexSets.forEach((set) => {
-    if (set?.abbreviation?.official) byAbbreviation.set(String(set.abbreviation.official).toLowerCase(), set);
-    if (set?.name) byName.set(normalizeString(set.name), set);
-    if (set?.en?.name) byName.set(normalizeString(set.en.name), set);
-    if (set?.id) {
-      byId.set(String(set.id).toLowerCase(), set);
-      byNormalizedId.set(normalizeSetId(set.id), set);
-    }
-  });
-
-  const primarySetId = String(primarySet.id || '').toLowerCase();
-  const customMappedTcgdexId = CONFIG.CUSTOM_SET_ID_MAPPINGS?.[primarySetId];
-  if (customMappedTcgdexId) {
-    const direct = byId.get(String(customMappedTcgdexId).toLowerCase());
-    if (direct) return direct;
-    const normalizedCustom = byNormalizedId.get(normalizeSetId(customMappedTcgdexId));
-    if (normalizedCustom) return normalizedCustom;
-  }
-
-  const direct = byId.get(primarySetId);
+  const direct = CONFIG.CUSTOM_SET_ID_MAPPINGS?.[pokemontcgId];
   if (direct) return direct;
-
-  const normalizedPrimaryId = normalizeSetId(primarySet.id);
-  if (normalizedPrimaryId && byNormalizedId.has(normalizedPrimaryId)) {
-    return byNormalizedId.get(normalizedPrimaryId);
-  }
-
-  if (primarySet.ptcgoCode) {
-    const byCode = byAbbreviation.get(String(primarySet.ptcgoCode).toLowerCase());
-    if (byCode) return byCode;
-  }
-
-  const normalizedPrimaryName = primarySet.name ? normalizeString(primarySet.name) : '';
-  if (normalizedPrimaryName) {
-    const exact = byName.get(normalizedPrimaryName);
-    if (exact) return exact;
-
-    for (const set of allTcgdexSets) {
-      const deName = set?.name ? normalizeString(set.name) : '';
-      const enName = set?.en?.name ? normalizeString(set.en.name) : '';
-      if (
-        (deName && normalizedPrimaryName.includes(deName)) ||
-        (deName && deName.includes(normalizedPrimaryName)) ||
-        (enName && normalizedPrimaryName.includes(enName)) ||
-        (enName && enName.includes(normalizedPrimaryName))
-      ) {
-        return set;
-      }
-    }
-  }
-
-  return null;
+  const aliases = buildSetIdAliasCandidates(pokemontcgId, CONFIG.CUSTOM_SET_ID_MAPPINGS);
+  const candidate = aliases.find((alias) => alias && alias !== pokemontcgId && !String(alias).startsWith('TCGDEX-'));
+  return candidate || pokemontcgId;
 }
 
 async function fetchPokemontcgSet(setId) {
@@ -271,7 +203,7 @@ export async function fetchMergedCards(setId) {
     ptcgoCode: primarySet?.ptcgoCode || primarySet?.code || ''
   };
 
-  let matchingTcgdexSet = findMatchingTcgdexSet(primarySetLike, tcgdexSets);
+  let matchingTcgdexSet = findMatchingTcgdexSet(primarySetLike, tcgdexSets, CONFIG.CUSTOM_SET_ID_MAPPINGS);
   if (!matchingTcgdexSet) {
     const mappedTcgdexId = toTcgdexId(setId);
     matchingTcgdexSet = tcgdexSets.find((set) => String(set?.id || '').toLowerCase() === String(mappedTcgdexId).toLowerCase()) || null;
@@ -367,7 +299,7 @@ export async function fetchAllAvailableSets() {
   const combined = [];
 
   (primarySets || []).forEach((primarySet) => {
-    const tcgdexMatch = findMatchingTcgdexSet(primarySet, tcgdexSets);
+    const tcgdexMatch = findMatchingTcgdexSet(primarySet, tcgdexSets, CONFIG.CUSTOM_SET_ID_MAPPINGS);
     if (tcgdexMatch?.id) matchedTcgdexIds.add(tcgdexMatch.id);
     const model = mapSetToOverviewModel(primarySet);
     if (!model) return;
