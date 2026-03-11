@@ -78,6 +78,9 @@ const dom = {
   queuePresetSelect: document.getElementById('queue-preset-select'),
   btnQueuePresetSave: document.getElementById('btn-queue-preset-save'),
   btnQueuePresetDelete: document.getElementById('btn-queue-preset-delete'),
+  btnQueuePresetExport: document.getElementById('btn-queue-preset-export'),
+  btnQueuePresetImport: document.getElementById('btn-queue-preset-import'),
+  queuePresetFileInput: document.getElementById('input-queue-presets-file'),
   btnQueueBuilderCancel: document.getElementById('btn-queue-builder-cancel'),
   btnQueueBuilderAdd: document.getElementById('btn-queue-builder-add'),
   btnExportBackup: document.getElementById('btn-export-backup'),
@@ -398,6 +401,58 @@ function applySelectedQueuePreset() {
   renderQueueBuilder();
 }
 
+function exportQueuePresetsJson() {
+  if (!state.queuePresets.length) {
+    showToast('Keine Presets zum Exportieren.', 'info');
+    return;
+  }
+  const payload = {
+    app: 'poke-tcg-try4',
+    type: 'queue-presets',
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    presets: state.queuePresets
+  };
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  downloadJson(`poke_queue_presets_${stamp}.json`, payload);
+  showToast(`${state.queuePresets.length} Preset(s) exportiert.`, 'success', 3000);
+}
+
+function normalizeImportedPresets(raw) {
+  const presets = Array.isArray(raw?.presets) ? raw.presets : (Array.isArray(raw) ? raw : []);
+  const validIds = new Set(getQueueBuilderActionsCatalog().map((item) => item.id));
+  const normalized = [];
+
+  presets.forEach((entry) => {
+    const name = String(entry?.name ?? '').trim();
+    const actionIds = Array.isArray(entry?.actionIds)
+      ? entry.actionIds.filter((id) => validIds.has(id))
+      : [];
+    if (!name || !actionIds.length) return;
+    normalized.push({ name, actionIds: Array.from(new Set(actionIds)) });
+  });
+
+  return normalized;
+}
+
+function mergeQueuePresets(importedPresets) {
+  let added = 0;
+  let updated = 0;
+  importedPresets.forEach((incoming) => {
+    const index = state.queuePresets.findIndex((preset) => preset.name.toLowerCase() === incoming.name.toLowerCase());
+    if (index >= 0) {
+      state.queuePresets[index] = incoming;
+      updated++;
+    } else {
+      state.queuePresets.push(incoming);
+      added++;
+    }
+  });
+  persistQueuePresets();
+  renderQueuePresetSelect();
+  return { added, updated };
+}
+
 function renderQueueBuilder() {
   const catalog = getQueueBuilderActionsCatalog();
   dom.queueBuilderList.innerHTML = '';
@@ -457,6 +512,30 @@ function initQueueBuilderDialog() {
   dom.queuePresetSelect?.addEventListener('change', applySelectedQueuePreset);
   dom.btnQueuePresetSave?.addEventListener('click', saveCurrentQueuePreset);
   dom.btnQueuePresetDelete?.addEventListener('click', deleteSelectedQueuePreset);
+  dom.btnQueuePresetExport?.addEventListener('click', exportQueuePresetsJson);
+  dom.btnQueuePresetImport?.addEventListener('click', () => dom.queuePresetFileInput?.click());
+
+  dom.queuePresetFileInput?.addEventListener('change', async () => {
+    const file = dom.queuePresetFileInput.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      const imported = normalizeImportedPresets(parsed);
+      if (!imported.length) {
+        showToast('Keine gültigen Presets im Import gefunden.', 'error', 4500);
+        return;
+      }
+      const { added, updated } = mergeQueuePresets(imported);
+      showToast(`Presets importiert: ${added} neu, ${updated} aktualisiert.`, 'success', 4000);
+    } catch (err) {
+      console.error('[queuePresetImport]', err);
+      showToast(`Preset-Import fehlgeschlagen: ${err.message}`, 'error', 5000);
+    } finally {
+      dom.queuePresetFileInput.value = '';
+    }
+  });
+
   dom.btnQueueBuilderAdd?.addEventListener('click', () => {
     const catalog = getQueueBuilderActionsCatalog();
     const selected = catalog.filter((item) => state.queueBuilderSelection.includes(item.id));
