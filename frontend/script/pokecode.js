@@ -2285,10 +2285,17 @@ function renderAndSortCardsInSheet(cardSheet, setId, allCards, pokemontcgIoCardD
   const totalRowsForCards = Math.ceil(numCards / CARDS_PER_ROW_IN_GRID) * CARD_BLOCK_HEIGHT_ROWS;
   const totalRowsNeeded = SET_SHEET_HEADER_ROWS + totalRowsForCards;
 
-  // Löscht überschüssige Zeilen, falls vorhanden.
-  if (cardSheet.getMaxRows() > totalRowsNeeded) {
+  // Stelle sicher, dass das Blatt VOR allen Range-/RowHeight-Operationen groß genug ist.
+  if (cardSheet.getMaxRows() < totalRowsNeeded) {
+    cardSheet.insertRowsAfter(cardSheet.getMaxRows(), totalRowsNeeded - cardSheet.getMaxRows());
+  } else if (cardSheet.getMaxRows() > totalRowsNeeded) {
     cardSheet.deleteRows(totalRowsNeeded + 1, cardSheet.getMaxRows() - totalRowsNeeded);
   }
+
+  if (cardSheet.getMaxColumns() < totalColsNeeded) {
+    cardSheet.insertColumnsAfter(cardSheet.getMaxColumns(), totalColsNeeded - cardSheet.getMaxColumns());
+  }
+
   // Setze Zeilenhöhen für die Kartenblöcke
   for (let i = 0; i < totalRowsForCards / CARD_BLOCK_HEIGHT_ROWS; i++) {
     const startSheetRow = SET_SHEET_HEADER_ROWS + 1 + i * CARD_BLOCK_HEIGHT_ROWS;
@@ -2427,16 +2434,6 @@ function renderAndSortCardsInSheet(cardSheet, setId, allCards, pokemontcgIoCardD
   });
 
   if (totalRowsForCards > 0) {
-    // make sure sheet is big enough to hold the grid
-    const requiredRows = SET_SHEET_HEADER_ROWS + totalRowsForCards;
-    if (cardSheet.getMaxRows() < requiredRows) {
-      cardSheet.insertRowsAfter(cardSheet.getMaxRows(), requiredRows - cardSheet.getMaxRows());
-    }
-    const requiredCols = totalColsNeeded;
-    if (cardSheet.getMaxColumns() < requiredCols) {
-      cardSheet.insertColumnsAfter(cardSheet.getMaxColumns(), requiredCols - cardSheet.getMaxColumns());
-    }
-
     const fullRange = cardSheet.getRange(SET_SHEET_HEADER_ROWS + 1, 1, totalRowsForCards, totalColsNeeded);
     fullRange.setValues(values);
     fullRange.setBackgrounds(backgrounds);
