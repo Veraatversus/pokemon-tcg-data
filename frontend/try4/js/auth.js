@@ -11,6 +11,19 @@ let gisInited = false;
 
 const GAPI_TIMEOUT_MS = 10000;
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function waitForGlobal(check, label, timeoutMs = 15000, intervalMs = 100) {
+  const started = Date.now();
+  while (Date.now() - started < timeoutMs) {
+    if (check()) return true;
+    await sleep(intervalMs);
+  }
+  throw new Error(`${label} nicht verfügbar nach ${timeoutMs}ms`);
+}
+
 function gapiLoadClient() {
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(() => {
@@ -18,17 +31,18 @@ function gapiLoadClient() {
     }, GAPI_TIMEOUT_MS);
 
     try {
-      if (!gapi || !gapi.load) {
+      const gapiRef = globalThis.gapi;
+      if (!gapiRef || !gapiRef.load) {
         clearTimeout(timeout);
         throw new Error('gapi or gapi.load not available');
       }
 
       console.log('[gapiLoadClient] calling gapi.load...');
-      gapi.load('client', () => {
+      gapiRef.load('client', () => {
         clearTimeout(timeout);
         try {
           console.log('[gapiLoadClient] gapi.load callback fired');
-          gapi.client.init({}).then(() => {
+          gapiRef.client.init({}).then(() => {
             console.log('[gapiLoadClient] gapi.client.init success');
             resolve();
           }).catch((error) => {
@@ -50,7 +64,7 @@ function gapiLoadClient() {
 /** Lädt die Sheets-Discovery-Docs und setzt den gespeicherten Token in den Client. */
 export async function loadDiscoveryDocs() {
   try {
-    await gapi.client.load(CONFIG.DISCOVERY_DOCS[0]);
+    await globalThis.gapi.client.load(CONFIG.DISCOVERY_DOCS[0]);
   } catch (err) {
     console.error('[loadDiscoveryDocs]', err);
     // Falls Discovery fehlschlägt, trotzdem weitermachen – API funktioniert ohne auch
@@ -68,13 +82,13 @@ function saveToken(tokenResponse) {
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   accessToken = tokenResponse.access_token;
-  gapi.client.setToken(tokenResponse);
+  globalThis.gapi?.client?.setToken(tokenResponse);
 }
 
 function clearToken() {
   localStorage.removeItem(STORAGE_KEY);
   accessToken = null;
-  gapi.client.setToken(null);
+  globalThis.gapi?.client?.setToken(null);
 }
 
 /** Versucht einen gespeicherten Token zu laden. Gibt true zurück wenn erfolgreich. */
@@ -89,7 +103,7 @@ async function tryRestoreToken() {
       return false;
     }
     accessToken = data.token;
-    gapi.client.setToken({ access_token: data.token });
+    globalThis.gapi?.client?.setToken({ access_token: data.token });
     try {
       await loadDiscoveryDocs();
     } catch (err) {
@@ -117,16 +131,15 @@ export async function initAuth() {
       google: typeof google !== 'undefined'
     });
     
+    await waitForGlobal(() => Boolean(globalThis.gapi?.load), 'gapi.load');
     console.log('[initAuth] loading gapi.client...');
     await gapiLoadClient();
     console.log('[initAuth] gapi.client loaded');
     gapiInited = true;
 
     console.log('[initAuth] initializing gis tokenClient...');
-    if (!google?.accounts?.oauth2) {
-      throw new Error('google.accounts.oauth2 not initialized');
-    }
-    tokenClient = google.accounts.oauth2.initTokenClient({
+    await waitForGlobal(() => Boolean(globalThis.google?.accounts?.oauth2), 'google.accounts.oauth2');
+    tokenClient = globalThis.google.accounts.oauth2.initTokenClient({
       client_id: CONFIG.GOOGLE_CLIENT_ID,
       scope: CONFIG.SCOPES,
       callback: () => {}  // wird pro Request überschrieben
@@ -176,8 +189,8 @@ export function signIn() {
 
 /** Widerruft den Token und löscht alle gespeicherten Daten. */
 export function signOut() {
-  if (accessToken) {
-    google.accounts.oauth2.revoke(accessToken, () => {});
+  if (accessToken && globalThis.google?.accounts?.oauth2?.revoke) {
+    globalThis.google.accounts.oauth2.revoke(accessToken, () => {});
   }
   clearToken();
 }

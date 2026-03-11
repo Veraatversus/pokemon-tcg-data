@@ -15,6 +15,13 @@ function buildRange(sheetName, a1Range) {
   return `${quoteSheetName(sheetName)}!${a1Range}`;
 }
 
+function isDbSheetTitle(title) {
+  const normalized = normalizeName(title);
+  return normalized === normalizeName(DB_SHEETS.sets)
+    || normalized === normalizeName(DB_SHEETS.cards)
+    || normalized === normalizeName(DB_SHEETS.collection);
+}
+
 let resolvedSheetsCache = null;
 let schemaEnsuredPromise = null;
 const dbRowsCache = new Map();
@@ -101,23 +108,6 @@ async function resolveSheetNames() {
     .map((sheet) => sheet.properties?.title)
     .filter(Boolean);
 
-  let overview = pickSheetTitle(
-    titles,
-    CONFIG.SHEETS.OVERVIEW,
-    ['Set Overview', 'Pokémon TCG Sets Übersicht', 'Pokemon TCG Sets Übersicht', 'Sets Übersicht'],
-    (name) => (name.includes('set') || name.includes('sets')) && (name.includes('overview') || name.includes('übersicht'))
-  );
-  if (!overview) {
-    overview = await detectOverviewByContent(titles);
-  }
-
-  const summary = pickSheetTitle(
-    titles,
-    CONFIG.SHEETS.SUMMARY,
-    ['Summary', 'Collection', 'Sammlungsübersicht'],
-    (name) => name.includes('summary') || name.includes('zusammenfassung') || name.includes('sammlung')
-  );
-
   const settings = pickSheetTitle(
     titles,
     CONFIG.SHEETS.SETTINGS,
@@ -125,8 +115,27 @@ async function resolveSheetNames() {
     (name) => name.includes('setting') || name.includes('einstellung')
   ) || CONFIG.SHEETS.SETTINGS;
 
+  const nonDbTitles = titles.filter((title) => !isDbSheetTitle(title) && normalizeName(title) !== normalizeName(settings));
+
+  let overview = pickSheetTitle(
+    nonDbTitles,
+    CONFIG.SHEETS.OVERVIEW,
+    ['Set Overview', 'Pokémon TCG Sets Übersicht', 'Pokemon TCG Sets Übersicht', 'Sets Übersicht'],
+    (name) => (name.includes('set') || name.includes('sets')) && (name.includes('overview') || name.includes('übersicht'))
+  );
+  if (!overview) {
+    overview = await detectOverviewByContent(nonDbTitles);
+  }
+
+  const summary = pickSheetTitle(
+    nonDbTitles,
+    CONFIG.SHEETS.SUMMARY,
+    ['Summary', 'Collection', 'Sammlungsübersicht'],
+    (name) => name.includes('summary') || name.includes('zusammenfassung') || name.includes('sammlung')
+  );
+
   resolvedSheetsCache = {
-    overview: overview || titles[0] || CONFIG.SHEETS.OVERVIEW,
+    overview: overview || null,
     summary: summary || null,
     settings,
     titles
@@ -141,6 +150,7 @@ function isInvalidRangeError(err) {
 }
 
 async function getOverviewRows(sheets) {
+  if (!sheets?.overview) return [];
   const primaryRange = buildRange(sheets.overview, 'A3:J');
   try {
     return await getFormulas(primaryRange);
@@ -166,8 +176,8 @@ async function getOverviewRows(sheets) {
   }
 }
 
-async function getValues(range, renderOption = 'UNFORMATTED_VALUE') {
-  const maxRetries = 4;
+async function getValues(range, renderOption = 'UNFORMATTED_VALUE', suppressErrorLog = false) {
+  const maxRetries = 6;
   try {
     if (!gapi?.client?.sheets?.spreadsheets?.values?.get) {
       throw new Error('Sheets API nicht initialisiert – bitte melden Sie sich an');
@@ -182,13 +192,15 @@ async function getValues(range, renderOption = 'UNFORMATTED_VALUE') {
         return response.result.values || [];
       } catch (err) {
         if (err?.status !== 429 || attempt >= maxRetries) throw err;
-        const delay = 200 * Math.pow(2, attempt);
+        const delay = Math.min(10000, 400 * Math.pow(2, attempt)) + Math.floor(Math.random() * 120);
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
     return [];
   } catch (err) {
-    console.error('[getValues]', err);
+    if (!suppressErrorLog) {
+      console.error('[getValues]', err);
+    }
     throw err;
   }
 }
@@ -199,7 +211,7 @@ async function getFormulas(range) {
 }
 
 async function putValues(range, values) {
-  const maxRetries = 4;
+  const maxRetries = 6;
   try {
     if (!gapi?.client?.sheets?.spreadsheets?.values?.update) {
       throw new Error('Sheets API nicht initialisiert – bitte melden Sie sich an');
@@ -215,7 +227,7 @@ async function putValues(range, values) {
         return;
       } catch (err) {
         if (err?.status !== 429 || attempt >= maxRetries) throw err;
-        const delay = 200 * Math.pow(2, attempt);
+        const delay = Math.min(10000, 500 * Math.pow(2, attempt)) + Math.floor(Math.random() * 150);
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
@@ -565,6 +577,7 @@ async function upsertOverviewEntry(setMeta, imported = true) {
   await upsertDbSet(setMeta, imported);
 
   const sheets = await resolveSheetNames();
+  if (!sheets.overview) return;
   const overviewRange = buildRange(sheets.overview, 'A3:J');
   const rows = await getFormulas(overviewRange).catch(() => []);
   const normalizedTargetId = toSafeCellString(setMeta.setId).toLowerCase();
@@ -594,30 +607,35 @@ export async function syncOverviewWithApiSets(sets, importedSetIds = []) {
   const normalizedImported = new Set(Array.from(importedSetIds).map((id) => toSafeCellString(id).toLowerCase()));
 
   const dbRows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length);
-  const dbById = new Map();
+  const mergedById = new Map();
   dbRows.forEach((row) => {
     const key = toSafeCellString(row[0]).toLowerCase();
     if (!key) return;
-    dbById.set(key, row);
+    mergedById.set(key, row);
   });
 
   for (const set of (sets || [])) {
     const key = toSafeCellString(set?.setId).toLowerCase();
     if (!key) continue;
-    const existing = dbById.get(key) || [];
-    await upsertDbSet({
-      setId: set.setId,
-      setName: set.setName,
-      series: set.series,
-      releaseDate: set.releaseDate,
-      totalCards: set.totalCards,
-      ptcgoCode: set.ptcgoCode,
-      logoUrl: set.logoUrl,
-      symbolUrl: set.symbolUrl
-    }, Boolean(normalizedImported.has(key) || toBoolean(existing[8])));
+    const existing = mergedById.get(key) || [];
+    mergedById.set(key, [
+      toSafeCellString(set.setId),
+      toSafeCellString(set.setName),
+      toSafeCellString(set.series),
+      toSafeCellString(set.releaseDate),
+      Number(set.totalCards) || 0,
+      toSafeCellString(set.ptcgoCode),
+      toSafeCellString(set.logoUrl),
+      toSafeCellString(set.symbolUrl),
+      Boolean(normalizedImported.has(key) || toBoolean(existing[8])),
+      nowIso()
+    ]);
   }
 
+  await rewriteDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length, Array.from(mergedById.values()));
+
   const sheets = await resolveSheetNames();
+  if (!sheets.overview) return;
   const rows = await getOverviewRows(sheets).catch(() => []);
 
   const rowBySetId = new Map();
@@ -691,11 +709,16 @@ export async function importSetIntoCollection(setMeta, cards) {
 }
 
 async function readLegacySetCollectionMap(setSheetName) {
+  const sheets = await resolveSheetNames().catch(() => null);
+  if (Array.isArray(sheets?.titles) && !sheets.titles.includes(setSheetName)) {
+    return new Map();
+  }
+
   const totalCols = CONFIG.GRID.CARDS_PER_ROW * CONFIG.GRID.BLOCK_WIDTH;
   const endColumn = colToA1(totalCols);
   let values = [];
   try {
-    values = await getValues(buildRange(setSheetName, `A3:${endColumn}2000`));
+    values = await getValues(buildRange(setSheetName, `A3:${endColumn}2000`), 'UNFORMATTED_VALUE', true);
   } catch (err) {
     if (isInvalidRangeError(err)) return new Map();
     throw err;
