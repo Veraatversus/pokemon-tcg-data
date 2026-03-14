@@ -2462,9 +2462,9 @@ function parseStructuredSearchQuery(rawQuery, availableSets = []) {
   const nameTokens = [];
   for (const part of remaining) {
     if (!cardNumber && /^[a-zA-Z._-]*\d+[a-zA-Z._-]*$/.test(part)) {
-      cardNumber = normalizeCardNumber(part).toLowerCase();
+      cardNumber = normalizeCardNumberForSearch(part);
     } else {
-      nameTokens.push(part.toLowerCase());
+      nameTokens.push(normalizeSearchText(part));
     }
   }
   return {
@@ -2480,7 +2480,7 @@ function parseStructuredSearchQuery(rawQuery, availableSets = []) {
  * Gibt null zurück, wenn kein sinnvolles gemischtes Muster erkannt wird.
  */
 function parseMixedQuery(rawQuery) {
-  const normalized = String(rawQuery || '').trim().toLowerCase();
+  const normalized = normalizeSearchText(rawQuery).trim();
   if (!normalized) return null;
 
   const parts = normalized.split(/\s+/).filter(Boolean);
@@ -2494,18 +2494,43 @@ function parseMixedQuery(rawQuery) {
   if (!nameTokens.length || !numberTokens.length) return null;
 
   return {
-    cardNumber: normalizeCardNumber(numberTokens[0]).toLowerCase(),
+    cardNumber: normalizeCardNumberForSearch(numberTokens[0]),
     nameTokens
   };
 }
 
+function normalizeSearchText(value) {
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+function normalizeCardNumberForSearch(value) {
+  const raw = String(value || '').trim().toLowerCase();
+  if (!raw) return '';
+  const withoutTotal = raw.split('/')[0];
+  return normalizeCardNumber(withoutTotal).toLowerCase();
+}
+
+function cardNumberMatchesQuery(cardNumber, queryNumber) {
+  const normalizedCard = normalizeCardNumberForSearch(cardNumber);
+  const normalizedQuery = normalizeCardNumberForSearch(queryNumber);
+  if (!normalizedCard || !normalizedQuery) return false;
+  if (normalizedCard === normalizedQuery) return true;
+
+  const cardDigits = (normalizedCard.match(/\d+/) || [''])[0];
+  const queryDigits = (normalizedQuery.match(/\d+/) || [''])[0];
+  return Boolean(queryDigits && cardDigits === queryDigits);
+}
+
 function computeSearchScore(card, normalizedQuery, structuredQuery, mixedQuery) {
-  const name = (card.name || '').toLowerCase();
+  const name = normalizeSearchText(card.name || '');
   const numberRaw = String(card.number || '').toLowerCase();
-  const number = normalizeCardNumber(card.number).toLowerCase();
+  const number = normalizeCardNumberForSearch(card.number);
 
   if (structuredQuery) {
-    const numberMatch = !structuredQuery.cardNumber || number === structuredQuery.cardNumber;
+    const numberMatch = !structuredQuery.cardNumber || cardNumberMatchesQuery(card.number, structuredQuery.cardNumber);
     const nameMatch = !structuredQuery.namePart || structuredQuery.namePart.every((token) => name.includes(token));
     if (!numberMatch || !nameMatch) return -1;
 
@@ -2519,7 +2544,7 @@ function computeSearchScore(card, normalizedQuery, structuredQuery, mixedQuery) 
   }
 
   if (mixedQuery) {
-    const numberMatch = number === mixedQuery.cardNumber;
+    const numberMatch = cardNumberMatchesQuery(card.number, mixedQuery.cardNumber);
     const nameMatch = mixedQuery.nameTokens.every((token) => name.includes(token));
     if (!numberMatch || !nameMatch) return -1;
 
@@ -2550,7 +2575,7 @@ async function runSearch(options = {}) {
   const isStale = () => runId !== state.searchRunId;
 
   const rawQuery = dom.searchInput.value.trim();
-  const query = rawQuery.toLowerCase();
+  const query = normalizeSearchText(rawQuery);
   if (!query) {
     dom.searchResults.innerHTML = '<p class="empty-state">Suchbegriff eingeben.</p>';
     return;
