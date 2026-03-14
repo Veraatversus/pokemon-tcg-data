@@ -2455,21 +2455,62 @@ function parseStructuredSearchQuery(rawQuery, availableSets = []) {
   );
   if (!matchingSet) return null;
 
-  const cardNumberQuery = parts.slice(1).join('').trim();
+  // Remaining tokens after set code: separate number from name tokens
+  const remaining = parts.slice(1);
+  let cardNumber = '';
+  const nameTokens = [];
+  for (const part of remaining) {
+    if (!cardNumber && /^[a-zA-Z._-]*\d+[a-zA-Z._-]*$/.test(part)) {
+      cardNumber = normalizeCardNumber(part).toLowerCase();
+    } else {
+      nameTokens.push(part.toLowerCase());
+    }
+  }
   return {
     set: matchingSet,
     setId: String(matchingSet.setId),
-    cardNumber: cardNumberQuery ? normalizeCardNumber(cardNumberQuery).toLowerCase() : ''
+    cardNumber,
+    namePart: nameTokens.length ? nameTokens : null
   };
 }
 
-function matchesCardSearch(card, normalizedQuery, structuredQuery) {
-  if (structuredQuery?.cardNumber) {
-    return normalizeCardNumber(card.number).toLowerCase() === structuredQuery.cardNumber;
+/**
+ * Erkennt freie Kombinationen aus Kartennummer + Namenstokens, z.B. "57 Digda" oder "Digda 57".
+ * Gibt null zurück, wenn kein sinnvolles gemischtes Muster erkannt wird.
+ */
+function parseMixedQuery(rawQuery) {
+  const normalized = String(rawQuery || '').trim().toLowerCase();
+  if (!normalized) return null;
+
+  const parts = normalized.split(/\s+/).filter(Boolean);
+  if (parts.length < 2) return null;
+
+  // Tokens die wie eine Kartennummer aussehen: optionale alpha-Präfix + Zahlen + optionales Suffix
+  const numberTokens = parts.filter((p) => /^[a-z._-]*\d+[a-z._-]*$/.test(p));
+  const nameTokens   = parts.filter((p) => !/^[a-z._-]*\d+[a-z._-]*$/.test(p));
+
+  // Nur sinnvoll wenn mindestens ein Namentoken UND genau ein Nummerntoken vorhanden ist
+  if (!nameTokens.length || !numberTokens.length) return null;
+
+  return {
+    cardNumber: normalizeCardNumber(numberTokens[0]).toLowerCase(),
+    nameTokens
+  };
+}
+
+function matchesCardSearch(card, normalizedQuery, structuredQuery, mixedQuery) {
+  if (structuredQuery) {
+    const numberMatch = !structuredQuery.cardNumber ||
+      normalizeCardNumber(card.number).toLowerCase() === structuredQuery.cardNumber;
+    const nameMatch = !structuredQuery.namePart ||
+      structuredQuery.namePart.every((t) => (card.name || '').toLowerCase().includes(t));
+    return numberMatch && nameMatch;
   }
 
-  if (structuredQuery?.setId) {
-    return true;
+  if (mixedQuery) {
+    const numberMatch = normalizeCardNumber(card.number).toLowerCase() === mixedQuery.cardNumber;
+    const nameMatch   = mixedQuery.nameTokens.every((t) => (card.name || '').toLowerCase().includes(t));
+    return numberMatch && nameMatch;
   }
 
   return (card.name || '').toLowerCase().includes(normalizedQuery)
@@ -2489,6 +2530,8 @@ async function runSearch() {
   // da state.sets (aus Google Sheets) ptcgoCode leer haben kann.
   const lookupPool = state.allSets?.length ? state.allSets : baseSetsToSearch;
   const structuredQuery = parseStructuredSearchQuery(rawQuery, lookupPool);
+  // Freie Kombinations-Suche (z.B. "57 Digda") nur wenn kein Set-Präfix erkannt wurde
+  const mixedQuery = !structuredQuery ? parseMixedQuery(rawQuery) : null;
   // Für die eigentliche Suche das importierte Set bevorzugen (hat Collection-Daten),
   // fallback auf das Set aus allSets falls nicht importiert.
   const setsToSearch = structuredQuery
@@ -2519,12 +2562,13 @@ async function runSearch() {
         cache.set(dbCacheKey, dbMap, CONFIG.CACHE_TTL_MS);
       }
       cards.forEach((card) => {
-        if (matchesCardSearch(card, query, structuredQuery)) {
+        if (matchesCardSearch(card, query, structuredQuery, mixedQuery)) {
           results.push({ card, set, dbMap });
         }
       });
-      if (!structuredQuery && results.length >= 200) break;
-      if (structuredQuery?.cardNumber && results.length >= 1) break;
+      if (!structuredQuery && !mixedQuery && results.length >= 200) break;
+      // Exakter Set+Nummer-Treffer (ohne Namensfilter) — kann frühzeitig abbrechen
+      if (structuredQuery?.cardNumber && !structuredQuery?.namePart && results.length >= 1) break;
     } catch (err) {
       console.warn('[runSearch] error for set', set.setId, err);
     }
