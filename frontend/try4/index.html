@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups" />
+  <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp" />
+  <title>Pokémon TCG Tracker</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%8E%B4%3C/text%3E%3C/svg%3E" />
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="theme-color" content="#1f2937" />
+  <meta name="apple-mobile-web-app-capable" content="true" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Pokémon TCG Tracker" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect fill='%231f2937' width='180' height='180' rx='40'/%3E%3Ctext x='90' y='120' font-size='100' text-anchor='middle' fill='%23fff' dominant-baseline='middle'%3E🎴%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="./css/main.css" />
+  <link rel="stylesheet" href="./css/trading-marketplace.css" />
+</head>
+<body>
+
+  <!-- Lade-Overlay -->
+  <div id="loading-overlay" class="loading-overlay hidden" role="status" aria-live="polite">
+    <div class="spinner"></div>
+    <p id="loading-text">Lade…</p>
+  </div>
+
+  <!-- Toast-Container -->
+  <div id="toast-container" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+  <!-- Spreadsheet-Setup-Dialog -->
+  <dialog id="dialog-spreadsheet" class="ss-dialog">
+    <h2>Google Spreadsheet verknüpfen</h2>
+    <p>Bitte die ID oder URL des Google Sheets eingeben, das als Datenbank genutzt werden soll.</p>
+    <label for="input-spreadsheet-id">Spreadsheet-ID oder URL</label>
+    <input id="input-spreadsheet-id" type="text" class="ss-input"
+           placeholder="https://docs.google.com/spreadsheets/d/… oder nur die ID" />
+    <p id="dialog-error" class="dialog-error hidden"></p>
+    <div class="dialog-actions">
+      <button id="btn-dialog-cancel" class="btn-secondary">Abbrechen</button>
+      <button id="btn-dialog-save">Verbinden</button>
+    </div>
+  </dialog>
+
+  <!-- Batch-Import-Dialog -->
+  <dialog id="dialog-batch-import" class="ss-dialog batch-dialog">
+    <h2>Batch-Import</h2>
+    <p>Mehrere Sets auswählen und in einem Lauf importieren.</p>
+    <label for="batch-search-input">Filter</label>
+    <input id="batch-search-input" type="search" class="ss-input" placeholder="Set-ID, Name oder Serie…" />
+    <div class="batch-dialog-actions-top">
+      <button id="btn-batch-select-visible" class="btn-secondary" type="button">Sichtbare auswählen</button>
+      <button id="btn-batch-clear-selection" class="btn-secondary" type="button">Auswahl leeren</button>
+    </div>
+    <div id="batch-list" class="batch-list"></div>
+    <p id="batch-selection-info" class="dialog-error hidden"></p>
+    <div class="dialog-actions">
+      <button id="btn-batch-cancel" class="btn-secondary" type="button">Abbrechen</button>
+      <button id="btn-batch-import-selected" type="button">Ausgewählte importieren</button>
+    </div>
+  </dialog>
+
+  <!-- Lightbox-Dialog -->
+  <dialog id="dialog-lightbox" class="lightbox-dialog">
+    <button id="btn-lightbox-close" class="lightbox-close" title="Schließen (Esc)">✕</button>
+    <button id="btn-lightbox-prev" class="lightbox-nav lightbox-prev" title="Vorherige (←)" disabled>‹</button>
+    <button id="btn-lightbox-next" class="lightbox-nav lightbox-next" title="Nächste (→)" disabled>›</button>
+    <div class="lightbox-content">
+      <div class="lightbox-img-wrap">
+        <img id="lightbox-img" src="" alt="" />
+      </div>
+      <div class="lightbox-meta">
+        <h3 id="lightbox-title"></h3>
+        <p id="lightbox-subtitle"></p>
+        <p id="lightbox-counter" class="lightbox-counter"></p>
+        <a id="lightbox-cm-link" href="#" target="_blank" rel="noopener noreferrer"
+           class="lightbox-cm-link hidden">🛒 Cardmarket</a>
+        <div class="lightbox-checks">
+          <label class="lightbox-check-label">
+            <input type="checkbox" id="lightbox-g-check" />
+            <span>Normal (G)</span>
+          </label>
+          <label class="lightbox-check-label">
+            <input type="checkbox" id="lightbox-rh-check" />
+            <span>Reverse Holo (RH)</span>
+          </label>
+        </div>
+        <p class="lightbox-hint">← → navigieren &nbsp;|&nbsp; Leertaste = G togglen &nbsp;|&nbsp; Esc schließen</p>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Header -->
+  <header class="topbar">
+    <h1>🎴 Pokémon TCG Tracker</h1>
+    <nav class="main-nav hidden" id="main-nav">
+      <a href="#dashboard" class="nav-link active" data-view="dashboard">Dashboard</a>
+      <a href="#set" class="nav-link" data-view="set" id="nav-set-link">Set-Ansicht</a>
+      <a href="#stats" class="nav-link" data-view="stats">Statistiken</a>
+      <a href="#search" class="nav-link" data-view="search">Suche</a>
+    </nav>
+    <div id="recent-sets" class="recent-sets hidden" aria-label="Zuletzt bearbeitete Sets"></div>
+    <div class="header-actions">
+      <button id="btn-dark-mode" class="btn-icon" title="Dark Mode umschalten">🌙</button>
+      <button id="btn-login">Google Login</button>
+      <button id="btn-logout" disabled>Logout</button>
+    </div>
+  </header>
+
+  <!-- Status-Leiste -->
+  <div class="status-bar">
+    <p id="global-status" class="global-status">Bereit.</p>
+    <div id="engine-metrics" class="engine-metrics hidden" style="font-size: 11px; color: #666; margin-left: auto; padding-right: 12px; display: flex; gap: 16px; align-items: center;">
+      <span title="Cache Hit Rate">📦 <span id="metric-cache-rate">–</span>%</span>
+      <span title="API Status">🔗 <span id="metric-api-status">online</span></span>
+    </div>
+    <!-- Verbundenes Spreadsheet -->
+    <div id="spreadsheet-info" class="spreadsheet-info hidden">
+      <span class="ss-label">📊</span>
+      <a id="spreadsheet-link" href="#" target="_blank" rel="noopener noreferrer" class="ss-link">–</a>
+      <button id="btn-change-spreadsheet" class="btn-icon" title="Anderes Spreadsheet wählen">✏️</button>
+    </div>
+  </div>
+
+  <section id="job-panel" class="job-panel hidden" aria-live="polite">
+    <div class="job-head">
+      <strong id="job-title">Hintergrund-Job</strong>
+      <button id="btn-job-cancel" class="btn-secondary" type="button">Abbrechen</button>
+    </div>
+    <div class="job-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div id="job-progress-fill" class="job-progress-fill"></div>
+    </div>
+    <p id="job-status-text" class="job-status-text">Bereit</p>
+    <ul id="job-history" class="job-history"></ul>
+  </section>
+
+  <!-- App-Views -->
+  <div id="app-views">
+
+    <!-- ── VIEW: Dashboard ── -->
+    <div id="view-dashboard" class="view">
+      <div class="view-header">
+        <h2>Meine Sammlung</h2>
+        <div class="view-controls">
+          <input id="dash-filter" type="search" placeholder="Set suchen…" class="dash-filter-input" />
+          <select id="dash-series-filter">
+            <option value="">Alle Serien</option>
+          </select>
+          <select id="dash-sort">
+            <option value="series-date">Serie / Datum</option>
+            <option value="completion">Vollständigkeit</option>
+            <option value="name">Name A–Z</option>
+          </select>
+        </div>
+        <div id="dashboard-view-tabs" class="dashboard-view-tabs" role="tablist" aria-label="Dashboard-Ansicht">
+          <button class="dashboard-view-tab active" type="button" data-dashboard-view="all" aria-selected="true">Alle</button>
+          <button class="dashboard-view-tab" type="button" data-dashboard-view="imported" aria-selected="false">Importiert</button>
+          <button class="dashboard-view-tab" type="button" data-dashboard-view="not-imported" aria-selected="false">Nicht importiert</button>
+          <button class="dashboard-view-tab" type="button" data-dashboard-view="favorites" aria-selected="false">Favoriten</button>
+          <button id="btn-dashboard-compact" class="dashboard-view-tab" type="button" aria-pressed="false" title="Ansichtsdichte wechseln">Komfort</button>
+        </div>
+        <details class="dashboard-tools">
+          <summary>🧰 Tools</summary>
+          <div class="dashboard-actions">
+            <section class="dashboard-tools-group" aria-label="Import und Synchronisation">
+              <h3>Import & Sync</h3>
+              <div class="dashboard-tools-buttons">
+                <button id="btn-overview-sync" class="btn-secondary" type="button">🔄 Overview sync</button>
+                <button id="btn-overview-power-refresh" class="btn-secondary" type="button">⚡ Power-Refresh</button>
+                <button id="btn-import-batch" class="btn-secondary" type="button">📦 Batch-Import</button>
+                <button id="btn-import-all-missing" class="btn-secondary" type="button">🌐 Alle fehlenden importieren</button>
+                <button id="btn-reimport-current" class="btn-secondary" type="button">♻️ Aktuelles Set reimportieren</button>
+                <button id="btn-reimport-all-imported" class="btn-secondary" type="button">🔁 Alle importierten aktualisieren</button>
+              </div>
+            </section>
+
+            <section class="dashboard-tools-group" aria-label="Queue und Automatisierung">
+              <h3>Queue & Automatisierung</h3>
+              <div class="dashboard-tools-buttons">
+                <button id="btn-queue-autofix-refresh" class="btn-secondary" type="button">🧩 Queue: Auto-Fix → Refresh</button>
+                <button id="btn-queue-builder" class="btn-secondary" type="button">🧱 Queue Builder</button>
+                <button id="btn-queue-run" class="btn-secondary" type="button">▶️ Queue starten</button>
+                <button id="btn-queue-clear" class="btn-secondary" type="button">🗑️ Queue leeren</button>
+              </div>
+            </section>
+
+            <section class="dashboard-tools-group" aria-label="Diagnose und Backup">
+              <h3>Diagnose & Backup</h3>
+              <div class="dashboard-tools-buttons">
+                <button id="btn-export-summary-csv" class="btn-secondary" type="button">📤 Sammlung CSV</button>
+                <button id="btn-data-health-check" class="btn-secondary" type="button">🩺 Datencheck</button>
+                <button id="btn-data-health-autofix" class="btn-secondary" type="button">🛠️ Datencheck + Auto-Fix</button>
+                <button id="dashboard-action-parity" class="btn btn-secondary" type="button">🧪 Pokecode-Parity-Test</button>
+                <button id="btn-export-backup" class="btn-secondary" type="button">💾 Backup exportieren</button>
+                <button id="btn-import-backup" class="btn-secondary" type="button">📥 Backup importieren</button>
+              </div>
+            </section>
+            <input id="input-backup-file" type="file" accept="application/json" class="hidden" />
+          </div>
+        </details>
+      </div>
+      <div id="quick-filters-container"></div>
+      <div id="dashboard-grid" class="dashboard-grid">
+        <p class="empty-state">Bitte anmelden.</p>
+      </div>
+    </div>
+
+    <!-- ── VIEW: Set-Detail ── -->
+    <div id="view-set" class="view view-with-sidebar hidden">
+
+      <!-- Sidebar -->
+      <aside class="panel sidebar">
+        <h2>Set wählen</h2>
+        <div class="row">
+          <label for="set-selector">Set</label>
+          <select id="set-selector" disabled>
+            <option value="">Bitte wählen…</option>
+          </select>
+        </div>
+        <div id="set-logo-wrap" class="set-logo-wrap hidden">
+          <img id="set-logo" src="" alt="Set-Logo" class="set-logo" />
+          <img id="set-symbol" src="" alt="Set-Symbol" class="set-symbol" />
+        </div>
+        <div class="row">
+          <button id="btn-load" disabled>Laden</button>
+          <button id="btn-refresh" disabled>🔄 Neu laden</button>
+        </div>
+        <p id="status" class="status">Nicht angemeldet.</p>
+
+        <!-- Fortschrittsanzeige -->
+        <section id="stats-section" class="stats-section hidden">
+          <h3>Sammlung</h3>
+          <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div id="progress-fill" class="progress-fill"></div>
+          </div>
+          <p id="progress-text" class="progress-text">0 / 0 (0&nbsp;%)</p>
+          <ul class="stats-list">
+            <li>Gesamt: <strong id="stat-total">0</strong></li>
+            <li>Normal: <strong id="stat-collected">0</strong></li>
+            <li>RH: <strong id="stat-rh">0</strong></li>
+            <li>Fehlend: <strong id="stat-missing">0</strong></li>
+          </ul>
+        </section>
+
+        <!-- Filter-Buttons -->
+        <section id="filter-section" class="filter-section hidden">
+          <h3>Filter</h3>
+          <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">Alle</button>
+            <button class="filter-btn" data-filter="missing">Fehlend</button>
+            <button class="filter-btn" data-filter="collected">Gesammelt</button>
+          </div>
+        </section>
+
+        <!-- Sortierung -->
+        <section class="sort-section hidden" id="sort-section">
+          <h3>Sortierung</h3>
+          <select id="card-sort" class="full-width-select">
+            <option value="number">Nach Nummer</option>
+            <option value="name">Nach Name</option>
+            <option value="status">Nach Status</option>
+          </select>
+        </section>
+      </aside>
+
+      <!-- Karten-Bereich -->
+      <section class="panel cards-panel">
+        <!-- Toolbar -->
+        <div class="set-toolbar" id="set-toolbar">
+          <button id="btn-bulk-edit" class="btn-secondary">☑ Mehrfach-Auswahl</button>
+          <button id="btn-missing-export" class="btn-secondary">📋 Fehlende exportieren</button>
+        </div>
+
+        <!-- Bulk-Edit-Toolbar -->
+        <div id="bulk-toolbar" class="bulk-toolbar hidden">
+          <span id="bulk-count" class="bulk-count">0 ausgewählt</span>
+          <button id="btn-bulk-mark-g" class="btn-success">✅ Als G markieren</button>
+          <button id="btn-bulk-mark-rh" class="btn-primary">🔵 Als RH markieren</button>
+          <button id="btn-bulk-unmark" class="btn-secondary">☐ Markierung entfernen</button>
+          <button id="btn-bulk-cancel" class="btn-danger">✕ Abbrechen</button>
+        </div>
+
+        <!-- Empty-State -->
+        <div id="empty-state" class="empty-state">
+          <p>🗃️ Kein Set geladen. Bitte ein Set auswählen.</p>
+          <p class="empty-hint">Tipp: Pfeiltasten navigieren, Leertaste = G togglen, I = Bild-Zoom</p>
+        </div>
+        <!-- Karten-Grid -->
+        <div id="cards" class="cards hidden" role="list"></div>
+      </section>
+    </div>
+
+    <!-- ── VIEW: Statistiken ── -->
+    <div id="view-stats" class="view hidden">
+      <div class="view-header">
+        <h2>📊 Sammlungsstatistiken</h2>
+      </div>
+      <div id="stats-content" class="stats-content">
+        <p class="empty-state">Statistiken werden geladen…</p>
+      </div>
+    </div>
+
+    <!-- ── VIEW: Suche ── -->
+    <div id="view-search" class="view hidden">
+      <div class="view-header">
+        <h2>🔍 Kartensuche</h2>
+        <div class="view-controls">
+          <input id="search-input" type="search" placeholder="Kartenname oder Nummer eingeben…"
+                 class="search-main-input" autofocus />
+          <select id="search-set-filter">
+            <option value="">Alle Sets</option>
+          </select>
+        </div>
+      </div>
+      <p class="search-hint">Sucht in allen importierten Sets. Ergebnisse erscheinen automatisch.</p>
+      <div id="search-results" class="cards search-results">
+        <p class="empty-state">Suchbegriff oben eingeben.</p>
+      </div>
+    </div>
+
+  </div><!-- /#app-views -->
+
+  <dialog id="dialog-queue-builder" class="ss-dialog batch-dialog">
+    <h2>Queue Builder</h2>
+    <p>Wähle Aktionen in Ausführungsreihenfolge aus.</p>
+    <div class="batch-dialog-actions-top">
+      <select id="queue-preset-select" class="full-width-select">
+        <option value="">Preset laden…</option>
+      </select>
+      <button id="btn-queue-preset-save" class="btn-secondary" type="button">Preset speichern</button>
+      <button id="btn-queue-preset-rename" class="btn-secondary" type="button">Umbenennen</button>
+      <button id="btn-queue-preset-duplicate" class="btn-secondary" type="button">Duplizieren</button>
+      <button id="btn-queue-preset-delete" class="btn-secondary" type="button">Preset löschen</button>
+      <button id="btn-queue-preset-export" class="btn-secondary" type="button">Presets export</button>
+      <button id="btn-queue-preset-import" class="btn-secondary" type="button">Presets import</button>
+      <input id="input-queue-presets-file" type="file" accept="application/json" class="hidden" />
+    </div>
+    <div id="queue-builder-list" class="batch-list"></div>
+    <p class="batch-item-sub">Ausgewählte Reihenfolge (Drag & Drop):</p>
+    <ul id="queue-builder-selected" class="queue-selected-list"></ul>
+    <div class="dialog-actions">
+      <button id="btn-queue-builder-cancel" class="btn-secondary" type="button">Abbrechen</button>
+      <button id="btn-queue-builder-add" type="button">Zur Queue hinzufügen</button>
+    </div>
+  </dialog>
+
+  <!-- Command Palette Container -->
+  <div id="command-palette" class="command-palette-hidden"></div>
+
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://apis.google.com/js/api.js" async defer></script>
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
