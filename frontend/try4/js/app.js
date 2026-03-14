@@ -245,6 +245,7 @@ const state = {
   bulkSelected: new Set(),
   lightboxIndex: 0,
   searchCache:  new Map(),
+  searchRunId:  0,
   batchSelection: new Set(),
   activeJob: null,
   queuedActions: [],
@@ -2498,26 +2499,56 @@ function parseMixedQuery(rawQuery) {
   };
 }
 
-function matchesCardSearch(card, normalizedQuery, structuredQuery, mixedQuery) {
+function computeSearchScore(card, normalizedQuery, structuredQuery, mixedQuery) {
+  const name = (card.name || '').toLowerCase();
+  const numberRaw = String(card.number || '').toLowerCase();
+  const number = normalizeCardNumber(card.number).toLowerCase();
+
   if (structuredQuery) {
-    const numberMatch = !structuredQuery.cardNumber ||
-      normalizeCardNumber(card.number).toLowerCase() === structuredQuery.cardNumber;
-    const nameMatch = !structuredQuery.namePart ||
-      structuredQuery.namePart.every((t) => (card.name || '').toLowerCase().includes(t));
-    return numberMatch && nameMatch;
+    const numberMatch = !structuredQuery.cardNumber || number === structuredQuery.cardNumber;
+    const nameMatch = !structuredQuery.namePart || structuredQuery.namePart.every((token) => name.includes(token));
+    if (!numberMatch || !nameMatch) return -1;
+
+    let score = 1000;
+    if (structuredQuery.cardNumber) score += 250;
+    if (structuredQuery.namePart?.length) {
+      score += structuredQuery.namePart.length * 40;
+      score += 80;
+    }
+    return score;
   }
 
   if (mixedQuery) {
-    const numberMatch = normalizeCardNumber(card.number).toLowerCase() === mixedQuery.cardNumber;
-    const nameMatch   = mixedQuery.nameTokens.every((t) => (card.name || '').toLowerCase().includes(t));
-    return numberMatch && nameMatch;
+    const numberMatch = number === mixedQuery.cardNumber;
+    const nameMatch = mixedQuery.nameTokens.every((token) => name.includes(token));
+    if (!numberMatch || !nameMatch) return -1;
+
+    return 900 + (mixedQuery.nameTokens.length * 45) + 200;
   }
 
-  return (card.name || '').toLowerCase().includes(normalizedQuery)
-    || (card.number || '').toLowerCase().includes(normalizedQuery);
+  const nameContains = name.includes(normalizedQuery);
+  const numberContains = number.includes(normalizedQuery) || numberRaw.includes(normalizedQuery);
+  if (!nameContains && !numberContains) return -1;
+
+  const queryTokens = normalizedQuery.split(/\s+/).filter(Boolean);
+  let score = 0;
+  if (nameContains) score += 140;
+  if (numberContains) score += 120;
+  if (nameContains && numberContains) score += 180;
+  if (queryTokens.length > 1 && queryTokens.every((token) => name.includes(token))) score += 70;
+
+  return score;
 }
 
-async function runSearch() {
+function matchesCardSearch(card, normalizedQuery, structuredQuery, mixedQuery) {
+  return computeSearchScore(card, normalizedQuery, structuredQuery, mixedQuery) >= 0;
+}
+
+async function runSearch(options = {}) {
+  const { force = false } = options;
+  const runId = ++state.searchRunId;
+  const isStale = () => runId !== state.searchRunId;
+
   const rawQuery = dom.searchInput.value.trim();
   const query = rawQuery.toLowerCase();
   if (!query) {
@@ -2532,6 +2563,10 @@ async function runSearch() {
   const structuredQuery = parseStructuredSearchQuery(rawQuery, lookupPool);
   // Freie Kombinations-Suche (z.B. "57 Digda") nur wenn kein Set-Präfix erkannt wurde
   const mixedQuery = !structuredQuery ? parseMixedQuery(rawQuery) : null;
+  if (!force && !structuredQuery && !mixedQuery && query.length < 2) {
+    dom.searchResults.innerHTML = '<p class="empty-state">Mindestens 2 Zeichen eingeben oder Enter drücken.</p>';
+    return;
+  }
   // Für die eigentliche Suche das importierte Set bevorzugen (hat Collection-Daten),
   // fallback auf das Set aus allSets falls nicht importiert.
   const setsToSearch = structuredQuery
@@ -2544,6 +2579,7 @@ async function runSearch() {
   dom.searchResults.innerHTML = '<p class="loading-placeholder">Suche\u2026</p>';
   const results = [];
   for (const set of setsToSearch) {
+    if (isStale()) return;
     try {
       const cacheKey = `cards_${set.setId}`;
       let cards;
@@ -2554,6 +2590,7 @@ async function runSearch() {
         cache.set(cacheKey, cards, CONFIG.CACHE_TTL_MS);
         state.searchCache.set(set.setId, cards);
       }
+      if (isStale()) return;
       let dbMap = new Map();
       const dbCacheKey = `db_${set.setId}`;
       if (cache.has(dbCacheKey)) dbMap = cache.get(dbCacheKey);
@@ -2561,9 +2598,11 @@ async function runSearch() {
         dbMap = await readSetCollectionMap(set.setName);
         cache.set(dbCacheKey, dbMap, CONFIG.CACHE_TTL_MS);
       }
+      if (isStale()) return;
       cards.forEach((card) => {
-        if (matchesCardSearch(card, query, structuredQuery, mixedQuery)) {
-          results.push({ card, set, dbMap });
+        const score = computeSearchScore(card, query, structuredQuery, mixedQuery);
+        if (score >= 0) {
+          results.push({ card, set, dbMap, score });
         }
       });
       if (!structuredQuery && !mixedQuery && results.length >= 200) break;
@@ -2577,6 +2616,14 @@ async function runSearch() {
     dom.searchResults.innerHTML = `<p class="empty-state">Keine Karten f\u00fcr \u201e${rawQuery}\u201c gefunden (durchsucht: ${setsToSearch.length} Sets).</p>`;
     return;
   }
+  results.sort((left, right) => {
+    if (right.score !== left.score) return right.score - left.score;
+    const setCompare = String(left.set?.setName || '').localeCompare(String(right.set?.setName || ''), 'de', { sensitivity: 'base' });
+    if (setCompare !== 0) return setCompare;
+    return String(left.card?.number || '').localeCompare(String(right.card?.number || ''), undefined, { numeric: true, sensitivity: 'base' });
+  });
+
+  if (isStale()) return;
   dom.searchResults.innerHTML = `<p class="search-result-count">${results.length} Ergebnis${results.length !== 1 ? 'se' : ''}</p>`;
   const frag = document.createDocumentFragment();
   results.forEach(({ card, set, dbMap }) => {
@@ -2669,9 +2716,17 @@ async function openSearchResultLightbox(card, set) {
 
 function initSearch() {
   let debounce;
-  dom.searchInput.addEventListener('input', () => { clearTimeout(debounce); debounce = setTimeout(runSearch, 400); });
-  dom.searchSetFilter.addEventListener('change', runSearch);
-  dom.searchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { clearTimeout(debounce); runSearch(); } });
+  dom.searchInput.addEventListener('input', () => {
+    clearTimeout(debounce);
+    debounce = setTimeout(() => runSearch(), 500);
+  });
+  dom.searchSetFilter.addEventListener('change', () => runSearch({ force: true }));
+  dom.searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      clearTimeout(debounce);
+      runSearch({ force: true });
+    }
+  });
 }
 
 // ══════════════════════════════════════════════════════════════════════════
