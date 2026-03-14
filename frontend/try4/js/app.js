@@ -2439,6 +2439,22 @@ async function renderStats() {
 // ══════════════════════════════════════════════════════════════════════════
 // SUCHE (cross-set)
 // ══════════════════════════════════════════════════════════════════════════
+const SEARCH_NOISE_TOKENS = new Set([
+  'karte', 'karten', 'kartennummer', 'kartennr', 'nummer', 'nr', 'no', 'num',
+  'pokemon', 'pokemontcg', 'tcg', 'set', 'im', 'in', 'von', 'die', 'der', 'das'
+]);
+
+function sanitizeSearchToken(token) {
+  return normalizeSearchText(token).replace(/^[^a-z0-9]+|[^a-z0-9]+$/g, '');
+}
+
+function extractMeaningfulNameTokens(tokens = []) {
+  return tokens
+    .map((token) => sanitizeSearchToken(token))
+    .filter((token) => token && token.length >= 2)
+    .filter((token) => !SEARCH_NOISE_TOKENS.has(token));
+}
+
 function parseStructuredSearchQuery(rawQuery, availableSets = []) {
   const trimmedQuery = String(rawQuery || '').trim();
   if (!trimmedQuery) return null;
@@ -2464,14 +2480,15 @@ function parseStructuredSearchQuery(rawQuery, availableSets = []) {
     if (!cardNumber && /^[a-zA-Z._-]*\d+[a-zA-Z._-]*$/.test(part)) {
       cardNumber = normalizeCardNumberForSearch(part);
     } else {
-      nameTokens.push(normalizeSearchText(part));
+      nameTokens.push(part);
     }
   }
+  const meaningfulNameTokens = extractMeaningfulNameTokens(nameTokens);
   return {
     set: matchingSet,
     setId: String(matchingSet.setId),
     cardNumber,
-    namePart: nameTokens.length ? nameTokens : null
+    namePart: meaningfulNameTokens.length ? meaningfulNameTokens : null
   };
 }
 
@@ -2488,7 +2505,8 @@ function parseMixedQuery(rawQuery) {
 
   // Tokens die wie eine Kartennummer aussehen: optionale alpha-Präfix + Zahlen + optionales Suffix
   const numberTokens = parts.filter((p) => /^[a-z._-]*\d+[a-z._-]*$/.test(p));
-  const nameTokens   = parts.filter((p) => !/^[a-z._-]*\d+[a-z._-]*$/.test(p));
+  const nameTokensRaw = parts.filter((p) => !/^[a-z._-]*\d+[a-z._-]*$/.test(p));
+  const nameTokens = extractMeaningfulNameTokens(nameTokensRaw);
 
   // Nur sinnvoll wenn mindestens ein Namentoken UND genau ein Nummerntoken vorhanden ist
   if (!nameTokens.length || !numberTokens.length) return null;
