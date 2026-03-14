@@ -1003,6 +1003,65 @@ function getErrorMessage(err, fallback = 'Unbekannter Fehler') {
   }
 }
 
+function isAuthError(err) {
+  const status = Number(err?.status || err?.result?.error?.code || 0);
+  if (status === 401 || status === 403) return true;
+  const message = String(err?.result?.error?.message || err?.message || '').toLowerCase();
+  return message.includes('unauthenticated')
+    || message.includes('unauthorized')
+    || message.includes('auth')
+    || message.includes('anmelden');
+}
+
+function buildCardImageFallbacks(card, setIdHint = '') {
+  const seen = new Set();
+  const add = (url) => {
+    const value = String(url || '').trim();
+    if (!value || seen.has(value)) return;
+    seen.add(value);
+  };
+
+  const original = String(card?.image || '').trim();
+  const localFallbacks = Array.isArray(card?.imageFallbacks) ? card.imageFallbacks : [];
+  localFallbacks.forEach((url) => add(url));
+
+  if (/^https?:\/\/assets\.tcgdex\.net\/de\//i.test(original)) {
+    add(original.replace('/de/', '/en/'));
+  }
+  if (/\/low\.webp(\?.*)?$/i.test(original)) {
+    add(original.replace(/\/low\.webp(\?.*)?$/i, '/low.jpg$1'));
+    if (/^https?:\/\/assets\.tcgdex\.net\/de\//i.test(original)) {
+      const enWebp = original.replace('/de/', '/en/');
+      add(enWebp.replace(/\/low\.webp(\?.*)?$/i, '/low.jpg$1'));
+    }
+  }
+
+  const setId = String(setIdHint || '').trim();
+  const normalizedNumber = normalizeCardNumber(card?.number || '');
+  if (setId && !setId.startsWith('TCGDEX-') && normalizedNumber) {
+    add(`https://images.pokemontcg.io/${encodeURIComponent(setId)}/${encodeURIComponent(normalizedNumber)}.png`);
+  }
+
+  if (original) seen.delete(original);
+  return Array.from(seen);
+}
+
+function attachImageFallback(img, card, setIdHint = '') {
+  const fallbackQueue = buildCardImageFallbacks(card, setIdHint);
+  img.style.display = '';
+  img.onerror = () => {
+    while (fallbackQueue.length) {
+      const next = fallbackQueue.shift();
+      if (next && next !== img.src) {
+        img.src = next;
+        return;
+      }
+    }
+    img.onerror = null;
+    img.style.display = 'none';
+  };
+}
+
 function setEmptyState(show) {
   dom.emptyState.classList.toggle('hidden', !show);
   dom.cards.classList.toggle('hidden', show);
@@ -1161,7 +1220,13 @@ async function loadSets() {
 
     importedSets.forEach((set) => {
       const current = mergedMap.get(set.setId) || {};
-      mergedMap.set(set.setId, { ...current, ...set, imported: true });
+      mergedMap.set(set.setId, {
+        ...current,
+        ...set,
+        // ptcgoCode aus der API nicht mit einem leeren Sheets-Wert überschreiben
+        ptcgoCode: set.ptcgoCode || current.ptcgoCode || '',
+        imported: true
+      });
     });
 
     state.allSets = Array.from(mergedMap.values());
@@ -2373,14 +2438,62 @@ async function renderStats() {
 // ══════════════════════════════════════════════════════════════════════════
 // SUCHE (cross-set)
 // ══════════════════════════════════════════════════════════════════════════
+function parseStructuredSearchQuery(rawQuery, availableSets = []) {
+  const trimmedQuery = String(rawQuery || '').trim();
+  if (!trimmedQuery) return null;
+
+  const normalizedQuery = trimmedQuery.replace(/^\(+|\)+$/g, '').trim();
+  if (!normalizedQuery) return null;
+
+  const parts = normalizedQuery.split(/\s+/).filter(Boolean);
+  if (!parts.length) return null;
+
+  const requestedCode = parts[0].toLowerCase();
+  const matchingSet = availableSets.find((set) =>
+    (set?.ptcgoCode && String(set.ptcgoCode).toLowerCase() === requestedCode) ||
+    String(set?.setId || '').toLowerCase() === requestedCode
+  );
+  if (!matchingSet) return null;
+
+  const cardNumberQuery = parts.slice(1).join('').trim();
+  return {
+    set: matchingSet,
+    setId: String(matchingSet.setId),
+    cardNumber: cardNumberQuery ? normalizeCardNumber(cardNumberQuery).toLowerCase() : ''
+  };
+}
+
+function matchesCardSearch(card, normalizedQuery, structuredQuery) {
+  if (structuredQuery?.cardNumber) {
+    return normalizeCardNumber(card.number).toLowerCase() === structuredQuery.cardNumber;
+  }
+
+  if (structuredQuery?.setId) {
+    return true;
+  }
+
+  return (card.name || '').toLowerCase().includes(normalizedQuery)
+    || (card.number || '').toLowerCase().includes(normalizedQuery);
+}
+
 async function runSearch() {
-  const query = dom.searchInput.value.trim().toLowerCase();
+  const rawQuery = dom.searchInput.value.trim();
+  const query = rawQuery.toLowerCase();
   if (!query) {
     dom.searchResults.innerHTML = '<p class="empty-state">Suchbegriff eingeben.</p>';
     return;
   }
-  const setFilter    = dom.searchSetFilter.value;
-  const setsToSearch = setFilter ? state.sets.filter((s) => s.setId === setFilter) : state.sets;
+  const setFilter = dom.searchSetFilter.value;
+  const baseSetsToSearch = setFilter ? state.sets.filter((s) => s.setId === setFilter) : state.sets;
+  // Für ptcgoCode-Lookup state.allSets nutzen (hat zuverlässige Daten aus den JSON-Dateien),
+  // da state.sets (aus Google Sheets) ptcgoCode leer haben kann.
+  const lookupPool = state.allSets?.length ? state.allSets : baseSetsToSearch;
+  const structuredQuery = parseStructuredSearchQuery(rawQuery, lookupPool);
+  // Für die eigentliche Suche das importierte Set bevorzugen (hat Collection-Daten),
+  // fallback auf das Set aus allSets falls nicht importiert.
+  const setsToSearch = structuredQuery
+    ? [baseSetsToSearch.find((s) => s.setId === structuredQuery.setId) ?? structuredQuery.set]
+    : baseSetsToSearch;
   if (!setsToSearch.length) {
     dom.searchResults.innerHTML = '<p class="empty-state">Keine Sets importiert.</p>';
     return;
@@ -2406,17 +2519,18 @@ async function runSearch() {
         cache.set(dbCacheKey, dbMap, CONFIG.CACHE_TTL_MS);
       }
       cards.forEach((card) => {
-        if ((card.name || '').toLowerCase().includes(query) || (card.number || '').toLowerCase().includes(query)) {
+        if (matchesCardSearch(card, query, structuredQuery)) {
           results.push({ card, set, dbMap });
         }
       });
-      if (results.length >= 200) break;
+      if (!structuredQuery && results.length >= 200) break;
+      if (structuredQuery?.cardNumber && results.length >= 1) break;
     } catch (err) {
       console.warn('[runSearch] error for set', set.setId, err);
     }
   }
   if (!results.length) {
-    dom.searchResults.innerHTML = `<p class="empty-state">Keine Karten f\u00fcr \u201e${query}\u201c gefunden (durchsucht: ${setsToSearch.length} Sets).</p>`;
+    dom.searchResults.innerHTML = `<p class="empty-state">Keine Karten f\u00fcr \u201e${rawQuery}\u201c gefunden (durchsucht: ${setsToSearch.length} Sets).</p>`;
     return;
   }
   dom.searchResults.innerHTML = `<p class="search-result-count">${results.length} Ergebnis${results.length !== 1 ? 'se' : ''}</p>`;
@@ -2436,21 +2550,77 @@ function createSearchResultCard(card, key, db, set) {
 
   const img = document.createElement('img');
   img.src = card.image || ''; img.alt = card.name || key; img.loading = 'lazy';
-  img.onerror = () => { img.style.display = 'none'; };
+  attachImageFallback(img, card, set?.setId || '');
 
   const meta    = document.createElement('div'); meta.className = 'meta';
   const setTag  = document.createElement('span'); setTag.className = 'search-set-tag'; setTag.textContent = set.setName;
   const title   = document.createElement('div'); title.className = 'title'; title.textContent = `${card.number} \u2013 ${card.name || '?'}`;
   const status  = document.createElement('div'); status.className = 'search-status';
+  const actions = document.createElement('div'); actions.className = 'search-actions';
+  const goToSetBtn = document.createElement('button');
+  goToSetBtn.type = 'button';
+  goToSetBtn.className = 'btn-secondary';
+  goToSetBtn.textContent = 'Zum Set';
+  goToSetBtn.title = `${set.setName} öffnen`;
   status.textContent = db?.rh ? '\uD83D\uDD35 RH' : db?.g ? '\u2705 G' : '\u2610 Fehlend';
-  meta.append(setTag, title, status);
+  actions.append(goToSetBtn);
+  meta.append(setTag, title, status, actions);
   article.append(img, meta);
 
-  article.addEventListener('click', () => {
-    dom.selector.value = set.setId;
-    navigate(`set/${set.setId}`);
+  article.addEventListener('click', async () => {
+    try {
+      await openSearchResultLightbox(card, set);
+    } catch (err) {
+      showToast(`Karte konnte nicht geöffnet werden: ${err.message}`, 'error');
+    }
   });
+
+  goToSetBtn.addEventListener('click', (event) => {
+    event.stopPropagation();
+    navigateToSearchResultSet(set);
+  });
+
   return article;
+}
+
+function navigateToSearchResultSet(set) {
+  if (!set?.setId) return;
+  dom.selector.value = set.setId;
+  navigate(`set/${set.setId}`);
+}
+
+async function openSearchResultLightbox(card, set) {
+  if (!set?.setId || !card) return;
+
+  const cardsCacheKey = `cards_${set.setId}`;
+  const dbCacheKey = `db_${set.setId}`;
+
+  const [cards, dbMap] = await Promise.all([
+    cache.has(cardsCacheKey)
+      ? cache.get(cardsCacheKey)
+      : fetchMergedCards(set.setId).then((loadedCards) => {
+        cache.set(cardsCacheKey, loadedCards, CONFIG.CACHE_TTL_MS);
+        state.searchCache.set(set.setId, loadedCards);
+        return loadedCards;
+      }),
+    cache.has(dbCacheKey)
+      ? cache.get(dbCacheKey)
+      : readSetCollectionMap(set.setName).then((loadedDbMap) => {
+        cache.set(dbCacheKey, loadedDbMap, CONFIG.CACHE_TTL_MS);
+        return loadedDbMap;
+      })
+  ]);
+
+  const targetKey = normalizeCardNumber(card.number);
+  const targetIndex = cards.findIndex((item) => normalizeCardNumber(item.number) === targetKey);
+  if (targetIndex < 0) return;
+
+  state.currentSet = set;
+  state.cards = cards;
+  state.dbMap = dbMap;
+  state.lightboxIndex = targetIndex;
+
+  openLightbox(targetIndex);
 }
 
 function initSearch() {
@@ -2574,7 +2744,7 @@ function createCardElement(card, key, db, index) {
 
   const img = document.createElement('img');
   img.src = card.image || ''; img.alt = card.name || key; img.loading = 'lazy';
-  img.onerror = () => { img.style.display = 'none'; };
+  attachImageFallback(img, card, state.currentSet?.setId || '');
   imgWrap.appendChild(img);
 
   // Bulk overlay
@@ -2760,6 +2930,7 @@ function renderLightbox(index) {
   const key = normalizeCardNumber(card.number);
   const db  = state.dbMap.get(key) || { displayId: card.number, g: false, rh: false, gCell: null, rhCell: null };
   dom.lightboxImg.src              = card.image || '';
+  attachImageFallback(dom.lightboxImg, card, state.currentSet?.setId || '');
   dom.lightboxImg.alt              = card.name  || key;
   dom.lightboxTitle.textContent    = card.name  || 'Unbekannt';
   dom.lightboxSubtitle.textContent = `#${card.number}`;
@@ -3027,6 +3198,12 @@ async function loadCurrentSet(forceRefresh = false) {
     if (!forceRefresh) showToast(`${selected.setName} geladen`, 'success', 2000);
   } catch (err) {
     console.error('[loadCurrentSet]', err);
+    if (isAuthError(err)) {
+      showToast('Sitzung abgelaufen. Bitte erneut mit Google anmelden.', 'error', 6000);
+      try { signOut(); } catch {}
+      resetToLoggedOut();
+      return;
+    }
     showToast(`Fehler beim Laden: ${err.message}`, 'error');
     setGlobalStatus('Fehler beim Laden.');
     state.cards = [];
