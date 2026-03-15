@@ -207,7 +207,13 @@ function mapTcgdexCardToMerged(tcgdexSetId, tcgdexCard, fallbackImage = null, fa
     name: tcgdexCard?.name || number,
     image: resolveTcgdexImageUrl(tcgdexSetId, tcgdexCard) || fallbackImage || '',
     cardmarketUrl: resolvedCardmarketUrl,
-    rarity: tcgdexCard?.rarity || ''
+    rarity: tcgdexCard?.rarity || '',
+    hp: tcgdexCard?.hp ? String(tcgdexCard.hp) : '',
+    types: Array.isArray(tcgdexCard?.types) ? tcgdexCard.types : [],
+    supertype: tcgdexCard?.category || '',
+    subtypes: tcgdexCard?.stage ? [tcgdexCard.stage] : (tcgdexCard?.suffix ? [tcgdexCard.suffix] : []),
+    evolvesFrom: tcgdexCard?.evolveFrom || '',
+    artist: Array.isArray(tcgdexCard?.illustrator) ? tcgdexCard.illustrator.join(', ') : (tcgdexCard?.illustrator || '')
   };
 
   if (description) {
@@ -341,7 +347,18 @@ export async function loadCardsForSetCompat({
         || primaryCard.images?.small
         || `https://images.pokemontcg.io/${pokemontcgSetId}/${number}.png`,
       cardmarketUrl: resolvedCardmarketUrl,
-      rarity: primaryCard.rarity || tcgdexCard?.rarity || ''
+      rarity: primaryCard.rarity || tcgdexCard?.rarity || '',
+      hp: primaryCard.hp ? String(primaryCard.hp) : (tcgdexCard?.hp ? String(tcgdexCard.hp) : ''),
+      types: Array.isArray(primaryCard.types) && primaryCard.types.length
+        ? primaryCard.types
+        : (Array.isArray(tcgdexCard?.types) ? tcgdexCard.types : []),
+      supertype: primaryCard.supertype || tcgdexCard?.category || '',
+      subtypes: Array.isArray(primaryCard.subtypes) && primaryCard.subtypes.length
+        ? primaryCard.subtypes
+        : (tcgdexCard?.stage ? [tcgdexCard.stage] : (tcgdexCard?.suffix ? [tcgdexCard.suffix] : [])),
+      evolvesFrom: primaryCard.evolvesFrom || tcgdexCard?.evolveFrom || '',
+      artist: primaryCard.artist || (Array.isArray(tcgdexCard?.illustrator) ? tcgdexCard.illustrator.join(', ') : (tcgdexCard?.illustrator || '')),
+      regulationMark: primaryCard.regulationMark || ''
     };
 
     if (tcgdexCard?.description) {
@@ -462,7 +479,15 @@ export function combineSetsForOverviewCompat({
         series: tcgdexSet?.serie?.name || model.series,
         releaseDate: tcgdexSet?.releaseDate || model.releaseDate || '',
         totalCards: toNumber(tcgdexSet?.cardCount?.official) || model.totalCards,
-        ptcgoCode: model.ptcgoCode || tcgdexSet?.abbreviation?.official || ''
+        ptcgoCode: model.ptcgoCode || tcgdexSet?.abbreviation?.official || '',
+        tcgdexId: tcgdexSet?.id || '',
+        tcgdexName: tcgdexSet?.name || tcgdexSet?.en?.name || '',
+        legalities: primarySet?.legalities || tcgdexSet?.legal || null,
+        cardCountTotal: toNumber(tcgdexSet?.cardCount?.total),
+        cardCountHolo: toNumber(tcgdexSet?.cardCount?.holo),
+        cardCountReverse: toNumber(tcgdexSet?.cardCount?.reverse),
+        cardCountFirstEdition: toNumber(tcgdexSet?.cardCount?.firstEdition),
+        cardCountNormal: toNumber(tcgdexSet?.cardCount?.normal)
       });
       return;
     }
@@ -476,7 +501,15 @@ export function combineSetsForOverviewCompat({
         series: tcgdexSet.serie?.name || '',
         releaseDate: tcgdexSet.releaseDate || '',
         totalCards: toNumber(tcgdexSet?.cardCount?.official) || toNumber(tcgdexSet?.cardCount?.total),
-        ptcgoCode: tcgdexSet.abbreviation?.official || ''
+        ptcgoCode: tcgdexSet.abbreviation?.official || '',
+        tcgdexId: tcgdexSet.id || '',
+        tcgdexName: tcgdexSet.name || tcgdexSet.en?.name || '',
+        legalities: tcgdexSet.legal || null,
+        cardCountTotal: toNumber(tcgdexSet?.cardCount?.total),
+        cardCountHolo: toNumber(tcgdexSet?.cardCount?.holo),
+        cardCountReverse: toNumber(tcgdexSet?.cardCount?.reverse),
+        cardCountFirstEdition: toNumber(tcgdexSet?.cardCount?.firstEdition),
+        cardCountNormal: toNumber(tcgdexSet?.cardCount?.normal)
       });
     }
   });

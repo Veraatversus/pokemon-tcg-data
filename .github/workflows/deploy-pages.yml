@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - release
+      - dev
   workflow_dispatch: # Allow manual trigger
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
@@ -25,18 +26,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout release branch
         uses: actions/checkout@v4
         with:
           ref: release
+          path: release_src
+
+      - name: Checkout dev branch
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          path: dev_src
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
+      - name: Build pages artifact content
+        run: |
+          mkdir -p _site
+          rsync -a --delete --exclude='.git' release_src/ _site/
+          mkdir -p _site/dev
+          rsync -a --delete --exclude='.git' dev_src/ _site/dev/
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: '_site'
 
       - name: Deploy to GitHub Pages
         id: deployment

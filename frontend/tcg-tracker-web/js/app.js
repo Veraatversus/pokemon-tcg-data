@@ -3,6 +3,7 @@ import {
   listImportedSets,
   listSetsOverviewData,
   readSetCollectionMap,
+  readDbCardsForSet,
   ensureCollectionEntry,
   updateCellBoolean,
   readSummarySheet,
@@ -214,6 +215,16 @@ const dom = {
   lightboxTitle:    document.getElementById('lightbox-title'),
   lightboxSubtitle: document.getElementById('lightbox-subtitle'),
   lightboxCounter:  document.getElementById('lightbox-counter'),
+  lightboxRarity:   document.getElementById('lightbox-rarity'),
+  lightboxHp:       document.getElementById('lightbox-hp'),
+  lightboxTypes:    document.getElementById('lightbox-types'),
+  lightboxSupertype: document.getElementById('lightbox-supertype'),
+  lightboxSubtypes: document.getElementById('lightbox-subtypes'),
+  lightboxEvolvesFrom: document.getElementById('lightbox-evolves-from'),
+  lightboxArtist:   document.getElementById('lightbox-artist'),
+  lightboxRegulationMark: document.getElementById('lightbox-regulation-mark'),
+  lightboxRules:    document.getElementById('lightbox-rules'),
+  lightboxFlavorText: document.getElementById('lightbox-flavor-text'),
   lightboxCmLink:   document.getElementById('lightbox-cm-link'),
   lightboxGCheck:   document.getElementById('lightbox-g-check'),
   lightboxRhCheck:  document.getElementById('lightbox-rh-check'),
@@ -225,6 +236,7 @@ const dom = {
   // Search view
   searchInput:      document.getElementById('search-input'),
   searchSetFilter:  document.getElementById('search-set-filter'),
+  searchApiFallback: document.getElementById('search-api-fallback'),
   searchResults:    document.getElementById('search-results'),
 };
 
@@ -246,6 +258,7 @@ const state = {
   lightboxIndex: 0,
   searchCache:  new Map(),
   searchRunId:  0,
+  searchAbortController: null,
   batchSelection: new Set(),
   activeJob: null,
   queuedActions: [],
@@ -274,6 +287,7 @@ const QUEUE_PRESETS_STORAGE_KEY = 'poke_try4_queue_presets_v1';
 const DASHBOARD_PREFS_STORAGE_KEY = 'poke_try4_dashboard_prefs_v1';
 const RECENT_SETS_STORAGE_KEY = 'poke_try4_recent_sets_v1';
 const DASHBOARD_VIRTUAL_PAGE_SIZE = 180;
+const SEARCH_INPUT_DEBOUNCE_MS = 900;
 const DASHBOARD_VIRTUAL_THRESHOLD = 220;
 
 function loadRecentSets() {
@@ -1193,25 +1207,16 @@ function initSpreadsheetDialog() {
 async function loadSets() {
   setLoading(true, 'Lade Sets\u2026');
   try {
-    const [importedSets, overviewSets, apiSets] = await Promise.all([
+    const [importedSets, overviewSets] = await Promise.all([
       listImportedSets(),
-      listSetsOverviewData().catch(() => []),
-      fetchAllAvailableSets().catch(() => [])
+      listSetsOverviewData().catch(() => [])
     ]);
 
     if (!Array.isArray(importedSets)) throw new Error('Ungültiges Sets-Format');
     state.sets = importedSets;
 
     const importedById = new Map(importedSets.map((set) => [set.setId, set]));
-    const overviewById = new Map((overviewSets || []).map((set) => [set.setId, set]));
     const mergedMap = new Map();
-
-    (apiSets || []).forEach((set) => {
-      mergedMap.set(set.setId, {
-        ...set,
-        imported: Boolean(importedById.get(set.setId)?.imported || overviewById.get(set.setId)?.imported)
-      });
-    });
 
     (overviewSets || []).forEach((set) => {
       if (!mergedMap.has(set.setId)) {
@@ -1224,7 +1229,7 @@ async function loadSets() {
       mergedMap.set(set.setId, {
         ...current,
         ...set,
-        // ptcgoCode aus der API nicht mit einem leeren Sheets-Wert überschreiben
+        // ptcgoCode nicht mit einem leeren Sheets-Wert überschreiben
         ptcgoCode: set.ptcgoCode || current.ptcgoCode || '',
         imported: true
       });
@@ -2628,9 +2633,16 @@ async function runSearch(options = {}) {
   const { force = false } = options;
   const runId = ++state.searchRunId;
   const isStale = () => runId !== state.searchRunId;
+  if (state.searchAbortController) {
+    state.searchAbortController.abort();
+  }
+  const abortController = new AbortController();
+  state.searchAbortController = abortController;
+  const isAborted = () => abortController.signal.aborted;
 
   const rawQuery = dom.searchInput.value.trim();
   const query = normalizeSearchText(rawQuery);
+  const allowApiFallback = Boolean(dom.searchApiFallback?.checked);
   if (!query) {
     dom.searchResults.innerHTML = '<p class="empty-state">Suchbegriff eingeben.</p>';
     return;
@@ -2659,18 +2671,29 @@ async function runSearch(options = {}) {
   dom.searchResults.innerHTML = '<p class="loading-placeholder">Suche\u2026</p>';
   const results = [];
   for (const set of setsToSearch) {
-    if (isStale()) return;
+    if (isStale() || isAborted()) return;
     try {
       const cacheKey = `cards_${set.setId}`;
+      const dbCardsCacheKey = `db_cards_${set.setId}`;
       let cards;
       if (state.searchCache.has(set.setId))  cards = state.searchCache.get(set.setId);
-      else if (cache.has(cacheKey))          cards = cache.get(cacheKey), state.searchCache.set(set.setId, cards);
+      else if (cache.has(dbCardsCacheKey))   cards = cache.get(dbCardsCacheKey), state.searchCache.set(set.setId, cards);
       else {
-        cards = await fetchMergedCards(set.setId);
+        const dbCards = await readDbCardsForSet(set.setId).catch(() => []);
+        if (Array.isArray(dbCards) && dbCards.length > 0) {
+          cards = dbCards;
+          cache.set(dbCardsCacheKey, cards, CONFIG.CACHE_TTL_MS);
+          state.searchCache.set(set.setId, cards);
+        }
+      }
+      if (!cards && cache.has(cacheKey))     cards = cache.get(cacheKey), state.searchCache.set(set.setId, cards);
+      if (!cards && allowApiFallback) {
+        cards = await fetchMergedCards(set.setId, { signal: abortController.signal });
         cache.set(cacheKey, cards, CONFIG.CACHE_TTL_MS);
         state.searchCache.set(set.setId, cards);
       }
-      if (isStale()) return;
+      if (!cards || !cards.length) continue;
+      if (isStale() || isAborted()) return;
       let dbMap = new Map();
       const dbCacheKey = `db_${set.setId}`;
       if (cache.has(dbCacheKey)) dbMap = cache.get(dbCacheKey);
@@ -2678,7 +2701,7 @@ async function runSearch(options = {}) {
         dbMap = await readSetCollectionMap(set.setName);
         cache.set(dbCacheKey, dbMap, CONFIG.CACHE_TTL_MS);
       }
-      if (isStale()) return;
+      if (isStale() || isAborted()) return;
       cards.forEach((card) => {
         const score = computeSearchScore(card, query, structuredQuery, mixedQuery);
         if (score >= 0) {
@@ -2689,11 +2712,15 @@ async function runSearch(options = {}) {
       // Exakter Set+Nummer-Treffer (ohne Namensfilter) — kann frühzeitig abbrechen
       if (structuredQuery?.cardNumber && !structuredQuery?.namePart && results.length >= 1) break;
     } catch (err) {
+      if (err?.name === 'AbortError') {
+        return;
+      }
       console.warn('[runSearch] error for set', set.setId, err);
     }
   }
   if (!results.length) {
-    dom.searchResults.innerHTML = `<p class="empty-state">Keine Karten f\u00fcr \u201e${rawQuery}\u201c gefunden (durchsucht: ${setsToSearch.length} Sets).</p>`;
+    const fallbackHint = allowApiFallback ? '' : ' (API-Fallback ist aus)';
+    dom.searchResults.innerHTML = `<p class="empty-state">Keine Karten f\u00fcr \u201e${rawQuery}\u201c gefunden (durchsucht: ${setsToSearch.length} Sets)${fallbackHint}.</p>`;
     return;
   }
   results.sort((left, right) => {
@@ -2703,7 +2730,7 @@ async function runSearch(options = {}) {
     return String(left.card?.number || '').localeCompare(String(right.card?.number || ''), undefined, { numeric: true, sensitivity: 'base' });
   });
 
-  if (isStale()) return;
+  if (isStale() || isAborted()) return;
   dom.searchResults.innerHTML = `<p class="search-result-count">${results.length} Ergebnis${results.length !== 1 ? 'se' : ''}</p>`;
   const frag = document.createDocumentFragment();
   results.forEach(({ card, set, dbMap }) => {
@@ -2763,16 +2790,28 @@ function navigateToSearchResultSet(set) {
 async function openSearchResultLightbox(card, set) {
   if (!set?.setId || !card) return;
 
-  const cardsCacheKey = `cards_${set.setId}`;
+  const cardsCacheKey = `db_cards_${set.setId}`;
   const dbCacheKey = `db_${set.setId}`;
+  const allowApiFallback = Boolean(dom.searchApiFallback?.checked);
 
   const [cards, dbMap] = await Promise.all([
     cache.has(cardsCacheKey)
       ? cache.get(cardsCacheKey)
-      : fetchMergedCards(set.setId).then((loadedCards) => {
-        cache.set(cardsCacheKey, loadedCards, CONFIG.CACHE_TTL_MS);
-        state.searchCache.set(set.setId, loadedCards);
-        return loadedCards;
+      : readDbCardsForSet(set.setId).then(async (loadedCards) => {
+        if (Array.isArray(loadedCards) && loadedCards.length > 0) {
+          cache.set(cardsCacheKey, loadedCards, CONFIG.CACHE_TTL_MS);
+          state.searchCache.set(set.setId, loadedCards);
+          return loadedCards;
+        }
+
+        if (allowApiFallback) {
+          const apiCards = await fetchMergedCards(set.setId);
+          cache.set(cardsCacheKey, apiCards, CONFIG.CACHE_TTL_MS);
+          state.searchCache.set(set.setId, apiCards);
+          return apiCards;
+        }
+
+        return [];
       }),
     cache.has(dbCacheKey)
       ? cache.get(dbCacheKey)
@@ -2781,6 +2820,11 @@ async function openSearchResultLightbox(card, set) {
         return loadedDbMap;
       })
   ]);
+
+  if (!Array.isArray(cards) || cards.length === 0) {
+    showToast('Keine Kartendaten in der Datenbank für dieses Set. Optional API-Fallback aktivieren oder Set neu importieren.', 'info', 4500);
+    return;
+  }
 
   const targetKey = normalizeCardNumber(card.number);
   const targetIndex = cards.findIndex((item) => normalizeCardNumber(item.number) === targetKey);
@@ -2798,9 +2842,10 @@ function initSearch() {
   let debounce;
   dom.searchInput.addEventListener('input', () => {
     clearTimeout(debounce);
-    debounce = setTimeout(() => runSearch(), 500);
+    debounce = setTimeout(() => runSearch(), SEARCH_INPUT_DEBOUNCE_MS);
   });
   dom.searchSetFilter.addEventListener('change', () => runSearch({ force: true }));
+  dom.searchApiFallback?.addEventListener('change', () => runSearch({ force: true }));
   dom.searchInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       clearTimeout(debounce);
@@ -3108,12 +3153,31 @@ function renderLightbox(index) {
   if (!card) return;
   const key = normalizeCardNumber(card.number);
   const db  = state.dbMap.get(key) || { displayId: card.number, g: false, rh: false, gCell: null, rhCell: null };
+  const listToText = (value) => Array.isArray(value) ? value.filter(Boolean).join(', ') : '';
+  const rulesText = Array.isArray(card.rules) ? card.rules.filter(Boolean).join('\n') : '';
+  const setFact = (node, value, { longText = false } = {}) => {
+    if (!node) return;
+    const text = String(value ?? '').trim() || '—';
+    node.textContent = text;
+    node.classList.toggle('lightbox-fact-long', longText && text !== '—');
+  };
+
   dom.lightboxImg.src              = card.image || '';
   attachImageFallback(dom.lightboxImg, card, state.currentSet?.setId || '');
   dom.lightboxImg.alt              = card.name  || key;
   dom.lightboxTitle.textContent    = card.name  || 'Unbekannt';
   dom.lightboxSubtitle.textContent = `#${card.number}`;
   dom.lightboxCounter.textContent  = `${index + 1}\u202f/\u202f${state.cards.length}`;
+  setFact(dom.lightboxRarity, card.rarity);
+  setFact(dom.lightboxHp, card.hp);
+  setFact(dom.lightboxTypes, listToText(card.types));
+  setFact(dom.lightboxSupertype, card.supertype);
+  setFact(dom.lightboxSubtypes, listToText(card.subtypes));
+  setFact(dom.lightboxEvolvesFrom, card.evolvesFrom);
+  setFact(dom.lightboxArtist, card.artist);
+  setFact(dom.lightboxRegulationMark, card.regulationMark);
+  setFact(dom.lightboxRules, rulesText, { longText: true });
+  setFact(dom.lightboxFlavorText, card.flavorText, { longText: true });
   if (card.cardmarketUrl) {
     const isFallbackCardmarket = isGeneratedCardmarketSearchUrl(card.cardmarketUrl);
     dom.lightboxCmLink.href = card.cardmarketUrl;
@@ -3352,13 +3416,31 @@ async function loadCurrentSet(forceRefresh = false) {
   }
 
   try {
-    const cardsCacheKey = `cards_${setId}`, dbCacheKey = `db_${setId}`;
+    const cardsCacheKey = `db_cards_${setId}`, dbCacheKey = `db_${setId}`;
+    const allowApiFallback = Boolean(dom.searchApiFallback?.checked);
     if (forceRefresh) { cache.del(cardsCacheKey); cache.del(dbCacheKey); }
 
     const [cards, dbMap] = await Promise.all([
-      cache.has(cardsCacheKey) ? cache.get(cardsCacheKey) : fetchMergedCards(setId).then((c) => { cache.set(cardsCacheKey, c, CONFIG.CACHE_TTL_MS); return c; }),
+      cache.has(cardsCacheKey)
+        ? cache.get(cardsCacheKey)
+        : readDbCardsForSet(setId).then(async (dbCards) => {
+          if (Array.isArray(dbCards) && dbCards.length > 0) {
+            cache.set(cardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
+            return dbCards;
+          }
+          if (allowApiFallback) {
+            const apiCards = await fetchMergedCards(setId);
+            cache.set(cardsCacheKey, apiCards, CONFIG.CACHE_TTL_MS);
+            return apiCards;
+          }
+          return [];
+        }),
       cache.has(dbCacheKey)    ? cache.get(dbCacheKey)    : readSetCollectionMap(selected.setName).then((m) => { cache.set(dbCacheKey, m, CONFIG.CACHE_TTL_MS); return m; }),
     ]);
+
+    if (!Array.isArray(cards) || cards.length === 0) {
+      throw new Error('Keine Kartendaten in der Datenbank gefunden. Bitte Set importieren/aktualisieren oder API-Fallback aktivieren.');
+    }
 
     state.cards = cards;
     state.dbMap = dbMap;
