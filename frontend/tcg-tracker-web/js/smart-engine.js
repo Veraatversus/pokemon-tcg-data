@@ -157,51 +157,6 @@ export async function startAutoHealing(apiCollectionMap, sheetCollectionMap) {
   return { mismatches, autoFixCount: fixes.length, shouldApplyFixes: fixes.length > 0 };
 }
 
-/** Smart recommendation engine based on collection stats */
-export function generateCollectionReccommendations(allSets, importedSets, collectionStats) {
-  const recommendations = [];
-  const completionBySet = new Map();
-
-  for (const set of allSets) {
-    const stat = collectionStats.find((s) => s.setId === set.setId);
-    if (!stat) continue;
-    const pct = stat.total > 0 ? (stat.collected / stat.total) * 100 : 0;
-    completionBySet.set(set.setId, { pct, stat });
-  }
-
-  const importedCompletions = Array.from(completionBySet.values())
-    .filter((item) => importedSets.some((s) => s.setId === item.stat.setId))
-    .sort((a, b) => Math.abs(a.pct - 50) - Math.abs(b.pct - 50));
-
-  if (importedCompletions.length > 0) {
-    const closest = importedCompletions[0];
-    const needed = closest.stat.total - closest.stat.collected;
-    recommendations.push({
-      type: 'almost-complete',
-      setId: closest.stat.setId,
-      message: `Nur noch ${needed} Karte${needed !== 1 ? 'n' : ''} bis zum Vollsatz!`,
-      priority: 'high',
-      cardsRemaining: needed
-    });
-  }
-
-  const sortedByCompletion = Array.from(completionBySet.values()).sort((a, b) => a.pct - b.pct);
-  if (sortedByCompletion.length > 0) {
-    const easiest = sortedByCompletion[sortedByCompletion.length - 1];
-    if (!importedSets.some((s) => s.setId === easiest.stat.setId)) {
-      recommendations.push({
-        type: 'easy-win',
-        setId: easiest.stat.setId,
-        message: 'Ein großartiges Set zum Anfangen!',
-        priority: 'medium',
-        avgCompletion: Math.round((easiest.pct + 50) / 2)
-      });
-    }
-  }
-
-  return recommendations;
-}
-
 /** Fuzzy search for sets and cards */
 export function fuzzySearch(query, haystack, fields = ['name', 'setName']) {
   const normalizeForSearch = (str) => String(str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -271,7 +226,7 @@ export async function initSmartEngine() {
   try {
     await initOfflineDb();
     initSyncQueue();
-    console.log('✨ Smart Engine initialized (Offline-First, Auto-Healing, Recommendations)');
+    console.log('✨ Smart Engine initialized (Offline-First, Auto-Healing)');
     return true;
   } catch (err) {
     console.warn('⚠️ Smart Engine partial init:', err);
