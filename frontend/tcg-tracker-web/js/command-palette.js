@@ -17,7 +17,6 @@ const COMMANDS = [
   { id: 'marketplace', label: '💱 Trading Marketplace', desc: 'Handelsangebote & Matches', category: 'Trading', hotkey: null },
   { id: 'wanted', label: '🎯 Gesuchte Karten', desc: 'Wanted-Liste verwalten', category: 'Trading', hotkey: null },
   { id: 'collection-value', label: '💰 Kollektionswert', desc: 'Wertschätzung deiner Sammlung', category: 'Analytics', hotkey: null },
-  { id: 'ml-recommendations', label: '🧠 ML-Empfehlungen', desc: 'KI-basierte Set-Priorisierung', category: 'AI', hotkey: null },
   { id: 'live-dashboard', label: '📊 Live Dashboard', desc: 'Realtime KPIs & Health', category: 'Analytics', hotkey: null },
   { id: 'help', label: '❓ Keyboard Help', desc: 'Shortcuts anzeigen', category: 'Help', hotkey: '?' }
 ];

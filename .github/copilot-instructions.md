@@ -80,7 +80,7 @@ When making changes:
 If automatic workflows fail due to merge conflicts:
 - An issue will be automatically created with resolution instructions
 - Follow the provided git commands to resolve conflicts locally
-- Refer to `WORKFLOW_DOCUMENTATION.md` for detailed conflict resolution steps
+- Refer to `docs/WORKFLOW_DOCUMENTATION.md` for detailed conflict resolution steps
 
 ## Testing and Validation
 
@@ -93,10 +93,10 @@ This is a data repository without traditional unit tests:
 ## Documentation
 
 - `README.md` - General repository information and usage
-- `ARCHITECTURE.md` - Visual workflow architecture diagrams
-- `WORKFLOW_DOCUMENTATION.md` - Detailed workflow and branch strategy documentation
-- `QUICKSTART.md` - Quick reference for common tasks
-- `SETUP.md` - Initial setup instructions
+- `docs/ARCHITECTURE.md` - Visual workflow architecture diagrams
+- `docs/WORKFLOW_DOCUMENTATION.md` - Detailed workflow and branch strategy documentation
+- `docs/QUICKSTART.md` - Quick reference for common tasks
+- `docs/SETUP.md` - Initial setup instructions
 
 ## Language Support
 

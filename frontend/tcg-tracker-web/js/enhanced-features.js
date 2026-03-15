@@ -2,11 +2,13 @@
 // ENHANCED FEATURES: Favorites, Search History, Quick Filters, Export/Import
 // ══════════════════════════════════════════════════════════════════════════
 
+import { scopedStorageKey } from './config.js';
+
 const STORAGE_KEYS = {
-  favorites: 'poke-favorites-sets',
-  searchHistory: 'poke-search-history',
-  settings: 'poke-user-settings',
-  collections: 'poke-collections-exports'
+  favorites: scopedStorageKey('favorites-sets'),
+  searchHistory: scopedStorageKey('search-history'),
+  settings: scopedStorageKey('user-settings'),
+  collections: scopedStorageKey('collections-exports')
 };
 
 const MAX_SEARCH_HISTORY = 20;

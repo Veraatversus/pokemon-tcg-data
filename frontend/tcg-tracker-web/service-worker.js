@@ -32,7 +32,6 @@ const STATIC_ASSETS = [
   './js/card-filters.js',
   './js/trading-system.js',
   './js/trading-ui.js',
-  './js/ml-recommendations.js',
   './js/realtime-sync.js'
 ];
 

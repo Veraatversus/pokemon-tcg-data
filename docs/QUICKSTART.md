@@ -6,8 +6,8 @@ Nach dem Merge dieses PRs folge diesen Schritten:
 
 ### 1. Release Branch erstellen
 ```bash
-git checkout main
-git pull
+git checkout dev
+git pull origin dev
 git checkout -b release
 git push -u origin release
 ```
@@ -27,9 +27,9 @@ git push -u origin release
 
 | Workflow | Trigger | Zweck |
 |----------|---------|-------|
-| **Sync with Upstream** | Täglich 2:00 UTC + Manuell | Synchronisiert `main` mit PokemonTCG/pokemon-tcg-data |
-| **Merge to Release** | Push zu `main` + Manuell | Merged `main` → `release` |
-| **Deploy Pages** | Push zu `release` + Manuell | Deployed zu GitHub Pages |
+| **Sync with Upstream** | Täglich 2:00 UTC + Manuell | Synchronisiert `master` mit JulienGitHub/pokemon-tcg-data |
+| **Merge to Release** | Manuell | Merged `dev` → `release` |
+| **Deploy Pages** | Push zu `release`/`dev` + Manuell | Deployt Release (Root) und Dev-Preview (`/dev`) |
 
 ---
 
@@ -39,7 +39,7 @@ git push -u origin release
 ```
 Actions → "Sync with Upstream" → Run workflow → main
 ```
-→ Triggert automatisch Merge to Release → Deploy Pages
+→ Aktualisiert `master`, danach manuell `dev` → `release` mergen und deployen
 
 ### Bei Merge-Konflikt
 Wenn ein Workflow fehlschlägt:
@@ -49,13 +49,13 @@ Wenn ein Workflow fehlschlägt:
 
 ### Eigene Änderungen hinzufügen
 ```bash
-git checkout main
-git pull
+git checkout dev
+git pull origin dev
 git checkout -b feature/meine-aenderung
 # Änderungen vornehmen
 git commit -am "Beschreibung"
 git push origin feature/meine-aenderung
-# → Pull Request gegen main erstellen
+# → Pull Request gegen dev erstellen
 ```
 
 ---
@@ -73,14 +73,14 @@ git push origin feature/meine-aenderung
 
 - **[SETUP.md](SETUP.md)** - Ausführliche Setup-Anleitung
 - **[WORKFLOW_DOCUMENTATION.md](WORKFLOW_DOCUMENTATION.md)** - Detaillierte Workflow-Dokumentation
-- **[README.md](README.md)** - Allgemeine Repository-Information
+- **[README.md](../README.md)** - Allgemeine Repository-Information
 
 ---
 
 ## ⚙️ Workflow-Dateien
 
 - `.github/workflows/sync-upstream.yml` - Upstream Synchronisation
-- `.github/workflows/merge-to-release.yml` - Main → Release Merge
+- `.github/workflows/merge-to-release.yml` - Dev → Release Merge (manuell)
 - `.github/workflows/deploy-pages.yml` - GitHub Pages Deployment
 
 ---

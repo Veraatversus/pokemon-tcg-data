@@ -49,7 +49,7 @@ Dieses Repository verwendet eine strukturierte Branch-Strategie:
 - **`release`** - Stabiler Branch für GitHub Pages Deployment
 - **`feature/*`** - Feature-Branches für neue Funktionen
 
-📖 **Ausführliche Dokumentation:** Siehe [WORKFLOW_DOCUMENTATION.md](WORKFLOW_DOCUMENTATION.md) für Details zu Workflows und Branch-Strategie.
+📖 **Ausführliche Dokumentation:** Siehe [docs/README.md](docs/README.md) für den Dokumentationsindex und [docs/WORKFLOW_DOCUMENTATION.md](docs/WORKFLOW_DOCUMENTATION.md) für Details zu Workflows und Branch-Strategie.
 
 # Automated Workflows
 

@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js';
+import { CONFIG, scopedStorageKey } from './config.js';
 
-const STORAGE_KEY = 'poke_tcg_tracker_token';
+const STORAGE_KEY = scopedStorageKey('tcg_tracker_token');
 
 let tokenClient = null;
 let accessToken = null;

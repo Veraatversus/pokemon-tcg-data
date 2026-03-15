@@ -2,11 +2,13 @@
 // TRADING MARKETPLACE & EXCHANGE SYSTEM
 // ══════════════════════════════════════════════════════════════════════════
 
+import { scopedStorageKey } from './config.js';
+
 const STORAGE_KEYS = {
-  trades: 'poke-trades',
-  trade_offers: 'poke-trade-offers',
-  trade_history: 'poke-trade-history',
-  wanted_cards: 'poke-wanted-cards'
+  trades: scopedStorageKey('trades'),
+  trade_offers: scopedStorageKey('trade-offers'),
+  trade_history: scopedStorageKey('trade-history'),
+  wanted_cards: scopedStorageKey('wanted-cards')
 };
 
 export const TRADE_STATUS = {

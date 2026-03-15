@@ -13,7 +13,7 @@ Dieses Repository verwendet eine strukturierte Branch-Strategie, um automatische
 
 ### 🟣 `dev` Branch (Default)
 - **Zweck:** Standard-Branch für Entwicklung und Pull Requests
-- **Updates:** Erhält eigene Änderungen und automatische Übernahmen aus `master`
+- **Updates:** Erhält eigene Änderungen über PRs/Merges
 - **Verwendung:** Basis für `feature/*` Branches und Merge-Quelle für `release`
 
 ### 🟢 `release` Branch
@@ -39,15 +39,15 @@ Dieses Repository verwendet eine strukturierte Branch-Strategie, um automatische
 │  - Empfängt Updates vom Upstream                        │
 │  - Wird nur als Referenz benutzt                        │
 └────────────────────┬────────────────────────────────────┘
-                     │ Optionaler Merge
+                     │ Manueller Merge
                      ▼
 ┌─────────────────────────────────────────────────────────┐
 │  dev Branch (eigene Basis)                              │
 │  - Ableitung von release als Ausgangspunkt             │
 │  - Hier werden Features zusammengeführt                │
 └────────────────────┬────────────────────────────────────┘
-                     │ Automatisches Merge
-                     │ (bei jedem Push + manuell)
+                     │ Manueller Merge
+                     │ (workflow_dispatch)
                      ▼
 ┌─────────────────────────────────────────────────────────┐
 │  release Branch                                          │
@@ -78,9 +78,7 @@ Dieses Repository verwendet eine strukturierte Branch-Strategie, um automatische
 4. Überprüfung auf Updates
 5. Merge der upstream Änderungen in `master`
 6. Push zu origin/master
-7. **Automatisch:** Nach dem Push wechselt der Workflow intern zu `dev` und führt ein `git merge master` durch;
-   das Ergebnis wird wiederum zu `origin/dev` gepusht. Diese Aktion löst sofort den zweiten Workflow aus
-   (Merge → `release`), daher ist ein manueller Dispatch nicht mehr notwendig.
+7. Aktualisierung von `dev` erfolgt bewusst getrennt (manueller Merge/PR), damit eigene Änderungen kontrolliert bleiben.
 
 **Bei Konflikten:**
 - Workflow schlägt fehl
@@ -90,8 +88,7 @@ Dieses Repository verwendet eine strukturierte Branch-Strategie, um automatische
 ### 2. 🔀 Merge to Release (`merge-to-release.yml`)
 
 **Trigger:**
-- Bei jedem Push zum `dev` Branch (persönlicher Entwicklungszweig)
-- Manuell über GitHub Actions UI
+- Manuell über GitHub Actions UI (`workflow_dispatch`)
 
 **Ablauf:**
 1. Checkout des `release` Branches
@@ -108,6 +105,7 @@ Dieses Repository verwendet eine strukturierte Branch-Strategie, um automatische
 
 **Trigger:**
 - Bei jedem Push zum `release` Branch
+- Bei jedem Push zum `dev` Branch (Preview unter `/dev`)
 - Manuell über GitHub Actions UI
 
 **Ablauf:**
@@ -123,7 +121,7 @@ Dieses Repository verwendet eine strukturierte Branch-Strategie, um automatische
 1. Gehe zu "Actions" im GitHub Repository
 2. Wähle den gewünschten Workflow aus der Liste
 3. Klicke auf "Run workflow"
-4. Wähle den Branch (meist `dev` für Merge‑Workflows oder `master` für Sync)
+4. Wähle den Branch (meist `master` für Sync oder `release` für manuellen Merge-Workflow)
 5. Klicke auf "Run workflow"
 
 ### Konfliktlösung
@@ -160,13 +158,13 @@ git fetch origin
 git checkout release
 git pull origin release
 
-# 2. Upstream (master) Branch mergen
-git merge origin/master
+# 2. dev Branch mergen
+git merge origin/dev
 # Konflikte manuell in den betroffenen Dateien lösen
 
 # 3. Commit und Push
 git add .
-git commit -m "Resolve merge conflict from main"
+git commit -m "Resolve merge conflict from dev"
 git push origin release
 ```
 

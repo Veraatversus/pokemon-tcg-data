@@ -5,7 +5,9 @@
  * ╚══════════════════════════════════════════════════════════════════════════
  */
 
-const DB_NAME = 'poke-tcg-offline';
+import { STORAGE_SCOPE } from './config.js';
+
+const DB_NAME = `poke-tcg-offline-${STORAGE_SCOPE}`;
 const DB_VERSION = 1;
 const STORES = {
   sets: 'sets',

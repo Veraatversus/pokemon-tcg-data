@@ -2,13 +2,17 @@
 // COLLECTION SHARING, WISHLISTS & SOCIAL FEATURES
 // ══════════════════════════════════════════════════════════════════════════
 
+import { scopedStorageKey, scopedStoragePrefix } from './config.js';
+
 const STORAGE_KEYS = {
-  wishlists: 'poke-wishlists',
-  trading_log: 'poke-trading-log',
-  achievements: 'poke-achievements',
-  backup_schedule: 'poke-backup-schedule',
-  collection_shares: 'poke-collection-shares'
+  wishlists: scopedStorageKey('wishlists'),
+  trading_log: scopedStorageKey('trading-log'),
+  achievements: scopedStorageKey('achievements'),
+  backup_schedule: scopedStorageKey('backup-schedule'),
+  collection_shares: scopedStorageKey('collection-shares')
 };
+
+const SET_RATING_PREFIX = scopedStoragePrefix('set-rating-');
 
 // ══════════════════════════════════════════════════════════════════════════
 // WISHLIST MANAGEMENT
@@ -526,7 +530,7 @@ export class GestureController {
 
 export function rateSet(setId, rating, review = '') {
   try {
-    const key = `poke-set-rating-${setId}`;
+    const key = `${SET_RATING_PREFIX}${setId}`;
     const ratingData = {
       setId,
       rating: Math.min(5, Math.max(1, rating)),
@@ -544,7 +548,7 @@ export function rateSet(setId, rating, review = '') {
 
 export function getSetRating(setId) {
   try {
-    const key = `poke-set-rating-${setId}`;
+    const key = `${SET_RATING_PREFIX}${setId}`;
     const data = localStorage.getItem(key);
     return data ? JSON.parse(data) : null;
   } catch (err) {
@@ -558,7 +562,7 @@ export function getAllRatings() {
     const ratings = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key.startsWith('poke-set-rating-')) {
+      if (key.startsWith(SET_RATING_PREFIX)) {
         ratings.push(JSON.parse(localStorage.getItem(key)));
       }
     }
