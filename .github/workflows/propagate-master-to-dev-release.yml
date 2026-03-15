@@ -1,0 +1,81 @@
+name: Propagate Master to Dev and Release
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  propagate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge master into dev and release
+        id: propagate
+        run: |
+          echo "conflict_target=" >> $GITHUB_OUTPUT
+
+          merge_target () {
+            TARGET="$1"
+            git fetch origin "$TARGET" || true
+
+            if git ls-remote --exit-code --heads origin "$TARGET" >/dev/null 2>&1; then
+              git checkout -B "$TARGET" "origin/$TARGET"
+            else
+              git checkout -B "$TARGET" master
+            fi
+
+            if git merge -X theirs master --no-edit; then
+              git push origin "$TARGET"
+            else
+              git merge --abort
+              echo "conflict_target=$TARGET" >> $GITHUB_OUTPUT
+              exit 1
+            fi
+          }
+
+          merge_target dev
+          merge_target release
+
+      - name: Create issue on propagation conflict
+        if: failure()
+        env:
+          PROPAGATE_CONFLICT: ${{ steps.propagate.outputs.conflict_target }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const target = process.env.PROPAGATE_CONFLICT || 'unknown';
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🔁 Master Propagation Conflict - Manual Resolution Required',
+              body: `The propagation workflow could not merge \`master\` into \`${target}\`.
+
+              **Action Required:**
+              Please resolve the conflict manually.
+
+              **Steps:**
+              1. \`git checkout ${target}\`
+              2. \`git merge -X theirs master\`
+              3. Resolve conflicts if needed
+              4. \`git push origin ${target}\``,
+              labels: ['propagation', 'manual-action-required']
+            });
+            console.log('Created issue:', issue.data.number);
