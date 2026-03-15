@@ -2477,10 +2477,12 @@ function parseStructuredSearchQuery(rawQuery, availableSets = []) {
   let cardNumber = '';
   const nameTokens = [];
   for (const part of remaining) {
-    if (!cardNumber && /^[a-zA-Z._-]*\d+[a-zA-Z._-]*$/.test(part)) {
-      cardNumber = normalizeCardNumberForSearch(part);
+    const token = sanitizeSearchToken(part);
+    if (!token) continue;
+    if (!cardNumber && /^[a-z._-]*\d+[a-z._-]*$/.test(token)) {
+      cardNumber = normalizeCardNumberForSearch(token);
     } else {
-      nameTokens.push(part);
+      nameTokens.push(token);
     }
   }
   const meaningfulNameTokens = extractMeaningfulNameTokens(nameTokens);
@@ -2500,7 +2502,10 @@ function parseMixedQuery(rawQuery) {
   const normalized = normalizeSearchText(rawQuery).trim();
   if (!normalized) return null;
 
-  const parts = normalized.split(/\s+/).filter(Boolean);
+  const parts = normalized
+    .split(/\s+/)
+    .map((part) => sanitizeSearchToken(part))
+    .filter(Boolean);
   if (parts.length < 2) return null;
 
   // Tokens die wie eine Kartennummer aussehen: optionale alpha-Präfix + Zahlen + optionales Suffix
@@ -2569,16 +2574,48 @@ function computeSearchScore(card, normalizedQuery, structuredQuery, mixedQuery) 
     return 900 + (mixedQuery.nameTokens.length * 45) + 200;
   }
 
-  const nameContains = name.includes(normalizedQuery);
-  const numberContains = number.includes(normalizedQuery) || numberRaw.includes(normalizedQuery);
-  if (!nameContains && !numberContains) return -1;
+  const normalizedFreeQuery = normalizeSearchText(normalizedQuery).trim();
+  const queryTokens = normalizedFreeQuery
+    .split(/\s+/)
+    .map((token) => sanitizeSearchToken(token))
+    .filter(Boolean);
+  const meaningfulTokens = extractMeaningfulNameTokens(queryTokens);
 
-  const queryTokens = normalizedQuery.split(/\s+/).filter(Boolean);
+  if (!queryTokens.length) return -1;
+
+  let isMatch = false;
+  let nameContains = false;
+  let numberContains = false;
+
+  if (queryTokens.length === 1) {
+    const token = queryTokens[0];
+    nameContains = name.includes(token);
+    numberContains = number.includes(token) || numberRaw.includes(token);
+    isMatch = nameContains || numberContains;
+  } else {
+    const numberLikeTokens = queryTokens.filter((token) => /^[a-z._-]*\d+[a-z._-]*$/.test(token));
+    const nameLikeTokens = meaningfulTokens;
+
+    if (numberLikeTokens.length && nameLikeTokens.length) {
+      numberContains = numberLikeTokens.every((token) => cardNumberMatchesQuery(card.number, token));
+      nameContains = nameLikeTokens.every((token) => name.includes(token));
+      isMatch = numberContains && nameContains;
+    } else if (nameLikeTokens.length) {
+      nameContains = nameLikeTokens.every((token) => name.includes(token));
+      isMatch = nameContains;
+    } else if (numberLikeTokens.length) {
+      numberContains = numberLikeTokens.every((token) => cardNumberMatchesQuery(card.number, token));
+      isMatch = numberContains;
+    }
+  }
+
+  if (!isMatch) return -1;
+
   let score = 0;
   if (nameContains) score += 140;
   if (numberContains) score += 120;
   if (nameContains && numberContains) score += 180;
-  if (queryTokens.length > 1 && queryTokens.every((token) => name.includes(token))) score += 70;
+  if (queryTokens.length > 1 && meaningfulTokens.length && meaningfulTokens.every((token) => name.includes(token))) score += 70;
 
   return score;
 }
