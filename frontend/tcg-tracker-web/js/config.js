@@ -1,6 +1,13 @@
 function detectStorageScope() {
-  const path = String(globalThis?.location?.pathname || '/').toLowerCase();
-  return /\/dev(\/|$)/.test(path) ? 'dev' : 'prod';
+  const locationRef = globalThis?.location;
+  const path = String(locationRef?.pathname || '/').toLowerCase();
+  const search = String(locationRef?.search || '').toLowerCase();
+
+  if (/([?&])env=dev([&#]|$)/.test(search) || /([?&])scope=dev([&#]|$)/.test(search)) {
+    return 'dev';
+  }
+
+  return /(^|\/)dev(\/|$|\.)/.test(path) ? 'dev' : 'prod';
 }
 
 export const STORAGE_SCOPE = detectStorageScope();
