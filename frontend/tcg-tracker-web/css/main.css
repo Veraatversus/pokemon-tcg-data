@@ -1348,6 +1348,40 @@ body.dark .stats-series-bar { background: #334155; }
   margin: 0;
 }
 .search-result-count { padding: 6px 12px; font-size: 13px; color: var(--color-muted); grid-column: 1 / -1; }
+.search-results-head {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.search-results-head .search-result-count {
+  padding: 0;
+  margin: 0;
+}
+.search-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  font-size: 11px;
+  padding: 3px 10px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-muted);
+}
+.search-mode-badge.imported {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.search-mode-badge.all {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+.search-mode-badge.online {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
 .search-set-tag {
   display: inline-block;
   background: var(--color-primary);
