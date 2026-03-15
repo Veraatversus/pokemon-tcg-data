@@ -12,6 +12,9 @@
   <meta name="apple-mobile-web-app-capable" content="true" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Pokémon TCG Tracker" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect fill='%231f2937' width='180' height='180' rx='40'/%3E%3Ctext x='90' y='120' font-size='100' text-anchor='middle' fill='%23fff' dominant-baseline='middle'%3E🎴%3C/text%3E%3C/svg%3E" />
   <link rel="stylesheet" href="./css/main.css" />
   <link rel="stylesheet" href="./css/trading-marketplace.css" />
@@ -61,9 +64,9 @@
 
   <!-- Lightbox-Dialog -->
   <dialog id="dialog-lightbox" class="lightbox-dialog">
-    <button id="btn-lightbox-close" class="lightbox-close" title="Schließen (Esc)">✕</button>
-    <button id="btn-lightbox-prev" class="lightbox-nav lightbox-prev" title="Vorherige (←)" disabled>‹</button>
-    <button id="btn-lightbox-next" class="lightbox-nav lightbox-next" title="Nächste (→)" disabled>›</button>
+    <button id="btn-lightbox-close" class="lightbox-close" title="Schließen (Esc)" aria-label="Lightbox schließen">✕</button>
+    <button id="btn-lightbox-prev" class="lightbox-nav lightbox-prev" title="Vorherige (←)" aria-label="Vorherige Karte" disabled>‹</button>
+    <button id="btn-lightbox-next" class="lightbox-nav lightbox-next" title="Nächste (→)" aria-label="Nächste Karte" disabled>›</button>
     <div class="lightbox-content">
       <div class="lightbox-img-wrap">
         <img id="lightbox-img" src="" alt="" />
@@ -112,7 +115,7 @@
     </nav>
     <div id="recent-sets" class="recent-sets hidden" aria-label="Zuletzt bearbeitete Sets"></div>
     <div class="header-actions">
-      <button id="btn-dark-mode" class="btn-icon" title="Dark Mode umschalten">🌙</button>
+      <button id="btn-dark-mode" class="btn-icon" title="Dark Mode umschalten" aria-label="Dark Mode umschalten">🌙</button>
       <button id="btn-login">Google Login</button>
       <button id="btn-logout" disabled>Logout</button>
     </div>
@@ -129,7 +132,7 @@
     <div id="spreadsheet-info" class="spreadsheet-info hidden">
       <span class="ss-label">📊</span>
       <a id="spreadsheet-link" href="#" target="_blank" rel="noopener noreferrer" class="ss-link">–</a>
-      <button id="btn-change-spreadsheet" class="btn-icon" title="Anderes Spreadsheet wählen">✏️</button>
+      <button id="btn-change-spreadsheet" class="btn-icon" title="Anderes Spreadsheet wählen" aria-label="Anderes Spreadsheet wählen">✏️</button>
     </div>
   </div>
 
