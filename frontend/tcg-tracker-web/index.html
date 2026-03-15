@@ -323,11 +323,15 @@
           </select>
         </div>
       </div>
-      <label class="search-api-fallback-toggle" for="search-api-fallback">
-        <input id="search-api-fallback" type="checkbox" />
-        <span>API in die Suche einbeziehen (DB + API)</span>
+      <label class="search-api-fallback-toggle" for="search-scope-mode">
+        <span>Suchbereich</span>
+        <select id="search-scope-mode">
+          <option value="imported" selected>Importierte Sets</option>
+          <option value="all">Alle Sets</option>
+          <option value="online">Online-Suche</option>
+        </select>
       </label>
-      <p class="search-hint">Standard: nur DB/importierte Sets. Mit Haken: DB + API (inkl. nicht importierter Sets).</p>
+      <p class="search-hint">Importierte Sets: nur DB. Alle Sets: importierte aus DB, nicht importierte online. Online-Suche: DB + API für alle Sets.</p>
       <div id="search-results" class="cards search-results">
         <p class="empty-state">Suchbegriff oben eingeben.</p>
       </div>
