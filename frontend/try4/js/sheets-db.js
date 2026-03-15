@@ -33,8 +33,8 @@ const DB_SHEETS = {
 };
 
 const DB_HEADERS = {
-  sets: ['setId', 'setName', 'series', 'releaseDate', 'totalCards', 'ptcgoCode', 'logoUrl', 'symbolUrl', 'imported', 'updatedAt'],
-  cards: ['setId', 'cardId', 'number', 'name', 'imageUrl', 'cardmarketUrl', 'rarity', 'updatedAt'],
+  sets: ['setId', 'setName', 'series', 'releaseDate', 'totalCards', 'ptcgoCode', 'logoUrl', 'symbolUrl', 'imported', 'updatedAt', 'tcgdexId', 'tcgdexName', 'legalities', 'cardCountTotal', 'cardCountHolo', 'cardCountReverse', 'cardCountFirstEdition', 'cardCountNormal'],
+  cards: ['setId', 'cardId', 'number', 'name', 'imageUrl', 'cardmarketUrl', 'rarity', 'hp', 'types', 'supertype', 'subtypes', 'evolvesFrom', 'artist', 'regulationMark', 'rules', 'flavorText', 'updatedAt'],
   collection: ['setId', 'cardId', 'g', 'rh', 'updatedAt']
 };
 
@@ -299,6 +299,17 @@ async function ensureSheetWithHeader(sheetName, header) {
   const hasHeader = Array.isArray(existingHeader[0]) && existingHeader[0].some((value) => String(value ?? '').trim() !== '');
   if (!hasHeader) {
     await putValues(buildRange(sheetName, `A1:${colToA1(header.length)}1`), [header]);
+    return;
+  }
+
+  const existingCount = Array.isArray(existingHeader[0])
+    ? existingHeader[0].filter((value) => String(value ?? '').trim() !== '').length
+    : 0;
+
+  if (existingCount > 0 && existingCount < header.length) {
+    const startCol = colToA1(existingCount + 1);
+    const endCol = colToA1(header.length);
+    await putValues(buildRange(sheetName, `${startCol}1:${endCol}1`), [header.slice(existingCount)]);
   }
 }
 
@@ -397,6 +408,30 @@ function toSafeCellString(value) {
   return String(value ?? '').trim();
 }
 
+function toSafeJsonString(value) {
+  if (value == null) return '';
+  if (Array.isArray(value) && value.length === 0) return '';
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    return trimmed;
+  }
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return '';
+  }
+}
+
+function tryParseJson(value, fallback) {
+  const text = toSafeCellString(value);
+  if (!text) return fallback;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return fallback;
+  }
+}
+
 function nowIso() {
   return new Date().toISOString();
 }
@@ -417,14 +452,31 @@ async function upsertDbSet(setMeta, imported = false) {
     toSafeCellString(setMeta?.logoUrl),
     toSafeCellString(setMeta?.symbolUrl),
     Boolean(imported),
-    nowIso()
+    nowIso(),
+    toSafeCellString(setMeta?.tcgdexId),
+    toSafeCellString(setMeta?.tcgdexName),
+    toSafeJsonString(setMeta?.legalities),
+    Number(setMeta?.cardCountTotal) || 0,
+    Number(setMeta?.cardCountHolo) || 0,
+    Number(setMeta?.cardCountReverse) || 0,
+    Number(setMeta?.cardCountFirstEdition) || 0,
+    Number(setMeta?.cardCountNormal) || 0
   ];
 
   const existingIndex = rows.findIndex((row) => toSafeCellString(row[0]).toLowerCase() === setId.toLowerCase());
   if (existingIndex >= 0) {
     const rowNo = existingIndex + 2;
-    const existingImported = toBoolean(rows[existingIndex][8]);
+    const existingRow = rows[existingIndex];
+    const existingImported = toBoolean(existingRow[8]);
     target[8] = Boolean(imported || existingImported);
+    target[10] = target[10] || toSafeCellString(existingRow[10]);
+    target[11] = target[11] || toSafeCellString(existingRow[11]);
+    target[12] = target[12] || toSafeCellString(existingRow[12]);
+    target[13] = target[13] || Number(existingRow[13]) || 0;
+    target[14] = target[14] || Number(existingRow[14]) || 0;
+    target[15] = target[15] || Number(existingRow[15]) || 0;
+    target[16] = target[16] || Number(existingRow[16]) || 0;
+    target[17] = target[17] || Number(existingRow[17]) || 0;
     await putValues(buildRange(DB_SHEETS.sets, `A${rowNo}:${colToA1(DB_HEADERS.sets.length)}${rowNo}`), [target]);
     rows[existingIndex] = target;
   } else {
@@ -458,6 +510,15 @@ async function writeDbCardsForSet(setId, cards) {
     toSafeCellString(card.image),
     toSafeCellString(card.cardmarketUrl),
     toSafeCellString(card.rarity),
+    toSafeCellString(card.hp),
+    toSafeJsonString(card.types),
+    toSafeCellString(card.supertype),
+    toSafeJsonString(card.subtypes),
+    toSafeCellString(card.evolvesFrom),
+    toSafeCellString(card.artist),
+    toSafeCellString(card.regulationMark),
+    toSafeJsonString(card.rules),
+    toSafeCellString(card.flavorText),
     nowIso()
   ]);
   await appendDbRows(DB_SHEETS.cards, DB_HEADERS.cards.length, setRows);
@@ -511,7 +572,16 @@ export async function readDbCardsForSet(setId) {
       name: toSafeCellString(row[3]),
       image: toSafeCellString(row[4]),
       cardmarketUrl: toSafeCellString(row[5]),
-      rarity: toSafeCellString(row[6])
+      rarity: toSafeCellString(row[6]),
+      hp: toSafeCellString(row[7]),
+      types: tryParseJson(row[8], []),
+      supertype: toSafeCellString(row[9]),
+      subtypes: tryParseJson(row[10], []),
+      evolvesFrom: toSafeCellString(row[11]),
+      artist: toSafeCellString(row[12]),
+      regulationMark: toSafeCellString(row[13]),
+      rules: tryParseJson(row[14], null),
+      flavorText: toSafeCellString(row[15])
     }))
     .filter((card) => card.number);
 }
@@ -535,7 +605,15 @@ export async function listSetsOverviewData() {
       ptcgoCode: toSafeCellString(row[5]),
       logoUrl: toSafeCellString(row[6]),
       symbolUrl: toSafeCellString(row[7]),
-      imported: toBoolean(row[8])
+      imported: toBoolean(row[8]),
+      tcgdexId: toSafeCellString(row[10]),
+      tcgdexName: toSafeCellString(row[11]),
+      legalities: tryParseJson(row[12], null),
+      cardCountTotal: Number(row[13]) || 0,
+      cardCountHolo: Number(row[14]) || 0,
+      cardCountReverse: Number(row[15]) || 0,
+      cardCountFirstEdition: Number(row[16]) || 0,
+      cardCountNormal: Number(row[17]) || 0
     }))
     .filter((item) => item.setId && item.setName);
   if (dbSets.length > 0) {
@@ -734,7 +812,15 @@ export async function syncOverviewWithApiSets(sets, importedSetIds = []) {
       toSafeCellString(set.logoUrl),
       toSafeCellString(set.symbolUrl),
       Boolean(normalizedImported.has(key) || toBoolean(existing[8])),
-      nowIso()
+      nowIso(),
+      toSafeCellString(set.tcgdexId),
+      toSafeCellString(set.tcgdexName),
+      toSafeJsonString(set.legalities),
+      Number(set.cardCountTotal) || 0,
+      Number(set.cardCountHolo) || 0,
+      Number(set.cardCountReverse) || 0,
+      Number(set.cardCountFirstEdition) || 0,
+      Number(set.cardCountNormal) || 0
     ]);
   }
 

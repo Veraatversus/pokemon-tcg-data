@@ -215,6 +215,16 @@ const dom = {
   lightboxTitle:    document.getElementById('lightbox-title'),
   lightboxSubtitle: document.getElementById('lightbox-subtitle'),
   lightboxCounter:  document.getElementById('lightbox-counter'),
+  lightboxRarity:   document.getElementById('lightbox-rarity'),
+  lightboxHp:       document.getElementById('lightbox-hp'),
+  lightboxTypes:    document.getElementById('lightbox-types'),
+  lightboxSupertype: document.getElementById('lightbox-supertype'),
+  lightboxSubtypes: document.getElementById('lightbox-subtypes'),
+  lightboxEvolvesFrom: document.getElementById('lightbox-evolves-from'),
+  lightboxArtist:   document.getElementById('lightbox-artist'),
+  lightboxRegulationMark: document.getElementById('lightbox-regulation-mark'),
+  lightboxRules:    document.getElementById('lightbox-rules'),
+  lightboxFlavorText: document.getElementById('lightbox-flavor-text'),
   lightboxCmLink:   document.getElementById('lightbox-cm-link'),
   lightboxGCheck:   document.getElementById('lightbox-g-check'),
   lightboxRhCheck:  document.getElementById('lightbox-rh-check'),
@@ -1197,25 +1207,16 @@ function initSpreadsheetDialog() {
 async function loadSets() {
   setLoading(true, 'Lade Sets\u2026');
   try {
-    const [importedSets, overviewSets, apiSets] = await Promise.all([
+    const [importedSets, overviewSets] = await Promise.all([
       listImportedSets(),
-      listSetsOverviewData().catch(() => []),
-      fetchAllAvailableSets().catch(() => [])
+      listSetsOverviewData().catch(() => [])
     ]);
 
     if (!Array.isArray(importedSets)) throw new Error('Ungültiges Sets-Format');
     state.sets = importedSets;
 
     const importedById = new Map(importedSets.map((set) => [set.setId, set]));
-    const overviewById = new Map((overviewSets || []).map((set) => [set.setId, set]));
     const mergedMap = new Map();
-
-    (apiSets || []).forEach((set) => {
-      mergedMap.set(set.setId, {
-        ...set,
-        imported: Boolean(importedById.get(set.setId)?.imported || overviewById.get(set.setId)?.imported)
-      });
-    });
 
     (overviewSets || []).forEach((set) => {
       if (!mergedMap.has(set.setId)) {
@@ -1228,7 +1229,7 @@ async function loadSets() {
       mergedMap.set(set.setId, {
         ...current,
         ...set,
-        // ptcgoCode aus der API nicht mit einem leeren Sheets-Wert überschreiben
+        // ptcgoCode nicht mit einem leeren Sheets-Wert überschreiben
         ptcgoCode: set.ptcgoCode || current.ptcgoCode || '',
         imported: true
       });
@@ -2789,16 +2790,28 @@ function navigateToSearchResultSet(set) {
 async function openSearchResultLightbox(card, set) {
   if (!set?.setId || !card) return;
 
-  const cardsCacheKey = `cards_${set.setId}`;
+  const cardsCacheKey = `db_cards_${set.setId}`;
   const dbCacheKey = `db_${set.setId}`;
+  const allowApiFallback = Boolean(dom.searchApiFallback?.checked);
 
   const [cards, dbMap] = await Promise.all([
     cache.has(cardsCacheKey)
       ? cache.get(cardsCacheKey)
-      : fetchMergedCards(set.setId).then((loadedCards) => {
-        cache.set(cardsCacheKey, loadedCards, CONFIG.CACHE_TTL_MS);
-        state.searchCache.set(set.setId, loadedCards);
-        return loadedCards;
+      : readDbCardsForSet(set.setId).then(async (loadedCards) => {
+        if (Array.isArray(loadedCards) && loadedCards.length > 0) {
+          cache.set(cardsCacheKey, loadedCards, CONFIG.CACHE_TTL_MS);
+          state.searchCache.set(set.setId, loadedCards);
+          return loadedCards;
+        }
+
+        if (allowApiFallback) {
+          const apiCards = await fetchMergedCards(set.setId);
+          cache.set(cardsCacheKey, apiCards, CONFIG.CACHE_TTL_MS);
+          state.searchCache.set(set.setId, apiCards);
+          return apiCards;
+        }
+
+        return [];
       }),
     cache.has(dbCacheKey)
       ? cache.get(dbCacheKey)
@@ -2807,6 +2820,11 @@ async function openSearchResultLightbox(card, set) {
         return loadedDbMap;
       })
   ]);
+
+  if (!Array.isArray(cards) || cards.length === 0) {
+    showToast('Keine Kartendaten in der Datenbank für dieses Set. Optional API-Fallback aktivieren oder Set neu importieren.', 'info', 4500);
+    return;
+  }
 
   const targetKey = normalizeCardNumber(card.number);
   const targetIndex = cards.findIndex((item) => normalizeCardNumber(item.number) === targetKey);
@@ -3135,12 +3153,31 @@ function renderLightbox(index) {
   if (!card) return;
   const key = normalizeCardNumber(card.number);
   const db  = state.dbMap.get(key) || { displayId: card.number, g: false, rh: false, gCell: null, rhCell: null };
+  const listToText = (value) => Array.isArray(value) ? value.filter(Boolean).join(', ') : '';
+  const rulesText = Array.isArray(card.rules) ? card.rules.filter(Boolean).join('\n') : '';
+  const setFact = (node, value, { longText = false } = {}) => {
+    if (!node) return;
+    const text = String(value ?? '').trim() || '—';
+    node.textContent = text;
+    node.classList.toggle('lightbox-fact-long', longText && text !== '—');
+  };
+
   dom.lightboxImg.src              = card.image || '';
   attachImageFallback(dom.lightboxImg, card, state.currentSet?.setId || '');
   dom.lightboxImg.alt              = card.name  || key;
   dom.lightboxTitle.textContent    = card.name  || 'Unbekannt';
   dom.lightboxSubtitle.textContent = `#${card.number}`;
   dom.lightboxCounter.textContent  = `${index + 1}\u202f/\u202f${state.cards.length}`;
+  setFact(dom.lightboxRarity, card.rarity);
+  setFact(dom.lightboxHp, card.hp);
+  setFact(dom.lightboxTypes, listToText(card.types));
+  setFact(dom.lightboxSupertype, card.supertype);
+  setFact(dom.lightboxSubtypes, listToText(card.subtypes));
+  setFact(dom.lightboxEvolvesFrom, card.evolvesFrom);
+  setFact(dom.lightboxArtist, card.artist);
+  setFact(dom.lightboxRegulationMark, card.regulationMark);
+  setFact(dom.lightboxRules, rulesText, { longText: true });
+  setFact(dom.lightboxFlavorText, card.flavorText, { longText: true });
   if (card.cardmarketUrl) {
     const isFallbackCardmarket = isGeneratedCardmarketSearchUrl(card.cardmarketUrl);
     dom.lightboxCmLink.href = card.cardmarketUrl;
@@ -3379,13 +3416,31 @@ async function loadCurrentSet(forceRefresh = false) {
   }
 
   try {
-    const cardsCacheKey = `cards_${setId}`, dbCacheKey = `db_${setId}`;
+    const cardsCacheKey = `db_cards_${setId}`, dbCacheKey = `db_${setId}`;
+    const allowApiFallback = Boolean(dom.searchApiFallback?.checked);
     if (forceRefresh) { cache.del(cardsCacheKey); cache.del(dbCacheKey); }
 
     const [cards, dbMap] = await Promise.all([
-      cache.has(cardsCacheKey) ? cache.get(cardsCacheKey) : fetchMergedCards(setId).then((c) => { cache.set(cardsCacheKey, c, CONFIG.CACHE_TTL_MS); return c; }),
+      cache.has(cardsCacheKey)
+        ? cache.get(cardsCacheKey)
+        : readDbCardsForSet(setId).then(async (dbCards) => {
+          if (Array.isArray(dbCards) && dbCards.length > 0) {
+            cache.set(cardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
+            return dbCards;
+          }
+          if (allowApiFallback) {
+            const apiCards = await fetchMergedCards(setId);
+            cache.set(cardsCacheKey, apiCards, CONFIG.CACHE_TTL_MS);
+            return apiCards;
+          }
+          return [];
+        }),
       cache.has(dbCacheKey)    ? cache.get(dbCacheKey)    : readSetCollectionMap(selected.setName).then((m) => { cache.set(dbCacheKey, m, CONFIG.CACHE_TTL_MS); return m; }),
     ]);
+
+    if (!Array.isArray(cards) || cards.length === 0) {
+      throw new Error('Keine Kartendaten in der Datenbank gefunden. Bitte Set importieren/aktualisieren oder API-Fallback aktivieren.');
+    }
 
     state.cards = cards;
     state.dbMap = dbMap;
