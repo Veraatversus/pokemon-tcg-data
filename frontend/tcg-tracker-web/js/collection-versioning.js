@@ -4,7 +4,9 @@
  * ╚══════════════════════════════════════════════════════════════════════════
  */
 
-const SNAPSHOTS_STORAGE_KEY = 'poke-collection-snapshots';
+import { scopedStorageKey } from './config.js';
+
+const SNAPSHOTS_STORAGE_KEY = scopedStorageKey('collection-snapshots');
 const MAX_SNAPSHOTS = 20;
 
 export class CollectionSnapshot {

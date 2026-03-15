@@ -2,22 +2,22 @@
 
 Diese Anleitung hilft dir, das Repository nach dem Merge vollständig einzurichten.
 
-## Schritt 1: Branch-Struktur erstellen
+## Schritt 1: Branch-Struktur prüfen
 
-Nach dem Merge dieses Pull Requests in den `main` Branch (oder aktuellen Default-Branch):
+Dieses Repository arbeitet mit `master` (Upstream-Mirror), `dev` (Arbeitsbranch) und `release` (Pages):
 
 ```bash
 # 1. Lokales Repository aktualisieren
 git fetch origin
-git checkout main  # oder dein aktueller Default-Branch
-git pull origin main
+git checkout dev
+git pull origin dev
 
-# 2. Release Branch erstellen (vom main Branch)
+# 2. Release Branch erstellen (falls noch nicht vorhanden)
 git checkout -b release
 git push -u origin release
 
-# 3. Zurück zum main Branch
-git checkout main
+# 3. Zurück zum dev Branch
+git checkout dev
 ```
 
 ## Schritt 2: GitHub Pages aktivieren
@@ -31,12 +31,12 @@ git checkout main
 
 ## Schritt 3: Default Branch setzen (optional)
 
-Falls dein aktueller Branch nicht `main` heißt:
+Empfehlung: `dev` als Default Branch für eigene Arbeit:
 
 1. Gehe zu **Settings** → **General**
 2. Unter "Default branch":
    - Klicke auf den Umschalter
-   - Wähle `main` als Default Branch
+   - Wähle `dev` als Default Branch
    - Bestätige die Änderung
 
 ## Schritt 4: Branch Protection Rules einrichten (empfohlen)
@@ -45,8 +45,8 @@ Schütze wichtige Branches vor versehentlichen Änderungen:
 
 1. Gehe zu **Settings** → **Branches**
 2. Klicke auf **Add rule** unter "Branch protection rules"
-3. Für den `main` Branch:
-   - Branch name pattern: `main`
+3. Für den `dev` Branch:
+   - Branch name pattern: `dev`
    - ✅ Require a pull request before merging
    - ✅ Require status checks to pass before merging (optional)
    - Klicke auf **Create**
@@ -59,7 +59,7 @@ Schütze wichtige Branches vor versehentlichen Änderungen:
 1. Gehe zu **Actions** im Repository
 2. Wähle "Sync with Upstream" aus der Liste
 3. Klicke auf **Run workflow**
-4. Wähle Branch: `main`
+4. Wähle Branch: `master`
 5. Klicke auf **Run workflow**
 6. Warte bis der Workflow abgeschlossen ist
 
@@ -68,7 +68,7 @@ Schütze wichtige Branches vor versehentlichen Änderungen:
 1. Nach erfolgreichem Upstream Sync sollte automatisch der "Merge to Release" Workflow starten
 2. Falls nicht, triggere ihn manuell:
    - **Actions** → "Merge to Release"
-   - **Run workflow** mit Branch: `main`
+   - **Run workflow** mit Branch: `release`
 
 ### Test 3: GitHub Pages Deployment
 
@@ -145,7 +145,7 @@ Nach erfolgreicher Einrichtung:
 
 **Zusätzliche Dokumentation:**
 - [WORKFLOW_DOCUMENTATION.md](WORKFLOW_DOCUMENTATION.md) - Ausführliche Workflow-Dokumentation
-- [README.md](README.md) - Allgemeine Repository-Information
+- [README.md](../README.md) - Allgemeine Repository-Information
 
 ## Support
 

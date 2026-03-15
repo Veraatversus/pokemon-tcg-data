@@ -17,14 +17,25 @@
                            ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                                                                 │
-│  main Branch                                                    │
+│  master Branch                                                  │
 │  - Empfängt Updates vom Upstream                               │
-│  - Basis für alle Features und PRs                             │
+│  - Upstream-Mirror (keine Feature-Entwicklung)                 │
 │                                                                 │
 └──────────────────────────┬──────────────────────────────────────┘
                            │
-                           │ [2] Merge to Release
-                           │     - Bei jedem Push zu main
+                           │ [2] Update dev
+                           │     - Manuell via PR/Merge
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│  dev Branch                                                     │
+│  - Standard-Entwicklung                                         │
+│  - Wird zusätzlich unter /dev veröffentlicht                    │
+│                                                                 │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │
+                           │ [3] Merge to Release
                            │     - Manuell triggerbar
                            │
                            ▼
@@ -36,8 +47,8 @@
 │                                                                 │
 └──────────────────────────┬──────────────────────────────────────┘
                            │
-                           │ [3] Deploy to GitHub Pages
-                           │     - Bei jedem Push zu release
+                           │ [4] Deploy to GitHub Pages
+                           │     - Bei Push zu release und dev
                            │     - Manuell triggerbar
                            │
                            ▼
@@ -57,35 +68,37 @@
   - Schedule: täglich um 2:00 UTC
   - Manual: workflow_dispatch
 - **Aktionen:**
-  1. Checkout main branch
+  1. Checkout master branch
   2. Upstream remote hinzufügen
   3. Upstream changes fetchen
   4. Auf Updates prüfen
-  5. Falls Updates: merge in main
-  6. Push zu origin/main
-  7. Trigger "Merge to Release" workflow
+  5. Falls Updates: merge in master
+  6. Push zu origin/master
 - **Bei Fehler:** Erstellt Issue mit Anleitung zur manuellen Konfliktlösung
 
-### [2] Merge to Release
+### [2] Update dev
+- **Hinweis:** Erfolgt manuell über PR/Merge (kein eigener Workflow)
+
+### [3] Merge to Release
 - **Datei:** `.github/workflows/merge-to-release.yml`
 - **Trigger:** 
-  - Push zu main branch
   - Manual: workflow_dispatch
 - **Aktionen:**
   1. Checkout release branch
-  2. Fetch main branch
-  3. Merge main in release
+  2. Fetch dev branch
+  3. Merge dev in release
   4. Push zu origin/release
 - **Bei Fehler:** Erstellt Issue mit Anleitung zur manuellen Konfliktlösung
 
-### [3] Deploy to GitHub Pages
+### [4] Deploy to GitHub Pages
 - **Datei:** `.github/workflows/deploy-pages.yml`
 - **Trigger:** 
-  - Push zu release branch
+  - Push zu release branch (Root-Seite)
+  - Push zu dev branch (Preview unter `/dev`)
   - Manual: workflow_dispatch
 - **Aktionen:**
-  1. Checkout release branch
-  2. Configure GitHub Pages
+  1. Checkout release + dev
+  2. Build Artifact (`release` nach Root, `dev` nach `/dev`)
   3. Upload artifact
   4. Deploy zu Pages
 - **Ergebnis:** Website verfügbar unter GitHub Pages URL
@@ -93,7 +106,7 @@
 ## Feature-Branch Workflow
 
 ```
-                main
+                dev
                  │
                  │ git checkout -b feature/xyz
                  ├──────────────► feature/xyz
@@ -105,7 +118,7 @@
                  ◄────────────────────┘
                  │
                  │ Nach Merge:
-                 │ automatisch zu release
+                 │ manuell zu release
                  ▼
               release
                  │
@@ -118,7 +131,7 @@
 
 ### Szenario 1: Upstream Sync Konflikt
 ```
-Upstream ──┬──> main (Konflikt!)
+Upstream ──┬──> master (Konflikt!)
            │
            └──> Issue erstellt
                 Manuelle Lösung erforderlich
@@ -126,7 +139,7 @@ Upstream ──┬──> main (Konflikt!)
 
 ### Szenario 2: Release Merge Konflikt
 ```
-main ──┬──> release (Konflikt!)
+dev ──┬──> release (Konflikt!)
        │
        └──> Issue erstellt
             Manuelle Lösung erforderlich
@@ -136,9 +149,9 @@ main ──┬──> release (Konflikt!)
 
 | Zeit (UTC) | Ereignis |
 |------------|----------|
-| 02:00 | Automatischer Upstream Sync Versuch |
-| ~02:05 | Falls Updates: Auto-Merge zu release |
-| ~02:10 | Falls erfolgreich: Pages Deployment |
+| 02:00 | Automatischer Upstream Sync Versuch (`master`) |
+| Danach | Optionaler manueller Merge `dev` → `release` |
+| Bei Push | Pages Deployment (`release` Root, `dev` unter `/dev`) |
 
 ## Berechtigungen
 
@@ -146,14 +159,14 @@ Alle Workflows verwenden `GITHUB_TOKEN` mit folgenden Berechtigungen:
 
 | Workflow | Benötigte Permissions |
 |----------|----------------------|
-| Sync with Upstream | `contents: write` (für Push zu main) |
+| Sync with Upstream | `contents: write` (für Push zu master) |
 | Merge to Release | `contents: write` (für Push zu release) |
 | Deploy Pages | `contents: read`, `pages: write`, `id-token: write` |
 
 ## Sicherheit
 
 - Keine Secrets erforderlich (außer automatischem GITHUB_TOKEN)
-- Branch Protection Rules empfohlen für main und release
+- Branch Protection Rules empfohlen für master/dev/release
 - Pull Request Reviews empfohlen für Contributions
 - Automatische Issue-Erstellung bei Workflow-Fehlern
 

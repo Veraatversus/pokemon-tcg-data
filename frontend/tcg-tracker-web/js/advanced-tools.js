@@ -2,6 +2,10 @@
 // ADVANCED SEARCH & FILTERING ENGINE
 // ══════════════════════════════════════════════════════════════════════════
 
+import { scopedStorageKey } from './config.js';
+
+const FAVORITES_STORAGE_KEY = scopedStorageKey('favorites-sets');
+
 export class AdvancedSearch {
   constructor(allSets, collectionData) {
     this.allSets = allSets;
@@ -53,7 +57,7 @@ export class AdvancedSearch {
 
   getFavoritesFromStorage() {
     try {
-      const data = localStorage.getItem('poke-favorites-sets');
+      const data = localStorage.getItem(FAVORITES_STORAGE_KEY);
       return new Set(data ? JSON.parse(data) : []);
     } catch {
       return new Set();

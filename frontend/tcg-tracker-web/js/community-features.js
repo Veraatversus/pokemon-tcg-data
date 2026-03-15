@@ -2,12 +2,14 @@
 // COMMUNITY & PUBLIC SHARING FEATURES
 // ══════════════════════════════════════════════════════════════════════════
 
+import { scopedStorageKey } from './config.js';
+
 const STORAGE_KEYS = {
-  shared_collections: 'poke-shared-collections',
-  user_profiles: 'poke-user-profiles',
-  community_follows: 'poke-community-follows',
-  community_reviews: 'poke-community-reviews',
-  trending_cache: 'poke-trending-cache'
+  shared_collections: scopedStorageKey('shared-collections'),
+  user_profiles: scopedStorageKey('user-profiles'),
+  community_follows: scopedStorageKey('community-follows'),
+  community_reviews: scopedStorageKey('community-reviews'),
+  trending_cache: scopedStorageKey('trending-cache')
 };
 
 // ══════════════════════════════════════════════════════════════════════════

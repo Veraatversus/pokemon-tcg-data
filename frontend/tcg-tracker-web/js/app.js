@@ -15,7 +15,7 @@ import {
 import { fetchMergedCards, fetchAllAvailableSets, runPokecodeParityCheck } from './pokemon-api.js';
 import { normalizeCardNumber } from './utils.js';
 import * as cache from './cache.js';
-import { CONFIG } from './config.js';
+import { CONFIG, scopedStorageKey } from './config.js';
 import {
   initSmartEngine,
   startAutoHealing,
@@ -93,10 +93,6 @@ import {
   createTradeStatsCard, createTradeSuggestionsPanel,
   createTradeHistoryPanel
 } from './trading-ui.js';
-import {
-  generateMLSetRecommendations,
-  summarizeMLRecommendations
-} from './ml-recommendations.js';
 import {
   initRealtimeSync,
   buildCollectionUpdateEvent
@@ -284,9 +280,12 @@ const state = {
 
 let focusedCardIndex = -1;
 
-const QUEUE_PRESETS_STORAGE_KEY = 'poke_try4_queue_presets_v1';
-const DASHBOARD_PREFS_STORAGE_KEY = 'poke_try4_dashboard_prefs_v1';
-const RECENT_SETS_STORAGE_KEY = 'poke_try4_recent_sets_v1';
+const QUEUE_PRESETS_STORAGE_KEY = scopedStorageKey('queue_presets_v1');
+const DASHBOARD_PREFS_STORAGE_KEY = scopedStorageKey('dashboard_prefs_v1');
+const RECENT_SETS_STORAGE_KEY = scopedStorageKey('recent_sets_v1');
+const DARK_MODE_STORAGE_KEY = scopedStorageKey('dark_mode');
+const REALTIME_CLIENT_STORAGE_KEY = scopedStorageKey('realtime_client_id');
+const USER_ID_STORAGE_KEY = scopedStorageKey('user_id');
 const DASHBOARD_VIRTUAL_PAGE_SIZE = 180;
 const SEARCH_INPUT_DEBOUNCE_MS = 900;
 const DASHBOARD_VIRTUAL_THRESHOLD = 220;
@@ -1159,7 +1158,7 @@ function setEmptyState(show) {
 // DARK MODE
 // ══════════════════════════════════════════════════════════════════════════
 function initDarkMode() {
-  const saved = localStorage.getItem('poke_dark_mode');
+  const saved = localStorage.getItem(DARK_MODE_STORAGE_KEY);
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
   if (saved === 'true' || (saved === null && prefersDark)) {
     document.body.classList.add('dark');
@@ -1167,7 +1166,7 @@ function initDarkMode() {
   }
   dom.darkModeToggle.addEventListener('click', () => {
     const isDark = document.body.classList.toggle('dark');
-    localStorage.setItem('poke_dark_mode', isDark);
+    localStorage.setItem(DARK_MODE_STORAGE_KEY, isDark);
     dom.darkModeToggle.textContent = isDark ? '\u2600\uFE0F' : '\uD83C\uDF19';
   });
 }
@@ -1412,53 +1411,6 @@ async function renderRecommendations() {
   }
 }
 
-function renderMLRecommendationsWidget() {
-  try {
-    if (!state.sets?.length || !state.summaryData?.length) return;
-
-    const recommendations = generateMLSetRecommendations(
-      state.summaryData || [],
-      state.allSets || state.sets,
-      5
-    );
-
-    if (!recommendations.length) return;
-
-    const summary = summarizeMLRecommendations(recommendations);
-    const container = document.createElement('div');
-    container.className = 'ml-recommendations-widget';
-    container.style.cssText = 'grid-column: 1 / -1; padding: 16px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-bg-secondary); margin-bottom: 16px;';
-
-    container.innerHTML = `
-      <div style="font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-        <span>🧠 ML Set-Empfehlungen</span>
-        <small style="color: var(--color-muted);">Confidence bis ${summary.topConfidence}%</small>
-      </div>
-      ${recommendations.map((item) => `
-        <div style="padding: 10px; margin: 6px 0; border-left: 3px solid var(--color-primary); background: var(--color-bg); border-radius: 4px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
-          <div>
-            <div style="font-weight: 600;">${item.setName} (${item.completion}%)</div>
-            <div style="font-size: 12px; color: var(--color-muted);">${item.reasons.join(' • ')}</div>
-          </div>
-          <span style="background: var(--color-primary); color: white; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap;">${item.confidence}%</span>
-        </div>
-      `).join('')}
-    `;
-
-    const dashboard = document.getElementById('dashboard-grid');
-    if (!dashboard) return;
-
-    const existing = dashboard.querySelector('.ml-recommendations-widget');
-    if (existing) {
-      existing.replaceWith(container);
-    } else {
-      dashboard.insertBefore(container, dashboard.firstChild);
-    }
-  } catch (err) {
-    console.warn('[renderMLRecommendationsWidget]', err);
-  }
-}
-
 // ══════════════════════════════════════════════════════════════════════════
 // DASHBOARD
 // ══════════════════════════════════════════════════════════════════════════
@@ -1594,7 +1546,6 @@ async function renderDashboard() {
     }
 
     await renderRecommendations();
-    renderMLRecommendationsWidget();
   } catch (err) {
     console.error('[renderDashboard]', err);
     dom.dashboardGrid.innerHTML = `<p class="empty-state">\u2715 Fehler beim Laden der \u00dcbersicht</p>`;
@@ -3792,8 +3743,8 @@ async function bootstrap() {
   initSearch();
 
   try {
-    state.realtimeClientId = localStorage.getItem('poke-realtime-client-id') || `client_${Date.now()}`;
-    localStorage.setItem('poke-realtime-client-id', state.realtimeClientId);
+    state.realtimeClientId = localStorage.getItem(REALTIME_CLIENT_STORAGE_KEY) || `client_${Date.now()}`;
+    localStorage.setItem(REALTIME_CLIENT_STORAGE_KEY, state.realtimeClientId);
     state.realtime = initRealtimeSync({
       clientId: state.realtimeClientId,
       onEvent: applyIncomingRealtimeUpdate
@@ -4064,13 +4015,13 @@ async function bootstrap() {
     },
     'profile': () => {
       // Generate or get current user ID (in real app, from auth)
-      const userId = localStorage.getItem('poke-user-id') || 'user_' + Date.now();
-      localStorage.setItem('poke-user-id', userId);
+      const userId = localStorage.getItem(USER_ID_STORAGE_KEY) || 'user_' + Date.now();
+      localStorage.setItem(USER_ID_STORAGE_KEY, userId);
 
       let profile = getUserProfile(userId);
       if (!profile) {
         profile = createUserProfile('collector', 'Pokémon Sammler', 'Meine Pokémon TCG Collection');
-        localStorage.setItem('poke-user-id', profile.userId);
+        localStorage.setItem(USER_ID_STORAGE_KEY, profile.userId);
       }
 
       const card = createUserProfileCard(profile.userId, profile.userId);
@@ -4089,7 +4040,7 @@ async function bootstrap() {
         return;
       }
 
-      const userId = localStorage.getItem('poke-user-id') || 'user_' + Date.now();
+      const userId = localStorage.getItem(USER_ID_STORAGE_KEY) || 'user_' + Date.now();
       const collectionData = {}; // Würde echte Collection laden
 
       const form = document.createElement('div');
@@ -4265,54 +4216,6 @@ async function bootstrap() {
       container.appendChild(info);
       
       dialog.innerHTML = '<h3 style="padding: 20px 20px 0 20px; margin: 0; border-bottom: 1px solid var(--color-border);">💰 Kollektionswert</h3>';
-      dialog.appendChild(container);
-      document.body.appendChild(dialog);
-      dialog.showModal();
-      dialog.addEventListener('close', () => dialog.remove());
-    },
-    'ml-recommendations': () => {
-      const recommendations = generateMLSetRecommendations(
-        state.summaryData || [],
-        state.allSets || state.sets,
-        10
-      );
-
-      if (!recommendations.length) {
-        showToast('Keine ML-Empfehlungen verfügbar', 'info');
-        return;
-      }
-
-      const dialog = document.createElement('dialog');
-      dialog.className = 'ss-dialog';
-      dialog.style.cssText = 'width: 90vw; max-width: 900px; max-height: 80vh; overflow-y: auto;';
-
-      const summary = summarizeMLRecommendations(recommendations);
-      const container = document.createElement('div');
-      container.style.cssText = 'padding: 20px; display: grid; gap: 10px;';
-
-      const header = document.createElement('div');
-      header.style.cssText = 'padding: 12px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-bg-secondary);';
-      header.innerHTML = `
-        <div style="font-weight: 700;">${summary.headline}</div>
-        <div style="color: var(--color-muted); font-size: 13px;">Top Confidence: ${summary.topConfidence}% • Ø Completion: ${summary.averageCompletion}%</div>
-      `;
-      container.appendChild(header);
-
-      recommendations.forEach((item, index) => {
-        const row = document.createElement('div');
-        row.style.cssText = 'padding: 12px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-bg-secondary); display: flex; justify-content: space-between; gap: 10px;';
-        row.innerHTML = `
-          <div>
-            <div style="font-weight: 600;">${index + 1}. ${item.setName} <span style="color: var(--color-muted); font-weight: 400;">(${item.setId})</span></div>
-            <div style="font-size: 13px; color: var(--color-muted);">Serie: ${item.series} • Fortschritt: ${item.collected}/${item.total} (${item.completion}%)</div>
-            <div style="font-size: 13px; margin-top: 4px;">${item.reasons.join(' • ')}</div>
-          </div>
-          <div style="align-self: center; background: var(--color-primary); color: white; border-radius: 999px; padding: 6px 12px; font-weight: 700;">${item.confidence}%</div>
-        `;
-        container.appendChild(row);
-      });
-
-      dialog.innerHTML = '<h3 style="padding: 20px 20px 0 20px; margin: 0; border-bottom: 1px solid var(--color-border);">🧠 ML-Empfehlungen</h3>';
       dialog.appendChild(container);
       document.body.appendChild(dialog);
       dialog.showModal();

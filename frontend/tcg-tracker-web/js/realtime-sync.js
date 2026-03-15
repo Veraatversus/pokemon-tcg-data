@@ -2,8 +2,10 @@
 // REALTIME MULTIPLAYER SYNC (BroadcastChannel + storage fallback)
 // ══════════════════════════════════════════════════════════════════════════
 
-const CHANNEL_NAME = 'poke-tcg-realtime';
-const STORAGE_KEY = 'poke-tcg-realtime-event';
+import { scopedStorageKey } from './config.js';
+
+const CHANNEL_NAME = scopedStorageKey('tcg-realtime-channel');
+const STORAGE_KEY = scopedStorageKey('tcg-realtime-event');
 
 let broadcastChannel = null;
 let storageListener = null;

@@ -1,4 +1,19 @@
-const SPREADSHEET_ID_KEY = 'poke_tcg_spreadsheet_id';
+function detectStorageScope() {
+  const path = String(globalThis?.location?.pathname || '/').toLowerCase();
+  return /\/dev(\/|$)/.test(path) ? 'dev' : 'prod';
+}
+
+export const STORAGE_SCOPE = detectStorageScope();
+
+export function scopedStorageKey(baseKey) {
+  return `poke:${STORAGE_SCOPE}:${baseKey}`;
+}
+
+export function scopedStoragePrefix(basePrefix = '') {
+  return `poke:${STORAGE_SCOPE}:${basePrefix}`;
+}
+
+const SPREADSHEET_ID_KEY = scopedStorageKey('tcg_spreadsheet_id');
 
 export const CONFIG = {
   // ── Google API ──────────────────────────────────────────────

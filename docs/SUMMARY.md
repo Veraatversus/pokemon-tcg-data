@@ -11,8 +11,8 @@ Dieses Pull Request implementiert eine vollständige Infrastruktur für:
 
 ### GitHub Actions Workflows (`.github/workflows/`)
 - **`sync-upstream.yml`** - Synchronisiert täglich mit PokemonTCG/pokemon-tcg-data
-- **`merge-to-release.yml`** - Merged automatisch von main zu release
-- **`deploy-pages.yml`** - Deployed zu GitHub Pages
+- **`merge-to-release.yml`** - Merged manuell von dev zu release
+- **`deploy-pages.yml`** - Deployed zu GitHub Pages (Root + `/dev` Preview)
 
 ### Dokumentation
 - **`README.md`** - Aktualisiert mit neuen Features
@@ -35,8 +35,8 @@ Nach dem Merge dieses Pull Requests **MÜSSEN** folgende Schritte durchgeführt 
 
 ### 1. Release Branch erstellen
 ```bash
-git checkout main  # oder dein Default-Branch
-git pull
+git checkout dev  # oder dein Default-Branch
+git pull origin dev
 git checkout -b release
 git push -u origin release
 ```
@@ -53,7 +53,7 @@ git push -u origin release
 
 ### 4. Erste Synchronisation testen
 1. Actions → "Sync with Upstream" → "Run workflow"
-2. Branch: main auswählen
+2. Branch: master auswählen
 3. "Run workflow" klicken
 
 **Detaillierte Anleitung:** Siehe [SETUP.md](SETUP.md)
@@ -72,9 +72,10 @@ git push -u origin release
 
 ### 🔄 Branch-Strategie
 ```
-Upstream → main → release → GitHub Pages
+Upstream → master → dev → release → GitHub Pages
 ```
-- **main:** Empfängt Updates, Basis für Features
+- **master:** Empfängt Upstream-Updates (Mirror)
+- **dev:** Basis für Features und Vorschau unter `/dev`
 - **release:** Stabile Version für Deployment
 
 ### 🛡️ Fehlerbehandlung
@@ -96,17 +97,17 @@ Upstream → main → release → GitHub Pages
 ### Sync with Upstream
 - **Trigger:** Täglich 2:00 UTC + Manuell
 - **Dauer:** ~1-2 Minuten
-- **Ziel:** main Branch aktuell halten
+- **Ziel:** master Branch aktuell halten
 
 ### Merge to Release
-- **Trigger:** Push zu main + Manuell
+- **Trigger:** Manuell (workflow_dispatch)
 - **Dauer:** ~30 Sekunden
-- **Ziel:** Änderungen zu release propagieren
+- **Ziel:** Änderungen von dev zu release propagieren
 
 ### Deploy to GitHub Pages
-- **Trigger:** Push zu release + Manuell
+- **Trigger:** Push zu release/dev + Manuell
 - **Dauer:** ~2-5 Minuten
-- **Ziel:** Website aktualisieren
+- **Ziel:** Website aktualisieren (release Root, dev unter `/dev`)
 
 ## 🎨 GitHub Pages Features
 
@@ -170,35 +171,19 @@ Nach erfolgreicher Einrichtung:
 - ✅ Konflikt-Handling mit automatischen Issues
 - ✅ Vollständige Dokumentation
 
-## 🎴 Try3 Frontend - Pokémon TCG Collection Tracker
+## 🎴 Frontend & Google Sheets Struktur
 
-Zusätzlich zur Dateninfrastruktur gibt es jetzt ein vollständiges Frontend im `frontend/try3/` Verzeichnis:
+Zusätzlich zur Dateninfrastruktur gibt es ein produktives Frontend und eine gebündelte Google-Sheets-Struktur:
 
-### Was ist Try3?
-Ein modernes, statisches Frontend für GitHub Pages mit Google Sheets API Integration zum Verwalten der Pokémon-Kartensammlung.
+### Frontend
+- `frontend/tcg-tracker-web/` – aktive Web-App (GitHub Pages)
 
-### Features
-- ✅ OAuth 2.0 Authentication
-- ✅ Google Sheets Integration (Echtzeit-Sync)
-- ✅ Card Collection Tracking
-- ✅ Search, Filter, Sort
-- ✅ Analytics Dashboard
-- ✅ Export (CSV, JSON, Print)
-- ✅ Error Handling & Offline Support
-- ✅ Responsive Design
+### Google Sheets Ressourcen
+- `frontend/tcg-tracker-google-sheets/script/` – Apps Script / Automationscode
+- `frontend/tcg-tracker-google-sheets/sheet/` – Spreadsheet-Dateien und Vorlagen
 
 ### Status
-**✅ Implementation Complete & Ready for Testing**
-
-### Quick Start
-Für Try3 Getting Started siehe: [frontend/try3/GETTING_STARTED.md](frontend/try3/GETTING_STARTED.md)
-
-### Documentation
-Umfassende Dokumentation verfügbar:
-- [frontend/try3/README.md](frontend/try3/README.md) - Übersicht
-- [frontend/try3/TESTING.md](frontend/try3/TESTING.md) - Testing Guide
-- [frontend/try3/RELEASE_NOTES.md](frontend/try3/RELEASE_NOTES.md) - Features
-- [frontend/try3/DOCUMENTATION_INDEX.md](frontend/try3/DOCUMENTATION_INDEX.md) - Alle Docs
+**✅ Struktur konsolidiert und bereinigt**
 
 ## 📞 Support
 
@@ -206,11 +191,11 @@ Bei Fragen oder Problemen:
 1. Siehe [SETUP.md](SETUP.md) für Setup-Hilfe
 2. Siehe [WORKFLOW_DOCUMENTATION.md](WORKFLOW_DOCUMENTATION.md) für Workflow-Details
 3. Siehe [QUICKSTART.md](QUICKSTART.md) für häufige Aufgaben
-4. Für Try3-spezifische Fragen: [frontend/try3/QUICK_REFERENCE.md](frontend/try3/QUICK_REFERENCE.md)
+4. Für Frontend-Themen: [frontend/tcg-tracker-web/index.html](frontend/tcg-tracker-web/index.html)
 5. Erstelle ein Issue im Repository
 
 ---
 
 **Wichtig:** Bitte die Schritte in [SETUP.md](SETUP.md) nach dem Merge durchführen!
 
-**Try3 Status**: 🟢 Ready for Testing & Deployment
+**Frontend Status**: 🟢 `tcg-tracker-web` aktiv
