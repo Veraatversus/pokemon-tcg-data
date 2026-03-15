@@ -3409,7 +3409,22 @@ async function loadCurrentSet(forceRefresh = false) {
   setLoading(true, `Lade ${selected.setName}\u2026`);
 
   if (selected.logoUrl) {
-    dom.setLogo.src = selected.logoUrl; dom.setSymbol.src = selected.symbolUrl || '';
+    dom.setLogo.onerror = () => {
+      dom.setLogo.style.display = 'none';
+    };
+    dom.setLogo.style.display = '';
+    dom.setLogo.src = selected.logoUrl;
+
+    dom.setSymbol.onerror = () => {
+      dom.setSymbol.style.display = 'none';
+    };
+    if (selected.symbolUrl) {
+      dom.setSymbol.style.display = '';
+      dom.setSymbol.src = selected.symbolUrl;
+    } else {
+      dom.setSymbol.style.display = 'none';
+      dom.setSymbol.removeAttribute('src');
+    }
     dom.setLogoWrap.classList.remove('hidden');
   } else {
     dom.setLogoWrap.classList.add('hidden');
