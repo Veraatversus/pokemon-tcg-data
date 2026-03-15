@@ -1,9 +1,6 @@
 name: Merge to Release
 
 on:
-  push:
-    branches:
-      - dev   # personal working branch
   workflow_dispatch: # Allow manual trigger
 
 permissions:

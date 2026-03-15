@@ -1,5 +1,5 @@
 /**
- * utils.js – Gemeinsame Hilfsfunktionen für try4
+ * utils.js – Gemeinsame Hilfsfunktionen für tcg-tracker-web
  */
 
 /**
