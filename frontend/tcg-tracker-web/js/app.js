@@ -19,7 +19,6 @@ import { CONFIG, scopedStorageKey } from './config.js';
 import {
   initSmartEngine,
   startAutoHealing,
-  generateCollectionReccommendations,
   fuzzySearch,
   getEngineMetrics,
   cacheCardsOffline,
@@ -36,7 +35,7 @@ import {
   createCollectionSnapshot, generateCollectionReport,
   loadSettings, saveSettings, updateSetting,
   applyQuickFilters, calculateCollectionStats,
-  generateSmartRecommendations, getSyncStatus, setSyncStatus
+  getSyncStatus, setSyncStatus
 } from './enhanced-features.js';
 import {
   initQuickFiltersUI, createSearchHistoryWidget, createStatisticsPanel,
@@ -1372,45 +1371,6 @@ function buildSeriesMap(sets) {
   return map;
 }
 
-async function renderRecommendations() {
-  try {
-    if (!state.sets.length || !state.summaryData?.length) return;
-    const recommendations = generateCollectionReccommendations(
-      state.allSets || state.sets,
-      state.importedSets || state.sets,
-      state.summaryData
-    );
-    if (!recommendations.length) return;
-
-    const container = document.createElement('div');
-    container.className = 'recommendations-widget';
-    container.style.cssText = 'grid-column: 1 / -1; padding: 16px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-bg-secondary); margin-bottom: 16px;';
-    container.innerHTML = `
-      <div style="font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-        <span>💡</span> Intelligente Empfehlungen
-      </div>
-      ${recommendations
-        .map(
-          (rec) => `
-        <div style="padding: 8px; margin: 4px 0; border-left: 3px solid ${rec.priority === 'high' ? '#ff6b6b' : '#ffd43b'}; background: var(--color-bg); border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-size: 14px;">${rec.message}</span>
-          ${rec.cardsRemaining ? `<span style="background: var(--color-primary); color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">${rec.cardsRemaining}</span>` : ''}
-        </div>
-      `
-        )
-        .join('')}
-    `;
-    const dashboard = document.getElementById('dashboard-grid');
-    if (dashboard) {
-      const existing = dashboard.querySelector('.recommendations-widget');
-      if (existing) existing.replaceWith(container);
-      else dashboard.insertBefore(container, dashboard.firstChild);
-    }
-  } catch (err) {
-    console.warn('[renderRecommendations]', err);
-  }
-}
-
 // ══════════════════════════════════════════════════════════════════════════
 // DASHBOARD
 // ══════════════════════════════════════════════════════════════════════════
@@ -1545,7 +1505,6 @@ async function renderDashboard() {
       dom.dashboardGrid.appendChild(createDashboardVirtualFooter(sets.length, visibleSets.length));
     }
 
-    await renderRecommendations();
   } catch (err) {
     console.error('[renderDashboard]', err);
     dom.dashboardGrid.innerHTML = `<p class="empty-state">\u2715 Fehler beim Laden der \u00dcbersicht</p>`;
@@ -2315,12 +2274,10 @@ function initDashboardControls() {
   dom.dashSeriesFilter.addEventListener('change', () => {
     resetDashboardVirtualization();
     renderDashboard();
-    renderRecommendations();
   });
   dom.dashSort.addEventListener('change', () => {
     resetDashboardVirtualization();
     renderDashboard();
-    renderRecommendations();
   });
   document.querySelectorAll('.dashboard-view-tab').forEach((button) => {
     if (!button.dataset.dashboardView) return;
