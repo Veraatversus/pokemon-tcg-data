@@ -322,20 +322,20 @@ function shouldUseApiForSearchSet(mode, set) {
 function getSearchModeMeta(mode) {
   if (mode === SEARCH_SCOPE_ONLINE) {
     return {
-      label: 'Modus: Online-Suche',
+      label: '⚡ Modus: Online-Suche',
       className: 'online',
       hint: 'DB + API für alle Sets'
     };
   }
   if (mode === SEARCH_SCOPE_ALL) {
     return {
-      label: 'Modus: Alle Sets',
+      label: '🌐 Modus: Alle Sets',
       className: 'all',
       hint: 'Importierte aus DB, nicht importierte online'
     };
   }
   return {
-    label: 'Modus: Importierte Sets',
+    label: '📦 Modus: Importierte Sets',
     className: 'imported',
     hint: 'Nur importierte Sets/DB'
   };
