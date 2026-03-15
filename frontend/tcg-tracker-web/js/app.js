@@ -236,7 +236,7 @@ const dom = {
   // Search view
   searchInput:      document.getElementById('search-input'),
   searchSetFilter:  document.getElementById('search-set-filter'),
-  searchApiFallback: document.getElementById('search-api-fallback'),
+  searchScopeMode:  document.getElementById('search-scope-mode'),
   searchResults:    document.getElementById('search-results'),
 };
 
@@ -290,6 +290,56 @@ const RECENT_SETS_STORAGE_KEY = 'poke_try4_recent_sets_v1';
 const DASHBOARD_VIRTUAL_PAGE_SIZE = 180;
 const SEARCH_INPUT_DEBOUNCE_MS = 900;
 const DASHBOARD_VIRTUAL_THRESHOLD = 220;
+const SEARCH_SCOPE_IMPORTED = 'imported';
+const SEARCH_SCOPE_ALL = 'all';
+const SEARCH_SCOPE_ONLINE = 'online';
+
+function getSearchScopeMode() {
+  const mode = String(dom.searchScopeMode?.value || SEARCH_SCOPE_IMPORTED);
+  if (mode === SEARCH_SCOPE_ALL || mode === SEARCH_SCOPE_ONLINE) {
+    return mode;
+  }
+  return SEARCH_SCOPE_IMPORTED;
+}
+
+function getSetsForSearchMode(mode) {
+  if (mode === SEARCH_SCOPE_IMPORTED) {
+    return state.sets || [];
+  }
+  return state.allSets?.length ? state.allSets : (state.sets || []);
+}
+
+function shouldUseApiForSearchSet(mode, set) {
+  if (mode === SEARCH_SCOPE_ONLINE) {
+    return true;
+  }
+  if (mode === SEARCH_SCOPE_ALL) {
+    return !Boolean(set?.imported);
+  }
+  return false;
+}
+
+function renderSearchSetFilterOptions() {
+  if (!dom.searchSetFilter) return;
+  const mode = getSearchScopeMode();
+  const previousValue = String(dom.searchSetFilter.value || '');
+  const sets = getSetsForSearchMode(mode);
+  const allLabel = mode === SEARCH_SCOPE_IMPORTED ? 'Importierte Sets' : 'Alle Sets';
+
+  dom.searchSetFilter.innerHTML = `<option value="">${allLabel}</option>`;
+  sets.forEach((set) => {
+    const opt = document.createElement('option');
+    opt.value = set.setId;
+    opt.textContent = set.setName;
+    dom.searchSetFilter.appendChild(opt);
+  });
+
+  if (previousValue && sets.some((set) => set.setId === previousValue)) {
+    dom.searchSetFilter.value = previousValue;
+  } else {
+    dom.searchSetFilter.value = '';
+  }
+}
 
 function loadRecentSets() {
   try {
@@ -1266,13 +1316,7 @@ async function loadSets() {
       dom.dashSeriesFilter.appendChild(opt);
     });
 
-    dom.searchSetFilter.innerHTML = '<option value="">Alle Sets</option>';
-    importedSets.forEach((set) => {
-      const opt = document.createElement('option');
-      opt.value = set.setId;
-      opt.textContent = set.setName;
-      dom.searchSetFilter.appendChild(opt);
-    });
+    renderSearchSetFilterOptions();
 
     const settings = await readSettings();
     if (settings.lastSetId) dom.selector.value = settings.lastSetId;
@@ -1625,14 +1669,15 @@ async function importSetFromOverview(set) {
     const cards = await fetchMergedCards(set.setId);
     await importSetIntoCollection(set, cards);
     cache.del(`cards_${set.setId}`);
+    cache.del(`db_cards_${set.setId}`);
     cache.del(`db_${set.setId}`);
+    state.searchCache.clear();
     state.summaryData = null;
 
     await loadSets();
     markSetAsRecent(set);
-    dom.selector.value = set.setId;
-    navigate(`set/${set.setId}`);
-    await loadCurrentSet(true);
+    await renderDashboard();
+    setGlobalStatus(`${set.setName} wurde importiert.`);
     showToast(`${set.setName} wurde importiert.`, 'success', 3000);
   } catch (err) {
     console.error('[importSetFromOverview]', err);
@@ -2663,13 +2708,13 @@ async function runSearch(options = {}) {
 
   const rawQuery = dom.searchInput.value.trim();
   const query = normalizeSearchText(rawQuery);
-  const includeApiSearch = Boolean(dom.searchApiFallback?.checked);
+  const searchScopeMode = getSearchScopeMode();
   if (!query) {
     dom.searchResults.innerHTML = '<p class="empty-state">Suchbegriff eingeben.</p>';
     return;
   }
   const setFilter = dom.searchSetFilter.value;
-  const availableSetsForSearch = includeApiSearch ? state.allSets : state.sets;
+  const availableSetsForSearch = getSetsForSearchMode(searchScopeMode);
   const baseSetsToSearch = setFilter
     ? availableSetsForSearch.filter((s) => s.setId === setFilter)
     : availableSetsForSearch;
@@ -2699,7 +2744,8 @@ async function runSearch(options = {}) {
     try {
       const cacheKey = `cards_${set.setId}`;
       const dbCardsCacheKey = `db_cards_${set.setId}`;
-      const searchCacheKey = `${set.setId}::${includeApiSearch ? 'db+api' : 'db'}`;
+      const searchCacheKey = `${set.setId}::${searchScopeMode}`;
+      const useApiForSet = shouldUseApiForSearchSet(searchScopeMode, set);
       let cards;
       if (state.searchCache.has(searchCacheKey)) {
         cards = state.searchCache.get(searchCacheKey);
@@ -2714,7 +2760,7 @@ async function runSearch(options = {}) {
           }
         }
 
-        if (includeApiSearch) {
+        if (useApiForSet) {
           let apiCards = [];
           if (cache.has(cacheKey)) {
             apiCards = cache.get(cacheKey) || [];
@@ -2724,7 +2770,9 @@ async function runSearch(options = {}) {
               cache.set(cacheKey, apiCards, CONFIG.CACHE_TTL_MS);
             }
           }
-          cards = mergeSearchCards(dbCards, apiCards);
+          cards = searchScopeMode === SEARCH_SCOPE_ALL
+            ? mergeSearchCards([], apiCards)
+            : mergeSearchCards(dbCards, apiCards);
         } else {
           cards = Array.isArray(dbCards) ? dbCards : [];
         }
@@ -2737,7 +2785,7 @@ async function runSearch(options = {}) {
       const dbCacheKey = `db_${set.setId}`;
       if (cache.has(dbCacheKey)) dbMap = cache.get(dbCacheKey);
       else {
-        dbMap = await readSetCollectionMap(set.setName);
+        dbMap = await readSetCollectionMap(set.setName).catch(() => new Map());
         cache.set(dbCacheKey, dbMap, CONFIG.CACHE_TTL_MS);
       }
       if (isStale() || isAborted()) return;
@@ -2758,7 +2806,11 @@ async function runSearch(options = {}) {
     }
   }
   if (!results.length) {
-    const modeHint = includeApiSearch ? ' (DB + API durchsucht)' : ' (nur DB durchsucht)';
+    const modeHint = searchScopeMode === SEARCH_SCOPE_IMPORTED
+      ? ' (nur importierte Sets/DB)'
+      : (searchScopeMode === SEARCH_SCOPE_ALL
+        ? ' (importierte aus DB, nicht importierte online)'
+        : ' (Online-Suche: DB + API)');
     dom.searchResults.innerHTML = `<p class="empty-state">Keine Karten f\u00fcr \u201e${rawQuery}\u201c gefunden (durchsucht: ${setsToSearch.length} Sets)${modeHint}.</p>`;
     return;
   }
@@ -2831,8 +2883,9 @@ async function openSearchResultLightbox(card, set, { apiOnly = false } = {}) {
 
   const cardsCacheKey = `db_cards_${set.setId}`;
   const dbCacheKey = `db_${set.setId}`;
-  const includeApiSearch = Boolean(dom.searchApiFallback?.checked);
-  const searchCacheKey = `${set.setId}::${includeApiSearch ? 'db+api' : 'db'}`;
+  const searchScopeMode = getSearchScopeMode();
+  const useApiForSet = shouldUseApiForSearchSet(searchScopeMode, set);
+  const searchCacheKey = `${set.setId}::${searchScopeMode}`;
 
   const [cards, dbMap] = await Promise.all([
     state.searchCache.has(searchCacheKey)
@@ -2843,7 +2896,7 @@ async function openSearchResultLightbox(card, set, { apiOnly = false } = {}) {
           cache.set(cardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
         }
 
-        if (!includeApiSearch) {
+        if (!useApiForSet) {
           state.searchCache.set(searchCacheKey, dbCards);
           return dbCards;
         }
@@ -2855,15 +2908,22 @@ async function openSearchResultLightbox(card, set, { apiOnly = false } = {}) {
           cache.set(`cards_${set.setId}`, apiCards, CONFIG.CACHE_TTL_MS);
         }
 
-        const mergedCards = mergeSearchCards(dbCards, apiCards);
+        const mergedCards = searchScopeMode === SEARCH_SCOPE_ALL
+          ? mergeSearchCards([], apiCards)
+          : mergeSearchCards(dbCards, apiCards);
         state.searchCache.set(searchCacheKey, mergedCards);
         return mergedCards;
       }),
     cache.has(dbCacheKey)
       ? cache.get(dbCacheKey)
       : readSetCollectionMap(set.setName).then((loadedDbMap) => {
-        cache.set(dbCacheKey, loadedDbMap, CONFIG.CACHE_TTL_MS);
-        return loadedDbMap;
+        const safeDbMap = loadedDbMap instanceof Map ? loadedDbMap : new Map();
+        cache.set(dbCacheKey, safeDbMap, CONFIG.CACHE_TTL_MS);
+        return safeDbMap;
+      }).catch(() => {
+        const emptyDbMap = new Map();
+        cache.set(dbCacheKey, emptyDbMap, CONFIG.CACHE_TTL_MS);
+        return emptyDbMap;
       })
   ]);
 
@@ -2892,7 +2952,8 @@ function initSearch() {
     debounce = setTimeout(() => runSearch(), SEARCH_INPUT_DEBOUNCE_MS);
   });
   dom.searchSetFilter.addEventListener('change', () => runSearch({ force: true }));
-  dom.searchApiFallback?.addEventListener('change', () => {
+  dom.searchScopeMode?.addEventListener('change', () => {
+    renderSearchSetFilterOptions();
     state.searchCache.clear();
     runSearch({ force: true });
   });
@@ -3513,7 +3574,7 @@ async function loadCurrentSet(forceRefresh = false) {
 
   try {
     const cardsCacheKey = `db_cards_${setId}`, dbCacheKey = `db_${setId}`;
-    const allowApiFallback = Boolean(dom.searchApiFallback?.checked);
+    const allowApiFallback = getSearchScopeMode() === SEARCH_SCOPE_ONLINE;
     if (forceRefresh) { cache.del(cardsCacheKey); cache.del(dbCacheKey); }
 
     const [cards, dbMap] = await Promise.all([
