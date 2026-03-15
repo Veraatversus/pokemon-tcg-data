@@ -8,8 +8,12 @@ import {
 
 // ── Interne Hilfsfunktionen ──────────────────────────────────────
 
-async function fetchJson(url) {
-  const response = await fetch(url);
+function isAbortError(err) {
+  return err?.name === 'AbortError';
+}
+
+async function fetchJson(url, { signal } = {}) {
+  const response = await fetch(url, { signal });
   if (!response.ok) throw new Error(`API Fehler ${response.status}: ${url}`);
   return response.json();
 }
@@ -17,22 +21,24 @@ async function fetchJson(url) {
 let tcgdexSetsCache = null;
 let veraSetsCache = null;
 
-async function fetchTcgdexSets() {
+async function fetchTcgdexSets({ signal } = {}) {
   if (tcgdexSetsCache) return tcgdexSetsCache;
   try {
-    const sets = await fetchJson(`${CONFIG.APIS.TCGDEX_DE}/sets`);
+    const sets = await fetchJson(`${CONFIG.APIS.TCGDEX_DE}/sets`, { signal });
     tcgdexSetsCache = Array.isArray(sets) ? sets : [];
-  } catch {
+  } catch (err) {
+    if (isAbortError(err)) throw err;
     tcgdexSetsCache = [];
   }
   return tcgdexSetsCache;
 }
 
-async function fetchPokemontcgSet(setId) {
+async function fetchPokemontcgSet(setId, { signal } = {}) {
   try {
-    const data = await fetchJson(`${CONFIG.APIS.POKEMONTCG}/sets/${encodeURIComponent(setId)}`);
+    const data = await fetchJson(`${CONFIG.APIS.POKEMONTCG}/sets/${encodeURIComponent(setId)}`, { signal });
     return data?.data || null;
-  } catch {
+  } catch (err) {
+    if (isAbortError(err)) throw err;
     return null;
   }
 }
@@ -77,10 +83,10 @@ function mapSetToOverviewModel(set) {
   };
 }
 
-async function fetchVeraSets() {
+async function fetchVeraSets({ signal } = {}) {
   if (veraSetsCache) return veraSetsCache;
   const url = `${CONFIG.APIS.VERA_BASE}/sets/${CONFIG.VERA_API_LANGUAGE}.json`;
-  const data = await fetchJson(url);
+  const data = await fetchJson(url, { signal });
   veraSetsCache = Array.isArray(data) ? data : [];
   return veraSetsCache;
 }
@@ -116,18 +122,20 @@ async function fetchPokemontcgSets() {
  * @param {string} setId  pokemontcg.io-Set-ID oder "TCGDEX-{tcgdexId}"
  * @returns {Promise<Array<{number, name, image, cardmarketUrl}>>}
  */
-export async function fetchMergedCards(setId) {
-  const tcgdexSets = await fetchTcgdexSets();
+export async function fetchMergedCards(setId, { signal } = {}) {
+  const tcgdexSets = await fetchTcgdexSets({ signal });
   let primarySet = null;
   if (CONFIG.USE_VERA_API) {
-    const veraSets = await fetchVeraSets();
+    const veraSets = await fetchVeraSets({ signal });
     primarySet = veraSets.find((set) => String(set?.id || '').toLowerCase() === String(setId).toLowerCase()) || null;
     if (!primarySet) {
-      primarySet = await fetchPokemontcgSet(setId);
+      primarySet = await fetchPokemontcgSet(setId, { signal });
     }
   } else {
-    primarySet = await fetchPokemontcgSet(setId);
+    primarySet = await fetchPokemontcgSet(setId, { signal });
   }
+
+  const fetchJsonWithSignal = (url) => fetchJson(url, { signal });
 
   const { allCards } = await loadCardsForSetCompat({
     setId,
@@ -142,7 +150,7 @@ export async function fetchMergedCards(setId) {
       pokemontcgBase: CONFIG.APIS.POKEMONTCG,
       tcgdexBase: CONFIG.APIS.TCGDEX_DE
     },
-    fetchJson
+    fetchJson: fetchJsonWithSignal
   });
 
   return naturalSort(allCards || [], 'number');

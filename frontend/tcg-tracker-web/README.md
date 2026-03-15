@@ -1,4 +1,4 @@
-# Pokémon TCG Tracker – try4
+# Pokémon TCG Tracker – tcg-tracker-web
 
 Statische Web-App (HTML/CSS/ES-Module), die **Google Sheets als Datenbank** nutzt.  
 Kein Server, kein Build-Schritt – direkt auf GitHub Pages deploybar.
@@ -54,7 +54,7 @@ Das Spreadsheet braucht folgende Sheets (exakte Namen):
 ### 3. config.js befüllen
 
 ```js
-// frontend/try4/js/config.js
+// frontend/tcg-tracker-web/js/config.js
 GOOGLE_CLIENT_ID: 'DEINE_CLIENT_ID.apps.googleusercontent.com',
 GOOGLE_API_KEY:   'REDACTED_PLACEHOLDER',
 SPREADSHEET_ID:   'AUS_DER_SHEETS-URL',
@@ -63,9 +63,9 @@ SPREADSHEET_ID:   'AUS_DER_SHEETS-URL',
 ### 4. Lokal starten
 
 ```bash
-npx serve frontend/try4          # empfohlen
+npx serve frontend/tcg-tracker-web          # empfohlen
 # oder:
-cd frontend/try4 && python -m http.server 8080
+cd frontend/tcg-tracker-web && python -m http.server 8080
 ```
 
 Öffne: `http://localhost:8080`
@@ -132,7 +132,7 @@ loadCurrentSet(setId)
 
 3. Lokal testen:
    - z. B. `python -m http.server 8000`
-   - `http://localhost:8000/frontend/try4/`
+  - `http://localhost:8000/frontend/tcg-tracker-web/`
 
 ## Hinweise
 - Diese Version ist ein MVP-Startpunkt.

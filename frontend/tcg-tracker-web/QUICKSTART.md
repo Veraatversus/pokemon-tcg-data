@@ -1,4 +1,4 @@
-# Try4 – Pokémon TCG Collection Manager SPA
+# tcg-tracker-web – Pokémon TCG Collection Manager SPA
 
 **Vollständige, produktionsreife Web-App** zum Verwalten deiner Pokémon-Kartensammlung in Google Sheets.
 
@@ -8,7 +8,7 @@
 
 ### 1. App Starten
 ```bash
-cd frontend/try4
+cd frontend/tcg-tracker-web
 npx serve . --listen 8080
 # Browser: http://localhost:8080
 ```
@@ -219,7 +219,7 @@ Grid: 5 Blocks × 3 Spalten × 4 Reihen = 60 Karten/Block
 
 ```bash
 # Entwicklungs-Server
-npx serve frontend/try4 --listen 8080
+npx serve frontend/tcg-tracker-web --listen 8080
 
 # Production Build (optional)
 # (Derzeit: SPA lädt direkt von Quelle)

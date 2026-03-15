@@ -1,5 +1,5 @@
 /**
- * cache.js – In-Memory TTL-Cache für try4
+ * cache.js – In-Memory TTL-Cache für tcg-tracker-web
  *
  * Kein localStorage — rein im RAM. Überlebt keinen Page-Reload,
  * entlastet aber innerhalb einer Session teure API-Requests.
