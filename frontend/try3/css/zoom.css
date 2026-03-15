@@ -1,0 +1,90 @@
+/* Zoom Controls Styling */
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px;
+  margin-bottom: 15px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 70px;
+  z-index: 100;
+}
+
+.zoom-btn {
+  width: 36px;
+  height: 36px;
+  border: 2px solid #667eea;
+  border-radius: 50%;
+  background: white;
+  color: #667eea;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.zoom-btn:hover {
+  background: #667eea;
+  color: white;
+  transform: scale(1.1);
+}
+
+.zoom-btn:active {
+  transform: scale(0.95);
+}
+
+.zoom-display {
+  min-width: 60px;
+  text-align: center;
+  font-weight: bold;
+  color: #333;
+  font-size: 14px;
+}
+
+/* Hide zoom controls on desktop (only show on mobile/tablet) */
+@media (min-width: 1025px) {
+  .zoom-controls {
+    display: none;
+  }
+}
+
+/* Zoom container transformations */
+#cards-container {
+  transform-origin: top left;
+  transition: transform 0.2s ease-out;
+  will-change: transform;
+}
+
+/* Cardmarket Link Styling */
+.cardmarket-link {
+  display: inline-block;
+  margin-left: auto;
+  font-size: 18px;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+.cardmarket-link:hover {
+  transform: scale(1.2);
+}
+
+/* Improve checkbox label layout with link */
+.card-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.card-checkboxes .checkbox-label:last-of-type {
+  margin-bottom: 0;
+}
