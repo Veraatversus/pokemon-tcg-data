@@ -1,4 +1,4 @@
-name: Merge to Release
+name: Manual Merge Dev to Release
 
 on:
   workflow_dispatch: # Allow manual trigger
