@@ -1,4 +1,4 @@
-name: Sync with Upstream
+name: Sync Upstream to Master
 
 env:
   UPSTREAM_REPO: JulienGitHub/pokemon-tcg-data
@@ -7,9 +7,6 @@ on:
   schedule:
     # Run daily at 2 AM UTC
     - cron: '0 2 * * *'
-  push:
-    branches:
-      - master
   workflow_dispatch: # Allow manual trigger
 
 permissions:
@@ -18,7 +15,7 @@ permissions:
   issues: write
 
 jobs:
-  sync:
+  sync_upstream_to_master:
     runs-on: ubuntu-latest
 
     steps:
@@ -36,9 +33,7 @@ jobs:
 
       - name: Sync master with upstream
         id: sync_upstream
-        if: github.event_name != 'push'
         run: |
-          echo "master_updated=false" >> $GITHUB_OUTPUT
           echo "conflict_type=" >> $GITHUB_OUTPUT
 
           git remote add upstream https://github.com/${UPSTREAM_REPO}.git || true
@@ -57,71 +52,21 @@ jobs:
           if git merge -X theirs upstream/$UPSTREAM_BRANCH --no-edit; then
             echo "Successfully merged upstream changes into master"
             git push origin master
-            echo "master_updated=true" >> $GITHUB_OUTPUT
           else
             git merge --abort
             echo "conflict_type=upstream->master" >> $GITHUB_OUTPUT
             exit 1
           fi
 
-      - name: Mark master push update
-        id: mark_push
-        if: github.event_name == 'push'
-        run: |
-          echo "master_updated=true" >> $GITHUB_OUTPUT
-
-      - name: Resolve update state
-        id: state
-        run: |
-          MASTER_UPDATED="${{ steps.sync_upstream.outputs.master_updated }}"
-          if [ -z "$MASTER_UPDATED" ]; then
-            MASTER_UPDATED="${{ steps.mark_push.outputs.master_updated }}"
-          fi
-          echo "master_updated=${MASTER_UPDATED:-false}" >> $GITHUB_OUTPUT
-
-      - name: Propagate master to dev and release
-        id: propagate
-        if: steps.state.outputs.master_updated == 'true'
-        run: |
-          echo "conflict_target=" >> $GITHUB_OUTPUT
-
-          merge_target () {
-            TARGET="$1"
-            git fetch origin "$TARGET" || true
-
-            if git ls-remote --exit-code --heads origin "$TARGET" >/dev/null 2>&1; then
-              git checkout -B "$TARGET" "origin/$TARGET"
-            else
-              git checkout -B "$TARGET" master
-            fi
-
-            if git merge -X theirs master --no-edit; then
-              git push origin "$TARGET"
-            else
-              git merge --abort
-              echo "conflict_target=$TARGET" >> $GITHUB_OUTPUT
-              exit 1
-            fi
-          }
-
-          merge_target dev
-          merge_target release
-
-          git checkout master
-
       - name: Create issue on merge conflict
         if: failure()
         env:
           SYNC_CONFLICT: ${{ steps.sync_upstream.outputs.conflict_type }}
-          PROPAGATE_CONFLICT: ${{ steps.propagate.outputs.conflict_target }}
         uses: actions/github-script@v7
         with:
           script: |
             const syncConflict = process.env.SYNC_CONFLICT || '';
-            const propagateConflict = process.env.PROPAGATE_CONFLICT || '';
-            const conflictType = syncConflict
-              ? syncConflict
-              : (propagateConflict ? `master->${propagateConflict}` : 'unknown');
+            const conflictType = syncConflict || 'unknown';
 
             const issue = await github.rest.issues.create({
               owner: context.repo.owner,
@@ -141,20 +86,8 @@ jobs:
               4. Resolve conflicts
               5. \`git push origin master\`
 
-                6. Merge master into dev and release:
-                 \`\`\`sh
-                 git checkout dev
-                  git merge -X theirs master
-                 git push origin dev
-
-                  git checkout release
-                  git merge -X theirs master
-                  git push origin release
-                 \`\`\`
-
               **Upstream Repository:** https://github.com/${process.env.UPSTREAM_REPO}
-
-                Once resolved, updates on \`release\` and \`dev\` are deployed to GitHub Pages.`,
+              `,
               labels: ['upstream-sync', 'manual-action-required']
             });
             console.log('Created issue:', issue.data.number);
