@@ -486,6 +486,37 @@ export async function listImportedSets() {
 }
 
 /**
+ * Liest Karten für ein Set direkt aus db_cards.
+ * Wird für performante, API-arme Suchläufe verwendet.
+ * @param {string} setId
+ * @returns {Promise<Array<{number, name, image, cardmarketUrl, rarity}>>}
+ */
+export async function readDbCardsForSet(setId) {
+  await ensureNormalizedSchema();
+  const normalizedSetId = toSafeCellString(setId).toLowerCase();
+  if (!normalizedSetId) return [];
+
+  const rows = await readDbRows(DB_SHEETS.cards, DB_HEADERS.cards.length);
+  const latestPerCard = new Map();
+  rows.forEach((row) => {
+    if (toSafeCellString(row[0]).toLowerCase() !== normalizedSetId) return;
+    const cardId = toSafeCellString(row[1] || row[2]);
+    if (!cardId) return;
+    latestPerCard.set(cardId, row);
+  });
+
+  return Array.from(latestPerCard.values())
+    .map((row) => ({
+      number: toSafeCellString(row[2] || row[1]),
+      name: toSafeCellString(row[3]),
+      image: toSafeCellString(row[4]),
+      cardmarketUrl: toSafeCellString(row[5]),
+      rarity: toSafeCellString(row[6])
+    }))
+    .filter((card) => card.number);
+}
+
+/**
  * Gibt ALLE Sets (auch nicht importierte) mit vollständigen Metadaten zurück.
  * Nützlich zum Anzeigen einer vollständigen Set-Liste.
  * @returns {Promise<Array<{setId, setName, series, releaseDate, totalCards, ptcgoCode, imported}>>}

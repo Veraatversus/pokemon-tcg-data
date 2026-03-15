@@ -1302,6 +1302,17 @@ body.dark .stats-series-bar { background: #334155; }
    ══════════════════════════════════════════════════════════════════════════ */
 .search-main-input { min-width: 280px; flex: 1; padding: 9px 14px; font-size: 15px; }
 .search-hint { margin: 8px 16px; font-size: 12px; color: var(--color-muted); }
+.search-api-fallback-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 16px 0;
+  font-size: 12px;
+  color: var(--color-muted);
+}
+.search-api-fallback-toggle input[type="checkbox"] {
+  margin: 0;
+}
 .search-result-count { padding: 6px 12px; font-size: 13px; color: var(--color-muted); grid-column: 1 / -1; }
 .search-set-tag {
   display: inline-block;
