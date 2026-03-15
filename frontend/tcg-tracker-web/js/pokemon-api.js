@@ -43,6 +43,32 @@ async function fetchPokemontcgSet(setId, { signal } = {}) {
   }
 }
 
+function resolveApiSetIds(setId) {
+  const raw = String(setId || '').trim();
+  const isTcgdexOnly = raw.startsWith('TCGDEX-');
+  const tcgdexSetId = isTcgdexOnly ? raw.substring('TCGDEX-'.length) : raw;
+
+  let primarySetId = null;
+  if (!isTcgdexOnly) {
+    primarySetId = raw;
+  } else if (tcgdexSetId) {
+    const lowerTcgdex = tcgdexSetId.toLowerCase();
+    for (const [pokeId, mappedTcgdexId] of Object.entries(CONFIG.CUSTOM_SET_ID_MAPPINGS || {})) {
+      if (String(mappedTcgdexId || '').toLowerCase() === lowerTcgdex) {
+        primarySetId = String(pokeId || '').trim() || null;
+        break;
+      }
+    }
+  }
+
+  return {
+    rawSetId: raw,
+    tcgdexSetId,
+    primarySetId,
+    isTcgdexOnly
+  };
+}
+
 async function resolvePrimarySetForId(setId, primarySets = null) {
   if (String(setId).startsWith('TCGDEX-')) return null;
   if (Array.isArray(primarySets)) {
@@ -124,15 +150,18 @@ async function fetchPokemontcgSets() {
  */
 export async function fetchMergedCards(setId, { signal } = {}) {
   const tcgdexSets = await fetchTcgdexSets({ signal });
+  const { primarySetId, isTcgdexOnly } = resolveApiSetIds(setId);
   let primarySet = null;
-  if (CONFIG.USE_VERA_API) {
-    const veraSets = await fetchVeraSets({ signal });
-    primarySet = veraSets.find((set) => String(set?.id || '').toLowerCase() === String(setId).toLowerCase()) || null;
-    if (!primarySet) {
-      primarySet = await fetchPokemontcgSet(setId, { signal });
+  if (!isTcgdexOnly && primarySetId) {
+    if (CONFIG.USE_VERA_API) {
+      const veraSets = await fetchVeraSets({ signal });
+      primarySet = veraSets.find((set) => String(set?.id || '').toLowerCase() === String(primarySetId).toLowerCase()) || null;
+      if (!primarySet) {
+        primarySet = await fetchPokemontcgSet(primarySetId, { signal });
+      }
+    } else {
+      primarySet = await fetchPokemontcgSet(primarySetId, { signal });
     }
-  } else {
-    primarySet = await fetchPokemontcgSet(setId, { signal });
   }
 
   const fetchJsonWithSignal = (url) => fetchJson(url, { signal });
