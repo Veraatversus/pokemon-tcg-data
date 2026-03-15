@@ -2,9 +2,9 @@
 // SERVICE WORKER - Offline Support & Caching
 // ══════════════════════════════════════════════════════════════════════════
 
-const CACHE_NAME = 'poke-tcg-v2';
-const RUNTIME_CACHE = 'poke-tcg-runtime';
-const IMAGE_CACHE = 'poke-tcg-images';
+const CACHE_NAME = 'poke-tcg-v3';
+const RUNTIME_CACHE = 'poke-tcg-runtime-v3';
+const IMAGE_CACHE = 'poke-tcg-images-v3';
 
 const STATIC_ASSETS = [
   './',

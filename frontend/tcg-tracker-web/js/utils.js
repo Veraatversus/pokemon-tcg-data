@@ -11,7 +11,14 @@
  */
 export function normalizeCardNumber(cardNumber) {
   if (cardNumber === null || cardNumber === undefined) return '';
-  const normalized = String(cardNumber).trim();
+  let normalized = String(cardNumber).trim();
+  if (!normalized) return '';
+
+  const slashIndex = normalized.indexOf('/');
+  if (slashIndex > 0) {
+    normalized = normalized.slice(0, slashIndex).trim();
+  }
+
   const match = normalized.match(/^([a-zA-Z._-]*?)(\d+)([a-zA-Z._-]*)$/);
   if (!match) return normalized;
   const prefix = match[1];

@@ -2725,7 +2725,7 @@ async function runSearch(options = {}) {
           results.push({ card, set, dbMap, score, apiOnly: Boolean(card?.__searchApiOnly) });
         }
       });
-      if (!structuredQuery && !mixedQuery && results.length >= 200) break;
+      if (!structuredQuery && !mixedQuery && results.length >= 200 && searchScopeMode === SEARCH_SCOPE_IMPORTED) break;
       // Exakter Set+Nummer-Treffer (ohne Namensfilter) — kann frühzeitig abbrechen
       if (structuredQuery?.cardNumber && !structuredQuery?.namePart && results.length >= 1) break;
     } catch (err) {
@@ -3269,7 +3269,7 @@ function initLightbox() {
     const card = state.cards[state.lightboxIndex];
     if (!card) return;
     const key = normalizeCardNumber(card.number);
-    const db  = state.dbMap.get(key) || { displayId: card.number, g: false, rh: false, gCell: null, rhCell: null };
+    let db = state.dbMap.get(key) || { displayId: card.number, g: false, rh: false, gCell: null, rhCell: null };
     const shouldEnsureImportedSet = checked && (Boolean(state.pendingSearchSetImport) || !Boolean(state.currentSet?.imported));
     if (shouldEnsureImportedSet) {
       const setToImport = state.currentSet;
@@ -3296,13 +3296,15 @@ function initLightbox() {
         state.pendingSearchSetImport = false;
         state.dbMap = await readSetCollectionMap(refreshedSet.setName).catch(() => new Map());
         cache.set(`db_${setId}`, state.dbMap, CONFIG.CACHE_TTL_MS);
+        db = state.dbMap.get(key) || db;
         showToast(`${refreshedSet.setName} wurde automatisch importiert.`, 'success', 3200);
       } finally {
         setLoading(false);
       }
     }
     if (!db?.gCell) {
-      const ensured = await ensureCollectionEntry(state.currentSet.setName, db?.displayId || key);
+      const ensured = await ensureCollectionEntry(state.currentSet.setName, card.number || db?.displayId || key);
+      db.displayId = ensured.displayId || db.displayId || card.number || key;
       db.gCell = ensured.gCell;
       db.rhCell = ensured.rhCell;
       state.dbMap.set(key, db);
@@ -3326,6 +3328,7 @@ function initLightbox() {
       updateStats();
       state.summaryData = null;
       broadcastRealtimeCardUpdate(key, db);
+      runSearch({ force: true });
     } catch (err) {
       showToast(`Fehler: ${err.message}`, 'error');
       renderLightbox(state.lightboxIndex); // revert UI
