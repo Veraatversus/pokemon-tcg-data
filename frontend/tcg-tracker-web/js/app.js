@@ -319,6 +319,28 @@ function shouldUseApiForSearchSet(mode, set) {
   return false;
 }
 
+function getSearchModeMeta(mode) {
+  if (mode === SEARCH_SCOPE_ONLINE) {
+    return {
+      label: 'Modus: Online-Suche',
+      className: 'online',
+      hint: 'DB + API für alle Sets'
+    };
+  }
+  if (mode === SEARCH_SCOPE_ALL) {
+    return {
+      label: 'Modus: Alle Sets',
+      className: 'all',
+      hint: 'Importierte aus DB, nicht importierte online'
+    };
+  }
+  return {
+    label: 'Modus: Importierte Sets',
+    className: 'imported',
+    hint: 'Nur importierte Sets/DB'
+  };
+}
+
 function renderSearchSetFilterOptions() {
   if (!dom.searchSetFilter) return;
   const mode = getSearchScopeMode();
@@ -2806,12 +2828,13 @@ async function runSearch(options = {}) {
     }
   }
   if (!results.length) {
-    const modeHint = searchScopeMode === SEARCH_SCOPE_IMPORTED
-      ? ' (nur importierte Sets/DB)'
-      : (searchScopeMode === SEARCH_SCOPE_ALL
-        ? ' (importierte aus DB, nicht importierte online)'
-        : ' (Online-Suche: DB + API)');
-    dom.searchResults.innerHTML = `<p class="empty-state">Keine Karten f\u00fcr \u201e${rawQuery}\u201c gefunden (durchsucht: ${setsToSearch.length} Sets)${modeHint}.</p>`;
+    const modeMeta = getSearchModeMeta(searchScopeMode);
+    dom.searchResults.innerHTML = `
+      <div class="search-results-head">
+        <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
+      </div>
+      <p class="empty-state">Keine Karten f\u00fcr \u201e${rawQuery}\u201c gefunden (durchsucht: ${setsToSearch.length} Sets, ${modeMeta.hint}).</p>
+    `;
     return;
   }
   results.sort((left, right) => {
@@ -2822,7 +2845,13 @@ async function runSearch(options = {}) {
   });
 
   if (isStale() || isAborted()) return;
-  dom.searchResults.innerHTML = `<p class="search-result-count">${results.length} Ergebnis${results.length !== 1 ? 'se' : ''}</p>`;
+  const modeMeta = getSearchModeMeta(searchScopeMode);
+  dom.searchResults.innerHTML = `
+    <div class="search-results-head">
+      <p class="search-result-count">${results.length} Ergebnis${results.length !== 1 ? 'se' : ''}</p>
+      <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
+    </div>
+  `;
   const frag = document.createDocumentFragment();
   results.forEach(({ card, set, dbMap, apiOnly }) => {
     const key = normalizeCardNumber(card.number);
