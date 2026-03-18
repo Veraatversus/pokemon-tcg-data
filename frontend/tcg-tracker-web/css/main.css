@@ -112,7 +112,8 @@ body {
 }
 
 .header-actions { display: flex; gap: 8px; align-items: center; }
-.header-actions button { font-size: 13px; padding: 6px 12px; }
+.header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: nowrap; flex-shrink: 0; }
+.header-actions button { font-size: 13px; padding: 6px 12px; white-space: nowrap; }
 
 .recent-sets {
   display: flex;
@@ -1703,8 +1704,8 @@ body.dark .stats-series-bar { background: #334155; }
 
 @media (max-width: 768px) {
   .topbar { flex-wrap: wrap; padding: 8px 10px; gap: 8px; }
-  .topbar h1 { font-size: 15px; flex: 1; min-width: 100%; }
-  .header-actions { gap: 4px; }
+  .topbar h1 { font-size: 15px; flex: 1; min-width: 0; }
+  .header-actions { gap: 4px; flex-shrink: 0; flex-wrap: nowrap; }
   .main-nav {
     order: 2;
     flex-wrap: nowrap;
