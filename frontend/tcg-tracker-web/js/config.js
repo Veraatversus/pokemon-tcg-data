@@ -2,12 +2,21 @@ function detectStorageScope() {
   const locationRef = globalThis?.location;
   const path = String(locationRef?.pathname || '/').toLowerCase();
   const search = String(locationRef?.search || '').toLowerCase();
+  const segments = path.split('/').filter(Boolean);
 
   if (/([?&])env=dev([&#]|$)/.test(search) || /([?&])scope=dev([&#]|$)/.test(search)) {
     return 'dev';
   }
 
-  return /(^|\/)dev(\/|$|\.)/.test(path) ? 'dev' : 'prod';
+  if (/([?&])env=release([&#]|$)/.test(search) || /([?&])scope=release([&#]|$)/.test(search)) {
+    return 'release';
+  }
+
+  if (segments.includes('dev')) {
+    return 'dev';
+  }
+
+  return 'release';
 }
 
 export const STORAGE_SCOPE = detectStorageScope();
@@ -33,8 +42,11 @@ export const CONFIG = {
     if (id) localStorage.setItem(SPREADSHEET_ID_KEY, id);
     else    localStorage.removeItem(SPREADSHEET_ID_KEY);
   },
-  DISCOVERY_DOCS: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
-  SCOPES: 'https://www.googleapis.com/auth/spreadsheets',
+  DISCOVERY_DOCS: [
+    'https://sheets.googleapis.com/$discovery/rest?version=v4',
+    'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'
+  ],
+  SCOPES: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.metadata.readonly',
 
   // ── Sheet-Namen ─────────────────────────────────────────────
   SHEETS: {
