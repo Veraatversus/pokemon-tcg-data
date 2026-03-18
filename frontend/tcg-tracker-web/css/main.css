@@ -712,6 +712,8 @@ label:active {
 }
 
 .lightbox-image-dialog {
+  position: fixed;
+  inset: 0;
   width: 100vw;
   height: 100dvh;
   max-width: none;
@@ -739,8 +741,10 @@ label:active {
 }
 
 .lightbox-image-stage img {
-  max-width: 100vw;
-  max-height: 100dvh;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
   object-fit: contain;
   transform-origin: center center;
   transition: transform 0.12s ease;
@@ -3600,11 +3604,15 @@ body {
   --window-bg-elevated: var(--color-surface-elevated);
   --window-border: var(--color-border);
   --window-muted: var(--color-muted);
-  --card-collected-bg: color-mix(in srgb, #d8f3dc 78%, var(--color-surface) 22%);
-  --card-collected-border: color-mix(in srgb, #2f855a 78%, var(--color-border) 22%);
+  --card-collected-bg: #d8f3dc;
+  --card-collected-bg-2: #c7ebcf;
+  --card-collected-border: #2f855a;
+  --card-collected-border-soft: rgba(47, 133, 90, 0.45);
   --card-collected-accent: #2f855a;
-  --card-reverse-bg: color-mix(in srgb, #dbeafe 76%, var(--color-surface) 24%);
-  --card-reverse-border: color-mix(in srgb, #2563eb 78%, var(--color-border) 22%);
+  --card-reverse-bg: #dbeafe;
+  --card-reverse-bg-2: #cde3ff;
+  --card-reverse-border: #2563eb;
+  --card-reverse-border-soft: rgba(37, 99, 235, 0.45);
   --card-reverse-accent: #2563eb;
 }
 
@@ -3613,11 +3621,15 @@ body.dark {
   --window-bg-elevated: color-mix(in srgb, var(--color-surface-elevated) 90%, #000 10%);
   --window-border: color-mix(in srgb, var(--color-border) 85%, #93c5fd 15%);
   --window-muted: color-mix(in srgb, var(--color-muted) 88%, #dbeafe 12%);
-  --card-collected-bg: color-mix(in srgb, #123524 72%, var(--color-surface) 28%);
-  --card-collected-border: color-mix(in srgb, #4ade80 74%, var(--color-border) 26%);
+  --card-collected-bg: #123524;
+  --card-collected-bg-2: #174b31;
+  --card-collected-border: #4ade80;
+  --card-collected-border-soft: rgba(74, 222, 128, 0.5);
   --card-collected-accent: #4ade80;
-  --card-reverse-bg: color-mix(in srgb, #102a56 72%, var(--color-surface) 28%);
-  --card-reverse-border: color-mix(in srgb, #60a5fa 74%, var(--color-border) 26%);
+  --card-reverse-bg: #102a56;
+  --card-reverse-bg-2: #173a70;
+  --card-reverse-border: #60a5fa;
+  --card-reverse-border-soft: rgba(96, 165, 250, 0.52);
   --card-reverse-accent: #60a5fa;
 }
 
@@ -3708,6 +3720,40 @@ body.dark .lightbox-image-hint {
   color: #e2e8f0 !important;
 }
 
+body.dark #lightbox-title,
+body.dark #lightbox-subtitle,
+body.dark #lightbox-counter,
+body.dark .lightbox-check-label,
+body.dark .lightbox-check-label span,
+body.dark .lightbox-fact-row dd,
+body.dark .lightbox-cm-link {
+  color: #f1f5f9 !important;
+}
+
+body.dark .lightbox-fact-row dt,
+body.dark .lightbox-hint {
+  color: #cbd5e1 !important;
+}
+
+body.dark .lightbox-check-label input[type="checkbox"] {
+  accent-color: #60a5fa;
+}
+
+@media (max-width: 640px) {
+  .lightbox-image-hint {
+    bottom: 8px;
+    padding: 5px 10px;
+    font-size: 11px;
+    max-width: calc(100vw - 16px);
+    text-align: center;
+  }
+
+  .lightbox-image-dialog .lightbox-close {
+    top: 8px;
+    right: 8px;
+  }
+}
+
 /* ── Dropdown color-scheme & native option rendering ── */
 body.dark select,
 body.dark input,
@@ -3780,21 +3826,22 @@ body.dark select option {
 .dash-sets-row,
 .compact-dashboard .dash-sets-row,
 .logos-dashboard .dash-sets-row {
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--grid-min-width, 165px)), 1fr)) !important;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
+  grid-template-columns: repeat(auto-fit, minmax(var(--grid-min-width, 165px), 1fr)) !important;
 }
 
 .card.collected,
 .search-result-card.collected {
-  background: linear-gradient(180deg, var(--card-collected-bg), color-mix(in srgb, var(--card-collected-bg) 82%, #ffffff 18%)) !important;
+  background: linear-gradient(180deg, var(--card-collected-bg), var(--card-collected-bg-2)) !important;
   border-color: var(--card-collected-border) !important;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--card-collected-border) 36%, transparent), inset 4px 0 0 0 var(--card-collected-accent);
+  box-shadow: inset 0 0 0 1px var(--card-collected-border-soft), inset 4px 0 0 0 var(--card-collected-accent);
 }
 
 .card.reverse,
 .search-result-card.reverse {
-  background: linear-gradient(180deg, var(--card-reverse-bg), color-mix(in srgb, var(--card-reverse-bg) 82%, #ffffff 18%)) !important;
+  background: linear-gradient(180deg, var(--card-reverse-bg), var(--card-reverse-bg-2)) !important;
   border-color: var(--card-reverse-border) !important;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--card-reverse-border) 38%, transparent), inset 4px 0 0 0 var(--card-reverse-accent);
+  box-shadow: inset 0 0 0 1px var(--card-reverse-border-soft), inset 4px 0 0 0 var(--card-reverse-accent);
 }
 
 .card.collected .meta,
