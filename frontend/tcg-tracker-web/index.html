@@ -81,11 +81,11 @@
   <!-- Lightbox-Dialog -->
   <dialog id="dialog-lightbox" class="lightbox-dialog">
     <button id="btn-lightbox-close" class="lightbox-close" title="Schließen (Esc)" aria-label="Lightbox schließen">✕</button>
-    <button id="btn-lightbox-prev" class="lightbox-nav lightbox-prev" title="Vorherige (←)" aria-label="Vorherige Karte" disabled>‹</button>
-    <button id="btn-lightbox-next" class="lightbox-nav lightbox-next" title="Nächste (→)" aria-label="Nächste Karte" disabled>›</button>
     <div class="lightbox-content">
       <div class="lightbox-img-wrap">
+        <button id="btn-lightbox-prev" class="lightbox-nav lightbox-prev" title="Vorherige (←)" aria-label="Vorherige Karte" disabled>‹</button>
         <img id="lightbox-img" src="" alt="" />
+        <button id="btn-lightbox-next" class="lightbox-nav lightbox-next" title="Nächste (→)" aria-label="Nächste Karte" disabled>›</button>
       </div>
       <div class="lightbox-meta">
         <h3 id="lightbox-title"></h3>
@@ -115,9 +115,17 @@
             <span>Reverse Holo (RH)</span>
           </label>
         </div>
-        <p class="lightbox-hint">← → navigieren / im Bildbereich wischen &nbsp;|&nbsp; Leertaste = G togglen &nbsp;|&nbsp; Esc schließen</p>
+        <p class="lightbox-hint">← → navigieren / im Bildbereich links-rechts wischen / nach unten schließen &nbsp;|&nbsp; Bild antippen = Vollbild</p>
       </div>
     </div>
+  </dialog>
+
+  <dialog id="dialog-lightbox-image" class="lightbox-image-dialog">
+    <button id="btn-lightbox-image-close" class="lightbox-close" title="Vollbild schließen (Esc)" aria-label="Vollbild schließen">✕</button>
+    <div class="lightbox-image-stage" id="lightbox-image-stage">
+      <img id="lightbox-image-full" src="" alt="" />
+    </div>
+    <p class="lightbox-image-hint">Links/Rechts wischen = Karte wechseln · Nach unten wischen = schließen · Pinch = Zoom</p>
   </dialog>
 
   <!-- Header -->
