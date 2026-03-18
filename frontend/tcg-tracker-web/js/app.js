@@ -231,6 +231,10 @@ const dom = {
   btnLightboxClose: document.getElementById('btn-lightbox-close'),
   btnLightboxPrev:  document.getElementById('btn-lightbox-prev'),
   btnLightboxNext:  document.getElementById('btn-lightbox-next'),
+  lightboxImageDialog: document.getElementById('dialog-lightbox-image'),
+  lightboxImageStage: document.getElementById('lightbox-image-stage'),
+  lightboxImageFull: document.getElementById('lightbox-image-full'),
+  btnLightboxImageClose: document.getElementById('btn-lightbox-image-close'),
   // Stats view
   statsContent:     document.getElementById('stats-content'),
   // Search view
@@ -3487,17 +3491,31 @@ function initLightbox() {
   dom.btnLightboxClose.addEventListener('click', closeLightbox);
   dom.lightboxDialog.addEventListener('click', (e) => { if (e.target === dom.lightboxDialog) closeLightbox(); });
 
-  dom.btnLightboxPrev.addEventListener('click', () => {
-    if (state.lightboxIndex > 0) { state.lightboxIndex--; renderLightbox(state.lightboxIndex); }
-  });
-  dom.btnLightboxNext.addEventListener('click', () => {
-    if (state.lightboxIndex < state.cards.length - 1) { state.lightboxIndex++; renderLightbox(state.lightboxIndex); }
-  });
+  const goPrevLightboxCard = () => {
+    if (state.lightboxIndex > 0) {
+      state.lightboxIndex--;
+      renderLightbox(state.lightboxIndex);
+      return true;
+    }
+    return false;
+  };
+
+  const goNextLightboxCard = () => {
+    if (state.lightboxIndex < state.cards.length - 1) {
+      state.lightboxIndex++;
+      renderLightbox(state.lightboxIndex);
+      return true;
+    }
+    return false;
+  };
+
+  dom.btnLightboxPrev.addEventListener('click', goPrevLightboxCard);
+  dom.btnLightboxNext.addEventListener('click', goNextLightboxCard);
 
   dom.lightboxDialog.addEventListener('keydown', (e) => {
     if (e.key === 'Escape')     closeLightbox();
-    if (e.key === 'ArrowLeft')  dom.btnLightboxPrev.click();
-    if (e.key === 'ArrowRight') dom.btnLightboxNext.click();
+    if (e.key === 'ArrowLeft')  goPrevLightboxCard();
+    if (e.key === 'ArrowRight') goNextLightboxCard();
     if (e.key === ' ')          { e.preventDefault(); dom.lightboxGCheck.click(); }
   });
 
@@ -3531,14 +3549,169 @@ function initLightbox() {
         && Math.abs(deltaY) <= maxVertical
         && elapsed <= maxDuration;
 
+      const isSwipeDownToClose = deltaY >= 72
+        && Math.abs(deltaX) <= 50
+        && elapsed <= maxDuration;
+
+      if (isSwipeDownToClose) {
+        closeLightbox();
+        return;
+      }
+
       if (!isHorizontalSwipe) return;
 
-      if (deltaX > 0 && state.lightboxIndex > 0) {
-        state.lightboxIndex--;
-        renderLightbox(state.lightboxIndex);
-      } else if (deltaX < 0 && state.lightboxIndex < state.cards.length - 1) {
-        state.lightboxIndex++;
-        renderLightbox(state.lightboxIndex);
+      if (deltaX > 0) goPrevLightboxCard();
+      else if (deltaX < 0) goNextLightboxCard();
+    }, { passive: true });
+  }
+
+  if (dom.lightboxImg && dom.lightboxImageDialog && dom.lightboxImageFull && dom.lightboxImageStage && dom.btnLightboxImageClose) {
+    let fsScale = 1;
+    let fsTranslateX = 0;
+    let fsTranslateY = 0;
+    let fsStartX = 0;
+    let fsStartY = 0;
+    let fsStartTime = 0;
+    let fsStartTranslateX = 0;
+    let fsStartTranslateY = 0;
+    let fsPinchStartDistance = 0;
+    let fsPinchStartScale = 1;
+
+    const resetFullscreenTransform = () => {
+      fsScale = 1;
+      fsTranslateX = 0;
+      fsTranslateY = 0;
+      dom.lightboxImageFull.style.transform = 'translate3d(0, 0, 0) scale(1)';
+    };
+
+    const applyFullscreenTransform = () => {
+      dom.lightboxImageFull.style.transform = `translate3d(${fsTranslateX}px, ${fsTranslateY}px, 0) scale(${fsScale})`;
+    };
+
+    const syncFullscreenImage = (resetTransform = false) => {
+      const card = state.cards[state.lightboxIndex];
+      if (!card) return;
+      dom.lightboxImageFull.src = card.image || '';
+      dom.lightboxImageFull.alt = card.name || '';
+      if (resetTransform) resetFullscreenTransform();
+    };
+
+    const openFullscreenImage = () => {
+      syncFullscreenImage(true);
+      dom.lightboxImageDialog.showModal();
+    };
+
+    const closeFullscreenImage = () => {
+      if (!dom.lightboxImageDialog.open) return;
+      dom.lightboxImageDialog.close();
+      resetFullscreenTransform();
+    };
+
+    dom.lightboxImg.addEventListener('click', () => {
+      if (!dom.lightboxDialog.open) return;
+      openFullscreenImage();
+    });
+
+    dom.btnLightboxImageClose.addEventListener('click', closeFullscreenImage);
+    dom.lightboxImageDialog.addEventListener('click', (e) => {
+      if (e.target === dom.lightboxImageDialog) closeFullscreenImage();
+    });
+    dom.lightboxImageDialog.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeFullscreenImage();
+      if (e.key === 'ArrowLeft') {
+        if (goPrevLightboxCard()) syncFullscreenImage(true);
+      }
+      if (e.key === 'ArrowRight') {
+        if (goNextLightboxCard()) syncFullscreenImage(true);
+      }
+    });
+
+    const distance = (touchA, touchB) => {
+      const dx = touchA.clientX - touchB.clientX;
+      const dy = touchA.clientY - touchB.clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    dom.lightboxImageStage.addEventListener('touchstart', (e) => {
+      if (!dom.lightboxImageDialog.open) return;
+      if (e.touches.length === 2) {
+        fsPinchStartDistance = distance(e.touches[0], e.touches[1]);
+        fsPinchStartScale = fsScale;
+        fsStartTime = 0;
+        return;
+      }
+      if (e.touches.length !== 1) return;
+      const touch = e.touches[0];
+      fsStartX = touch.clientX;
+      fsStartY = touch.clientY;
+      fsStartTime = Date.now();
+      fsStartTranslateX = fsTranslateX;
+      fsStartTranslateY = fsTranslateY;
+    }, { passive: true });
+
+    dom.lightboxImageStage.addEventListener('touchmove', (e) => {
+      if (!dom.lightboxImageDialog.open) return;
+      if (e.touches.length === 2) {
+        const currentDistance = distance(e.touches[0], e.touches[1]);
+        if (!fsPinchStartDistance) {
+          fsPinchStartDistance = currentDistance;
+          fsPinchStartScale = fsScale;
+          return;
+        }
+        const nextScale = fsPinchStartScale * (currentDistance / fsPinchStartDistance);
+        fsScale = Math.max(1, Math.min(4, nextScale));
+        if (fsScale === 1) {
+          fsTranslateX = 0;
+          fsTranslateY = 0;
+        }
+        applyFullscreenTransform();
+        e.preventDefault();
+        return;
+      }
+
+      if (e.touches.length !== 1 || fsScale <= 1) return;
+      const touch = e.touches[0];
+      fsTranslateX = fsStartTranslateX + (touch.clientX - fsStartX);
+      fsTranslateY = fsStartTranslateY + (touch.clientY - fsStartY);
+      applyFullscreenTransform();
+      e.preventDefault();
+    }, { passive: false });
+
+    dom.lightboxImageStage.addEventListener('touchend', (e) => {
+      if (!dom.lightboxImageDialog.open) return;
+
+      if (e.touches.length === 0) {
+        fsPinchStartDistance = 0;
+      }
+
+      if (!fsStartTime || e.changedTouches.length !== 1 || fsScale > 1) return;
+
+      const touch = e.changedTouches[0];
+      const deltaX = touch.clientX - fsStartX;
+      const deltaY = touch.clientY - fsStartY;
+      const elapsed = Date.now() - fsStartTime;
+      fsStartTime = 0;
+
+      const minHorizontal = 52;
+      const maxVertical = 44;
+      const isHorizontalSwipe = Math.abs(deltaX) >= minHorizontal
+        && Math.abs(deltaY) <= maxVertical
+        && elapsed <= 700;
+
+      if (isHorizontalSwipe) {
+        if (deltaX > 0) {
+          if (goPrevLightboxCard()) syncFullscreenImage(true);
+        } else {
+          if (goNextLightboxCard()) syncFullscreenImage(true);
+        }
+        return;
+      }
+
+      const isSwipeDownClose = deltaY >= 78
+        && Math.abs(deltaX) <= 52
+        && elapsed <= 700;
+      if (isSwipeDownClose) {
+        closeFullscreenImage();
       }
     }, { passive: true });
   }
