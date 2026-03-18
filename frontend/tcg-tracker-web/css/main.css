@@ -3910,3 +3910,33 @@ body:not(.dark) .search-result-card.reverse .meta {
   min-width: 0;
 }
 
+/* ── Auto-Hide Topbar on Scroll ────────────────────────────────────────── */
+:root {
+  --topbar-height: 72px;
+}
+
+.topbar {
+  transition: transform 0.24s ease, box-shadow 0.24s ease;
+  will-change: transform;
+}
+
+.status-bar {
+  transition: margin-top 0.24s ease;
+}
+
+body.topbar-collapsed .topbar {
+  transform: translateY(calc(-1 * var(--topbar-height) - 6px));
+  box-shadow: none;
+}
+
+body.topbar-collapsed .status-bar {
+  margin-top: calc(-1 * var(--topbar-height));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topbar,
+  .status-bar {
+    transition: none !important;
+  }
+}
+

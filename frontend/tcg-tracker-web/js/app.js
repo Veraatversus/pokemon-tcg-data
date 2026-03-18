@@ -102,6 +102,8 @@ import {
 const dom = {
   // Global
   auth:             document.getElementById('btn-auth'),
+  topbar:           document.querySelector('.topbar'),
+  headerActions:    document.querySelector('.header-actions'),
   darkModeToggle:   document.getElementById('btn-dark-mode'),
   mainNav:          document.getElementById('main-nav'),
   loadingOverlay:   document.getElementById('loading-overlay'),
@@ -1221,6 +1223,58 @@ function initGridZoom() {
     applyGridZoom(v);
     localStorage.setItem(GRID_ZOOM_STORAGE_KEY, v);
   });
+}
+
+function initAutoHideTopbar() {
+  const topbar = dom.topbar || document.querySelector('.topbar');
+  if (!topbar) return;
+
+  const root = document.documentElement;
+  const body = document.body;
+  const hideClass = 'topbar-collapsed';
+  const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+  let lastY = Math.max(window.scrollY || 0, 0);
+  let ticking = false;
+
+  const syncTopbarHeight = () => {
+    root.style.setProperty('--topbar-height', `${topbar.offsetHeight}px`);
+  };
+
+  const showTopbar = () => {
+    body.classList.remove(hideClass);
+  };
+
+  const onScrollFrame = () => {
+    ticking = false;
+    const currentY = Math.max(window.scrollY || 0, 0);
+    const delta = currentY - lastY;
+    const isNearTop = currentY < 88;
+
+    if (reducedMotion || isNearTop) {
+      showTopbar();
+      lastY = currentY;
+      return;
+    }
+
+    if (delta > 8) {
+      body.classList.add(hideClass);
+    } else if (delta < -8) {
+      showTopbar();
+    }
+
+    lastY = currentY;
+  };
+
+  syncTopbarHeight();
+  window.addEventListener('resize', syncTopbarHeight, { passive: true });
+  window.addEventListener('orientationchange', syncTopbarHeight, { passive: true });
+  window.addEventListener('hashchange', showTopbar, { passive: true });
+
+  window.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(onScrollFrame);
+  }, { passive: true });
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -4119,6 +4173,7 @@ async function bootstrap() {
     console.warn('Smart Engine init:', err);
   }
   initDarkMode();
+  initAutoHideTopbar();
   initGridZoom();
   initFilterButtons();
   initSpreadsheetDialog();
