@@ -57,7 +57,7 @@ import {
   createRatingStatsWidget
 } from './social-ui.js';
 import {
-  VoiceCommandRecognizer, GestureRecognizer, downloadJson, downloadCsv,
+  VoiceCommandRecognizer, downloadJson, downloadCsv,
   createLocalBackup, getLocalBackups, restoreLocalBackup, deleteLocalBackup,
   generateAdvancedStatistics
 } from './advanced-features.js';
@@ -3501,6 +3501,48 @@ function initLightbox() {
     if (e.key === ' ')          { e.preventDefault(); dom.lightboxGCheck.click(); }
   });
 
+  const lightboxImgWrap = dom.lightboxDialog.querySelector('.lightbox-img-wrap');
+  if (lightboxImgWrap) {
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartTime = 0;
+
+    lightboxImgWrap.addEventListener('touchstart', (e) => {
+      if (!dom.lightboxDialog.open || e.touches.length !== 1) return;
+      const touch = e.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+      touchStartTime = Date.now();
+    }, { passive: true });
+
+    lightboxImgWrap.addEventListener('touchend', (e) => {
+      if (!dom.lightboxDialog.open || !touchStartTime || e.changedTouches.length !== 1) return;
+      const touch = e.changedTouches[0];
+      const deltaX = touch.clientX - touchStartX;
+      const deltaY = touch.clientY - touchStartY;
+      const elapsed = Date.now() - touchStartTime;
+
+      touchStartTime = 0;
+
+      const minDistance = 48;
+      const maxVertical = 42;
+      const maxDuration = 700;
+      const isHorizontalSwipe = Math.abs(deltaX) >= minDistance
+        && Math.abs(deltaY) <= maxVertical
+        && elapsed <= maxDuration;
+
+      if (!isHorizontalSwipe) return;
+
+      if (deltaX > 0 && state.lightboxIndex > 0) {
+        state.lightboxIndex--;
+        renderLightbox(state.lightboxIndex);
+      } else if (deltaX < 0 && state.lightboxIndex < state.cards.length - 1) {
+        state.lightboxIndex++;
+        renderLightbox(state.lightboxIndex);
+      }
+    }, { passive: true });
+  }
+
   async function lightboxToggle(isG, checked) {
     const card = state.cards[state.lightboxIndex];
     if (!card) return;
@@ -3877,44 +3919,6 @@ function initVoiceCommands() {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
-// GESTURE CONTROLS INITIALIZATION
-// ══════════════════════════════════════════════════════════════════════════
-function initGestureControls() {
-  try {
-    const gestureRecognizer = new GestureRecognizer(document.body, (gesture, data) => {
-      console.log('👆 Gesture detected:', gesture, data);
-
-      if (gesture === 'swipe-right') {
-        navigate('dashboard');
-        showToast('👆 Swiped right', 'info', 1000);
-      } else if (gesture === 'swipe-left') {
-        // Navigate to next set or next view
-        showToast('👆 Swiped left', 'info', 1000);
-      } else if (gesture === 'swipe-up') {
-        // Scroll up or show last set
-        showToast('👆 Swiped up', 'info', 1000);
-      } else if (gesture === 'swipe-down') {
-        // Pull to refresh
-        if (state.currentSet) {
-          loadCurrentSet(true);
-          showToast('👆 Refreshing...', 'info', 1000);
-        }
-      } else if (gesture === 'longpress') {
-        // Show context menu
-        console.log('Long press at:', data);
-      } else if (gesture === 'pinch') {
-        // Zoom in/out
-        console.log('Pinch scale:', data.scale);
-      }
-    });
-
-    console.log('✅ Gesture controls initialized');
-  } catch (err) {
-    console.warn('⚠️ Gesture controls init failed:', err);
-  }
-}
-
-// ══════════════════════════════════════════════════════════════════════════
 // BOOTSTRAP
 // ══════════════════════════════════════════════════════════════════════════
 async function bootstrap() {
@@ -3935,7 +3939,6 @@ async function bootstrap() {
   initQueueBuilderDialog();
   initLightbox();
   initVoiceCommands();
-  initGestureControls();
   initBulkEdit();
   initKeyboardNav();
   initDashboardControls();
