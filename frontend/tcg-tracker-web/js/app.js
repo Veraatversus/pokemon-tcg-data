@@ -57,7 +57,7 @@ import {
   createRatingStatsWidget
 } from './social-ui.js';
 import {
-  VoiceCommandRecognizer, downloadJson, downloadCsv,
+  downloadJson, downloadCsv,
   createLocalBackup, getLocalBackups, restoreLocalBackup, deleteLocalBackup,
   generateAdvancedStatistics
 } from './advanced-features.js';
@@ -103,7 +103,6 @@ const dom = {
   // Global
   auth:             document.getElementById('btn-auth'),
   topbar:           document.querySelector('.topbar'),
-  headerActions:    document.querySelector('.header-actions'),
   darkModeToggle:   document.getElementById('btn-dark-mode'),
   mainNav:          document.getElementById('main-nav'),
   loadingOverlay:   document.getElementById('loading-overlay'),
@@ -4098,69 +4097,6 @@ async function loadCurrentSet(forceRefresh = false) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
-// VOICE COMMANDS INITIALIZATION
-// ══════════════════════════════════════════════════════════════════════════
-function initVoiceCommands() {
-  try {
-    const voiceRecognizer = new VoiceCommandRecognizer((command) => {
-      console.log('✅ Voice command received:', command);
-      if (command === 'search-set') {
-        dom.search?.focus();
-        showToast('🎤 Searching...', 'info', 2000);
-      } else if (command === 'show-collection') {
-        navigate('dashboard');
-        showToast('🎤 Showing collection', 'info', 2000);
-      } else if (command === 'show-stats') {
-        showToast('🎤 Opening statistics', 'info', 2000);
-      } else if (command === 'settings') {
-        commandHandlers['settings']();
-      } else if (command === 'wishlists') {
-        commandHandlers['wishlists']?.();
-      }
-    });
-
-    // Add voice button to header
-    if (!document.getElementById('voice-btn')) {
-      const voiceBtn = document.createElement('button');
-      voiceBtn.id = 'voice-btn';
-      voiceBtn.textContent = '🎤';
-      voiceBtn.style.cssText = `
-        padding: 8px 12px; 
-        background: var(--color-primary); 
-        color: white; 
-        border: none; 
-        border-radius: 4px; 
-        cursor: pointer;
-        font-size: 14px;
-      `;
-
-      if (voiceRecognizer.isSupported()) {
-        voiceBtn.addEventListener('click', () => {
-          if (voiceRecognizer.isListening) {
-            voiceRecognizer.stop();
-            voiceBtn.style.background = 'var(--color-primary)';
-            showToast('🎤 Stopped listening', 'info', 2000);
-          } else {
-            voiceRecognizer.start();
-            voiceBtn.style.background = '#ff6b6b';
-            showToast('🎤 Listening...', 'info', 2000);
-          }
-        });
-
-        dom.headerActions?.appendChild(voiceBtn);
-        console.log('✅ Voice commands enabled');
-      } else {
-        voiceBtn.disabled = true;
-        voiceBtn.title = 'Speech Recognition not supported';
-        voiceBtn.style.opacity = '0.5';
-      }
-    }
-  } catch (err) {
-    console.warn('⚠️ Voice commands init failed:', err);
-  }
-}
-
-// ══════════════════════════════════════════════════════════════════════════
 // BOOTSTRAP
 // ══════════════════════════════════════════════════════════════════════════
 async function bootstrap() {
@@ -4181,7 +4117,6 @@ async function bootstrap() {
   initBackupImportExport();
   initQueueBuilderDialog();
   initLightbox();
-  initVoiceCommands();
   initBulkEdit();
   initKeyboardNav();
   initDashboardControls();
@@ -4385,9 +4320,6 @@ async function bootstrap() {
       document.body.appendChild(dialog);
       dialog.showModal();
       dialog.addEventListener('close', () => dialog.remove());
-    },
-    'voice': () => {
-      showToast('🎤 Sprachsteuerung aktiviert - Sag einen Befehl', 'info', 3000);
     },
     'local-backup': () => {
       try {
