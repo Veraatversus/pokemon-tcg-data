@@ -101,8 +101,7 @@ import {
 // ══════════════════════════════════════════════════════════════════════════
 const dom = {
   // Global
-  login:            document.getElementById('btn-login'),
-  logout:           document.getElementById('btn-logout'),
+  auth:             document.getElementById('btn-auth'),
   darkModeToggle:   document.getElementById('btn-dark-mode'),
   mainNav:          document.getElementById('main-nav'),
   loadingOverlay:   document.getElementById('loading-overlay'),
@@ -4715,14 +4714,13 @@ async function bootstrap() {
   try {
     const autoLoggedIn = await initAuth();
 
-    dom.login.addEventListener('click', async () => {
-      dom.login.disabled = true;
+    dom.auth.addEventListener('click', async () => {
+      if (dom.auth.dataset.state === 'out') { signOut(); resetToLoggedOut(); return; }
+      dom.auth.disabled = true;
       const ok = await signIn();
-      if (!ok) { dom.login.disabled = false; showToast('Login fehlgeschlagen.', 'error'); setGlobalStatus('Login fehlgeschlagen.'); return; }
+      if (!ok) { dom.auth.disabled = false; showToast('Login fehlgeschlagen.', 'error'); setGlobalStatus('Login fehlgeschlagen.'); return; }
       onLoginSuccess();
     });
-
-    dom.logout.addEventListener('click', () => { signOut(); resetToLoggedOut(); });
 
     dom.load.addEventListener('click', async () => {
       if (!isSignedIn()) return;
@@ -4764,7 +4762,7 @@ async function bootstrap() {
 
 async function onLoginSuccess() {
   state.loggedIn = true;
-  dom.login.disabled = true; dom.logout.disabled = false;
+  dom.auth.textContent = 'Logout'; dom.auth.dataset.state = 'out'; dom.auth.disabled = false;
   renderRecentSets();
   if (!CONFIG.SPREADSHEET_ID) { openSpreadsheetDialog(true); setLoading(false); return; }
   updateSpreadsheetInfoBar();
@@ -4777,7 +4775,7 @@ function resetToLoggedOut() {
   dom.cards.innerHTML = '';
   dom.selector.innerHTML = '<option value="">Bitte w\u00e4hlen\u2026</option>';
   dom.selector.disabled = true; dom.load.disabled = true; dom.refresh.disabled = true;
-  dom.login.disabled = false; dom.logout.disabled = true;
+  dom.auth.textContent = 'Google Login'; dom.auth.dataset.state = 'in'; dom.auth.disabled = false;
   dom.statsSection.classList.add('hidden');
   dom.filterSection.classList.add('hidden');
   dom.sortSection.classList.add('hidden');
