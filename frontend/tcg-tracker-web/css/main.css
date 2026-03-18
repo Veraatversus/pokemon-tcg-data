@@ -3502,4 +3502,88 @@ button:hover:not(:disabled),
   }
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   Final Theme Harmonizer Override (must stay last)
+   ══════════════════════════════════════════════════════════════════════════ */
+body {
+  --window-bg: var(--color-surface);
+  --window-bg-elevated: var(--color-surface-elevated);
+  --window-border: var(--color-border);
+  --window-muted: var(--color-muted);
+}
+
+body.dark {
+  --window-bg: color-mix(in srgb, var(--color-surface) 90%, #000 10%);
+  --window-bg-elevated: color-mix(in srgb, var(--color-surface-elevated) 90%, #000 10%);
+  --window-border: color-mix(in srgb, var(--color-border) 85%, #93c5fd 15%);
+  --window-muted: color-mix(in srgb, var(--color-muted) 88%, #dbeafe 12%);
+}
+
+dialog.ss-dialog,
+.lightbox-dialog,
+.command-palette-box,
+.settings-panel,
+.statistics-panel,
+.snapshots-widget,
+.rating-widget,
+.rating-stats,
+.wishlist-item,
+.share-link-container,
+.trading-log-item,
+.achievement-badge,
+.search-history-dropdown,
+.batch-dialog,
+.batch-list,
+.batch-item,
+.quick-filters-toolbar,
+.dashboard-tools,
+.dashboard-tools-group {
+  background: var(--window-bg) !important;
+  border-color: var(--window-border) !important;
+  color: var(--color-text) !important;
+}
+
+dialog.ss-dialog .ss-input,
+dialog.ss-dialog input,
+dialog.ss-dialog select,
+.batch-dialog .ss-input,
+.batch-dialog input,
+.batch-dialog select,
+.command-palette-input,
+.settings-panel input,
+.settings-panel select,
+.csv-preview {
+  background: var(--window-bg-elevated) !important;
+  border-color: var(--window-border) !important;
+  color: var(--color-text) !important;
+}
+
+dialog.ss-dialog > p,
+dialog.ss-dialog .ss-label,
+.batch-item-sub,
+.lightbox-fact-row dt,
+.lightbox-hint,
+.command-palette-hint,
+.command-palette-footer,
+.dash-set-series,
+.dash-rh-text,
+#engine-metrics,
+.global-status {
+  color: var(--window-muted) !important;
+}
+
+dialog.ss-dialog .dialog-error,
+.batch-dialog .dialog-error {
+  color: var(--color-danger) !important;
+}
+
+.lightbox-close {
+  background: var(--window-bg-elevated) !important;
+  border-color: var(--window-border) !important;
+  color: var(--color-text) !important;
+}
+
+.lightbox-close:hover {
+  background: var(--window-bg) !important;
+}
 
