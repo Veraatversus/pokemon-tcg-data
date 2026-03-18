@@ -317,7 +317,7 @@ function shouldUseApiForSearchSet(mode, set) {
     return true;
   }
   if (mode === SEARCH_SCOPE_ALL) {
-    return !Boolean(set?.imported);
+    return true;
   }
   return false;
 }
@@ -327,14 +327,14 @@ function getSearchModeMeta(mode) {
     return {
       label: '⚡ Modus: Online-Suche',
       className: 'online',
-      hint: 'DB + API für alle Sets'
+      hint: 'Nur API für alle Sets'
     };
   }
   if (mode === SEARCH_SCOPE_ALL) {
     return {
       label: '🌐 Modus: Alle Sets',
       className: 'all',
-      hint: 'Importierte aus DB, nicht importierte online'
+      hint: 'DB + API für alle Sets'
     };
   }
   return {
@@ -2904,7 +2904,7 @@ async function runSearch(options = {}) {
               cache.set(cacheKey, apiCards, CONFIG.CACHE_TTL_MS);
             }
           }
-          cards = searchScopeMode === SEARCH_SCOPE_ALL
+          cards = searchScopeMode === SEARCH_SCOPE_ONLINE
             ? mergeSearchCards([], apiCards)
             : mergeSearchCards(dbCards, apiCards);
         } else {
@@ -3049,7 +3049,7 @@ async function openSearchResultLightbox(card, set, { apiOnly = false } = {}) {
           cache.set(`cards_${set.setId}`, apiCards, CONFIG.CACHE_TTL_MS);
         }
 
-        const mergedCards = searchScopeMode === SEARCH_SCOPE_ALL
+        const mergedCards = searchScopeMode === SEARCH_SCOPE_ONLINE
           ? mergeSearchCards([], apiCards)
           : mergeSearchCards(dbCards, apiCards);
         state.searchCache.set(searchCacheKey, mergedCards);
