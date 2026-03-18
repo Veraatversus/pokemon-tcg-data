@@ -163,7 +163,8 @@ export async function initAuth() {
  * Öffnet den OAuth-Consent-Dialog (nur wenn nicht schon angemeldet).
  * @returns {Promise<boolean>}
  */
-export function signIn() {
+export function signIn(options = {}) {
+  const forceConsent = Boolean(options?.forceConsent);
   if (!gapiInited || !gisInited) return Promise.resolve(false);
   return new Promise((resolve) => {
     tokenClient.callback = async (response) => {
@@ -185,7 +186,9 @@ export function signIn() {
         resolve(false);
       }
     };
-    tokenClient.requestAccessToken({ prompt: accessToken ? '' : 'consent' });
+    tokenClient.requestAccessToken({
+      prompt: forceConsent || !accessToken ? 'consent' : ''
+    });
   });
 }
 
