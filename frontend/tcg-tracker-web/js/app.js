@@ -3502,6 +3502,10 @@ function initLightbox() {
         cache.set(`db_${setId}`, state.dbMap, CONFIG.CACHE_TTL_MS);
         db = state.dbMap.get(key) || db;
         showToast(`${refreshedSet.setName} wurde automatisch importiert.`, 'success', 3200);
+      } catch (err) {
+        showToast(`Automatischer Set-Import fehlgeschlagen: ${err.message || err}`, 'error', 4200);
+        renderLightbox(state.lightboxIndex);
+        return;
       } finally {
         setLoading(false);
       }
