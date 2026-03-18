@@ -1185,7 +1185,9 @@ function initDarkMode() {
 const GRID_ZOOM_STORAGE_KEY = 'gridZoom';
 
 function applyGridZoom(value) {
-  document.documentElement.style.setProperty('--grid-min-width', value + 'px');
+  const cssValue = value + 'px';
+  document.documentElement.style.setProperty('--grid-min-width', cssValue);
+  document.body?.style?.setProperty('--grid-min-width', cssValue);
 }
 
 function initGridZoom() {
@@ -1205,6 +1207,12 @@ function initGridZoom() {
   applyGridZoom(val);
 
   slider.addEventListener('input', (e) => {
+    const v = Math.max(parseInt(slider.min, 10), Math.min(parseInt(slider.max, 10), parseInt(e.target.value, 10)));
+    applyGridZoom(v);
+    localStorage.setItem(GRID_ZOOM_STORAGE_KEY, v);
+  });
+
+  slider.addEventListener('change', (e) => {
     const v = Math.max(parseInt(slider.min, 10), Math.min(parseInt(slider.max, 10), parseInt(e.target.value, 10)));
     applyGridZoom(v);
     localStorage.setItem(GRID_ZOOM_STORAGE_KEY, v);
@@ -3010,13 +3018,16 @@ async function runSearch(options = {}) {
 
 function createSearchResultCard(card, key, db, set, apiOnly = false) {
   const article = document.createElement('article');
-  article.className = 'card';
+  article.className = 'card search-result-card';
   if (db?.rh)     article.classList.add('reverse');
   else if (db?.g) article.classList.add('collected');
 
+  const imgWrap = document.createElement('div');
+  imgWrap.className = 'card-img-wrap';
   const img = document.createElement('img');
   img.src = card.image || ''; img.alt = card.name || key; img.loading = 'lazy';
   attachImageFallback(img, card, set?.setId || '');
+  imgWrap.appendChild(img);
 
   const meta    = document.createElement('div'); meta.className = 'meta';
   const setTag  = document.createElement('span'); setTag.className = 'search-set-tag'; setTag.textContent = set.setName;
@@ -3031,7 +3042,7 @@ function createSearchResultCard(card, key, db, set, apiOnly = false) {
   status.textContent = db?.rh ? '\uD83D\uDD35 RH' : db?.g ? '\u2705 G' : (apiOnly ? '🌐 API' : '\u2610 Fehlend');
   actions.append(goToSetBtn);
   meta.append(setTag, title, status, actions);
-  article.append(img, meta);
+  article.append(imgWrap, meta);
 
   article.addEventListener('click', async () => {
     try {
