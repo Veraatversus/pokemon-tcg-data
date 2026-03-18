@@ -1188,6 +1188,11 @@ function applyGridZoom(value) {
   const cssValue = value + 'px';
   document.documentElement.style.setProperty('--grid-min-width', cssValue);
   document.body?.style?.setProperty('--grid-min-width', cssValue);
+
+  const template = `repeat(auto-fit, minmax(${value}px, 1fr))`;
+  document.querySelectorAll('.cards, .dash-sets-row').forEach((grid) => {
+    grid.style.setProperty('grid-template-columns', template, 'important');
+  });
 }
 
 function initGridZoom() {
