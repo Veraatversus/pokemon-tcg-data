@@ -2,9 +2,11 @@
 // SERVICE WORKER - Offline Support & Caching
 // ══════════════════════════════════════════════════════════════════════════
 
-const CACHE_NAME = 'poke-tcg-v3';
-const RUNTIME_CACHE = 'poke-tcg-runtime-v3';
-const IMAGE_CACHE = 'poke-tcg-images-v3';
+const SW_SCOPE_PATH = new URL(self.registration.scope).pathname.toLowerCase();
+const SW_SCOPE = /(^|\/)dev(\/|$)/.test(SW_SCOPE_PATH) ? 'dev' : 'release';
+const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v4`;
+const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v4`;
+const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v4`;
 
 const STATIC_ASSETS = [
   './',

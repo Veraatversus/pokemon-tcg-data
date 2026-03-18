@@ -64,7 +64,9 @@ function gapiLoadClient() {
 /** Lädt die Sheets-Discovery-Docs und setzt den gespeicherten Token in den Client. */
 export async function loadDiscoveryDocs() {
   try {
-    await globalThis.gapi.client.load(CONFIG.DISCOVERY_DOCS[0]);
+    for (const doc of CONFIG.DISCOVERY_DOCS) {
+      await globalThis.gapi.client.load(doc);
+    }
   } catch (err) {
     console.error('[loadDiscoveryDocs]', err);
     // Falls Discovery fehlschlägt, trotzdem weitermachen – API funktioniert ohne auch

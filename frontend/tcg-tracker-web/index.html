@@ -33,7 +33,23 @@
   <!-- Spreadsheet-Setup-Dialog -->
   <dialog id="dialog-spreadsheet" class="ss-dialog">
     <h2>Google Spreadsheet verknüpfen</h2>
-    <p>Bitte die ID oder URL des Google Sheets eingeben, das als Datenbank genutzt werden soll.</p>
+    <p>Wähle ein vorhandenes Sheet (eigene + freigegebene), erstelle ein neues, oder gib eine ID/URL manuell ein.</p>
+
+    <label for="select-spreadsheet-existing">Vorhandene Tabellen</label>
+    <select id="select-spreadsheet-existing" class="ss-input">
+      <option value="">Lade Tabellen…</option>
+    </select>
+    <div class="dialog-actions" style="margin-top: 8px;">
+      <button id="btn-spreadsheet-refresh" class="btn-secondary" type="button">🔄 Liste aktualisieren</button>
+      <button id="btn-spreadsheet-use-selected" type="button">✅ Auswahl verwenden</button>
+    </div>
+
+    <label for="input-new-spreadsheet-name" style="margin-top: 10px;">Neue Tabelle erstellen</label>
+    <input id="input-new-spreadsheet-name" type="text" class="ss-input" placeholder="z. B. Pokémon TCG Sammlung (Dev)" />
+    <div class="dialog-actions" style="margin-top: 8px;">
+      <button id="btn-spreadsheet-create" type="button">➕ Neue Tabelle erstellen & nutzen</button>
+    </div>
+
     <label for="input-spreadsheet-id">Spreadsheet-ID oder URL</label>
     <input id="input-spreadsheet-id" type="text" class="ss-input"
            placeholder="https://docs.google.com/spreadsheets/d/… oder nur die ID" />

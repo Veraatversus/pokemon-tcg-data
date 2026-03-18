@@ -118,9 +118,14 @@ const dom = {
   // Spreadsheet-Dialog
   dialog:           document.getElementById('dialog-spreadsheet'),
   dialogInput:      document.getElementById('input-spreadsheet-id'),
+  dialogExistingSelect: document.getElementById('select-spreadsheet-existing'),
+  dialogNewNameInput: document.getElementById('input-new-spreadsheet-name'),
   dialogError:      document.getElementById('dialog-error'),
   btnDialogSave:    document.getElementById('btn-dialog-save'),
   btnDialogCancel:  document.getElementById('btn-dialog-cancel'),
+  btnSpreadsheetRefresh: document.getElementById('btn-spreadsheet-refresh'),
+  btnSpreadsheetUseSelected: document.getElementById('btn-spreadsheet-use-selected'),
+  btnSpreadsheetCreate: document.getElementById('btn-spreadsheet-create'),
   batchDialog:      document.getElementById('dialog-batch-import'),
   batchSearchInput: document.getElementById('batch-search-input'),
   batchList:        document.getElementById('batch-list'),
@@ -1239,9 +1244,147 @@ function openSpreadsheetDialog(required = false) {
   dom.dialogError.textContent = '';
   dom.dialogError.classList.add('hidden');
   dom.dialogInput.value = CONFIG.SPREADSHEET_ID || '';
+  if (dom.dialogNewNameInput) dom.dialogNewNameInput.value = '';
   dom.btnDialogCancel.disabled = required;
   dom.btnDialogCancel.style.display = required ? 'none' : '';
   dom.dialog.showModal();
+  refreshSpreadsheetList();
+}
+
+function setSpreadsheetDialogError(message = '', isError = true) {
+  if (!dom.dialogError) return;
+  dom.dialogError.textContent = message;
+  dom.dialogError.style.color = isError ? 'var(--color-danger)' : 'var(--color-muted)';
+  dom.dialogError.classList.toggle('hidden', !message);
+}
+
+function parseDriveSpreadsheetFile(file, sourceLabel) {
+  return {
+    id: String(file?.id || '').trim(),
+    name: String(file?.name || 'Unbenannte Tabelle').trim(),
+    source: sourceLabel
+  };
+}
+
+async function listAccessibleSpreadsheets() {
+  const baseQuery = "mimeType='application/vnd.google-apps.spreadsheet' and trashed=false";
+  const fields = 'files(id,name,owners(displayName,emailAddress),shared),nextPageToken';
+
+  const ownResp = await gapi.client.drive.files.list({
+    q: `${baseQuery} and 'me' in owners`,
+    pageSize: 100,
+    orderBy: 'modifiedTime desc',
+    fields,
+    includeItemsFromAllDrives: true,
+    supportsAllDrives: true
+  });
+
+  const sharedResp = await gapi.client.drive.files.list({
+    q: `${baseQuery} and sharedWithMe=true`,
+    pageSize: 100,
+    orderBy: 'modifiedTime desc',
+    fields,
+    includeItemsFromAllDrives: true,
+    supportsAllDrives: true
+  });
+
+  const all = [];
+  const seen = new Set();
+
+  const addFiles = (files, label) => {
+    (files || []).forEach((file) => {
+      const parsed = parseDriveSpreadsheetFile(file, label);
+      if (!parsed.id || seen.has(parsed.id)) return;
+      seen.add(parsed.id);
+      all.push(parsed);
+    });
+  };
+
+  addFiles(ownResp?.result?.files, 'Eigene Datei');
+  addFiles(sharedResp?.result?.files, 'Freigegeben');
+
+  all.sort((a, b) => a.name.localeCompare(b.name, 'de', { sensitivity: 'base' }));
+  return all;
+}
+
+function renderSpreadsheetOptions(items = []) {
+  if (!dom.dialogExistingSelect) return;
+  const currentId = CONFIG.SPREADSHEET_ID || '';
+  dom.dialogExistingSelect.innerHTML = '<option value="">Bitte Tabelle auswählen…</option>';
+
+  if (!items.length) {
+    const empty = document.createElement('option');
+    empty.value = '';
+    empty.textContent = 'Keine Tabellen gefunden';
+    dom.dialogExistingSelect.appendChild(empty);
+    return;
+  }
+
+  items.forEach((item) => {
+    const option = document.createElement('option');
+    option.value = item.id;
+    option.textContent = `${item.name} — ${item.source}`;
+    dom.dialogExistingSelect.appendChild(option);
+  });
+
+  if (currentId && items.some((item) => item.id === currentId)) {
+    dom.dialogExistingSelect.value = currentId;
+  }
+}
+
+async function refreshSpreadsheetList() {
+  if (!dom.dialogExistingSelect || !state.loggedIn) return;
+  try {
+    dom.dialogExistingSelect.disabled = true;
+    dom.btnSpreadsheetRefresh && (dom.btnSpreadsheetRefresh.disabled = true);
+    setSpreadsheetDialogError('Tabellen werden geladen…', false);
+    const items = await listAccessibleSpreadsheets();
+    renderSpreadsheetOptions(items);
+    setSpreadsheetDialogError('');
+  } catch (err) {
+    console.error('[refreshSpreadsheetList]', err);
+    setSpreadsheetDialogError('Tabellen konnten nicht geladen werden. Falls nötig bitte einmal neu einloggen.');
+  } finally {
+    dom.dialogExistingSelect.disabled = false;
+    dom.btnSpreadsheetRefresh && (dom.btnSpreadsheetRefresh.disabled = false);
+  }
+}
+
+async function applySpreadsheetSelection(id) {
+  if (!id) {
+    setSpreadsheetDialogError('Bitte eine Tabelle auswählen oder ID/URL eingeben.');
+    return;
+  }
+
+  CONFIG.SPREADSHEET_ID = id;
+  dom.dialog.close();
+  updateSpreadsheetInfoBar();
+  await loadSets();
+}
+
+async function createAndUseSpreadsheet() {
+  const title = String(dom.dialogNewNameInput?.value || '').trim() || `Pokémon TCG Tracker ${new Date().toLocaleDateString('de-DE')}`;
+  try {
+    dom.btnSpreadsheetCreate && (dom.btnSpreadsheetCreate.disabled = true);
+    setSpreadsheetDialogError('Neue Tabelle wird erstellt…', false);
+
+    const response = await gapi.client.sheets.spreadsheets.create({
+      properties: { title }
+    });
+
+    const spreadsheetId = String(response?.result?.spreadsheetId || '').trim();
+    if (!spreadsheetId) {
+      throw new Error('Spreadsheet-ID wurde nicht zurückgegeben.');
+    }
+
+    await applySpreadsheetSelection(spreadsheetId);
+    showToast(`Neue Tabelle erstellt: ${title}`, 'success');
+  } catch (err) {
+    console.error('[createAndUseSpreadsheet]', err);
+    setSpreadsheetDialogError(`Neue Tabelle konnte nicht erstellt werden: ${err.message || err}`);
+  } finally {
+    dom.btnSpreadsheetCreate && (dom.btnSpreadsheetCreate.disabled = false);
+  }
 }
 
 function updateSpreadsheetInfoBar() {
@@ -1256,20 +1399,27 @@ function updateSpreadsheetInfoBar() {
 }
 
 function initSpreadsheetDialog() {
-  dom.dialog?.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !dom.btnDialogCancel.hidden) dom.dialog.close(); });
-  dom.btnDialogSave?.addEventListener('click', () => {
+  dom.dialog?.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !dom.btnDialogCancel.disabled) dom.dialog.close();
+  });
+  dom.btnDialogSave?.addEventListener('click', async () => {
     const id = extractSpreadsheetId(dom.dialogInput?.value?.trim());
     if (!id) {
-      if (dom.dialogError) { dom.dialogError.textContent = 'Ung\u00fcltige Spreadsheet-ID oder URL.'; dom.dialogError.classList.remove('hidden'); }
+      setSpreadsheetDialogError('Ungültige Spreadsheet-ID oder URL.');
       return;
     }
-    CONFIG.SPREADSHEET_ID = id;
-    dom.dialog.close();
-    updateSpreadsheetInfoBar();
-    loadSets();
+    await applySpreadsheetSelection(id);
   });
   dom.btnDialogCancel?.addEventListener('click', () => dom.dialog?.close());
   dom.btnChangeSheet?.addEventListener('click', () => openSpreadsheetDialog(false));
+  dom.btnSpreadsheetRefresh?.addEventListener('click', () => refreshSpreadsheetList());
+  dom.btnSpreadsheetUseSelected?.addEventListener('click', async () => {
+    const id = String(dom.dialogExistingSelect?.value || '').trim();
+    await applySpreadsheetSelection(id);
+  });
+  dom.btnSpreadsheetCreate?.addEventListener('click', async () => {
+    await createAndUseSpreadsheet();
+  });
 }
 
 // ══════════════════════════════════════════════════════════════════════════
