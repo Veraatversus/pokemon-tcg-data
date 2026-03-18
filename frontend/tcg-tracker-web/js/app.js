@@ -1270,23 +1270,32 @@ async function listAccessibleSpreadsheets() {
   const baseQuery = "mimeType='application/vnd.google-apps.spreadsheet' and trashed=false";
   const fields = 'files(id,name,owners(displayName,emailAddress),shared),nextPageToken';
 
-  const ownResp = await gapi.client.drive.files.list({
-    q: `${baseQuery} and 'me' in owners`,
-    pageSize: 100,
-    orderBy: 'modifiedTime desc',
-    fields,
-    includeItemsFromAllDrives: true,
-    supportsAllDrives: true
-  });
+  async function listAllFiles(query) {
+    const files = [];
+    let pageToken;
 
-  const sharedResp = await gapi.client.drive.files.list({
-    q: `${baseQuery} and sharedWithMe=true`,
-    pageSize: 100,
-    orderBy: 'modifiedTime desc',
-    fields,
-    includeItemsFromAllDrives: true,
-    supportsAllDrives: true
-  });
+    do {
+      const response = await gapi.client.drive.files.list({
+        q: query,
+        pageSize: 100,
+        orderBy: 'modifiedTime desc',
+        fields,
+        includeItemsFromAllDrives: true,
+        supportsAllDrives: true,
+        pageToken
+      });
+
+      files.push(...(response?.result?.files || []));
+      pageToken = response?.result?.nextPageToken || null;
+    } while (pageToken);
+
+    return files;
+  }
+
+  const [ownFiles, sharedFiles] = await Promise.all([
+    listAllFiles(`${baseQuery} and 'me' in owners`),
+    listAllFiles(`${baseQuery} and sharedWithMe=true`)
+  ]);
 
   const all = [];
   const seen = new Set();
@@ -1300,8 +1309,8 @@ async function listAccessibleSpreadsheets() {
     });
   };
 
-  addFiles(ownResp?.result?.files, 'Eigene Datei');
-  addFiles(sharedResp?.result?.files, 'Freigegeben');
+  addFiles(ownFiles, 'Eigene Datei');
+  addFiles(sharedFiles, 'Freigegeben');
 
   all.sort((a, b) => a.name.localeCompare(b.name, 'de', { sensitivity: 'base' }));
   return all;
@@ -1317,6 +1326,7 @@ function renderSpreadsheetOptions(items = []) {
     empty.value = '';
     empty.textContent = 'Keine Tabellen gefunden';
     dom.dialogExistingSelect.appendChild(empty);
+    dom.btnSpreadsheetUseSelected && (dom.btnSpreadsheetUseSelected.disabled = true);
     return;
   }
 
@@ -1330,9 +1340,12 @@ function renderSpreadsheetOptions(items = []) {
   if (currentId && items.some((item) => item.id === currentId)) {
     dom.dialogExistingSelect.value = currentId;
   }
+
+  dom.btnSpreadsheetUseSelected && (dom.btnSpreadsheetUseSelected.disabled = false);
 }
 
-async function refreshSpreadsheetList() {
+async function refreshSpreadsheetList(options = {}) {
+  const allowReauth = options.allowReauth !== false;
   if (!dom.dialogExistingSelect || !state.loggedIn) return;
   try {
     dom.dialogExistingSelect.disabled = true;
@@ -1343,6 +1356,20 @@ async function refreshSpreadsheetList() {
     setSpreadsheetDialogError('');
   } catch (err) {
     console.error('[refreshSpreadsheetList]', err);
+
+    const status = err?.status || err?.result?.error?.code;
+    const reason = err?.result?.error?.status || '';
+    const missingScope = status === 401 || status === 403 || reason === 'PERMISSION_DENIED';
+
+    if (allowReauth && missingScope) {
+      setSpreadsheetDialogError('Berechtigungen werden aktualisiert…', false);
+      const reauthed = await signIn({ forceConsent: true });
+      if (reauthed) {
+        await refreshSpreadsheetList({ allowReauth: false });
+        return;
+      }
+    }
+
     setSpreadsheetDialogError('Tabellen konnten nicht geladen werden. Falls nötig bitte einmal neu einloggen.');
   } finally {
     dom.dialogExistingSelect.disabled = false;
@@ -1356,10 +1383,29 @@ async function applySpreadsheetSelection(id) {
     return;
   }
 
-  CONFIG.SPREADSHEET_ID = id;
-  dom.dialog.close();
-  updateSpreadsheetInfoBar();
-  await loadSets();
+  const nextId = String(id).trim();
+  const previousId = CONFIG.SPREADSHEET_ID;
+
+  try {
+    setSpreadsheetDialogError('Prüfe Tabellenzugriff…', false);
+    await gapi.client.sheets.spreadsheets.get({
+      spreadsheetId: nextId,
+      fields: 'spreadsheetId,properties(title)'
+    });
+
+    CONFIG.SPREADSHEET_ID = nextId;
+    updateSpreadsheetInfoBar();
+    await loadSets();
+    dom.dialog.close();
+    setSpreadsheetDialogError('');
+  } catch (err) {
+    CONFIG.SPREADSHEET_ID = previousId;
+    updateSpreadsheetInfoBar();
+    console.error('[applySpreadsheetSelection]', err);
+    setSpreadsheetDialogError(`Tabelle konnte nicht verwendet werden: ${err.message || err}`);
+    showToast('Tabellenauswahl fehlgeschlagen.', 'error', 3200);
+    throw err;
+  }
 }
 
 async function createAndUseSpreadsheet() {
@@ -1408,14 +1454,22 @@ function initSpreadsheetDialog() {
       setSpreadsheetDialogError('Ungültige Spreadsheet-ID oder URL.');
       return;
     }
-    await applySpreadsheetSelection(id);
+    try {
+      await applySpreadsheetSelection(id);
+    } catch {
+      // Fehler bereits im Dialog angezeigt
+    }
   });
   dom.btnDialogCancel?.addEventListener('click', () => dom.dialog?.close());
   dom.btnChangeSheet?.addEventListener('click', () => openSpreadsheetDialog(false));
   dom.btnSpreadsheetRefresh?.addEventListener('click', () => refreshSpreadsheetList());
   dom.btnSpreadsheetUseSelected?.addEventListener('click', async () => {
     const id = String(dom.dialogExistingSelect?.value || '').trim();
-    await applySpreadsheetSelection(id);
+    try {
+      await applySpreadsheetSelection(id);
+    } catch {
+      // Fehler bereits im Dialog angezeigt
+    }
   });
   dom.btnSpreadsheetCreate?.addEventListener('click', async () => {
     await createAndUseSpreadsheet();
