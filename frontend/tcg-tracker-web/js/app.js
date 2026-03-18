@@ -4701,6 +4701,9 @@ async function bootstrap() {
   try {
     const autoLoggedIn = await initAuth();
 
+    syncAuthButtonLabel();
+    window.addEventListener('resize', syncAuthButtonLabel, { passive: true });
+
     dom.auth.addEventListener('click', async () => {
       if (dom.auth.dataset.state === 'out') { signOut(); resetToLoggedOut(); return; }
       dom.auth.disabled = true;
@@ -4749,7 +4752,7 @@ async function bootstrap() {
 
 async function onLoginSuccess() {
   state.loggedIn = true;
-  dom.auth.textContent = 'Logout'; dom.auth.dataset.state = 'out'; dom.auth.disabled = false;
+  dom.auth.dataset.state = 'out'; dom.auth.disabled = false; syncAuthButtonLabel();
   renderRecentSets();
   if (!CONFIG.SPREADSHEET_ID) { openSpreadsheetDialog(true); setLoading(false); return; }
   updateSpreadsheetInfoBar();
@@ -4762,7 +4765,7 @@ function resetToLoggedOut() {
   dom.cards.innerHTML = '';
   dom.selector.innerHTML = '<option value="">Bitte w\u00e4hlen\u2026</option>';
   dom.selector.disabled = true; dom.load.disabled = true; dom.refresh.disabled = true;
-  dom.auth.textContent = 'Google Login'; dom.auth.dataset.state = 'in'; dom.auth.disabled = false;
+  dom.auth.dataset.state = 'in'; dom.auth.disabled = false; syncAuthButtonLabel();
   dom.statsSection.classList.add('hidden');
   dom.filterSection.classList.add('hidden');
   dom.sortSection.classList.add('hidden');
@@ -4774,6 +4777,17 @@ function resetToLoggedOut() {
   setGlobalStatus('Abgemeldet.');
   showView('dashboard');
   dom.dashboardGrid.innerHTML = '<p class="empty-state">Bitte anmelden.</p>';
+}
+
+function getAuthButtonLabel() {
+  const isNarrow = window.matchMedia('(max-width: 360px)').matches;
+  if (dom.auth?.dataset?.state === 'out') return 'Logout';
+  return isNarrow ? 'Login' : 'Google Login';
+}
+
+function syncAuthButtonLabel() {
+  if (!dom.auth) return;
+  dom.auth.textContent = getAuthButtonLabel();
 }
 
 bootstrap().catch((err) => {
