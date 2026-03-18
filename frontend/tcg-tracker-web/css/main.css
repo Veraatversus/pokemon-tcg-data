@@ -3916,21 +3916,24 @@ body:not(.dark) .search-result-card.reverse .meta {
 }
 
 .topbar {
-  transition: transform 0.24s ease, box-shadow 0.24s ease;
+  transition: transform 0.24s ease, box-shadow 0.24s ease, opacity 0.2s ease;
   will-change: transform;
 }
 
 .status-bar {
-  transition: margin-top 0.24s ease;
+  transition: margin-top 0.24s ease, opacity 0.2s ease;
 }
 
 body.topbar-collapsed .topbar {
-  transform: translateY(calc(-1 * var(--topbar-height) - 6px));
-  box-shadow: none;
+  transform: translateY(calc(-1 * var(--topbar-height) - 6px)) !important;
+  box-shadow: none !important;
+  opacity: 0;
+  pointer-events: none;
 }
 
 body.topbar-collapsed .status-bar {
-  margin-top: calc(-1 * var(--topbar-height));
+  margin-top: calc(-1 * var(--topbar-height)) !important;
+  opacity: 0.92;
 }
 
 @media (prefers-reduced-motion: reduce) {
