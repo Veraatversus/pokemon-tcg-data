@@ -1186,35 +1186,22 @@ function applyGridZoom(value) {
 
 function initGridZoom() {
   const slider = document.getElementById('grid-zoom-slider');
-  const btnOut = document.getElementById('btn-zoom-out');
-  const btnIn  = document.getElementById('btn-zoom-in');
   if (!slider) return;
 
   const defaultVal = window.innerWidth >= 1025 ? 200
                    : window.innerWidth >= 641  ? 165
                    : 130;
   const saved = localStorage.getItem(GRID_ZOOM_STORAGE_KEY);
-  const val   = saved !== null ? parseInt(saved, 10) : defaultVal;
+  const rawVal = saved !== null ? parseInt(saved, 10) : defaultVal;
+  const val = Number.isFinite(rawVal)
+    ? Math.max(parseInt(slider.min, 10), Math.min(parseInt(slider.max, 10), rawVal))
+    : defaultVal;
 
   slider.value = val;
   applyGridZoom(val);
 
   slider.addEventListener('input', (e) => {
-    const v = parseInt(e.target.value, 10);
-    applyGridZoom(v);
-    localStorage.setItem(GRID_ZOOM_STORAGE_KEY, v);
-  });
-
-  if (btnOut) btnOut.addEventListener('click', () => {
-    const v = Math.max(parseInt(slider.min, 10), parseInt(slider.value, 10) - 20);
-    slider.value = v;
-    applyGridZoom(v);
-    localStorage.setItem(GRID_ZOOM_STORAGE_KEY, v);
-  });
-
-  if (btnIn) btnIn.addEventListener('click', () => {
-    const v = Math.min(parseInt(slider.max, 10), parseInt(slider.value, 10) + 20);
-    slider.value = v;
+    const v = Math.max(parseInt(slider.min, 10), Math.min(parseInt(slider.max, 10), parseInt(e.target.value, 10)));
     applyGridZoom(v);
     localStorage.setItem(GRID_ZOOM_STORAGE_KEY, v);
   });
