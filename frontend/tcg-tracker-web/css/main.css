@@ -2783,15 +2783,15 @@ button.btn-secondary {
   background: linear-gradient(90deg, #69f2ff 0%, #8f74ff 100%);
 }
 
-.cards .card,
-.card {
+body.dark .cards .card,
+body.dark .card {
   border-radius: 14px;
   border: 1px solid rgba(89, 122, 209, 0.48);
   background: linear-gradient(160deg, rgba(14, 23, 49, 0.94), rgba(11, 19, 43, 0.96));
   box-shadow: 0 10px 28px rgba(5, 10, 24, 0.58);
 }
 
-.card:hover {
+body.dark .card:hover {
   transform: translateY(-2px);
   box-shadow: 0 16px 34px rgba(5, 12, 27, 0.66);
 }
@@ -3723,16 +3723,23 @@ body.dark .lightbox-image-hint {
 body.dark #lightbox-title,
 body.dark #lightbox-subtitle,
 body.dark #lightbox-counter,
-body.dark .lightbox-check-label,
-body.dark .lightbox-check-label span,
 body.dark .lightbox-fact-row dd,
-body.dark .lightbox-cm-link {
+body.dark .lightbox-cm-link,
+body.dark .lightbox-checks,
+body.dark .lightbox-checks label,
+body.dark .lightbox-check-label,
+body.dark .lightbox-check-label span {
   color: #f1f5f9 !important;
 }
 
 body.dark .lightbox-fact-row dt,
 body.dark .lightbox-hint {
-  color: #cbd5e1 !important;
+  color: #94a3b8 !important;
+}
+
+body.dark .lightbox-check-label {
+  background: rgba(15, 28, 60, 0.90) !important;
+  border-color: rgba(96, 165, 250, 0.44) !important;
 }
 
 body.dark .lightbox-check-label input[type="checkbox"] {
@@ -3830,25 +3837,49 @@ body.dark select option {
   grid-template-columns: repeat(auto-fit, minmax(var(--grid-min-width, 165px), 1fr)) !important;
 }
 
-.card.collected,
-.search-result-card.collected {
-  background: linear-gradient(180deg, var(--card-collected-bg), var(--card-collected-bg-2)) !important;
-  border-color: var(--card-collected-border) !important;
-  box-shadow: inset 0 0 0 1px var(--card-collected-border-soft), inset 4px 0 0 0 var(--card-collected-accent);
+/* ── Dark Mode Status Colors ── */
+body.dark .card.collected,
+body.dark .search-result-card.collected {
+  background: linear-gradient(180deg, #123524, #0f2a1e) !important;
+  border: 2px solid #4ade80 !important;
+  box-shadow: inset 4px 0 0 0 #4ade80, 0 0 12px rgba(74, 222, 128, 0.22) !important;
 }
 
-.card.reverse,
-.search-result-card.reverse {
-  background: linear-gradient(180deg, var(--card-reverse-bg), var(--card-reverse-bg-2)) !important;
-  border-color: var(--card-reverse-border) !important;
-  box-shadow: inset 0 0 0 1px var(--card-reverse-border-soft), inset 4px 0 0 0 var(--card-reverse-accent);
+body.dark .card.reverse,
+body.dark .search-result-card.reverse {
+  background: linear-gradient(180deg, #102a56, #0c2044) !important;
+  border: 2px solid #60a5fa !important;
+  box-shadow: inset 4px 0 0 0 #60a5fa, 0 0 12px rgba(96, 165, 250, 0.22) !important;
 }
 
-.card.collected .meta,
-.card.reverse .meta,
-.search-result-card.collected .meta,
-.search-result-card.reverse .meta {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--window-bg-elevated) 92%, transparent), color-mix(in srgb, var(--window-bg) 96%, transparent));
+/* ── Light Mode Status Colors ── */
+body:not(.dark) .card.collected,
+body:not(.dark) .search-result-card.collected {
+  background: linear-gradient(180deg, #c8f5d4, #b3edbc) !important;
+  border: 2px solid #2f855a !important;
+  box-shadow: inset 4px 0 0 0 #2f855a !important;
+}
+
+body:not(.dark) .card.reverse,
+body:not(.dark) .search-result-card.reverse {
+  background: linear-gradient(180deg, #bfdbfe, #a8c8ff) !important;
+  border: 2px solid #2563eb !important;
+  box-shadow: inset 4px 0 0 0 #2563eb !important;
+}
+
+/* Meta-Bereiche */
+body.dark .card.collected .meta,
+body.dark .card.reverse .meta,
+body.dark .search-result-card.collected .meta,
+body.dark .search-result-card.reverse .meta {
+  background: rgba(8, 16, 36, 0.82);
+}
+
+body:not(.dark) .card.collected .meta,
+body:not(.dark) .card.reverse .meta,
+body:not(.dark) .search-result-card.collected .meta,
+body:not(.dark) .search-result-card.reverse .meta {
+  background: rgba(255, 255, 255, 0.80);
 }
 
 .card.collected .title,
