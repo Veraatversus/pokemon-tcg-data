@@ -3600,6 +3600,12 @@ body {
   --window-bg-elevated: var(--color-surface-elevated);
   --window-border: var(--color-border);
   --window-muted: var(--color-muted);
+  --card-collected-bg: color-mix(in srgb, #d8f3dc 78%, var(--color-surface) 22%);
+  --card-collected-border: color-mix(in srgb, #2f855a 78%, var(--color-border) 22%);
+  --card-collected-accent: #2f855a;
+  --card-reverse-bg: color-mix(in srgb, #dbeafe 76%, var(--color-surface) 24%);
+  --card-reverse-border: color-mix(in srgb, #2563eb 78%, var(--color-border) 22%);
+  --card-reverse-accent: #2563eb;
 }
 
 body.dark {
@@ -3607,6 +3613,12 @@ body.dark {
   --window-bg-elevated: color-mix(in srgb, var(--color-surface-elevated) 90%, #000 10%);
   --window-border: color-mix(in srgb, var(--color-border) 85%, #93c5fd 15%);
   --window-muted: color-mix(in srgb, var(--color-muted) 88%, #dbeafe 12%);
+  --card-collected-bg: color-mix(in srgb, #123524 72%, var(--color-surface) 28%);
+  --card-collected-border: color-mix(in srgb, #4ade80 74%, var(--color-border) 26%);
+  --card-collected-accent: #4ade80;
+  --card-reverse-bg: color-mix(in srgb, #102a56 72%, var(--color-surface) 28%);
+  --card-reverse-border: color-mix(in srgb, #60a5fa 74%, var(--color-border) 26%);
+  --card-reverse-accent: #60a5fa;
 }
 
 dialog.ss-dialog,
@@ -3769,6 +3781,38 @@ body.dark select option {
 .compact-dashboard .dash-sets-row,
 .logos-dashboard .dash-sets-row {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--grid-min-width, 165px)), 1fr)) !important;
+}
+
+.card.collected,
+.search-result-card.collected {
+  background: linear-gradient(180deg, var(--card-collected-bg), color-mix(in srgb, var(--card-collected-bg) 82%, #ffffff 18%)) !important;
+  border-color: var(--card-collected-border) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--card-collected-border) 36%, transparent), inset 4px 0 0 0 var(--card-collected-accent);
+}
+
+.card.reverse,
+.search-result-card.reverse {
+  background: linear-gradient(180deg, var(--card-reverse-bg), color-mix(in srgb, var(--card-reverse-bg) 82%, #ffffff 18%)) !important;
+  border-color: var(--card-reverse-border) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--card-reverse-border) 38%, transparent), inset 4px 0 0 0 var(--card-reverse-accent);
+}
+
+.card.collected .meta,
+.card.reverse .meta,
+.search-result-card.collected .meta,
+.search-result-card.reverse .meta {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--window-bg-elevated) 92%, transparent), color-mix(in srgb, var(--window-bg) 96%, transparent));
+}
+
+.card.collected .title,
+.card.reverse .title,
+.card.collected .search-status,
+.card.reverse .search-status,
+.search-result-card.collected .title,
+.search-result-card.reverse .title,
+.search-result-card.collected .search-status,
+.search-result-card.reverse .search-status {
+  color: var(--color-text) !important;
 }
 
 .cards .card img,
