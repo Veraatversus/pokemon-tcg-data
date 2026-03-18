@@ -13,7 +13,7 @@ import {
   syncOverviewWithApiSets,
 } from './sheets-db.js';
 import { fetchMergedCards, fetchAllAvailableSets, runPokecodeParityCheck } from './pokemon-api.js';
-import { normalizeCardNumber } from './utils.js';
+import { normalizeCardNumber, toBoolean } from './utils.js';
 import * as cache from './cache.js';
 import { CONFIG, scopedStorageKey } from './config.js';
 import {
@@ -317,7 +317,7 @@ function shouldUseApiForSearchSet(mode, set) {
     return true;
   }
   if (mode === SEARCH_SCOPE_ALL) {
-    return true;
+    return !toBoolean(set?.imported);
   }
   return false;
 }
@@ -334,7 +334,7 @@ function getSearchModeMeta(mode) {
     return {
       label: '🌐 Modus: Alle Sets',
       className: 'all',
-      hint: 'DB + API für alle Sets'
+      hint: 'Importierte aus DB, nicht importierte online'
     };
   }
   return {
@@ -1495,7 +1495,7 @@ async function loadSets() {
 
     (overviewSets || []).forEach((set) => {
       if (!mergedMap.has(set.setId)) {
-        mergedMap.set(set.setId, { ...set, imported: Boolean(set.imported) });
+        mergedMap.set(set.setId, { ...set, imported: toBoolean(set.imported) });
       }
     });
 
@@ -1618,7 +1618,7 @@ async function renderDashboard() {
     if (seriesFilter) sets = sets.filter((s) => (s.series || 'Andere') === seriesFilter);
 
     if (activeDashboardView === 'imported') {
-      sets = sets.filter((set) => Boolean(set.imported));
+      sets = sets.filter((set) => toBoolean(set.imported));
     } else if (activeDashboardView === 'not-imported') {
       sets = sets.filter((set) => !set.imported);
     } else if (activeDashboardView === 'favorites') {
