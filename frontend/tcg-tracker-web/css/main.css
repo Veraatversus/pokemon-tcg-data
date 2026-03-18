@@ -1726,6 +1726,119 @@ body.dark .stats-series-bar { background: #334155; }
   }
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   Theme Consistency Patch (Dark/Light)
+   ══════════════════════════════════════════════════════════════════════════ */
+body.dark {
+  background:
+    radial-gradient(1200px 720px at -8% -18%, rgba(118, 46, 255, 0.28), transparent 58%),
+    radial-gradient(920px 560px at 105% -22%, rgba(0, 224, 255, 0.24), transparent 54%),
+    linear-gradient(180deg, #090f22 0%, #070b1b 52%, #040711 100%);
+}
+
+body.dark .topbar {
+  background:
+    linear-gradient(90deg, rgba(11, 18, 40, 0.95), rgba(18, 24, 52, 0.88)),
+    linear-gradient(145deg, rgba(128, 72, 255, 0.18), rgba(0, 234, 255, 0.12));
+  border-bottom: 1px solid rgba(114, 152, 245, 0.35);
+  box-shadow: 0 18px 48px rgba(1, 4, 13, 0.6);
+}
+
+body.dark .topbar h1 {
+  color: var(--color-text);
+  text-shadow: 0 0 26px rgba(96, 242, 255, 0.42);
+}
+
+body.dark .main-nav {
+  background: rgba(9, 15, 35, 0.6);
+  border: 1px solid rgba(125, 150, 226, 0.35);
+}
+
+body.dark .nav-link {
+  color: #d6e4ff;
+}
+
+body.dark .nav-link:hover {
+  background: rgba(96, 242, 255, 0.12);
+  color: #ffffff;
+}
+
+body.dark .status-bar {
+  background: linear-gradient(90deg, rgba(10, 15, 35, 0.88), rgba(18, 28, 58, 0.74));
+  border-bottom: 1px solid rgba(102, 134, 212, 0.34);
+}
+
+body.dark .global-status {
+  color: #b8caf9;
+}
+
+body.dark .view,
+body.dark .panel,
+body.dark .job-panel,
+body.dark .stats-section,
+body.dark .filter-section,
+body.dark .snapshots-widget,
+body.dark .rating-widget,
+body.dark .rating-stats,
+body.dark .wishlist-item,
+body.dark .share-link-container,
+body.dark .trading-log-item,
+body.dark .achievement-badge,
+body.dark .command-palette-box,
+body.dark dialog.ss-dialog,
+body.dark .lightbox-dialog {
+  background:
+    linear-gradient(155deg, rgba(16, 26, 55, 0.95), rgba(11, 19, 42, 0.95)),
+    linear-gradient(180deg, rgba(82, 116, 212, 0.12), rgba(96, 242, 255, 0.06));
+  border: 1px solid rgba(88, 118, 199, 0.48);
+  box-shadow: var(--shadow-md);
+}
+
+body.dark button,
+body.dark input,
+body.dark select,
+body.dark textarea,
+body.dark .btn-secondary,
+body.dark .btn-primary,
+body.dark .btn-danger,
+body.dark .btn-success {
+  border: 1px solid rgba(96, 127, 205, 0.52);
+  background: linear-gradient(180deg, rgba(20, 33, 69, 0.98), rgba(13, 22, 49, 0.98));
+  color: #ebf2ff;
+}
+
+body:not(.dark) dialog.ss-dialog,
+body:not(.dark) .ss-dialog {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+body:not(.dark) .ss-dialog > p,
+body:not(.dark) .ss-dialog label,
+body:not(.dark) .ss-label,
+body:not(.dark) .dialog-error {
+  color: var(--color-text);
+}
+
+body:not(.dark) .ss-dialog > p,
+body:not(.dark) .ss-label {
+  color: var(--color-muted);
+}
+
+body:not(.dark) .ss-dialog .ss-input,
+body:not(.dark) .ss-dialog button,
+body:not(.dark) .ss-dialog .btn-secondary {
+  background: var(--color-surface-elevated);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+body:not(.dark) .ss-dialog button.btn-primary,
+body:not(.dark) .ss-dialog button:not(.btn-secondary) {
+  color: #fff;
+}
+
 @media (max-width: 480px) {
   body { font-size: 13px; }
   .topbar { padding: 4px; }
