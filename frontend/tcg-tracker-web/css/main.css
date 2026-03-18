@@ -3940,3 +3940,74 @@ body.topbar-collapsed .status-bar {
   }
 }
 
+/* ── Mobile Header Feinschliff (Mode/Auth/Zoom nebeneinander) ───────────── */
+@media (max-width: 640px) {
+  .topbar {
+    row-gap: 6px;
+  }
+
+  .topbar h1 {
+    width: auto;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-right: 6px;
+  }
+
+  .header-actions {
+    width: auto;
+    margin-left: auto;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+
+  .header-actions button,
+  .header-actions .btn-icon {
+    width: auto;
+    min-height: 40px;
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+
+  .header-actions #btn-auth {
+    max-width: 122px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .zoom-control {
+    margin-left: 0;
+  }
+
+  .zoom-slider {
+    width: clamp(40px, 18vw, 64px);
+  }
+}
+
+@media (max-width: 420px) {
+  .topbar {
+    padding: 6px 8px calc(6px + env(safe-area-inset-top, 0));
+  }
+
+  .topbar h1 {
+    font-size: 12px;
+  }
+
+  .header-actions {
+    gap: 4px;
+  }
+
+  .header-actions button,
+  .header-actions .btn-icon {
+    min-height: 36px;
+    padding: 5px 7px;
+    font-size: 11px;
+  }
+
+  .zoom-slider {
+    width: 46px;
+  }
+}
+
