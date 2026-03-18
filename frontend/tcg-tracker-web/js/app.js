@@ -1232,7 +1232,17 @@ function initAutoHideTopbar() {
   const body = document.body;
   const hideClass = 'topbar-collapsed';
   const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
-  let lastY = Math.max(window.scrollY || 0, 0);
+  const scroller = document.scrollingElement || document.documentElement;
+  const getScrollY = () => Math.max(
+    window.scrollY || 0,
+    scroller?.scrollTop || 0,
+    document.documentElement?.scrollTop || 0,
+    document.body?.scrollTop || 0
+  );
+
+  let lastY = Math.max(getScrollY(), 0);
+  let dir = 0;
+  let accumulated = 0;
   let ticking = false;
 
   const syncTopbarHeight = () => {
@@ -1245,35 +1255,61 @@ function initAutoHideTopbar() {
 
   const onScrollFrame = () => {
     ticking = false;
-    const currentY = Math.max(window.scrollY || 0, 0);
+    const currentY = Math.max(getScrollY(), 0);
     const delta = currentY - lastY;
     const isNearTop = currentY < 88;
 
-    if (reducedMotion || isNearTop) {
+    if (reducedMotion) {
       showTopbar();
       lastY = currentY;
       return;
     }
 
-    if (delta > 8) {
-      body.classList.add(hideClass);
-    } else if (delta < -8) {
+    if (isNearTop) {
       showTopbar();
+      dir = 0;
+      accumulated = 0;
+      lastY = currentY;
+      return;
+    }
+
+    if (Math.abs(delta) < 1) {
+      lastY = currentY;
+      return;
+    }
+
+    const nextDir = delta > 0 ? 1 : -1;
+    if (nextDir === dir) {
+      accumulated += Math.abs(delta);
+    } else {
+      dir = nextDir;
+      accumulated = Math.abs(delta);
+    }
+
+    if (dir > 0 && accumulated > 22) {
+      body.classList.add(hideClass);
+      accumulated = 0;
+    } else if (dir < 0 && accumulated > 14) {
+      showTopbar();
+      accumulated = 0;
     }
 
     lastY = currentY;
   };
 
-  syncTopbarHeight();
-  window.addEventListener('resize', syncTopbarHeight, { passive: true });
-  window.addEventListener('orientationchange', syncTopbarHeight, { passive: true });
-  window.addEventListener('hashchange', showTopbar, { passive: true });
-
-  window.addEventListener('scroll', () => {
+  const onScroll = () => {
     if (ticking) return;
     ticking = true;
     window.requestAnimationFrame(onScrollFrame);
-  }, { passive: true });
+  };
+
+  syncTopbarHeight();
+  showTopbar();
+  window.addEventListener('resize', syncTopbarHeight, { passive: true });
+  window.addEventListener('orientationchange', syncTopbarHeight, { passive: true });
+  window.addEventListener('hashchange', showTopbar, { passive: true });
+  window.addEventListener('scroll', onScroll, { passive: true });
+  document.addEventListener('scroll', onScroll, { passive: true, capture: true });
 }
 
 // ══════════════════════════════════════════════════════════════════════════
