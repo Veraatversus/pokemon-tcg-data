@@ -3,6 +3,10 @@
         "/^python -m http\\.server 8000$/": {
             "approve": true,
             "matchCommandLine": true
+        },
+        "/^Get-NetTCPConnection -LocalPort 8080 -State Listen \\| Select-Object -First 5 LocalAddress,LocalPort,OwningProcess,State \\| Format-Table -AutoSize \\| Out-String$/": {
+            "approve": true,
+            "matchCommandLine": true
         }
     }
 }

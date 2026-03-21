@@ -5,21 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups" />
   <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp" />
-  <title>Pokémon TCG Tracker</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%8E%B4%3C/text%3E%3C/svg%3E" />
-  <link rel="manifest" href="./manifest.json" />
-  <meta name="theme-color" content="#0b1024" />
+  <title>Veras Pokemon TCG Tracker</title>
+  <link rel="icon" type="image/jpeg" sizes="32x32" href="./assets/branding/logo-veras-pokemon.jpg?v=5" />
+  <link rel="shortcut icon" type="image/jpeg" href="./assets/branding/logo-veras-pokemon.jpg?v=5" />
+  <link rel="manifest" href="./manifest.json?v=5" />
+  <meta name="theme-color" content="#070b1b" />
   <meta name="apple-mobile-web-app-capable" content="true" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Pokémon TCG Tracker" />
+  <meta name="apple-mobile-web-app-title" content="Veras Pokemon TCG" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&display=swap" rel="stylesheet" />
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect fill='%231f2937' width='180' height='180' rx='40'/%3E%3Ctext x='90' y='120' font-size='100' text-anchor='middle' fill='%23fff' dominant-baseline='middle'%3E🎴%3C/text%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="./assets/branding/logo-veras-pokemon.jpg?v=5" />
   <link rel="stylesheet" href="./css/main.css" />
   <link rel="stylesheet" href="./css/trading-marketplace.css" />
 </head>
-<body>
+<body class="dark">
 
   <!-- Lade-Overlay -->
   <div id="loading-overlay" class="loading-overlay hidden" role="status" aria-live="polite">
@@ -130,7 +131,13 @@
 
   <!-- Header -->
   <header class="topbar">
-    <h1>🎴 Pokémon TCG Tracker</h1>
+    <h1 class="brand-lockup">
+      <img class="brand-logo" src="./assets/branding/logo-veras-pokemon.jpg" alt="Veras Pokemon Logo" />
+      <span class="brand-copy">
+        <span class="brand-kicker">VERAS POKEMON</span>
+        <span class="brand-title">TCG Tracker</span>
+      </span>
+    </h1>
     <nav class="main-nav hidden" id="main-nav">
       <a href="#dashboard" class="nav-link active" data-view="dashboard">Dashboard</a>
       <a href="#set" class="nav-link" data-view="set" id="nav-set-link">Set-Ansicht</a>
@@ -139,7 +146,6 @@
     </nav>
     <div id="recent-sets" class="recent-sets hidden" aria-label="Zuletzt bearbeitete Sets"></div>
     <div class="header-actions">
-      <button id="btn-dark-mode" class="btn-icon" title="Dark Mode umschalten" aria-label="Dark Mode umschalten">🌙</button>
       <button id="btn-auth" data-state="in">Google Login</button>
       <div class="zoom-control" title="Rastergröße">
         <input type="range" id="grid-zoom-slider" min="80" max="300" value="165" step="10" class="zoom-slider" aria-label="Rastergröße">

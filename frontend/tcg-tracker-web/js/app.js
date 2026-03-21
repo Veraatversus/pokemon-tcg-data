@@ -103,7 +103,6 @@ const dom = {
   // Global
   auth:             document.getElementById('btn-auth'),
   topbar:           document.querySelector('.topbar'),
-  darkModeToggle:   document.getElementById('btn-dark-mode'),
   mainNav:          document.getElementById('main-nav'),
   loadingOverlay:   document.getElementById('loading-overlay'),
   loadingText:      document.getElementById('loading-text'),
@@ -288,10 +287,12 @@ const state = {
 
 let focusedCardIndex = -1;
 
+const LOADING_MAX_BLOCK_MS = 12000;
+let loadingFailsafeTimer = null;
+
 const QUEUE_PRESETS_STORAGE_KEY = scopedStorageKey('queue_presets_v1');
 const DASHBOARD_PREFS_STORAGE_KEY = scopedStorageKey('dashboard_prefs_v1');
 const RECENT_SETS_STORAGE_KEY = scopedStorageKey('recent_sets_v1');
-const DARK_MODE_STORAGE_KEY = scopedStorageKey('dark_mode');
 const REALTIME_CLIENT_STORAGE_KEY = scopedStorageKey('realtime_client_id');
 const USER_ID_STORAGE_KEY = scopedStorageKey('user_id');
 const DASHBOARD_VIRTUAL_PAGE_SIZE = 180;
@@ -1071,8 +1072,24 @@ function setGlobalStatus(text) {
 }
 
 function setLoading(show, text = 'Lade\u2026') {
-  dom.loadingText.textContent = text;
+  if (!dom.loadingOverlay) return;
+  if (dom.loadingText) dom.loadingText.textContent = text;
+
+  if (loadingFailsafeTimer) {
+    clearTimeout(loadingFailsafeTimer);
+    loadingFailsafeTimer = null;
+  }
+
   dom.loadingOverlay.classList.toggle('hidden', !show);
+  dom.loadingOverlay.setAttribute('aria-hidden', show ? 'false' : 'true');
+
+  if (show) {
+    loadingFailsafeTimer = window.setTimeout(() => {
+      dom.loadingOverlay.classList.add('hidden');
+      dom.loadingOverlay.setAttribute('aria-hidden', 'true');
+      console.warn('Loading overlay auto-hidden by failsafe timer.');
+    }, LOADING_MAX_BLOCK_MS);
+  }
 }
 
 function showToast(message, type = 'info', durationMs = 3000) {
@@ -1163,23 +1180,6 @@ function setEmptyState(show) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
-// DARK MODE
-// ══════════════════════════════════════════════════════════════════════════
-function initDarkMode() {
-  const saved = localStorage.getItem(DARK_MODE_STORAGE_KEY);
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  if (saved === 'true' || (saved === null && prefersDark)) {
-    document.body.classList.add('dark');
-    dom.darkModeToggle.textContent = '\u2600\uFE0F';
-  }
-  dom.darkModeToggle.addEventListener('click', () => {
-    const isDark = document.body.classList.toggle('dark');
-    localStorage.setItem(DARK_MODE_STORAGE_KEY, isDark);
-    dom.darkModeToggle.textContent = isDark ? '\u2600\uFE0F' : '\uD83C\uDF19';
-  });
-}
-
-// ══════════════════════════════════════════════════════════════════════════
 // GRID ZOOM
 // ══════════════════════════════════════════════════════════════════════════
 const GRID_ZOOM_STORAGE_KEY = 'gridZoom';
@@ -1221,6 +1221,166 @@ function initGridZoom() {
     const v = Math.max(parseInt(slider.min, 10), Math.min(parseInt(slider.max, 10), parseInt(e.target.value, 10)));
     applyGridZoom(v);
     localStorage.setItem(GRID_ZOOM_STORAGE_KEY, v);
+  });
+}
+
+function initCustomSelects() {
+  const nativeSelects = Array.from(document.querySelectorAll('select'));
+  if (!nativeSelects.length) return;
+
+  const closeAll = (except = null) => {
+    document.querySelectorAll('.custom-select.is-open').forEach((node) => {
+      if (node !== except) node.classList.remove('is-open');
+    });
+  };
+
+  const createOptionNode = ({ option, select, list, button, root }) => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'custom-select-option';
+    item.dataset.value = option.value;
+    item.textContent = option.textContent?.trim() || '—';
+    item.setAttribute('role', 'option');
+    item.setAttribute('aria-selected', String(option.selected));
+
+    if (option.disabled) {
+      item.disabled = true;
+      item.classList.add('is-disabled');
+    }
+
+    if (option.selected) {
+      item.classList.add('is-selected');
+      button.textContent = item.textContent;
+    }
+
+    item.addEventListener('click', () => {
+      if (option.disabled) return;
+      select.value = option.value;
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      root.classList.remove('is-open');
+      button.focus();
+    });
+
+    list.appendChild(item);
+  };
+
+  nativeSelects.forEach((select) => {
+    if (select.closest('.custom-select')) return;
+    if (select.dataset.customized === 'true') return;
+
+    select.dataset.customized = 'true';
+    select.classList.add('cs-native');
+
+    const root = document.createElement('div');
+    root.className = 'custom-select';
+    if (select.className) {
+      select.className.split(' ').filter(Boolean).forEach((klass) => root.classList.add(`from-${klass}`));
+    }
+    if (select.id) root.classList.add(`from-id-${select.id}`);
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'custom-select-trigger';
+    button.setAttribute('aria-haspopup', 'listbox');
+    button.setAttribute('aria-expanded', 'false');
+    button.disabled = select.disabled;
+
+    const list = document.createElement('div');
+    list.className = 'custom-select-list';
+    list.setAttribute('role', 'listbox');
+
+    const rebuild = () => {
+      list.innerHTML = '';
+      button.textContent = '';
+      const options = Array.from(select.options);
+      options.forEach((option) => createOptionNode({ option, select, list, button, root }));
+      if (!button.textContent) {
+        const selectedOption = options.find((option) => option.selected) || options[0];
+        button.textContent = selectedOption?.textContent?.trim() || 'Auswählen…';
+      }
+      button.disabled = select.disabled;
+      root.classList.toggle('is-disabled', Boolean(select.disabled));
+    };
+
+    const syncSelectionState = () => {
+      const selectedValue = select.value;
+      list.querySelectorAll('.custom-select-option').forEach((optionNode) => {
+        const isSelected = optionNode.dataset.value === selectedValue;
+        optionNode.classList.toggle('is-selected', isSelected);
+        optionNode.setAttribute('aria-selected', String(isSelected));
+        if (isSelected) button.textContent = optionNode.textContent || 'Auswählen…';
+      });
+      button.disabled = select.disabled;
+      root.classList.toggle('is-disabled', Boolean(select.disabled));
+    };
+
+    button.addEventListener('click', () => {
+      if (button.disabled) return;
+      const shouldOpen = !root.classList.contains('is-open');
+      closeAll(root);
+      root.classList.toggle('is-open', shouldOpen);
+      button.setAttribute('aria-expanded', String(shouldOpen));
+      if (shouldOpen) {
+        const selectedNode = list.querySelector('.custom-select-option.is-selected');
+        selectedNode?.scrollIntoView({ block: 'nearest' });
+      }
+    });
+
+    button.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        root.classList.remove('is-open');
+        button.setAttribute('aria-expanded', 'false');
+      }
+      if ((event.key === 'Enter' || event.key === ' ') && !root.classList.contains('is-open')) {
+        event.preventDefault();
+        button.click();
+      }
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        const enabled = Array.from(select.options).filter((option) => !option.disabled);
+        if (!enabled.length) return;
+        const currentIndex = enabled.findIndex((option) => option.value === select.value);
+        const delta = event.key === 'ArrowDown' ? 1 : -1;
+        const nextIndex = currentIndex < 0
+          ? 0
+          : (currentIndex + delta + enabled.length) % enabled.length;
+        select.value = enabled[nextIndex].value;
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
+
+    select.addEventListener('change', syncSelectionState);
+
+    const observer = new MutationObserver(() => {
+      rebuild();
+      syncSelectionState();
+    });
+    observer.observe(select, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['disabled', 'selected', 'label', 'value']
+    });
+
+    select.parentNode?.insertBefore(root, select);
+    root.appendChild(select);
+    root.appendChild(button);
+    root.appendChild(list);
+    rebuild();
+    syncSelectionState();
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!(event.target instanceof Element)) {
+      closeAll();
+      return;
+    }
+    if (!event.target.closest('.custom-select')) {
+      closeAll();
+      document.querySelectorAll('.custom-select-trigger[aria-expanded="true"]').forEach((button) => {
+        button.setAttribute('aria-expanded', 'false');
+      });
+    }
   });
 }
 
@@ -4144,9 +4304,9 @@ async function bootstrap() {
   } catch (err) {
     console.warn('Smart Engine init:', err);
   }
-  initDarkMode();
   initAutoHideTopbar();
   initGridZoom();
+  initCustomSelects();
   initFilterButtons();
   initSpreadsheetDialog();
   initBatchImportDialog();
@@ -4843,6 +5003,20 @@ if ('serviceWorker' in navigator) {
         scope: './'
       });
       console.log('✅ Service Worker registered:', registration);
+
+      if (registration.waiting) {
+        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+      }
+
+      registration.addEventListener('updatefound', () => {
+        const newWorker = registration.installing;
+        if (!newWorker) return;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            newWorker.postMessage({ type: 'SKIP_WAITING' });
+          }
+        });
+      });
       
       // Check for updates periodically
       setInterval(() => {
@@ -4851,7 +5025,10 @@ if ('serviceWorker' in navigator) {
       
       // Handle controller change (new SW ready)
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        showToast('🔄 App wurde aktualisiert', 'success', 3000);
+        showToast('🔄 App wurde aktualisiert', 'success', 1500);
+        window.setTimeout(() => {
+          window.location.reload();
+        }, 300);
       });
       
       // Listen for messages from Service Worker
