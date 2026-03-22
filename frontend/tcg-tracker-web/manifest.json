@@ -1,24 +1,24 @@
 {
-  "name": "Pokémon TCG Card Tracker",
-  "short_name": "Pokémon TCG Tracker",
-  "description": "Verwalte deine Pokémon Sammelkartensammlung offline-first mit vollständiger Synchronisation",
+  "name": "Veras Pokemon TCG Tracker",
+  "short_name": "Veras Pokemon",
+  "description": "Verwalte deine Pokémon Sammelkartensammlung offline-first im Veras-Pokemon-Design mit vollständiger Synchronisation",
   "start_url": "./index.html",
   "scope": ".",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#ffffff",
-  "theme_color": "#1f2937",
+  "background_color": "#070b1b",
+  "theme_color": "#0a0e1f",
   "icons": [
     {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect fill='%231f2937' width='192' height='192'/%3E%3Ctext x='96' y='130' font-size='120' text-anchor='middle' fill='%23fff' dominant-baseline='middle'%3E🎴%3C/text%3E%3C/svg%3E",
-      "sizes": "192x192",
-      "type": "image/svg+xml",
+      "src": "./assets/branding/logo-veras-pokemon.jpg",
+      "sizes": "768x768",
+      "type": "image/jpeg",
       "purpose": "any"
     },
     {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect fill='%231f2937' width='512' height='512'/%3E%3Ctext x='256' y='340' font-size='320' text-anchor='middle' fill='%23fff' dominant-baseline='middle'%3E🎴%3C/text%3E%3C/svg%3E",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
+      "src": "./assets/branding/logo-veras-pokemon.jpg",
+      "sizes": "768x768",
+      "type": "image/jpeg",
       "purpose": "any maskable"
     }
   ],

@@ -35,6 +35,7 @@ jobs:
         id: sync_upstream
         run: |
           echo "conflict_type=" >> $GITHUB_OUTPUT
+          echo "synced=false" >> $GITHUB_OUTPUT
 
           git remote add upstream https://github.com/${UPSTREAM_REPO}.git || true
           git remote set-url upstream https://github.com/${UPSTREAM_REPO}.git
@@ -52,11 +53,25 @@ jobs:
           if git merge -X theirs upstream/$UPSTREAM_BRANCH --no-edit; then
             echo "Successfully merged upstream changes into master"
             git push origin master
+            echo "synced=true" >> $GITHUB_OUTPUT
           else
             git merge --abort
             echo "conflict_type=upstream->master" >> $GITHUB_OUTPUT
             exit 1
           fi
+
+      - name: Trigger propagation workflow
+        if: steps.sync_upstream.outputs.synced == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'propagate-master-to-dev-release.yml',
+              ref: 'master'
+            });
+            core.info('Triggered propagate-master-to-dev-release workflow on master');
 
       - name: Create issue on merge conflict
         if: failure()
