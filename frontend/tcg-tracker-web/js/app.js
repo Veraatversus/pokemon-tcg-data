@@ -1073,23 +1073,9 @@ function setGlobalStatus(text) {
 
 function setLoading(show, text = 'Lade\u2026') {
   if (!dom.loadingOverlay) return;
-  if (dom.loadingText) dom.loadingText.textContent = text;
-
-  if (loadingFailsafeTimer) {
-    clearTimeout(loadingFailsafeTimer);
-    loadingFailsafeTimer = null;
-  }
-
-  dom.loadingOverlay.classList.toggle('hidden', !show);
-  dom.loadingOverlay.setAttribute('aria-hidden', show ? 'false' : 'true');
-
-  if (show) {
-    loadingFailsafeTimer = window.setTimeout(() => {
-      dom.loadingOverlay.classList.add('hidden');
-      dom.loadingOverlay.setAttribute('aria-hidden', 'true');
-      console.warn('Loading overlay auto-hidden by failsafe timer.');
-    }, LOADING_MAX_BLOCK_MS);
-  }
+  // OVERLAY DISABLED: Always hide immediately – start directly on page
+  dom.loadingOverlay.classList.add('hidden');
+  dom.loadingOverlay.setAttribute('aria-hidden', 'true');
 }
 
 function showToast(message, type = 'info', durationMs = 3000) {

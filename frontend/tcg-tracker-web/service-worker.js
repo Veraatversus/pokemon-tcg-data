@@ -4,9 +4,9 @@
 
 const SW_SCOPE_PATH = new URL(self.registration.scope).pathname.toLowerCase();
 const SW_SCOPE = /(^|\/)dev(\/|$)/.test(SW_SCOPE_PATH) ? 'dev' : 'release';
-const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v5`;
-const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v5`;
-const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v5`;
+const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v7`;
+const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v7`;
+const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v7`;
 
 const STATIC_ASSETS = [
   './',
