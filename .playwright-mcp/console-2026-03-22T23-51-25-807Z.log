@@ -1,0 +1,11 @@
+[  824614ms] [ERROR] Cross-Origin-Opener-Policy policy would block the window.opener call. @ https://apis.google.com/_/scs/abc-static/_/js/k=gapi.lb.de.C5FXo_yJSS8.O/m=client/rt=j/sv=1/d=1/ed=1/rs=AHpOoo_8yvxaJYyD2akBQcq3C9yrdMFRVw/cb=gapi.loaded_0?le=scs,fedcm_migration_mod:435
+[  824614ms] [ERROR] Cross-Origin-Opener-Policy policy would block the window.opener call. @ https://apis.google.com/_/scs/abc-static/_/js/k=gapi.lb.de.C5FXo_yJSS8.O/m=client/rt=j/sv=1/d=1/ed=1/rs=AHpOoo_8yvxaJYyD2akBQcq3C9yrdMFRVw/cb=gapi.loaded_0?le=scs,fedcm_migration_mod:435
+[  857760ms] [ERROR] [loadSets] TypeError: Cannot read properties of undefined (reading 'spreadsheets')
+    at listSheetTitles (http://localhost:8080/js/data/sheets-db.js:265:41)
+    at ensureSheetWithHeader (http://localhost:8080/js/data/sheets-db.js:291:24)
+    at http://localhost:8080/js/data/sheets-db.js:319:13
+    at ensureNormalizedSchema (http://localhost:8080/js/data/sheets-db.js:322:7)
+    at readSummarySheet (http://localhost:8080/js/data/sheets-db.js:645:9)
+    at renderDashboard (http://localhost:8080/js/app.js:1885:33)
+    at http://localhost:8080/js/app.js:4331:7
+    at HTMLDivElement.<anonymous> (http://localhost:8080/js/ui/components.js:53:14) @ http://localhost:8080/js/app.js:1839
