@@ -1,4 +1,4 @@
-import { initAuth, signIn, signOut, isSignedIn } from './auth.js';
+﻿import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js';
 import {
   listImportedSets,
   listSetsOverviewData,
@@ -10,12 +10,13 @@ import {
   readSettings,
   writeSetting,
   importSetIntoCollection,
+  upsertOverviewSet,
   syncOverviewWithApiSets,
-} from './sheets-db.js';
-import { fetchMergedCards, fetchAllAvailableSets, runPokecodeParityCheck } from './pokemon-api.js';
-import { normalizeCardNumber, toBoolean } from './utils.js';
-import * as cache from './cache.js';
-import { CONFIG, scopedStorageKey } from './config.js';
+} from './data/sheets-db.js';
+import { fetchMergedCards, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js';
+import { normalizeCardNumber, toBoolean } from './core/utils.js';
+import * as cache from './core/cache.js';
+import { CONFIG, scopedStorageKey } from './core/config.js';
 import {
   initSmartEngine,
   startAutoHealing,
@@ -23,12 +24,12 @@ import {
   getEngineMetrics,
   cacheCardsOffline,
   getCachedCardsOffline
-} from './smart-engine.js';
+} from './features/search/index.js';
 import {
   createAutoSnapshot,
   loadSnapshots
-} from './collection-versioning.js';
-import { initCommandPalette } from './command-palette.js';
+} from './features/collection/index.js';
+import { initCommandPalette } from './ui/command-palette.js';
 import {
   loadFavorites, saveFavorites, toggleFavorite, isFavorite,
   loadSearchHistory, addSearchHistory, clearSearchHistory,
@@ -39,14 +40,14 @@ import {
 } from './enhanced-features.js';
 import {
   initQuickFiltersUI, createSearchHistoryWidget, createStatisticsPanel,
-  createExportDialog, createSettingsPanel, createShortcutsOverlay,
+  createExportDialog, createSettingsPanel,
   createBulkActionsToolbar
-} from './ui-components.js';
+} from './ui/components.js';
 import {
   AdvancedSearch, SyncIndicator, CardCollectionTools,
   generateCollectionInsights, generateSetComparison,
   NotificationManager, PerformanceTracker
-} from './advanced-tools.js';
+} from './ui/tools.js';
 import {
   loadWishlists, addTradeLog, getTradingLog, checkAchievementsProgress,
   importCollectionFromCSV, GestureController, rateSet, getAllRatings
@@ -95,7 +96,7 @@ import {
 import {
   initRealtimeSync,
   buildCollectionUpdateEvent
-} from './realtime-sync.js';
+} from './features/community/index.js';
 // ══════════════════════════════════════════════════════════════════════════
 // DOM-REFERENZEN
 // ══════════════════════════════════════════════════════════════════════════
@@ -155,6 +156,8 @@ const dom = {
   btnExportSummaryCsv: document.getElementById('btn-export-summary-csv'),
   btnDataHealthCheck: document.getElementById('btn-data-health-check'),
   btnDataHealthAutofix: document.getElementById('btn-data-health-autofix'),
+  btnManageImportedSets: document.getElementById('btn-manage-imported-sets'),
+  btnSheetsRetryReport: document.getElementById('btn-sheets-retry-report'),
   btnParityCheck: document.getElementById('dashboard-action-parity'),
   btnQueueAutofixRefresh: document.getElementById('btn-queue-autofix-refresh'),
   btnQueueBuilder: document.getElementById('btn-queue-builder'),
@@ -177,12 +180,27 @@ const dom = {
   btnExportBackup: document.getElementById('btn-export-backup'),
   btnImportBackup: document.getElementById('btn-import-backup'),
   backupFileInput: document.getElementById('input-backup-file'),
+  manageSetsDialog: document.getElementById('dialog-manage-sets'),
+  manageSetsSearch: document.getElementById('manage-sets-search-input'),
+  manageSetsList: document.getElementById('manage-sets-list'),
+  manageSetsInfo: document.getElementById('manage-sets-info'),
+  btnManageSetsSelectVisible: document.getElementById('btn-manage-sets-select-visible'),
+  btnManageSetsClearSelection: document.getElementById('btn-manage-sets-clear-selection'),
+  btnManageSetsReimportSelected: document.getElementById('btn-manage-sets-reimport-selected'),
+  btnManageSetsDeleteSelected: document.getElementById('btn-manage-sets-delete-selected'),
+  btnManageSetsCancel: document.getElementById('btn-manage-sets-cancel'),
+  sheetsRetryDialog: document.getElementById('dialog-sheets-retry-report'),
+  sheetsRetryStats: document.getElementById('sheets-retry-stats'),
+  sheetsRetryHistory: document.getElementById('sheets-retry-history'),
+  btnSheetsRetryReset: document.getElementById('btn-sheets-retry-reset'),
+  btnSheetsRetryClose: document.getElementById('btn-sheets-retry-close'),
   dashboardGrid:    document.getElementById('dashboard-grid'),
   // Set detail – sidebar
   selector:         document.getElementById('set-selector'),
   load:             document.getElementById('btn-load'),
   refresh:          document.getElementById('btn-refresh'),
   status:           document.getElementById('status'),
+  saveStatePill:    document.getElementById('save-state-pill'),
   setLogoWrap:      document.getElementById('set-logo-wrap'),
   setLogo:          document.getElementById('set-logo'),
   setSymbol:        document.getElementById('set-symbol'),
@@ -198,6 +216,8 @@ const dom = {
   cardSort:         document.getElementById('card-sort'),
   // Set detail – toolbar
   btnBulkEdit:      document.getElementById('btn-bulk-edit'),
+  btnUndoLast:      document.getElementById('btn-undo-last'),
+  btnAuditPanel:    document.getElementById('btn-audit-panel'),
   btnMissingExport: document.getElementById('btn-missing-export'),
   bulkToolbar:      document.getElementById('bulk-toolbar'),
   bulkCount:        document.getElementById('bulk-count'),
@@ -205,6 +225,9 @@ const dom = {
   btnBulkMarkRh:    document.getElementById('btn-bulk-mark-rh'),
   btnBulkUnmark:    document.getElementById('btn-bulk-unmark'),
   btnBulkCancel:    document.getElementById('btn-bulk-cancel'),
+  auditPanel:       document.getElementById('audit-panel'),
+  auditList:        document.getElementById('audit-list'),
+  btnAuditClear:    document.getElementById('btn-audit-clear'),
   // Cards
   cards:            document.getElementById('cards'),
   emptyState:       document.getElementById('empty-state'),
@@ -251,6 +274,7 @@ const state = {
   sets:         [],
   allSets:      [],
   summaryData:  null,
+  summaryOverrides: new Map(),
   currentSet:   null,
   dbMap:        new Map(),
   cards:        [],
@@ -283,6 +307,21 @@ const state = {
   },
   realtimeClientId: null,
   realtime: null,
+  pendingWrites: 0,
+  lastSaveError: null,
+  saveStateTimer: null,
+  importBlockedSetIds: new Set(),
+  manageSetsSelection: new Set(),
+  sheetsRetryMetrics: {
+    totalWrites: 0,
+    totalRetries: 0,
+    totalFailures: 0,
+    maxAttemptSeen: 0,
+    events: []
+  },
+  undoStack: [],
+  auditEntries: [],
+  devCompletionMode: false,
 };
 
 let focusedCardIndex = -1;
@@ -295,6 +334,7 @@ const DASHBOARD_PREFS_STORAGE_KEY = scopedStorageKey('dashboard_prefs_v1');
 const RECENT_SETS_STORAGE_KEY = scopedStorageKey('recent_sets_v1');
 const REALTIME_CLIENT_STORAGE_KEY = scopedStorageKey('realtime_client_id');
 const USER_ID_STORAGE_KEY = scopedStorageKey('user_id');
+const DEV_COMPLETION_STORAGE_KEY = scopedStorageKey('dev_completion_mode');
 const DASHBOARD_VIRTUAL_PAGE_SIZE = 180;
 const SEARCH_INPUT_DEBOUNCE_MS = 900;
 const DASHBOARD_VIRTUAL_THRESHOLD = 220;
@@ -368,6 +408,29 @@ function renderSearchSetFilterOptions() {
     dom.searchSetFilter.value = previousValue;
   } else {
     dom.searchSetFilter.value = '';
+  }
+}
+
+function refreshImportedSetSelectorOptions() {
+  if (!dom.selector) return;
+  const previousValue = String(dom.selector.value || '');
+  dom.selector.innerHTML = '<option value="">Bitte wählen…</option>';
+  const seriesMap = buildSeriesMap(state.sets || []);
+  seriesMap.forEach((setsArr, seriesName) => {
+    const group = document.createElement('optgroup');
+    group.label = seriesName;
+    setsArr.forEach((set) => {
+      const opt = document.createElement('option');
+      opt.value = set.setId;
+      opt.textContent = set.setName;
+      group.appendChild(opt);
+    });
+    dom.selector.appendChild(group);
+  });
+  if (previousValue && (state.sets || []).some((set) => set.setId === previousValue)) {
+    dom.selector.value = previousValue;
+  } else {
+    dom.selector.value = '';
   }
 }
 
@@ -471,8 +534,32 @@ function createDashboardVirtualFooter(total, visible) {
 }
 
 function initSheetsWriteFeedback() {
+  const pushRetryEvent = (type, details = {}) => {
+    const metrics = state.sheetsRetryMetrics;
+    const entry = {
+      type,
+      at: new Date().toISOString(),
+      ...details
+    };
+    metrics.events.unshift(entry);
+    if (metrics.events.length > 120) metrics.events.length = 120;
+    renderSheetsRetryReport();
+  };
+
   window.addEventListener('sheets-write-retry', (event) => {
     const details = event?.detail || {};
+    state.sheetsRetryMetrics.totalRetries += 1;
+    state.sheetsRetryMetrics.maxAttemptSeen = Math.max(
+      state.sheetsRetryMetrics.maxAttemptSeen,
+      Number(details.attempt || 0)
+    );
+    pushRetryEvent('retry', {
+      range: details.range || '',
+      attempt: Number(details.attempt || 0),
+      maxRetries: Number(details.maxRetries || 0),
+      delayMs: Number(details.delayMs || 0),
+      status: details.status || null
+    });
     const retryLabel = `${details.attempt || '?'} / ${details.maxRetries || '?'}`;
     const waitSeconds = Math.max(1, Math.ceil((Number(details.delayMs) || 0) / 1000));
     const message = `Sheets-Write Retry ${retryLabel} (warte ${waitSeconds}s)`;
@@ -482,14 +569,127 @@ function initSheetsWriteFeedback() {
     }
   });
 
+  window.addEventListener('sheets-write-success', (event) => {
+    const details = event?.detail || {};
+    state.sheetsRetryMetrics.totalWrites += 1;
+    state.sheetsRetryMetrics.maxAttemptSeen = Math.max(
+      state.sheetsRetryMetrics.maxAttemptSeen,
+      Number(details.attemptsUsed || 1)
+    );
+    if (Number(details.attemptsUsed || 1) > 1) {
+      pushRetryEvent('recovered', {
+        range: details.range || '',
+        attemptsUsed: Number(details.attemptsUsed || 1)
+      });
+    }
+  });
+
   window.addEventListener('sheets-write-failed', (event) => {
     const details = event?.detail || {};
+    state.sheetsRetryMetrics.totalFailures += 1;
+    pushRetryEvent('failed', {
+      range: details.range || '',
+      status: details.status || null,
+      message: details.message || ''
+    });
     const message = `Sheets-Write fehlgeschlagen (${details.status || 'unbekannt'}): ${details.range || 'Range unbekannt'}`;
     setGlobalStatus(message);
     if (state.activeJob) {
       updateJob(state.activeJob, state.activeJob.current, message);
     }
   });
+}
+
+function resetSheetsRetryMetrics() {
+  state.sheetsRetryMetrics = {
+    totalWrites: 0,
+    totalRetries: 0,
+    totalFailures: 0,
+    maxAttemptSeen: 0,
+    events: []
+  };
+  renderSheetsRetryReport();
+}
+
+function renderSheetsRetryReport() {
+  if (dom.sheetsRetryStats) {
+    const metrics = state.sheetsRetryMetrics;
+    const retryRate = metrics.totalWrites > 0
+      ? Math.round((metrics.totalRetries / metrics.totalWrites) * 100)
+      : 0;
+    dom.sheetsRetryStats.innerHTML = `
+      <li><strong>Writes:</strong> ${metrics.totalWrites}</li>
+      <li><strong>Retries:</strong> ${metrics.totalRetries}</li>
+      <li><strong>Failures:</strong> ${metrics.totalFailures}</li>
+      <li><strong>Retry-Rate:</strong> ${retryRate}%</li>
+      <li><strong>Max Attempts:</strong> ${metrics.maxAttemptSeen || 1}</li>
+    `;
+  }
+
+  if (dom.sheetsRetryHistory) {
+    const events = state.sheetsRetryMetrics.events || [];
+    if (!events.length) {
+      dom.sheetsRetryHistory.innerHTML = '<li class="retry-empty">Noch keine Sheets-Retry-Ereignisse.</li>';
+      return;
+    }
+    dom.sheetsRetryHistory.innerHTML = events.map((entry) => {
+      const time = new Date(entry.at).toLocaleTimeString('de-DE');
+      const kind = entry.type === 'failed' ? 'Fehler' : entry.type === 'recovered' ? 'Erholt' : 'Retry';
+      const detail = entry.type === 'retry'
+        ? `Versuch ${entry.attempt || '?'} / ${entry.maxRetries || '?'} · ${(Math.ceil((entry.delayMs || 0) / 1000) || 0)}s`
+        : entry.type === 'failed'
+          ? `${entry.status || 'unbekannt'} · ${entry.message || 'ohne Fehlermeldung'}`
+          : `nach ${entry.attemptsUsed || '?'} Versuchen erfolgreich`;
+      return `<li class="retry-entry ${entry.type}"><span class="retry-time">${time}</span><span class="retry-kind">${kind}</span><span class="retry-detail">${detail}</span><span class="retry-range">${entry.range || 'Range unbekannt'}</span></li>`;
+    }).join('');
+  }
+}
+
+function openSheetsRetryReportDialog() {
+  if (!dom.sheetsRetryDialog) return;
+  renderSheetsRetryReport();
+  dom.sheetsRetryDialog.showModal();
+}
+
+function initAuditAndSaveUi() {
+  updateSaveStatePill();
+  renderAuditPanel();
+  updateUndoUi();
+
+  dom.btnAuditPanel?.addEventListener('click', () => {
+    if (!dom.auditPanel) return;
+    dom.auditPanel.classList.toggle('hidden');
+    const expanded = !dom.auditPanel.classList.contains('hidden');
+    dom.btnAuditPanel.setAttribute('aria-expanded', String(expanded));
+  });
+
+  dom.btnAuditClear?.addEventListener('click', () => {
+    state.auditEntries = [];
+    renderAuditPanel();
+  });
+
+  dom.btnUndoLast?.addEventListener('click', () => undoLastChange());
+
+  window.addEventListener('keydown', (event) => {
+    const isUndo = (event.ctrlKey || event.metaKey) && String(event.key).toLowerCase() === 'z';
+    if (!isUndo) return;
+    if (event.target?.matches?.('input, textarea, [contenteditable="true"]')) return;
+    event.preventDefault();
+    undoLastChange();
+  });
+}
+
+function initDevCompletionMode() {
+  const query = new URLSearchParams(window.location.search);
+  const fromQuery = query.get('devComplete');
+
+  if (fromQuery === '1') localStorage.setItem(DEV_COMPLETION_STORAGE_KEY, '1');
+  if (fromQuery === '0') localStorage.removeItem(DEV_COMPLETION_STORAGE_KEY);
+
+  state.devCompletionMode = localStorage.getItem(DEV_COMPLETION_STORAGE_KEY) === '1';
+  if (state.devCompletionMode) {
+    pushAuditEntry('info', 'Dev-Completion-Modus aktiv');
+  }
 }
 
 function loadDashboardPreferences() {
@@ -1086,6 +1286,157 @@ function showToast(message, type = 'info', durationMs = 3000) {
   setTimeout(() => el.remove(), durationMs);
 }
 
+function pushAuditEntry(kind, message) {
+  const entry = {
+    kind,
+    message: String(message || '').trim(),
+    at: new Date().toISOString()
+  };
+  state.auditEntries.unshift(entry);
+  if (state.auditEntries.length > 80) state.auditEntries.length = 80;
+  renderAuditPanel();
+}
+
+function renderAuditPanel() {
+  if (!dom.auditList) return;
+  const rows = state.auditEntries || [];
+  if (!rows.length) {
+    dom.auditList.innerHTML = '<li class="audit-empty">Noch keine Einträge.</li>';
+    return;
+  }
+  dom.auditList.innerHTML = rows.map((entry) => {
+    const time = new Date(entry.at).toLocaleTimeString('de-DE');
+    const safeKind = String(entry.kind || 'info').replace(/[^a-z-]/gi, '').toLowerCase();
+    return `<li class="audit-entry ${safeKind}"><span class="audit-time">${time}</span><span class="audit-msg">${entry.message}</span></li>`;
+  }).join('');
+}
+
+function updateSaveStatePill() {
+  if (!dom.saveStatePill) return;
+  const pending = Number(state.pendingWrites || 0);
+  dom.saveStatePill.classList.remove('is-pending', 'is-error', 'is-saved');
+
+  if (pending > 0) {
+    dom.saveStatePill.textContent = `Speichert… (${pending})`;
+    dom.saveStatePill.classList.add('is-pending');
+    return;
+  }
+
+  if (state.lastSaveError) {
+    dom.saveStatePill.textContent = 'Speicherfehler';
+    dom.saveStatePill.classList.add('is-error');
+    return;
+  }
+
+  dom.saveStatePill.textContent = 'Gespeichert';
+  dom.saveStatePill.classList.add('is-saved');
+}
+
+function setCardSaveState(article, mode = '') {
+  if (!article) return;
+  const checks = article.querySelector('.checks');
+  if (!checks) return;
+  checks.classList.remove('is-saving', 'is-error', 'is-saved');
+  if (mode === 'saving') checks.classList.add('is-saving');
+  if (mode === 'error') checks.classList.add('is-error');
+  if (mode === 'saved') {
+    checks.classList.add('is-saved');
+    window.setTimeout(() => {
+      checks.classList.remove('is-saved');
+    }, 1000);
+  }
+}
+
+function beginTrackedWrite(label) {
+  state.pendingWrites = Math.max(0, Number(state.pendingWrites || 0)) + 1;
+  state.lastSaveError = null;
+  updateSaveStatePill();
+  if (label) pushAuditEntry('info', `Start: ${label}`);
+}
+
+function finishTrackedWrite(label, error = null) {
+  state.pendingWrites = Math.max(0, Number(state.pendingWrites || 0) - 1);
+  if (error) {
+    state.lastSaveError = String(error?.message || error || 'Unbekannter Fehler');
+    if (label) pushAuditEntry('error', `${label}: ${state.lastSaveError}`);
+  } else if (label) {
+    pushAuditEntry('success', `${label}: OK`);
+  }
+  updateSaveStatePill();
+
+  if (!error) {
+    window.clearTimeout(state.saveStateTimer);
+    state.saveStateTimer = window.setTimeout(() => {
+      if (state.pendingWrites === 0 && !state.lastSaveError) updateSaveStatePill();
+    }, 800);
+  }
+}
+
+function pushUndoEntry(entry) {
+  if (!entry || !Array.isArray(entry.changes) || entry.changes.length === 0) return;
+  state.undoStack.push(entry);
+  if (state.undoStack.length > 30) state.undoStack.shift();
+  if (dom.btnUndoLast) dom.btnUndoLast.disabled = false;
+}
+
+function updateUndoUi() {
+  if (!dom.btnUndoLast) return;
+  const count = state.undoStack.length;
+  dom.btnUndoLast.disabled = count === 0;
+  dom.btnUndoLast.title = count > 0 ? `Letzte Änderung rückgängig (${count})` : 'Keine Änderung zum Rückgängigmachen';
+}
+
+async function undoLastChange() {
+  const entry = state.undoStack.pop();
+  updateUndoUi();
+  if (!entry) {
+    showToast('Keine Änderung zum Rückgängigmachen.', 'info', 2200);
+    return;
+  }
+
+  if (!state.currentSet || (entry.setId && state.currentSet.setId !== entry.setId)) {
+    showToast('Undo ist nur im gleichen Set möglich.', 'info', 2600);
+    return;
+  }
+
+  beginTrackedWrite('Undo');
+  setLoading(true, 'Undo läuft…');
+  let reverted = 0;
+  try {
+    for (const change of entry.changes) {
+      const db = state.dbMap.get(change.key);
+      if (!db?.gCell) continue;
+      const prevG = Boolean(change.prev?.g);
+      const prevRh = Boolean(change.prev?.rh && prevG);
+      await updateCellBoolean(getCollectionSetRef(state.currentSet), db.gCell.row, db.gCell.col, prevG);
+      db.g = prevG;
+      if (db.rhCell) {
+        await updateCellBoolean(getCollectionSetRef(state.currentSet), db.rhCell.row, db.rhCell.col, prevRh);
+        db.rh = prevRh;
+      } else {
+        db.rh = false;
+      }
+
+      const article = dom.cards.querySelector(`[data-card-id="${change.key}"]`);
+      if (article) updateCardState(article, db);
+      broadcastRealtimeCardUpdate(change.key, db);
+      reverted++;
+    }
+
+    updateStats();
+    applyFilter();
+    state.summaryData = null;
+    showToast(`Undo abgeschlossen (${reverted} Karte${reverted === 1 ? '' : 'n'}).`, 'success', 2500);
+    finishTrackedWrite('Undo', null);
+  } catch (err) {
+    showToast(`Undo fehlgeschlagen: ${err.message}`, 'error', 4500);
+    finishTrackedWrite('Undo', err);
+  } finally {
+    setLoading(false);
+    updateUndoUi();
+  }
+}
+
 function getErrorMessage(err, fallback = 'Unbekannter Fehler') {
   if (!err) return fallback;
   if (err instanceof Error && err.message) return err.message;
@@ -1156,8 +1507,23 @@ function attachImageFallback(img, card, setIdHint = '') {
       }
     }
     img.onerror = null;
-    img.style.display = 'none';
+    // Kein Bild verfügbar – Pokéball-Fallback anzeigen statt Element verstecken
+    img.src = './assets/pokeball-fallback.svg';
+    img.classList.add('img-fallback');
   };
+}
+
+function isKnownBrokenSetAssetUrl(url) {
+  const value = String(url || '').trim().toLowerCase();
+  if (!value) return false;
+  return value.includes('images.pokemontcg.io/me25/logo.png')
+    || value.includes('images.pokedata.ovh/en/mebsp/promo.png');
+}
+
+function resolveSetAssetUrl(url, fallbackUrl = './assets/pokeball-fallback.svg') {
+  const value = String(url || '').trim();
+  if (!value) return '';
+  return isKnownBrokenSetAssetUrl(value) ? fallbackUrl : value;
 }
 
 function setEmptyState(show) {
@@ -1216,7 +1582,10 @@ function initCustomSelects() {
 
   const closeAll = (except = null) => {
     document.querySelectorAll('.custom-select.is-open').forEach((node) => {
-      if (node !== except) node.classList.remove('is-open');
+      if (node !== except) {
+        node.classList.remove('is-open');
+        node.querySelector('.custom-select-trigger')?.setAttribute('aria-expanded', 'false');
+      }
     });
   };
 
@@ -1368,6 +1737,10 @@ function initCustomSelects() {
       });
     }
   });
+
+  window.addEventListener('scroll', () => {
+    closeAll();
+  }, { passive: true });
 }
 
 function initAutoHideTopbar() {
@@ -1390,6 +1763,7 @@ function initAutoHideTopbar() {
   let dir = 0;
   let accumulated = 0;
   let ticking = false;
+  let visibilityLockedUntil = 0;
 
   const syncTopbarHeight = () => {
     root.style.setProperty('--topbar-height', `${topbar.offsetHeight}px`);
@@ -1397,6 +1771,12 @@ function initAutoHideTopbar() {
 
   const showTopbar = () => {
     body.classList.remove(hideClass);
+    visibilityLockedUntil = Date.now() + 180;
+  };
+
+  const hideTopbar = () => {
+    body.classList.add(hideClass);
+    visibilityLockedUntil = Date.now() + 180;
   };
 
   const onScrollFrame = () => {
@@ -1404,6 +1784,7 @@ function initAutoHideTopbar() {
     const currentY = Math.max(getScrollY(), 0);
     const delta = currentY - lastY;
     const isNearTop = currentY < 88;
+    const now = Date.now();
 
     if (reducedMotion) {
       showTopbar();
@@ -1424,6 +1805,11 @@ function initAutoHideTopbar() {
       return;
     }
 
+    if (now < visibilityLockedUntil) {
+      lastY = currentY;
+      return;
+    }
+
     const nextDir = delta > 0 ? 1 : -1;
     if (nextDir === dir) {
       accumulated += Math.abs(delta);
@@ -1432,10 +1818,10 @@ function initAutoHideTopbar() {
       accumulated = Math.abs(delta);
     }
 
-    if (dir > 0 && accumulated > 22) {
-      body.classList.add(hideClass);
+    if (dir > 0 && accumulated > 36 && currentY > 120) {
+      hideTopbar();
       accumulated = 0;
-    } else if (dir < 0 && accumulated > 14) {
+    } else if (dir < 0 && accumulated > 18) {
       showTopbar();
       accumulated = 0;
     }
@@ -1455,7 +1841,6 @@ function initAutoHideTopbar() {
   window.addEventListener('orientationchange', syncTopbarHeight, { passive: true });
   window.addEventListener('hashchange', showTopbar, { passive: true });
   window.addEventListener('scroll', onScroll, { passive: true });
-  document.addEventListener('scroll', onScroll, { passive: true, capture: true });
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -1771,9 +2156,18 @@ async function loadSets() {
     ]);
 
     if (!Array.isArray(importedSets)) throw new Error('Ungültiges Sets-Format');
-    state.sets = importedSets;
+    const hasOverviewState = Array.isArray(overviewSets) && overviewSets.length > 0;
+    const explicitlyImportedIds = new Set(
+      (overviewSets || [])
+        .filter((set) => toBoolean(set?.imported))
+        .map((set) => set.setId)
+        .filter(Boolean)
+    );
+    const effectiveImportedSets = hasOverviewState
+      ? importedSets.filter((set) => explicitlyImportedIds.has(set?.setId))
+      : importedSets;
+    state.sets = effectiveImportedSets;
 
-    const importedById = new Map(importedSets.map((set) => [set.setId, set]));
     const mergedMap = new Map();
 
     (overviewSets || []).forEach((set) => {
@@ -1782,7 +2176,7 @@ async function loadSets() {
       }
     });
 
-    importedSets.forEach((set) => {
+    effectiveImportedSets.forEach((set) => {
       const current = mergedMap.get(set.setId) || {};
       mergedMap.set(set.setId, {
         ...current,
@@ -1798,7 +2192,7 @@ async function loadSets() {
     renderRecentSets();
 
     dom.selector.innerHTML = '<option value="">Bitte w\u00e4hlen\u2026</option>';
-    const seriesMap = buildSeriesMap(importedSets);
+    const seriesMap = buildSeriesMap(effectiveImportedSets);
     seriesMap.forEach((setsArr, seriesName) => {
       const group = document.createElement('optgroup');
       group.label = seriesName;
@@ -1828,7 +2222,7 @@ async function loadSets() {
     const settings = await readSettings();
     if (settings.lastSetId) dom.selector.value = settings.lastSetId;
 
-    setGlobalStatus(`${importedSets.length} von ${state.allSets.length} Sets geladen.`);
+    setGlobalStatus(`${effectiveImportedSets.length} von ${state.allSets.length} Sets geladen.`);
     dom.mainNav.classList.remove('hidden');
 
     if (!window.location.hash || window.location.hash === '#') {
@@ -1885,7 +2279,13 @@ async function renderDashboard() {
       state.summaryData = await readSummarySheet().catch(() => []);
     }
     const summaryByName = new Map();
-    (state.summaryData || []).forEach((row) => summaryByName.set(row.setName, row));
+    (state.summaryData || []).forEach((row) => {
+      if (row?.setName) summaryByName.set(row.setName, row);
+      if (row?.setId) summaryByName.set(row.setId, row);
+    });
+    state.summaryOverrides.forEach((row, key) => {
+      summaryByName.set(key, row);
+    });
 
     let sets = [...state.allSets];
     const filterText = dom.dashFilter.value.toLowerCase().trim();
@@ -1923,7 +2323,7 @@ async function renderDashboard() {
           return Boolean(quickFilters.notImported);
         }
 
-        const summary = summaryByName.get(set.setName) || summaryByName.get(set.setId);
+        const summary = summaryByName.get(set.setId) || summaryByName.get(set.setName);
         const total = Number(summary?.total ?? set.totalCards ?? 0);
         const collected = Number(summary?.collected ?? 0);
         const isCompleted = total > 0 && collected >= total;
@@ -1940,8 +2340,8 @@ async function renderDashboard() {
       sets.sort((a, b) => a.setName.localeCompare(b.setName));
     } else if (sortBy === 'completion') {
       sets.sort((a, b) => {
-        const sa = summaryByName.get(a.setName);
-        const sb = summaryByName.get(b.setName);
+        const sa = summaryByName.get(a.setId) || summaryByName.get(a.setName);
+        const sb = summaryByName.get(b.setId) || summaryByName.get(b.setName);
         const pa = sa && sa.total > 0 ? sa.collected / sa.total : 0;
         const pb = sb && sb.total > 0 ? sb.collected / sb.total : 0;
         return pb - pa;
@@ -1972,7 +2372,7 @@ async function renderDashboard() {
         const grid = document.createElement('div');
         grid.className = 'dash-sets-row';
         setsArr.forEach((set) => {
-          const summary = summaryByName.get(set.setName) || summaryByName.get(set.setId);
+          const summary = summaryByName.get(set.setId) || summaryByName.get(set.setName);
           grid.appendChild(createDashSetCard(set, summary));
         });
         section.appendChild(grid);
@@ -1982,7 +2382,7 @@ async function renderDashboard() {
       const grid = document.createElement('div');
       grid.className = 'dash-sets-row';
       visibleSets.forEach((set) => {
-        const summary = summaryByName.get(set.setName) || summaryByName.get(set.setId);
+        const summary = summaryByName.get(set.setId) || summaryByName.get(set.setName);
         grid.appendChild(createDashSetCard(set, summary));
       });
       dom.dashboardGrid.appendChild(grid);
@@ -2001,6 +2401,8 @@ async function renderDashboard() {
 
 function createDashSetCard(set, summary) {
   const card = document.createElement('div');
+  const dashboardLogoUrl = resolveSetAssetUrl(set.logoUrl);
+  const isImportBlocked = state.importBlockedSetIds.has(set.setId);
   card.className = 'dash-set-card';
   card.classList.toggle('not-imported', !set.imported);
   const total     = summary?.total     ?? 0;
@@ -2010,10 +2412,21 @@ function createDashSetCard(set, summary) {
   if (percent >= 100 && total > 0) card.classList.add('complete');
   else if (percent > 0)            card.classList.add('in-progress');
 
+  card.dataset.setId = set.setId || '';
+  card.dataset.hoverData = JSON.stringify({
+    name: set.setName || set.setId || '',
+    series: set.series || '',
+    collected,
+    total: total || set.totalCards || 0,
+    rh,
+    percent,
+    imported: Boolean(set.imported)
+  });
+
   card.innerHTML = `
     <div class="dash-set-logo-wrap">
-      ${set.logoUrl
-        ? `<img src="${set.logoUrl}" alt="${set.setName}" class="dash-set-logo" onerror="this.style.display='none'" loading="lazy"/>`
+      ${dashboardLogoUrl
+        ? `<img src="${dashboardLogoUrl}" alt="${set.setName}" class="dash-set-logo" loading="lazy" onerror="this.onerror=null;this.src='./assets/pokeball-fallback.svg';this.classList.add('img-fallback')"/>`
         : `<span class="dash-set-name-fallback">${set.setName}</span>`}
     </div>
     <div class="dash-set-info">
@@ -2027,7 +2440,9 @@ function createDashSetCard(set, summary) {
           ? `<button class="btn-secondary dash-view-btn" type="button" title="Ansehen">👁️</button>
              <button class="btn-secondary dash-favorite-btn" type="button" title="Favorit">${isFavorite(set.setId) ? '⭐' : '☆'}</button>
              <button class="btn-secondary dash-delete-btn" type="button" title="Löschen">🗑️</button>`
-          : `<button class="btn-primary dash-import-btn" type="button">➕ Importieren</button>`}
+          : isImportBlocked
+            ? `<button class="btn-secondary dash-import-blocked-btn" type="button" title="Keine Kartenquelle verfügbar" disabled>🚫 Nicht verfügbar</button>`
+            : `<button class="btn-primary dash-import-btn" type="button">➕ Importieren</button>`}
       </div>
     </div>`;
 
@@ -2071,7 +2486,56 @@ function createDashSetCard(set, summary) {
     dom.selector.value = set.setId;
     navigate(`set/${set.setId}`);
   });
+
+  if (set.imported) {
+    checkSetCompletion(set.setId || set.setName, percent, card);
+  }
+
   return card;
+}
+
+function syncDashboardCardForSet(setMeta, summary) {
+  if (!setMeta?.setId) return;
+  const card = dom.dashboardGrid?.querySelector(`.dash-set-card[data-set-id="${setMeta.setId}"]`);
+  if (!card) return;
+
+  const total = Number(summary?.total ?? setMeta?.totalCards ?? 0);
+  const collected = Number(summary?.collected ?? 0);
+  const rh = Number(summary?.rh ?? 0);
+  const percent = total > 0 ? Math.round((collected / total) * 100) : 0;
+
+  card.classList.toggle('complete', percent >= 100 && total > 0);
+  card.classList.toggle('in-progress', percent > 0 && percent < 100);
+
+  const fill = card.querySelector('.dash-progress-fill');
+  if (fill) fill.style.width = `${percent}%`;
+
+  const text = card.querySelector('.dash-progress-text');
+  if (text) text.textContent = `${collected}\u202f/\u202f${total || '?'} (${percent}%)`;
+
+  let rhText = card.querySelector('.dash-rh-text');
+  if (rh > 0 && !rhText) {
+    rhText = document.createElement('p');
+    rhText.className = 'dash-rh-text';
+    const info = card.querySelector('.dash-set-info');
+    info?.insertBefore(rhText, info.querySelector('.dash-card-actions'));
+  }
+  if (rhText) {
+    if (rh > 0) rhText.textContent = `RH: ${rh}`;
+    else rhText.remove();
+  }
+
+  card.dataset.hoverData = JSON.stringify({
+    name: setMeta.setName || setMeta.setId || '',
+    series: setMeta.series || '',
+    collected,
+    total,
+    rh,
+    percent,
+    imported: true
+  });
+
+  checkSetCompletion(setMeta.setId || setMeta.setName, percent, card);
 }
 
 async function importSetFromOverview(set) {
@@ -2087,6 +2551,7 @@ async function importSetFromOverview(set) {
   try {
     const cards = await fetchMergedCards(set.setId);
     await importSetIntoCollection(set, cards);
+    state.importBlockedSetIds.delete(set.setId);
     cache.del(`cards_${set.setId}`);
     cache.del(`db_cards_${set.setId}`);
     cache.del(`db_${set.setId}`);
@@ -2094,13 +2559,26 @@ async function importSetFromOverview(set) {
     state.summaryData = null;
 
     await loadSets();
+    applyLocalSetImportedState(set, true);
     markSetAsRecent(set);
     await renderDashboard();
     setGlobalStatus(`${set.setName} wurde importiert.`);
     showToast(`${set.setName} wurde importiert.`, 'success', 3000);
   } catch (err) {
-    console.error('[importSetFromOverview]', err);
     const reason = getErrorMessage(err);
+    const isNoCardsError = /keine\s+karten\s+f(ü|u)r\s+set/i.test(String(reason || ''));
+    const isTcgdexOnlySet = String(set?.setId || '').toUpperCase().startsWith('TCGDEX-');
+
+    if (isNoCardsError && isTcgdexOnlySet) {
+      state.importBlockedSetIds.add(set.setId);
+      await renderDashboard();
+      console.warn('[importSetFromOverview] set currently has no card payload in source APIs:', set.setId, reason);
+      showToast(`Import nicht möglich: ${set.setName} hat derzeit keine Kartenquelle in den APIs.`, 'info', 6000);
+      setGlobalStatus(`Import nicht möglich: ${set.setName} (keine Kartenquelle).`);
+      return;
+    }
+
+    console.error('[importSetFromOverview]', err);
     showToast(`Import fehlgeschlagen: ${reason}`, 'error', 5000);
     setGlobalStatus(`Import fehlgeschlagen: ${set.setName}`);
   } finally {
@@ -2108,14 +2586,15 @@ async function importSetFromOverview(set) {
   }
 }
 
-async function deleteSetFromCollection(set) {
+async function deleteSetFromCollection(set, options = {}) {
+  const { skipReload = false, skipConfirm = false } = options;
   if (!set?.setId || !set.imported) {
     showToast('Set kann nicht gelöscht werden.', 'error', 3000);
     return;
   }
 
   const confirmMsg = `${set.setName} wirklich aus deiner Sammlung löschen? Diese Aktion kann nicht rückgängig gemacht werden.`;
-  if (!window.confirm(confirmMsg)) {
+  if (!skipConfirm && !window.confirm(confirmMsg)) {
     return;
   }
 
@@ -2133,21 +2612,37 @@ async function deleteSetFromCollection(set) {
     }
 
     // Entferne das Set aus der Sammlung
-    const range = await readSetCollectionMap(set.setName).catch(() => new Map());
+    const setRef = getCollectionSetRef(set);
+    const range = await readSetCollectionMap(setRef).catch(() => new Map());
     if (range && range.size > 0) {
-      // Lösche alle Zellen des Sets (setze auf FALSE)
-      for (const [cardNum] of range) {
-        await updateCellBoolean(set.setName, cardNum, false, false);
+      for (const [, db] of range) {
+        if (db?.gCell?.row && db?.gCell?.col) {
+          await updateCellBoolean(setRef, db.gCell.row, db.gCell.col, false);
+        }
+        if (db?.rhCell?.row && db?.rhCell?.col) {
+          await updateCellBoolean(setRef, db.rhCell.row, db.rhCell.col, false);
+        }
       }
     }
 
+    await upsertOverviewSet(set, false);
+
     cache.del(`cards_${set.setId}`);
     cache.del(`db_${set.setId}`);
+    cache.del(`db_cards_${set.setId}`);
+    state.searchCache.clear();
     state.summaryData = null;
+    state.summaryOverrides.delete(set.setName);
+    state.summaryOverrides.delete(set.setId);
+
+    applyLocalSetImportedState(set, false);
 
     // Aktualisiere die Ansicht
-    await loadSets();
-    await renderDashboard();
+    if (!skipReload) {
+      await loadSets();
+      applyLocalSetImportedState(set, false);
+      await renderDashboard();
+    }
     
     showToast(`${set.setName} wurde gelöscht.`, 'success', 3000);
     setGlobalStatus(`${set.setName} wurde gelöscht.`);
@@ -2162,6 +2657,39 @@ async function deleteSetFromCollection(set) {
 
 function getSetById(setId) {
   return state.allSets.find((set) => set.setId === setId) || state.sets.find((set) => set.setId === setId) || null;
+}
+
+function getCollectionSetRef(set) {
+  return set?.setId || set?.setName || '';
+}
+
+function applyLocalSetImportedState(setMeta, imported) {
+  const targetSetId = String(setMeta?.setId || '').trim();
+  if (!targetSetId) return;
+
+  state.allSets = (state.allSets || []).map((entry) => (
+    entry?.setId === targetSetId ? { ...entry, imported } : entry
+  ));
+
+  if (imported) {
+    const nextSet = state.allSets.find((entry) => entry?.setId === targetSetId) || { ...setMeta, imported: true };
+    const existingIndex = (state.sets || []).findIndex((entry) => entry?.setId === targetSetId);
+    if (existingIndex >= 0) {
+      state.sets[existingIndex] = { ...state.sets[existingIndex], ...nextSet, imported: true };
+    } else {
+      state.sets = [...(state.sets || []), { ...nextSet, imported: true }];
+    }
+  } else {
+    state.sets = (state.sets || []).filter((entry) => entry?.setId !== targetSetId);
+  }
+
+  if (state.currentSet?.setId === targetSetId) {
+    state.currentSet = { ...state.currentSet, imported };
+  }
+
+  refreshImportedSetSelectorOptions();
+  renderSearchSetFilterOptions();
+  renderRecentSets();
 }
 
 async function importSetsSequential(sets, options = {}) {
@@ -2435,6 +2963,155 @@ function initBatchImportDialog() {
   });
 }
 
+function getImportedSetsForManagement() {
+  return (state.allSets || []).filter((set) => toBoolean(set.imported));
+}
+
+function updateManageSetsInfo(filtered = []) {
+  if (!dom.manageSetsInfo) return;
+  const selectedCount = state.manageSetsSelection.size;
+  dom.manageSetsInfo.textContent = `${selectedCount} ausgewählt • ${filtered.length} sichtbar`;
+}
+
+function renderManageImportedSetsList() {
+  if (!dom.manageSetsList) return;
+  const query = String(dom.manageSetsSearch?.value || '').trim().toLowerCase();
+  const importedSets = getImportedSetsForManagement();
+  const filtered = !query
+    ? importedSets
+    : importedSets.filter((set) =>
+      String(set.setName || '').toLowerCase().includes(query)
+      || String(set.setId || '').toLowerCase().includes(query)
+      || String(set.series || '').toLowerCase().includes(query)
+    );
+
+  if (!filtered.length) {
+    dom.manageSetsList.innerHTML = '<p class="empty-state">Keine importierten Sets für den aktuellen Filter.</p>';
+    updateManageSetsInfo(filtered);
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+  filtered.forEach((set) => {
+    const row = document.createElement('label');
+    row.className = 'batch-item';
+
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.checked = state.manageSetsSelection.has(set.setId);
+    input.addEventListener('change', () => {
+      if (input.checked) state.manageSetsSelection.add(set.setId);
+      else state.manageSetsSelection.delete(set.setId);
+      updateManageSetsInfo(filtered);
+    });
+
+    const main = document.createElement('span');
+    main.className = 'batch-item-main';
+
+    const title = document.createElement('span');
+    title.className = 'batch-item-title';
+    title.textContent = `${set.setId} — ${set.setName}`;
+
+    const sub = document.createElement('span');
+    sub.className = 'batch-item-sub';
+    sub.textContent = `${set.series || 'Serie unbekannt'} • ${set.totalCards || '?'} Karten`;
+
+    main.append(title, sub);
+    row.append(input, main);
+    fragment.appendChild(row);
+  });
+
+  dom.manageSetsList.innerHTML = '';
+  dom.manageSetsList.appendChild(fragment);
+  updateManageSetsInfo(filtered);
+}
+
+function openManageImportedSetsDialog() {
+  state.manageSetsSelection.clear();
+  if (dom.manageSetsSearch) dom.manageSetsSearch.value = '';
+  renderManageImportedSetsList();
+  dom.manageSetsDialog?.showModal();
+}
+
+async function reimportSelectedImportedSets() {
+  const selectedIds = Array.from(state.manageSetsSelection);
+  if (!selectedIds.length) {
+    showToast('Bitte mindestens ein Set auswählen.', 'info');
+    return;
+  }
+
+  const selectedSets = selectedIds.map((id) => getSetById(id)).filter(Boolean);
+  dom.manageSetsDialog?.close();
+  await importSetsSequential(selectedSets, { successMessage: '{count} ausgewählte Sets aktualisiert.' });
+}
+
+async function deleteSelectedImportedSets() {
+  const selectedIds = Array.from(state.manageSetsSelection);
+  if (!selectedIds.length) {
+    showToast('Bitte mindestens ein Set auswählen.', 'info');
+    return;
+  }
+
+  const selectedSets = selectedIds
+    .map((id) => getSetById(id))
+    .filter((set) => set && toBoolean(set.imported));
+
+  if (!selectedSets.length) {
+    showToast('Keine löschbaren importierten Sets ausgewählt.', 'info');
+    return;
+  }
+
+  const ok = window.confirm(`${selectedSets.length} importierte Sets wirklich löschen?`);
+  if (!ok) return;
+
+  dom.manageSetsDialog?.close();
+  setLoading(true, 'Lösche ausgewählte Sets…');
+  let deleted = 0;
+  let failed = 0;
+  try {
+    for (const set of selectedSets) {
+      try {
+        await deleteSetFromCollection(set, { skipReload: true, skipConfirm: true });
+        deleted++;
+      } catch (err) {
+        console.warn('[deleteSelectedImportedSets]', set?.setId, err);
+        failed++;
+      }
+    }
+  } finally {
+    setLoading(false);
+  }
+
+  state.summaryData = null;
+  await loadSets();
+  await renderDashboard();
+  showToast(`${deleted} gelöscht${failed ? `, ${failed} Fehler` : ''}.`, failed ? 'error' : 'success', 4500);
+}
+
+function initManageImportedSetsDialog() {
+  dom.btnManageImportedSets?.addEventListener('click', openManageImportedSetsDialog);
+  dom.manageSetsSearch?.addEventListener('input', () => renderManageImportedSetsList());
+  dom.btnManageSetsSelectVisible?.addEventListener('click', () => {
+    dom.manageSetsList?.querySelectorAll('.batch-item input[type="checkbox"]').forEach((input) => {
+      const label = input.closest('.batch-item')?.querySelector('.batch-item-title')?.textContent || '';
+      const setId = label.split(' — ')[0] || '';
+      if (setId) state.manageSetsSelection.add(setId);
+    });
+    renderManageImportedSetsList();
+  });
+  dom.btnManageSetsClearSelection?.addEventListener('click', () => {
+    state.manageSetsSelection.clear();
+    renderManageImportedSetsList();
+  });
+  dom.btnManageSetsReimportSelected?.addEventListener('click', reimportSelectedImportedSets);
+  dom.btnManageSetsDeleteSelected?.addEventListener('click', deleteSelectedImportedSets);
+  dom.btnManageSetsCancel?.addEventListener('click', () => dom.manageSetsDialog?.close());
+
+  dom.btnSheetsRetryReport?.addEventListener('click', openSheetsRetryReportDialog);
+  dom.btnSheetsRetryReset?.addEventListener('click', () => resetSheetsRetryMetrics());
+  dom.btnSheetsRetryClose?.addEventListener('click', () => dom.sheetsRetryDialog?.close());
+}
+
 async function reimportAllImportedSets() {
   if (!state.sets.length) {
     showToast('Keine importierten Sets vorhanden.', 'info');
@@ -2443,6 +3120,113 @@ async function reimportAllImportedSets() {
   const ok = window.confirm(`${state.sets.length} importierte Sets neu laden? Bestehende Sammel-Checks bleiben erhalten.`);
   if (!ok) return;
   await importSetsSequential(state.sets, { successMessage: '{count} importierte Sets aktualisiert.' });
+}
+
+function resolveBackfillTargets(options = {}) {
+  const {
+    setIds = null,
+    query = '',
+    limit = 0
+  } = options;
+
+  const importedSets = Array.isArray(state.sets) ? [...state.sets] : [];
+  let targets = importedSets;
+
+  if (Array.isArray(setIds) && setIds.length > 0) {
+    const idSet = new Set(setIds.map((value) => String(value || '').trim().toLowerCase()).filter(Boolean));
+    targets = targets.filter((set) => idSet.has(String(set?.setId || '').toLowerCase()));
+  }
+
+  const normalizedQuery = String(query || '').trim().toLowerCase();
+  if (normalizedQuery) {
+    targets = targets.filter((set) => {
+      return [set?.setId, set?.setName, set?.series]
+        .some((value) => String(value || '').toLowerCase().includes(normalizedQuery));
+    });
+  }
+
+  const parsedLimit = Number(limit) || 0;
+  if (parsedLimit > 0) {
+    targets = targets.slice(0, parsedLimit);
+  }
+
+  return targets;
+}
+
+async function runImportedSetsBackfill(options = {}) {
+  const {
+    setIds = null,
+    query = '',
+    limit = 0,
+    dryRun = false,
+    skipConfirm = false
+  } = options;
+
+  if (!isSignedIn()) {
+    throw new Error('Nicht angemeldet. Bitte zuerst Google Login durchführen.');
+  }
+
+  if (!Array.isArray(state.sets) || !state.sets.length) {
+    await loadSets();
+  }
+
+  const targets = resolveBackfillTargets({ setIds, query, limit });
+  const summary = {
+    requested: {
+      setIds: Array.isArray(setIds) ? setIds : null,
+      query: String(query || ''),
+      limit: Number(limit) || 0,
+      dryRun: Boolean(dryRun)
+    },
+    importedSetCount: Array.isArray(state.sets) ? state.sets.length : 0,
+    targetCount: targets.length,
+    targetSetIds: targets.map((set) => set.setId)
+  };
+
+  if (!targets.length) {
+    setGlobalStatus('Backfill: keine passenden importierten Sets gefunden.');
+    return { ...summary, skipped: true, reason: 'no_targets' };
+  }
+
+  if (dryRun) {
+    console.log('[Backfill][DryRun]', summary);
+    setGlobalStatus(`Backfill Dry-Run: ${targets.length} Set(s) würden reimportiert.`);
+    return { ...summary, dryRun: true };
+  }
+
+  if (!skipConfirm) {
+    const ok = window.confirm(
+      `${targets.length} importierte Set(s) per Backfill reimportieren?\n` +
+      'Bestehende Sammel-Checks bleiben erhalten.'
+    );
+    if (!ok) {
+      return { ...summary, skipped: true, reason: 'cancelled' };
+    }
+  }
+
+  await importSetsSequential(targets, {
+    successMessage: '{count} Set(s) per Backfill reimportiert.'
+  });
+
+  return {
+    ...summary,
+    done: targets.length,
+    skipped: false
+  };
+}
+
+function initBackfillDebugApi() {
+  const api = {
+    runImportedSetsBackfill,
+    previewImportedSetsBackfill(options = {}) {
+      return runImportedSetsBackfill({ ...options, dryRun: true });
+    }
+  };
+
+  window.TCG_TRACKER_TOOLS = {
+    ...(window.TCG_TRACKER_TOOLS || {}),
+    ...api
+  };
 }
 
 async function exportCollectionSummaryCsv() {
@@ -2492,7 +3276,7 @@ async function exportCollectionBackup() {
     for (let index = 0; index < state.sets.length; index++) {
       const set = state.sets[index];
       setGlobalStatus(`Backup ${index + 1}/${state.sets.length}: ${set.setName}`);
-      const dbMap = await readSetCollectionMap(set.setName).catch(() => new Map());
+      const dbMap = await readSetCollectionMap(getCollectionSetRef(set)).catch(() => new Map());
       const cards = [];
       for (const [cardId, db] of dbMap.entries()) {
         if (!db?.g && !db?.rh) continue;
@@ -2544,7 +3328,7 @@ async function runDataHealthCheck({ autoFix = false } = {}) {
       try {
         const [apiCards, sheetMap] = await Promise.all([
           fetchMergedCards(set.setId),
-          readSetCollectionMap(set.setName)
+          readSetCollectionMap(getCollectionSetRef(set))
         ]);
 
         const apiCount = Array.isArray(apiCards) ? apiCards.length : 0;
@@ -2682,7 +3466,7 @@ async function applyCollectionBackup(payload) {
       }
 
       setGlobalStatus(`Backup ${setIndex + 1}/${sets.length}: ${liveSet.setName}`);
-      const liveMap = await readSetCollectionMap(liveSet.setName).catch(() => new Map());
+      const liveMap = await readSetCollectionMap(getCollectionSetRef(liveSet)).catch(() => new Map());
       const snapshotByCard = new Map((backupSet.cards || []).map((entry) => [normalizeCardNumber(entry.cardId), entry]));
 
       for (const [cardId, db] of liveMap.entries()) {
@@ -2692,12 +3476,12 @@ async function applyCollectionBackup(payload) {
         const targetRh = Boolean(target.g && target.rh);
 
         if (Boolean(db.g) !== targetG) {
-          await updateCellBoolean(liveSet.setName, db.gCell.row, db.gCell.col, targetG);
+          await updateCellBoolean(getCollectionSetRef(liveSet), db.gCell.row, db.gCell.col, targetG);
           db.g = targetG;
           updated++;
         }
         if (Boolean(db.rh) !== targetRh) {
-          await updateCellBoolean(liveSet.setName, db.rhCell.row, db.rhCell.col, targetRh);
+          await updateCellBoolean(getCollectionSetRef(liveSet), db.rhCell.row, db.rhCell.col, targetRh);
           db.rh = targetRh;
           updated++;
         }
@@ -2846,7 +3630,7 @@ async function renderStats() {
     // Serien-Breakdown
     const seriesMap = new Map();
     state.sets.forEach((set) => {
-      const row    = data.find((r) => r.setName === set.setName);
+      const row    = data.find((r) => r.setId === set.setId) || data.find((r) => r.setName === set.setName);
       const series = set.series || 'Andere';
       if (!seriesMap.has(series)) seriesMap.set(series, { total: 0, collected: 0, rh: 0, count: 0, completed: 0 });
       const sg = seriesMap.get(series);
@@ -2877,12 +3661,22 @@ async function renderStats() {
       <div class="stats-series-table">
         ${Array.from(seriesMap.entries()).map(([name, sg]) => {
           const pct = sg.total > 0 ? Math.round((sg.collected / sg.total) * 100) : 0;
-          return `<div class="stats-series-row">
+          return `<div class="stats-series-row" data-series="${name.replace(/"/g, '&quot;')}">
             <div class="stats-series-name">${name}</div>
             <div class="stats-series-bar"><div class="dash-progress-fill" style="width:${pct}%"></div></div>
             <div class="stats-series-numbers">${sg.collected}/${sg.total} (${pct}%) &bull; ${sg.completed}/${sg.count} Sets</div>
           </div>`;
         }).join('')}
+      </div>
+      <div class="stats-charts-row">
+        <div class="stats-chart-wrap">
+          <h3>Gesamtfortschritt</h3>
+          <canvas id="chart-overall" height="220"></canvas>
+        </div>
+        <div class="stats-chart-wrap">
+          <h3>Serien-Vergleich</h3>
+          <canvas id="chart-series" height="220"></canvas>
+        </div>
       </div>
       <div class="stats-two-col">
         <div>
@@ -2898,6 +3692,9 @@ async function renderStats() {
           </ol>
         </div>
       </div>`;
+
+    initStatsCharts(totalCollected, totalCards, seriesMap);
+    initStatsDrillDown();
   } catch (err) {
     console.error('[renderStats]', err);
     dom.statsContent.innerHTML = `<p class="empty-state">\u2715 Fehler beim Laden der Statistiken</p>`;
@@ -3150,13 +3947,17 @@ async function runSearch(options = {}) {
   const setsToSearch = structuredQuery
     ? [baseSetsToSearch.find((s) => s.setId === structuredQuery.setId) ?? structuredQuery.set]
     : baseSetsToSearch;
-  if (!setsToSearch.length) {
+  // Im Online-Modus ohne Set-Filter: auf max. 30 Sets begrenzen, um exzessive API-Calls zu vermeiden
+  const activeSearchSets = (searchScopeMode === SEARCH_SCOPE_ONLINE && !setFilter)
+    ? setsToSearch.slice(0, 30)
+    : setsToSearch;
+  if (!activeSearchSets.length) {
     dom.searchResults.innerHTML = '<p class="empty-state">Keine passenden Sets verfügbar.</p>';
     return;
   }
   dom.searchResults.innerHTML = '<p class="loading-placeholder">Suche\u2026</p>';
   const results = [];
-  for (const set of setsToSearch) {
+  for (const set of activeSearchSets) {
     if (isStale() || isAborted()) return;
     try {
       const cacheKey = `cards_${set.setId}`;
@@ -3182,9 +3983,21 @@ async function runSearch(options = {}) {
           if (cache.has(cacheKey)) {
             apiCards = cache.get(cacheKey) || [];
           } else {
-            apiCards = await fetchMergedCards(set.setId, { signal: abortController.signal }).catch(() => []);
-            if (Array.isArray(apiCards) && apiCards.length > 0) {
-              cache.set(cacheKey, apiCards, CONFIG.CACHE_TTL_MS);
+            try {
+              apiCards = await fetchMergedCards(set.setId, { signal: abortController.signal });
+              if (Array.isArray(apiCards) && apiCards.length > 0) {
+                cache.set(cacheKey, apiCards, CONFIG.CACHE_TTL_MS);
+                // Im Hintergrund für Offline-Betrieb im IndexedDB cachen
+                cacheCardsOffline(set.setId, apiCards).catch(() => {});
+              }
+            } catch (fetchErr) {
+              if (fetchErr?.name === 'AbortError') throw fetchErr;
+              // Netzwerkfehler: Offline-Cache als Fallback versuchen
+              const offlineCached = await getCachedCardsOffline(set.setId).catch(() => null);
+              apiCards = Array.isArray(offlineCached) ? offlineCached : [];
+              if (apiCards.length > 0) {
+                console.info('[runSearch] Offline-Fallback für', set.setId, `(${apiCards.length} Karten aus IndexedDB)`);
+              }
             }
           }
           cards = searchScopeMode === SEARCH_SCOPE_ONLINE
@@ -3202,7 +4015,7 @@ async function runSearch(options = {}) {
       const dbCacheKey = `db_${set.setId}`;
       if (cache.has(dbCacheKey)) dbMap = cache.get(dbCacheKey);
       else {
-        dbMap = await readSetCollectionMap(set.setName).catch(() => new Map());
+        dbMap = await readSetCollectionMap(getCollectionSetRef(set)).catch(() => new Map());
         cache.set(dbCacheKey, dbMap, CONFIG.CACHE_TTL_MS);
       }
       if (isStale() || isAborted()) return;
@@ -3212,7 +4025,7 @@ async function runSearch(options = {}) {
           results.push({ card, set, dbMap, score, apiOnly: Boolean(card?.__searchApiOnly) });
         }
       });
-      if (!structuredQuery && !mixedQuery && results.length >= 200 && searchScopeMode === SEARCH_SCOPE_IMPORTED) break;
+      if (!structuredQuery && !mixedQuery && results.length >= 200) break;
       // Exakter Set+Nummer-Treffer (ohne Namensfilter) — kann frühzeitig abbrechen
       if (structuredQuery?.cardNumber && !structuredQuery?.namePart && results.length >= 1) break;
     } catch (err) {
@@ -3228,7 +4041,7 @@ async function runSearch(options = {}) {
       <div class="search-results-head">
         <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
       </div>
-      <p class="empty-state">Keine Karten f\u00fcr \u201e${rawQuery}\u201c gefunden (durchsucht: ${setsToSearch.length} Sets, ${modeMeta.hint}).</p>
+      <p class="empty-state">Keine Karten f\u00fcr \u201e${rawQuery}\u201c gefunden (durchsucht: ${activeSearchSets.length} Sets, ${modeMeta.hint}).</p>
     `;
     return;
   }
@@ -3343,7 +4156,7 @@ async function openSearchResultLightbox(card, set, { apiOnly = false } = {}) {
       }),
     cache.has(dbCacheKey)
       ? cache.get(dbCacheKey)
-      : readSetCollectionMap(set.setName).then((loadedDbMap) => {
+      : readSetCollectionMap(getCollectionSetRef(set)).then((loadedDbMap) => {
         const safeDbMap = loadedDbMap instanceof Map ? loadedDbMap : new Map();
         cache.set(dbCacheKey, safeDbMap, CONFIG.CACHE_TTL_MS);
         return safeDbMap;
@@ -3367,7 +4180,9 @@ async function openSearchResultLightbox(card, set, { apiOnly = false } = {}) {
   state.cards = cards;
   state.dbMap = dbMap;
   state.lightboxIndex = targetIndex;
-  state.pendingSearchSetImport = Boolean(apiOnly || !set?.imported);
+  // Auto-Import nur wenn das Set noch nicht importiert wurde (apiOnly ist irrelevant,
+  // da importierte Sets auch im Online-Modus per API abgerufen werden können)
+  state.pendingSearchSetImport = Boolean(!set?.imported);
 
   openLightbox(targetIndex);
 }
@@ -3415,6 +4230,30 @@ function updateStats() {
   dom.statsSection.classList.remove('hidden');
   dom.filterSection.classList.remove('hidden');
   dom.sortSection.classList.remove('hidden');
+
+  if (state.currentSet?.setName) {
+    const summaryRow = {
+      setId: state.currentSet.setId || '',
+      setName: state.currentSet.setName,
+      total,
+      collected,
+      rh,
+      percent
+    };
+    state.summaryOverrides.set(state.currentSet.setName, summaryRow);
+    if (state.currentSet?.setId) {
+      state.summaryOverrides.set(state.currentSet.setId, summaryRow);
+    }
+    if (Array.isArray(state.summaryData)) {
+      const rowIndex = state.summaryData.findIndex((row) => row?.setId === state.currentSet.setId || row?.setName === state.currentSet.setName);
+      if (rowIndex >= 0) {
+        state.summaryData[rowIndex] = { ...state.summaryData[rowIndex], ...summaryRow };
+      } else {
+        state.summaryData.push(summaryRow);
+      }
+    }
+    syncDashboardCardForSet(state.currentSet, summaryRow);
+  }
 }
 
 function applyFilter() {
@@ -3569,7 +4408,7 @@ function attachCheckboxListeners(article, db, key) {
 
   async function ensureDbEntry() {
     if (db?.gCell && db?.rhCell) return db;
-    const ensured = await ensureCollectionEntry(state.currentSet.setName, db?.displayId || key);
+    const ensured = await ensureCollectionEntry(getCollectionSetRef(state.currentSet), db?.displayId || key);
     db.g = Boolean(db?.g);
     db.rh = Boolean(db?.rh && db?.g);
     db.gCell = ensured.gCell;
@@ -3582,12 +4421,15 @@ function attachCheckboxListeners(article, db, key) {
   gInput.addEventListener('change', async () => {
     if (state.bulkMode) { gInput.checked = !gInput.checked; return; }
     const checked = gInput.checked;
+    const prevState = { g: Boolean(db?.g), rh: Boolean(db?.rh) };
+    setCardSaveState(article, 'saving');
+    beginTrackedWrite(`Karte #${db?.displayId || key} speichern`);
     try {
       await ensureDbEntry();
-      await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, checked);
+      await updateCellBoolean(getCollectionSetRef(state.currentSet), db.gCell.row, db.gCell.col, checked);
       db.g = checked;
       if (!checked && db?.rhCell) {
-        await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, false);
+        await updateCellBoolean(getCollectionSetRef(state.currentSet), db.rhCell.row, db.rhCell.col, false);
         db.rh = false; rhInput.checked = false; rhInput.disabled = true;
       } else {
         rhInput.disabled = !db?.rhCell;
@@ -3595,10 +4437,21 @@ function attachCheckboxListeners(article, db, key) {
       updateCardState(article, db);
       updateStats(); applyFilter();
       state.summaryData = null;
+      pushUndoEntry({
+        setId: state.currentSet?.setId,
+        setName: state.currentSet?.setName,
+        label: 'Kartenstatus geändert',
+        changes: [{ key, prev: prevState, next: { g: Boolean(db.g), rh: Boolean(db.rh) } }]
+      });
+      updateUndoUi();
       broadcastRealtimeCardUpdate(key, db);
+      setCardSaveState(article, 'saved');
+      finishTrackedWrite(`Karte #${db?.displayId || key} speichern`, null);
     } catch (err) {
       showToast(`Speichern fehlgeschlagen: ${err.message}`, 'error');
       gInput.checked = !checked;
+      setCardSaveState(article, 'error');
+      finishTrackedWrite(`Karte #${db?.displayId || key} speichern`, err);
     }
   });
 
@@ -3606,16 +4459,30 @@ function attachCheckboxListeners(article, db, key) {
     if (state.bulkMode) { rhInput.checked = !rhInput.checked; return; }
     if (!db.g || !db?.rhCell) { rhInput.checked = false; return; }
     const checked = rhInput.checked;
+    const prevState = { g: Boolean(db?.g), rh: Boolean(db?.rh) };
+    setCardSaveState(article, 'saving');
+    beginTrackedWrite(`Karte #${db?.displayId || key} RH speichern`);
     try {
       await ensureDbEntry();
-      await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, checked);
+      await updateCellBoolean(getCollectionSetRef(state.currentSet), db.rhCell.row, db.rhCell.col, checked);
       db.rh = checked;
       updateCardState(article, db);
       state.summaryData = null;
+      pushUndoEntry({
+        setId: state.currentSet?.setId,
+        setName: state.currentSet?.setName,
+        label: 'RH-Status geändert',
+        changes: [{ key, prev: prevState, next: { g: Boolean(db.g), rh: Boolean(db.rh) } }]
+      });
+      updateUndoUi();
       broadcastRealtimeCardUpdate(key, db);
+      setCardSaveState(article, 'saved');
+      finishTrackedWrite(`Karte #${db?.displayId || key} RH speichern`, null);
     } catch (err) {
       showToast(`Speichern fehlgeschlagen: ${err.message}`, 'error');
       rhInput.checked = !checked;
+      setCardSaveState(article, 'error');
+      finishTrackedWrite(`Karte #${db?.displayId || key} RH speichern`, err);
     }
   });
 }
@@ -3970,7 +4837,9 @@ function initLightbox() {
     const card = state.cards[state.lightboxIndex];
     if (!card) return;
     const key = normalizeCardNumber(card.number);
+    const article = dom.cards.querySelector(`[data-card-index="${state.lightboxIndex}"]`);
     let db = state.dbMap.get(key) || { displayId: card.number, g: false, rh: false, gCell: null, rhCell: null };
+    const prevState = { g: Boolean(db?.g), rh: Boolean(db?.rh) };
     const shouldEnsureImportedSet = checked && (Boolean(state.pendingSearchSetImport) || !Boolean(state.currentSet?.imported));
     if (shouldEnsureImportedSet) {
       const setToImport = state.currentSet;
@@ -3989,13 +4858,14 @@ function initLightbox() {
         state.searchCache.clear();
         state.summaryData = null;
         await loadSets();
+        applyLocalSetImportedState(setToImport, true);
         const refreshedSet = state.sets.find((entry) => entry.setId === setId)
           || state.allSets.find((entry) => entry.setId === setId)
           || setToImport;
         refreshedSet.imported = true;
         state.currentSet = refreshedSet;
         state.pendingSearchSetImport = false;
-        state.dbMap = await readSetCollectionMap(refreshedSet.setName).catch(() => new Map());
+        state.dbMap = await readSetCollectionMap(getCollectionSetRef(refreshedSet)).catch(() => new Map());
         cache.set(`db_${setId}`, state.dbMap, CONFIG.CACHE_TTL_MS);
         db = state.dbMap.get(key) || db;
         showToast(`${refreshedSet.setName} wurde automatisch importiert.`, 'success', 3200);
@@ -4008,35 +4878,47 @@ function initLightbox() {
       }
     }
     if (!db?.gCell) {
-      const ensured = await ensureCollectionEntry(state.currentSet.setName, card.number || db?.displayId || key);
+      const ensured = await ensureCollectionEntry(getCollectionSetRef(state.currentSet), card.number || db?.displayId || key);
       db.displayId = ensured.displayId || db.displayId || card.number || key;
       db.gCell = ensured.gCell;
       db.rhCell = ensured.rhCell;
       state.dbMap.set(key, db);
     }
+    setCardSaveState(article, 'saving');
+    beginTrackedWrite(`Lightbox #${db?.displayId || key}`);
     try {
       if (isG) {
-        await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, checked);
+        await updateCellBoolean(getCollectionSetRef(state.currentSet), db.gCell.row, db.gCell.col, checked);
         db.g = checked;
         if (!checked && db?.rhCell) {
-          await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, false);
+          await updateCellBoolean(getCollectionSetRef(state.currentSet), db.rhCell.row, db.rhCell.col, false);
           db.rh = false;
         }
       } else {
         if (!db.g || !db?.rhCell) return;
-        await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, checked);
+        await updateCellBoolean(getCollectionSetRef(state.currentSet), db.rhCell.row, db.rhCell.col, checked);
         db.rh = checked;
       }
       renderLightbox(state.lightboxIndex);
-      const article = dom.cards.querySelector(`[data-card-index="${state.lightboxIndex}"]`);
       if (article) updateCardState(article, db);
       updateStats();
       state.summaryData = null;
+      pushUndoEntry({
+        setId: state.currentSet?.setId,
+        setName: state.currentSet?.setName,
+        label: 'Lightbox-Änderung',
+        changes: [{ key, prev: prevState, next: { g: Boolean(db.g), rh: Boolean(db.rh) } }]
+      });
+      updateUndoUi();
       broadcastRealtimeCardUpdate(key, db);
       runSearch({ force: true });
+      setCardSaveState(article, 'saved');
+      finishTrackedWrite(`Lightbox #${db?.displayId || key}`, null);
     } catch (err) {
       showToast(`Fehler: ${err.message}`, 'error');
       renderLightbox(state.lightboxIndex); // revert UI
+      setCardSaveState(article, 'error');
+      finishTrackedWrite(`Lightbox #${db?.displayId || key}`, err);
     }
   }
 
@@ -4068,23 +4950,27 @@ function updateBulkCount() {
 }
 
 async function bulkUpdate(g, rh) {
-  if (!state.bulkSelected.size) { showToast('Keine Karten ausgew\u00e4hlt.', 'info'); return; }
-  setLoading(true, 'Massenaktion\u2026');
+  if (!state.bulkSelected.size) { showToast('Keine Karten ausgewählt.', 'info'); return; }
+  beginTrackedWrite('Bulk-Update');
+  setLoading(true, 'Massenaktion…');
   let updated = 0, errors = 0;
+  const undoChanges = [];
   try {
     for (const key of state.bulkSelected) {
       const db = state.dbMap.get(key);
       if (!db?.gCell) continue;
+      const prevState = { g: Boolean(db?.g), rh: Boolean(db?.rh) };
       try {
-        await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, g);
+        await updateCellBoolean(getCollectionSetRef(state.currentSet), db.gCell.row, db.gCell.col, g);
         db.g = g;
         if (db.rhCell) {
           const newRh = g && rh;
-          await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, newRh);
+          await updateCellBoolean(getCollectionSetRef(state.currentSet), db.rhCell.row, db.rhCell.col, newRh);
           db.rh = newRh;
         }
         const article = dom.cards.querySelector(`[data-card-id="${key}"]`);
         if (article) updateCardState(article, db);
+        undoChanges.push({ key, prev: prevState, next: { g: Boolean(db.g), rh: Boolean(db.rh) } });
         broadcastRealtimeCardUpdate(key, db);
         updated++;
       } catch (err) {
@@ -4098,6 +4984,16 @@ async function bulkUpdate(g, rh) {
   updateStats(); applyFilter();
   state.summaryData = null;
   toggleBulkMode(false);
+  if (undoChanges.length) {
+    pushUndoEntry({
+      setId: state.currentSet?.setId,
+      setName: state.currentSet?.setName,
+      label: 'Bulk-Änderung',
+      changes: undoChanges
+    });
+    updateUndoUi();
+  }
+  finishTrackedWrite('Bulk-Update', errors > 0 ? new Error(`${errors} Fehler`) : null);
   const msg = errors > 0 ? `${updated} aktualisiert, ${errors} Fehler.` : `${updated} Karten aktualisiert.`;
   showToast(msg, errors > 0 ? 'error' : 'success', errors > 0 ? 5000 : 3000);
 }
@@ -4195,19 +5091,24 @@ async function loadCurrentSet(forceRefresh = false) {
   setGlobalStatus(`Lade ${selected.setName}\u2026`);
   setLoading(true, `Lade ${selected.setName}\u2026`);
 
-  if (selected.logoUrl) {
+  const resolvedLogoUrl = resolveSetAssetUrl(selected.logoUrl);
+  const resolvedSymbolUrl = resolveSetAssetUrl(selected.symbolUrl, '');
+
+  if (resolvedLogoUrl) {
     dom.setLogo.onerror = () => {
-      dom.setLogo.style.display = 'none';
+      dom.setLogo.onerror = null;
+      dom.setLogo.src = './assets/pokeball-fallback.svg';
+      dom.setLogo.classList.add('img-fallback');
     };
     dom.setLogo.style.display = '';
-    dom.setLogo.src = selected.logoUrl;
+    dom.setLogo.src = resolvedLogoUrl;
 
     dom.setSymbol.onerror = () => {
       dom.setSymbol.style.display = 'none';
     };
-    if (selected.symbolUrl) {
+    if (resolvedSymbolUrl) {
       dom.setSymbol.style.display = '';
-      dom.setSymbol.src = selected.symbolUrl;
+      dom.setSymbol.src = resolvedSymbolUrl;
     } else {
       dom.setSymbol.style.display = 'none';
       dom.setSymbol.removeAttribute('src');
@@ -4237,7 +5138,7 @@ async function loadCurrentSet(forceRefresh = false) {
           }
           return [];
         }),
-      cache.has(dbCacheKey)    ? cache.get(dbCacheKey)    : readSetCollectionMap(selected.setName).then((m) => { cache.set(dbCacheKey, m, CONFIG.CACHE_TTL_MS); return m; }),
+      cache.has(dbCacheKey)    ? cache.get(dbCacheKey)    : readSetCollectionMap(getCollectionSetRef(selected)).then((m) => { cache.set(dbCacheKey, m, CONFIG.CACHE_TTL_MS); return m; }),
     ]);
 
     if (!Array.isArray(cards) || cards.length === 0) {
@@ -4296,6 +5197,7 @@ async function bootstrap() {
   initFilterButtons();
   initSpreadsheetDialog();
   initBatchImportDialog();
+  initManageImportedSetsDialog();
   initBackupImportExport();
   initQueueBuilderDialog();
   initLightbox();
@@ -4303,8 +5205,14 @@ async function bootstrap() {
   initKeyboardNav();
   initDashboardControls();
   initSheetsWriteFeedback();
+  initAuditAndSaveUi();
+  initDevCompletionMode();
   initSortControl();
   initSearch();
+  initOfflineIndicator();
+  initDashboardHoverPreview();
+  initSearchAutocomplete();
+  initShareButton();
 
   try {
     state.realtimeClientId = localStorage.getItem(REALTIME_CLIENT_STORAGE_KEY) || `client_${Date.now()}`;
@@ -4337,6 +5245,11 @@ async function bootstrap() {
 
   // Store search history globally
   window.SEARCH_HISTORY = loadSearchHistory();
+
+  // Debug/Operations API (Konsole):
+  // - window.TCG_TRACKER_TOOLS.previewImportedSetsBackfill({ limit: 10 })
+  // - window.TCG_TRACKER_TOOLS.runImportedSetsBackfill({ limit: 10 })
+  initBackfillDebugApi();
   
   // Clear search history on event
   window.addEventListener('clear-search-history', () => {
@@ -4345,22 +5258,7 @@ async function bootstrap() {
     showToast('Suchverlauf gelöscht', 'success', 2000);
   });
   
-  // Initialize Shortcuts Overlay
-  try {
-    const shortcutsOverlay = createShortcutsOverlay();
-    document.body.appendChild(shortcutsOverlay);
-    
-    // ? key to show shortcuts
-    document.addEventListener('keydown', (e) => {
-      if (e.key === '?' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
-        shortcutsOverlay.classList.remove('hidden');
-        e.preventDefault();
-      }
-    });
-    console.log('✅ Shortcuts overlay initialized');
-  } catch (err) {
-    console.warn('⚠️ Shortcuts overlay init failed:', err);
-  }
+  // Shortcuts Overlay: wird durch showShortcutsOverlay() bereitgestellt (Feature 8)
   
   // Initialize Command Palette with handlers
   const commandHandlers = {
@@ -4944,6 +5842,11 @@ async function onLoginSuccess() {
 function resetToLoggedOut() {
   state.loggedIn = false; state.sets = []; state.allSets = []; state.currentSet = null;
   state.dbMap = new Map(); state.cards = []; state.summaryData = null;
+  state.summaryOverrides = new Map();
+  state.pendingWrites = 0;
+  state.lastSaveError = null;
+  state.undoStack = [];
+  state.auditEntries = [];
   dom.cards.innerHTML = '';
   dom.selector.innerHTML = '<option value="">Bitte w\u00e4hlen\u2026</option>';
   dom.selector.disabled = true; dom.load.disabled = true; dom.refresh.disabled = true;
@@ -4954,7 +5857,11 @@ function resetToLoggedOut() {
   dom.setLogoWrap.classList.add('hidden');
   dom.spreadsheetInfo.classList.add('hidden');
   dom.mainNav.classList.add('hidden');
+  dom.auditPanel?.classList.add('hidden');
   renderRecentSets();
+  renderAuditPanel();
+  updateSaveStatePill();
+  updateUndoUi();
   setEmptyState(true);
   setGlobalStatus('Abgemeldet.');
   showView('dashboard');
@@ -4988,6 +5895,10 @@ if ('serviceWorker' in navigator) {
       const registration = await navigator.serviceWorker.register('./service-worker.js', {
         scope: './'
       });
+      if (!registration) {
+        console.warn('Service Worker registration returned no object');
+        return;
+      }
       console.log('✅ Service Worker registered:', registration);
 
       if (registration.waiting) {
@@ -5010,11 +5921,16 @@ if ('serviceWorker' in navigator) {
       }, 60000); // Check every minute
       
       // Handle controller change (new SW ready)
+      // Nur bei echtem Update (nicht bei Erstregistrierung) reload auslösen.
+      // previousController ist null beim allerersten Load → kein Reload.
+      const previousController = navigator.serviceWorker.controller;
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        showToast('🔄 App wurde aktualisiert', 'success', 1500);
-        window.setTimeout(() => {
-          window.location.reload();
-        }, 300);
+        if (previousController) {
+          showToast('🔄 App wurde aktualisiert', 'success', 1500);
+          window.setTimeout(() => {
+            window.location.reload();
+          }, 300);
+        }
       });
       
       // Listen for messages from Service Worker
@@ -5063,4 +5979,527 @@ window.addEventListener('appinstalled', () => {
   console.log('✅ PWA installfiert');
   showToast('🎉 App erfolgreich installiert!', 'success', 4000);
 });
+
+const _featureInitFlags = {
+  offline: false,
+  hoverPreview: false,
+  autocomplete: false,
+  statsDrilldown: false,
+  shortcuts: false,
+  share: false,
+};
+
+// ══════════════════════════════════════════════════════════════════════════
+// FEATURE 2: Charts in Statistiken (Chart.js)
+// ══════════════════════════════════════════════════════════════════════════
+const _statsChartInstances = {};
+
+function initStatsCharts(totalCollected, totalCards, seriesMap) {
+  if (!window.Chart) return;
+
+  Object.values(_statsChartInstances).forEach((chartInstance) => {
+    try { chartInstance.destroy(); } catch (_) { /* noop */ }
+  });
+
+  const textColor = '#94a3b8';
+  const gridColor = '#1e293b';
+
+  const ctxOverall = document.getElementById('chart-overall')?.getContext('2d');
+  if (ctxOverall) {
+    _statsChartInstances.overall = new window.Chart(ctxOverall, {
+      type: 'doughnut',
+      data: {
+        labels: ['Gesammelt', 'Fehlend'],
+        datasets: [{
+          data: [totalCollected, Math.max(0, totalCards - totalCollected)],
+          backgroundColor: ['#22c55e', '#1e293b'],
+          borderColor: ['#16a34a', '#334155'],
+          borderWidth: 2,
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        cutout: '68%',
+        plugins: {
+          legend: { labels: { color: textColor, font: { size: 12 } } },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => ` ${ctx.label}: ${ctx.parsed.toLocaleString('de-DE')} Karten`
+            }
+          }
+        }
+      }
+    });
+  }
+
+  const ctxSeries = document.getElementById('chart-series')?.getContext('2d');
+  if (ctxSeries) {
+    const topSeries = [...seriesMap.entries()]
+      .filter(([, group]) => (group.total || 0) > 0)
+      .sort((a, b) => b[1].total - a[1].total)
+      .slice(0, 8);
+
+    _statsChartInstances.series = new window.Chart(ctxSeries, {
+      type: 'bar',
+      data: {
+        labels: topSeries.map(([name]) => (name.length > 16 ? `${name.slice(0, 14)}…` : name)),
+        datasets: [{
+          label: 'Gesammelt %',
+          data: topSeries.map(([, group]) => (group.total > 0 ? Math.round((group.collected / group.total) * 100) : 0)),
+          backgroundColor: '#0ea5e9',
+          borderRadius: 4,
+          barThickness: 14
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: (ctx) => ` ${ctx.parsed.x}%` } }
+        },
+        scales: {
+          x: {
+            min: 0,
+            max: 100,
+            grid: { color: gridColor },
+            ticks: { color: textColor, callback: (value) => `${value}%` }
+          },
+          y: {
+            grid: { color: gridColor },
+            ticks: { color: textColor, font: { size: 11 } }
+          }
+        }
+      }
+    });
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// FEATURE 3: Offline-Status-Indikator
+// ══════════════════════════════════════════════════════════════════════════
+function initOfflineIndicator() {
+  if (_featureInitFlags.offline) return;
+  _featureInitFlags.offline = true;
+
+  const banner = document.getElementById('offline-banner');
+  if (!banner) return;
+
+  const update = () => {
+    const offline = !navigator.onLine;
+    banner.classList.toggle('visible', offline);
+    document.body.classList.toggle('is-offline', offline);
+  };
+
+  window.addEventListener('online', () => {
+    update();
+    showToast('🟢 Wieder online', 'success', 2500);
+  });
+
+  window.addEventListener('offline', () => {
+    update();
+    showToast('📴 Offline – gespeicherte Daten verfügbar', 'info', 3500);
+  });
+
+  update();
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// FEATURE 4: Set-Card Hover-Preview
+// ══════════════════════════════════════════════════════════════════════════
+function initDashboardHoverPreview() {
+  if (_featureInitFlags.hoverPreview) return;
+  _featureInitFlags.hoverPreview = true;
+
+  if (window.matchMedia('(hover: none)').matches) return;
+  const grid = document.getElementById('dashboard-grid');
+  if (!grid) return;
+
+  let tip = document.getElementById('dash-hover-tip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.id = 'dash-hover-tip';
+    tip.className = 'dash-hover-tip hidden';
+    document.body.appendChild(tip);
+  }
+
+  let currentCard = null;
+
+  grid.addEventListener('mouseover', (event) => {
+    const card = event.target.closest('.dash-set-card');
+    if (!card || card === currentCard) return;
+    currentCard = card;
+
+    let data = {};
+    try { data = JSON.parse(card.dataset.hoverData || '{}'); } catch (_) { data = {}; }
+    if (!data.name) return;
+
+    tip.innerHTML = data.imported
+      ? `
+        <p class="dhp-name">${data.name}</p>
+        <p class="dhp-hint">${data.series || ''}</p>
+        <div class="dhp-pct-bar"><div class="dhp-pct-fill" style="width:${data.percent || 0}%"></div></div>
+        <div class="dhp-row"><span>Gesammelt</span><strong>${data.collected || 0}/${data.total || 0}</strong></div>
+        <div class="dhp-row"><span>Fortschritt</span><strong>${data.percent || 0}%</strong></div>
+        ${data.rh > 0 ? `<div class="dhp-row"><span>Reverse Holos</span><strong>${data.rh}</strong></div>` : ''}
+      `
+      : `
+        <p class="dhp-name">${data.name}</p>
+        <p class="dhp-hint">Noch nicht importiert · ${data.total || '?'} Karten</p>
+      `;
+
+    tip.classList.remove('hidden');
+  });
+
+  grid.addEventListener('mousemove', (event) => {
+    if (!currentCard || tip.classList.contains('hidden')) return;
+    const margin = 12;
+    const tipW = tip.offsetWidth || 220;
+    const tipH = tip.offsetHeight || 140;
+    let left = event.clientX + margin;
+    let top = event.clientY + margin;
+    if (left + tipW > window.innerWidth) left = event.clientX - tipW - margin;
+    if (top + tipH > window.innerHeight) top = event.clientY - tipH - margin;
+    tip.style.left = `${Math.max(8, left)}px`;
+    tip.style.top = `${Math.max(8, top)}px`;
+  });
+
+  const hideTip = () => {
+    currentCard = null;
+    tip.classList.add('hidden');
+  };
+
+  grid.addEventListener('mouseleave', hideTip);
+  grid.addEventListener('mouseout', (event) => {
+    if (!grid.contains(event.relatedTarget)) hideTip();
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// FEATURE 5: Set-Completion Celebration
+// ══════════════════════════════════════════════════════════════════════════
+function triggerCompletionCelebration(setId, cardEl) {
+  const setName = cardEl.querySelector('.dash-set-name')?.textContent || setId;
+  showToast(`🎉 ${setName} vollständig gesammelt!`, 'success', 5000);
+
+  if (window.confetti) {
+    const rect = cardEl.getBoundingClientRect();
+    const x = (rect.left + rect.width / 2) / window.innerWidth;
+    const y = (rect.top + rect.height / 2) / window.innerHeight;
+    window.confetti({
+      particleCount: 120,
+      spread: 75,
+      origin: { x, y },
+      colors: ['#f59e0b', '#ef4444', '#3b82f6', '#22c55e', '#8b5cf6', '#ec4899']
+    });
+  }
+
+  cardEl.classList.add('complete-celebrate');
+  cardEl.addEventListener('animationend', () => cardEl.classList.remove('complete-celebrate'), { once: true });
+}
+
+function checkSetCompletion(setId, percent, cardEl) {
+  if (!setId) return;
+  const storageKey = `completed_set_${setId}`;
+  if (percent < 100) {
+    localStorage.removeItem(storageKey);
+    return;
+  }
+  if (localStorage.getItem(storageKey)) return;
+  localStorage.setItem(storageKey, '1');
+  const delay = state.devCompletionMode ? 40 : 450;
+  setTimeout(() => triggerCompletionCelebration(setId, cardEl), delay);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// FEATURE 6: Suche-Autocomplete
+// ══════════════════════════════════════════════════════════════════════════
+function initSearchAutocomplete() {
+  if (_featureInitFlags.autocomplete) return;
+  _featureInitFlags.autocomplete = true;
+
+  const input = document.getElementById('search-input');
+  const list = document.getElementById('search-autocomplete');
+  if (!input || !list) return;
+
+  let selectedIndex = -1;
+
+  const buildCandidates = (query) => {
+    const normalizedQuery = String(query || '').trim().toLowerCase();
+    if (normalizedQuery.length < 2) return [];
+
+    const entries = new Map();
+    (state.allSets || state.sets || []).forEach((set) => {
+      if (!set?.setName) return;
+      const key = `set:${set.setName}`;
+      entries.set(key, { label: set.setName, badge: set.series || '', type: 'set' });
+    });
+
+    (state.cards || []).forEach((card) => {
+      if (!card?.name) return;
+      const key = `card:${card.name}`;
+      entries.set(key, { label: card.name, badge: card.number || '', type: 'card' });
+    });
+
+    return [...entries.values()]
+      .filter((entry) => entry.label.toLowerCase().includes(normalizedQuery))
+      .slice(0, 8);
+  };
+
+  const renderList = (items) => {
+    selectedIndex = -1;
+    if (!items.length) {
+      list.classList.add('hidden');
+      list.innerHTML = '';
+      return;
+    }
+
+    list.innerHTML = items.map((item, idx) => `
+      <li class="search-ac-item" role="option" data-idx="${idx}" data-value="${item.label.replace(/"/g, '&quot;')}">
+        <span>${item.label}</span>
+        <span class="ac-badge">${item.badge}</span>
+      </li>
+    `).join('');
+    list.classList.remove('hidden');
+  };
+
+  input.addEventListener('input', () => {
+    renderList(buildCandidates(input.value));
+  });
+
+  input.addEventListener('keydown', (event) => {
+    const items = [...list.querySelectorAll('.search-ac-item')];
+    if (!items.length || list.classList.contains('hidden')) return;
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      selectedIndex = Math.max(selectedIndex - 1, 0);
+    } else if (event.key === 'Enter' && selectedIndex >= 0) {
+      event.preventDefault();
+      const value = items[selectedIndex].dataset.value || '';
+      input.value = value;
+      list.classList.add('hidden');
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      return;
+    } else if (event.key === 'Escape') {
+      list.classList.add('hidden');
+      return;
+    } else {
+      return;
+    }
+
+    items.forEach((item, idx) => item.classList.toggle('keyboard-focus', idx === selectedIndex));
+  });
+
+  list.addEventListener('mousedown', (event) => {
+    const item = event.target.closest('.search-ac-item');
+    if (!item) return;
+    event.preventDefault();
+    input.value = item.dataset.value || '';
+    list.classList.add('hidden');
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!input.contains(event.target) && !list.contains(event.target)) {
+      list.classList.add('hidden');
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// FEATURE 7: Statistiken Drill-Down
+// ══════════════════════════════════════════════════════════════════════════
+function initStatsDrillDown() {
+  const statsContent = document.getElementById('stats-content');
+  if (!statsContent || _featureInitFlags.statsDrilldown) return;
+  _featureInitFlags.statsDrilldown = true;
+
+  statsContent.addEventListener('click', (event) => {
+    const row = event.target.closest('.stats-series-row');
+    if (!row) return;
+
+    const seriesName = row.dataset.series || row.querySelector('.stats-series-name')?.textContent?.trim();
+    if (!seriesName) return;
+
+    const existing = document.getElementById('stats-drilldown');
+    if (existing) {
+      const isSameSeries = existing.dataset.series === seriesName;
+      existing.remove();
+      document.querySelectorAll('.stats-series-row.expanded').forEach((el) => el.classList.remove('expanded'));
+      if (isSameSeries) return;
+    }
+
+    const seriesSets = (state.sets || []).filter((set) => (set.series || 'Andere') === seriesName);
+    const summaryRows = state.summaryData || [];
+
+    const panel = document.createElement('div');
+    panel.id = 'stats-drilldown';
+    panel.className = 'stats-drilldown';
+    panel.dataset.series = seriesName;
+
+    panel.innerHTML = `
+      <h4>📦 ${seriesName} – ${seriesSets.length} Sets</h4>
+      <div class="stats-drilldown-grid">
+        ${seriesSets.map((set) => {
+          const summary = summaryRows.find((entry) => entry.setId === set.setId) || summaryRows.find((entry) => entry.setName === set.setName) || {};
+          const total = Number(summary.total || set.totalCards || 0);
+          const collected = Number(summary.collected || 0);
+          const pct = total > 0 ? Math.round((collected / total) * 100) : 0;
+          return `
+            <div class="stats-drill-set">
+              <strong>${set.setName}</strong>
+              <div class="mini-bar"><div class="mini-fill" style="width:${pct}%"></div></div>
+              <span class="drill-nums">${collected}/${total || '?'} (${pct}%)</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+
+    row.classList.add('expanded');
+    row.insertAdjacentElement('afterend', panel);
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// FEATURE 8: Keyboard-Shortcuts Overlay
+// ══════════════════════════════════════════════════════════════════════════
+const KEYBOARD_SHORTCUTS = [
+  ['D', 'Dashboard öffnen'],
+  ['S', 'Set-Ansicht öffnen'],
+  ['T', 'Statistiken öffnen'],
+  ['/', 'Suche fokussieren'],
+  ['← / →', 'Karte navigieren'],
+  ['Leertaste', 'Normal (G) togglen'],
+  ['R', 'Reverse Holo (RH) togglen'],
+  ['I', 'Kartendetails / Bild-Zoom'],
+  ['Cmd/Strg K', 'Command Palette öffnen'],
+  ['?', 'Diese Shortcut-Übersicht'],
+  ['Esc', 'Dialog / Overlay schließen'],
+];
+
+function showShortcutsOverlay() {
+  const existing = document.getElementById('shortcuts-overlay');
+  if (existing) {
+    existing.remove();
+    return;
+  }
+
+  const overlay = document.createElement('div');
+  overlay.id = 'shortcuts-overlay';
+  overlay.className = 'shortcuts-overlay';
+  overlay.innerHTML = `
+    <div class="shortcuts-panel" role="dialog" aria-modal="true" aria-label="Keyboard Shortcuts">
+      <h2>⌨️ Keyboard Shortcuts</h2>
+      <p>Tippe außerhalb von Eingabefeldern</p>
+      <table class="shortcut-table">
+        <tbody>
+          ${KEYBOARD_SHORTCUTS.map(([key, desc]) => `
+            <tr>
+              <td><span class="shortcut-key">${key}</span></td>
+              <td class="shortcut-desc">${desc}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+      <p class="shortcuts-close-hint">Esc oder ? oder Klick außerhalb zum Schließen</p>
+    </div>
+  `;
+
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) overlay.remove();
+  });
+
+  document.body.appendChild(overlay);
+}
+
+function initShortcutsOverlay() {
+  if (_featureInitFlags.shortcuts) return;
+  _featureInitFlags.shortcuts = true;
+
+  window.addEventListener('keydown', (event) => {
+    if (event.target?.matches?.('input, textarea, select, [contenteditable]')) return;
+    const isQuestionShortcut = event.key === '?' || (event.key === '/' && event.shiftKey) || (event.code === 'Slash' && event.shiftKey);
+    if (isQuestionShortcut) {
+      event.preventDefault();
+      showShortcutsOverlay();
+    }
+    if (event.key === 'Escape') {
+      document.getElementById('shortcuts-overlay')?.remove();
+    }
+  });
+}
+
+initShortcutsOverlay();
+
+// ══════════════════════════════════════════════════════════════════════════
+// FEATURE 9: Sammlung teilen (ShareURL)
+// ══════════════════════════════════════════════════════════════════════════
+function initShareButton() {
+  if (_featureInitFlags.share) return;
+  _featureInitFlags.share = true;
+
+  const btn = document.getElementById('btn-share');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    const ssid = CONFIG.SPREADSHEET_ID || '';
+    const shareUrl = new URL(location.href);
+    shareUrl.hash = '#dashboard';
+    shareUrl.searchParams.delete('ssid');
+    shareUrl.searchParams.delete('share');
+    shareUrl.searchParams.delete('nocache');
+    shareUrl.searchParams.delete('t');
+    if (ssid) shareUrl.searchParams.set('ssid', ssid);
+    showShareDialog(shareUrl.toString());
+  });
+
+  const ssidFromUrl = new URLSearchParams(location.search).get('ssid');
+  if (ssidFromUrl && ssidFromUrl.length > 10 && !CONFIG.SPREADSHEET_ID) {
+    sessionStorage.setItem('tcg_pending_ssid', ssidFromUrl);
+  }
+}
+
+function showShareDialog(url) {
+  const existing = document.getElementById('dialog-share');
+  if (existing) {
+    existing.showModal();
+    return;
+  }
+
+  const dialog = document.createElement('dialog');
+  dialog.id = 'dialog-share';
+  dialog.className = 'ss-dialog share-dialog';
+  dialog.innerHTML = `
+    <h2>🔗 Sammlung teilen</h2>
+    <p>Der Link enthält deine Spreadsheet-ID und funktioniert für Personen mit Zugriff auf dein Sheet.</p>
+    <div class="share-url-wrap">
+      <input class="share-url-input" type="text" readonly value="${url.replace(/"/g, '&quot;')}" />
+      <button class="share-copy-btn" type="button">📋 Kopieren</button>
+    </div>
+    <div class="dialog-actions">
+      <button class="btn-secondary" type="button" onclick="this.closest('dialog').close()">Schließen</button>
+    </div>
+  `;
+
+  dialog.querySelector('.share-copy-btn').addEventListener('click', async () => {
+    const input = dialog.querySelector('.share-url-input');
+    try {
+      await navigator.clipboard.writeText(input.value);
+    } catch (_) {
+      input.select();
+      document.execCommand('copy');
+    }
+    showToast('📋 Link kopiert!', 'success', 2500);
+  });
+
+  dialog.addEventListener('close', () => dialog.remove());
+  document.body.appendChild(dialog);
+  dialog.showModal();
+}
 
