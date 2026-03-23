@@ -3,9 +3,7 @@ import { naturalSort } from '../core/utils.js';
 import {
   loadCardsForSetCompat,
   combineSetsForOverviewCompat,
-  fetchAllPrimaryCardsForSet,
-  deduplicateVeraSets,
-  combineVeraAndTcgdexSetsWithStatus
+  fetchAllPrimaryCardsForSet
 } from '../pokecode-compat.js';
 
 // ── Interne Hilfsfunktionen ──────────────────────────────────────
@@ -22,7 +20,6 @@ async function fetchJson(url, { signal } = {}) {
 
 let tcgdexSetsCache = null;
 let veraSetsCache = null;
-let lastSetMergeDiagnostics = null;
 
 async function fetchTcgdexSets({ signal } = {}) {
   if (tcgdexSetsCache) return tcgdexSetsCache;
@@ -207,100 +204,12 @@ export async function fetchAllAvailableSets() {
   }
 
   const tcgdexSets = await fetchTcgdexSets();
-  const { deduplicated: dedupedPrimarySets, duplicates } = deduplicateVeraSets(primarySets);
-
-  if (duplicates.length > 0) {
-    console.warn(`[fetchAllAvailableSets] Vera duplicate set IDs detected: ${duplicates.length}`);
-  }
-
-  const combinedWithStatus = combineVeraAndTcgdexSetsWithStatus(
-    dedupedPrimarySets,
+  const combined = combineSetsForOverviewCompat({
+    primarySets,
     tcgdexSets,
-    CONFIG.CUSTOM_SET_ID_MAPPINGS
-  );
-
-  lastSetMergeDiagnostics = {
-    createdAt: new Date().toISOString(),
-    duplicateSetIdsDetected: duplicates.length,
-    duplicateDetails: duplicates,
-    matchStatistics: combinedWithStatus.matchStatistics,
-    warningThresholds: {
-      unmatchedTcgdexOnlyWarnAt: 20,
-      nameHeuristicWarnAt: 10
-    }
-  };
-
-  if ((combinedWithStatus.matchStatistics?.unmatched_tcgdex_only || 0) >= 20) {
-    console.warn('[fetchAllAvailableSets] High unmatched TCGdex-only count:', combinedWithStatus.matchStatistics.unmatched_tcgdex_only);
-  }
-  if ((combinedWithStatus.matchStatistics?.name_heuristic || 0) >= 10) {
-    console.warn('[fetchAllAvailableSets] High heuristic-match count:', combinedWithStatus.matchStatistics.name_heuristic);
-  }
-
-  const combined = [];
-
-  combinedWithStatus.matched.forEach((entry) => {
-    const primarySet = entry?.sources?.vera;
-    const tcgdexSet = entry?.sources?.tcgdex;
-    if (!primarySet) return;
-
-    const model = mapSetToOverviewModel(primarySet);
-    if (!model) return;
-
-    combined.push({
-      ...model,
-      setName: tcgdexSet?.name || model.setName,
-      series: tcgdexSet?.serie?.name || model.series,
-      releaseDate: tcgdexSet?.releaseDate || model.releaseDate || '',
-      totalCards: toNumber(tcgdexSet?.cardCount?.official) || model.totalCards,
-      ptcgoCode: model.ptcgoCode || tcgdexSet?.abbreviation?.official || '',
-      tcgdexId: tcgdexSet?.id || '',
-      tcgdexName: tcgdexSet?.name || tcgdexSet?.en?.name || '',
-      legalities: primarySet?.legalities || tcgdexSet?.legal || null,
-      cardCountTotal: toNumber(tcgdexSet?.cardCount?.total),
-      cardCountHolo: toNumber(tcgdexSet?.cardCount?.holo),
-      cardCountReverse: toNumber(tcgdexSet?.cardCount?.reverse),
-      cardCountFirstEdition: toNumber(tcgdexSet?.cardCount?.firstEdition),
-      cardCountNormal: toNumber(tcgdexSet?.cardCount?.normal),
-      matchStatus: entry.matchStatus || null,
-      matchReason: entry.matchReason || null,
-      matchConfidence: entry.matchConfidence || 0,
-      sources: {
-        vera: primarySet,
-        tcgdex: tcgdexSet || null
-      }
-    });
-  });
-
-  combinedWithStatus.tcgdexOnly.forEach((entry) => {
-    const tcgdexSet = entry?.sources?.tcgdex;
-    if (!tcgdexSet) return;
-
-    combined.push({
-      setId: `TCGDEX-${tcgdexSet.id}`,
-      setName: tcgdexSet.name || tcgdexSet.en?.name || tcgdexSet.id,
-      logoUrl: tcgdexSet.logo || '',
-      symbolUrl: tcgdexSet.symbol || '',
-      series: tcgdexSet.serie?.name || '',
-      releaseDate: tcgdexSet.releaseDate || '',
-      totalCards: toNumber(tcgdexSet?.cardCount?.official) || toNumber(tcgdexSet?.cardCount?.total),
-      ptcgoCode: tcgdexSet.abbreviation?.official || '',
-      tcgdexId: tcgdexSet.id || '',
-      tcgdexName: tcgdexSet.name || tcgdexSet.en?.name || '',
-      legalities: tcgdexSet.legal || null,
-      cardCountTotal: toNumber(tcgdexSet?.cardCount?.total),
-      cardCountHolo: toNumber(tcgdexSet?.cardCount?.holo),
-      cardCountReverse: toNumber(tcgdexSet?.cardCount?.reverse),
-      cardCountFirstEdition: toNumber(tcgdexSet?.cardCount?.firstEdition),
-      cardCountNormal: toNumber(tcgdexSet?.cardCount?.normal),
-      matchStatus: entry.matchStatus,
-      matchReason: entry.matchReason,
-      matchConfidence: entry.matchConfidence,
-      sources: {
-        vera: null,
-        tcgdex: tcgdexSet
-      }
-    });
+    customMappings: CONFIG.CUSTOM_SET_ID_MAPPINGS,
+    mapPrimarySetToOverviewModel: mapSetToOverviewModel,
+    toNumber
   });
 
   return combined.sort((a, b) => {
@@ -315,10 +224,6 @@ export async function fetchAllAvailableSets() {
   });
 }
 
-export function getLastSetMergeDiagnostics() {
-  return lastSetMergeDiagnostics;
-}
-
 export async function runPokecodeParityCheck({ setIds = [], maxSets = 10 } = {}) {
   const tcgdexSets = await fetchTcgdexSets();
   let primarySets = [];
@@ -328,11 +233,9 @@ export async function runPokecodeParityCheck({ setIds = [], maxSets = 10 } = {})
     primarySets = await fetchPokemontcgSets();
   }
 
-  const { deduplicated: dedupedPrimarySets } = deduplicateVeraSets(primarySets);
-
   const overviewAdapter = await fetchAllAvailableSets();
   const overviewCompat = combineSetsForOverviewCompat({
-    primarySets: dedupedPrimarySets,
+    primarySets,
     tcgdexSets,
     customMappings: CONFIG.CUSTOM_SET_ID_MAPPINGS,
     mapPrimarySetToOverviewModel: mapSetToOverviewModel,

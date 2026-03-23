@@ -13,7 +13,6 @@ Zentrale Landing-Page für die technische Dokumentation der `frontend/tcg-tracke
 | [app.md](app.md) | Einstiegspunkt `app.js` |
 | [navigation.md](navigation.md) | Seitennavigation und UI-Routingkonzept |
 | [migration-validation.md](migration-validation.md) | Testmatrix, Protokoll, Abnahmeregeln |
-| [regression-checklist.md](regression-checklist.md) | Manuelle Regressionen für Delete/Search/Reimport-Flows |
 | [changelog/removed-code.md](changelog/removed-code.md) | Entfernte Module und Dead-Code-Protokoll |
 
 ---

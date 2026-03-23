@@ -4,9 +4,9 @@
 
 const SW_SCOPE_PATH = new URL(self.registration.scope).pathname.toLowerCase();
 const SW_SCOPE = /(^|\/)dev(\/|$)/.test(SW_SCOPE_PATH) ? 'dev' : 'release';
-const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v8`;
-const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v8`;
-const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v8`;
+const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v7`;
+const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v7`;
+const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v7`;
 
 const STATIC_ASSETS = [
   './',
@@ -145,42 +145,7 @@ self.addEventListener('fetch', (event) => {
       return;
     }
 
-    const shouldBypassStaticCache =
-      url.searchParams.has('nocache')
-      || request.destination === 'document'
-      || request.destination === 'script'
-      || request.destination === 'style';
-
-    // Lokale HTML/JS/CSS-Dateien network-first ausliefern, damit Deployments
-    // und Modul-Updates nicht von alten SW-Caches verdeckt werden.
-    if (shouldBypassStaticCache) {
-      event.respondWith(
-        fetch(request)
-          .then((response) => {
-            if (response && response.status === 200) {
-              const responseToCache = response.clone();
-              caches.open(CACHE_NAME).then((cache) => {
-                cache.put(request, responseToCache).catch((err) => {
-                  console.warn('[SW] cache.put failed:', err);
-                });
-              });
-            }
-            return response;
-          })
-          .catch(() => {
-            return caches.match(request).then((response) => {
-              if (response) {
-                console.log('[SW] Serving static fallback from cache:', request.url);
-                return response;
-              }
-              return new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
-            });
-          })
-      );
-      return;
-    }
-
-    // Andere lokale Assets: cache first
+    // Static assets: cache first
     event.respondWith(
       caches.match(request).then((response) => {
         if (response) {

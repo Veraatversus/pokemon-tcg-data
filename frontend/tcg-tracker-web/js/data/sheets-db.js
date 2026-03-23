@@ -33,57 +33,10 @@ const DB_SHEETS = {
 };
 
 const DB_HEADERS = {
-  sets: [
-    // ── Ursprüngliche Spalten (Legacy, werden zu Display-only nach Phase 5) ─────
-    'setId', 'setName', 'series', 'releaseDate', 'totalCards', 'ptcgoCode', 'logoUrl', 'symbolUrl', 'imported', 'updatedAt',
-    'tcgdexId', 'tcgdexName', 'legalities', 'cardCountTotal', 'cardCountHolo', 'cardCountReverse', 'cardCountFirstEdition', 'cardCountNormal',
-    
-    // ── Phase 4: Vera-Source-Spalten (neu ab Phase 4) ────────────────────────
-    // Vollständige Spalten für alle Vera-Felder
-    'vera_id', 'vera_name', 'vera_series', 'vera_releaseDate', 'vera_printedTotal', 'vera_total',
-    'vera_cardCount_official', 'vera_cardCount_reverse', 'vera_cardCount_holo', 'vera_cardCount_firstEdition',
-    'vera_images_logo', 'vera_images_symbol',
-    'vera_ptcgoCode', 'vera_legalities', 'vera_updatedAt',
-    
-    // ── Phase 4: TCGdex-Source-Spalten (neu ab Phase 4) ──────────────────────
-    // Vollständige Spalten für alle TCGdex-Felder
-    'tcgdex_id', 'tcgdex_name_en', 'tcgdex_name_de', 'tcgdex_serie_name', 'tcgdex_releaseDate',
-    'tcgdex_cardCount_official', 'tcgdex_cardCount_reverse', 'tcgdex_cardCount_holo', 'tcgdex_cardCount_firstEdition',
-    'tcgdex_cardCount_total', 'tcgdex_cardCount_normal',
-    'tcgdex_images_logo', 'tcgdex_images_symbol',
-    'tcgdex_legal', 'tcgdex_abbreviation_official',
-    
-    // ── Phase 4: Match-Metadaten ──────────────────────────────────────────────
-    'match_status', 'match_reason', 'match_confidence'
-  ],
-  
-  cards: [
-    // ── Ursprüngliche Spalten (Legacy, werden zu Display-only nach Phase 5) ─────
-    'setId', 'cardId', 'number', 'name', 'imageUrl', 'cardmarketUrl', 'rarity', 'hp', 'types', 'supertype', 'subtypes', 'evolvesFrom', 'artist', 'regulationMark', 'rules', 'flavorText', 'updatedAt',
-    
-    // ── Phase 4: Vera-Source-Spalten (neu ab Phase 4) ────────────────────────
-    'vera_localId', 'vera_number', 'vera_name', 'vera_nameEn', 'vera_images_small', 'vera_images_large',
-    'vera_cardmarketUrl', 'vera_hp', 'vera_types', 'vera_supertype', 'vera_subtypes', 'vera_evolvesFrom',
-    'vera_rarity', 'vera_regulationMark', 'vera_artist', 'vera_flavorText', 'vera_rules',
-    'vera_normalPrice', 'vera_reversePrice', 'vera_updatedAt',
-    
-    // ── Phase 4: TCGdex-Source-Spalten (neu ab Phase 4) ──────────────────────
-    'tcgdex_localId', 'tcgdex_number', 'tcgdex_name_en', 'tcgdex_name_de', 'tcgdex_images_small', 'tcgdex_images_large',
-    'tcgdex_cardmarketUrl', 'tcgdex_hp', 'tcgdex_types', 'tcgdex_supertype', 'tcgdex_subtypes', 'tcgdex_evolvesFrom',
-    'tcgdex_rarity', 'tcgdex_regulationMark', 'tcgdex_artist', 'tcgdex_flavorText', 'tcgdex_rules',
-    'tcgdex_normalPrice', 'tcgdex_reversePrice', 'tcgdex_legalities', 'tcgdex_updatedAt',
-    
-    // ── Phase 4: Match-Metadaten ──────────────────────────────────────────────
-    'match_status', 'match_reason', 'match_confidence'
-  ],
-  
-  collection: [
-    'setId', 'cardId', 'g', 'rh', 'updatedAt'
-  ]
+  sets: ['setId', 'setName', 'series', 'releaseDate', 'totalCards', 'ptcgoCode', 'logoUrl', 'symbolUrl', 'imported', 'updatedAt', 'tcgdexId', 'tcgdexName', 'legalities', 'cardCountTotal', 'cardCountHolo', 'cardCountReverse', 'cardCountFirstEdition', 'cardCountNormal'],
+  cards: ['setId', 'cardId', 'number', 'name', 'imageUrl', 'cardmarketUrl', 'rarity', 'hp', 'types', 'supertype', 'subtypes', 'evolvesFrom', 'artist', 'regulationMark', 'rules', 'flavorText', 'updatedAt'],
+  collection: ['setId', 'cardId', 'g', 'rh', 'updatedAt']
 };
-
-const SET_HEADER_INDEX = Object.fromEntries(DB_HEADERS.sets.map((name, index) => [name, index]));
-const CARD_HEADER_INDEX = Object.fromEntries(DB_HEADERS.cards.map((name, index) => [name, index]));
 
 function normalizeName(value) {
   return String(value ?? '').trim().toLowerCase();
@@ -488,178 +441,50 @@ function nowIso() {
   return new Date().toISOString();
 }
 
-function setRowCell(row, indexMap, key, value) {
-  const index = indexMap[key];
-  if (typeof index !== 'number') return;
-  row[index] = value;
-}
-
-function isEmptyCell(value) {
-  return value === '' || value === null || typeof value === 'undefined';
-}
-
-function mergeRowsPreferNew(nextRow, existingRow) {
-  if (!Array.isArray(existingRow)) return nextRow;
-  return nextRow.map((value, index) => (isEmptyCell(value) ? existingRow[index] ?? '' : value));
-}
-
-function buildDbSetRow(setMeta, imported = false, existingRow = null) {
-  const row = new Array(DB_HEADERS.sets.length).fill('');
-  const vera = setMeta?.sources?.vera || {};
-  const tcgdex = setMeta?.sources?.tcgdex || {};
-
-  setRowCell(row, SET_HEADER_INDEX, 'setId', toSafeCellString(setMeta?.setId));
-  setRowCell(row, SET_HEADER_INDEX, 'setName', toSafeCellString(setMeta?.setName));
-  setRowCell(row, SET_HEADER_INDEX, 'series', toSafeCellString(setMeta?.series));
-  setRowCell(row, SET_HEADER_INDEX, 'releaseDate', toSafeCellString(setMeta?.releaseDate));
-  setRowCell(row, SET_HEADER_INDEX, 'totalCards', Number(setMeta?.totalCards) || 0);
-  setRowCell(row, SET_HEADER_INDEX, 'ptcgoCode', toSafeCellString(setMeta?.ptcgoCode));
-  setRowCell(row, SET_HEADER_INDEX, 'logoUrl', toSafeCellString(setMeta?.logoUrl));
-  setRowCell(row, SET_HEADER_INDEX, 'symbolUrl', toSafeCellString(setMeta?.symbolUrl));
-  setRowCell(row, SET_HEADER_INDEX, 'imported', Boolean(imported));
-  setRowCell(row, SET_HEADER_INDEX, 'updatedAt', nowIso());
-  setRowCell(row, SET_HEADER_INDEX, 'tcgdexId', toSafeCellString(setMeta?.tcgdexId));
-  setRowCell(row, SET_HEADER_INDEX, 'tcgdexName', toSafeCellString(setMeta?.tcgdexName));
-  setRowCell(row, SET_HEADER_INDEX, 'legalities', toSafeJsonString(setMeta?.legalities));
-  setRowCell(row, SET_HEADER_INDEX, 'cardCountTotal', Number(setMeta?.cardCountTotal) || 0);
-  setRowCell(row, SET_HEADER_INDEX, 'cardCountHolo', Number(setMeta?.cardCountHolo) || 0);
-  setRowCell(row, SET_HEADER_INDEX, 'cardCountReverse', Number(setMeta?.cardCountReverse) || 0);
-  setRowCell(row, SET_HEADER_INDEX, 'cardCountFirstEdition', Number(setMeta?.cardCountFirstEdition) || 0);
-  setRowCell(row, SET_HEADER_INDEX, 'cardCountNormal', Number(setMeta?.cardCountNormal) || 0);
-
-  setRowCell(row, SET_HEADER_INDEX, 'vera_id', toSafeCellString(vera?.id || setMeta?.setId));
-  setRowCell(row, SET_HEADER_INDEX, 'vera_name', toSafeCellString(vera?.name));
-  setRowCell(row, SET_HEADER_INDEX, 'vera_series', toSafeCellString(vera?.series));
-  setRowCell(row, SET_HEADER_INDEX, 'vera_releaseDate', toSafeCellString(vera?.releaseDate));
-  setRowCell(row, SET_HEADER_INDEX, 'vera_printedTotal', Number(vera?.printedTotal) || 0);
-  setRowCell(row, SET_HEADER_INDEX, 'vera_total', Number(vera?.total) || 0);
-  setRowCell(row, SET_HEADER_INDEX, 'vera_cardCount_official', Number(vera?.cardCount?.official) || 0);
-  setRowCell(row, SET_HEADER_INDEX, 'vera_cardCount_reverse', Number(vera?.cardCount?.reverse) || 0);
-  setRowCell(row, SET_HEADER_INDEX, 'vera_cardCount_holo', Number(vera?.cardCount?.holo) || 0);
-  setRowCell(row, SET_HEADER_INDEX, 'vera_cardCount_firstEdition', Number(vera?.cardCount?.firstEdition) || 0);
-  setRowCell(row, SET_HEADER_INDEX, 'vera_images_logo', toSafeCellString(vera?.images?.logo));
-  setRowCell(row, SET_HEADER_INDEX, 'vera_images_symbol', toSafeCellString(vera?.images?.symbol));
-  setRowCell(row, SET_HEADER_INDEX, 'vera_ptcgoCode', toSafeCellString(vera?.ptcgoCode));
-  setRowCell(row, SET_HEADER_INDEX, 'vera_legalities', toSafeJsonString(vera?.legalities));
-  setRowCell(row, SET_HEADER_INDEX, 'vera_updatedAt', toSafeCellString(vera?.updatedAt));
-
-  setRowCell(row, SET_HEADER_INDEX, 'tcgdex_id', toSafeCellString(tcgdex?.id || setMeta?.tcgdexId));
-  setRowCell(row, SET_HEADER_INDEX, 'tcgdex_name_en', toSafeCellString(tcgdex?.en?.name));
-  setRowCell(row, SET_HEADER_INDEX, 'tcgdex_name_de', toSafeCellString(tcgdex?.name));
-  setRowCell(row, SET_HEADER_INDEX, 'tcgdex_serie_name', toSafeCellString(tcgdex?.serie?.name));
-  setRowCell(row, SET_HEADER_INDEX, 'tcgdex_releaseDate', toSafeCellString(tcgdex?.releaseDate));
-  setRowCell(row, SET_HEADER_INDEX, 'tcgdex_cardCount_official', Number(tcgdex?.cardCount?.official) || 0);
-  setRowCell(row, SET_HEADER_INDEX, 'tcgdex_cardCount_reverse', Number(tcgdex?.cardCount?.reverse) || 0);
-  setRowCell(row, SET_HEADER_INDEX, 'tcgdex_cardCount_holo', Number(tcgdex?.cardCount?.holo) || 0);
-  setRowCell(row, SET_HEADER_INDEX, 'tcgdex_cardCount_firstEdition', Number(tcgdex?.cardCount?.firstEdition) || 0);
-  setRowCell(row, SET_HEADER_INDEX, 'tcgdex_cardCount_total', Number(tcgdex?.cardCount?.total) || 0);
-  setRowCell(row, SET_HEADER_INDEX, 'tcgdex_cardCount_normal', Number(tcgdex?.cardCount?.normal) || 0);
-  setRowCell(row, SET_HEADER_INDEX, 'tcgdex_images_logo', toSafeCellString(tcgdex?.logo));
-  setRowCell(row, SET_HEADER_INDEX, 'tcgdex_images_symbol', toSafeCellString(tcgdex?.symbol));
-  setRowCell(row, SET_HEADER_INDEX, 'tcgdex_legal', toSafeJsonString(tcgdex?.legal));
-  setRowCell(row, SET_HEADER_INDEX, 'tcgdex_abbreviation_official', toSafeCellString(tcgdex?.abbreviation?.official));
-
-  setRowCell(row, SET_HEADER_INDEX, 'match_status', toSafeCellString(setMeta?.matchStatus));
-  setRowCell(row, SET_HEADER_INDEX, 'match_reason', toSafeCellString(setMeta?.matchReason));
-  setRowCell(row, SET_HEADER_INDEX, 'match_confidence', Number(setMeta?.matchConfidence) || 0);
-
-  const merged = mergeRowsPreferNew(row, existingRow);
-  const existingImported = Boolean(existingRow && toBoolean(existingRow[SET_HEADER_INDEX.imported]));
-  merged[SET_HEADER_INDEX.imported] = Boolean(imported || existingImported);
-  merged[SET_HEADER_INDEX.updatedAt] = nowIso();
-  return merged;
-}
-
-function buildDbCardRow(setId, card) {
-  const row = new Array(DB_HEADERS.cards.length).fill('');
-  const vera = card?.sources?.vera || card?.vera || {};
-  const tcgdex = card?.sources?.tcgdex || card?.tcgdex || {};
-  const cardNumber = toSafeCellString(card?.number || card?.localId);
-
-  setRowCell(row, CARD_HEADER_INDEX, 'setId', toSafeCellString(setId));
-  setRowCell(row, CARD_HEADER_INDEX, 'cardId', cardNumber);
-  setRowCell(row, CARD_HEADER_INDEX, 'number', cardNumber);
-  setRowCell(row, CARD_HEADER_INDEX, 'name', toSafeCellString(card?.name));
-  setRowCell(row, CARD_HEADER_INDEX, 'imageUrl', toSafeCellString(card?.image));
-  setRowCell(row, CARD_HEADER_INDEX, 'cardmarketUrl', toSafeCellString(card?.cardmarketUrl));
-  setRowCell(row, CARD_HEADER_INDEX, 'rarity', toSafeCellString(card?.rarity));
-  setRowCell(row, CARD_HEADER_INDEX, 'hp', toSafeCellString(card?.hp));
-  setRowCell(row, CARD_HEADER_INDEX, 'types', toSafeJsonString(card?.types));
-  setRowCell(row, CARD_HEADER_INDEX, 'supertype', toSafeCellString(card?.supertype));
-  setRowCell(row, CARD_HEADER_INDEX, 'subtypes', toSafeJsonString(card?.subtypes));
-  setRowCell(row, CARD_HEADER_INDEX, 'evolvesFrom', toSafeCellString(card?.evolvesFrom));
-  setRowCell(row, CARD_HEADER_INDEX, 'artist', toSafeCellString(card?.artist));
-  setRowCell(row, CARD_HEADER_INDEX, 'regulationMark', toSafeCellString(card?.regulationMark));
-  setRowCell(row, CARD_HEADER_INDEX, 'rules', toSafeJsonString(card?.rules));
-  setRowCell(row, CARD_HEADER_INDEX, 'flavorText', toSafeCellString(card?.flavorText));
-  setRowCell(row, CARD_HEADER_INDEX, 'updatedAt', nowIso());
-
-  setRowCell(row, CARD_HEADER_INDEX, 'vera_localId', toSafeCellString(vera?.localId || cardNumber));
-  setRowCell(row, CARD_HEADER_INDEX, 'vera_number', toSafeCellString(vera?.number || cardNumber));
-  setRowCell(row, CARD_HEADER_INDEX, 'vera_name', toSafeCellString(vera?.name));
-  setRowCell(row, CARD_HEADER_INDEX, 'vera_nameEn', toSafeCellString(vera?.name));
-  setRowCell(row, CARD_HEADER_INDEX, 'vera_images_small', toSafeCellString(vera?.images?.small));
-  setRowCell(row, CARD_HEADER_INDEX, 'vera_images_large', toSafeCellString(vera?.images?.large));
-  setRowCell(row, CARD_HEADER_INDEX, 'vera_cardmarketUrl', toSafeCellString(vera?.cardmarket?.url || vera?.cardmarketUrl));
-  setRowCell(row, CARD_HEADER_INDEX, 'vera_hp', toSafeCellString(vera?.hp));
-  setRowCell(row, CARD_HEADER_INDEX, 'vera_types', toSafeJsonString(vera?.types));
-  setRowCell(row, CARD_HEADER_INDEX, 'vera_supertype', toSafeCellString(vera?.supertype));
-  setRowCell(row, CARD_HEADER_INDEX, 'vera_subtypes', toSafeJsonString(vera?.subtypes));
-  setRowCell(row, CARD_HEADER_INDEX, 'vera_evolvesFrom', toSafeCellString(vera?.evolvesFrom));
-  setRowCell(row, CARD_HEADER_INDEX, 'vera_rarity', toSafeCellString(vera?.rarity));
-  setRowCell(row, CARD_HEADER_INDEX, 'vera_regulationMark', toSafeCellString(vera?.regulationMark));
-  setRowCell(row, CARD_HEADER_INDEX, 'vera_artist', toSafeCellString(vera?.artist));
-  setRowCell(row, CARD_HEADER_INDEX, 'vera_flavorText', toSafeCellString(vera?.flavorText));
-  setRowCell(row, CARD_HEADER_INDEX, 'vera_rules', toSafeJsonString(vera?.rules));
-  setRowCell(row, CARD_HEADER_INDEX, 'vera_normalPrice', Number(vera?.cardmarket?.prices?.averageSellPrice || vera?.normalPrice) || 0);
-  setRowCell(row, CARD_HEADER_INDEX, 'vera_reversePrice', Number(vera?.cardmarket?.prices?.reverseHolofoil?.market || vera?.reversePrice) || 0);
-  setRowCell(row, CARD_HEADER_INDEX, 'vera_updatedAt', toSafeCellString(vera?.updatedAt));
-
-  setRowCell(row, CARD_HEADER_INDEX, 'tcgdex_localId', toSafeCellString(tcgdex?.localId || tcgdex?.id || cardNumber));
-  setRowCell(row, CARD_HEADER_INDEX, 'tcgdex_number', toSafeCellString(tcgdex?.localId || tcgdex?.id || cardNumber));
-  setRowCell(row, CARD_HEADER_INDEX, 'tcgdex_name_en', toSafeCellString(tcgdex?.en?.name));
-  setRowCell(row, CARD_HEADER_INDEX, 'tcgdex_name_de', toSafeCellString(tcgdex?.name));
-  setRowCell(row, CARD_HEADER_INDEX, 'tcgdex_images_small', toSafeCellString(tcgdex?.image || tcgdex?.images?.small));
-  setRowCell(row, CARD_HEADER_INDEX, 'tcgdex_images_large', toSafeCellString(tcgdex?.images?.high || tcgdex?.images?.large || tcgdex?.image));
-  setRowCell(row, CARD_HEADER_INDEX, 'tcgdex_cardmarketUrl', toSafeCellString(tcgdex?.links?.cardmarket || tcgdex?.cardmarketUrl));
-  setRowCell(row, CARD_HEADER_INDEX, 'tcgdex_hp', toSafeCellString(tcgdex?.hp));
-  setRowCell(row, CARD_HEADER_INDEX, 'tcgdex_types', toSafeJsonString(tcgdex?.types));
-  setRowCell(row, CARD_HEADER_INDEX, 'tcgdex_supertype', toSafeCellString(tcgdex?.category || tcgdex?.supertype));
-  setRowCell(row, CARD_HEADER_INDEX, 'tcgdex_subtypes', toSafeJsonString(tcgdex?.suffix ? [tcgdex.suffix] : tcgdex?.subtypes));
-  setRowCell(row, CARD_HEADER_INDEX, 'tcgdex_evolvesFrom', toSafeCellString(tcgdex?.evolveFrom || tcgdex?.evolvesFrom));
-  setRowCell(row, CARD_HEADER_INDEX, 'tcgdex_rarity', toSafeCellString(tcgdex?.rarity));
-  setRowCell(row, CARD_HEADER_INDEX, 'tcgdex_regulationMark', toSafeCellString(tcgdex?.regulationMark));
-  setRowCell(row, CARD_HEADER_INDEX, 'tcgdex_artist', toSafeCellString(tcgdex?.illustrator));
-  setRowCell(row, CARD_HEADER_INDEX, 'tcgdex_flavorText', toSafeCellString(tcgdex?.description));
-  setRowCell(row, CARD_HEADER_INDEX, 'tcgdex_rules', toSafeJsonString(tcgdex?.effects || tcgdex?.rules));
-  setRowCell(row, CARD_HEADER_INDEX, 'tcgdex_normalPrice', Number(tcgdex?.variants?.normal?.price || tcgdex?.normalPrice) || 0);
-  setRowCell(row, CARD_HEADER_INDEX, 'tcgdex_reversePrice', Number(tcgdex?.variants?.reverse?.price || tcgdex?.reversePrice) || 0);
-  setRowCell(row, CARD_HEADER_INDEX, 'tcgdex_legalities', toSafeJsonString(tcgdex?.legal || tcgdex?.legalities));
-  setRowCell(row, CARD_HEADER_INDEX, 'tcgdex_updatedAt', toSafeCellString(tcgdex?.updated || tcgdex?.updatedAt));
-
-  setRowCell(row, CARD_HEADER_INDEX, 'match_status', toSafeCellString(card?.matchStatus));
-  setRowCell(row, CARD_HEADER_INDEX, 'match_reason', toSafeCellString(card?.matchReason));
-  setRowCell(row, CARD_HEADER_INDEX, 'match_confidence', Number(card?.matchConfidence) || 0);
-
-  return row;
-}
-
 async function upsertDbSet(setMeta, imported = false) {
   await ensureNormalizedSchema();
   const setId = toSafeCellString(setMeta?.setId);
   if (!setId) return;
 
   const rows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length);
+  const target = [
+    setId,
+    toSafeCellString(setMeta?.setName),
+    toSafeCellString(setMeta?.series),
+    toSafeCellString(setMeta?.releaseDate),
+    Number(setMeta?.totalCards) || 0,
+    toSafeCellString(setMeta?.ptcgoCode),
+    toSafeCellString(setMeta?.logoUrl),
+    toSafeCellString(setMeta?.symbolUrl),
+    Boolean(imported),
+    nowIso(),
+    toSafeCellString(setMeta?.tcgdexId),
+    toSafeCellString(setMeta?.tcgdexName),
+    toSafeJsonString(setMeta?.legalities),
+    Number(setMeta?.cardCountTotal) || 0,
+    Number(setMeta?.cardCountHolo) || 0,
+    Number(setMeta?.cardCountReverse) || 0,
+    Number(setMeta?.cardCountFirstEdition) || 0,
+    Number(setMeta?.cardCountNormal) || 0
+  ];
 
   const existingIndex = rows.findIndex((row) => toSafeCellString(row[0]).toLowerCase() === setId.toLowerCase());
   if (existingIndex >= 0) {
     const rowNo = existingIndex + 2;
     const existingRow = rows[existingIndex];
-    const target = buildDbSetRow(setMeta, imported, existingRow);
+    const existingImported = toBoolean(existingRow[8]);
+    target[8] = Boolean(imported || existingImported);
+    target[10] = target[10] || toSafeCellString(existingRow[10]);
+    target[11] = target[11] || toSafeCellString(existingRow[11]);
+    target[12] = target[12] || toSafeCellString(existingRow[12]);
+    target[13] = target[13] || Number(existingRow[13]) || 0;
+    target[14] = target[14] || Number(existingRow[14]) || 0;
+    target[15] = target[15] || Number(existingRow[15]) || 0;
+    target[16] = target[16] || Number(existingRow[16]) || 0;
+    target[17] = target[17] || Number(existingRow[17]) || 0;
     await putValues(buildRange(DB_SHEETS.sets, `A${rowNo}:${colToA1(DB_HEADERS.sets.length)}${rowNo}`), [target]);
     rows[existingIndex] = target;
   } else {
-    const target = buildDbSetRow(setMeta, imported);
     const rowNo = rows.length + 2;
     await putValues(buildRange(DB_SHEETS.sets, `A${rowNo}:${colToA1(DB_HEADERS.sets.length)}${rowNo}`), [target]);
     rows.push(target);
@@ -671,8 +496,6 @@ async function resolveSetIdFromName(setSheetName) {
   await ensureNormalizedSchema();
   const rows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length);
   const normalizedName = toSafeCellString(setSheetName).toLowerCase();
-  const directId = rows.find((row) => toSafeCellString(row[0]).toLowerCase() === normalizedName);
-  if (directId?.[0]) return toSafeCellString(directId[0]);
   const direct = rows.find((row) => toSafeCellString(row[1]).toLowerCase() === normalizedName);
   if (direct?.[0]) return toSafeCellString(direct[0]);
 
@@ -684,7 +507,25 @@ async function resolveSetIdFromName(setSheetName) {
 
 async function writeDbCardsForSet(setId, cards) {
   await ensureNormalizedSchema();
-  const setRows = cards.map((card) => buildDbCardRow(setId, card));
+  const setRows = cards.map((card) => [
+    setId,
+    toSafeCellString(card.number),
+    toSafeCellString(card.number),
+    toSafeCellString(card.name),
+    toSafeCellString(card.image),
+    toSafeCellString(card.cardmarketUrl),
+    toSafeCellString(card.rarity),
+    toSafeCellString(card.hp),
+    toSafeJsonString(card.types),
+    toSafeCellString(card.supertype),
+    toSafeJsonString(card.subtypes),
+    toSafeCellString(card.evolvesFrom),
+    toSafeCellString(card.artist),
+    toSafeCellString(card.regulationMark),
+    toSafeJsonString(card.rules),
+    toSafeCellString(card.flavorText),
+    nowIso()
+  ]);
   await appendDbRows(DB_SHEETS.cards, DB_HEADERS.cards.length, setRows);
 }
 
@@ -732,23 +573,20 @@ export async function readDbCardsForSet(setId) {
 
   return Array.from(latestPerCard.values())
     .map((row) => ({
-      number: toSafeCellString(row[CARD_HEADER_INDEX.number] || row[CARD_HEADER_INDEX.cardId]),
-      name: toSafeCellString(row[CARD_HEADER_INDEX.tcgdex_name_de]) || toSafeCellString(row[CARD_HEADER_INDEX.name]),
-      image: toSafeCellString(row[CARD_HEADER_INDEX.tcgdex_images_large]) || toSafeCellString(row[CARD_HEADER_INDEX.tcgdex_images_small]) || toSafeCellString(row[CARD_HEADER_INDEX.imageUrl]),
-      cardmarketUrl: toSafeCellString(row[CARD_HEADER_INDEX.tcgdex_cardmarketUrl]) || toSafeCellString(row[CARD_HEADER_INDEX.cardmarketUrl]),
-      rarity: toSafeCellString(row[CARD_HEADER_INDEX.tcgdex_rarity]) || toSafeCellString(row[CARD_HEADER_INDEX.rarity]),
-      hp: toSafeCellString(row[CARD_HEADER_INDEX.tcgdex_hp]) || toSafeCellString(row[CARD_HEADER_INDEX.hp]),
-      types: tryParseJson(row[CARD_HEADER_INDEX.tcgdex_types], null) || tryParseJson(row[CARD_HEADER_INDEX.types], []),
-      supertype: toSafeCellString(row[CARD_HEADER_INDEX.tcgdex_supertype]) || toSafeCellString(row[CARD_HEADER_INDEX.supertype]),
-      subtypes: tryParseJson(row[CARD_HEADER_INDEX.tcgdex_subtypes], null) || tryParseJson(row[CARD_HEADER_INDEX.subtypes], []),
-      evolvesFrom: toSafeCellString(row[CARD_HEADER_INDEX.tcgdex_evolvesFrom]) || toSafeCellString(row[CARD_HEADER_INDEX.evolvesFrom]),
-      artist: toSafeCellString(row[CARD_HEADER_INDEX.tcgdex_artist]) || toSafeCellString(row[CARD_HEADER_INDEX.artist]),
-      regulationMark: toSafeCellString(row[CARD_HEADER_INDEX.tcgdex_regulationMark]) || toSafeCellString(row[CARD_HEADER_INDEX.regulationMark]),
-      rules: tryParseJson(row[CARD_HEADER_INDEX.tcgdex_rules], null) || tryParseJson(row[CARD_HEADER_INDEX.rules], null),
-      flavorText: toSafeCellString(row[CARD_HEADER_INDEX.tcgdex_flavorText]) || toSafeCellString(row[CARD_HEADER_INDEX.flavorText]),
-      matchStatus: toSafeCellString(row[CARD_HEADER_INDEX.match_status]),
-      matchReason: toSafeCellString(row[CARD_HEADER_INDEX.match_reason]),
-      matchConfidence: Number(row[CARD_HEADER_INDEX.match_confidence]) || 0
+      number: toSafeCellString(row[2] || row[1]),
+      name: toSafeCellString(row[3]),
+      image: toSafeCellString(row[4]),
+      cardmarketUrl: toSafeCellString(row[5]),
+      rarity: toSafeCellString(row[6]),
+      hp: toSafeCellString(row[7]),
+      types: tryParseJson(row[8], []),
+      supertype: toSafeCellString(row[9]),
+      subtypes: tryParseJson(row[10], []),
+      evolvesFrom: toSafeCellString(row[11]),
+      artist: toSafeCellString(row[12]),
+      regulationMark: toSafeCellString(row[13]),
+      rules: tryParseJson(row[14], null),
+      flavorText: toSafeCellString(row[15])
     }))
     .filter((card) => card.number);
 }
@@ -764,26 +602,23 @@ export async function listSetsOverviewData() {
   const dbSets = dbRows
     .filter((row) => row[0])
     .map((row) => ({
-      setId: toSafeCellString(row[SET_HEADER_INDEX.setId]),
-      setName: toSafeCellString(row[SET_HEADER_INDEX.tcgdex_name_de]) || toSafeCellString(row[SET_HEADER_INDEX.setName]),
-      series: toSafeCellString(row[SET_HEADER_INDEX.tcgdex_serie_name]) || toSafeCellString(row[SET_HEADER_INDEX.series]),
-      releaseDate: toSafeCellString(row[SET_HEADER_INDEX.tcgdex_releaseDate]) || toSafeCellString(row[SET_HEADER_INDEX.releaseDate]),
-      totalCards: Number(row[SET_HEADER_INDEX.tcgdex_cardCount_official]) || Number(row[SET_HEADER_INDEX.totalCards]) || 0,
-      ptcgoCode: toSafeCellString(row[SET_HEADER_INDEX.ptcgoCode]),
-      logoUrl: toSafeCellString(row[SET_HEADER_INDEX.tcgdex_images_logo]) || toSafeCellString(row[SET_HEADER_INDEX.logoUrl]),
-      symbolUrl: toSafeCellString(row[SET_HEADER_INDEX.tcgdex_images_symbol]) || toSafeCellString(row[SET_HEADER_INDEX.symbolUrl]),
-      imported: toBoolean(row[SET_HEADER_INDEX.imported]),
-      tcgdexId: toSafeCellString(row[SET_HEADER_INDEX.tcgdexId]) || toSafeCellString(row[SET_HEADER_INDEX.tcgdex_id]),
-      tcgdexName: toSafeCellString(row[SET_HEADER_INDEX.tcgdexName]) || toSafeCellString(row[SET_HEADER_INDEX.tcgdex_name_de]),
-      legalities: tryParseJson(row[SET_HEADER_INDEX.tcgdex_legal], null) || tryParseJson(row[SET_HEADER_INDEX.legalities], null),
-      cardCountTotal: Number(row[SET_HEADER_INDEX.tcgdex_cardCount_total]) || Number(row[SET_HEADER_INDEX.cardCountTotal]) || 0,
-      cardCountHolo: Number(row[SET_HEADER_INDEX.tcgdex_cardCount_holo]) || Number(row[SET_HEADER_INDEX.cardCountHolo]) || 0,
-      cardCountReverse: Number(row[SET_HEADER_INDEX.tcgdex_cardCount_reverse]) || Number(row[SET_HEADER_INDEX.cardCountReverse]) || 0,
-      cardCountFirstEdition: Number(row[SET_HEADER_INDEX.tcgdex_cardCount_firstEdition]) || Number(row[SET_HEADER_INDEX.cardCountFirstEdition]) || 0,
-      cardCountNormal: Number(row[SET_HEADER_INDEX.tcgdex_cardCount_normal]) || Number(row[SET_HEADER_INDEX.cardCountNormal]) || 0,
-      matchStatus: toSafeCellString(row[SET_HEADER_INDEX.match_status]),
-      matchReason: toSafeCellString(row[SET_HEADER_INDEX.match_reason]),
-      matchConfidence: Number(row[SET_HEADER_INDEX.match_confidence]) || 0
+      setId: toSafeCellString(row[0]),
+      setName: toSafeCellString(row[1]),
+      series: toSafeCellString(row[2]),
+      releaseDate: toSafeCellString(row[3]),
+      totalCards: Number(row[4]) || 0,
+      ptcgoCode: toSafeCellString(row[5]),
+      logoUrl: toSafeCellString(row[6]),
+      symbolUrl: toSafeCellString(row[7]),
+      imported: toBoolean(row[8]),
+      tcgdexId: toSafeCellString(row[10]),
+      tcgdexName: toSafeCellString(row[11]),
+      legalities: tryParseJson(row[12], null),
+      cardCountTotal: Number(row[13]) || 0,
+      cardCountHolo: Number(row[14]) || 0,
+      cardCountReverse: Number(row[15]) || 0,
+      cardCountFirstEdition: Number(row[16]) || 0,
+      cardCountNormal: Number(row[17]) || 0
     }))
     .filter((item) => item.setId && item.setName);
   if (dbSets.length > 0) {
@@ -857,7 +692,6 @@ export async function readSummarySheet() {
       const collected = counts.collected || 0;
       const rh = counts.rh || 0;
       result.push({
-        setId,
         setName: meta.setName,
         total,
         collected,
@@ -886,7 +720,6 @@ export async function readSummarySheet() {
   return rows
     .filter((row) => row[0])
     .map((row) => ({
-      setId:     '',
       setName:   String(row[0]).trim(),
       total:     Number(row[1]) || 0,
       collected: Number(row[2]) || 0,
@@ -974,7 +807,26 @@ export async function syncOverviewWithApiSets(sets, importedSetIds = []) {
     const key = toSafeCellString(set?.setId).toLowerCase();
     if (!key) continue;
     const existing = mergedById.get(key) || [];
-    mergedById.set(key, buildDbSetRow(set, normalizedImported.has(key), existing));
+    mergedById.set(key, [
+      toSafeCellString(set.setId),
+      toSafeCellString(set.setName),
+      toSafeCellString(set.series),
+      toSafeCellString(set.releaseDate),
+      Number(set.totalCards) || 0,
+      toSafeCellString(set.ptcgoCode),
+      toSafeCellString(set.logoUrl),
+      toSafeCellString(set.symbolUrl),
+      Boolean(normalizedImported.has(key) || toBoolean(existing[8])),
+      nowIso(),
+      toSafeCellString(set.tcgdexId),
+      toSafeCellString(set.tcgdexName),
+      toSafeJsonString(set.legalities),
+      Number(set.cardCountTotal) || 0,
+      Number(set.cardCountHolo) || 0,
+      Number(set.cardCountReverse) || 0,
+      Number(set.cardCountFirstEdition) || 0,
+      Number(set.cardCountNormal) || 0
+    ]);
   }
 
   await rewriteDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length, Array.from(mergedById.values()));

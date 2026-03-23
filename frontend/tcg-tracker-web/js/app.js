@@ -310,7 +310,6 @@ const state = {
   pendingWrites: 0,
   lastSaveError: null,
   saveStateTimer: null,
-  importBlockedSetIds: new Set(),
   manageSetsSelection: new Set(),
   sheetsRetryMetrics: {
     totalWrites: 0,
@@ -408,29 +407,6 @@ function renderSearchSetFilterOptions() {
     dom.searchSetFilter.value = previousValue;
   } else {
     dom.searchSetFilter.value = '';
-  }
-}
-
-function refreshImportedSetSelectorOptions() {
-  if (!dom.selector) return;
-  const previousValue = String(dom.selector.value || '');
-  dom.selector.innerHTML = '<option value="">Bitte wählen…</option>';
-  const seriesMap = buildSeriesMap(state.sets || []);
-  seriesMap.forEach((setsArr, seriesName) => {
-    const group = document.createElement('optgroup');
-    group.label = seriesName;
-    setsArr.forEach((set) => {
-      const opt = document.createElement('option');
-      opt.value = set.setId;
-      opt.textContent = set.setName;
-      group.appendChild(opt);
-    });
-    dom.selector.appendChild(group);
-  });
-  if (previousValue && (state.sets || []).some((set) => set.setId === previousValue)) {
-    dom.selector.value = previousValue;
-  } else {
-    dom.selector.value = '';
   }
 }
 
@@ -1408,10 +1384,10 @@ async function undoLastChange() {
       if (!db?.gCell) continue;
       const prevG = Boolean(change.prev?.g);
       const prevRh = Boolean(change.prev?.rh && prevG);
-      await updateCellBoolean(getCollectionSetRef(state.currentSet), db.gCell.row, db.gCell.col, prevG);
+      await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, prevG);
       db.g = prevG;
       if (db.rhCell) {
-        await updateCellBoolean(getCollectionSetRef(state.currentSet), db.rhCell.row, db.rhCell.col, prevRh);
+        await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, prevRh);
         db.rh = prevRh;
       } else {
         db.rh = false;
@@ -1507,23 +1483,8 @@ function attachImageFallback(img, card, setIdHint = '') {
       }
     }
     img.onerror = null;
-    // Kein Bild verfügbar – Pokéball-Fallback anzeigen statt Element verstecken
-    img.src = './assets/pokeball-fallback.svg';
-    img.classList.add('img-fallback');
+    img.style.display = 'none';
   };
-}
-
-function isKnownBrokenSetAssetUrl(url) {
-  const value = String(url || '').trim().toLowerCase();
-  if (!value) return false;
-  return value.includes('images.pokemontcg.io/me25/logo.png')
-    || value.includes('images.pokedata.ovh/en/mebsp/promo.png');
-}
-
-function resolveSetAssetUrl(url, fallbackUrl = './assets/pokeball-fallback.svg') {
-  const value = String(url || '').trim();
-  if (!value) return '';
-  return isKnownBrokenSetAssetUrl(value) ? fallbackUrl : value;
 }
 
 function setEmptyState(show) {
@@ -2156,18 +2117,9 @@ async function loadSets() {
     ]);
 
     if (!Array.isArray(importedSets)) throw new Error('Ungültiges Sets-Format');
-    const hasOverviewState = Array.isArray(overviewSets) && overviewSets.length > 0;
-    const explicitlyImportedIds = new Set(
-      (overviewSets || [])
-        .filter((set) => toBoolean(set?.imported))
-        .map((set) => set.setId)
-        .filter(Boolean)
-    );
-    const effectiveImportedSets = hasOverviewState
-      ? importedSets.filter((set) => explicitlyImportedIds.has(set?.setId))
-      : importedSets;
-    state.sets = effectiveImportedSets;
+    state.sets = importedSets;
 
+    const importedById = new Map(importedSets.map((set) => [set.setId, set]));
     const mergedMap = new Map();
 
     (overviewSets || []).forEach((set) => {
@@ -2176,7 +2128,7 @@ async function loadSets() {
       }
     });
 
-    effectiveImportedSets.forEach((set) => {
+    importedSets.forEach((set) => {
       const current = mergedMap.get(set.setId) || {};
       mergedMap.set(set.setId, {
         ...current,
@@ -2192,7 +2144,7 @@ async function loadSets() {
     renderRecentSets();
 
     dom.selector.innerHTML = '<option value="">Bitte w\u00e4hlen\u2026</option>';
-    const seriesMap = buildSeriesMap(effectiveImportedSets);
+    const seriesMap = buildSeriesMap(importedSets);
     seriesMap.forEach((setsArr, seriesName) => {
       const group = document.createElement('optgroup');
       group.label = seriesName;
@@ -2222,7 +2174,7 @@ async function loadSets() {
     const settings = await readSettings();
     if (settings.lastSetId) dom.selector.value = settings.lastSetId;
 
-    setGlobalStatus(`${effectiveImportedSets.length} von ${state.allSets.length} Sets geladen.`);
+    setGlobalStatus(`${importedSets.length} von ${state.allSets.length} Sets geladen.`);
     dom.mainNav.classList.remove('hidden');
 
     if (!window.location.hash || window.location.hash === '#') {
@@ -2279,10 +2231,7 @@ async function renderDashboard() {
       state.summaryData = await readSummarySheet().catch(() => []);
     }
     const summaryByName = new Map();
-    (state.summaryData || []).forEach((row) => {
-      if (row?.setName) summaryByName.set(row.setName, row);
-      if (row?.setId) summaryByName.set(row.setId, row);
-    });
+    (state.summaryData || []).forEach((row) => summaryByName.set(row.setName, row));
     state.summaryOverrides.forEach((row, key) => {
       summaryByName.set(key, row);
     });
@@ -2323,7 +2272,7 @@ async function renderDashboard() {
           return Boolean(quickFilters.notImported);
         }
 
-        const summary = summaryByName.get(set.setId) || summaryByName.get(set.setName);
+        const summary = summaryByName.get(set.setName) || summaryByName.get(set.setId);
         const total = Number(summary?.total ?? set.totalCards ?? 0);
         const collected = Number(summary?.collected ?? 0);
         const isCompleted = total > 0 && collected >= total;
@@ -2340,8 +2289,8 @@ async function renderDashboard() {
       sets.sort((a, b) => a.setName.localeCompare(b.setName));
     } else if (sortBy === 'completion') {
       sets.sort((a, b) => {
-        const sa = summaryByName.get(a.setId) || summaryByName.get(a.setName);
-        const sb = summaryByName.get(b.setId) || summaryByName.get(b.setName);
+        const sa = summaryByName.get(a.setName) || summaryByName.get(a.setId);
+        const sb = summaryByName.get(b.setName) || summaryByName.get(b.setId);
         const pa = sa && sa.total > 0 ? sa.collected / sa.total : 0;
         const pb = sb && sb.total > 0 ? sb.collected / sb.total : 0;
         return pb - pa;
@@ -2372,7 +2321,7 @@ async function renderDashboard() {
         const grid = document.createElement('div');
         grid.className = 'dash-sets-row';
         setsArr.forEach((set) => {
-          const summary = summaryByName.get(set.setId) || summaryByName.get(set.setName);
+          const summary = summaryByName.get(set.setName) || summaryByName.get(set.setId);
           grid.appendChild(createDashSetCard(set, summary));
         });
         section.appendChild(grid);
@@ -2382,7 +2331,7 @@ async function renderDashboard() {
       const grid = document.createElement('div');
       grid.className = 'dash-sets-row';
       visibleSets.forEach((set) => {
-        const summary = summaryByName.get(set.setId) || summaryByName.get(set.setName);
+        const summary = summaryByName.get(set.setName) || summaryByName.get(set.setId);
         grid.appendChild(createDashSetCard(set, summary));
       });
       dom.dashboardGrid.appendChild(grid);
@@ -2401,8 +2350,6 @@ async function renderDashboard() {
 
 function createDashSetCard(set, summary) {
   const card = document.createElement('div');
-  const dashboardLogoUrl = resolveSetAssetUrl(set.logoUrl);
-  const isImportBlocked = state.importBlockedSetIds.has(set.setId);
   card.className = 'dash-set-card';
   card.classList.toggle('not-imported', !set.imported);
   const total     = summary?.total     ?? 0;
@@ -2425,8 +2372,8 @@ function createDashSetCard(set, summary) {
 
   card.innerHTML = `
     <div class="dash-set-logo-wrap">
-      ${dashboardLogoUrl
-        ? `<img src="${dashboardLogoUrl}" alt="${set.setName}" class="dash-set-logo" loading="lazy" onerror="this.onerror=null;this.src='./assets/pokeball-fallback.svg';this.classList.add('img-fallback')"/>`
+      ${set.logoUrl
+        ? `<img src="${set.logoUrl}" alt="${set.setName}" class="dash-set-logo" loading="lazy" onerror="this.onerror=null;this.src='./assets/pokeball-fallback.svg';this.classList.add('img-fallback')"/>`
         : `<span class="dash-set-name-fallback">${set.setName}</span>`}
     </div>
     <div class="dash-set-info">
@@ -2440,9 +2387,7 @@ function createDashSetCard(set, summary) {
           ? `<button class="btn-secondary dash-view-btn" type="button" title="Ansehen">👁️</button>
              <button class="btn-secondary dash-favorite-btn" type="button" title="Favorit">${isFavorite(set.setId) ? '⭐' : '☆'}</button>
              <button class="btn-secondary dash-delete-btn" type="button" title="Löschen">🗑️</button>`
-          : isImportBlocked
-            ? `<button class="btn-secondary dash-import-blocked-btn" type="button" title="Keine Kartenquelle verfügbar" disabled>🚫 Nicht verfügbar</button>`
-            : `<button class="btn-primary dash-import-btn" type="button">➕ Importieren</button>`}
+          : `<button class="btn-primary dash-import-btn" type="button">➕ Importieren</button>`}
       </div>
     </div>`;
 
@@ -2551,7 +2496,6 @@ async function importSetFromOverview(set) {
   try {
     const cards = await fetchMergedCards(set.setId);
     await importSetIntoCollection(set, cards);
-    state.importBlockedSetIds.delete(set.setId);
     cache.del(`cards_${set.setId}`);
     cache.del(`db_cards_${set.setId}`);
     cache.del(`db_${set.setId}`);
@@ -2559,26 +2503,13 @@ async function importSetFromOverview(set) {
     state.summaryData = null;
 
     await loadSets();
-    applyLocalSetImportedState(set, true);
     markSetAsRecent(set);
     await renderDashboard();
     setGlobalStatus(`${set.setName} wurde importiert.`);
     showToast(`${set.setName} wurde importiert.`, 'success', 3000);
   } catch (err) {
-    const reason = getErrorMessage(err);
-    const isNoCardsError = /keine\s+karten\s+f(ü|u)r\s+set/i.test(String(reason || ''));
-    const isTcgdexOnlySet = String(set?.setId || '').toUpperCase().startsWith('TCGDEX-');
-
-    if (isNoCardsError && isTcgdexOnlySet) {
-      state.importBlockedSetIds.add(set.setId);
-      await renderDashboard();
-      console.warn('[importSetFromOverview] set currently has no card payload in source APIs:', set.setId, reason);
-      showToast(`Import nicht möglich: ${set.setName} hat derzeit keine Kartenquelle in den APIs.`, 'info', 6000);
-      setGlobalStatus(`Import nicht möglich: ${set.setName} (keine Kartenquelle).`);
-      return;
-    }
-
     console.error('[importSetFromOverview]', err);
+    const reason = getErrorMessage(err);
     showToast(`Import fehlgeschlagen: ${reason}`, 'error', 5000);
     setGlobalStatus(`Import fehlgeschlagen: ${set.setName}`);
   } finally {
@@ -2612,15 +2543,14 @@ async function deleteSetFromCollection(set, options = {}) {
     }
 
     // Entferne das Set aus der Sammlung
-    const setRef = getCollectionSetRef(set);
-    const range = await readSetCollectionMap(setRef).catch(() => new Map());
+    const range = await readSetCollectionMap(set.setName).catch(() => new Map());
     if (range && range.size > 0) {
       for (const [, db] of range) {
         if (db?.gCell?.row && db?.gCell?.col) {
-          await updateCellBoolean(setRef, db.gCell.row, db.gCell.col, false);
+          await updateCellBoolean(set.setName, db.gCell.row, db.gCell.col, false);
         }
         if (db?.rhCell?.row && db?.rhCell?.col) {
-          await updateCellBoolean(setRef, db.rhCell.row, db.rhCell.col, false);
+          await updateCellBoolean(set.setName, db.rhCell.row, db.rhCell.col, false);
         }
       }
     }
@@ -2630,17 +2560,13 @@ async function deleteSetFromCollection(set, options = {}) {
     cache.del(`cards_${set.setId}`);
     cache.del(`db_${set.setId}`);
     cache.del(`db_cards_${set.setId}`);
-    state.searchCache.clear();
     state.summaryData = null;
     state.summaryOverrides.delete(set.setName);
     state.summaryOverrides.delete(set.setId);
 
-    applyLocalSetImportedState(set, false);
-
     // Aktualisiere die Ansicht
     if (!skipReload) {
       await loadSets();
-      applyLocalSetImportedState(set, false);
       await renderDashboard();
     }
     
@@ -2657,39 +2583,6 @@ async function deleteSetFromCollection(set, options = {}) {
 
 function getSetById(setId) {
   return state.allSets.find((set) => set.setId === setId) || state.sets.find((set) => set.setId === setId) || null;
-}
-
-function getCollectionSetRef(set) {
-  return set?.setId || set?.setName || '';
-}
-
-function applyLocalSetImportedState(setMeta, imported) {
-  const targetSetId = String(setMeta?.setId || '').trim();
-  if (!targetSetId) return;
-
-  state.allSets = (state.allSets || []).map((entry) => (
-    entry?.setId === targetSetId ? { ...entry, imported } : entry
-  ));
-
-  if (imported) {
-    const nextSet = state.allSets.find((entry) => entry?.setId === targetSetId) || { ...setMeta, imported: true };
-    const existingIndex = (state.sets || []).findIndex((entry) => entry?.setId === targetSetId);
-    if (existingIndex >= 0) {
-      state.sets[existingIndex] = { ...state.sets[existingIndex], ...nextSet, imported: true };
-    } else {
-      state.sets = [...(state.sets || []), { ...nextSet, imported: true }];
-    }
-  } else {
-    state.sets = (state.sets || []).filter((entry) => entry?.setId !== targetSetId);
-  }
-
-  if (state.currentSet?.setId === targetSetId) {
-    state.currentSet = { ...state.currentSet, imported };
-  }
-
-  refreshImportedSetSelectorOptions();
-  renderSearchSetFilterOptions();
-  renderRecentSets();
 }
 
 async function importSetsSequential(sets, options = {}) {
@@ -3122,113 +3015,6 @@ async function reimportAllImportedSets() {
   await importSetsSequential(state.sets, { successMessage: '{count} importierte Sets aktualisiert.' });
 }
 
-function resolveBackfillTargets(options = {}) {
-  const {
-    setIds = null,
-    query = '',
-    limit = 0
-  } = options;
-
-  const importedSets = Array.isArray(state.sets) ? [...state.sets] : [];
-  let targets = importedSets;
-
-  if (Array.isArray(setIds) && setIds.length > 0) {
-    const idSet = new Set(setIds.map((value) => String(value || '').trim().toLowerCase()).filter(Boolean));
-    targets = targets.filter((set) => idSet.has(String(set?.setId || '').toLowerCase()));
-  }
-
-  const normalizedQuery = String(query || '').trim().toLowerCase();
-  if (normalizedQuery) {
-    targets = targets.filter((set) => {
-      return [set?.setId, set?.setName, set?.series]
-        .some((value) => String(value || '').toLowerCase().includes(normalizedQuery));
-    });
-  }
-
-  const parsedLimit = Number(limit) || 0;
-  if (parsedLimit > 0) {
-    targets = targets.slice(0, parsedLimit);
-  }
-
-  return targets;
-}
-
-async function runImportedSetsBackfill(options = {}) {
-  const {
-    setIds = null,
-    query = '',
-    limit = 0,
-    dryRun = false,
-    skipConfirm = false
-  } = options;
-
-  if (!isSignedIn()) {
-    throw new Error('Nicht angemeldet. Bitte zuerst Google Login durchführen.');
-  }
-
-  if (!Array.isArray(state.sets) || !state.sets.length) {
-    await loadSets();
-  }
-
-  const targets = resolveBackfillTargets({ setIds, query, limit });
-  const summary = {
-    requested: {
-      setIds: Array.isArray(setIds) ? setIds : null,
-      query: String(query || ''),
-      limit: Number(limit) || 0,
-      dryRun: Boolean(dryRun)
-    },
-    importedSetCount: Array.isArray(state.sets) ? state.sets.length : 0,
-    targetCount: targets.length,
-    targetSetIds: targets.map((set) => set.setId)
-  };
-
-  if (!targets.length) {
-    setGlobalStatus('Backfill: keine passenden importierten Sets gefunden.');
-    return { ...summary, skipped: true, reason: 'no_targets' };
-  }
-
-  if (dryRun) {
-    console.log('[Backfill][DryRun]', summary);
-    setGlobalStatus(`Backfill Dry-Run: ${targets.length} Set(s) würden reimportiert.`);
-    return { ...summary, dryRun: true };
-  }
-
-  if (!skipConfirm) {
-    const ok = window.confirm(
-      `${targets.length} importierte Set(s) per Backfill reimportieren?\n` +
-      'Bestehende Sammel-Checks bleiben erhalten.'
-    );
-    if (!ok) {
-      return { ...summary, skipped: true, reason: 'cancelled' };
-    }
-  }
-
-  await importSetsSequential(targets, {
-    successMessage: '{count} Set(s) per Backfill reimportiert.'
-  });
-
-  return {
-    ...summary,
-    done: targets.length,
-    skipped: false
-  };
-}
-
-function initBackfillDebugApi() {
-  const api = {
-    runImportedSetsBackfill,
-    previewImportedSetsBackfill(options = {}) {
-      return runImportedSetsBackfill({ ...options, dryRun: true });
-    }
-  };
-
-  window.TCG_TRACKER_TOOLS = {
-    ...(window.TCG_TRACKER_TOOLS || {}),
-    ...api
-  };
-}
-
 async function exportCollectionSummaryCsv() {
   const rows = state.summaryData && Array.isArray(state.summaryData)
     ? state.summaryData
@@ -3276,7 +3062,7 @@ async function exportCollectionBackup() {
     for (let index = 0; index < state.sets.length; index++) {
       const set = state.sets[index];
       setGlobalStatus(`Backup ${index + 1}/${state.sets.length}: ${set.setName}`);
-      const dbMap = await readSetCollectionMap(getCollectionSetRef(set)).catch(() => new Map());
+      const dbMap = await readSetCollectionMap(set.setName).catch(() => new Map());
       const cards = [];
       for (const [cardId, db] of dbMap.entries()) {
         if (!db?.g && !db?.rh) continue;
@@ -3328,7 +3114,7 @@ async function runDataHealthCheck({ autoFix = false } = {}) {
       try {
         const [apiCards, sheetMap] = await Promise.all([
           fetchMergedCards(set.setId),
-          readSetCollectionMap(getCollectionSetRef(set))
+          readSetCollectionMap(set.setName)
         ]);
 
         const apiCount = Array.isArray(apiCards) ? apiCards.length : 0;
@@ -3466,7 +3252,7 @@ async function applyCollectionBackup(payload) {
       }
 
       setGlobalStatus(`Backup ${setIndex + 1}/${sets.length}: ${liveSet.setName}`);
-      const liveMap = await readSetCollectionMap(getCollectionSetRef(liveSet)).catch(() => new Map());
+      const liveMap = await readSetCollectionMap(liveSet.setName).catch(() => new Map());
       const snapshotByCard = new Map((backupSet.cards || []).map((entry) => [normalizeCardNumber(entry.cardId), entry]));
 
       for (const [cardId, db] of liveMap.entries()) {
@@ -3476,12 +3262,12 @@ async function applyCollectionBackup(payload) {
         const targetRh = Boolean(target.g && target.rh);
 
         if (Boolean(db.g) !== targetG) {
-          await updateCellBoolean(getCollectionSetRef(liveSet), db.gCell.row, db.gCell.col, targetG);
+          await updateCellBoolean(liveSet.setName, db.gCell.row, db.gCell.col, targetG);
           db.g = targetG;
           updated++;
         }
         if (Boolean(db.rh) !== targetRh) {
-          await updateCellBoolean(getCollectionSetRef(liveSet), db.rhCell.row, db.rhCell.col, targetRh);
+          await updateCellBoolean(liveSet.setName, db.rhCell.row, db.rhCell.col, targetRh);
           db.rh = targetRh;
           updated++;
         }
@@ -3630,7 +3416,7 @@ async function renderStats() {
     // Serien-Breakdown
     const seriesMap = new Map();
     state.sets.forEach((set) => {
-      const row    = data.find((r) => r.setId === set.setId) || data.find((r) => r.setName === set.setName);
+      const row    = data.find((r) => r.setName === set.setName);
       const series = set.series || 'Andere';
       if (!seriesMap.has(series)) seriesMap.set(series, { total: 0, collected: 0, rh: 0, count: 0, completed: 0 });
       const sg = seriesMap.get(series);
@@ -3947,17 +3733,13 @@ async function runSearch(options = {}) {
   const setsToSearch = structuredQuery
     ? [baseSetsToSearch.find((s) => s.setId === structuredQuery.setId) ?? structuredQuery.set]
     : baseSetsToSearch;
-  // Im Online-Modus ohne Set-Filter: auf max. 30 Sets begrenzen, um exzessive API-Calls zu vermeiden
-  const activeSearchSets = (searchScopeMode === SEARCH_SCOPE_ONLINE && !setFilter)
-    ? setsToSearch.slice(0, 30)
-    : setsToSearch;
-  if (!activeSearchSets.length) {
+  if (!setsToSearch.length) {
     dom.searchResults.innerHTML = '<p class="empty-state">Keine passenden Sets verfügbar.</p>';
     return;
   }
   dom.searchResults.innerHTML = '<p class="loading-placeholder">Suche\u2026</p>';
   const results = [];
-  for (const set of activeSearchSets) {
+  for (const set of setsToSearch) {
     if (isStale() || isAborted()) return;
     try {
       const cacheKey = `cards_${set.setId}`;
@@ -3983,21 +3765,9 @@ async function runSearch(options = {}) {
           if (cache.has(cacheKey)) {
             apiCards = cache.get(cacheKey) || [];
           } else {
-            try {
-              apiCards = await fetchMergedCards(set.setId, { signal: abortController.signal });
-              if (Array.isArray(apiCards) && apiCards.length > 0) {
-                cache.set(cacheKey, apiCards, CONFIG.CACHE_TTL_MS);
-                // Im Hintergrund für Offline-Betrieb im IndexedDB cachen
-                cacheCardsOffline(set.setId, apiCards).catch(() => {});
-              }
-            } catch (fetchErr) {
-              if (fetchErr?.name === 'AbortError') throw fetchErr;
-              // Netzwerkfehler: Offline-Cache als Fallback versuchen
-              const offlineCached = await getCachedCardsOffline(set.setId).catch(() => null);
-              apiCards = Array.isArray(offlineCached) ? offlineCached : [];
-              if (apiCards.length > 0) {
-                console.info('[runSearch] Offline-Fallback für', set.setId, `(${apiCards.length} Karten aus IndexedDB)`);
-              }
+            apiCards = await fetchMergedCards(set.setId, { signal: abortController.signal }).catch(() => []);
+            if (Array.isArray(apiCards) && apiCards.length > 0) {
+              cache.set(cacheKey, apiCards, CONFIG.CACHE_TTL_MS);
             }
           }
           cards = searchScopeMode === SEARCH_SCOPE_ONLINE
@@ -4015,7 +3785,7 @@ async function runSearch(options = {}) {
       const dbCacheKey = `db_${set.setId}`;
       if (cache.has(dbCacheKey)) dbMap = cache.get(dbCacheKey);
       else {
-        dbMap = await readSetCollectionMap(getCollectionSetRef(set)).catch(() => new Map());
+        dbMap = await readSetCollectionMap(set.setName).catch(() => new Map());
         cache.set(dbCacheKey, dbMap, CONFIG.CACHE_TTL_MS);
       }
       if (isStale() || isAborted()) return;
@@ -4025,7 +3795,7 @@ async function runSearch(options = {}) {
           results.push({ card, set, dbMap, score, apiOnly: Boolean(card?.__searchApiOnly) });
         }
       });
-      if (!structuredQuery && !mixedQuery && results.length >= 200) break;
+      if (!structuredQuery && !mixedQuery && results.length >= 200 && searchScopeMode === SEARCH_SCOPE_IMPORTED) break;
       // Exakter Set+Nummer-Treffer (ohne Namensfilter) — kann frühzeitig abbrechen
       if (structuredQuery?.cardNumber && !structuredQuery?.namePart && results.length >= 1) break;
     } catch (err) {
@@ -4041,7 +3811,7 @@ async function runSearch(options = {}) {
       <div class="search-results-head">
         <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
       </div>
-      <p class="empty-state">Keine Karten f\u00fcr \u201e${rawQuery}\u201c gefunden (durchsucht: ${activeSearchSets.length} Sets, ${modeMeta.hint}).</p>
+      <p class="empty-state">Keine Karten f\u00fcr \u201e${rawQuery}\u201c gefunden (durchsucht: ${setsToSearch.length} Sets, ${modeMeta.hint}).</p>
     `;
     return;
   }
@@ -4156,7 +3926,7 @@ async function openSearchResultLightbox(card, set, { apiOnly = false } = {}) {
       }),
     cache.has(dbCacheKey)
       ? cache.get(dbCacheKey)
-      : readSetCollectionMap(getCollectionSetRef(set)).then((loadedDbMap) => {
+      : readSetCollectionMap(set.setName).then((loadedDbMap) => {
         const safeDbMap = loadedDbMap instanceof Map ? loadedDbMap : new Map();
         cache.set(dbCacheKey, safeDbMap, CONFIG.CACHE_TTL_MS);
         return safeDbMap;
@@ -4180,9 +3950,7 @@ async function openSearchResultLightbox(card, set, { apiOnly = false } = {}) {
   state.cards = cards;
   state.dbMap = dbMap;
   state.lightboxIndex = targetIndex;
-  // Auto-Import nur wenn das Set noch nicht importiert wurde (apiOnly ist irrelevant,
-  // da importierte Sets auch im Online-Modus per API abgerufen werden können)
-  state.pendingSearchSetImport = Boolean(!set?.imported);
+  state.pendingSearchSetImport = Boolean(apiOnly || !set?.imported);
 
   openLightbox(targetIndex);
 }
@@ -4233,7 +4001,6 @@ function updateStats() {
 
   if (state.currentSet?.setName) {
     const summaryRow = {
-      setId: state.currentSet.setId || '',
       setName: state.currentSet.setName,
       total,
       collected,
@@ -4245,7 +4012,7 @@ function updateStats() {
       state.summaryOverrides.set(state.currentSet.setId, summaryRow);
     }
     if (Array.isArray(state.summaryData)) {
-      const rowIndex = state.summaryData.findIndex((row) => row?.setId === state.currentSet.setId || row?.setName === state.currentSet.setName);
+      const rowIndex = state.summaryData.findIndex((row) => row?.setName === state.currentSet.setName);
       if (rowIndex >= 0) {
         state.summaryData[rowIndex] = { ...state.summaryData[rowIndex], ...summaryRow };
       } else {
@@ -4408,7 +4175,7 @@ function attachCheckboxListeners(article, db, key) {
 
   async function ensureDbEntry() {
     if (db?.gCell && db?.rhCell) return db;
-    const ensured = await ensureCollectionEntry(getCollectionSetRef(state.currentSet), db?.displayId || key);
+    const ensured = await ensureCollectionEntry(state.currentSet.setName, db?.displayId || key);
     db.g = Boolean(db?.g);
     db.rh = Boolean(db?.rh && db?.g);
     db.gCell = ensured.gCell;
@@ -4426,10 +4193,10 @@ function attachCheckboxListeners(article, db, key) {
     beginTrackedWrite(`Karte #${db?.displayId || key} speichern`);
     try {
       await ensureDbEntry();
-      await updateCellBoolean(getCollectionSetRef(state.currentSet), db.gCell.row, db.gCell.col, checked);
+      await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, checked);
       db.g = checked;
       if (!checked && db?.rhCell) {
-        await updateCellBoolean(getCollectionSetRef(state.currentSet), db.rhCell.row, db.rhCell.col, false);
+        await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, false);
         db.rh = false; rhInput.checked = false; rhInput.disabled = true;
       } else {
         rhInput.disabled = !db?.rhCell;
@@ -4464,7 +4231,7 @@ function attachCheckboxListeners(article, db, key) {
     beginTrackedWrite(`Karte #${db?.displayId || key} RH speichern`);
     try {
       await ensureDbEntry();
-      await updateCellBoolean(getCollectionSetRef(state.currentSet), db.rhCell.row, db.rhCell.col, checked);
+      await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, checked);
       db.rh = checked;
       updateCardState(article, db);
       state.summaryData = null;
@@ -4858,14 +4625,13 @@ function initLightbox() {
         state.searchCache.clear();
         state.summaryData = null;
         await loadSets();
-        applyLocalSetImportedState(setToImport, true);
         const refreshedSet = state.sets.find((entry) => entry.setId === setId)
           || state.allSets.find((entry) => entry.setId === setId)
           || setToImport;
         refreshedSet.imported = true;
         state.currentSet = refreshedSet;
         state.pendingSearchSetImport = false;
-        state.dbMap = await readSetCollectionMap(getCollectionSetRef(refreshedSet)).catch(() => new Map());
+        state.dbMap = await readSetCollectionMap(refreshedSet.setName).catch(() => new Map());
         cache.set(`db_${setId}`, state.dbMap, CONFIG.CACHE_TTL_MS);
         db = state.dbMap.get(key) || db;
         showToast(`${refreshedSet.setName} wurde automatisch importiert.`, 'success', 3200);
@@ -4878,7 +4644,7 @@ function initLightbox() {
       }
     }
     if (!db?.gCell) {
-      const ensured = await ensureCollectionEntry(getCollectionSetRef(state.currentSet), card.number || db?.displayId || key);
+      const ensured = await ensureCollectionEntry(state.currentSet.setName, card.number || db?.displayId || key);
       db.displayId = ensured.displayId || db.displayId || card.number || key;
       db.gCell = ensured.gCell;
       db.rhCell = ensured.rhCell;
@@ -4888,15 +4654,15 @@ function initLightbox() {
     beginTrackedWrite(`Lightbox #${db?.displayId || key}`);
     try {
       if (isG) {
-        await updateCellBoolean(getCollectionSetRef(state.currentSet), db.gCell.row, db.gCell.col, checked);
+        await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, checked);
         db.g = checked;
         if (!checked && db?.rhCell) {
-          await updateCellBoolean(getCollectionSetRef(state.currentSet), db.rhCell.row, db.rhCell.col, false);
+          await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, false);
           db.rh = false;
         }
       } else {
         if (!db.g || !db?.rhCell) return;
-        await updateCellBoolean(getCollectionSetRef(state.currentSet), db.rhCell.row, db.rhCell.col, checked);
+        await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, checked);
         db.rh = checked;
       }
       renderLightbox(state.lightboxIndex);
@@ -4961,11 +4727,11 @@ async function bulkUpdate(g, rh) {
       if (!db?.gCell) continue;
       const prevState = { g: Boolean(db?.g), rh: Boolean(db?.rh) };
       try {
-        await updateCellBoolean(getCollectionSetRef(state.currentSet), db.gCell.row, db.gCell.col, g);
+        await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, g);
         db.g = g;
         if (db.rhCell) {
           const newRh = g && rh;
-          await updateCellBoolean(getCollectionSetRef(state.currentSet), db.rhCell.row, db.rhCell.col, newRh);
+          await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, newRh);
           db.rh = newRh;
         }
         const article = dom.cards.querySelector(`[data-card-id="${key}"]`);
@@ -5091,24 +4857,21 @@ async function loadCurrentSet(forceRefresh = false) {
   setGlobalStatus(`Lade ${selected.setName}\u2026`);
   setLoading(true, `Lade ${selected.setName}\u2026`);
 
-  const resolvedLogoUrl = resolveSetAssetUrl(selected.logoUrl);
-  const resolvedSymbolUrl = resolveSetAssetUrl(selected.symbolUrl, '');
-
-  if (resolvedLogoUrl) {
+  if (selected.logoUrl) {
     dom.setLogo.onerror = () => {
       dom.setLogo.onerror = null;
       dom.setLogo.src = './assets/pokeball-fallback.svg';
       dom.setLogo.classList.add('img-fallback');
     };
     dom.setLogo.style.display = '';
-    dom.setLogo.src = resolvedLogoUrl;
+    dom.setLogo.src = selected.logoUrl;
 
     dom.setSymbol.onerror = () => {
       dom.setSymbol.style.display = 'none';
     };
-    if (resolvedSymbolUrl) {
+    if (selected.symbolUrl) {
       dom.setSymbol.style.display = '';
-      dom.setSymbol.src = resolvedSymbolUrl;
+      dom.setSymbol.src = selected.symbolUrl;
     } else {
       dom.setSymbol.style.display = 'none';
       dom.setSymbol.removeAttribute('src');
@@ -5138,7 +4901,7 @@ async function loadCurrentSet(forceRefresh = false) {
           }
           return [];
         }),
-      cache.has(dbCacheKey)    ? cache.get(dbCacheKey)    : readSetCollectionMap(getCollectionSetRef(selected)).then((m) => { cache.set(dbCacheKey, m, CONFIG.CACHE_TTL_MS); return m; }),
+      cache.has(dbCacheKey)    ? cache.get(dbCacheKey)    : readSetCollectionMap(selected.setName).then((m) => { cache.set(dbCacheKey, m, CONFIG.CACHE_TTL_MS); return m; }),
     ]);
 
     if (!Array.isArray(cards) || cards.length === 0) {
@@ -5245,11 +5008,6 @@ async function bootstrap() {
 
   // Store search history globally
   window.SEARCH_HISTORY = loadSearchHistory();
-
-  // Debug/Operations API (Konsole):
-  // - window.TCG_TRACKER_TOOLS.previewImportedSetsBackfill({ limit: 10 })
-  // - window.TCG_TRACKER_TOOLS.runImportedSetsBackfill({ limit: 10 })
-  initBackfillDebugApi();
   
   // Clear search history on event
   window.addEventListener('clear-search-history', () => {
@@ -5895,10 +5653,6 @@ if ('serviceWorker' in navigator) {
       const registration = await navigator.serviceWorker.register('./service-worker.js', {
         scope: './'
       });
-      if (!registration) {
-        console.warn('Service Worker registration returned no object');
-        return;
-      }
       console.log('✅ Service Worker registered:', registration);
 
       if (registration.waiting) {
@@ -5921,16 +5675,11 @@ if ('serviceWorker' in navigator) {
       }, 60000); // Check every minute
       
       // Handle controller change (new SW ready)
-      // Nur bei echtem Update (nicht bei Erstregistrierung) reload auslösen.
-      // previousController ist null beim allerersten Load → kein Reload.
-      const previousController = navigator.serviceWorker.controller;
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (previousController) {
-          showToast('🔄 App wurde aktualisiert', 'success', 1500);
-          window.setTimeout(() => {
-            window.location.reload();
-          }, 300);
-        }
+        showToast('🔄 App wurde aktualisiert', 'success', 1500);
+        window.setTimeout(() => {
+          window.location.reload();
+        }, 300);
       });
       
       // Listen for messages from Service Worker
@@ -6346,7 +6095,7 @@ function initStatsDrillDown() {
       <h4>📦 ${seriesName} – ${seriesSets.length} Sets</h4>
       <div class="stats-drilldown-grid">
         ${seriesSets.map((set) => {
-          const summary = summaryRows.find((entry) => entry.setId === set.setId) || summaryRows.find((entry) => entry.setName === set.setName) || {};
+          const summary = summaryRows.find((entry) => entry.setName === set.setName) || {};
           const total = Number(summary.total || set.totalCards || 0);
           const collected = Number(summary.collected || 0);
           const pct = total > 0 ? Math.round((collected / total) * 100) : 0;

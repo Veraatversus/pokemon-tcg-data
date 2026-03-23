@@ -1,5 +1,3 @@
-import { FIELD_MERGE_MATRIX } from '../schema-contract.js';
-
 function detectStorageScope() {
   const locationRef = globalThis?.location;
   const path = String(locationRef?.pathname || '/').toLowerCase();
@@ -105,11 +103,6 @@ export const CONFIG = {
     'sv4.5': 'sv4pt5',
     'sv6.5': 'sv6pt5',
     'sv8.5': 'sv8pt5'
-  },
-
-  // ── Phase 1: Feldweise Merge-Regeln (Schema Contract) ──────────
-  // Wird in allen Phasen für feldweise Konfliktauflösung genutzt.
-  // Kann später pro Feld im UI konfigurierbar werden.
-  FIELD_MATRIX: FIELD_MERGE_MATRIX
+  }
 };
 
