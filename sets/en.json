@@ -3055,5 +3055,24 @@
             "symbol": "https://images.pokedata.ovh/en/me3/symbol.png",
             "logo": "https://images.pokedata.ovh/en/me3/logo.webp"
         }
+  },
+  {
+    "id": "me3",
+    "name": "Perfect Order",
+    "series": "Mega Evolution",
+    "printedTotal": 88,
+    "total": 124,
+    "legalities": {
+      "unlimited": "Legal",
+      "standard": "Legal",
+      "expanded": "Legal"
+    },
+    "ptcgoCode": "POR",
+    "releaseDate": "2026/03/27",
+    "updatedAt": "2026/003/26 15:00:00",
+    "images": {
+      "symbol": "https://images.scrydex.com/pokemon/me3-symbol/symbol",
+      "logo": "https://images.scrydex.com/pokemon/me3-logo/logo"
+    }
     }
 ]
