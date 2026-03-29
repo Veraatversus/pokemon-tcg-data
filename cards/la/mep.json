@@ -86,7 +86,6 @@
                 "convertedEnergyCost": 1
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Lightning",
@@ -251,7 +250,6 @@
                 "convertedEnergyCost": 1
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Dark",
@@ -312,7 +310,6 @@
                 "convertedEnergyCost": 2
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Dark",
@@ -545,7 +542,6 @@
                 "convertedEnergyCost": 1
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Psychic",
@@ -604,7 +600,6 @@
                 "convertedEnergyCost": 3
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "",
@@ -662,7 +657,6 @@
                 "convertedEnergyCost": 2
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Psychic",
@@ -771,7 +765,6 @@
                 "convertedEnergyCost": 1
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Water",
@@ -821,7 +814,6 @@
                 "convertedEnergyCost": 2
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Metal",
@@ -985,7 +977,6 @@
                 "convertedEnergyCost": 1
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Metal",
@@ -1041,7 +1032,6 @@
                 "convertedEnergyCost": 1
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Metal",
@@ -1101,7 +1091,6 @@
                 "convertedEnergyCost": 2
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Grass",
@@ -1157,7 +1146,6 @@
                 "convertedEnergyCost": 2
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Grass",
@@ -1219,7 +1207,6 @@
                 "convertedEnergyCost": 1
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Water",
@@ -1271,7 +1258,6 @@
                 "convertedEnergyCost": 2
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Water",
@@ -1441,7 +1427,6 @@
                 "convertedEnergyCost": 2
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Dark",
@@ -1500,7 +1485,6 @@
                 "convertedEnergyCost": 1
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Fighting",
@@ -1551,5 +1535,163 @@
             "small": "https://images.pokedata.ovh/la/mebsp/28.webp",
             "large": "https://images.pokedata.ovh/la/mebsp/28_hires.webp"
         }
+    },
+    {
+        "id": "mep-29",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Stage 2",
+            "ex",
+            "Mega Evolution ex"
+        ],
+        "types": [
+            "Fire"
+        ],
+        "hp": 360,
+        "Release Date": "2026-02-19T17:00:00.0000000Z",
+        "Craftable Date": "2026-02-19 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Charmander",
+        "name": "Mega-Charizard X ex",
+        "rarity": "DoubleRare",
+        "attacks": [
+            {
+                "name": "Infierno X",
+                "text": "Descarta cualquier cantidad de Energías fire de tus Pokémon, y este ataque hace 90 puntos de daño por cada carta que descartaste de esta manera.",
+                "cost": "RR",
+                "damage": "90x",
+                "convertedEnergyCost": 2
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Water",
+                "value": "×2"
+            }
+        ],
+        "number": "29",
+        "regulationMark": "I",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 2,
+        "images": {
+            "small": "https://images.pokedata.ovh/la/mebsp/29.webp",
+            "large": "https://images.pokedata.ovh/la/mebsp/29_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "mep-30",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Stage 2",
+            "ex",
+            "Mega Evolution ex"
+        ],
+        "types": [
+            "Fire"
+        ],
+        "hp": 360,
+        "Release Date": "2026-02-19T17:00:00.0000000Z",
+        "Craftable Date": "2026-02-19 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Charmander",
+        "name": "Mega-Charizard Y ex",
+        "rarity": "DoubleRare",
+        "attacks": [
+            {
+                "name": "Explosión Y",
+                "text": "Descarta 3 Energías de este Pokémon, y este ataque hace 280 puntos de daño a 1 de los Pokémon de tu rival. <i>(No apliques Debilidad y Resistencia a los Pokémon en Banca).</i>",
+                "cost": "RRC",
+                "damage": "",
+                "convertedEnergyCost": 3
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Water",
+                "value": "×2"
+            }
+        ],
+        "number": "30",
+        "regulationMark": "J",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless"
+        ],
+        "convertedRetreatCost": 1,
+        "images": {
+            "small": "https://images.pokedata.ovh/la/mebsp/30.webp",
+            "large": "https://images.pokedata.ovh/la/mebsp/30_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "mep-31",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Basic Stage",
+            "Trainer-Owned"
+        ],
+        "types": [
+            "Dragon"
+        ],
+        "hp": 130,
+        "Release Date": "2026-02-19T17:00:00.0000000Z",
+        "Craftable Date": "2026-08-19 19:00:00",
+        "Craftable": 0,
+        "baseEvolution": "Zekrom de N",
+        "name": "Zekrom de N",
+        "rarity": "IllustrationRare",
+        "attacks": [
+            {
+                "name": "Despedazar",
+                "text": "El daño de este ataque no se ve afectado por ningún efecto en el Pokémon Activo de tu rival.",
+                "cost": "CCC",
+                "damage": "70",
+                "convertedEnergyCost": 3
+            },
+            {
+                "name": "Trueno Arrasador",
+                "text": "Durante tu próximo turno, este Pokémon no puede usar ataques.",
+                "cost": "RLLC",
+                "damage": "250",
+                "convertedEnergyCost": 4
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "",
+                "value": "×"
+            }
+        ],
+        "number": "31",
+        "regulationMark": "I",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 2,
+        "images": {
+            "small": "https://images.pokedata.ovh/la/mebsp/31.webp",
+            "large": "https://images.pokedata.ovh/la/mebsp/31_hires.webp"
+        },
+        "resistances": []
     }
 ]

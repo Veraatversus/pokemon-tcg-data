@@ -86,7 +86,6 @@
                 "convertedEnergyCost": 1
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Lightning",
@@ -251,7 +250,6 @@
                 "convertedEnergyCost": 1
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Dark",
@@ -312,7 +310,6 @@
                 "convertedEnergyCost": 2
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Dark",
@@ -545,7 +542,6 @@
                 "convertedEnergyCost": 1
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Psychic",
@@ -604,7 +600,6 @@
                 "convertedEnergyCost": 3
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "",
@@ -662,7 +657,6 @@
                 "convertedEnergyCost": 2
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Psychic",
@@ -771,7 +765,6 @@
                 "convertedEnergyCost": 1
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Water",
@@ -821,7 +814,6 @@
                 "convertedEnergyCost": 2
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Metal",
@@ -985,7 +977,6 @@
                 "convertedEnergyCost": 1
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Metal",
@@ -1041,7 +1032,6 @@
                 "convertedEnergyCost": 1
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Metal",
@@ -1101,7 +1091,6 @@
                 "convertedEnergyCost": 2
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Grass",
@@ -1157,7 +1146,6 @@
                 "convertedEnergyCost": 2
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Grass",
@@ -1219,7 +1207,6 @@
                 "convertedEnergyCost": 1
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Water",
@@ -1271,7 +1258,6 @@
                 "convertedEnergyCost": 2
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Water",
@@ -1441,7 +1427,6 @@
                 "convertedEnergyCost": 2
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Dark",
@@ -1500,7 +1485,6 @@
                 "convertedEnergyCost": 1
             }
         ],
-        "abilities": [],
         "weaknesses": [
             {
                 "type": "Fighting",
@@ -1551,5 +1535,1136 @@
             "small": "https://images.pokedata.ovh/en/mebsp/28.webp",
             "large": "https://images.pokedata.ovh/en/mebsp/28_hires.webp"
         }
+    },
+    {
+        "id": "mep-29",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Stage 2",
+            "ex",
+            "Mega Evolution ex"
+        ],
+        "types": [
+            "Fire"
+        ],
+        "hp": 360,
+        "Release Date": "2026-02-19T17:00:00.0000000Z",
+        "Craftable Date": "2026-02-19 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Charmander",
+        "name": "Mega Charizard X ex",
+        "rarity": "DoubleRare",
+        "attacks": [
+            {
+                "name": "Inferno X",
+                "text": "Discard any amount of fire Energy from among your Pokémon, and this attack does 90 damage for each card you discarded in this way.",
+                "cost": "RR",
+                "damage": "90x",
+                "convertedEnergyCost": 2
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Water",
+                "value": "×2"
+            }
+        ],
+        "number": "29",
+        "regulationMark": "I",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 2,
+        "images": {
+            "small": "https://images.pokedata.ovh/en/mebsp/29.webp",
+            "large": "https://images.pokedata.ovh/en/mebsp/29_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "mep-30",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Stage 2",
+            "ex",
+            "Mega Evolution ex"
+        ],
+        "types": [
+            "Fire"
+        ],
+        "hp": 360,
+        "Release Date": "2026-02-19T17:00:00.0000000Z",
+        "Craftable Date": "2026-02-19 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Charmander",
+        "name": "Mega Charizard Y ex",
+        "rarity": "DoubleRare",
+        "attacks": [
+            {
+                "name": "Explosion Y",
+                "text": "Discard 3 Energy from this Pokémon, and this attack does 280 damage to 1 of your opponent's Pokémon. <i>(Don't apply Weakness and Resistance for Benched Pokémon.)</i>",
+                "cost": "RRC",
+                "damage": "",
+                "convertedEnergyCost": 3
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Water",
+                "value": "×2"
+            }
+        ],
+        "number": "30",
+        "regulationMark": "J",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless"
+        ],
+        "convertedRetreatCost": 1,
+        "images": {
+            "small": "https://images.pokedata.ovh/en/mebsp/30.webp",
+            "large": "https://images.pokedata.ovh/en/mebsp/30_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "mep-31",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Basic Stage",
+            "Trainer-Owned"
+        ],
+        "types": [
+            "Dragon"
+        ],
+        "hp": 130,
+        "Release Date": "2026-02-19T17:00:00.0000000Z",
+        "Craftable Date": "2026-08-19 19:00:00",
+        "Craftable": 0,
+        "baseEvolution": "Zekrom de N",
+        "name": "N's Zekrom",
+        "rarity": "IllustrationRare",
+        "attacks": [
+            {
+                "name": "Shred",
+                "text": "This attack's damage isn't affected by any effects on your opponent's Active Pokémon.",
+                "cost": "CCC",
+                "damage": "70",
+                "convertedEnergyCost": 3
+            },
+            {
+                "name": "Rampaging Thunder",
+                "text": "During your next turn, this Pokémon can't use attacks.",
+                "cost": "RLLC",
+                "damage": "250",
+                "convertedEnergyCost": 4
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "",
+                "value": "×"
+            }
+        ],
+        "number": "31",
+        "regulationMark": "I",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 2,
+        "images": {
+            "small": "https://images.pokedata.ovh/en/mebsp/31.webp",
+            "large": "https://images.pokedata.ovh/en/mebsp/31_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "mep-32",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Stage 2",
+            "ex",
+            "Mega Evolution ex"
+        ],
+        "types": [
+            "Psychic"
+        ],
+        "hp": 360,
+        "Release Date": "2026-03-19T17:00:00.0000000Z",
+        "Craftable Date": "2026-09-19 19:00:00",
+        "Craftable": 0,
+        "baseEvolution": "Ralts",
+        "name": "Mega Gardevoir ex",
+        "rarity": "MegaAttackRare",
+        "attacks": [
+            {
+                "name": "Overflowing Wishes",
+                "text": "For each of your Benched Pokémon, search your deck for a Basic psychic Energy card and attach it to that Pokémon. Then, shuffle your deck.",
+                "cost": "P",
+                "damage": "",
+                "convertedEnergyCost": 1
+            },
+            {
+                "name": "Mega Symphonia",
+                "text": "This attack does 50 damage for each psychic Energy attached to all of your Pokémon.",
+                "cost": "P",
+                "damage": "50x",
+                "convertedEnergyCost": 1
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Dark",
+                "value": "×2"
+            }
+        ],
+        "number": "32",
+        "regulationMark": "I",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 2,
+        "images": {
+            "small": "https://images.pokedata.ovh/en/mebsp/32.webp",
+            "large": "https://images.pokedata.ovh/en/mebsp/32_hires.webp"
+        },
+        "resistances": [
+            {
+                "type": "Fighting",
+                "value": "-30"
+            }
+        ]
+    },
+    {
+        "id": "mep-33",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Stage 1",
+            "ex",
+            "Mega Evolution ex"
+        ],
+        "types": [
+            "Fighting"
+        ],
+        "hp": 340,
+        "Release Date": "2026-03-19T17:00:00.0000000Z",
+        "Craftable Date": "2026-09-19 19:00:00",
+        "Craftable": 0,
+        "baseEvolution": "Riolu",
+        "name": "Mega Lucario ex",
+        "rarity": "MegaAttackRare",
+        "attacks": [
+            {
+                "name": "Aura Jab",
+                "text": "Attach up to 3 Basic fighting Energy cards from your discard pile to your Benched Pokémon in any way you like.",
+                "cost": "F",
+                "damage": "130",
+                "convertedEnergyCost": 1
+            },
+            {
+                "name": "Mega Brave",
+                "text": "During your next turn, this Pokémon can't use Mega Brave.",
+                "cost": "FF",
+                "damage": "270",
+                "convertedEnergyCost": 2
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Psychic",
+                "value": "×2"
+            }
+        ],
+        "number": "33",
+        "regulationMark": "I",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 2,
+        "images": {
+            "small": "https://images.pokedata.ovh/en/mebsp/33.webp",
+            "large": "https://images.pokedata.ovh/en/mebsp/33_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "mep-37",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Basic Stage"
+        ],
+        "types": [
+            "Grass"
+        ],
+        "hp": 80,
+        "Release Date": "2026-03-19T17:00:00.0000000Z",
+        "Craftable Date": "2026-09-19 19:00:00",
+        "Craftable": 0,
+        "baseEvolution": "Bulbasaur",
+        "evolvesInto": [
+            "Ivysaur"
+        ],
+        "name": "Bulbasaur",
+        "rarity": "IllustrationRare",
+        "attacks": [
+            {
+                "name": "Leech Seed",
+                "text": "Heal 10 damage from this Pokémon.",
+                "cost": "G",
+                "damage": "10",
+                "convertedEnergyCost": 1
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Fire",
+                "value": "×2"
+            }
+        ],
+        "number": "37",
+        "regulationMark": "J",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 2,
+        "images": {
+            "small": "https://images.pokedata.ovh/en/mebsp/37.webp",
+            "large": "https://images.pokedata.ovh/en/mebsp/37_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "mep-38",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Basic Stage"
+        ],
+        "types": [
+            "Fire"
+        ],
+        "hp": 80,
+        "Release Date": "2026-03-19T17:00:00.0000000Z",
+        "Craftable Date": "2026-09-19 19:00:00",
+        "Craftable": 0,
+        "baseEvolution": "Charmander",
+        "evolvesInto": [
+            "Charmeleon"
+        ],
+        "name": "Charmander",
+        "rarity": "IllustrationRare",
+        "attacks": [
+            {
+                "name": "Ember",
+                "text": "Discard an Energy from this Pokémon.",
+                "cost": "R",
+                "damage": "30",
+                "convertedEnergyCost": 1
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Water",
+                "value": "×2"
+            }
+        ],
+        "number": "38",
+        "regulationMark": "J",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 2,
+        "images": {
+            "small": "https://images.pokedata.ovh/en/mebsp/38.webp",
+            "large": "https://images.pokedata.ovh/en/mebsp/38_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "mep-39",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Basic Stage"
+        ],
+        "types": [
+            "Water"
+        ],
+        "hp": 80,
+        "Release Date": "2026-03-19T17:00:00.0000000Z",
+        "Craftable Date": "2026-09-19 19:00:00",
+        "Craftable": 0,
+        "baseEvolution": "Squirtle",
+        "evolvesInto": [
+            "Wartortle"
+        ],
+        "name": "Squirtle",
+        "rarity": "IllustrationRare",
+        "attacks": [
+            {
+                "name": "Bubble",
+                "text": "Flip a coin. If heads, your opponent's Active Pokémon is now Paralyzed.",
+                "cost": "W",
+                "damage": "10",
+                "convertedEnergyCost": 1
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Lightning",
+                "value": "×2"
+            }
+        ],
+        "number": "39",
+        "regulationMark": "J",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 2,
+        "images": {
+            "small": "https://images.pokedata.ovh/en/mebsp/39.webp",
+            "large": "https://images.pokedata.ovh/en/mebsp/39_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "mep-40",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Basic Stage"
+        ],
+        "types": [
+            "Grass"
+        ],
+        "hp": 90,
+        "Release Date": "2026-03-19T17:00:00.0000000Z",
+        "Craftable Date": "2026-09-19 19:00:00",
+        "Craftable": 0,
+        "baseEvolution": "Turtwig",
+        "evolvesInto": [
+            "Grotle"
+        ],
+        "name": "Turtwig",
+        "rarity": "IllustrationRare",
+        "attacks": [
+            {
+                "name": "Razor Leaf",
+                "text": "",
+                "cost": "GGC",
+                "damage": "60",
+                "convertedEnergyCost": 3
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Fire",
+                "value": "×2"
+            }
+        ],
+        "number": "40",
+        "regulationMark": "J",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 3,
+        "images": {
+            "small": "https://images.pokedata.ovh/en/mebsp/40.webp",
+            "large": "https://images.pokedata.ovh/en/mebsp/40_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "mep-41",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Basic Stage"
+        ],
+        "types": [
+            "Fire"
+        ],
+        "hp": 60,
+        "Release Date": "2026-03-19T17:00:00.0000000Z",
+        "Craftable Date": "2026-09-19 19:00:00",
+        "Craftable": 0,
+        "baseEvolution": "Chimchar",
+        "evolvesInto": [
+            "Monferno"
+        ],
+        "name": "Chimchar",
+        "rarity": "IllustrationRare",
+        "attacks": [
+            {
+                "name": "Fury Swipes",
+                "text": "Flip 3 coins. This attack does 20 damage for each heads.",
+                "cost": "CC",
+                "damage": "20x",
+                "convertedEnergyCost": 2
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Water",
+                "value": "×2"
+            }
+        ],
+        "number": "41",
+        "regulationMark": "J",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless"
+        ],
+        "convertedRetreatCost": 1,
+        "images": {
+            "small": "https://images.pokedata.ovh/en/mebsp/41.webp",
+            "large": "https://images.pokedata.ovh/en/mebsp/41_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "mep-42",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Basic Stage"
+        ],
+        "types": [
+            "Water"
+        ],
+        "hp": 70,
+        "Release Date": "2026-03-19T17:00:00.0000000Z",
+        "Craftable Date": "2026-09-19 19:00:00",
+        "Craftable": 0,
+        "baseEvolution": "Piplup",
+        "evolvesInto": [
+            "Prinplup"
+        ],
+        "name": "Piplup",
+        "rarity": "IllustrationRare",
+        "attacks": [
+            {
+                "name": "Peck",
+                "text": "",
+                "cost": "W",
+                "damage": "20",
+                "convertedEnergyCost": 1
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Lightning",
+                "value": "×2"
+            }
+        ],
+        "number": "42",
+        "regulationMark": "J",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless"
+        ],
+        "convertedRetreatCost": 1,
+        "images": {
+            "small": "https://images.pokedata.ovh/en/mebsp/42.webp",
+            "large": "https://images.pokedata.ovh/en/mebsp/42_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "mep-43",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Basic Stage"
+        ],
+        "types": [
+            "Grass"
+        ],
+        "hp": 70,
+        "Release Date": "2026-03-19T17:00:00.0000000Z",
+        "Craftable Date": "2026-09-19 19:00:00",
+        "Craftable": 0,
+        "baseEvolution": "Rowlet",
+        "evolvesInto": [
+            "Dartrix"
+        ],
+        "name": "Rowlet",
+        "rarity": "IllustrationRare",
+        "attacks": [
+            {
+                "name": "Tackle",
+                "text": "",
+                "cost": "CC",
+                "damage": "20",
+                "convertedEnergyCost": 2
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Fire",
+                "value": "×2"
+            }
+        ],
+        "number": "43",
+        "regulationMark": "J",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless"
+        ],
+        "convertedRetreatCost": 1,
+        "images": {
+            "small": "https://images.pokedata.ovh/en/mebsp/43.webp",
+            "large": "https://images.pokedata.ovh/en/mebsp/43_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "mep-44",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Basic Stage"
+        ],
+        "types": [
+            "Fire"
+        ],
+        "hp": 70,
+        "Release Date": "2026-03-19T17:00:00.0000000Z",
+        "Craftable Date": "2026-09-19 19:00:00",
+        "Craftable": 0,
+        "baseEvolution": "Litten",
+        "evolvesInto": [
+            "Torracat"
+        ],
+        "name": "Litten",
+        "rarity": "IllustrationRare",
+        "attacks": [
+            {
+                "name": "Fire Fang",
+                "text": "Your opponent's Active Pokémon is now Burned.",
+                "cost": "RR",
+                "damage": "20",
+                "convertedEnergyCost": 2
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Water",
+                "value": "×2"
+            }
+        ],
+        "number": "44",
+        "regulationMark": "J",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless"
+        ],
+        "convertedRetreatCost": 1,
+        "images": {
+            "small": "https://images.pokedata.ovh/en/mebsp/44.webp",
+            "large": "https://images.pokedata.ovh/en/mebsp/44_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "mep-45",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Basic Stage"
+        ],
+        "types": [
+            "Water"
+        ],
+        "hp": 70,
+        "Release Date": "2026-03-19T17:00:00.0000000Z",
+        "Craftable Date": "2026-09-19 19:00:00",
+        "Craftable": 0,
+        "baseEvolution": "Popplio",
+        "evolvesInto": [
+            "Brionne"
+        ],
+        "name": "Popplio",
+        "rarity": "IllustrationRare",
+        "attacks": [
+            {
+                "name": "Disarming Voice",
+                "text": "Your opponent's Active Pokémon is now Confused.",
+                "cost": "WW",
+                "damage": "20",
+                "convertedEnergyCost": 2
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Lightning",
+                "value": "×2"
+            }
+        ],
+        "number": "45",
+        "regulationMark": "J",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless"
+        ],
+        "convertedRetreatCost": 1,
+        "images": {
+            "small": "https://images.pokedata.ovh/en/mebsp/45.webp",
+            "large": "https://images.pokedata.ovh/en/mebsp/45_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "mep-64",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Stage 2"
+        ],
+        "types": [
+            "Grass"
+        ],
+        "hp": 160,
+        "Release Date": "2026-03-26T17:00:00.0000000Z",
+        "Craftable Date": "2026-03-26 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Snivy",
+        "name": "Serperior",
+        "rarity": "RareHolo",
+        "attacks": [
+            {
+                "name": "Regal Command",
+                "text": "This attack does 20 damage for each of your Pokémon in play.",
+                "cost": "G",
+                "damage": "20x",
+                "convertedEnergyCost": 1
+            },
+            {
+                "name": "Solar Coiling",
+                "text": "If Rosa's Encouragement is in your discard pile, this attack does 150 more damage.",
+                "cost": "GGG",
+                "damage": "100+",
+                "convertedEnergyCost": 3
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Fire",
+                "value": "×2"
+            }
+        ],
+        "number": "64",
+        "regulationMark": "J",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 2,
+        "images": {
+            "small": "https://images.pokedata.ovh/en/mebsp/64.webp",
+            "large": "https://images.pokedata.ovh/en/mebsp/64_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "mep-65",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Stage 1"
+        ],
+        "types": [
+            "Fighting"
+        ],
+        "hp": 130,
+        "Release Date": "2026-03-26T17:00:00.0000000Z",
+        "Craftable Date": "2026-03-26 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Binacle",
+        "name": "Barbaracle",
+        "rarity": "RareHolo",
+        "attacks": [
+            {
+                "name": "Hammer In",
+                "text": "",
+                "cost": "FFC",
+                "damage": "80",
+                "convertedEnergyCost": 3
+            }
+        ],
+        "abilities": [
+            {
+                "name": "[Ability] Stone Arms",
+                "text": "Once during your turn, you may use this Ability. Attach a Basic fighting Energy card from your hand to 1 of your fighting Pokémon."
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Grass",
+                "value": "×2"
+            }
+        ],
+        "number": "65",
+        "regulationMark": "J",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 2,
+        "images": {
+            "small": "https://images.pokedata.ovh/en/mebsp/65.webp",
+            "large": "https://images.pokedata.ovh/en/mebsp/65_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "mep-66",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Stage 2"
+        ],
+        "types": [
+            "Fighting"
+        ],
+        "hp": 180,
+        "Release Date": "2026-03-26T17:00:00.0000000Z",
+        "Craftable Date": "2026-03-26 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Antique Jaw Fossil",
+        "name": "Tyrantrum",
+        "rarity": "RareHolo",
+        "attacks": [
+            {
+                "name": "Wreak Havoc",
+                "text": "Flip a coin until you get tails. For each heads, discard the top card of your opponent's deck.",
+                "cost": "FC",
+                "damage": "160",
+                "convertedEnergyCost": 2
+            }
+        ],
+        "abilities": [
+            {
+                "name": "[Ability] Tyrannically Gutsy",
+                "text": "If this Pokémon has any Special Energy attached, it gets +150 HP."
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Grass",
+                "value": "×2"
+            }
+        ],
+        "number": "66",
+        "regulationMark": "J",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 3,
+        "images": {
+            "small": "https://images.pokedata.ovh/en/mebsp/66.webp",
+            "large": "https://images.pokedata.ovh/en/mebsp/66_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "mep-67",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Stage 1"
+        ],
+        "types": [
+            "Metal"
+        ],
+        "hp": 100,
+        "Release Date": "2026-03-26T17:00:00.0000000Z",
+        "Craftable Date": "2026-03-26 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Honedge",
+        "evolvesInto": [
+            "Aegislash",
+            "Aegislash ex"
+        ],
+        "name": "Doublade",
+        "rarity": "RareHolo",
+        "attacks": [
+            {
+                "name": "Weaponized Swords",
+                "text": "Reveal any number of Honedge, Doublade, and Aegislash from your hand, and this attack does 60 damage for each card you revealed in this way.",
+                "cost": "CC",
+                "damage": "60x",
+                "convertedEnergyCost": 2
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Fire",
+                "value": "×2"
+            }
+        ],
+        "number": "67",
+        "regulationMark": "J",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 2,
+        "images": {
+            "small": "https://images.pokedata.ovh/en/mebsp/67.webp",
+            "large": "https://images.pokedata.ovh/en/mebsp/67_hires.webp"
+        },
+        "resistances": [
+            {
+                "type": "Grass",
+                "value": "-30"
+            }
+        ]
+    },
+    {
+        "id": "mep-68",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Basic Stage"
+        ],
+        "types": [
+            "Fighting"
+        ],
+        "hp": 80,
+        "Release Date": "2026-03-26T17:00:00.0000000Z",
+        "Craftable Date": "2026-03-26 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Makuhita",
+        "evolvesInto": [
+            "Hariyama"
+        ],
+        "name": "Makuhita",
+        "rarity": "Rare",
+        "attacks": [
+            {
+                "name": "Corkscrew Punch",
+                "text": "",
+                "cost": "F",
+                "damage": "10",
+                "convertedEnergyCost": 1
+            },
+            {
+                "name": "Confront",
+                "text": "",
+                "cost": "FF",
+                "damage": "30",
+                "convertedEnergyCost": 2
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Psychic",
+                "value": "×2"
+            }
+        ],
+        "number": "68",
+        "regulationMark": "I",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 2,
+        "images": {
+            "small": "https://images.pokedata.ovh/en/mebsp/68.webp",
+            "large": "https://images.pokedata.ovh/en/mebsp/68_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "mep-69",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Basic Stage"
+        ],
+        "types": [
+            "Grass"
+        ],
+        "hp": 70,
+        "Release Date": "2026-03-26T17:00:00.0000000Z",
+        "Craftable Date": "2026-03-26 18:00:00",
+        "Craftable": 1,
+        "baseEvolution": "Chikorita",
+        "evolvesInto": [
+            "Bayleef"
+        ],
+        "name": "Chikorita",
+        "rarity": "Rare",
+        "attacks": [
+            {
+                "name": "Razor Leaf",
+                "text": "",
+                "cost": "G",
+                "damage": "20",
+                "convertedEnergyCost": 1
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Fire",
+                "value": "×2"
+            }
+        ],
+        "number": "69",
+        "regulationMark": "I",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless"
+        ],
+        "convertedRetreatCost": 1,
+        "images": {
+            "small": "https://images.pokedata.ovh/en/mebsp/69.webp",
+            "large": "https://images.pokedata.ovh/en/mebsp/69_hires.webp"
+        },
+        "resistances": []
+    },
+    {
+        "id": "mep-70",
+        "supertype": "Pokémon",
+        "subtypes": [
+            "Stage 1"
+        ],
+        "types": [
+            "Fighting"
+        ],
+        "hp": 100,
+        "Release Date": "2026-03-26T17:00:00.0000000Z",
+        "Craftable Date": "2026-09-26 19:00:00",
+        "Craftable": 0,
+        "baseEvolution": "Antique Jaw Fossil",
+        "evolvesInto": [
+            "Tyrantrum"
+        ],
+        "name": "Tyrunt",
+        "rarity": "IllustrationRare",
+        "attacks": [
+            {
+                "name": "Get Angry",
+                "text": "This attack does 20 damage for each damage counter on this Pokémon.",
+                "cost": "FC",
+                "damage": "20x",
+                "convertedEnergyCost": 2
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Grass",
+                "value": "×2"
+            }
+        ],
+        "number": "70",
+        "regulationMark": "J",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "retreatCost": [
+            "Colorless",
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 3,
+        "images": {
+            "small": "https://images.pokedata.ovh/en/mebsp/70.webp",
+            "large": "https://images.pokedata.ovh/en/mebsp/70_hires.webp"
+        },
+        "resistances": []
     }
 ]
