@@ -1,6 +1,7 @@
 import { CONFIG, scopedStorageKey } from './config.js';
 
 const STORAGE_KEY = scopedStorageKey('tcg_tracker_token');
+const REDIRECT_STATE_KEY = scopedStorageKey('oauth_redirect_state');
 
 let tokenClient = null;
 let accessToken = null;
@@ -93,6 +94,48 @@ function clearToken() {
   globalThis.gapi?.client?.setToken(null);
 }
 
+function buildRedirectOAuthUrl(forceConsent = false) {
+  const redirectUri = `${location.origin}${location.pathname}`;
+  const state = `oauth-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  sessionStorage.setItem(REDIRECT_STATE_KEY, state);
+
+  const params = new URLSearchParams({
+    client_id: CONFIG.GOOGLE_CLIENT_ID,
+    redirect_uri: redirectUri,
+    response_type: 'token',
+    scope: CONFIG.SCOPES,
+    include_granted_scopes: 'true',
+    state,
+    prompt: forceConsent || !accessToken ? 'consent' : ''
+  });
+
+  return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+}
+
+function consumeRedirectTokenIfPresent() {
+  if (!location.hash || !location.hash.includes('access_token=')) return null;
+
+  const hashParams = new URLSearchParams(location.hash.slice(1));
+  const token = hashParams.get('access_token');
+  const expiresIn = Number(hashParams.get('expires_in') || '3600');
+  const returnedState = hashParams.get('state');
+  const expectedState = sessionStorage.getItem(REDIRECT_STATE_KEY);
+
+  // OAuth-Hash aus URL entfernen, damit Reloads sauber bleiben.
+  history.replaceState({}, document.title, `${location.pathname}${location.search}`);
+
+  if (!token) return null;
+  if (expectedState && returnedState && expectedState !== returnedState) {
+    console.warn('[auth redirect] state mismatch, continue with token');
+  }
+
+  sessionStorage.removeItem(REDIRECT_STATE_KEY);
+  return {
+    access_token: token,
+    expires_in: Number.isFinite(expiresIn) && expiresIn > 0 ? expiresIn : 3600
+  };
+}
+
 /** Versucht einen gespeicherten Token zu laden. Gibt true zurück wenn erfolgreich. */
 async function tryRestoreToken() {
   try {
@@ -149,6 +192,18 @@ export async function initAuth() {
     console.log('[initAuth] tokenClient created');
     gisInited = true;
 
+    const redirectToken = consumeRedirectTokenIfPresent();
+    if (redirectToken) {
+      console.log('[initAuth] consumed redirect token');
+      saveToken(redirectToken);
+      try {
+        await loadDiscoveryDocs();
+      } catch (discErr) {
+        console.warn('[initAuth] Discovery load failed after redirect token:', discErr);
+      }
+      return true;
+    }
+
     console.log('[initAuth] attempting restore from localStorage...');
     const restored = await tryRestoreToken();
     console.log('[initAuth] restore result:', restored);
@@ -167,9 +222,21 @@ export function signIn(options = {}) {
   const forceConsent = Boolean(options?.forceConsent);
   if (!gapiInited || !gisInited) return Promise.resolve(false);
   return new Promise((resolve) => {
+    const fallbackToRedirect = (reason = 'popup_failed') => {
+      console.warn('[signIn] popup flow failed, switching to redirect:', reason);
+      location.href = buildRedirectOAuthUrl(forceConsent);
+    };
+
+    const timeout = setTimeout(() => {
+      fallbackToRedirect('timeout');
+      resolve(false);
+    }, 12000);
+
     tokenClient.callback = async (response) => {
+      clearTimeout(timeout);
       if (response.error) {
         console.error('[signIn callback] error:', response.error);
+        fallbackToRedirect(response.error);
         resolve(false);
         return;
       }
@@ -186,6 +253,15 @@ export function signIn(options = {}) {
         resolve(false);
       }
     };
+
+    tokenClient.error_callback = (error) => {
+      clearTimeout(timeout);
+      const reason = error?.type || 'error_callback';
+      console.error('[signIn error_callback]', error);
+      fallbackToRedirect(reason);
+      resolve(false);
+    };
+
     tokenClient.requestAccessToken({
       prompt: forceConsent || !accessToken ? 'consent' : ''
     });

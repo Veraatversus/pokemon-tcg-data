@@ -219,8 +219,47 @@ export function createSettingsPanel(currentSettings, onSave) {
     { key: 'darkMode', label: 'Dark Mode', type: 'toggle' },
     { key: 'compactMode', label: 'Kompaktus Modus', type: 'toggle' },
     { key: 'autoBackup', label: 'Auto Backup', type: 'toggle' },
-    { key: 'notificationsEnabled', label: 'Benachrichtigungen', type: 'toggle' }
+    { key: 'notificationsEnabled', label: 'Benachrichtigungen', type: 'toggle' },
+    { key: 'expertResolverMode', label: 'Expert Resolver Modus', type: 'toggle' }
   ];
+
+  const resolverOptions = [
+    { value: 'tcgdex|vera|legacy', label: 'TCGDex > Vera > Legacy' },
+    { value: 'vera|tcgdex|legacy', label: 'Vera > TCGDex > Legacy' },
+    { value: 'legacy|vera|tcgdex', label: 'Legacy > Vera > TCGDex' },
+    { value: 'legacy|tcgdex|vera', label: 'Legacy > TCGDex > Vera' },
+    { value: 'vera|legacy|tcgdex', label: 'Vera > Legacy > TCGDex' },
+    { value: 'tcgdex|legacy|vera', label: 'TCGDex > Legacy > Vera' }
+  ];
+
+  const fieldGroups = [
+    {
+      scope: 'set',
+      title: 'Set-Felder',
+      fields: ['setName', 'series', 'releaseDate', 'totalCards', 'ptcgoCode', 'logoUrl', 'symbolUrl', 'legalities']
+    },
+    {
+      scope: 'card',
+      title: 'Karten-Felder',
+      fields: ['number', 'name', 'image', 'cardmarketUrl', 'rarity', 'hp', 'types', 'supertype', 'subtypes', 'artist', 'rules', 'flavorText']
+    }
+  ];
+
+  const currentMatrix = currentSettings.resolverMatrix || { set: {}, card: {} };
+
+  const buildResolverRows = (scope, fields) => fields.map((field) => {
+    const currentOrder = Array.isArray(currentMatrix?.[scope]?.[field]) && currentMatrix[scope][field].length
+      ? currentMatrix[scope][field].join('|')
+      : 'tcgdex|vera|legacy';
+    return `
+      <label style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin: 6px 0;">
+        <span style="font-size:12px; color:var(--color-muted);">${scope}.${field}</span>
+        <select data-resolver-scope="${scope}" data-resolver-field="${field}" style="min-width: 190px;">
+          ${resolverOptions.map((opt) => `<option value="${opt.value}" ${opt.value === currentOrder ? 'selected' : ''}>${opt.label}</option>`).join('')}
+        </select>
+      </label>
+    `;
+  }).join('');
 
   panel.innerHTML = `
     ${settings
@@ -231,6 +270,17 @@ export function createSettingsPanel(currentSettings, onSave) {
         </label>
       `)
       .join('')}
+    <details style="border:1px solid var(--color-border); border-radius:6px; padding:8px; background: var(--color-surface);">
+      <summary style="cursor:pointer; font-weight:600;">Resolver-Matrix (Expert)</summary>
+      <p style="font-size:12px; color:var(--color-muted); margin:8px 0 10px;">Legt fest, welche Quelle pro Feld priorisiert wird. Reihenfolge links nach rechts.</p>
+      ${fieldGroups.map((group) => `
+        <div style="margin: 10px 0 12px;">
+          <div style="font-size:12px; font-weight:600; margin-bottom:4px;">${group.title}</div>
+          ${buildResolverRows(group.scope, group.fields)}
+        </div>
+      `).join('')}
+      <button class="btn-secondary" type="button" data-action="resolver-defaults" style="margin-top:6px;">Resolver auf Defaults</button>
+    </details>
     <div style="display: flex; gap: 8px; margin-top: 12px;">
       <button class="btn-secondary" type="button" data-action="clear-history">🗑️ Suchverlauf löschen</button>
       <button class="btn-primary" type="button" data-action="save">💾 Speichern</button>
@@ -242,7 +292,33 @@ export function createSettingsPanel(currentSettings, onSave) {
     panel.querySelectorAll('input[type="checkbox"]').forEach(input => {
       updated[input.dataset.key] = input.checked;
     });
+
+    const matrix = { set: {}, card: {} };
+    panel.querySelectorAll('select[data-resolver-scope][data-resolver-field]').forEach((select) => {
+      const scope = select.dataset.resolverScope;
+      const field = select.dataset.resolverField;
+      if (!matrix[scope]) matrix[scope] = {};
+      matrix[scope][field] = String(select.value || '').split('|').filter(Boolean);
+    });
+    updated.resolverMatrix = matrix;
+
     onSave?.(updated);
+  });
+
+  panel.querySelector('[data-action="resolver-defaults"]').addEventListener('click', () => {
+    panel.querySelectorAll('select[data-resolver-scope][data-resolver-field]').forEach((select) => {
+      const scope = select.dataset.resolverScope;
+      const field = select.dataset.resolverField;
+      if (scope === 'set' && ['ptcgoCode', 'logoUrl', 'symbolUrl', 'legalities'].includes(field)) {
+        select.value = 'vera|tcgdex|legacy';
+      } else if (scope === 'card' && ['number'].includes(field)) {
+        select.value = 'legacy|vera|tcgdex';
+      } else if (scope === 'card' && ['rarity', 'hp', 'types', 'supertype', 'subtypes', 'artist', 'rules', 'flavorText'].includes(field)) {
+        select.value = 'vera|tcgdex|legacy';
+      } else {
+        select.value = 'tcgdex|vera|legacy';
+      }
+    });
   });
 
   panel.querySelector('[data-action="clear-history"]').addEventListener('click', () => {

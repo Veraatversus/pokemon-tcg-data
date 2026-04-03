@@ -1,4 +1,4 @@
-﻿import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js';
+﻿import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js?v=20260403a';
 import {
   listImportedSets,
   listSetsOverviewData,
@@ -12,8 +12,8 @@ import {
   importSetIntoCollection,
   upsertOverviewSet,
   syncOverviewWithApiSets,
-} from './data/sheets-db.js';
-import { fetchMergedCards, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js';
+} from './data/sheets-db.js?v=20260403a';
+import { fetchMergedCards, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260403b';
 import { normalizeCardNumber, toBoolean } from './core/utils.js';
 import * as cache from './core/cache.js';
 import { CONFIG, scopedStorageKey } from './core/config.js';
@@ -37,7 +37,8 @@ import {
   loadSettings, saveSettings, updateSetting,
   applyQuickFilters, calculateCollectionStats,
   getSyncStatus, setSyncStatus
-} from './enhanced-features.js';
+} from './enhanced-features.js?v=20260402b';
+
 import {
   initQuickFiltersUI, createSearchHistoryWidget, createStatisticsPanel,
   createExportDialog, createSettingsPanel,
@@ -1438,6 +1439,48 @@ function isAuthError(err) {
     || message.includes('anmelden');
 }
 
+const brokenSetAssetUrls = new Set();
+
+function sanitizeSetAssetUrl(url, setIdHint = '') {
+  const value = String(url || '').trim();
+  if (!value) return '';
+
+  const normalized = value.toLowerCase();
+  if (normalized === '0' || normalized === 'null' || normalized === 'undefined' || normalized === 'nan') {
+    return '';
+  }
+
+  if (brokenSetAssetUrls.has(value)) return '';
+
+  const setId = String(setIdHint || '').trim();
+  if (/^https?:\/\/images\.pokedata\.ovh\//i.test(value)) {
+    if (setId && !setId.startsWith('TCGDEX-')) {
+      return `https://images.pokemontcg.io/${encodeURIComponent(setId)}/logo.png`;
+    }
+    return '';
+  }
+
+  if (/^https?:\/\//i.test(value) || value.startsWith('/') || value.startsWith('./') || value.startsWith('../')) {
+    return value;
+  }
+
+  return '';
+}
+
+function attachSetAssetFallback(img, fallbackUrl = './assets/pokeball-fallback.svg') {
+  const originalUrl = img?.src || '';
+  img.onerror = () => {
+    if (originalUrl) brokenSetAssetUrls.add(originalUrl);
+    img.onerror = null;
+    if (fallbackUrl) {
+      img.src = fallbackUrl;
+      img.classList.add('img-fallback');
+    } else {
+      img.style.display = 'none';
+    }
+  };
+}
+
 function buildCardImageFallbacks(card, setIdHint = '') {
   const seen = new Set();
   const add = (url) => {
@@ -2111,13 +2154,21 @@ function initSpreadsheetDialog() {
 async function loadSets() {
   setLoading(true, 'Lade Sets\u2026');
   try {
-    const [importedSets, overviewSets] = await Promise.all([
+    const [importedSets, initialOverviewSets] = await Promise.all([
       listImportedSets(),
       listSetsOverviewData().catch(() => [])
     ]);
 
     if (!Array.isArray(importedSets)) throw new Error('Ungültiges Sets-Format');
     state.sets = importedSets;
+
+    let overviewSets = Array.isArray(initialOverviewSets) ? initialOverviewSets : [];
+    if (overviewSets.length === 0) {
+      const apiSets = await fetchAllAvailableSets();
+      const importedIds = new Set(importedSets.map((set) => set.setId));
+      await syncOverviewWithApiSets(apiSets, importedIds);
+      overviewSets = await listSetsOverviewData().catch(() => []);
+    }
 
     const importedById = new Map(importedSets.map((set) => [set.setId, set]));
     const mergedMap = new Map();
@@ -2370,10 +2421,12 @@ function createDashSetCard(set, summary) {
     imported: Boolean(set.imported)
   });
 
+  const safeLogoUrl = sanitizeSetAssetUrl(set.logoUrl, set.setId);
+
   card.innerHTML = `
     <div class="dash-set-logo-wrap">
-      ${set.logoUrl
-        ? `<img src="${set.logoUrl}" alt="${set.setName}" class="dash-set-logo" loading="lazy" onerror="this.onerror=null;this.src='./assets/pokeball-fallback.svg';this.classList.add('img-fallback')"/>`
+      ${safeLogoUrl
+        ? `<img src="${safeLogoUrl}" alt="${set.setName}" class="dash-set-logo" loading="lazy" onerror="this.onerror=null;this.src='./assets/pokeball-fallback.svg';this.classList.add('img-fallback')"/>`
         : `<span class="dash-set-name-fallback">${set.setName}</span>`}
     </div>
     <div class="dash-set-info">
@@ -4851,27 +4904,25 @@ async function loadCurrentSet(forceRefresh = false) {
   if (!selected) return;
 
   state.currentSet = selected;
+  sessionStorage.setItem('tcg_last_set', setId);
   const navSetLink = document.getElementById('nav-set-link');
   if (navSetLink) { navSetLink.textContent = selected.setName; navSetLink.href = `#set/${setId}`; }
 
   setGlobalStatus(`Lade ${selected.setName}\u2026`);
   setLoading(true, `Lade ${selected.setName}\u2026`);
 
-  if (selected.logoUrl) {
-    dom.setLogo.onerror = () => {
-      dom.setLogo.onerror = null;
-      dom.setLogo.src = './assets/pokeball-fallback.svg';
-      dom.setLogo.classList.add('img-fallback');
-    };
-    dom.setLogo.style.display = '';
-    dom.setLogo.src = selected.logoUrl;
+  const safeSetLogoUrl = sanitizeSetAssetUrl(selected.logoUrl, selected.setId);
+  const safeSetSymbolUrl = sanitizeSetAssetUrl(selected.symbolUrl, selected.setId);
 
-    dom.setSymbol.onerror = () => {
-      dom.setSymbol.style.display = 'none';
-    };
-    if (selected.symbolUrl) {
+  if (safeSetLogoUrl) {
+    attachSetAssetFallback(dom.setLogo, './assets/pokeball-fallback.svg');
+    dom.setLogo.style.display = '';
+    dom.setLogo.src = safeSetLogoUrl;
+
+    if (safeSetSymbolUrl) {
+      attachSetAssetFallback(dom.setSymbol, '');
       dom.setSymbol.style.display = '';
-      dom.setSymbol.src = selected.symbolUrl;
+      dom.setSymbol.src = safeSetSymbolUrl;
     } else {
       dom.setSymbol.style.display = 'none';
       dom.setSymbol.removeAttribute('src');
@@ -5738,6 +5789,14 @@ const _featureInitFlags = {
   share: false,
 };
 
+const _connectivityState = {
+  browserOnline: navigator.onLine,
+  appOnline: null,
+  checking: false,
+  lastError: null,
+  pollTimer: null
+};
+
 // ══════════════════════════════════════════════════════════════════════════
 // FEATURE 2: Charts in Statistiken (Chart.js)
 // ══════════════════════════════════════════════════════════════════════════
@@ -5828,6 +5887,84 @@ function initStatsCharts(totalCollected, totalCards, seriesMap) {
 // ══════════════════════════════════════════════════════════════════════════
 // FEATURE 3: Offline-Status-Indikator
 // ══════════════════════════════════════════════════════════════════════════
+function isOfflineLikeError(err) {
+  const status = Number(err?.status || err?.result?.error?.code || 0);
+  if (status === 0) return true;
+
+  const message = String(err?.result?.error?.message || err?.message || '').toLowerCase();
+  if (!message) return false;
+
+  return message.includes('failed to fetch')
+    || message.includes('network')
+    || message.includes('offline')
+    || message.includes('timeout')
+    || message.includes('unreachable')
+    || message.includes('load failed');
+}
+
+function renderOfflineIndicator() {
+  const banner = document.getElementById('offline-banner');
+  if (!banner) return;
+
+  const offline = _connectivityState.appOnline === false
+    || (_connectivityState.appOnline == null && !_connectivityState.browserOnline);
+
+  banner.classList.toggle('visible', offline);
+  document.body.classList.toggle('is-offline', offline);
+}
+
+async function probeAppConnectivity(options = {}) {
+  const silent = options.silent !== false;
+  _connectivityState.browserOnline = navigator.onLine;
+
+  if (_connectivityState.checking) return _connectivityState.appOnline;
+  if (!isSignedIn()) {
+    _connectivityState.appOnline = _connectivityState.browserOnline;
+    _connectivityState.lastError = null;
+    renderOfflineIndicator();
+    return _connectivityState.appOnline;
+  }
+
+  if (!CONFIG.SPREADSHEET_ID || !globalThis.gapi?.client?.sheets?.spreadsheets?.get) {
+    _connectivityState.appOnline = _connectivityState.browserOnline;
+    renderOfflineIndicator();
+    return _connectivityState.appOnline;
+  }
+
+  _connectivityState.checking = true;
+  try {
+    await globalThis.gapi.client.sheets.spreadsheets.get({
+      spreadsheetId: CONFIG.SPREADSHEET_ID,
+      fields: 'spreadsheetId'
+    });
+    const wasOffline = _connectivityState.appOnline === false;
+    _connectivityState.appOnline = true;
+    _connectivityState.lastError = null;
+    renderOfflineIndicator();
+    if (!silent && wasOffline) {
+      showToast('🟢 Verbindung zu Google Sheets wiederhergestellt', 'success', 2500);
+    }
+  } catch (err) {
+    _connectivityState.lastError = err;
+    if (isOfflineLikeError(err)) {
+      const wasOnline = _connectivityState.appOnline !== false;
+      _connectivityState.appOnline = false;
+      renderOfflineIndicator();
+      if (!silent && wasOnline) {
+        showToast('📴 Keine Verbindung zu Google Sheets – gespeicherte Daten werden angezeigt', 'info', 3500);
+      }
+    } else {
+      // Auth/config problems are not the same as offline mode.
+      _connectivityState.appOnline = true;
+      renderOfflineIndicator();
+    }
+  } finally {
+    _connectivityState.checking = false;
+  }
+
+  return _connectivityState.appOnline;
+}
+
 function initOfflineIndicator() {
   if (_featureInitFlags.offline) return;
   _featureInitFlags.offline = true;
@@ -5835,23 +5972,23 @@ function initOfflineIndicator() {
   const banner = document.getElementById('offline-banner');
   if (!banner) return;
 
-  const update = () => {
-    const offline = !navigator.onLine;
-    banner.classList.toggle('visible', offline);
-    document.body.classList.toggle('is-offline', offline);
-  };
-
   window.addEventListener('online', () => {
-    update();
-    showToast('🟢 Wieder online', 'success', 2500);
+    _connectivityState.browserOnline = true;
+    probeAppConnectivity({ silent: false });
   });
 
   window.addEventListener('offline', () => {
-    update();
-    showToast('📴 Offline – gespeicherte Daten verfügbar', 'info', 3500);
+    _connectivityState.browserOnline = false;
+    probeAppConnectivity({ silent: false });
   });
 
-  update();
+  renderOfflineIndicator();
+  probeAppConnectivity({ silent: true });
+
+  clearInterval(_connectivityState.pollTimer);
+  _connectivityState.pollTimer = setInterval(() => {
+    probeAppConnectivity({ silent: true });
+  }, 30000);
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -6177,9 +6314,59 @@ function initShortcutsOverlay() {
     if (isQuestionShortcut) {
       event.preventDefault();
       showShortcutsOverlay();
+      return;
     }
     if (event.key === 'Escape') {
       document.getElementById('shortcuts-overlay')?.remove();
+      return;
+    }
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+    switch (event.key.toLowerCase()) {
+      case 'd':
+        event.preventDefault();
+        location.hash = '#dashboard';
+        break;
+      case 's': {
+        event.preventDefault();
+        const lastSet = state?.currentSet?.setId || sessionStorage.getItem('tcg_last_set');
+        location.hash = lastSet ? `#set/${lastSet}` : '#dashboard';
+        break;
+      }
+      case 't':
+        event.preventDefault();
+        location.hash = '#stats';
+        break;
+      case '/':
+        event.preventDefault();
+        location.hash = '#search';
+        // Route-Render kann asynchron sein: mehrfach versuchen, dann sinnvollen Fallback nutzen.
+        {
+          const focusSearchInput = () => {
+            const searchInput = document.getElementById('search-input');
+            const viewSearch = document.getElementById('view-search');
+            const searchVisible = !!(viewSearch && !viewSearch.classList.contains('hidden'));
+            if (searchInput && searchVisible) {
+              searchInput.focus();
+              return true;
+            }
+            return false;
+          };
+
+          let tries = 0;
+          const maxTries = 8;
+          const tick = () => {
+            if (focusSearchInput()) return;
+            tries += 1;
+            if (tries < maxTries) {
+              setTimeout(tick, 80);
+              return;
+            }
+            // Fallback (z.B. nicht eingeloggt): Dashboard-Suche fokussieren.
+            document.getElementById('dash-filter')?.focus();
+          };
+          setTimeout(tick, 0);
+        }
+        break;
     }
   });
 }

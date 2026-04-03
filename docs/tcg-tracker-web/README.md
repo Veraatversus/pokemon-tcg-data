@@ -10,6 +10,7 @@ Zentrale Landing-Page für die technische Dokumentation der `frontend/tcg-tracke
 |---------|-------------|
 | [architecture.md](architecture.md) | Schichtenarchitektur, Modul-Abhängigkeitsregeln |
 | [data-flow.md](data-flow.md) | Datenfluss: Google Sheets ↔ App ↔ API |
+| [field-equivalence-matrix.md](field-equivalence-matrix.md) | Feldzuordnung Vera ↔ TCGDex und Resolver-Defaults |
 | [app.md](app.md) | Einstiegspunkt `app.js` |
 | [navigation.md](navigation.md) | Seitennavigation und UI-Routingkonzept |
 | [migration-validation.md](migration-validation.md) | Testmatrix, Protokoll, Abnahmeregeln |

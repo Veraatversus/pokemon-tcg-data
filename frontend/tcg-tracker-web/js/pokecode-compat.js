@@ -1,4 +1,5 @@
 import { normalizeCardNumber, naturalSort } from './utils.js';
+import { buildCardRecordFromSources, buildSetRecordFromSources } from './data/schema-contract.js';
 
 export function normalizeString(str) {
   if (str === null || typeof str === 'undefined') {
@@ -145,6 +146,12 @@ export function resolveTcgdexImageUrl(tcgdexSetId, tcgdexCard) {
 }
 
 function resolveOfficialSetTag({ setTag = '', tcgdexSet = null, primarySet = null, fallbackSetId = '' } = {}) {
+
+  function hasTcgdexSetById(tcgdexSets, setId) {
+    const target = String(setId || '').trim().toLowerCase();
+    if (!target || !Array.isArray(tcgdexSets)) return false;
+    return tcgdexSets.some((set) => String(set?.id || '').trim().toLowerCase() === target);
+  }
   const candidates = [
     setTag,
     tcgdexSet?.abbreviation?.official,
@@ -193,35 +200,13 @@ function resolveCardmarketUrl({ tcgdexUrl = null, primaryUrl = null, cardName = 
 }
 
 function mapTcgdexCardToMerged(tcgdexSetId, tcgdexCard, fallbackImage = null, fallbackSetName = '', fallbackSetTag = '') {
-  const number = normalizeCardNumber(tcgdexCard?.localId || tcgdexCard?.id);
-  const description = tcgdexCard?.description || '';
-  const resolvedCardmarketUrl = resolveCardmarketUrl({
-    tcgdexUrl: tcgdexCard?.links?.cardmarket || null,
-    cardName: tcgdexCard?.name || number,
-    setTag: fallbackSetTag,
-    setName: fallbackSetName,
-    cardNumber: number
+  return buildCardRecordFromSources({
+    setId: tcgdexSetId,
+    tcgdexCard,
+    fallbackImage: resolveTcgdexImageUrl(tcgdexSetId, tcgdexCard) || fallbackImage || '',
+    fallbackSetName,
+    fallbackSetTag
   });
-  const card = {
-    number,
-    name: tcgdexCard?.name || number,
-    image: resolveTcgdexImageUrl(tcgdexSetId, tcgdexCard) || fallbackImage || '',
-    cardmarketUrl: resolvedCardmarketUrl,
-    rarity: tcgdexCard?.rarity || '',
-    hp: tcgdexCard?.hp ? String(tcgdexCard.hp) : '',
-    types: Array.isArray(tcgdexCard?.types) ? tcgdexCard.types : [],
-    supertype: tcgdexCard?.category || '',
-    subtypes: tcgdexCard?.stage ? [tcgdexCard.stage] : (tcgdexCard?.suffix ? [tcgdexCard.suffix] : []),
-    evolvesFrom: tcgdexCard?.evolveFrom || '',
-    artist: Array.isArray(tcgdexCard?.illustrator) ? tcgdexCard.illustrator.join(', ') : (tcgdexCard?.illustrator || '')
-  };
-
-  if (description) {
-    card.rules = [description];
-    card.flavorText = description;
-  }
-
-  return card;
 }
 
 export async function fetchAllPrimaryCardsForSet({
@@ -280,6 +265,9 @@ export async function loadCardsForSetCompat({
   const isTcgdexOnlySet = String(setId || '').startsWith('TCGDEX-');
   if (isTcgdexOnlySet) {
     const tcgdexActualSetId = String(setId).substring('TCGDEX-'.length);
+    if (!hasTcgdexSetById(tcgdexSets, tcgdexActualSetId)) {
+      throw new Error(`TCGDex-Set nicht verfügbar: ${tcgdexActualSetId}`);
+    }
     tcgdexDetailedSet = await fetchJson(`${apis.tcgdexBase}/sets/${encodeURIComponent(tcgdexActualSetId)}`);
     const officialSetTag = resolveOfficialSetTag({
       tcgdexSet: tcgdexDetailedSet,
@@ -313,7 +301,10 @@ export async function loadCardsForSetCompat({
   );
 
   const tcgdexId = matchingTcgdexSet?.id || customMappings?.[String(pokemontcgSetId).toLowerCase()] || pokemontcgSetId;
-  tcgdexDetailedSet = await fetchJson(`${apis.tcgdexBase}/sets/${encodeURIComponent(tcgdexId)}`).catch(() => null);
+  const tcgdexSetExists = hasTcgdexSetById(tcgdexSets, tcgdexId);
+  tcgdexDetailedSet = tcgdexSetExists
+    ? await fetchJson(`${apis.tcgdexBase}/sets/${encodeURIComponent(tcgdexId)}`).catch(() => null)
+    : null;
   const officialSetTag = resolveOfficialSetTag({
     tcgdexSet: tcgdexDetailedSet || matchingTcgdexSet,
     primarySet: primaryDetailedSet,
@@ -340,33 +331,16 @@ export async function loadCardsForSetCompat({
       cardNumber: number
     });
 
-    const mergedCard = {
-      number,
-      name: tcgdexCard?.name || primaryCard.name,
-      image: generatedTcgdexImage
+    return buildCardRecordFromSources({
+      setId: pokemontcgSetId,
+      primaryCard,
+      tcgdexCard,
+      fallbackImage: generatedTcgdexImage
         || primaryCard.images?.small
         || `https://images.pokemontcg.io/${pokemontcgSetId}/${number}.png`,
-      cardmarketUrl: resolvedCardmarketUrl,
-      rarity: primaryCard.rarity || tcgdexCard?.rarity || '',
-      hp: primaryCard.hp ? String(primaryCard.hp) : (tcgdexCard?.hp ? String(tcgdexCard.hp) : ''),
-      types: Array.isArray(primaryCard.types) && primaryCard.types.length
-        ? primaryCard.types
-        : (Array.isArray(tcgdexCard?.types) ? tcgdexCard.types : []),
-      supertype: primaryCard.supertype || tcgdexCard?.category || '',
-      subtypes: Array.isArray(primaryCard.subtypes) && primaryCard.subtypes.length
-        ? primaryCard.subtypes
-        : (tcgdexCard?.stage ? [tcgdexCard.stage] : (tcgdexCard?.suffix ? [tcgdexCard.suffix] : [])),
-      evolvesFrom: primaryCard.evolvesFrom || tcgdexCard?.evolveFrom || '',
-      artist: primaryCard.artist || (Array.isArray(tcgdexCard?.illustrator) ? tcgdexCard.illustrator.join(', ') : (tcgdexCard?.illustrator || '')),
-      regulationMark: primaryCard.regulationMark || ''
-    };
-
-    if (tcgdexCard?.description) {
-      mergedCard.rules = [tcgdexCard.description];
-      mergedCard.flavorText = tcgdexCard.description;
-    }
-
-    return mergedCard;
+      fallbackSetName: primaryDetailedSet?.name || matchingTcgdexSet?.name || setName || '',
+      fallbackSetTag: officialSetTag
+    });
   });
 
   if (tcgdexDetailedSet?.cards) {
@@ -473,44 +447,22 @@ export function combineSetsForOverviewCompat({
     if (primarySet) {
       const model = mapPrimarySetToOverviewModel(primarySet);
       if (!model) return;
-      mapped.push({
-        ...model,
-        setName: tcgdexSet?.name || model.setName,
-        series: tcgdexSet?.serie?.name || model.series,
-        releaseDate: tcgdexSet?.releaseDate || model.releaseDate || '',
-        totalCards: toNumber(tcgdexSet?.cardCount?.official) || model.totalCards,
-        ptcgoCode: model.ptcgoCode || tcgdexSet?.abbreviation?.official || '',
-        tcgdexId: tcgdexSet?.id || '',
-        tcgdexName: tcgdexSet?.name || tcgdexSet?.en?.name || '',
-        legalities: primarySet?.legalities || tcgdexSet?.legal || null,
-        cardCountTotal: toNumber(tcgdexSet?.cardCount?.total),
-        cardCountHolo: toNumber(tcgdexSet?.cardCount?.holo),
-        cardCountReverse: toNumber(tcgdexSet?.cardCount?.reverse),
-        cardCountFirstEdition: toNumber(tcgdexSet?.cardCount?.firstEdition),
-        cardCountNormal: toNumber(tcgdexSet?.cardCount?.normal)
-      });
+      mapped.push(buildSetRecordFromSources({
+        setId: model.setId,
+        primarySet,
+        tcgdexSet,
+        isTcgdexOnly: false
+      }));
       return;
     }
 
     if (isOnlyTcgdex && tcgdexSet) {
-      mapped.push({
+      mapped.push(buildSetRecordFromSources({
         setId: `TCGDEX-${tcgdexSet.id}`,
-        setName: tcgdexSet.name || tcgdexSet.en?.name || tcgdexSet.id,
-        logoUrl: tcgdexSet.logo || '',
-        symbolUrl: tcgdexSet.symbol || '',
-        series: tcgdexSet.serie?.name || '',
-        releaseDate: tcgdexSet.releaseDate || '',
-        totalCards: toNumber(tcgdexSet?.cardCount?.official) || toNumber(tcgdexSet?.cardCount?.total),
-        ptcgoCode: tcgdexSet.abbreviation?.official || '',
-        tcgdexId: tcgdexSet.id || '',
-        tcgdexName: tcgdexSet.name || tcgdexSet.en?.name || '',
-        legalities: tcgdexSet.legal || null,
-        cardCountTotal: toNumber(tcgdexSet?.cardCount?.total),
-        cardCountHolo: toNumber(tcgdexSet?.cardCount?.holo),
-        cardCountReverse: toNumber(tcgdexSet?.cardCount?.reverse),
-        cardCountFirstEdition: toNumber(tcgdexSet?.cardCount?.firstEdition),
-        cardCountNormal: toNumber(tcgdexSet?.cardCount?.normal)
-      });
+        primarySet: null,
+        tcgdexSet,
+        isTcgdexOnly: true
+      }));
     }
   });
 

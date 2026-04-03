@@ -5,6 +5,7 @@ import {
   combineSetsForOverviewCompat,
   fetchAllPrimaryCardsForSet
 } from '../pokecode-compat.js';
+import { resolveDisplayCard, resolveDisplaySet } from './schema-contract.js';
 
 // ── Interne Hilfsfunktionen ──────────────────────────────────────
 
@@ -182,7 +183,7 @@ export async function fetchMergedCards(setId, { signal } = {}) {
     fetchJson: fetchJsonWithSignal
   });
 
-  return naturalSort(allCards || [], 'number');
+  return naturalSort((allCards || []).map((card) => resolveDisplayCard(card)), 'number');
 }
 
 /**
@@ -212,7 +213,7 @@ export async function fetchAllAvailableSets() {
     toNumber
   });
 
-  return combined.sort((a, b) => {
+  return combined.map((set) => resolveDisplaySet(set)).sort((a, b) => {
     const aIsTcgdexOnly = String(a.setId).startsWith('TCGDEX-');
     const bIsTcgdexOnly = String(b.setId).startsWith('TCGDEX-');
     if (!aIsTcgdexOnly && bIsTcgdexOnly) return -1;
@@ -220,7 +221,7 @@ export async function fetchAllAvailableSets() {
     const dateA = new Date(a.releaseDate || 0).getTime();
     const dateB = new Date(b.releaseDate || 0).getTime();
     if (dateA !== dateB) return dateB - dateA;
-    return naturalSort(a.setName || '', b.setName || '');
+    return String(a.setName || '').localeCompare(String(b.setName || ''), undefined, { numeric: true, sensitivity: 'base' });
   });
 }
 
@@ -298,15 +299,18 @@ export async function runPokecodeParityCheck({ setIds = [], maxSets = 10 } = {})
       fetchJson
     });
 
-    const normalizeCards = (cards) => (cards || []).map((card) => ({
+    const normalizeCards = (cards) => (cards || []).map((card) => {
+      const resolved = resolveDisplayCard(card);
+      return {
       number: String(card?.number || ''),
-      name: String(card?.name || ''),
-      image: String(card?.image || ''),
-      cardmarketUrl: String(card?.cardmarketUrl || ''),
-      rarity: String(card?.rarity || ''),
-      rules: Array.isArray(card?.rules) ? card.rules : [],
-      flavorText: String(card?.flavorText || '')
-    })).sort((a, b) => naturalSort(a.number, b.number));
+      name: String(resolved?.name || ''),
+      image: String(resolved?.image || ''),
+      cardmarketUrl: String(resolved?.cardmarketUrl || ''),
+      rarity: String(resolved?.rarity || ''),
+      rules: Array.isArray(resolved?.rules) ? resolved.rules : [],
+      flavorText: String(resolved?.flavorText || '')
+      };
+    }).sort((a, b) => String(a.number).localeCompare(String(b.number), undefined, { numeric: true, sensitivity: 'base' }));
 
     const left = normalizeCards(adapterCards);
     const right = normalizeCards(compat.allCards);
