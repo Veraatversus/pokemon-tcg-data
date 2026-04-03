@@ -141,8 +141,8 @@ export const SET_DB_HEADERS = [
   'vera_legalities', 'tcgdex_legal',
   // Logo-Paar
   'vera_images_logo', 'tcgdex_logo',
-  // Symbol-Paar
-  'vera_images_symbol', 'tcgdex_symbol'
+  // Symbol (nur Vera, tcgdex /sets liefert kein symbol-Feld)
+  'vera_images_symbol'
 ];
 
 export const CARD_DB_HEADERS = [
@@ -156,38 +156,17 @@ export const CARD_DB_HEADERS = [
   // Bild-Gruppe
   'vera_images_small', 'tcgdex_image',
   'vera_images_large',
-  // Cardmarket-Paar
-  'vera_cardmarket_url', 'tcgdex_cardmarket_url',
-  // Seltenheit-Paar
-  'vera_rarity', 'tcgdex_rarity',
-  // HP-Paar
-  'vera_hp', 'tcgdex_hp',
-  // Typen-Paar (EN vs DE)
-  'vera_types', 'tcgdex_types',
-  // Kartentyp-Paar
-  'vera_supertype', 'tcgdex_category',
-  // Subtyp-Gruppe
-  'vera_subtypes', 'tcgdex_stage', 'tcgdex_suffix',
-  // Entwicklung-Paar
-  'vera_evolvesFrom', 'tcgdex_evolvesFrom',
-  // Künstler-Paar
-  'vera_artist', 'tcgdex_illustrator',
-  // RegMark-Paar
-  'vera_regulationMark', 'tcgdex_regulationMark',
-  // Flavor-Paar
-  'vera_flavorText', 'tcgdex_description',
-  // Pokédex-Paar
-  'vera_nationalPokedexNumbers', 'tcgdex_dexId',
-  // Rückzug-Gruppe
-  'vera_convertedRetreatCost', 'vera_retreatCost', 'tcgdex_retreat',
-  // Legalitäten-Paar
-  'vera_legalities', 'tcgdex_legal',
+  // Cardmarket (über Fallback auf Vera-Feld konsolidiert)
+  'vera_cardmarket_url',
+  // Vera-exklusive Kartendaten (tcgdex /sets/{id}.cards liefert nur id/localId/name/image)
+  'vera_rarity', 'vera_hp', 'vera_types', 'vera_supertype', 'vera_subtypes',
+  'vera_evolvesFrom', 'vera_artist', 'vera_regulationMark', 'vera_flavorText',
+  'vera_nationalPokedexNumbers', 'vera_convertedRetreatCost', 'vera_retreatCost',
+  'vera_legalities',
   // Fähigkeiten / Angriffe / Schwächen / Resistenzen
   'vera_abilities', 'vera_attacks', 'vera_weaknesses', 'vera_resistances',
-  // Regeln / Effekt-Paar
-  'vera_rules', 'tcgdex_effect',
-  // Weitere TCGDex-Felder
-  'tcgdex_variants', 'tcgdex_trainerType'
+  // Regeln
+  'vera_rules'
 ];
 
 function toNumber(value) {
@@ -286,7 +265,6 @@ export function buildSetRecordFromSources({
     tcgdex_releaseDate: tcgdexSet?.releaseDate || '',
     tcgdex_legal: tcgdexSet?.legal || null,
     tcgdex_logo: tcgdexSet?.logo || '',
-    tcgdex_symbol: tcgdexSet?.symbol || '',
     tcgdex_cardCount_official: toNumber(tcgdexSet?.cardCount?.official),
     tcgdex_cardCount_total: toNumber(tcgdexSet?.cardCount?.total),
     tcgdex_cardCount_holo: toNumber(tcgdexSet?.cardCount?.holo),
@@ -352,29 +330,12 @@ export function buildCardRecordFromSources({
     vera_rules: Array.isArray(primaryCard?.rules) ? primaryCard.rules : [],
     vera_images_small: primaryCard?.images?.small || '',
     vera_images_large: primaryCard?.images?.large || '',
-    vera_cardmarket_url: primaryCard?.cardmarket?.url || '',
+    vera_cardmarket_url: cardmarketUrl || '',
     // tcgdex-Felder
     tcgdex_id: tcgdexCard?.id || '',
     tcgdex_name: tcgdexCard?.name || '',
     tcgdex_localId: tcgdexCard?.localId || '',
-    tcgdex_image: resolveTcgdexImage(tcgdexCard),
-    tcgdex_cardmarket_url: '',
-    tcgdex_rarity: tcgdexCard?.rarity || '',
-    tcgdex_hp: tcgdexCard?.hp || '',
-    tcgdex_types: Array.isArray(tcgdexCard?.types) ? tcgdexCard.types : [],
-    tcgdex_category: tcgdexCard?.category || '',
-    tcgdex_stage: tcgdexCard?.stage || '',
-    tcgdex_suffix: tcgdexCard?.suffix || '',
-    tcgdex_evolvesFrom: tcgdexCard?.evolveFrom || '',
-    tcgdex_illustrator: tcgdexCard?.illustrator || '',
-    tcgdex_regulationMark: tcgdexCard?.regulationMark || '',
-    tcgdex_description: tcgdexCard?.description || '',
-    tcgdex_effect: tcgdexCard?.effect || '',
-    tcgdex_dexId: Array.isArray(tcgdexCard?.dexId) ? tcgdexCard.dexId : [],
-    tcgdex_retreat: tcgdexCard?.retreat != null ? Number(tcgdexCard.retreat) : null,
-    tcgdex_legal: tcgdexCard?.legal || null,
-    tcgdex_variants: tcgdexCard?.variants || null,
-    tcgdex_trainerType: tcgdexCard?.trainerType || ''
+    tcgdex_image: resolveTcgdexImage(tcgdexCard)
   };
 }
 

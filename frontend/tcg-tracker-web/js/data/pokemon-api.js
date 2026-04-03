@@ -4,7 +4,7 @@ import {
   loadCardsForSetCompat,
   combineSetsForOverviewCompat,
   fetchAllPrimaryCardsForSet
-} from '../pokecode-compat.js';
+} from '../pokecode-compat.js?v=20260403d';
 import { resolveDisplayCard, resolveDisplaySet } from './schema-contract.js';
 
 // ── Interne Hilfsfunktionen ──────────────────────────────────────
@@ -20,6 +20,7 @@ async function fetchJson(url, { signal } = {}) {
 }
 
 let tcgdexSetsCache = null;
+let tcgdexSetsDetailedCache = null;
 let veraSetsCache = null;
 
 async function fetchTcgdexSets({ signal } = {}) {
@@ -32,6 +33,40 @@ async function fetchTcgdexSets({ signal } = {}) {
     tcgdexSetsCache = [];
   }
   return tcgdexSetsCache;
+}
+
+/**
+ * Lädt alle TCGDex-Sets als vollständige Detailobjekte (inkl. serie, abbreviation,
+ * releaseDate, legal, logo). Nutzt Batches von 15 gleichzeitigen Requests um die API
+ * nicht zu überlasten. Ergebnis wird für die Session gecacht.
+ */
+async function fetchTcgdexSetsDetailed({ signal } = {}) {
+  if (tcgdexSetsDetailedCache) return tcgdexSetsDetailedCache;
+  const summaryList = await fetchTcgdexSets({ signal });
+  if (!summaryList.length) {
+    tcgdexSetsDetailedCache = [];
+    return tcgdexSetsDetailedCache;
+  }
+  const BATCH_SIZE = 15;
+  const detailed = [];
+  for (let i = 0; i < summaryList.length; i += BATCH_SIZE) {
+    if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+    const batch = summaryList.slice(i, i + BATCH_SIZE);
+    const results = await Promise.allSettled(
+      batch.map((set) =>
+        fetchJson(`${CONFIG.APIS.TCGDEX_DE}/sets/${encodeURIComponent(set.id)}`, { signal })
+          .catch(() => set)
+      )
+    );
+    results.forEach((result, idx) => {
+      detailed.push(result.status === 'fulfilled' ? result.value : batch[idx]);
+    });
+    if (i + BATCH_SIZE < summaryList.length) {
+      await new Promise((r) => setTimeout(r, 30));
+    }
+  }
+  tcgdexSetsDetailedCache = detailed;
+  return tcgdexSetsDetailedCache;
 }
 
 async function fetchPokemontcgSet(setId, { signal } = {}) {
@@ -150,6 +185,15 @@ async function fetchPokemontcgSets() {
  * @returns {Promise<Array<{number, name, image, cardmarketUrl}>>}
  */
 export async function fetchMergedCards(setId, { signal } = {}) {
+  const payload = await fetchMergedCardsWithSetMeta(setId, { signal });
+  return payload.cards;
+}
+
+/**
+ * Lädt gemergte Kartendaten plus Set-Metadaten-Patch aus den tatsächlich genutzten Endpunkten.
+ * Wichtig: tcgdex-Kartendaten kommen hier aus /sets/{id}.cards (nicht /cards).
+ */
+export async function fetchMergedCardsWithSetMeta(setId, { signal } = {}) {
   const tcgdexSets = await fetchTcgdexSets({ signal });
   const { primarySetId, isTcgdexOnly } = resolveApiSetIds(setId);
   let primarySet = null;
@@ -167,7 +211,7 @@ export async function fetchMergedCards(setId, { signal } = {}) {
 
   const fetchJsonWithSignal = (url) => fetchJson(url, { signal });
 
-  const { allCards } = await loadCardsForSetCompat({
+  const { allCards, tcgdexDetailedSet, matchingTcgdexSet } = await loadCardsForSetCompat({
     setId,
     setName: primarySet?.name || setId,
     useVeraApi: CONFIG.USE_VERA_API,
@@ -183,7 +227,20 @@ export async function fetchMergedCards(setId, { signal } = {}) {
     fetchJson: fetchJsonWithSignal
   });
 
-  return naturalSort((allCards || []).map((card) => resolveDisplayCard(card)), 'number');
+  const cards = naturalSort((allCards || []).map((card) => resolveDisplayCard(card)), 'number');
+
+  // Set-Meta-Patch aus den beim Kartenabruf vorhandenen Setdaten zusammenbauen,
+  // damit Overview/DB keine leeren tcgdex-Felder behalten.
+  const tcgdexSet = tcgdexDetailedSet || matchingTcgdexSet || null;
+  const setMetaPatch = resolveDisplaySet(buildSetRecordFromSources({
+    setId,
+    primarySet,
+    tcgdexSet,
+    isTcgdexOnly,
+    imported: false
+  }));
+
+  return { cards, setMetaPatch };
 }
 
 /**
@@ -204,7 +261,7 @@ export async function fetchAllAvailableSets() {
     primarySets = await fetchPokemontcgSets();
   }
 
-  const tcgdexSets = await fetchTcgdexSets();
+  const tcgdexSets = await fetchTcgdexSetsDetailed();
   const combined = combineSetsForOverviewCompat({
     primarySets,
     tcgdexSets,

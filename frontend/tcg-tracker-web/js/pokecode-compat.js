@@ -145,13 +145,13 @@ export function resolveTcgdexImageUrl(tcgdexSetId, tcgdexCard) {
   return `https://assets.tcgdex.net/de/${encodeURIComponent(tcgdexSetId)}/${encodeURIComponent(localId)}/low.webp`;
 }
 
-function resolveOfficialSetTag({ setTag = '', tcgdexSet = null, primarySet = null, fallbackSetId = '' } = {}) {
+function hasTcgdexSetById(tcgdexSets, setId) {
+  const target = String(setId || '').trim().toLowerCase();
+  if (!target || !Array.isArray(tcgdexSets)) return false;
+  return tcgdexSets.some((set) => String(set?.id || '').trim().toLowerCase() === target);
+}
 
-  function hasTcgdexSetById(tcgdexSets, setId) {
-    const target = String(setId || '').trim().toLowerCase();
-    if (!target || !Array.isArray(tcgdexSets)) return false;
-    return tcgdexSets.some((set) => String(set?.id || '').trim().toLowerCase() === target);
-  }
+function resolveOfficialSetTag({ setTag = '', tcgdexSet = null, primarySet = null, fallbackSetId = '' } = {}) {
   const candidates = [
     setTag,
     tcgdexSet?.abbreviation?.official,
@@ -220,12 +220,18 @@ export async function fetchAllPrimaryCardsForSet({
 }) {
   if (useVeraApi) {
     const url = `${veraBaseUrl}/cards/${veraLanguage}/${encodeURIComponent(setId)}.json`;
-    const response = await fetchJson(url);
-    const cards = Array.isArray(response) ? response : [];
-    if (!cards.length) {
-      throw new Error(`Keine Karten von Vera für Set "${setName}" gefunden.`);
+    try {
+      const response = await fetchJson(url);
+      const cards = Array.isArray(response) ? response : [];
+      if (cards.length) {
+        return cards.sort((a, b) => naturalSort(a.number || '', b.number || ''));
+      }
+      // Vera-Setdatei existiert, aber leer -> fallback auf pokemontcg.io
+      console.warn(`[fetchAllPrimaryCardsForSet] Vera lieferte 0 Karten für ${setId}, fallback auf pokemontcg.io`);
+    } catch (err) {
+      // 404/Fetch-Fehler bei Vera dürfen Suche/Import nicht abbrechen.
+      console.warn(`[fetchAllPrimaryCardsForSet] Vera request failed for ${setId}, fallback auf pokemontcg.io`, err);
     }
-    return cards.sort((a, b) => naturalSort(a.number || '', b.number || ''));
   }
 
   let page = 1;

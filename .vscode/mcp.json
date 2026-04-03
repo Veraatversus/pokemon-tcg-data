@@ -5,22 +5,13 @@
 			"type": "promptString",
 			"description": "",
 			"password": true
+		},
+		{
+			"id": "CONTEXT7_API_KEY",
+			"type": "promptString",
+			"description": "API key for authentication",
+			"password": true
 		}
 	],
-	"servers": {
-		"io.github.github/github-mcp-server": {
-			"type": "stdio",
-			"command": "docker",
-			"args": [
-				"run",
-				"-i",
-				"--rm",
-				"-e",
-				"GITHUB_PERSONAL_ACCESS_TOKEN=${input:token}",
-				"ghcr.io/github/github-mcp-server:0.33.0"
-			],
-			"gallery": "https://api.mcp.github.com",
-			"version": "0.33.0"
-		}
-	}
+	"servers": {}
 }

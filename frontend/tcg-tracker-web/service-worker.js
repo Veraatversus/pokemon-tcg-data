@@ -4,9 +4,9 @@
 
 const SW_SCOPE_PATH = new URL(self.registration.scope).pathname.toLowerCase();
 const SW_SCOPE = /(^|\/)dev(\/|$)/.test(SW_SCOPE_PATH) ? 'dev' : 'release';
-const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v7`;
-const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v7`;
-const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v7`;
+const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v9`;
+const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v9`;
+const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v9`;
 
 const STATIC_ASSETS = [
   './',
@@ -83,6 +83,26 @@ self.addEventListener('fetch', (event) => {
 
   // Handle API requests
   if (request.method === 'GET') {
+    // HTML/Navigations: network-first, damit neue index.html/app-Versionen sofort aktiv werden
+    if (request.mode === 'navigate' || request.destination === 'document') {
+      event.respondWith(
+        fetch(request)
+          .then((response) => {
+            if (response && response.status === 200) {
+              const responseToCache = response.clone();
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(request, responseToCache).catch((err) => {
+                  console.warn('[SW] cache.put failed:', err);
+                });
+              });
+            }
+            return response;
+          })
+          .catch(() => caches.match(request))
+      );
+      return;
+    }
+
     // Images: cache first, then network
     if (request.destination === 'image') {
       event.respondWith(
@@ -141,6 +161,30 @@ self.addEventListener('fetch', (event) => {
               );
             });
           })
+      );
+      return;
+    }
+
+    // JS/CSS: network-first to avoid stale app modules after deploys
+    const isCodeAsset = request.destination === 'script'
+      || request.destination === 'style'
+      || url.pathname.endsWith('.js')
+      || url.pathname.endsWith('.css');
+    if (isCodeAsset) {
+      event.respondWith(
+        fetch(request)
+          .then((response) => {
+            if (response && response.status === 200) {
+              const responseToCache = response.clone();
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(request, responseToCache).catch((err) => {
+                  console.warn('[SW] cache.put failed:', err);
+                });
+              });
+            }
+            return response;
+          })
+          .catch(() => caches.match(request))
       );
       return;
     }

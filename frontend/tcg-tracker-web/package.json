@@ -6,8 +6,5 @@
     "test:smoke": "node tests/regression-smoke.mjs",
     "test:smoke:auth": "node tests/auth-smoke.mjs",
     "test:smoke:all": "npm run test:smoke && npm run test:smoke:auth"
-  },
-  "devDependencies": {
-    "playwright": "^1.52.0"
   }
 }

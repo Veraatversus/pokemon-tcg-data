@@ -1,4 +1,4 @@
-﻿import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js?v=20260403a';
+﻿import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js?v=20260403b';
 import {
   listImportedSets,
   listSetsOverviewData,
@@ -12,8 +12,8 @@ import {
   importSetIntoCollection,
   upsertOverviewSet,
   syncOverviewWithApiSets,
-} from './data/sheets-db.js?v=20260403a';
-import { fetchMergedCards, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260403b';
+} from './data/sheets-db.js?v=20260503a';
+import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260503a';
 import { normalizeCardNumber, toBoolean } from './core/utils.js';
 import * as cache from './core/cache.js';
 import { CONFIG, scopedStorageKey } from './core/config.js';
@@ -2547,8 +2547,8 @@ async function importSetFromOverview(set) {
   setLoading(true, `Importiere ${set.setName}…`);
   setGlobalStatus(`Importiere ${set.setName}…`);
   try {
-    const cards = await fetchMergedCards(set.setId);
-    await importSetIntoCollection(set, cards);
+    const { cards, setMetaPatch } = await fetchMergedCardsWithSetMeta(set.setId);
+    await importSetIntoCollection({ ...set, ...(setMetaPatch || {}) }, cards);
     cache.del(`cards_${set.setId}`);
     cache.del(`db_cards_${set.setId}`);
     cache.del(`db_${set.setId}`);
@@ -2669,8 +2669,8 @@ async function importSetsSequential(sets, options = {}) {
       setGlobalStatus(`Importiere ${index + 1}/${validSets.length}: ${set.setName}`);
       updateJob(job, index, `Importiere ${index + 1}/${validSets.length}: ${set.setName}`);
       try {
-        const cards = await fetchMergedCards(set.setId);
-        await importSetIntoCollection(set, cards);
+        const { cards, setMetaPatch } = await fetchMergedCardsWithSetMeta(set.setId);
+        await importSetIntoCollection({ ...set, ...(setMetaPatch || {}) }, cards);
         cache.del(`cards_${set.setId}`);
         cache.del(`db_${set.setId}`);
         done++;
@@ -4667,11 +4667,12 @@ function initLightbox() {
       if (!setId) return;
       setLoading(true, `Importiere ${setToImport.setName}…`);
       try {
-        const importCards = await fetchMergedCards(setId).catch(() => []);
+        const importPayload = await fetchMergedCardsWithSetMeta(setId).catch(() => ({ cards: [] }));
+        const importCards = Array.isArray(importPayload?.cards) ? importPayload.cards : [];
         if (!Array.isArray(importCards) || !importCards.length) {
           throw new Error('Keine Kartendaten für den automatischen Set-Import gefunden.');
         }
-        await importSetIntoCollection(setToImport, importCards);
+        await importSetIntoCollection({ ...setToImport, ...(importPayload?.setMetaPatch || {}) }, importCards);
         cache.del(`cards_${setId}`);
         cache.del(`db_cards_${setId}`);
         cache.del(`db_${setId}`);

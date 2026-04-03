@@ -1,7 +1,0 @@
-[  264544ms] [ERROR] Cross-Origin-Opener-Policy policy would block the window.opener call. @ https://apis.google.com/_/scs/abc-static/_/js/k=gapi.lb.de.cIr2f3DgAek.O/m=client/rt=j/sv=1/d=1/ed=1/rs=AHpOoo8eiOTTmVyE9N16BmLTiBHajktR2A/cb=gapi.loaded_0?le=scs,fedcm_migration_mod:435
-[  264545ms] [ERROR] Cross-Origin-Opener-Policy policy would block the window.opener call. @ https://apis.google.com/_/scs/abc-static/_/js/k=gapi.lb.de.cIr2f3DgAek.O/m=client/rt=j/sv=1/d=1/ed=1/rs=AHpOoo8eiOTTmVyE9N16BmLTiBHajktR2A/cb=gapi.loaded_0?le=scs,fedcm_migration_mod:435
-[  271701ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://images.pokemontcg.io/me25/logo.png:0
-[  271965ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ https://images.pokedata.ovh/en/mebsp/promo.png:0
-[  412395ms] [ERROR] Failed to load resource: net::ERR_INTERNET_DISCONNECTED @ https://content-sheets.googleapis.com/v4/spreadsheets/138sq6ObNOVwlLoFEHrjfPKXLZTm38p8YDV2ifUy0VPg?fields=sheets(properties(title)):0
-[  412396ms] [ERROR] [loadSets] {result: Object, body: {"error":{"code":-1,"message":"A network error occurred, and the request could not be completed."}}, headers: Object, status: null, statusText: null} @ http://localhost:8080/js/app.js:1839
-[  452973ms] [WARNING] [renderStats] readSummarySheet error: undefined @ http://localhost:8080/js/app.js:2846
