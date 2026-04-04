@@ -12,8 +12,8 @@ import {
   importSetIntoCollection,
   upsertOverviewSet,
   syncOverviewWithApiSets,
-} from './data/sheets-db.js?v=20260503a';
-import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260503a';
+} from './data/sheets-db.js?v=20260504d';
+import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260504d';
 import { normalizeCardNumber, toBoolean } from './core/utils.js';
 import * as cache from './core/cache.js';
 import { CONFIG, scopedStorageKey } from './core/config.js';
@@ -43,7 +43,7 @@ import {
   initQuickFiltersUI, createSearchHistoryWidget, createStatisticsPanel,
   createExportDialog, createSettingsPanel,
   createBulkActionsToolbar
-} from './ui/components.js';
+} from './ui/components.js?v=20260504d';
 import {
   AdvancedSearch, SyncIndicator, CardCollectionTools,
   generateCollectionInsights, generateSetComparison,
@@ -104,6 +104,7 @@ import {
 const dom = {
   // Global
   auth:             document.getElementById('btn-auth'),
+  btnOpenSettings:  document.getElementById('btn-open-settings'),
   topbar:           document.querySelector('.topbar'),
   mainNav:          document.getElementById('main-nav'),
   loadingOverlay:   document.getElementById('loading-overlay'),
@@ -1445,8 +1446,18 @@ function sanitizeSetAssetUrl(url, setIdHint = '') {
   const value = String(url || '').trim();
   if (!value) return '';
 
+  if (/^https?:\/\/assets\.tcgdex\.net\/.+\/(logo|symbol)$/i.test(value)) {
+    return `${value}.webp`;
+  }
+
   const normalized = value.toLowerCase();
-  if (normalized === '0' || normalized === 'null' || normalized === 'undefined' || normalized === 'nan') {
+  if (
+    normalized === '0'
+    || normalized === 'null'
+    || normalized === 'undefined'
+    || normalized === 'nan'
+    || normalized.includes('pokeball-fallback.svg')
+  ) {
     return '';
   }
 
@@ -1467,10 +1478,36 @@ function sanitizeSetAssetUrl(url, setIdHint = '') {
   return '';
 }
 
-function attachSetAssetFallback(img, fallbackUrl = './assets/pokeball-fallback.svg') {
-  const originalUrl = img?.src || '';
+function buildMediaCandidateQueue(currentValue, candidateUrls = []) {
+  const current = String(currentValue || '').trim();
+  const seen = new Set();
+  const queue = [];
+  const add = (value) => {
+    const text = String(value || '').trim();
+    if (!text || /pokeball-fallback\.svg/i.test(text)) return;
+    if (current && text === current) return;
+    if (seen.has(text)) return;
+    seen.add(text);
+    queue.push(text);
+  };
+  (Array.isArray(candidateUrls) ? candidateUrls : []).forEach(add);
+  return queue;
+}
+
+function attachSetAssetFallback(img, fallbackUrl = './assets/pokeball-fallback.svg', candidateUrls = []) {
+  const fallbackQueue = buildMediaCandidateQueue(img?.src || '', candidateUrls);
   img.onerror = () => {
-    if (originalUrl) brokenSetAssetUrls.add(originalUrl);
+    const failedUrl = String(img?.src || '').trim();
+    if (failedUrl) brokenSetAssetUrls.add(failedUrl);
+
+    while (fallbackQueue.length) {
+      const next = fallbackQueue.shift();
+      if (next && next !== img.src) {
+        img.src = next;
+        return;
+      }
+    }
+
     img.onerror = null;
     if (fallbackUrl) {
       img.src = fallbackUrl;
@@ -1481,42 +1518,51 @@ function attachSetAssetFallback(img, fallbackUrl = './assets/pokeball-fallback.s
   };
 }
 
-function buildCardImageFallbacks(card, setIdHint = '') {
-  const seen = new Set();
-  const add = (url) => {
-    const value = String(url || '').trim();
-    if (!value || seen.has(value)) return;
-    seen.add(value);
+function attachImageFallback(img, card, setIdHint = '') {
+  void setIdHint;
+  const fallbackQueue = buildMediaCandidateQueue(
+    img?.src || card?.image || card?.imageUrl || '',
+    Array.isArray(card?.imageCandidates) ? card.imageCandidates : []
+  );
+  const wrap = img.closest('.card-img-wrap');
+  const applyVisualFallback = () => {
+    if (wrap) {
+      wrap.classList.add('missing-image');
+      wrap.dataset.placeholder = card?.number
+        ? `${card.number} · Kein Kartenbild`
+        : 'Kein Kartenbild';
+    }
+    img.onerror = null;
+    img.style.display = '';
+    img.src = './assets/pokeball-fallback.svg';
+    img.classList.add('img-fallback');
+    img.alt = `Kein Kartenbild für ${card?.name || card?.number || 'diese Karte'}`;
   };
 
-  const original = String(card?.image || '').trim();
-  const localFallbacks = Array.isArray(card?.imageFallbacks) ? card.imageFallbacks : [];
-  localFallbacks.forEach((url) => add(url));
-
-  if (/^https?:\/\/assets\.tcgdex\.net\/de\//i.test(original)) {
-    add(original.replace('/de/', '/en/'));
+  if (wrap) {
+    wrap.classList.remove('missing-image');
+    delete wrap.dataset.placeholder;
   }
-  if (/\/low\.webp(\?.*)?$/i.test(original)) {
-    add(original.replace(/\/low\.webp(\?.*)?$/i, '/low.jpg$1'));
-    if (/^https?:\/\/assets\.tcgdex\.net\/de\//i.test(original)) {
-      const enWebp = original.replace('/de/', '/en/');
-      add(enWebp.replace(/\/low\.webp(\?.*)?$/i, '/low.jpg$1'));
+  img.classList.remove('img-fallback');
+  img.style.display = '';
+
+  const currentImage = String(card?.image || img?.src || '').trim();
+  if (!currentImage || /pokeball-fallback\.svg/i.test(currentImage)) {
+    while (fallbackQueue.length) {
+      const next = fallbackQueue.shift();
+      if (next) {
+        img.src = next;
+        break;
+      }
     }
   }
 
-  const setId = String(setIdHint || '').trim();
-  const normalizedNumber = normalizeCardNumber(card?.number || '');
-  if (setId && !setId.startsWith('TCGDEX-') && normalizedNumber) {
-    add(`https://images.pokemontcg.io/${encodeURIComponent(setId)}/${encodeURIComponent(normalizedNumber)}.png`);
+  const activeImage = String(img?.src || '').trim();
+  if (!activeImage || /pokeball-fallback\.svg/i.test(activeImage)) {
+    applyVisualFallback();
+    return;
   }
 
-  if (original) seen.delete(original);
-  return Array.from(seen);
-}
-
-function attachImageFallback(img, card, setIdHint = '') {
-  const fallbackQueue = buildCardImageFallbacks(card, setIdHint);
-  img.style.display = '';
   img.onerror = () => {
     while (fallbackQueue.length) {
       const next = fallbackQueue.shift();
@@ -1525,8 +1571,7 @@ function attachImageFallback(img, card, setIdHint = '') {
         return;
       }
     }
-    img.onerror = null;
-    img.style.display = 'none';
+    applyVisualFallback();
   };
 }
 
@@ -2422,12 +2467,17 @@ function createDashSetCard(set, summary) {
   });
 
   const safeLogoUrl = sanitizeSetAssetUrl(set.logoUrl, set.setId);
+  const placeholderCode = String(set.ptcgoCode || set.setId || 'SET').toUpperCase();
 
   card.innerHTML = `
     <div class="dash-set-logo-wrap">
       ${safeLogoUrl
         ? `<img src="${safeLogoUrl}" alt="${set.setName}" class="dash-set-logo" loading="lazy" onerror="this.onerror=null;this.src='./assets/pokeball-fallback.svg';this.classList.add('img-fallback')"/>`
-        : `<span class="dash-set-name-fallback">${set.setName}</span>`}
+        : `<div class="dash-set-placeholder" role="img" aria-label="Kein Setlogo für ${set.setName} verfügbar">
+             <img src="./assets/pokeball-fallback.svg" alt="" class="dash-set-placeholder-icon" loading="lazy" />
+             <span class="dash-set-placeholder-badge">Kein Setlogo</span>
+             <span class="dash-set-placeholder-code">${placeholderCode}</span>
+           </div>`}
     </div>
     <div class="dash-set-info">
       <p class="dash-set-name">${set.setName}</p>
@@ -3374,6 +3424,24 @@ async function reimportCurrentSetFromApi() {
   await loadCurrentSet(true);
 }
 
+function openSettingsDialog() {
+  const currentSettings = loadSettings();
+  const settingsPanel = createSettingsPanel(currentSettings, (updated) => {
+    saveSettings(updated);
+    showToast('Einstellungen gespeichert', 'success', 2000);
+    window.location.reload();
+  });
+
+  const dialog = document.createElement('dialog');
+  dialog.className = 'ss-dialog';
+  dialog.style.cssText = 'width: min(92vw, 760px); max-height: 88vh;';
+  dialog.innerHTML = '<h2>⚙️ Einstellungen</h2>';
+  dialog.appendChild(settingsPanel);
+  document.body.appendChild(dialog);
+  dialog.showModal();
+  dialog.addEventListener('close', () => dialog.remove());
+}
+
 function initDashboardControls() {
   let debounce;
   dom.dashFilter.addEventListener('input', () => {
@@ -3408,6 +3476,7 @@ function initDashboardControls() {
     saveDashboardPreferences();
     renderDashboard();
   });
+  dom.btnOpenSettings?.addEventListener('click', openSettingsDialog);
   dom.btnOverviewSync?.addEventListener('click', syncOverviewFromApi);
   dom.btnOverviewPowerRefresh?.addEventListener('click', powerRefreshOverviewFromApi);
   dom.btnImportBatch?.addEventListener('click', openBatchImportDialog);
@@ -4387,8 +4456,15 @@ function renderLightbox(index) {
     node.classList.toggle('lightbox-fact-long', longText && text !== '—');
   };
 
-  dom.lightboxImg.src              = card.image || '';
-  attachImageFallback(dom.lightboxImg, card, state.currentSet?.setId || '');
+  const lightboxCard = {
+    ...card,
+    image: card.imageLarge || card.image || '',
+    imageCandidates: Array.isArray(card.imageLargeCandidates) && card.imageLargeCandidates.length
+      ? card.imageLargeCandidates
+      : (Array.isArray(card.imageCandidates) ? card.imageCandidates : [])
+  };
+  dom.lightboxImg.src              = lightboxCard.image || '';
+  attachImageFallback(dom.lightboxImg, lightboxCard, state.currentSet?.setId || '');
   dom.lightboxImg.alt              = card.name  || key;
   dom.lightboxTitle.textContent    = card.name  || 'Unbekannt';
   dom.lightboxSubtitle.textContent = `#${card.number}`;
@@ -4528,7 +4604,15 @@ function initLightbox() {
     const syncFullscreenImage = (resetTransform = false) => {
       const card = state.cards[state.lightboxIndex];
       if (!card) return;
-      dom.lightboxImageFull.src = card.image || '';
+      const fullscreenCard = {
+        ...card,
+        image: card.imageLarge || dom.lightboxImg?.currentSrc || card.image || '',
+        imageCandidates: Array.isArray(card.imageLargeCandidates) && card.imageLargeCandidates.length
+          ? card.imageLargeCandidates
+          : (Array.isArray(card.imageCandidates) ? card.imageCandidates : [])
+      };
+      dom.lightboxImageFull.src = fullscreenCard.image || '';
+      attachImageFallback(dom.lightboxImageFull, fullscreenCard, state.currentSet?.setId || '');
       dom.lightboxImageFull.alt = card.name || '';
       if (resetTransform) resetFullscreenTransform();
     };
@@ -4916,12 +5000,12 @@ async function loadCurrentSet(forceRefresh = false) {
   const safeSetSymbolUrl = sanitizeSetAssetUrl(selected.symbolUrl, selected.setId);
 
   if (safeSetLogoUrl) {
-    attachSetAssetFallback(dom.setLogo, './assets/pokeball-fallback.svg');
+    attachSetAssetFallback(dom.setLogo, './assets/pokeball-fallback.svg', selected.logoUrlCandidates);
     dom.setLogo.style.display = '';
     dom.setLogo.src = safeSetLogoUrl;
 
     if (safeSetSymbolUrl) {
-      attachSetAssetFallback(dom.setSymbol, '');
+      attachSetAssetFallback(dom.setSymbol, '', selected.symbolUrlCandidates);
       dom.setSymbol.style.display = '';
       dom.setSymbol.src = safeSetSymbolUrl;
     } else {
@@ -5116,24 +5200,7 @@ async function bootstrap() {
     'snapshots': () => {
       showToast('Snapshots: ' + (loadSnapshots() || []).length + ' verfügbar', 'info', 3000);
     },
-    'settings': () => {
-      const currentSettings = loadSettings();
-      const settingsPanel = createSettingsPanel(currentSettings, (updated) => {
-        saveSettings(updated);
-        showToast('Einstellungen gespeichert', 'success', 2000);
-        window.location.reload();
-      });
-      
-      const dialog = document.createElement('dialog');
-      dialog.className = 'ss-dialog';
-      dialog.style.cssText = 'width: 90vw; max-width: 400px;';
-      dialog.innerHTML = '<h2>⚙️ Einstellungen</h2>';
-      dialog.appendChild(settingsPanel);
-      document.body.appendChild(dialog);
-      dialog.showModal();
-      
-      dialog.addEventListener('close', () => dialog.remove());
-    },
+    'settings': () => openSettingsDialog(),
     'export-collection': async () => {
       if (!state.collection || !state.sets.length) {
         showToast('Keine Sammlung zum Exportieren', 'error', 3000);
@@ -5905,12 +5972,11 @@ function isOfflineLikeError(err) {
 
 function renderOfflineIndicator() {
   const banner = document.getElementById('offline-banner');
-  if (!banner) return;
 
   const offline = _connectivityState.appOnline === false
     || (_connectivityState.appOnline == null && !_connectivityState.browserOnline);
 
-  banner.classList.toggle('visible', offline);
+  if (banner) banner.classList.toggle('visible', offline);
   document.body.classList.toggle('is-offline', offline);
 }
 
@@ -5969,9 +6035,6 @@ async function probeAppConnectivity(options = {}) {
 function initOfflineIndicator() {
   if (_featureInitFlags.offline) return;
   _featureInitFlags.offline = true;
-
-  const banner = document.getElementById('offline-banner');
-  if (!banner) return;
 
   window.addEventListener('online', () => {
     _connectivityState.browserOnline = true;

@@ -5,7 +5,7 @@ import {
   combineSetsForOverviewCompat,
   fetchAllPrimaryCardsForSet
 } from '../pokecode-compat.js?v=20260403d';
-import { resolveDisplayCard, resolveDisplaySet } from './schema-contract.js';
+import { buildSetRecordFromSources, resolveDisplayCard, resolveDisplaySet } from './schema-contract.js?v=20260504d';
 
 // ── Interne Hilfsfunktionen ──────────────────────────────────────
 

@@ -1,5 +1,5 @@
 import { normalizeCardNumber, naturalSort } from './utils.js';
-import { buildCardRecordFromSources, buildSetRecordFromSources } from './data/schema-contract.js';
+import { buildCardRecordFromSources, buildSetRecordFromSources } from './data/schema-contract.js?v=20260504d';
 
 export function normalizeString(str) {
   if (str === null || typeof str === 'undefined') {
@@ -124,25 +124,34 @@ export function findMatchingTcgdexSet(pokemontcgIoSet, allTcgdexSets, customMapp
   return null;
 }
 
-export function resolveTcgdexImageUrl(tcgdexSetId, tcgdexCard) {
+export function resolveTcgdexImageUrl(tcgdexSetId, tcgdexCard, options = {}) {
+  const config = typeof options === 'string'
+    ? { quality: options }
+    : (options || {});
+  const quality = String(config.quality || 'low').toLowerCase() === 'high' ? 'high' : 'low';
+  const language = String(config.language || 'en').trim() || 'en';
+  const seriesId = String(config.seriesId || tcgdexCard?.set?.serie?.id || tcgdexCard?.serie?.id || '').trim();
+
   const imageValue = tcgdexCard?.image;
   if (typeof imageValue === 'string' && imageValue.trim()) {
-    const trimmed = imageValue.trim();
-    if (/\.(png|jpe?g|webp)$/i.test(trimmed)) {
-      return trimmed;
-    }
-    return `${trimmed}/low.jpg`;
+    const trimmed = imageValue.trim().replace(/\/(low|high)\.(png|jpe?g|webp)$/i, '');
+    return `${trimmed}/${quality}.webp`;
   }
   if (imageValue && typeof imageValue === 'object') {
-    if (imageValue.low) return imageValue.low;
-    if (imageValue.high) return imageValue.high;
-    if (imageValue.base) return `${imageValue.base}/low.jpg`;
+    if (typeof imageValue[quality] === 'string' && imageValue[quality].trim()) return imageValue[quality].trim();
+    if (typeof imageValue.base === 'string' && imageValue.base.trim()) return `${imageValue.base.trim()}/${quality}.webp`;
+    if (typeof imageValue.low === 'string' && imageValue.low.trim()) {
+      return imageValue.low.trim().replace(/\/(low|high)\.(png|jpe?g|webp)$/i, `/${quality}.webp`);
+    }
+    if (typeof imageValue.high === 'string' && imageValue.high.trim()) {
+      return imageValue.high.trim().replace(/\/(low|high)\.(png|jpe?g|webp)$/i, `/${quality}.webp`);
+    }
   }
   const localId = normalizeCardNumber(tcgdexCard?.localId || tcgdexCard?.id || '');
-  if (!tcgdexSetId || !localId) {
+  if (!tcgdexSetId || !localId || !seriesId) {
     return null;
   }
-  return `https://assets.tcgdex.net/de/${encodeURIComponent(tcgdexSetId)}/${encodeURIComponent(localId)}/low.webp`;
+  return `https://assets.tcgdex.net/${encodeURIComponent(language)}/${encodeURIComponent(seriesId)}/${encodeURIComponent(tcgdexSetId)}/${encodeURIComponent(localId)}/${quality}.webp`;
 }
 
 function hasTcgdexSetById(tcgdexSets, setId) {
@@ -199,11 +208,14 @@ function resolveCardmarketUrl({ tcgdexUrl = null, primaryUrl = null, cardName = 
   return buildCardmarketSearchUrl({ cardName, setTag, setName, cardNumber });
 }
 
-function mapTcgdexCardToMerged(tcgdexSetId, tcgdexCard, fallbackImage = null, fallbackSetName = '', fallbackSetTag = '') {
+function mapTcgdexCardToMerged(tcgdexSetId, tcgdexCard, fallbackImageSmall = null, fallbackImageLarge = null, fallbackSetName = '', fallbackSetTag = '', tcgdexSeriesId = '') {
   return buildCardRecordFromSources({
     setId: tcgdexSetId,
+    tcgdexSetId,
+    tcgdexSeriesId,
     tcgdexCard,
-    fallbackImage: resolveTcgdexImageUrl(tcgdexSetId, tcgdexCard) || fallbackImage || '',
+    fallbackImageSmall: resolveTcgdexImageUrl(tcgdexSetId, tcgdexCard, { quality: 'low', seriesId: tcgdexSeriesId }) || fallbackImageSmall || '',
+    fallbackImageLarge: resolveTcgdexImageUrl(tcgdexSetId, tcgdexCard, { quality: 'high', seriesId: tcgdexSeriesId }) || fallbackImageLarge || fallbackImageSmall || '',
     fallbackSetName,
     fallbackSetTag
   });
@@ -325,8 +337,17 @@ export async function loadCardsForSetCompat({
   allCards = primaryCards.map((primaryCard) => {
     const number = normalizeCardNumber(primaryCard.number);
     const tcgdexCard = tcgdexCardsMap.get(number);
-    const generatedTcgdexImage = tcgdexCard
-      ? resolveTcgdexImageUrl(matchingTcgdexSet?.id || tcgdexId, tcgdexCard)
+    const generatedTcgdexImageSmall = tcgdexCard
+      ? resolveTcgdexImageUrl(matchingTcgdexSet?.id || tcgdexId, tcgdexCard, {
+          quality: 'low',
+          seriesId: tcgdexDetailedSet?.serie?.id || matchingTcgdexSet?.serie?.id || ''
+        })
+      : null;
+    const generatedTcgdexImageLarge = tcgdexCard
+      ? resolveTcgdexImageUrl(matchingTcgdexSet?.id || tcgdexId, tcgdexCard, {
+          quality: 'high',
+          seriesId: tcgdexDetailedSet?.serie?.id || matchingTcgdexSet?.serie?.id || ''
+        })
       : null;
     const resolvedCardmarketUrl = resolveCardmarketUrl({
       tcgdexUrl: tcgdexCard?.links?.cardmarket || null,
@@ -341,7 +362,13 @@ export async function loadCardsForSetCompat({
       setId: pokemontcgSetId,
       primaryCard,
       tcgdexCard,
-      fallbackImage: generatedTcgdexImage
+      tcgdexSetId: matchingTcgdexSet?.id || tcgdexId,
+      tcgdexSeriesId: tcgdexDetailedSet?.serie?.id || matchingTcgdexSet?.serie?.id || '',
+      fallbackImageSmall: generatedTcgdexImageSmall
+        || primaryCard.images?.small
+        || `https://images.pokemontcg.io/${pokemontcgSetId}/${number}.png`,
+      fallbackImageLarge: generatedTcgdexImageLarge
+        || primaryCard.images?.large
         || primaryCard.images?.small
         || `https://images.pokemontcg.io/${pokemontcgSetId}/${number}.png`,
       fallbackSetName: primaryDetailedSet?.name || matchingTcgdexSet?.name || setName || '',
@@ -360,8 +387,10 @@ export async function loadCardsForSetCompat({
           matchingTcgdexSet?.id || tcgdexId,
           tcgdexCard,
           `https://images.pokemontcg.io/${pokemontcgSetId}/${normalizedTcgdexNumber}.png`,
+          `https://images.pokemontcg.io/${pokemontcgSetId}/${normalizedTcgdexNumber}.png`,
           primaryDetailedSet?.name || matchingTcgdexSet?.name || setName || '',
-          officialSetTag
+          officialSetTag,
+          tcgdexDetailedSet?.serie?.id || matchingTcgdexSet?.serie?.id || ''
         )
       });
       const resolvedTcgdexCardmarketUrl = resolveCardmarketUrl({

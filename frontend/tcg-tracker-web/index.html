@@ -17,15 +17,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&display=swap" rel="stylesheet" />
   <link rel="apple-touch-icon" href="./assets/branding/logo-veras-pokemon.jpg?v=8" />
-  <link rel="stylesheet" href="./css/main.css" />
-  <link rel="stylesheet" href="./css/trading-marketplace.css" />
+  <link rel="stylesheet" href="./css/main.css?v=20260504e" />
+  <link rel="stylesheet" href="./css/trading-marketplace.css?v=20260504e" />
 </head>
 <body class="dark">
-
-  <!-- F3: Offline-Banner -->
-  <div id="offline-banner" class="offline-banner" role="alert" aria-live="assertive">
-    📴 Offline – gespeicherte Daten werden angezeigt
-  </div>
 
   <!-- Lade-Overlay -->
   <div id="loading-overlay" class="loading-overlay hidden" role="status" aria-live="polite">
@@ -151,6 +146,7 @@
     </nav>
     <div id="recent-sets" class="recent-sets hidden" aria-label="Zuletzt bearbeitete Sets"></div>
     <div class="header-actions">
+      <button id="btn-open-settings" class="btn-icon" title="Einstellungen" aria-label="Einstellungen">⚙️</button>
       <button id="btn-share" class="btn-icon btn-share-link" title="Sammlung teilen – Link kopieren" aria-label="Link teilen">🔗</button>
       <button id="btn-auth" data-state="in">Google Login</button>
       <div class="zoom-control" title="Rastergröße">
@@ -222,7 +218,7 @@
           <button class="dashboard-view-tab" type="button" data-dashboard-view="favorites" aria-selected="false">Favoriten</button>
           <button id="btn-dashboard-compact" class="dashboard-view-tab" type="button" aria-pressed="false" title="Ansichtsdichte wechseln">Komfort</button>
         </div>
-        <details class="dashboard-tools">
+        <details class="dashboard-tools hidden" hidden aria-hidden="true">
           <summary>🧰 Tools</summary>
           <div class="dashboard-actions">
             <section class="dashboard-tools-group" aria-label="Import und Synchronisation">
@@ -459,5 +455,5 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://apis.google.com/js/api.js" async defer></script>
-  <script type="module" src="./js/app.js?v=20260403h"></script>
+  <script type="module" src="./js/app.js?v=20260504e"></script>
 </html>

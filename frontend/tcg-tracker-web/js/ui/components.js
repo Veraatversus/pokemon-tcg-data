@@ -202,7 +202,7 @@ export function createExportDialog(report) {
 // SETTINGS PANEL
 // ══════════════════════════════════════════════════════════════════════════
 
-export function createSettingsPanel(currentSettings, onSave) {
+export function createSettingsPanel(currentSettings = {}, onSave) {
   const panel = document.createElement('div');
   panel.className = 'settings-panel';
   panel.style.cssText = `
@@ -216,11 +216,9 @@ export function createSettingsPanel(currentSettings, onSave) {
   `;
 
   const settings = [
-    { key: 'darkMode', label: 'Dark Mode', type: 'toggle' },
-    { key: 'compactMode', label: 'Kompaktus Modus', type: 'toggle' },
-    { key: 'autoBackup', label: 'Auto Backup', type: 'toggle' },
-    { key: 'notificationsEnabled', label: 'Benachrichtigungen', type: 'toggle' },
-    { key: 'expertResolverMode', label: 'Expert Resolver Modus', type: 'toggle' }
+    { key: 'compactMode', label: 'Kompaktmodus' },
+    { key: 'autoBackup', label: 'Auto-Backup' },
+    { key: 'notificationsEnabled', label: 'Benachrichtigungen' }
   ];
 
   const resolverOptions = [
@@ -232,6 +230,8 @@ export function createSettingsPanel(currentSettings, onSave) {
     { value: 'tcgdex|legacy|vera', label: 'TCGDex > Legacy > Vera' }
   ];
 
+  const getResolverDefaultOrder = () => 'tcgdex|vera|legacy';
+
   const fieldGroups = [
     {
       scope: 'set',
@@ -241,55 +241,154 @@ export function createSettingsPanel(currentSettings, onSave) {
     {
       scope: 'card',
       title: 'Karten-Felder',
-      fields: ['number', 'name', 'image', 'cardmarketUrl', 'rarity', 'hp', 'types', 'supertype', 'subtypes', 'artist', 'rules', 'flavorText']
+      fields: ['number', 'name', 'image', 'imageLarge', 'cardmarketUrl', 'rarity', 'hp', 'types', 'supertype', 'subtypes', 'evolvesFrom', 'artist', 'regulationMark', 'rules', 'flavorText']
     }
   ];
 
   const currentMatrix = currentSettings.resolverMatrix || { set: {}, card: {} };
 
+  const toolGroups = [
+    {
+      title: 'Import & Sync',
+      buttons: [
+        ['btn-overview-sync', '🔄 Overview sync'],
+        ['btn-overview-power-refresh', '⚡ Power-Refresh'],
+        ['btn-import-batch', '📦 Batch-Import'],
+        ['btn-manage-imported-sets', '🗂️ Importierte Sets verwalten'],
+        ['btn-import-all-missing', '🌐 Alle fehlenden importieren'],
+        ['btn-reimport-current', '♻️ Aktuelles Set reimportieren'],
+        ['btn-reimport-all-imported', '🔁 Alle importierten aktualisieren']
+      ]
+    },
+    {
+      title: 'Queue & Automatisierung',
+      buttons: [
+        ['btn-queue-autofix-refresh', '🧩 Queue: Auto-Fix → Refresh'],
+        ['btn-queue-builder', '🧱 Queue Builder'],
+        ['btn-queue-run', '▶️ Queue starten'],
+        ['btn-queue-clear', '🗑️ Queue leeren']
+      ]
+    },
+    {
+      title: 'Diagnose & Backup',
+      buttons: [
+        ['btn-export-summary-csv', '📤 Sammlung CSV'],
+        ['btn-data-health-check', '🩺 Datencheck'],
+        ['btn-data-health-autofix', '🛠️ Datencheck + Auto-Fix'],
+        ['btn-sheets-retry-report', '📈 Sheets Retry Analyse'],
+        ['dashboard-action-parity', '🧪 Pokecode-Parity-Test'],
+        ['btn-export-backup', '💾 Backup exportieren'],
+        ['btn-import-backup', '📥 Backup importieren']
+      ]
+    }
+  ];
+
   const buildResolverRows = (scope, fields) => fields.map((field) => {
     const currentOrder = Array.isArray(currentMatrix?.[scope]?.[field]) && currentMatrix[scope][field].length
       ? currentMatrix[scope][field].join('|')
-      : 'tcgdex|vera|legacy';
+      : getResolverDefaultOrder(scope, field);
     return `
       <label style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin: 6px 0;">
         <span style="font-size:12px; color:var(--color-muted);">${scope}.${field}</span>
-        <select data-resolver-scope="${scope}" data-resolver-field="${field}" style="min-width: 190px;">
+        <select data-resolver-scope="${scope}" data-resolver-field="${field}" style="min-width: 210px;">
           ${resolverOptions.map((opt) => `<option value="${opt.value}" ${opt.value === currentOrder ? 'selected' : ''}>${opt.label}</option>`).join('')}
         </select>
       </label>
     `;
   }).join('');
 
+  const expertEnabled = Boolean(currentSettings.expertResolverMode);
+
   panel.innerHTML = `
-    ${settings
-      .map(s => `
-        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      ${settings.map((s) => `
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
           <input type="checkbox" data-key="${s.key}" ${currentSettings[s.key] ? 'checked' : ''} />
           <span>${s.label}</span>
         </label>
-      `)
-      .join('')}
-    <details style="border:1px solid var(--color-border); border-radius:6px; padding:8px; background: var(--color-surface);">
-      <summary style="cursor:pointer; font-weight:600;">Resolver-Matrix (Expert)</summary>
-      <p style="font-size:12px; color:var(--color-muted); margin:8px 0 10px;">Legt fest, welche Quelle pro Feld priorisiert wird. Reihenfolge links nach rechts.</p>
+      `).join('')}
+
+      <div style="border:1px solid var(--color-border); border-radius:8px; padding:10px 12px; background: var(--color-surface);">
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600;">
+          <input type="checkbox" data-key="expertResolverMode" ${expertEnabled ? 'checked' : ''} />
+          <span>Expert Resolver Modus</span>
+        </label>
+        <p style="font-size:12px; color:var(--color-muted); margin:8px 0 0; line-height:1.45;">
+          Steuert lokal in diesem Browser, ob pro Feld bevorzugt Vera- oder TCGDex-Werte angezeigt werden. Die Rohdaten in Google Sheets bleiben dabei unverändert.
+        </p>
+      </div>
+    </div>
+
+    <p data-expert-resolver-hint style="font-size:12px; color:var(--color-muted); margin:0; ${expertEnabled ? 'display:none;' : ''}">
+      Aktiviere den Expert Resolver Modus, um die Quellen-Priorität pro Feld anzupassen.
+    </p>
+
+    <details data-expert-resolver-details ${expertEnabled ? 'open' : ''} style="border:1px solid var(--color-border); border-radius:8px; padding:10px 12px; background: var(--color-surface); ${expertEnabled ? '' : 'display:none;'}">
+      <summary style="cursor:pointer; font-weight:700;">Resolver-Matrix (Expert)</summary>
+      <p style="font-size:12px; color:var(--color-muted); margin:8px 0 10px; line-height:1.45;">
+        Reihenfolge = Priorität von links nach rechts. Beispiel: <strong>TCGDex &gt; Vera &gt; Legacy</strong> bedeutet, dass zuerst TCGDex verwendet wird und nur bei leerem Wert auf Vera bzw. Legacy zurückgefallen wird.
+      </p>
+      <div style="font-size:12px; color:var(--color-muted); border-left:3px solid rgba(37,99,235,.45); padding:8px 10px; background: rgba(37,99,235,.06); border-radius:6px; margin-bottom:10px;">
+        Sicherer Standard: Namen und Bilder bevorzugen meist <strong>TCGDex</strong>. Für <strong>Logo/Symbol</strong> sowie <strong>Kartenbild groß</strong> kannst du Vera- und TCGDex-Werte jetzt getrennt priorisieren.
+      </div>
       ${fieldGroups.map((group) => `
-        <div style="margin: 10px 0 12px;">
-          <div style="font-size:12px; font-weight:600; margin-bottom:4px;">${group.title}</div>
+        <div style="margin: 10px 0 14px;">
+          <div style="font-size:12px; font-weight:700; margin-bottom:4px;">${group.title}</div>
           ${buildResolverRows(group.scope, group.fields)}
         </div>
       `).join('')}
-      <button class="btn-secondary" type="button" data-action="resolver-defaults" style="margin-top:6px;">Resolver auf Defaults</button>
+      <div style="display:flex; justify-content:flex-end; margin-top:6px;">
+        <button class="btn-secondary" type="button" data-action="resolver-defaults">Resolver auf Defaults</button>
+      </div>
     </details>
-    <div style="display: flex; gap: 8px; margin-top: 12px;">
+
+    <details style="border:1px solid var(--color-border); border-radius:8px; padding:10px 12px; background: var(--color-surface);">
+      <summary style="cursor:pointer; font-weight:700;">🧰 Tools & Wartung</summary>
+      <p style="font-size:12px; color:var(--color-muted); margin:8px 0 10px; line-height:1.45;">
+        Die bisherigen Dashboard-Tools sind jetzt hier im Expertenmenü gebündelt.
+      </p>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        ${toolGroups.map((group) => `
+          <section>
+            <div style="font-size:12px; font-weight:700; margin-bottom:6px;">${group.title}</div>
+            <div style="display:flex; flex-wrap:wrap; gap:8px;">
+              ${group.buttons.map(([target, label]) => `
+                <button class="btn-secondary" type="button" data-proxy-click="${target}">${label}</button>
+              `).join('')}
+            </div>
+          </section>
+        `).join('')}
+      </div>
+    </details>
+
+    <div style="display:flex; gap:8px; margin-top: 4px; flex-wrap: wrap;">
       <button class="btn-secondary" type="button" data-action="clear-history">🗑️ Suchverlauf löschen</button>
       <button class="btn-primary" type="button" data-action="save">💾 Speichern</button>
     </div>
   `;
 
+  const expertToggle = panel.querySelector('input[data-key="expertResolverMode"]');
+  const expertHint = panel.querySelector('[data-expert-resolver-hint]');
+  const expertDetails = panel.querySelector('[data-expert-resolver-details]');
+
+  const syncExpertModeUi = () => {
+    const enabled = Boolean(expertToggle?.checked);
+    if (expertHint) expertHint.style.display = enabled ? 'none' : 'block';
+    if (expertDetails) {
+      expertDetails.style.display = enabled ? 'block' : 'none';
+      if (enabled) expertDetails.open = true;
+    }
+    panel.querySelectorAll('select[data-resolver-scope][data-resolver-field], [data-action="resolver-defaults"]').forEach((el) => {
+      el.disabled = !enabled;
+    });
+  };
+
+  expertToggle?.addEventListener('change', syncExpertModeUi);
+  syncExpertModeUi();
+
   panel.querySelector('[data-action="save"]').addEventListener('click', () => {
     const updated = { ...currentSettings };
-    panel.querySelectorAll('input[type="checkbox"]').forEach(input => {
+    panel.querySelectorAll('input[type="checkbox"]').forEach((input) => {
       updated[input.dataset.key] = input.checked;
     });
 
@@ -309,15 +408,7 @@ export function createSettingsPanel(currentSettings, onSave) {
     panel.querySelectorAll('select[data-resolver-scope][data-resolver-field]').forEach((select) => {
       const scope = select.dataset.resolverScope;
       const field = select.dataset.resolverField;
-      if (scope === 'set' && ['ptcgoCode', 'logoUrl', 'symbolUrl', 'legalities'].includes(field)) {
-        select.value = 'vera|tcgdex|legacy';
-      } else if (scope === 'card' && ['number'].includes(field)) {
-        select.value = 'legacy|vera|tcgdex';
-      } else if (scope === 'card' && ['rarity', 'hp', 'types', 'supertype', 'subtypes', 'artist', 'rules', 'flavorText'].includes(field)) {
-        select.value = 'vera|tcgdex|legacy';
-      } else {
-        select.value = 'tcgdex|vera|legacy';
-      }
+      select.value = getResolverDefaultOrder(scope, field);
     });
   });
 
@@ -325,6 +416,20 @@ export function createSettingsPanel(currentSettings, onSave) {
     if (window.confirm('Suchverlauf wirklich löschen?')) {
       window.dispatchEvent(new Event('clear-search-history'));
     }
+  });
+
+  panel.querySelectorAll('[data-proxy-click]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const targetId = button.dataset.proxyClick;
+      const target = targetId ? document.getElementById(targetId) : null;
+      const dialog = panel.closest('dialog');
+      if (dialog?.open) dialog.close();
+      if (target) {
+        window.setTimeout(() => target.click(), 0);
+      } else {
+        console.warn('[settings-panel] Tool target not found:', targetId);
+      }
+    });
   });
 
   return panel;

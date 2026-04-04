@@ -13,7 +13,7 @@ import {
   CARD_MATCH_STATUS,
   resolveDisplaySet,
   resolveDisplayCard
-} from './schema-contract.js';
+} from './schema-contract.js?v=20260504d';
 
 function quoteSheetName(sheetName) {
   const name = String(sheetName ?? '').replace(/'/g, "''");
@@ -507,6 +507,12 @@ function toSafeCellString(value) {
   return String(value ?? '').trim();
 }
 
+function toPersistableMediaString(value) {
+  const text = toSafeCellString(value);
+  if (!text) return '';
+  return /pokeball-fallback\.svg/i.test(text) ? '' : text;
+}
+
 function toSafeJsonString(value) {
   if (value == null) return '';
   if (Array.isArray(value) && value.length === 0) return '';
@@ -549,6 +555,16 @@ function isNewCardFormat(row) {
   return /^\d{4}-\d{2}-\d{2}T/.test(String(row?.[2] ?? ''));
 }
 
+function isCardImageSplitFormat(row) {
+  const slot16 = String(row?.[16] ?? '').trim();
+  const slot19 = String(row?.[19] ?? '').trim();
+  const slot18 = String(row?.[18] ?? '').trim();
+  if (/^[\[{]/.test(slot19)) return true;   // neues Format: vera_types liegt bei [19]
+  if (/^[\[{]/.test(slot18)) return false;  // altes Format: vera_types lag bei [18]
+  if (/^https?:\/\//i.test(slot16)) return true; // neues Format: vera_cardmarket_url liegt bei [16]
+  return Array.isArray(row) && row.length >= CARD_DB_HEADERS.length;
+}
+
 async function upsertDbSet(setMeta, imported = false) {
   await ensureNormalizedSchema();
   const setId = toSafeCellString(setMeta?.setId);
@@ -583,9 +599,10 @@ async function upsertDbSet(setMeta, imported = false) {
     toSafeCellString(setMeta?.tcgdex_releaseDate ?? ''),                     // [23] tcgdex_releaseDate
     toSafeJsonString(setMeta?.vera_legalities),                              // [24] vera_legalities
     toSafeJsonString(setMeta?.tcgdex_legal),                                 // [25] tcgdex_legal
-    toSafeCellString(setMeta?.vera_images_logo ?? ''),                       // [26] vera_images_logo
-    toSafeCellString(setMeta?.tcgdex_logo ?? ''),                            // [27] tcgdex_logo
-    toSafeCellString(setMeta?.vera_images_symbol ?? '')                      // [28] vera_images_symbol
+    toPersistableMediaString(setMeta?.vera_images_logo ?? ''),               // [26] vera_images_logo
+    toPersistableMediaString(setMeta?.tcgdex_logo ?? ''),                    // [27] tcgdex_logo
+    toPersistableMediaString(setMeta?.vera_images_symbol ?? ''),             // [28] vera_images_symbol
+    toPersistableMediaString(setMeta?.tcgdex_symbol ?? '')                   // [29] tcgdex_symbol
   ];
 
   const existingIndex = rows.findIndex((row) => toSafeCellString(row[0]).toLowerCase() === setId.toLowerCase());
@@ -643,28 +660,29 @@ async function writeDbCardsForSet(setId, cards) {
     toSafeCellString(card.tcgdex_localId ?? ''),                               // [9]  tcgdex_localId
     toSafeCellString(card.vera_name ?? ''),                                    // [10] vera_name
     toSafeCellString(card.tcgdex_name ?? ''),                                  // [11] tcgdex_name
-    toSafeCellString(card.vera_images_small ?? ''),                            // [12] vera_images_small
-    toSafeCellString(card.tcgdex_image ?? ''),                                 // [13] tcgdex_image
-    toSafeCellString(card.vera_images_large ?? ''),                            // [14] vera_images_large
-    toSafeCellString(card.vera_cardmarket_url ?? ''),                          // [15] vera_cardmarket_url
-    toSafeCellString(card.vera_rarity ?? ''),                                  // [16] vera_rarity
-    toSafeCellString(card.vera_hp ?? ''),                                      // [17] vera_hp
-    toSafeJsonString(card.vera_types),                                         // [18] vera_types
-    toSafeCellString(card.vera_supertype ?? ''),                               // [19] vera_supertype
-    toSafeJsonString(card.vera_subtypes),                                      // [20] vera_subtypes
-    toSafeCellString(card.vera_evolvesFrom ?? ''),                             // [21] vera_evolvesFrom
-    toSafeCellString(card.vera_artist ?? ''),                                  // [22] vera_artist
-    toSafeCellString(card.vera_regulationMark ?? ''),                          // [23] vera_regulationMark
-    toSafeCellString(card.vera_flavorText ?? ''),                              // [24] vera_flavorText
-    toSafeJsonString(card.vera_nationalPokedexNumbers),                        // [25] vera_nationalPokedexNumbers
-    Number(card.vera_convertedRetreatCost) || 0,                               // [26] vera_convertedRetreatCost
-    toSafeJsonString(card.vera_retreatCost),                                   // [27] vera_retreatCost
-    toSafeJsonString(card.vera_legalities),                                    // [28] vera_legalities
-    toSafeJsonString(card.vera_abilities),                                     // [29] vera_abilities
-    toSafeJsonString(card.vera_attacks),                                       // [30] vera_attacks
-    toSafeJsonString(card.vera_weaknesses),                                    // [31] vera_weaknesses
-    toSafeJsonString(card.vera_resistances),                                   // [32] vera_resistances
-    toSafeJsonString(card.vera_rules)                                          // [33] vera_rules
+    toPersistableMediaString(card.vera_images_small ?? ''),                    // [12] vera_images_small
+    toPersistableMediaString(card.tcgdex_image_small ?? card.tcgdex_image ?? ''), // [13] tcgdex_image_small
+    toPersistableMediaString(card.vera_images_large ?? ''),                    // [14] vera_images_large
+    toPersistableMediaString(card.tcgdex_image_large ?? ''),                   // [15] tcgdex_image_large
+    toSafeCellString(card.vera_cardmarket_url ?? ''),                          // [16] vera_cardmarket_url
+    toSafeCellString(card.vera_rarity ?? ''),                                  // [17] vera_rarity
+    toSafeCellString(card.vera_hp ?? ''),                                      // [18] vera_hp
+    toSafeJsonString(card.vera_types),                                         // [19] vera_types
+    toSafeCellString(card.vera_supertype ?? ''),                               // [20] vera_supertype
+    toSafeJsonString(card.vera_subtypes),                                      // [21] vera_subtypes
+    toSafeCellString(card.vera_evolvesFrom ?? ''),                             // [22] vera_evolvesFrom
+    toSafeCellString(card.vera_artist ?? ''),                                  // [23] vera_artist
+    toSafeCellString(card.vera_regulationMark ?? ''),                          // [24] vera_regulationMark
+    toSafeCellString(card.vera_flavorText ?? ''),                              // [25] vera_flavorText
+    toSafeJsonString(card.vera_nationalPokedexNumbers),                        // [26] vera_nationalPokedexNumbers
+    Number(card.vera_convertedRetreatCost) || 0,                               // [27] vera_convertedRetreatCost
+    toSafeJsonString(card.vera_retreatCost),                                   // [28] vera_retreatCost
+    toSafeJsonString(card.vera_legalities),                                    // [29] vera_legalities
+    toSafeJsonString(card.vera_abilities),                                     // [30] vera_abilities
+    toSafeJsonString(card.vera_attacks),                                       // [31] vera_attacks
+    toSafeJsonString(card.vera_weaknesses),                                    // [32] vera_weaknesses
+    toSafeJsonString(card.vera_resistances),                                   // [33] vera_resistances
+    toSafeJsonString(card.vera_rules)                                          // [34] vera_rules
   ]);
   await appendDbRows(DB_SHEETS.cards, DB_HEADERS.cards.length, setRows);
 }
@@ -714,7 +732,9 @@ export async function readDbCardsForSet(setId) {
   return Array.from(latestPerCard.values())
     .map((row) => {
       if (isNewCardFormat(row)) {
-        // New CARD_DB_HEADERS format
+        // CARD_DB_HEADERS format; unterstützt altes Bild-Schema (ohne tcgdex_image_large) rückwärtskompatibel.
+        const hasSplitImageSchema = isCardImageSplitFormat(row);
+        const offset = hasSplitImageSchema ? 1 : 0;
         return resolveDisplayCard({
           cardId:                      toSafeCellString(row[1]),
           updatedAt:                   toSafeCellString(row[2]),
@@ -728,27 +748,28 @@ export async function readDbCardsForSet(setId) {
           vera_name:                   toSafeCellString(row[10]),
           tcgdex_name:                 toSafeCellString(row[11]),
           vera_images_small:           toSafeCellString(row[12]),
-          tcgdex_image:                toSafeCellString(row[13]),
+          tcgdex_image_small:          toSafeCellString(row[13]),
           vera_images_large:           toSafeCellString(row[14]),
-          vera_cardmarket_url:         toSafeCellString(row[15]),
-          vera_rarity:                 toSafeCellString(row[16]),
-          vera_hp:                     toSafeCellString(row[17]),
-          vera_types:                  tryParseJson(row[18], []),
-          vera_supertype:              toSafeCellString(row[19]),
-          vera_subtypes:               tryParseJson(row[20], []),
-          vera_evolvesFrom:            toSafeCellString(row[21]),
-          vera_artist:                 toSafeCellString(row[22]),
-          vera_regulationMark:         toSafeCellString(row[23]),
-          vera_flavorText:             toSafeCellString(row[24]),
-          vera_nationalPokedexNumbers: tryParseJson(row[25], []),
-          vera_convertedRetreatCost:   Number(row[26]) || 0,
-          vera_retreatCost:            tryParseJson(row[27], []),
-          vera_legalities:             tryParseJson(row[28], null),
-          vera_abilities:              tryParseJson(row[29], []),
-          vera_attacks:                tryParseJson(row[30], []),
-          vera_weaknesses:             tryParseJson(row[31], []),
-          vera_resistances:            tryParseJson(row[32], []),
-          vera_rules:                  tryParseJson(row[33], [])
+          tcgdex_image_large:          hasSplitImageSchema ? toSafeCellString(row[15]) : '',
+          vera_cardmarket_url:         toSafeCellString(row[15 + offset]),
+          vera_rarity:                 toSafeCellString(row[16 + offset]),
+          vera_hp:                     toSafeCellString(row[17 + offset]),
+          vera_types:                  tryParseJson(row[18 + offset], []),
+          vera_supertype:              toSafeCellString(row[19 + offset]),
+          vera_subtypes:               tryParseJson(row[20 + offset], []),
+          vera_evolvesFrom:            toSafeCellString(row[21 + offset]),
+          vera_artist:                 toSafeCellString(row[22 + offset]),
+          vera_regulationMark:         toSafeCellString(row[23 + offset]),
+          vera_flavorText:             toSafeCellString(row[24 + offset]),
+          vera_nationalPokedexNumbers: tryParseJson(row[25 + offset], []),
+          vera_convertedRetreatCost:   Number(row[26 + offset]) || 0,
+          vera_retreatCost:            tryParseJson(row[27 + offset], []),
+          vera_legalities:             tryParseJson(row[28 + offset], null),
+          vera_abilities:              tryParseJson(row[29 + offset], []),
+          vera_attacks:                tryParseJson(row[30 + offset], []),
+          vera_weaknesses:             tryParseJson(row[31 + offset], []),
+          vera_resistances:            tryParseJson(row[32 + offset], []),
+          vera_rules:                  tryParseJson(row[33 + offset], [])
         });
       }
       // Legacy format (pre-CARD_DB_HEADERS): display fields at [2-15], vera_* at [20-44]
@@ -843,7 +864,8 @@ export async function listSetsOverviewData() {
           tcgdex_legal:                 tryParseJson(row[25], null),
           vera_images_logo:             toSafeCellString(row[26]),
           tcgdex_logo:                  toSafeCellString(row[27]),
-          vera_images_symbol:           toSafeCellString(row[28])
+          vera_images_symbol:           toSafeCellString(row[28]),
+          tcgdex_symbol:                toSafeCellString(row[29])
         });
       }
       // Legacy format (pre-SET_DB_HEADERS)
@@ -1011,9 +1033,10 @@ export async function readSummarySheet() {
 /** Hilfsfunktion: Extrahiert die URL aus einer =IMAGE("...") Formel. */
 function extractImageUrl(value) {
   if (!value) return '';
-  const text = String(value);
+  const text = String(value).trim();
+  if (!text || /pokeball-fallback\.svg/i.test(text)) return '';
   const match = /=IMAGE\("([^"]+)"/.exec(text);
-  if (match) return match[1];
+  if (match && !/pokeball-fallback\.svg/i.test(match[1])) return match[1];
   if (/^https?:\/\//i.test(text)) return text;
   return '';
 }
@@ -1025,8 +1048,8 @@ function buildOverviewRowValues(setMeta, imported = false) {
   return [[
     toSafeCellString(meta.setId ?? setMeta.setId),
     toSafeCellString(meta.setName),
-    toSafeCellString(meta.logoUrl),
-    toSafeCellString(meta.symbolUrl),
+    toPersistableMediaString(meta.logoUrl),
+    toPersistableMediaString(meta.symbolUrl),
     toSafeCellString(meta.series),
     toSafeCellString(meta.releaseDate),
     Number(meta.totalCards) || 0,
