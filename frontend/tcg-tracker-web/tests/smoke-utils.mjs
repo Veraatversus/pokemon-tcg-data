@@ -68,7 +68,13 @@ export async function gotoReady(page, url = BASE_URL) {
     async () => {
       await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
       await page.waitForTimeout(200);
-      await page.waitForLoadState('networkidle', { timeout: 12000 });
+      await page.waitForLoadState('networkidle', { timeout: 12000 }).catch(() => {});
+      await page.evaluate(() => {
+        if (window.location.hash) {
+          window.dispatchEvent(new HashChangeEvent('hashchange'));
+        }
+      }).catch(() => {});
+      await page.waitForTimeout(250);
     },
     { retries: 3, delayMs: 500, label: 'Navigation' }
   );

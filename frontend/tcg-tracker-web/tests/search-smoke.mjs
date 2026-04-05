@@ -149,6 +149,63 @@ async function runDashboardCase(page, name, query, expectedTexts = []) {
   };
 }
 
+async function runGoToSetCase(page, name, query) {
+  await page.evaluate(() => {
+    window.location.hash = '#search';
+  });
+  await pause(page, 350);
+  await waitForSearchView(page);
+
+  await setScope(page, 'online');
+  await setSetFilter(page, '');
+  await page.locator('#search-input').fill(query);
+  await pause(page, 150);
+  await page.locator('#search-input').press('Enter').catch(() => {});
+  await waitForSearchSettled(page);
+
+  const candidate = await page.evaluate(() => {
+    const cards = Array.from(document.querySelectorAll('#search-results .search-result-card'));
+    const index = cards.findIndex((node) => (node.querySelector('.search-status')?.textContent || '').includes('API'));
+    if (index < 0) return null;
+    const node = cards[index];
+    return {
+      index,
+      title: node.querySelector('.title')?.textContent?.trim() || '',
+      set: node.querySelector('.search-set-tag')?.textContent?.trim() || '',
+    };
+  });
+
+  if (!candidate) {
+    throw new Error(`[${name}] Kein API-Suchergebnis mit "Zum Set" gefunden.`);
+  }
+
+  await page.locator('#search-results .search-result-card').nth(candidate.index).locator('.search-actions button').click();
+  await pause(page, 400);
+
+  const state = await page.evaluate(() => ({
+    hash: window.location.hash,
+    selectorValue: document.getElementById('set-selector')?.value || '',
+    cardCount: document.querySelectorAll('#cards .card').length,
+    statusText: document.getElementById('status')?.textContent?.trim() || '',
+    navText: document.getElementById('nav-set-link')?.textContent?.trim() || '',
+    setViewVisible: !document.getElementById('view-set')?.classList.contains('hidden'),
+  }));
+
+  if (!state.setViewVisible || !state.hash.startsWith('#set/')) {
+    throw new Error(`[${name}] Set-Ansicht wurde nach "Zum Set" nicht geöffnet: ${JSON.stringify(state)}`);
+  }
+  if (!state.selectorValue || state.cardCount < 1) {
+    throw new Error(`[${name}] API-Treffer „${candidate.title}“ aus „${candidate.set}“ lädt das Ziel-Set nicht korrekt: ${JSON.stringify(state)}`);
+  }
+
+  return {
+    name,
+    query,
+    candidate,
+    state,
+  };
+}
+
 async function run() {
   await withBrowser(async (page) => {
     await gotoReady(page, `${BASE_URL}?nocache=${Date.now()}#search`);
@@ -268,6 +325,7 @@ async function run() {
 
     report.push(await runDashboardCase(page, 'dashboard_ptcgo_code', 'SVI', ['Scarlet & Violet', 'Karmesin & Purpur']));
     report.push(await runDashboardCase(page, 'dashboard_loose_punctuation', 'scarlet violet', ['Scarlet & Violet', 'Karmesin & Purpur']));
+    report.push(await runGoToSetCase(page, 'api_result_go_to_set', 'Charizard'));
 
     report.push(await runSearchCase(page, 'set_name_all_sets', 'Base Set', {
       scope: 'all',

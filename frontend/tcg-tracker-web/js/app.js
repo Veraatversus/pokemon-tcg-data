@@ -1919,10 +1919,18 @@ function handleRouteChange() {
     case 'set':
       showView('set');
       if (params[0]) {
+        const targetSet = getSetById(params[0]);
+        if (targetSet) {
+          ensureSetSelectorOption(targetSet);
+        }
         if (dom.selector.value !== params[0]) {
           dom.selector.value = params[0];
         }
-        if (!state.currentSet || state.currentSet.setId !== params[0]) {
+        const shouldReloadSet = !state.currentSet
+          || state.currentSet.setId !== params[0]
+          || !Array.isArray(state.cards)
+          || state.cards.length === 0;
+        if (shouldReloadSet) {
           loadCurrentSet(false);
         }
       }
@@ -2704,6 +2712,32 @@ async function deleteSetFromCollection(set, options = {}) {
 
 function getSetById(setId) {
   return state.allSets.find((set) => set.setId === setId) || state.sets.find((set) => set.setId === setId) || null;
+}
+
+function ensureSetSelectorOption(set) {
+  if (!dom.selector || !set?.setId) return;
+
+  const existingOption = Array.from(dom.selector.options || []).find((option) => option.value === set.setId);
+  if (existingOption) {
+    if (set?.setName) existingOption.textContent = set.setName;
+    return;
+  }
+
+  const groupLabel = set.series || set.vera_series || set.tcgdex_serie_name || 'Weitere Sets';
+  let group = Array.from(dom.selector.querySelectorAll('optgroup')).find((entry) => entry.label === groupLabel);
+  if (!group) {
+    group = document.createElement('optgroup');
+    group.label = groupLabel;
+    dom.selector.appendChild(group);
+  }
+
+  const option = document.createElement('option');
+  option.value = set.setId;
+  option.textContent = set.setName || set.setId;
+  if (!toBoolean(set.imported)) {
+    option.dataset.source = 'search-api';
+  }
+  group.appendChild(option);
 }
 
 async function importSetsSequential(sets, options = {}) {
@@ -4211,8 +4245,19 @@ function createSearchResultCard(card, key, db, set, apiOnly = false) {
 
 function navigateToSearchResultSet(set) {
   if (!set?.setId) return;
-  dom.selector.value = set.setId;
-  navigate(`set/${set.setId}`);
+  const resolvedSet = getSetById(set.setId) || set;
+  state.pendingSearchSetImport = Boolean(!resolvedSet?.imported);
+  ensureSetSelectorOption(resolvedSet);
+  dom.selector.value = resolvedSet.setId;
+
+  const targetHash = `#set/${resolvedSet.setId}`;
+  if (window.location.hash === targetHash) {
+    showView('set');
+    loadCurrentSet(false);
+    return;
+  }
+
+  navigate(`set/${resolvedSet.setId}`);
 }
 
 async function openSearchResultLightbox(card, set, { apiOnly = false } = {}) {
@@ -5193,8 +5238,10 @@ function initKeyboardNav() {
 async function loadCurrentSet(forceRefresh = false) {
   const setId   = dom.selector.value;
   if (!setId) return;
-  const selected = state.sets.find((s) => s.setId === setId);
+  const selected = state.sets.find((s) => s.setId === setId) || getSetById(setId);
   if (!selected) return;
+
+  ensureSetSelectorOption(selected);
 
   state.currentSet = selected;
   sessionStorage.setItem('tcg_last_set', setId);
@@ -5227,7 +5274,7 @@ async function loadCurrentSet(forceRefresh = false) {
 
   try {
     const cardsCacheKey = `db_cards_${setId}`, dbCacheKey = `db_${setId}`;
-    const allowApiFallback = getSearchScopeMode() === SEARCH_SCOPE_ONLINE;
+    const allowApiFallback = getSearchScopeMode() === SEARCH_SCOPE_ONLINE || Boolean(state.pendingSearchSetImport) || !Boolean(selected.imported);
     if (forceRefresh) { cache.del(cardsCacheKey); cache.del(dbCacheKey); }
 
     const [cards, dbMap] = await Promise.all([
