@@ -43,6 +43,38 @@ async function run() {
       throw new Error('Topbar-Scroll-State nicht auswertbar.');
     }
 
+    await page.goto(`${BASE_URL}#search`, { waitUntil: 'domcontentloaded' });
+    await waitForSelectorStable(page, '#search-input');
+
+    await page.evaluate(() => {
+      window.SEARCH_HISTORY = ['Base Set', 'Glurak', 'Charizard ex'];
+    });
+
+    await page.fill('#search-input', 'b');
+    await page.waitForTimeout(250);
+
+    const suggestion = page.locator('#search-autocomplete .search-ac-item').filter({ hasText: 'Base Set' }).first();
+    if (await suggestion.count() === 0) {
+      throw new Error('Autocomplete zeigt keinen Suchvorschlag für einen 1-Zeichen-Query an.');
+    }
+
+    await page.locator('#search-input').blur();
+    await page.waitForTimeout(120);
+    const dropdownStillVisible = await page.evaluate(() => {
+      const node = document.querySelector('#search-autocomplete');
+      return node ? !node.classList.contains('hidden') : false;
+    });
+    if (!dropdownStillVisible) {
+      throw new Error('Autocomplete verschwindet zu schnell nach kurzem Blur.');
+    }
+
+    await suggestion.click();
+    await page.waitForTimeout(150);
+    const selectedValue = await page.locator('#search-input').inputValue();
+    if (selectedValue !== 'Base Set') {
+      throw new Error('Autocomplete-Auswahl wurde nicht in das Suchfeld übernommen.');
+    }
+
     console.log('✅ Regression Smoke OK');
   });
 }

@@ -3720,31 +3720,118 @@ function cardNumberMatchesQuery(cardNumber, queryNumber) {
   return Boolean(queryDigits && cardDigits === queryDigits);
 }
 
-function computeSearchScore(card, normalizedQuery, structuredQuery, mixedQuery) {
-  const name = normalizeSearchText(card.name || '');
+function collectSearchStrings(values = []) {
+  const seen = new Set();
+  const result = [];
+
+  const visit = (value) => {
+    if (value == null) return;
+    if (Array.isArray(value)) {
+      value.forEach(visit);
+      return;
+    }
+    if (typeof value === 'object') {
+      Object.values(value).forEach(visit);
+      return;
+    }
+
+    const raw = String(value || '').trim();
+    if (!raw || /^https?:\/\//i.test(raw)) return;
+    const normalized = normalizeSearchText(raw).replace(/\s+/g, ' ').trim();
+    if (!normalized || seen.has(normalized)) return;
+    seen.add(normalized);
+    result.push(normalized);
+  };
+
+  values.forEach(visit);
+  return result;
+}
+
+function matchesTokensInValues(tokens = [], values = []) {
+  if (!tokens.length) return false;
+  return tokens.every((token) => values.some((value) => value.includes(token)));
+}
+
+function buildCardSearchContext(card, set = null) {
+  const nameValues = collectSearchStrings([
+    card?.name,
+    card?.vera_name,
+    card?.tcgdex_name
+  ]);
+
+  const setValues = collectSearchStrings([
+    set?.setName,
+    set?.vera_name,
+    set?.tcgdex_name,
+    set?.series,
+    set?.vera_series,
+    set?.tcgdex_serie_name,
+    set?.ptcgoCode,
+    set?.vera_ptcgoCode,
+    set?.tcgdex_abbreviation_official,
+    set?.setId
+  ]);
+
+  const taxonomyValues = collectSearchStrings([
+    card?.rarity,
+    card?.hp,
+    card?.types,
+    card?.vera_types,
+    card?.supertype,
+    card?.subtypes,
+    card?.evolvesFrom,
+    card?.vera_evolvesFrom,
+    card?.artist,
+    card?.regulationMark,
+    card?.flavorText,
+    card?.vera_flavorText,
+    card?.rules,
+    card?.abilities,
+    card?.attacks,
+    card?.weaknesses,
+    card?.resistances
+  ]);
+
+  const numberValues = collectSearchStrings([
+    card?.number,
+    card?.vera_number,
+    card?.tcgdex_localId
+  ]);
+
+  return {
+    nameValues,
+    setValues,
+    taxonomyValues,
+    numberValues,
+    fullText: [...nameValues, ...setValues, ...taxonomyValues, ...numberValues].join(' ')
+  };
+}
+
+function computeSearchScore(card, normalizedQuery, structuredQuery, mixedQuery, set = null) {
+  const context = buildCardSearchContext(card, set);
   const numberRaw = String(card.number || '').toLowerCase();
-  const number = normalizeCardNumberForSearch(card.number);
+  const normalizedCardNumber = normalizeCardNumberForSearch(card.number);
 
   if (structuredQuery) {
     const numberMatch = !structuredQuery.cardNumber || cardNumberMatchesQuery(card.number, structuredQuery.cardNumber);
-    const nameMatch = !structuredQuery.namePart || structuredQuery.namePart.every((token) => name.includes(token));
+    const nameMatch = !structuredQuery.namePart || matchesTokensInValues(structuredQuery.namePart, context.nameValues.length ? context.nameValues : [context.fullText]);
     if (!numberMatch || !nameMatch) return -1;
 
     let score = 1000;
     if (structuredQuery.cardNumber) score += 250;
     if (structuredQuery.namePart?.length) {
-      score += structuredQuery.namePart.length * 40;
-      score += 80;
+      score += structuredQuery.namePart.length * 45;
+      score += 90;
     }
     return score;
   }
 
   if (mixedQuery) {
     const numberMatch = cardNumberMatchesQuery(card.number, mixedQuery.cardNumber);
-    const nameMatch = mixedQuery.nameTokens.every((token) => name.includes(token));
+    const nameMatch = matchesTokensInValues(mixedQuery.nameTokens, context.nameValues.length ? context.nameValues : [context.fullText]);
     if (!numberMatch || !nameMatch) return -1;
 
-    return 900 + (mixedQuery.nameTokens.length * 45) + 200;
+    return 900 + (mixedQuery.nameTokens.length * 45) + 220;
   }
 
   const normalizedFreeQuery = normalizeSearchText(normalizedQuery).trim();
@@ -3756,45 +3843,60 @@ function computeSearchScore(card, normalizedQuery, structuredQuery, mixedQuery) 
 
   if (!queryTokens.length) return -1;
 
-  let isMatch = false;
-  let nameContains = false;
-  let numberContains = false;
+  const exactNameMatch = context.nameValues.some((value) => value === normalizedFreeQuery);
+  const nameStartsWith = context.nameValues.some((value) => value.startsWith(normalizedFreeQuery));
+  const nameContains = context.nameValues.some((value) => value.includes(normalizedFreeQuery));
+  const setExactMatch = context.setValues.some((value) => value === normalizedFreeQuery);
+  const setContains = context.setValues.some((value) => value.includes(normalizedFreeQuery));
+  const taxonomyContains = context.taxonomyValues.some((value) => value.includes(normalizedFreeQuery));
+  const numberContains = context.numberValues.some((value) => value.includes(normalizedFreeQuery))
+    || normalizedCardNumber.includes(normalizedFreeQuery)
+    || numberRaw.includes(normalizedFreeQuery)
+    || cardNumberMatchesQuery(card.number, normalizedFreeQuery);
 
-  if (queryTokens.length === 1) {
-    const token = queryTokens[0];
-    nameContains = name.includes(token);
-    numberContains = number.includes(token) || numberRaw.includes(token);
-    isMatch = nameContains || numberContains;
-  } else {
-    const numberLikeTokens = queryTokens.filter((token) => /^[a-z._-]*\d+[a-z._-]*$/.test(token));
-    const nameLikeTokens = meaningfulTokens;
+  const numberLikeTokens = queryTokens.filter((token) => /^[a-z._-]*\d+[a-z._-]*$/.test(token));
+  const nameLikeTokens = meaningfulTokens;
+  const nameTokenMatch = nameLikeTokens.length ? matchesTokensInValues(nameLikeTokens, context.nameValues.length ? context.nameValues : [context.fullText]) : false;
+  const setTokenMatch = nameLikeTokens.length ? matchesTokensInValues(nameLikeTokens, context.setValues) : false;
+  const taxonomyTokenMatch = nameLikeTokens.length ? matchesTokensInValues(nameLikeTokens, context.taxonomyValues) : false;
+  const numberTokenMatch = numberLikeTokens.length ? numberLikeTokens.every((token) => cardNumberMatchesQuery(card.number, token)) : false;
+  const fullTokenMatch = queryTokens.every((token) => context.fullText.includes(token) || cardNumberMatchesQuery(card.number, token));
 
-    if (numberLikeTokens.length && nameLikeTokens.length) {
-      numberContains = numberLikeTokens.every((token) => cardNumberMatchesQuery(card.number, token));
-      nameContains = nameLikeTokens.every((token) => name.includes(token));
-      isMatch = numberContains && nameContains;
-    } else if (nameLikeTokens.length) {
-      nameContains = nameLikeTokens.every((token) => name.includes(token));
-      isMatch = nameContains;
-    } else if (numberLikeTokens.length) {
-      numberContains = numberLikeTokens.every((token) => cardNumberMatchesQuery(card.number, token));
-      isMatch = numberContains;
-    }
-  }
+  const isMatch = exactNameMatch
+    || nameStartsWith
+    || nameContains
+    || setExactMatch
+    || setContains
+    || taxonomyContains
+    || numberContains
+    || nameTokenMatch
+    || setTokenMatch
+    || taxonomyTokenMatch
+    || numberTokenMatch
+    || fullTokenMatch;
 
   if (!isMatch) return -1;
 
   let score = 0;
-  if (nameContains) score += 140;
-  if (numberContains) score += 120;
-  if (nameContains && numberContains) score += 180;
-  if (queryTokens.length > 1 && meaningfulTokens.length && meaningfulTokens.every((token) => name.includes(token))) score += 70;
+  if (exactNameMatch) score += 420;
+  else if (nameStartsWith) score += 320;
+  else if (nameContains) score += 220;
+
+  if (numberContains) score += 190;
+  if (setExactMatch) score += 240;
+  else if (setContains) score += 140;
+  if (taxonomyContains || taxonomyTokenMatch) score += 60;
+  if (nameTokenMatch) score += 110;
+  if (setTokenMatch) score += 95;
+  if (numberTokenMatch) score += 135;
+  if (fullTokenMatch && queryTokens.length > 1) score += 120;
+  if (nameTokenMatch && numberTokenMatch) score += 180;
 
   return score;
 }
 
-function matchesCardSearch(card, normalizedQuery, structuredQuery, mixedQuery) {
-  return computeSearchScore(card, normalizedQuery, structuredQuery, mixedQuery) >= 0;
+function matchesCardSearch(card, normalizedQuery, structuredQuery, mixedQuery, set = null) {
+  return computeSearchScore(card, normalizedQuery, structuredQuery, mixedQuery, set) >= 0;
 }
 
 function mergeSearchCards(dbCards = [], apiCards = []) {
@@ -3832,6 +3934,7 @@ async function runSearch(options = {}) {
   const query = normalizeSearchText(rawQuery);
   const searchScopeMode = getSearchScopeMode();
   if (!query) {
+    state.lastSearchResults = [];
     dom.searchResults.innerHTML = '<p class="empty-state">Suchbegriff eingeben.</p>';
     return;
   }
@@ -3847,8 +3950,13 @@ async function runSearch(options = {}) {
   // Freie Kombinations-Suche (z.B. "57 Digda") nur wenn kein Set-Präfix erkannt wurde
   const mixedQuery = !structuredQuery ? parseMixedQuery(rawQuery) : null;
   if (!force && !structuredQuery && !mixedQuery && query.length < 2) {
+    state.lastSearchResults = [];
     dom.searchResults.innerHTML = '<p class="empty-state">Mindestens 2 Zeichen eingeben oder Enter drücken.</p>';
     return;
+  }
+
+  if (force || structuredQuery || mixedQuery || rawQuery.length >= 3) {
+    window.SEARCH_HISTORY = addSearchHistory(rawQuery);
   }
   // Für die eigentliche Suche das importierte Set bevorzugen (hat Collection-Daten),
   // fallback auf das Set aus allSets falls nicht importiert.
@@ -3912,7 +4020,7 @@ async function runSearch(options = {}) {
       }
       if (isStale() || isAborted()) return;
       cards.forEach((card) => {
-        const score = computeSearchScore(card, query, structuredQuery, mixedQuery);
+        const score = computeSearchScore(card, query, structuredQuery, mixedQuery, set);
         if (score >= 0) {
           results.push({ card, set, dbMap, score, apiOnly: Boolean(card?.__searchApiOnly) });
         }
@@ -3943,6 +4051,8 @@ async function runSearch(options = {}) {
     if (setCompare !== 0) return setCompare;
     return String(left.card?.number || '').localeCompare(String(right.card?.number || ''), undefined, { numeric: true, sensitivity: 'base' });
   });
+
+  state.lastSearchResults = results.slice(0, 60);
 
   if (isStale() || isAborted()) return;
   const modeMeta = getSearchModeMeta(searchScopeMode);
@@ -6174,30 +6284,184 @@ function initSearchAutocomplete() {
   if (!input || !list) return;
 
   let selectedIndex = -1;
+  let activeItems = [];
+  let hideTimer = null;
+
+  const escapeHtml = (value) => String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+
+  const clearHideTimer = () => {
+    if (hideTimer) {
+      clearTimeout(hideTimer);
+      hideTimer = null;
+    }
+  };
+
+  const hideList = () => {
+    clearHideTimer();
+    list.classList.add('hidden');
+  };
+
+  const scheduleHide = () => {
+    clearHideTimer();
+    hideTimer = setTimeout(() => {
+      list.classList.add('hidden');
+    }, 220);
+  };
+
+  const pushCandidate = (map, candidate, score = 0) => {
+    if (!candidate?.key || !candidate?.label) return;
+    const existing = map.get(candidate.key);
+    if (!existing || score > existing.score) {
+      map.set(candidate.key, { ...candidate, score });
+    }
+  };
 
   const buildCandidates = (query) => {
-    const normalizedQuery = String(query || '').trim().toLowerCase();
-    if (normalizedQuery.length < 2) return [];
-
+    const normalizedQuery = normalizeSearchText(query).trim();
     const entries = new Map();
-    (state.allSets || state.sets || []).forEach((set) => {
-      if (!set?.setName) return;
-      const key = `set:${set.setName}`;
-      entries.set(key, { label: set.setName, badge: set.series || '', type: 'set' });
+    const history = Array.isArray(window.SEARCH_HISTORY) ? window.SEARCH_HISTORY : loadSearchHistory();
+
+    const addHistoryEntries = () => {
+      history
+        .filter((item) => !normalizedQuery || normalizeSearchText(item).includes(normalizedQuery))
+        .slice(0, normalizedQuery ? 4 : 6)
+        .forEach((item, idx) => {
+          pushCandidate(entries, {
+            key: `history:${normalizeSearchText(item)}`,
+            label: item,
+            value: item,
+            badge: 'Zuletzt',
+            meta: 'Vorherige Suche',
+            type: 'history'
+          }, 120 - idx);
+        });
+    };
+
+    addHistoryEntries();
+
+    const setsPool = getSetsForSearchMode(getSearchScopeMode());
+    (Array.isArray(setsPool) ? setsPool : []).forEach((set) => {
+      const label = String(set?.setName || set?.tcgdex_name || set?.vera_name || set?.setId || '').trim();
+      if (!label) return;
+
+      const haystackValues = collectSearchStrings([
+        label,
+        set?.setId,
+        set?.series,
+        set?.vera_series,
+        set?.tcgdex_serie_name,
+        set?.ptcgoCode,
+        set?.vera_ptcgoCode,
+        set?.tcgdex_abbreviation_official,
+        set?.vera_name,
+        set?.tcgdex_name
+      ]);
+      const haystack = haystackValues.join(' ');
+      if (normalizedQuery && !haystack.includes(normalizedQuery)) return;
+
+      const labelNorm = normalizeSearchText(label);
+      let score = 70;
+      if (labelNorm === normalizedQuery) score += 180;
+      else if (labelNorm.startsWith(normalizedQuery)) score += 130;
+      else if (labelNorm.includes(normalizedQuery)) score += 95;
+
+      pushCandidate(entries, {
+        key: `set:${set?.setId || labelNorm}`,
+        label,
+        value: label,
+        badge: set?.ptcgoCode || set?.setId || 'Set',
+        meta: set?.series || set?.tcgdex_serie_name || 'Set',
+        type: 'set',
+        setId: set?.setId || ''
+      }, score);
     });
 
-    (state.cards || []).forEach((card) => {
-      if (!card?.name) return;
-      const key = `card:${card.name}`;
-      entries.set(key, { label: card.name, badge: card.number || '', type: 'card' });
+    const cardBundles = [];
+    const pushCardBundle = (card, set) => {
+      if (!card) return;
+      cardBundles.push({ card, set: set || null });
+    };
+
+    (Array.isArray(state.lastSearchResults) ? state.lastSearchResults : []).forEach((entry) => {
+      pushCardBundle(entry?.card, entry?.set);
+    });
+
+    if (Array.isArray(state.cards) && state.currentSet) {
+      state.cards.forEach((card) => pushCardBundle(card, state.currentSet));
+    }
+
+    let inspectedCards = 0;
+    state.searchCache?.forEach((cards, key) => {
+      if (inspectedCards >= 800) return;
+      const setId = String(key || '').split('::')[0];
+      const setMeta = (state.allSets || state.sets || []).find((entry) => String(entry?.setId || '') === setId) || null;
+      (Array.isArray(cards) ? cards : []).slice(0, 40).forEach((card) => {
+        if (inspectedCards >= 800) return;
+        inspectedCards += 1;
+        pushCardBundle(card, setMeta);
+      });
+    });
+
+    const seenCards = new Set();
+    cardBundles.forEach(({ card, set }) => {
+      const uniqueKey = `${set?.setId || 'unknown'}::${normalizeCardNumber(card?.number || card?.vera_number || card?.tcgdex_localId || '')}`;
+      if (!card?.name || seenCards.has(uniqueKey)) return;
+      seenCards.add(uniqueKey);
+
+      const label = String(card?.name || card?.tcgdex_name || card?.vera_name || '').trim();
+      if (!label) return;
+
+      const nameValues = collectSearchStrings([card?.name, card?.vera_name, card?.tcgdex_name]);
+      const haystack = collectSearchStrings([
+        label,
+        card?.number,
+        card?.vera_number,
+        card?.tcgdex_localId,
+        nameValues,
+        set?.setName,
+        set?.series,
+        set?.ptcgoCode
+      ]).join(' ');
+      if (normalizedQuery && !haystack.includes(normalizedQuery)) return;
+
+      const labelNorm = normalizeSearchText(label);
+      let score = 60;
+      if (labelNorm === normalizedQuery) score += 200;
+      else if (labelNorm.startsWith(normalizedQuery)) score += 150;
+      else if (labelNorm.includes(normalizedQuery)) score += 105;
+      if (cardNumberMatchesQuery(card?.number, normalizedQuery)) score += 120;
+
+      const altNames = nameValues.filter((value) => value !== labelNorm).slice(0, 2);
+      const metaParts = [
+        set?.setName || set?.series || '',
+        altNames.length ? `Alias: ${altNames.join(' · ')}` : ''
+      ].filter(Boolean);
+
+      pushCandidate(entries, {
+        key: `card:${uniqueKey}`,
+        label,
+        value: label,
+        badge: card?.number || card?.tcgdex_localId || 'Karte',
+        meta: metaParts.join(' · '),
+        type: 'card',
+        setId: set?.setId || ''
+      }, score);
     });
 
     return [...entries.values()]
-      .filter((entry) => entry.label.toLowerCase().includes(normalizedQuery))
-      .slice(0, 8);
+      .sort((left, right) => {
+        if (right.score !== left.score) return right.score - left.score;
+        return String(left.label || '').localeCompare(String(right.label || ''), 'de', { sensitivity: 'base' });
+      })
+      .slice(0, 10);
   };
 
   const renderList = (items) => {
+    activeItems = items;
     selectedIndex = -1;
     if (!items.length) {
       list.classList.add('hidden');
@@ -6206,21 +6470,57 @@ function initSearchAutocomplete() {
     }
 
     list.innerHTML = items.map((item, idx) => `
-      <li class="search-ac-item" role="option" data-idx="${idx}" data-value="${item.label.replace(/"/g, '&quot;')}">
-        <span>${item.label}</span>
-        <span class="ac-badge">${item.badge}</span>
+      <li class="search-ac-item search-ac-item--${escapeHtml(item.type)}" role="option" data-idx="${idx}">
+        <span class="ac-main">
+          <span class="ac-label">${escapeHtml(item.label)}</span>
+          ${item.meta ? `<small class="ac-meta">${escapeHtml(item.meta)}</small>` : ''}
+        </span>
+        <span class="ac-badge">${escapeHtml(item.badge || '')}</span>
       </li>
     `).join('');
     list.classList.remove('hidden');
   };
 
-  input.addEventListener('input', () => {
+  const applySelection = (item) => {
+    if (!item) return;
+    clearHideTimer();
+    if (item.setId && dom.searchSetFilter) {
+      const hasOption = [...dom.searchSetFilter.options].some((option) => option.value === item.setId);
+      if (hasOption) dom.searchSetFilter.value = item.setId;
+    }
+    input.value = item.value || item.label || '';
+    list.classList.add('hidden');
+    window.SEARCH_HISTORY = addSearchHistory(input.value);
+    runSearch({ force: true });
+    input.focus();
+  };
+
+  input.addEventListener('focus', () => {
+    clearHideTimer();
     renderList(buildCandidates(input.value));
   });
 
+  input.addEventListener('input', () => {
+    clearHideTimer();
+    renderList(buildCandidates(input.value));
+  });
+
+  input.addEventListener('blur', scheduleHide);
+  list.addEventListener('pointerenter', clearHideTimer);
+  list.addEventListener('pointerleave', () => {
+    if (document.activeElement !== input) scheduleHide();
+  });
+
   input.addEventListener('keydown', (event) => {
+    if (list.classList.contains('hidden') && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+      renderList(buildCandidates(input.value));
+    }
+
     const items = [...list.querySelectorAll('.search-ac-item')];
-    if (!items.length || list.classList.contains('hidden')) return;
+    if (!items.length || list.classList.contains('hidden')) {
+      if (event.key === 'Escape') hideList();
+      return;
+    }
 
     if (event.key === 'ArrowDown') {
       event.preventDefault();
@@ -6230,13 +6530,10 @@ function initSearchAutocomplete() {
       selectedIndex = Math.max(selectedIndex - 1, 0);
     } else if (event.key === 'Enter' && selectedIndex >= 0) {
       event.preventDefault();
-      const value = items[selectedIndex].dataset.value || '';
-      input.value = value;
-      list.classList.add('hidden');
-      input.dispatchEvent(new Event('input', { bubbles: true }));
+      applySelection(activeItems[selectedIndex]);
       return;
     } else if (event.key === 'Escape') {
-      list.classList.add('hidden');
+      hideList();
       return;
     } else {
       return;
@@ -6249,14 +6546,15 @@ function initSearchAutocomplete() {
     const item = event.target.closest('.search-ac-item');
     if (!item) return;
     event.preventDefault();
-    input.value = item.dataset.value || '';
-    list.classList.add('hidden');
-    input.dispatchEvent(new Event('input', { bubbles: true }));
+    const idx = Number(item.dataset.idx || '-1');
+    applySelection(activeItems[idx]);
   });
 
-  document.addEventListener('click', (event) => {
+  document.addEventListener('pointerdown', (event) => {
     if (!input.contains(event.target) && !list.contains(event.target)) {
-      list.classList.add('hidden');
+      scheduleHide();
+    } else {
+      clearHideTimer();
     }
   });
 }

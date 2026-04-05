@@ -4566,7 +4566,7 @@ textarea::placeholder {
   }
   .search-autocomplete.hidden { display: none; }
   .search-ac-item {
-    padding: 8px 12px;
+    padding: 9px 12px;
     border-radius: 5px;
     cursor: pointer;
     font-size: 13px;
@@ -4574,16 +4574,38 @@ textarea::placeholder {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 8px;
-    white-space: nowrap;
+    gap: 10px;
     overflow: hidden;
   }
   .search-ac-item:hover, .search-ac-item.keyboard-focus { background: #0ea5e9; color: #fff; }
+  .search-ac-item .ac-main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .search-ac-item .ac-label {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .search-ac-item .ac-meta {
+    font-size: 11px;
+    color: #94a3b8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .search-ac-item .ac-badge {
     font-size: 10px; color: #64748b; background: #0f172a;
-    padding: 1px 6px; border-radius: 3px; flex-shrink: 0;
+    padding: 1px 6px; border-radius: 999px; flex-shrink: 0;
   }
   .search-ac-item:hover .ac-badge, .search-ac-item.keyboard-focus .ac-badge { color: rgba(255,255,255,0.7); background: rgba(0,0,0,.25); }
+  .search-ac-item:hover .ac-meta, .search-ac-item.keyboard-focus .ac-meta { color: rgba(255,255,255,0.82); }
+  .search-ac-item--history .ac-badge { background: rgba(14,165,233,0.16); color: #7dd3fc; }
+  .search-ac-item--set .ac-badge { background: rgba(168,85,247,0.18); color: #d8b4fe; }
+  .search-ac-item--card .ac-badge { background: rgba(34,197,94,0.16); color: #86efac; }
 
   /* ── F7: Statistiken Drill-Down ─────────────────────────────────────────── */
   .stats-series-row {
