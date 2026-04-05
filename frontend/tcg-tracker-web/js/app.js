@@ -2333,15 +2333,27 @@ async function renderDashboard() {
     });
 
     let sets = [...state.allSets];
-    const filterText = dom.dashFilter.value.toLowerCase().trim();
+    const filterText = dom.dashFilter.value.trim();
+    const dashboardSearchScores = new Map();
+    const getDashboardSearchKey = (set) => String(set?.setId || set?.setName || '');
+    const compareDashboardSearchScore = (left, right) => {
+      if (!filterText) return 0;
+      const leftScore = dashboardSearchScores.get(getDashboardSearchKey(left)) || 0;
+      const rightScore = dashboardSearchScores.get(getDashboardSearchKey(right)) || 0;
+      return rightScore - leftScore;
+    };
+
     if (filterText) {
-      sets = sets.filter(
-        (s) =>
-          s.setName.toLowerCase().includes(filterText) ||
-          s.setId.toLowerCase().includes(filterText) ||
-          (s.series || '').toLowerCase().includes(filterText),
-      );
+      sets = sets.filter((set) => {
+        const score = scoreDashboardSetMatch(set, filterText);
+        if (score < 0) return false;
+        dashboardSearchScores.set(getDashboardSearchKey(set), score);
+        return matchesDashboardSetFilter(set, filterText);
+      });
+
+      sets.sort((left, right) => compareDashboardSearchScore(left, right));
     }
+
     const seriesFilter = dom.dashSeriesFilter.value;
     if (seriesFilter) sets = sets.filter((s) => (s.series || 'Andere') === seriesFilter);
 
@@ -2382,9 +2394,15 @@ async function renderDashboard() {
 
     const sortBy = dom.dashSort.value;
     if (sortBy === 'name') {
-      sets.sort((a, b) => a.setName.localeCompare(b.setName));
+      sets.sort((a, b) => {
+        const scoreDiff = compareDashboardSearchScore(a, b);
+        if (scoreDiff !== 0) return scoreDiff;
+        return a.setName.localeCompare(b.setName);
+      });
     } else if (sortBy === 'completion') {
       sets.sort((a, b) => {
+        const scoreDiff = compareDashboardSearchScore(a, b);
+        if (scoreDiff !== 0) return scoreDiff;
         const sa = summaryByName.get(a.setName) || summaryByName.get(a.setId);
         const sb = summaryByName.get(b.setName) || summaryByName.get(b.setId);
         const pa = sa && sa.total > 0 ? sa.collected / sa.total : 0;
@@ -3681,6 +3699,9 @@ function parseMixedQuery(rawQuery) {
     .filter(Boolean);
   if (parts.length < 2) return null;
 
+  const hasSetLikeMarker = parts.some((token) => token === 'set' || token === 'series' || token === 'serie');
+  if (hasSetLikeMarker) return null;
+
   // Tokens die wie eine Kartennummer aussehen: optionale alpha-Präfix + Zahlen + optionales Suffix
   const numberTokens = parts.filter((p) => /^[a-z._-]*\d+[a-z._-]*$/.test(p));
   const nameTokensRaw = parts.filter((p) => !/^[a-z._-]*\d+[a-z._-]*$/.test(p));
@@ -3750,6 +3771,77 @@ function collectSearchStrings(values = []) {
 function matchesTokensInValues(tokens = [], values = []) {
   if (!tokens.length) return false;
   return tokens.every((token) => values.some((value) => value.includes(token)));
+}
+
+function buildSetSearchContext(set = null) {
+  const nameValues = collectSearchStrings([
+    set?.setName,
+    set?.vera_name,
+    set?.tcgdex_name
+  ]);
+
+  const seriesValues = collectSearchStrings([
+    set?.series,
+    set?.vera_series,
+    set?.tcgdex_serie_name,
+    set?.tcgdex_serie_id
+  ]);
+
+  const codeValues = collectSearchStrings([
+    set?.setId,
+    set?.ptcgoCode,
+    set?.vera_ptcgoCode,
+    set?.tcgdex_abbreviation_official
+  ]);
+
+  return {
+    nameValues,
+    seriesValues,
+    codeValues,
+    fullText: [...nameValues, ...seriesValues, ...codeValues].join(' ')
+  };
+}
+
+function scoreDashboardSetMatch(set, rawQuery = '') {
+  const normalizedQuery = normalizeSearchText(rawQuery).replace(/\s+/g, ' ').trim();
+  if (!normalizedQuery) return 0;
+
+  const tokens = normalizedQuery.split(/\s+/).filter(Boolean);
+  const context = buildSetSearchContext(set);
+  const weightedGroups = [
+    { values: context.codeValues, exact: 280, prefix: 240, includes: 180 },
+    { values: context.nameValues, exact: 230, prefix: 180, includes: 125 },
+    { values: context.seriesValues, exact: 120, prefix: 90, includes: 70 }
+  ];
+
+  let bestScore = -1;
+
+  weightedGroups.forEach(({ values, exact, prefix, includes }) => {
+    values.forEach((value) => {
+      if (!value) return;
+      if (value === normalizedQuery) bestScore = Math.max(bestScore, exact);
+      else if (value.startsWith(normalizedQuery)) bestScore = Math.max(bestScore, prefix);
+      else if (value.includes(normalizedQuery)) bestScore = Math.max(bestScore, includes);
+    });
+  });
+
+  if (tokens.length && matchesTokensInValues(tokens, context.codeValues)) {
+    bestScore = Math.max(bestScore, 160 + (tokens.length * 12));
+  }
+  if (tokens.length && matchesTokensInValues(tokens, context.nameValues)) {
+    bestScore = Math.max(bestScore, 135 + (tokens.length * 11));
+  }
+  if (tokens.length && matchesTokensInValues(tokens, context.seriesValues)) {
+    bestScore = Math.max(bestScore, 85 + (tokens.length * 8));
+  } else if (tokens.length && tokens.every((token) => context.fullText.includes(token))) {
+    bestScore = Math.max(bestScore, 50 + (tokens.length * 8));
+  }
+
+  return bestScore;
+}
+
+function matchesDashboardSetFilter(set, rawQuery = '') {
+  return scoreDashboardSetMatch(set, rawQuery) >= 0;
 }
 
 function buildCardSearchContext(card, set = null) {
@@ -3990,7 +4082,10 @@ async function runSearch(options = {}) {
           }
         }
 
-        if (useApiForSet) {
+        const hasDbCards = Array.isArray(dbCards) && dbCards.length > 0;
+        const shouldFetchApiCards = useApiForSet || (searchScopeMode === SEARCH_SCOPE_ALL && !hasDbCards);
+
+        if (shouldFetchApiCards) {
           let apiCards = [];
           if (cache.has(cacheKey)) {
             apiCards = cache.get(cacheKey) || [];
@@ -4004,7 +4099,7 @@ async function runSearch(options = {}) {
             ? mergeSearchCards([], apiCards)
             : mergeSearchCards(dbCards, apiCards);
         } else {
-          cards = Array.isArray(dbCards) ? dbCards : [];
+          cards = hasDbCards ? dbCards : [];
         }
 
         state.searchCache.set(searchCacheKey, cards || []);
@@ -4138,7 +4233,10 @@ async function openSearchResultLightbox(card, set, { apiOnly = false } = {}) {
           cache.set(cardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
         }
 
-        if (!useApiForSet) {
+        const hasDbCards = Array.isArray(dbCards) && dbCards.length > 0;
+        const shouldFetchApiCards = useApiForSet || (searchScopeMode === SEARCH_SCOPE_ALL && !hasDbCards);
+
+        if (!shouldFetchApiCards) {
           state.searchCache.set(searchCacheKey, dbCards);
           return dbCards;
         }

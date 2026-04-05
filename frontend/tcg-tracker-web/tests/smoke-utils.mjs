@@ -1,13 +1,49 @@
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { chromium } from 'playwright';
+
+const CLI_ARGS = process.argv.slice(2);
+const TRUTHY_PATTERN = /^(1|true|yes|on)$/i;
+const SLOWMO_ARG = CLI_ARGS.find((arg) => arg.startsWith('--slowmo='));
+const HEADED = CLI_ARGS.includes('--headless')
+  ? false
+  : CLI_ARGS.includes('--headed') || TRUTHY_PATTERN.test(String(process.env.PLAYWRIGHT_HEADED || '').trim());
+const SLOW_MO = Number.parseInt(
+  SLOWMO_ARG?.split('=')[1] ?? process.env.PLAYWRIGHT_SLOWMO ?? (HEADED ? '125' : '0'),
+  10
+) || 0;
+const DEFAULT_PROFILE_DIR = resolve(process.cwd(), '.playwright-profile', 'tcg-search');
+const PROFILE_DIR = String(process.env.PLAYWRIGHT_PROFILE_DIR || '').trim() || (existsSync(DEFAULT_PROFILE_DIR) ? DEFAULT_PROFILE_DIR : '');
+const STORAGE_STATE = String(process.env.PLAYWRIGHT_STORAGE_STATE || '').trim();
 
 export const BASE_URL = process.env.TCG_TRACKER_BASE_URL || 'http://localhost:8080';
 
 export async function withBrowser(testFn) {
-  const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage({ viewport: { width: 1366, height: 900 } });
+  if (PROFILE_DIR) {
+    const context = await chromium.launchPersistentContext(PROFILE_DIR, {
+      headless: !HEADED,
+      slowMo: SLOW_MO,
+      viewport: { width: 1366, height: 900 },
+    });
+    const page = context.pages()[0] || await context.newPage();
+    try {
+      await testFn(page);
+    } finally {
+      await context.close();
+    }
+    return;
+  }
+
+  const browser = await chromium.launch({ headless: !HEADED, slowMo: SLOW_MO });
+  const context = await browser.newContext({
+    viewport: { width: 1366, height: 900 },
+    ...(STORAGE_STATE ? { storageState: STORAGE_STATE } : {}),
+  });
+  const page = await context.newPage();
   try {
     await testFn(page);
   } finally {
+    await context.close();
     await browser.close();
   }
 }
@@ -38,16 +74,24 @@ export async function gotoReady(page, url = BASE_URL) {
   );
 }
 
-export async function waitForSelectorStable(page, selector, timeout = 30000) {
+export async function waitForSelectorStable(page, selector, timeout = 30000, { allowHidden = false } = {}) {
   await page.waitForSelector(selector, { timeout, state: 'attached' });
   await page.waitForFunction(
-    (sel) => {
+    ({ sel, allowHidden: allowHiddenValue }) => {
       const node = document.querySelector(sel);
       if (!node) return false;
+      if (allowHiddenValue) return true;
+
       const style = window.getComputedStyle(node);
-      return style.display !== 'none' || node.id === 'audit-panel';
+      const rectCount = typeof node.getClientRects === 'function' ? node.getClientRects().length : 0;
+      const opacity = Number.parseFloat(style.opacity || '1');
+
+      return style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && opacity > 0
+        && rectCount > 0;
     },
-    selector,
+    { sel: selector, allowHidden },
     { timeout }
   );
 }

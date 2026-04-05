@@ -1,3 +1,8 @@
 cards/en/v1/
 .idea/
 .playwright-mcp/
+frontend/tcg-tracker-web/node_modules/
+frontend/tcg-tracker-web/.playwright-cli/
+frontend/tcg-tracker-web/.playwright-profile/
+frontend/tcg-tracker-web/tests/*-output.txt
+frontend/tcg-tracker-web/tests/auth-localhost.json
