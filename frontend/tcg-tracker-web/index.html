@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&display=swap" rel="stylesheet" />
   <link rel="apple-touch-icon" href="./assets/branding/logo-veras-pokemon.jpg?v=8" />
-  <link rel="stylesheet" href="./css/main.css?v=20260505e" />
+  <link rel="stylesheet" href="./css/main.css?v=20260506h" />
   <link rel="stylesheet" href="./css/trading-marketplace.css?v=20260505e" />
 </head>
 <body class="dark">
@@ -92,6 +92,28 @@
         <h3 id="lightbox-title"></h3>
         <p id="lightbox-subtitle"></p>
         <p id="lightbox-counter" class="lightbox-counter"></p>
+        <section class="lightbox-status-panel" aria-label="Sammelstatus direkt setzen">
+          <div class="lightbox-status-head">
+            <p class="lightbox-status-kicker">Schnellzugriff</p>
+            <strong class="lightbox-status-title">Sammelstatus</strong>
+          </div>
+          <div class="lightbox-checks">
+            <label class="lightbox-check-label lightbox-check-label-g">
+              <input type="checkbox" id="lightbox-g-check" />
+              <span>
+                <small>Sammlung</small>
+                <strong>Normal (G)</strong>
+              </span>
+            </label>
+            <label class="lightbox-check-label lightbox-check-label-rh">
+              <input type="checkbox" id="lightbox-rh-check" />
+              <span>
+                <small>Variante</small>
+                <strong>Reverse Holo</strong>
+              </span>
+            </label>
+          </div>
+        </section>
         <dl class="lightbox-facts" id="lightbox-facts">
           <div class="lightbox-fact-row"><dt>Rarity</dt><dd id="lightbox-rarity">—</dd></div>
           <div class="lightbox-fact-row"><dt>HP</dt><dd id="lightbox-hp">—</dd></div>
@@ -106,16 +128,6 @@
         </dl>
         <a id="lightbox-cm-link" href="#" target="_blank" rel="noopener noreferrer"
            class="lightbox-cm-link hidden">🛒 Cardmarket</a>
-        <div class="lightbox-checks">
-          <label class="lightbox-check-label">
-            <input type="checkbox" id="lightbox-g-check" />
-            <span>Normal (G)</span>
-          </label>
-          <label class="lightbox-check-label">
-            <input type="checkbox" id="lightbox-rh-check" />
-            <span>Reverse Holo (RH)</span>
-          </label>
-        </div>
         <p class="lightbox-hint">← → navigieren / im Bildbereich links-rechts wischen / nach unten schließen &nbsp;|&nbsp; Bild antippen = Vollbild</p>
       </div>
     </div>
@@ -455,5 +467,5 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://apis.google.com/js/api.js" async defer></script>
-  <script type="module" src="./js/app.js?v=20260506d"></script>
+  <script type="module" src="./js/app.js?v=20260506k"></script>
 </html>

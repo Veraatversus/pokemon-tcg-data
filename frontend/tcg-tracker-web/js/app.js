@@ -14,7 +14,8 @@ import {
   syncOverviewWithApiSets,
   resetSheetsDataCaches,
 } from './data/sheets-db.js?v=20260506a';
-import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260506c';
+import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260506k';
+import { resolveSeriesGroupInfo } from './data/schema-contract.js?v=20260506k';
 import { normalizeCardNumber, toBoolean } from './core/utils.js';
 import * as cache from './core/cache.js';
 import { CONFIG, scopedStorageKey } from './core/config.js';
@@ -2318,10 +2319,11 @@ async function loadSets() {
 
     dom.selector.innerHTML = '<option value="">Bitte w\u00e4hlen\u2026</option>';
     const seriesMap = buildSeriesMap(importedSets);
-    seriesMap.forEach((setsArr, seriesName) => {
+    seriesMap.forEach((groupInfo) => {
       const group = document.createElement('optgroup');
-      group.label = seriesName;
-      setsArr.forEach((set) => {
+      group.label = groupInfo.label;
+      group.dataset.seriesKey = groupInfo.key;
+      groupInfo.sets.forEach((set) => {
         const opt = document.createElement('option');
         opt.value = set.setId;
         opt.textContent = set.setName;
@@ -2335,10 +2337,10 @@ async function loadSets() {
     dom.refresh.disabled  = false;
 
     dom.dashSeriesFilter.innerHTML = '<option value="">Alle Serien</option>';
-    buildSeriesMap(state.allSets).forEach((_, name) => {
+    buildSeriesMap(state.allSets).forEach((groupInfo) => {
       const opt = document.createElement('option');
-      opt.value = name;
-      opt.textContent = name;
+      opt.value = groupInfo.key;
+      opt.textContent = groupInfo.label;
       dom.dashSeriesFilter.appendChild(opt);
     });
 
@@ -2367,12 +2369,34 @@ async function loadSets() {
   }
 }
 
+function getSetSeriesGroupInfo(set) {
+  return resolveSeriesGroupInfo(set || {});
+}
+
 function buildSeriesMap(sets) {
   const map = new Map();
-  sets.forEach((set) => {
-    const s = set.series || 'Andere';
-    if (!map.has(s)) map.set(s, []);
-    map.get(s).push(set);
+  (sets || []).forEach((set) => {
+    const info = getSetSeriesGroupInfo(set);
+    const existing = map.get(info.key);
+    if (!existing) {
+      map.set(info.key, {
+        key: info.key,
+        label: info.label || 'Andere',
+        canonicalName: info.canonicalName || info.label || 'Andere',
+        sets: [set],
+        labelVotes: new Map([[info.label || 'Andere', 1]])
+      });
+      return;
+    }
+
+    existing.sets.push(set);
+    const label = info.label || 'Andere';
+    const nextVotes = (existing.labelVotes.get(label) || 0) + 1;
+    existing.labelVotes.set(label, nextVotes);
+    const currentVotes = existing.labelVotes.get(existing.label) || 0;
+    if (nextVotes > currentVotes) {
+      existing.label = label;
+    }
   });
   return map;
 }
@@ -2432,7 +2456,7 @@ async function renderDashboard() {
     }
 
     const seriesFilter = dom.dashSeriesFilter.value;
-    if (seriesFilter) sets = sets.filter((s) => (s.series || 'Andere') === seriesFilter);
+    if (seriesFilter) sets = sets.filter((set) => getSetSeriesGroupInfo(set).key === seriesFilter);
 
     if (activeDashboardView === 'imported') {
       sets = sets.filter((set) => toBoolean(set.imported));
@@ -2503,15 +2527,15 @@ async function renderDashboard() {
 
     if (sortBy === 'series-date') {
       const seriesMap = buildSeriesMap(visibleSets);
-      seriesMap.forEach((setsArr, seriesName) => {
+      seriesMap.forEach((groupInfo) => {
         const section = document.createElement('section');
         section.className = 'dash-series-group';
         const h3 = document.createElement('h3');
-        h3.textContent = seriesName;
+        h3.textContent = groupInfo.label;
         section.appendChild(h3);
         const grid = document.createElement('div');
         grid.className = 'dash-sets-row';
-        setsArr.forEach((set) => {
+        groupInfo.sets.forEach((set) => {
           const summary = summaryByName.get(set.setName) || summaryByName.get(set.setId);
           grid.appendChild(createDashSetCard(set, summary));
         });
@@ -2938,11 +2962,14 @@ function ensureSetSelectorOption(set) {
     return;
   }
 
-  const groupLabel = set.series || set.vera_series || set.tcgdex_serie_name || 'Weitere Sets';
-  let group = Array.from(dom.selector.querySelectorAll('optgroup')).find((entry) => entry.label === groupLabel);
+  const groupInfo = getSetSeriesGroupInfo(set);
+  const groupLabel = groupInfo.label || 'Weitere Sets';
+  const groupKey = groupInfo.key || 'weitere-sets';
+  let group = Array.from(dom.selector.querySelectorAll('optgroup')).find((entry) => (entry.dataset.seriesKey || '') === groupKey);
   if (!group) {
     group = document.createElement('optgroup');
     group.label = groupLabel;
+    group.dataset.seriesKey = groupKey;
     dom.selector.appendChild(group);
   }
 
@@ -3805,10 +3832,19 @@ async function renderStats() {
     // Serien-Breakdown
     const seriesMap = new Map();
     state.sets.forEach((set) => {
-      const row    = data.find((r) => r.setName === set.setName);
-      const series = set.series || 'Andere';
-      if (!seriesMap.has(series)) seriesMap.set(series, { total: 0, collected: 0, rh: 0, count: 0, completed: 0 });
-      const sg = seriesMap.get(series);
+      const row = data.find((r) => r.setName === set.setName);
+      const groupInfo = getSetSeriesGroupInfo(set);
+      if (!seriesMap.has(groupInfo.key)) {
+        seriesMap.set(groupInfo.key, {
+          label: groupInfo.label || 'Andere',
+          total: 0,
+          collected: 0,
+          rh: 0,
+          count: 0,
+          completed: 0
+        });
+      }
+      const sg = seriesMap.get(groupInfo.key);
       sg.total     += row?.total     || 0;
       sg.collected += row?.collected || 0;
       sg.rh        += row?.rh        || 0;
@@ -3834,10 +3870,11 @@ async function renderStats() {
       <p style="text-align:center;color:var(--color-muted);margin:4px 0 28px">${totalCollected.toLocaleString('de-DE')} / ${totalCards.toLocaleString('de-DE')} Karten (${overallPct}%)</p>
       <h3>Serien-\u00dcbersicht</h3>
       <div class="stats-series-table">
-        ${Array.from(seriesMap.entries()).map(([name, sg]) => {
+        ${Array.from(seriesMap.entries()).map(([key, sg]) => {
           const pct = sg.total > 0 ? Math.round((sg.collected / sg.total) * 100) : 0;
-          return `<div class="stats-series-row" data-series="${name.replace(/"/g, '&quot;')}">
-            <div class="stats-series-name">${name}</div>
+          const label = sg.label || key;
+          return `<div class="stats-series-row" data-series="${key.replace(/"/g, '&quot;')}">
+            <div class="stats-series-name">${label}</div>
             <div class="stats-series-bar"><div class="dash-progress-fill" style="width:${pct}%"></div></div>
             <div class="stats-series-numbers">${sg.collected}/${sg.total} (${pct}%) &bull; ${sg.completed}/${sg.count} Sets</div>
           </div>`;
@@ -4260,6 +4297,25 @@ function mergeSearchCards(dbCards = [], apiCards = []) {
   return Array.from(byNumber.values());
 }
 
+function hasRichCardDetails(card = {}) {
+  return Boolean(
+    String(card?.rarity || '').trim()
+    || String(card?.hp || '').trim()
+    || (Array.isArray(card?.types) && card.types.length)
+    || String(card?.supertype || '').trim()
+    || String(card?.artist || '').trim()
+    || (Array.isArray(card?.rules) && card.rules.length)
+    || String(card?.flavorText || '').trim()
+  );
+}
+
+function needsApiCardEnrichment(cards = []) {
+  const sample = (Array.isArray(cards) ? cards : []).filter(Boolean).slice(0, 12);
+  if (!sample.length) return false;
+  const richCount = sample.filter((card) => hasRichCardDetails(card)).length;
+  return richCount < Math.max(1, Math.ceil(sample.length * 0.4));
+}
+
 async function runSearch(options = {}) {
   const { force = false } = options;
   const runId = ++state.searchRunId;
@@ -4496,7 +4552,9 @@ async function openSearchResultLightbox(card, set, { apiOnly = false } = {}) {
         }
 
         const hasDbCards = Array.isArray(dbCards) && dbCards.length > 0;
-        const shouldFetchApiCards = useApiForSet || (searchScopeMode === SEARCH_SCOPE_ALL && !hasDbCards);
+        const shouldFetchApiCards = useApiForSet
+          || (searchScopeMode === SEARCH_SCOPE_ALL && !hasDbCards)
+          || needsApiCardEnrichment(dbCards);
 
         if (!shouldFetchApiCards) {
           state.searchCache.set(searchCacheKey, dbCards);
@@ -4720,7 +4778,11 @@ function createCardElement(card, key, db, index) {
   // Image wrap (click → lightbox)
   const imgWrap = document.createElement('div');
   imgWrap.className = 'card-img-wrap';
-  imgWrap.addEventListener('click', () => { if (!state.bulkMode) openLightbox(index); });
+  imgWrap.addEventListener('click', (e) => {
+    if (state.bulkMode) return;
+    e.stopPropagation();
+    openLightbox(index);
+  });
 
   const img = document.createElement('img');
   img.src = card.image || ''; img.alt = card.name || key; img.loading = 'lazy';
@@ -4759,8 +4821,14 @@ function createCardElement(card, key, db, index) {
 
   // Bulk-Klick auf Artikel
   article.addEventListener('click', (e) => {
-    if (!state.bulkMode) return;
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'A') return;
+    const target = e.target;
+    if (target instanceof HTMLElement && target.closest('input, a, label')) return;
+
+    if (!state.bulkMode) {
+      openLightbox(index);
+      return;
+    }
+
     toggleBulkSelect(article, key);
     e.stopPropagation();
   });
@@ -4921,14 +4989,36 @@ function applyIncomingRealtimeUpdate(payload) {
 // ══════════════════════════════════════════════════════════════════════════
 // LIGHTBOX
 // ══════════════════════════════════════════════════════════════════════════
+function syncLightboxModalState() {
+  const shouldLockScroll = Boolean(dom.lightboxDialog?.open || dom.lightboxImageDialog?.open);
+  document.documentElement.classList.toggle('modal-scroll-locked', shouldLockScroll);
+  document.body.classList.toggle('modal-scroll-locked', shouldLockScroll);
+}
+
 function openLightbox(index) {
+  if (!dom.lightboxDialog) return;
   state.lightboxIndex = index;
   renderLightbox(index);
-  dom.lightboxDialog.showModal();
+  if (dom.lightboxImageDialog?.open) {
+    dom.lightboxImageDialog.close();
+  }
+  if (!dom.lightboxDialog.open) {
+    dom.lightboxDialog.showModal();
+  }
+  dom.lightboxDialog.scrollTop = 0;
+  dom.lightboxDialog.querySelector('.lightbox-meta')?.scrollTo({ top: 0, behavior: 'auto' });
+  syncLightboxModalState();
+  dom.btnLightboxClose?.focus({ preventScroll: true });
 }
 
 function closeLightbox() {
-  dom.lightboxDialog.close();
+  if (dom.lightboxImageDialog?.open) {
+    dom.lightboxImageDialog.close();
+  }
+  if (dom.lightboxDialog?.open) {
+    dom.lightboxDialog.close();
+  }
+  syncLightboxModalState();
   dom.cards.querySelector(`[data-card-index="${state.lightboxIndex}"]`)?.focus();
 }
 
@@ -4993,6 +5083,11 @@ function renderLightbox(index) {
 function initLightbox() {
   dom.btnLightboxClose.addEventListener('click', closeLightbox);
   dom.lightboxDialog.addEventListener('click', (e) => { if (e.target === dom.lightboxDialog) closeLightbox(); });
+  dom.lightboxDialog.addEventListener('close', syncLightboxModalState);
+  dom.lightboxDialog.addEventListener('cancel', (e) => {
+    e.preventDefault();
+    closeLightbox();
+  });
 
   const goPrevLightboxCard = () => {
     if (state.lightboxIndex > 0) {
@@ -5110,12 +5205,14 @@ function initLightbox() {
     const openFullscreenImage = () => {
       syncFullscreenImage(true);
       dom.lightboxImageDialog.showModal();
+      syncLightboxModalState();
     };
 
     const closeFullscreenImage = () => {
       if (!dom.lightboxImageDialog.open) return;
       dom.lightboxImageDialog.close();
       resetFullscreenTransform();
+      syncLightboxModalState();
     };
 
     dom.lightboxImg.addEventListener('click', () => {
@@ -5124,6 +5221,11 @@ function initLightbox() {
     });
 
     dom.btnLightboxImageClose.addEventListener('click', closeFullscreenImage);
+    dom.lightboxImageDialog.addEventListener('close', syncLightboxModalState);
+    dom.lightboxImageDialog.addEventListener('cancel', (e) => {
+      e.preventDefault();
+      closeFullscreenImage();
+    });
     dom.lightboxImageDialog.addEventListener('click', (e) => {
       if (e.target === dom.lightboxImageDialog) closeFullscreenImage();
     });
@@ -5516,8 +5618,27 @@ async function loadCurrentSet(forceRefresh = false) {
         ? cache.get(cardsCacheKey)
         : readDbCardsForSet(setId).then(async (dbCards) => {
           if (Array.isArray(dbCards) && dbCards.length > 0) {
-            cache.set(cardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
-            return dbCards;
+            const shouldHydrateFromApi = allowApiFallback || needsApiCardEnrichment(dbCards);
+            if (!shouldHydrateFromApi) {
+              cache.set(cardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
+              return dbCards;
+            }
+
+            const apiPayload = await fetchMergedCardsWithSetMeta(setId).catch(() => ({ cards: [], setMetaPatch: null }));
+            const apiCards = Array.isArray(apiPayload?.cards) ? apiPayload.cards : [];
+            const mergedCards = apiCards.length > 0 ? mergeSearchCards(dbCards, apiCards) : dbCards;
+            cache.set(cardsCacheKey, mergedCards, CONFIG.CACHE_TTL_MS);
+
+            if (apiCards.length > 0 && shouldAutoImportCurrentView) {
+              ensureSetImportedFromApi(selected, apiCards, {
+                setMetaPatch: apiPayload?.setMetaPatch || null,
+                source: state.pendingSearchSetImport ? 'search-jump' : 'set-view'
+              }).catch((autoImportErr) => {
+                console.warn('[loadCurrentSet] auto-import failed for set', setId, autoImportErr);
+              });
+            }
+
+            return mergedCards;
           }
           if (allowApiFallback) {
             const apiPayload = await fetchMergedCardsWithSetMeta(setId).catch(() => ({ cards: [], setMetaPatch: null }));

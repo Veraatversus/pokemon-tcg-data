@@ -11,15 +11,15 @@ const DEFAULT_RESOLVER_MATRIX = {
     releaseDate: ['tcgdex', 'vera', 'legacy'],
     totalCards: ['tcgdex', 'vera', 'legacy'],
     ptcgoCode: ['tcgdex', 'vera', 'legacy'],
-    logoUrl: ['tcgdex', 'vera', 'legacy'],
-    symbolUrl: ['tcgdex', 'vera', 'legacy'],
+    logoUrl: ['vera', 'tcgdex', 'legacy'],
+    symbolUrl: ['vera', 'tcgdex', 'legacy'],
     legalities: ['tcgdex', 'vera', 'legacy']
   },
   card: {
     number: ['tcgdex', 'vera', 'legacy'],
     name: ['tcgdex', 'vera', 'legacy'],
-    image: ['tcgdex', 'vera', 'legacy'],
-    imageLarge: ['tcgdex', 'vera', 'legacy'],
+    image: ['vera', 'tcgdex', 'legacy'],
+    imageLarge: ['vera', 'tcgdex', 'legacy'],
     cardmarketUrl: ['tcgdex', 'vera', 'legacy'],
     rarity: ['tcgdex', 'vera', 'legacy'],
     hp: ['tcgdex', 'vera', 'legacy'],
@@ -75,6 +75,16 @@ function normalizeResolverMatrix(input) {
     Object.keys(defaults[scope]).forEach((field) => {
       normalized[scope][field] = normalizePriority(scopeInput[field], defaults[scope][field]);
     });
+  });
+
+  const oldMediaDefault = ['tcgdex', 'vera', 'legacy'];
+  const safeMediaDefault = ['vera', 'tcgdex', 'legacy'];
+  const samePriority = (priority = [], expected = []) => priority.length === expected.length && priority.every((entry, index) => entry === expected[index]);
+
+  [['set', 'logoUrl'], ['set', 'symbolUrl'], ['card', 'image'], ['card', 'imageLarge']].forEach(([scope, field]) => {
+    if (samePriority(normalized?.[scope]?.[field], oldMediaDefault)) {
+      normalized[scope][field] = [...safeMediaDefault];
+    }
   });
 
   return normalized;
@@ -204,6 +214,89 @@ export const CARD_DB_HEADERS = [
   // Regeln
   'vera_rules'
 ];
+
+function normalizeSeriesGroupKey(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim();
+}
+
+const SERIES_GROUP_KEY_ALIASES = new Map([
+  ['sword shield', 'swsh'],
+  ['schwert schild', 'swsh'],
+  ['scarlet violet', 'sv'],
+  ['karmesin purpur', 'sv'],
+  ['sun moon', 'sm'],
+  ['sonne mond', 'sm'],
+  ['black white', 'bw'],
+  ['schwarz weiss', 'bw'],
+  ['diamond pearl', 'dp'],
+  ['diamant perl', 'dp'],
+  ['heartgold soulsilver', 'hgss'],
+  ['pokemon pocket', 'pocket'],
+  ['pokemon sammelkartenspiel pocket', 'pocket']
+]);
+
+function inferSeriesGroupKeyFromSetIds(setRecord = {}) {
+  const candidates = [setRecord.tcgdex_serie_id, setRecord.tcgdex_id, setRecord.vera_id, setRecord.setId]
+    .map((value) => String(value || '').trim().toLowerCase())
+    .filter(Boolean);
+
+  for (const candidate of candidates) {
+    if (/^(swsh)/.test(candidate)) return 'swsh';
+    if (/^(sv|rsv|zsv|hsp)/.test(candidate)) return 'sv';
+    if (/^(sm)/.test(candidate)) return 'sm';
+    if (/^(bw)/.test(candidate)) return 'bw';
+    if (/^(xy)/.test(candidate)) return 'xy';
+    if (/^(dp)/.test(candidate)) return 'dp';
+    if (/^(hgss|hs)/.test(candidate)) return 'hgss';
+    if (/^(ecard)/.test(candidate)) return 'ecard';
+    if (/^(ex)/.test(candidate)) return 'ex';
+    if (/^(neo)/.test(candidate)) return 'neo';
+    if (/^(gym)/.test(candidate)) return 'gym';
+    if (/^(base)/.test(candidate)) return 'base';
+    if (/^(pop)/.test(candidate)) return 'pop';
+  }
+
+  return '';
+}
+
+function inferSeriesGroupKeyFromNames(setRecord = {}, displayLabel = '') {
+  const nameCandidates = [setRecord.tcgdex_serie_name, setRecord.vera_series, displayLabel]
+    .map((value) => normalizeSeriesGroupKey(value))
+    .filter(Boolean);
+
+  for (const candidate of nameCandidates) {
+    if (SERIES_GROUP_KEY_ALIASES.has(candidate)) {
+      return SERIES_GROUP_KEY_ALIASES.get(candidate);
+    }
+  }
+
+  return '';
+}
+
+export function resolveSeriesGroupInfo(setRecord = {}) {
+  const displayLabel = [setRecord.series, setRecord.vera_series, setRecord.tcgdex_serie_name]
+    .map((value) => String(value || '').trim())
+    .find(Boolean) || 'Andere';
+
+  const canonicalSeries = String(setRecord.tcgdex_serie_id || '').trim()
+    || inferSeriesGroupKeyFromSetIds(setRecord)
+    || inferSeriesGroupKeyFromNames(setRecord, displayLabel)
+    || String(setRecord.tcgdex_serie_name || '').trim()
+    || String(setRecord.vera_series || '').trim()
+    || displayLabel;
+
+  return {
+    key: normalizeSeriesGroupKey(canonicalSeries) || 'andere',
+    label: displayLabel,
+    canonicalName: String(setRecord.tcgdex_serie_name || '').trim() || displayLabel
+  };
+}
 
 function toNumber(value) {
   const parsed = Number(value);
@@ -399,7 +492,21 @@ export function buildCardRecordFromSources({
     tcgdex_name: tcgdexCard?.name || '',
     tcgdex_localId: tcgdexCard?.localId || '',
     tcgdex_image_small: tcgdexImageSmall || fallbackImageSmall || '',
-    tcgdex_image_large: tcgdexImageLarge || fallbackImageLarge || imageLargeUrl || ''
+    tcgdex_image_large: tcgdexImageLarge || fallbackImageLarge || imageLargeUrl || '',
+    tcgdex_cardmarket_url: String(tcgdexCard?.links?.cardmarket || cardmarketUrl || '').trim(),
+    tcgdex_rarity: tcgdexCard?.rarity || '',
+    tcgdex_hp: tcgdexCard?.hp != null && tcgdexCard?.hp !== '' ? String(tcgdexCard.hp) : '',
+    tcgdex_types: normalizeStringList(tcgdexCard?.types),
+    tcgdex_category: tcgdexCard?.category || '',
+    tcgdex_stage: tcgdexCard?.stage || '',
+    tcgdex_suffix: tcgdexCard?.suffix || '',
+    tcgdex_evolvesFrom: tcgdexCard?.evolveFrom || tcgdexCard?.evolvesFrom || '',
+    tcgdex_illustrator: tcgdexCard?.illustrator || '',
+    tcgdex_regulationMark: tcgdexCard?.regulationMark || '',
+    tcgdex_description: typeof tcgdexCard?.description === 'string'
+      ? tcgdexCard.description
+      : (tcgdexCard?.description?.en || Object.values(tcgdexCard?.description || {}).find(Boolean) || ''),
+    tcgdex_effect: tcgdexCard?.effect || null
   };
 }
 
@@ -414,6 +521,7 @@ export function resolveDisplaySet(setRecord = {}) {
     tcgdex: setRecord.tcgdex_serie_name,
     vera: setRecord.vera_series
   }, { fallback: setRecord.vera_series || setRecord.tcgdex_serie_name || '' });
+  const seriesGroup = resolveSeriesGroupInfo({ ...setRecord, series });
 
   const releaseDate = resolveFieldByPriority(matrix.releaseDate, {
     tcgdex: setRecord.tcgdex_releaseDate,
@@ -463,6 +571,9 @@ export function resolveDisplaySet(setRecord = {}) {
     ...setRecord,
     setName,
     series,
+    seriesGroupKey: seriesGroup.key,
+    seriesGroupLabel: seriesGroup.label,
+    seriesCanonicalName: seriesGroup.canonicalName,
     releaseDate,
     totalCards,
     ptcgoCode,

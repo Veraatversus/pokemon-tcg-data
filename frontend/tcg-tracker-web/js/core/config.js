@@ -87,23 +87,24 @@ export const CONFIG = {
 
   // ── TCGDex-ID-Übersetzungstabelle ───────────────────────────
   // Pokemontcg.io-ID → TCGDex-ID, wenn sie sich unterscheiden
+  // Aktuelle Einträge sind bewusst deaktiviert und können gezielt wieder aktiviert werden.
   CUSTOM_SET_ID_MAPPINGS: {
-    'swsh3.5': 'swsh35',
-    'sm2.5': 'sm25',
-    'sm3.5': 'sm35',
-    'sm7.5': 'sm75',
-    'swsh4.5': 'swsh45',
-    'sm35': 'sm3.5',
-    'sm75': 'sm7.5',
-    'swsh35': 'swsh3.5',
-    'swsh45': 'swsh4.5',
-    'swsh45.sv': 'swsh45sv',
-    'zsv10pt5': 'sv10.5b',
-    'rsv10pt5': 'sv10.5w',
-    'sv3.5': 'sv3pt5',
-    'sv4.5': 'sv4pt5',
-    'sv6.5': 'sv6pt5',
-    'sv8.5': 'sv8pt5'
+    // 'swsh3.5': 'swsh35',
+    // 'sm2.5': 'sm25',
+    // 'sm3.5': 'sm35',
+    // 'sm7.5': 'sm75',
+    // 'swsh4.5': 'swsh45',
+    // 'sm35': 'sm3.5',
+    // 'sm75': 'sm7.5',
+    // 'swsh35': 'swsh3.5',
+    // 'swsh45': 'swsh4.5',
+    // 'swsh45.sv': 'swsh45sv',
+    // 'zsv10pt5': 'sv10.5b',
+    // 'rsv10pt5': 'sv10.5w',
+    // 'sv3.5': 'sv3pt5',
+    // 'sv4.5': 'sv4pt5',
+    // 'sv6.5': 'sv6pt5',
+    // 'sv8.5': 'sv8pt5'
   }
 };
 

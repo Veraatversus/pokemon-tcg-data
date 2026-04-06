@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import { findMatchingTcgdexSet } from '../js/pokecode-compat.js';
+import { findMatchingTcgdexSet, resolvePreferredTcgdexSetBases } from '../js/pokecode-compat.js';
+import { buildCardRecordFromSources, resolveDisplayCard, resolveSeriesGroupInfo } from '../js/data/schema-contract.js';
 
 function testDoesNotFalseMatchSubsetName() {
   const result = findMatchingTcgdexSet(
@@ -42,9 +43,135 @@ function testDirectIdWinsWhenEnglishFallbackSetExists() {
   assert.equal(result?.id, 'ex7');
 }
 
+function testExactEnglishNameBeatsConflictingCode() {
+  const result = findMatchingTcgdexSet(
+    { id: 'unknown-set', name: 'Team Rocket Returns', ptcgoCode: 'RO' },
+    [
+      {
+        id: 'base5',
+        name: 'Team Rocket',
+        abbreviation: { official: 'RO' }
+      },
+      {
+        id: 'ex7',
+        name: 'Team Rocket Returns',
+        abbreviation: { official: 'TR' }
+      }
+    ],
+    {}
+  );
+
+  assert.equal(
+    result?.id,
+    'ex7',
+    'Exact English set-name matching must win even if a conflicting code would point to base5.'
+  );
+}
+
+function testLocaleResolutionSkipsGerman404WhenSetIsKnownEnOnly() {
+  const bases = resolvePreferredTcgdexSetBases('ex7', {
+    tcgdexBase: 'https://api.tcgdex.net/v2/de',
+    tcgdexFallbackBase: 'https://api.tcgdex.net/v2/en',
+    tcgdexDeSetIds: new Set(['base5']),
+    tcgdexEnSetIds: new Set(['base5', 'ex7'])
+  });
+
+  assert.deepEqual(
+    bases,
+    ['https://api.tcgdex.net/v2/en'],
+    'Known EN-only sets should skip the DE endpoint instead of producing a predictable 404 first.'
+  );
+}
+
+function testSeriesGroupingUsesStableTcgdexKeyAcrossLocalizedLabels() {
+  const germanDisplay = resolveSeriesGroupInfo({
+    setId: 'swsh12pt5',
+    series: 'Schwert & Schild',
+    vera_series: 'Sword & Shield',
+    tcgdex_serie_name: 'Schwert & Schild',
+    tcgdex_serie_id: 'swsh'
+  });
+
+  const englishFallbackDisplay = resolveSeriesGroupInfo({
+    setId: 'swsh12pt5gg',
+    series: 'Sword & Shield',
+    vera_series: 'Sword & Shield',
+    tcgdex_serie_name: '',
+    tcgdex_serie_id: ''
+  });
+
+  assert.equal(germanDisplay.key, englishFallbackDisplay.key, 'Localized and English display labels must land in the same dashboard series bucket even when one set has no TCGDex series metadata.');
+  assert.equal(germanDisplay.label, 'Schwert & Schild', 'When a localized Vera label exists, it should remain available for UI display.');
+}
+
+function testCardResolverUsesTcgdexDetailFieldsWhenPrimaryDataIsMissing() {
+  const merged = buildCardRecordFromSources({
+    setId: 'swsh12pt5gg',
+    primaryCard: {
+      id: 'swsh12pt5gg-TG01',
+      number: 'TG01',
+      name: 'Pikachu',
+      images: { small: '', large: '' },
+      types: []
+    },
+    tcgdexCard: {
+      id: 'swsh12pt5gg-1',
+      localId: 'TG01',
+      name: 'Pikachu',
+      rarity: 'Trainer Gallery Rare Holo',
+      hp: 60,
+      types: ['Lightning'],
+      category: 'Pokemon',
+      stage: 'Basic',
+      suffix: 'TAG',
+      illustrator: 'Naoki Saito',
+      regulationMark: 'F',
+      description: 'Spark mouse Pokémon.',
+      effect: { en: 'Static' },
+      variants: { normal: true, reverse: true },
+      image: 'https://assets.tcgdex.net/en/swsh/swsh12pt5gg/TG01'
+    },
+    tcgdexSetId: 'swsh12pt5gg',
+    tcgdexSeriesId: 'swsh'
+  });
+
+  const display = resolveDisplayCard(merged);
+
+  assert.equal(display.rarity, 'Trainer Gallery Rare Holo');
+  assert.equal(display.hp, '60');
+  assert.deepEqual(display.types, ['Lightning']);
+  assert.equal(display.supertype, 'Pokemon');
+  assert.deepEqual(display.subtypes, ['Basic']);
+  assert.equal(display.artist, 'Naoki Saito');
+  assert.equal(display.regulationMark, 'F');
+  assert.ok(Array.isArray(display.rules) && display.rules.some((entry) => String(entry).includes('Spark mouse Pokémon.')), 'TCGDex description/effect should still populate rules when Vera data is sparse.');
+  assert.equal(display.flavorText, 'Spark mouse Pokémon.');
+}
+
+function testCardImageResolverPrefersReliableVeraAssets() {
+  const display = resolveDisplayCard({
+    vera_number: '001',
+    vera_name: 'Tannza',
+    vera_images_small: 'https://images.pokemontcg.io/sv1/1.png',
+    vera_images_large: 'https://images.pokemontcg.io/sv1/1_hires.png',
+    tcgdex_localId: '001',
+    tcgdex_name: 'Tannza',
+    tcgdex_image_small: 'https://assets.tcgdex.net/de/sv/sv01/001/low.webp',
+    tcgdex_image_large: 'https://assets.tcgdex.net/de/sv/sv01/001/high.webp'
+  });
+
+  assert.equal(display.image, 'https://images.pokemontcg.io/sv1/1.png');
+  assert.equal(display.imageLarge, 'https://images.pokemontcg.io/sv1/1_hires.png');
+}
+
 try {
   testDoesNotFalseMatchSubsetName();
   testDirectIdWinsWhenEnglishFallbackSetExists();
+  testExactEnglishNameBeatsConflictingCode();
+  testLocaleResolutionSkipsGerman404WhenSetIsKnownEnOnly();
+  testSeriesGroupingUsesStableTcgdexKeyAcrossLocalizedLabels();
+  testCardResolverUsesTcgdexDetailFieldsWhenPrimaryDataIsMissing();
+  testCardImageResolverPrefersReliableVeraAssets();
   console.log('set-match-regression: ok');
 } catch (error) {
   console.error('set-match-regression: failed');

@@ -3,9 +3,10 @@ import { naturalSort } from '../core/utils.js';
 import {
   loadCardsForSetCompat,
   combineSetsForOverviewCompat,
-  fetchAllPrimaryCardsForSet
-} from '../pokecode-compat.js?v=20260506c';
-import { buildSetRecordFromSources, resolveDisplayCard, resolveDisplaySet } from './schema-contract.js?v=20260504d';
+  fetchAllPrimaryCardsForSet,
+  resolvePreferredTcgdexSetBases
+} from '../pokecode-compat.js?v=20260506k';
+import { buildSetRecordFromSources, resolveDisplayCard, resolveDisplaySet } from './schema-contract.js?v=20260506k';
 
 // ── Interne Hilfsfunktionen ──────────────────────────────────────
 
@@ -20,17 +21,34 @@ async function fetchJson(url, { signal } = {}) {
 }
 
 let tcgdexSetsCache = null;
+let tcgdexEnSetIdsCache = null;
+let tcgdexDeSetIdsCache = null;
 let tcgdexSetsDetailedCache = null;
 let veraSetsCache = null;
+
+function buildTcgdexSetIdSet(sets = []) {
+  return new Set(
+    (Array.isArray(sets) ? sets : [])
+      .map((set) => String(set?.id || '').trim().toLowerCase())
+      .filter(Boolean)
+  );
+}
 
 async function fetchTcgdexSetDetailWithFallback(setId, { signal } = {}) {
   const normalizedSetId = String(setId || '').trim();
   if (!normalizedSetId) return null;
 
-  const bases = [CONFIG.APIS.TCGDEX_DE, CONFIG.APIS.TCGDEX_EN]
-    .map((value) => String(value || '').trim())
-    .filter(Boolean)
-    .filter((value, index, array) => array.indexOf(value) === index);
+  const [tcgdexEnSetIds, tcgdexDeSetIds] = await Promise.all([
+    fetchTcgdexEnSetIds({ signal }),
+    fetchTcgdexDeSetIds({ signal })
+  ]);
+
+  const bases = resolvePreferredTcgdexSetBases(normalizedSetId, {
+    tcgdexBase: CONFIG.APIS.TCGDEX_DE,
+    tcgdexFallbackBase: CONFIG.APIS.TCGDEX_EN,
+    tcgdexDeSetIds,
+    tcgdexEnSetIds
+  });
 
   for (const base of bases) {
     try {
@@ -44,49 +62,37 @@ async function fetchTcgdexSetDetailWithFallback(setId, { signal } = {}) {
   return null;
 }
 
-async function augmentTcgdexSetsWithEnglishFallbacks(primarySets = [], tcgdexSets = [], { signal } = {}) {
-  const merged = new Map();
-  (tcgdexSets || []).forEach((set) => {
-    const key = String(set?.id || '').trim().toLowerCase();
-    if (key) merged.set(key, set);
-  });
-
-  const missingIds = [];
-  (primarySets || []).forEach((primarySet) => {
-    const primaryId = String(primarySet?.id || '').trim();
-    if (!primaryId) return;
-    const mappedId = String(CONFIG.CUSTOM_SET_ID_MAPPINGS?.[primaryId.toLowerCase()] || primaryId).trim();
-    if (!mappedId || merged.has(mappedId.toLowerCase())) return;
-    missingIds.push(mappedId);
-  });
-
-  const uniqueMissingIds = Array.from(new Set(missingIds));
-  if (!uniqueMissingIds.length) {
-    return Array.from(merged.values());
-  }
-
-  const fallbackResults = await Promise.allSettled(
-    uniqueMissingIds.map((id) => fetchTcgdexSetDetailWithFallback(id, { signal }))
-  );
-
-  fallbackResults.forEach((result) => {
-    if (result.status !== 'fulfilled' || !result.value?.id) return;
-    merged.set(String(result.value.id).trim().toLowerCase(), result.value);
-  });
-
-  return Array.from(merged.values());
-}
-
 async function fetchTcgdexSets({ signal } = {}) {
   if (tcgdexSetsCache) return tcgdexSetsCache;
   try {
-    const sets = await fetchJson(`${CONFIG.APIS.TCGDEX_DE}/sets`, { signal });
+    // Die Matching-Phase läuft bewusst gegen die englische TCGDex-Settabelle.
+    const sets = await fetchJson(`${CONFIG.APIS.TCGDEX_EN}/sets`, { signal });
     tcgdexSetsCache = Array.isArray(sets) ? sets : [];
+    tcgdexEnSetIdsCache = buildTcgdexSetIdSet(tcgdexSetsCache);
   } catch (err) {
     if (isAbortError(err)) throw err;
     tcgdexSetsCache = [];
+    tcgdexEnSetIdsCache = new Set();
   }
   return tcgdexSetsCache;
+}
+
+async function fetchTcgdexEnSetIds({ signal } = {}) {
+  if (tcgdexEnSetIdsCache) return tcgdexEnSetIdsCache;
+  await fetchTcgdexSets({ signal });
+  return tcgdexEnSetIdsCache || new Set();
+}
+
+async function fetchTcgdexDeSetIds({ signal } = {}) {
+  if (tcgdexDeSetIdsCache) return tcgdexDeSetIdsCache;
+  try {
+    const sets = await fetchJson(`${CONFIG.APIS.TCGDEX_DE}/sets`, { signal });
+    tcgdexDeSetIdsCache = buildTcgdexSetIdSet(Array.isArray(sets) ? sets : []);
+  } catch (err) {
+    if (isAbortError(err)) throw err;
+    tcgdexDeSetIdsCache = new Set();
+  }
+  return tcgdexDeSetIdsCache;
 }
 
 /**
@@ -249,7 +255,11 @@ export async function fetchMergedCards(setId, { signal } = {}) {
  * Wichtig: tcgdex-Kartendaten kommen hier aus /sets/{id}.cards (nicht /cards).
  */
 export async function fetchMergedCardsWithSetMeta(setId, { signal } = {}) {
-  let tcgdexSets = await fetchTcgdexSets({ signal });
+  const [tcgdexSets, tcgdexEnSetIds, tcgdexDeSetIds] = await Promise.all([
+    fetchTcgdexSets({ signal }),
+    fetchTcgdexEnSetIds({ signal }),
+    fetchTcgdexDeSetIds({ signal })
+  ]);
   const { primarySetId, isTcgdexOnly } = resolveApiSetIds(setId);
   let primarySet = null;
   if (!isTcgdexOnly && primarySetId) {
@@ -262,10 +272,6 @@ export async function fetchMergedCardsWithSetMeta(setId, { signal } = {}) {
     } else {
       primarySet = await fetchPokemontcgSet(primarySetId, { signal });
     }
-  }
-
-  if (primarySet) {
-    tcgdexSets = await augmentTcgdexSetsWithEnglishFallbacks([primarySet], tcgdexSets, { signal });
   }
 
   const fetchJsonWithSignal = (url) => fetchJson(url, { signal });
@@ -282,7 +288,9 @@ export async function fetchMergedCardsWithSetMeta(setId, { signal } = {}) {
       veraLanguage: CONFIG.VERA_API_LANGUAGE,
       pokemontcgBase: CONFIG.APIS.POKEMONTCG,
       tcgdexBase: CONFIG.APIS.TCGDEX_DE,
-      tcgdexFallbackBase: CONFIG.APIS.TCGDEX_EN
+      tcgdexFallbackBase: CONFIG.APIS.TCGDEX_EN,
+      tcgdexDeSetIds,
+      tcgdexEnSetIds
     },
     fetchJson: fetchJsonWithSignal
   });
@@ -321,13 +329,12 @@ export async function fetchAllAvailableSets() {
     primarySets = await fetchPokemontcgSets();
   }
 
-  const tcgdexSets = await augmentTcgdexSetsWithEnglishFallbacks(
-    primarySets,
-    await fetchTcgdexSetsDetailed()
-  );
+  const tcgdexMatchSets = await fetchTcgdexSets();
+  const tcgdexResolvedSets = await fetchTcgdexSetsDetailed();
   const combined = combineSetsForOverviewCompat({
     primarySets,
-    tcgdexSets,
+    tcgdexSets: tcgdexMatchSets,
+    tcgdexResolvedSets,
     customMappings: CONFIG.CUSTOM_SET_ID_MAPPINGS,
     mapPrimarySetToOverviewModel: mapSetToOverviewModel,
     toNumber
@@ -353,12 +360,14 @@ export async function runPokecodeParityCheck({ setIds = [], maxSets = 10 } = {})
     primarySets = await fetchPokemontcgSets();
   }
 
-  const tcgdexSets = await augmentTcgdexSetsWithEnglishFallbacks(primarySets, await fetchTcgdexSets());
+  const tcgdexMatchSets = await fetchTcgdexSets();
+  const tcgdexResolvedSets = await fetchTcgdexSetsDetailed();
 
   const overviewAdapter = await fetchAllAvailableSets();
   const overviewCompat = combineSetsForOverviewCompat({
     primarySets,
-    tcgdexSets,
+    tcgdexSets: tcgdexMatchSets,
+    tcgdexResolvedSets,
     customMappings: CONFIG.CUSTOM_SET_ID_MAPPINGS,
     mapPrimarySetToOverviewModel: mapSetToOverviewModel,
     toNumber
