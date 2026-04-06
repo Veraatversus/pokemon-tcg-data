@@ -34,6 +34,9 @@ function isDbSheetTitle(title) {
 let resolvedSheetsCache = null;
 let schemaEnsuredPromise = null;
 const dbRowsCache = new Map();
+const sheetCapacityCache = new Map();
+let sheetsWriteQueue = Promise.resolve();
+const SHEETS_WRITE_GAP_MS = 90;
 
 const DB_SHEETS = {
   sets: 'db_sets',
@@ -49,6 +52,54 @@ const DB_HEADERS = {
 
 function normalizeName(value) {
   return String(value ?? '').trim().toLowerCase();
+}
+
+export function resetSheetsDataCaches() {
+  resolvedSheetsCache = null;
+  schemaEnsuredPromise = null;
+  dbRowsCache.clear();
+  sheetCapacityCache.clear();
+  sheetsWriteQueue = Promise.resolve();
+}
+
+function invalidateSheetRowCache(sheetName) {
+  const prefix = `${sheetName}:`;
+  for (const key of dbRowsCache.keys()) {
+    if (key.startsWith(prefix)) {
+      dbRowsCache.delete(key);
+    }
+  }
+}
+
+function primeSheetCapacityCache(sheets = []) {
+  (sheets || []).forEach((sheet) => {
+    const title = sheet?.properties?.title;
+    if (!title) return;
+    sheetCapacityCache.set(normalizeName(title), {
+      sheetId: sheet?.properties?.sheetId,
+      title,
+      rowCount: Number(sheet?.properties?.gridProperties?.rowCount) || 0,
+      columnCount: Number(sheet?.properties?.gridProperties?.columnCount) || 0,
+    });
+  });
+}
+
+function waitForDelay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function enqueueSheetsMutation(task, { gapMs = SHEETS_WRITE_GAP_MS } = {}) {
+  const runTask = async () => {
+    const result = await task();
+    if (gapMs > 0) {
+      await waitForDelay(gapMs);
+    }
+    return result;
+  };
+
+  const scheduled = sheetsWriteQueue.then(runTask, runTask);
+  sheetsWriteQueue = scheduled.catch(() => undefined);
+  return scheduled;
 }
 
 function pickSheetTitle(titles, preferred, aliases, matcher) {
@@ -110,10 +161,13 @@ async function resolveSheetNames() {
 
   const meta = await gapi.client.sheets.spreadsheets.get({
     spreadsheetId: CONFIG.SPREADSHEET_ID,
-    fields: 'sheets(properties(title))'
+    fields: 'sheets(properties(sheetId,title,gridProperties(rowCount,columnCount)))'
   });
 
-  const titles = (meta.result.sheets || [])
+  const metaSheets = meta.result.sheets || [];
+  primeSheetCapacityCache(metaSheets);
+
+  const titles = metaSheets
     .map((sheet) => sheet.properties?.title)
     .filter(Boolean);
 
@@ -248,47 +302,49 @@ async function putValues(range, values) {
     if (!gapi?.client?.sheets?.spreadsheets?.values?.update) {
       throw new Error('Sheets API nicht initialisiert – bitte melden Sie sich an');
     }
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
-      try {
-        await gapi.client.sheets.spreadsheets.values.update({
-          spreadsheetId: CONFIG.SPREADSHEET_ID,
-          range,
-          valueInputOption: 'USER_ENTERED',
-          resource: { values }
-        });
-        emitWriteEvent('sheets-write-success', {
-          range,
-          attemptsUsed: attempt + 1,
-          maxRetries
-        });
-        return;
-      } catch (err) {
-        if (isAuthWriteError(err) && !reauthedOnce) {
-          reauthedOnce = true;
-          const reauthed = await signIn({ forceConsent: true }).catch(() => false);
-          if (reauthed) {
-            emitWriteEvent('sheets-write-retry', {
-              range,
-              attempt: attempt + 1,
-              maxRetries,
-              delayMs: 0,
-              status: Number(err?.status || err?.result?.error?.code || 0) || null
-            });
-            continue;
+    return await enqueueSheetsMutation(async () => {
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+          await gapi.client.sheets.spreadsheets.values.update({
+            spreadsheetId: CONFIG.SPREADSHEET_ID,
+            range,
+            valueInputOption: 'USER_ENTERED',
+            resource: { values }
+          });
+          emitWriteEvent('sheets-write-success', {
+            range,
+            attemptsUsed: attempt + 1,
+            maxRetries
+          });
+          return;
+        } catch (err) {
+          if (isAuthWriteError(err) && !reauthedOnce) {
+            reauthedOnce = true;
+            const reauthed = await signIn({ forceConsent: true }).catch(() => false);
+            if (reauthed) {
+              emitWriteEvent('sheets-write-retry', {
+                range,
+                attempt: attempt + 1,
+                maxRetries,
+                delayMs: 0,
+                status: Number(err?.status || err?.result?.error?.code || 0) || null
+              });
+              continue;
+            }
           }
+          if (!isRetryableWriteError(err) || attempt >= maxRetries) throw err;
+          const delay = Math.min(10000, 500 * Math.pow(2, attempt)) + Math.floor(Math.random() * 150);
+          emitWriteEvent('sheets-write-retry', {
+            range,
+            attempt: attempt + 1,
+            maxRetries,
+            delayMs: delay,
+            status: Number(err?.status || err?.result?.error?.code || 0) || null
+          });
+          await waitForDelay(delay);
         }
-        if (!isRetryableWriteError(err) || attempt >= maxRetries) throw err;
-        const delay = Math.min(10000, 500 * Math.pow(2, attempt)) + Math.floor(Math.random() * 150);
-        emitWriteEvent('sheets-write-retry', {
-          range,
-          attempt: attempt + 1,
-          maxRetries,
-          delayMs: delay,
-          status: Number(err?.status || err?.result?.error?.code || 0) || null
-        });
-        await new Promise((resolve) => setTimeout(resolve, delay));
       }
-    }
+    });
   } catch (err) {
     emitWriteEvent('sheets-write-failed', {
       range,
@@ -300,25 +356,101 @@ async function putValues(range, values) {
   }
 }
 
+async function batchPutValues(updates = []) {
+  const normalizedUpdates = (updates || []).filter((entry) => entry?.range && Array.isArray(entry?.values) && entry.values.length > 0);
+  if (!normalizedUpdates.length) return;
+
+  const maxRetries = 6;
+  let reauthedOnce = false;
+  const rangeLabel = normalizedUpdates.length === 1 ? normalizedUpdates[0].range : `${normalizedUpdates.length} ranges`;
+
+  try {
+    if (!gapi?.client?.sheets?.spreadsheets?.values?.batchUpdate) {
+      for (const entry of normalizedUpdates) {
+        await putValues(entry.range, entry.values);
+      }
+      return;
+    }
+
+    return await enqueueSheetsMutation(async () => {
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+          await gapi.client.sheets.spreadsheets.values.batchUpdate({
+            spreadsheetId: CONFIG.SPREADSHEET_ID,
+            resource: {
+              valueInputOption: 'USER_ENTERED',
+              data: normalizedUpdates.map((entry) => ({ range: entry.range, values: entry.values }))
+            }
+          });
+          emitWriteEvent('sheets-write-success', {
+            range: rangeLabel,
+            attemptsUsed: attempt + 1,
+            maxRetries
+          });
+          return;
+        } catch (err) {
+          if (isAuthWriteError(err) && !reauthedOnce) {
+            reauthedOnce = true;
+            const reauthed = await signIn({ forceConsent: true }).catch(() => false);
+            if (reauthed) {
+              emitWriteEvent('sheets-write-retry', {
+                range: rangeLabel,
+                attempt: attempt + 1,
+                maxRetries,
+                delayMs: 0,
+                status: Number(err?.status || err?.result?.error?.code || 0) || null
+              });
+              continue;
+            }
+          }
+          if (!isRetryableWriteError(err) || attempt >= maxRetries) throw err;
+          const delay = Math.min(10000, 500 * Math.pow(2, attempt)) + Math.floor(Math.random() * 150);
+          emitWriteEvent('sheets-write-retry', {
+            range: rangeLabel,
+            attempt: attempt + 1,
+            maxRetries,
+            delayMs: delay,
+            status: Number(err?.status || err?.result?.error?.code || 0) || null
+          });
+          await waitForDelay(delay);
+        }
+      }
+    });
+  } catch (err) {
+    emitWriteEvent('sheets-write-failed', {
+      range: rangeLabel,
+      status: Number(err?.status || err?.result?.error?.code || 0) || null,
+      message: String(err?.result?.error?.message || err?.message || 'Unbekannter Fehler')
+    });
+    console.error('[batchPutValues]', err);
+    throw err;
+  }
+}
+
 async function listSheetTitles() {
   const meta = await gapi.client.sheets.spreadsheets.get({
     spreadsheetId: CONFIG.SPREADSHEET_ID,
-    fields: 'sheets(properties(title))'
+    fields: 'sheets(properties(sheetId,title,gridProperties(rowCount,columnCount)))'
   });
-  return (meta.result.sheets || [])
+  const metaSheets = meta.result.sheets || [];
+  primeSheetCapacityCache(metaSheets);
+  return metaSheets
     .map((sheet) => sheet.properties?.title)
     .filter(Boolean);
 }
 
 async function addSheet(title) {
-  await gapi.client.sheets.spreadsheets.batchUpdate({
-    spreadsheetId: CONFIG.SPREADSHEET_ID,
-    resource: {
-      requests: [{ addSheet: { properties: { title } } }]
-    }
-  });
+  await enqueueSheetsMutation(async () => {
+    await gapi.client.sheets.spreadsheets.batchUpdate({
+      spreadsheetId: CONFIG.SPREADSHEET_ID,
+      resource: {
+        requests: [{ addSheet: { properties: { title } } }]
+      }
+    });
+  }, { gapMs: 0 });
   resolvedSheetsCache = null;
   dbRowsCache.clear();
+  sheetCapacityCache.clear();
 }
 
 function buildDataRange(sheetName, columnCount, startRow = 2, endRow = 200000) {
@@ -435,6 +567,7 @@ async function readDbRows(sheetName, columnCount, force = false) {
 
 async function rewriteDbRows(sheetName, columnCount, rows) {
   await clearValues(buildDataRange(sheetName, columnCount, 2, 200000));
+  invalidateSheetRowCache(sheetName);
   if (rows.length === 0) return;
   const endRow = rows.length + 1;
   const endCol = colToA1(columnCount);
@@ -454,30 +587,34 @@ async function appendDbRows(sheetName, columnCount, rows) {
 }
 
 async function ensureSheetCapacity(sheetName, requiredRows, requiredCols) {
+  const normalizedSheetName = normalizeName(sheetName);
+  const targetRows = Math.max(0, Number(requiredRows) || 0);
+  const targetCols = Math.max(0, Number(requiredCols) || 0);
+
+  let sheetInfo = sheetCapacityCache.get(normalizedSheetName) || null;
+  if (sheetInfo && targetRows <= sheetInfo.rowCount && targetCols <= sheetInfo.columnCount) {
+    return;
+  }
+
   const meta = await gapi.client.sheets.spreadsheets.get({
     spreadsheetId: CONFIG.SPREADSHEET_ID,
     fields: 'sheets(properties(sheetId,title,gridProperties(rowCount,columnCount)))'
   });
+  primeSheetCapacityCache(meta.result.sheets || []);
+  sheetInfo = sheetCapacityCache.get(normalizedSheetName) || null;
 
-  const sheet = (meta.result.sheets || []).find(
-    (entry) => normalizeName(entry?.properties?.title) === normalizeName(sheetName)
-  );
-
-  if (!sheet?.properties?.sheetId) {
+  if (!sheetInfo?.sheetId) {
     throw new Error(`Sheet nicht gefunden: ${sheetName}`);
   }
 
-  const sheetId = sheet.properties.sheetId;
-  const currentRows = Number(sheet.properties?.gridProperties?.rowCount) || 0;
-  const currentCols = Number(sheet.properties?.gridProperties?.columnCount) || 0;
-  const targetRows = Math.max(0, Number(requiredRows) || 0);
-  const targetCols = Math.max(0, Number(requiredCols) || 0);
+  const currentRows = Number(sheetInfo.rowCount) || 0;
+  const currentCols = Number(sheetInfo.columnCount) || 0;
   const requests = [];
 
   if (targetRows > currentRows) {
     requests.push({
       appendDimension: {
-        sheetId,
+        sheetId: sheetInfo.sheetId,
         dimension: 'ROWS',
         length: targetRows - currentRows
       }
@@ -487,20 +624,30 @@ async function ensureSheetCapacity(sheetName, requiredRows, requiredCols) {
   if (targetCols > currentCols) {
     requests.push({
       appendDimension: {
-        sheetId,
+        sheetId: sheetInfo.sheetId,
         dimension: 'COLUMNS',
         length: targetCols - currentCols
       }
     });
   }
 
-  if (requests.length > 0) {
+  if (requests.length === 0) {
+    return;
+  }
+
+  await enqueueSheetsMutation(async () => {
     await gapi.client.sheets.spreadsheets.batchUpdate({
       spreadsheetId: CONFIG.SPREADSHEET_ID,
       resource: { requests }
     });
-    dbRowsCache.delete(`${sheetName}:${targetCols}`);
-  }
+  }, { gapMs: 0 });
+
+  sheetCapacityCache.set(normalizedSheetName, {
+    ...sheetInfo,
+    rowCount: Math.max(currentRows, targetRows),
+    columnCount: Math.max(currentCols, targetCols)
+  });
+  invalidateSheetRowCache(sheetName);
 }
 
 function toSafeCellString(value) {
@@ -1061,9 +1208,11 @@ function buildOverviewRowValues(setMeta, imported = false) {
 
 async function clearValues(range) {
   if (!gapi?.client?.sheets?.spreadsheets?.values?.clear) return;
-  await gapi.client.sheets.spreadsheets.values.clear({
-    spreadsheetId: CONFIG.SPREADSHEET_ID,
-    range
+  await enqueueSheetsMutation(async () => {
+    await gapi.client.sheets.spreadsheets.values.clear({
+      spreadsheetId: CONFIG.SPREADSHEET_ID,
+      range
+    });
   });
 }
 
@@ -1181,8 +1330,11 @@ export async function syncOverviewWithApiSets(sets, importedSetIds = []) {
     }
   });
 
-  for (const update of updates) {
-    await putValues(buildRange(sheets.overview, `A${update.rowIndex}:J${update.rowIndex}`), [update.rowValues]);
+  if (updates.length) {
+    await batchPutValues(updates.map((update) => ({
+      range: buildRange(sheets.overview, `A${update.rowIndex}:J${update.rowIndex}`),
+      values: [update.rowValues]
+    })));
   }
 
   if (appendValues.length) {

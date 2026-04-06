@@ -184,16 +184,25 @@ async page => {
     }
 
     await page.locator('#search-results .search-result-card').nth(candidate.index).locator('.search-actions button').click();
-    await pause(400);
+    await pause(900);
 
-    const state = await page.evaluate(() => ({
-      hash: window.location.hash,
-      selectorValue: document.getElementById('set-selector')?.value || '',
-      cardCount: document.querySelectorAll('#cards .card').length,
-      statusText: document.getElementById('status')?.textContent?.trim() || '',
-      navText: document.getElementById('nav-set-link')?.textContent?.trim() || '',
-      setViewVisible: !document.getElementById('view-set')?.classList.contains('hidden'),
-    }));
+    const state = await page.evaluate((candidateTitle) => {
+      const matchingCard = Array.from(document.querySelectorAll('#cards .card')).find((node) => {
+        const title = node.querySelector('.title')?.textContent?.trim() || '';
+        return title === candidateTitle;
+      });
+      const rect = matchingCard?.getBoundingClientRect?.();
+      return {
+        hash: window.location.hash,
+        selectorValue: document.getElementById('set-selector')?.value || '',
+        cardCount: document.querySelectorAll('#cards .card').length,
+        statusText: document.getElementById('status')?.textContent?.trim() || '',
+        navText: document.getElementById('nav-set-link')?.textContent?.trim() || '',
+        setViewVisible: !document.getElementById('view-set')?.classList.contains('hidden'),
+        targetCardFound: Boolean(matchingCard),
+        targetCardVisible: Boolean(rect && rect.bottom > 0 && rect.top < window.innerHeight),
+      };
+    }, candidate.title);
 
     if (!state.setViewVisible || !state.hash.startsWith('#set/')) {
       throw new Error(`[${name}] Set-Ansicht wurde nach "Zum Set" nicht geöffnet: ${JSON.stringify(state)}`);
@@ -201,12 +210,54 @@ async page => {
     if (!state.selectorValue || state.cardCount < 1) {
       throw new Error(`[${name}] API-Treffer „${candidate.title}“ aus „${candidate.set}“ lädt das Ziel-Set nicht korrekt: ${JSON.stringify(state)}`);
     }
+    if (!state.targetCardFound || !state.targetCardVisible) {
+      throw new Error(`[${name}] Die gefundene Karte „${candidate.title}“ wird nach "Zum Set" nicht direkt sichtbar gemacht: ${JSON.stringify(state)}`);
+    }
+
+    await gotoSearch();
+    await setScope('imported');
+    await setSetFilter(state.selectorValue);
+    await page.locator('#search-input').fill(query);
+    await pause(150);
+    await page.locator('#search-input').press('Enter').catch(() => {});
+    await waitForSearchSettled();
+
+    const importedSearchState = await collectSearchState();
+    const importedHasApiBadge = importedSearchState.cards.some((entry) => /api/i.test(entry.status || ''));
+
+    if (importedSearchState.count < 1 || importedHasApiBadge || importedSearchState.setFilterValue !== state.selectorValue) {
+      throw new Error(`[${name}] Das API-Set wurde nach dem Öffnen nicht korrekt in die importierte Suche übernommen: ${JSON.stringify({ candidate, state, importedSearchState })}`);
+    }
+
+    await gotoDashboard();
+    await page.locator('#dash-filter').fill(candidate.set);
+    await pause(450);
+
+    const dashboardState = await page.evaluate((candidateSet) => {
+      const cards = Array.from(document.querySelectorAll('.dash-set-card'));
+      const match = cards.find((node) => {
+        const title = node.querySelector('.dash-set-name')?.textContent?.trim() || '';
+        return title === candidateSet;
+      });
+      return {
+        found: Boolean(match),
+        progressText: match?.querySelector('.dash-progress-text')?.textContent?.trim() || '',
+        hasImportButton: Boolean(match?.querySelector('.dash-import-btn')),
+        hasDeleteButton: Boolean(match?.querySelector('.dash-delete-btn')),
+      };
+    }, candidate.set);
+
+    if (!dashboardState.found || dashboardState.hasImportButton || /nicht importiert/i.test(dashboardState.progressText)) {
+      throw new Error(`[${name}] Dashboard/Statistik zeigt das API-Set nach dem Suchtreffer noch nicht als importiert an: ${JSON.stringify({ candidate, dashboardState })}`);
+    }
 
     return {
       name,
       query,
       candidate,
       state,
+      importedSearchState,
+      dashboardState,
     };
   }
 

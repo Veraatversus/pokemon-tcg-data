@@ -7,10 +7,12 @@ let tokenClient = null;
 let accessToken = null;
 let gapiInited = false;
 let gisInited = false;
+let signInPromise = null;
 
 // ── GAPI helpers ──────────────────────────────────────────────────────────────
 
 const GAPI_TIMEOUT_MS = 10000;
+const SIGN_IN_TIMEOUT_MS = 180000;
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -187,6 +189,7 @@ export async function initAuth() {
     tokenClient = globalThis.google.accounts.oauth2.initTokenClient({
       client_id: CONFIG.GOOGLE_CLIENT_ID,
       scope: CONFIG.SCOPES,
+      ux_mode: 'popup',
       callback: () => {}  // wird pro Request überschrieben
     });
     console.log('[initAuth] tokenClient created');
@@ -220,24 +223,30 @@ export async function initAuth() {
  */
 export function signIn(options = {}) {
   const forceConsent = Boolean(options?.forceConsent);
-  if (!gapiInited || !gisInited) return Promise.resolve(false);
-  return new Promise((resolve) => {
-    const fallbackToRedirect = (reason = 'popup_failed') => {
-      console.warn('[signIn] popup flow failed, switching to redirect:', reason);
-      location.href = buildRedirectOAuthUrl(forceConsent);
+  if (!gapiInited || !gisInited || !tokenClient) return Promise.resolve(false);
+  if (signInPromise) return signInPromise;
+
+  signInPromise = new Promise((resolve) => {
+    let finished = false;
+    const finish = (result) => {
+      if (finished) return;
+      finished = true;
+      clearTimeout(timeout);
+      signInPromise = null;
+      tokenClient.callback = () => {};
+      tokenClient.error_callback = undefined;
+      resolve(Boolean(result));
     };
 
     const timeout = setTimeout(() => {
-      fallbackToRedirect('timeout');
-      resolve(false);
-    }, 12000);
+      console.warn(`[signIn] popup flow timed out after ${SIGN_IN_TIMEOUT_MS}ms; same-window fallback remains disabled`);
+      finish(false);
+    }, SIGN_IN_TIMEOUT_MS);
 
     tokenClient.callback = async (response) => {
-      clearTimeout(timeout);
-      if (response.error) {
+      if (response?.error) {
         console.error('[signIn callback] error:', response.error);
-        fallbackToRedirect(response.error);
-        resolve(false);
+        finish(false);
         return;
       }
       try {
@@ -247,25 +256,31 @@ export function signIn(options = {}) {
         } catch (discErr) {
           console.warn('[signIn] Discovery load failed, continuing:', discErr);
         }
-        resolve(true);
+        finish(true);
       } catch (err) {
         console.error('[signIn]', err);
-        resolve(false);
+        finish(false);
       }
     };
 
     tokenClient.error_callback = (error) => {
-      clearTimeout(timeout);
       const reason = error?.type || 'error_callback';
       console.error('[signIn error_callback]', error);
-      fallbackToRedirect(reason);
-      resolve(false);
+      console.warn('[signIn] popup-only flow aborted:', reason);
+      finish(false);
     };
 
-    tokenClient.requestAccessToken({
-      prompt: forceConsent || !accessToken ? 'consent' : ''
-    });
+    try {
+      tokenClient.requestAccessToken({
+        prompt: forceConsent || !accessToken ? 'consent' : ''
+      });
+    } catch (err) {
+      console.error('[signIn requestAccessToken]', err);
+      finish(false);
+    }
   });
+
+  return signInPromise;
 }
 
 /** Widerruft den Token und löscht alle gespeicherten Daten. */

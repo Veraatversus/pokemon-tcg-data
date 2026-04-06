@@ -221,6 +221,18 @@ export function createSettingsPanel(currentSettings = {}, onSave) {
     { key: 'notificationsEnabled', label: 'Benachrichtigungen' }
   ];
 
+  const normalizeAutoImportMode = (value) => {
+    const normalized = String(value || '').trim().toLowerCase();
+    if (normalized === 'never' || normalized === 'always') return normalized;
+    return 'jump';
+  };
+
+  const autoImportOptions = [
+    { value: 'jump', label: 'Nur bei „Zum Set“' },
+    { value: 'never', label: 'Nie automatisch importieren' },
+    { value: 'always', label: 'Immer beim Öffnen importieren' }
+  ];
+
   const resolverOptions = [
     { value: 'tcgdex|vera|legacy', label: 'TCGDex > Vera > Legacy' },
     { value: 'vera|tcgdex|legacy', label: 'Vera > TCGDex > Legacy' },
@@ -246,6 +258,7 @@ export function createSettingsPanel(currentSettings = {}, onSave) {
   ];
 
   const currentMatrix = currentSettings.resolverMatrix || { set: {}, card: {} };
+  const currentAutoImportMode = normalizeAutoImportMode(currentSettings.autoImportMode);
 
   const toolGroups = [
     {
@@ -307,6 +320,16 @@ export function createSettingsPanel(currentSettings = {}, onSave) {
           <span>${s.label}</span>
         </label>
       `).join('')}
+
+      <div style="border:1px solid var(--color-border); border-radius:8px; padding:10px 12px; background: var(--color-surface); display:flex; flex-direction:column; gap:8px;">
+        <label for="settings-auto-import-mode" style="font-weight:600;">Auto-Import für API-Sets</label>
+        <select id="settings-auto-import-mode" data-key="autoImportMode" style="max-width: 320px;">
+          ${autoImportOptions.map((opt) => `<option value="${opt.value}" ${opt.value === currentAutoImportMode ? 'selected' : ''}>${opt.label}</option>`).join('')}
+        </select>
+        <p style="font-size:12px; color:var(--color-muted); margin:0; line-height:1.45;">
+          Standard ist <strong>nur bei „Zum Set“</strong>. Im Modus <strong>Immer</strong> bleibt der Hintergrund-Import bewusst über eine sichtbare Warteschlange gebremst.
+        </p>
+      </div>
 
       <div style="border:1px solid var(--color-border); border-radius:8px; padding:10px 12px; background: var(--color-surface);">
         <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600;">
@@ -391,6 +414,9 @@ export function createSettingsPanel(currentSettings = {}, onSave) {
     panel.querySelectorAll('input[type="checkbox"]').forEach((input) => {
       updated[input.dataset.key] = input.checked;
     });
+
+    const autoImportSelect = panel.querySelector('select[data-key="autoImportMode"]');
+    updated.autoImportMode = normalizeAutoImportMode(autoImportSelect?.value);
 
     const matrix = { set: {}, card: {} };
     panel.querySelectorAll('select[data-resolver-scope][data-resolver-field]').forEach((select) => {

@@ -68,6 +68,7 @@ export const CONFIG = {
   APIS: {
     POKEMONTCG: 'https://api.pokemontcg.io/v2',
     TCGDEX_DE: 'https://api.tcgdex.net/v2/de',  // kein trailing slash!
+    TCGDEX_EN: 'https://api.tcgdex.net/v2/en',
     VERA_BASE: 'https://veraatversus.github.io/pokemon-tcg-data'
   },
 

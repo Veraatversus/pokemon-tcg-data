@@ -1,4 +1,4 @@
-﻿import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js?v=20260403b';
+﻿import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js?v=20260506d';
 import {
   listImportedSets,
   listSetsOverviewData,
@@ -12,8 +12,9 @@ import {
   importSetIntoCollection,
   upsertOverviewSet,
   syncOverviewWithApiSets,
-} from './data/sheets-db.js?v=20260504d';
-import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260504d';
+  resetSheetsDataCaches,
+} from './data/sheets-db.js?v=20260506a';
+import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260506c';
 import { normalizeCardNumber, toBoolean } from './core/utils.js';
 import * as cache from './core/cache.js';
 import { CONFIG, scopedStorageKey } from './core/config.js';
@@ -37,13 +38,13 @@ import {
   loadSettings, saveSettings, updateSetting,
   applyQuickFilters, calculateCollectionStats,
   getSyncStatus, setSyncStatus
-} from './enhanced-features.js?v=20260402b';
+} from './enhanced-features.js?v=20260506b';
 
 import {
   initQuickFiltersUI, createSearchHistoryWidget, createStatisticsPanel,
   createExportDialog, createSettingsPanel,
   createBulkActionsToolbar
-} from './ui/components.js?v=20260504d';
+} from './ui/components.js?v=20260506b';
 import {
   AdvancedSearch, SyncIndicator, CardCollectionTools,
   generateCollectionInsights, generateSetComparison,
@@ -289,6 +290,13 @@ const state = {
   searchRunId:  0,
   searchAbortController: null,
   pendingSearchSetImport: false,
+  pendingSearchCardFocusKey: null,
+  autoImportJobs: new Map(),
+  autoImportQueue: Promise.resolve(),
+  autoImportQueuedSetIds: [],
+  autoImportActiveSetId: null,
+  autoImportLastLimitToastAt: 0,
+  autoImportRefreshTimer: null,
   batchSelection: new Set(),
   activeJob: null,
   queuedActions: [],
@@ -342,6 +350,65 @@ const DASHBOARD_VIRTUAL_THRESHOLD = 220;
 const SEARCH_SCOPE_IMPORTED = 'imported';
 const SEARCH_SCOPE_ALL = 'all';
 const SEARCH_SCOPE_ONLINE = 'online';
+const AUTO_IMPORT_MODE_JUMP = 'jump';
+const AUTO_IMPORT_MODE_NEVER = 'never';
+const AUTO_IMPORT_MODE_ALWAYS = 'always';
+const AUTO_IMPORT_QUEUE_LIMIT = 3;
+
+function normalizeAutoImportMode(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (normalized === AUTO_IMPORT_MODE_NEVER || normalized === AUTO_IMPORT_MODE_ALWAYS) return normalized;
+  return AUTO_IMPORT_MODE_JUMP;
+}
+
+function getAutoImportMode() {
+  return normalizeAutoImportMode(loadSettings().autoImportMode);
+}
+
+function getAutoImportModeLabel(mode = getAutoImportMode()) {
+  if (mode === AUTO_IMPORT_MODE_NEVER) return 'Nie';
+  if (mode === AUTO_IMPORT_MODE_ALWAYS) return 'Immer';
+  return 'Nur bei „Zum Set“';
+}
+
+function shouldAutoImportCurrentSet(set, { fromSearchJump = false } = {}) {
+  const mode = getAutoImportMode();
+  if (mode === AUTO_IMPORT_MODE_NEVER) return false;
+  if (mode === AUTO_IMPORT_MODE_ALWAYS) return !Boolean(set?.imported);
+  return Boolean(fromSearchJump);
+}
+
+function resolveAutoImportSetLabel(setId) {
+  const match = getSetById(setId)
+    || (state.currentSet?.setId === setId ? state.currentSet : null);
+  return match?.setName || setId;
+}
+
+function updateAutoImportQueueUi() {
+  if (state.activeJob || state.queueRunning) return;
+  if (!dom.jobPanel || !dom.jobTitle || !dom.jobStatusText) return;
+
+  const activeSetId = state.autoImportActiveSetId;
+  const queuedIds = Array.isArray(state.autoImportQueuedSetIds) ? state.autoImportQueuedSetIds : [];
+  const totalCount = (activeSetId ? 1 : 0) + queuedIds.length;
+
+  if (totalCount === 0) {
+    if (dom.jobTitle.textContent === 'Auto-Import Queue') {
+      dom.jobPanel.classList.add('hidden');
+      dom.jobTitle.textContent = 'Job Queue';
+      dom.jobStatusText.textContent = 'Bereit';
+      if (dom.btnJobCancel) dom.btnJobCancel.disabled = true;
+    }
+    return;
+  }
+
+  dom.jobPanel.classList.remove('hidden');
+  dom.jobTitle.textContent = 'Auto-Import Queue';
+  const activeLabel = activeSetId ? `Aktiv: ${resolveAutoImportSetLabel(activeSetId)}` : 'Wartet auf freien Slot';
+  const waitingLabel = queuedIds.length ? ` • ${queuedIds.length} wartend` : '';
+  dom.jobStatusText.textContent = `${activeLabel}${waitingLabel} • Modus: ${getAutoImportModeLabel()}`;
+  if (dom.btnJobCancel) dom.btnJobCancel.disabled = true;
+}
 
 function getSearchScopeMode() {
   const mode = String(dom.searchScopeMode?.value || SEARCH_SCOPE_IMPORTED);
@@ -2119,12 +2186,14 @@ async function applySpreadsheetSelection(id) {
     });
 
     CONFIG.SPREADSHEET_ID = nextId;
+    resetSheetsDataCaches();
     updateSpreadsheetInfoBar();
     await loadSets();
     dom.dialog.close();
     setSpreadsheetDialogError('');
   } catch (err) {
     CONFIG.SPREADSHEET_ID = previousId;
+    resetSheetsDataCaches();
     updateSpreadsheetInfoBar();
     console.error('[applySpreadsheetSelection]', err);
     setSpreadsheetDialogError(`Tabelle konnte nicht verwendet werden: ${err.message || err}`);
@@ -2610,6 +2679,152 @@ function syncDashboardCardForSet(setMeta, summary) {
   });
 
   checkSetCompletion(setMeta.setId || setMeta.setName, percent, card);
+}
+
+function mergeImportedSetIntoLocalState(setMeta = {}) {
+  if (!setMeta?.setId) return null;
+
+  const mergedSet = {
+    ...setMeta,
+    imported: true,
+    totalCards: Number(setMeta?.totalCards) || Number(setMeta?.printedTotal) || 0,
+  };
+
+  const mergeIntoList = (list, { addIfMissing = false } = {}) => {
+    if (!Array.isArray(list)) return null;
+    const index = list.findIndex((entry) => entry?.setId === mergedSet.setId);
+    if (index >= 0) {
+      list[index] = { ...list[index], ...mergedSet, imported: true };
+      return list[index];
+    }
+    if (!addIfMissing) return null;
+    const appended = { ...mergedSet, imported: true };
+    list.push(appended);
+    return appended;
+  };
+
+  const allSet = mergeIntoList(state.allSets, { addIfMissing: true }) || mergedSet;
+  mergeIntoList(state.sets, { addIfMissing: true });
+
+  if (state.currentSet?.setId === mergedSet.setId) {
+    state.currentSet = { ...state.currentSet, ...allSet, imported: true };
+    state.pendingSearchSetImport = false;
+  }
+
+  ensureSetSelectorOption(allSet);
+  renderSearchSetFilterOptions();
+  return allSet;
+}
+
+function scheduleAutoImportUiRefresh() {
+  if (state.autoImportRefreshTimer) {
+    clearTimeout(state.autoImportRefreshTimer);
+  }
+
+  state.autoImportRefreshTimer = window.setTimeout(async () => {
+    state.autoImportRefreshTimer = null;
+    try {
+      renderSearchSetFilterOptions();
+      if (dom.viewDashboard && !dom.viewDashboard.classList.contains('hidden')) {
+        await renderDashboard();
+      }
+      if (dom.viewStats && !dom.viewStats.classList.contains('hidden')) {
+        await renderStats();
+      }
+      if (dom.viewSearch && !dom.viewSearch.classList.contains('hidden') && String(dom.searchInput?.value || '').trim()) {
+        runSearch({ force: true });
+      }
+    } catch (err) {
+      console.warn('[scheduleAutoImportUiRefresh]', err);
+    }
+  }, 180);
+}
+
+async function ensureSetImportedFromApi(setMeta, cards, options = {}) {
+  const { setMetaPatch = null, showSuccessToast = false, successMessage = '', source = 'search' } = options;
+  const setId = String(setMeta?.setId || '').trim();
+  const safeCards = Array.isArray(cards) ? cards : [];
+  if (!setId || safeCards.length === 0) return null;
+
+  const mergedSet = {
+    ...setMeta,
+    ...(setMetaPatch || {}),
+    imported: true,
+    totalCards: Number(setMetaPatch?.totalCards) || Number(setMeta?.totalCards) || safeCards.length,
+  };
+  const existingSetState = [
+    ...(Array.isArray(state.sets) ? state.sets : []),
+    ...(Array.isArray(state.allSets) ? state.allSets : []),
+  ].find((entry) => entry?.setId === setId);
+  const alreadyImported = toBoolean(setMeta?.imported)
+    || toBoolean(existingSetState?.imported);
+
+  if (alreadyImported) {
+    return mergeImportedSetIntoLocalState(mergedSet) || mergedSet;
+  }
+
+  if (state.autoImportJobs.has(setId)) {
+    return state.autoImportJobs.get(setId);
+  }
+
+  const pendingCount = (state.autoImportActiveSetId ? 1 : 0) + state.autoImportQueuedSetIds.length;
+  if (pendingCount >= AUTO_IMPORT_QUEUE_LIMIT) {
+    const now = Date.now();
+    if (now - Number(state.autoImportLastLimitToastAt || 0) > 2500) {
+      state.autoImportLastLimitToastAt = now;
+      showToast(`Auto-Import-Warteschlange voll (${AUTO_IMPORT_QUEUE_LIMIT}). ${mergedSet.setName || setId} wird vorerst nicht automatisch importiert.`, 'info', 4500);
+    }
+    setGlobalStatus(`Auto-Import pausiert: Warteschlange voll (${AUTO_IMPORT_QUEUE_LIMIT}).`);
+    updateAutoImportQueueUi();
+    return null;
+  }
+
+  state.autoImportQueuedSetIds = [...state.autoImportQueuedSetIds, setId];
+  updateAutoImportQueueUi();
+
+  const queuedJob = state.autoImportQueue
+    .catch(() => undefined)
+    .then(async () => {
+      state.autoImportQueuedSetIds = state.autoImportQueuedSetIds.filter((id) => id !== setId);
+      state.autoImportActiveSetId = setId;
+      updateAutoImportQueueUi();
+      setGlobalStatus(`Auto-Importiere ${mergedSet.setName || setId}…`);
+
+      await importSetIntoCollection(mergedSet, safeCards);
+      cache.del(`cards_${setId}`);
+      cache.del(`db_cards_${setId}`);
+      cache.del(`db_${setId}`);
+      state.searchCache.clear();
+      state.summaryData = null;
+
+      const refreshedSet = mergeImportedSetIntoLocalState(mergedSet) || mergedSet;
+      scheduleAutoImportUiRefresh();
+
+      if (showSuccessToast) {
+        const message = successMessage || `${refreshedSet.setName} wurde automatisch importiert.`;
+        showToast(message, 'success', 3200);
+      }
+
+      return refreshedSet;
+    });
+
+  state.autoImportQueue = queuedJob.catch(() => undefined);
+
+  const job = queuedJob.catch((err) => {
+    console.warn(`[ensureSetImportedFromApi:${source}]`, err);
+    throw err;
+  }).finally(() => {
+    state.autoImportQueuedSetIds = state.autoImportQueuedSetIds.filter((id) => id !== setId);
+    if (state.autoImportActiveSetId === setId) {
+      state.autoImportActiveSetId = null;
+    }
+    state.autoImportJobs.delete(setId);
+    updateAutoImportQueueUi();
+  });
+
+  state.autoImportJobs.set(setId, job);
+  updateAutoImportQueueUi();
+  return job;
 }
 
 async function importSetFromOverview(set) {
@@ -4124,8 +4339,9 @@ async function runSearch(options = {}) {
           if (cache.has(cacheKey)) {
             apiCards = cache.get(cacheKey) || [];
           } else {
-            apiCards = await fetchMergedCards(set.setId, { signal: abortController.signal }).catch(() => []);
-            if (Array.isArray(apiCards) && apiCards.length > 0) {
+            const apiPayload = await fetchMergedCardsWithSetMeta(set.setId, { signal: abortController.signal }).catch(() => ({ cards: [], setMetaPatch: null }));
+            apiCards = Array.isArray(apiPayload?.cards) ? apiPayload.cards : [];
+            if (apiCards.length > 0) {
               cache.set(cacheKey, apiCards, CONFIG.CACHE_TTL_MS);
             }
           }
@@ -4237,16 +4453,17 @@ function createSearchResultCard(card, key, db, set, apiOnly = false) {
 
   goToSetBtn.addEventListener('click', (event) => {
     event.stopPropagation();
-    navigateToSearchResultSet(set);
+    navigateToSearchResultSet(set, card);
   });
 
   return article;
 }
 
-function navigateToSearchResultSet(set) {
+function navigateToSearchResultSet(set, card = null) {
   if (!set?.setId) return;
   const resolvedSet = getSetById(set.setId) || set;
   state.pendingSearchSetImport = Boolean(!resolvedSet?.imported);
+  state.pendingSearchCardFocusKey = card?.number ? normalizeCardNumber(card.number) : null;
   ensureSetSelectorOption(resolvedSet);
   dom.selector.value = resolvedSet.setId;
 
@@ -4286,9 +4503,13 @@ async function openSearchResultLightbox(card, set, { apiOnly = false } = {}) {
           return dbCards;
         }
 
-        const apiCards = cache.has(`cards_${set.setId}`)
-          ? (cache.get(`cards_${set.setId}`) || [])
-          : await fetchMergedCards(set.setId).catch(() => []);
+        let apiCards = [];
+        if (cache.has(`cards_${set.setId}`)) {
+          apiCards = cache.get(`cards_${set.setId}`) || [];
+        } else {
+          const apiPayload = await fetchMergedCardsWithSetMeta(set.setId).catch(() => ({ cards: [], setMetaPatch: null }));
+          apiCards = Array.isArray(apiPayload?.cards) ? apiPayload.cards : [];
+        }
         if (Array.isArray(apiCards) && apiCards.length > 0) {
           cache.set(`cards_${set.setId}`, apiCards, CONFIG.CACHE_TTL_MS);
         }
@@ -4459,6 +4680,22 @@ function renderCards() {
   dom.cards.appendChild(fragment);
   applyFilter();
   updateStats();
+  revealPendingSearchCardFocus();
+}
+
+function revealPendingSearchCardFocus() {
+  const targetKey = String(state.pendingSearchCardFocusKey || '').trim();
+  if (!targetKey || !dom.cards) return;
+
+  state.pendingSearchCardFocusKey = null;
+  const safeKey = targetKey.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  const article = dom.cards.querySelector(`[data-card-id="${safeKey}"]`);
+  if (!article) return;
+
+  window.requestAnimationFrame(() => {
+    article.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    article.focus();
+  });
 }
 
 function createCardElement(card, key, db, index) {
@@ -5004,28 +5241,22 @@ function initLightbox() {
       if (!setId) return;
       setLoading(true, `Importiere ${setToImport.setName}…`);
       try {
-        const importPayload = await fetchMergedCardsWithSetMeta(setId).catch(() => ({ cards: [] }));
+        const importPayload = await fetchMergedCardsWithSetMeta(setId).catch(() => ({ cards: [], setMetaPatch: null }));
         const importCards = Array.isArray(importPayload?.cards) ? importPayload.cards : [];
-        if (!Array.isArray(importCards) || !importCards.length) {
+        if (!importCards.length) {
           throw new Error('Keine Kartendaten für den automatischen Set-Import gefunden.');
         }
-        await importSetIntoCollection({ ...setToImport, ...(importPayload?.setMetaPatch || {}) }, importCards);
-        cache.del(`cards_${setId}`);
-        cache.del(`db_cards_${setId}`);
-        cache.del(`db_${setId}`);
-        state.searchCache.clear();
-        state.summaryData = null;
-        await loadSets();
-        const refreshedSet = state.sets.find((entry) => entry.setId === setId)
-          || state.allSets.find((entry) => entry.setId === setId)
-          || setToImport;
-        refreshedSet.imported = true;
-        state.currentSet = refreshedSet;
+        const refreshedSet = await ensureSetImportedFromApi(setToImport, importCards, {
+          setMetaPatch: importPayload?.setMetaPatch || null,
+          showSuccessToast: true,
+          successMessage: `${setToImport.setName} wurde automatisch importiert.`,
+          source: 'lightbox'
+        });
+        state.currentSet = refreshedSet || { ...setToImport, imported: true };
         state.pendingSearchSetImport = false;
-        state.dbMap = await readSetCollectionMap(refreshedSet.setName).catch(() => new Map());
+        state.dbMap = await readSetCollectionMap(state.currentSet.setName).catch(() => new Map());
         cache.set(`db_${setId}`, state.dbMap, CONFIG.CACHE_TTL_MS);
         db = state.dbMap.get(key) || db;
-        showToast(`${refreshedSet.setName} wurde automatisch importiert.`, 'success', 3200);
       } catch (err) {
         showToast(`Automatischer Set-Import fehlgeschlagen: ${err.message || err}`, 'error', 4200);
         renderLightbox(state.lightboxIndex);
@@ -5274,6 +5505,9 @@ async function loadCurrentSet(forceRefresh = false) {
 
   try {
     const cardsCacheKey = `db_cards_${setId}`, dbCacheKey = `db_${setId}`;
+    const shouldAutoImportCurrentView = shouldAutoImportCurrentSet(selected, {
+      fromSearchJump: Boolean(state.pendingSearchSetImport)
+    });
     const allowApiFallback = getSearchScopeMode() === SEARCH_SCOPE_ONLINE || Boolean(state.pendingSearchSetImport) || !Boolean(selected.imported);
     if (forceRefresh) { cache.del(cardsCacheKey); cache.del(dbCacheKey); }
 
@@ -5286,8 +5520,19 @@ async function loadCurrentSet(forceRefresh = false) {
             return dbCards;
           }
           if (allowApiFallback) {
-            const apiCards = await fetchMergedCards(setId);
-            cache.set(cardsCacheKey, apiCards, CONFIG.CACHE_TTL_MS);
+            const apiPayload = await fetchMergedCardsWithSetMeta(setId).catch(() => ({ cards: [], setMetaPatch: null }));
+            const apiCards = Array.isArray(apiPayload?.cards) ? apiPayload.cards : [];
+            if (apiCards.length > 0) {
+              cache.set(cardsCacheKey, apiCards, CONFIG.CACHE_TTL_MS);
+              if (shouldAutoImportCurrentView) {
+                ensureSetImportedFromApi(selected, apiCards, {
+                  setMetaPatch: apiPayload?.setMetaPatch || null,
+                  source: state.pendingSearchSetImport ? 'search-jump' : 'set-view'
+                }).catch((autoImportErr) => {
+                  console.warn('[loadCurrentSet] auto-import failed for set', setId, autoImportErr);
+                });
+              }
+            }
             return apiCards;
           }
           return [];
@@ -5297,6 +5542,14 @@ async function loadCurrentSet(forceRefresh = false) {
 
     if (!Array.isArray(cards) || cards.length === 0) {
       throw new Error('Keine Kartendaten in der Datenbank gefunden. Bitte Set importieren/aktualisieren oder API-Fallback aktivieren.');
+    }
+
+    if (shouldAutoImportCurrentView && allowApiFallback && cards.length > 0) {
+      ensureSetImportedFromApi(selected, cards, {
+        source: state.pendingSearchSetImport ? 'search-jump-cache' : 'set-view-cache'
+      }).catch((autoImportErr) => {
+        console.warn('[loadCurrentSet] deferred auto-import failed for set', setId, autoImportErr);
+      });
     }
 
     state.cards = cards;
@@ -5919,8 +6172,10 @@ async function bootstrap() {
     dom.auth.addEventListener('click', async () => {
       if (dom.auth.dataset.state === 'out') { signOut(); resetToLoggedOut(); return; }
       dom.auth.disabled = true;
+      setGlobalStatus('Bitte Google-Login im Popup abschließen…');
+      showToast('Google-Login im Popup geöffnet.', 'info', 2600);
       const ok = await signIn();
-      if (!ok) { dom.auth.disabled = false; showToast('Login fehlgeschlagen.', 'error'); setGlobalStatus('Login fehlgeschlagen.'); return; }
+      if (!ok) { dom.auth.disabled = false; showToast('Login fehlgeschlagen oder abgebrochen.', 'error'); setGlobalStatus('Login fehlgeschlagen oder abgebrochen.'); return; }
       onLoginSuccess();
     });
 

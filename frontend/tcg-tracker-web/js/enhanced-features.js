@@ -8,6 +8,13 @@ const STORAGE_KEYS = {
 };
 
 const MAX_SEARCH_HISTORY = 20;
+const DEFAULT_SETTINGS = {
+  compactMode: false,
+  autoBackup: false,
+  notificationsEnabled: false,
+  expertResolverMode: false,
+  autoImportMode: 'jump'
+};
 
 function readJson(key, fallback) {
   try {
@@ -92,7 +99,11 @@ export function generateCollectionReport(collection = {}, sets = []) {
 
 // Settings
 export function loadSettings() {
-  return readJson(STORAGE_KEYS.settings, {});
+  const stored = readJson(STORAGE_KEYS.settings, {});
+  return {
+    ...DEFAULT_SETTINGS,
+    ...(stored && typeof stored === 'object' ? stored : {})
+  };
 }
 
 export function saveSettings(settings) {
