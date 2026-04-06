@@ -1,6 +1,8 @@
 cards/en/v1/
 .idea/
 .playwright-mcp/
+.playwright/
+.playwright-cli/
 frontend/tcg-tracker-web/node_modules/
 frontend/tcg-tracker-web/.playwright-cli/
 frontend/tcg-tracker-web/.playwright-profile/
