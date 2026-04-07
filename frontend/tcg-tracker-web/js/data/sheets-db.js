@@ -13,7 +13,7 @@ import {
   CARD_MATCH_STATUS,
   resolveDisplaySet,
   resolveDisplayCard
-} from './schema-contract.js?v=20260506k';
+} from './schema-contract.js?v=20260507a';
 
 function quoteSheetName(sheetName) {
   const name = String(sheetName ?? '').replace(/'/g, "''");

@@ -1,5 +1,5 @@
 import { normalizeCardNumber, naturalSort } from './utils.js';
-import { buildCardRecordFromSources, buildSetRecordFromSources } from './data/schema-contract.js?v=20260506k';
+import { buildCardRecordFromSources, buildSetRecordFromSources } from './data/schema-contract.js?v=20260507a';
 
 export function normalizeString(str) {
   if (str === null || typeof str === 'undefined') {

@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&display=swap" rel="stylesheet" />
   <link rel="apple-touch-icon" href="./assets/branding/logo-veras-pokemon.jpg?v=8" />
-  <link rel="stylesheet" href="./css/main.css?v=20260506h" />
+  <link rel="stylesheet" href="./css/main.css?v=20260407-navset2" />
   <link rel="stylesheet" href="./css/trading-marketplace.css?v=20260505e" />
 </head>
 <body class="dark">
@@ -152,11 +152,25 @@
     </h1>
     <nav class="main-nav hidden" id="main-nav">
       <a href="#dashboard" class="nav-link active" data-view="dashboard">Dashboard</a>
-      <a href="#set" class="nav-link" data-view="set" id="nav-set-link">Set-Ansicht</a>
+      <div class="nav-set-split" id="nav-set-split">
+        <a href="#set" class="nav-link" data-view="set" id="nav-set-link">Set-Ansicht</a>
+        <button
+          id="btn-nav-set-toggle"
+          class="nav-link nav-set-toggle"
+          data-view="set"
+          data-nav-toggle="recent-sets"
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded="false"
+          aria-controls="recent-sets"
+          aria-label="Zuletzt bearbeitete Sets öffnen"
+          title="Zuletzt bearbeitete Sets"
+        >▾</button>
+        <div id="recent-sets" class="recent-sets hidden" aria-label="Zuletzt bearbeitete Sets" role="menu"></div>
+      </div>
       <a href="#stats" class="nav-link" data-view="stats">Statistiken</a>
       <a href="#search" class="nav-link" data-view="search">Suche</a>
     </nav>
-    <div id="recent-sets" class="recent-sets hidden" aria-label="Zuletzt bearbeitete Sets"></div>
     <div class="header-actions">
       <button id="btn-open-settings" class="btn-icon" title="Einstellungen" aria-label="Einstellungen">⚙️</button>
       <button id="btn-share" class="btn-icon btn-share-link" title="Sammlung teilen – Link kopieren" aria-label="Link teilen">🔗</button>
@@ -266,9 +280,11 @@
                 <button id="dashboard-action-parity" class="btn btn-secondary" type="button">🧪 Pokecode-Parity-Test</button>
                 <button id="btn-export-backup" class="btn-secondary" type="button">💾 Backup exportieren</button>
                 <button id="btn-import-backup" class="btn-secondary" type="button">📥 Backup importieren</button>
+                <button id="btn-import-legacy-xlsx" class="btn-secondary" type="button">🧬 Altbestand (.xlsx)</button>
               </div>
             </section>
             <input id="input-backup-file" type="file" accept="application/json" class="hidden" />
+            <input id="input-legacy-import-file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" class="hidden" />
           </div>
         </details>
       </div>
@@ -467,5 +483,5 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://apis.google.com/js/api.js" async defer></script>
-  <script type="module" src="./js/app.js?v=20260506k"></script>
+  <script type="module" src="./js/app.js?v=20260407-statslabel1"></script>
 </html>

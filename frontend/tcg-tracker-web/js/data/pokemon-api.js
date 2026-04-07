@@ -5,8 +5,8 @@ import {
   combineSetsForOverviewCompat,
   fetchAllPrimaryCardsForSet,
   resolvePreferredTcgdexSetBases
-} from '../pokecode-compat.js?v=20260506k';
-import { buildSetRecordFromSources, resolveDisplayCard, resolveDisplaySet } from './schema-contract.js?v=20260506k';
+} from '../pokecode-compat.js?v=20260507a';
+import { buildSetRecordFromSources, resolveDisplayCard, resolveDisplaySet } from './schema-contract.js?v=20260507a';
 
 // ── Interne Hilfsfunktionen ──────────────────────────────────────
 

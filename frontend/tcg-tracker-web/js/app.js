@@ -14,9 +14,10 @@ import {
   syncOverviewWithApiSets,
   resetSheetsDataCaches,
 } from './data/sheets-db.js?v=20260506a';
-import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260506k';
-import { resolveSeriesGroupInfo } from './data/schema-contract.js?v=20260506k';
+import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260507a';
+import { resolveSeriesGroupInfo } from './data/schema-contract.js?v=20260507a';
 import { normalizeCardNumber, toBoolean } from './core/utils.js';
+import { getCollectionUiState, resolveCollectionToggleState } from './core/collection-state.js?v=20260507c';
 import * as cache from './core/cache.js';
 import { CONFIG, scopedStorageKey } from './core/config.js';
 import {
@@ -31,7 +32,15 @@ import {
   createAutoSnapshot,
   loadSnapshots
 } from './features/collection/index.js';
+import {
+  loadLegacyWorkbookFromFile,
+  parseLegacyWorkbook,
+  buildLegacyImportPlan,
+  summarizeLegacyImportPlan,
+  pickCanonicalCardId
+} from './features/collection/legacy-import.js?v=20260407a';
 import { initCommandPalette } from './ui/command-palette.js';
+import { filterSetsBySeriesKey, getStatsSeriesLabel } from './ui/stats-series.js?v=20260407a';
 import {
   loadFavorites, saveFavorites, toggleFavorite, isFavorite,
   loadSearchHistory, addSearchHistory, clearSearchHistory,
@@ -109,6 +118,9 @@ const dom = {
   btnOpenSettings:  document.getElementById('btn-open-settings'),
   topbar:           document.querySelector('.topbar'),
   mainNav:          document.getElementById('main-nav'),
+  navSetLink:       document.getElementById('nav-set-link'),
+  navSetSplit:      document.getElementById('nav-set-split'),
+  btnNavSetToggle:  document.getElementById('btn-nav-set-toggle'),
   loadingOverlay:   document.getElementById('loading-overlay'),
   loadingText:      document.getElementById('loading-text'),
   toastContainer:   document.getElementById('toast-container'),
@@ -183,7 +195,9 @@ const dom = {
   btnQueueBuilderAdd: document.getElementById('btn-queue-builder-add'),
   btnExportBackup: document.getElementById('btn-export-backup'),
   btnImportBackup: document.getElementById('btn-import-backup'),
+  btnImportLegacyXlsx: document.getElementById('btn-import-legacy-xlsx'),
   backupFileInput: document.getElementById('input-backup-file'),
+  legacyImportFileInput: document.getElementById('input-legacy-import-file'),
   manageSetsDialog: document.getElementById('dialog-manage-sets'),
   manageSetsSearch: document.getElementById('manage-sets-search-input'),
   manageSetsList: document.getElementById('manage-sets-list'),
@@ -508,12 +522,61 @@ function saveRecentSets() {
   }
 }
 
+function syncSetNavLink(setMeta = state.currentSet) {
+  if (!dom.navSetLink) return;
+  const label = String(setMeta?.setName || 'Set-Ansicht');
+  dom.navSetLink.textContent = label;
+  dom.navSetLink.title = label;
+  dom.navSetLink.href = setMeta?.setId ? `#set/${setMeta.setId}` : '#set';
+}
+
+function positionRecentSetsDropdown() {
+  if (!dom.navSetSplit || !dom.recentSets || !dom.navSetSplit.classList.contains('open')) return;
+
+  const anchorRect = dom.navSetSplit.getBoundingClientRect();
+  const viewportPadding = 12;
+  const maxWidth = Math.min(340, window.innerWidth - (viewportPadding * 2));
+  const menuWidth = Math.min(dom.recentSets.offsetWidth || maxWidth, maxWidth);
+  let left = anchorRect.left;
+
+  if ((left + menuWidth) > (window.innerWidth - viewportPadding)) {
+    left = window.innerWidth - viewportPadding - menuWidth;
+  }
+  if (left < viewportPadding) {
+    left = viewportPadding;
+  }
+
+  dom.recentSets.style.setProperty('--recent-sets-left', `${Math.round(left)}px`);
+  dom.recentSets.style.setProperty('--recent-sets-top', `${Math.round(anchorRect.bottom + 8)}px`);
+}
+
+function setRecentSetsDropdownOpen(isOpen) {
+  if (!dom.navSetSplit || !dom.btnNavSetToggle || !dom.recentSets) return;
+  const hasItems = !dom.recentSets.classList.contains('hidden') && dom.recentSets.childElementCount > 0;
+  const shouldOpen = Boolean(isOpen) && hasItems;
+  dom.navSetSplit.classList.toggle('open', shouldOpen);
+  dom.btnNavSetToggle.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+  if (shouldOpen) {
+    window.requestAnimationFrame(positionRecentSetsDropdown);
+  }
+}
+
+function syncRecentSetsDropdownAvailability(hasItems) {
+  if (!dom.btnNavSetToggle) return;
+  dom.btnNavSetToggle.disabled = !hasItems;
+  dom.btnNavSetToggle.setAttribute('aria-disabled', hasItems ? 'false' : 'true');
+  if (!hasItems) {
+    setRecentSetsDropdownOpen(false);
+  }
+}
+
 function renderRecentSets() {
   if (!dom.recentSets) return;
   const recent = Array.isArray(state.recentSets) ? state.recentSets : [];
   if (!state.loggedIn || recent.length === 0) {
     dom.recentSets.classList.add('hidden');
     dom.recentSets.innerHTML = '';
+    syncRecentSetsDropdownAvailability(false);
     return;
   }
 
@@ -521,16 +584,21 @@ function renderRecentSets() {
   dom.recentSets.innerHTML = recent
     .map((entry) => {
       const label = labelsById.get(entry.setId) || entry.setName || entry.setId;
-      return `<button class="recent-set-chip" type="button" data-set-id="${entry.setId}" title="${label}">${label}</button>`;
+      return `<button class="recent-set-chip" type="button" role="menuitem" data-set-id="${entry.setId}" title="${label}">${label}</button>`;
     })
     .join('');
   dom.recentSets.classList.remove('hidden');
+  syncRecentSetsDropdownAvailability(true);
+  if (dom.navSetSplit?.classList.contains('open')) {
+    window.requestAnimationFrame(positionRecentSetsDropdown);
+  }
 
   dom.recentSets.querySelectorAll('.recent-set-chip').forEach((chip) => {
     chip.addEventListener('click', () => {
       const setId = chip.dataset.setId;
       if (!setId) return;
       dom.selector.value = setId;
+      setRecentSetsDropdownOpen(false);
       navigate(`set/${setId}`);
     });
   });
@@ -1976,6 +2044,7 @@ function showView(viewId) {
 }
 
 function navigate(path) {
+  setRecentSetsDropdownOpen(false);
   window.location.hash = path;
 }
 
@@ -3681,9 +3750,216 @@ async function applyCollectionBackup(payload) {
   showToast(`Backup eingespielt. Änderungen: ${updated}, übersprungen: ${skipped}.`, skipped ? 'info' : 'success', 5000);
 }
 
+function buildLegacyImportPreviewText(plan) {
+  const summary = summarizeLegacyImportPlan(plan);
+  const lines = [
+    `Set-Blätter erkannt: ${summary.sheetCount}`,
+    `Markierte Karten (G/RH): ${summary.checkedCardCount}`,
+    `Eindeutig zuordenbar: ${summary.matchedCardCount}`,
+    `Fehlende Sets zum Vorimport: ${summary.missingSetCount}`
+  ];
+
+  if (!summary.ok) {
+    lines.push('');
+    lines.push(`Offene Set-Konflikte: ${summary.unresolvedSheetCount}`);
+    lines.push(`Offene Karten-Konflikte: ${summary.unresolvedCardCount}`);
+
+    if (plan.unresolvedSheets?.length) {
+      lines.push('');
+      lines.push('Set-Probleme:');
+      plan.unresolvedSheets.slice(0, 5).forEach((entry) => {
+        lines.push(`• ${entry.sheetName}: ${entry.reason}`);
+      });
+    }
+
+    if (plan.unresolvedCards?.length) {
+      lines.push('');
+      lines.push('Karten-Probleme:');
+      plan.unresolvedCards.slice(0, 8).forEach((entry) => {
+        lines.push(`• ${entry.setId} / ${entry.sourceCardId}: ${entry.reason}`);
+      });
+    }
+
+    lines.push('');
+    lines.push('Der Import wurde blockiert, bis alle Konflikte eindeutig gelöst sind.');
+    return lines.join('\n');
+  }
+
+  lines.push('');
+  lines.push('Der Import setzt die betroffenen Sets exakt auf den XLSX-Stand (G/RH) – inklusive Entfernen nicht markierter Treffer in diesen Sets.');
+  return lines.join('\n');
+}
+
+async function prepareLegacyWorkbookImport(file) {
+  if (!file) throw new Error('Keine XLSX-Datei ausgewählt.');
+  if (!state.allSets?.length) {
+    await loadSets();
+  }
+  if (!state.allSets?.length) {
+    throw new Error('Sets konnten vor der Analyse nicht geladen werden.');
+  }
+
+  const workbook = await loadLegacyWorkbookFromFile(file);
+  const parsedWorkbook = parseLegacyWorkbook(workbook);
+  if (!parsedWorkbook.sheets.length) {
+    throw new Error('In der XLSX-Datei wurden keine markierten Karten gefunden.');
+  }
+
+  const preflight = buildLegacyImportPlan({
+    parsedWorkbook,
+    allSets: state.allSets,
+    cardsBySetId: {}
+  });
+
+  if (preflight.unresolvedSheets.length) {
+    return { parsedWorkbook, cardsBySetId: {}, plan: preflight };
+  }
+
+  const cardsBySetId = {};
+  const uniqueSetIds = Array.from(new Set(preflight.matchedSets.map((entry) => entry.setId)));
+
+  for (let index = 0; index < uniqueSetIds.length; index++) {
+    const setId = uniqueSetIds[index];
+    const setMeta = getSetById(setId);
+    setGlobalStatus(`Analysiere XLSX ${index + 1}/${uniqueSetIds.length}: ${setMeta?.setName || setId}`);
+    const cards = await fetchMergedCards(setId);
+    if (!Array.isArray(cards) || !cards.length) {
+      throw new Error(`Kartenkatalog für ${setMeta?.setName || setId} konnte nicht geladen werden.`);
+    }
+    cardsBySetId[setId] = cards;
+  }
+
+  const plan = buildLegacyImportPlan({
+    parsedWorkbook,
+    allSets: state.allSets,
+    cardsBySetId
+  });
+
+  return { parsedWorkbook, cardsBySetId, plan };
+}
+
+async function applyLegacyImportPlan(plan, cardsBySetId) {
+  if (!plan?.ok) {
+    throw new Error('Der Dry-Run enthält noch Konflikte.');
+  }
+
+  const missingSets = plan.missingSetIds
+    .map((setId) => getSetById(setId))
+    .filter((set) => set?.setId);
+
+  if (missingSets.length) {
+    await importSetsSequential(missingSets, {
+      successMessage: '{count} fehlende Sets für den XLSX-Import importiert.'
+    });
+    await loadSets();
+  }
+
+  try {
+    await createAutoSnapshot(`Legacy XLSX Import (${plan.matchedSets.length} Sets)`, state.collection || {});
+  } catch (err) {
+    console.warn('[applyLegacyImportPlan] snapshot failed', err);
+  }
+
+  let updatedCells = 0;
+  setLoading(true, 'Synchronisiere Altbestand…');
+  try {
+    for (let setIndex = 0; setIndex < plan.matchedSets.length; setIndex++) {
+      const matchedSet = plan.matchedSets[setIndex];
+      const liveSet = getSetById(matchedSet.setId);
+      if (!liveSet?.setName) {
+        throw new Error(`Ziel-Set ${matchedSet.setId} ist nach dem Vorimport nicht verfügbar.`);
+      }
+
+      setGlobalStatus(`XLSX-Import ${setIndex + 1}/${plan.matchedSets.length}: ${liveSet.setName}`);
+      const liveMap = await readSetCollectionMap(liveSet.setName).catch(() => new Map());
+      const targetByCard = new Map(
+        (matchedSet.cards || []).map((entry) => [normalizeCardNumber(entry.cardId), entry])
+      );
+      const setCards = Array.isArray(cardsBySetId?.[matchedSet.setId]) ? cardsBySetId[matchedSet.setId] : [];
+
+      for (const sourceCard of setCards) {
+        const cardId = pickCanonicalCardId(sourceCard);
+        if (!cardId) continue;
+
+        const normalizedCardId = normalizeCardNumber(cardId);
+        const target = targetByCard.get(normalizedCardId) || { g: false, rh: false };
+        let entry = liveMap.get(normalizedCardId) || null;
+
+        if (!entry && !target.g && !target.rh) continue;
+        if (!entry) {
+          entry = await ensureCollectionEntry(liveSet.setName, cardId);
+          liveMap.set(normalizedCardId, entry);
+        }
+
+        const targetG = Boolean(target.g);
+        const targetRh = Boolean(target.g && target.rh);
+
+        if (!targetG && Boolean(entry.rh)) {
+          await updateCellBoolean(liveSet.setName, entry.rhCell.row, entry.rhCell.col, false);
+          entry.rh = false;
+          updatedCells += 1;
+        }
+        if (Boolean(entry.g) !== targetG) {
+          await updateCellBoolean(liveSet.setName, entry.gCell.row, entry.gCell.col, targetG);
+          entry.g = targetG;
+          updatedCells += 1;
+        }
+        if (targetG && Boolean(entry.rh) !== targetRh) {
+          await updateCellBoolean(liveSet.setName, entry.rhCell.row, entry.rhCell.col, targetRh);
+          entry.rh = targetRh;
+          updatedCells += 1;
+        }
+      }
+    }
+  } finally {
+    setLoading(false);
+  }
+
+  state.summaryData = null;
+  await loadSets();
+  if (state.currentSet?.setId) {
+    await loadCurrentSet(true).catch(() => {});
+  }
+
+  showToast(`Altbestand importiert: ${plan.matchedSets.length} Sets synchronisiert, ${updatedCells} Änderungen geschrieben.`, 'success', 5000);
+}
+
+async function startLegacyWorkbookImport(file) {
+  if (!file) return;
+
+  setLoading(true, 'Analysiere Altbestand…');
+  try {
+    const { plan, cardsBySetId } = await prepareLegacyWorkbookImport(file);
+    const summary = summarizeLegacyImportPlan(plan);
+
+    if (!summary.ok) {
+      const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      downloadJson(`legacy_import_report_${stamp}.json`, {
+        createdAt: new Date().toISOString(),
+        summary,
+        plan
+      });
+      window.alert(buildLegacyImportPreviewText(plan));
+      showToast(`Import blockiert: ${summary.unresolvedSheetCount} Set- und ${summary.unresolvedCardCount} Kartenkonflikte. Prüfbericht exportiert.`, 'error', 7000);
+      return;
+    }
+
+    const ok = window.confirm(`${buildLegacyImportPreviewText(plan)}\n\nImport jetzt anwenden?`);
+    if (!ok) return;
+
+    await applyLegacyImportPlan(plan, cardsBySetId);
+  } catch (err) {
+    console.error('[startLegacyWorkbookImport]', err);
+    showToast(`Altbestand-Import fehlgeschlagen: ${err.message}`, 'error', 7000);
+  } finally {
+    setLoading(false);
+  }
+}
+
 function initBackupImportExport() {
   dom.btnExportBackup?.addEventListener('click', exportCollectionBackup);
   dom.btnImportBackup?.addEventListener('click', () => dom.backupFileInput?.click());
+  dom.btnImportLegacyXlsx?.addEventListener('click', () => dom.legacyImportFileInput?.click());
 
   dom.backupFileInput?.addEventListener('change', async () => {
     const file = dom.backupFileInput.files?.[0];
@@ -3699,6 +3975,16 @@ function initBackupImportExport() {
       showToast(`Backup-Import fehlgeschlagen: ${err.message}`, 'error', 6000);
     } finally {
       dom.backupFileInput.value = '';
+    }
+  });
+
+  dom.legacyImportFileInput?.addEventListener('change', async () => {
+    const file = dom.legacyImportFileInput.files?.[0];
+    if (!file) return;
+    try {
+      await startLegacyWorkbookImport(file);
+    } finally {
+      dom.legacyImportFileInput.value = '';
     }
   });
 }
@@ -3872,8 +4158,8 @@ async function renderStats() {
       <div class="stats-series-table">
         ${Array.from(seriesMap.entries()).map(([key, sg]) => {
           const pct = sg.total > 0 ? Math.round((sg.collected / sg.total) * 100) : 0;
-          const label = sg.label || key;
-          return `<div class="stats-series-row" data-series="${key.replace(/"/g, '&quot;')}">
+          const label = getStatsSeriesLabel(key, sg);
+          return `<div class="stats-series-row" data-series="${key.replace(/"/g, '&quot;')}" data-series-label="${label.replace(/"/g, '&quot;')}">
             <div class="stats-series-name">${label}</div>
             <div class="stats-series-bar"><div class="dash-progress-fill" style="width:${pct}%"></div></div>
             <div class="stats-series-numbers">${sg.collected}/${sg.total} (${pct}%) &bull; ${sg.completed}/${sg.count} Sets</div>
@@ -4802,7 +5088,7 @@ function createCardElement(card, key, db, index) {
   const checksDiv = document.createElement('div'); checksDiv.className = 'checks';
   checksDiv.append(
     makeCheckbox('G', 'g', dbEntry?.g ?? false, !isEditable),
-    makeCheckbox('RH', 'rh', dbEntry?.rh ?? false, !isEditable || !dbEntry?.g || !dbEntry?.rhCell)
+    makeCheckbox('RH', 'rh', dbEntry?.rh ?? false, !isEditable || !dbEntry?.rhCell)
   );
   meta.append(titleDiv, checksDiv);
 
@@ -4849,6 +5135,18 @@ function makeCheckbox(labelText, type, checked, disabled) {
   return label;
 }
 
+function syncCollectionCheckboxUi(gInput, rhInput, db, { isEditable = Boolean(state.currentSet?.setName) } = {}) {
+  const uiState = getCollectionUiState(db, { isEditable });
+  if (gInput) {
+    gInput.checked = uiState.gChecked;
+    gInput.disabled = uiState.gDisabled;
+  }
+  if (rhInput) {
+    rhInput.checked = uiState.rhChecked;
+    rhInput.disabled = uiState.rhDisabled;
+  }
+}
+
 function attachCheckboxListeners(article, db, key) {
   const gInput  = article.querySelector('input[data-type="g"]');
   const rhInput = article.querySelector('input[data-type="rh"]');
@@ -4873,14 +5171,13 @@ function attachCheckboxListeners(article, db, key) {
     beginTrackedWrite(`Karte #${db?.displayId || key} speichern`);
     try {
       await ensureDbEntry();
-      await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, checked);
-      db.g = checked;
-      if (!checked && db?.rhCell) {
-        await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, false);
-        db.rh = false; rhInput.checked = false; rhInput.disabled = true;
-      } else {
-        rhInput.disabled = !db?.rhCell;
+      const nextState = resolveCollectionToggleState(db, { isG: true, checked });
+      await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, nextState.g);
+      if (db?.rhCell && nextState.rh !== Boolean(db?.rh)) {
+        await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, nextState.rh);
       }
+      db.g = nextState.g;
+      db.rh = nextState.rh;
       updateCardState(article, db);
       updateStats(); applyFilter();
       state.summaryData = null;
@@ -4904,16 +5201,22 @@ function attachCheckboxListeners(article, db, key) {
 
   rhInput.addEventListener('change', async () => {
     if (state.bulkMode) { rhInput.checked = !rhInput.checked; return; }
-    if (!db.g || !db?.rhCell) { rhInput.checked = false; return; }
+    if (!db?.rhCell) { rhInput.checked = false; return; }
     const checked = rhInput.checked;
     const prevState = { g: Boolean(db?.g), rh: Boolean(db?.rh) };
     setCardSaveState(article, 'saving');
     beginTrackedWrite(`Karte #${db?.displayId || key} RH speichern`);
     try {
       await ensureDbEntry();
-      await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, checked);
-      db.rh = checked;
+      const nextState = resolveCollectionToggleState(db, { isG: false, checked });
+      if (nextState.g !== Boolean(db?.g)) {
+        await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, nextState.g);
+      }
+      await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, nextState.rh);
+      db.g = nextState.g;
+      db.rh = nextState.rh;
       updateCardState(article, db);
+      updateStats(); applyFilter();
       state.summaryData = null;
       pushUndoEntry({
         setId: state.currentSet?.setId,
@@ -4935,10 +5238,13 @@ function attachCheckboxListeners(article, db, key) {
 }
 
 function updateCardState(article, db) {
+  const gInput = article?.querySelector('input[data-type="g"]');
+  const rhInput = article?.querySelector('input[data-type="rh"]');
+  syncCollectionCheckboxUi(gInput, rhInput, db);
   article.classList.toggle('reverse',   Boolean(db?.rh));
   article.classList.toggle('collected', Boolean(db?.g) && !db?.rh);
   if (dom.lightboxDialog.open) {
-    const idx = parseInt(article.dataset.cardIndex);
+    const idx = parseInt(article.dataset.cardIndex, 10);
     if (state.lightboxIndex === idx) renderLightbox(idx);
   }
 }
@@ -5070,12 +5376,9 @@ function renderLightbox(index) {
     dom.lightboxCmLink.classList.add('hidden');
     dom.lightboxCmLink.classList.remove('lightbox-cm-link-fallback');
   }
-  const hasGCell                = Boolean(db?.gCell);
-  const hasRhCell               = Boolean(db?.rhCell);
-  dom.lightboxGCheck.checked    = db?.g  ?? false;
-  dom.lightboxGCheck.disabled   = !Boolean(state.currentSet?.setName);
-  dom.lightboxRhCheck.checked   = db?.rh ?? false;
-  dom.lightboxRhCheck.disabled  = !hasRhCell || !db?.g;
+  syncCollectionCheckboxUi(dom.lightboxGCheck, dom.lightboxRhCheck, db, {
+    isEditable: Boolean(state.currentSet?.setName)
+  });
   dom.btnLightboxPrev.disabled  = index === 0;
   dom.btnLightboxNext.disabled  = index === state.cards.length - 1;
 }
@@ -5377,18 +5680,19 @@ function initLightbox() {
     setCardSaveState(article, 'saving');
     beginTrackedWrite(`Lightbox #${db?.displayId || key}`);
     try {
-      if (isG) {
-        await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, checked);
-        db.g = checked;
-        if (!checked && db?.rhCell) {
-          await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, false);
-          db.rh = false;
-        }
-      } else {
-        if (!db.g || !db?.rhCell) return;
-        await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, checked);
-        db.rh = checked;
+      if (!isG && !db?.rhCell) {
+        renderLightbox(state.lightboxIndex);
+        return;
       }
+      const nextState = resolveCollectionToggleState(db, { isG, checked });
+      if (nextState.g !== Boolean(db?.g)) {
+        await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, nextState.g);
+      }
+      if (db?.rhCell && nextState.rh !== Boolean(db?.rh)) {
+        await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, nextState.rh);
+      }
+      db.g = nextState.g;
+      db.rh = nextState.rh;
       renderLightbox(state.lightboxIndex);
       if (article) updateCardState(article, db);
       updateStats();
@@ -5578,8 +5882,7 @@ async function loadCurrentSet(forceRefresh = false) {
 
   state.currentSet = selected;
   sessionStorage.setItem('tcg_last_set', setId);
-  const navSetLink = document.getElementById('nav-set-link');
-  if (navSetLink) { navSetLink.textContent = selected.setName; navSetLink.href = `#set/${setId}`; }
+  syncSetNavLink(selected);
 
   setGlobalStatus(`Lade ${selected.setName}\u2026`);
   setLoading(true, `Lade ${selected.setName}\u2026`);
@@ -6277,8 +6580,31 @@ async function bootstrap() {
   }, 5000);
 
   document.querySelectorAll('.nav-link').forEach((link) => {
-    link.addEventListener('click', (e) => { e.preventDefault(); navigate(link.dataset.view); });
+    if (link.dataset.navToggle) return;
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      navigate(link.dataset.view);
+    });
   });
+  dom.btnNavSetToggle?.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (dom.btnNavSetToggle.disabled) return;
+    setRecentSetsDropdownOpen(!dom.navSetSplit?.classList.contains('open'));
+  });
+  document.addEventListener('click', (event) => {
+    if (!(event.target instanceof Node)) return;
+    if (!dom.navSetSplit?.contains(event.target)) {
+      setRecentSetsDropdownOpen(false);
+    }
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      setRecentSetsDropdownOpen(false);
+    }
+  });
+  window.addEventListener('resize', positionRecentSetsDropdown, { passive: true });
+  window.addEventListener('scroll', positionRecentSetsDropdown, { passive: true });
   window.addEventListener('hashchange', handleRouteChange);
 
   setLoading(true, 'Initialisiere\u2026');
@@ -6319,6 +6645,7 @@ async function bootstrap() {
         return;
       }
       state.currentSet = null; state.cards = []; state.dbMap = new Map();
+      syncSetNavLink(null);
       dom.cards.innerHTML = '';
       dom.statsSection.classList.add('hidden');
       dom.filterSection.classList.add('hidden');
@@ -6350,6 +6677,7 @@ async function onLoginSuccess() {
 function resetToLoggedOut() {
   state.loggedIn = false; state.sets = []; state.allSets = []; state.currentSet = null;
   state.dbMap = new Map(); state.cards = []; state.summaryData = null;
+  syncSetNavLink(null);
   state.summaryOverrides = new Map();
   state.pendingWrites = 0;
   state.lastSaveError = null;
@@ -6550,7 +6878,10 @@ function initStatsCharts(totalCollected, totalCards, seriesMap) {
     _statsChartInstances.series = new window.Chart(ctxSeries, {
       type: 'bar',
       data: {
-        labels: topSeries.map(([name]) => (name.length > 16 ? `${name.slice(0, 14)}…` : name)),
+        labels: topSeries.map(([key, group]) => {
+          const label = getStatsSeriesLabel(key, group);
+          return label.length > 16 ? `${label.slice(0, 14)}…` : label;
+        }),
         datasets: [{
           label: 'Gesammelt %',
           data: topSeries.map(([, group]) => (group.total > 0 ? Math.round((group.collected / group.total) * 100) : 0)),
@@ -7092,27 +7423,28 @@ function initStatsDrillDown() {
     const row = event.target.closest('.stats-series-row');
     if (!row) return;
 
-    const seriesName = row.dataset.series || row.querySelector('.stats-series-name')?.textContent?.trim();
-    if (!seriesName) return;
+    const seriesKey = row.dataset.series || '';
+    const seriesLabel = row.dataset.seriesLabel || row.querySelector('.stats-series-name')?.textContent?.trim() || seriesKey;
+    if (!seriesKey) return;
 
     const existing = document.getElementById('stats-drilldown');
     if (existing) {
-      const isSameSeries = existing.dataset.series === seriesName;
+      const isSameSeries = existing.dataset.series === seriesKey;
       existing.remove();
       document.querySelectorAll('.stats-series-row.expanded').forEach((el) => el.classList.remove('expanded'));
       if (isSameSeries) return;
     }
 
-    const seriesSets = (state.sets || []).filter((set) => (set.series || 'Andere') === seriesName);
+    const seriesSets = filterSetsBySeriesKey(state.sets || [], seriesKey);
     const summaryRows = state.summaryData || [];
 
     const panel = document.createElement('div');
     panel.id = 'stats-drilldown';
     panel.className = 'stats-drilldown';
-    panel.dataset.series = seriesName;
+    panel.dataset.series = seriesKey;
 
     panel.innerHTML = `
-      <h4>📦 ${seriesName} – ${seriesSets.length} Sets</h4>
+      <h4>📦 ${seriesLabel} – ${seriesSets.length} Sets</h4>
       <div class="stats-drilldown-grid">
         ${seriesSets.map((set) => {
           const summary = summaryRows.find((entry) => entry.setName === set.setName) || {};

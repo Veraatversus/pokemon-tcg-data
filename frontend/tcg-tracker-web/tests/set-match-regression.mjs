@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { findMatchingTcgdexSet, resolvePreferredTcgdexSetBases } from '../js/pokecode-compat.js';
 import { buildCardRecordFromSources, resolveDisplayCard, resolveSeriesGroupInfo } from '../js/data/schema-contract.js';
+import { getCollectionUiState, resolveCollectionToggleState } from '../js/core/collection-state.js';
+import { filterSetsBySeriesKey, getStatsSeriesLabel } from '../js/ui/stats-series.js';
 
 function testDoesNotFalseMatchSubsetName() {
   const result = findMatchingTcgdexSet(
@@ -148,7 +150,7 @@ function testCardResolverUsesTcgdexDetailFieldsWhenPrimaryDataIsMissing() {
   assert.equal(display.flavorText, 'Spark mouse Pokémon.');
 }
 
-function testCardImageResolverPrefersReliableVeraAssets() {
+function testCardImageResolverDefaultsToTcgdexFirstPriority() {
   const display = resolveDisplayCard({
     vera_number: '001',
     vera_name: 'Tannza',
@@ -160,8 +162,43 @@ function testCardImageResolverPrefersReliableVeraAssets() {
     tcgdex_image_large: 'https://assets.tcgdex.net/de/sv/sv01/001/high.webp'
   });
 
-  assert.equal(display.image, 'https://images.pokemontcg.io/sv1/1.png');
-  assert.equal(display.imageLarge, 'https://images.pokemontcg.io/sv1/1_hires.png');
+  assert.equal(display.image, 'https://assets.tcgdex.net/de/sv/sv01/001/low.webp');
+  assert.equal(display.imageLarge, 'https://assets.tcgdex.net/de/sv/sv01/001/high.webp');
+}
+
+function testCollectionUiKeepsRhToggleAvailableWithoutCollectedFlag() {
+  const uiState = getCollectionUiState({
+    g: false,
+    rh: false,
+    gCell: { row: 2, col: 3 },
+    rhCell: { row: 2, col: 4 }
+  }, { isEditable: true });
+
+  assert.equal(uiState.gDisabled, false);
+  assert.equal(uiState.rhDisabled, false);
+}
+
+function testStatsSeriesHelpersPreferDisplayNamesOverIds() {
+  const sets = [
+    { setId: 'mep1', series: 'Mega-Entwicklung', tcgdex_serie_id: 'me' },
+    { setId: 'sv1', series: 'Karmesin & Purpur', tcgdex_serie_id: 'sv' }
+  ];
+
+  assert.equal(getStatsSeriesLabel('me', { label: 'Mega-Entwicklung' }), 'Mega-Entwicklung');
+  assert.equal(filterSetsBySeriesKey(sets, 'me').length, 1);
+  assert.equal(filterSetsBySeriesKey(sets, 'me')[0].setId, 'mep1');
+}
+
+function testRhToggleAutoEnablesCollectedStatus() {
+  const nextState = resolveCollectionToggleState({
+    g: false,
+    rh: false
+  }, {
+    isG: false,
+    checked: true
+  });
+
+  assert.deepEqual(nextState, { g: true, rh: true });
 }
 
 try {
@@ -171,7 +208,10 @@ try {
   testLocaleResolutionSkipsGerman404WhenSetIsKnownEnOnly();
   testSeriesGroupingUsesStableTcgdexKeyAcrossLocalizedLabels();
   testCardResolverUsesTcgdexDetailFieldsWhenPrimaryDataIsMissing();
-  testCardImageResolverPrefersReliableVeraAssets();
+  testCardImageResolverDefaultsToTcgdexFirstPriority();
+  testCollectionUiKeepsRhToggleAvailableWithoutCollectedFlag();
+  testStatsSeriesHelpersPreferDisplayNamesOverIds();
+  testRhToggleAutoEnablesCollectedStatus();
   console.log('set-match-regression: ok');
 } catch (error) {
   console.error('set-match-regression: failed');

@@ -11,15 +11,15 @@ const DEFAULT_RESOLVER_MATRIX = {
     releaseDate: ['tcgdex', 'vera', 'legacy'],
     totalCards: ['tcgdex', 'vera', 'legacy'],
     ptcgoCode: ['tcgdex', 'vera', 'legacy'],
-    logoUrl: ['vera', 'tcgdex', 'legacy'],
-    symbolUrl: ['vera', 'tcgdex', 'legacy'],
+    logoUrl: ['tcgdex', 'vera', 'legacy'],
+    symbolUrl: ['tcgdex', 'vera', 'legacy'],
     legalities: ['tcgdex', 'vera', 'legacy']
   },
   card: {
     number: ['tcgdex', 'vera', 'legacy'],
     name: ['tcgdex', 'vera', 'legacy'],
-    image: ['vera', 'tcgdex', 'legacy'],
-    imageLarge: ['vera', 'tcgdex', 'legacy'],
+    image: ['tcgdex', 'vera', 'legacy'],
+    imageLarge: ['tcgdex', 'vera', 'legacy'],
     cardmarketUrl: ['tcgdex', 'vera', 'legacy'],
     rarity: ['tcgdex', 'vera', 'legacy'],
     hp: ['tcgdex', 'vera', 'legacy'],
@@ -75,16 +75,6 @@ function normalizeResolverMatrix(input) {
     Object.keys(defaults[scope]).forEach((field) => {
       normalized[scope][field] = normalizePriority(scopeInput[field], defaults[scope][field]);
     });
-  });
-
-  const oldMediaDefault = ['tcgdex', 'vera', 'legacy'];
-  const safeMediaDefault = ['vera', 'tcgdex', 'legacy'];
-  const samePriority = (priority = [], expected = []) => priority.length === expected.length && priority.every((entry, index) => entry === expected[index]);
-
-  [['set', 'logoUrl'], ['set', 'symbolUrl'], ['card', 'image'], ['card', 'imageLarge']].forEach(([scope, field]) => {
-    if (samePriority(normalized?.[scope]?.[field], oldMediaDefault)) {
-      normalized[scope][field] = [...safeMediaDefault];
-    }
   });
 
   return normalized;
