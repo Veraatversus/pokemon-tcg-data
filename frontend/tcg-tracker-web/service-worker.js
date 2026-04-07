@@ -2,15 +2,19 @@
 // SERVICE WORKER - Offline Support & Caching
 // ══════════════════════════════════════════════════════════════════════════
 
-const CACHE_NAME = 'poke-tcg-v2';
-const RUNTIME_CACHE = 'poke-tcg-runtime';
-const IMAGE_CACHE = 'poke-tcg-images';
+const SW_SCOPE_PATH = new URL(self.registration.scope).pathname.toLowerCase();
+const SW_SCOPE = /(^|\/)dev(\/|$)/.test(SW_SCOPE_PATH) ? 'dev' : 'release';
+const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v12`;
+const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v12`;
+const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v12`;
 
 const STATIC_ASSETS = [
   './',
   './index.html',
+  './manifest.json',
   './css/main.css',
   './css/trading-marketplace.css',
+  './assets/branding/logo-veras-pokemon.jpg',
   './js/app.js',
   './js/auth.js',
   './js/sheets-db.js',
@@ -32,7 +36,6 @@ const STATIC_ASSETS = [
   './js/card-filters.js',
   './js/trading-system.js',
   './js/trading-ui.js',
-  './js/ml-recommendations.js',
   './js/realtime-sync.js'
 ];
 
@@ -80,6 +83,26 @@ self.addEventListener('fetch', (event) => {
 
   // Handle API requests
   if (request.method === 'GET') {
+    // HTML/Navigations: network-first, damit neue index.html/app-Versionen sofort aktiv werden
+    if (request.mode === 'navigate' || request.destination === 'document') {
+      event.respondWith(
+        fetch(request)
+          .then((response) => {
+            if (response && response.status === 200) {
+              const responseToCache = response.clone();
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(request, responseToCache).catch((err) => {
+                  console.warn('[SW] cache.put failed:', err);
+                });
+              });
+            }
+            return response;
+          })
+          .catch(() => caches.match(request))
+      );
+      return;
+    }
+
     // Images: cache first, then network
     if (request.destination === 'image') {
       event.respondWith(
@@ -138,6 +161,30 @@ self.addEventListener('fetch', (event) => {
               );
             });
           })
+      );
+      return;
+    }
+
+    // JS/CSS: network-first to avoid stale app modules after deploys
+    const isCodeAsset = request.destination === 'script'
+      || request.destination === 'style'
+      || url.pathname.endsWith('.js')
+      || url.pathname.endsWith('.css');
+    if (isCodeAsset) {
+      event.respondWith(
+        fetch(request)
+          .then((response) => {
+            if (response && response.status === 200) {
+              const responseToCache = response.clone();
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(request, responseToCache).catch((err) => {
+                  console.warn('[SW] cache.put failed:', err);
+                });
+              });
+            }
+            return response;
+          })
+          .catch(() => caches.match(request))
       );
       return;
     }
@@ -220,8 +267,8 @@ self.addEventListener('push', (event) => {
 
   const options = {
     body: event.data.text(),
-    icon: './data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 192 192%22%3E%3Crect fill=%22%231f2937%22 width=%22192%22 height=%22192%22/%3E%3Ctext x=%2296%22 y=%22130%22 font-size=%22120%22 text-anchor=%22middle%22 fill=%22%23fff%22 dominant-baseline=%22middle%22%3E🎴%3C/text%3E%3C/svg%3E',
-    badge: './data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 96 96%22%3E%3Ctext x=%2248%22 y=%2248%22 font-size=%2270%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22%3E🎴%3C/text%3E%3C/svg%3E',
+    icon: './assets/branding/logo-veras-pokemon.jpg',
+    badge: './assets/branding/logo-veras-pokemon.jpg',
     tag: 'poke-notification',
     requireInteraction: false
   };

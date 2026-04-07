@@ -4,31 +4,6 @@
 		{
 			"label": "Serve tcg-tracker-web on 8080",
 			"type": "shell",
-			"command": "py",
-			"args": [
-				"-m",
-				"http.server",
-				"8080",
-				"--directory",
-				"frontend/tcg-tracker-web"
-			],
-			"isBackground": true
-		},
-		{
-			"label": "Serve tcg-tracker-web on 8080 (npx)",
-			"type": "shell",
-			"command": "npx",
-			"args": [
-				"http-server",
-				"frontend/tcg-tracker-web",
-				"-p",
-				"8080"
-			],
-			"isBackground": true
-		},
-		{
-			"label": "Serve tcg-tracker-web on 8080 (npx --yes)",
-			"type": "shell",
 			"command": "npx",
 			"args": [
 				"--yes",
@@ -37,18 +12,6 @@
 				"-p",
 				"8080"
 			],
-			"isBackground": true
-		},
-		{
-			"label": "Serve tcg-tracker-web on 8080 (PowerShell)",
-			"type": "shell",
-			"command": "$root = (Resolve-Path 'frontend/tcg-tracker-web').Path; $listener = [System.Net.HttpListener]::new(); $listener.Prefixes.Add('http://localhost:8080/'); $listener.Start(); Write-Host \"Serving $root on http://localhost:8080\"; while ($listener.IsListening) { $ctx = $listener.GetContext(); $reqPath = [uri]::UnescapeDataString($ctx.Request.Url.AbsolutePath.TrimStart('/')); if ([string]::IsNullOrWhiteSpace($reqPath)) { $reqPath = 'index.html' }; $file = Join-Path $root $reqPath; if (Test-Path $file -PathType Container) { $file = Join-Path $file 'index.html' }; if (Test-Path $file -PathType Leaf) { $bytes = [System.IO.File]::ReadAllBytes($file); $ctx.Response.StatusCode = 200; $ctx.Response.ContentLength64 = $bytes.Length; $ctx.Response.OutputStream.Write($bytes,0,$bytes.Length) } else { $msg = [System.Text.Encoding]::UTF8.GetBytes('404 Not Found'); $ctx.Response.StatusCode = 404; $ctx.Response.ContentLength64 = $msg.Length; $ctx.Response.OutputStream.Write($msg,0,$msg.Length) }; $ctx.Response.OutputStream.Close() }",
-			"isBackground": true
-		},
-		{
-			"label": "Serve tcg-tracker-web on 8080 (PowerShell MIME)",
-			"type": "shell",
-			"command": "$root=(Resolve-Path 'frontend/tcg-tracker-web').Path; $mime=@{'.html'='text/html; charset=utf-8';'.js'='text/javascript; charset=utf-8';'.mjs'='text/javascript; charset=utf-8';'.css'='text/css; charset=utf-8';'.json'='application/json; charset=utf-8';'.svg'='image/svg+xml';'.png'='image/png';'.jpg'='image/jpeg';'.jpeg'='image/jpeg';'.gif'='image/gif';'.webp'='image/webp';'.ico'='image/x-icon';'.woff'='font/woff';'.woff2'='font/woff2';'.map'='application/json; charset=utf-8';'.txt'='text/plain; charset=utf-8'}; $listener=[System.Net.HttpListener]::new(); $listener.Prefixes.Add('http://localhost:8080/'); $listener.Start(); Write-Host \"Serving $root on http://localhost:8080\"; while($listener.IsListening){ $ctx=$listener.GetContext(); try{ $req=[uri]::UnescapeDataString($ctx.Request.Url.AbsolutePath.TrimStart('/')); if([string]::IsNullOrWhiteSpace($req)){ $req='index.html' }; $candidate=Join-Path $root $req; if(Test-Path $candidate -PathType Container){ $candidate=Join-Path $candidate 'index.html' }; $full=[System.IO.Path]::GetFullPath($candidate); if(-not $full.StartsWith($root,[System.StringComparison]::OrdinalIgnoreCase)){ $ctx.Response.StatusCode=403; $bytes=[System.Text.Encoding]::UTF8.GetBytes('403 Forbidden'); $ctx.Response.ContentType='text/plain; charset=utf-8'; $ctx.Response.ContentLength64=$bytes.Length; $ctx.Response.OutputStream.Write($bytes,0,$bytes.Length); $ctx.Response.OutputStream.Close(); continue }; if(Test-Path $full -PathType Leaf){ $ext=[System.IO.Path]::GetExtension($full).ToLowerInvariant(); $ctx.Response.ContentType=($mime[$ext] ?? 'application/octet-stream'); $bytes=[System.IO.File]::ReadAllBytes($full); $ctx.Response.StatusCode=200; $ctx.Response.ContentLength64=$bytes.Length; $ctx.Response.OutputStream.Write($bytes,0,$bytes.Length) } else { $ctx.Response.StatusCode=404; $msg=[System.Text.Encoding]::UTF8.GetBytes('404 Not Found'); $ctx.Response.ContentType='text/plain; charset=utf-8'; $ctx.Response.ContentLength64=$msg.Length; $ctx.Response.OutputStream.Write($msg,0,$msg.Length) } } finally { $ctx.Response.OutputStream.Close() } }",
 			"isBackground": true
 		}
 	]

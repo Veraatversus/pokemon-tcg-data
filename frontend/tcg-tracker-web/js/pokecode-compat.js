@@ -1,4 +1,5 @@
 import { normalizeCardNumber, naturalSort } from './utils.js';
+import { buildCardRecordFromSources, buildSetRecordFromSources } from './data/schema-contract.js?v=20260507a';
 
 export function normalizeString(str) {
   if (str === null || typeof str === 'undefined') {
@@ -43,20 +44,55 @@ export function buildSetIdAliasCandidates(setId, customMappings = {}) {
   return Array.from(candidates).filter(Boolean);
 }
 
+function isStandaloneTrainerGallerySet(set) {
+  const setName = String(set?.name || '').trim();
+  const normalizedSetId = normalizeSetId(set?.id || '');
+  return Boolean(setName)
+    && /trainer gallery$/i.test(setName)
+    && /tg$/i.test(normalizedSetId);
+}
+
+function tokenizeSetName(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+}
+
+function isSafePartialSetNameMatch(leftName, rightName) {
+  const leftTokens = tokenizeSetName(leftName);
+  const rightTokens = tokenizeSetName(rightName);
+
+  if (!leftTokens.length || !rightTokens.length) return false;
+  if (leftTokens.join('') === rightTokens.join('')) return true;
+
+  const shorter = leftTokens.length <= rightTokens.length ? leftTokens : rightTokens;
+  const longer = shorter === leftTokens ? rightTokens : leftTokens;
+
+  if (shorter.length < 3) return false;
+
+  const matchesAtStart = shorter.every((token, index) => token === longer[index]);
+  const offset = longer.length - shorter.length;
+  const matchesAtEnd = shorter.every((token, index) => token === longer[offset + index]);
+
+  return matchesAtStart || matchesAtEnd;
+}
+
 export function findMatchingTcgdexSet(pokemontcgIoSet, allTcgdexSets, customMappings = {}) {
   if (!pokemontcgIoSet || !allTcgdexSets) {
     return null;
   }
 
-  const tcgdexSetsMapByAbbreviation = new Map();
+  if (isStandaloneTrainerGallerySet(pokemontcgIoSet)) {
+    return null;
+  }
+
   const tcgdexSetsByNameMap = new Map();
   const tcgdexSetsMapById = new Map();
   const tcgdexSetsMapByNormalizedId = new Map();
 
   allTcgdexSets.forEach((set) => {
-    if (set?.abbreviation?.official) {
-      tcgdexSetsMapByAbbreviation.set(String(set.abbreviation.official).toLowerCase(), set);
-    }
     if (set?.name) {
       tcgdexSetsByNameMap.set(normalizeString(set.name), set);
     }
@@ -91,13 +127,7 @@ export function findMatchingTcgdexSet(pokemontcgIoSet, allTcgdexSets, customMapp
     return tcgdexSetsMapByNormalizedId.get(normalizedPokemontcgId);
   }
 
-  if (pokemontcgIoSet.ptcgoCode) {
-    const matchedByCode = tcgdexSetsMapByAbbreviation.get(String(pokemontcgIoSet.ptcgoCode).toLowerCase());
-    if (matchedByCode) {
-      return matchedByCode;
-    }
-  }
-
+  const normalizedPokeCode = String(pokemontcgIoSet.ptcgoCode || '').trim().toLowerCase();
   const normalizedPokeName = pokemontcgIoSet.name ? normalizeString(pokemontcgIoSet.name) : '';
   if (normalizedPokeName) {
     const exactByName = tcgdexSetsByNameMap.get(normalizedPokeName);
@@ -106,14 +136,13 @@ export function findMatchingTcgdexSet(pokemontcgIoSet, allTcgdexSets, customMapp
     }
 
     for (const currentTcgdexSet of allTcgdexSets) {
-      const currentTcgdexNormalizedName = currentTcgdexSet?.name ? normalizeString(currentTcgdexSet.name) : '';
-      const currentTcgdexEnNormalizedName = currentTcgdexSet?.en?.name ? normalizeString(currentTcgdexSet.en.name) : '';
+      const currentTcgdexOfficialCode = String(currentTcgdexSet?.abbreviation?.official || '').trim().toLowerCase();
+      const hasCodeConflict = normalizedPokeCode && currentTcgdexOfficialCode && normalizedPokeCode !== currentTcgdexOfficialCode;
+      if (hasCodeConflict) continue;
 
       if (
-        (currentTcgdexNormalizedName && normalizedPokeName.includes(currentTcgdexNormalizedName))
-        || (currentTcgdexNormalizedName && currentTcgdexNormalizedName.includes(normalizedPokeName))
-        || (currentTcgdexEnNormalizedName && normalizedPokeName.includes(currentTcgdexEnNormalizedName))
-        || (currentTcgdexEnNormalizedName && currentTcgdexEnNormalizedName.includes(normalizedPokeName))
+        isSafePartialSetNameMatch(pokemontcgIoSet.name, currentTcgdexSet?.name)
+        || isSafePartialSetNameMatch(pokemontcgIoSet.name, currentTcgdexSet?.en?.name)
       ) {
         return currentTcgdexSet;
       }
@@ -123,25 +152,104 @@ export function findMatchingTcgdexSet(pokemontcgIoSet, allTcgdexSets, customMapp
   return null;
 }
 
-export function resolveTcgdexImageUrl(tcgdexSetId, tcgdexCard) {
+export function resolveTcgdexImageUrl(tcgdexSetId, tcgdexCard, options = {}) {
+  const config = typeof options === 'string'
+    ? { quality: options }
+    : (options || {});
+  const quality = String(config.quality || 'low').toLowerCase() === 'high' ? 'high' : 'low';
+  const language = String(config.language || 'en').trim() || 'en';
+  const seriesId = String(config.seriesId || tcgdexCard?.set?.serie?.id || tcgdexCard?.serie?.id || '').trim();
+
   const imageValue = tcgdexCard?.image;
   if (typeof imageValue === 'string' && imageValue.trim()) {
-    const trimmed = imageValue.trim();
-    if (/\.(png|jpe?g|webp)$/i.test(trimmed)) {
-      return trimmed;
-    }
-    return `${trimmed}/low.jpg`;
+    const trimmed = imageValue.trim().replace(/\/(low|high)\.(png|jpe?g|webp)$/i, '');
+    return `${trimmed}/${quality}.webp`;
   }
   if (imageValue && typeof imageValue === 'object') {
-    if (imageValue.low) return imageValue.low;
-    if (imageValue.high) return imageValue.high;
-    if (imageValue.base) return `${imageValue.base}/low.jpg`;
+    if (typeof imageValue[quality] === 'string' && imageValue[quality].trim()) return imageValue[quality].trim();
+    if (typeof imageValue.base === 'string' && imageValue.base.trim()) return `${imageValue.base.trim()}/${quality}.webp`;
+    if (typeof imageValue.low === 'string' && imageValue.low.trim()) {
+      return imageValue.low.trim().replace(/\/(low|high)\.(png|jpe?g|webp)$/i, `/${quality}.webp`);
+    }
+    if (typeof imageValue.high === 'string' && imageValue.high.trim()) {
+      return imageValue.high.trim().replace(/\/(low|high)\.(png|jpe?g|webp)$/i, `/${quality}.webp`);
+    }
   }
   const localId = normalizeCardNumber(tcgdexCard?.localId || tcgdexCard?.id || '');
-  if (!tcgdexSetId || !localId) {
+  if (!tcgdexSetId || !localId || !seriesId) {
     return null;
   }
-  return `https://assets.tcgdex.net/de/${encodeURIComponent(tcgdexSetId)}/${encodeURIComponent(localId)}/low.webp`;
+  return `https://assets.tcgdex.net/${encodeURIComponent(language)}/${encodeURIComponent(seriesId)}/${encodeURIComponent(tcgdexSetId)}/${encodeURIComponent(localId)}/${quality}.webp`;
+}
+
+function hasTcgdexSetById(tcgdexSets, setId) {
+  const target = String(setId || '').trim().toLowerCase();
+  if (!target || !Array.isArray(tcgdexSets)) return false;
+  return tcgdexSets.some((set) => String(set?.id || '').trim().toLowerCase() === target);
+}
+
+function normalizeTcgdexSetIdCollection(value) {
+  if (value instanceof Set) {
+    return new Set(Array.from(value, (entry) => String(entry || '').trim().toLowerCase()).filter(Boolean));
+  }
+  if (Array.isArray(value)) {
+    return new Set(value.map((entry) => String(entry || '').trim().toLowerCase()).filter(Boolean));
+  }
+  return null;
+}
+
+export function resolvePreferredTcgdexSetBases(tcgdexSetId, apis = {}) {
+  const normalizedSetId = String(tcgdexSetId || '').trim().toLowerCase();
+  if (!normalizedSetId) return [];
+
+  const deBase = String(apis?.tcgdexBase || '').trim();
+  const enBase = String(apis?.tcgdexFallbackBase || '').trim();
+  const deSetIds = normalizeTcgdexSetIdCollection(apis?.tcgdexDeSetIds);
+  const enSetIds = normalizeTcgdexSetIdCollection(apis?.tcgdexEnSetIds);
+
+  const hasDeKnowledge = deSetIds instanceof Set;
+  const hasEnKnowledge = enSetIds instanceof Set;
+  const existsInDe = hasDeKnowledge ? deSetIds.has(normalizedSetId) : false;
+  const existsInEn = hasEnKnowledge ? enSetIds.has(normalizedSetId) : false;
+
+  const orderedBases = [];
+  if (existsInDe && deBase) orderedBases.push(deBase);
+  if (existsInEn && enBase) orderedBases.push(enBase);
+
+  if (orderedBases.length) {
+    return orderedBases.filter((value, index, array) => array.indexOf(value) === index);
+  }
+
+  if (hasDeKnowledge || hasEnKnowledge) {
+    if (!hasEnKnowledge && enBase) return [enBase];
+    if (!hasDeKnowledge && deBase) return [deBase];
+    return [];
+  }
+
+  return [deBase, enBase]
+    .filter(Boolean)
+    .filter((value, index, array) => array.indexOf(value) === index);
+}
+
+async function fetchTcgdexSetDetailsWithFallback(tcgdexSetId, apis = {}, fetchJson) {
+  const normalizedSetId = String(tcgdexSetId || '').trim();
+  if (!normalizedSetId || typeof fetchJson !== 'function') return null;
+
+  const bases = resolvePreferredTcgdexSetBases(normalizedSetId, apis);
+  if (!bases.length) {
+    return null;
+  }
+
+  for (const base of bases) {
+    try {
+      const detail = await fetchJson(`${base}/sets/${encodeURIComponent(normalizedSetId)}`);
+      if (detail?.id) return detail;
+    } catch (_error) {
+      // try next locale fallback only when the locale is actually plausible
+    }
+  }
+
+  return null;
 }
 
 function resolveOfficialSetTag({ setTag = '', tcgdexSet = null, primarySet = null, fallbackSetId = '' } = {}) {
@@ -192,36 +300,17 @@ function resolveCardmarketUrl({ tcgdexUrl = null, primaryUrl = null, cardName = 
   return buildCardmarketSearchUrl({ cardName, setTag, setName, cardNumber });
 }
 
-function mapTcgdexCardToMerged(tcgdexSetId, tcgdexCard, fallbackImage = null, fallbackSetName = '', fallbackSetTag = '') {
-  const number = normalizeCardNumber(tcgdexCard?.localId || tcgdexCard?.id);
-  const description = tcgdexCard?.description || '';
-  const resolvedCardmarketUrl = resolveCardmarketUrl({
-    tcgdexUrl: tcgdexCard?.links?.cardmarket || null,
-    cardName: tcgdexCard?.name || number,
-    setTag: fallbackSetTag,
-    setName: fallbackSetName,
-    cardNumber: number
+function mapTcgdexCardToMerged(tcgdexSetId, tcgdexCard, fallbackImageSmall = null, fallbackImageLarge = null, fallbackSetName = '', fallbackSetTag = '', tcgdexSeriesId = '') {
+  return buildCardRecordFromSources({
+    setId: tcgdexSetId,
+    tcgdexSetId,
+    tcgdexSeriesId,
+    tcgdexCard,
+    fallbackImageSmall: resolveTcgdexImageUrl(tcgdexSetId, tcgdexCard, { quality: 'low', seriesId: tcgdexSeriesId }) || fallbackImageSmall || '',
+    fallbackImageLarge: resolveTcgdexImageUrl(tcgdexSetId, tcgdexCard, { quality: 'high', seriesId: tcgdexSeriesId }) || fallbackImageLarge || fallbackImageSmall || '',
+    fallbackSetName,
+    fallbackSetTag
   });
-  const card = {
-    number,
-    name: tcgdexCard?.name || number,
-    image: resolveTcgdexImageUrl(tcgdexSetId, tcgdexCard) || fallbackImage || '',
-    cardmarketUrl: resolvedCardmarketUrl,
-    rarity: tcgdexCard?.rarity || '',
-    hp: tcgdexCard?.hp ? String(tcgdexCard.hp) : '',
-    types: Array.isArray(tcgdexCard?.types) ? tcgdexCard.types : [],
-    supertype: tcgdexCard?.category || '',
-    subtypes: tcgdexCard?.stage ? [tcgdexCard.stage] : (tcgdexCard?.suffix ? [tcgdexCard.suffix] : []),
-    evolvesFrom: tcgdexCard?.evolveFrom || '',
-    artist: Array.isArray(tcgdexCard?.illustrator) ? tcgdexCard.illustrator.join(', ') : (tcgdexCard?.illustrator || '')
-  };
-
-  if (description) {
-    card.rules = [description];
-    card.flavorText = description;
-  }
-
-  return card;
 }
 
 export async function fetchAllPrimaryCardsForSet({
@@ -235,12 +324,18 @@ export async function fetchAllPrimaryCardsForSet({
 }) {
   if (useVeraApi) {
     const url = `${veraBaseUrl}/cards/${veraLanguage}/${encodeURIComponent(setId)}.json`;
-    const response = await fetchJson(url);
-    const cards = Array.isArray(response) ? response : [];
-    if (!cards.length) {
-      throw new Error(`Keine Karten von Vera für Set "${setName}" gefunden.`);
+    try {
+      const response = await fetchJson(url);
+      const cards = Array.isArray(response) ? response : [];
+      if (cards.length) {
+        return cards.sort((a, b) => naturalSort(a.number || '', b.number || ''));
+      }
+      // Vera-Setdatei existiert, aber leer -> fallback auf pokemontcg.io
+      console.warn(`[fetchAllPrimaryCardsForSet] Vera lieferte 0 Karten für ${setId}, fallback auf pokemontcg.io`);
+    } catch (err) {
+      // 404/Fetch-Fehler bei Vera dürfen Suche/Import nicht abbrechen.
+      console.warn(`[fetchAllPrimaryCardsForSet] Vera request failed for ${setId}, fallback auf pokemontcg.io`, err);
     }
-    return cards.sort((a, b) => naturalSort(a.number || '', b.number || ''));
   }
 
   let page = 1;
@@ -280,7 +375,13 @@ export async function loadCardsForSetCompat({
   const isTcgdexOnlySet = String(setId || '').startsWith('TCGDEX-');
   if (isTcgdexOnlySet) {
     const tcgdexActualSetId = String(setId).substring('TCGDEX-'.length);
-    tcgdexDetailedSet = await fetchJson(`${apis.tcgdexBase}/sets/${encodeURIComponent(tcgdexActualSetId)}`);
+    if (!hasTcgdexSetById(tcgdexSets, tcgdexActualSetId)) {
+      throw new Error(`TCGDex-Set nicht verfügbar: ${tcgdexActualSetId}`);
+    }
+    tcgdexDetailedSet = await fetchTcgdexSetDetailsWithFallback(tcgdexActualSetId, apis, fetchJson);
+    if (!tcgdexDetailedSet) {
+      throw new Error(`TCGDex-Set nicht verfügbar: ${tcgdexActualSetId}`);
+    }
     const officialSetTag = resolveOfficialSetTag({
       tcgdexSet: tcgdexDetailedSet,
       fallbackSetId: tcgdexActualSetId
@@ -313,7 +414,9 @@ export async function loadCardsForSetCompat({
   );
 
   const tcgdexId = matchingTcgdexSet?.id || customMappings?.[String(pokemontcgSetId).toLowerCase()] || pokemontcgSetId;
-  tcgdexDetailedSet = await fetchJson(`${apis.tcgdexBase}/sets/${encodeURIComponent(tcgdexId)}`).catch(() => null);
+  tcgdexDetailedSet = tcgdexId
+    ? await fetchTcgdexSetDetailsWithFallback(tcgdexId, apis, fetchJson)
+    : null;
   const officialSetTag = resolveOfficialSetTag({
     tcgdexSet: tcgdexDetailedSet || matchingTcgdexSet,
     primarySet: primaryDetailedSet,
@@ -328,8 +431,17 @@ export async function loadCardsForSetCompat({
   allCards = primaryCards.map((primaryCard) => {
     const number = normalizeCardNumber(primaryCard.number);
     const tcgdexCard = tcgdexCardsMap.get(number);
-    const generatedTcgdexImage = tcgdexCard
-      ? resolveTcgdexImageUrl(matchingTcgdexSet?.id || tcgdexId, tcgdexCard)
+    const generatedTcgdexImageSmall = tcgdexCard
+      ? resolveTcgdexImageUrl(matchingTcgdexSet?.id || tcgdexId, tcgdexCard, {
+          quality: 'low',
+          seriesId: tcgdexDetailedSet?.serie?.id || matchingTcgdexSet?.serie?.id || ''
+        })
+      : null;
+    const generatedTcgdexImageLarge = tcgdexCard
+      ? resolveTcgdexImageUrl(matchingTcgdexSet?.id || tcgdexId, tcgdexCard, {
+          quality: 'high',
+          seriesId: tcgdexDetailedSet?.serie?.id || matchingTcgdexSet?.serie?.id || ''
+        })
       : null;
     const resolvedCardmarketUrl = resolveCardmarketUrl({
       tcgdexUrl: tcgdexCard?.links?.cardmarket || null,
@@ -340,33 +452,22 @@ export async function loadCardsForSetCompat({
       cardNumber: number
     });
 
-    const mergedCard = {
-      number,
-      name: tcgdexCard?.name || primaryCard.name,
-      image: generatedTcgdexImage
+    return buildCardRecordFromSources({
+      setId: pokemontcgSetId,
+      primaryCard,
+      tcgdexCard,
+      tcgdexSetId: matchingTcgdexSet?.id || tcgdexId,
+      tcgdexSeriesId: tcgdexDetailedSet?.serie?.id || matchingTcgdexSet?.serie?.id || '',
+      fallbackImageSmall: generatedTcgdexImageSmall
         || primaryCard.images?.small
         || `https://images.pokemontcg.io/${pokemontcgSetId}/${number}.png`,
-      cardmarketUrl: resolvedCardmarketUrl,
-      rarity: primaryCard.rarity || tcgdexCard?.rarity || '',
-      hp: primaryCard.hp ? String(primaryCard.hp) : (tcgdexCard?.hp ? String(tcgdexCard.hp) : ''),
-      types: Array.isArray(primaryCard.types) && primaryCard.types.length
-        ? primaryCard.types
-        : (Array.isArray(tcgdexCard?.types) ? tcgdexCard.types : []),
-      supertype: primaryCard.supertype || tcgdexCard?.category || '',
-      subtypes: Array.isArray(primaryCard.subtypes) && primaryCard.subtypes.length
-        ? primaryCard.subtypes
-        : (tcgdexCard?.stage ? [tcgdexCard.stage] : (tcgdexCard?.suffix ? [tcgdexCard.suffix] : [])),
-      evolvesFrom: primaryCard.evolvesFrom || tcgdexCard?.evolveFrom || '',
-      artist: primaryCard.artist || (Array.isArray(tcgdexCard?.illustrator) ? tcgdexCard.illustrator.join(', ') : (tcgdexCard?.illustrator || '')),
-      regulationMark: primaryCard.regulationMark || ''
-    };
-
-    if (tcgdexCard?.description) {
-      mergedCard.rules = [tcgdexCard.description];
-      mergedCard.flavorText = tcgdexCard.description;
-    }
-
-    return mergedCard;
+      fallbackImageLarge: generatedTcgdexImageLarge
+        || primaryCard.images?.large
+        || primaryCard.images?.small
+        || `https://images.pokemontcg.io/${pokemontcgSetId}/${number}.png`,
+      fallbackSetName: primaryDetailedSet?.name || matchingTcgdexSet?.name || setName || '',
+      fallbackSetTag: officialSetTag
+    });
   });
 
   if (tcgdexDetailedSet?.cards) {
@@ -380,8 +481,10 @@ export async function loadCardsForSetCompat({
           matchingTcgdexSet?.id || tcgdexId,
           tcgdexCard,
           `https://images.pokemontcg.io/${pokemontcgSetId}/${normalizedTcgdexNumber}.png`,
+          `https://images.pokemontcg.io/${pokemontcgSetId}/${normalizedTcgdexNumber}.png`,
           primaryDetailedSet?.name || matchingTcgdexSet?.name || setName || '',
-          officialSetTag
+          officialSetTag,
+          tcgdexDetailedSet?.serie?.id || matchingTcgdexSet?.serie?.id || ''
         )
       });
       const resolvedTcgdexCardmarketUrl = resolveCardmarketUrl({
@@ -418,22 +521,32 @@ export async function loadCardsForSetCompat({
 export function combineSetsForOverviewCompat({
   primarySets,
   tcgdexSets,
+  tcgdexResolvedSets = tcgdexSets,
   customMappings,
   mapPrimarySetToOverviewModel,
   toNumber
 }) {
   const combinedSetsMap = new Map();
+  const resolvedTcgdexById = new Map(
+    (tcgdexResolvedSets || [])
+      .map((set) => [String(set?.id || '').trim().toLowerCase(), set])
+      .filter(([id]) => Boolean(id))
+  );
 
   (primarySets || []).forEach((primarySet) => {
     const tcgdexMatch = findMatchingTcgdexSet(primarySet, tcgdexSets || [], customMappings || {});
+    const resolvedTcgdexMatch = tcgdexMatch
+      ? (resolvedTcgdexById.get(String(tcgdexMatch.id || '').trim().toLowerCase()) || tcgdexMatch)
+      : null;
+
     combinedSetsMap.set(primarySet.id, {
       primaryData: primarySet,
-      tcgdexData: tcgdexMatch,
+      tcgdexData: resolvedTcgdexMatch,
       isOnlyTcgdex: false
     });
   });
 
-  (tcgdexSets || []).forEach((tcgdexSet) => {
+  (tcgdexResolvedSets || tcgdexSets || []).forEach((tcgdexSet) => {
     let foundInCombined = false;
     for (const [, mergedData] of combinedSetsMap.entries()) {
       if (mergedData.primaryData && mergedData.tcgdexData && mergedData.tcgdexData.id === tcgdexSet.id) {
@@ -473,44 +586,22 @@ export function combineSetsForOverviewCompat({
     if (primarySet) {
       const model = mapPrimarySetToOverviewModel(primarySet);
       if (!model) return;
-      mapped.push({
-        ...model,
-        setName: tcgdexSet?.name || model.setName,
-        series: tcgdexSet?.serie?.name || model.series,
-        releaseDate: tcgdexSet?.releaseDate || model.releaseDate || '',
-        totalCards: toNumber(tcgdexSet?.cardCount?.official) || model.totalCards,
-        ptcgoCode: model.ptcgoCode || tcgdexSet?.abbreviation?.official || '',
-        tcgdexId: tcgdexSet?.id || '',
-        tcgdexName: tcgdexSet?.name || tcgdexSet?.en?.name || '',
-        legalities: primarySet?.legalities || tcgdexSet?.legal || null,
-        cardCountTotal: toNumber(tcgdexSet?.cardCount?.total),
-        cardCountHolo: toNumber(tcgdexSet?.cardCount?.holo),
-        cardCountReverse: toNumber(tcgdexSet?.cardCount?.reverse),
-        cardCountFirstEdition: toNumber(tcgdexSet?.cardCount?.firstEdition),
-        cardCountNormal: toNumber(tcgdexSet?.cardCount?.normal)
-      });
+      mapped.push(buildSetRecordFromSources({
+        setId: model.setId,
+        primarySet,
+        tcgdexSet,
+        isTcgdexOnly: false
+      }));
       return;
     }
 
     if (isOnlyTcgdex && tcgdexSet) {
-      mapped.push({
+      mapped.push(buildSetRecordFromSources({
         setId: `TCGDEX-${tcgdexSet.id}`,
-        setName: tcgdexSet.name || tcgdexSet.en?.name || tcgdexSet.id,
-        logoUrl: tcgdexSet.logo || '',
-        symbolUrl: tcgdexSet.symbol || '',
-        series: tcgdexSet.serie?.name || '',
-        releaseDate: tcgdexSet.releaseDate || '',
-        totalCards: toNumber(tcgdexSet?.cardCount?.official) || toNumber(tcgdexSet?.cardCount?.total),
-        ptcgoCode: tcgdexSet.abbreviation?.official || '',
-        tcgdexId: tcgdexSet.id || '',
-        tcgdexName: tcgdexSet.name || tcgdexSet.en?.name || '',
-        legalities: tcgdexSet.legal || null,
-        cardCountTotal: toNumber(tcgdexSet?.cardCount?.total),
-        cardCountHolo: toNumber(tcgdexSet?.cardCount?.holo),
-        cardCountReverse: toNumber(tcgdexSet?.cardCount?.reverse),
-        cardCountFirstEdition: toNumber(tcgdexSet?.cardCount?.firstEdition),
-        cardCountNormal: toNumber(tcgdexSet?.cardCount?.normal)
-      });
+        primarySet: null,
+        tcgdexSet,
+        isTcgdexOnly: true
+      }));
     }
   });
 

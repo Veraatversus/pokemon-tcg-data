@@ -124,11 +124,10 @@ Nummer,Name,Set
 
 ---
 
-## 🌙 Dark Mode
+## 🌙 Standard-Theme
 
-- **Toggle**: 🌙 Button in Topbar
-- **Speichert**: localStorage `poke_dark_mode`
-- **Auto-Detect**: System `prefers-color-scheme`
+- **Modus**: Einheitlicher Dark Mode (Standard)
+- **Umschalter**: entfernt
 
 ---
 
@@ -211,7 +210,7 @@ Grid: 5 Blocks × 3 Spalten × 4 Reihen = 60 Karten/Block
 | "API-Fehler beim Laden" | Browser-Konsole prüfen (F12), Credentials prüfen |
 | "Timeout" | Netzwerk / API-Rate-Limit, Seite aktualisieren |
 | "Checkboxen nicht gespeichert" | Spreadsheet-Berechtigungen prüfen |
-| Dark Mode funktioniert nicht | Browser-Cache leeren (Ctrl+Shift+Del) |
+| Theme wirkt veraltet | Browser-Cache leeren (Ctrl+Shift+Del) |
 
 ---
 
@@ -255,7 +254,7 @@ location.reload();
 
 ## 📝 Commits
 
-- `c3d53ee` – Full SPA (Dashboard, Lightbox, Stats, Search, Bulk-Edit, Dark Mode, Keyboard Nav, CSV Export)
+- `c3d53ee` – Full SPA (Dashboard, Lightbox, Stats, Search, Bulk-Edit, Keyboard Nav, CSV Export)
 - `04e65c0` – Fix: doppelter Import
 - `7027acf` – Polish: Error-Handling, Logging, Keyboard Nav Refinement
 

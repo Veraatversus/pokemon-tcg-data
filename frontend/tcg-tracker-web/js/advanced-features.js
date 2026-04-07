@@ -2,6 +2,8 @@
 // VOICE COMMANDS & GESTURE RECOGNITION
 // ══════════════════════════════════════════════════════════════════════════
 
+import { scopedStoragePrefix } from './config.js';
+
 export class VoiceCommandRecognizer {
   constructor(onCommand) {
     this.onCommand = onCommand;
@@ -255,7 +257,7 @@ export function downloadCsv(filename, data) {
 // LOCAL BACKUP/RESTORE
 // ══════════════════════════════════════════════════════════════════════════
 
-const BACKUP_PREFIX = 'poke-backup-';
+const BACKUP_PREFIX = scopedStoragePrefix('backup-');
 
 export function createLocalBackup(data, name) {
   try {

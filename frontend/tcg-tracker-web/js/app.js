@@ -1,4 +1,4 @@
-import { initAuth, signIn, signOut, isSignedIn } from './auth.js';
+﻿import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js?v=20260506d';
 import {
   listImportedSets,
   listSetsOverviewData,
@@ -6,48 +6,67 @@ import {
   readDbCardsForSet,
   ensureCollectionEntry,
   updateCellBoolean,
+  updateCellBooleansBatch,
   readSummarySheet,
   readSettings,
   writeSetting,
   importSetIntoCollection,
+  upsertOverviewSet,
   syncOverviewWithApiSets,
-} from './sheets-db.js';
-import { fetchMergedCards, fetchAllAvailableSets, runPokecodeParityCheck } from './pokemon-api.js';
-import { normalizeCardNumber } from './utils.js';
-import * as cache from './cache.js';
-import { CONFIG } from './config.js';
+  resetSheetsDataCaches,
+} from './data/sheets-db.js?v=20260407-login1';
+import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260507a';
+import { resolveSeriesGroupInfo } from './data/schema-contract.js?v=20260507a';
+import {
+  buildCombinedSearchDropdownOptions,
+  createSpreadsheetSwitchStatePatch,
+  normalizeCardNumber,
+  resolveCombinedSearchSelection,
+  toBoolean
+} from './core/utils.js?v=20260407-searchscope1';
+import { getCollectionUiState, resolveCollectionToggleState } from './core/collection-state.js?v=20260507c';
+import * as cache from './core/cache.js';
+import { CONFIG, scopedStorageKey } from './core/config.js';
 import {
   initSmartEngine,
   startAutoHealing,
-  generateCollectionReccommendations,
   fuzzySearch,
   getEngineMetrics,
   cacheCardsOffline,
   getCachedCardsOffline
-} from './smart-engine.js';
+} from './features/search/index.js';
 import {
   createAutoSnapshot,
   loadSnapshots
-} from './collection-versioning.js';
-import { initCommandPalette } from './command-palette.js';
+} from './features/collection/index.js';
+import {
+  loadLegacyWorkbookFromFile,
+  parseLegacyWorkbook,
+  buildLegacyImportPlan,
+  summarizeLegacyImportPlan,
+  pickCanonicalCardId
+} from './features/collection/legacy-import.js?v=20260407a';
+import { initCommandPalette } from './ui/command-palette.js';
+import { filterSetsBySeriesKey, getStatsSeriesLabel } from './ui/stats-series.js?v=20260407a';
 import {
   loadFavorites, saveFavorites, toggleFavorite, isFavorite,
   loadSearchHistory, addSearchHistory, clearSearchHistory,
   createCollectionSnapshot, generateCollectionReport,
   loadSettings, saveSettings, updateSetting,
   applyQuickFilters, calculateCollectionStats,
-  generateSmartRecommendations, getSyncStatus, setSyncStatus
-} from './enhanced-features.js';
+  getSyncStatus, setSyncStatus
+} from './enhanced-features.js?v=20260506b';
+
 import {
   initQuickFiltersUI, createSearchHistoryWidget, createStatisticsPanel,
-  createExportDialog, createSettingsPanel, createShortcutsOverlay,
+  createExportDialog, createSettingsPanel,
   createBulkActionsToolbar
-} from './ui-components.js';
+} from './ui/components.js?v=20260506b';
 import {
   AdvancedSearch, SyncIndicator, CardCollectionTools,
   generateCollectionInsights, generateSetComparison,
   NotificationManager, PerformanceTracker
-} from './advanced-tools.js';
+} from './ui/tools.js';
 import {
   loadWishlists, addTradeLog, getTradingLog, checkAchievementsProgress,
   importCollectionFromCSV, GestureController, rateSet, getAllRatings
@@ -58,7 +77,7 @@ import {
   createRatingStatsWidget
 } from './social-ui.js';
 import {
-  VoiceCommandRecognizer, GestureRecognizer, downloadJson, downloadCsv,
+  downloadJson, downloadCsv,
   createLocalBackup, getLocalBackups, restoreLocalBackup, deleteLocalBackup,
   generateAdvancedStatistics
 } from './advanced-features.js';
@@ -94,22 +113,21 @@ import {
   createTradeHistoryPanel
 } from './trading-ui.js';
 import {
-  generateMLSetRecommendations,
-  summarizeMLRecommendations
-} from './ml-recommendations.js';
-import {
   initRealtimeSync,
   buildCollectionUpdateEvent
-} from './realtime-sync.js';
+} from './features/community/index.js';
 // ══════════════════════════════════════════════════════════════════════════
 // DOM-REFERENZEN
 // ══════════════════════════════════════════════════════════════════════════
 const dom = {
   // Global
-  login:            document.getElementById('btn-login'),
-  logout:           document.getElementById('btn-logout'),
-  darkModeToggle:   document.getElementById('btn-dark-mode'),
+  auth:             document.getElementById('btn-auth'),
+  btnOpenSettings:  document.getElementById('btn-open-settings'),
+  topbar:           document.querySelector('.topbar'),
   mainNav:          document.getElementById('main-nav'),
+  navSetLink:       document.getElementById('nav-set-link'),
+  navSetSplit:      document.getElementById('nav-set-split'),
+  btnNavSetToggle:  document.getElementById('btn-nav-set-toggle'),
   loadingOverlay:   document.getElementById('loading-overlay'),
   loadingText:      document.getElementById('loading-text'),
   toastContainer:   document.getElementById('toast-container'),
@@ -123,9 +141,14 @@ const dom = {
   // Spreadsheet-Dialog
   dialog:           document.getElementById('dialog-spreadsheet'),
   dialogInput:      document.getElementById('input-spreadsheet-id'),
+  dialogExistingSelect: document.getElementById('select-spreadsheet-existing'),
+  dialogNewNameInput: document.getElementById('input-new-spreadsheet-name'),
   dialogError:      document.getElementById('dialog-error'),
   btnDialogSave:    document.getElementById('btn-dialog-save'),
   btnDialogCancel:  document.getElementById('btn-dialog-cancel'),
+  btnSpreadsheetRefresh: document.getElementById('btn-spreadsheet-refresh'),
+  btnSpreadsheetUseSelected: document.getElementById('btn-spreadsheet-use-selected'),
+  btnSpreadsheetCreate: document.getElementById('btn-spreadsheet-create'),
   batchDialog:      document.getElementById('dialog-batch-import'),
   batchSearchInput: document.getElementById('batch-search-input'),
   batchList:        document.getElementById('batch-list'),
@@ -156,6 +179,8 @@ const dom = {
   btnExportSummaryCsv: document.getElementById('btn-export-summary-csv'),
   btnDataHealthCheck: document.getElementById('btn-data-health-check'),
   btnDataHealthAutofix: document.getElementById('btn-data-health-autofix'),
+  btnManageImportedSets: document.getElementById('btn-manage-imported-sets'),
+  btnSheetsRetryReport: document.getElementById('btn-sheets-retry-report'),
   btnParityCheck: document.getElementById('dashboard-action-parity'),
   btnQueueAutofixRefresh: document.getElementById('btn-queue-autofix-refresh'),
   btnQueueBuilder: document.getElementById('btn-queue-builder'),
@@ -177,13 +202,34 @@ const dom = {
   btnQueueBuilderAdd: document.getElementById('btn-queue-builder-add'),
   btnExportBackup: document.getElementById('btn-export-backup'),
   btnImportBackup: document.getElementById('btn-import-backup'),
+  btnImportLegacyXlsx: document.getElementById('btn-import-legacy-xlsx'),
   backupFileInput: document.getElementById('input-backup-file'),
+  legacyImportFileInput: document.getElementById('input-legacy-import-file'),
+  manageSetsDialog: document.getElementById('dialog-manage-sets'),
+  manageSetsSearch: document.getElementById('manage-sets-search-input'),
+  manageSetsList: document.getElementById('manage-sets-list'),
+  manageSetsInfo: document.getElementById('manage-sets-info'),
+  btnManageSetsSelectVisible: document.getElementById('btn-manage-sets-select-visible'),
+  btnManageSetsClearSelection: document.getElementById('btn-manage-sets-clear-selection'),
+  btnManageSetsReimportSelected: document.getElementById('btn-manage-sets-reimport-selected'),
+  btnManageSetsDeleteSelected: document.getElementById('btn-manage-sets-delete-selected'),
+  btnManageSetsCancel: document.getElementById('btn-manage-sets-cancel'),
+  sheetsRetryDialog: document.getElementById('dialog-sheets-retry-report'),
+  sheetsRetryStats: document.getElementById('sheets-retry-stats'),
+  sheetsRetryHistory: document.getElementById('sheets-retry-history'),
+  btnSheetsRetryReset: document.getElementById('btn-sheets-retry-reset'),
+  btnSheetsRetryClose: document.getElementById('btn-sheets-retry-close'),
   dashboardGrid:    document.getElementById('dashboard-grid'),
   // Set detail – sidebar
   selector:         document.getElementById('set-selector'),
   load:             document.getElementById('btn-load'),
   refresh:          document.getElementById('btn-refresh'),
+  refreshSplit:     document.getElementById('refresh-split'),
+  btnRefreshMenu:   document.getElementById('btn-refresh-menu'),
+  refreshMenu:      document.getElementById('refresh-menu'),
+  btnRefreshReimport: document.getElementById('btn-refresh-reimport'),
   status:           document.getElementById('status'),
+  saveStatePill:    document.getElementById('save-state-pill'),
   setLogoWrap:      document.getElementById('set-logo-wrap'),
   setLogo:          document.getElementById('set-logo'),
   setSymbol:        document.getElementById('set-symbol'),
@@ -199,6 +245,8 @@ const dom = {
   cardSort:         document.getElementById('card-sort'),
   // Set detail – toolbar
   btnBulkEdit:      document.getElementById('btn-bulk-edit'),
+  btnUndoLast:      document.getElementById('btn-undo-last'),
+  btnAuditPanel:    document.getElementById('btn-audit-panel'),
   btnMissingExport: document.getElementById('btn-missing-export'),
   bulkToolbar:      document.getElementById('bulk-toolbar'),
   bulkCount:        document.getElementById('bulk-count'),
@@ -206,6 +254,9 @@ const dom = {
   btnBulkMarkRh:    document.getElementById('btn-bulk-mark-rh'),
   btnBulkUnmark:    document.getElementById('btn-bulk-unmark'),
   btnBulkCancel:    document.getElementById('btn-bulk-cancel'),
+  auditPanel:       document.getElementById('audit-panel'),
+  auditList:        document.getElementById('audit-list'),
+  btnAuditClear:    document.getElementById('btn-audit-clear'),
   // Cards
   cards:            document.getElementById('cards'),
   emptyState:       document.getElementById('empty-state'),
@@ -231,12 +282,16 @@ const dom = {
   btnLightboxClose: document.getElementById('btn-lightbox-close'),
   btnLightboxPrev:  document.getElementById('btn-lightbox-prev'),
   btnLightboxNext:  document.getElementById('btn-lightbox-next'),
+  lightboxImageDialog: document.getElementById('dialog-lightbox-image'),
+  lightboxImageStage: document.getElementById('lightbox-image-stage'),
+  lightboxImageFull: document.getElementById('lightbox-image-full'),
+  btnLightboxImageClose: document.getElementById('btn-lightbox-image-close'),
   // Stats view
   statsContent:     document.getElementById('stats-content'),
   // Search view
   searchInput:      document.getElementById('search-input'),
   searchSetFilter:  document.getElementById('search-set-filter'),
-  searchApiFallback: document.getElementById('search-api-fallback'),
+  searchScopeMode:  document.getElementById('search-scope-mode'),
   searchResults:    document.getElementById('search-results'),
 };
 
@@ -248,6 +303,7 @@ const state = {
   sets:         [],
   allSets:      [],
   summaryData:  null,
+  summaryOverrides: new Map(),
   currentSet:   null,
   dbMap:        new Map(),
   cards:        [],
@@ -259,6 +315,14 @@ const state = {
   searchCache:  new Map(),
   searchRunId:  0,
   searchAbortController: null,
+  pendingSearchSetImport: false,
+  pendingSearchCardFocusKey: null,
+  autoImportJobs: new Map(),
+  autoImportQueue: Promise.resolve(),
+  autoImportQueuedSetIds: [],
+  autoImportActiveSetId: null,
+  autoImportLastLimitToastAt: 0,
+  autoImportRefreshTimer: null,
   batchSelection: new Set(),
   activeJob: null,
   queuedActions: [],
@@ -279,16 +343,191 @@ const state = {
   },
   realtimeClientId: null,
   realtime: null,
+  pendingWrites: 0,
+  lastSaveError: null,
+  saveStateTimer: null,
+  manageSetsSelection: new Set(),
+  sheetsRetryMetrics: {
+    totalWrites: 0,
+    totalRetries: 0,
+    totalFailures: 0,
+    maxAttemptSeen: 0,
+    events: []
+  },
+  undoStack: [],
+  auditEntries: [],
+  devCompletionMode: false,
 };
 
 let focusedCardIndex = -1;
 
-const QUEUE_PRESETS_STORAGE_KEY = 'poke_try4_queue_presets_v1';
-const DASHBOARD_PREFS_STORAGE_KEY = 'poke_try4_dashboard_prefs_v1';
-const RECENT_SETS_STORAGE_KEY = 'poke_try4_recent_sets_v1';
+const LOADING_MAX_BLOCK_MS = 12000;
+let loadingFailsafeTimer = null;
+
+const QUEUE_PRESETS_STORAGE_KEY = scopedStorageKey('queue_presets_v1');
+const DASHBOARD_PREFS_STORAGE_KEY = scopedStorageKey('dashboard_prefs_v1');
+const RECENT_SETS_STORAGE_KEY = scopedStorageKey('recent_sets_v1');
+const REALTIME_CLIENT_STORAGE_KEY = scopedStorageKey('realtime_client_id');
+const USER_ID_STORAGE_KEY = scopedStorageKey('user_id');
+const DEV_COMPLETION_STORAGE_KEY = scopedStorageKey('dev_completion_mode');
 const DASHBOARD_VIRTUAL_PAGE_SIZE = 180;
 const SEARCH_INPUT_DEBOUNCE_MS = 900;
 const DASHBOARD_VIRTUAL_THRESHOLD = 220;
+const SEARCH_SCOPE_IMPORTED = 'imported';
+const SEARCH_SCOPE_ALL = 'all';
+const SEARCH_SCOPE_ONLINE = 'online';
+const AUTO_IMPORT_MODE_JUMP = 'jump';
+const AUTO_IMPORT_MODE_NEVER = 'never';
+const AUTO_IMPORT_MODE_ALWAYS = 'always';
+const AUTO_IMPORT_QUEUE_LIMIT = 3;
+
+function normalizeAutoImportMode(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (normalized === AUTO_IMPORT_MODE_NEVER || normalized === AUTO_IMPORT_MODE_ALWAYS) return normalized;
+  return AUTO_IMPORT_MODE_JUMP;
+}
+
+function getAutoImportMode() {
+  return normalizeAutoImportMode(loadSettings().autoImportMode);
+}
+
+function getAutoImportModeLabel(mode = getAutoImportMode()) {
+  if (mode === AUTO_IMPORT_MODE_NEVER) return 'Nie';
+  if (mode === AUTO_IMPORT_MODE_ALWAYS) return 'Immer';
+  return 'Nur bei „Zum Set“';
+}
+
+function shouldAutoImportCurrentSet(set, { fromSearchJump = false } = {}) {
+  const mode = getAutoImportMode();
+  if (mode === AUTO_IMPORT_MODE_NEVER) return false;
+  if (mode === AUTO_IMPORT_MODE_ALWAYS) return !Boolean(set?.imported);
+  return Boolean(fromSearchJump);
+}
+
+function resolveAutoImportSetLabel(setId) {
+  const match = getSetById(setId)
+    || (state.currentSet?.setId === setId ? state.currentSet : null);
+  return match?.setName || setId;
+}
+
+function updateAutoImportQueueUi() {
+  if (state.activeJob || state.queueRunning) return;
+  if (!dom.jobPanel || !dom.jobTitle || !dom.jobStatusText) return;
+
+  const activeSetId = state.autoImportActiveSetId;
+  const queuedIds = Array.isArray(state.autoImportQueuedSetIds) ? state.autoImportQueuedSetIds : [];
+  const totalCount = (activeSetId ? 1 : 0) + queuedIds.length;
+
+  if (totalCount === 0) {
+    if (dom.jobTitle.textContent === 'Auto-Import Queue') {
+      dom.jobPanel.classList.add('hidden');
+      dom.jobTitle.textContent = 'Job Queue';
+      dom.jobStatusText.textContent = 'Bereit';
+      if (dom.btnJobCancel) dom.btnJobCancel.disabled = true;
+    }
+    return;
+  }
+
+  dom.jobPanel.classList.remove('hidden');
+  dom.jobTitle.textContent = 'Auto-Import Queue';
+  const activeLabel = activeSetId ? `Aktiv: ${resolveAutoImportSetLabel(activeSetId)}` : 'Wartet auf freien Slot';
+  const waitingLabel = queuedIds.length ? ` • ${queuedIds.length} wartend` : '';
+  dom.jobStatusText.textContent = `${activeLabel}${waitingLabel} • Modus: ${getAutoImportModeLabel()}`;
+  if (dom.btnJobCancel) dom.btnJobCancel.disabled = true;
+}
+
+function getSearchSelectionState() {
+  const fallbackValue = `scope:${SEARCH_SCOPE_IMPORTED}`;
+  return resolveCombinedSearchSelection(dom.searchSetFilter?.value || fallbackValue, SEARCH_SCOPE_IMPORTED);
+}
+
+function getSearchScopeMode() {
+  const { mode } = getSearchSelectionState();
+  if (mode === SEARCH_SCOPE_ALL || mode === SEARCH_SCOPE_ONLINE) {
+    return mode;
+  }
+  return SEARCH_SCOPE_IMPORTED;
+}
+
+function getSearchSetFilterValue() {
+  return getSearchSelectionState().setId || '';
+}
+
+function getSetsForSearchMode(mode) {
+  if (mode === SEARCH_SCOPE_IMPORTED) {
+    return state.sets || [];
+  }
+  return state.allSets?.length ? state.allSets : (state.sets || []);
+}
+
+function shouldUseApiForSearchSet(mode, set) {
+  if (mode === SEARCH_SCOPE_ONLINE) {
+    return true;
+  }
+  if (mode === SEARCH_SCOPE_ALL) {
+    return !toBoolean(set?.imported);
+  }
+  return false;
+}
+
+function getSearchModeMeta(mode) {
+  if (mode === SEARCH_SCOPE_ONLINE) {
+    return {
+      label: '⚡ Modus: Online-Suche',
+      className: 'online',
+      hint: 'Nur API für alle Sets'
+    };
+  }
+  if (mode === SEARCH_SCOPE_ALL) {
+    return {
+      label: '🌐 Modus: Alle Sets',
+      className: 'all',
+      hint: 'Importierte aus DB, nicht importierte online'
+    };
+  }
+  return {
+    label: '📦 Modus: Importierte Sets',
+    className: 'imported',
+    hint: 'Nur importierte Sets/DB'
+  };
+}
+
+function renderSearchSetFilterOptions() {
+  if (!dom.searchSetFilter) return;
+
+  const previousValue = String(dom.searchSetFilter.value || `scope:${SEARCH_SCOPE_IMPORTED}`);
+  const previousSelection = resolveCombinedSearchSelection(previousValue, SEARCH_SCOPE_IMPORTED);
+  const desiredValue = previousSelection.setId || `scope:${previousSelection.mode}`;
+  const groups = buildCombinedSearchDropdownOptions(state.sets || []);
+  const availableValues = [];
+
+  dom.searchSetFilter.innerHTML = '';
+  groups.forEach((group) => {
+    const options = Array.isArray(group?.options) ? group.options : [];
+    if (!options.length) return;
+
+    const optgroup = document.createElement('optgroup');
+    optgroup.label = group.label || '';
+
+    options.forEach((entry) => {
+      const opt = document.createElement('option');
+      opt.value = entry.value;
+      opt.textContent = entry.label;
+      if (entry.disabled) opt.disabled = true;
+      optgroup.appendChild(opt);
+      availableValues.push(entry.value);
+    });
+
+    dom.searchSetFilter.appendChild(optgroup);
+  });
+
+  const fallbackValue = `scope:${SEARCH_SCOPE_IMPORTED}`;
+  dom.searchSetFilter.value = availableValues.includes(desiredValue) ? desiredValue : fallbackValue;
+
+  if (dom.searchScopeMode) {
+    dom.searchScopeMode.value = getSearchScopeMode();
+  }
+}
 
 function loadRecentSets() {
   try {
@@ -318,12 +557,61 @@ function saveRecentSets() {
   }
 }
 
+function syncSetNavLink(setMeta = state.currentSet) {
+  if (!dom.navSetLink) return;
+  const label = String(setMeta?.setName || 'Set-Ansicht');
+  dom.navSetLink.textContent = label;
+  dom.navSetLink.title = label;
+  dom.navSetLink.href = setMeta?.setId ? `#set/${setMeta.setId}` : '#set';
+}
+
+function positionRecentSetsDropdown() {
+  if (!dom.navSetSplit || !dom.recentSets || !dom.navSetSplit.classList.contains('open')) return;
+
+  const anchorRect = dom.navSetSplit.getBoundingClientRect();
+  const viewportPadding = 12;
+  const maxWidth = Math.min(340, window.innerWidth - (viewportPadding * 2));
+  const menuWidth = Math.min(dom.recentSets.offsetWidth || maxWidth, maxWidth);
+  let left = anchorRect.left;
+
+  if ((left + menuWidth) > (window.innerWidth - viewportPadding)) {
+    left = window.innerWidth - viewportPadding - menuWidth;
+  }
+  if (left < viewportPadding) {
+    left = viewportPadding;
+  }
+
+  dom.recentSets.style.setProperty('--recent-sets-left', `${Math.round(left)}px`);
+  dom.recentSets.style.setProperty('--recent-sets-top', `${Math.round(anchorRect.bottom + 8)}px`);
+}
+
+function setRecentSetsDropdownOpen(isOpen) {
+  if (!dom.navSetSplit || !dom.btnNavSetToggle || !dom.recentSets) return;
+  const hasItems = !dom.recentSets.classList.contains('hidden') && dom.recentSets.childElementCount > 0;
+  const shouldOpen = Boolean(isOpen) && hasItems;
+  dom.navSetSplit.classList.toggle('open', shouldOpen);
+  dom.btnNavSetToggle.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+  if (shouldOpen) {
+    window.requestAnimationFrame(positionRecentSetsDropdown);
+  }
+}
+
+function syncRecentSetsDropdownAvailability(hasItems) {
+  if (!dom.btnNavSetToggle) return;
+  dom.btnNavSetToggle.disabled = !hasItems;
+  dom.btnNavSetToggle.setAttribute('aria-disabled', hasItems ? 'false' : 'true');
+  if (!hasItems) {
+    setRecentSetsDropdownOpen(false);
+  }
+}
+
 function renderRecentSets() {
   if (!dom.recentSets) return;
   const recent = Array.isArray(state.recentSets) ? state.recentSets : [];
   if (!state.loggedIn || recent.length === 0) {
     dom.recentSets.classList.add('hidden');
     dom.recentSets.innerHTML = '';
+    syncRecentSetsDropdownAvailability(false);
     return;
   }
 
@@ -331,16 +619,21 @@ function renderRecentSets() {
   dom.recentSets.innerHTML = recent
     .map((entry) => {
       const label = labelsById.get(entry.setId) || entry.setName || entry.setId;
-      return `<button class="recent-set-chip" type="button" data-set-id="${entry.setId}" title="${label}">${label}</button>`;
+      return `<button class="recent-set-chip" type="button" role="menuitem" data-set-id="${entry.setId}" title="${label}">${label}</button>`;
     })
     .join('');
   dom.recentSets.classList.remove('hidden');
+  syncRecentSetsDropdownAvailability(true);
+  if (dom.navSetSplit?.classList.contains('open')) {
+    window.requestAnimationFrame(positionRecentSetsDropdown);
+  }
 
   dom.recentSets.querySelectorAll('.recent-set-chip').forEach((chip) => {
     chip.addEventListener('click', () => {
       const setId = chip.dataset.setId;
       if (!setId) return;
       dom.selector.value = setId;
+      setRecentSetsDropdownOpen(false);
       navigate(`set/${setId}`);
     });
   });
@@ -390,8 +683,32 @@ function createDashboardVirtualFooter(total, visible) {
 }
 
 function initSheetsWriteFeedback() {
+  const pushRetryEvent = (type, details = {}) => {
+    const metrics = state.sheetsRetryMetrics;
+    const entry = {
+      type,
+      at: new Date().toISOString(),
+      ...details
+    };
+    metrics.events.unshift(entry);
+    if (metrics.events.length > 120) metrics.events.length = 120;
+    renderSheetsRetryReport();
+  };
+
   window.addEventListener('sheets-write-retry', (event) => {
     const details = event?.detail || {};
+    state.sheetsRetryMetrics.totalRetries += 1;
+    state.sheetsRetryMetrics.maxAttemptSeen = Math.max(
+      state.sheetsRetryMetrics.maxAttemptSeen,
+      Number(details.attempt || 0)
+    );
+    pushRetryEvent('retry', {
+      range: details.range || '',
+      attempt: Number(details.attempt || 0),
+      maxRetries: Number(details.maxRetries || 0),
+      delayMs: Number(details.delayMs || 0),
+      status: details.status || null
+    });
     const retryLabel = `${details.attempt || '?'} / ${details.maxRetries || '?'}`;
     const waitSeconds = Math.max(1, Math.ceil((Number(details.delayMs) || 0) / 1000));
     const message = `Sheets-Write Retry ${retryLabel} (warte ${waitSeconds}s)`;
@@ -401,14 +718,127 @@ function initSheetsWriteFeedback() {
     }
   });
 
+  window.addEventListener('sheets-write-success', (event) => {
+    const details = event?.detail || {};
+    state.sheetsRetryMetrics.totalWrites += 1;
+    state.sheetsRetryMetrics.maxAttemptSeen = Math.max(
+      state.sheetsRetryMetrics.maxAttemptSeen,
+      Number(details.attemptsUsed || 1)
+    );
+    if (Number(details.attemptsUsed || 1) > 1) {
+      pushRetryEvent('recovered', {
+        range: details.range || '',
+        attemptsUsed: Number(details.attemptsUsed || 1)
+      });
+    }
+  });
+
   window.addEventListener('sheets-write-failed', (event) => {
     const details = event?.detail || {};
+    state.sheetsRetryMetrics.totalFailures += 1;
+    pushRetryEvent('failed', {
+      range: details.range || '',
+      status: details.status || null,
+      message: details.message || ''
+    });
     const message = `Sheets-Write fehlgeschlagen (${details.status || 'unbekannt'}): ${details.range || 'Range unbekannt'}`;
     setGlobalStatus(message);
     if (state.activeJob) {
       updateJob(state.activeJob, state.activeJob.current, message);
     }
   });
+}
+
+function resetSheetsRetryMetrics() {
+  state.sheetsRetryMetrics = {
+    totalWrites: 0,
+    totalRetries: 0,
+    totalFailures: 0,
+    maxAttemptSeen: 0,
+    events: []
+  };
+  renderSheetsRetryReport();
+}
+
+function renderSheetsRetryReport() {
+  if (dom.sheetsRetryStats) {
+    const metrics = state.sheetsRetryMetrics;
+    const retryRate = metrics.totalWrites > 0
+      ? Math.round((metrics.totalRetries / metrics.totalWrites) * 100)
+      : 0;
+    dom.sheetsRetryStats.innerHTML = `
+      <li><strong>Writes:</strong> ${metrics.totalWrites}</li>
+      <li><strong>Retries:</strong> ${metrics.totalRetries}</li>
+      <li><strong>Failures:</strong> ${metrics.totalFailures}</li>
+      <li><strong>Retry-Rate:</strong> ${retryRate}%</li>
+      <li><strong>Max Attempts:</strong> ${metrics.maxAttemptSeen || 1}</li>
+    `;
+  }
+
+  if (dom.sheetsRetryHistory) {
+    const events = state.sheetsRetryMetrics.events || [];
+    if (!events.length) {
+      dom.sheetsRetryHistory.innerHTML = '<li class="retry-empty">Noch keine Sheets-Retry-Ereignisse.</li>';
+      return;
+    }
+    dom.sheetsRetryHistory.innerHTML = events.map((entry) => {
+      const time = new Date(entry.at).toLocaleTimeString('de-DE');
+      const kind = entry.type === 'failed' ? 'Fehler' : entry.type === 'recovered' ? 'Erholt' : 'Retry';
+      const detail = entry.type === 'retry'
+        ? `Versuch ${entry.attempt || '?'} / ${entry.maxRetries || '?'} · ${(Math.ceil((entry.delayMs || 0) / 1000) || 0)}s`
+        : entry.type === 'failed'
+          ? `${entry.status || 'unbekannt'} · ${entry.message || 'ohne Fehlermeldung'}`
+          : `nach ${entry.attemptsUsed || '?'} Versuchen erfolgreich`;
+      return `<li class="retry-entry ${entry.type}"><span class="retry-time">${time}</span><span class="retry-kind">${kind}</span><span class="retry-detail">${detail}</span><span class="retry-range">${entry.range || 'Range unbekannt'}</span></li>`;
+    }).join('');
+  }
+}
+
+function openSheetsRetryReportDialog() {
+  if (!dom.sheetsRetryDialog) return;
+  renderSheetsRetryReport();
+  dom.sheetsRetryDialog.showModal();
+}
+
+function initAuditAndSaveUi() {
+  updateSaveStatePill();
+  renderAuditPanel();
+  updateUndoUi();
+
+  dom.btnAuditPanel?.addEventListener('click', () => {
+    if (!dom.auditPanel) return;
+    dom.auditPanel.classList.toggle('hidden');
+    const expanded = !dom.auditPanel.classList.contains('hidden');
+    dom.btnAuditPanel.setAttribute('aria-expanded', String(expanded));
+  });
+
+  dom.btnAuditClear?.addEventListener('click', () => {
+    state.auditEntries = [];
+    renderAuditPanel();
+  });
+
+  dom.btnUndoLast?.addEventListener('click', () => undoLastChange());
+
+  window.addEventListener('keydown', (event) => {
+    const isUndo = (event.ctrlKey || event.metaKey) && String(event.key).toLowerCase() === 'z';
+    if (!isUndo) return;
+    if (event.target?.matches?.('input, textarea, [contenteditable="true"]')) return;
+    event.preventDefault();
+    undoLastChange();
+  });
+}
+
+function initDevCompletionMode() {
+  const query = new URLSearchParams(window.location.search);
+  const fromQuery = query.get('devComplete');
+
+  if (fromQuery === '1') localStorage.setItem(DEV_COMPLETION_STORAGE_KEY, '1');
+  if (fromQuery === '0') localStorage.removeItem(DEV_COMPLETION_STORAGE_KEY);
+
+  state.devCompletionMode = localStorage.getItem(DEV_COMPLETION_STORAGE_KEY) === '1';
+  if (state.devCompletionMode) {
+    pushAuditEntry('info', 'Dev-Completion-Modus aktiv');
+  }
 }
 
 function loadDashboardPreferences() {
@@ -991,8 +1421,10 @@ function setGlobalStatus(text) {
 }
 
 function setLoading(show, text = 'Lade\u2026') {
-  dom.loadingText.textContent = text;
-  dom.loadingOverlay.classList.toggle('hidden', !show);
+  if (!dom.loadingOverlay) return;
+  // OVERLAY DISABLED: Always hide immediately – start directly on page
+  dom.loadingOverlay.classList.add('hidden');
+  dom.loadingOverlay.setAttribute('aria-hidden', 'true');
 }
 
 function showToast(message, type = 'info', durationMs = 3000) {
@@ -1001,6 +1433,157 @@ function showToast(message, type = 'info', durationMs = 3000) {
   el.textContent = message;
   dom.toastContainer.appendChild(el);
   setTimeout(() => el.remove(), durationMs);
+}
+
+function pushAuditEntry(kind, message) {
+  const entry = {
+    kind,
+    message: String(message || '').trim(),
+    at: new Date().toISOString()
+  };
+  state.auditEntries.unshift(entry);
+  if (state.auditEntries.length > 80) state.auditEntries.length = 80;
+  renderAuditPanel();
+}
+
+function renderAuditPanel() {
+  if (!dom.auditList) return;
+  const rows = state.auditEntries || [];
+  if (!rows.length) {
+    dom.auditList.innerHTML = '<li class="audit-empty">Noch keine Einträge.</li>';
+    return;
+  }
+  dom.auditList.innerHTML = rows.map((entry) => {
+    const time = new Date(entry.at).toLocaleTimeString('de-DE');
+    const safeKind = String(entry.kind || 'info').replace(/[^a-z-]/gi, '').toLowerCase();
+    return `<li class="audit-entry ${safeKind}"><span class="audit-time">${time}</span><span class="audit-msg">${entry.message}</span></li>`;
+  }).join('');
+}
+
+function updateSaveStatePill() {
+  if (!dom.saveStatePill) return;
+  const pending = Number(state.pendingWrites || 0);
+  dom.saveStatePill.classList.remove('is-pending', 'is-error', 'is-saved');
+
+  if (pending > 0) {
+    dom.saveStatePill.textContent = `Speichert… (${pending})`;
+    dom.saveStatePill.classList.add('is-pending');
+    return;
+  }
+
+  if (state.lastSaveError) {
+    dom.saveStatePill.textContent = 'Speicherfehler';
+    dom.saveStatePill.classList.add('is-error');
+    return;
+  }
+
+  dom.saveStatePill.textContent = 'Gespeichert';
+  dom.saveStatePill.classList.add('is-saved');
+}
+
+function setCardSaveState(article, mode = '') {
+  if (!article) return;
+  const checks = article.querySelector('.checks');
+  if (!checks) return;
+  checks.classList.remove('is-saving', 'is-error', 'is-saved');
+  if (mode === 'saving') checks.classList.add('is-saving');
+  if (mode === 'error') checks.classList.add('is-error');
+  if (mode === 'saved') {
+    checks.classList.add('is-saved');
+    window.setTimeout(() => {
+      checks.classList.remove('is-saved');
+    }, 1000);
+  }
+}
+
+function beginTrackedWrite(label) {
+  state.pendingWrites = Math.max(0, Number(state.pendingWrites || 0)) + 1;
+  state.lastSaveError = null;
+  updateSaveStatePill();
+  if (label) pushAuditEntry('info', `Start: ${label}`);
+}
+
+function finishTrackedWrite(label, error = null) {
+  state.pendingWrites = Math.max(0, Number(state.pendingWrites || 0) - 1);
+  if (error) {
+    state.lastSaveError = String(error?.message || error || 'Unbekannter Fehler');
+    if (label) pushAuditEntry('error', `${label}: ${state.lastSaveError}`);
+  } else if (label) {
+    pushAuditEntry('success', `${label}: OK`);
+  }
+  updateSaveStatePill();
+
+  if (!error) {
+    window.clearTimeout(state.saveStateTimer);
+    state.saveStateTimer = window.setTimeout(() => {
+      if (state.pendingWrites === 0 && !state.lastSaveError) updateSaveStatePill();
+    }, 800);
+  }
+}
+
+function pushUndoEntry(entry) {
+  if (!entry || !Array.isArray(entry.changes) || entry.changes.length === 0) return;
+  state.undoStack.push(entry);
+  if (state.undoStack.length > 30) state.undoStack.shift();
+  if (dom.btnUndoLast) dom.btnUndoLast.disabled = false;
+}
+
+function updateUndoUi() {
+  if (!dom.btnUndoLast) return;
+  const count = state.undoStack.length;
+  dom.btnUndoLast.disabled = count === 0;
+  dom.btnUndoLast.title = count > 0 ? `Letzte Änderung rückgängig (${count})` : 'Keine Änderung zum Rückgängigmachen';
+}
+
+async function undoLastChange() {
+  const entry = state.undoStack.pop();
+  updateUndoUi();
+  if (!entry) {
+    showToast('Keine Änderung zum Rückgängigmachen.', 'info', 2200);
+    return;
+  }
+
+  if (!state.currentSet || (entry.setId && state.currentSet.setId !== entry.setId)) {
+    showToast('Undo ist nur im gleichen Set möglich.', 'info', 2600);
+    return;
+  }
+
+  beginTrackedWrite('Undo');
+  setLoading(true, 'Undo läuft…');
+  let reverted = 0;
+  try {
+    for (const change of entry.changes) {
+      const db = state.dbMap.get(change.key);
+      if (!db?.gCell) continue;
+      const prevG = Boolean(change.prev?.g);
+      const prevRh = Boolean(change.prev?.rh && prevG);
+      await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, prevG);
+      db.g = prevG;
+      if (db.rhCell) {
+        await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, prevRh);
+        db.rh = prevRh;
+      } else {
+        db.rh = false;
+      }
+
+      const article = dom.cards.querySelector(`[data-card-id="${change.key}"]`);
+      if (article) updateCardState(article, db);
+      broadcastRealtimeCardUpdate(change.key, db);
+      reverted++;
+    }
+
+    updateStats();
+    applyFilter();
+    state.summaryData = null;
+    showToast(`Undo abgeschlossen (${reverted} Karte${reverted === 1 ? '' : 'n'}).`, 'success', 2500);
+    finishTrackedWrite('Undo', null);
+  } catch (err) {
+    showToast(`Undo fehlgeschlagen: ${err.message}`, 'error', 4500);
+    finishTrackedWrite('Undo', err);
+  } finally {
+    setLoading(false);
+    updateUndoUi();
+  }
 }
 
 function getErrorMessage(err, fallback = 'Unbekannter Fehler') {
@@ -1028,42 +1611,129 @@ function isAuthError(err) {
     || message.includes('anmelden');
 }
 
-function buildCardImageFallbacks(card, setIdHint = '') {
-  const seen = new Set();
-  const add = (url) => {
-    const value = String(url || '').trim();
-    if (!value || seen.has(value)) return;
-    seen.add(value);
-  };
+const brokenSetAssetUrls = new Set();
 
-  const original = String(card?.image || '').trim();
-  const localFallbacks = Array.isArray(card?.imageFallbacks) ? card.imageFallbacks : [];
-  localFallbacks.forEach((url) => add(url));
+function sanitizeSetAssetUrl(url, setIdHint = '') {
+  const value = String(url || '').trim();
+  if (!value) return '';
 
-  if (/^https?:\/\/assets\.tcgdex\.net\/de\//i.test(original)) {
-    add(original.replace('/de/', '/en/'));
+  if (/^https?:\/\/assets\.tcgdex\.net\/.+\/(logo|symbol)$/i.test(value)) {
+    return `${value}.webp`;
   }
-  if (/\/low\.webp(\?.*)?$/i.test(original)) {
-    add(original.replace(/\/low\.webp(\?.*)?$/i, '/low.jpg$1'));
-    if (/^https?:\/\/assets\.tcgdex\.net\/de\//i.test(original)) {
-      const enWebp = original.replace('/de/', '/en/');
-      add(enWebp.replace(/\/low\.webp(\?.*)?$/i, '/low.jpg$1'));
-    }
+
+  const normalized = value.toLowerCase();
+  if (
+    normalized === '0'
+    || normalized === 'null'
+    || normalized === 'undefined'
+    || normalized === 'nan'
+    || normalized.includes('pokeball-fallback.svg')
+  ) {
+    return '';
   }
+
+  if (brokenSetAssetUrls.has(value)) return '';
 
   const setId = String(setIdHint || '').trim();
-  const normalizedNumber = normalizeCardNumber(card?.number || '');
-  if (setId && !setId.startsWith('TCGDEX-') && normalizedNumber) {
-    add(`https://images.pokemontcg.io/${encodeURIComponent(setId)}/${encodeURIComponent(normalizedNumber)}.png`);
+  if (/^https?:\/\/images\.pokedata\.ovh\//i.test(value)) {
+    if (setId && !setId.startsWith('TCGDEX-')) {
+      return `https://images.pokemontcg.io/${encodeURIComponent(setId)}/logo.png`;
+    }
+    return '';
   }
 
-  if (original) seen.delete(original);
-  return Array.from(seen);
+  if (/^https?:\/\//i.test(value) || value.startsWith('/') || value.startsWith('./') || value.startsWith('../')) {
+    return value;
+  }
+
+  return '';
+}
+
+function buildMediaCandidateQueue(currentValue, candidateUrls = []) {
+  const current = String(currentValue || '').trim();
+  const seen = new Set();
+  const queue = [];
+  const add = (value) => {
+    const text = String(value || '').trim();
+    if (!text || /pokeball-fallback\.svg/i.test(text)) return;
+    if (current && text === current) return;
+    if (seen.has(text)) return;
+    seen.add(text);
+    queue.push(text);
+  };
+  (Array.isArray(candidateUrls) ? candidateUrls : []).forEach(add);
+  return queue;
+}
+
+function attachSetAssetFallback(img, fallbackUrl = './assets/pokeball-fallback.svg', candidateUrls = []) {
+  const fallbackQueue = buildMediaCandidateQueue(img?.src || '', candidateUrls);
+  img.onerror = () => {
+    const failedUrl = String(img?.src || '').trim();
+    if (failedUrl) brokenSetAssetUrls.add(failedUrl);
+
+    while (fallbackQueue.length) {
+      const next = fallbackQueue.shift();
+      if (next && next !== img.src) {
+        img.src = next;
+        return;
+      }
+    }
+
+    img.onerror = null;
+    if (fallbackUrl) {
+      img.src = fallbackUrl;
+      img.classList.add('img-fallback');
+    } else {
+      img.style.display = 'none';
+    }
+  };
 }
 
 function attachImageFallback(img, card, setIdHint = '') {
-  const fallbackQueue = buildCardImageFallbacks(card, setIdHint);
+  void setIdHint;
+  const fallbackQueue = buildMediaCandidateQueue(
+    img?.src || card?.image || card?.imageUrl || '',
+    Array.isArray(card?.imageCandidates) ? card.imageCandidates : []
+  );
+  const wrap = img.closest('.card-img-wrap');
+  const applyVisualFallback = () => {
+    if (wrap) {
+      wrap.classList.add('missing-image');
+      wrap.dataset.placeholder = card?.number
+        ? `${card.number} · Kein Kartenbild`
+        : 'Kein Kartenbild';
+    }
+    img.onerror = null;
+    img.style.display = '';
+    img.src = './assets/pokeball-fallback.svg';
+    img.classList.add('img-fallback');
+    img.alt = `Kein Kartenbild für ${card?.name || card?.number || 'diese Karte'}`;
+  };
+
+  if (wrap) {
+    wrap.classList.remove('missing-image');
+    delete wrap.dataset.placeholder;
+  }
+  img.classList.remove('img-fallback');
   img.style.display = '';
+
+  const currentImage = String(card?.image || img?.src || '').trim();
+  if (!currentImage || /pokeball-fallback\.svg/i.test(currentImage)) {
+    while (fallbackQueue.length) {
+      const next = fallbackQueue.shift();
+      if (next) {
+        img.src = next;
+        break;
+      }
+    }
+  }
+
+  const activeImage = String(img?.src || '').trim();
+  if (!activeImage || /pokeball-fallback\.svg/i.test(activeImage)) {
+    applyVisualFallback();
+    return;
+  }
+
   img.onerror = () => {
     while (fallbackQueue.length) {
       const next = fallbackQueue.shift();
@@ -1072,8 +1742,7 @@ function attachImageFallback(img, card, setIdHint = '') {
         return;
       }
     }
-    img.onerror = null;
-    img.style.display = 'none';
+    applyVisualFallback();
   };
 }
 
@@ -1082,21 +1751,357 @@ function setEmptyState(show) {
   dom.cards.classList.toggle('hidden', show);
 }
 
-// ══════════════════════════════════════════════════════════════════════════
-// DARK MODE
-// ══════════════════════════════════════════════════════════════════════════
-function initDarkMode() {
-  const saved = localStorage.getItem('poke_dark_mode');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  if (saved === 'true' || (saved === null && prefersDark)) {
-    document.body.classList.add('dark');
-    dom.darkModeToggle.textContent = '\u2600\uFE0F';
+function setRefreshMenuOpen(isOpen) {
+  if (!dom.refreshMenu || !dom.btnRefreshMenu) return;
+  const shouldOpen = Boolean(isOpen) && !dom.btnRefreshMenu.disabled;
+  dom.refreshMenu.classList.toggle('hidden', !shouldOpen);
+  dom.btnRefreshMenu.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+}
+
+function resetRuntimeUiForSpreadsheetSwitch() {
+  try {
+    state.searchAbortController?.abort?.();
+  } catch (err) {
+    console.warn('[resetRuntimeUiForSpreadsheetSwitch] abort search failed:', err);
   }
-  dom.darkModeToggle.addEventListener('click', () => {
-    const isDark = document.body.classList.toggle('dark');
-    localStorage.setItem('poke_dark_mode', isDark);
-    dom.darkModeToggle.textContent = isDark ? '\u2600\uFE0F' : '\uD83C\uDF19';
+
+  if (state.autoImportRefreshTimer) {
+    clearTimeout(state.autoImportRefreshTimer);
+    state.autoImportRefreshTimer = null;
+  }
+
+  Object.assign(state, createSpreadsheetSwitchStatePatch(state));
+  cache.clear();
+  focusedCardIndex = -1;
+
+  syncSetNavLink(null);
+  dom.cards.innerHTML = '';
+  dom.searchResults.innerHTML = '<p class="empty-state">Bitte neue Suche starten.</p>';
+  dom.setLogoWrap.classList.add('hidden');
+  dom.statsSection.classList.add('hidden');
+  dom.filterSection.classList.add('hidden');
+  dom.sortSection.classList.add('hidden');
+  dom.cardSort.value = 'number';
+
+  document.querySelectorAll('.filter-btn').forEach((button) => button.classList.remove('active'));
+  document.querySelector('.filter-btn[data-filter="all"]')?.classList.add('active');
+
+  renderAuditPanel();
+  updateUndoUi();
+  updateSaveStatePill();
+  setEmptyState(true);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// GRID ZOOM
+// ══════════════════════════════════════════════════════════════════════════
+const GRID_ZOOM_STORAGE_KEY = 'gridZoom';
+
+function applyGridZoom(value) {
+  const cssValue = value + 'px';
+  document.documentElement.style.setProperty('--grid-min-width', cssValue);
+  document.body?.style?.setProperty('--grid-min-width', cssValue);
+
+  const template = `repeat(auto-fit, minmax(${value}px, 1fr))`;
+  document.querySelectorAll('.cards, .dash-sets-row').forEach((grid) => {
+    grid.style.setProperty('grid-template-columns', template, 'important');
   });
+}
+
+function initGridZoom() {
+  const slider = document.getElementById('grid-zoom-slider');
+  if (!slider) return;
+
+  const defaultVal = window.innerWidth >= 1025 ? 200
+                   : window.innerWidth >= 641  ? 165
+                   : 130;
+  const saved = localStorage.getItem(GRID_ZOOM_STORAGE_KEY);
+  const rawVal = saved !== null ? parseInt(saved, 10) : defaultVal;
+  const val = Number.isFinite(rawVal)
+    ? Math.max(parseInt(slider.min, 10), Math.min(parseInt(slider.max, 10), rawVal))
+    : defaultVal;
+
+  slider.value = val;
+  applyGridZoom(val);
+
+  slider.addEventListener('input', (e) => {
+    const v = Math.max(parseInt(slider.min, 10), Math.min(parseInt(slider.max, 10), parseInt(e.target.value, 10)));
+    applyGridZoom(v);
+    localStorage.setItem(GRID_ZOOM_STORAGE_KEY, v);
+  });
+
+  slider.addEventListener('change', (e) => {
+    const v = Math.max(parseInt(slider.min, 10), Math.min(parseInt(slider.max, 10), parseInt(e.target.value, 10)));
+    applyGridZoom(v);
+    localStorage.setItem(GRID_ZOOM_STORAGE_KEY, v);
+  });
+}
+
+function initCustomSelects() {
+  const nativeSelects = Array.from(document.querySelectorAll('select'));
+  if (!nativeSelects.length) return;
+
+  const closeAll = (except = null) => {
+    document.querySelectorAll('.custom-select.is-open').forEach((node) => {
+      if (node !== except) {
+        node.classList.remove('is-open');
+        node.querySelector('.custom-select-trigger')?.setAttribute('aria-expanded', 'false');
+      }
+    });
+  };
+
+  const createOptionNode = ({ option, select, list, button, root }) => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'custom-select-option';
+    item.dataset.value = option.value;
+    item.textContent = option.textContent?.trim() || '—';
+    item.setAttribute('role', 'option');
+    item.setAttribute('aria-selected', String(option.selected));
+
+    if (option.disabled) {
+      item.disabled = true;
+      item.classList.add('is-disabled');
+    }
+
+    if (option.selected) {
+      item.classList.add('is-selected');
+      button.textContent = item.textContent;
+    }
+
+    item.addEventListener('click', () => {
+      if (option.disabled) return;
+      select.value = option.value;
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      root.classList.remove('is-open');
+      button.focus();
+    });
+
+    list.appendChild(item);
+  };
+
+  nativeSelects.forEach((select) => {
+    if (select.closest('.custom-select')) return;
+    if (select.dataset.customized === 'true') return;
+
+    select.dataset.customized = 'true';
+    select.classList.add('cs-native');
+
+    const root = document.createElement('div');
+    root.className = 'custom-select';
+    if (select.className) {
+      select.className.split(' ').filter(Boolean).forEach((klass) => root.classList.add(`from-${klass}`));
+    }
+    if (select.id) root.classList.add(`from-id-${select.id}`);
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'custom-select-trigger';
+    button.setAttribute('aria-haspopup', 'listbox');
+    button.setAttribute('aria-expanded', 'false');
+    button.disabled = select.disabled;
+
+    const list = document.createElement('div');
+    list.className = 'custom-select-list';
+    list.setAttribute('role', 'listbox');
+
+    const rebuild = () => {
+      list.innerHTML = '';
+      button.textContent = '';
+      const options = Array.from(select.options);
+      options.forEach((option) => createOptionNode({ option, select, list, button, root }));
+      if (!button.textContent) {
+        const selectedOption = options.find((option) => option.selected) || options[0];
+        button.textContent = selectedOption?.textContent?.trim() || 'Auswählen…';
+      }
+      button.disabled = select.disabled;
+      root.classList.toggle('is-disabled', Boolean(select.disabled));
+    };
+
+    const syncSelectionState = () => {
+      const selectedValue = select.value;
+      list.querySelectorAll('.custom-select-option').forEach((optionNode) => {
+        const isSelected = optionNode.dataset.value === selectedValue;
+        optionNode.classList.toggle('is-selected', isSelected);
+        optionNode.setAttribute('aria-selected', String(isSelected));
+        if (isSelected) button.textContent = optionNode.textContent || 'Auswählen…';
+      });
+      button.disabled = select.disabled;
+      root.classList.toggle('is-disabled', Boolean(select.disabled));
+    };
+
+    button.addEventListener('click', () => {
+      if (button.disabled) return;
+      const shouldOpen = !root.classList.contains('is-open');
+      closeAll(root);
+      root.classList.toggle('is-open', shouldOpen);
+      button.setAttribute('aria-expanded', String(shouldOpen));
+      if (shouldOpen) {
+        const selectedNode = list.querySelector('.custom-select-option.is-selected');
+        selectedNode?.scrollIntoView({ block: 'nearest' });
+      }
+    });
+
+    button.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        root.classList.remove('is-open');
+        button.setAttribute('aria-expanded', 'false');
+      }
+      if ((event.key === 'Enter' || event.key === ' ') && !root.classList.contains('is-open')) {
+        event.preventDefault();
+        button.click();
+      }
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        const enabled = Array.from(select.options).filter((option) => !option.disabled);
+        if (!enabled.length) return;
+        const currentIndex = enabled.findIndex((option) => option.value === select.value);
+        const delta = event.key === 'ArrowDown' ? 1 : -1;
+        const nextIndex = currentIndex < 0
+          ? 0
+          : (currentIndex + delta + enabled.length) % enabled.length;
+        select.value = enabled[nextIndex].value;
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
+
+    select.addEventListener('change', syncSelectionState);
+
+    const observer = new MutationObserver(() => {
+      rebuild();
+      syncSelectionState();
+    });
+    observer.observe(select, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['disabled', 'selected', 'label', 'value']
+    });
+
+    select.parentNode?.insertBefore(root, select);
+    root.appendChild(select);
+    root.appendChild(button);
+    root.appendChild(list);
+    rebuild();
+    syncSelectionState();
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!(event.target instanceof Element)) {
+      closeAll();
+      return;
+    }
+    if (!event.target.closest('.custom-select')) {
+      closeAll();
+      document.querySelectorAll('.custom-select-trigger[aria-expanded="true"]').forEach((button) => {
+        button.setAttribute('aria-expanded', 'false');
+      });
+    }
+  });
+
+  window.addEventListener('scroll', () => {
+    closeAll();
+  }, { passive: true });
+}
+
+function initAutoHideTopbar() {
+  const topbar = dom.topbar || document.querySelector('.topbar');
+  if (!topbar) return;
+
+  const root = document.documentElement;
+  const body = document.body;
+  const hideClass = 'topbar-collapsed';
+  const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+  const scroller = document.scrollingElement || document.documentElement;
+  const getScrollY = () => Math.max(
+    window.scrollY || 0,
+    scroller?.scrollTop || 0,
+    document.documentElement?.scrollTop || 0,
+    document.body?.scrollTop || 0
+  );
+
+  let lastY = Math.max(getScrollY(), 0);
+  let dir = 0;
+  let accumulated = 0;
+  let ticking = false;
+  let visibilityLockedUntil = 0;
+
+  const syncTopbarHeight = () => {
+    root.style.setProperty('--topbar-height', `${topbar.offsetHeight}px`);
+  };
+
+  const showTopbar = () => {
+    body.classList.remove(hideClass);
+    visibilityLockedUntil = Date.now() + 180;
+  };
+
+  const hideTopbar = () => {
+    body.classList.add(hideClass);
+    visibilityLockedUntil = Date.now() + 180;
+  };
+
+  const onScrollFrame = () => {
+    ticking = false;
+    const currentY = Math.max(getScrollY(), 0);
+    const delta = currentY - lastY;
+    const isNearTop = currentY < 88;
+    const now = Date.now();
+
+    if (reducedMotion) {
+      showTopbar();
+      lastY = currentY;
+      return;
+    }
+
+    if (isNearTop) {
+      showTopbar();
+      dir = 0;
+      accumulated = 0;
+      lastY = currentY;
+      return;
+    }
+
+    if (Math.abs(delta) < 1) {
+      lastY = currentY;
+      return;
+    }
+
+    if (now < visibilityLockedUntil) {
+      lastY = currentY;
+      return;
+    }
+
+    const nextDir = delta > 0 ? 1 : -1;
+    if (nextDir === dir) {
+      accumulated += Math.abs(delta);
+    } else {
+      dir = nextDir;
+      accumulated = Math.abs(delta);
+    }
+
+    if (dir > 0 && accumulated > 36 && currentY > 120) {
+      hideTopbar();
+      accumulated = 0;
+    } else if (dir < 0 && accumulated > 18) {
+      showTopbar();
+      accumulated = 0;
+    }
+
+    lastY = currentY;
+  };
+
+  const onScroll = () => {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(onScrollFrame);
+  };
+
+  syncTopbarHeight();
+  showTopbar();
+  window.addEventListener('resize', syncTopbarHeight, { passive: true });
+  window.addEventListener('orientationchange', syncTopbarHeight, { passive: true });
+  window.addEventListener('hashchange', showTopbar, { passive: true });
+  window.addEventListener('scroll', onScroll, { passive: true });
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -1115,6 +2120,7 @@ function showView(viewId) {
 }
 
 function navigate(path) {
+  setRecentSetsDropdownOpen(false);
   window.location.hash = path;
 }
 
@@ -1126,10 +2132,18 @@ function handleRouteChange() {
     case 'set':
       showView('set');
       if (params[0]) {
+        const targetSet = getSetById(params[0]);
+        if (targetSet) {
+          ensureSetSelectorOption(targetSet);
+        }
         if (dom.selector.value !== params[0]) {
           dom.selector.value = params[0];
         }
-        if (!state.currentSet || state.currentSet.setId !== params[0]) {
+        const shouldReloadSet = !state.currentSet
+          || state.currentSet.setId !== params[0]
+          || !Array.isArray(state.cards)
+          || state.cards.length === 0;
+        if (shouldReloadSet) {
           loadCurrentSet(false);
         }
       }
@@ -1168,9 +2182,199 @@ function openSpreadsheetDialog(required = false) {
   dom.dialogError.textContent = '';
   dom.dialogError.classList.add('hidden');
   dom.dialogInput.value = CONFIG.SPREADSHEET_ID || '';
+  if (dom.dialogNewNameInput) dom.dialogNewNameInput.value = '';
   dom.btnDialogCancel.disabled = required;
   dom.btnDialogCancel.style.display = required ? 'none' : '';
   dom.dialog.showModal();
+  refreshSpreadsheetList();
+}
+
+function setSpreadsheetDialogError(message = '', isError = true) {
+  if (!dom.dialogError) return;
+  dom.dialogError.textContent = message;
+  dom.dialogError.style.color = isError ? 'var(--color-danger)' : 'var(--color-muted)';
+  dom.dialogError.classList.toggle('hidden', !message);
+}
+
+function parseDriveSpreadsheetFile(file, sourceLabel) {
+  return {
+    id: String(file?.id || '').trim(),
+    name: String(file?.name || 'Unbenannte Tabelle').trim(),
+    source: sourceLabel
+  };
+}
+
+async function listAccessibleSpreadsheets() {
+  const baseQuery = "mimeType='application/vnd.google-apps.spreadsheet' and trashed=false";
+  const fields = 'files(id,name,owners(displayName,emailAddress),shared),nextPageToken';
+
+  async function listAllFiles(query) {
+    const files = [];
+    let pageToken;
+
+    do {
+      const response = await gapi.client.drive.files.list({
+        q: query,
+        pageSize: 100,
+        orderBy: 'modifiedTime desc',
+        fields,
+        includeItemsFromAllDrives: true,
+        supportsAllDrives: true,
+        pageToken
+      });
+
+      files.push(...(response?.result?.files || []));
+      pageToken = response?.result?.nextPageToken || null;
+    } while (pageToken);
+
+    return files;
+  }
+
+  const [ownFiles, sharedFiles] = await Promise.all([
+    listAllFiles(`${baseQuery} and 'me' in owners`),
+    listAllFiles(`${baseQuery} and sharedWithMe=true`)
+  ]);
+
+  const all = [];
+  const seen = new Set();
+
+  const addFiles = (files, label) => {
+    (files || []).forEach((file) => {
+      const parsed = parseDriveSpreadsheetFile(file, label);
+      if (!parsed.id || seen.has(parsed.id)) return;
+      seen.add(parsed.id);
+      all.push(parsed);
+    });
+  };
+
+  addFiles(ownFiles, 'Eigene Datei');
+  addFiles(sharedFiles, 'Freigegeben');
+
+  all.sort((a, b) => a.name.localeCompare(b.name, 'de', { sensitivity: 'base' }));
+  return all;
+}
+
+function renderSpreadsheetOptions(items = []) {
+  if (!dom.dialogExistingSelect) return;
+  const currentId = CONFIG.SPREADSHEET_ID || '';
+  dom.dialogExistingSelect.innerHTML = '<option value="">Bitte Tabelle auswählen…</option>';
+
+  if (!items.length) {
+    const empty = document.createElement('option');
+    empty.value = '';
+    empty.textContent = 'Keine Tabellen gefunden';
+    dom.dialogExistingSelect.appendChild(empty);
+    dom.btnSpreadsheetUseSelected && (dom.btnSpreadsheetUseSelected.disabled = true);
+    return;
+  }
+
+  items.forEach((item) => {
+    const option = document.createElement('option');
+    option.value = item.id;
+    option.textContent = `${item.name} — ${item.source}`;
+    dom.dialogExistingSelect.appendChild(option);
+  });
+
+  if (currentId && items.some((item) => item.id === currentId)) {
+    dom.dialogExistingSelect.value = currentId;
+  }
+
+  dom.btnSpreadsheetUseSelected && (dom.btnSpreadsheetUseSelected.disabled = false);
+}
+
+async function refreshSpreadsheetList(options = {}) {
+  const allowReauth = options.allowReauth !== false;
+  if (!dom.dialogExistingSelect || !state.loggedIn) return;
+  try {
+    dom.dialogExistingSelect.disabled = true;
+    dom.btnSpreadsheetRefresh && (dom.btnSpreadsheetRefresh.disabled = true);
+    setSpreadsheetDialogError('Tabellen werden geladen…', false);
+    const items = await listAccessibleSpreadsheets();
+    renderSpreadsheetOptions(items);
+    setSpreadsheetDialogError('');
+  } catch (err) {
+    console.error('[refreshSpreadsheetList]', err);
+
+    const status = err?.status || err?.result?.error?.code;
+    const reason = err?.result?.error?.status || '';
+    const missingScope = status === 401 || status === 403 || reason === 'PERMISSION_DENIED';
+
+    if (allowReauth && missingScope) {
+      setSpreadsheetDialogError('Berechtigungen werden aktualisiert…', false);
+      const reauthed = await signIn({ forceConsent: true });
+      if (reauthed) {
+        await refreshSpreadsheetList({ allowReauth: false });
+        return;
+      }
+    }
+
+    setSpreadsheetDialogError('Tabellen konnten nicht geladen werden. Falls nötig bitte einmal neu einloggen.');
+  } finally {
+    dom.dialogExistingSelect.disabled = false;
+    dom.btnSpreadsheetRefresh && (dom.btnSpreadsheetRefresh.disabled = false);
+  }
+}
+
+async function applySpreadsheetSelection(id) {
+  if (!id) {
+    setSpreadsheetDialogError('Bitte eine Tabelle auswählen oder ID/URL eingeben.');
+    return;
+  }
+
+  const nextId = String(id).trim();
+  const previousId = CONFIG.SPREADSHEET_ID;
+
+  try {
+    setSpreadsheetDialogError('Prüfe Tabellenzugriff…', false);
+    await gapi.client.sheets.spreadsheets.get({
+      spreadsheetId: nextId,
+      fields: 'spreadsheetId,properties(title)'
+    });
+
+    CONFIG.SPREADSHEET_ID = nextId;
+    resetSheetsDataCaches();
+    resetRuntimeUiForSpreadsheetSwitch();
+    updateSpreadsheetInfoBar();
+    await loadSets();
+    if (!dom.viewSearch?.classList.contains('hidden') && String(dom.searchInput?.value || '').trim()) {
+      await runSearch({ force: true });
+    }
+    dom.dialog.close();
+    setSpreadsheetDialogError('');
+  } catch (err) {
+    CONFIG.SPREADSHEET_ID = previousId;
+    resetSheetsDataCaches();
+    updateSpreadsheetInfoBar();
+    console.error('[applySpreadsheetSelection]', err);
+    setSpreadsheetDialogError(`Tabelle konnte nicht verwendet werden: ${err.message || err}`);
+    showToast('Tabellenauswahl fehlgeschlagen.', 'error', 3200);
+    throw err;
+  }
+}
+
+async function createAndUseSpreadsheet() {
+  const title = String(dom.dialogNewNameInput?.value || '').trim() || `Pokémon TCG Tracker ${new Date().toLocaleDateString('de-DE')}`;
+  try {
+    dom.btnSpreadsheetCreate && (dom.btnSpreadsheetCreate.disabled = true);
+    setSpreadsheetDialogError('Neue Tabelle wird erstellt…', false);
+
+    const response = await gapi.client.sheets.spreadsheets.create({
+      properties: { title }
+    });
+
+    const spreadsheetId = String(response?.result?.spreadsheetId || '').trim();
+    if (!spreadsheetId) {
+      throw new Error('Spreadsheet-ID wurde nicht zurückgegeben.');
+    }
+
+    await applySpreadsheetSelection(spreadsheetId);
+    showToast(`Neue Tabelle erstellt: ${title}`, 'success');
+  } catch (err) {
+    console.error('[createAndUseSpreadsheet]', err);
+    setSpreadsheetDialogError(`Neue Tabelle konnte nicht erstellt werden: ${err.message || err}`);
+  } finally {
+    dom.btnSpreadsheetCreate && (dom.btnSpreadsheetCreate.disabled = false);
+  }
 }
 
 function updateSpreadsheetInfoBar() {
@@ -1185,20 +2389,35 @@ function updateSpreadsheetInfoBar() {
 }
 
 function initSpreadsheetDialog() {
-  dom.dialog?.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !dom.btnDialogCancel.hidden) dom.dialog.close(); });
-  dom.btnDialogSave?.addEventListener('click', () => {
+  dom.dialog?.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !dom.btnDialogCancel.disabled) dom.dialog.close();
+  });
+  dom.btnDialogSave?.addEventListener('click', async () => {
     const id = extractSpreadsheetId(dom.dialogInput?.value?.trim());
     if (!id) {
-      if (dom.dialogError) { dom.dialogError.textContent = 'Ung\u00fcltige Spreadsheet-ID oder URL.'; dom.dialogError.classList.remove('hidden'); }
+      setSpreadsheetDialogError('Ungültige Spreadsheet-ID oder URL.');
       return;
     }
-    CONFIG.SPREADSHEET_ID = id;
-    dom.dialog.close();
-    updateSpreadsheetInfoBar();
-    loadSets();
+    try {
+      await applySpreadsheetSelection(id);
+    } catch {
+      // Fehler bereits im Dialog angezeigt
+    }
   });
   dom.btnDialogCancel?.addEventListener('click', () => dom.dialog?.close());
   dom.btnChangeSheet?.addEventListener('click', () => openSpreadsheetDialog(false));
+  dom.btnSpreadsheetRefresh?.addEventListener('click', () => refreshSpreadsheetList());
+  dom.btnSpreadsheetUseSelected?.addEventListener('click', async () => {
+    const id = String(dom.dialogExistingSelect?.value || '').trim();
+    try {
+      await applySpreadsheetSelection(id);
+    } catch {
+      // Fehler bereits im Dialog angezeigt
+    }
+  });
+  dom.btnSpreadsheetCreate?.addEventListener('click', async () => {
+    await createAndUseSpreadsheet();
+  });
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -1207,7 +2426,7 @@ function initSpreadsheetDialog() {
 async function loadSets() {
   setLoading(true, 'Lade Sets\u2026');
   try {
-    const [importedSets, overviewSets] = await Promise.all([
+    const [importedSets, initialOverviewSets] = await Promise.all([
       listImportedSets(),
       listSetsOverviewData().catch(() => [])
     ]);
@@ -1215,12 +2434,20 @@ async function loadSets() {
     if (!Array.isArray(importedSets)) throw new Error('Ungültiges Sets-Format');
     state.sets = importedSets;
 
+    let overviewSets = Array.isArray(initialOverviewSets) ? initialOverviewSets : [];
+    if (overviewSets.length === 0) {
+      const apiSets = await fetchAllAvailableSets();
+      const importedIds = new Set(importedSets.map((set) => set.setId));
+      await syncOverviewWithApiSets(apiSets, importedIds);
+      overviewSets = await listSetsOverviewData().catch(() => []);
+    }
+
     const importedById = new Map(importedSets.map((set) => [set.setId, set]));
     const mergedMap = new Map();
 
     (overviewSets || []).forEach((set) => {
       if (!mergedMap.has(set.setId)) {
-        mergedMap.set(set.setId, { ...set, imported: Boolean(set.imported) });
+        mergedMap.set(set.setId, { ...set, imported: toBoolean(set.imported) });
       }
     });
 
@@ -1241,10 +2468,11 @@ async function loadSets() {
 
     dom.selector.innerHTML = '<option value="">Bitte w\u00e4hlen\u2026</option>';
     const seriesMap = buildSeriesMap(importedSets);
-    seriesMap.forEach((setsArr, seriesName) => {
+    seriesMap.forEach((groupInfo) => {
       const group = document.createElement('optgroup');
-      group.label = seriesName;
-      setsArr.forEach((set) => {
+      group.label = groupInfo.label;
+      group.dataset.seriesKey = groupInfo.key;
+      groupInfo.sets.forEach((set) => {
         const opt = document.createElement('option');
         opt.value = set.setId;
         opt.textContent = set.setName;
@@ -1256,22 +2484,18 @@ async function loadSets() {
     dom.selector.disabled = false;
     dom.load.disabled     = false;
     dom.refresh.disabled  = false;
+    if (dom.btnRefreshMenu) dom.btnRefreshMenu.disabled = false;
+    setRefreshMenuOpen(false);
 
     dom.dashSeriesFilter.innerHTML = '<option value="">Alle Serien</option>';
-    buildSeriesMap(state.allSets).forEach((_, name) => {
+    buildSeriesMap(state.allSets).forEach((groupInfo) => {
       const opt = document.createElement('option');
-      opt.value = name;
-      opt.textContent = name;
+      opt.value = groupInfo.key;
+      opt.textContent = groupInfo.label;
       dom.dashSeriesFilter.appendChild(opt);
     });
 
-    dom.searchSetFilter.innerHTML = '<option value="">Alle Sets</option>';
-    importedSets.forEach((set) => {
-      const opt = document.createElement('option');
-      opt.value = set.setId;
-      opt.textContent = set.setName;
-      dom.searchSetFilter.appendChild(opt);
-    });
+    renderSearchSetFilterOptions();
 
     const settings = await readSettings();
     if (settings.lastSetId) dom.selector.value = settings.lastSetId;
@@ -1296,100 +2520,36 @@ async function loadSets() {
   }
 }
 
+function getSetSeriesGroupInfo(set) {
+  return resolveSeriesGroupInfo(set || {});
+}
+
 function buildSeriesMap(sets) {
   const map = new Map();
-  sets.forEach((set) => {
-    const s = set.series || 'Andere';
-    if (!map.has(s)) map.set(s, []);
-    map.get(s).push(set);
+  (sets || []).forEach((set) => {
+    const info = getSetSeriesGroupInfo(set);
+    const existing = map.get(info.key);
+    if (!existing) {
+      map.set(info.key, {
+        key: info.key,
+        label: info.label || 'Andere',
+        canonicalName: info.canonicalName || info.label || 'Andere',
+        sets: [set],
+        labelVotes: new Map([[info.label || 'Andere', 1]])
+      });
+      return;
+    }
+
+    existing.sets.push(set);
+    const label = info.label || 'Andere';
+    const nextVotes = (existing.labelVotes.get(label) || 0) + 1;
+    existing.labelVotes.set(label, nextVotes);
+    const currentVotes = existing.labelVotes.get(existing.label) || 0;
+    if (nextVotes > currentVotes) {
+      existing.label = label;
+    }
   });
   return map;
-}
-
-async function renderRecommendations() {
-  try {
-    if (!state.sets.length || !state.summaryData?.length) return;
-    const recommendations = generateCollectionReccommendations(
-      state.allSets || state.sets,
-      state.importedSets || state.sets,
-      state.summaryData
-    );
-    if (!recommendations.length) return;
-
-    const container = document.createElement('div');
-    container.className = 'recommendations-widget';
-    container.style.cssText = 'grid-column: 1 / -1; padding: 16px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-bg-secondary); margin-bottom: 16px;';
-    container.innerHTML = `
-      <div style="font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-        <span>💡</span> Intelligente Empfehlungen
-      </div>
-      ${recommendations
-        .map(
-          (rec) => `
-        <div style="padding: 8px; margin: 4px 0; border-left: 3px solid ${rec.priority === 'high' ? '#ff6b6b' : '#ffd43b'}; background: var(--color-bg); border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-size: 14px;">${rec.message}</span>
-          ${rec.cardsRemaining ? `<span style="background: var(--color-primary); color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">${rec.cardsRemaining}</span>` : ''}
-        </div>
-      `
-        )
-        .join('')}
-    `;
-    const dashboard = document.getElementById('dashboard-grid');
-    if (dashboard) {
-      const existing = dashboard.querySelector('.recommendations-widget');
-      if (existing) existing.replaceWith(container);
-      else dashboard.insertBefore(container, dashboard.firstChild);
-    }
-  } catch (err) {
-    console.warn('[renderRecommendations]', err);
-  }
-}
-
-function renderMLRecommendationsWidget() {
-  try {
-    if (!state.sets?.length || !state.summaryData?.length) return;
-
-    const recommendations = generateMLSetRecommendations(
-      state.summaryData || [],
-      state.allSets || state.sets,
-      5
-    );
-
-    if (!recommendations.length) return;
-
-    const summary = summarizeMLRecommendations(recommendations);
-    const container = document.createElement('div');
-    container.className = 'ml-recommendations-widget';
-    container.style.cssText = 'grid-column: 1 / -1; padding: 16px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-bg-secondary); margin-bottom: 16px;';
-
-    container.innerHTML = `
-      <div style="font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-        <span>🧠 ML Set-Empfehlungen</span>
-        <small style="color: var(--color-muted);">Confidence bis ${summary.topConfidence}%</small>
-      </div>
-      ${recommendations.map((item) => `
-        <div style="padding: 10px; margin: 6px 0; border-left: 3px solid var(--color-primary); background: var(--color-bg); border-radius: 4px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
-          <div>
-            <div style="font-weight: 600;">${item.setName} (${item.completion}%)</div>
-            <div style="font-size: 12px; color: var(--color-muted);">${item.reasons.join(' • ')}</div>
-          </div>
-          <span style="background: var(--color-primary); color: white; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap;">${item.confidence}%</span>
-        </div>
-      `).join('')}
-    `;
-
-    const dashboard = document.getElementById('dashboard-grid');
-    if (!dashboard) return;
-
-    const existing = dashboard.querySelector('.ml-recommendations-widget');
-    if (existing) {
-      existing.replaceWith(container);
-    } else {
-      dashboard.insertBefore(container, dashboard.firstChild);
-    }
-  } catch (err) {
-    console.warn('[renderMLRecommendationsWidget]', err);
-  }
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -1420,22 +2580,37 @@ async function renderDashboard() {
     }
     const summaryByName = new Map();
     (state.summaryData || []).forEach((row) => summaryByName.set(row.setName, row));
+    state.summaryOverrides.forEach((row, key) => {
+      summaryByName.set(key, row);
+    });
 
     let sets = [...state.allSets];
-    const filterText = dom.dashFilter.value.toLowerCase().trim();
+    const filterText = dom.dashFilter.value.trim();
+    const dashboardSearchScores = new Map();
+    const getDashboardSearchKey = (set) => String(set?.setId || set?.setName || '');
+    const compareDashboardSearchScore = (left, right) => {
+      if (!filterText) return 0;
+      const leftScore = dashboardSearchScores.get(getDashboardSearchKey(left)) || 0;
+      const rightScore = dashboardSearchScores.get(getDashboardSearchKey(right)) || 0;
+      return rightScore - leftScore;
+    };
+
     if (filterText) {
-      sets = sets.filter(
-        (s) =>
-          s.setName.toLowerCase().includes(filterText) ||
-          s.setId.toLowerCase().includes(filterText) ||
-          (s.series || '').toLowerCase().includes(filterText),
-      );
+      sets = sets.filter((set) => {
+        const score = scoreDashboardSetMatch(set, filterText);
+        if (score < 0) return false;
+        dashboardSearchScores.set(getDashboardSearchKey(set), score);
+        return matchesDashboardSetFilter(set, filterText);
+      });
+
+      sets.sort((left, right) => compareDashboardSearchScore(left, right));
     }
+
     const seriesFilter = dom.dashSeriesFilter.value;
-    if (seriesFilter) sets = sets.filter((s) => (s.series || 'Andere') === seriesFilter);
+    if (seriesFilter) sets = sets.filter((set) => getSetSeriesGroupInfo(set).key === seriesFilter);
 
     if (activeDashboardView === 'imported') {
-      sets = sets.filter((set) => Boolean(set.imported));
+      sets = sets.filter((set) => toBoolean(set.imported));
     } else if (activeDashboardView === 'not-imported') {
       sets = sets.filter((set) => !set.imported);
     } else if (activeDashboardView === 'favorites') {
@@ -1471,11 +2646,17 @@ async function renderDashboard() {
 
     const sortBy = dom.dashSort.value;
     if (sortBy === 'name') {
-      sets.sort((a, b) => a.setName.localeCompare(b.setName));
+      sets.sort((a, b) => {
+        const scoreDiff = compareDashboardSearchScore(a, b);
+        if (scoreDiff !== 0) return scoreDiff;
+        return a.setName.localeCompare(b.setName);
+      });
     } else if (sortBy === 'completion') {
       sets.sort((a, b) => {
-        const sa = summaryByName.get(a.setName);
-        const sb = summaryByName.get(b.setName);
+        const scoreDiff = compareDashboardSearchScore(a, b);
+        if (scoreDiff !== 0) return scoreDiff;
+        const sa = summaryByName.get(a.setName) || summaryByName.get(a.setId);
+        const sb = summaryByName.get(b.setName) || summaryByName.get(b.setId);
         const pa = sa && sa.total > 0 ? sa.collected / sa.total : 0;
         const pb = sb && sb.total > 0 ? sb.collected / sb.total : 0;
         return pb - pa;
@@ -1497,15 +2678,15 @@ async function renderDashboard() {
 
     if (sortBy === 'series-date') {
       const seriesMap = buildSeriesMap(visibleSets);
-      seriesMap.forEach((setsArr, seriesName) => {
+      seriesMap.forEach((groupInfo) => {
         const section = document.createElement('section');
         section.className = 'dash-series-group';
         const h3 = document.createElement('h3');
-        h3.textContent = seriesName;
+        h3.textContent = groupInfo.label;
         section.appendChild(h3);
         const grid = document.createElement('div');
         grid.className = 'dash-sets-row';
-        setsArr.forEach((set) => {
+        groupInfo.sets.forEach((set) => {
           const summary = summaryByName.get(set.setName) || summaryByName.get(set.setId);
           grid.appendChild(createDashSetCard(set, summary));
         });
@@ -1526,8 +2707,6 @@ async function renderDashboard() {
       dom.dashboardGrid.appendChild(createDashboardVirtualFooter(sets.length, visibleSets.length));
     }
 
-    await renderRecommendations();
-    renderMLRecommendationsWidget();
   } catch (err) {
     console.error('[renderDashboard]', err);
     dom.dashboardGrid.innerHTML = `<p class="empty-state">\u2715 Fehler beim Laden der \u00dcbersicht</p>`;
@@ -1546,11 +2725,29 @@ function createDashSetCard(set, summary) {
   if (percent >= 100 && total > 0) card.classList.add('complete');
   else if (percent > 0)            card.classList.add('in-progress');
 
+  card.dataset.setId = set.setId || '';
+  card.dataset.hoverData = JSON.stringify({
+    name: set.setName || set.setId || '',
+    series: set.series || '',
+    collected,
+    total: total || set.totalCards || 0,
+    rh,
+    percent,
+    imported: Boolean(set.imported)
+  });
+
+  const safeLogoUrl = sanitizeSetAssetUrl(set.logoUrl, set.setId);
+  const placeholderCode = String(set.ptcgoCode || set.setId || 'SET').toUpperCase();
+
   card.innerHTML = `
     <div class="dash-set-logo-wrap">
-      ${set.logoUrl
-        ? `<img src="${set.logoUrl}" alt="${set.setName}" class="dash-set-logo" onerror="this.style.display='none'" loading="lazy"/>`
-        : `<span class="dash-set-name-fallback">${set.setName}</span>`}
+      ${safeLogoUrl
+        ? `<img src="${safeLogoUrl}" alt="${set.setName}" class="dash-set-logo" loading="lazy" onerror="this.onerror=null;this.src='./assets/pokeball-fallback.svg';this.classList.add('img-fallback')"/>`
+        : `<div class="dash-set-placeholder" role="img" aria-label="Kein Setlogo für ${set.setName} verfügbar">
+             <img src="./assets/pokeball-fallback.svg" alt="" class="dash-set-placeholder-icon" loading="lazy" />
+             <span class="dash-set-placeholder-badge">Kein Setlogo</span>
+             <span class="dash-set-placeholder-code">${placeholderCode}</span>
+           </div>`}
     </div>
     <div class="dash-set-info">
       <p class="dash-set-name">${set.setName}</p>
@@ -1607,7 +2804,202 @@ function createDashSetCard(set, summary) {
     dom.selector.value = set.setId;
     navigate(`set/${set.setId}`);
   });
+
+  if (set.imported) {
+    checkSetCompletion(set.setId || set.setName, percent, card);
+  }
+
   return card;
+}
+
+function syncDashboardCardForSet(setMeta, summary) {
+  if (!setMeta?.setId) return;
+  const card = dom.dashboardGrid?.querySelector(`.dash-set-card[data-set-id="${setMeta.setId}"]`);
+  if (!card) return;
+
+  const total = Number(summary?.total ?? setMeta?.totalCards ?? 0);
+  const collected = Number(summary?.collected ?? 0);
+  const rh = Number(summary?.rh ?? 0);
+  const percent = total > 0 ? Math.round((collected / total) * 100) : 0;
+
+  card.classList.toggle('complete', percent >= 100 && total > 0);
+  card.classList.toggle('in-progress', percent > 0 && percent < 100);
+
+  const fill = card.querySelector('.dash-progress-fill');
+  if (fill) fill.style.width = `${percent}%`;
+
+  const text = card.querySelector('.dash-progress-text');
+  if (text) text.textContent = `${collected}\u202f/\u202f${total || '?'} (${percent}%)`;
+
+  let rhText = card.querySelector('.dash-rh-text');
+  if (rh > 0 && !rhText) {
+    rhText = document.createElement('p');
+    rhText.className = 'dash-rh-text';
+    const info = card.querySelector('.dash-set-info');
+    info?.insertBefore(rhText, info.querySelector('.dash-card-actions'));
+  }
+  if (rhText) {
+    if (rh > 0) rhText.textContent = `RH: ${rh}`;
+    else rhText.remove();
+  }
+
+  card.dataset.hoverData = JSON.stringify({
+    name: setMeta.setName || setMeta.setId || '',
+    series: setMeta.series || '',
+    collected,
+    total,
+    rh,
+    percent,
+    imported: true
+  });
+
+  checkSetCompletion(setMeta.setId || setMeta.setName, percent, card);
+}
+
+function mergeImportedSetIntoLocalState(setMeta = {}) {
+  if (!setMeta?.setId) return null;
+
+  const mergedSet = {
+    ...setMeta,
+    imported: true,
+    totalCards: Number(setMeta?.totalCards) || Number(setMeta?.printedTotal) || 0,
+  };
+
+  const mergeIntoList = (list, { addIfMissing = false } = {}) => {
+    if (!Array.isArray(list)) return null;
+    const index = list.findIndex((entry) => entry?.setId === mergedSet.setId);
+    if (index >= 0) {
+      list[index] = { ...list[index], ...mergedSet, imported: true };
+      return list[index];
+    }
+    if (!addIfMissing) return null;
+    const appended = { ...mergedSet, imported: true };
+    list.push(appended);
+    return appended;
+  };
+
+  const allSet = mergeIntoList(state.allSets, { addIfMissing: true }) || mergedSet;
+  mergeIntoList(state.sets, { addIfMissing: true });
+
+  if (state.currentSet?.setId === mergedSet.setId) {
+    state.currentSet = { ...state.currentSet, ...allSet, imported: true };
+    state.pendingSearchSetImport = false;
+  }
+
+  ensureSetSelectorOption(allSet);
+  renderSearchSetFilterOptions();
+  return allSet;
+}
+
+function scheduleAutoImportUiRefresh() {
+  if (state.autoImportRefreshTimer) {
+    clearTimeout(state.autoImportRefreshTimer);
+  }
+
+  state.autoImportRefreshTimer = window.setTimeout(async () => {
+    state.autoImportRefreshTimer = null;
+    try {
+      renderSearchSetFilterOptions();
+      if (dom.viewDashboard && !dom.viewDashboard.classList.contains('hidden')) {
+        await renderDashboard();
+      }
+      if (dom.viewStats && !dom.viewStats.classList.contains('hidden')) {
+        await renderStats();
+      }
+      if (dom.viewSearch && !dom.viewSearch.classList.contains('hidden') && String(dom.searchInput?.value || '').trim()) {
+        runSearch({ force: true });
+      }
+    } catch (err) {
+      console.warn('[scheduleAutoImportUiRefresh]', err);
+    }
+  }, 180);
+}
+
+async function ensureSetImportedFromApi(setMeta, cards, options = {}) {
+  const { setMetaPatch = null, showSuccessToast = false, successMessage = '', source = 'search' } = options;
+  const setId = String(setMeta?.setId || '').trim();
+  const safeCards = Array.isArray(cards) ? cards : [];
+  if (!setId || safeCards.length === 0) return null;
+
+  const mergedSet = {
+    ...setMeta,
+    ...(setMetaPatch || {}),
+    imported: true,
+    totalCards: Number(setMetaPatch?.totalCards) || Number(setMeta?.totalCards) || safeCards.length,
+  };
+  const existingSetState = [
+    ...(Array.isArray(state.sets) ? state.sets : []),
+    ...(Array.isArray(state.allSets) ? state.allSets : []),
+  ].find((entry) => entry?.setId === setId);
+  const alreadyImported = toBoolean(setMeta?.imported)
+    || toBoolean(existingSetState?.imported);
+
+  if (alreadyImported) {
+    return mergeImportedSetIntoLocalState(mergedSet) || mergedSet;
+  }
+
+  if (state.autoImportJobs.has(setId)) {
+    return state.autoImportJobs.get(setId);
+  }
+
+  const pendingCount = (state.autoImportActiveSetId ? 1 : 0) + state.autoImportQueuedSetIds.length;
+  if (pendingCount >= AUTO_IMPORT_QUEUE_LIMIT) {
+    const now = Date.now();
+    if (now - Number(state.autoImportLastLimitToastAt || 0) > 2500) {
+      state.autoImportLastLimitToastAt = now;
+      showToast(`Auto-Import-Warteschlange voll (${AUTO_IMPORT_QUEUE_LIMIT}). ${mergedSet.setName || setId} wird vorerst nicht automatisch importiert.`, 'info', 4500);
+    }
+    setGlobalStatus(`Auto-Import pausiert: Warteschlange voll (${AUTO_IMPORT_QUEUE_LIMIT}).`);
+    updateAutoImportQueueUi();
+    return null;
+  }
+
+  state.autoImportQueuedSetIds = [...state.autoImportQueuedSetIds, setId];
+  updateAutoImportQueueUi();
+
+  const queuedJob = state.autoImportQueue
+    .catch(() => undefined)
+    .then(async () => {
+      state.autoImportQueuedSetIds = state.autoImportQueuedSetIds.filter((id) => id !== setId);
+      state.autoImportActiveSetId = setId;
+      updateAutoImportQueueUi();
+      setGlobalStatus(`Auto-Importiere ${mergedSet.setName || setId}…`);
+
+      await importSetIntoCollection(mergedSet, safeCards);
+      cache.del(`cards_${setId}`);
+      cache.del(`db_cards_${setId}`);
+      cache.del(`db_${setId}`);
+      state.searchCache.clear();
+      state.summaryData = null;
+
+      const refreshedSet = mergeImportedSetIntoLocalState(mergedSet) || mergedSet;
+      scheduleAutoImportUiRefresh();
+
+      if (showSuccessToast) {
+        const message = successMessage || `${refreshedSet.setName} wurde automatisch importiert.`;
+        showToast(message, 'success', 3200);
+      }
+
+      return refreshedSet;
+    });
+
+  state.autoImportQueue = queuedJob.catch(() => undefined);
+
+  const job = queuedJob.catch((err) => {
+    console.warn(`[ensureSetImportedFromApi:${source}]`, err);
+    throw err;
+  }).finally(() => {
+    state.autoImportQueuedSetIds = state.autoImportQueuedSetIds.filter((id) => id !== setId);
+    if (state.autoImportActiveSetId === setId) {
+      state.autoImportActiveSetId = null;
+    }
+    state.autoImportJobs.delete(setId);
+    updateAutoImportQueueUi();
+  });
+
+  state.autoImportJobs.set(setId, job);
+  updateAutoImportQueueUi();
+  return job;
 }
 
 async function importSetFromOverview(set) {
@@ -1621,17 +3013,18 @@ async function importSetFromOverview(set) {
   setLoading(true, `Importiere ${set.setName}…`);
   setGlobalStatus(`Importiere ${set.setName}…`);
   try {
-    const cards = await fetchMergedCards(set.setId);
-    await importSetIntoCollection(set, cards);
+    const { cards, setMetaPatch } = await fetchMergedCardsWithSetMeta(set.setId);
+    await importSetIntoCollection({ ...set, ...(setMetaPatch || {}) }, cards);
     cache.del(`cards_${set.setId}`);
+    cache.del(`db_cards_${set.setId}`);
     cache.del(`db_${set.setId}`);
+    state.searchCache.clear();
     state.summaryData = null;
 
     await loadSets();
     markSetAsRecent(set);
-    dom.selector.value = set.setId;
-    navigate(`set/${set.setId}`);
-    await loadCurrentSet(true);
+    await renderDashboard();
+    setGlobalStatus(`${set.setName} wurde importiert.`);
     showToast(`${set.setName} wurde importiert.`, 'success', 3000);
   } catch (err) {
     console.error('[importSetFromOverview]', err);
@@ -1643,14 +3036,15 @@ async function importSetFromOverview(set) {
   }
 }
 
-async function deleteSetFromCollection(set) {
+async function deleteSetFromCollection(set, options = {}) {
+  const { skipReload = false, skipConfirm = false } = options;
   if (!set?.setId || !set.imported) {
     showToast('Set kann nicht gelöscht werden.', 'error', 3000);
     return;
   }
 
   const confirmMsg = `${set.setName} wirklich aus deiner Sammlung löschen? Diese Aktion kann nicht rückgängig gemacht werden.`;
-  if (!window.confirm(confirmMsg)) {
+  if (!skipConfirm && !window.confirm(confirmMsg)) {
     return;
   }
 
@@ -1670,19 +3064,30 @@ async function deleteSetFromCollection(set) {
     // Entferne das Set aus der Sammlung
     const range = await readSetCollectionMap(set.setName).catch(() => new Map());
     if (range && range.size > 0) {
-      // Lösche alle Zellen des Sets (setze auf FALSE)
-      for (const [cardNum] of range) {
-        await updateCellBoolean(set.setName, cardNum, false, false);
+      for (const [, db] of range) {
+        if (db?.gCell?.row && db?.gCell?.col) {
+          await updateCellBoolean(set.setName, db.gCell.row, db.gCell.col, false);
+        }
+        if (db?.rhCell?.row && db?.rhCell?.col) {
+          await updateCellBoolean(set.setName, db.rhCell.row, db.rhCell.col, false);
+        }
       }
     }
 
+    await upsertOverviewSet(set, false);
+
     cache.del(`cards_${set.setId}`);
     cache.del(`db_${set.setId}`);
+    cache.del(`db_cards_${set.setId}`);
     state.summaryData = null;
+    state.summaryOverrides.delete(set.setName);
+    state.summaryOverrides.delete(set.setId);
 
     // Aktualisiere die Ansicht
-    await loadSets();
-    await renderDashboard();
+    if (!skipReload) {
+      await loadSets();
+      await renderDashboard();
+    }
     
     showToast(`${set.setName} wurde gelöscht.`, 'success', 3000);
     setGlobalStatus(`${set.setName} wurde gelöscht.`);
@@ -1697,6 +3102,35 @@ async function deleteSetFromCollection(set) {
 
 function getSetById(setId) {
   return state.allSets.find((set) => set.setId === setId) || state.sets.find((set) => set.setId === setId) || null;
+}
+
+function ensureSetSelectorOption(set) {
+  if (!dom.selector || !set?.setId) return;
+
+  const existingOption = Array.from(dom.selector.options || []).find((option) => option.value === set.setId);
+  if (existingOption) {
+    if (set?.setName) existingOption.textContent = set.setName;
+    return;
+  }
+
+  const groupInfo = getSetSeriesGroupInfo(set);
+  const groupLabel = groupInfo.label || 'Weitere Sets';
+  const groupKey = groupInfo.key || 'weitere-sets';
+  let group = Array.from(dom.selector.querySelectorAll('optgroup')).find((entry) => (entry.dataset.seriesKey || '') === groupKey);
+  if (!group) {
+    group = document.createElement('optgroup');
+    group.label = groupLabel;
+    group.dataset.seriesKey = groupKey;
+    dom.selector.appendChild(group);
+  }
+
+  const option = document.createElement('option');
+  option.value = set.setId;
+  option.textContent = set.setName || set.setId;
+  if (!toBoolean(set.imported)) {
+    option.dataset.source = 'search-api';
+  }
+  group.appendChild(option);
 }
 
 async function importSetsSequential(sets, options = {}) {
@@ -1730,8 +3164,8 @@ async function importSetsSequential(sets, options = {}) {
       setGlobalStatus(`Importiere ${index + 1}/${validSets.length}: ${set.setName}`);
       updateJob(job, index, `Importiere ${index + 1}/${validSets.length}: ${set.setName}`);
       try {
-        const cards = await fetchMergedCards(set.setId);
-        await importSetIntoCollection(set, cards);
+        const { cards, setMetaPatch } = await fetchMergedCardsWithSetMeta(set.setId);
+        await importSetIntoCollection({ ...set, ...(setMetaPatch || {}) }, cards);
         cache.del(`cards_${set.setId}`);
         cache.del(`db_${set.setId}`);
         done++;
@@ -1968,6 +3402,155 @@ function initBatchImportDialog() {
     const targetSets = selectedIds.map((id) => getSetById(id)).filter(Boolean);
     await importSetsSequential(targetSets, { successMessage: '{count} Sets per Batch importiert.' });
   });
+}
+
+function getImportedSetsForManagement() {
+  return (state.allSets || []).filter((set) => toBoolean(set.imported));
+}
+
+function updateManageSetsInfo(filtered = []) {
+  if (!dom.manageSetsInfo) return;
+  const selectedCount = state.manageSetsSelection.size;
+  dom.manageSetsInfo.textContent = `${selectedCount} ausgewählt • ${filtered.length} sichtbar`;
+}
+
+function renderManageImportedSetsList() {
+  if (!dom.manageSetsList) return;
+  const query = String(dom.manageSetsSearch?.value || '').trim().toLowerCase();
+  const importedSets = getImportedSetsForManagement();
+  const filtered = !query
+    ? importedSets
+    : importedSets.filter((set) =>
+      String(set.setName || '').toLowerCase().includes(query)
+      || String(set.setId || '').toLowerCase().includes(query)
+      || String(set.series || '').toLowerCase().includes(query)
+    );
+
+  if (!filtered.length) {
+    dom.manageSetsList.innerHTML = '<p class="empty-state">Keine importierten Sets für den aktuellen Filter.</p>';
+    updateManageSetsInfo(filtered);
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+  filtered.forEach((set) => {
+    const row = document.createElement('label');
+    row.className = 'batch-item';
+
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.checked = state.manageSetsSelection.has(set.setId);
+    input.addEventListener('change', () => {
+      if (input.checked) state.manageSetsSelection.add(set.setId);
+      else state.manageSetsSelection.delete(set.setId);
+      updateManageSetsInfo(filtered);
+    });
+
+    const main = document.createElement('span');
+    main.className = 'batch-item-main';
+
+    const title = document.createElement('span');
+    title.className = 'batch-item-title';
+    title.textContent = `${set.setId} — ${set.setName}`;
+
+    const sub = document.createElement('span');
+    sub.className = 'batch-item-sub';
+    sub.textContent = `${set.series || 'Serie unbekannt'} • ${set.totalCards || '?'} Karten`;
+
+    main.append(title, sub);
+    row.append(input, main);
+    fragment.appendChild(row);
+  });
+
+  dom.manageSetsList.innerHTML = '';
+  dom.manageSetsList.appendChild(fragment);
+  updateManageSetsInfo(filtered);
+}
+
+function openManageImportedSetsDialog() {
+  state.manageSetsSelection.clear();
+  if (dom.manageSetsSearch) dom.manageSetsSearch.value = '';
+  renderManageImportedSetsList();
+  dom.manageSetsDialog?.showModal();
+}
+
+async function reimportSelectedImportedSets() {
+  const selectedIds = Array.from(state.manageSetsSelection);
+  if (!selectedIds.length) {
+    showToast('Bitte mindestens ein Set auswählen.', 'info');
+    return;
+  }
+
+  const selectedSets = selectedIds.map((id) => getSetById(id)).filter(Boolean);
+  dom.manageSetsDialog?.close();
+  await importSetsSequential(selectedSets, { successMessage: '{count} ausgewählte Sets aktualisiert.' });
+}
+
+async function deleteSelectedImportedSets() {
+  const selectedIds = Array.from(state.manageSetsSelection);
+  if (!selectedIds.length) {
+    showToast('Bitte mindestens ein Set auswählen.', 'info');
+    return;
+  }
+
+  const selectedSets = selectedIds
+    .map((id) => getSetById(id))
+    .filter((set) => set && toBoolean(set.imported));
+
+  if (!selectedSets.length) {
+    showToast('Keine löschbaren importierten Sets ausgewählt.', 'info');
+    return;
+  }
+
+  const ok = window.confirm(`${selectedSets.length} importierte Sets wirklich löschen?`);
+  if (!ok) return;
+
+  dom.manageSetsDialog?.close();
+  setLoading(true, 'Lösche ausgewählte Sets…');
+  let deleted = 0;
+  let failed = 0;
+  try {
+    for (const set of selectedSets) {
+      try {
+        await deleteSetFromCollection(set, { skipReload: true, skipConfirm: true });
+        deleted++;
+      } catch (err) {
+        console.warn('[deleteSelectedImportedSets]', set?.setId, err);
+        failed++;
+      }
+    }
+  } finally {
+    setLoading(false);
+  }
+
+  state.summaryData = null;
+  await loadSets();
+  await renderDashboard();
+  showToast(`${deleted} gelöscht${failed ? `, ${failed} Fehler` : ''}.`, failed ? 'error' : 'success', 4500);
+}
+
+function initManageImportedSetsDialog() {
+  dom.btnManageImportedSets?.addEventListener('click', openManageImportedSetsDialog);
+  dom.manageSetsSearch?.addEventListener('input', () => renderManageImportedSetsList());
+  dom.btnManageSetsSelectVisible?.addEventListener('click', () => {
+    dom.manageSetsList?.querySelectorAll('.batch-item input[type="checkbox"]').forEach((input) => {
+      const label = input.closest('.batch-item')?.querySelector('.batch-item-title')?.textContent || '';
+      const setId = label.split(' — ')[0] || '';
+      if (setId) state.manageSetsSelection.add(setId);
+    });
+    renderManageImportedSetsList();
+  });
+  dom.btnManageSetsClearSelection?.addEventListener('click', () => {
+    state.manageSetsSelection.clear();
+    renderManageImportedSetsList();
+  });
+  dom.btnManageSetsReimportSelected?.addEventListener('click', reimportSelectedImportedSets);
+  dom.btnManageSetsDeleteSelected?.addEventListener('click', deleteSelectedImportedSets);
+  dom.btnManageSetsCancel?.addEventListener('click', () => dom.manageSetsDialog?.close());
+
+  dom.btnSheetsRetryReport?.addEventListener('click', openSheetsRetryReportDialog);
+  dom.btnSheetsRetryReset?.addEventListener('click', () => resetSheetsRetryMetrics());
+  dom.btnSheetsRetryClose?.addEventListener('click', () => dom.sheetsRetryDialog?.close());
 }
 
 async function reimportAllImportedSets() {
@@ -2249,9 +3832,229 @@ async function applyCollectionBackup(payload) {
   showToast(`Backup eingespielt. Änderungen: ${updated}, übersprungen: ${skipped}.`, skipped ? 'info' : 'success', 5000);
 }
 
+function buildLegacyImportPreviewText(plan) {
+  const summary = summarizeLegacyImportPlan(plan);
+  const lines = [
+    `Set-Blätter erkannt: ${summary.sheetCount}`,
+    `Markierte Karten (G/RH): ${summary.checkedCardCount}`,
+    `Eindeutig zuordenbar: ${summary.matchedCardCount}`,
+    `Fehlende Sets zum Vorimport: ${summary.missingSetCount}`
+  ];
+
+  if (!summary.ok) {
+    lines.push('');
+    lines.push(`Offene Set-Konflikte: ${summary.unresolvedSheetCount}`);
+    lines.push(`Offene Karten-Konflikte: ${summary.unresolvedCardCount}`);
+
+    if (plan.unresolvedSheets?.length) {
+      lines.push('');
+      lines.push('Set-Probleme:');
+      plan.unresolvedSheets.slice(0, 5).forEach((entry) => {
+        lines.push(`• ${entry.sheetName}: ${entry.reason}`);
+      });
+    }
+
+    if (plan.unresolvedCards?.length) {
+      lines.push('');
+      lines.push('Karten-Probleme:');
+      plan.unresolvedCards.slice(0, 8).forEach((entry) => {
+        lines.push(`• ${entry.setId} / ${entry.sourceCardId}: ${entry.reason}`);
+      });
+    }
+
+    lines.push('');
+    lines.push('Der Import wurde blockiert, bis alle Konflikte eindeutig gelöst sind.');
+    return lines.join('\n');
+  }
+
+  lines.push('');
+  lines.push('Der Import setzt die betroffenen Sets exakt auf den XLSX-Stand (G/RH) – inklusive Entfernen nicht markierter Treffer in diesen Sets.');
+  return lines.join('\n');
+}
+
+async function prepareLegacyWorkbookImport(file) {
+  if (!file) throw new Error('Keine XLSX-Datei ausgewählt.');
+  if (!state.allSets?.length) {
+    await loadSets();
+  }
+  if (!state.allSets?.length) {
+    throw new Error('Sets konnten vor der Analyse nicht geladen werden.');
+  }
+
+  const workbook = await loadLegacyWorkbookFromFile(file);
+  const parsedWorkbook = parseLegacyWorkbook(workbook);
+  if (!parsedWorkbook.sheets.length) {
+    throw new Error('In der XLSX-Datei wurden keine markierten Karten gefunden.');
+  }
+
+  const preflight = buildLegacyImportPlan({
+    parsedWorkbook,
+    allSets: state.allSets,
+    cardsBySetId: {}
+  });
+
+  if (preflight.unresolvedSheets.length) {
+    return { parsedWorkbook, cardsBySetId: {}, plan: preflight };
+  }
+
+  const cardsBySetId = {};
+  const uniqueSetIds = Array.from(new Set(preflight.matchedSets.map((entry) => entry.setId)));
+
+  for (let index = 0; index < uniqueSetIds.length; index++) {
+    const setId = uniqueSetIds[index];
+    const setMeta = getSetById(setId);
+    setGlobalStatus(`Analysiere XLSX ${index + 1}/${uniqueSetIds.length}: ${setMeta?.setName || setId}`);
+    const cards = await fetchMergedCards(setId);
+    if (!Array.isArray(cards) || !cards.length) {
+      throw new Error(`Kartenkatalog für ${setMeta?.setName || setId} konnte nicht geladen werden.`);
+    }
+    cardsBySetId[setId] = cards;
+  }
+
+  const plan = buildLegacyImportPlan({
+    parsedWorkbook,
+    allSets: state.allSets,
+    cardsBySetId
+  });
+
+  return { parsedWorkbook, cardsBySetId, plan };
+}
+
+async function applyLegacyImportPlan(plan, cardsBySetId) {
+  if (!plan?.ok) {
+    throw new Error('Der Dry-Run enthält noch Konflikte.');
+  }
+
+  const missingSets = plan.missingSetIds
+    .map((setId) => getSetById(setId))
+    .filter((set) => set?.setId);
+
+  if (missingSets.length) {
+    await importSetsSequential(missingSets, {
+      successMessage: '{count} fehlende Sets für den XLSX-Import importiert.'
+    });
+    await loadSets();
+  }
+
+  try {
+    await createAutoSnapshot(`Legacy XLSX Import (${plan.matchedSets.length} Sets)`, state.collection || {});
+  } catch (err) {
+    console.warn('[applyLegacyImportPlan] snapshot failed', err);
+  }
+
+  let updatedCells = 0;
+  setLoading(true, 'Synchronisiere Altbestand…');
+  try {
+    for (let setIndex = 0; setIndex < plan.matchedSets.length; setIndex++) {
+      const matchedSet = plan.matchedSets[setIndex];
+      const liveSet = getSetById(matchedSet.setId);
+      if (!liveSet?.setName) {
+        throw new Error(`Ziel-Set ${matchedSet.setId} ist nach dem Vorimport nicht verfügbar.`);
+      }
+
+      setGlobalStatus(`XLSX-Import ${setIndex + 1}/${plan.matchedSets.length}: ${liveSet.setName}`);
+      const liveMap = await readSetCollectionMap(liveSet.setName).catch(() => new Map());
+      const targetByCard = new Map(
+        (matchedSet.cards || []).map((entry) => [normalizeCardNumber(entry.cardId), entry])
+      );
+      const setCards = Array.isArray(cardsBySetId?.[matchedSet.setId]) ? cardsBySetId[matchedSet.setId] : [];
+      const pendingCellUpdates = [];
+
+      for (const sourceCard of setCards) {
+        const cardId = pickCanonicalCardId(sourceCard);
+        if (!cardId) continue;
+
+        const normalizedCardId = normalizeCardNumber(cardId);
+        const target = targetByCard.get(normalizedCardId) || { g: false, rh: false };
+        let entry = liveMap.get(normalizedCardId) || null;
+
+        if (!entry && !target.g && !target.rh) continue;
+        if (!entry) {
+          entry = await ensureCollectionEntry(liveSet.setName, cardId);
+          liveMap.set(normalizedCardId, entry);
+        }
+
+        const targetG = Boolean(target.g);
+        const targetRh = Boolean(target.g && target.rh);
+
+        if (!targetG && Boolean(entry.rh)) {
+          pendingCellUpdates.push({ row: entry.rhCell.row, col: entry.rhCell.col, value: false });
+          entry.rh = false;
+          updatedCells += 1;
+        }
+        if (Boolean(entry.g) !== targetG) {
+          pendingCellUpdates.push({ row: entry.gCell.row, col: entry.gCell.col, value: targetG });
+          entry.g = targetG;
+          updatedCells += 1;
+        }
+        if (targetG && Boolean(entry.rh) !== targetRh) {
+          pendingCellUpdates.push({ row: entry.rhCell.row, col: entry.rhCell.col, value: targetRh });
+          entry.rh = targetRh;
+          updatedCells += 1;
+        }
+      }
+
+      if (pendingCellUpdates.length) {
+        await updateCellBooleansBatch(liveSet.setName, pendingCellUpdates, { chunkSize: 200 });
+      }
+    }
+  } finally {
+    setLoading(false);
+  }
+
+  state.summaryData = null;
+  await loadSets();
+  if (state.currentSet?.setId) {
+    await loadCurrentSet(true).catch(() => {});
+  }
+
+  setGlobalStatus(`Altbestand importiert: ${plan.matchedSets.length} Sets, ${updatedCells} Änderungen.`);
+  showToast(`Altbestand importiert: ${plan.matchedSets.length} Sets synchronisiert, ${updatedCells} Änderungen geschrieben.`, 'success', 5000);
+}
+
+async function startLegacyWorkbookImport(file) {
+  if (!file) return;
+
+  setLoading(true, 'Analysiere Altbestand…');
+  try {
+    const { plan, cardsBySetId } = await prepareLegacyWorkbookImport(file);
+    const summary = summarizeLegacyImportPlan(plan);
+
+    if (!summary.ok) {
+      const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      downloadJson(`legacy_import_report_${stamp}.json`, {
+        createdAt: new Date().toISOString(),
+        summary,
+        plan
+      });
+      setGlobalStatus(`Altbestand blockiert: ${summary.unresolvedSheetCount} Set-, ${summary.unresolvedCardCount} Kartenkonflikte.`);
+      window.alert(buildLegacyImportPreviewText(plan));
+      showToast(`Import blockiert: ${summary.unresolvedSheetCount} Set- und ${summary.unresolvedCardCount} Kartenkonflikte. Prüfbericht exportiert.`, 'error', 7000);
+      return;
+    }
+
+    const ok = window.confirm(`${buildLegacyImportPreviewText(plan)}\n\nImport jetzt anwenden?`);
+    if (!ok) {
+      setGlobalStatus('Altbestand-Analyse abgeschlossen – Import nicht angewendet.');
+      showToast('Altbestand analysiert. Es wurden noch keine Änderungen geschrieben.', 'info', 4500);
+      return;
+    }
+
+    await applyLegacyImportPlan(plan, cardsBySetId);
+  } catch (err) {
+    const message = getErrorMessage(err, 'Unbekannter Fehler');
+    console.error('[startLegacyWorkbookImport]', err);
+    setGlobalStatus(`Altbestand-Import fehlgeschlagen: ${message}`);
+    showToast(`Altbestand-Import fehlgeschlagen: ${message}`, 'error', 7000);
+  } finally {
+    setLoading(false);
+  }
+}
+
 function initBackupImportExport() {
   dom.btnExportBackup?.addEventListener('click', exportCollectionBackup);
   dom.btnImportBackup?.addEventListener('click', () => dom.backupFileInput?.click());
+  dom.btnImportLegacyXlsx?.addEventListener('click', () => dom.legacyImportFileInput?.click());
 
   dom.backupFileInput?.addEventListener('change', async () => {
     const file = dom.backupFileInput.files?.[0];
@@ -2267,6 +4070,16 @@ function initBackupImportExport() {
       showToast(`Backup-Import fehlgeschlagen: ${err.message}`, 'error', 6000);
     } finally {
       dom.backupFileInput.value = '';
+    }
+  });
+
+  dom.legacyImportFileInput?.addEventListener('change', async () => {
+    const file = dom.legacyImportFileInput.files?.[0];
+    if (!file) return;
+    try {
+      await startLegacyWorkbookImport(file);
+    } finally {
+      dom.legacyImportFileInput.value = '';
     }
   });
 }
@@ -2286,6 +4099,24 @@ async function reimportCurrentSetFromApi() {
   await loadCurrentSet(true);
 }
 
+function openSettingsDialog() {
+  const currentSettings = loadSettings();
+  const settingsPanel = createSettingsPanel(currentSettings, (updated) => {
+    saveSettings(updated);
+    showToast('Einstellungen gespeichert', 'success', 2000);
+    window.location.reload();
+  });
+
+  const dialog = document.createElement('dialog');
+  dialog.className = 'ss-dialog';
+  dialog.style.cssText = 'width: min(92vw, 760px); max-height: 88vh;';
+  dialog.innerHTML = '<h2>⚙️ Einstellungen</h2>';
+  dialog.appendChild(settingsPanel);
+  document.body.appendChild(dialog);
+  dialog.showModal();
+  dialog.addEventListener('close', () => dialog.remove());
+}
+
 function initDashboardControls() {
   let debounce;
   dom.dashFilter.addEventListener('input', () => {
@@ -2296,12 +4127,10 @@ function initDashboardControls() {
   dom.dashSeriesFilter.addEventListener('change', () => {
     resetDashboardVirtualization();
     renderDashboard();
-    renderRecommendations();
   });
   dom.dashSort.addEventListener('change', () => {
     resetDashboardVirtualization();
     renderDashboard();
-    renderRecommendations();
   });
   document.querySelectorAll('.dashboard-view-tab').forEach((button) => {
     if (!button.dataset.dashboardView) return;
@@ -2322,6 +4151,7 @@ function initDashboardControls() {
     saveDashboardPreferences();
     renderDashboard();
   });
+  dom.btnOpenSettings?.addEventListener('click', openSettingsDialog);
   dom.btnOverviewSync?.addEventListener('click', syncOverviewFromApi);
   dom.btnOverviewPowerRefresh?.addEventListener('click', powerRefreshOverviewFromApi);
   dom.btnImportBatch?.addEventListener('click', openBatchImportDialog);
@@ -2379,62 +4209,269 @@ async function renderStats() {
       if ((row.collected || 0) >= (row.total || 1) && row.total > 0) completedSets++;
     });
     const overallPct = totalCards > 0 ? Math.round((totalCollected / totalCards) * 100) : 0;
+    const formatNumber = (value) => Number(value || 0).toLocaleString('de-DE');
+    const getSetPct = (row) => {
+      const total = Number(row?.total || 0);
+      const collected = Number(row?.collected || 0);
+      return total > 0 ? Math.round((collected / total) * 100) : 0;
+    };
+    const summaryByName = new Map(data.map((row) => [row.setName, row]));
+    const missingCards = Math.max(0, totalCards - totalCollected);
+    const averageSetCompletion = data.length
+      ? Math.round(data.reduce((sum, row) => sum + getSetPct(row), 0) / data.length)
+      : 0;
+    const activeSets = data.filter((row) => Number(row?.collected || 0) > 0).length;
+    const rhCoverage = totalCards > 0 ? Math.round((totalRh / totalCards) * 100) : 0;
+    const nextMilestone = [80, 85, 90, 95, 100].find((value) => value > overallPct) || null;
+    const cardsToNextMilestone = nextMilestone
+      ? Math.max(0, Math.ceil((nextMilestone / 100) * totalCards) - totalCollected)
+      : 0;
+    const collectionPhase = overallPct >= 90
+      ? '🔥 Endspurt'
+      : overallPct >= 75
+        ? '🚀 Sehr starker Ausbau'
+        : overallPct >= 50
+          ? '📈 Spürbarer Fortschritt'
+          : '🌱 Aufbauphase';
 
     // Serien-Breakdown
     const seriesMap = new Map();
-    state.sets.forEach((set) => {
-      const row    = data.find((r) => r.setName === set.setName);
-      const series = set.series || 'Andere';
-      if (!seriesMap.has(series)) seriesMap.set(series, { total: 0, collected: 0, rh: 0, count: 0, completed: 0 });
-      const sg = seriesMap.get(series);
-      sg.total     += row?.total     || 0;
+    (state.sets || []).forEach((set) => {
+      const row = summaryByName.get(set.setName);
+      const groupInfo = getSetSeriesGroupInfo(set);
+      if (!seriesMap.has(groupInfo.key)) {
+        seriesMap.set(groupInfo.key, {
+          label: groupInfo.label || 'Andere',
+          total: 0,
+          collected: 0,
+          rh: 0,
+          count: 0,
+          completed: 0
+        });
+      }
+      const sg = seriesMap.get(groupInfo.key);
+      sg.total += row?.total || 0;
       sg.collected += row?.collected || 0;
-      sg.rh        += row?.rh        || 0;
+      sg.rh += row?.rh || 0;
       sg.count++;
       if ((row?.collected || 0) >= (row?.total || 1) && row?.total > 0) sg.completed++;
     });
 
-    const sorted      = [...data].filter((r) => r.total > 0).sort((a, b) => (b.collected / b.total) - (a.collected / a.total));
-    const top5Done    = sorted.slice(0, 5);
-    const top5Missing = [...data].filter((r) => r.total > 0 && (r.collected || 0) < r.total)
-      .sort((a, b) => (b.total - b.collected) - (a.total - a.collected)).slice(0, 5);
+    const sorted = [...data]
+      .filter((row) => Number(row?.total || 0) > 0)
+      .sort((a, b) => getSetPct(b) - getSetPct(a));
+    const top5Done = sorted.slice(0, 5);
+    const top5Missing = [...data]
+      .filter((row) => Number(row?.total || 0) > 0 && Number(row?.collected || 0) < Number(row?.total || 0))
+      .sort((a, b) => (Number(b.total || 0) - Number(b.collected || 0)) - (Number(a.total || 0) - Number(a.collected || 0)))
+      .slice(0, 5);
+    const nextSetTargets = [...data]
+      .filter((row) => Number(row?.total || 0) > 0 && Number(row?.collected || 0) > 0 && Number(row?.collected || 0) < Number(row?.total || 0))
+      .sort((a, b) => {
+        const missingDiff = (Number(a.total || 0) - Number(a.collected || 0)) - (Number(b.total || 0) - Number(b.collected || 0));
+        if (missingDiff !== 0) return missingDiff;
+        return getSetPct(b) - getSetPct(a);
+      })
+      .slice(0, 3);
+
+    const leadingSet = top5Done[0] || null;
+    const topSeriesEntry = [...seriesMap.entries()]
+      .filter(([, group]) => Number(group?.total || 0) > 0)
+      .sort((a, b) => {
+        const pctDiff = (b[1].collected / Math.max(1, b[1].total)) - (a[1].collected / Math.max(1, a[1].total));
+        if (pctDiff !== 0) return pctDiff;
+        return Number(b[1].collected || 0) - Number(a[1].collected || 0);
+      })[0] || null;
+    const largestSeriesEntry = [...seriesMap.entries()]
+      .filter(([, group]) => Number(group?.total || 0) > 0)
+      .sort((a, b) => Number(b[1].collected || 0) - Number(a[1].collected || 0))[0] || null;
+
+    const seriesRows = Array.from(seriesMap.entries())
+      .filter(([, group]) => Number(group?.total || 0) > 0)
+      .sort((a, b) => {
+        const pctDiff = Math.round((b[1].collected / Math.max(1, b[1].total)) * 100) - Math.round((a[1].collected / Math.max(1, a[1].total)) * 100);
+        if (pctDiff !== 0) return pctDiff;
+        return Number(b[1].collected || 0) - Number(a[1].collected || 0);
+      })
+      .map(([key, group]) => {
+        const pct = group.total > 0 ? Math.round((group.collected / group.total) * 100) : 0;
+        const label = getStatsSeriesLabel(key, group);
+        const safeKey = String(key).replace(/"/g, '&quot;');
+        const safeLabel = String(label).replace(/"/g, '&quot;');
+        return `
+          <div class="stats-series-row" data-series="${safeKey}" data-series-label="${safeLabel}">
+            <div class="stats-series-name-wrap">
+              <div class="stats-series-name">${label}</div>
+              <div class="stats-series-meta">${group.completed}/${group.count} Sets komplett</div>
+            </div>
+            <div class="stats-series-bar"><div class="dash-progress-fill" style="width:${pct}%"></div></div>
+            <div class="stats-series-numbers"><strong>${pct}%</strong><span>${formatNumber(group.collected)}/${formatNumber(group.total)}</span></div>
+          </div>`;
+      }).join('');
 
     dom.statsContent.innerHTML = `
+      <section class="stats-hero" style="--stats-progress:${overallPct};">
+        <div class="stats-hero-copy">
+          <span class="stats-eyebrow">SAMMLUNGSPULS</span>
+          <span class="stats-hero-badge">${collectionPhase}</span>
+          <h3>Deine Collection wirkt jetzt wie ein echtes Langzeitprojekt – <strong>${formatNumber(totalCollected)}</strong> von <strong>${formatNumber(totalCards)}</strong> Karten sind bereits gesichert.</h3>
+          <p>${overallPct}% Gesamtfortschritt, ${completedSets} ${completedSets === 1 ? 'komplettes Set' : 'komplette Sets'}, ${formatNumber(totalRh)} Reverse Holos und ${activeSets} aktive Sets machen aus der Statistik endlich eine richtige Trophäenwand.</p>
+          <div class="stats-pill-row">
+            <span class="stats-pill primary">📦 ${formatNumber(data.length)} importierte Sets</span>
+            <span class="stats-pill success">🏆 ${completedSets} komplett</span>
+            <span class="stats-pill">✨ Ø ${averageSetCompletion}% pro Set</span>
+            ${nextMilestone ? `<span class="stats-pill warning">🎯 Noch ${formatNumber(cardsToNextMilestone)} Karten bis ${nextMilestone}%</span>` : '<span class="stats-pill success">✅ 100% erreicht</span>'}
+          </div>
+        </div>
+        <div class="stats-hero-meter">
+          <div class="stats-hero-ring">
+            <div class="stats-hero-ring-core">
+              <strong>${overallPct}%</strong>
+              <span>Fortschritt</span>
+            </div>
+          </div>
+          <div class="stats-hero-meter-detail">
+            <strong>${formatNumber(missingCards)} Karten fehlen noch</strong>
+            <span>${nextMilestone ? `${formatNumber(cardsToNextMilestone)} bis zum nächsten Meilenstein` : 'Die Sammlung ist vollständig.'}</span>
+          </div>
+        </div>
+      </section>
+
       <div class="stats-overview-cards">
-        <div class="stat-card"><span class="stat-card-value">${totalCards.toLocaleString('de-DE')}</span><span class="stat-card-label">Karten gesamt</span></div>
-        <div class="stat-card collected"><span class="stat-card-value">${totalCollected.toLocaleString('de-DE')}</span><span class="stat-card-label">Normal gesammelt</span></div>
-        <div class="stat-card reverse"><span class="stat-card-value">${totalRh.toLocaleString('de-DE')}</span><span class="stat-card-label">Reverse Holos</span></div>
-        <div class="stat-card"><span class="stat-card-value">${overallPct}%</span><span class="stat-card-label">Gesamtfortschritt</span></div>
-        <div class="stat-card success"><span class="stat-card-value">${completedSets}</span><span class="stat-card-label">Vollst\u00e4ndige Sets</span></div>
-        <div class="stat-card"><span class="stat-card-value">${data.length}</span><span class="stat-card-label">Importierte Sets</span></div>
+        <article class="stat-card accent">
+          <span class="stat-card-value">${formatNumber(totalCards)}</span>
+          <span class="stat-card-label">Slots im Tracker</span>
+          <span class="stat-card-meta">${seriesMap.size} Serien im Blick</span>
+        </article>
+        <article class="stat-card collected">
+          <span class="stat-card-value">${formatNumber(totalCollected)}</span>
+          <span class="stat-card-label">Normals gesammelt</span>
+          <span class="stat-card-meta">${overallPct}% der Gesamtmenge</span>
+        </article>
+        <article class="stat-card reverse">
+          <span class="stat-card-value">${formatNumber(totalRh)}</span>
+          <span class="stat-card-label">Reverse Holos</span>
+          <span class="stat-card-meta">${rhCoverage}% bezogen auf alle Karten</span>
+        </article>
+        <article class="stat-card success">
+          <span class="stat-card-value">${completedSets}</span>
+          <span class="stat-card-label">Sets komplett</span>
+          <span class="stat-card-meta">${activeSets}/${data.length} Sets mit Fortschritt</span>
+        </article>
+        <article class="stat-card">
+          <span class="stat-card-value">${averageSetCompletion}%</span>
+          <span class="stat-card-label">Ø Set-Fortschritt</span>
+          <span class="stat-card-meta">${formatNumber(missingCards)} Karten bis 100%</span>
+        </article>
+        <article class="stat-card">
+          <span class="stat-card-value">${activeSets}</span>
+          <span class="stat-card-label">Aktive Sets</span>
+          <span class="stat-card-meta">${formatNumber(data.length)} importiert</span>
+        </article>
       </div>
-      <div class="stats-progress-bar-full"><div class="dash-progress-fill" style="width:${overallPct}%;height:16px;border-radius:8px;"></div></div>
-      <p style="text-align:center;color:var(--color-muted);margin:4px 0 28px">${totalCollected.toLocaleString('de-DE')} / ${totalCards.toLocaleString('de-DE')} Karten (${overallPct}%)</p>
-      <h3>Serien-\u00dcbersicht</h3>
-      <div class="stats-series-table">
-        ${Array.from(seriesMap.entries()).map(([name, sg]) => {
-          const pct = sg.total > 0 ? Math.round((sg.collected / sg.total) * 100) : 0;
-          return `<div class="stats-series-row">
-            <div class="stats-series-name">${name}</div>
-            <div class="stats-series-bar"><div class="dash-progress-fill" style="width:${pct}%"></div></div>
-            <div class="stats-series-numbers">${sg.collected}/${sg.total} (${pct}%) &bull; ${sg.completed}/${sg.count} Sets</div>
-          </div>`;
-        }).join('')}
+
+      <div class="stats-story-grid">
+        <section class="stats-spotlight-card">
+          <div class="stats-section-kicker">Highlights</div>
+          <h3>Was gerade am meisten glänzt</h3>
+          <ul class="stats-insight-list">
+            <li><span>Bestes Set</span><strong>${leadingSet ? `${leadingSet.setName} · ${getSetPct(leadingSet)}%` : '—'}</strong></li>
+            <li><span>Stärkste Serie</span><strong>${topSeriesEntry ? `${getStatsSeriesLabel(topSeriesEntry[0], topSeriesEntry[1])} · ${Math.round((topSeriesEntry[1].collected / Math.max(1, topSeriesEntry[1].total)) * 100)}%` : '—'}</strong></li>
+            <li><span>Größter Kartenblock</span><strong>${largestSeriesEntry ? `${getStatsSeriesLabel(largestSeriesEntry[0], largestSeriesEntry[1])} · ${formatNumber(largestSeriesEntry[1].collected)} Karten` : '—'}</strong></li>
+          </ul>
+        </section>
+
+        <section class="stats-spotlight-card emphasis">
+          <div class="stats-section-kicker">Nächste Abschlüsse</div>
+          <h3>Diese Sets lohnen sich jetzt besonders</h3>
+          <div class="stats-goal-list">
+            ${nextSetTargets.length ? nextSetTargets.map((row) => `
+              <article class="stats-target-card">
+                <div class="stats-target-top">
+                  <strong>${row.setName}</strong>
+                  <span>${formatNumber((row.total || 0) - (row.collected || 0))} fehlen</span>
+                </div>
+                <div class="stats-mini-track"><div class="stats-mini-fill" style="width:${getSetPct(row)}%"></div></div>
+                <small>${formatNumber(row.collected || 0)}/${formatNumber(row.total || 0)} · ${getSetPct(row)}%</small>
+              </article>
+            `).join('') : '<p class="stats-empty-note">Sobald ein Set kurz vor dem Abschluss steht, erscheint es hier.</p>'}
+          </div>
+        </section>
+
+        <section class="stats-spotlight-card">
+          <div class="stats-section-kicker">Fokus</div>
+          <h3>Was den nächsten Sprung bringt</h3>
+          <ul class="stats-insight-list compact">
+            <li><span>Bis 100%</span><strong>${formatNumber(missingCards)} Karten</strong></li>
+            <li><span>${nextMilestone ? `Bis ${nextMilestone}%` : 'Status'}</span><strong>${nextMilestone ? `${formatNumber(cardsToNextMilestone)} Karten` : 'Meilenstein erreicht'}</strong></li>
+            <li><span>Größte Baustelle</span><strong>${top5Missing[0] ? `${top5Missing[0].setName} · ${formatNumber((top5Missing[0].total || 0) - (top5Missing[0].collected || 0))} fehlend` : 'Keine offenen Baustellen'}</strong></li>
+          </ul>
+        </section>
       </div>
+
+      <section class="stats-series-section">
+        <div class="stats-section-head">
+          <div>
+            <div class="stats-section-kicker">Serienvergleich</div>
+            <h3>Wie sich dein Fortschritt verteilt</h3>
+          </div>
+          <span class="stats-section-note">Klicke eine Reihe für die Set-Details.</span>
+        </div>
+        <div class="stats-series-table">
+          ${seriesRows || '<p class="stats-empty-note">Noch keine Serienstatistiken verfügbar.</p>'}
+        </div>
+      </section>
+
+      <div class="stats-charts-row">
+        <div class="stats-chart-wrap">
+          <div class="stats-section-kicker">Visualisierung</div>
+          <h3>Gesamtfortschritt</h3>
+          <p>Gesammelt gegen fehlend – als schneller Blick auf den gesamten Binder.</p>
+          <canvas id="chart-overall" height="220"></canvas>
+        </div>
+        <div class="stats-chart-wrap">
+          <div class="stats-section-kicker">Visualisierung</div>
+          <h3>Top-Serien im Vergleich</h3>
+          <p>Die stärksten Reihen nach Abschlussquote auf einen Blick.</p>
+          <canvas id="chart-series" height="220"></canvas>
+        </div>
+      </div>
+
       <div class="stats-two-col">
-        <div>
-          <h3>Top 5: Vollst\u00e4ndigste Sets</h3>
+        <section class="stats-list-card">
+          <div class="stats-section-kicker">Trophy Board</div>
+          <h3>Top 5 vollständigste Sets</h3>
           <ol class="stats-top-list">
-            ${top5Done.map((r) => `<li><strong>${r.setName}</strong> \u2013 ${r.collected}/${r.total} (${Math.round((r.collected/r.total)*100)}%)</li>`).join('')}
+            ${top5Done.length ? top5Done.map((row) => `
+              <li>
+                <div class="stats-top-main">
+                  <strong>${row.setName}</strong>
+                  <span>${getSetPct(row)}%</span>
+                </div>
+                <small>${formatNumber(row.collected || 0)}/${formatNumber(row.total || 0)} Karten</small>
+              </li>
+            `).join('') : '<li class="stats-empty-note">Noch keine Sets verfügbar.</li>'}
           </ol>
-        </div>
-        <div>
-          <h3>Top 5: Meiste fehlende Karten</h3>
+        </section>
+        <section class="stats-list-card">
+          <div class="stats-section-kicker">Baustellen</div>
+          <h3>Top 5 mit den meisten fehlenden Karten</h3>
           <ol class="stats-top-list">
-            ${top5Missing.map((r) => `<li><strong>${r.setName}</strong> \u2013 ${r.total - r.collected} fehlend</li>`).join('')}
+            ${top5Missing.length ? top5Missing.map((row) => `
+              <li>
+                <div class="stats-top-main">
+                  <strong>${row.setName}</strong>
+                  <span>${formatNumber((row.total || 0) - (row.collected || 0))} offen</span>
+                </div>
+                <small>${formatNumber(row.collected || 0)}/${formatNumber(row.total || 0)} Karten</small>
+              </li>
+            `).join('') : '<li class="stats-empty-note">Keine offenen Sets mehr.</li>'}
           </ol>
-        </div>
+        </section>
       </div>`;
+
+    initStatsCharts(totalCollected, totalCards, seriesMap);
+    initStatsDrillDown();
   } catch (err) {
     console.error('[renderStats]', err);
     dom.statsContent.innerHTML = `<p class="empty-state">\u2715 Fehler beim Laden der Statistiken</p>`;
@@ -2513,6 +4550,9 @@ function parseMixedQuery(rawQuery) {
     .filter(Boolean);
   if (parts.length < 2) return null;
 
+  const hasSetLikeMarker = parts.some((token) => token === 'set' || token === 'series' || token === 'serie');
+  if (hasSetLikeMarker) return null;
+
   // Tokens die wie eine Kartennummer aussehen: optionale alpha-Präfix + Zahlen + optionales Suffix
   const numberTokens = parts.filter((p) => /^[a-z._-]*\d+[a-z._-]*$/.test(p));
   const nameTokensRaw = parts.filter((p) => !/^[a-z._-]*\d+[a-z._-]*$/.test(p));
@@ -2552,31 +4592,189 @@ function cardNumberMatchesQuery(cardNumber, queryNumber) {
   return Boolean(queryDigits && cardDigits === queryDigits);
 }
 
-function computeSearchScore(card, normalizedQuery, structuredQuery, mixedQuery) {
-  const name = normalizeSearchText(card.name || '');
+function collectSearchStrings(values = []) {
+  const seen = new Set();
+  const result = [];
+
+  const visit = (value) => {
+    if (value == null) return;
+    if (Array.isArray(value)) {
+      value.forEach(visit);
+      return;
+    }
+    if (typeof value === 'object') {
+      Object.values(value).forEach(visit);
+      return;
+    }
+
+    const raw = String(value || '').trim();
+    if (!raw || /^https?:\/\//i.test(raw)) return;
+    const normalized = normalizeSearchText(raw).replace(/\s+/g, ' ').trim();
+    if (!normalized || seen.has(normalized)) return;
+    seen.add(normalized);
+    result.push(normalized);
+  };
+
+  values.forEach(visit);
+  return result;
+}
+
+function matchesTokensInValues(tokens = [], values = []) {
+  if (!tokens.length) return false;
+  return tokens.every((token) => values.some((value) => value.includes(token)));
+}
+
+function buildSetSearchContext(set = null) {
+  const nameValues = collectSearchStrings([
+    set?.setName,
+    set?.vera_name,
+    set?.tcgdex_name
+  ]);
+
+  const seriesValues = collectSearchStrings([
+    set?.series,
+    set?.vera_series,
+    set?.tcgdex_serie_name,
+    set?.tcgdex_serie_id
+  ]);
+
+  const codeValues = collectSearchStrings([
+    set?.setId,
+    set?.ptcgoCode,
+    set?.vera_ptcgoCode,
+    set?.tcgdex_abbreviation_official
+  ]);
+
+  return {
+    nameValues,
+    seriesValues,
+    codeValues,
+    fullText: [...nameValues, ...seriesValues, ...codeValues].join(' ')
+  };
+}
+
+function scoreDashboardSetMatch(set, rawQuery = '') {
+  const normalizedQuery = normalizeSearchText(rawQuery).replace(/\s+/g, ' ').trim();
+  if (!normalizedQuery) return 0;
+
+  const tokens = normalizedQuery.split(/\s+/).filter(Boolean);
+  const context = buildSetSearchContext(set);
+  const weightedGroups = [
+    { values: context.codeValues, exact: 280, prefix: 240, includes: 180 },
+    { values: context.nameValues, exact: 230, prefix: 180, includes: 125 },
+    { values: context.seriesValues, exact: 120, prefix: 90, includes: 70 }
+  ];
+
+  let bestScore = -1;
+
+  weightedGroups.forEach(({ values, exact, prefix, includes }) => {
+    values.forEach((value) => {
+      if (!value) return;
+      if (value === normalizedQuery) bestScore = Math.max(bestScore, exact);
+      else if (value.startsWith(normalizedQuery)) bestScore = Math.max(bestScore, prefix);
+      else if (value.includes(normalizedQuery)) bestScore = Math.max(bestScore, includes);
+    });
+  });
+
+  if (tokens.length && matchesTokensInValues(tokens, context.codeValues)) {
+    bestScore = Math.max(bestScore, 160 + (tokens.length * 12));
+  }
+  if (tokens.length && matchesTokensInValues(tokens, context.nameValues)) {
+    bestScore = Math.max(bestScore, 135 + (tokens.length * 11));
+  }
+  if (tokens.length && matchesTokensInValues(tokens, context.seriesValues)) {
+    bestScore = Math.max(bestScore, 85 + (tokens.length * 8));
+  } else if (tokens.length && tokens.every((token) => context.fullText.includes(token))) {
+    bestScore = Math.max(bestScore, 50 + (tokens.length * 8));
+  }
+
+  return bestScore;
+}
+
+function matchesDashboardSetFilter(set, rawQuery = '') {
+  return scoreDashboardSetMatch(set, rawQuery) >= 0;
+}
+
+function buildCardSearchContext(card, set = null) {
+  const nameValues = collectSearchStrings([
+    card?.name,
+    card?.vera_name,
+    card?.tcgdex_name
+  ]);
+
+  const setValues = collectSearchStrings([
+    set?.setName,
+    set?.vera_name,
+    set?.tcgdex_name,
+    set?.series,
+    set?.vera_series,
+    set?.tcgdex_serie_name,
+    set?.ptcgoCode,
+    set?.vera_ptcgoCode,
+    set?.tcgdex_abbreviation_official,
+    set?.setId
+  ]);
+
+  const taxonomyValues = collectSearchStrings([
+    card?.rarity,
+    card?.hp,
+    card?.types,
+    card?.vera_types,
+    card?.supertype,
+    card?.subtypes,
+    card?.evolvesFrom,
+    card?.vera_evolvesFrom,
+    card?.artist,
+    card?.regulationMark,
+    card?.flavorText,
+    card?.vera_flavorText,
+    card?.rules,
+    card?.abilities,
+    card?.attacks,
+    card?.weaknesses,
+    card?.resistances
+  ]);
+
+  const numberValues = collectSearchStrings([
+    card?.number,
+    card?.vera_number,
+    card?.tcgdex_localId
+  ]);
+
+  return {
+    nameValues,
+    setValues,
+    taxonomyValues,
+    numberValues,
+    fullText: [...nameValues, ...setValues, ...taxonomyValues, ...numberValues].join(' ')
+  };
+}
+
+function computeSearchScore(card, normalizedQuery, structuredQuery, mixedQuery, set = null) {
+  const context = buildCardSearchContext(card, set);
   const numberRaw = String(card.number || '').toLowerCase();
-  const number = normalizeCardNumberForSearch(card.number);
+  const normalizedCardNumber = normalizeCardNumberForSearch(card.number);
 
   if (structuredQuery) {
     const numberMatch = !structuredQuery.cardNumber || cardNumberMatchesQuery(card.number, structuredQuery.cardNumber);
-    const nameMatch = !structuredQuery.namePart || structuredQuery.namePart.every((token) => name.includes(token));
+    const nameMatch = !structuredQuery.namePart || matchesTokensInValues(structuredQuery.namePart, context.nameValues.length ? context.nameValues : [context.fullText]);
     if (!numberMatch || !nameMatch) return -1;
 
     let score = 1000;
     if (structuredQuery.cardNumber) score += 250;
     if (structuredQuery.namePart?.length) {
-      score += structuredQuery.namePart.length * 40;
-      score += 80;
+      score += structuredQuery.namePart.length * 45;
+      score += 90;
     }
     return score;
   }
 
   if (mixedQuery) {
     const numberMatch = cardNumberMatchesQuery(card.number, mixedQuery.cardNumber);
-    const nameMatch = mixedQuery.nameTokens.every((token) => name.includes(token));
+    const nameMatch = matchesTokensInValues(mixedQuery.nameTokens, context.nameValues.length ? context.nameValues : [context.fullText]);
     if (!numberMatch || !nameMatch) return -1;
 
-    return 900 + (mixedQuery.nameTokens.length * 45) + 200;
+    return 900 + (mixedQuery.nameTokens.length * 45) + 220;
   }
 
   const normalizedFreeQuery = normalizeSearchText(normalizedQuery).trim();
@@ -2588,45 +4786,99 @@ function computeSearchScore(card, normalizedQuery, structuredQuery, mixedQuery) 
 
   if (!queryTokens.length) return -1;
 
-  let isMatch = false;
-  let nameContains = false;
-  let numberContains = false;
+  const exactNameMatch = context.nameValues.some((value) => value === normalizedFreeQuery);
+  const nameStartsWith = context.nameValues.some((value) => value.startsWith(normalizedFreeQuery));
+  const nameContains = context.nameValues.some((value) => value.includes(normalizedFreeQuery));
+  const setExactMatch = context.setValues.some((value) => value === normalizedFreeQuery);
+  const setContains = context.setValues.some((value) => value.includes(normalizedFreeQuery));
+  const taxonomyContains = context.taxonomyValues.some((value) => value.includes(normalizedFreeQuery));
+  const numberContains = context.numberValues.some((value) => value.includes(normalizedFreeQuery))
+    || normalizedCardNumber.includes(normalizedFreeQuery)
+    || numberRaw.includes(normalizedFreeQuery)
+    || cardNumberMatchesQuery(card.number, normalizedFreeQuery);
 
-  if (queryTokens.length === 1) {
-    const token = queryTokens[0];
-    nameContains = name.includes(token);
-    numberContains = number.includes(token) || numberRaw.includes(token);
-    isMatch = nameContains || numberContains;
-  } else {
-    const numberLikeTokens = queryTokens.filter((token) => /^[a-z._-]*\d+[a-z._-]*$/.test(token));
-    const nameLikeTokens = meaningfulTokens;
+  const numberLikeTokens = queryTokens.filter((token) => /^[a-z._-]*\d+[a-z._-]*$/.test(token));
+  const nameLikeTokens = meaningfulTokens;
+  const nameTokenMatch = nameLikeTokens.length ? matchesTokensInValues(nameLikeTokens, context.nameValues.length ? context.nameValues : [context.fullText]) : false;
+  const setTokenMatch = nameLikeTokens.length ? matchesTokensInValues(nameLikeTokens, context.setValues) : false;
+  const taxonomyTokenMatch = nameLikeTokens.length ? matchesTokensInValues(nameLikeTokens, context.taxonomyValues) : false;
+  const numberTokenMatch = numberLikeTokens.length ? numberLikeTokens.every((token) => cardNumberMatchesQuery(card.number, token)) : false;
+  const fullTokenMatch = queryTokens.every((token) => context.fullText.includes(token) || cardNumberMatchesQuery(card.number, token));
 
-    if (numberLikeTokens.length && nameLikeTokens.length) {
-      numberContains = numberLikeTokens.every((token) => cardNumberMatchesQuery(card.number, token));
-      nameContains = nameLikeTokens.every((token) => name.includes(token));
-      isMatch = numberContains && nameContains;
-    } else if (nameLikeTokens.length) {
-      nameContains = nameLikeTokens.every((token) => name.includes(token));
-      isMatch = nameContains;
-    } else if (numberLikeTokens.length) {
-      numberContains = numberLikeTokens.every((token) => cardNumberMatchesQuery(card.number, token));
-      isMatch = numberContains;
-    }
-  }
+  const isMatch = exactNameMatch
+    || nameStartsWith
+    || nameContains
+    || setExactMatch
+    || setContains
+    || taxonomyContains
+    || numberContains
+    || nameTokenMatch
+    || setTokenMatch
+    || taxonomyTokenMatch
+    || numberTokenMatch
+    || fullTokenMatch;
 
   if (!isMatch) return -1;
 
   let score = 0;
-  if (nameContains) score += 140;
-  if (numberContains) score += 120;
-  if (nameContains && numberContains) score += 180;
-  if (queryTokens.length > 1 && meaningfulTokens.length && meaningfulTokens.every((token) => name.includes(token))) score += 70;
+  if (exactNameMatch) score += 420;
+  else if (nameStartsWith) score += 320;
+  else if (nameContains) score += 220;
+
+  if (numberContains) score += 190;
+  if (setExactMatch) score += 240;
+  else if (setContains) score += 140;
+  if (taxonomyContains || taxonomyTokenMatch) score += 60;
+  if (nameTokenMatch) score += 110;
+  if (setTokenMatch) score += 95;
+  if (numberTokenMatch) score += 135;
+  if (fullTokenMatch && queryTokens.length > 1) score += 120;
+  if (nameTokenMatch && numberTokenMatch) score += 180;
 
   return score;
 }
 
-function matchesCardSearch(card, normalizedQuery, structuredQuery, mixedQuery) {
-  return computeSearchScore(card, normalizedQuery, structuredQuery, mixedQuery) >= 0;
+function matchesCardSearch(card, normalizedQuery, structuredQuery, mixedQuery, set = null) {
+  return computeSearchScore(card, normalizedQuery, structuredQuery, mixedQuery, set) >= 0;
+}
+
+function mergeSearchCards(dbCards = [], apiCards = []) {
+  const byNumber = new Map();
+  (Array.isArray(dbCards) ? dbCards : []).forEach((entry) => {
+    const cardNumberKey = normalizeCardNumber(entry?.number || '');
+    if (!cardNumberKey) return;
+    byNumber.set(cardNumberKey, { ...entry, __searchApiOnly: false });
+  });
+  (Array.isArray(apiCards) ? apiCards : []).forEach((entry) => {
+    const cardNumberKey = normalizeCardNumber(entry?.number || '');
+    if (!cardNumberKey) return;
+    const existing = byNumber.get(cardNumberKey);
+    if (existing) {
+      byNumber.set(cardNumberKey, { ...existing, ...entry, __searchApiOnly: false });
+    } else {
+      byNumber.set(cardNumberKey, { ...entry, __searchApiOnly: true });
+    }
+  });
+  return Array.from(byNumber.values());
+}
+
+function hasRichCardDetails(card = {}) {
+  return Boolean(
+    String(card?.rarity || '').trim()
+    || String(card?.hp || '').trim()
+    || (Array.isArray(card?.types) && card.types.length)
+    || String(card?.supertype || '').trim()
+    || String(card?.artist || '').trim()
+    || (Array.isArray(card?.rules) && card.rules.length)
+    || String(card?.flavorText || '').trim()
+  );
+}
+
+function needsApiCardEnrichment(cards = []) {
+  const sample = (Array.isArray(cards) ? cards : []).filter(Boolean).slice(0, 12);
+  if (!sample.length) return false;
+  const richCount = sample.filter((card) => hasRichCardDetails(card)).length;
+  return richCount < Math.max(1, Math.ceil(sample.length * 0.4));
 }
 
 async function runSearch(options = {}) {
@@ -2642,13 +4894,17 @@ async function runSearch(options = {}) {
 
   const rawQuery = dom.searchInput.value.trim();
   const query = normalizeSearchText(rawQuery);
-  const allowApiFallback = Boolean(dom.searchApiFallback?.checked);
+  const searchScopeMode = getSearchScopeMode();
   if (!query) {
+    state.lastSearchResults = [];
     dom.searchResults.innerHTML = '<p class="empty-state">Suchbegriff eingeben.</p>';
     return;
   }
-  const setFilter = dom.searchSetFilter.value;
-  const baseSetsToSearch = setFilter ? state.sets.filter((s) => s.setId === setFilter) : state.sets;
+  const setFilter = getSearchSetFilterValue();
+  const availableSetsForSearch = getSetsForSearchMode(searchScopeMode);
+  const baseSetsToSearch = setFilter
+    ? availableSetsForSearch.filter((s) => s.setId === setFilter)
+    : availableSetsForSearch;
   // Für ptcgoCode-Lookup state.allSets nutzen (hat zuverlässige Daten aus den JSON-Dateien),
   // da state.sets (aus Google Sheets) ptcgoCode leer haben kann.
   const lookupPool = state.allSets?.length ? state.allSets : baseSetsToSearch;
@@ -2656,8 +4912,13 @@ async function runSearch(options = {}) {
   // Freie Kombinations-Suche (z.B. "57 Digda") nur wenn kein Set-Präfix erkannt wurde
   const mixedQuery = !structuredQuery ? parseMixedQuery(rawQuery) : null;
   if (!force && !structuredQuery && !mixedQuery && query.length < 2) {
+    state.lastSearchResults = [];
     dom.searchResults.innerHTML = '<p class="empty-state">Mindestens 2 Zeichen eingeben oder Enter drücken.</p>';
     return;
+  }
+
+  if (force || structuredQuery || mixedQuery || rawQuery.length >= 3) {
+    window.SEARCH_HISTORY = addSearchHistory(rawQuery);
   }
   // Für die eigentliche Suche das importierte Set bevorzugen (hat Collection-Daten),
   // fallback auf das Set aus allSets falls nicht importiert.
@@ -2665,7 +4926,7 @@ async function runSearch(options = {}) {
     ? [baseSetsToSearch.find((s) => s.setId === structuredQuery.setId) ?? structuredQuery.set]
     : baseSetsToSearch;
   if (!setsToSearch.length) {
-    dom.searchResults.innerHTML = '<p class="empty-state">Keine Sets importiert.</p>';
+    dom.searchResults.innerHTML = '<p class="empty-state">Keine passenden Sets verfügbar.</p>';
     return;
   }
   dom.searchResults.innerHTML = '<p class="loading-placeholder">Suche\u2026</p>';
@@ -2675,22 +4936,44 @@ async function runSearch(options = {}) {
     try {
       const cacheKey = `cards_${set.setId}`;
       const dbCardsCacheKey = `db_cards_${set.setId}`;
+      const searchCacheKey = `${set.setId}::${searchScopeMode}`;
+      const useApiForSet = shouldUseApiForSearchSet(searchScopeMode, set);
       let cards;
-      if (state.searchCache.has(set.setId))  cards = state.searchCache.get(set.setId);
-      else if (cache.has(dbCardsCacheKey))   cards = cache.get(dbCardsCacheKey), state.searchCache.set(set.setId, cards);
-      else {
-        const dbCards = await readDbCardsForSet(set.setId).catch(() => []);
-        if (Array.isArray(dbCards) && dbCards.length > 0) {
-          cards = dbCards;
-          cache.set(dbCardsCacheKey, cards, CONFIG.CACHE_TTL_MS);
-          state.searchCache.set(set.setId, cards);
+      if (state.searchCache.has(searchCacheKey)) {
+        cards = state.searchCache.get(searchCacheKey);
+      } else {
+        let dbCards = [];
+        if (cache.has(dbCardsCacheKey)) {
+          dbCards = cache.get(dbCardsCacheKey) || [];
+        } else {
+          dbCards = await readDbCardsForSet(set.setId).catch(() => []);
+          if (Array.isArray(dbCards) && dbCards.length > 0) {
+            cache.set(dbCardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
+          }
         }
-      }
-      if (!cards && cache.has(cacheKey))     cards = cache.get(cacheKey), state.searchCache.set(set.setId, cards);
-      if (!cards && allowApiFallback) {
-        cards = await fetchMergedCards(set.setId, { signal: abortController.signal });
-        cache.set(cacheKey, cards, CONFIG.CACHE_TTL_MS);
-        state.searchCache.set(set.setId, cards);
+
+        const hasDbCards = Array.isArray(dbCards) && dbCards.length > 0;
+        const shouldFetchApiCards = useApiForSet || (searchScopeMode === SEARCH_SCOPE_ALL && !hasDbCards);
+
+        if (shouldFetchApiCards) {
+          let apiCards = [];
+          if (cache.has(cacheKey)) {
+            apiCards = cache.get(cacheKey) || [];
+          } else {
+            const apiPayload = await fetchMergedCardsWithSetMeta(set.setId, { signal: abortController.signal }).catch(() => ({ cards: [], setMetaPatch: null }));
+            apiCards = Array.isArray(apiPayload?.cards) ? apiPayload.cards : [];
+            if (apiCards.length > 0) {
+              cache.set(cacheKey, apiCards, CONFIG.CACHE_TTL_MS);
+            }
+          }
+          cards = searchScopeMode === SEARCH_SCOPE_ONLINE
+            ? mergeSearchCards([], apiCards)
+            : mergeSearchCards(dbCards, apiCards);
+        } else {
+          cards = hasDbCards ? dbCards : [];
+        }
+
+        state.searchCache.set(searchCacheKey, cards || []);
       }
       if (!cards || !cards.length) continue;
       if (isStale() || isAborted()) return;
@@ -2698,17 +4981,17 @@ async function runSearch(options = {}) {
       const dbCacheKey = `db_${set.setId}`;
       if (cache.has(dbCacheKey)) dbMap = cache.get(dbCacheKey);
       else {
-        dbMap = await readSetCollectionMap(set.setName);
+        dbMap = await readSetCollectionMap(set.setName).catch(() => new Map());
         cache.set(dbCacheKey, dbMap, CONFIG.CACHE_TTL_MS);
       }
       if (isStale() || isAborted()) return;
       cards.forEach((card) => {
-        const score = computeSearchScore(card, query, structuredQuery, mixedQuery);
+        const score = computeSearchScore(card, query, structuredQuery, mixedQuery, set);
         if (score >= 0) {
-          results.push({ card, set, dbMap, score });
+          results.push({ card, set, dbMap, score, apiOnly: Boolean(card?.__searchApiOnly) });
         }
       });
-      if (!structuredQuery && !mixedQuery && results.length >= 200) break;
+      if (!structuredQuery && !mixedQuery && results.length >= 200 && searchScopeMode === SEARCH_SCOPE_IMPORTED) break;
       // Exakter Set+Nummer-Treffer (ohne Namensfilter) — kann frühzeitig abbrechen
       if (structuredQuery?.cardNumber && !structuredQuery?.namePart && results.length >= 1) break;
     } catch (err) {
@@ -2719,8 +5002,13 @@ async function runSearch(options = {}) {
     }
   }
   if (!results.length) {
-    const fallbackHint = allowApiFallback ? '' : ' (API-Fallback ist aus)';
-    dom.searchResults.innerHTML = `<p class="empty-state">Keine Karten f\u00fcr \u201e${rawQuery}\u201c gefunden (durchsucht: ${setsToSearch.length} Sets)${fallbackHint}.</p>`;
+    const modeMeta = getSearchModeMeta(searchScopeMode);
+    dom.searchResults.innerHTML = `
+      <div class="search-results-head">
+        <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
+      </div>
+      <p class="empty-state">Keine Karten f\u00fcr \u201e${rawQuery}\u201c gefunden (durchsucht: ${setsToSearch.length} Sets, ${modeMeta.hint}).</p>
+    `;
     return;
   }
   results.sort((left, right) => {
@@ -2730,25 +5018,36 @@ async function runSearch(options = {}) {
     return String(left.card?.number || '').localeCompare(String(right.card?.number || ''), undefined, { numeric: true, sensitivity: 'base' });
   });
 
+  state.lastSearchResults = results.slice(0, 60);
+
   if (isStale() || isAborted()) return;
-  dom.searchResults.innerHTML = `<p class="search-result-count">${results.length} Ergebnis${results.length !== 1 ? 'se' : ''}</p>`;
+  const modeMeta = getSearchModeMeta(searchScopeMode);
+  dom.searchResults.innerHTML = `
+    <div class="search-results-head">
+      <p class="search-result-count">${results.length} Ergebnis${results.length !== 1 ? 'se' : ''}</p>
+      <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
+    </div>
+  `;
   const frag = document.createDocumentFragment();
-  results.forEach(({ card, set, dbMap }) => {
+  results.forEach(({ card, set, dbMap, apiOnly }) => {
     const key = normalizeCardNumber(card.number);
-    frag.appendChild(createSearchResultCard(card, key, dbMap.get(key), set));
+    frag.appendChild(createSearchResultCard(card, key, dbMap.get(key), set, apiOnly));
   });
   dom.searchResults.appendChild(frag);
 }
 
-function createSearchResultCard(card, key, db, set) {
+function createSearchResultCard(card, key, db, set, apiOnly = false) {
   const article = document.createElement('article');
-  article.className = 'card';
+  article.className = 'card search-result-card';
   if (db?.rh)     article.classList.add('reverse');
   else if (db?.g) article.classList.add('collected');
 
+  const imgWrap = document.createElement('div');
+  imgWrap.className = 'card-img-wrap';
   const img = document.createElement('img');
   img.src = card.image || ''; img.alt = card.name || key; img.loading = 'lazy';
   attachImageFallback(img, card, set?.setId || '');
+  imgWrap.appendChild(img);
 
   const meta    = document.createElement('div'); meta.className = 'meta';
   const setTag  = document.createElement('span'); setTag.className = 'search-set-tag'; setTag.textContent = set.setName;
@@ -2760,14 +5059,14 @@ function createSearchResultCard(card, key, db, set) {
   goToSetBtn.className = 'btn-secondary';
   goToSetBtn.textContent = 'Zum Set';
   goToSetBtn.title = `${set.setName} öffnen`;
-  status.textContent = db?.rh ? '\uD83D\uDD35 RH' : db?.g ? '\u2705 G' : '\u2610 Fehlend';
+  status.textContent = db?.rh ? '\uD83D\uDD35 RH' : db?.g ? '\u2705 G' : (apiOnly ? '🌐 API' : '\u2610 Fehlend');
   actions.append(goToSetBtn);
   meta.append(setTag, title, status, actions);
-  article.append(img, meta);
+  article.append(imgWrap, meta);
 
   article.addEventListener('click', async () => {
     try {
-      await openSearchResultLightbox(card, set);
+      await openSearchResultLightbox(card, set, { apiOnly });
     } catch (err) {
       showToast(`Karte konnte nicht geöffnet werden: ${err.message}`, 'error');
     }
@@ -2775,54 +5074,90 @@ function createSearchResultCard(card, key, db, set) {
 
   goToSetBtn.addEventListener('click', (event) => {
     event.stopPropagation();
-    navigateToSearchResultSet(set);
+    navigateToSearchResultSet(set, card);
   });
 
   return article;
 }
 
-function navigateToSearchResultSet(set) {
+function navigateToSearchResultSet(set, card = null) {
   if (!set?.setId) return;
-  dom.selector.value = set.setId;
-  navigate(`set/${set.setId}`);
+  const resolvedSet = getSetById(set.setId) || set;
+  state.pendingSearchSetImport = Boolean(!resolvedSet?.imported);
+  state.pendingSearchCardFocusKey = card?.number ? normalizeCardNumber(card.number) : null;
+  ensureSetSelectorOption(resolvedSet);
+  dom.selector.value = resolvedSet.setId;
+
+  const targetHash = `#set/${resolvedSet.setId}`;
+  if (window.location.hash === targetHash) {
+    showView('set');
+    loadCurrentSet(false);
+    return;
+  }
+
+  navigate(`set/${resolvedSet.setId}`);
 }
 
-async function openSearchResultLightbox(card, set) {
+async function openSearchResultLightbox(card, set, { apiOnly = false } = {}) {
   if (!set?.setId || !card) return;
 
   const cardsCacheKey = `db_cards_${set.setId}`;
   const dbCacheKey = `db_${set.setId}`;
-  const allowApiFallback = Boolean(dom.searchApiFallback?.checked);
+  const searchScopeMode = getSearchScopeMode();
+  const useApiForSet = shouldUseApiForSearchSet(searchScopeMode, set);
+  const searchCacheKey = `${set.setId}::${searchScopeMode}`;
 
   const [cards, dbMap] = await Promise.all([
-    cache.has(cardsCacheKey)
-      ? cache.get(cardsCacheKey)
+    state.searchCache.has(searchCacheKey)
+      ? state.searchCache.get(searchCacheKey)
       : readDbCardsForSet(set.setId).then(async (loadedCards) => {
-        if (Array.isArray(loadedCards) && loadedCards.length > 0) {
-          cache.set(cardsCacheKey, loadedCards, CONFIG.CACHE_TTL_MS);
-          state.searchCache.set(set.setId, loadedCards);
-          return loadedCards;
+        const dbCards = Array.isArray(loadedCards) ? loadedCards : [];
+        if (dbCards.length > 0) {
+          cache.set(cardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
         }
 
-        if (allowApiFallback) {
-          const apiCards = await fetchMergedCards(set.setId);
-          cache.set(cardsCacheKey, apiCards, CONFIG.CACHE_TTL_MS);
-          state.searchCache.set(set.setId, apiCards);
-          return apiCards;
+        const hasDbCards = Array.isArray(dbCards) && dbCards.length > 0;
+        const shouldFetchApiCards = useApiForSet
+          || (searchScopeMode === SEARCH_SCOPE_ALL && !hasDbCards)
+          || needsApiCardEnrichment(dbCards);
+
+        if (!shouldFetchApiCards) {
+          state.searchCache.set(searchCacheKey, dbCards);
+          return dbCards;
         }
 
-        return [];
+        let apiCards = [];
+        if (cache.has(`cards_${set.setId}`)) {
+          apiCards = cache.get(`cards_${set.setId}`) || [];
+        } else {
+          const apiPayload = await fetchMergedCardsWithSetMeta(set.setId).catch(() => ({ cards: [], setMetaPatch: null }));
+          apiCards = Array.isArray(apiPayload?.cards) ? apiPayload.cards : [];
+        }
+        if (Array.isArray(apiCards) && apiCards.length > 0) {
+          cache.set(`cards_${set.setId}`, apiCards, CONFIG.CACHE_TTL_MS);
+        }
+
+        const mergedCards = searchScopeMode === SEARCH_SCOPE_ONLINE
+          ? mergeSearchCards([], apiCards)
+          : mergeSearchCards(dbCards, apiCards);
+        state.searchCache.set(searchCacheKey, mergedCards);
+        return mergedCards;
       }),
     cache.has(dbCacheKey)
       ? cache.get(dbCacheKey)
       : readSetCollectionMap(set.setName).then((loadedDbMap) => {
-        cache.set(dbCacheKey, loadedDbMap, CONFIG.CACHE_TTL_MS);
-        return loadedDbMap;
+        const safeDbMap = loadedDbMap instanceof Map ? loadedDbMap : new Map();
+        cache.set(dbCacheKey, safeDbMap, CONFIG.CACHE_TTL_MS);
+        return safeDbMap;
+      }).catch(() => {
+        const emptyDbMap = new Map();
+        cache.set(dbCacheKey, emptyDbMap, CONFIG.CACHE_TTL_MS);
+        return emptyDbMap;
       })
   ]);
 
   if (!Array.isArray(cards) || cards.length === 0) {
-    showToast('Keine Kartendaten in der Datenbank für dieses Set. Optional API-Fallback aktivieren oder Set neu importieren.', 'info', 4500);
+    showToast('Keine Kartendaten für dieses Set gefunden.', 'info', 4500);
     return;
   }
 
@@ -2834,6 +5169,7 @@ async function openSearchResultLightbox(card, set) {
   state.cards = cards;
   state.dbMap = dbMap;
   state.lightboxIndex = targetIndex;
+  state.pendingSearchSetImport = Boolean(apiOnly || !set?.imported);
 
   openLightbox(targetIndex);
 }
@@ -2844,8 +5180,22 @@ function initSearch() {
     clearTimeout(debounce);
     debounce = setTimeout(() => runSearch(), SEARCH_INPUT_DEBOUNCE_MS);
   });
-  dom.searchSetFilter.addEventListener('change', () => runSearch({ force: true }));
-  dom.searchApiFallback?.addEventListener('change', () => runSearch({ force: true }));
+  dom.searchSetFilter.addEventListener('change', () => {
+    if (dom.searchScopeMode) {
+      dom.searchScopeMode.value = getSearchScopeMode();
+    }
+    state.searchCache.clear();
+    runSearch({ force: true });
+  });
+  dom.searchScopeMode?.addEventListener('change', () => {
+    const selectedMode = String(dom.searchScopeMode?.value || SEARCH_SCOPE_IMPORTED);
+    renderSearchSetFilterOptions();
+    if (dom.searchSetFilter) {
+      dom.searchSetFilter.value = `scope:${selectedMode}`;
+    }
+    state.searchCache.clear();
+    runSearch({ force: true });
+  });
   dom.searchInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       clearTimeout(debounce);
@@ -2877,6 +5227,29 @@ function updateStats() {
   dom.statsSection.classList.remove('hidden');
   dom.filterSection.classList.remove('hidden');
   dom.sortSection.classList.remove('hidden');
+
+  if (state.currentSet?.setName) {
+    const summaryRow = {
+      setName: state.currentSet.setName,
+      total,
+      collected,
+      rh,
+      percent
+    };
+    state.summaryOverrides.set(state.currentSet.setName, summaryRow);
+    if (state.currentSet?.setId) {
+      state.summaryOverrides.set(state.currentSet.setId, summaryRow);
+    }
+    if (Array.isArray(state.summaryData)) {
+      const rowIndex = state.summaryData.findIndex((row) => row?.setName === state.currentSet.setName);
+      if (rowIndex >= 0) {
+        state.summaryData[rowIndex] = { ...state.summaryData[rowIndex], ...summaryRow };
+      } else {
+        state.summaryData.push(summaryRow);
+      }
+    }
+    syncDashboardCardForSet(state.currentSet, summaryRow);
+  }
 }
 
 function applyFilter() {
@@ -2940,6 +5313,22 @@ function renderCards() {
   dom.cards.appendChild(fragment);
   applyFilter();
   updateStats();
+  revealPendingSearchCardFocus();
+}
+
+function revealPendingSearchCardFocus() {
+  const targetKey = String(state.pendingSearchCardFocusKey || '').trim();
+  if (!targetKey || !dom.cards) return;
+
+  state.pendingSearchCardFocusKey = null;
+  const safeKey = targetKey.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  const article = dom.cards.querySelector(`[data-card-id="${safeKey}"]`);
+  if (!article) return;
+
+  window.requestAnimationFrame(() => {
+    article.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    article.focus();
+  });
 }
 
 function createCardElement(card, key, db, index) {
@@ -2964,7 +5353,11 @@ function createCardElement(card, key, db, index) {
   // Image wrap (click → lightbox)
   const imgWrap = document.createElement('div');
   imgWrap.className = 'card-img-wrap';
-  imgWrap.addEventListener('click', () => { if (!state.bulkMode) openLightbox(index); });
+  imgWrap.addEventListener('click', (e) => {
+    if (state.bulkMode) return;
+    e.stopPropagation();
+    openLightbox(index);
+  });
 
   const img = document.createElement('img');
   img.src = card.image || ''; img.alt = card.name || key; img.loading = 'lazy';
@@ -2984,7 +5377,7 @@ function createCardElement(card, key, db, index) {
   const checksDiv = document.createElement('div'); checksDiv.className = 'checks';
   checksDiv.append(
     makeCheckbox('G', 'g', dbEntry?.g ?? false, !isEditable),
-    makeCheckbox('RH', 'rh', dbEntry?.rh ?? false, !isEditable || !dbEntry?.g || !dbEntry?.rhCell)
+    makeCheckbox('RH', 'rh', dbEntry?.rh ?? false, !isEditable || !dbEntry?.rhCell)
   );
   meta.append(titleDiv, checksDiv);
 
@@ -3003,8 +5396,14 @@ function createCardElement(card, key, db, index) {
 
   // Bulk-Klick auf Artikel
   article.addEventListener('click', (e) => {
-    if (!state.bulkMode) return;
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'A') return;
+    const target = e.target;
+    if (target instanceof HTMLElement && target.closest('input, a, label')) return;
+
+    if (!state.bulkMode) {
+      openLightbox(index);
+      return;
+    }
+
     toggleBulkSelect(article, key);
     e.stopPropagation();
   });
@@ -3023,6 +5422,18 @@ function makeCheckbox(labelText, type, checked, disabled) {
   input.type = 'checkbox'; input.dataset.type = type; input.checked = checked; input.disabled = disabled;
   label.append(input, ` ${labelText}`);
   return label;
+}
+
+function syncCollectionCheckboxUi(gInput, rhInput, db, { isEditable = Boolean(state.currentSet?.setName) } = {}) {
+  const uiState = getCollectionUiState(db, { isEditable });
+  if (gInput) {
+    gInput.checked = uiState.gChecked;
+    gInput.disabled = uiState.gDisabled;
+  }
+  if (rhInput) {
+    rhInput.checked = uiState.rhChecked;
+    rhInput.disabled = uiState.rhDisabled;
+  }
 }
 
 function attachCheckboxListeners(article, db, key) {
@@ -3044,49 +5455,85 @@ function attachCheckboxListeners(article, db, key) {
   gInput.addEventListener('change', async () => {
     if (state.bulkMode) { gInput.checked = !gInput.checked; return; }
     const checked = gInput.checked;
+    const prevState = { g: Boolean(db?.g), rh: Boolean(db?.rh) };
+    setCardSaveState(article, 'saving');
+    beginTrackedWrite(`Karte #${db?.displayId || key} speichern`);
     try {
       await ensureDbEntry();
-      await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, checked);
-      db.g = checked;
-      if (!checked && db?.rhCell) {
-        await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, false);
-        db.rh = false; rhInput.checked = false; rhInput.disabled = true;
-      } else {
-        rhInput.disabled = !db?.rhCell;
+      const nextState = resolveCollectionToggleState(db, { isG: true, checked });
+      await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, nextState.g);
+      if (db?.rhCell && nextState.rh !== Boolean(db?.rh)) {
+        await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, nextState.rh);
       }
+      db.g = nextState.g;
+      db.rh = nextState.rh;
       updateCardState(article, db);
       updateStats(); applyFilter();
       state.summaryData = null;
+      pushUndoEntry({
+        setId: state.currentSet?.setId,
+        setName: state.currentSet?.setName,
+        label: 'Kartenstatus geändert',
+        changes: [{ key, prev: prevState, next: { g: Boolean(db.g), rh: Boolean(db.rh) } }]
+      });
+      updateUndoUi();
       broadcastRealtimeCardUpdate(key, db);
+      setCardSaveState(article, 'saved');
+      finishTrackedWrite(`Karte #${db?.displayId || key} speichern`, null);
     } catch (err) {
       showToast(`Speichern fehlgeschlagen: ${err.message}`, 'error');
       gInput.checked = !checked;
+      setCardSaveState(article, 'error');
+      finishTrackedWrite(`Karte #${db?.displayId || key} speichern`, err);
     }
   });
 
   rhInput.addEventListener('change', async () => {
     if (state.bulkMode) { rhInput.checked = !rhInput.checked; return; }
-    if (!db.g || !db?.rhCell) { rhInput.checked = false; return; }
+    if (!db?.rhCell) { rhInput.checked = false; return; }
     const checked = rhInput.checked;
+    const prevState = { g: Boolean(db?.g), rh: Boolean(db?.rh) };
+    setCardSaveState(article, 'saving');
+    beginTrackedWrite(`Karte #${db?.displayId || key} RH speichern`);
     try {
       await ensureDbEntry();
-      await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, checked);
-      db.rh = checked;
+      const nextState = resolveCollectionToggleState(db, { isG: false, checked });
+      if (nextState.g !== Boolean(db?.g)) {
+        await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, nextState.g);
+      }
+      await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, nextState.rh);
+      db.g = nextState.g;
+      db.rh = nextState.rh;
       updateCardState(article, db);
+      updateStats(); applyFilter();
       state.summaryData = null;
+      pushUndoEntry({
+        setId: state.currentSet?.setId,
+        setName: state.currentSet?.setName,
+        label: 'RH-Status geändert',
+        changes: [{ key, prev: prevState, next: { g: Boolean(db.g), rh: Boolean(db.rh) } }]
+      });
+      updateUndoUi();
       broadcastRealtimeCardUpdate(key, db);
+      setCardSaveState(article, 'saved');
+      finishTrackedWrite(`Karte #${db?.displayId || key} RH speichern`, null);
     } catch (err) {
       showToast(`Speichern fehlgeschlagen: ${err.message}`, 'error');
       rhInput.checked = !checked;
+      setCardSaveState(article, 'error');
+      finishTrackedWrite(`Karte #${db?.displayId || key} RH speichern`, err);
     }
   });
 }
 
 function updateCardState(article, db) {
+  const gInput = article?.querySelector('input[data-type="g"]');
+  const rhInput = article?.querySelector('input[data-type="rh"]');
+  syncCollectionCheckboxUi(gInput, rhInput, db);
   article.classList.toggle('reverse',   Boolean(db?.rh));
   article.classList.toggle('collected', Boolean(db?.g) && !db?.rh);
   if (dom.lightboxDialog.open) {
-    const idx = parseInt(article.dataset.cardIndex);
+    const idx = parseInt(article.dataset.cardIndex, 10);
     if (state.lightboxIndex === idx) renderLightbox(idx);
   }
 }
@@ -3137,14 +5584,36 @@ function applyIncomingRealtimeUpdate(payload) {
 // ══════════════════════════════════════════════════════════════════════════
 // LIGHTBOX
 // ══════════════════════════════════════════════════════════════════════════
+function syncLightboxModalState() {
+  const shouldLockScroll = Boolean(dom.lightboxDialog?.open || dom.lightboxImageDialog?.open);
+  document.documentElement.classList.toggle('modal-scroll-locked', shouldLockScroll);
+  document.body.classList.toggle('modal-scroll-locked', shouldLockScroll);
+}
+
 function openLightbox(index) {
+  if (!dom.lightboxDialog) return;
   state.lightboxIndex = index;
   renderLightbox(index);
-  dom.lightboxDialog.showModal();
+  if (dom.lightboxImageDialog?.open) {
+    dom.lightboxImageDialog.close();
+  }
+  if (!dom.lightboxDialog.open) {
+    dom.lightboxDialog.showModal();
+  }
+  dom.lightboxDialog.scrollTop = 0;
+  dom.lightboxDialog.querySelector('.lightbox-meta')?.scrollTo({ top: 0, behavior: 'auto' });
+  syncLightboxModalState();
+  dom.btnLightboxClose?.focus({ preventScroll: true });
 }
 
 function closeLightbox() {
-  dom.lightboxDialog.close();
+  if (dom.lightboxImageDialog?.open) {
+    dom.lightboxImageDialog.close();
+  }
+  if (dom.lightboxDialog?.open) {
+    dom.lightboxDialog.close();
+  }
+  syncLightboxModalState();
   dom.cards.querySelector(`[data-card-index="${state.lightboxIndex}"]`)?.focus();
 }
 
@@ -3162,8 +5631,15 @@ function renderLightbox(index) {
     node.classList.toggle('lightbox-fact-long', longText && text !== '—');
   };
 
-  dom.lightboxImg.src              = card.image || '';
-  attachImageFallback(dom.lightboxImg, card, state.currentSet?.setId || '');
+  const lightboxCard = {
+    ...card,
+    image: card.imageLarge || card.image || '',
+    imageCandidates: Array.isArray(card.imageLargeCandidates) && card.imageLargeCandidates.length
+      ? card.imageLargeCandidates
+      : (Array.isArray(card.imageCandidates) ? card.imageCandidates : [])
+  };
+  dom.lightboxImg.src              = lightboxCard.image || '';
+  attachImageFallback(dom.lightboxImg, lightboxCard, state.currentSet?.setId || '');
   dom.lightboxImg.alt              = card.name  || key;
   dom.lightboxTitle.textContent    = card.name  || 'Unbekannt';
   dom.lightboxSubtitle.textContent = `#${card.number}`;
@@ -3189,12 +5665,9 @@ function renderLightbox(index) {
     dom.lightboxCmLink.classList.add('hidden');
     dom.lightboxCmLink.classList.remove('lightbox-cm-link-fallback');
   }
-  const hasGCell                = Boolean(db?.gCell);
-  const hasRhCell               = Boolean(db?.rhCell);
-  dom.lightboxGCheck.checked    = db?.g  ?? false;
-  dom.lightboxGCheck.disabled   = !Boolean(state.currentSet?.setName);
-  dom.lightboxRhCheck.checked   = db?.rh ?? false;
-  dom.lightboxRhCheck.disabled  = !hasRhCell || !db?.g;
+  syncCollectionCheckboxUi(dom.lightboxGCheck, dom.lightboxRhCheck, db, {
+    isEditable: Boolean(state.currentSet?.setName)
+  });
   dom.btnLightboxPrev.disabled  = index === 0;
   dom.btnLightboxNext.disabled  = index === state.cards.length - 1;
 }
@@ -3202,54 +5675,333 @@ function renderLightbox(index) {
 function initLightbox() {
   dom.btnLightboxClose.addEventListener('click', closeLightbox);
   dom.lightboxDialog.addEventListener('click', (e) => { if (e.target === dom.lightboxDialog) closeLightbox(); });
+  dom.lightboxDialog.addEventListener('close', syncLightboxModalState);
+  dom.lightboxDialog.addEventListener('cancel', (e) => {
+    e.preventDefault();
+    closeLightbox();
+  });
 
-  dom.btnLightboxPrev.addEventListener('click', () => {
-    if (state.lightboxIndex > 0) { state.lightboxIndex--; renderLightbox(state.lightboxIndex); }
-  });
-  dom.btnLightboxNext.addEventListener('click', () => {
-    if (state.lightboxIndex < state.cards.length - 1) { state.lightboxIndex++; renderLightbox(state.lightboxIndex); }
-  });
+  const goPrevLightboxCard = () => {
+    if (state.lightboxIndex > 0) {
+      state.lightboxIndex--;
+      renderLightbox(state.lightboxIndex);
+      return true;
+    }
+    return false;
+  };
+
+  const goNextLightboxCard = () => {
+    if (state.lightboxIndex < state.cards.length - 1) {
+      state.lightboxIndex++;
+      renderLightbox(state.lightboxIndex);
+      return true;
+    }
+    return false;
+  };
+
+  dom.btnLightboxPrev.addEventListener('click', goPrevLightboxCard);
+  dom.btnLightboxNext.addEventListener('click', goNextLightboxCard);
 
   dom.lightboxDialog.addEventListener('keydown', (e) => {
     if (e.key === 'Escape')     closeLightbox();
-    if (e.key === 'ArrowLeft')  dom.btnLightboxPrev.click();
-    if (e.key === 'ArrowRight') dom.btnLightboxNext.click();
+    if (e.key === 'ArrowLeft')  goPrevLightboxCard();
+    if (e.key === 'ArrowRight') goNextLightboxCard();
     if (e.key === ' ')          { e.preventDefault(); dom.lightboxGCheck.click(); }
   });
+
+  const lightboxImgWrap = dom.lightboxDialog.querySelector('.lightbox-img-wrap');
+  if (lightboxImgWrap) {
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartTime = 0;
+
+    lightboxImgWrap.addEventListener('touchstart', (e) => {
+      if (!dom.lightboxDialog.open || e.touches.length !== 1) return;
+      const touch = e.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+      touchStartTime = Date.now();
+    }, { passive: true });
+
+    lightboxImgWrap.addEventListener('touchend', (e) => {
+      if (!dom.lightboxDialog.open || !touchStartTime || e.changedTouches.length !== 1) return;
+      const touch = e.changedTouches[0];
+      const deltaX = touch.clientX - touchStartX;
+      const deltaY = touch.clientY - touchStartY;
+      const elapsed = Date.now() - touchStartTime;
+
+      touchStartTime = 0;
+
+      const minDistance = 48;
+      const maxVertical = 42;
+      const maxDuration = 700;
+      const isHorizontalSwipe = Math.abs(deltaX) >= minDistance
+        && Math.abs(deltaY) <= maxVertical
+        && elapsed <= maxDuration;
+
+      const isSwipeDownToClose = deltaY >= 72
+        && Math.abs(deltaX) <= 50
+        && elapsed <= maxDuration;
+
+      if (isSwipeDownToClose) {
+        closeLightbox();
+        return;
+      }
+
+      if (!isHorizontalSwipe) return;
+
+      if (deltaX > 0) goPrevLightboxCard();
+      else if (deltaX < 0) goNextLightboxCard();
+    }, { passive: true });
+  }
+
+  if (dom.lightboxImg && dom.lightboxImageDialog && dom.lightboxImageFull && dom.lightboxImageStage && dom.btnLightboxImageClose) {
+    let fsScale = 1;
+    let fsTranslateX = 0;
+    let fsTranslateY = 0;
+    let fsStartX = 0;
+    let fsStartY = 0;
+    let fsStartTime = 0;
+    let fsStartTranslateX = 0;
+    let fsStartTranslateY = 0;
+    let fsPinchStartDistance = 0;
+    let fsPinchStartScale = 1;
+
+    const resetFullscreenTransform = () => {
+      fsScale = 1;
+      fsTranslateX = 0;
+      fsTranslateY = 0;
+      dom.lightboxImageFull.style.transform = 'translate3d(0, 0, 0) scale(1)';
+    };
+
+    const applyFullscreenTransform = () => {
+      dom.lightboxImageFull.style.transform = `translate3d(${fsTranslateX}px, ${fsTranslateY}px, 0) scale(${fsScale})`;
+    };
+
+    const syncFullscreenImage = (resetTransform = false) => {
+      const card = state.cards[state.lightboxIndex];
+      if (!card) return;
+      const fullscreenCard = {
+        ...card,
+        image: card.imageLarge || dom.lightboxImg?.currentSrc || card.image || '',
+        imageCandidates: Array.isArray(card.imageLargeCandidates) && card.imageLargeCandidates.length
+          ? card.imageLargeCandidates
+          : (Array.isArray(card.imageCandidates) ? card.imageCandidates : [])
+      };
+      dom.lightboxImageFull.src = fullscreenCard.image || '';
+      attachImageFallback(dom.lightboxImageFull, fullscreenCard, state.currentSet?.setId || '');
+      dom.lightboxImageFull.alt = card.name || '';
+      if (resetTransform) resetFullscreenTransform();
+    };
+
+    const openFullscreenImage = () => {
+      syncFullscreenImage(true);
+      dom.lightboxImageDialog.showModal();
+      syncLightboxModalState();
+    };
+
+    const closeFullscreenImage = () => {
+      if (!dom.lightboxImageDialog.open) return;
+      dom.lightboxImageDialog.close();
+      resetFullscreenTransform();
+      syncLightboxModalState();
+    };
+
+    dom.lightboxImg.addEventListener('click', () => {
+      if (!dom.lightboxDialog.open) return;
+      openFullscreenImage();
+    });
+
+    dom.btnLightboxImageClose.addEventListener('click', closeFullscreenImage);
+    dom.lightboxImageDialog.addEventListener('close', syncLightboxModalState);
+    dom.lightboxImageDialog.addEventListener('cancel', (e) => {
+      e.preventDefault();
+      closeFullscreenImage();
+    });
+    dom.lightboxImageDialog.addEventListener('click', (e) => {
+      if (e.target === dom.lightboxImageDialog) closeFullscreenImage();
+    });
+    dom.lightboxImageDialog.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeFullscreenImage();
+      if (e.key === 'ArrowLeft') {
+        if (goPrevLightboxCard()) syncFullscreenImage(true);
+      }
+      if (e.key === 'ArrowRight') {
+        if (goNextLightboxCard()) syncFullscreenImage(true);
+      }
+    });
+
+    const distance = (touchA, touchB) => {
+      const dx = touchA.clientX - touchB.clientX;
+      const dy = touchA.clientY - touchB.clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    dom.lightboxImageStage.addEventListener('touchstart', (e) => {
+      if (!dom.lightboxImageDialog.open) return;
+      if (e.touches.length === 2) {
+        fsPinchStartDistance = distance(e.touches[0], e.touches[1]);
+        fsPinchStartScale = fsScale;
+        fsStartTime = 0;
+        return;
+      }
+      if (e.touches.length !== 1) return;
+      const touch = e.touches[0];
+      fsStartX = touch.clientX;
+      fsStartY = touch.clientY;
+      fsStartTime = Date.now();
+      fsStartTranslateX = fsTranslateX;
+      fsStartTranslateY = fsTranslateY;
+    }, { passive: true });
+
+    dom.lightboxImageStage.addEventListener('touchmove', (e) => {
+      if (!dom.lightboxImageDialog.open) return;
+      if (e.touches.length === 2) {
+        const currentDistance = distance(e.touches[0], e.touches[1]);
+        if (!fsPinchStartDistance) {
+          fsPinchStartDistance = currentDistance;
+          fsPinchStartScale = fsScale;
+          return;
+        }
+        const nextScale = fsPinchStartScale * (currentDistance / fsPinchStartDistance);
+        fsScale = Math.max(1, Math.min(4, nextScale));
+        if (fsScale === 1) {
+          fsTranslateX = 0;
+          fsTranslateY = 0;
+        }
+        applyFullscreenTransform();
+        e.preventDefault();
+        return;
+      }
+
+      if (e.touches.length !== 1 || fsScale <= 1) return;
+      const touch = e.touches[0];
+      fsTranslateX = fsStartTranslateX + (touch.clientX - fsStartX);
+      fsTranslateY = fsStartTranslateY + (touch.clientY - fsStartY);
+      applyFullscreenTransform();
+      e.preventDefault();
+    }, { passive: false });
+
+    dom.lightboxImageStage.addEventListener('touchend', (e) => {
+      if (!dom.lightboxImageDialog.open) return;
+
+      if (e.touches.length === 0) {
+        fsPinchStartDistance = 0;
+      }
+
+      if (!fsStartTime || e.changedTouches.length !== 1 || fsScale > 1) return;
+
+      const touch = e.changedTouches[0];
+      const deltaX = touch.clientX - fsStartX;
+      const deltaY = touch.clientY - fsStartY;
+      const elapsed = Date.now() - fsStartTime;
+      fsStartTime = 0;
+
+      const minHorizontal = 52;
+      const maxVertical = 44;
+      const isHorizontalSwipe = Math.abs(deltaX) >= minHorizontal
+        && Math.abs(deltaY) <= maxVertical
+        && elapsed <= 700;
+
+      if (isHorizontalSwipe) {
+        if (deltaX > 0) {
+          if (goPrevLightboxCard()) syncFullscreenImage(true);
+        } else {
+          if (goNextLightboxCard()) syncFullscreenImage(true);
+        }
+        return;
+      }
+
+      const isSwipeDownClose = deltaY >= 78
+        && Math.abs(deltaX) <= 52
+        && elapsed <= 700;
+      if (isSwipeDownClose) {
+        closeFullscreenImage();
+      }
+    }, { passive: true });
+  }
 
   async function lightboxToggle(isG, checked) {
     const card = state.cards[state.lightboxIndex];
     if (!card) return;
     const key = normalizeCardNumber(card.number);
-    const db  = state.dbMap.get(key) || { displayId: card.number, g: false, rh: false, gCell: null, rhCell: null };
+    const article = dom.cards.querySelector(`[data-card-index="${state.lightboxIndex}"]`);
+    let db = state.dbMap.get(key) || { displayId: card.number, g: false, rh: false, gCell: null, rhCell: null };
+    const prevState = { g: Boolean(db?.g), rh: Boolean(db?.rh) };
+    const shouldEnsureImportedSet = checked && (Boolean(state.pendingSearchSetImport) || !Boolean(state.currentSet?.imported));
+    if (shouldEnsureImportedSet) {
+      const setToImport = state.currentSet;
+      const setId = setToImport?.setId;
+      if (!setId) return;
+      setLoading(true, `Importiere ${setToImport.setName}…`);
+      try {
+        const importPayload = await fetchMergedCardsWithSetMeta(setId).catch(() => ({ cards: [], setMetaPatch: null }));
+        const importCards = Array.isArray(importPayload?.cards) ? importPayload.cards : [];
+        if (!importCards.length) {
+          throw new Error('Keine Kartendaten für den automatischen Set-Import gefunden.');
+        }
+        const refreshedSet = await ensureSetImportedFromApi(setToImport, importCards, {
+          setMetaPatch: importPayload?.setMetaPatch || null,
+          showSuccessToast: true,
+          successMessage: `${setToImport.setName} wurde automatisch importiert.`,
+          source: 'lightbox'
+        });
+        state.currentSet = refreshedSet || { ...setToImport, imported: true };
+        state.pendingSearchSetImport = false;
+        state.dbMap = await readSetCollectionMap(state.currentSet.setName).catch(() => new Map());
+        cache.set(`db_${setId}`, state.dbMap, CONFIG.CACHE_TTL_MS);
+        db = state.dbMap.get(key) || db;
+      } catch (err) {
+        showToast(`Automatischer Set-Import fehlgeschlagen: ${err.message || err}`, 'error', 4200);
+        renderLightbox(state.lightboxIndex);
+        return;
+      } finally {
+        setLoading(false);
+      }
+    }
     if (!db?.gCell) {
-      const ensured = await ensureCollectionEntry(state.currentSet.setName, db?.displayId || key);
+      const ensured = await ensureCollectionEntry(state.currentSet.setName, card.number || db?.displayId || key);
+      db.displayId = ensured.displayId || db.displayId || card.number || key;
       db.gCell = ensured.gCell;
       db.rhCell = ensured.rhCell;
       state.dbMap.set(key, db);
     }
+    setCardSaveState(article, 'saving');
+    beginTrackedWrite(`Lightbox #${db?.displayId || key}`);
     try {
-      if (isG) {
-        await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, checked);
-        db.g = checked;
-        if (!checked && db?.rhCell) {
-          await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, false);
-          db.rh = false;
-        }
-      } else {
-        if (!db.g || !db?.rhCell) return;
-        await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, checked);
-        db.rh = checked;
+      if (!isG && !db?.rhCell) {
+        renderLightbox(state.lightboxIndex);
+        return;
       }
+      const nextState = resolveCollectionToggleState(db, { isG, checked });
+      if (nextState.g !== Boolean(db?.g)) {
+        await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, nextState.g);
+      }
+      if (db?.rhCell && nextState.rh !== Boolean(db?.rh)) {
+        await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, nextState.rh);
+      }
+      db.g = nextState.g;
+      db.rh = nextState.rh;
       renderLightbox(state.lightboxIndex);
-      const article = dom.cards.querySelector(`[data-card-index="${state.lightboxIndex}"]`);
       if (article) updateCardState(article, db);
       updateStats();
       state.summaryData = null;
+      pushUndoEntry({
+        setId: state.currentSet?.setId,
+        setName: state.currentSet?.setName,
+        label: 'Lightbox-Änderung',
+        changes: [{ key, prev: prevState, next: { g: Boolean(db.g), rh: Boolean(db.rh) } }]
+      });
+      updateUndoUi();
       broadcastRealtimeCardUpdate(key, db);
+      runSearch({ force: true });
+      setCardSaveState(article, 'saved');
+      finishTrackedWrite(`Lightbox #${db?.displayId || key}`, null);
     } catch (err) {
       showToast(`Fehler: ${err.message}`, 'error');
       renderLightbox(state.lightboxIndex); // revert UI
+      setCardSaveState(article, 'error');
+      finishTrackedWrite(`Lightbox #${db?.displayId || key}`, err);
     }
   }
 
@@ -3281,13 +6033,16 @@ function updateBulkCount() {
 }
 
 async function bulkUpdate(g, rh) {
-  if (!state.bulkSelected.size) { showToast('Keine Karten ausgew\u00e4hlt.', 'info'); return; }
-  setLoading(true, 'Massenaktion\u2026');
+  if (!state.bulkSelected.size) { showToast('Keine Karten ausgewählt.', 'info'); return; }
+  beginTrackedWrite('Bulk-Update');
+  setLoading(true, 'Massenaktion…');
   let updated = 0, errors = 0;
+  const undoChanges = [];
   try {
     for (const key of state.bulkSelected) {
       const db = state.dbMap.get(key);
       if (!db?.gCell) continue;
+      const prevState = { g: Boolean(db?.g), rh: Boolean(db?.rh) };
       try {
         await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, g);
         db.g = g;
@@ -3298,6 +6053,7 @@ async function bulkUpdate(g, rh) {
         }
         const article = dom.cards.querySelector(`[data-card-id="${key}"]`);
         if (article) updateCardState(article, db);
+        undoChanges.push({ key, prev: prevState, next: { g: Boolean(db.g), rh: Boolean(db.rh) } });
         broadcastRealtimeCardUpdate(key, db);
         updated++;
       } catch (err) {
@@ -3311,6 +6067,16 @@ async function bulkUpdate(g, rh) {
   updateStats(); applyFilter();
   state.summaryData = null;
   toggleBulkMode(false);
+  if (undoChanges.length) {
+    pushUndoEntry({
+      setId: state.currentSet?.setId,
+      setName: state.currentSet?.setName,
+      label: 'Bulk-Änderung',
+      changes: undoChanges
+    });
+    updateUndoUi();
+  }
+  finishTrackedWrite('Bulk-Update', errors > 0 ? new Error(`${errors} Fehler`) : null);
   const msg = errors > 0 ? `${updated} aktualisiert, ${errors} Fehler.` : `${updated} Karten aktualisiert.`;
   showToast(msg, errors > 0 ? 'error' : 'success', errors > 0 ? 5000 : 3000);
 }
@@ -3398,18 +6164,34 @@ function initKeyboardNav() {
 async function loadCurrentSet(forceRefresh = false) {
   const setId   = dom.selector.value;
   if (!setId) return;
-  const selected = state.sets.find((s) => s.setId === setId);
+  const selected = state.sets.find((s) => s.setId === setId) || getSetById(setId);
   if (!selected) return;
 
+  ensureSetSelectorOption(selected);
+
   state.currentSet = selected;
-  const navSetLink = document.getElementById('nav-set-link');
-  if (navSetLink) { navSetLink.textContent = selected.setName; navSetLink.href = `#set/${setId}`; }
+  sessionStorage.setItem('tcg_last_set', setId);
+  syncSetNavLink(selected);
 
   setGlobalStatus(`Lade ${selected.setName}\u2026`);
   setLoading(true, `Lade ${selected.setName}\u2026`);
 
-  if (selected.logoUrl) {
-    dom.setLogo.src = selected.logoUrl; dom.setSymbol.src = selected.symbolUrl || '';
+  const safeSetLogoUrl = sanitizeSetAssetUrl(selected.logoUrl, selected.setId);
+  const safeSetSymbolUrl = sanitizeSetAssetUrl(selected.symbolUrl, selected.setId);
+
+  if (safeSetLogoUrl) {
+    attachSetAssetFallback(dom.setLogo, './assets/pokeball-fallback.svg', selected.logoUrlCandidates);
+    dom.setLogo.style.display = '';
+    dom.setLogo.src = safeSetLogoUrl;
+
+    if (safeSetSymbolUrl) {
+      attachSetAssetFallback(dom.setSymbol, '', selected.symbolUrlCandidates);
+      dom.setSymbol.style.display = '';
+      dom.setSymbol.src = safeSetSymbolUrl;
+    } else {
+      dom.setSymbol.style.display = 'none';
+      dom.setSymbol.removeAttribute('src');
+    }
     dom.setLogoWrap.classList.remove('hidden');
   } else {
     dom.setLogoWrap.classList.add('hidden');
@@ -3417,7 +6199,10 @@ async function loadCurrentSet(forceRefresh = false) {
 
   try {
     const cardsCacheKey = `db_cards_${setId}`, dbCacheKey = `db_${setId}`;
-    const allowApiFallback = Boolean(dom.searchApiFallback?.checked);
+    const shouldAutoImportCurrentView = shouldAutoImportCurrentSet(selected, {
+      fromSearchJump: Boolean(state.pendingSearchSetImport)
+    });
+    const allowApiFallback = getSearchScopeMode() === SEARCH_SCOPE_ONLINE || Boolean(state.pendingSearchSetImport) || !Boolean(selected.imported);
     if (forceRefresh) { cache.del(cardsCacheKey); cache.del(dbCacheKey); }
 
     const [cards, dbMap] = await Promise.all([
@@ -3425,12 +6210,42 @@ async function loadCurrentSet(forceRefresh = false) {
         ? cache.get(cardsCacheKey)
         : readDbCardsForSet(setId).then(async (dbCards) => {
           if (Array.isArray(dbCards) && dbCards.length > 0) {
-            cache.set(cardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
-            return dbCards;
+            const shouldHydrateFromApi = allowApiFallback || needsApiCardEnrichment(dbCards);
+            if (!shouldHydrateFromApi) {
+              cache.set(cardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
+              return dbCards;
+            }
+
+            const apiPayload = await fetchMergedCardsWithSetMeta(setId).catch(() => ({ cards: [], setMetaPatch: null }));
+            const apiCards = Array.isArray(apiPayload?.cards) ? apiPayload.cards : [];
+            const mergedCards = apiCards.length > 0 ? mergeSearchCards(dbCards, apiCards) : dbCards;
+            cache.set(cardsCacheKey, mergedCards, CONFIG.CACHE_TTL_MS);
+
+            if (apiCards.length > 0 && shouldAutoImportCurrentView) {
+              ensureSetImportedFromApi(selected, apiCards, {
+                setMetaPatch: apiPayload?.setMetaPatch || null,
+                source: state.pendingSearchSetImport ? 'search-jump' : 'set-view'
+              }).catch((autoImportErr) => {
+                console.warn('[loadCurrentSet] auto-import failed for set', setId, autoImportErr);
+              });
+            }
+
+            return mergedCards;
           }
           if (allowApiFallback) {
-            const apiCards = await fetchMergedCards(setId);
-            cache.set(cardsCacheKey, apiCards, CONFIG.CACHE_TTL_MS);
+            const apiPayload = await fetchMergedCardsWithSetMeta(setId).catch(() => ({ cards: [], setMetaPatch: null }));
+            const apiCards = Array.isArray(apiPayload?.cards) ? apiPayload.cards : [];
+            if (apiCards.length > 0) {
+              cache.set(cardsCacheKey, apiCards, CONFIG.CACHE_TTL_MS);
+              if (shouldAutoImportCurrentView) {
+                ensureSetImportedFromApi(selected, apiCards, {
+                  setMetaPatch: apiPayload?.setMetaPatch || null,
+                  source: state.pendingSearchSetImport ? 'search-jump' : 'set-view'
+                }).catch((autoImportErr) => {
+                  console.warn('[loadCurrentSet] auto-import failed for set', setId, autoImportErr);
+                });
+              }
+            }
             return apiCards;
           }
           return [];
@@ -3442,8 +6257,17 @@ async function loadCurrentSet(forceRefresh = false) {
       throw new Error('Keine Kartendaten in der Datenbank gefunden. Bitte Set importieren/aktualisieren oder API-Fallback aktivieren.');
     }
 
+    if (shouldAutoImportCurrentView && allowApiFallback && cards.length > 0) {
+      ensureSetImportedFromApi(selected, cards, {
+        source: state.pendingSearchSetImport ? 'search-jump-cache' : 'set-view-cache'
+      }).catch((autoImportErr) => {
+        console.warn('[loadCurrentSet] deferred auto-import failed for set', setId, autoImportErr);
+      });
+    }
+
     state.cards = cards;
     state.dbMap = dbMap;
+    state.pendingSearchSetImport = false;
     focusedCardIndex = -1;
     if (state.bulkMode) toggleBulkMode(false);
     state.filter = 'all';
@@ -3476,107 +6300,6 @@ async function loadCurrentSet(forceRefresh = false) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
-// VOICE COMMANDS INITIALIZATION
-// ══════════════════════════════════════════════════════════════════════════
-function initVoiceCommands() {
-  try {
-    const voiceRecognizer = new VoiceCommandRecognizer((command) => {
-      console.log('✅ Voice command received:', command);
-      if (command === 'search-set') {
-        dom.search?.focus();
-        showToast('🎤 Searching...', 'info', 2000);
-      } else if (command === 'show-collection') {
-        navigate('dashboard');
-        showToast('🎤 Showing collection', 'info', 2000);
-      } else if (command === 'show-stats') {
-        showToast('🎤 Opening statistics', 'info', 2000);
-      } else if (command === 'settings') {
-        commandHandlers['settings']();
-      } else if (command === 'wishlists') {
-        commandHandlers['wishlists']?.();
-      }
-    });
-
-    // Add voice button to header
-    if (!document.getElementById('voice-btn')) {
-      const voiceBtn = document.createElement('button');
-      voiceBtn.id = 'voice-btn';
-      voiceBtn.textContent = '🎤';
-      voiceBtn.style.cssText = `
-        padding: 8px 12px; 
-        background: var(--color-primary); 
-        color: white; 
-        border: none; 
-        border-radius: 4px; 
-        cursor: pointer;
-        font-size: 14px;
-      `;
-
-      if (voiceRecognizer.isSupported()) {
-        voiceBtn.addEventListener('click', () => {
-          if (voiceRecognizer.isListening) {
-            voiceRecognizer.stop();
-            voiceBtn.style.background = 'var(--color-primary)';
-            showToast('🎤 Stopped listening', 'info', 2000);
-          } else {
-            voiceRecognizer.start();
-            voiceBtn.style.background = '#ff6b6b';
-            showToast('🎤 Listening...', 'info', 2000);
-          }
-        });
-
-        dom.headerActions?.appendChild(voiceBtn);
-        console.log('✅ Voice commands enabled');
-      } else {
-        voiceBtn.disabled = true;
-        voiceBtn.title = 'Speech Recognition not supported';
-        voiceBtn.style.opacity = '0.5';
-      }
-    }
-  } catch (err) {
-    console.warn('⚠️ Voice commands init failed:', err);
-  }
-}
-
-// ══════════════════════════════════════════════════════════════════════════
-// GESTURE CONTROLS INITIALIZATION
-// ══════════════════════════════════════════════════════════════════════════
-function initGestureControls() {
-  try {
-    const gestureRecognizer = new GestureRecognizer(document.body, (gesture, data) => {
-      console.log('👆 Gesture detected:', gesture, data);
-
-      if (gesture === 'swipe-right') {
-        navigate('dashboard');
-        showToast('👆 Swiped right', 'info', 1000);
-      } else if (gesture === 'swipe-left') {
-        // Navigate to next set or next view
-        showToast('👆 Swiped left', 'info', 1000);
-      } else if (gesture === 'swipe-up') {
-        // Scroll up or show last set
-        showToast('👆 Swiped up', 'info', 1000);
-      } else if (gesture === 'swipe-down') {
-        // Pull to refresh
-        if (state.currentSet) {
-          loadCurrentSet(true);
-          showToast('👆 Refreshing...', 'info', 1000);
-        }
-      } else if (gesture === 'longpress') {
-        // Show context menu
-        console.log('Long press at:', data);
-      } else if (gesture === 'pinch') {
-        // Zoom in/out
-        console.log('Pinch scale:', data.scale);
-      }
-    });
-
-    console.log('✅ Gesture controls initialized');
-  } catch (err) {
-    console.warn('⚠️ Gesture controls init failed:', err);
-  }
-}
-
-// ══════════════════════════════════════════════════════════════════════════
 // BOOTSTRAP
 // ══════════════════════════════════════════════════════════════════════════
 async function bootstrap() {
@@ -3588,25 +6311,32 @@ async function bootstrap() {
   } catch (err) {
     console.warn('Smart Engine init:', err);
   }
-  initDarkMode();
+  initAutoHideTopbar();
+  initGridZoom();
+  initCustomSelects();
   initFilterButtons();
   initSpreadsheetDialog();
   initBatchImportDialog();
+  initManageImportedSetsDialog();
   initBackupImportExport();
   initQueueBuilderDialog();
   initLightbox();
-  initVoiceCommands();
-  initGestureControls();
   initBulkEdit();
   initKeyboardNav();
   initDashboardControls();
   initSheetsWriteFeedback();
+  initAuditAndSaveUi();
+  initDevCompletionMode();
   initSortControl();
   initSearch();
+  initOfflineIndicator();
+  initDashboardHoverPreview();
+  initSearchAutocomplete();
+  initShareButton();
 
   try {
-    state.realtimeClientId = localStorage.getItem('poke-realtime-client-id') || `client_${Date.now()}`;
-    localStorage.setItem('poke-realtime-client-id', state.realtimeClientId);
+    state.realtimeClientId = localStorage.getItem(REALTIME_CLIENT_STORAGE_KEY) || `client_${Date.now()}`;
+    localStorage.setItem(REALTIME_CLIENT_STORAGE_KEY, state.realtimeClientId);
     state.realtime = initRealtimeSync({
       clientId: state.realtimeClientId,
       onEvent: applyIncomingRealtimeUpdate
@@ -3643,22 +6373,7 @@ async function bootstrap() {
     showToast('Suchverlauf gelöscht', 'success', 2000);
   });
   
-  // Initialize Shortcuts Overlay
-  try {
-    const shortcutsOverlay = createShortcutsOverlay();
-    document.body.appendChild(shortcutsOverlay);
-    
-    // ? key to show shortcuts
-    document.addEventListener('keydown', (e) => {
-      if (e.key === '?' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
-        shortcutsOverlay.classList.remove('hidden');
-        e.preventDefault();
-      }
-    });
-    console.log('✅ Shortcuts overlay initialized');
-  } catch (err) {
-    console.warn('⚠️ Shortcuts overlay init failed:', err);
-  }
+  // Shortcuts Overlay: wird durch showShortcutsOverlay() bereitgestellt (Feature 8)
   
   // Initialize Command Palette with handlers
   const commandHandlers = {
@@ -3706,24 +6421,7 @@ async function bootstrap() {
     'snapshots': () => {
       showToast('Snapshots: ' + (loadSnapshots() || []).length + ' verfügbar', 'info', 3000);
     },
-    'settings': () => {
-      const currentSettings = loadSettings();
-      const settingsPanel = createSettingsPanel(currentSettings, (updated) => {
-        saveSettings(updated);
-        showToast('Einstellungen gespeichert', 'success', 2000);
-        window.location.reload();
-      });
-      
-      const dialog = document.createElement('dialog');
-      dialog.className = 'ss-dialog';
-      dialog.style.cssText = 'width: 90vw; max-width: 400px;';
-      dialog.innerHTML = '<h2>⚙️ Einstellungen</h2>';
-      dialog.appendChild(settingsPanel);
-      document.body.appendChild(dialog);
-      dialog.showModal();
-      
-      dialog.addEventListener('close', () => dialog.remove());
-    },
+    'settings': () => openSettingsDialog(),
     'export-collection': async () => {
       if (!state.collection || !state.sets.length) {
         showToast('Keine Sammlung zum Exportieren', 'error', 3000);
@@ -3801,9 +6499,6 @@ async function bootstrap() {
       dialog.showModal();
       dialog.addEventListener('close', () => dialog.remove());
     },
-    'voice': () => {
-      showToast('🎤 Sprachsteuerung aktiviert - Sag einen Befehl', 'info', 3000);
-    },
     'local-backup': () => {
       try {
         const backupData = {
@@ -3877,13 +6572,13 @@ async function bootstrap() {
     },
     'profile': () => {
       // Generate or get current user ID (in real app, from auth)
-      const userId = localStorage.getItem('poke-user-id') || 'user_' + Date.now();
-      localStorage.setItem('poke-user-id', userId);
+      const userId = localStorage.getItem(USER_ID_STORAGE_KEY) || 'user_' + Date.now();
+      localStorage.setItem(USER_ID_STORAGE_KEY, userId);
 
       let profile = getUserProfile(userId);
       if (!profile) {
         profile = createUserProfile('collector', 'Pokémon Sammler', 'Meine Pokémon TCG Collection');
-        localStorage.setItem('poke-user-id', profile.userId);
+        localStorage.setItem(USER_ID_STORAGE_KEY, profile.userId);
       }
 
       const card = createUserProfileCard(profile.userId, profile.userId);
@@ -3902,7 +6597,7 @@ async function bootstrap() {
         return;
       }
 
-      const userId = localStorage.getItem('poke-user-id') || 'user_' + Date.now();
+      const userId = localStorage.getItem(USER_ID_STORAGE_KEY) || 'user_' + Date.now();
       const collectionData = {}; // Würde echte Collection laden
 
       const form = document.createElement('div');
@@ -4083,54 +6778,6 @@ async function bootstrap() {
       dialog.showModal();
       dialog.addEventListener('close', () => dialog.remove());
     },
-    'ml-recommendations': () => {
-      const recommendations = generateMLSetRecommendations(
-        state.summaryData || [],
-        state.allSets || state.sets,
-        10
-      );
-
-      if (!recommendations.length) {
-        showToast('Keine ML-Empfehlungen verfügbar', 'info');
-        return;
-      }
-
-      const dialog = document.createElement('dialog');
-      dialog.className = 'ss-dialog';
-      dialog.style.cssText = 'width: 90vw; max-width: 900px; max-height: 80vh; overflow-y: auto;';
-
-      const summary = summarizeMLRecommendations(recommendations);
-      const container = document.createElement('div');
-      container.style.cssText = 'padding: 20px; display: grid; gap: 10px;';
-
-      const header = document.createElement('div');
-      header.style.cssText = 'padding: 12px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-bg-secondary);';
-      header.innerHTML = `
-        <div style="font-weight: 700;">${summary.headline}</div>
-        <div style="color: var(--color-muted); font-size: 13px;">Top Confidence: ${summary.topConfidence}% • Ø Completion: ${summary.averageCompletion}%</div>
-      `;
-      container.appendChild(header);
-
-      recommendations.forEach((item, index) => {
-        const row = document.createElement('div');
-        row.style.cssText = 'padding: 12px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-bg-secondary); display: flex; justify-content: space-between; gap: 10px;';
-        row.innerHTML = `
-          <div>
-            <div style="font-weight: 600;">${index + 1}. ${item.setName} <span style="color: var(--color-muted); font-weight: 400;">(${item.setId})</span></div>
-            <div style="font-size: 13px; color: var(--color-muted);">Serie: ${item.series} • Fortschritt: ${item.collected}/${item.total} (${item.completion}%)</div>
-            <div style="font-size: 13px; margin-top: 4px;">${item.reasons.join(' • ')}</div>
-          </div>
-          <div style="align-self: center; background: var(--color-primary); color: white; border-radius: 999px; padding: 6px 12px; font-weight: 700;">${item.confidence}%</div>
-        `;
-        container.appendChild(row);
-      });
-
-      dialog.innerHTML = '<h3 style="padding: 20px 20px 0 20px; margin: 0; border-bottom: 1px solid var(--color-border);">🧠 ML-Empfehlungen</h3>';
-      dialog.appendChild(container);
-      document.body.appendChild(dialog);
-      dialog.showModal();
-      dialog.addEventListener('close', () => dialog.remove());
-    },
     'live-dashboard': () => {
       const dialog = document.createElement('dialog');
       dialog.className = 'ss-dialog';
@@ -4222,8 +6869,35 @@ async function bootstrap() {
   }, 5000);
 
   document.querySelectorAll('.nav-link').forEach((link) => {
-    link.addEventListener('click', (e) => { e.preventDefault(); navigate(link.dataset.view); });
+    if (link.dataset.navToggle) return;
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      navigate(link.dataset.view);
+    });
   });
+  dom.btnNavSetToggle?.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (dom.btnNavSetToggle.disabled) return;
+    setRecentSetsDropdownOpen(!dom.navSetSplit?.classList.contains('open'));
+  });
+  document.addEventListener('click', (event) => {
+    if (!(event.target instanceof Node)) return;
+    if (!dom.navSetSplit?.contains(event.target)) {
+      setRecentSetsDropdownOpen(false);
+    }
+    if (!dom.refreshSplit?.contains(event.target)) {
+      setRefreshMenuOpen(false);
+    }
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      setRecentSetsDropdownOpen(false);
+      setRefreshMenuOpen(false);
+    }
+  });
+  window.addEventListener('resize', positionRecentSetsDropdown, { passive: true });
+  window.addEventListener('scroll', positionRecentSetsDropdown, { passive: true });
   window.addEventListener('hashchange', handleRouteChange);
 
   setLoading(true, 'Initialisiere\u2026');
@@ -4232,17 +6906,22 @@ async function bootstrap() {
   try {
     const autoLoggedIn = await initAuth();
 
-    dom.login.addEventListener('click', async () => {
-      dom.login.disabled = true;
+    syncAuthButtonLabel();
+    window.addEventListener('resize', syncAuthButtonLabel, { passive: true });
+
+    dom.auth.addEventListener('click', async () => {
+      if (dom.auth.dataset.state === 'out') { signOut(); resetToLoggedOut(); return; }
+      dom.auth.disabled = true;
+      setGlobalStatus('Bitte Google-Login im Popup abschließen…');
+      showToast('Google-Login im Popup geöffnet.', 'info', 2600);
       const ok = await signIn();
-      if (!ok) { dom.login.disabled = false; showToast('Login fehlgeschlagen.', 'error'); setGlobalStatus('Login fehlgeschlagen.'); return; }
+      if (!ok) { dom.auth.disabled = false; showToast('Login fehlgeschlagen oder abgebrochen.', 'error'); setGlobalStatus('Login fehlgeschlagen oder abgebrochen.'); return; }
       onLoginSuccess();
     });
 
-    dom.logout.addEventListener('click', () => { signOut(); resetToLoggedOut(); });
-
     dom.load.addEventListener('click', async () => {
       if (!isSignedIn()) return;
+      setRefreshMenuOpen(false);
       const setId = dom.selector.value;
       if (setId) navigate(`set/${setId}`);
       await loadCurrentSet(false);
@@ -4250,16 +6929,34 @@ async function bootstrap() {
 
     dom.refresh.addEventListener('click', async () => {
       if (!isSignedIn() || !state.currentSet) return;
+      setRefreshMenuOpen(false);
       await loadCurrentSet(true);
     });
 
+    dom.btnRefreshMenu?.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!isSignedIn() || dom.btnRefreshMenu.disabled || !state.currentSet) return;
+      setRefreshMenuOpen(dom.refreshMenu?.classList.contains('hidden'));
+    });
+
+    dom.btnRefreshReimport?.addEventListener('click', async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      setRefreshMenuOpen(false);
+      if (!isSignedIn() || !state.currentSet) return;
+      await reimportCurrentSetFromApi();
+    });
+
     dom.selector.addEventListener('change', () => {
+      setRefreshMenuOpen(false);
       const setId = dom.selector.value;
       if (setId) {
         navigate(`set/${setId}`);
         return;
       }
       state.currentSet = null; state.cards = []; state.dbMap = new Map();
+      syncSetNavLink(null);
       dom.cards.innerHTML = '';
       dom.statsSection.classList.add('hidden');
       dom.filterSection.classList.add('hidden');
@@ -4281,7 +6978,7 @@ async function bootstrap() {
 
 async function onLoginSuccess() {
   state.loggedIn = true;
-  dom.login.disabled = true; dom.logout.disabled = false;
+  dom.auth.dataset.state = 'out'; dom.auth.disabled = false; syncAuthButtonLabel();
   renderRecentSets();
   if (!CONFIG.SPREADSHEET_ID) { openSpreadsheetDialog(true); setLoading(false); return; }
   updateSpreadsheetInfoBar();
@@ -4291,21 +6988,44 @@ async function onLoginSuccess() {
 function resetToLoggedOut() {
   state.loggedIn = false; state.sets = []; state.allSets = []; state.currentSet = null;
   state.dbMap = new Map(); state.cards = []; state.summaryData = null;
+  syncSetNavLink(null);
+  state.summaryOverrides = new Map();
+  state.pendingWrites = 0;
+  state.lastSaveError = null;
+  state.undoStack = [];
+  state.auditEntries = [];
   dom.cards.innerHTML = '';
   dom.selector.innerHTML = '<option value="">Bitte w\u00e4hlen\u2026</option>';
   dom.selector.disabled = true; dom.load.disabled = true; dom.refresh.disabled = true;
-  dom.login.disabled = false; dom.logout.disabled = true;
+  if (dom.btnRefreshMenu) dom.btnRefreshMenu.disabled = true;
+  setRefreshMenuOpen(false);
+  dom.auth.dataset.state = 'in'; dom.auth.disabled = false; syncAuthButtonLabel();
   dom.statsSection.classList.add('hidden');
   dom.filterSection.classList.add('hidden');
   dom.sortSection.classList.add('hidden');
   dom.setLogoWrap.classList.add('hidden');
   dom.spreadsheetInfo.classList.add('hidden');
   dom.mainNav.classList.add('hidden');
+  dom.auditPanel?.classList.add('hidden');
   renderRecentSets();
+  renderAuditPanel();
+  updateSaveStatePill();
+  updateUndoUi();
   setEmptyState(true);
   setGlobalStatus('Abgemeldet.');
   showView('dashboard');
   dom.dashboardGrid.innerHTML = '<p class="empty-state">Bitte anmelden.</p>';
+}
+
+function getAuthButtonLabel() {
+  const isNarrow = window.matchMedia('(max-width: 360px)').matches;
+  if (dom.auth?.dataset?.state === 'out') return 'Logout';
+  return isNarrow ? 'Login' : 'Google Login';
+}
+
+function syncAuthButtonLabel() {
+  if (!dom.auth) return;
+  dom.auth.textContent = getAuthButtonLabel();
 }
 
 bootstrap().catch((err) => {
@@ -4325,6 +7045,20 @@ if ('serviceWorker' in navigator) {
         scope: './'
       });
       console.log('✅ Service Worker registered:', registration);
+
+      if (registration.waiting) {
+        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+      }
+
+      registration.addEventListener('updatefound', () => {
+        const newWorker = registration.installing;
+        if (!newWorker) return;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            newWorker.postMessage({ type: 'SKIP_WAITING' });
+          }
+        });
+      });
       
       // Check for updates periodically
       setInterval(() => {
@@ -4333,7 +7067,10 @@ if ('serviceWorker' in navigator) {
       
       // Handle controller change (new SW ready)
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        showToast('🔄 App wurde aktualisiert', 'success', 3000);
+        showToast('🔄 App wurde aktualisiert', 'success', 1500);
+        window.setTimeout(() => {
+          window.location.reload();
+        }, 300);
       });
       
       // Listen for messages from Service Worker
@@ -4382,4 +7119,859 @@ window.addEventListener('appinstalled', () => {
   console.log('✅ PWA installfiert');
   showToast('🎉 App erfolgreich installiert!', 'success', 4000);
 });
+
+const _featureInitFlags = {
+  offline: false,
+  hoverPreview: false,
+  autocomplete: false,
+  statsDrilldown: false,
+  shortcuts: false,
+  share: false,
+};
+
+const _connectivityState = {
+  browserOnline: navigator.onLine,
+  appOnline: null,
+  checking: false,
+  lastError: null,
+  pollTimer: null
+};
+
+// ══════════════════════════════════════════════════════════════════════════
+// FEATURE 2: Charts in Statistiken (Chart.js)
+// ══════════════════════════════════════════════════════════════════════════
+const _statsChartInstances = {};
+
+function initStatsCharts(totalCollected, totalCards, seriesMap) {
+  if (!window.Chart) return;
+
+  Object.values(_statsChartInstances).forEach((chartInstance) => {
+    try { chartInstance.destroy(); } catch (_) { /* noop */ }
+  });
+
+  const textColor = '#94a3b8';
+  const gridColor = '#1e293b';
+
+  const ctxOverall = document.getElementById('chart-overall')?.getContext('2d');
+  if (ctxOverall) {
+    _statsChartInstances.overall = new window.Chart(ctxOverall, {
+      type: 'doughnut',
+      data: {
+        labels: ['Gesammelt', 'Fehlend'],
+        datasets: [{
+          data: [totalCollected, Math.max(0, totalCards - totalCollected)],
+          backgroundColor: ['#22c55e', '#1e293b'],
+          borderColor: ['#16a34a', '#334155'],
+          borderWidth: 2,
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        cutout: '68%',
+        plugins: {
+          legend: { labels: { color: textColor, font: { size: 12 } } },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => ` ${ctx.label}: ${ctx.parsed.toLocaleString('de-DE')} Karten`
+            }
+          }
+        }
+      }
+    });
+  }
+
+  const ctxSeries = document.getElementById('chart-series')?.getContext('2d');
+  if (ctxSeries) {
+    const topSeries = [...seriesMap.entries()]
+      .filter(([, group]) => (group.total || 0) > 0)
+      .sort((a, b) => b[1].total - a[1].total)
+      .slice(0, 8);
+
+    _statsChartInstances.series = new window.Chart(ctxSeries, {
+      type: 'bar',
+      data: {
+        labels: topSeries.map(([key, group]) => {
+          const label = getStatsSeriesLabel(key, group);
+          return label.length > 16 ? `${label.slice(0, 14)}…` : label;
+        }),
+        datasets: [{
+          label: 'Gesammelt %',
+          data: topSeries.map(([, group]) => (group.total > 0 ? Math.round((group.collected / group.total) * 100) : 0)),
+          backgroundColor: '#0ea5e9',
+          borderRadius: 4,
+          barThickness: 14
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: (ctx) => ` ${ctx.parsed.x}%` } }
+        },
+        scales: {
+          x: {
+            min: 0,
+            max: 100,
+            grid: { color: gridColor },
+            ticks: { color: textColor, callback: (value) => `${value}%` }
+          },
+          y: {
+            grid: { color: gridColor },
+            ticks: { color: textColor, font: { size: 11 } }
+          }
+        }
+      }
+    });
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// FEATURE 3: Offline-Status-Indikator
+// ══════════════════════════════════════════════════════════════════════════
+function isOfflineLikeError(err) {
+  const status = Number(err?.status || err?.result?.error?.code || 0);
+  if (status === 0) return true;
+
+  const message = String(err?.result?.error?.message || err?.message || '').toLowerCase();
+  if (!message) return false;
+
+  return message.includes('failed to fetch')
+    || message.includes('network')
+    || message.includes('offline')
+    || message.includes('timeout')
+    || message.includes('unreachable')
+    || message.includes('load failed');
+}
+
+function renderOfflineIndicator() {
+  const banner = document.getElementById('offline-banner');
+
+  const offline = _connectivityState.appOnline === false
+    || (_connectivityState.appOnline == null && !_connectivityState.browserOnline);
+
+  if (banner) banner.classList.toggle('visible', offline);
+  document.body.classList.toggle('is-offline', offline);
+}
+
+async function probeAppConnectivity(options = {}) {
+  const silent = options.silent !== false;
+  _connectivityState.browserOnline = navigator.onLine;
+
+  if (_connectivityState.checking) return _connectivityState.appOnline;
+  if (!isSignedIn()) {
+    _connectivityState.appOnline = _connectivityState.browserOnline;
+    _connectivityState.lastError = null;
+    renderOfflineIndicator();
+    return _connectivityState.appOnline;
+  }
+
+  if (!CONFIG.SPREADSHEET_ID || !globalThis.gapi?.client?.sheets?.spreadsheets?.get) {
+    _connectivityState.appOnline = _connectivityState.browserOnline;
+    renderOfflineIndicator();
+    return _connectivityState.appOnline;
+  }
+
+  _connectivityState.checking = true;
+  try {
+    await globalThis.gapi.client.sheets.spreadsheets.get({
+      spreadsheetId: CONFIG.SPREADSHEET_ID,
+      fields: 'spreadsheetId'
+    });
+    const wasOffline = _connectivityState.appOnline === false;
+    _connectivityState.appOnline = true;
+    _connectivityState.lastError = null;
+    renderOfflineIndicator();
+    if (!silent && wasOffline) {
+      showToast('🟢 Verbindung zu Google Sheets wiederhergestellt', 'success', 2500);
+    }
+  } catch (err) {
+    _connectivityState.lastError = err;
+    if (isOfflineLikeError(err)) {
+      const wasOnline = _connectivityState.appOnline !== false;
+      _connectivityState.appOnline = false;
+      renderOfflineIndicator();
+      if (!silent && wasOnline) {
+        showToast('📴 Keine Verbindung zu Google Sheets – gespeicherte Daten werden angezeigt', 'info', 3500);
+      }
+    } else {
+      // Auth/config problems are not the same as offline mode.
+      _connectivityState.appOnline = true;
+      renderOfflineIndicator();
+    }
+  } finally {
+    _connectivityState.checking = false;
+  }
+
+  return _connectivityState.appOnline;
+}
+
+function initOfflineIndicator() {
+  if (_featureInitFlags.offline) return;
+  _featureInitFlags.offline = true;
+
+  window.addEventListener('online', () => {
+    _connectivityState.browserOnline = true;
+    probeAppConnectivity({ silent: false });
+  });
+
+  window.addEventListener('offline', () => {
+    _connectivityState.browserOnline = false;
+    probeAppConnectivity({ silent: false });
+  });
+
+  renderOfflineIndicator();
+  probeAppConnectivity({ silent: true });
+
+  clearInterval(_connectivityState.pollTimer);
+  _connectivityState.pollTimer = setInterval(() => {
+    probeAppConnectivity({ silent: true });
+  }, 30000);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// FEATURE 4: Set-Card Hover-Preview
+// ══════════════════════════════════════════════════════════════════════════
+function initDashboardHoverPreview() {
+  if (_featureInitFlags.hoverPreview) return;
+  _featureInitFlags.hoverPreview = true;
+
+  if (window.matchMedia('(hover: none)').matches) return;
+  const grid = document.getElementById('dashboard-grid');
+  if (!grid) return;
+
+  let tip = document.getElementById('dash-hover-tip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.id = 'dash-hover-tip';
+    tip.className = 'dash-hover-tip hidden';
+    document.body.appendChild(tip);
+  }
+
+  let currentCard = null;
+
+  grid.addEventListener('mouseover', (event) => {
+    const card = event.target.closest('.dash-set-card');
+    if (!card || card === currentCard) return;
+    currentCard = card;
+
+    let data = {};
+    try { data = JSON.parse(card.dataset.hoverData || '{}'); } catch (_) { data = {}; }
+    if (!data.name) return;
+
+    tip.innerHTML = data.imported
+      ? `
+        <p class="dhp-name">${data.name}</p>
+        <p class="dhp-hint">${data.series || ''}</p>
+        <div class="dhp-pct-bar"><div class="dhp-pct-fill" style="width:${data.percent || 0}%"></div></div>
+        <div class="dhp-row"><span>Gesammelt</span><strong>${data.collected || 0}/${data.total || 0}</strong></div>
+        <div class="dhp-row"><span>Fortschritt</span><strong>${data.percent || 0}%</strong></div>
+        ${data.rh > 0 ? `<div class="dhp-row"><span>Reverse Holos</span><strong>${data.rh}</strong></div>` : ''}
+      `
+      : `
+        <p class="dhp-name">${data.name}</p>
+        <p class="dhp-hint">Noch nicht importiert · ${data.total || '?'} Karten</p>
+      `;
+
+    tip.classList.remove('hidden');
+  });
+
+  grid.addEventListener('mousemove', (event) => {
+    if (!currentCard || tip.classList.contains('hidden')) return;
+    const margin = 12;
+    const tipW = tip.offsetWidth || 220;
+    const tipH = tip.offsetHeight || 140;
+    let left = event.clientX + margin;
+    let top = event.clientY + margin;
+    if (left + tipW > window.innerWidth) left = event.clientX - tipW - margin;
+    if (top + tipH > window.innerHeight) top = event.clientY - tipH - margin;
+    tip.style.left = `${Math.max(8, left)}px`;
+    tip.style.top = `${Math.max(8, top)}px`;
+  });
+
+  const hideTip = () => {
+    currentCard = null;
+    tip.classList.add('hidden');
+  };
+
+  grid.addEventListener('mouseleave', hideTip);
+  grid.addEventListener('mouseout', (event) => {
+    if (!grid.contains(event.relatedTarget)) hideTip();
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// FEATURE 5: Set-Completion Celebration
+// ══════════════════════════════════════════════════════════════════════════
+function triggerCompletionCelebration(setId, cardEl) {
+  const setName = cardEl.querySelector('.dash-set-name')?.textContent || setId;
+  showToast(`🎉 ${setName} vollständig gesammelt!`, 'success', 5000);
+
+  if (window.confetti) {
+    const rect = cardEl.getBoundingClientRect();
+    const x = (rect.left + rect.width / 2) / window.innerWidth;
+    const y = (rect.top + rect.height / 2) / window.innerHeight;
+    window.confetti({
+      particleCount: 120,
+      spread: 75,
+      origin: { x, y },
+      colors: ['#f59e0b', '#ef4444', '#3b82f6', '#22c55e', '#8b5cf6', '#ec4899']
+    });
+  }
+
+  cardEl.classList.add('complete-celebrate');
+  cardEl.addEventListener('animationend', () => cardEl.classList.remove('complete-celebrate'), { once: true });
+}
+
+function checkSetCompletion(setId, percent, cardEl) {
+  if (!setId) return;
+  const storageKey = `completed_set_${setId}`;
+  if (percent < 100) {
+    localStorage.removeItem(storageKey);
+    return;
+  }
+  if (localStorage.getItem(storageKey)) return;
+  localStorage.setItem(storageKey, '1');
+  const delay = state.devCompletionMode ? 40 : 450;
+  setTimeout(() => triggerCompletionCelebration(setId, cardEl), delay);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// FEATURE 6: Suche-Autocomplete
+// ══════════════════════════════════════════════════════════════════════════
+function initSearchAutocomplete() {
+  if (_featureInitFlags.autocomplete) return;
+  _featureInitFlags.autocomplete = true;
+
+  const input = document.getElementById('search-input');
+  const list = document.getElementById('search-autocomplete');
+  if (!input || !list) return;
+
+  let selectedIndex = -1;
+  let activeItems = [];
+  let hideTimer = null;
+
+  const escapeHtml = (value) => String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+
+  const clearHideTimer = () => {
+    if (hideTimer) {
+      clearTimeout(hideTimer);
+      hideTimer = null;
+    }
+  };
+
+  const hideList = () => {
+    clearHideTimer();
+    list.classList.add('hidden');
+  };
+
+  const scheduleHide = () => {
+    clearHideTimer();
+    hideTimer = setTimeout(() => {
+      list.classList.add('hidden');
+    }, 220);
+  };
+
+  const pushCandidate = (map, candidate, score = 0) => {
+    if (!candidate?.key || !candidate?.label) return;
+    const existing = map.get(candidate.key);
+    if (!existing || score > existing.score) {
+      map.set(candidate.key, { ...candidate, score });
+    }
+  };
+
+  const buildCandidates = (query) => {
+    const normalizedQuery = normalizeSearchText(query).trim();
+    const entries = new Map();
+    const history = Array.isArray(window.SEARCH_HISTORY) ? window.SEARCH_HISTORY : loadSearchHistory();
+
+    const addHistoryEntries = () => {
+      history
+        .filter((item) => !normalizedQuery || normalizeSearchText(item).includes(normalizedQuery))
+        .slice(0, normalizedQuery ? 4 : 6)
+        .forEach((item, idx) => {
+          pushCandidate(entries, {
+            key: `history:${normalizeSearchText(item)}`,
+            label: item,
+            value: item,
+            badge: 'Zuletzt',
+            meta: 'Vorherige Suche',
+            type: 'history'
+          }, 120 - idx);
+        });
+    };
+
+    addHistoryEntries();
+
+    const setsPool = getSetsForSearchMode(getSearchScopeMode());
+    (Array.isArray(setsPool) ? setsPool : []).forEach((set) => {
+      const label = String(set?.setName || set?.tcgdex_name || set?.vera_name || set?.setId || '').trim();
+      if (!label) return;
+
+      const haystackValues = collectSearchStrings([
+        label,
+        set?.setId,
+        set?.series,
+        set?.vera_series,
+        set?.tcgdex_serie_name,
+        set?.ptcgoCode,
+        set?.vera_ptcgoCode,
+        set?.tcgdex_abbreviation_official,
+        set?.vera_name,
+        set?.tcgdex_name
+      ]);
+      const haystack = haystackValues.join(' ');
+      if (normalizedQuery && !haystack.includes(normalizedQuery)) return;
+
+      const labelNorm = normalizeSearchText(label);
+      let score = 70;
+      if (labelNorm === normalizedQuery) score += 180;
+      else if (labelNorm.startsWith(normalizedQuery)) score += 130;
+      else if (labelNorm.includes(normalizedQuery)) score += 95;
+
+      pushCandidate(entries, {
+        key: `set:${set?.setId || labelNorm}`,
+        label,
+        value: label,
+        badge: set?.ptcgoCode || set?.setId || 'Set',
+        meta: set?.series || set?.tcgdex_serie_name || 'Set',
+        type: 'set',
+        setId: set?.setId || ''
+      }, score);
+    });
+
+    const cardBundles = [];
+    const pushCardBundle = (card, set) => {
+      if (!card) return;
+      cardBundles.push({ card, set: set || null });
+    };
+
+    (Array.isArray(state.lastSearchResults) ? state.lastSearchResults : []).forEach((entry) => {
+      pushCardBundle(entry?.card, entry?.set);
+    });
+
+    if (Array.isArray(state.cards) && state.currentSet) {
+      state.cards.forEach((card) => pushCardBundle(card, state.currentSet));
+    }
+
+    let inspectedCards = 0;
+    state.searchCache?.forEach((cards, key) => {
+      if (inspectedCards >= 800) return;
+      const setId = String(key || '').split('::')[0];
+      const setMeta = (state.allSets || state.sets || []).find((entry) => String(entry?.setId || '') === setId) || null;
+      (Array.isArray(cards) ? cards : []).slice(0, 40).forEach((card) => {
+        if (inspectedCards >= 800) return;
+        inspectedCards += 1;
+        pushCardBundle(card, setMeta);
+      });
+    });
+
+    const seenCards = new Set();
+    cardBundles.forEach(({ card, set }) => {
+      const uniqueKey = `${set?.setId || 'unknown'}::${normalizeCardNumber(card?.number || card?.vera_number || card?.tcgdex_localId || '')}`;
+      if (!card?.name || seenCards.has(uniqueKey)) return;
+      seenCards.add(uniqueKey);
+
+      const label = String(card?.name || card?.tcgdex_name || card?.vera_name || '').trim();
+      if (!label) return;
+
+      const nameValues = collectSearchStrings([card?.name, card?.vera_name, card?.tcgdex_name]);
+      const haystack = collectSearchStrings([
+        label,
+        card?.number,
+        card?.vera_number,
+        card?.tcgdex_localId,
+        nameValues,
+        set?.setName,
+        set?.series,
+        set?.ptcgoCode
+      ]).join(' ');
+      if (normalizedQuery && !haystack.includes(normalizedQuery)) return;
+
+      const labelNorm = normalizeSearchText(label);
+      let score = 60;
+      if (labelNorm === normalizedQuery) score += 200;
+      else if (labelNorm.startsWith(normalizedQuery)) score += 150;
+      else if (labelNorm.includes(normalizedQuery)) score += 105;
+      if (cardNumberMatchesQuery(card?.number, normalizedQuery)) score += 120;
+
+      const altNames = nameValues.filter((value) => value !== labelNorm).slice(0, 2);
+      const metaParts = [
+        set?.setName || set?.series || '',
+        altNames.length ? `Alias: ${altNames.join(' · ')}` : ''
+      ].filter(Boolean);
+
+      pushCandidate(entries, {
+        key: `card:${uniqueKey}`,
+        label,
+        value: label,
+        badge: card?.number || card?.tcgdex_localId || 'Karte',
+        meta: metaParts.join(' · '),
+        type: 'card',
+        setId: set?.setId || ''
+      }, score);
+    });
+
+    return [...entries.values()]
+      .sort((left, right) => {
+        if (right.score !== left.score) return right.score - left.score;
+        return String(left.label || '').localeCompare(String(right.label || ''), 'de', { sensitivity: 'base' });
+      })
+      .slice(0, 10);
+  };
+
+  const renderList = (items) => {
+    activeItems = items;
+    selectedIndex = -1;
+    if (!items.length) {
+      list.classList.add('hidden');
+      list.innerHTML = '';
+      return;
+    }
+
+    list.innerHTML = items.map((item, idx) => `
+      <li class="search-ac-item search-ac-item--${escapeHtml(item.type)}" role="option" data-idx="${idx}">
+        <span class="ac-main">
+          <span class="ac-label">${escapeHtml(item.label)}</span>
+          ${item.meta ? `<small class="ac-meta">${escapeHtml(item.meta)}</small>` : ''}
+        </span>
+        <span class="ac-badge">${escapeHtml(item.badge || '')}</span>
+      </li>
+    `).join('');
+    list.classList.remove('hidden');
+  };
+
+  const applySelection = (item) => {
+    if (!item) return;
+    clearHideTimer();
+    if (item.setId && dom.searchSetFilter) {
+      const hasOption = [...dom.searchSetFilter.options].some((option) => option.value === item.setId);
+      if (hasOption) dom.searchSetFilter.value = item.setId;
+    }
+    input.value = item.value || item.label || '';
+    list.classList.add('hidden');
+    window.SEARCH_HISTORY = addSearchHistory(input.value);
+    runSearch({ force: true });
+    input.focus();
+  };
+
+  input.addEventListener('focus', () => {
+    clearHideTimer();
+    renderList(buildCandidates(input.value));
+  });
+
+  input.addEventListener('input', () => {
+    clearHideTimer();
+    renderList(buildCandidates(input.value));
+  });
+
+  input.addEventListener('blur', scheduleHide);
+  list.addEventListener('pointerenter', clearHideTimer);
+  list.addEventListener('pointerleave', () => {
+    if (document.activeElement !== input) scheduleHide();
+  });
+
+  input.addEventListener('keydown', (event) => {
+    if (list.classList.contains('hidden') && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+      renderList(buildCandidates(input.value));
+    }
+
+    const items = [...list.querySelectorAll('.search-ac-item')];
+    if (!items.length || list.classList.contains('hidden')) {
+      if (event.key === 'Escape') hideList();
+      return;
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      selectedIndex = Math.max(selectedIndex - 1, 0);
+    } else if (event.key === 'Enter' && selectedIndex >= 0) {
+      event.preventDefault();
+      applySelection(activeItems[selectedIndex]);
+      return;
+    } else if (event.key === 'Escape') {
+      hideList();
+      return;
+    } else {
+      return;
+    }
+
+    items.forEach((item, idx) => item.classList.toggle('keyboard-focus', idx === selectedIndex));
+  });
+
+  list.addEventListener('mousedown', (event) => {
+    const item = event.target.closest('.search-ac-item');
+    if (!item) return;
+    event.preventDefault();
+    const idx = Number(item.dataset.idx || '-1');
+    applySelection(activeItems[idx]);
+  });
+
+  document.addEventListener('pointerdown', (event) => {
+    if (!input.contains(event.target) && !list.contains(event.target)) {
+      scheduleHide();
+    } else {
+      clearHideTimer();
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// FEATURE 7: Statistiken Drill-Down
+// ══════════════════════════════════════════════════════════════════════════
+function initStatsDrillDown() {
+  const statsContent = document.getElementById('stats-content');
+  if (!statsContent || _featureInitFlags.statsDrilldown) return;
+  _featureInitFlags.statsDrilldown = true;
+
+  statsContent.addEventListener('click', (event) => {
+    const row = event.target.closest('.stats-series-row');
+    if (!row) return;
+
+    const seriesKey = row.dataset.series || '';
+    const seriesLabel = row.dataset.seriesLabel || row.querySelector('.stats-series-name')?.textContent?.trim() || seriesKey;
+    if (!seriesKey) return;
+
+    const existing = document.getElementById('stats-drilldown');
+    if (existing) {
+      const isSameSeries = existing.dataset.series === seriesKey;
+      existing.remove();
+      document.querySelectorAll('.stats-series-row.expanded').forEach((el) => el.classList.remove('expanded'));
+      if (isSameSeries) return;
+    }
+
+    const seriesSets = filterSetsBySeriesKey(state.sets || [], seriesKey);
+    const summaryRows = state.summaryData || [];
+
+    const panel = document.createElement('div');
+    panel.id = 'stats-drilldown';
+    panel.className = 'stats-drilldown';
+    panel.dataset.series = seriesKey;
+
+    panel.innerHTML = `
+      <h4>📦 ${seriesLabel} – ${seriesSets.length} Sets</h4>
+      <div class="stats-drilldown-grid">
+        ${seriesSets.map((set) => {
+          const summary = summaryRows.find((entry) => entry.setName === set.setName) || {};
+          const total = Number(summary.total || set.totalCards || 0);
+          const collected = Number(summary.collected || 0);
+          const pct = total > 0 ? Math.round((collected / total) * 100) : 0;
+          const missing = total > 0 ? Math.max(0, total - collected) : null;
+          const statusClass = pct >= 100 ? 'is-complete' : pct >= 75 ? 'is-close' : '';
+          return `
+            <div class="stats-drill-set ${statusClass}">
+              <div class="stats-drill-set-head">
+                <strong>${set.setName}</strong>
+                <span class="stats-drill-pct">${pct}%</span>
+              </div>
+              <div class="mini-bar"><div class="mini-fill" style="width:${pct}%"></div></div>
+              <span class="drill-nums">
+                <span>${collected}/${total || '?'} Karten</span>
+                <span>${missing == null ? 'Gesamt unbekannt' : `${missing} fehlend`}</span>
+              </span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+
+    row.classList.add('expanded');
+    row.insertAdjacentElement('afterend', panel);
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// FEATURE 8: Keyboard-Shortcuts Overlay
+// ══════════════════════════════════════════════════════════════════════════
+const KEYBOARD_SHORTCUTS = [
+  ['D', 'Dashboard öffnen'],
+  ['S', 'Set-Ansicht öffnen'],
+  ['T', 'Statistiken öffnen'],
+  ['/', 'Suche fokussieren'],
+  ['← / →', 'Karte navigieren'],
+  ['Leertaste', 'Normal (G) togglen'],
+  ['R', 'Reverse Holo (RH) togglen'],
+  ['I', 'Kartendetails / Bild-Zoom'],
+  ['Cmd/Strg K', 'Command Palette öffnen'],
+  ['?', 'Diese Shortcut-Übersicht'],
+  ['Esc', 'Dialog / Overlay schließen'],
+];
+
+function showShortcutsOverlay() {
+  const existing = document.getElementById('shortcuts-overlay');
+  if (existing) {
+    existing.remove();
+    return;
+  }
+
+  const overlay = document.createElement('div');
+  overlay.id = 'shortcuts-overlay';
+  overlay.className = 'shortcuts-overlay';
+  overlay.innerHTML = `
+    <div class="shortcuts-panel" role="dialog" aria-modal="true" aria-label="Keyboard Shortcuts">
+      <h2>⌨️ Keyboard Shortcuts</h2>
+      <p>Tippe außerhalb von Eingabefeldern</p>
+      <table class="shortcut-table">
+        <tbody>
+          ${KEYBOARD_SHORTCUTS.map(([key, desc]) => `
+            <tr>
+              <td><span class="shortcut-key">${key}</span></td>
+              <td class="shortcut-desc">${desc}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+      <p class="shortcuts-close-hint">Esc oder ? oder Klick außerhalb zum Schließen</p>
+    </div>
+  `;
+
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) overlay.remove();
+  });
+
+  document.body.appendChild(overlay);
+}
+
+function initShortcutsOverlay() {
+  if (_featureInitFlags.shortcuts) return;
+  _featureInitFlags.shortcuts = true;
+
+  window.addEventListener('keydown', (event) => {
+    if (event.target?.matches?.('input, textarea, select, [contenteditable]')) return;
+    const isQuestionShortcut = event.key === '?' || (event.key === '/' && event.shiftKey) || (event.code === 'Slash' && event.shiftKey);
+    if (isQuestionShortcut) {
+      event.preventDefault();
+      showShortcutsOverlay();
+      return;
+    }
+    if (event.key === 'Escape') {
+      document.getElementById('shortcuts-overlay')?.remove();
+      return;
+    }
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+    switch (event.key.toLowerCase()) {
+      case 'd':
+        event.preventDefault();
+        location.hash = '#dashboard';
+        break;
+      case 's': {
+        event.preventDefault();
+        const lastSet = state?.currentSet?.setId || sessionStorage.getItem('tcg_last_set');
+        location.hash = lastSet ? `#set/${lastSet}` : '#dashboard';
+        break;
+      }
+      case 't':
+        event.preventDefault();
+        location.hash = '#stats';
+        break;
+      case '/':
+        event.preventDefault();
+        location.hash = '#search';
+        // Route-Render kann asynchron sein: mehrfach versuchen, dann sinnvollen Fallback nutzen.
+        {
+          const focusSearchInput = () => {
+            const searchInput = document.getElementById('search-input');
+            const viewSearch = document.getElementById('view-search');
+            const searchVisible = !!(viewSearch && !viewSearch.classList.contains('hidden'));
+            if (searchInput && searchVisible) {
+              searchInput.focus();
+              return true;
+            }
+            return false;
+          };
+
+          let tries = 0;
+          const maxTries = 8;
+          const tick = () => {
+            if (focusSearchInput()) return;
+            tries += 1;
+            if (tries < maxTries) {
+              setTimeout(tick, 80);
+              return;
+            }
+            // Fallback (z.B. nicht eingeloggt): Dashboard-Suche fokussieren.
+            document.getElementById('dash-filter')?.focus();
+          };
+          setTimeout(tick, 0);
+        }
+        break;
+    }
+  });
+}
+
+initShortcutsOverlay();
+
+// ══════════════════════════════════════════════════════════════════════════
+// FEATURE 9: Sammlung teilen (ShareURL)
+// ══════════════════════════════════════════════════════════════════════════
+function initShareButton() {
+  if (_featureInitFlags.share) return;
+  _featureInitFlags.share = true;
+
+  const btn = document.getElementById('btn-share');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    const ssid = CONFIG.SPREADSHEET_ID || '';
+    const shareUrl = new URL(location.href);
+    shareUrl.hash = '#dashboard';
+    shareUrl.searchParams.delete('ssid');
+    shareUrl.searchParams.delete('share');
+    shareUrl.searchParams.delete('nocache');
+    shareUrl.searchParams.delete('t');
+    if (ssid) shareUrl.searchParams.set('ssid', ssid);
+    showShareDialog(shareUrl.toString());
+  });
+
+  const ssidFromUrl = new URLSearchParams(location.search).get('ssid');
+  if (ssidFromUrl && ssidFromUrl.length > 10 && !CONFIG.SPREADSHEET_ID) {
+    sessionStorage.setItem('tcg_pending_ssid', ssidFromUrl);
+  }
+}
+
+function showShareDialog(url) {
+  const existing = document.getElementById('dialog-share');
+  if (existing) {
+    existing.showModal();
+    return;
+  }
+
+  const dialog = document.createElement('dialog');
+  dialog.id = 'dialog-share';
+  dialog.className = 'ss-dialog share-dialog';
+  dialog.innerHTML = `
+    <h2>🔗 Sammlung teilen</h2>
+    <p>Der Link enthält deine Spreadsheet-ID und funktioniert für Personen mit Zugriff auf dein Sheet.</p>
+    <div class="share-url-wrap">
+      <input class="share-url-input" type="text" readonly value="${url.replace(/"/g, '&quot;')}" />
+      <button class="share-copy-btn" type="button">📋 Kopieren</button>
+    </div>
+    <div class="dialog-actions">
+      <button class="btn-secondary" type="button" onclick="this.closest('dialog').close()">Schließen</button>
+    </div>
+  `;
+
+  dialog.querySelector('.share-copy-btn').addEventListener('click', async () => {
+    const input = dialog.querySelector('.share-url-input');
+    try {
+      await navigator.clipboard.writeText(input.value);
+    } catch (_) {
+      input.select();
+      document.execCommand('copy');
+    }
+    showToast('📋 Link kopiert!', 'success', 2500);
+  });
+
+  dialog.addEventListener('close', () => dialog.remove());
+  document.body.appendChild(dialog);
+  dialog.showModal();
+}
 
