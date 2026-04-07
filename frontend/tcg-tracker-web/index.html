@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&display=swap" rel="stylesheet" />
   <link rel="apple-touch-icon" href="./assets/branding/logo-veras-pokemon.jpg?v=8" />
-  <link rel="stylesheet" href="./css/main.css?v=20260407-navset2" />
+  <link rel="stylesheet" href="./css/main.css?v=20260407-lightboxpolish1" />
   <link rel="stylesheet" href="./css/trading-marketplace.css?v=20260505e" />
 </head>
 <body class="dark">
@@ -310,9 +310,30 @@
           <img id="set-logo" src="" alt="Set-Logo" class="set-logo" />
           <img id="set-symbol" src="" alt="Set-Symbol" class="set-symbol" />
         </div>
-        <div class="row">
+        <div class="row row-set-actions">
           <button id="btn-load" disabled>Laden</button>
-          <button id="btn-refresh" disabled>🔄 Neu laden</button>
+          <div id="refresh-split" class="split-action-group">
+            <button id="btn-refresh" disabled>🔄 Neu laden</button>
+            <button
+              id="btn-refresh-menu"
+              class="btn-icon split-action-toggle"
+              type="button"
+              aria-label="Weitere Neu-laden-Optionen"
+              aria-haspopup="menu"
+              aria-controls="refresh-menu"
+              aria-expanded="false"
+              disabled
+            >
+              <span class="split-action-caret" aria-hidden="true">▾</span>
+            </button>
+            <div id="refresh-menu" class="action-dropdown hidden" role="menu" aria-label="Neu laden Optionen">
+              <div class="action-dropdown-note">Schnell aktualisieren oder direkt mit frischem API-Reimport.</div>
+              <button id="btn-refresh-reimport" class="btn-secondary action-dropdown-item" type="button" role="menuitem">
+                <span class="action-dropdown-label">♻️ Mit API-Reimport</span>
+                <small>Holt neue Kartendaten und lädt das Set anschließend erneut.</small>
+              </button>
+            </div>
+          </div>
         </div>
         <p id="status" class="status">Nicht angemeldet.</p>
 
@@ -401,20 +422,12 @@
                  class="search-main-input" autofocus autocomplete="off" />
                <ul id="search-autocomplete" class="search-autocomplete hidden" role="listbox" aria-label="Suchvorschläge"></ul>
              </div>
-             <select id="search-set-filter">
-            <option value="">Alle Sets</option>
+             <select id="search-set-filter" aria-label="Suchbereich oder importiertes Set">
+            <option value="scope:imported">Importierte Sets</option>
           </select>
         </div>
       </div>
-      <label class="search-api-fallback-toggle" for="search-scope-mode">
-        <span>Suchbereich</span>
-        <select id="search-scope-mode">
-          <option value="imported" selected>Importierte Sets</option>
-          <option value="all">Alle Sets</option>
-          <option value="online">Online-Suche</option>
-        </select>
-      </label>
-      <p class="search-hint">Suche nach Kartenname, Setname, Nummer und vorhandenen DE/EN-Feldern. Importierte Sets: nur DB. Alle Sets: importierte aus DB, nicht importierte online. Online-Suche: DB + API für alle Sets.</p>
+      <p class="search-hint">Im Dropdown wählst du zwischen importierten Sets, allen Sets, Online-Suche oder einem bestimmten importierten Set. Die Suche findet Kartenname, Setname, Nummer und vorhandene DE/EN-Felder.</p>
       <div id="search-results" class="cards search-results">
         <p class="empty-state">Suchbegriff oben eingeben.</p>
       </div>
@@ -483,5 +496,5 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://apis.google.com/js/api.js" async defer></script>
-  <script type="module" src="./js/app.js?v=20260407-statslabel1"></script>
+  <script type="module" src="./js/app.js?v=20260407-searchscope1"></script>
 </html>

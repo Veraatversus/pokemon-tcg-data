@@ -2,6 +2,11 @@ import assert from 'node:assert/strict';
 import { findMatchingTcgdexSet, resolvePreferredTcgdexSetBases } from '../js/pokecode-compat.js';
 import { buildCardRecordFromSources, resolveDisplayCard, resolveSeriesGroupInfo } from '../js/data/schema-contract.js';
 import { getCollectionUiState, resolveCollectionToggleState } from '../js/core/collection-state.js';
+import {
+  buildCombinedSearchDropdownOptions,
+  createSpreadsheetSwitchStatePatch,
+  resolveCombinedSearchSelection
+} from '../js/core/utils.js';
 import { filterSetsBySeriesKey, getStatsSeriesLabel } from '../js/ui/stats-series.js';
 
 function testDoesNotFalseMatchSubsetName() {
@@ -201,6 +206,71 @@ function testRhToggleAutoEnablesCollectedStatus() {
   assert.deepEqual(nextState, { g: true, rh: true });
 }
 
+function testSpreadsheetSwitchStatePatchClearsStaleCollectionState() {
+  const patch = createSpreadsheetSwitchStatePatch({
+    searchRunId: 4,
+    currentSet: { setId: 'sv1' },
+    cards: [{ id: 'sv1-1' }],
+    summaryData: [{ setName: 'Scarlet & Violet', collected: 3 }],
+    summaryOverrides: new Map([['sv1', { collected: 3 }]]),
+    dbMap: new Map([['sv1-1', { g: true }]]),
+    searchCache: new Map([['pikachu', [{ id: 'sv1-1' }]]]),
+    pendingSearchSetImport: true,
+    pendingSearchCardFocusKey: 'sv1-1'
+  });
+
+  assert.equal(patch.summaryData, null);
+  assert.equal(patch.currentSet, null);
+  assert.deepEqual(patch.cards, []);
+  assert.ok(patch.summaryOverrides instanceof Map && patch.summaryOverrides.size === 0);
+  assert.ok(patch.dbMap instanceof Map && patch.dbMap.size === 0);
+  assert.ok(patch.searchCache instanceof Map && patch.searchCache.size === 0);
+  assert.equal(patch.pendingSearchSetImport, false);
+  assert.equal(patch.pendingSearchCardFocusKey, null);
+  assert.equal(patch.searchRunId, 5, 'Spreadsheet switch should invalidate older search runs and caches.');
+}
+
+function testCombinedSearchSelectionKeepsModesAndImportedSetTargetsDistinct() {
+  assert.deepEqual(resolveCombinedSearchSelection('scope:imported'), {
+    mode: 'imported',
+    setId: ''
+  });
+
+  assert.deepEqual(resolveCombinedSearchSelection('scope:all'), {
+    mode: 'all',
+    setId: ''
+  });
+
+  assert.deepEqual(resolveCombinedSearchSelection('scope:online'), {
+    mode: 'online',
+    setId: ''
+  });
+
+  assert.deepEqual(resolveCombinedSearchSelection('sv1'), {
+    mode: 'imported',
+    setId: 'sv1'
+  });
+}
+
+function testCombinedSearchDropdownOptionsIncludeGlobalModesAndImportedSets() {
+  const groups = buildCombinedSearchDropdownOptions([
+    { setId: 'sv1', setName: 'Scarlet & Violet' },
+    { setId: 'pal', setName: 'Paldea Evolved' }
+  ]);
+
+  assert.equal(groups.length, 2, 'Combined search dropdown should render one group for search scopes and one for imported sets.');
+  assert.equal(groups[0]?.label, 'Suchbereich');
+  assert.deepEqual(
+    groups[0]?.options?.map((entry) => entry.value),
+    ['scope:imported', 'scope:all', 'scope:online']
+  );
+  assert.equal(groups[1]?.label, 'Importierte Sets');
+  assert.deepEqual(
+    groups[1]?.options?.map((entry) => entry.value),
+    ['sv1', 'pal']
+  );
+}
+
 try {
   testDoesNotFalseMatchSubsetName();
   testDirectIdWinsWhenEnglishFallbackSetExists();
@@ -212,6 +282,9 @@ try {
   testCollectionUiKeepsRhToggleAvailableWithoutCollectedFlag();
   testStatsSeriesHelpersPreferDisplayNamesOverIds();
   testRhToggleAutoEnablesCollectedStatus();
+  testSpreadsheetSwitchStatePatchClearsStaleCollectionState();
+  testCombinedSearchSelectionKeepsModesAndImportedSetTargetsDistinct();
+  testCombinedSearchDropdownOptionsIncludeGlobalModesAndImportedSets();
   console.log('set-match-regression: ok');
 } catch (error) {
   console.error('set-match-regression: failed');

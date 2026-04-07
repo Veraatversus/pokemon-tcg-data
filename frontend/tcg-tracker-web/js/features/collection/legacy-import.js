@@ -27,6 +27,13 @@ function normalizeSetName(value) {
     .replace(/\s+/g, ' ');
 }
 
+function cleanLegacySetHeaderValue(value) {
+  return String(value || '')
+    .replace(/\(\s*set[-\s]*id\s*:[^)]+\)/i, '')
+    .replace(/\s*-\s*collected\s*:.*$/i, '')
+    .trim();
+}
+
 function getSheetCell(sheet, address) {
   if (!sheet || typeof sheet !== 'object') return null;
   return sheet[address] ?? null;
@@ -52,7 +59,7 @@ function getCellCommentText(cell) {
 }
 
 function extractSetIdFromText(text) {
-  const match = String(text || '').match(/set\s*id\s*:\s*([a-z0-9._-]+)/i);
+  const match = String(text || '').match(/set[-\s]*id\s*:\s*([a-z0-9._-]+)/i);
   return match ? String(match[1]).trim() : '';
 }
 
@@ -120,8 +127,9 @@ export function parseLegacyWorkbook(workbook) {
     if (!sheet) continue;
 
     const a1Cell = getSheetCell(sheet, 'A1');
-    const sourceSetName = String(getSheetCellValue(sheet, 'A1') || sheetName || '').trim();
-    const sourceSetIdRaw = extractSetIdFromText(getCellCommentText(a1Cell));
+    const rawHeaderValue = String(getSheetCellValue(sheet, 'A1') || sheetName || '').trim();
+    const sourceSetName = cleanLegacySetHeaderValue(rawHeaderValue) || String(sheetName || '').trim();
+    const sourceSetIdRaw = extractSetIdFromText(`${getCellCommentText(a1Cell)}\n${rawHeaderValue}`);
     const cards = collectLegacyCheckedCards(sheet);
 
     if (!cards.length) {
@@ -341,6 +349,7 @@ export async function loadLegacyWorkbookFromFile(file) {
     cellHTML: false,
     cellNF: false,
     cellStyles: false,
+    cellComments: true,
     sheetStubs: true
   });
 }

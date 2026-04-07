@@ -1538,6 +1538,43 @@ export async function updateCellBoolean(sheetName, row, col, value) {
   await putValues(a1, [[Boolean(value)]]);
 }
 
+export async function updateCellBooleansBatch(sheetName, updates = [], { chunkSize = 250 } = {}) {
+  await ensureNormalizedSchema();
+  const normalizedUpdates = (updates || [])
+    .map((entry) => ({
+      row: Number(entry?.row),
+      col: Number(entry?.col),
+      value: Boolean(entry?.value)
+    }))
+    .filter((entry) => Number.isFinite(entry.row) && entry.row >= 1 && Number.isFinite(entry.col) && entry.col >= 1);
+
+  if (!normalizedUpdates.length) return 0;
+
+  const groupedByTargetSheet = new Map();
+  normalizedUpdates.forEach((entry) => {
+    const useNormalizedCollection = entry.row >= 2 && (entry.col === 3 || entry.col === 4);
+    const targetSheet = useNormalizedCollection ? DB_SHEETS.collection : sheetName;
+    if (!groupedByTargetSheet.has(targetSheet)) groupedByTargetSheet.set(targetSheet, []);
+    groupedByTargetSheet.get(targetSheet).push(entry);
+  });
+
+  for (const [targetSheet, targetUpdates] of groupedByTargetSheet.entries()) {
+    const maxRow = Math.max(...targetUpdates.map((entry) => entry.row));
+    const maxCol = Math.max(...targetUpdates.map((entry) => entry.col));
+    await ensureSheetCapacity(targetSheet, maxRow, maxCol);
+
+    for (let start = 0; start < targetUpdates.length; start += chunkSize) {
+      const chunk = targetUpdates.slice(start, start + chunkSize);
+      await batchPutValues(chunk.map((entry) => ({
+        range: buildRange(targetSheet, `${colToA1(entry.col)}${entry.row}`),
+        values: [[Boolean(entry.value)]]
+      })));
+    }
+  }
+
+  return normalizedUpdates.length;
+}
+
 export async function ensureSettingsSheet() {
   const sheets = await resolveSheetNames();
   const sheetMeta = await gapi.client.sheets.spreadsheets.get({

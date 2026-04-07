@@ -40,11 +40,12 @@ async page => {
   }
 
   async function setScope(value) {
-    await page.locator('#search-scope-mode').selectOption(value);
+    await page.locator('#search-set-filter').selectOption(`scope:${value}`);
     await pause(250);
   }
 
   async function setSetFilter(value = '') {
+    if (!value) return;
     await page.locator('#search-set-filter').selectOption(value);
     await pause(250);
   }
@@ -72,6 +73,7 @@ async page => {
         type: Array.from(node.classList).find((entry) => entry.startsWith('search-ac-item--'))?.replace('search-ac-item--', '') || '',
       }));
 
+      const selectedValue = document.querySelector('#search-set-filter')?.value || '';
       return {
         count: cards.length,
         cards,
@@ -80,8 +82,8 @@ async page => {
         badgeText: document.querySelector('#search-results .search-mode-badge')?.textContent?.trim() || '',
         emptyText: document.querySelector('#search-results .empty-state')?.textContent?.trim() || '',
         inputValue: document.querySelector('#search-input')?.value || '',
-        setFilterValue: document.querySelector('#search-set-filter')?.value || '',
-        scopeValue: document.querySelector('#search-scope-mode')?.value || '',
+        setFilterValue: selectedValue.startsWith('scope:') ? '' : selectedValue,
+        scopeValue: selectedValue.startsWith('scope:') ? selectedValue.slice('scope:'.length) : 'imported',
       };
     });
   }
@@ -436,22 +438,6 @@ async page => {
     }));
   }
 
-  const onlineFilter = await page.evaluate(() => {
-    const select = document.getElementById('search-set-filter');
-    const options = Array.from(select?.options || []).map((option) => ({
-      value: option.value,
-      label: option.textContent?.trim() || '',
-    }));
-    return options.find((option) => option.value === 'base1') || options.find((option) => /base set/i.test(option.label)) || null;
-  });
-
-  if (onlineFilter) {
-    report.push(await runSearchCase('set_filter_online', 'Charizard', {
-      scope: 'online',
-      setFilter: onlineFilter.value,
-      expectedTexts: [onlineFilter.label, 'charizard'],
-    }));
-  }
 
   await page.evaluate((auditReport) => {
     window.__searchAuditReport = auditReport;

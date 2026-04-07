@@ -225,6 +225,37 @@ async function testStatsView(page) {
   }
 }
 
+async function testRefreshSplitUi(page) {
+  await page.evaluate(() => { window.location.hash = '#set'; });
+  await page.waitForTimeout(300);
+
+  const hasRefreshButton = await page.locator('#btn-refresh').count();
+  const hasRefreshMenuToggle = await page.locator('#btn-refresh-menu').count();
+  const hasRefreshMenu = await page.locator('#refresh-menu').count();
+
+  if (!hasRefreshButton || !hasRefreshMenuToggle || !hasRefreshMenu) {
+    throw new Error('Refresh-Split-Button mit Dropdown fehlt in der Set-Ansicht.');
+  }
+
+  const toggleDisabled = await page.locator('#btn-refresh-menu').isDisabled().catch(() => true);
+  if (!toggleDisabled) {
+    await page.locator('#btn-refresh-menu').click();
+    await page.waitForTimeout(120);
+
+    const menuVisible = await page.evaluate(() => {
+      const menu = document.querySelector('#refresh-menu');
+      return !!menu && !menu.classList.contains('hidden');
+    });
+    const hasReimportAction = await page.locator('#btn-refresh-reimport').count();
+
+    if (!menuVisible || !hasReimportAction) {
+      throw new Error('Refresh-Dropdown öffnet sich nicht korrekt oder Reimport-Aktion fehlt.');
+    }
+
+    await page.keyboard.press('Escape').catch(() => {});
+  }
+}
+
 async function testSetViewWhenLoggedIn(page) {
   const loggedIn = await isLoggedIn(page);
   if (!loggedIn) {
@@ -316,6 +347,7 @@ async function run() {
     await testSettingsAndToolButtons(page);
     await testSearchView(page);
     await testStatsView(page);
+    await testRefreshSplitUi(page);
     await testSetViewWhenLoggedIn(page);
 
     await closeOpenDialogs(page);

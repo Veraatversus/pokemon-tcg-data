@@ -25,7 +25,6 @@ async function waitForSearchView(page) {
 
   await waitForSelectorStable(page, '#search-input');
   await waitForSelectorStable(page, '#search-set-filter');
-  await waitForSelectorStable(page, '#search-scope-mode');
 }
 
 async function gotoDashboard(page) {
@@ -39,11 +38,12 @@ async function gotoDashboard(page) {
 }
 
 async function setScope(page, value) {
-  await page.locator('#search-scope-mode').selectOption(value);
+  await page.locator('#search-set-filter').selectOption(`scope:${value}`);
   await pause(page, 250);
 }
 
 async function setSetFilter(page, value = '') {
+  if (!value) return;
   await page.locator('#search-set-filter').selectOption(value);
   await pause(page, 250);
 }
@@ -411,22 +411,6 @@ async function run() {
       }));
     }
 
-    await setScope(page, 'online');
-    const onlineFilter = await page.evaluate(() => {
-      const options = Array.from(document.querySelectorAll('#search-set-filter option')).map((node) => ({
-        value: node.value,
-        label: node.textContent?.trim() || '',
-      }));
-      return options.find((option) => option.value === 'base1') || options.find((option) => /base set/i.test(option.label)) || null;
-    });
-
-    if (onlineFilter?.value) {
-      report.push(await runSearchCase(page, 'set_filter_online', 'Charizard', {
-        scope: 'online',
-        setFilter: onlineFilter.value,
-        expectedTexts: [onlineFilter.label, 'charizard'],
-      }));
-    }
 
     console.log('✅ Search Smoke OK');
     console.log(JSON.stringify(report, null, 2));

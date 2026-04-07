@@ -291,7 +291,8 @@ export function createSettingsPanel(currentSettings = {}, onSave) {
         ['btn-sheets-retry-report', '📈 Sheets Retry Analyse'],
         ['dashboard-action-parity', '🧪 Pokecode-Parity-Test'],
         ['btn-export-backup', '💾 Backup exportieren'],
-        ['btn-import-backup', '📥 Backup importieren']
+        ['btn-import-backup', '📥 Backup importieren'],
+        ['btn-import-legacy-xlsx', '🧬 Altbestand (.xlsx)']
       ]
     }
   ];

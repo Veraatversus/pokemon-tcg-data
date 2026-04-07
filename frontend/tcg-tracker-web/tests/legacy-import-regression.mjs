@@ -27,6 +27,20 @@ function createWorkbookFixture() {
   };
 }
 
+function createWorkbookFixtureWithoutComment() {
+  return {
+    SheetNames: ['Scarlet & Violet'],
+    Sheets: {
+      'Scarlet & Violet': {
+        A1: { v: 'Scarlet & Violet (Set-ID: sv1)' },
+        A3: { v: '001' },
+        A5: { v: true },
+        B5: { v: false }
+      }
+    }
+  };
+}
+
 function testParsesLegacyGridFromWorkbook() {
   const parsed = parseLegacyWorkbook(createWorkbookFixture());
 
@@ -70,6 +84,14 @@ function testBuildsStrictImportPlanForKnownSet() {
   );
 }
 
+function testExtractsSetIdFromHeaderTextFallback() {
+  const parsed = parseLegacyWorkbook(createWorkbookFixtureWithoutComment());
+
+  assert.equal(parsed.sheets.length, 1, 'Comment-free sheets should still be parsed.');
+  assert.equal(parsed.sheets[0].sourceSetIdRaw, 'sv1', 'The parser must recover the canonical set ID from the A1 header text fallback.');
+  assert.equal(parsed.sheets[0].sourceSetName, 'Scarlet & Violet', 'The visible set name should be cleaned up for exact fallback matching.');
+}
+
 function testStopsOnUnknownCardMappings() {
   const workbook = createWorkbookFixture();
   workbook.Sheets['Scarlet & Violet'].J3 = { v: '999' };
@@ -98,6 +120,7 @@ function testStopsOnUnknownCardMappings() {
 try {
   testParsesLegacyGridFromWorkbook();
   testBuildsStrictImportPlanForKnownSet();
+  testExtractsSetIdFromHeaderTextFallback();
   testStopsOnUnknownCardMappings();
   console.log('legacy-import-regression: ok');
 } catch (error) {

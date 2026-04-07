@@ -6,6 +6,7 @@ import {
   readDbCardsForSet,
   ensureCollectionEntry,
   updateCellBoolean,
+  updateCellBooleansBatch,
   readSummarySheet,
   readSettings,
   writeSetting,
@@ -13,10 +14,16 @@ import {
   upsertOverviewSet,
   syncOverviewWithApiSets,
   resetSheetsDataCaches,
-} from './data/sheets-db.js?v=20260506a';
+} from './data/sheets-db.js?v=20260407-login1';
 import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260507a';
 import { resolveSeriesGroupInfo } from './data/schema-contract.js?v=20260507a';
-import { normalizeCardNumber, toBoolean } from './core/utils.js';
+import {
+  buildCombinedSearchDropdownOptions,
+  createSpreadsheetSwitchStatePatch,
+  normalizeCardNumber,
+  resolveCombinedSearchSelection,
+  toBoolean
+} from './core/utils.js?v=20260407-searchscope1';
 import { getCollectionUiState, resolveCollectionToggleState } from './core/collection-state.js?v=20260507c';
 import * as cache from './core/cache.js';
 import { CONFIG, scopedStorageKey } from './core/config.js';
@@ -217,6 +224,10 @@ const dom = {
   selector:         document.getElementById('set-selector'),
   load:             document.getElementById('btn-load'),
   refresh:          document.getElementById('btn-refresh'),
+  refreshSplit:     document.getElementById('refresh-split'),
+  btnRefreshMenu:   document.getElementById('btn-refresh-menu'),
+  refreshMenu:      document.getElementById('refresh-menu'),
+  btnRefreshReimport: document.getElementById('btn-refresh-reimport'),
   status:           document.getElementById('status'),
   saveStatePill:    document.getElementById('save-state-pill'),
   setLogoWrap:      document.getElementById('set-logo-wrap'),
@@ -425,12 +436,21 @@ function updateAutoImportQueueUi() {
   if (dom.btnJobCancel) dom.btnJobCancel.disabled = true;
 }
 
+function getSearchSelectionState() {
+  const fallbackValue = `scope:${SEARCH_SCOPE_IMPORTED}`;
+  return resolveCombinedSearchSelection(dom.searchSetFilter?.value || fallbackValue, SEARCH_SCOPE_IMPORTED);
+}
+
 function getSearchScopeMode() {
-  const mode = String(dom.searchScopeMode?.value || SEARCH_SCOPE_IMPORTED);
+  const { mode } = getSearchSelectionState();
   if (mode === SEARCH_SCOPE_ALL || mode === SEARCH_SCOPE_ONLINE) {
     return mode;
   }
   return SEARCH_SCOPE_IMPORTED;
+}
+
+function getSearchSetFilterValue() {
+  return getSearchSelectionState().setId || '';
 }
 
 function getSetsForSearchMode(mode) {
@@ -474,23 +494,38 @@ function getSearchModeMeta(mode) {
 
 function renderSearchSetFilterOptions() {
   if (!dom.searchSetFilter) return;
-  const mode = getSearchScopeMode();
-  const previousValue = String(dom.searchSetFilter.value || '');
-  const sets = getSetsForSearchMode(mode);
-  const allLabel = mode === SEARCH_SCOPE_IMPORTED ? 'Importierte Sets' : 'Alle Sets';
 
-  dom.searchSetFilter.innerHTML = `<option value="">${allLabel}</option>`;
-  sets.forEach((set) => {
-    const opt = document.createElement('option');
-    opt.value = set.setId;
-    opt.textContent = set.setName;
-    dom.searchSetFilter.appendChild(opt);
+  const previousValue = String(dom.searchSetFilter.value || `scope:${SEARCH_SCOPE_IMPORTED}`);
+  const previousSelection = resolveCombinedSearchSelection(previousValue, SEARCH_SCOPE_IMPORTED);
+  const desiredValue = previousSelection.setId || `scope:${previousSelection.mode}`;
+  const groups = buildCombinedSearchDropdownOptions(state.sets || []);
+  const availableValues = [];
+
+  dom.searchSetFilter.innerHTML = '';
+  groups.forEach((group) => {
+    const options = Array.isArray(group?.options) ? group.options : [];
+    if (!options.length) return;
+
+    const optgroup = document.createElement('optgroup');
+    optgroup.label = group.label || '';
+
+    options.forEach((entry) => {
+      const opt = document.createElement('option');
+      opt.value = entry.value;
+      opt.textContent = entry.label;
+      if (entry.disabled) opt.disabled = true;
+      optgroup.appendChild(opt);
+      availableValues.push(entry.value);
+    });
+
+    dom.searchSetFilter.appendChild(optgroup);
   });
 
-  if (previousValue && sets.some((set) => set.setId === previousValue)) {
-    dom.searchSetFilter.value = previousValue;
-  } else {
-    dom.searchSetFilter.value = '';
+  const fallbackValue = `scope:${SEARCH_SCOPE_IMPORTED}`;
+  dom.searchSetFilter.value = availableValues.includes(desiredValue) ? desiredValue : fallbackValue;
+
+  if (dom.searchScopeMode) {
+    dom.searchScopeMode.value = getSearchScopeMode();
   }
 }
 
@@ -1716,6 +1751,47 @@ function setEmptyState(show) {
   dom.cards.classList.toggle('hidden', show);
 }
 
+function setRefreshMenuOpen(isOpen) {
+  if (!dom.refreshMenu || !dom.btnRefreshMenu) return;
+  const shouldOpen = Boolean(isOpen) && !dom.btnRefreshMenu.disabled;
+  dom.refreshMenu.classList.toggle('hidden', !shouldOpen);
+  dom.btnRefreshMenu.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+}
+
+function resetRuntimeUiForSpreadsheetSwitch() {
+  try {
+    state.searchAbortController?.abort?.();
+  } catch (err) {
+    console.warn('[resetRuntimeUiForSpreadsheetSwitch] abort search failed:', err);
+  }
+
+  if (state.autoImportRefreshTimer) {
+    clearTimeout(state.autoImportRefreshTimer);
+    state.autoImportRefreshTimer = null;
+  }
+
+  Object.assign(state, createSpreadsheetSwitchStatePatch(state));
+  cache.clear();
+  focusedCardIndex = -1;
+
+  syncSetNavLink(null);
+  dom.cards.innerHTML = '';
+  dom.searchResults.innerHTML = '<p class="empty-state">Bitte neue Suche starten.</p>';
+  dom.setLogoWrap.classList.add('hidden');
+  dom.statsSection.classList.add('hidden');
+  dom.filterSection.classList.add('hidden');
+  dom.sortSection.classList.add('hidden');
+  dom.cardSort.value = 'number';
+
+  document.querySelectorAll('.filter-btn').forEach((button) => button.classList.remove('active'));
+  document.querySelector('.filter-btn[data-filter="all"]')?.classList.add('active');
+
+  renderAuditPanel();
+  updateUndoUi();
+  updateSaveStatePill();
+  setEmptyState(true);
+}
+
 // ══════════════════════════════════════════════════════════════════════════
 // GRID ZOOM
 // ══════════════════════════════════════════════════════════════════════════
@@ -2257,8 +2333,12 @@ async function applySpreadsheetSelection(id) {
 
     CONFIG.SPREADSHEET_ID = nextId;
     resetSheetsDataCaches();
+    resetRuntimeUiForSpreadsheetSwitch();
     updateSpreadsheetInfoBar();
     await loadSets();
+    if (!dom.viewSearch?.classList.contains('hidden') && String(dom.searchInput?.value || '').trim()) {
+      await runSearch({ force: true });
+    }
     dom.dialog.close();
     setSpreadsheetDialogError('');
   } catch (err) {
@@ -2404,6 +2484,8 @@ async function loadSets() {
     dom.selector.disabled = false;
     dom.load.disabled     = false;
     dom.refresh.disabled  = false;
+    if (dom.btnRefreshMenu) dom.btnRefreshMenu.disabled = false;
+    setRefreshMenuOpen(false);
 
     dom.dashSeriesFilter.innerHTML = '<option value="">Alle Serien</option>';
     buildSeriesMap(state.allSets).forEach((groupInfo) => {
@@ -3876,6 +3958,7 @@ async function applyLegacyImportPlan(plan, cardsBySetId) {
         (matchedSet.cards || []).map((entry) => [normalizeCardNumber(entry.cardId), entry])
       );
       const setCards = Array.isArray(cardsBySetId?.[matchedSet.setId]) ? cardsBySetId[matchedSet.setId] : [];
+      const pendingCellUpdates = [];
 
       for (const sourceCard of setCards) {
         const cardId = pickCanonicalCardId(sourceCard);
@@ -3895,20 +3978,24 @@ async function applyLegacyImportPlan(plan, cardsBySetId) {
         const targetRh = Boolean(target.g && target.rh);
 
         if (!targetG && Boolean(entry.rh)) {
-          await updateCellBoolean(liveSet.setName, entry.rhCell.row, entry.rhCell.col, false);
+          pendingCellUpdates.push({ row: entry.rhCell.row, col: entry.rhCell.col, value: false });
           entry.rh = false;
           updatedCells += 1;
         }
         if (Boolean(entry.g) !== targetG) {
-          await updateCellBoolean(liveSet.setName, entry.gCell.row, entry.gCell.col, targetG);
+          pendingCellUpdates.push({ row: entry.gCell.row, col: entry.gCell.col, value: targetG });
           entry.g = targetG;
           updatedCells += 1;
         }
         if (targetG && Boolean(entry.rh) !== targetRh) {
-          await updateCellBoolean(liveSet.setName, entry.rhCell.row, entry.rhCell.col, targetRh);
+          pendingCellUpdates.push({ row: entry.rhCell.row, col: entry.rhCell.col, value: targetRh });
           entry.rh = targetRh;
           updatedCells += 1;
         }
+      }
+
+      if (pendingCellUpdates.length) {
+        await updateCellBooleansBatch(liveSet.setName, pendingCellUpdates, { chunkSize: 200 });
       }
     }
   } finally {
@@ -3921,6 +4008,7 @@ async function applyLegacyImportPlan(plan, cardsBySetId) {
     await loadCurrentSet(true).catch(() => {});
   }
 
+  setGlobalStatus(`Altbestand importiert: ${plan.matchedSets.length} Sets, ${updatedCells} Änderungen.`);
   showToast(`Altbestand importiert: ${plan.matchedSets.length} Sets synchronisiert, ${updatedCells} Änderungen geschrieben.`, 'success', 5000);
 }
 
@@ -3939,18 +4027,25 @@ async function startLegacyWorkbookImport(file) {
         summary,
         plan
       });
+      setGlobalStatus(`Altbestand blockiert: ${summary.unresolvedSheetCount} Set-, ${summary.unresolvedCardCount} Kartenkonflikte.`);
       window.alert(buildLegacyImportPreviewText(plan));
       showToast(`Import blockiert: ${summary.unresolvedSheetCount} Set- und ${summary.unresolvedCardCount} Kartenkonflikte. Prüfbericht exportiert.`, 'error', 7000);
       return;
     }
 
     const ok = window.confirm(`${buildLegacyImportPreviewText(plan)}\n\nImport jetzt anwenden?`);
-    if (!ok) return;
+    if (!ok) {
+      setGlobalStatus('Altbestand-Analyse abgeschlossen – Import nicht angewendet.');
+      showToast('Altbestand analysiert. Es wurden noch keine Änderungen geschrieben.', 'info', 4500);
+      return;
+    }
 
     await applyLegacyImportPlan(plan, cardsBySetId);
   } catch (err) {
+    const message = getErrorMessage(err, 'Unbekannter Fehler');
     console.error('[startLegacyWorkbookImport]', err);
-    showToast(`Altbestand-Import fehlgeschlagen: ${err.message}`, 'error', 7000);
+    setGlobalStatus(`Altbestand-Import fehlgeschlagen: ${message}`);
+    showToast(`Altbestand-Import fehlgeschlagen: ${message}`, 'error', 7000);
   } finally {
     setLoading(false);
   }
@@ -4114,11 +4209,35 @@ async function renderStats() {
       if ((row.collected || 0) >= (row.total || 1) && row.total > 0) completedSets++;
     });
     const overallPct = totalCards > 0 ? Math.round((totalCollected / totalCards) * 100) : 0;
+    const formatNumber = (value) => Number(value || 0).toLocaleString('de-DE');
+    const getSetPct = (row) => {
+      const total = Number(row?.total || 0);
+      const collected = Number(row?.collected || 0);
+      return total > 0 ? Math.round((collected / total) * 100) : 0;
+    };
+    const summaryByName = new Map(data.map((row) => [row.setName, row]));
+    const missingCards = Math.max(0, totalCards - totalCollected);
+    const averageSetCompletion = data.length
+      ? Math.round(data.reduce((sum, row) => sum + getSetPct(row), 0) / data.length)
+      : 0;
+    const activeSets = data.filter((row) => Number(row?.collected || 0) > 0).length;
+    const rhCoverage = totalCards > 0 ? Math.round((totalRh / totalCards) * 100) : 0;
+    const nextMilestone = [80, 85, 90, 95, 100].find((value) => value > overallPct) || null;
+    const cardsToNextMilestone = nextMilestone
+      ? Math.max(0, Math.ceil((nextMilestone / 100) * totalCards) - totalCollected)
+      : 0;
+    const collectionPhase = overallPct >= 90
+      ? '🔥 Endspurt'
+      : overallPct >= 75
+        ? '🚀 Sehr starker Ausbau'
+        : overallPct >= 50
+          ? '📈 Spürbarer Fortschritt'
+          : '🌱 Aufbauphase';
 
     // Serien-Breakdown
     const seriesMap = new Map();
-    state.sets.forEach((set) => {
-      const row = data.find((r) => r.setName === set.setName);
+    (state.sets || []).forEach((set) => {
+      const row = summaryByName.get(set.setName);
       const groupInfo = getSetSeriesGroupInfo(set);
       if (!seriesMap.has(groupInfo.key)) {
         seriesMap.set(groupInfo.key, {
@@ -4131,64 +4250,224 @@ async function renderStats() {
         });
       }
       const sg = seriesMap.get(groupInfo.key);
-      sg.total     += row?.total     || 0;
+      sg.total += row?.total || 0;
       sg.collected += row?.collected || 0;
-      sg.rh        += row?.rh        || 0;
+      sg.rh += row?.rh || 0;
       sg.count++;
       if ((row?.collected || 0) >= (row?.total || 1) && row?.total > 0) sg.completed++;
     });
 
-    const sorted      = [...data].filter((r) => r.total > 0).sort((a, b) => (b.collected / b.total) - (a.collected / a.total));
-    const top5Done    = sorted.slice(0, 5);
-    const top5Missing = [...data].filter((r) => r.total > 0 && (r.collected || 0) < r.total)
-      .sort((a, b) => (b.total - b.collected) - (a.total - a.collected)).slice(0, 5);
+    const sorted = [...data]
+      .filter((row) => Number(row?.total || 0) > 0)
+      .sort((a, b) => getSetPct(b) - getSetPct(a));
+    const top5Done = sorted.slice(0, 5);
+    const top5Missing = [...data]
+      .filter((row) => Number(row?.total || 0) > 0 && Number(row?.collected || 0) < Number(row?.total || 0))
+      .sort((a, b) => (Number(b.total || 0) - Number(b.collected || 0)) - (Number(a.total || 0) - Number(a.collected || 0)))
+      .slice(0, 5);
+    const nextSetTargets = [...data]
+      .filter((row) => Number(row?.total || 0) > 0 && Number(row?.collected || 0) > 0 && Number(row?.collected || 0) < Number(row?.total || 0))
+      .sort((a, b) => {
+        const missingDiff = (Number(a.total || 0) - Number(a.collected || 0)) - (Number(b.total || 0) - Number(b.collected || 0));
+        if (missingDiff !== 0) return missingDiff;
+        return getSetPct(b) - getSetPct(a);
+      })
+      .slice(0, 3);
+
+    const leadingSet = top5Done[0] || null;
+    const topSeriesEntry = [...seriesMap.entries()]
+      .filter(([, group]) => Number(group?.total || 0) > 0)
+      .sort((a, b) => {
+        const pctDiff = (b[1].collected / Math.max(1, b[1].total)) - (a[1].collected / Math.max(1, a[1].total));
+        if (pctDiff !== 0) return pctDiff;
+        return Number(b[1].collected || 0) - Number(a[1].collected || 0);
+      })[0] || null;
+    const largestSeriesEntry = [...seriesMap.entries()]
+      .filter(([, group]) => Number(group?.total || 0) > 0)
+      .sort((a, b) => Number(b[1].collected || 0) - Number(a[1].collected || 0))[0] || null;
+
+    const seriesRows = Array.from(seriesMap.entries())
+      .filter(([, group]) => Number(group?.total || 0) > 0)
+      .sort((a, b) => {
+        const pctDiff = Math.round((b[1].collected / Math.max(1, b[1].total)) * 100) - Math.round((a[1].collected / Math.max(1, a[1].total)) * 100);
+        if (pctDiff !== 0) return pctDiff;
+        return Number(b[1].collected || 0) - Number(a[1].collected || 0);
+      })
+      .map(([key, group]) => {
+        const pct = group.total > 0 ? Math.round((group.collected / group.total) * 100) : 0;
+        const label = getStatsSeriesLabel(key, group);
+        const safeKey = String(key).replace(/"/g, '&quot;');
+        const safeLabel = String(label).replace(/"/g, '&quot;');
+        return `
+          <div class="stats-series-row" data-series="${safeKey}" data-series-label="${safeLabel}">
+            <div class="stats-series-name-wrap">
+              <div class="stats-series-name">${label}</div>
+              <div class="stats-series-meta">${group.completed}/${group.count} Sets komplett</div>
+            </div>
+            <div class="stats-series-bar"><div class="dash-progress-fill" style="width:${pct}%"></div></div>
+            <div class="stats-series-numbers"><strong>${pct}%</strong><span>${formatNumber(group.collected)}/${formatNumber(group.total)}</span></div>
+          </div>`;
+      }).join('');
 
     dom.statsContent.innerHTML = `
+      <section class="stats-hero" style="--stats-progress:${overallPct};">
+        <div class="stats-hero-copy">
+          <span class="stats-eyebrow">SAMMLUNGSPULS</span>
+          <span class="stats-hero-badge">${collectionPhase}</span>
+          <h3>Deine Collection wirkt jetzt wie ein echtes Langzeitprojekt – <strong>${formatNumber(totalCollected)}</strong> von <strong>${formatNumber(totalCards)}</strong> Karten sind bereits gesichert.</h3>
+          <p>${overallPct}% Gesamtfortschritt, ${completedSets} ${completedSets === 1 ? 'komplettes Set' : 'komplette Sets'}, ${formatNumber(totalRh)} Reverse Holos und ${activeSets} aktive Sets machen aus der Statistik endlich eine richtige Trophäenwand.</p>
+          <div class="stats-pill-row">
+            <span class="stats-pill primary">📦 ${formatNumber(data.length)} importierte Sets</span>
+            <span class="stats-pill success">🏆 ${completedSets} komplett</span>
+            <span class="stats-pill">✨ Ø ${averageSetCompletion}% pro Set</span>
+            ${nextMilestone ? `<span class="stats-pill warning">🎯 Noch ${formatNumber(cardsToNextMilestone)} Karten bis ${nextMilestone}%</span>` : '<span class="stats-pill success">✅ 100% erreicht</span>'}
+          </div>
+        </div>
+        <div class="stats-hero-meter">
+          <div class="stats-hero-ring">
+            <div class="stats-hero-ring-core">
+              <strong>${overallPct}%</strong>
+              <span>Fortschritt</span>
+            </div>
+          </div>
+          <div class="stats-hero-meter-detail">
+            <strong>${formatNumber(missingCards)} Karten fehlen noch</strong>
+            <span>${nextMilestone ? `${formatNumber(cardsToNextMilestone)} bis zum nächsten Meilenstein` : 'Die Sammlung ist vollständig.'}</span>
+          </div>
+        </div>
+      </section>
+
       <div class="stats-overview-cards">
-        <div class="stat-card"><span class="stat-card-value">${totalCards.toLocaleString('de-DE')}</span><span class="stat-card-label">Karten gesamt</span></div>
-        <div class="stat-card collected"><span class="stat-card-value">${totalCollected.toLocaleString('de-DE')}</span><span class="stat-card-label">Normal gesammelt</span></div>
-        <div class="stat-card reverse"><span class="stat-card-value">${totalRh.toLocaleString('de-DE')}</span><span class="stat-card-label">Reverse Holos</span></div>
-        <div class="stat-card"><span class="stat-card-value">${overallPct}%</span><span class="stat-card-label">Gesamtfortschritt</span></div>
-        <div class="stat-card success"><span class="stat-card-value">${completedSets}</span><span class="stat-card-label">Vollst\u00e4ndige Sets</span></div>
-        <div class="stat-card"><span class="stat-card-value">${data.length}</span><span class="stat-card-label">Importierte Sets</span></div>
+        <article class="stat-card accent">
+          <span class="stat-card-value">${formatNumber(totalCards)}</span>
+          <span class="stat-card-label">Slots im Tracker</span>
+          <span class="stat-card-meta">${seriesMap.size} Serien im Blick</span>
+        </article>
+        <article class="stat-card collected">
+          <span class="stat-card-value">${formatNumber(totalCollected)}</span>
+          <span class="stat-card-label">Normals gesammelt</span>
+          <span class="stat-card-meta">${overallPct}% der Gesamtmenge</span>
+        </article>
+        <article class="stat-card reverse">
+          <span class="stat-card-value">${formatNumber(totalRh)}</span>
+          <span class="stat-card-label">Reverse Holos</span>
+          <span class="stat-card-meta">${rhCoverage}% bezogen auf alle Karten</span>
+        </article>
+        <article class="stat-card success">
+          <span class="stat-card-value">${completedSets}</span>
+          <span class="stat-card-label">Sets komplett</span>
+          <span class="stat-card-meta">${activeSets}/${data.length} Sets mit Fortschritt</span>
+        </article>
+        <article class="stat-card">
+          <span class="stat-card-value">${averageSetCompletion}%</span>
+          <span class="stat-card-label">Ø Set-Fortschritt</span>
+          <span class="stat-card-meta">${formatNumber(missingCards)} Karten bis 100%</span>
+        </article>
+        <article class="stat-card">
+          <span class="stat-card-value">${activeSets}</span>
+          <span class="stat-card-label">Aktive Sets</span>
+          <span class="stat-card-meta">${formatNumber(data.length)} importiert</span>
+        </article>
       </div>
-      <div class="stats-progress-bar-full"><div class="dash-progress-fill" style="width:${overallPct}%;height:16px;border-radius:8px;"></div></div>
-      <p style="text-align:center;color:var(--color-muted);margin:4px 0 28px">${totalCollected.toLocaleString('de-DE')} / ${totalCards.toLocaleString('de-DE')} Karten (${overallPct}%)</p>
-      <h3>Serien-\u00dcbersicht</h3>
-      <div class="stats-series-table">
-        ${Array.from(seriesMap.entries()).map(([key, sg]) => {
-          const pct = sg.total > 0 ? Math.round((sg.collected / sg.total) * 100) : 0;
-          const label = getStatsSeriesLabel(key, sg);
-          return `<div class="stats-series-row" data-series="${key.replace(/"/g, '&quot;')}" data-series-label="${label.replace(/"/g, '&quot;')}">
-            <div class="stats-series-name">${label}</div>
-            <div class="stats-series-bar"><div class="dash-progress-fill" style="width:${pct}%"></div></div>
-            <div class="stats-series-numbers">${sg.collected}/${sg.total} (${pct}%) &bull; ${sg.completed}/${sg.count} Sets</div>
-          </div>`;
-        }).join('')}
+
+      <div class="stats-story-grid">
+        <section class="stats-spotlight-card">
+          <div class="stats-section-kicker">Highlights</div>
+          <h3>Was gerade am meisten glänzt</h3>
+          <ul class="stats-insight-list">
+            <li><span>Bestes Set</span><strong>${leadingSet ? `${leadingSet.setName} · ${getSetPct(leadingSet)}%` : '—'}</strong></li>
+            <li><span>Stärkste Serie</span><strong>${topSeriesEntry ? `${getStatsSeriesLabel(topSeriesEntry[0], topSeriesEntry[1])} · ${Math.round((topSeriesEntry[1].collected / Math.max(1, topSeriesEntry[1].total)) * 100)}%` : '—'}</strong></li>
+            <li><span>Größter Kartenblock</span><strong>${largestSeriesEntry ? `${getStatsSeriesLabel(largestSeriesEntry[0], largestSeriesEntry[1])} · ${formatNumber(largestSeriesEntry[1].collected)} Karten` : '—'}</strong></li>
+          </ul>
+        </section>
+
+        <section class="stats-spotlight-card emphasis">
+          <div class="stats-section-kicker">Nächste Abschlüsse</div>
+          <h3>Diese Sets lohnen sich jetzt besonders</h3>
+          <div class="stats-goal-list">
+            ${nextSetTargets.length ? nextSetTargets.map((row) => `
+              <article class="stats-target-card">
+                <div class="stats-target-top">
+                  <strong>${row.setName}</strong>
+                  <span>${formatNumber((row.total || 0) - (row.collected || 0))} fehlen</span>
+                </div>
+                <div class="stats-mini-track"><div class="stats-mini-fill" style="width:${getSetPct(row)}%"></div></div>
+                <small>${formatNumber(row.collected || 0)}/${formatNumber(row.total || 0)} · ${getSetPct(row)}%</small>
+              </article>
+            `).join('') : '<p class="stats-empty-note">Sobald ein Set kurz vor dem Abschluss steht, erscheint es hier.</p>'}
+          </div>
+        </section>
+
+        <section class="stats-spotlight-card">
+          <div class="stats-section-kicker">Fokus</div>
+          <h3>Was den nächsten Sprung bringt</h3>
+          <ul class="stats-insight-list compact">
+            <li><span>Bis 100%</span><strong>${formatNumber(missingCards)} Karten</strong></li>
+            <li><span>${nextMilestone ? `Bis ${nextMilestone}%` : 'Status'}</span><strong>${nextMilestone ? `${formatNumber(cardsToNextMilestone)} Karten` : 'Meilenstein erreicht'}</strong></li>
+            <li><span>Größte Baustelle</span><strong>${top5Missing[0] ? `${top5Missing[0].setName} · ${formatNumber((top5Missing[0].total || 0) - (top5Missing[0].collected || 0))} fehlend` : 'Keine offenen Baustellen'}</strong></li>
+          </ul>
+        </section>
       </div>
+
+      <section class="stats-series-section">
+        <div class="stats-section-head">
+          <div>
+            <div class="stats-section-kicker">Serienvergleich</div>
+            <h3>Wie sich dein Fortschritt verteilt</h3>
+          </div>
+          <span class="stats-section-note">Klicke eine Reihe für die Set-Details.</span>
+        </div>
+        <div class="stats-series-table">
+          ${seriesRows || '<p class="stats-empty-note">Noch keine Serienstatistiken verfügbar.</p>'}
+        </div>
+      </section>
+
       <div class="stats-charts-row">
         <div class="stats-chart-wrap">
+          <div class="stats-section-kicker">Visualisierung</div>
           <h3>Gesamtfortschritt</h3>
+          <p>Gesammelt gegen fehlend – als schneller Blick auf den gesamten Binder.</p>
           <canvas id="chart-overall" height="220"></canvas>
         </div>
         <div class="stats-chart-wrap">
-          <h3>Serien-Vergleich</h3>
+          <div class="stats-section-kicker">Visualisierung</div>
+          <h3>Top-Serien im Vergleich</h3>
+          <p>Die stärksten Reihen nach Abschlussquote auf einen Blick.</p>
           <canvas id="chart-series" height="220"></canvas>
         </div>
       </div>
+
       <div class="stats-two-col">
-        <div>
-          <h3>Top 5: Vollst\u00e4ndigste Sets</h3>
+        <section class="stats-list-card">
+          <div class="stats-section-kicker">Trophy Board</div>
+          <h3>Top 5 vollständigste Sets</h3>
           <ol class="stats-top-list">
-            ${top5Done.map((r) => `<li><strong>${r.setName}</strong> \u2013 ${r.collected}/${r.total} (${Math.round((r.collected/r.total)*100)}%)</li>`).join('')}
+            ${top5Done.length ? top5Done.map((row) => `
+              <li>
+                <div class="stats-top-main">
+                  <strong>${row.setName}</strong>
+                  <span>${getSetPct(row)}%</span>
+                </div>
+                <small>${formatNumber(row.collected || 0)}/${formatNumber(row.total || 0)} Karten</small>
+              </li>
+            `).join('') : '<li class="stats-empty-note">Noch keine Sets verfügbar.</li>'}
           </ol>
-        </div>
-        <div>
-          <h3>Top 5: Meiste fehlende Karten</h3>
+        </section>
+        <section class="stats-list-card">
+          <div class="stats-section-kicker">Baustellen</div>
+          <h3>Top 5 mit den meisten fehlenden Karten</h3>
           <ol class="stats-top-list">
-            ${top5Missing.map((r) => `<li><strong>${r.setName}</strong> \u2013 ${r.total - r.collected} fehlend</li>`).join('')}
+            ${top5Missing.length ? top5Missing.map((row) => `
+              <li>
+                <div class="stats-top-main">
+                  <strong>${row.setName}</strong>
+                  <span>${formatNumber((row.total || 0) - (row.collected || 0))} offen</span>
+                </div>
+                <small>${formatNumber(row.collected || 0)}/${formatNumber(row.total || 0)} Karten</small>
+              </li>
+            `).join('') : '<li class="stats-empty-note">Keine offenen Sets mehr.</li>'}
           </ol>
-        </div>
+        </section>
       </div>`;
 
     initStatsCharts(totalCollected, totalCards, seriesMap);
@@ -4621,7 +4900,7 @@ async function runSearch(options = {}) {
     dom.searchResults.innerHTML = '<p class="empty-state">Suchbegriff eingeben.</p>';
     return;
   }
-  const setFilter = dom.searchSetFilter.value;
+  const setFilter = getSearchSetFilterValue();
   const availableSetsForSearch = getSetsForSearchMode(searchScopeMode);
   const baseSetsToSearch = setFilter
     ? availableSetsForSearch.filter((s) => s.setId === setFilter)
@@ -4901,9 +5180,19 @@ function initSearch() {
     clearTimeout(debounce);
     debounce = setTimeout(() => runSearch(), SEARCH_INPUT_DEBOUNCE_MS);
   });
-  dom.searchSetFilter.addEventListener('change', () => runSearch({ force: true }));
+  dom.searchSetFilter.addEventListener('change', () => {
+    if (dom.searchScopeMode) {
+      dom.searchScopeMode.value = getSearchScopeMode();
+    }
+    state.searchCache.clear();
+    runSearch({ force: true });
+  });
   dom.searchScopeMode?.addEventListener('change', () => {
+    const selectedMode = String(dom.searchScopeMode?.value || SEARCH_SCOPE_IMPORTED);
     renderSearchSetFilterOptions();
+    if (dom.searchSetFilter) {
+      dom.searchSetFilter.value = `scope:${selectedMode}`;
+    }
     state.searchCache.clear();
     runSearch({ force: true });
   });
@@ -6597,10 +6886,14 @@ async function bootstrap() {
     if (!dom.navSetSplit?.contains(event.target)) {
       setRecentSetsDropdownOpen(false);
     }
+    if (!dom.refreshSplit?.contains(event.target)) {
+      setRefreshMenuOpen(false);
+    }
   });
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
       setRecentSetsDropdownOpen(false);
+      setRefreshMenuOpen(false);
     }
   });
   window.addEventListener('resize', positionRecentSetsDropdown, { passive: true });
@@ -6628,6 +6921,7 @@ async function bootstrap() {
 
     dom.load.addEventListener('click', async () => {
       if (!isSignedIn()) return;
+      setRefreshMenuOpen(false);
       const setId = dom.selector.value;
       if (setId) navigate(`set/${setId}`);
       await loadCurrentSet(false);
@@ -6635,10 +6929,27 @@ async function bootstrap() {
 
     dom.refresh.addEventListener('click', async () => {
       if (!isSignedIn() || !state.currentSet) return;
+      setRefreshMenuOpen(false);
       await loadCurrentSet(true);
     });
 
+    dom.btnRefreshMenu?.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!isSignedIn() || dom.btnRefreshMenu.disabled || !state.currentSet) return;
+      setRefreshMenuOpen(dom.refreshMenu?.classList.contains('hidden'));
+    });
+
+    dom.btnRefreshReimport?.addEventListener('click', async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      setRefreshMenuOpen(false);
+      if (!isSignedIn() || !state.currentSet) return;
+      await reimportCurrentSetFromApi();
+    });
+
     dom.selector.addEventListener('change', () => {
+      setRefreshMenuOpen(false);
       const setId = dom.selector.value;
       if (setId) {
         navigate(`set/${setId}`);
@@ -6686,6 +6997,8 @@ function resetToLoggedOut() {
   dom.cards.innerHTML = '';
   dom.selector.innerHTML = '<option value="">Bitte w\u00e4hlen\u2026</option>';
   dom.selector.disabled = true; dom.load.disabled = true; dom.refresh.disabled = true;
+  if (dom.btnRefreshMenu) dom.btnRefreshMenu.disabled = true;
+  setRefreshMenuOpen(false);
   dom.auth.dataset.state = 'in'; dom.auth.disabled = false; syncAuthButtonLabel();
   dom.statsSection.classList.add('hidden');
   dom.filterSection.classList.add('hidden');
@@ -7451,11 +7764,19 @@ function initStatsDrillDown() {
           const total = Number(summary.total || set.totalCards || 0);
           const collected = Number(summary.collected || 0);
           const pct = total > 0 ? Math.round((collected / total) * 100) : 0;
+          const missing = total > 0 ? Math.max(0, total - collected) : null;
+          const statusClass = pct >= 100 ? 'is-complete' : pct >= 75 ? 'is-close' : '';
           return `
-            <div class="stats-drill-set">
-              <strong>${set.setName}</strong>
+            <div class="stats-drill-set ${statusClass}">
+              <div class="stats-drill-set-head">
+                <strong>${set.setName}</strong>
+                <span class="stats-drill-pct">${pct}%</span>
+              </div>
               <div class="mini-bar"><div class="mini-fill" style="width:${pct}%"></div></div>
-              <span class="drill-nums">${collected}/${total || '?'} (${pct}%)</span>
+              <span class="drill-nums">
+                <span>${collected}/${total || '?'} Karten</span>
+                <span>${missing == null ? 'Gesamt unbekannt' : `${missing} fehlend`}</span>
+              </span>
             </div>
           `;
         }).join('')}

@@ -58,6 +58,97 @@ export function toBoolean(value) {
 }
 
 /**
+ * Liefert die State-Felder, die beim Wechsel auf ein anderes Spreadsheet
+ * bewusst geleert werden müssen, damit keine alten Tabellen-/Suchdaten
+ * in der Oberfläche hängen bleiben.
+ * @param {object} [currentState]
+ * @returns {object}
+ */
+export function createSpreadsheetSwitchStatePatch(currentState = {}) {
+  return {
+    summaryData: null,
+    summaryOverrides: new Map(),
+    currentSet: null,
+    dbMap: new Map(),
+    cards: [],
+    filter: 'all',
+    sortOrder: 'number',
+    bulkMode: false,
+    bulkSelected: new Set(),
+    batchSelection: new Set(),
+    manageSetsSelection: new Set(),
+    undoStack: [],
+    auditEntries: [],
+    searchCache: new Map(),
+    searchRunId: Number(currentState?.searchRunId || 0) + 1,
+    searchAbortController: null,
+    pendingSearchSetImport: false,
+    pendingSearchCardFocusKey: null,
+  };
+}
+
+const COMBINED_SEARCH_SCOPE_PREFIX = 'scope:';
+const COMBINED_SEARCH_SCOPE_VALUES = new Set(['imported', 'all', 'online']);
+
+/**
+ * Löst die kombinierte Suchauswahl in Modus + optionales importiertes Set auf.
+ * Globale Suchmodi verwenden Werte wie `scope:imported`, konkrete importierte
+ * Sets direkt ihre `setId`.
+ * @param {string} value
+ * @param {string} [fallbackMode='imported']
+ * @returns {{ mode: string, setId: string }}
+ */
+export function resolveCombinedSearchSelection(value, fallbackMode = 'imported') {
+  const raw = String(value || '').trim();
+  if (!raw) {
+    return { mode: fallbackMode, setId: '' };
+  }
+
+  if (raw.startsWith(COMBINED_SEARCH_SCOPE_PREFIX)) {
+    const mode = raw.slice(COMBINED_SEARCH_SCOPE_PREFIX.length).trim().toLowerCase();
+    if (COMBINED_SEARCH_SCOPE_VALUES.has(mode)) {
+      return { mode, setId: '' };
+    }
+  }
+
+  return { mode: 'imported', setId: raw };
+}
+
+/**
+ * Baut die Optionsgruppen für das kombinierte Such-Dropdown auf.
+ * @param {Array<{setId:string, setName?:string}>} importedSets
+ * @returns {Array<{label:string, options:Array<{value:string,label:string}>}>}
+ */
+export function buildCombinedSearchDropdownOptions(importedSets = []) {
+  const groups = [
+    {
+      label: 'Suchbereich',
+      options: [
+        { value: 'scope:imported', label: 'Importierte Sets' },
+        { value: 'scope:all', label: 'Alle Sets' },
+        { value: 'scope:online', label: 'Online-Suche' }
+      ]
+    }
+  ];
+
+  const importedOptions = (Array.isArray(importedSets) ? importedSets : [])
+    .filter((set) => set?.setId)
+    .map((set) => ({
+      value: String(set.setId),
+      label: String(set.setName || set.setId)
+    }));
+
+  if (importedOptions.length) {
+    groups.push({
+      label: 'Importierte Sets',
+      options: importedOptions
+    });
+  }
+
+  return groups;
+}
+
+/**
  * Extrahiert den Anzeigetext aus einer Google-Sheets-HYPERLINK-Formel.
  * Falls kein HYPERLINK vorhanden, den ursprünglichen Wert zurückgeben.
  * @param {string} value
