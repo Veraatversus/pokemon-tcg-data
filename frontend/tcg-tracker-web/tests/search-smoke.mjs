@@ -140,11 +140,46 @@ async function runProgressiveSearchCase(page, name, query, options = {}) {
     progressiveSeen = false;
   }
 
+  const loadingSnapshots = [];
+  if (progressiveSeen) {
+    const loadingProbeStart = Date.now();
+    while (Date.now() - loadingProbeStart < 1800) {
+      const loadingState = await page.evaluate(() => ({
+        loading: Boolean(document.querySelector('#search-results .loading-placeholder')),
+        titles: Array.from(document.querySelectorAll('#search-results .search-result-card .title'))
+          .slice(0, 5)
+          .map((node) => node.textContent?.trim() || '')
+          .filter(Boolean),
+      }));
+
+      if (loadingState.loading && loadingState.titles.length) {
+        loadingSnapshots.push(loadingState.titles);
+      }
+      if (!loadingState.loading && loadingSnapshots.length) {
+        break;
+      }
+      await pause(page, 180);
+    }
+  }
+
   await waitForSearchSettled(page);
   const finalState = await collectSearchState(page);
+  const reorderEvents = loadingSnapshots.reduce((count, titles, index) => {
+    if (index === 0) return count;
+    const previousTitles = loadingSnapshots[index - 1] || [];
+    const comparableLength = Math.min(previousTitles.length, titles.length);
+    const prefixChanged = previousTitles
+      .slice(0, comparableLength)
+      .some((title, titleIndex) => titles[titleIndex] !== title);
+    return prefixChanged ? count + 1 : count;
+  }, 0);
 
   if (!progressiveSeen) {
     throw new Error(`[${name}] Während der laufenden Suche wurden keine Treffer parallel zum Ladehinweis angezeigt. Finaler Zustand: ${JSON.stringify(finalState)}`);
+  }
+
+  if (reorderEvents > 1) {
+    throw new Error(`[${name}] Die Reihenfolge der sichtbaren Treffer hat sich während der laufenden Suche zu oft verändert (${reorderEvents}x): ${JSON.stringify(loadingSnapshots)}`);
   }
 
   if (finalState.count < 1) {
@@ -160,6 +195,7 @@ async function runProgressiveSearchCase(page, name, query, options = {}) {
     countText: finalState.countText,
     badgeText: finalState.badgeText,
     progressiveSeen,
+    reorderEvents,
     topResults: finalState.cards,
   };
 }
@@ -346,10 +382,24 @@ async function run() {
       throw new Error('Autocomplete verschwindet zu schnell nach einem kurzen Blur.');
     }
 
+    await page.locator('#search-input').press('Enter').catch(() => {});
+    await pause(page, 150);
+    const autocompleteAfterSubmit = await page.evaluate(() => {
+      const node = document.getElementById('search-autocomplete');
+      return {
+        hidden: !node || node.classList.contains('hidden'),
+        activeElementId: document.activeElement?.id || '',
+      };
+    });
+    if (!autocompleteAfterSubmit.hidden) {
+      throw new Error(`Autocomplete bleibt nach Enter sichtbar: ${JSON.stringify(autocompleteAfterSubmit)}`);
+    }
+
     report.push({
       name: 'autocomplete_short_query',
       query: 'b',
       suggestions: autocompleteState.suggestions,
+      afterSubmit: autocompleteAfterSubmit,
     });
 
     report.push(await runProgressiveSearchCase(page, 'progressive_online_results', 'Charizard', {

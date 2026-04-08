@@ -4950,6 +4950,37 @@ function sortSearchResults(results = []) {
   });
 }
 
+function getSearchResultKey(card = {}, set = null) {
+  const setId = String(set?.setId || '').trim();
+  const cardNumber = normalizeCardNumber(card?.number || '');
+  const fallbackName = normalizeSearchText(card?.name || '');
+  return `${setId}::${cardNumber || fallbackName || 'card'}`;
+}
+
+function getSearchResultsInOrder(resultsMap, orderedKeys = []) {
+  if (!(resultsMap instanceof Map)) return [];
+  if (!Array.isArray(orderedKeys) || !orderedKeys.length) {
+    return Array.from(resultsMap.values());
+  }
+
+  const orderedResults = [];
+  const seenKeys = new Set();
+
+  orderedKeys.forEach((key) => {
+    if (!resultsMap.has(key)) return;
+    orderedResults.push(resultsMap.get(key));
+    seenKeys.add(key);
+  });
+
+  resultsMap.forEach((value, key) => {
+    if (!seenKeys.has(key)) {
+      orderedResults.push(value);
+    }
+  });
+
+  return orderedResults;
+}
+
 function renderSearchToolbarMeta({
   rawQuery = '',
   searchScopeMode = SEARCH_SCOPE_IMPORTED,
@@ -5121,74 +5152,91 @@ async function runSearch(options = {}) {
     isSearching: true,
   });
 
-  const results = [];
+  const resultsMap = new Map();
+  const apiPhaseQueue = [];
+  let apiRenderOrderKeys = null;
   let searchedSetsCount = 0;
+  let shouldStopSearch = false;
+
+  const upsertMatches = (cards, set, dbMap) => {
+    (Array.isArray(cards) ? cards : []).forEach((card) => {
+      const score = computeSearchScore(card, query, structuredQuery, mixedQuery, set);
+      if (score < 0) return;
+      const resultKey = getSearchResultKey(card, set);
+      const hadKey = resultsMap.has(resultKey);
+      resultsMap.set(resultKey, {
+        card,
+        set,
+        dbMap,
+        score,
+        apiOnly: Boolean(card?.__searchApiOnly),
+        resultKey,
+      });
+      if (!hadKey && Array.isArray(apiRenderOrderKeys) && !apiRenderOrderKeys.includes(resultKey)) {
+        apiRenderOrderKeys.push(resultKey);
+      }
+    });
+  };
+
+  const renderCurrentResults = ({ isSearching = false, preserveSortedPrefix = false } = {}) => {
+    const currentResults = preserveSortedPrefix
+      ? getSearchResultsInOrder(resultsMap, apiRenderOrderKeys)
+      : Array.from(resultsMap.values());
+
+    if (!currentResults.length) return;
+    state.lastSearchResults = currentResults.slice(0, 60);
+    if (isStale() || isAborted()) return;
+    renderSearchResultsList(currentResults, searchScopeMode, {
+      rawQuery,
+      setsProcessed: searchedSetsCount,
+      totalSets: setsToSearch.length,
+      isSearching,
+    });
+  };
+
   for (const set of setsToSearch) {
     if (isStale() || isAborted()) return;
-    let shouldStopSearch = false;
     try {
       const cacheKey = `cards_${set.setId}`;
       const dbCardsCacheKey = `db_cards_${set.setId}`;
+      const dbCacheKey = `db_${set.setId}`;
       const searchCacheKey = `${set.setId}::${searchScopeMode}`;
       const useApiForSet = shouldUseApiForSearchSet(searchScopeMode, set);
-      let cards;
-      if (state.searchCache.has(searchCacheKey)) {
-        cards = state.searchCache.get(searchCacheKey);
+
+      let dbCards = [];
+      if (cache.has(dbCardsCacheKey)) {
+        dbCards = cache.get(dbCardsCacheKey) || [];
       } else {
-        let dbCards = [];
-        if (cache.has(dbCardsCacheKey)) {
-          dbCards = cache.get(dbCardsCacheKey) || [];
-        } else {
-          dbCards = await readDbCardsForSet(set.setId).catch(() => []);
-          if (Array.isArray(dbCards) && dbCards.length > 0) {
-            cache.set(dbCardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
-          }
+        dbCards = await readDbCardsForSet(set.setId).catch(() => []);
+        if (Array.isArray(dbCards) && dbCards.length > 0) {
+          cache.set(dbCardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
         }
-
-        const hasDbCards = Array.isArray(dbCards) && dbCards.length > 0;
-        const shouldFetchApiCards = useApiForSet || (searchScopeMode === SEARCH_SCOPE_ALL && !hasDbCards);
-
-        if (shouldFetchApiCards) {
-          let apiCards = [];
-          if (cache.has(cacheKey)) {
-            apiCards = cache.get(cacheKey) || [];
-          } else {
-            const apiPayload = await fetchMergedCardsWithSetMeta(set.setId, { signal: abortController.signal }).catch(() => ({ cards: [], setMetaPatch: null }));
-            apiCards = Array.isArray(apiPayload?.cards) ? apiPayload.cards : [];
-            if (apiCards.length > 0) {
-              cache.set(cacheKey, apiCards, CONFIG.CACHE_TTL_MS);
-            }
-          }
-          cards = searchScopeMode === SEARCH_SCOPE_ONLINE
-            ? mergeSearchCards([], apiCards)
-            : mergeSearchCards(dbCards, apiCards);
-        } else {
-          cards = hasDbCards ? dbCards : [];
-        }
-
-        state.searchCache.set(searchCacheKey, cards || []);
       }
-      if (!cards || !cards.length) continue;
-      if (isStale() || isAborted()) return;
+
       let dbMap = new Map();
-      const dbCacheKey = `db_${set.setId}`;
       if (cache.has(dbCacheKey)) dbMap = cache.get(dbCacheKey);
       else {
         dbMap = await readSetCollectionMap(set.setName).catch(() => new Map());
         cache.set(dbCacheKey, dbMap, CONFIG.CACHE_TTL_MS);
       }
-      if (isStale() || isAborted()) return;
-      cards.forEach((card) => {
-        const score = computeSearchScore(card, query, structuredQuery, mixedQuery, set);
-        if (score >= 0) {
-          results.push({ card, set, dbMap, score, apiOnly: Boolean(card?.__searchApiOnly) });
-        }
-      });
-      if (!structuredQuery && !mixedQuery && results.length >= 200 && searchScopeMode === SEARCH_SCOPE_IMPORTED) {
+
+      const hasDbCards = Array.isArray(dbCards) && dbCards.length > 0;
+      const shouldFetchApiCards = useApiForSet || (searchScopeMode === SEARCH_SCOPE_ALL && !hasDbCards);
+      const dbSearchCards = !useApiForSet && hasDbCards ? dbCards : [];
+
+      if (dbSearchCards.length > 0) {
+        upsertMatches(dbSearchCards, set, dbMap);
+        state.searchCache.set(searchCacheKey, dbSearchCards);
+      }
+
+      if (shouldFetchApiCards) {
+        apiPhaseQueue.push({ set, dbCards, dbMap, cacheKey, searchCacheKey });
+      }
+
+      if (!structuredQuery && !mixedQuery && resultsMap.size >= 200 && searchScopeMode === SEARCH_SCOPE_IMPORTED) {
         shouldStopSearch = true;
       }
-      // Exakter Set+Nummer-Treffer (ohne Namensfilter) — kann frühzeitig abbrechen
-      if (structuredQuery?.cardNumber && !structuredQuery?.namePart && results.length >= 1) {
+      if (structuredQuery?.cardNumber && !structuredQuery?.namePart && resultsMap.size >= 1 && !shouldFetchApiCards) {
         shouldStopSearch = true;
       }
     } catch (err) {
@@ -5200,21 +5248,82 @@ async function runSearch(options = {}) {
 
     searchedSetsCount += 1;
 
-    if (results.length > 0) {
-      sortSearchResults(results);
-      state.lastSearchResults = results.slice(0, 60);
-      if (isStale() || isAborted()) return;
-      renderSearchResultsList(results, searchScopeMode, {
-        rawQuery,
-        setsProcessed: searchedSetsCount,
-        totalSets: setsToSearch.length,
-        isSearching: searchedSetsCount < setsToSearch.length && !shouldStopSearch,
+    if (resultsMap.size > 0) {
+      renderCurrentResults({
+        isSearching: searchedSetsCount < setsToSearch.length || (!shouldStopSearch && apiPhaseQueue.length > 0),
       });
     }
 
     if (shouldStopSearch) break;
   }
-  if (!results.length) {
+
+  if (shouldStopSearch) {
+    apiPhaseQueue.length = 0;
+  }
+
+  const hasPendingApiPhase = apiPhaseQueue.length > 0;
+  if (resultsMap.size > 0) {
+    const dbSortedResults = sortSearchResults(Array.from(resultsMap.values()));
+    apiRenderOrderKeys = hasPendingApiPhase
+      ? dbSortedResults.map((entry) => entry.resultKey)
+      : null;
+    state.lastSearchResults = dbSortedResults.slice(0, 60);
+
+    if (isStale() || isAborted()) return;
+    renderSearchResultsList(dbSortedResults, searchScopeMode, {
+      rawQuery,
+      setsProcessed: searchedSetsCount,
+      totalSets: setsToSearch.length,
+      isSearching: hasPendingApiPhase,
+    });
+  }
+
+  if (!shouldStopSearch && hasPendingApiPhase) {
+    for (let apiIndex = 0; apiIndex < apiPhaseQueue.length; apiIndex += 1) {
+      if (isStale() || isAborted()) return;
+      const { set, dbCards, dbMap, cacheKey, searchCacheKey } = apiPhaseQueue[apiIndex];
+
+      try {
+        let apiCards = [];
+        if (cache.has(cacheKey)) {
+          apiCards = cache.get(cacheKey) || [];
+        } else {
+          const apiPayload = await fetchMergedCardsWithSetMeta(set.setId, { signal: abortController.signal }).catch(() => ({ cards: [], setMetaPatch: null }));
+          apiCards = Array.isArray(apiPayload?.cards) ? apiPayload.cards : [];
+          if (apiCards.length > 0) {
+            cache.set(cacheKey, apiCards, CONFIG.CACHE_TTL_MS);
+          }
+        }
+
+        const mergedCards = searchScopeMode === SEARCH_SCOPE_ONLINE
+          ? mergeSearchCards([], apiCards)
+          : mergeSearchCards(dbCards, apiCards);
+
+        state.searchCache.set(searchCacheKey, mergedCards || []);
+
+        if (mergedCards.length > 0) {
+          upsertMatches(mergedCards, set, dbMap);
+          renderCurrentResults({
+            isSearching: apiIndex < apiPhaseQueue.length - 1,
+            preserveSortedPrefix: true,
+          });
+        }
+
+        if (structuredQuery?.cardNumber && !structuredQuery?.namePart && resultsMap.size >= 1) {
+          shouldStopSearch = true;
+        }
+      } catch (err) {
+        if (err?.name === 'AbortError') {
+          return;
+        }
+        console.warn('[runSearch] api phase error for set', set.setId, err);
+      }
+
+      if (shouldStopSearch) break;
+    }
+  }
+
+  if (!resultsMap.size) {
     const modeMeta = getSearchModeMeta(searchScopeMode);
     renderSearchToolbarMeta({
       rawQuery,
@@ -5228,17 +5337,18 @@ async function runSearch(options = {}) {
       <div class="search-results-head">
         <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
       </div>
-      <p class="empty-state">Keine Karten f\u00fcr \u201e${rawQuery}\u201c gefunden (durchsucht: ${setsToSearch.length} Sets, ${modeMeta.hint}).</p>
+      <p class="empty-state">Keine Karten für „${rawQuery}“ gefunden (durchsucht: ${setsToSearch.length} Sets, ${modeMeta.hint}).</p>
     `;
     return;
   }
-  sortSearchResults(results);
-  state.lastSearchResults = results.slice(0, 60);
+
+  const finalResults = sortSearchResults(Array.from(resultsMap.values()));
+  state.lastSearchResults = finalResults.slice(0, 60);
 
   if (isStale() || isAborted()) return;
-  renderSearchResultsList(results, searchScopeMode, {
+  renderSearchResultsList(finalResults, searchScopeMode, {
     rawQuery,
-    setsProcessed: searchedSetsCount,
+    setsProcessed: setsToSearch.length,
     totalSets: setsToSearch.length,
     isSearching: false,
   });
@@ -5383,6 +5493,28 @@ async function openSearchResultLightbox(card, set, { apiOnly = false } = {}) {
   openLightbox(targetIndex);
 }
 
+function shouldDismissMobileSearchKeyboard() {
+  try {
+    return Boolean(
+      window.matchMedia?.('(pointer: coarse)')?.matches
+      || /android|iphone|ipad|ipod|mobile/i.test(navigator.userAgent || '')
+    );
+  } catch {
+    return false;
+  }
+}
+
+function dismissSearchAutocomplete({ blurInput = false } = {}) {
+  const list = document.getElementById('search-autocomplete');
+  if (list) {
+    list.classList.add('hidden');
+  }
+
+  if (blurInput && dom.searchInput && typeof dom.searchInput.blur === 'function') {
+    window.requestAnimationFrame(() => dom.searchInput?.blur());
+  }
+}
+
 function initSearch() {
   let debounce;
   dom.searchInput.addEventListener('input', () => {
@@ -5408,6 +5540,7 @@ function initSearch() {
   dom.searchInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       clearTimeout(debounce);
+      dismissSearchAutocomplete({ blurInput: shouldDismissMobileSearchKeyboard() });
       runSearch({ force: true });
     }
   });
@@ -7895,6 +8028,7 @@ function initSearchAutocomplete() {
     const items = [...list.querySelectorAll('.search-ac-item')];
     if (!items.length || list.classList.contains('hidden')) {
       if (event.key === 'Escape') hideList();
+      if (event.key === 'Enter') dismissSearchAutocomplete({ blurInput: shouldDismissMobileSearchKeyboard() });
       return;
     }
 
@@ -7904,9 +8038,13 @@ function initSearchAutocomplete() {
     } else if (event.key === 'ArrowUp') {
       event.preventDefault();
       selectedIndex = Math.max(selectedIndex - 1, 0);
-    } else if (event.key === 'Enter' && selectedIndex >= 0) {
+    } else if (event.key === 'Enter') {
       event.preventDefault();
-      applySelection(activeItems[selectedIndex]);
+      if (selectedIndex >= 0) {
+        applySelection(activeItems[selectedIndex]);
+      } else {
+        dismissSearchAutocomplete({ blurInput: shouldDismissMobileSearchKeyboard() });
+      }
       return;
     } else if (event.key === 'Escape') {
       hideList();
