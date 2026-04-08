@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
 import {
   parseLegacyWorkbook,
-  buildLegacyImportPlan
+  buildLegacyImportPlan,
+  extractLegacySpreadsheetId,
+  buildWorkbookFromGoogleSheetsSpreadsheet,
+  loadLegacyWorkbookFromSpreadsheetInput
 } from '../js/features/collection/legacy-import.js';
 
 function createWorkbookFixture() {
@@ -38,6 +41,47 @@ function createWorkbookFixtureWithoutComment() {
         B5: { v: false }
       }
     }
+  };
+}
+
+function createGoogleSheetsFixture() {
+  return {
+    sheets: [
+      {
+        properties: { title: 'Scarlet & Violet' },
+        data: [
+          {
+            rowData: [
+              {
+                values: [
+                  { formattedValue: 'Scarlet & Violet', note: 'Set ID: sv1' }
+                ]
+              },
+              {},
+              {
+                values: [
+                  { formattedValue: '001' },
+                  {},
+                  {},
+                  { formattedValue: '002' },
+                  {}
+                ]
+              },
+              {},
+              {
+                values: [
+                  { effectiveValue: { boolValue: true }, formattedValue: 'TRUE' },
+                  { effectiveValue: { boolValue: false }, formattedValue: 'FALSE' },
+                  {},
+                  { effectiveValue: { boolValue: true }, formattedValue: 'TRUE' },
+                  { effectiveValue: { boolValue: true }, formattedValue: 'TRUE' }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
   };
 }
 
@@ -117,14 +161,69 @@ function testStopsOnUnknownCardMappings() {
   assert.equal(plan.unresolvedCards[0].sourceCardId, '999');
 }
 
-try {
+function testExtractsSpreadsheetIdFromUrl() {
+  const spreadsheetId = '1AbCdEfGhIjKlMnOpQrStUvWxYz1234567890';
+
+  assert.equal(extractLegacySpreadsheetId(`https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit#gid=0`), spreadsheetId);
+  assert.equal(extractLegacySpreadsheetId(spreadsheetId), spreadsheetId);
+  assert.equal(extractLegacySpreadsheetId('not-a-sheet'), null);
+}
+
+function testBuildsWorkbookFromGoogleSheetsGridData() {
+  const workbook = buildWorkbookFromGoogleSheetsSpreadsheet(createGoogleSheetsFixture());
+  const parsed = parseLegacyWorkbook(workbook);
+
+  assert.equal(parsed.sheets.length, 1, 'Google Sheets grid data should be convertible into the legacy workbook parser format.');
+  assert.equal(parsed.sheets[0].sourceSetIdRaw, 'sv1', 'The set note from the Google Sheet should be preserved for exact set resolution.');
+  assert.deepEqual(
+    parsed.sheets[0].cards,
+    [
+      { sourceCardId: '001', normalizedCardId: '1', g: true, rh: false },
+      { sourceCardId: '002', normalizedCardId: '2', g: true, rh: true }
+    ]
+  );
+}
+
+async function testLoadsSpreadsheetAfterDiscoveryBecomesReady() {
+  const spreadsheetId = '1AbCdEfGhIjKlMnOpQrStUvWxYz1234567890';
+  const previousGapi = globalThis.gapi;
+
+  globalThis.gapi = {
+    client: {
+      async load() {
+        globalThis.gapi.client.sheets = {
+          spreadsheets: {
+            async get({ spreadsheetId: id }) {
+              assert.equal(id, spreadsheetId);
+              return { result: createGoogleSheetsFixture() };
+            }
+          }
+        };
+      }
+    }
+  };
+
+  try {
+    const workbook = await loadLegacyWorkbookFromSpreadsheetInput(spreadsheetId);
+    assert.equal(workbook.SheetNames[0], 'Scarlet & Violet');
+  } finally {
+    globalThis.gapi = previousGapi;
+  }
+}
+
+async function run() {
   testParsesLegacyGridFromWorkbook();
   testBuildsStrictImportPlanForKnownSet();
   testExtractsSetIdFromHeaderTextFallback();
   testStopsOnUnknownCardMappings();
+  testExtractsSpreadsheetIdFromUrl();
+  testBuildsWorkbookFromGoogleSheetsGridData();
+  await testLoadsSpreadsheetAfterDiscoveryBecomesReady();
   console.log('legacy-import-regression: ok');
-} catch (error) {
+}
+
+run().catch((error) => {
   console.error('legacy-import-regression: failed');
   console.error(error);
   process.exit(1);
-}
+});

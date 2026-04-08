@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import { findMatchingTcgdexSet, resolvePreferredTcgdexSetBases } from '../js/pokecode-compat.js';
-import { buildCardRecordFromSources, resolveDisplayCard, resolveSeriesGroupInfo } from '../js/data/schema-contract.js';
+import { combineSetsForOverviewCompat, findMatchingTcgdexSet, resolvePreferredTcgdexSetBases } from '../js/pokecode-compat.js';
+import { buildCardRecordFromSources, resolveDisplayCard, resolveDisplaySet, resolveSeriesGroupInfo } from '../js/data/schema-contract.js';
 import { getCollectionUiState, resolveCollectionToggleState } from '../js/core/collection-state.js';
 import {
   buildCombinedSearchDropdownOptions,
@@ -109,6 +109,44 @@ function testSeriesGroupingUsesStableTcgdexKeyAcrossLocalizedLabels() {
 
   assert.equal(germanDisplay.key, englishFallbackDisplay.key, 'Localized and English display labels must land in the same dashboard series bucket even when one set has no TCGDex series metadata.');
   assert.equal(germanDisplay.label, 'Schwert & Schild', 'When a localized Vera label exists, it should remain available for UI display.');
+}
+
+function testGermanTcgdexSetAssetsFallbackToEnglishSummaryAssets() {
+  const [combined] = combineSetsForOverviewCompat({
+    primarySets: [{
+      id: 'sv1',
+      name: 'Karmesin & Purpur',
+      series: 'Karmesin & Purpur',
+      total: 198,
+      printedTotal: 198,
+      images: { logo: '', symbol: '' },
+      legalities: {},
+      releaseDate: '2023-03-31',
+      ptcgoCode: 'SVI'
+    }],
+    tcgdexSets: [{
+      id: 'sv1',
+      name: 'Scarlet & Violet',
+      logo: 'https://assets.tcgdex.net/en/sv/sv1/logo.webp',
+      symbol: 'https://assets.tcgdex.net/en/sv/sv1/symbol.webp',
+      abbreviation: { official: 'SVI' },
+      serie: { id: 'sv', name: 'Scarlet & Violet' }
+    }],
+    tcgdexResolvedSets: [{
+      id: 'sv1',
+      name: 'Karmesin & Purpur',
+      logo: '',
+      symbol: '',
+      abbreviation: { official: 'SVI' },
+      serie: { id: 'sv', name: 'Karmesin & Purpur' }
+    }],
+    customMappings: {},
+    mapPrimarySetToOverviewModel: (set) => ({ setId: set.id }),
+    toNumber: Number
+  }).map((set) => resolveDisplaySet(set));
+
+  assert.equal(combined.logoUrl, 'https://assets.tcgdex.net/en/sv/sv1/logo.webp');
+  assert.equal(combined.symbolUrl, 'https://assets.tcgdex.net/en/sv/sv1/symbol.webp');
 }
 
 function testCardResolverUsesTcgdexDetailFieldsWhenPrimaryDataIsMissing() {
@@ -277,6 +315,7 @@ try {
   testExactEnglishNameBeatsConflictingCode();
   testLocaleResolutionSkipsGerman404WhenSetIsKnownEnOnly();
   testSeriesGroupingUsesStableTcgdexKeyAcrossLocalizedLabels();
+  testGermanTcgdexSetAssetsFallbackToEnglishSummaryAssets();
   testCardResolverUsesTcgdexDetailFieldsWhenPrimaryDataIsMissing();
   testCardImageResolverDefaultsToTcgdexFirstPriority();
   testCollectionUiKeepsRhToggleAvailableWithoutCollectedFlag();

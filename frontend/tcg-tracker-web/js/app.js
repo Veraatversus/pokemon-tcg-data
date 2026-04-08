@@ -41,11 +41,13 @@ import {
 } from './features/collection/index.js';
 import {
   loadLegacyWorkbookFromFile,
+  loadLegacyWorkbookFromSpreadsheetInput,
   parseLegacyWorkbook,
   buildLegacyImportPlan,
   summarizeLegacyImportPlan,
-  pickCanonicalCardId
-} from './features/collection/legacy-import.js?v=20260407a';
+  pickCanonicalCardId,
+  extractLegacySpreadsheetId
+} from './features/collection/legacy-import.js?v=20260508a';
 import { initCommandPalette } from './ui/command-palette.js';
 import { filterSetsBySeriesKey, getStatsSeriesLabel } from './ui/stats-series.js?v=20260407a';
 import {
@@ -203,8 +205,14 @@ const dom = {
   btnExportBackup: document.getElementById('btn-export-backup'),
   btnImportBackup: document.getElementById('btn-import-backup'),
   btnImportLegacyXlsx: document.getElementById('btn-import-legacy-xlsx'),
+  btnImportLegacySheet: document.getElementById('btn-import-legacy-sheet'),
   backupFileInput: document.getElementById('input-backup-file'),
   legacyImportFileInput: document.getElementById('input-legacy-import-file'),
+  legacySheetDialog: document.getElementById('dialog-legacy-sheet-import'),
+  legacySheetInput: document.getElementById('input-legacy-sheet-link'),
+  legacySheetError: document.getElementById('legacy-sheet-import-error'),
+  btnLegacySheetCancel: document.getElementById('btn-legacy-sheet-cancel'),
+  btnLegacySheetImportConfirm: document.getElementById('btn-legacy-sheet-import-confirm'),
   manageSetsDialog: document.getElementById('dialog-manage-sets'),
   manageSetsSearch: document.getElementById('manage-sets-search-input'),
   manageSetsList: document.getElementById('manage-sets-list'),
@@ -293,6 +301,7 @@ const dom = {
   searchSetFilter:  document.getElementById('search-set-filter'),
   searchScopeMode:  document.getElementById('search-scope-mode'),
   searchResults:    document.getElementById('search-results'),
+  searchToolbarMeta: document.getElementById('search-toolbar-meta'),
 };
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -1758,6 +1767,15 @@ function setRefreshMenuOpen(isOpen) {
   dom.btnRefreshMenu.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
 }
 
+function syncRefreshControls() {
+  const canRefreshCurrentSet = Boolean(isSignedIn() && state.currentSet?.setId);
+  if (dom.refresh) dom.refresh.disabled = !canRefreshCurrentSet;
+  if (dom.btnRefreshMenu) dom.btnRefreshMenu.disabled = !canRefreshCurrentSet;
+  if (!canRefreshCurrentSet) {
+    setRefreshMenuOpen(false);
+  }
+}
+
 function resetRuntimeUiForSpreadsheetSwitch() {
   try {
     state.searchAbortController?.abort?.();
@@ -2483,9 +2501,7 @@ async function loadSets() {
 
     dom.selector.disabled = false;
     dom.load.disabled     = false;
-    dom.refresh.disabled  = false;
-    if (dom.btnRefreshMenu) dom.btnRefreshMenu.disabled = false;
-    setRefreshMenuOpen(false);
+    syncRefreshControls();
 
     dom.dashSeriesFilter.innerHTML = '<option value="">Alle Serien</option>';
     buildSeriesMap(state.allSets).forEach((groupInfo) => {
@@ -3868,12 +3884,12 @@ function buildLegacyImportPreviewText(plan) {
   }
 
   lines.push('');
-  lines.push('Der Import setzt die betroffenen Sets exakt auf den XLSX-Stand (G/RH) – inklusive Entfernen nicht markierter Treffer in diesen Sets.');
+  lines.push('Der Import setzt die betroffenen Sets exakt auf den Altbestand-Stand (G/RH) – inklusive Entfernen nicht markierter Treffer in diesen Sets.');
   return lines.join('\n');
 }
 
-async function prepareLegacyWorkbookImport(file) {
-  if (!file) throw new Error('Keine XLSX-Datei ausgewählt.');
+async function prepareLegacyWorkbookImport(workbook, sourceLabel = 'Altbestand') {
+  if (!workbook) throw new Error('Keine Altbestand-Quelle ausgewählt.');
   if (!state.allSets?.length) {
     await loadSets();
   }
@@ -3881,10 +3897,9 @@ async function prepareLegacyWorkbookImport(file) {
     throw new Error('Sets konnten vor der Analyse nicht geladen werden.');
   }
 
-  const workbook = await loadLegacyWorkbookFromFile(file);
   const parsedWorkbook = parseLegacyWorkbook(workbook);
   if (!parsedWorkbook.sheets.length) {
-    throw new Error('In der XLSX-Datei wurden keine markierten Karten gefunden.');
+    throw new Error(`In ${sourceLabel} wurden keine markierten Karten gefunden.`);
   }
 
   const preflight = buildLegacyImportPlan({
@@ -3903,7 +3918,7 @@ async function prepareLegacyWorkbookImport(file) {
   for (let index = 0; index < uniqueSetIds.length; index++) {
     const setId = uniqueSetIds[index];
     const setMeta = getSetById(setId);
-    setGlobalStatus(`Analysiere XLSX ${index + 1}/${uniqueSetIds.length}: ${setMeta?.setName || setId}`);
+    setGlobalStatus(`Analysiere ${sourceLabel} ${index + 1}/${uniqueSetIds.length}: ${setMeta?.setName || setId}`);
     const cards = await fetchMergedCards(setId);
     if (!Array.isArray(cards) || !cards.length) {
       throw new Error(`Kartenkatalog für ${setMeta?.setName || setId} konnte nicht geladen werden.`);
@@ -3931,13 +3946,13 @@ async function applyLegacyImportPlan(plan, cardsBySetId) {
 
   if (missingSets.length) {
     await importSetsSequential(missingSets, {
-      successMessage: '{count} fehlende Sets für den XLSX-Import importiert.'
+      successMessage: '{count} fehlende Sets für den Altbestand-Import importiert.'
     });
     await loadSets();
   }
 
   try {
-    await createAutoSnapshot(`Legacy XLSX Import (${plan.matchedSets.length} Sets)`, state.collection || {});
+    await createAutoSnapshot(`Legacy Altbestand Import (${plan.matchedSets.length} Sets)`, state.collection || {});
   } catch (err) {
     console.warn('[applyLegacyImportPlan] snapshot failed', err);
   }
@@ -3952,7 +3967,7 @@ async function applyLegacyImportPlan(plan, cardsBySetId) {
         throw new Error(`Ziel-Set ${matchedSet.setId} ist nach dem Vorimport nicht verfügbar.`);
       }
 
-      setGlobalStatus(`XLSX-Import ${setIndex + 1}/${plan.matchedSets.length}: ${liveSet.setName}`);
+      setGlobalStatus(`Altbestand-Import ${setIndex + 1}/${plan.matchedSets.length}: ${liveSet.setName}`);
       const liveMap = await readSetCollectionMap(liveSet.setName).catch(() => new Map());
       const targetByCard = new Map(
         (matchedSet.cards || []).map((entry) => [normalizeCardNumber(entry.cardId), entry])
@@ -4012,12 +4027,49 @@ async function applyLegacyImportPlan(plan, cardsBySetId) {
   showToast(`Altbestand importiert: ${plan.matchedSets.length} Sets synchronisiert, ${updatedCells} Änderungen geschrieben.`, 'success', 5000);
 }
 
-async function startLegacyWorkbookImport(file) {
-  if (!file) return;
+function setLegacySheetDialogError(message = '') {
+  if (!dom.legacySheetError) return;
+  dom.legacySheetError.textContent = message;
+  dom.legacySheetError.classList.toggle('hidden', !message);
+}
+
+function openLegacySheetImportDialog() {
+  setLegacySheetDialogError('');
+  if (dom.legacySheetInput) {
+    dom.legacySheetInput.value = '';
+  }
+  dom.legacySheetDialog?.showModal();
+  dom.legacySheetInput?.focus();
+}
+
+async function submitLegacySheetImportDialog() {
+  const rawInput = String(dom.legacySheetInput?.value || '').trim();
+  const spreadsheetId = extractLegacySpreadsheetId(rawInput);
+  if (!spreadsheetId) {
+    setLegacySheetDialogError('Bitte einen gültigen Google-Sheets-Link oder eine Spreadsheet-ID eingeben.');
+    dom.legacySheetInput?.focus();
+    return;
+  }
+
+  dom.legacySheetDialog?.close();
+  await startLegacyWorkbookImport({
+    spreadsheetInput: spreadsheetId,
+    sourceLabel: 'Google Sheet'
+  });
+}
+
+async function startLegacyWorkbookImport(source = {}) {
+  const sourceFile = source instanceof Blob ? source : source?.file || null;
+  const spreadsheetInput = typeof source === 'string' ? source : source?.spreadsheetInput || '';
+  const sourceLabel = String(source?.sourceLabel || (sourceFile ? 'XLSX' : 'Google Sheet')).trim();
+  if (!sourceFile && !spreadsheetInput) return;
 
   setLoading(true, 'Analysiere Altbestand…');
   try {
-    const { plan, cardsBySetId } = await prepareLegacyWorkbookImport(file);
+    const workbook = sourceFile
+      ? await loadLegacyWorkbookFromFile(sourceFile)
+      : await loadLegacyWorkbookFromSpreadsheetInput(spreadsheetInput);
+    const { plan, cardsBySetId } = await prepareLegacyWorkbookImport(workbook, sourceLabel);
     const summary = summarizeLegacyImportPlan(plan);
 
     if (!summary.ok) {
@@ -4055,6 +4107,14 @@ function initBackupImportExport() {
   dom.btnExportBackup?.addEventListener('click', exportCollectionBackup);
   dom.btnImportBackup?.addEventListener('click', () => dom.backupFileInput?.click());
   dom.btnImportLegacyXlsx?.addEventListener('click', () => dom.legacyImportFileInput?.click());
+  dom.btnImportLegacySheet?.addEventListener('click', openLegacySheetImportDialog);
+  dom.btnLegacySheetCancel?.addEventListener('click', () => dom.legacySheetDialog?.close());
+  dom.btnLegacySheetImportConfirm?.addEventListener('click', submitLegacySheetImportDialog);
+  dom.legacySheetInput?.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    submitLegacySheetImportDialog();
+  });
 
   dom.backupFileInput?.addEventListener('change', async () => {
     const file = dom.backupFileInput.files?.[0];
@@ -4881,6 +4941,117 @@ function needsApiCardEnrichment(cards = []) {
   return richCount < Math.max(1, Math.ceil(sample.length * 0.4));
 }
 
+function sortSearchResults(results = []) {
+  return results.sort((left, right) => {
+    if (right.score !== left.score) return right.score - left.score;
+    const setCompare = String(left.set?.setName || '').localeCompare(String(right.set?.setName || ''), 'de', { sensitivity: 'base' });
+    if (setCompare !== 0) return setCompare;
+    return String(left.card?.number || '').localeCompare(String(right.card?.number || ''), undefined, { numeric: true, sensitivity: 'base' });
+  });
+}
+
+function renderSearchToolbarMeta({
+  rawQuery = '',
+  searchScopeMode = SEARCH_SCOPE_IMPORTED,
+  resultCount = 0,
+  setsProcessed = 0,
+  totalSets = 0,
+  isSearching = false,
+  emptyMessage = '',
+} = {}) {
+  if (!dom.searchToolbarMeta) return;
+
+  const modeMeta = getSearchModeMeta(searchScopeMode);
+  const safeResultCount = Number.isFinite(resultCount) ? Math.max(0, resultCount) : 0;
+  const progressSuffix = totalSets > 0
+    ? ` · ${Math.min(setsProcessed, totalSets)}/${totalSets} Sets`
+    : '';
+
+  let statusText = emptyMessage || 'Suchbegriff oben eingeben.';
+  if (!emptyMessage && rawQuery) {
+    if (isSearching) {
+      statusText = `${safeResultCount || '…'} Ergebnis${safeResultCount === 1 ? '' : 'se'} · Suche läuft${progressSuffix}`;
+    } else if (safeResultCount > 0) {
+      statusText = `${safeResultCount} Ergebnis${safeResultCount === 1 ? '' : 'se'} gefunden`;
+    } else {
+      statusText = `Keine Treffer${progressSuffix}`;
+    }
+  }
+
+  dom.searchToolbarMeta.innerHTML = `
+    <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
+    <span class="search-meta-pill${isSearching ? ' is-live' : ''}">${statusText}</span>
+  `;
+}
+
+function renderSearchResultsList(results = [], searchScopeMode, options = {}) {
+  if (!dom.searchResults) return;
+
+  const {
+    rawQuery = '',
+    setsProcessed = 0,
+    totalSets = 0,
+    isSearching = false,
+  } = options;
+
+  const safeResults = Array.isArray(results) ? results : [];
+  const modeMeta = getSearchModeMeta(searchScopeMode);
+  const progressSuffix = totalSets > 0
+    ? ` (${Math.min(setsProcessed, totalSets)}/${totalSets} Sets geprüft)`
+    : '';
+
+  renderSearchToolbarMeta({
+    rawQuery,
+    searchScopeMode,
+    resultCount: safeResults.length,
+    setsProcessed,
+    totalSets,
+    isSearching,
+  });
+
+  if (!safeResults.length) {
+    if (isSearching) {
+      dom.searchResults.innerHTML = `
+        <div class="search-results-head">
+          <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
+        </div>
+        <p class="loading-placeholder">Suche läuft…${progressSuffix}</p>
+      `;
+      return;
+    }
+
+    dom.searchResults.innerHTML = `
+      <div class="search-results-head">
+        <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
+      </div>
+      <p class="empty-state">Keine Karten für „${rawQuery}“ gefunden (durchsucht: ${totalSets} Sets, ${modeMeta.hint}).</p>
+    `;
+    return;
+  }
+
+  dom.searchResults.innerHTML = `
+    <div class="search-results-head">
+      <p class="search-result-count">${safeResults.length} Ergebnis${safeResults.length !== 1 ? 'se' : ''}${isSearching ? ' · Suche läuft…' : ''}</p>
+      <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
+    </div>
+  `;
+
+  const frag = document.createDocumentFragment();
+  safeResults.forEach(({ card, set, dbMap, apiOnly }) => {
+    const key = normalizeCardNumber(card.number);
+    frag.appendChild(createSearchResultCard(card, key, dbMap.get(key), set, apiOnly));
+  });
+
+  if (isSearching) {
+    const loading = document.createElement('p');
+    loading.className = 'loading-placeholder';
+    loading.textContent = `Suche läuft…${progressSuffix}`;
+    frag.appendChild(loading);
+  }
+
+  dom.searchResults.appendChild(frag);
+}
+
 async function runSearch(options = {}) {
   const { force = false } = options;
   const runId = ++state.searchRunId;
@@ -4897,6 +5068,10 @@ async function runSearch(options = {}) {
   const searchScopeMode = getSearchScopeMode();
   if (!query) {
     state.lastSearchResults = [];
+    renderSearchToolbarMeta({
+      searchScopeMode,
+      emptyMessage: 'Suchbegriff oben eingeben.'
+    });
     dom.searchResults.innerHTML = '<p class="empty-state">Suchbegriff eingeben.</p>';
     return;
   }
@@ -4913,6 +5088,11 @@ async function runSearch(options = {}) {
   const mixedQuery = !structuredQuery ? parseMixedQuery(rawQuery) : null;
   if (!force && !structuredQuery && !mixedQuery && query.length < 2) {
     state.lastSearchResults = [];
+    renderSearchToolbarMeta({
+      rawQuery,
+      searchScopeMode,
+      emptyMessage: 'Mindestens 2 Zeichen eingeben oder Enter drücken.'
+    });
     dom.searchResults.innerHTML = '<p class="empty-state">Mindestens 2 Zeichen eingeben oder Enter drücken.</p>';
     return;
   }
@@ -4926,13 +5106,26 @@ async function runSearch(options = {}) {
     ? [baseSetsToSearch.find((s) => s.setId === structuredQuery.setId) ?? structuredQuery.set]
     : baseSetsToSearch;
   if (!setsToSearch.length) {
+    renderSearchToolbarMeta({
+      rawQuery,
+      searchScopeMode,
+      emptyMessage: 'Keine passenden Sets verfügbar.'
+    });
     dom.searchResults.innerHTML = '<p class="empty-state">Keine passenden Sets verfügbar.</p>';
     return;
   }
-  dom.searchResults.innerHTML = '<p class="loading-placeholder">Suche\u2026</p>';
+  renderSearchResultsList([], searchScopeMode, {
+    rawQuery,
+    setsProcessed: 0,
+    totalSets: setsToSearch.length,
+    isSearching: true,
+  });
+
   const results = [];
+  let searchedSetsCount = 0;
   for (const set of setsToSearch) {
     if (isStale() || isAborted()) return;
+    let shouldStopSearch = false;
     try {
       const cacheKey = `cards_${set.setId}`;
       const dbCardsCacheKey = `db_cards_${set.setId}`;
@@ -4991,18 +5184,46 @@ async function runSearch(options = {}) {
           results.push({ card, set, dbMap, score, apiOnly: Boolean(card?.__searchApiOnly) });
         }
       });
-      if (!structuredQuery && !mixedQuery && results.length >= 200 && searchScopeMode === SEARCH_SCOPE_IMPORTED) break;
+      if (!structuredQuery && !mixedQuery && results.length >= 200 && searchScopeMode === SEARCH_SCOPE_IMPORTED) {
+        shouldStopSearch = true;
+      }
       // Exakter Set+Nummer-Treffer (ohne Namensfilter) — kann frühzeitig abbrechen
-      if (structuredQuery?.cardNumber && !structuredQuery?.namePart && results.length >= 1) break;
+      if (structuredQuery?.cardNumber && !structuredQuery?.namePart && results.length >= 1) {
+        shouldStopSearch = true;
+      }
     } catch (err) {
       if (err?.name === 'AbortError') {
         return;
       }
       console.warn('[runSearch] error for set', set.setId, err);
     }
+
+    searchedSetsCount += 1;
+
+    if (results.length > 0) {
+      sortSearchResults(results);
+      state.lastSearchResults = results.slice(0, 60);
+      if (isStale() || isAborted()) return;
+      renderSearchResultsList(results, searchScopeMode, {
+        rawQuery,
+        setsProcessed: searchedSetsCount,
+        totalSets: setsToSearch.length,
+        isSearching: searchedSetsCount < setsToSearch.length && !shouldStopSearch,
+      });
+    }
+
+    if (shouldStopSearch) break;
   }
   if (!results.length) {
     const modeMeta = getSearchModeMeta(searchScopeMode);
+    renderSearchToolbarMeta({
+      rawQuery,
+      searchScopeMode,
+      resultCount: 0,
+      setsProcessed: setsToSearch.length,
+      totalSets: setsToSearch.length,
+      emptyMessage: `Keine Treffer · ${setsToSearch.length} Sets geprüft`
+    });
     dom.searchResults.innerHTML = `
       <div class="search-results-head">
         <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
@@ -5011,29 +5232,16 @@ async function runSearch(options = {}) {
     `;
     return;
   }
-  results.sort((left, right) => {
-    if (right.score !== left.score) return right.score - left.score;
-    const setCompare = String(left.set?.setName || '').localeCompare(String(right.set?.setName || ''), 'de', { sensitivity: 'base' });
-    if (setCompare !== 0) return setCompare;
-    return String(left.card?.number || '').localeCompare(String(right.card?.number || ''), undefined, { numeric: true, sensitivity: 'base' });
-  });
-
+  sortSearchResults(results);
   state.lastSearchResults = results.slice(0, 60);
 
   if (isStale() || isAborted()) return;
-  const modeMeta = getSearchModeMeta(searchScopeMode);
-  dom.searchResults.innerHTML = `
-    <div class="search-results-head">
-      <p class="search-result-count">${results.length} Ergebnis${results.length !== 1 ? 'se' : ''}</p>
-      <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
-    </div>
-  `;
-  const frag = document.createDocumentFragment();
-  results.forEach(({ card, set, dbMap, apiOnly }) => {
-    const key = normalizeCardNumber(card.number);
-    frag.appendChild(createSearchResultCard(card, key, dbMap.get(key), set, apiOnly));
+  renderSearchResultsList(results, searchScopeMode, {
+    rawQuery,
+    setsProcessed: searchedSetsCount,
+    totalSets: setsToSearch.length,
+    isSearching: false,
   });
-  dom.searchResults.appendChild(frag);
 }
 
 function createSearchResultCard(card, key, db, set, apiOnly = false) {
@@ -5166,6 +5374,7 @@ async function openSearchResultLightbox(card, set, { apiOnly = false } = {}) {
   if (targetIndex < 0) return;
 
   state.currentSet = set;
+  syncRefreshControls();
   state.cards = cards;
   state.dbMap = dbMap;
   state.lightboxIndex = targetIndex;
@@ -6170,6 +6379,7 @@ async function loadCurrentSet(forceRefresh = false) {
   ensureSetSelectorOption(selected);
 
   state.currentSet = selected;
+  syncRefreshControls();
   sessionStorage.setItem('tcg_last_set', setId);
   syncSetNavLink(selected);
 
@@ -6956,6 +7166,7 @@ async function bootstrap() {
         return;
       }
       state.currentSet = null; state.cards = []; state.dbMap = new Map();
+      syncRefreshControls();
       syncSetNavLink(null);
       dom.cards.innerHTML = '';
       dom.statsSection.classList.add('hidden');

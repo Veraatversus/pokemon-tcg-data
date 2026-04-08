@@ -292,7 +292,8 @@ export function createSettingsPanel(currentSettings = {}, onSave) {
         ['dashboard-action-parity', '🧪 Pokecode-Parity-Test'],
         ['btn-export-backup', '💾 Backup exportieren'],
         ['btn-import-backup', '📥 Backup importieren'],
-        ['btn-import-legacy-xlsx', '🧬 Altbestand (.xlsx)']
+        ['btn-import-legacy-xlsx', '🧬 Altbestand (.xlsx)'],
+        ['btn-import-legacy-sheet', '🔗 Altbestand (Sheets-Link)']
       ]
     }
   ];

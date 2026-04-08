@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&display=swap" rel="stylesheet" />
   <link rel="apple-touch-icon" href="./assets/branding/logo-veras-pokemon.jpg?v=8" />
-  <link rel="stylesheet" href="./css/main.css?v=20260407-lightboxpolish1" />
+  <link rel="stylesheet" href="./css/main.css?v=20260508-refreshmenu1"6/>
   <link rel="stylesheet" href="./css/trading-marketplace.css?v=20260505e" />
 </head>
 <body class="dark">
@@ -281,10 +281,25 @@
                 <button id="btn-export-backup" class="btn-secondary" type="button">💾 Backup exportieren</button>
                 <button id="btn-import-backup" class="btn-secondary" type="button">📥 Backup importieren</button>
                 <button id="btn-import-legacy-xlsx" class="btn-secondary" type="button">🧬 Altbestand (.xlsx)</button>
+                <button id="btn-import-legacy-sheet" class="btn-secondary" type="button">🔗 Altbestand (Sheets-Link)</button>
               </div>
             </section>
             <input id="input-backup-file" type="file" accept="application/json" class="hidden" />
             <input id="input-legacy-import-file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" class="hidden" />
+
+            <dialog id="dialog-legacy-sheet-import" class="dialog-card">
+              <h3>Altbestand per Google-Sheets-Link</h3>
+              <p>Füge den Link oder die Spreadsheet-ID deiner alten Sammlung ein. Bei Konflikten stoppt der Import weiterhin komplett.</p>
+              <label style="display:grid; gap:6px; margin:12px 0;">
+                <span>Google-Sheets-Link oder ID</span>
+                <input id="input-legacy-sheet-link" type="text" placeholder="https://docs.google.com/spreadsheets/d/..." autocomplete="off" />
+              </label>
+              <p id="legacy-sheet-import-error" class="hidden" style="color:var(--color-danger); margin:0 0 12px;"></p>
+              <div style="display:flex; justify-content:flex-end; gap:8px;">
+                <button id="btn-legacy-sheet-cancel" class="btn-secondary" type="button">Abbrechen</button>
+                <button id="btn-legacy-sheet-import-confirm" class="btn-secondary" type="button">Analysieren</button>
+              </div>
+            </dialog>
           </div>
         </details>
       </div>
@@ -426,6 +441,10 @@
             <option value="scope:imported">Importierte Sets</option>
           </select>
         </div>
+        <div id="search-toolbar-meta" class="search-toolbar-meta" aria-live="polite">
+          <span class="search-mode-badge imported">Importierte Sets</span>
+          <span class="search-meta-pill search-meta-pill--muted">Suchbegriff oben eingeben.</span>
+        </div>
       </div>
       <p class="search-hint">Im Dropdown wählst du zwischen importierten Sets, allen Sets, Online-Suche oder einem bestimmten importierten Set. Die Suche findet Kartenname, Setname, Nummer und vorhandene DE/EN-Felder.</p>
       <div id="search-results" class="cards search-results">
@@ -496,5 +515,5 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://apis.google.com/js/api.js" async defer></script>
-  <script type="module" src="./js/app.js?v=20260407-searchscope1"></script>
+  <script type="module" src="./js/app.js?v=20260508-refreshmenu1"></script>
 </html>

@@ -34,6 +34,16 @@ function cleanLegacySetHeaderValue(value) {
     .trim();
 }
 
+export function extractLegacySpreadsheetId(input) {
+  const text = String(input || '').trim();
+  if (!text) return null;
+
+  const urlMatch = text.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/i);
+  if (urlMatch) return String(urlMatch[1]).trim();
+  if (/^[a-zA-Z0-9_-]{20,}$/.test(text)) return text;
+  return null;
+}
+
 function getSheetCell(sheet, address) {
   if (!sheet || typeof sheet !== 'object') return null;
   return sheet[address] ?? null;
@@ -51,11 +61,20 @@ function getSheetCellValue(sheet, address) {
 
 function getCellCommentText(cell) {
   if (!cell || typeof cell !== 'object') return '';
-  if (!Array.isArray(cell.c)) return '';
-  return cell.c
-    .map((entry) => String(entry?.t || entry?.text || '').trim())
-    .filter(Boolean)
-    .join('\n');
+  const parts = [];
+
+  const noteText = String(cell.note || cell.comment || '').trim();
+  if (noteText) parts.push(noteText);
+
+  if (Array.isArray(cell.c)) {
+    parts.push(
+      ...cell.c
+        .map((entry) => String(entry?.t || entry?.text || '').trim())
+        .filter(Boolean)
+    );
+  }
+
+  return parts.join('\n');
 }
 
 function extractSetIdFromText(text) {
@@ -328,6 +347,132 @@ export function summarizeLegacyImportPlan(plan) {
     unresolvedSheetCount: Array.isArray(plan?.unresolvedSheets) ? plan.unresolvedSheets.length : 0,
     unresolvedCardCount: Array.isArray(plan?.unresolvedCards) ? plan.unresolvedCards.length : 0
   };
+}
+
+function getGoogleSheetsCellValue(cellData = {}) {
+  const effective = cellData?.effectiveValue || cellData?.userEnteredValue || {};
+
+  if (typeof effective.boolValue === 'boolean') return effective.boolValue;
+  if (typeof cellData?.formattedValue === 'string' && cellData.formattedValue.trim()) return cellData.formattedValue;
+  if (typeof effective.stringValue === 'string') return effective.stringValue;
+  if (typeof effective.numberValue === 'number') return cellData?.formattedValue ?? effective.numberValue;
+  if (typeof effective.formulaValue === 'string') return effective.formulaValue;
+  return '';
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function ensureLegacySheetsApiReady(timeoutMs = 15000) {
+  const started = Date.now();
+  let discoveryAttempted = false;
+
+  while (Date.now() - started < timeoutMs) {
+    const gapiRef = globalThis.gapi;
+    const client = gapiRef?.client;
+    const sheetsGet = client?.sheets?.spreadsheets?.get;
+    if (typeof sheetsGet === 'function') {
+      return sheetsGet.bind(client.sheets.spreadsheets);
+    }
+
+    if (!discoveryAttempted && typeof client?.load === 'function') {
+      discoveryAttempted = true;
+      try {
+        await client.load('https://sheets.googleapis.com/$discovery/rest?version=v4');
+        const discoveredGet = client?.sheets?.spreadsheets?.get;
+        if (typeof discoveredGet === 'function') {
+          return discoveredGet.bind(client.sheets.spreadsheets);
+        }
+      } catch (err) {
+        console.warn('[ensureLegacySheetsApiReady] discovery load failed', err);
+      }
+    }
+
+    await sleep(150);
+  }
+
+  return null;
+}
+
+export function buildWorkbookFromGoogleSheetsSpreadsheet(spreadsheet) {
+  const workbook = { SheetNames: [], Sheets: {} };
+  const sheets = Array.isArray(spreadsheet?.sheets) ? spreadsheet.sheets : [];
+
+  sheets.forEach((sheetEntry, index) => {
+    const title = String(sheetEntry?.properties?.title || `Sheet ${index + 1}`).trim();
+    if (!title) return;
+
+    const rowData = Array.isArray(sheetEntry?.data?.[0]?.rowData) ? sheetEntry.data[0].rowData : [];
+    const sheet = {};
+    let maxCol = 1;
+    let maxRow = 1;
+
+    rowData.forEach((row, rowIndex) => {
+      const values = Array.isArray(row?.values) ? row.values : [];
+      if (values.length) {
+        maxCol = Math.max(maxCol, values.length);
+        maxRow = Math.max(maxRow, rowIndex + 1);
+      }
+
+      values.forEach((cellData, colIndex) => {
+        const value = getGoogleSheetsCellValue(cellData);
+        const note = String(cellData?.note || '').trim();
+        const hasValue = !(value === '' || value == null);
+        if (!hasValue && !note) return;
+
+        const address = `${colToA1(colIndex + 1)}${rowIndex + 1}`;
+        const cell = {};
+        if (hasValue) {
+          cell.v = value;
+          if (typeof cellData?.formattedValue === 'string' && cellData.formattedValue !== String(value)) {
+            cell.w = cellData.formattedValue;
+          }
+        }
+        if (note) {
+          cell.note = note;
+          cell.c = [{ t: note }];
+        }
+        sheet[address] = cell;
+      });
+    });
+
+    sheet['!ref'] = `A1:${colToA1(Math.max(maxCol, 1))}${Math.max(maxRow, 1)}`;
+    workbook.SheetNames.push(title);
+    workbook.Sheets[title] = sheet;
+  });
+
+  return workbook;
+}
+
+export async function loadLegacyWorkbookFromSpreadsheetInput(input) {
+  const spreadsheetId = extractLegacySpreadsheetId(input);
+  if (!spreadsheetId) {
+    throw new Error('Ungültiger Google-Sheets-Link oder Spreadsheet-ID.');
+  }
+
+  const sheetsGet = await ensureLegacySheetsApiReady();
+  if (typeof sheetsGet !== 'function') {
+    throw new Error('Google Sheets API ist nicht bereit. Bitte kurz warten oder erneut anmelden.');
+  }
+
+  let response;
+  try {
+    response = await sheetsGet({
+      spreadsheetId,
+      includeGridData: true,
+      fields: 'sheets.properties(title),sheets.data.rowData.values(effectiveValue,formattedValue,note)'
+    });
+  } catch (err) {
+    const detail = err?.result?.error?.message || err?.message || err;
+    throw new Error(`Google-Sheet konnte nicht gelesen werden: ${detail}`);
+  }
+
+  const workbook = buildWorkbookFromGoogleSheetsSpreadsheet(response?.result || response);
+  if (!Array.isArray(workbook?.SheetNames) || !workbook.SheetNames.length) {
+    throw new Error('Im verknüpften Google-Sheet wurden keine Tabellenblätter gefunden.');
+  }
+  return workbook;
 }
 
 export async function loadLegacyWorkbookFromFile(file) {

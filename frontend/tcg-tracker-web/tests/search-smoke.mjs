@@ -119,6 +119,51 @@ async function runSearchCase(page, name, query, options = {}) {
   };
 }
 
+async function runProgressiveSearchCase(page, name, query, options = {}) {
+  const { scope = 'online', setFilter = '' } = options;
+
+  await setScope(page, scope);
+  await setSetFilter(page, setFilter);
+  await page.locator('#search-input').fill(query);
+  await pause(page, 150);
+  await page.locator('#search-input').press('Enter').catch(() => {});
+
+  let progressiveSeen = false;
+  try {
+    await page.waitForFunction(() => {
+      const cards = document.querySelectorAll('#search-results .search-result-card').length;
+      const loading = Boolean(document.querySelector('#search-results .loading-placeholder'));
+      return cards > 0 && loading;
+    }, undefined, { timeout: 12000, polling: 150 });
+    progressiveSeen = true;
+  } catch {
+    progressiveSeen = false;
+  }
+
+  await waitForSearchSettled(page);
+  const finalState = await collectSearchState(page);
+
+  if (!progressiveSeen) {
+    throw new Error(`[${name}] Während der laufenden Suche wurden keine Treffer parallel zum Ladehinweis angezeigt. Finaler Zustand: ${JSON.stringify(finalState)}`);
+  }
+
+  if (finalState.count < 1) {
+    throw new Error(`[${name}] Die progressive Suche lieferte am Ende keine Treffer für "${query}".`);
+  }
+
+  return {
+    name,
+    query,
+    scope,
+    setFilter,
+    count: finalState.count,
+    countText: finalState.countText,
+    badgeText: finalState.badgeText,
+    progressiveSeen,
+    topResults: finalState.cards,
+  };
+}
+
 async function runDashboardCase(page, name, query, expectedTexts = []) {
   await gotoDashboard(page);
   await page.locator('#dash-filter').fill(query);
@@ -306,6 +351,10 @@ async function run() {
       query: 'b',
       suggestions: autocompleteState.suggestions,
     });
+
+    report.push(await runProgressiveSearchCase(page, 'progressive_online_results', 'Charizard', {
+      scope: 'online',
+    }));
 
     report.push(await runSearchCase(page, 'english_name_online', 'Charizard', {
       scope: 'online',

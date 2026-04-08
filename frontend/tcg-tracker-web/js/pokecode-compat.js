@@ -188,6 +188,40 @@ function hasTcgdexSetById(tcgdexSets, setId) {
   return tcgdexSets.some((set) => String(set?.id || '').trim().toLowerCase() === target);
 }
 
+function findTcgdexSetById(tcgdexSets, setId) {
+  const target = String(setId || '').trim().toLowerCase();
+  if (!target || !Array.isArray(tcgdexSets)) return null;
+  return tcgdexSets.find((set) => String(set?.id || '').trim().toLowerCase() === target) || null;
+}
+
+function mergeTcgdexSetWithFallback(preferredSet, fallbackSet = null) {
+  if (!preferredSet && !fallbackSet) return null;
+
+  const preferred = preferredSet && typeof preferredSet === 'object' ? preferredSet : {};
+  const fallback = fallbackSet && typeof fallbackSet === 'object' ? fallbackSet : {};
+  const merged = {
+    ...fallback,
+    ...preferred,
+    serie: {
+      ...(fallback?.serie && typeof fallback.serie === 'object' ? fallback.serie : {}),
+      ...(preferred?.serie && typeof preferred.serie === 'object' ? preferred.serie : {})
+    },
+    abbreviation: {
+      ...(fallback?.abbreviation && typeof fallback.abbreviation === 'object' ? fallback.abbreviation : {}),
+      ...(preferred?.abbreviation && typeof preferred.abbreviation === 'object' ? preferred.abbreviation : {})
+    }
+  };
+
+  if (!String(merged.logo || '').trim()) {
+    merged.logo = String(fallback?.logo || fallback?.images?.logo || '').trim();
+  }
+  if (!String(merged.symbol || '').trim()) {
+    merged.symbol = String(fallback?.symbol || fallback?.images?.symbol || '').trim();
+  }
+
+  return merged;
+}
+
 function normalizeTcgdexSetIdCollection(value) {
   if (value instanceof Set) {
     return new Set(Array.from(value, (entry) => String(entry || '').trim().toLowerCase()).filter(Boolean));
@@ -378,7 +412,11 @@ export async function loadCardsForSetCompat({
     if (!hasTcgdexSetById(tcgdexSets, tcgdexActualSetId)) {
       throw new Error(`TCGDex-Set nicht verfügbar: ${tcgdexActualSetId}`);
     }
-    tcgdexDetailedSet = await fetchTcgdexSetDetailsWithFallback(tcgdexActualSetId, apis, fetchJson);
+    const tcgdexSummaryFallback = findTcgdexSetById(tcgdexSets, tcgdexActualSetId);
+    tcgdexDetailedSet = mergeTcgdexSetWithFallback(
+      await fetchTcgdexSetDetailsWithFallback(tcgdexActualSetId, apis, fetchJson),
+      tcgdexSummaryFallback
+    );
     if (!tcgdexDetailedSet) {
       throw new Error(`TCGDex-Set nicht verfügbar: ${tcgdexActualSetId}`);
     }
@@ -414,9 +452,13 @@ export async function loadCardsForSetCompat({
   );
 
   const tcgdexId = matchingTcgdexSet?.id || customMappings?.[String(pokemontcgSetId).toLowerCase()] || pokemontcgSetId;
+  const tcgdexSummaryFallback = matchingTcgdexSet || findTcgdexSetById(tcgdexSets, tcgdexId);
   tcgdexDetailedSet = tcgdexId
-    ? await fetchTcgdexSetDetailsWithFallback(tcgdexId, apis, fetchJson)
-    : null;
+    ? mergeTcgdexSetWithFallback(
+        await fetchTcgdexSetDetailsWithFallback(tcgdexId, apis, fetchJson),
+        tcgdexSummaryFallback
+      )
+    : tcgdexSummaryFallback || null;
   const officialSetTag = resolveOfficialSetTag({
     tcgdexSet: tcgdexDetailedSet || matchingTcgdexSet,
     primarySet: primaryDetailedSet,
@@ -536,7 +578,10 @@ export function combineSetsForOverviewCompat({
   (primarySets || []).forEach((primarySet) => {
     const tcgdexMatch = findMatchingTcgdexSet(primarySet, tcgdexSets || [], customMappings || {});
     const resolvedTcgdexMatch = tcgdexMatch
-      ? (resolvedTcgdexById.get(String(tcgdexMatch.id || '').trim().toLowerCase()) || tcgdexMatch)
+      ? mergeTcgdexSetWithFallback(
+          resolvedTcgdexById.get(String(tcgdexMatch.id || '').trim().toLowerCase()) || tcgdexMatch,
+          tcgdexMatch
+        )
       : null;
 
     combinedSetsMap.set(primarySet.id, {
@@ -547,17 +592,18 @@ export function combineSetsForOverviewCompat({
   });
 
   (tcgdexResolvedSets || tcgdexSets || []).forEach((tcgdexSet) => {
+    const enrichedTcgdexSet = mergeTcgdexSetWithFallback(tcgdexSet, findTcgdexSetById(tcgdexSets, tcgdexSet?.id));
     let foundInCombined = false;
     for (const [, mergedData] of combinedSetsMap.entries()) {
-      if (mergedData.primaryData && mergedData.tcgdexData && mergedData.tcgdexData.id === tcgdexSet.id) {
+      if (mergedData.primaryData && mergedData.tcgdexData && mergedData.tcgdexData.id === enrichedTcgdexSet?.id) {
         foundInCombined = true;
         break;
       }
     }
-    if (!foundInCombined) {
-      combinedSetsMap.set(`TCGDEX-${tcgdexSet.id}`, {
+    if (!foundInCombined && enrichedTcgdexSet) {
+      combinedSetsMap.set(`TCGDEX-${enrichedTcgdexSet.id}`, {
         primaryData: null,
-        tcgdexData: tcgdexSet,
+        tcgdexData: enrichedTcgdexSet,
         isOnlyTcgdex: true
       });
     }
