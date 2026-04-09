@@ -1,10 +1,14 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import {
   parseLegacyWorkbook,
   buildLegacyImportPlan,
+  buildLegacyImportSelectionTree,
+  filterLegacyImportPlanBySelection,
   extractLegacySpreadsheetId,
   buildWorkbookFromGoogleSheetsSpreadsheet,
-  loadLegacyWorkbookFromSpreadsheetInput
+  loadLegacyWorkbookFromSpreadsheetInput,
+  pickPreferredLegacyDriveXlsxFile
 } from '../js/features/collection/legacy-import.js';
 
 function createWorkbookFixture() {
@@ -184,6 +188,148 @@ function testBuildsWorkbookFromGoogleSheetsGridData() {
   );
 }
 
+function testLegacySheetDialogIsRenderedOutsideCollapsedToolsPanel() {
+  const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const dialogIndex = html.indexOf('<dialog id="dialog-legacy-sheet-import"');
+  const detailsCloseIndex = html.indexOf('</details>');
+
+  assert.notEqual(dialogIndex, -1, 'The direct Sheets-link dialog should exist in index.html.');
+  assert.notEqual(detailsCloseIndex, -1, 'The dashboard tools disclosure markup should exist in index.html.');
+  assert.ok(
+    dialogIndex > detailsCloseIndex,
+    'The direct Sheets-link dialog must be rendered outside the collapsed dashboard <details> block, otherwise showModal() stays visually hidden.'
+  );
+}
+
+function testPrefersSiblingDriveXlsxForLegacySheetImports() {
+  const preferred = pickPreferredLegacyDriveXlsxFile(
+    {
+      id: 'sheet-1',
+      name: 'Urst noch ne Kopie von Scarlett/Violet',
+      parents: ['folder-1']
+    },
+    [
+      {
+        id: 'other-sheet',
+        name: 'Urst noch ne Kopie von Scarlett/Violet',
+        mimeType: 'application/vnd.google-apps.spreadsheet',
+        parents: ['folder-1']
+      },
+      {
+        id: 'xlsx-1',
+        name: 'Urst noch ne Kopie von Scarlett/Violet.xlsx',
+        mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        fileExtension: 'xlsx',
+        parents: ['folder-1']
+      },
+      {
+        id: 'xlsx-2',
+        name: 'Kopie von Scarlett/Violet.xlsx',
+        mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        fileExtension: 'xlsx',
+        parents: ['folder-2']
+      }
+    ]
+  );
+
+  assert.equal(
+    preferred?.id || null,
+    'xlsx-1',
+    'When a same-name sibling `.xlsx` exists in Drive, the Sheets-link import should prefer that original workbook over the lossy converted Google Sheet copy.'
+  );
+}
+
+function testBuildsLegacySelectionTreeWithAllCardsPreselected() {
+  const plan = {
+    ok: true,
+    matchedSets: [
+      {
+        setId: 'sv1',
+        setName: 'Scarlet & Violet',
+        sheetName: 'Karmesin & Purpur',
+        imported: false,
+        cards: [
+          { cardId: '001', sourceCardId: '001', g: true, rh: false },
+          { cardId: '002', sourceCardId: '002', g: true, rh: true }
+        ]
+      }
+    ]
+  };
+  const tree = buildLegacyImportSelectionTree(plan, {
+    sv1: [
+      { number: '001', name: 'Koraidon' },
+      { number: '002', name: 'Miraidon' }
+    ]
+  });
+
+  assert.equal(tree.sets.length, 1);
+  assert.equal(tree.sets[0].selected, true);
+  assert.deepEqual(
+    tree.sets[0].cards.map((card) => ({ cardId: card.cardId, name: card.name, selected: card.selected })),
+    [
+      { cardId: '001', name: 'Koraidon', selected: true },
+      { cardId: '002', name: 'Miraidon', selected: true }
+    ],
+    'The selection dialog should start with every matched set and card preselected.'
+  );
+}
+
+function testFiltersLegacyImportPlanBySelection() {
+  const plan = {
+    ok: true,
+    matchedSets: [
+      {
+        setId: 'sv1',
+        setName: 'Scarlet & Violet',
+        imported: false,
+        cards: [
+          { cardId: '001', sourceCardId: '001', g: true, rh: false },
+          { cardId: '002', sourceCardId: '002', g: true, rh: true }
+        ]
+      },
+      {
+        setId: 'sv2',
+        setName: 'Paldea Evolved',
+        imported: true,
+        cards: [
+          { cardId: '010', sourceCardId: '010', g: true, rh: false }
+        ]
+      }
+    ],
+    missingSetIds: ['sv1'],
+    unresolvedSheets: [],
+    unresolvedCards: [],
+    stats: {
+      sheetCount: 2,
+      checkedCardCount: 3,
+      matchedCardCount: 3,
+      missingSetCount: 1
+    }
+  };
+  const tree = buildLegacyImportSelectionTree(plan, {
+    sv1: [
+      { number: '001', name: 'Koraidon' },
+      { number: '002', name: 'Miraidon' }
+    ],
+    sv2: [
+      { number: '010', name: 'Meowscarada' }
+    ]
+  });
+
+  tree.sets[0].cards[1].selected = false;
+  tree.sets[1].selected = false;
+  tree.sets[1].cards[0].selected = false;
+
+  const filtered = filterLegacyImportPlanBySelection(plan, tree);
+
+  assert.equal(filtered.matchedSets.length, 1);
+  assert.deepEqual(filtered.missingSetIds, ['sv1']);
+  assert.deepEqual(filtered.matchedSets[0].cards.map((card) => card.cardId), ['001']);
+  assert.equal(filtered.stats.sheetCount, 1);
+  assert.equal(filtered.stats.checkedCardCount, 1);
+  assert.equal(filtered.stats.matchedCardCount, 1);
+}
+
 async function testLoadsSpreadsheetAfterDiscoveryBecomesReady() {
   const spreadsheetId = '1AbCdEfGhIjKlMnOpQrStUvWxYz1234567890';
   const previousGapi = globalThis.gapi;
@@ -218,6 +364,10 @@ async function run() {
   testStopsOnUnknownCardMappings();
   testExtractsSpreadsheetIdFromUrl();
   testBuildsWorkbookFromGoogleSheetsGridData();
+  testLegacySheetDialogIsRenderedOutsideCollapsedToolsPanel();
+  testPrefersSiblingDriveXlsxForLegacySheetImports();
+  testBuildsLegacySelectionTreeWithAllCardsPreselected();
+  testFiltersLegacyImportPlanBySelection();
   await testLoadsSpreadsheetAfterDiscoveryBecomesReady();
   console.log('legacy-import-regression: ok');
 }

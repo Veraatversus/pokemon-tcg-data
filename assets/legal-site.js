@@ -1,7 +1,7 @@
 window.TCG_TRACKER_SITE = {
   brandName: "Vera's Pokémon TCG Tracker",
   shortName: 'Pokémon TCG Tracker',
-  supportEmail: 'veraatversus@gmail.com',
+  supportEmail: 'veraatversus+tcg@gmail.com',
   githubUrl: 'https://github.com/Veraatversus/pokemon-tcg-data',
   upstreamUrl: 'https://github.com/PokemonTCG/pokemon-tcg-data',
   homepageUrl: 'https://veraatversus.github.io/pokemon-tcg-data/',
@@ -9,13 +9,8 @@ window.TCG_TRACKER_SITE = {
   privacyUrl: 'https://veraatversus.github.io/pokemon-tcg-data/privacy.html',
   imprintUrl: 'https://veraatversus.github.io/pokemon-tcg-data/impressum.html',
   verificationGuideUrl: 'https://github.com/Veraatversus/pokemon-tcg-data/blob/main/docs/GOOGLE_OAUTH_VERIFICATION_GUIDE.md',
-  legalOwnerName: 'TODO: Betreibername ergänzen',
-  legalAddress: [
-    'TODO: Straße und Hausnummer ergänzen',
-    'TODO: PLZ Ort ergänzen',
-    'Deutschland / EU'
-  ],
-  lastUpdated: '6. April 2026'
+  publicContactNote: 'Öffentlicher Projektkontakt via E-Mail',
+  lastUpdated: '9. April 2026'
 };
 
 (function hydrateSiteMeta() {
@@ -39,24 +34,9 @@ window.TCG_TRACKER_SITE = {
     }
   });
 
-  document.querySelectorAll('[data-owner]').forEach((el) => {
-    el.textContent = cfg.legalOwnerName;
-  });
-
-  document.querySelectorAll('[data-owner-block]').forEach((el) => {
-    el.innerHTML = [cfg.legalOwnerName, ...cfg.legalAddress].join('<br>');
-  });
-
   document.querySelectorAll('[data-last-updated]').forEach((el) => {
     el.textContent = cfg.lastUpdated;
   });
-
-  const placeholderText = [cfg.legalOwnerName, ...(cfg.legalAddress || [])].join(' ');
-  const hasPlaceholders = /TODO/i.test(placeholderText);
-  const warning = document.getElementById('placeholder-warning');
-  if (warning) {
-    warning.hidden = !hasPlaceholders;
-  }
 
   const yearTargets = document.querySelectorAll('[data-current-year]');
   yearTargets.forEach((el) => {

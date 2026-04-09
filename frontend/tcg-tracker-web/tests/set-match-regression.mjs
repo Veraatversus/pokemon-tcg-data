@@ -5,7 +5,8 @@ import { getCollectionUiState, resolveCollectionToggleState } from '../js/core/c
 import {
   buildCombinedSearchDropdownOptions,
   createSpreadsheetSwitchStatePatch,
-  resolveCombinedSearchSelection
+  resolveCombinedSearchSelection,
+  shouldFetchApiCardsForSearchSet
 } from '../js/core/utils.js';
 import { filterSetsBySeriesKey, getStatsSeriesLabel } from '../js/ui/stats-series.js';
 
@@ -288,15 +289,22 @@ function testCombinedSearchSelectionKeepsModesAndImportedSetTargetsDistinct() {
     mode: 'imported',
     setId: 'sv1'
   });
+
+  assert.deepEqual(resolveCombinedSearchSelection('set:all:sv4'), {
+    mode: 'all',
+    setId: 'sv4'
+  });
 }
 
 function testCombinedSearchDropdownOptionsIncludeGlobalModesAndImportedSets() {
   const groups = buildCombinedSearchDropdownOptions([
-    { setId: 'sv1', setName: 'Scarlet & Violet' },
-    { setId: 'pal', setName: 'Paldea Evolved' }
+    { setId: 'sv1', setName: 'Scarlet & Violet', imported: true },
+    { setId: 'pal', setName: 'Paldea Evolved', imported: true },
+    { setId: 'sv4', setName: 'Paradox Rift', imported: false },
+    { setId: 'sv3', setName: 'Obsidian Flames', imported: false }
   ]);
 
-  assert.equal(groups.length, 2, 'Combined search dropdown should render one group for search scopes and one for imported sets.');
+  assert.equal(groups.length, 3, 'Combined search dropdown should render search scopes, imported sets, and marked non-imported sets.');
   assert.equal(groups[0]?.label, 'Suchbereich');
   assert.deepEqual(
     groups[0]?.options?.map((entry) => entry.value),
@@ -306,6 +314,33 @@ function testCombinedSearchDropdownOptionsIncludeGlobalModesAndImportedSets() {
   assert.deepEqual(
     groups[1]?.options?.map((entry) => entry.value),
     ['sv1', 'pal']
+  );
+  assert.equal(groups[2]?.label, 'Weitere Sets (noch nicht importiert)');
+  assert.deepEqual(
+    groups[2]?.options?.map((entry) => entry.value),
+    ['set:all:sv3', 'set:all:sv4']
+  );
+  assert.deepEqual(
+    groups[2]?.options?.map((entry) => entry.label),
+    ['Obsidian Flames', 'Paradox Rift']
+  );
+  assert.ok(
+    groups[2]?.options?.every((entry) => entry.mode === 'all' && entry.imported === false),
+    'Non-imported set options should stay selectable via all/API mode and be marked through metadata instead of verbose label text.'
+  );
+}
+
+function testImportedSearchFallsBackToApiWhenImportedSetHasNoDbCards() {
+  assert.equal(
+    shouldFetchApiCardsForSearchSet('imported', { imported: true, setId: 'sv11' }, false),
+    true,
+    'Imported-set search should still query the API when an imported set currently has no local DB cards.'
+  );
+
+  assert.equal(
+    shouldFetchApiCardsForSearchSet('imported', { imported: true, setId: 'sv11' }, true),
+    false,
+    'Imported-set search should stay on the DB path once imported cards are available locally.'
   );
 }
 
@@ -324,6 +359,7 @@ try {
   testSpreadsheetSwitchStatePatchClearsStaleCollectionState();
   testCombinedSearchSelectionKeepsModesAndImportedSetTargetsDistinct();
   testCombinedSearchDropdownOptionsIncludeGlobalModesAndImportedSets();
+  testImportedSearchFallsBackToApiWhenImportedSetHasNoDbCards();
   console.log('set-match-regression: ok');
 } catch (error) {
   console.error('set-match-regression: failed');

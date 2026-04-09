@@ -88,12 +88,14 @@ export function createSpreadsheetSwitchStatePatch(currentState = {}) {
 }
 
 const COMBINED_SEARCH_SCOPE_PREFIX = 'scope:';
+const COMBINED_SEARCH_SET_PREFIX = 'set:';
 const COMBINED_SEARCH_SCOPE_VALUES = new Set(['imported', 'all', 'online']);
 
 /**
- * Löst die kombinierte Suchauswahl in Modus + optionales importiertes Set auf.
- * Globale Suchmodi verwenden Werte wie `scope:imported`, konkrete importierte
- * Sets direkt ihre `setId`.
+ * Löst die kombinierte Suchauswahl in Modus + optionalem Set auf.
+ * Globale Suchmodi verwenden Werte wie `scope:imported`, konkrete Sets entweder
+ * direkt ihre `setId` (importiert) oder `set:all:<setId>` für noch nicht
+ * importierte/API-Sets.
  * @param {string} value
  * @param {string} [fallbackMode='imported']
  * @returns {{ mode: string, setId: string }}
@@ -111,15 +113,24 @@ export function resolveCombinedSearchSelection(value, fallbackMode = 'imported')
     }
   }
 
+  if (raw.startsWith(COMBINED_SEARCH_SET_PREFIX)) {
+    const [, modePart = '', ...setIdParts] = raw.split(':');
+    const mode = modePart.trim().toLowerCase();
+    const setId = setIdParts.join(':').trim();
+    if (setId && COMBINED_SEARCH_SCOPE_VALUES.has(mode)) {
+      return { mode, setId };
+    }
+  }
+
   return { mode: 'imported', setId: raw };
 }
 
 /**
  * Baut die Optionsgruppen für das kombinierte Such-Dropdown auf.
- * @param {Array<{setId:string, setName?:string}>} importedSets
- * @returns {Array<{label:string, options:Array<{value:string,label:string}>}>}
+ * @param {Array<{setId:string, setName?:string, imported?:boolean}>} sets
+ * @returns {Array<{label:string, options:Array<{value:string,label:string,mode?:string,imported?:boolean}>}>}
  */
-export function buildCombinedSearchDropdownOptions(importedSets = []) {
+export function buildCombinedSearchDropdownOptions(sets = []) {
   const groups = [
     {
       label: 'Suchbereich',
@@ -131,12 +142,25 @@ export function buildCombinedSearchDropdownOptions(importedSets = []) {
     }
   ];
 
-  const importedOptions = (Array.isArray(importedSets) ? importedSets : [])
-    .filter((set) => set?.setId)
+  const safeSets = (Array.isArray(sets) ? sets : []).filter((set) => set?.setId);
+  const importedOptions = safeSets
+    .filter((set) => toBoolean(set.imported))
     .map((set) => ({
       value: String(set.setId),
-      label: String(set.setName || set.setId)
+      label: String(set.setName || set.setId),
+      mode: 'imported',
+      imported: true
     }));
+
+  const notImportedOptions = naturalSort(
+    safeSets.filter((set) => !toBoolean(set.imported)),
+    (set) => String(set.setName || set.setId)
+  ).map((set) => ({
+    value: `${COMBINED_SEARCH_SET_PREFIX}all:${String(set.setId)}`,
+    label: String(set.setName || set.setId),
+    mode: 'all',
+    imported: false
+  }));
 
   if (importedOptions.length) {
     groups.push({
@@ -145,7 +169,41 @@ export function buildCombinedSearchDropdownOptions(importedSets = []) {
     });
   }
 
+  if (notImportedOptions.length) {
+    groups.push({
+      label: 'Weitere Sets (noch nicht importiert)',
+      options: notImportedOptions
+    });
+  }
+
   return groups;
+}
+
+/**
+ * Entscheidet, ob die Kartensuche für ein Set zusätzlich API-Karten laden soll.
+ * Das ist wichtig, wenn ein Set zwar schon als importiert markiert ist, aber im
+ * lokalen `db_cards` Cache (noch) keine Karten liegen – sonst liefert
+ * `Importierte Sets` fälschlich 0 Treffer, obwohl `Alle Sets` etwas findet.
+ * @param {string} mode
+ * @param {{ imported?: boolean }} [set]
+ * @param {boolean} [hasDbCards=false]
+ * @returns {boolean}
+ */
+export function shouldFetchApiCardsForSearchSet(mode, set = {}, hasDbCards = false) {
+  if (mode === 'online') {
+    return true;
+  }
+
+  const imported = toBoolean(set?.imported);
+  if (mode === 'all') {
+    return !imported || !hasDbCards;
+  }
+
+  if (mode === 'imported') {
+    return imported && !hasDbCards;
+  }
+
+  return false;
 }
 
 /**

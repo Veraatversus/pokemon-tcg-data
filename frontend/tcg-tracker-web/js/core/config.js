@@ -46,7 +46,7 @@ export const CONFIG = {
     'https://sheets.googleapis.com/$discovery/rest?version=v4',
     'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'
   ],
-  SCOPES: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.metadata.readonly',
+  SCOPES: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/drive.readonly',
 
   // ── Sheet-Namen ─────────────────────────────────────────────
   SHEETS: {

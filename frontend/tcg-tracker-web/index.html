@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&display=swap" rel="stylesheet" />
   <link rel="apple-touch-icon" href="./assets/branding/logo-veras-pokemon.jpg?v=8" />
-  <link rel="stylesheet" href="./css/main.css?v=20260508-refreshmenu1"6/>
+  <link rel="stylesheet" href="./css/main.css?v=20260509-legacytree1" />
   <link rel="stylesheet" href="./css/trading-marketplace.css?v=20260505e" />
 </head>
 <body class="dark">
@@ -286,22 +286,52 @@
             </section>
             <input id="input-backup-file" type="file" accept="application/json" class="hidden" />
             <input id="input-legacy-import-file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" class="hidden" />
-
-            <dialog id="dialog-legacy-sheet-import" class="dialog-card">
-              <h3>Altbestand per Google-Sheets-Link</h3>
-              <p>Füge den Link oder die Spreadsheet-ID deiner alten Sammlung ein. Bei Konflikten stoppt der Import weiterhin komplett.</p>
-              <label style="display:grid; gap:6px; margin:12px 0;">
-                <span>Google-Sheets-Link oder ID</span>
-                <input id="input-legacy-sheet-link" type="text" placeholder="https://docs.google.com/spreadsheets/d/..." autocomplete="off" />
-              </label>
-              <p id="legacy-sheet-import-error" class="hidden" style="color:var(--color-danger); margin:0 0 12px;"></p>
-              <div style="display:flex; justify-content:flex-end; gap:8px;">
-                <button id="btn-legacy-sheet-cancel" class="btn-secondary" type="button">Abbrechen</button>
-                <button id="btn-legacy-sheet-import-confirm" class="btn-secondary" type="button">Analysieren</button>
-              </div>
-            </dialog>
           </div>
         </details>
+
+        <dialog id="dialog-legacy-sheet-import" class="dialog-card">
+          <h3>Altbestand per Google-Sheets-Link</h3>
+          <p>Füge den Link oder die Spreadsheet-ID deiner alten Sammlung ein. Bei Konflikten stoppt der Import weiterhin komplett.</p>
+          <label style="display:grid; gap:6px; margin:12px 0;">
+            <span>Google-Sheets-Link oder ID</span>
+            <input id="input-legacy-sheet-link" type="text" placeholder="https://docs.google.com/spreadsheets/d/..." autocomplete="off" />
+          </label>
+          <p id="legacy-sheet-import-error" class="hidden" style="color:var(--color-danger); margin:0 0 12px;"></p>
+          <div style="display:flex; justify-content:flex-end; gap:8px;">
+            <button id="btn-legacy-sheet-cancel" class="btn-secondary" type="button">Abbrechen</button>
+            <button id="btn-legacy-sheet-import-confirm" class="btn-secondary" type="button">Analysieren</button>
+          </div>
+        </dialog>
+
+        <dialog id="dialog-legacy-import-selection" class="legacy-selection-dialog">
+          <div class="legacy-selection-header">
+            <div>
+              <p class="legacy-selection-kicker">Vorimport-Auswahl</p>
+              <h3>Altbestand gezielt übernehmen</h3>
+              <p>Wähle vor dem Schreiben aus, welche Sets und einzelnen Karten wirklich importiert werden sollen.</p>
+            </div>
+            <div id="legacy-selection-summary" class="legacy-selection-summary" aria-live="polite"></div>
+          </div>
+
+          <div class="legacy-selection-toolbar">
+            <label class="legacy-selection-search">
+              <span>Filter nach Set, Kartennummer oder Name</span>
+              <input id="input-legacy-selection-filter" type="search" placeholder="z. B. Karmesin, 001 oder Miraidon" autocomplete="off" />
+            </label>
+            <div class="legacy-selection-toolbar-actions">
+              <button id="btn-legacy-selection-all" class="btn-secondary" type="button">Alles markieren</button>
+              <button id="btn-legacy-selection-none" class="btn-secondary" type="button">Alles abwählen</button>
+            </div>
+          </div>
+
+          <p id="legacy-selection-info" class="legacy-selection-info" aria-live="polite"></p>
+          <div id="legacy-import-selection-tree" class="legacy-selection-tree" role="tree"></div>
+
+          <div class="legacy-selection-footer">
+            <button id="btn-legacy-selection-cancel" class="btn-secondary" type="button">Abbrechen</button>
+            <button id="btn-legacy-selection-confirm" type="button">Ausgewählte importieren</button>
+          </div>
+        </dialog>
       </div>
       <div id="quick-filters-container"></div>
       <div id="dashboard-grid" class="dashboard-grid">
@@ -437,7 +467,7 @@
                  class="search-main-input" autofocus autocomplete="off" />
                <ul id="search-autocomplete" class="search-autocomplete hidden" role="listbox" aria-label="Suchvorschläge"></ul>
              </div>
-             <select id="search-set-filter" aria-label="Suchbereich oder importiertes Set">
+             <select id="search-set-filter" aria-label="Suchbereich oder Set">
             <option value="scope:imported">Importierte Sets</option>
           </select>
         </div>
@@ -446,7 +476,7 @@
           <span class="search-meta-pill search-meta-pill--muted">Suchbegriff oben eingeben.</span>
         </div>
       </div>
-      <p class="search-hint">Im Dropdown wählst du zwischen importierten Sets, allen Sets, Online-Suche oder einem bestimmten importierten Set. Die Suche findet Kartenname, Setname, Nummer und vorhandene DE/EN-Felder.</p>
+      <p class="search-hint">Im Dropdown wählst du zwischen importierten Sets, allen Sets, Online-Suche oder einem bestimmten Set. Noch nicht importierte Sets stehen am Ende der Liste und sind entsprechend markiert.</p>
       <div id="search-results" class="cards search-results">
         <p class="empty-state">Suchbegriff oben eingeben.</p>
       </div>
@@ -515,5 +545,5 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://apis.google.com/js/api.js" async defer></script>
-  <script type="module" src="./js/app.js?v=20260508-searchsubmit1"></script>
+  <script type="module" src="./js/app.js?v=20260409-importedsearch1"></script>
 </html>

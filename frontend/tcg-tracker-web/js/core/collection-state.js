@@ -23,3 +23,7 @@ export function resolveCollectionToggleState(db = {}, { isG = false, checked = f
     rh: Boolean(checked)
   };
 }
+
+export function shouldAutoImportForCollectionToggle({ checked = false, pendingSearchSetImport = false, currentSetImported = true } = {}) {
+  return Boolean(checked) && (Boolean(pendingSearchSetImport) || !Boolean(currentSetImported));
+}

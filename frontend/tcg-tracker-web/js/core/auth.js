@@ -1,4 +1,4 @@
-import { CONFIG, scopedStorageKey } from './config.js';
+import { CONFIG, scopedStorageKey } from './config.js?v=20260409-treeview1';
 
 const STORAGE_KEY = scopedStorageKey('tcg_tracker_token');
 const REDIRECT_STATE_KEY = scopedStorageKey('oauth_redirect_state');
