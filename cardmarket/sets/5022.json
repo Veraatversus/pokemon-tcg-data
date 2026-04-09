@@ -1,0 +1,1477 @@
+{
+  "expansionId": 5022,
+  "cards": [
+    {
+      "cardmarketProductId": 651903,
+      "name": "Nidoran ♂ [Poison Horn | Scratch]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213032,
+      "dateAdded": "2022-04-14 14:47:08",
+      "prices": {
+        "avg": 4.5,
+        "low": 5,
+        "trend": 6.49,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651904,
+      "name": "Nidorino [Poison Horn | Take Down]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212989,
+      "dateAdded": "2022-04-14 14:50:33",
+      "prices": {
+        "avg": 20.21,
+        "low": 1.5,
+        "trend": 10.42,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651905,
+      "name": "Grimer [Poison Sludge]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213014,
+      "dateAdded": "2022-04-14 14:50:58",
+      "prices": {
+        "avg": 2.75,
+        "low": 2,
+        "trend": 3.5,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651906,
+      "name": "Muk [Heavyweight | Burning Sludge]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212909,
+      "dateAdded": "2022-04-14 14:51:23",
+      "prices": {
+        "avg": 5.7,
+        "low": 2,
+        "trend": 7.62,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651907,
+      "name": "Muk [Heavyweight | Burning Sludge]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212909,
+      "dateAdded": "2022-04-14 14:51:42",
+      "prices": {
+        "avg": 50,
+        "low": 25,
+        "trend": 58.09,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651908,
+      "name": "Spinarak [Sharp Stinger]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213048,
+      "dateAdded": "2022-04-14 14:52:32",
+      "prices": {
+        "avg": 5,
+        "low": 1.9,
+        "trend": 5.91,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651909,
+      "name": "Spinarak [Gnaw | Gooey Thread]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212996,
+      "dateAdded": "2022-04-14 14:53:01",
+      "prices": {
+        "avg": 6.1,
+        "low": 3.49,
+        "trend": 4.02,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651910,
+      "name": "Ariados [Gluey Slime | Spider Force]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212933,
+      "dateAdded": "2022-04-14 14:53:25",
+      "prices": {
+        "avg": 9,
+        "low": 4.5,
+        "trend": 6.24,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651911,
+      "name": "Ariados [Gluey Slime | Spider Force]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212933,
+      "dateAdded": "2022-04-14 14:53:42",
+      "prices": {
+        "avg": 63,
+        "low": 11,
+        "trend": 34.94,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651912,
+      "name": "Hoppip [Lightweight | Careless Tackle]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213018,
+      "dateAdded": "2022-04-14 14:54:08",
+      "prices": {
+        "avg": 7.33,
+        "low": 1.49,
+        "trend": 3.7,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651913,
+      "name": "Skiploom [Lightweight | Break Powder]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212994,
+      "dateAdded": "2022-04-14 14:54:27",
+      "prices": {
+        "avg": 3,
+        "low": 0.99,
+        "trend": 2.71,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651914,
+      "name": "Jumpluff [Fluff | Cotton Punch]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212915,
+      "dateAdded": "2022-04-14 14:54:53",
+      "prices": {
+        "avg": 35,
+        "low": 5.03,
+        "trend": 16.67,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651915,
+      "name": "Jumpluff [Fluff | Cotton Punch]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212915,
+      "dateAdded": "2022-04-14 14:55:12",
+      "prices": {
+        "avg": 42.72,
+        "low": 20,
+        "trend": 51.31,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651916,
+      "name": "Growlithe [Roar | Firebreathing]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213015,
+      "dateAdded": "2022-04-14 15:29:24",
+      "prices": {
+        "avg": 8.75,
+        "low": 7.06,
+        "trend": 12.91,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651917,
+      "name": "Growlithe [Ember]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212985,
+      "dateAdded": "2022-04-14 15:29:55",
+      "prices": {
+        "avg": 6.5,
+        "low": 10,
+        "trend": 9.86,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651918,
+      "name": "Arcanine [Extreme Speed | Fire Blow]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212902,
+      "dateAdded": "2022-04-14 15:30:15",
+      "prices": {
+        "avg": 65,
+        "low": 18.89,
+        "trend": 36.5,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651919,
+      "name": "Arcanine [Extreme Speed | Fire Blow]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212902,
+      "dateAdded": "2022-04-14 15:30:30",
+      "prices": {
+        "avg": 178.31,
+        "low": 130,
+        "trend": 148.22,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651920,
+      "name": "Houndour [Singe | Flare]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213021,
+      "dateAdded": "2022-04-14 15:30:57",
+      "prices": {
+        "avg": 2.65,
+        "low": 0.99,
+        "trend": 2.65,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651921,
+      "name": "Houndoom [Smokescreen | Burn Up]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212947,
+      "dateAdded": "2022-04-14 15:31:15",
+      "prices": {
+        "avg": 4,
+        "low": 3,
+        "trend": 1.32,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651922,
+      "name": "Psyduck [Headbutt | Scratch]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213041,
+      "dateAdded": "2022-04-14 15:36:09",
+      "prices": {
+        "avg": 215,
+        "low": 215,
+        "trend": 97.74,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651923,
+      "name": "Golduck [Slash | Distortion Beam]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212983,
+      "dateAdded": "2022-04-14 15:36:25",
+      "prices": {
+        "avg": 5,
+        "low": 2.99,
+        "trend": 6.57,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651924,
+      "name": "Goldeen [Knock Away]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213013,
+      "dateAdded": "2022-04-14 15:36:39",
+      "prices": {
+        "avg": 2.98,
+        "low": 1,
+        "trend": 3.65,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651925,
+      "name": "Seaking [Flail | Undulate]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212993,
+      "dateAdded": "2022-04-14 15:37:05",
+      "prices": {
+        "avg": 3.14,
+        "low": 1.25,
+        "trend": 2.63,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651926,
+      "name": "Marill [Headbutt | Sleepy Ball]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212987,
+      "dateAdded": "2022-04-14 15:37:26",
+      "prices": {
+        "avg": 3.99,
+        "low": 0.85,
+        "trend": 3.33,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651927,
+      "name": "Azumarill [Bubble Turn | Aqua Sonic]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212921,
+      "dateAdded": "2022-04-14 15:37:47",
+      "prices": {
+        "avg": 11.5,
+        "low": 12,
+        "trend": 13.83,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651928,
+      "name": "Azumarill [Bubble Turn | Aqua Sonic]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212921,
+      "dateAdded": "2022-04-14 15:37:59",
+      "prices": {
+        "avg": 152.5,
+        "low": 12,
+        "trend": 113.28,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651929,
+      "name": "Wooper [Bubble | Wave Splash]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213054,
+      "dateAdded": "2022-04-14 15:38:20",
+      "prices": {
+        "avg": null,
+        "low": 13,
+        "trend": 23.27,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651930,
+      "name": "Wooper [Tail Whap | Deep Dive]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213000,
+      "dateAdded": "2022-04-14 15:38:37",
+      "prices": {
+        "avg": 41.99,
+        "low": 9.99,
+        "trend": 22.92,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651931,
+      "name": "Quagsire [Water Gun | Slam]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212963,
+      "dateAdded": "2022-04-14 15:38:55",
+      "prices": {
+        "avg": 14.99,
+        "low": 24.98,
+        "trend": 17.64,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651932,
+      "name": "Suicune [Pure Body | Hypno Wave]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 343676,
+      "dateAdded": "2022-04-14 15:39:18",
+      "prices": {
+        "avg": 19.99,
+        "low": 7.89,
+        "trend": 24.85,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651933,
+      "name": "Suicune [Pure Body | Hypno Wave]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 343676,
+      "dateAdded": "2022-04-14 15:39:38",
+      "prices": {
+        "avg": 183,
+        "low": 30,
+        "trend": 110.75,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651934,
+      "name": "Magnemite [Conductive Body | Magnetic Bomb]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213026,
+      "dateAdded": "2022-04-14 15:46:51",
+      "prices": {
+        "avg": 2.93,
+        "low": 2.49,
+        "trend": 3.45,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651935,
+      "name": "Voltorb [Swift]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213052,
+      "dateAdded": "2022-04-14 15:47:10",
+      "prices": {
+        "avg": 3,
+        "low": 2,
+        "trend": 3.17,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651936,
+      "name": "Voltorb [Rollout | Thundershock]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212998,
+      "dateAdded": "2022-04-14 15:47:39",
+      "prices": {
+        "avg": 5,
+        "low": 1,
+        "trend": 4.3,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651937,
+      "name": "Electrode [Super Dynamo | Swift]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212924,
+      "dateAdded": "2022-04-14 15:48:11",
+      "prices": {
+        "avg": 19,
+        "low": 16.97,
+        "trend": 20.53,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651938,
+      "name": "Electrode [Super Dynamo | Swift]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212924,
+      "dateAdded": "2022-04-14 15:48:27",
+      "prices": {
+        "avg": 83.13,
+        "low": 14.9,
+        "trend": 64.16,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651939,
+      "name": "Zapdos [Anti-Lightning | Plasma | Lightning Storm]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212928,
+      "dateAdded": "2022-04-14 15:48:50",
+      "prices": {
+        "avg": 32.97,
+        "low": 10,
+        "trend": 30.87,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651940,
+      "name": "Zapdos [Anti-Lightning | Plasma | Lightning Storm]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212928,
+      "dateAdded": "2022-04-14 15:49:07",
+      "prices": {
+        "avg": 1000,
+        "low": 45,
+        "trend": 214.31,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651941,
+      "name": "Elekid [Energy Kick]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212942,
+      "dateAdded": "2022-04-14 15:49:37",
+      "prices": {
+        "avg": 3.47,
+        "low": 1.95,
+        "trend": 3.46,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651942,
+      "name": "Drowzee [Sleep Inducer | Tackle]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213009,
+      "dateAdded": "2022-04-14 15:56:54",
+      "prices": {
+        "avg": 2.21,
+        "low": 1.49,
+        "trend": 2.65,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651943,
+      "name": "Hypno [Sleep Pendulum | Spiral Aura]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212914,
+      "dateAdded": "2022-04-14 15:57:12",
+      "prices": {
+        "avg": 8.75,
+        "low": 3.99,
+        "trend": 8.85,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651944,
+      "name": "Hypno [Sleep Pendulum | Spiral Aura]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212914,
+      "dateAdded": "2022-04-14 15:57:31",
+      "prices": {
+        "avg": 129.3,
+        "low": 29,
+        "trend": 136.43,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651945,
+      "name": "Mr. Mime [Energy Barrier | Mind Shock]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213031,
+      "dateAdded": "2022-04-14 15:57:54",
+      "prices": {
+        "avg": 3.95,
+        "low": 0.96,
+        "trend": 2.73,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651946,
+      "name": "Jynx [Meditate | Confuse Ray]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212951,
+      "dateAdded": "2022-04-14 15:58:15",
+      "prices": {
+        "avg": 5.48,
+        "low": 2.7,
+        "trend": 5.63,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651947,
+      "name": "Espeon [Energy Return | Damage Blast]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212944,
+      "dateAdded": "2022-04-14 15:58:37",
+      "prices": {
+        "avg": 65,
+        "low": 38.88,
+        "trend": 72.91,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651948,
+      "name": "Espeon [Energy Return | Damage Blast]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212944,
+      "dateAdded": "2022-04-14 15:58:53",
+      "prices": {
+        "avg": 406.65,
+        "low": 119.99,
+        "trend": 313.89,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651949,
+      "name": "Smoochum [Energy Kiss]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212995,
+      "dateAdded": "2022-04-14 15:59:20",
+      "prices": {
+        "avg": null,
+        "low": 1.2,
+        "trend": 2.88,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651950,
+      "name": "Nidoking [Earth Rage | Giant Horn]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212904,
+      "dateAdded": "2022-04-14 16:00:43",
+      "prices": {
+        "avg": 16,
+        "low": 8,
+        "trend": 9.37,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651951,
+      "name": "Nidoking [Earth Rage | Giant Horn]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212904,
+      "dateAdded": "2022-04-14 16:00:57",
+      "prices": {
+        "avg": 96.25,
+        "low": 19.9,
+        "trend": 99.41,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651952,
+      "name": "Cubone [Teary Eyes | Tackle]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213006,
+      "dateAdded": "2022-04-14 16:01:16",
+      "prices": {
+        "avg": 49.49,
+        "low": 28,
+        "trend": 28.33,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651953,
+      "name": "Marowak [Triple Bone | Bone Rush]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212988,
+      "dateAdded": "2022-04-14 16:01:38",
+      "prices": {
+        "avg": 2.85,
+        "low": 0.8,
+        "trend": 4.45,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651954,
+      "name": "Hitmonchan [Rush | Smash Punch]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213016,
+      "dateAdded": "2022-04-14 16:01:59",
+      "prices": {
+        "avg": 20.95,
+        "low": 9,
+        "trend": 16.95,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651955,
+      "name": "Phanpy [Flail | Rollout]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213036,
+      "dateAdded": "2022-04-14 16:02:18",
+      "prices": {
+        "avg": 4,
+        "low": 2.4,
+        "trend": 3.63,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651956,
+      "name": "Donphan [Earthquake | Double Stab]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 343683,
+      "dateAdded": "2022-04-14 16:02:36",
+      "prices": {
+        "avg": 5.83,
+        "low": 2.45,
+        "trend": 4.19,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651957,
+      "name": "Tyrogue [Energy Punch]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212997,
+      "dateAdded": "2022-04-14 16:02:55",
+      "prices": {
+        "avg": 18.3,
+        "low": 9.99,
+        "trend": 14.18,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651958,
+      "name": "Hitmontop [Double Kick | Triple Spin]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213017,
+      "dateAdded": "2022-04-14 16:03:12",
+      "prices": {
+        "avg": 5.99,
+        "low": 1.5,
+        "trend": 7.35,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651959,
+      "name": "Chansey [Rollout | Double-edge]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213003,
+      "dateAdded": "2022-04-14 16:04:25",
+      "prices": {
+        "avg": 6,
+        "low": 2.4,
+        "trend": 4.9,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651960,
+      "name": "Eevee [Charge Up | Lunge]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213010,
+      "dateAdded": "2022-04-14 16:04:44",
+      "prices": {
+        "avg": 65,
+        "low": 33,
+        "trend": 72.5,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651961,
+      "name": "Porygon [Data Sort | Peck]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213040,
+      "dateAdded": "2022-04-14 16:05:01",
+      "prices": {
+        "avg": 3.47,
+        "low": 1.5,
+        "trend": 8.05,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651962,
+      "name": "Togepi [Minor Errand-Running | Pound]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 343684,
+      "dateAdded": "2022-04-14 16:05:17",
+      "prices": {
+        "avg": 3.88,
+        "low": 3.49,
+        "trend": 6.48,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651963,
+      "name": "Togetic [Miracle Shift | Mini-Metronome]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212930,
+      "dateAdded": "2022-04-14 16:05:36",
+      "prices": {
+        "avg": 20,
+        "low": 5,
+        "trend": 15.67,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651964,
+      "name": "Togetic [Miracle Shift | Mini-Metronome]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212930,
+      "dateAdded": "2022-04-14 16:05:50",
+      "prices": {
+        "avg": 90,
+        "low": 35,
+        "trend": 77.68,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651965,
+      "name": "Porygon2 [Backup | Hypnotic Ray]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212961,
+      "dateAdded": "2022-04-14 16:06:14",
+      "prices": {
+        "avg": 3.25,
+        "low": 0.9,
+        "trend": 3.44,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651966,
+      "name": "Smeargle [Paint Trick | Doubleslap]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213046,
+      "dateAdded": "2022-04-14 16:06:35",
+      "prices": {
+        "avg": 3.5,
+        "low": 1.49,
+        "trend": 3.23,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651967,
+      "name": "Blissey [Happy Healing | Smash Bomber]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212923,
+      "dateAdded": "2022-04-14 16:07:00",
+      "prices": {
+        "avg": 9,
+        "low": 9.99,
+        "trend": 14.86,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651968,
+      "name": "Blissey [Happy Healing | Smash Bomber]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212923,
+      "dateAdded": "2022-04-14 16:07:15",
+      "prices": {
+        "avg": 105,
+        "low": 25,
+        "trend": 72.89,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651969,
+      "name": "Umbreon [Dark Moon | Shadow Bind]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212931,
+      "dateAdded": "2022-04-14 16:08:08",
+      "prices": {
+        "avg": 165,
+        "low": 90,
+        "trend": 108.19,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651970,
+      "name": "Umbreon [Dark Moon | Shadow Bind]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212931,
+      "dateAdded": "2022-04-14 16:08:22",
+      "prices": {
+        "avg": 624.99,
+        "low": 349.98,
+        "trend": 811.85,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651971,
+      "name": "Houndour [Feint Attack]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213022,
+      "dateAdded": "2022-04-14 16:10:54",
+      "prices": {
+        "avg": 2.08,
+        "low": 2.8,
+        "trend": 2.35,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651972,
+      "name": "Houndoom [Fireworks | Dark Impact]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212948,
+      "dateAdded": "2022-04-14 16:11:17",
+      "prices": {
+        "avg": 43.5,
+        "low": 25,
+        "trend": 36.29,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651973,
+      "name": "Houndoom [Fireworks | Dark Impact]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212948,
+      "dateAdded": "2022-04-14 16:11:33",
+      "prices": {
+        "avg": 633.33,
+        "low": 299.99,
+        "trend": 317.48,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651974,
+      "name": "Magnemite [Attract | Tackle]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212986,
+      "dateAdded": "2022-04-14 16:12:23",
+      "prices": {
+        "avg": 2.3,
+        "low": 1.2,
+        "trend": 1.96,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651975,
+      "name": "Magneton [Magnetic Flow | Steel Wave]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212910,
+      "dateAdded": "2022-04-14 16:12:42",
+      "prices": {
+        "avg": 9,
+        "low": 2.95,
+        "trend": 7.89,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651976,
+      "name": "Magneton [Magnetic Flow | Steel Wave]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 212910,
+      "dateAdded": "2022-04-14 16:12:56",
+      "prices": {
+        "avg": 41.78,
+        "low": 15,
+        "trend": 48,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651977,
+      "name": "Weakness Guard",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213078,
+      "dateAdded": "2022-04-14 16:13:44",
+      "prices": {
+        "avg": 5.87,
+        "low": 2,
+        "trend": 5.36,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651978,
+      "name": "Super Energy Removal 2",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213071,
+      "dateAdded": "2022-04-14 16:14:02",
+      "prices": {
+        "avg": 15,
+        "low": 9,
+        "trend": 14.58,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651979,
+      "name": "Seer",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213070,
+      "dateAdded": "2022-04-14 16:15:14",
+      "prices": {
+        "avg": 4.99,
+        "low": 1.8,
+        "trend": 5.13,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651980,
+      "name": "Pokémon Fan Club",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 222737,
+      "dateAdded": "2022-04-14 16:15:27",
+      "prices": {
+        "avg": 3.6,
+        "low": 2.18,
+        "trend": 4.67,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651981,
+      "name": "Town Volunteers",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213073,
+      "dateAdded": "2022-04-14 16:15:40",
+      "prices": {
+        "avg": 14,
+        "low": 9.9,
+        "trend": 9.17,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651982,
+      "name": "Grass Cube 01",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213061,
+      "dateAdded": "2022-04-14 16:15:55",
+      "prices": {
+        "avg": 6,
+        "low": 0.99,
+        "trend": 5.93,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651983,
+      "name": "Fire Cube 01",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213059,
+      "dateAdded": "2022-04-14 16:16:09",
+      "prices": {
+        "avg": 4,
+        "low": 0.99,
+        "trend": 5.21,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651984,
+      "name": "Water Cube 01",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213077,
+      "dateAdded": "2022-04-14 16:16:23",
+      "prices": {
+        "avg": 4,
+        "low": 1.29,
+        "trend": 3.8,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651985,
+      "name": "Lightning Cube 01",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213064,
+      "dateAdded": "2022-04-14 16:16:38",
+      "prices": {
+        "avg": 5.75,
+        "low": 1.2,
+        "trend": 5.27,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651986,
+      "name": "Psychic Cube 01",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213069,
+      "dateAdded": "2022-04-14 16:16:55",
+      "prices": {
+        "avg": 7,
+        "low": 4,
+        "trend": 7.78,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651987,
+      "name": "Fighting Cube 01",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213058,
+      "dateAdded": "2022-04-14 16:17:11",
+      "prices": {
+        "avg": 3,
+        "low": 1.48,
+        "trend": 5.07,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651988,
+      "name": "Darkness Cube 01",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213056,
+      "dateAdded": "2022-04-14 16:17:25",
+      "prices": {
+        "avg": 6.99,
+        "low": 2.95,
+        "trend": 5.22,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651989,
+      "name": "Metal Cube 01",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213066,
+      "dateAdded": "2022-04-14 16:17:41",
+      "prices": {
+        "avg": 5.7,
+        "low": 2.24,
+        "trend": 5.27,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651990,
+      "name": "Pokémon Park",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213068,
+      "dateAdded": "2022-04-14 16:17:57",
+      "prices": {
+        "avg": 13.99,
+        "low": 7,
+        "trend": 10.95,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651991,
+      "name": "Power Plant",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213076,
+      "dateAdded": "2022-04-14 16:18:28",
+      "prices": {
+        "avg": 5,
+        "low": 1.5,
+        "trend": 5.3,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651992,
+      "name": "Darkness Energy [Special]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 213079,
+      "dateAdded": "2022-04-14 16:18:45",
+      "prices": {
+        "avg": 10,
+        "low": null,
+        "trend": 5.69,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651993,
+      "name": "Metal Energy [Special]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 217403,
+      "dateAdded": "2022-04-14 16:18:58",
+      "prices": {
+        "avg": 20,
+        "low": 10,
+        "trend": 18.34,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 651994,
+      "name": "Rainbow Energy",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 5022,
+      "metacardId": 211994,
+      "dateAdded": "2022-04-14 16:19:11",
+      "prices": {
+        "avg": 11,
+        "low": 49.99,
+        "trend": 8.87,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    }
+  ]
+}

@@ -1,0 +1,341 @@
+{
+  "expansionId": 6017,
+  "cards": [
+    {
+      "cardmarketProductId": 812456,
+      "name": "Steven's Baltoy [Summoning Sign | Psychic Sphere]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6017,
+      "metacardId": 446018,
+      "dateAdded": "2025-02-17 21:41:23",
+      "prices": {
+        "avg": 0.35,
+        "low": 0.2,
+        "trend": 0.38,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 812457,
+      "name": "Steven's Claydol [Eerie Light | Clay Blast]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6017,
+      "metacardId": 446019,
+      "dateAdded": "2025-02-17 21:42:54",
+      "prices": {
+        "avg": 0.39,
+        "low": 0.35,
+        "trend": 0.47,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 812458,
+      "name": "Steven's Carbink [Stone Palace | Magical Shot]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6017,
+      "metacardId": 446020,
+      "dateAdded": "2025-02-17 21:44:16",
+      "prices": {
+        "avg": 1.5,
+        "low": 0.5,
+        "trend": 1.48,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 812461,
+      "name": "Steven's Skarmory [Razor Wing | Sonic Double]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6017,
+      "metacardId": 446021,
+      "dateAdded": "2025-02-17 21:45:17",
+      "prices": {
+        "avg": 0.49,
+        "low": 0.1,
+        "trend": 0.46,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 812464,
+      "name": "Steven's Beldum [Ram]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6017,
+      "metacardId": 446022,
+      "dateAdded": "2025-02-17 21:46:33",
+      "prices": {
+        "avg": 0.4,
+        "low": 0.25,
+        "trend": 0.4,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 812465,
+      "name": "Steven's Metang [Metal Slash]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6017,
+      "metacardId": 446023,
+      "dateAdded": "2025-02-17 21:47:27",
+      "prices": {
+        "avg": 0.39,
+        "low": 0.24,
+        "trend": 0.33,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 812466,
+      "name": "Steven's Metagross ex [X-Boot | Metal Stomp]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6017,
+      "metacardId": 446024,
+      "dateAdded": "2025-02-17 21:48:40",
+      "prices": {
+        "avg": 1.94,
+        "low": 1.49,
+        "trend": 2.71,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 812467,
+      "name": "Energy Recycler",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6017,
+      "metacardId": 220582,
+      "dateAdded": "2025-02-17 21:51:53",
+      "prices": {
+        "avg": 0.25,
+        "low": 0.05,
+        "trend": 0.25,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 812468,
+      "name": "Super Rod",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6017,
+      "metacardId": 224641,
+      "dateAdded": "2025-02-17 21:52:12",
+      "prices": {
+        "avg": 0.15,
+        "low": 0.03,
+        "trend": 0.19,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 812469,
+      "name": "Buddy-Buddy Poffin",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6017,
+      "metacardId": 429711,
+      "dateAdded": "2025-02-17 21:52:26",
+      "prices": {
+        "avg": 0.24,
+        "low": 0.05,
+        "trend": 0.23,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 812470,
+      "name": "Ultra Ball",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6017,
+      "metacardId": 218103,
+      "dateAdded": "2025-02-17 21:52:44",
+      "prices": {
+        "avg": 0.15,
+        "low": 0.03,
+        "trend": 0.14,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 812471,
+      "name": "Rare Candy",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6017,
+      "metacardId": 211527,
+      "dateAdded": "2025-02-17 21:52:56",
+      "prices": {
+        "avg": 0.1,
+        "low": 0.15,
+        "trend": 0.13,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 812472,
+      "name": "Switch",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6017,
+      "metacardId": 224028,
+      "dateAdded": "2025-02-17 21:53:09",
+      "prices": {
+        "avg": null,
+        "low": 0.02,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 812473,
+      "name": "Iono",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6017,
+      "metacardId": 418748,
+      "dateAdded": "2025-02-17 21:53:24",
+      "prices": {
+        "avg": 0.19,
+        "low": 0.2,
+        "trend": 0.23,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 812474,
+      "name": "Nemona",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6017,
+      "metacardId": 415772,
+      "dateAdded": "2025-02-17 21:53:35",
+      "prices": {
+        "avg": null,
+        "low": 0.08,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 812475,
+      "name": "Professor's Research - Professor Birch",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6017,
+      "metacardId": 444403,
+      "dateAdded": "2025-02-17 21:53:53",
+      "prices": {
+        "avg": 0.19,
+        "low": 0.1,
+        "trend": 0.22,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 812476,
+      "name": "Boss's Orders - Ghetsis",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6017,
+      "metacardId": 444408,
+      "dateAdded": "2025-02-17 21:54:06",
+      "prices": {
+        "avg": 0.2,
+        "low": 0.1,
+        "trend": 0.19,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 812477,
+      "name": "Granite Cave",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6017,
+      "metacardId": 446025,
+      "dateAdded": "2025-02-17 21:54:17",
+      "prices": {
+        "avg": null,
+        "low": 0.09,
+        "trend": 0.25,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 812478,
+      "name": "Steven's Beldum [Ram]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6017,
+      "metacardId": 446022,
+      "dateAdded": "2025-02-17 21:54:31",
+      "prices": {
+        "avg": 9.66,
+        "low": 8.21,
+        "trend": 9.78,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 812479,
+      "name": "Basic Psychic Energy",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6017,
+      "metacardId": 439732,
+      "dateAdded": "2025-02-17 21:54:45",
+      "prices": {
+        "avg": 0.02,
+        "low": 0.02,
+        "trend": 0.02,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 812480,
+      "name": "Basic Metal Energy",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6017,
+      "metacardId": 439735,
+      "dateAdded": "2025-02-17 21:54:58",
+      "prices": {
+        "avg": 0.02,
+        "low": 0.02,
+        "trend": 0.02,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    }
+  ]
+}
