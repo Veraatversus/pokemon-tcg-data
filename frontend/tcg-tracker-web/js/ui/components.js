@@ -363,6 +363,16 @@ export function createSettingsPanel(currentSettings = {}, onSave) {
       </div>
     </details>
 
+    <details style="border:1px solid var(--color-border); border-radius:8px; padding:10px 12px; background: var(--color-surface);">
+      <summary style="cursor:pointer; font-weight:700;">💬 Hilfe & Kontakt</summary>
+      <p style="font-size:12px; color:var(--color-muted); margin:8px 0 10px; line-height:1.45;">
+        Öffnet den Support-Hub für Bug-Reports, Feature-Wünsche und frühzeitige Zugangs-Anfragen.
+      </p>
+      <div style="display:flex; flex-wrap:wrap; gap:8px;">
+        <button class="btn-secondary" type="button" data-proxy-click="btn-open-support-hub">💬 Feedback & Zugang</button>
+      </div>
+    </details>
+
     <div style="display:flex; gap:8px; margin-top: 4px; flex-wrap: wrap;">
       <button class="btn-secondary" type="button" data-action="clear-history">🗑️ Suchverlauf löschen</button>
       <button class="btn-primary" type="button" data-action="save">💾 Speichern</button>

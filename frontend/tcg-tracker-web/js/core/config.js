@@ -72,6 +72,21 @@ export const CONFIG = {
     VERA_BASE: 'https://veraatversus.github.io/pokemon-tcg-data'
   },
 
+  // ── Support & Kontakt ───────────────────────────────────────
+  SUPPORT: {
+    CONTACT_EMAIL: 'veraatversus+tcg@gmail.com',
+    channels: {
+      bug: 'https://docs.google.com/forms/d/e/1FAIpQLSeDSU0GRKB6pDZPSXMoOwlsqXFjk0kcnGYyVAuB7zSJDO_HCw/viewform',
+      feature: 'https://docs.google.com/forms/d/e/1FAIpQLSeDSU0GRKB6pDZPSXMoOwlsqXFjk0kcnGYyVAuB7zSJDO_HCw/viewform',
+      access: 'https://docs.google.com/forms/d/e/1FAIpQLSeDSU0GRKB6pDZPSXMoOwlsqXFjk0kcnGYyVAuB7zSJDO_HCw/viewform'
+    },
+    fallbackUrls: {
+      bug: './impressum.html#projektkontakt',
+      feature: './impressum.html#projektkontakt',
+      access: './impressum.html#projektkontakt'
+    }
+  },
+
   // ── Vera-API-Einstellungen ───────────────────────────────────
   USE_VERA_API: true,
   VERA_API_LANGUAGE: 'en',

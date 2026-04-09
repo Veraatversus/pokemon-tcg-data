@@ -429,7 +429,8 @@ select { background: var(--color-surface); color: var(--color-text); }
   gap: 8px;
   flex-wrap: wrap;
 }
-.app-legal-footer__links a {
+.app-legal-footer__links a,
+.app-legal-footer__action {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -439,16 +440,84 @@ select { background: var(--color-surface); color: var(--color-text); }
   text-decoration: none;
   transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }
+.app-legal-footer__action {
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(64, 124, 255, 0.12);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  font: inherit;
+}
 .app-legal-footer__links a::after {
   content: '↗';
   font-size: 11px;
   opacity: 0.72;
 }
 .app-legal-footer__links a:hover,
-.app-legal-footer__links a:focus-visible {
+.app-legal-footer__links a:focus-visible,
+.app-legal-footer__action:hover,
+.app-legal-footer__action:focus-visible {
   color: var(--color-text-primary);
   background: rgba(255,255,255,0.06);
   transform: translateY(-1px);
+}
+
+.support-hub-dialog {
+  width: min(92vw, 760px);
+  max-height: 88vh;
+}
+
+.support-hub-intro,
+.support-hub-note {
+  color: var(--color-text-secondary);
+  line-height: 1.55;
+}
+
+.support-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.support-hub-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--color-border);
+  background: linear-gradient(135deg, rgba(15, 22, 39, 0.95), rgba(18, 26, 48, 0.88));
+  color: var(--color-text-primary);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.support-hub-card:hover,
+.support-hub-card:focus-visible {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--color-primary) 55%, var(--color-border));
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
+}
+
+.support-hub-card__emoji {
+  font-size: 1.2rem;
+}
+
+.support-hub-card__title {
+  font-weight: 700;
+}
+
+.support-hub-card__text {
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.support-hub-contact-link {
+  text-decoration: none;
 }
 
 .view { display: block; }

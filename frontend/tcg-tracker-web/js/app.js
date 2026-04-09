@@ -128,6 +128,7 @@ const dom = {
   // Global
   auth:             document.getElementById('btn-auth'),
   btnOpenSettings:  document.getElementById('btn-open-settings'),
+  btnOpenSupportHub: document.getElementById('btn-open-support-hub'),
   topbar:           document.querySelector('.topbar'),
   mainNav:          document.getElementById('main-nav'),
   navSetLink:       document.getElementById('nav-set-link'),
@@ -165,6 +166,7 @@ const dom = {
   spreadsheetInfo:  document.getElementById('spreadsheet-info'),
   spreadsheetLink:  document.getElementById('spreadsheet-link'),
   btnChangeSheet:   document.getElementById('btn-change-spreadsheet'),
+  supportHubDialog: document.getElementById('dialog-support-hub'),
   // Views
   viewDashboard:    document.getElementById('view-dashboard'),
   viewSet:          document.getElementById('view-set'),
@@ -1498,6 +1500,53 @@ function showToast(message, type = 'info', durationMs = 3000) {
   el.textContent = message;
   dom.toastContainer.appendChild(el);
   setTimeout(() => el.remove(), durationMs);
+}
+
+const SUPPORT_CHANNEL_META = Object.freeze({
+  bug: {
+    title: 'Bug melden',
+    fallbackMessage: 'Bug-Formular noch nicht hinterlegt – ich öffne vorerst die Kontaktseite.'
+  },
+  feature: {
+    title: 'Feature wünschen',
+    fallbackMessage: 'Feature-Formular noch nicht hinterlegt – ich öffne vorerst die Kontaktseite.'
+  },
+  access: {
+    title: 'Zugang beantragen',
+    fallbackMessage: 'Access-Formular noch nicht hinterlegt – ich öffne vorerst die Kontaktseite.'
+  }
+});
+
+function isConfiguredSupportUrl(url) {
+  return Boolean(url) && !/replace|todo|example/i.test(String(url));
+}
+
+function resolveSupportTarget(kind) {
+  const supportConfig = CONFIG.SUPPORT || {};
+  const directUrl = String(supportConfig.channels?.[kind] || '').trim();
+  const fallbackUrl = String(supportConfig.fallbackUrls?.[kind] || './impressum.html#projektkontakt').trim();
+  return {
+    directUrl,
+    fallbackUrl: new URL(fallbackUrl, window.location.href).toString()
+  };
+}
+
+function openSupportHubDialog() {
+  dom.supportHubDialog?.showModal();
+}
+
+function openSupportChannel(kind) {
+  const safeKind = SUPPORT_CHANNEL_META[kind] ? kind : 'feature';
+  const meta = SUPPORT_CHANNEL_META[safeKind];
+  const { directUrl, fallbackUrl } = resolveSupportTarget(safeKind);
+  const targetUrl = isConfiguredSupportUrl(directUrl) ? directUrl : fallbackUrl;
+
+  dom.supportHubDialog?.close();
+  window.open(targetUrl, '_blank', 'noopener,noreferrer');
+
+  if (!isConfiguredSupportUrl(directUrl)) {
+    showToast(meta.fallbackMessage, 'info', 5200);
+  }
 }
 
 function pushAuditEntry(kind, message) {
@@ -4545,6 +4594,13 @@ function initDashboardControls() {
     renderDashboard();
   });
   dom.btnOpenSettings?.addEventListener('click', openSettingsDialog);
+  dom.btnOpenSupportHub?.addEventListener('click', openSupportHubDialog);
+  dom.supportHubDialog?.querySelectorAll('[data-support-kind]').forEach((button) => {
+    button.addEventListener('click', () => openSupportChannel(button.dataset.supportKind));
+  });
+  dom.supportHubDialog?.querySelectorAll('[data-action="close-support-hub"]').forEach((button) => {
+    button.addEventListener('click', () => dom.supportHubDialog.close());
+  });
   dom.btnOverviewSync?.addEventListener('click', syncOverviewFromApi);
   dom.btnOverviewPowerRefresh?.addEventListener('click', powerRefreshOverviewFromApi);
   dom.btnImportBatch?.addEventListener('click', openBatchImportDialog);
