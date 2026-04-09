@@ -38,6 +38,20 @@ window.TCG_TRACKER_SITE = {
     el.textContent = cfg.lastUpdated;
   });
 
+  document.querySelectorAll('a[href^="http"]:not([href^="mailto:"])').forEach((el) => {
+    el.setAttribute('target', '_blank');
+    el.setAttribute('rel', 'noreferrer noopener');
+  });
+
+  const currentPage = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
+  document.querySelectorAll('.topnav a').forEach((el) => {
+    const rawHref = (el.getAttribute('href') || '').split('#')[0].replace(/^\.\//, '').toLowerCase();
+    if (!rawHref || /^https?:/.test(rawHref) || rawHref.startsWith('mailto:')) return;
+    if ((currentPage === 'index.html' && rawHref === 'index.html') || rawHref === currentPage) {
+      el.setAttribute('aria-current', 'page');
+    }
+  });
+
   const yearTargets = document.querySelectorAll('[data-current-year]');
   yearTargets.forEach((el) => {
     el.textContent = String(new Date().getFullYear());

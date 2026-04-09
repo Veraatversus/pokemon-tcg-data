@@ -4135,15 +4135,6 @@ function renderLegacyImportSelectionDialog() {
   const session = legacyImportSelectionDialogState;
   if (!session || !dom.legacySelectionTree) return;
 
-  if (dom.legacySelectionTree.childElementCount) {
-    session.openSetKeys = new Set(
-      Array.from(dom.legacySelectionTree.querySelectorAll('details[data-set-key]'))
-        .filter((node) => node.open)
-        .map((node) => String(node.dataset.setKey || '').trim())
-        .filter(Boolean)
-    );
-  }
-
   const query = String(dom.legacySelectionSearch?.value || '').trim().toLowerCase();
   const stats = getLegacyImportSelectionStats(session.tree);
 
@@ -4170,7 +4161,6 @@ function renderLegacyImportSelectionDialog() {
 
   const setMarkup = (session.tree.sets || []).map((setEntry, setIndex) => {
     const selectedCount = syncLegacyImportSelectionSetState(setEntry);
-    const setKey = `${setEntry.setId || 'set'}::${setIndex}`;
     const setSearchText = [setEntry.setName, setEntry.sheetName, setEntry.setId].join(' ').toLowerCase();
     const setMatches = !query || setSearchText.includes(query);
     const visibleCards = (setEntry.cards || [])
@@ -4179,31 +4169,33 @@ function renderLegacyImportSelectionDialog() {
 
     if (query && !setMatches && !visibleCards.length) return '';
 
-    const cardsMarkup = visibleCards.map(({ card, cardIndex }) => {
-      const badgeHtml = [
-        card.g ? '<span class="legacy-tree-badge is-collected">G</span>' : '',
-        card.rh ? '<span class="legacy-tree-badge is-reverse">RH</span>' : ''
-      ].join('');
-      const cardNumber = escapeLegacyImportSelectionHtml(card.sourceCardId || card.cardId || '—');
-      const cardName = escapeLegacyImportSelectionHtml(card.name || card.cardId || 'Unbenannte Karte');
-      return `
-        <label class="legacy-tree-card">
-          <input type="checkbox" data-selection-type="card" data-set-index="${setIndex}" data-card-index="${cardIndex}" ${card.selected !== false ? 'checked' : ''} />
-          <span class="legacy-tree-card-id">#${cardNumber}</span>
-          <span class="legacy-tree-card-name">${cardName}</span>
-          <span class="legacy-tree-card-flags">${badgeHtml}</span>
-        </label>
-      `;
-    }).join('');
+    const shouldOpen = query ? true : Boolean(setEntry.expanded);
+    const cardsMarkup = shouldOpen
+      ? visibleCards.map(({ card, cardIndex }) => {
+          const badgeHtml = [
+            card.g ? '<span class="legacy-tree-badge is-collected">G</span>' : '',
+            card.rh ? '<span class="legacy-tree-badge is-reverse">RH</span>' : ''
+          ].join('');
+          const cardNumber = escapeLegacyImportSelectionHtml(card.sourceCardId || card.cardId || '—');
+          const cardName = escapeLegacyImportSelectionHtml(card.name || card.cardId || 'Unbenannte Karte');
+          return `
+            <label class="legacy-tree-card">
+              <input type="checkbox" data-selection-type="card" data-set-index="${setIndex}" data-card-index="${cardIndex}" ${card.selected !== false ? 'checked' : ''} />
+              <span class="legacy-tree-card-id">#${cardNumber}</span>
+              <span class="legacy-tree-card-name">${cardName}</span>
+              <span class="legacy-tree-card-flags">${badgeHtml}</span>
+            </label>
+          `;
+        }).join('')
+      : '';
 
     const summaryLabel = escapeLegacyImportSelectionHtml(setEntry.setName || setEntry.sheetName || setEntry.setId || 'Unbekanntes Set');
     const summaryMeta = escapeLegacyImportSelectionHtml(setEntry.sheetName && setEntry.sheetName !== setEntry.setName
       ? `${setEntry.sheetName} · ${setEntry.setId}`
       : `Set-ID: ${setEntry.setId}`);
-    const shouldOpen = query ? true : session.openSetKeys.has(setKey);
 
     return `
-      <details class="legacy-tree-set" data-set-key="${escapeLegacyImportSelectionHtml(setKey)}" ${shouldOpen ? 'open' : ''}>
+      <details class="legacy-tree-set" data-set-index="${setIndex}" ${shouldOpen ? 'open' : ''}>
         <summary class="legacy-tree-set-summary">
           <label class="legacy-tree-summary-check">
             <input class="legacy-tree-set-toggle" type="checkbox" data-selection-type="set" data-set-index="${setIndex}" ${selectedCount > 0 ? 'checked' : ''} />
@@ -4301,10 +4293,11 @@ function handleLegacyImportSelectionTreeToggle(event) {
   const session = legacyImportSelectionDialogState;
   const details = event.target;
   if (!(details instanceof HTMLDetailsElement) || !session) return;
-  const setKey = String(details.dataset.setKey || '').trim();
-  if (!setKey) return;
-  if (details.open) session.openSetKeys.add(setKey);
-  else session.openSetKeys.delete(setKey);
+  const setIndex = Number(details.dataset.setIndex || '-1');
+  const setEntry = session.tree.sets?.[setIndex];
+  if (!setEntry) return;
+  setEntry.expanded = Boolean(details.open);
+  renderLegacyImportSelectionDialog();
 }
 
 function openLegacyImportSelectionDialog(plan, cardsBySetId) {
@@ -4318,8 +4311,7 @@ function openLegacyImportSelectionDialog(plan, cardsBySetId) {
   legacyImportSelectionDialogState = {
     plan,
     tree,
-    resolve: null,
-    openSetKeys: new Set((tree.sets || []).map((setEntry, setIndex) => `${setEntry.setId || 'set'}::${setIndex}`))
+    resolve: null
   };
 
   if (dom.legacySelectionSearch) {

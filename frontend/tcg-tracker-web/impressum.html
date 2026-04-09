@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Weiterleitung · Impressum</title>
+  <link rel="stylesheet" href="./css/main.css?v=20260509-legalfooter1" />
+  <script>
+    (() => {
+      const hostedTarget = 'https://veraatversus.github.io/pokemon-tcg-data/impressum.html';
+      const rootTarget = '../../impressum.html';
+      const inGitHubPagesSubdir = /\/(?:dev\/)?frontend\/tcg-tracker-web\//.test(window.location.pathname);
+      const finalTarget = inGitHubPagesSubdir
+        ? new URL(rootTarget, window.location.href).href
+        : hostedTarget;
+      window.location.replace(finalTarget);
+    })();
+  </script>
+</head>
+<body class="dark">
+  <main class="view" style="max-width:760px;margin:40px auto;padding:14px;">
+    <section class="panel">
+      <h2>Weiterleitung zum Impressum…</h2>
+      <p>Falls die automatische Weiterleitung nicht startet, kannst du die öffentliche Kontakt- und Hinweisseite direkt öffnen.</p>
+      <p><a href="https://veraatversus.github.io/pokemon-tcg-data/impressum.html">Impressum öffnen</a></p>
+    </section>
+  </main>
+</body>
+</html>

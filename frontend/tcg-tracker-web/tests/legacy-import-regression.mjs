@@ -264,6 +264,7 @@ function testBuildsLegacySelectionTreeWithAllCardsPreselected() {
 
   assert.equal(tree.sets.length, 1);
   assert.equal(tree.sets[0].selected, true);
+  assert.equal(tree.sets[0].expanded, false, 'The treeview should start collapsed at the set level by default.');
   assert.deepEqual(
     tree.sets[0].cards.map((card) => ({ cardId: card.cardId, name: card.name, selected: card.selected })),
     [

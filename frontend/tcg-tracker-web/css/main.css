@@ -403,6 +403,54 @@ select { background: var(--color-surface); color: var(--color-text); }
    ══════════════════════════════════════════════════════════════════════════ */
 #app-views { padding: 0; }
 
+.app-legal-footer {
+  padding: 2px 14px 18px;
+}
+.app-legal-footer__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(15, 22, 39, 0.92), rgba(18, 26, 48, 0.88));
+  box-shadow: var(--shadow-sm);
+}
+.app-legal-footer__label {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.app-legal-footer__links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.app-legal-footer__links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+.app-legal-footer__links a::after {
+  content: '↗';
+  font-size: 11px;
+  opacity: 0.72;
+}
+.app-legal-footer__links a:hover,
+.app-legal-footer__links a:focus-visible {
+  color: var(--color-text-primary);
+  background: rgba(255,255,255,0.06);
+  transform: translateY(-1px);
+}
+
 .view { display: block; }
 .view.hidden { display: none !important; }
 
@@ -3508,6 +3556,11 @@ dialog.ss-dialog::backdrop {
 @media (max-width: 768px) {
   #app-views {
     padding: 8px;
+  }
+
+  .app-legal-footer__inner {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .topbar h1 {

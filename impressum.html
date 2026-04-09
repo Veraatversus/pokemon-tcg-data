@@ -16,8 +16,9 @@
       </div>
       <nav class="topnav" aria-label="Seitennavigation">
         <a href="./index.html">Landingpage</a>
-        <a href="./frontend/tcg-tracker-web/">Web-App</a>
+        <a class="nav-cta" href="./frontend/tcg-tracker-web/">Web-App</a>
         <a href="./privacy.html">Datenschutz</a>
+        <a href="./impressum.html">Impressum</a>
       </nav>
     </div>
 
@@ -27,10 +28,20 @@
       <p class="subtle">
         Diese Seite ist bewusst als allgemeine Kontakt-/Hinweisseite für die öffentliche GitHub-Pages-Version des Projekts aufgebaut.
       </p>
+      <div class="page-actions">
+        <a class="button button-primary" href="./frontend/tcg-tracker-web/">Zur Web-App</a>
+        <a class="button button-secondary" href="./index.html">Zur Landingpage</a>
+      </div>
+      <nav class="anchor-nav" aria-label="Schnellsprünge im Impressum">
+        <a href="#projektkontakt">Kontakt</a>
+        <a href="#charakter">Projektcharakter</a>
+        <a href="#dienste">Externe Dienste</a>
+        <a href="#unterlagen">Unterlagen</a>
+      </nav>
     </header>
 
     <main class="page-content">
-      <section class="legal-block">
+      <section class="legal-block" id="projektkontakt">
         <h2>1. Projektkontakt</h2>
         <p>
           Für Rückfragen zur Website, zum Projekt oder zur Google-OAuth-Einreichung:
@@ -50,7 +61,7 @@
         </p>
       </section>
 
-      <section class="legal-block">
+      <section class="legal-block" id="charakter">
         <h2>3. Charakter des Projekts</h2>
         <p>
           <span data-site="brandName">Vera's Pokémon TCG Tracker</span> ist ein inoffizielles, eigenständiges Webprojekt zur Organisation
@@ -62,7 +73,7 @@
         </p>
       </section>
 
-      <section class="legal-block">
+      <section class="legal-block" id="dienste">
         <h2>4. Externe Dienste</h2>
         <ul class="clean-list">
           <li>GitHub / GitHub Pages für Hosting und Quellcode-Veröffentlichung</li>
@@ -70,7 +81,7 @@
         </ul>
       </section>
 
-      <section class="legal-block">
+      <section class="legal-block" id="unterlagen">
         <h2>5. Weitere Unterlagen</h2>
         <div class="pill-row">
           <a class="pill" href="./privacy.html">Datenschutz</a>

@@ -451,6 +451,7 @@ export function buildLegacyImportSelectionTree(plan, cardsBySetId = {}) {
         sheetName: String(matchedSet?.sheetName || '').trim(),
         imported: Boolean(matchedSet?.imported),
         selected: true,
+        expanded: false,
         cards
       };
     })
