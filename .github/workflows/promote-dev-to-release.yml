@@ -41,6 +41,11 @@ jobs:
           if git merge -X theirs origin/dev --no-edit; then
             AFTER_COMMIT=$(git rev-parse HEAD)
             if [ "$BEFORE_COMMIT" != "$AFTER_COMMIT" ]; then
+              git restore --source="$BEFORE_COMMIT" --staged --worktree -- .github/workflows/deploy-pages.yml .github/workflows/merge-to-release.yml || true
+              if ! git diff --quiet || ! git diff --cached --quiet; then
+                git add .github/workflows/deploy-pages.yml .github/workflows/merge-to-release.yml
+                git commit --amend --no-edit
+              fi
               git push origin release
               echo "release_updated=true" >> $GITHUB_OUTPUT
             else
