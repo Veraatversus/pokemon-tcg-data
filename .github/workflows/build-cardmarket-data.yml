@@ -33,8 +33,8 @@ jobs:
       - name: Verify Cardmarket build helper tests
         run: node --test scripts/cardmarket/build-cardmarket-data.test.mjs
 
-      - name: Verify Cardmarket frontend helper tests
-        run: node --test frontend/tcg-tracker-web/tests/cardmarket-data.test.mjs
+      - name: Verify Cardmarket shared helper tests
+        run: node --test scripts/cardmarket/cardmarket-ui-helpers.test.mjs
 
       - name: Build Cardmarket static JSON endpoints
         run: node scripts/cardmarket/build-cardmarket-data.mjs
@@ -46,7 +46,6 @@ jobs:
           test -f cardmarket/index/products.json
           test -f cardmarket/index/names.json
           test -f cardmarket/index/tracker.json
-          test -f frontend/tcg-tracker-web/cardmarket/index/products.json
 
       - name: Commit generated Cardmarket data if changed
         id: commit_generated

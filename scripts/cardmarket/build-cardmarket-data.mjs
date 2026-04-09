@@ -68,6 +68,25 @@ async function loadTrackerReferenceData(repoRoot) {
   return { trackerSets, trackerCardsBySet };
 }
 
+async function resolveDefaultOutputDirs(repoRoot) {
+  const dirs = [process.env.CARDMARKET_OUTPUT_DIR || path.join(repoRoot, 'cardmarket')];
+  const frontendOutputDir = process.env.CARDMARKET_FRONTEND_OUTPUT_DIR || path.join(repoRoot, 'frontend', 'tcg-tracker-web', 'cardmarket');
+
+  if (process.env.CARDMARKET_FRONTEND_OUTPUT_DIR) {
+    dirs.push(frontendOutputDir);
+    return dirs;
+  }
+
+  try {
+    await fs.access(path.join(repoRoot, 'frontend', 'tcg-tracker-web'));
+    dirs.push(frontendOutputDir);
+  } catch {
+    // master can omit the frontend tree entirely; local/dev builds can still opt in explicitly
+  }
+
+  return dirs;
+}
+
 export async function buildDailyCardmarketData({ singlesUrl = DEFAULT_SINGLES_URL, priceGuideUrl = DEFAULT_PRICE_GUIDE_URL, outputDir, outputDirs = [], repoRoot } = {}) {
   const resolvedRepoRoot = repoRoot ? path.resolve(repoRoot) : path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
   const [singlesPayload, priceGuidePayload, trackerReference] = await Promise.all([
@@ -100,15 +119,12 @@ const isDirectRun = process.argv[1] && fileURLToPath(import.meta.url) === path.r
 
 if (isDirectRun) {
   const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-  const outputDirs = [
-    process.env.CARDMARKET_OUTPUT_DIR || path.join(repoRoot, 'cardmarket'),
-    process.env.CARDMARKET_FRONTEND_OUTPUT_DIR || path.join(repoRoot, 'frontend', 'tcg-tracker-web', 'cardmarket'),
-  ];
 
-  buildDailyCardmarketData({ outputDirs, repoRoot })
-    .then((artifacts) => {
-      console.log(`Cardmarket build complete: ${artifacts.meta.singlesCount} singles, ${artifacts.meta.priceGuideCount} price rows, ${artifacts.meta.setCount} expansions -> ${outputDirs.join(', ')}`);
-    })
+  resolveDefaultOutputDirs(repoRoot)
+    .then((outputDirs) => buildDailyCardmarketData({ outputDirs, repoRoot })
+      .then((artifacts) => {
+        console.log(`Cardmarket build complete: ${artifacts.meta.singlesCount} singles, ${artifacts.meta.priceGuideCount} price rows, ${artifacts.meta.setCount} expansions -> ${outputDirs.join(', ')}`);
+      }))
     .catch((error) => {
       console.error('[cardmarket-build] failed:', error);
       process.exitCode = 1;
