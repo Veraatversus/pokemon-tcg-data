@@ -1,0 +1,76 @@
+name: Promote Master to Dev
+
+on:
+  workflow_run:
+    workflows:
+      - Build Cardmarket Data
+    types:
+      - completed
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  promote_master_to_dev:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout dev
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge master into dev
+        id: promote
+        run: |
+          echo "dev_updated=false" >> $GITHUB_OUTPUT
+
+          git fetch origin master
+          BEFORE_COMMIT=$(git rev-parse HEAD)
+
+          if git merge -X theirs origin/master --no-edit; then
+            AFTER_COMMIT=$(git rev-parse HEAD)
+            if [ "$BEFORE_COMMIT" != "$AFTER_COMMIT" ]; then
+              git push origin dev
+              echo "dev_updated=true" >> $GITHUB_OUTPUT
+            else
+              echo "Dev is already up to date with master"
+            fi
+          else
+            git merge --abort || true
+            exit 1
+          fi
+
+      - name: Create issue on propagation conflict
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🔁 Master-to-Dev Promotion Conflict - Manual Resolution Required',
+              body: `The automated promotion from \`master\` to \`dev\` encountered a conflict.
+
+              **Action Required:**
+              Please resolve the conflict manually on \`dev\` and rerun the promotion workflow.
+
+              **Suggested steps:**
+              1. \`git checkout dev\`
+              2. \`git fetch origin master\`
+              3. \`git merge -X theirs origin/master\`
+              4. Resolve conflicts if needed and \`git push origin dev\`
+              `,
+              labels: ['propagation', 'manual-action-required']
+            });
+            console.log('Created issue:', issue.data.number);

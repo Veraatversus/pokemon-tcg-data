@@ -1,0 +1,133 @@
+{
+  "expansionId": 6367,
+  "cards": [
+    {
+      "cardmarketProductId": 855374,
+      "name": "Leafeon GX [Breath of the Leaves | Solar Beam | Grand Bloom GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6367,
+      "metacardId": 236260,
+      "dateAdded": "2025-10-27 14:02:58",
+      "prices": {
+        "avg": null,
+        "low": 69.68,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 855375,
+      "name": "Glaceon GX [Freezing Gaze | Frost Bullet | Polar Spear GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6367,
+      "metacardId": 236261,
+      "dateAdded": "2025-10-27 14:03:11",
+      "prices": {
+        "avg": 12.46,
+        "low": 12.46,
+        "trend": 12.39,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 855376,
+      "name": "Espeon GX [Psybeam | Psychic | Divide GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6367,
+      "metacardId": 224715,
+      "dateAdded": "2025-10-27 14:03:24",
+      "prices": {
+        "avg": 14.49,
+        "low": 12.99,
+        "trend": 13.71,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 855377,
+      "name": "Umbreon GX [Strafe | Shadow Bullet | Dark Call GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6367,
+      "metacardId": 224734,
+      "dateAdded": "2025-10-27 14:03:36",
+      "prices": {
+        "avg": 21.19,
+        "low": 15.99,
+        "trend": 14.99,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 855379,
+      "name": "Sylveon GX [Magical Ribbon | Fairy Wind | Plea GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6367,
+      "metacardId": 225410,
+      "dateAdded": "2025-10-27 14:03:48",
+      "prices": {
+        "avg": 15.49,
+        "low": 15.49,
+        "trend": 15.76,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 855380,
+      "name": "Eevee GX [Ascension DNA | Boost Dash | Joy Maker GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6367,
+      "metacardId": 268190,
+      "dateAdded": "2025-10-27 14:04:02",
+      "prices": {
+        "avg": 3.99,
+        "low": 3.48,
+        "trend": 3.97,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 855381,
+      "name": "Eevee GX [Ascension DNA | Boost Dash | Joy Maker GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6367,
+      "metacardId": 268190,
+      "dateAdded": "2025-10-27 14:04:13",
+      "prices": {
+        "avg": 4.5,
+        "low": 3.8,
+        "trend": 4.15,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 855382,
+      "name": "Eevee GX [Ascension DNA | Boost Dash | Joy Maker GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6367,
+      "metacardId": 268190,
+      "dateAdded": "2025-10-27 14:04:24",
+      "prices": {
+        "avg": 44.49,
+        "low": 43.99,
+        "trend": 43.98,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    }
+  ]
+}

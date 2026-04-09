@@ -1,0 +1,309 @@
+{
+  "expansionId": 4277,
+  "cards": [
+    {
+      "cardmarketProductId": 675942,
+      "name": "Venusaur Lv.56 [Giga Drain]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4277,
+      "metacardId": 216702,
+      "dateAdded": "2022-09-20 12:27:43",
+      "prices": {
+        "avg": 124.99,
+        "low": null,
+        "trend": 124.99,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 675943,
+      "name": "Cherrim Lv.28 [Solarbeam]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4277,
+      "metacardId": 216703,
+      "dateAdded": "2022-09-20 12:28:45",
+      "prices": {
+        "avg": 20,
+        "low": 45,
+        "trend": 20,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 675944,
+      "name": "Ninetales Lv.42 [Flame Tail]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4277,
+      "metacardId": 216704,
+      "dateAdded": "2022-09-20 12:29:02",
+      "prices": {
+        "avg": 40,
+        "low": 250,
+        "trend": 40,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 675945,
+      "name": "Heatran Lv.60 [Heat Boiler]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4277,
+      "metacardId": 216705,
+      "dateAdded": "2022-09-20 12:29:30",
+      "prices": {
+        "avg": 90,
+        "low": 39,
+        "trend": 90,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 675946,
+      "name": "Starmie Lv.43 [Spiral Drain]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4277,
+      "metacardId": 216706,
+      "dateAdded": "2022-09-20 12:29:47",
+      "prices": {
+        "avg": 39.9,
+        "low": 50,
+        "trend": 39.9,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 675947,
+      "name": "Gyarados Lv.55 [Thrash Tackle]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4277,
+      "metacardId": 216707,
+      "dateAdded": "2022-09-20 12:30:04",
+      "prices": {
+        "avg": 550,
+        "low": 250,
+        "trend": 550,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 675948,
+      "name": "Pikachu Lv.16 [Volt Tackle]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4277,
+      "metacardId": 216708,
+      "dateAdded": "2022-09-20 12:30:19",
+      "prices": {
+        "avg": 370,
+        "low": 10000,
+        "trend": 370,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 675949,
+      "name": "Zapdos Lv.41 [Drill Peck]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4277,
+      "metacardId": 216709,
+      "dateAdded": "2022-09-20 12:30:36",
+      "prices": {
+        "avg": 70,
+        "low": 168,
+        "trend": 70,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 675950,
+      "name": "Mewtwo Lv.65 [Super Psy Bolt]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4277,
+      "metacardId": 216710,
+      "dateAdded": "2022-09-20 12:31:00",
+      "prices": {
+        "avg": 225,
+        "low": 369.99,
+        "trend": 150.58,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 675951,
+      "name": "Mew Lv.39 [Cut | Will-o'-the-wisp]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4277,
+      "metacardId": 216711,
+      "dateAdded": "2022-09-20 12:31:14",
+      "prices": {
+        "avg": 899.95,
+        "low": 188,
+        "trend": 899.95,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 675952,
+      "name": "Diglett Lv.6 [Dig]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4277,
+      "metacardId": 216712,
+      "dateAdded": "2022-09-20 12:31:30",
+      "prices": {
+        "avg": 94.99,
+        "low": 35,
+        "trend": 138.03,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 675953,
+      "name": "Lucario Lv.41 [Metal Claw | Pulse Blast]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4277,
+      "metacardId": 216713,
+      "dateAdded": "2022-09-20 12:31:45",
+      "prices": {
+        "avg": 69,
+        "low": null,
+        "trend": 61.04,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 675954,
+      "name": "Skuntank Lv.35 [Rage]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4277,
+      "metacardId": 216714,
+      "dateAdded": "2022-09-20 12:32:06",
+      "prices": {
+        "avg": 20,
+        "low": 45,
+        "trend": 20,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 675955,
+      "name": "Bastiodon Lv.49 [Strength]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4277,
+      "metacardId": 216715,
+      "dateAdded": "2022-09-20 12:32:22",
+      "prices": {
+        "avg": 19.99,
+        "low": 30,
+        "trend": 19.99,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 675956,
+      "name": "Rattata Lv.9 [Bite]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4277,
+      "metacardId": 216716,
+      "dateAdded": "2022-09-20 12:32:35",
+      "prices": {
+        "avg": 25,
+        "low": 149,
+        "trend": 25,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 675957,
+      "name": "Bibarel Lv.22 [Rollout]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4277,
+      "metacardId": 216717,
+      "dateAdded": "2022-09-20 12:32:51",
+      "prices": {
+        "avg": 109.99,
+        "low": 144.99,
+        "trend": 109.99,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 675958,
+      "name": "Pachirisu Lv.27 [Electric Punch]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4277,
+      "metacardId": 412446,
+      "dateAdded": "2022-09-20 12:33:27",
+      "prices": {
+        "avg": null,
+        "low": null,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 675959,
+      "name": "Croagunk Lv.32 [Sludge Toss]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4277,
+      "metacardId": 412447,
+      "dateAdded": "2022-09-20 12:34:20",
+      "prices": {
+        "avg": null,
+        "low": null,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 675960,
+      "name": "Eevee Lv.8 [Tackle]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4277,
+      "metacardId": 412448,
+      "dateAdded": "2022-09-20 12:34:59",
+      "prices": {
+        "avg": null,
+        "low": null,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    }
+  ]
+}

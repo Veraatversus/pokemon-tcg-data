@@ -1,0 +1,293 @@
+{
+  "expansionId": 4199,
+  "cards": [
+    {
+      "cardmarketProductId": 568976,
+      "name": "Roselia [Needling Sting]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4199,
+      "metacardId": 218125,
+      "dateAdded": "2021-06-11 16:43:17",
+      "prices": {
+        "avg": 1.59,
+        "low": 0.2,
+        "trend": 1.58,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 568977,
+      "name": "Roserade [Le Parfum | Squeeze]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4199,
+      "metacardId": 342661,
+      "dateAdded": "2021-06-11 16:44:13",
+      "prices": {
+        "avg": null,
+        "low": 2.5,
+        "trend": 5.06,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 568978,
+      "name": "Foongus [Double Spin]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4199,
+      "metacardId": 342662,
+      "dateAdded": "2021-06-11 16:44:32",
+      "prices": {
+        "avg": null,
+        "low": 0.25,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 568979,
+      "name": "Drifloon [Beat | Gust]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4199,
+      "metacardId": 342663,
+      "dateAdded": "2021-06-11 16:45:02",
+      "prices": {
+        "avg": 0.5,
+        "low": 0.25,
+        "trend": 0.36,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 568980,
+      "name": "Houndour [Bite | Darkness Fang]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4199,
+      "metacardId": 342664,
+      "dateAdded": "2021-06-11 16:45:31",
+      "prices": {
+        "avg": 1.69,
+        "low": 0.2,
+        "trend": 1.53,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 568981,
+      "name": "Houndoom [Bite | Fire Fang]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4199,
+      "metacardId": 342665,
+      "dateAdded": "2021-06-11 16:45:58",
+      "prices": {
+        "avg": 4.99,
+        "low": 2.35,
+        "trend": 22.03,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 568982,
+      "name": "Deino [Guard Press | Headbutt]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4199,
+      "metacardId": 342666,
+      "dateAdded": "2021-06-11 16:46:26",
+      "prices": {
+        "avg": 0.5,
+        "low": 0.35,
+        "trend": 0.5,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 568983,
+      "name": "Zweilous [Draw In | Dragon Headbutt]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4199,
+      "metacardId": 342667,
+      "dateAdded": "2021-06-11 16:46:53",
+      "prices": {
+        "avg": null,
+        "low": 0.4,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 568984,
+      "name": "Hydreigon [Consume | Destructor Beam]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4199,
+      "metacardId": 342668,
+      "dateAdded": "2021-06-11 16:47:25",
+      "prices": {
+        "avg": null,
+        "low": 0.35,
+        "trend": 2.51,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 568985,
+      "name": "Ultra Ball",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4199,
+      "metacardId": 218103,
+      "dateAdded": "2021-06-11 16:47:46",
+      "prices": {
+        "avg": null,
+        "low": 0.5,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 568986,
+      "name": "Rare Candy",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4199,
+      "metacardId": 211527,
+      "dateAdded": "2021-06-11 16:48:03",
+      "prices": {
+        "avg": null,
+        "low": 0.4,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 568987,
+      "name": "Rescue Scarf",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4199,
+      "metacardId": 218227,
+      "dateAdded": "2021-06-11 16:48:20",
+      "prices": {
+        "avg": null,
+        "low": 0.3,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 568988,
+      "name": "Professor Juniper",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4199,
+      "metacardId": 218778,
+      "dateAdded": "2021-06-11 16:48:35",
+      "prices": {
+        "avg": null,
+        "low": 0.6,
+        "trend": 0.85,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 568989,
+      "name": "Cheren",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4199,
+      "metacardId": 218408,
+      "dateAdded": "2021-06-11 16:48:53",
+      "prices": {
+        "avg": null,
+        "low": 0.2,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 568990,
+      "name": "Blend Energy GFPD",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4199,
+      "metacardId": 300118,
+      "dateAdded": "2021-06-11 16:49:14",
+      "prices": {
+        "avg": null,
+        "low": 0.35,
+        "trend": 1,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 568991,
+      "name": "Grass Energy",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4199,
+      "metacardId": 224031,
+      "dateAdded": "2021-06-11 16:49:29",
+      "prices": {
+        "avg": null,
+        "low": 0.24,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 568992,
+      "name": "Psychic Energy",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4199,
+      "metacardId": 211657,
+      "dateAdded": "2021-06-11 16:49:41",
+      "prices": {
+        "avg": null,
+        "low": 0.15,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 568993,
+      "name": "Darkness Energy",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4199,
+      "metacardId": 212365,
+      "dateAdded": "2021-06-11 16:50:01",
+      "prices": {
+        "avg": 0.75,
+        "low": 0.34,
+        "trend": 0.75,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    }
+  ]
+}

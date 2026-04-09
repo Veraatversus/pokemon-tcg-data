@@ -1,0 +1,85 @@
+name: Manual Merge Dev to Release
+
+on:
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  actions: write
+  contents: write
+  issues: write
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: release
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge dev into release
+        id: merge
+        run: |
+          git fetch origin dev
+          echo "release_updated=false" >> $GITHUB_OUTPUT
+
+          # Keep release aligned with dev: prefer dev content on conflicts
+          if git merge -X theirs origin/dev --no-edit; then
+            echo "Successfully merged dev into release"
+            git push origin release
+            echo "release_updated=true" >> $GITHUB_OUTPUT
+          else
+            echo "Merge conflict detected. Creating an issue for manual resolution."
+            git merge --abort
+            exit 1
+          fi
+
+      - name: Trigger deploy-pages workflow
+        if: steps.merge.outputs.release_updated == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'deploy-pages.yml',
+                ref: 'release'
+              });
+              core.info('Triggered deploy-pages workflow on release');
+            } catch (error) {
+              core.warning(`Could not trigger deploy-pages.yml: ${error.message}`);
+            }
+
+      - name: Create issue on merge conflict
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🔀 Release Merge Conflict - Manual Resolution Required',
+              body: `The automated merge from dev to release branch encountered a conflict.
+
+              **Action Required:**
+              Please manually merge dev into release and resolve any conflicts.
+
+              **Steps:**
+              1. \`git checkout release\`
+              2. \`git merge dev\`
+              3. Resolve conflicts
+              4. \`git push origin release\`
+
+              The GitHub Pages deployment will automatically update once this is resolved.`,
+              labels: ['release-merge', 'manual-action-required']
+            });
+            console.log('Created issue:', issue.data.number);

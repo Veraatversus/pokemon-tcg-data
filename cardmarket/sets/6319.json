@@ -1,0 +1,3109 @@
+{
+  "expansionId": 6319,
+  "cards": [
+    {
+      "cardmarketProductId": 849415,
+      "name": "Karrablast [Take Down]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 276562,
+      "dateAdded": "2025-09-18 10:43:18",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849416,
+      "name": "Grubbin [Electrical Signal | Corkscrew Punch]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269636,
+      "dateAdded": "2025-09-18 10:43:35",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849417,
+      "name": "Blastoise & Piplup GX [Splash Maker | Bubble Launcher GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 280614,
+      "dateAdded": "2025-09-18 11:04:59",
+      "prices": {
+        "avg": 8.72,
+        "low": 10,
+        "trend": 10.25,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849418,
+      "name": "Slowpoke & Psyduck GX [Ditch and Splash | Thrilling Times GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 272646,
+      "dateAdded": "2025-09-18 11:05:15",
+      "prices": {
+        "avg": 9.25,
+        "low": 9.95,
+        "trend": 10.99,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849419,
+      "name": "Magikarp & Wailord GX [Super Splash | Towering Splash GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 266805,
+      "dateAdded": "2025-09-18 11:05:38",
+      "prices": {
+        "avg": 7.99,
+        "low": 5.98,
+        "trend": 7.29,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849420,
+      "name": "Squirtle [Bubble]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 214120,
+      "dateAdded": "2025-09-18 11:05:56",
+      "prices": {
+        "avg": null,
+        "low": 0.75,
+        "trend": 0.05,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849421,
+      "name": "Wartortle [Solid Shell | Aqua Slash]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269650,
+      "dateAdded": "2025-09-18 11:06:10",
+      "prices": {
+        "avg": 1,
+        "low": 0.8,
+        "trend": 1.11,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849422,
+      "name": "Blastoise [Powerful Squall | Hydro Tackle]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 267936,
+      "dateAdded": "2025-09-18 11:06:26",
+      "prices": {
+        "avg": 2.49,
+        "low": 2,
+        "trend": 2.49,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849423,
+      "name": "Blastoise GX [Solid Shell | Rocket Splash | Giant Geyser GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269584,
+      "dateAdded": "2025-09-18 11:06:42",
+      "prices": {
+        "avg": 2.04,
+        "low": 1.5,
+        "trend": 2.35,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849424,
+      "name": "Alolan Sandslash GX [Spiky Shield | Frost Breath | Spiky Storm GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 300288,
+      "dateAdded": "2025-09-18 11:06:56",
+      "prices": {
+        "avg": 0.88,
+        "low": 0.8,
+        "trend": 0.94,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849425,
+      "name": "Psyduck [Headache]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 267937,
+      "dateAdded": "2025-09-18 11:07:11",
+      "prices": {
+        "avg": 0.99,
+        "low": 1,
+        "trend": 1.08,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849426,
+      "name": "Golduck [Amnesia | Swim]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 267938,
+      "dateAdded": "2025-09-18 11:07:23",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849427,
+      "name": "Poliwag [Call for Family]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269652,
+      "dateAdded": "2025-09-18 11:07:35",
+      "prices": {
+        "avg": 0.05,
+        "low": 0.49,
+        "trend": 0.05,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849428,
+      "name": "Poliwhirl [Bubble | Knuckle Punch]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269653,
+      "dateAdded": "2025-09-18 11:07:47",
+      "prices": {
+        "avg": 0.05,
+        "low": 0.05,
+        "trend": 0.05,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849429,
+      "name": "Poliwrath [Knuckle Punch | Swirly Rush]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269654,
+      "dateAdded": "2025-09-18 11:08:02",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849430,
+      "name": "Tentacool [Bubble Jutsu]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269655,
+      "dateAdded": "2025-09-18 11:08:13",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849431,
+      "name": "Tentacruel [Wicked Tentacles | Wrap]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269656,
+      "dateAdded": "2025-09-18 11:08:43",
+      "prices": {
+        "avg": 1,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849432,
+      "name": "Slowpoke [Growl | Tail Whap]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269657,
+      "dateAdded": "2025-09-18 11:08:58",
+      "prices": {
+        "avg": 0.37,
+        "low": 0.6,
+        "trend": 0.05,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849433,
+      "name": "Slowbro [Yawn | Three Strikes]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269658,
+      "dateAdded": "2025-09-18 11:09:11",
+      "prices": {
+        "avg": 1,
+        "low": 1.49,
+        "trend": 1,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849434,
+      "name": "Seel [Horn Attack]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269659,
+      "dateAdded": "2025-09-18 11:09:28",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849435,
+      "name": "Dewgong [Tail Whap | Dual Blizzard]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269660,
+      "dateAdded": "2025-09-18 11:09:40",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849436,
+      "name": "Goldeen [Elegant Swim]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269663,
+      "dateAdded": "2025-09-18 11:10:03",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849437,
+      "name": "Seaking [Enhanced Horn]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269664,
+      "dateAdded": "2025-09-18 11:10:16",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849438,
+      "name": "Magikarp [Enter the Dragon]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 267940,
+      "dateAdded": "2025-09-18 11:10:33",
+      "prices": {
+        "avg": null,
+        "low": 1,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849439,
+      "name": "Gyarados [Distilled Blast | Hyper Beam]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 267941,
+      "dateAdded": "2025-09-18 11:10:58",
+      "prices": {
+        "avg": 1.5,
+        "low": 0.05,
+        "trend": 1.5,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849440,
+      "name": "Lapras [Mermaid's Call | Surf]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 276672,
+      "dateAdded": "2025-09-18 11:11:16",
+      "prices": {
+        "avg": 0.53,
+        "low": 0.75,
+        "trend": 0.05,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849441,
+      "name": "Articuno [Blizzard Veil | Cold Cyclone]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 267943,
+      "dateAdded": "2025-09-18 11:11:31",
+      "prices": {
+        "avg": null,
+        "low": 0.9,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849442,
+      "name": "Wailmer [Wave Splash]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284244,
+      "dateAdded": "2025-09-18 11:11:48",
+      "prices": {
+        "avg": 0.99,
+        "low": 0.05,
+        "trend": 0.99,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849443,
+      "name": "Wailord [Heavy Impact | Hydro Splash]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284249,
+      "dateAdded": "2025-09-18 11:12:10",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849444,
+      "name": "Snorunt [Continuous Headbutt]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284254,
+      "dateAdded": "2025-09-18 11:12:59",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849445,
+      "name": "Glalie [Ice Fang | Frost Typhoon]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284259,
+      "dateAdded": "2025-09-18 11:13:16",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849446,
+      "name": "Froslass [Spiteful Sigh | Icy Wind]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 276682,
+      "dateAdded": "2025-09-18 11:13:29",
+      "prices": {
+        "avg": null,
+        "low": 0.75,
+        "trend": 2.44,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849447,
+      "name": "Spheal [Body Slam]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284269,
+      "dateAdded": "2025-09-18 11:13:48",
+      "prices": {
+        "avg": 0.99,
+        "low": 0.6,
+        "trend": 0.99,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849448,
+      "name": "Sealeo [Rollout | Ice Ball]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284274,
+      "dateAdded": "2025-09-18 11:13:59",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849449,
+      "name": "Walrein [Cold Snap | Blizzard]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284279,
+      "dateAdded": "2025-09-18 11:14:15",
+      "prices": {
+        "avg": null,
+        "low": 0.2,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849450,
+      "name": "Kyogre [High Water | Swirling Waves]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284284,
+      "dateAdded": "2025-09-18 11:14:28",
+      "prices": {
+        "avg": null,
+        "low": 0.99,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849451,
+      "name": "Piplup [Bubble Hold]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 280659,
+      "dateAdded": "2025-09-18 11:14:45",
+      "prices": {
+        "avg": 0.05,
+        "low": 0.75,
+        "trend": 0.05,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849452,
+      "name": "Prinplup [Water Drip | Direct Dive]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284289,
+      "dateAdded": "2025-09-18 11:14:58",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849453,
+      "name": "Empoleon [Recall | Aquafall]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284294,
+      "dateAdded": "2025-09-18 11:15:14",
+      "prices": {
+        "avg": 0.05,
+        "low": 0.25,
+        "trend": 0.05,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849454,
+      "name": "Phione [Whirlpool Suction | Rain Splash]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284299,
+      "dateAdded": "2025-09-18 11:15:37",
+      "prices": {
+        "avg": 0.05,
+        "low": 0.99,
+        "trend": 0.05,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849455,
+      "name": "Basculin [Swarming Bites | Tackle]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 276707,
+      "dateAdded": "2025-09-18 11:15:58",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849456,
+      "name": "Cryogonal [Frozen Lock]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 276722,
+      "dateAdded": "2025-09-18 11:16:09",
+      "prices": {
+        "avg": null,
+        "low": 0.8,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849457,
+      "name": "Kyurem [Call Forth Cold | Hail Prison]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269665,
+      "dateAdded": "2025-09-18 11:16:35",
+      "prices": {
+        "avg": null,
+        "low": 1.49,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849458,
+      "name": "Black Kyurem [Frozen Wings | Dazzling Blizzard]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284319,
+      "dateAdded": "2025-09-18 11:16:51",
+      "prices": {
+        "avg": null,
+        "low": 0.75,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849459,
+      "name": "Keldeo GX [Pure Heart | Sonic Edge | Resolute Blade GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 276727,
+      "dateAdded": "2025-09-18 11:17:05",
+      "prices": {
+        "avg": 0.82,
+        "low": 0.8,
+        "trend": 0.9,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849460,
+      "name": "Wishiwashi [Scatter | Hydro Splash]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 280664,
+      "dateAdded": "2025-09-18 11:17:22",
+      "prices": {
+        "avg": null,
+        "low": 0.1,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849461,
+      "name": "Wishiwashi GX [School Storm | Massive Catch GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284324,
+      "dateAdded": "2025-09-18 11:17:36",
+      "prices": {
+        "avg": 0.87,
+        "low": 0.99,
+        "trend": 0.83,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849462,
+      "name": "Dewpider [Rain Splash | Bite]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 276732,
+      "dateAdded": "2025-09-18 11:17:52",
+      "prices": {
+        "avg": 0.05,
+        "low": 1,
+        "trend": 0.05,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849463,
+      "name": "Araquanid [Tangle Drag | Sticky Web]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 276737,
+      "dateAdded": "2025-09-18 11:18:06",
+      "prices": {
+        "avg": 0.05,
+        "low": 1,
+        "trend": 0.05,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849464,
+      "name": "Wimpod [Sand Attack]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 276742,
+      "dateAdded": "2025-09-18 11:18:21",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849465,
+      "name": "Golisopod [Emergency Exit | First Impression]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 276747,
+      "dateAdded": "2025-09-18 11:18:35",
+      "prices": {
+        "avg": null,
+        "low": 0.35,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849466,
+      "name": "Pyukumuku [Call for Family | Surprise Fist]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269668,
+      "dateAdded": "2025-09-18 11:18:56",
+      "prices": {
+        "avg": null,
+        "low": 0.99,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849467,
+      "name": "Tapu Fini [Razor Fin | Nature Wave]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 272664,
+      "dateAdded": "2025-09-18 11:19:12",
+      "prices": {
+        "avg": null,
+        "low": 0.99,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849496,
+      "name": "Pikachu & Zekrom GX [Full Blitz | Tag Bolt GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 266783,
+      "dateAdded": "2025-09-18 11:53:10",
+      "prices": {
+        "avg": 9.45,
+        "low": 8.99,
+        "trend": 10.29,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849497,
+      "name": "Raichu & Alolan Raichu GX [Tandem Shock | Lightning Ride GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 272658,
+      "dateAdded": "2025-09-18 11:53:20",
+      "prices": {
+        "avg": 6.11,
+        "low": 5,
+        "trend": 6.54,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849498,
+      "name": "Pikachu [Nuzzle | Volt Tackle]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 280689,
+      "dateAdded": "2025-09-18 11:53:35",
+      "prices": {
+        "avg": 2.44,
+        "low": 0.49,
+        "trend": 3.34,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849499,
+      "name": "Raichu [Nuzzle | Powerful Spark]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284339,
+      "dateAdded": "2025-09-18 11:53:47",
+      "prices": {
+        "avg": 0.05,
+        "low": 1,
+        "trend": 0.05,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849500,
+      "name": "Alolan Geodude [Charge | Smash Bomb]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 267945,
+      "dateAdded": "2025-09-18 11:53:59",
+      "prices": {
+        "avg": null,
+        "low": 2,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849501,
+      "name": "Alolan Graveler [Rollout | Electroslug]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 267946,
+      "dateAdded": "2025-09-18 11:54:14",
+      "prices": {
+        "avg": 0.05,
+        "low": 0.95,
+        "trend": 0.05,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849502,
+      "name": "Alolan Golem [Electromagnetic Bomb | Super Zap Cannon]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 267947,
+      "dateAdded": "2025-09-18 11:54:27",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849503,
+      "name": "Magnemite [Mirror Shot]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 280694,
+      "dateAdded": "2025-09-18 11:54:51",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849504,
+      "name": "Magneton [Call Signal | Magnetic Blast]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284344,
+      "dateAdded": "2025-09-18 11:55:03",
+      "prices": {
+        "avg": 0.1,
+        "low": 0.75,
+        "trend": 0.1,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849505,
+      "name": "Magnezone [Double Type | Magnetic Bolt]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 276782,
+      "dateAdded": "2025-09-18 11:55:14",
+      "prices": {
+        "avg": 0.1,
+        "low": 0.99,
+        "trend": 0.1,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849506,
+      "name": "Voltorb [Tackle]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 267948,
+      "dateAdded": "2025-09-18 11:55:30",
+      "prices": {
+        "avg": 1,
+        "low": 0.7,
+        "trend": 1,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849507,
+      "name": "Electrode [Electro Shaker | Speed Ball]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 267949,
+      "dateAdded": "2025-09-18 11:55:44",
+      "prices": {
+        "avg": 0.75,
+        "low": 1.8,
+        "trend": 0.97,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849508,
+      "name": "Chinchou [Scout | Razor Fin]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284354,
+      "dateAdded": "2025-09-18 11:56:12",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849509,
+      "name": "Lanturn [Blinking Lights | Swirling Flow]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284359,
+      "dateAdded": "2025-09-18 11:56:27",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849510,
+      "name": "Joltik [Jolt]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 276787,
+      "dateAdded": "2025-09-18 11:56:45",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849511,
+      "name": "Galvantula [Live Wire]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 276792,
+      "dateAdded": "2025-09-18 11:56:56",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849512,
+      "name": "Tynamo [Generate Electricity]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 276802,
+      "dateAdded": "2025-09-18 11:57:15",
+      "prices": {
+        "avg": 0.05,
+        "low": 0.99,
+        "trend": 0.05,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849513,
+      "name": "Eelektrik [Overspark]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 276807,
+      "dateAdded": "2025-09-18 11:57:35",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849514,
+      "name": "Eelektross [Electric Swamp | Hover Over]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 276812,
+      "dateAdded": "2025-09-18 11:57:48",
+      "prices": {
+        "avg": null,
+        "low": 1.5,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849515,
+      "name": "Stunfisk [Raging Thunder | Electric Trap]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269671,
+      "dateAdded": "2025-09-18 11:58:01",
+      "prices": {
+        "avg": 0.1,
+        "low": 0.05,
+        "trend": 0.1,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849516,
+      "name": "Thundurus [Thunderous Gale | Raging Thunder]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 276822,
+      "dateAdded": "2025-09-18 11:58:16",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849517,
+      "name": "Dedenne GX [Dedechange | Static Shock | Tingly Return GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269548,
+      "dateAdded": "2025-09-18 11:58:28",
+      "prices": {
+        "avg": 3.32,
+        "low": 1.49,
+        "trend": 3.39,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849518,
+      "name": "Charjabug [Battery | Pierce]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269672,
+      "dateAdded": "2025-09-18 11:58:42",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849519,
+      "name": "Vikavolt [Stealthy Body | Electricannon]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269673,
+      "dateAdded": "2025-09-18 11:58:53",
+      "prices": {
+        "avg": null,
+        "low": 0.49,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849520,
+      "name": "Togedemaru [Call for Family | Random Spark]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284364,
+      "dateAdded": "2025-09-18 11:59:10",
+      "prices": {
+        "avg": 0.05,
+        "low": 0.05,
+        "trend": 0.05,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849521,
+      "name": "Tapu Koko [Electro Ball | Nature Dive]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 276827,
+      "dateAdded": "2025-09-18 11:59:29",
+      "prices": {
+        "avg": null,
+        "low": 2,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849522,
+      "name": "Xurkitree [Three Mirrors | Signal Beam]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 276832,
+      "dateAdded": "2025-09-18 11:59:41",
+      "prices": {
+        "avg": 0.99,
+        "low": 0.99,
+        "trend": 0.79,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849523,
+      "name": "Zeraora [Crushing Claw | Discharge]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269585,
+      "dateAdded": "2025-09-18 11:59:55",
+      "prices": {
+        "avg": 0.74,
+        "low": 0.1,
+        "trend": 0.74,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849524,
+      "name": "Cosmog [Unaware | Surprise Attack]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284484,
+      "dateAdded": "2025-09-18 12:01:11",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849525,
+      "name": "Cosmoem [Stiffen]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284489,
+      "dateAdded": "2025-09-18 12:01:23",
+      "prices": {
+        "avg": 0.05,
+        "low": 0.1,
+        "trend": 0.05,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849526,
+      "name": "Lunala [Blessing of the Moone | Lunar Blast]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284494,
+      "dateAdded": "2025-09-18 12:01:37",
+      "prices": {
+        "avg": 0.1,
+        "low": 0.1,
+        "trend": 0.1,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849527,
+      "name": "Onix [Dig Deep | Tail Smash]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284509,
+      "dateAdded": "2025-09-18 12:03:23",
+      "prices": {
+        "avg": null,
+        "low": 0.2,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849528,
+      "name": "Wooper [Mud Bomb]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269710,
+      "dateAdded": "2025-09-18 12:03:36",
+      "prices": {
+        "avg": null,
+        "low": 1,
+        "trend": 0.05,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849529,
+      "name": "Quagsire [Water Gun | Surf]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269711,
+      "dateAdded": "2025-09-18 12:03:47",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0.99,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849530,
+      "name": "Nosepass [Draw Toward | Zap Cannon]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284514,
+      "dateAdded": "2025-09-18 12:04:01",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849531,
+      "name": "Riolu [Feint]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 218489,
+      "dateAdded": "2025-09-18 12:04:12",
+      "prices": {
+        "avg": null,
+        "low": 1,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849532,
+      "name": "Lucario & Melmetal GX [Steel Fist | Heavy Impact | Full Metal Wall GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 268809,
+      "dateAdded": "2025-09-18 12:09:40",
+      "prices": {
+        "avg": 5.14,
+        "low": 4.8,
+        "trend": 5.1,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849533,
+      "name": "Alolan Sandshrew [Run Around | Metal Claw]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284664,
+      "dateAdded": "2025-09-18 12:09:55",
+      "prices": {
+        "avg": null,
+        "low": 0.6,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849534,
+      "name": "Alolan Sandslash [Curve Strike | Reinforced Needle]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284669,
+      "dateAdded": "2025-09-18 12:10:09",
+      "prices": {
+        "avg": 0.05,
+        "low": 0.75,
+        "trend": 0.05,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849535,
+      "name": "Alolan Diglett [Ram]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269731,
+      "dateAdded": "2025-09-18 12:10:24",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849536,
+      "name": "Alolan Dugtrio [Hair Wall | Hammer In]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269732,
+      "dateAdded": "2025-09-18 12:10:35",
+      "prices": {
+        "avg": 0.75,
+        "low": 0.05,
+        "trend": 0.75,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849537,
+      "name": "Steelix [Thumping Fall | Iron Tail]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 280714,
+      "dateAdded": "2025-09-18 12:10:56",
+      "prices": {
+        "avg": 0.99,
+        "low": 0.75,
+        "trend": 0.99,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849538,
+      "name": "Mawile [Dual Calling | Dark Clamp]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284674,
+      "dateAdded": "2025-09-18 12:11:09",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849539,
+      "name": "Aron [Rigidify | Metal Claw]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269733,
+      "dateAdded": "2025-09-18 12:11:30",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849540,
+      "name": "Lairon [Rigidify | Headbutt]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269734,
+      "dateAdded": "2025-09-18 12:11:42",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849541,
+      "name": "Aggron [Extra-Tight Press | Giga Impact]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269735,
+      "dateAdded": "2025-09-18 12:11:57",
+      "prices": {
+        "avg": 1,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849542,
+      "name": "Lucario [Low Sweep | Rush Up]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269736,
+      "dateAdded": "2025-09-18 12:12:13",
+      "prices": {
+        "avg": null,
+        "low": 0.9,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849543,
+      "name": "Probopass [Hard Press | Triple Nose]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284679,
+      "dateAdded": "2025-09-18 12:12:35",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849544,
+      "name": "Escavalier [Discerning Spear | Iron Lance]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 277147,
+      "dateAdded": "2025-09-18 12:12:47",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849545,
+      "name": "Genesect [Fast-Flight Configuration | Splitting Beam]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269737,
+      "dateAdded": "2025-09-18 12:12:58",
+      "prices": {
+        "avg": null,
+        "low": 0.4,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849546,
+      "name": "Solgaleo [Armor of the Sunne | Sol Fangs]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284684,
+      "dateAdded": "2025-09-18 12:13:12",
+      "prices": {
+        "avg": null,
+        "low": 2,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849547,
+      "name": "Meltan [Steel Melt]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269738,
+      "dateAdded": "2025-09-18 12:13:22",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849548,
+      "name": "Melmetal [Metal Eater | Heavy Impact]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269246,
+      "dateAdded": "2025-09-18 12:13:37",
+      "prices": {
+        "avg": null,
+        "low": 0.25,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849549,
+      "name": "Melmetal GX [Hard Coat | Metal Blast | Iron Force GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 268490,
+      "dateAdded": "2025-09-18 12:13:54",
+      "prices": {
+        "avg": 0.68,
+        "low": 0.4,
+        "trend": 0.6,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849564,
+      "name": "Latias & Latios GX [Buster Purge | Aero Unit GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 266974,
+      "dateAdded": "2025-09-18 12:41:19",
+      "prices": {
+        "avg": 6.83,
+        "low": 6,
+        "trend": 6.69,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849565,
+      "name": "Dratini [Defensive Scales | Rain Splash]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 268018,
+      "dateAdded": "2025-09-18 12:41:40",
+      "prices": {
+        "avg": 0.05,
+        "low": 0.49,
+        "trend": 0.05,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849566,
+      "name": "Dragonair [Twister]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 268019,
+      "dateAdded": "2025-09-18 12:41:51",
+      "prices": {
+        "avg": 0.05,
+        "low": 0.1,
+        "trend": 0.05,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849567,
+      "name": "Dragonite [Hurricane Charge | Dragon Impact]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 277187,
+      "dateAdded": "2025-09-18 12:42:07",
+      "prices": {
+        "avg": 0.49,
+        "low": 0.5,
+        "trend": 1.75,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849568,
+      "name": "Dragonite GX [Dragon Claw | Sky Judgment | Mach Delivery GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 277182,
+      "dateAdded": "2025-09-18 12:42:25",
+      "prices": {
+        "avg": 1.17,
+        "low": 1.49,
+        "trend": 1.1,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849570,
+      "name": "Jangmo-o [Raging Claws]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284754,
+      "dateAdded": "2025-09-18 12:42:56",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849571,
+      "name": "Hakamo-o [Fighter's Roar | Dragonslice]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284764,
+      "dateAdded": "2025-09-18 12:43:15",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849572,
+      "name": "Kommo-o [Shout of Power | Scaly Uppercut]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284769,
+      "dateAdded": "2025-09-18 12:43:29",
+      "prices": {
+        "avg": 0.9,
+        "low": 0.99,
+        "trend": 0.9,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849574,
+      "name": "Pidgey [Quick Attack]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 268022,
+      "dateAdded": "2025-09-18 12:47:16",
+      "prices": {
+        "avg": null,
+        "low": 0.8,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849575,
+      "name": "Pidgeotto [Air Mail | Gust]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 268023,
+      "dateAdded": "2025-09-18 12:47:51",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849576,
+      "name": "Pidgeot [Whirlwind | Spin Storm]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 268024,
+      "dateAdded": "2025-09-18 12:48:03",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849581,
+      "name": "Farfetch'd [Collect | Tool Buster]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 268027,
+      "dateAdded": "2025-09-18 12:49:22",
+      "prices": {
+        "avg": 1,
+        "low": 0.05,
+        "trend": 1,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849582,
+      "name": "Aipom [Scampering Tail | Tail Smack]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284794,
+      "dateAdded": "2025-09-18 12:49:38",
+      "prices": {
+        "avg": 0.05,
+        "low": 0.1,
+        "trend": 0.05,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849583,
+      "name": "Ambipom [Nice-Nice Catch | Bye-Bye Throw]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284799,
+      "dateAdded": "2025-09-18 12:49:51",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849585,
+      "name": "Bidoof [Tackle | Hyper Fang]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 277277,
+      "dateAdded": "2025-09-18 12:50:05",
+      "prices": {
+        "avg": 1,
+        "low": 0.99,
+        "trend": 1.1,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849587,
+      "name": "Eevee GX [Ascension DNA | Boost Dash | Joy Maker GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 268190,
+      "dateAdded": "2025-09-18 12:54:42",
+      "prices": {
+        "avg": 4.32,
+        "low": 3.99,
+        "trend": 4.62,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849588,
+      "name": "Bibarel [Unaware | Amnesia]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 277282,
+      "dateAdded": "2025-09-18 12:55:20",
+      "prices": {
+        "avg": null,
+        "low": 0.5,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849589,
+      "name": "Tornadus [Knuckle Punch | Thunderous Tornado]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 277312,
+      "dateAdded": "2025-09-18 12:55:35",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849590,
+      "name": "Yungoos [Cavernous Chomp]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 277322,
+      "dateAdded": "2025-09-18 12:55:49",
+      "prices": {
+        "avg": 0.05,
+        "low": 0.02,
+        "trend": 0.05,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849591,
+      "name": "Gumshoos [Alert Headbutt]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 277327,
+      "dateAdded": "2025-09-18 12:56:04",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849596,
+      "name": "Oranguru [Sage's Riddle | Gentle Slap]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 277332,
+      "dateAdded": "2025-09-18 12:57:40",
+      "prices": {
+        "avg": null,
+        "low": 0.5,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849598,
+      "name": "Komala [Drowsing | Snooze]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 277347,
+      "dateAdded": "2025-09-18 12:58:02",
+      "prices": {
+        "avg": 1,
+        "low": 0.05,
+        "trend": 1,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849599,
+      "name": "Celesteela GX [Force Canceler | Power Cyclone | Discovery GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269353,
+      "dateAdded": "2025-09-18 12:58:22",
+      "prices": {
+        "avg": 0.83,
+        "low": 0.99,
+        "trend": 1.06,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849600,
+      "name": "Great Potion",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 277412,
+      "dateAdded": "2025-09-18 13:00:05",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849601,
+      "name": "Tag Switch",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 277467,
+      "dateAdded": "2025-09-18 13:00:22",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849602,
+      "name": "Pokégear 3.0",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 216928,
+      "dateAdded": "2025-09-18 13:00:33",
+      "prices": {
+        "avg": 0.02,
+        "low": 0.05,
+        "trend": 0.02,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849603,
+      "name": "Pokémon Communication",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 216930,
+      "dateAdded": "2025-09-18 13:00:51",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849604,
+      "name": "Dragonium Z: Dragon Claw",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284884,
+      "dateAdded": "2025-09-18 13:01:02",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849605,
+      "name": "Beastite",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284869,
+      "dateAdded": "2025-09-18 13:01:12",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849606,
+      "name": "Buff Padding",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 268036,
+      "dateAdded": "2025-09-18 13:01:24",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849607,
+      "name": "Metal Core Barrier",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269784,
+      "dateAdded": "2025-09-18 13:01:34",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849608,
+      "name": "U-Turn Board",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 277472,
+      "dateAdded": "2025-09-18 13:01:46",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849609,
+      "name": "Will",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284944,
+      "dateAdded": "2025-09-18 13:02:02",
+      "prices": {
+        "avg": null,
+        "low": 0.6,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849610,
+      "name": "Ultra Forest Kartenvoy",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269790,
+      "dateAdded": "2025-09-18 13:02:12",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849611,
+      "name": "Misty's Favor",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 277432,
+      "dateAdded": "2025-09-18 13:02:22",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849612,
+      "name": "Grimsley",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 277417,
+      "dateAdded": "2025-09-18 13:02:33",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849613,
+      "name": "Coach Trainer",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 277392,
+      "dateAdded": "2025-09-18 13:02:45",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849614,
+      "name": "Green's Exploration",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269780,
+      "dateAdded": "2025-09-18 13:02:56",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849615,
+      "name": "Molayne",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269785,
+      "dateAdded": "2025-09-18 13:03:12",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849616,
+      "name": "Mallow & Lana",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 280729,
+      "dateAdded": "2025-09-18 13:03:23",
+      "prices": {
+        "avg": 0.99,
+        "low": 0.05,
+        "trend": 0.99,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849617,
+      "name": "Lt. Surge's Strategy",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269783,
+      "dateAdded": "2025-09-18 13:03:34",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849618,
+      "name": "Viridian Forest",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 268053,
+      "dateAdded": "2025-09-18 13:03:46",
+      "prices": {
+        "avg": null,
+        "low": 0.5,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849619,
+      "name": "Recycle Energy",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 212366,
+      "dateAdded": "2025-09-18 13:04:00",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849643,
+      "name": "Piplup [Bubble Hold]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 280659,
+      "dateAdded": "2025-09-18 13:37:17",
+      "prices": {
+        "avg": 15.83,
+        "low": 12,
+        "trend": 16.18,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849644,
+      "name": "Wishiwashi [Scatter | Hydro Splash]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 280664,
+      "dateAdded": "2025-09-18 13:37:28",
+      "prices": {
+        "avg": 4.11,
+        "low": 3.9,
+        "trend": 4.09,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849645,
+      "name": "Pikachu [Nuzzle | Volt Tackle]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 280689,
+      "dateAdded": "2025-09-18 13:37:41",
+      "prices": {
+        "avg": 32.48,
+        "low": 38.95,
+        "trend": 37.3,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849647,
+      "name": "Magnemite [Mirror Shot]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 280694,
+      "dateAdded": "2025-09-18 13:37:59",
+      "prices": {
+        "avg": 4.83,
+        "low": 4.49,
+        "trend": 4.9,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849649,
+      "name": "Steelix [Thumping Fall | Iron Tail]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 280714,
+      "dateAdded": "2025-09-18 13:38:12",
+      "prices": {
+        "avg": 5.08,
+        "low": 4.9,
+        "trend": 5.74,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849658,
+      "name": "Blastoise & Piplup GX [Splash Maker | Bubble Launcher GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 280614,
+      "dateAdded": "2025-09-18 13:40:42",
+      "prices": {
+        "avg": 18.5,
+        "low": 15,
+        "trend": 18.17,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849659,
+      "name": "Blastoise & Piplup GX [Splash Maker | Bubble Launcher GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 280614,
+      "dateAdded": "2025-09-18 13:41:05",
+      "prices": {
+        "avg": 54.33,
+        "low": 67.99,
+        "trend": 55.81,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849662,
+      "name": "Slowpoke & Psyduck GX [Ditch and Splash | Thrilling Times GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 272646,
+      "dateAdded": "2025-09-18 13:41:43",
+      "prices": {
+        "avg": 22,
+        "low": 24,
+        "trend": 20.73,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849665,
+      "name": "Slowpoke & Psyduck GX [Ditch and Splash | Thrilling Times GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 272646,
+      "dateAdded": "2025-09-18 13:41:56",
+      "prices": {
+        "avg": 67,
+        "low": 94.99,
+        "trend": 68.94,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849666,
+      "name": "Magikarp & Wailord GX [Super Splash | Towering Splash GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 266805,
+      "dateAdded": "2025-09-18 13:42:13",
+      "prices": {
+        "avg": 20.5,
+        "low": 25,
+        "trend": 18.76,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849669,
+      "name": "Magikarp & Wailord GX [Super Splash | Towering Splash GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 266805,
+      "dateAdded": "2025-09-18 13:42:30",
+      "prices": {
+        "avg": 110,
+        "low": 139.95,
+        "trend": 98.41,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849673,
+      "name": "Blastoise GX [Solid Shell | Rocket Splash | Giant Geyser GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269584,
+      "dateAdded": "2025-09-18 13:43:03",
+      "prices": {
+        "avg": 6.32,
+        "low": 9.99,
+        "trend": 7.13,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849675,
+      "name": "Keldeo GX [Pure Heart | Sonic Edge | Resolute Blade GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 276727,
+      "dateAdded": "2025-09-18 13:43:15",
+      "prices": {
+        "avg": 2.99,
+        "low": 2.99,
+        "trend": 3.16,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849676,
+      "name": "Wishiwashi GX [School Storm | Massive Catch GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284324,
+      "dateAdded": "2025-09-18 13:43:26",
+      "prices": {
+        "avg": 4.99,
+        "low": 4.99,
+        "trend": 4.99,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849677,
+      "name": "Pikachu & Zekrom GX [Full Blitz | Tag Bolt GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 266783,
+      "dateAdded": "2025-09-18 13:44:10",
+      "prices": {
+        "avg": 18.5,
+        "low": 20,
+        "trend": 22.92,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849679,
+      "name": "Pikachu & Zekrom GX [Full Blitz | Tag Bolt GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 266783,
+      "dateAdded": "2025-09-18 13:44:22",
+      "prices": {
+        "avg": 130,
+        "low": 145,
+        "trend": 103.52,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849680,
+      "name": "Raichu & Alolan Raichu GX [Tandem Shock | Lightning Ride GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 272658,
+      "dateAdded": "2025-09-18 13:44:44",
+      "prices": {
+        "avg": 13.99,
+        "low": 11.5,
+        "trend": 14.12,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849682,
+      "name": "Raichu & Alolan Raichu GX [Tandem Shock | Lightning Ride GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 272658,
+      "dateAdded": "2025-09-18 13:45:01",
+      "prices": {
+        "avg": 70,
+        "low": 79.95,
+        "trend": 63.44,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849683,
+      "name": "Dedenne GX [Dedechange | Static Shock | Tingly Return GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269548,
+      "dateAdded": "2025-09-18 13:45:15",
+      "prices": {
+        "avg": 12,
+        "low": 12.49,
+        "trend": 12.33,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849685,
+      "name": "Dedenne GX [Dedechange | Static Shock | Tingly Return GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269548,
+      "dateAdded": "2025-09-18 13:45:26",
+      "prices": {
+        "avg": 28.5,
+        "low": 29.99,
+        "trend": 29.99,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849686,
+      "name": "Lucario & Melmetal GX [Steel Fist | Heavy Impact | Full Metal Wall GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 268809,
+      "dateAdded": "2025-09-18 13:45:45",
+      "prices": {
+        "avg": 8,
+        "low": 9.49,
+        "trend": 7.42,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849689,
+      "name": "Lucario & Melmetal GX [Steel Fist | Heavy Impact | Full Metal Wall GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 268809,
+      "dateAdded": "2025-09-18 13:46:00",
+      "prices": {
+        "avg": 24.13,
+        "low": 23,
+        "trend": 23.93,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849690,
+      "name": "Melmetal GX [Hard Coat | Metal Blast | Iron Force GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 268490,
+      "dateAdded": "2025-09-18 13:46:17",
+      "prices": {
+        "avg": 2.84,
+        "low": 2.85,
+        "trend": 2.84,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849692,
+      "name": "Latias & Latios GX [Buster Purge | Aero Unit GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 266974,
+      "dateAdded": "2025-09-18 13:46:35",
+      "prices": {
+        "avg": 14.25,
+        "low": 16.9,
+        "trend": 14.26,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849694,
+      "name": "Latias & Latios GX [Buster Purge | Aero Unit GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 266974,
+      "dateAdded": "2025-09-18 13:46:46",
+      "prices": {
+        "avg": 486.66,
+        "low": 400,
+        "trend": 456.54,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849697,
+      "name": "Dragonite GX [Dragon Claw | Sky Judgment | Mach Delivery GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 277182,
+      "dateAdded": "2025-09-18 13:47:06",
+      "prices": {
+        "avg": 5.59,
+        "low": 5.49,
+        "trend": 5.56,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849698,
+      "name": "Eevee GX [Ascension DNA | Boost Dash | Joy Maker GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 268190,
+      "dateAdded": "2025-09-18 13:47:17",
+      "prices": {
+        "avg": 16.3,
+        "low": 12.48,
+        "trend": 16.15,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849700,
+      "name": "Celesteela GX [Force Canceler | Power Cyclone | Discovery GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269353,
+      "dateAdded": "2025-09-18 13:47:28",
+      "prices": {
+        "avg": 3.49,
+        "low": 3,
+        "trend": 3.96,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849702,
+      "name": "Will",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 284944,
+      "dateAdded": "2025-09-18 13:48:17",
+      "prices": {
+        "avg": 5.99,
+        "low": null,
+        "trend": 5.99,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849703,
+      "name": "Misty's Favor",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 277432,
+      "dateAdded": "2025-09-18 13:48:38",
+      "prices": {
+        "avg": 105,
+        "low": 72.95,
+        "trend": 105,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849704,
+      "name": "Grimsley",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 277417,
+      "dateAdded": "2025-09-18 13:48:49",
+      "prices": {
+        "avg": 4.99,
+        "low": 14.99,
+        "trend": 4.99,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849705,
+      "name": "Coach Trainer",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 277392,
+      "dateAdded": "2025-09-18 13:49:07",
+      "prices": {
+        "avg": null,
+        "low": null,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849706,
+      "name": "Green's Exploration",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269780,
+      "dateAdded": "2025-09-18 13:49:17",
+      "prices": {
+        "avg": null,
+        "low": 65,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849707,
+      "name": "Molayne",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269785,
+      "dateAdded": "2025-09-18 13:49:27",
+      "prices": {
+        "avg": null,
+        "low": 4.9,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849708,
+      "name": "Mallow & Lana",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 280729,
+      "dateAdded": "2025-09-18 13:49:39",
+      "prices": {
+        "avg": 34.99,
+        "low": 39.98,
+        "trend": 41.34,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849709,
+      "name": "Pikachu & Zekrom GX [Full Blitz | Tag Bolt GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 266783,
+      "dateAdded": "2025-09-18 13:50:18",
+      "prices": {
+        "avg": 33.65,
+        "low": 32,
+        "trend": 33.65,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849710,
+      "name": "Lucario & Melmetal GX [Steel Fist | Heavy Impact | Full Metal Wall GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 268809,
+      "dateAdded": "2025-09-18 13:50:39",
+      "prices": {
+        "avg": 23.9,
+        "low": 25,
+        "trend": 23.58,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849711,
+      "name": "Tag Switch",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 277467,
+      "dateAdded": "2025-09-18 13:52:08",
+      "prices": {
+        "avg": null,
+        "low": null,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849712,
+      "name": "Pokégear 3.0",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 216928,
+      "dateAdded": "2025-09-18 13:52:19",
+      "prices": {
+        "avg": null,
+        "low": 65,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849713,
+      "name": "Pokémon Communication",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 216930,
+      "dateAdded": "2025-09-18 13:52:34",
+      "prices": {
+        "avg": null,
+        "low": 40,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849714,
+      "name": "Metal Core Barrier",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 269784,
+      "dateAdded": "2025-09-18 13:52:46",
+      "prices": {
+        "avg": null,
+        "low": 3.99,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849715,
+      "name": "U-Turn Board",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 277472,
+      "dateAdded": "2025-09-18 13:53:02",
+      "prices": {
+        "avg": null,
+        "low": null,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849716,
+      "name": "Viridian Forest",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 268053,
+      "dateAdded": "2025-09-18 13:53:14",
+      "prices": {
+        "avg": null,
+        "low": 25,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 849717,
+      "name": "Recycle Energy",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6319,
+      "metacardId": 212366,
+      "dateAdded": "2025-09-18 13:53:29",
+      "prices": {
+        "avg": 2,
+        "low": 6,
+        "trend": 2,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    }
+  ]
+}

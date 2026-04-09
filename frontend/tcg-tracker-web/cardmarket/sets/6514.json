@@ -1,0 +1,149 @@
+{
+  "expansionId": 6514,
+  "cards": [
+    {
+      "cardmarketProductId": 876872,
+      "name": "Bulbasaur [Leech Seed | MEP]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6514,
+      "metacardId": 460458,
+      "dateAdded": "2026-03-11 11:52:40",
+      "prices": {
+        "avg": 29.99,
+        "low": 15,
+        "trend": 13.67,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 876873,
+      "name": "Charmander [Ember | MEP]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6514,
+      "metacardId": 460459,
+      "dateAdded": "2026-03-11 11:53:04",
+      "prices": {
+        "avg": 18.5,
+        "low": 20,
+        "trend": 18.5,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 876874,
+      "name": "Squirtle [Bubble | MEP]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6514,
+      "metacardId": 460460,
+      "dateAdded": "2026-03-11 11:53:55",
+      "prices": {
+        "avg": 25,
+        "low": 20,
+        "trend": 21.02,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 876875,
+      "name": "Turtwig [Razor Leaf]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6514,
+      "metacardId": 460461,
+      "dateAdded": "2026-03-11 11:54:14",
+      "prices": {
+        "avg": 15,
+        "low": 9,
+        "trend": 9.17,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 876876,
+      "name": "Chimchar [Fury Swipes | MEP]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6514,
+      "metacardId": 460462,
+      "dateAdded": "2026-03-11 11:54:27",
+      "prices": {
+        "avg": 20.99,
+        "low": 9,
+        "trend": 7.34,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 876877,
+      "name": "Piplup [Peck]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6514,
+      "metacardId": 460463,
+      "dateAdded": "2026-03-11 11:54:40",
+      "prices": {
+        "avg": 15,
+        "low": 7.5,
+        "trend": 11.18,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 876878,
+      "name": "Rowlet [Tackle]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6514,
+      "metacardId": 460464,
+      "dateAdded": "2026-03-11 11:54:55",
+      "prices": {
+        "avg": 10,
+        "low": 9.98,
+        "trend": 9.82,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 876879,
+      "name": "Litten [Fire Fang | MEP]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6514,
+      "metacardId": 460465,
+      "dateAdded": "2026-03-11 11:55:06",
+      "prices": {
+        "avg": 10,
+        "low": 5,
+        "trend": 10,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 876880,
+      "name": "Popplio [Disarming Voice | MEP]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 6514,
+      "metacardId": 460466,
+      "dateAdded": "2026-03-11 11:55:20",
+      "prices": {
+        "avg": 10,
+        "low": 5,
+        "trend": 9,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+window.TCG_TRACKER_SITE = {
+  brandName: "Vera's Pokémon TCG Tracker",
+  shortName: 'Pokémon TCG Tracker',
+  supportEmail: 'veraatversus+tcg@gmail.com',
+  githubUrl: 'https://github.com/Veraatversus/pokemon-tcg-data',
+  upstreamUrl: 'https://github.com/PokemonTCG/pokemon-tcg-data',
+  homepageUrl: 'https://veraatversus.github.io/pokemon-tcg-data/',
+  appUrl: 'https://veraatversus.github.io/pokemon-tcg-data/frontend/tcg-tracker-web/',
+  privacyUrl: 'https://veraatversus.github.io/pokemon-tcg-data/privacy.html',
+  imprintUrl: 'https://veraatversus.github.io/pokemon-tcg-data/impressum.html',
+  verificationGuideUrl: 'https://github.com/Veraatversus/pokemon-tcg-data/blob/main/docs/GOOGLE_OAUTH_VERIFICATION_GUIDE.md',
+  publicContactNote: 'Öffentlicher Projektkontakt via E-Mail',
+  lastUpdated: '9. April 2026'
+};
+
+(function hydrateSiteMeta() {
+  const cfg = window.TCG_TRACKER_SITE;
+  if (!cfg) return;
+
+  document.querySelectorAll('[data-site]').forEach((el) => {
+    const key = el.dataset.site;
+    if (cfg[key]) el.textContent = cfg[key];
+  });
+
+  document.querySelectorAll('[data-site-href]').forEach((el) => {
+    const key = el.dataset.siteHref;
+    if (cfg[key]) el.setAttribute('href', cfg[key]);
+  });
+
+  document.querySelectorAll('[data-email]').forEach((el) => {
+    el.textContent = cfg.supportEmail;
+    if (el.tagName.toLowerCase() === 'a') {
+      el.href = `mailto:${cfg.supportEmail}`;
+    }
+  });
+
+  document.querySelectorAll('[data-last-updated]').forEach((el) => {
+    el.textContent = cfg.lastUpdated;
+  });
+
+  document.querySelectorAll('a[href^="http"]:not([href^="mailto:"])').forEach((el) => {
+    el.setAttribute('target', '_blank');
+    el.setAttribute('rel', 'noreferrer noopener');
+  });
+
+  const currentPage = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
+  document.querySelectorAll('.topnav a').forEach((el) => {
+    const rawHref = (el.getAttribute('href') || '').split('#')[0].replace(/^\.\//, '').toLowerCase();
+    if (!rawHref || /^https?:/.test(rawHref) || rawHref.startsWith('mailto:')) return;
+    if ((currentPage === 'index.html' && rawHref === 'index.html') || rawHref === currentPage) {
+      el.setAttribute('aria-current', 'page');
+    }
+  });
+
+  const yearTargets = document.querySelectorAll('[data-current-year]');
+  yearTargets.forEach((el) => {
+    el.textContent = String(new Date().getFullYear());
+  });
+})();

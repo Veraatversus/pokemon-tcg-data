@@ -1,0 +1,18 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Serve tcg-tracker-web on 8080",
+			"type": "shell",
+			"command": "npx",
+			"args": [
+				"--yes",
+				"http-server",
+				"frontend/tcg-tracker-web",
+				"-p",
+				"8080"
+			],
+			"isBackground": true
+		}
+	]
+}
