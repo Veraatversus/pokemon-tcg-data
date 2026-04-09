@@ -1,11 +1,6 @@
 name: Promote Dev to Release
 
 on:
-  workflow_run:
-    workflows:
-      - Verify Dev Preview
-    types:
-      - completed
   workflow_dispatch:
 
 permissions:

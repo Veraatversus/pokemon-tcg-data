@@ -40,7 +40,7 @@ Der empfohlene Test erfolgt in dieser Reihenfolge:
 2. erfolgreichen Lauf von **`Build Cardmarket Data`** abwarten
 3. erfolgreichen Lauf von **`Promote Master to Dev`** prüfen
 4. erfolgreichen Lauf von **`Verify Dev Preview`** prüfen
-5. bei Freigabe **`Promote Dev to Release`** ausführen oder automatisch abwarten
+5. bei Freigabe **`Promote Dev to Release`** manuell ausführen
 6. **`Deploy Pages (release root + dev preview)`** kontrollieren
 
 ## 4. Lokale Upstream-Remotes (optional)
