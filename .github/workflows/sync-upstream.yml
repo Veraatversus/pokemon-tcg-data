@@ -1,13 +1,14 @@
-name: Sync Upstream to Master
+name: Daily Sync All Upstreams to Master
 
 env:
-  UPSTREAM_REPO: JulienGitHub/pokemon-tcg-data
+  PRIMARY_UPSTREAM_REPO: PokemonTCG/pokemon-tcg-data
+  SECONDARY_UPSTREAM_REPO: JulienGitHub/pokemon-tcg-data
 
 on:
   schedule:
     # Run daily at 2 AM UTC
     - cron: '0 2 * * *'
-  workflow_dispatch: # Allow manual trigger
+  workflow_dispatch:
 
 permissions:
   actions: write
@@ -15,14 +16,14 @@ permissions:
   issues: write
 
 jobs:
-  sync_upstream_to_master:
+  sync_upstreams_to_master:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: master          # sync happens on the upstream mirror branch
+          ref: master
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -31,77 +32,72 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Sync master with upstream
-        id: sync_upstream
+      - name: Sync master with both upstreams
+        id: sync_upstreams
         run: |
-          echo "conflict_type=" >> $GITHUB_OUTPUT
-          echo "synced=false" >> $GITHUB_OUTPUT
+          echo "conflict_target=" >> $GITHUB_OUTPUT
+          echo "master_updated=false" >> $GITHUB_OUTPUT
 
-          git remote add upstream https://github.com/${UPSTREAM_REPO}.git || true
-          git remote set-url upstream https://github.com/${UPSTREAM_REPO}.git
-          git fetch upstream
+          START_COMMIT=$(git rev-parse HEAD)
 
-          UPSTREAM_BRANCH="master"
-          UPSTREAM_COMMIT=$(git rev-parse upstream/$UPSTREAM_BRANCH)
-          LOCAL_COMMIT=$(git rev-parse HEAD)
+          sync_remote () {
+            REMOTE_NAME="$1"
+            REMOTE_REPO="$2"
+            REMOTE_BRANCH="${3:-master}"
 
-          if [ "$UPSTREAM_COMMIT" = "$LOCAL_COMMIT" ]; then
-            echo "Already up to date with upstream"
-            exit 0
-          fi
+            git remote add "$REMOTE_NAME" "https://github.com/${REMOTE_REPO}.git" || true
+            git remote set-url "$REMOTE_NAME" "https://github.com/${REMOTE_REPO}.git"
+            git fetch "$REMOTE_NAME" "$REMOTE_BRANCH"
 
-          if git merge -X theirs upstream/$UPSTREAM_BRANCH --no-edit; then
-            echo "Successfully merged upstream changes into master"
+            if ! git merge -X theirs "$REMOTE_NAME/$REMOTE_BRANCH" --no-edit; then
+              git merge --abort || true
+              echo "conflict_target=$REMOTE_NAME/$REMOTE_BRANCH" >> $GITHUB_OUTPUT
+              exit 1
+            fi
+          }
+
+          sync_remote pokemontcg "${PRIMARY_UPSTREAM_REPO}" master
+          sync_remote julien "${SECONDARY_UPSTREAM_REPO}" master
+
+          END_COMMIT=$(git rev-parse HEAD)
+
+          if [ "$START_COMMIT" != "$END_COMMIT" ]; then
+            echo "Master changed after upstream sync; pushing updated integration branch"
             git push origin master
-            echo "synced=true" >> $GITHUB_OUTPUT
+            echo "master_updated=true" >> $GITHUB_OUTPUT
           else
-            git merge --abort
-            echo "conflict_type=upstream->master" >> $GITHUB_OUTPUT
-            exit 1
+            echo "Master already up to date with both upstreams"
           fi
-
-      - name: Trigger propagation workflow
-        if: steps.sync_upstream.outputs.synced == 'true'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'propagate-master-to-dev-release.yml',
-              ref: 'master'
-            });
-            core.info('Triggered propagate-master-to-dev-release workflow on master');
 
       - name: Create issue on merge conflict
         if: failure()
         env:
-          SYNC_CONFLICT: ${{ steps.sync_upstream.outputs.conflict_type }}
+          SYNC_CONFLICT_TARGET: ${{ steps.sync_upstreams.outputs.conflict_target }}
         uses: actions/github-script@v7
         with:
           script: |
-            const syncConflict = process.env.SYNC_CONFLICT || '';
-            const conflictType = syncConflict || 'unknown';
-
+            const conflictTarget = process.env.SYNC_CONFLICT_TARGET || 'unknown';
             const issue = await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: '🔄 Upstream Sync Conflict - Manual Resolution Required',
-              body: `The automated sync workflow encountered a merge conflict.
+              title: '🔄 Dual-Upstream Sync Conflict - Manual Resolution Required',
+              body: `The automated upstream integration for \`master\` encountered a merge conflict.
 
-              **Conflict Type:** ${conflictType}
+              **Conflict Target:** ${conflictTarget}
+
+              **Expected Merge Order:**
+              1. \`PokemonTCG/pokemon-tcg-data\`
+              2. \`JulienGitHub/pokemon-tcg-data\`
 
               **Action Required:**
-              Please manually sync with the upstream repository and resolve any conflicts.
+              Please resolve the merge conflict on \`master\` manually and rerun the workflow.
 
-              **Steps:**
-              1. \`git fetch upstream\`
-              2. \`git checkout master\`
-              3. \`git merge upstream/master\` (or \`upstream/main\`)
-              4. Resolve conflicts
-              5. \`git push origin master\`
-
-              **Upstream Repository:** https://github.com/${process.env.UPSTREAM_REPO}
+              **Suggested steps:**
+              1. \`git checkout master\`
+              2. \`git fetch --all\`
+              3. \`git merge pokemontcg/master\`
+              4. \`git merge julien/master\`
+              5. Resolve conflicts and \`git push origin master\`
               `,
               labels: ['upstream-sync', 'manual-action-required']
             });
