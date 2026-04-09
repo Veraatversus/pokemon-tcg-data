@@ -32,7 +32,7 @@ jobs:
         run: node --test scripts/cardmarket/cardmarket-ui-helpers.test.mjs
 
       - name: Verify tracker set-match regressions
-        run: node frontend/tcg-tracker-web/tests/set-match-regression.mjs
+        run: node --test scripts/cardmarket/set-match-regression.test.mjs
 
       - name: Verify generated Cardmarket metadata is present
         run: |

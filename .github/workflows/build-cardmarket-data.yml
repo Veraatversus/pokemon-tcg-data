@@ -36,6 +36,9 @@ jobs:
       - name: Verify Cardmarket shared helper tests
         run: node --test scripts/cardmarket/cardmarket-ui-helpers.test.mjs
 
+      - name: Verify tracker set-match regressions
+        run: node --test scripts/cardmarket/set-match-regression.test.mjs
+
       - name: Build Cardmarket static JSON endpoints
         run: node scripts/cardmarket/build-cardmarket-data.mjs
 
