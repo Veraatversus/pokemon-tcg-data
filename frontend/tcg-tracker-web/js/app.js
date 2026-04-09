@@ -1,4 +1,4 @@
-﻿import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js?v=20260506d';
+﻿import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js?v=20260409-driveexport2';
 import {
   listImportedSets,
   listSetsOverviewData,
@@ -15,18 +15,25 @@ import {
   syncOverviewWithApiSets,
   resetSheetsDataCaches,
 } from './data/sheets-db.js?v=20260407-login1';
-import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260507a';
-import { resolveSeriesGroupInfo } from './data/schema-contract.js?v=20260507a';
+import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260510d';
+import { resolveSeriesGroupInfo } from './data/schema-contract.js?v=20260510b';
+import {
+  buildCardmarketProductUrl,
+  resolveCardmarketEntryForCard,
+  formatCardmarketEntryLabel,
+  formatCardmarketEntryTitle
+} from './data/cardmarket-data.js?v=20260510-cardmarket7';
 import {
   buildCombinedSearchDropdownOptions,
   createSpreadsheetSwitchStatePatch,
   normalizeCardNumber,
   resolveCombinedSearchSelection,
+  shouldFetchApiCardsForSearchSet,
   toBoolean
-} from './core/utils.js?v=20260407-searchscope1';
-import { getCollectionUiState, resolveCollectionToggleState } from './core/collection-state.js?v=20260507c';
+} from './core/utils.js?v=20260409-searchscope2';
+import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle } from './core/collection-state.js?v=20260509a';
 import * as cache from './core/cache.js';
-import { CONFIG, scopedStorageKey } from './core/config.js';
+import { CONFIG, scopedStorageKey } from './core/config.js?v=20260409-treeview1';
 import {
   initSmartEngine,
   startAutoHealing,
@@ -41,11 +48,15 @@ import {
 } from './features/collection/index.js';
 import {
   loadLegacyWorkbookFromFile,
+  loadLegacyWorkbookFromSpreadsheetInput,
   parseLegacyWorkbook,
   buildLegacyImportPlan,
+  buildLegacyImportSelectionTree,
+  filterLegacyImportPlanBySelection,
   summarizeLegacyImportPlan,
-  pickCanonicalCardId
-} from './features/collection/legacy-import.js?v=20260407a';
+  pickCanonicalCardId,
+  extractLegacySpreadsheetId
+} from './features/collection/legacy-import.js?v=20260409-treeview1';
 import { initCommandPalette } from './ui/command-palette.js';
 import { filterSetsBySeriesKey, getStatsSeriesLabel } from './ui/stats-series.js?v=20260407a';
 import {
@@ -61,7 +72,7 @@ import {
   initQuickFiltersUI, createSearchHistoryWidget, createStatisticsPanel,
   createExportDialog, createSettingsPanel,
   createBulkActionsToolbar
-} from './ui/components.js?v=20260506b';
+} from './ui/components.js?v=20260509-discoverybar1';
 import {
   AdvancedSearch, SyncIndicator, CardCollectionTools,
   generateCollectionInsights, generateSetComparison,
@@ -123,6 +134,7 @@ const dom = {
   // Global
   auth:             document.getElementById('btn-auth'),
   btnOpenSettings:  document.getElementById('btn-open-settings'),
+  btnOpenSupportHub: document.getElementById('btn-open-support-hub'),
   topbar:           document.querySelector('.topbar'),
   mainNav:          document.getElementById('main-nav'),
   navSetLink:       document.getElementById('nav-set-link'),
@@ -160,6 +172,7 @@ const dom = {
   spreadsheetInfo:  document.getElementById('spreadsheet-info'),
   spreadsheetLink:  document.getElementById('spreadsheet-link'),
   btnChangeSheet:   document.getElementById('btn-change-spreadsheet'),
+  supportHubDialog: document.getElementById('dialog-support-hub'),
   // Views
   viewDashboard:    document.getElementById('view-dashboard'),
   viewSet:          document.getElementById('view-set'),
@@ -203,8 +216,23 @@ const dom = {
   btnExportBackup: document.getElementById('btn-export-backup'),
   btnImportBackup: document.getElementById('btn-import-backup'),
   btnImportLegacyXlsx: document.getElementById('btn-import-legacy-xlsx'),
+  btnImportLegacySheet: document.getElementById('btn-import-legacy-sheet'),
   backupFileInput: document.getElementById('input-backup-file'),
   legacyImportFileInput: document.getElementById('input-legacy-import-file'),
+  legacySheetDialog: document.getElementById('dialog-legacy-sheet-import'),
+  legacySheetInput: document.getElementById('input-legacy-sheet-link'),
+  legacySheetError: document.getElementById('legacy-sheet-import-error'),
+  btnLegacySheetCancel: document.getElementById('btn-legacy-sheet-cancel'),
+  btnLegacySheetImportConfirm: document.getElementById('btn-legacy-sheet-import-confirm'),
+  legacySelectionDialog: document.getElementById('dialog-legacy-import-selection'),
+  legacySelectionSearch: document.getElementById('input-legacy-selection-filter'),
+  legacySelectionSummary: document.getElementById('legacy-selection-summary'),
+  legacySelectionInfo: document.getElementById('legacy-selection-info'),
+  legacySelectionTree: document.getElementById('legacy-import-selection-tree'),
+  btnLegacySelectionAll: document.getElementById('btn-legacy-selection-all'),
+  btnLegacySelectionNone: document.getElementById('btn-legacy-selection-none'),
+  btnLegacySelectionCancel: document.getElementById('btn-legacy-selection-cancel'),
+  btnLegacySelectionConfirm: document.getElementById('btn-legacy-selection-confirm'),
   manageSetsDialog: document.getElementById('dialog-manage-sets'),
   manageSetsSearch: document.getElementById('manage-sets-search-input'),
   manageSetsList: document.getElementById('manage-sets-list'),
@@ -293,6 +321,7 @@ const dom = {
   searchSetFilter:  document.getElementById('search-set-filter'),
   searchScopeMode:  document.getElementById('search-scope-mode'),
   searchResults:    document.getElementById('search-results'),
+  searchToolbarMeta: document.getElementById('search-toolbar-meta'),
 };
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -338,8 +367,6 @@ const state = {
   quickFilters: {
     completed: false,
     inProgress: false,
-    notImported: false,
-    favoritesOnly: false,
   },
   realtimeClientId: null,
   realtime: null,
@@ -376,33 +403,7 @@ const DASHBOARD_VIRTUAL_THRESHOLD = 220;
 const SEARCH_SCOPE_IMPORTED = 'imported';
 const SEARCH_SCOPE_ALL = 'all';
 const SEARCH_SCOPE_ONLINE = 'online';
-const AUTO_IMPORT_MODE_JUMP = 'jump';
-const AUTO_IMPORT_MODE_NEVER = 'never';
-const AUTO_IMPORT_MODE_ALWAYS = 'always';
 const AUTO_IMPORT_QUEUE_LIMIT = 3;
-
-function normalizeAutoImportMode(value) {
-  const normalized = String(value || '').trim().toLowerCase();
-  if (normalized === AUTO_IMPORT_MODE_NEVER || normalized === AUTO_IMPORT_MODE_ALWAYS) return normalized;
-  return AUTO_IMPORT_MODE_JUMP;
-}
-
-function getAutoImportMode() {
-  return normalizeAutoImportMode(loadSettings().autoImportMode);
-}
-
-function getAutoImportModeLabel(mode = getAutoImportMode()) {
-  if (mode === AUTO_IMPORT_MODE_NEVER) return 'Nie';
-  if (mode === AUTO_IMPORT_MODE_ALWAYS) return 'Immer';
-  return 'Nur bei „Zum Set“';
-}
-
-function shouldAutoImportCurrentSet(set, { fromSearchJump = false } = {}) {
-  const mode = getAutoImportMode();
-  if (mode === AUTO_IMPORT_MODE_NEVER) return false;
-  if (mode === AUTO_IMPORT_MODE_ALWAYS) return !Boolean(set?.imported);
-  return Boolean(fromSearchJump);
-}
 
 function resolveAutoImportSetLabel(setId) {
   const match = getSetById(setId)
@@ -432,7 +433,7 @@ function updateAutoImportQueueUi() {
   dom.jobTitle.textContent = 'Auto-Import Queue';
   const activeLabel = activeSetId ? `Aktiv: ${resolveAutoImportSetLabel(activeSetId)}` : 'Wartet auf freien Slot';
   const waitingLabel = queuedIds.length ? ` • ${queuedIds.length} wartend` : '';
-  dom.jobStatusText.textContent = `${activeLabel}${waitingLabel} • Modus: ${getAutoImportModeLabel()}`;
+  dom.jobStatusText.textContent = `${activeLabel}${waitingLabel}`;
   if (dom.btnJobCancel) dom.btnJobCancel.disabled = true;
 }
 
@@ -497,8 +498,17 @@ function renderSearchSetFilterOptions() {
 
   const previousValue = String(dom.searchSetFilter.value || `scope:${SEARCH_SCOPE_IMPORTED}`);
   const previousSelection = resolveCombinedSearchSelection(previousValue, SEARCH_SCOPE_IMPORTED);
-  const desiredValue = previousSelection.setId || `scope:${previousSelection.mode}`;
-  const groups = buildCombinedSearchDropdownOptions(state.sets || []);
+  const selectedSetId = String(previousSelection.setId || '').trim();
+  const knownSets = state.allSets?.length ? state.allSets : (state.sets || []);
+  const selectedSet = selectedSetId
+    ? knownSets.find((set) => String(set?.setId || '').trim() === selectedSetId)
+    : null;
+  const desiredValue = selectedSetId
+    ? (previousSelection.mode === SEARCH_SCOPE_ALL && !toBoolean(selectedSet?.imported)
+      ? `set:all:${selectedSetId}`
+      : selectedSetId)
+    : `scope:${previousSelection.mode}`;
+  const groups = buildCombinedSearchDropdownOptions(knownSets);
   const availableValues = [];
 
   dom.searchSetFilter.innerHTML = '';
@@ -514,6 +524,13 @@ function renderSearchSetFilterOptions() {
       opt.value = entry.value;
       opt.textContent = entry.label;
       if (entry.disabled) opt.disabled = true;
+      if (entry.mode) opt.dataset.searchMode = entry.mode;
+      if (typeof entry.imported === 'boolean') {
+        opt.dataset.imported = String(entry.imported);
+        if (!entry.imported) {
+          opt.classList.add('option-not-imported');
+        }
+      }
       optgroup.appendChild(opt);
       availableValues.push(entry.value);
     });
@@ -526,6 +543,60 @@ function renderSearchSetFilterOptions() {
 
   if (dom.searchScopeMode) {
     dom.searchScopeMode.value = getSearchScopeMode();
+  }
+}
+
+function renderSetSelectorOptions(preferredValue = '') {
+  if (!dom.selector) return;
+
+  const desiredValue = String(preferredValue || dom.selector.value || '').trim();
+  const importedSets = Array.isArray(state.sets) ? state.sets.filter((set) => set?.setId) : [];
+  const knownSets = Array.isArray(state.allSets) && state.allSets.length
+    ? state.allSets.filter((set) => set?.setId)
+    : importedSets;
+  const notImportedSets = [...knownSets]
+    .filter((set) => !toBoolean(set.imported))
+    .sort((a, b) => String(a.setName || a.setId).localeCompare(String(b.setName || b.setId), undefined, {
+      numeric: true,
+      sensitivity: 'base'
+    }));
+
+  dom.selector.innerHTML = '<option value="">Bitte wählen…</option>';
+
+  const seriesMap = buildSeriesMap(importedSets);
+  seriesMap.forEach((groupInfo) => {
+    const group = document.createElement('optgroup');
+    group.label = groupInfo.label;
+    group.dataset.seriesKey = groupInfo.key;
+    groupInfo.sets.forEach((set) => {
+      const opt = document.createElement('option');
+      opt.value = set.setId;
+      opt.textContent = set.setName;
+      opt.dataset.imported = 'true';
+      group.appendChild(opt);
+    });
+    dom.selector.appendChild(group);
+  });
+
+  if (notImportedSets.length) {
+    const extraGroup = document.createElement('optgroup');
+    extraGroup.label = 'Weitere Sets (noch nicht importiert)';
+    extraGroup.dataset.seriesKey = 'not-imported';
+
+    notImportedSets.forEach((set) => {
+      const opt = document.createElement('option');
+      opt.value = set.setId;
+      opt.textContent = set.setName || set.setId;
+      opt.dataset.imported = 'false';
+      opt.classList.add('option-not-imported');
+      extraGroup.appendChild(opt);
+    });
+
+    dom.selector.appendChild(extraGroup);
+  }
+
+  if (desiredValue && Array.from(dom.selector.options).some((option) => option.value === desiredValue)) {
+    dom.selector.value = desiredValue;
   }
 }
 
@@ -859,14 +930,20 @@ function loadDashboardPreferences() {
       state.dashboardDensity = parsed.dashboardCompact ? 'compact' : 'comfortable';
     }
 
+    const legacyNotImported = Boolean(parsed?.quickFilters?.notImported);
+    const legacyFavoritesOnly = Boolean(parsed?.quickFilters?.favoritesOnly);
+
     if (parsed?.quickFilters && typeof parsed.quickFilters === 'object') {
       state.quickFilters = {
         ...state.quickFilters,
         completed: Boolean(parsed.quickFilters.completed),
         inProgress: Boolean(parsed.quickFilters.inProgress),
-        notImported: Boolean(parsed.quickFilters.notImported),
-        favoritesOnly: Boolean(parsed.quickFilters.favoritesOnly),
       };
+    }
+
+    if (state.dashboardView === 'all') {
+      if (legacyFavoritesOnly) state.dashboardView = 'favorites';
+      else if (legacyNotImported) state.dashboardView = 'not-imported';
     }
   } catch (err) {
     console.warn('[loadDashboardPreferences]', err);
@@ -878,7 +955,10 @@ function saveDashboardPreferences() {
     const payload = {
       dashboardView: state.dashboardView,
       dashboardDensity: state.dashboardDensity,
-      quickFilters: state.quickFilters,
+      quickFilters: {
+        completed: Boolean(state.quickFilters?.completed),
+        inProgress: Boolean(state.quickFilters?.inProgress),
+      },
     };
     localStorage.setItem(DASHBOARD_PREFS_STORAGE_KEY, JSON.stringify(payload));
   } catch (err) {
@@ -1435,6 +1515,53 @@ function showToast(message, type = 'info', durationMs = 3000) {
   setTimeout(() => el.remove(), durationMs);
 }
 
+const SUPPORT_CHANNEL_META = Object.freeze({
+  bug: {
+    title: 'Bug melden',
+    fallbackMessage: 'Bug-Formular noch nicht hinterlegt – ich öffne vorerst die Kontaktseite.'
+  },
+  feature: {
+    title: 'Feature wünschen',
+    fallbackMessage: 'Feature-Formular noch nicht hinterlegt – ich öffne vorerst die Kontaktseite.'
+  },
+  access: {
+    title: 'Zugang beantragen',
+    fallbackMessage: 'Access-Formular noch nicht hinterlegt – ich öffne vorerst die Kontaktseite.'
+  }
+});
+
+function isConfiguredSupportUrl(url) {
+  return Boolean(url) && !/replace|todo|example/i.test(String(url));
+}
+
+function resolveSupportTarget(kind) {
+  const supportConfig = CONFIG.SUPPORT || {};
+  const directUrl = String(supportConfig.channels?.[kind] || '').trim();
+  const fallbackUrl = String(supportConfig.fallbackUrls?.[kind] || './impressum.html#projektkontakt').trim();
+  return {
+    directUrl,
+    fallbackUrl: new URL(fallbackUrl, window.location.href).toString()
+  };
+}
+
+function openSupportHubDialog() {
+  dom.supportHubDialog?.showModal();
+}
+
+function openSupportChannel(kind) {
+  const safeKind = SUPPORT_CHANNEL_META[kind] ? kind : 'feature';
+  const meta = SUPPORT_CHANNEL_META[safeKind];
+  const { directUrl, fallbackUrl } = resolveSupportTarget(safeKind);
+  const targetUrl = isConfiguredSupportUrl(directUrl) ? directUrl : fallbackUrl;
+
+  dom.supportHubDialog?.close();
+  window.open(targetUrl, '_blank', 'noopener,noreferrer');
+
+  if (!isConfiguredSupportUrl(directUrl)) {
+    showToast(meta.fallbackMessage, 'info', 5200);
+  }
+}
+
 function pushAuditEntry(kind, message) {
   const entry = {
     kind,
@@ -1758,6 +1885,15 @@ function setRefreshMenuOpen(isOpen) {
   dom.btnRefreshMenu.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
 }
 
+function syncRefreshControls() {
+  const canRefreshCurrentSet = Boolean(isSignedIn() && state.currentSet?.setId);
+  if (dom.refresh) dom.refresh.disabled = !canRefreshCurrentSet;
+  if (dom.btnRefreshMenu) dom.btnRefreshMenu.disabled = !canRefreshCurrentSet;
+  if (!canRefreshCurrentSet) {
+    setRefreshMenuOpen(false);
+  }
+}
+
 function resetRuntimeUiForSpreadsheetSwitch() {
   try {
     state.searchAbortController?.abort?.();
@@ -1850,14 +1986,32 @@ function initCustomSelects() {
     });
   };
 
+  const applyTriggerSelectionState = (button, selectedNode = null) => {
+    const isNotImported = selectedNode?.dataset.imported === 'false';
+    button.classList.toggle('is-not-imported', isNotImported);
+    if (isNotImported) button.dataset.imported = 'false';
+    else button.removeAttribute('data-imported');
+  };
+
   const createOptionNode = ({ option, select, list, button, root }) => {
     const item = document.createElement('button');
     item.type = 'button';
     item.className = 'custom-select-option';
     item.dataset.value = option.value;
-    item.textContent = option.textContent?.trim() || '—';
+    const isNotImported = option.dataset.imported === 'false';
+    const rawLabel = option.textContent?.trim() || '—';
+    const visibleLabel = isNotImported
+      ? rawLabel.replace(/\s*[·-]\s*noch nicht importiert$/i, '').trim()
+      : rawLabel;
+    item.textContent = visibleLabel || rawLabel;
     item.setAttribute('role', 'option');
     item.setAttribute('aria-selected', String(option.selected));
+
+    if (option.dataset.imported) item.dataset.imported = option.dataset.imported;
+    if (isNotImported) {
+      item.classList.add('is-not-imported');
+      item.title = 'Noch nicht importiert';
+    }
 
     if (option.disabled) {
       item.disabled = true;
@@ -1867,6 +2021,7 @@ function initCustomSelects() {
     if (option.selected) {
       item.classList.add('is-selected');
       button.textContent = item.textContent;
+      applyTriggerSelectionState(button, item);
     }
 
     item.addEventListener('click', () => {
@@ -1920,12 +2075,17 @@ function initCustomSelects() {
 
     const syncSelectionState = () => {
       const selectedValue = select.value;
+      let selectedNode = null;
       list.querySelectorAll('.custom-select-option').forEach((optionNode) => {
         const isSelected = optionNode.dataset.value === selectedValue;
         optionNode.classList.toggle('is-selected', isSelected);
         optionNode.setAttribute('aria-selected', String(isSelected));
-        if (isSelected) button.textContent = optionNode.textContent || 'Auswählen…';
+        if (isSelected) {
+          selectedNode = optionNode;
+          button.textContent = optionNode.textContent || 'Auswählen…';
+        }
       });
+      applyTriggerSelectionState(button, selectedNode);
       button.disabled = select.disabled;
       root.classList.toggle('is-disabled', Boolean(select.disabled));
     };
@@ -2117,6 +2277,7 @@ function showView(viewId) {
   document.querySelectorAll('.nav-link').forEach((link) => {
     link.classList.toggle('active', link.dataset.view === viewId);
   });
+  dom.navSetSplit?.classList.toggle('is-active', viewId === 'set');
 }
 
 function navigate(path) {
@@ -2465,27 +2626,11 @@ async function loadSets() {
     state.allSets = Array.from(mergedMap.values());
     resetDashboardVirtualization();
     renderRecentSets();
-
-    dom.selector.innerHTML = '<option value="">Bitte w\u00e4hlen\u2026</option>';
-    const seriesMap = buildSeriesMap(importedSets);
-    seriesMap.forEach((groupInfo) => {
-      const group = document.createElement('optgroup');
-      group.label = groupInfo.label;
-      group.dataset.seriesKey = groupInfo.key;
-      groupInfo.sets.forEach((set) => {
-        const opt = document.createElement('option');
-        opt.value = set.setId;
-        opt.textContent = set.setName;
-        group.appendChild(opt);
-      });
-      dom.selector.appendChild(group);
-    });
+    renderSetSelectorOptions();
 
     dom.selector.disabled = false;
     dom.load.disabled     = false;
-    dom.refresh.disabled  = false;
-    if (dom.btnRefreshMenu) dom.btnRefreshMenu.disabled = false;
-    setRefreshMenuOpen(false);
+    syncRefreshControls();
 
     dom.dashSeriesFilter.innerHTML = '<option value="">Alle Serien</option>';
     buildSeriesMap(state.allSets).forEach((groupInfo) => {
@@ -2618,18 +2763,12 @@ async function renderDashboard() {
     }
 
     const quickFilters = state.quickFilters || {};
-    const hasStatusQuickFilter = Boolean(
-      quickFilters.completed || quickFilters.inProgress || quickFilters.notImported
-    );
-
-    if (quickFilters.favoritesOnly) {
-      sets = sets.filter((set) => isFavorite(set.setId));
-    }
+    const hasStatusQuickFilter = Boolean(quickFilters.completed || quickFilters.inProgress);
 
     if (hasStatusQuickFilter) {
       sets = sets.filter((set) => {
         if (!set.imported) {
-          return Boolean(quickFilters.notImported);
+          return false;
         }
 
         const summary = summaryByName.get(set.setName) || summaryByName.get(set.setId);
@@ -2639,8 +2778,7 @@ async function renderDashboard() {
         const isInProgress = collected > 0 && !isCompleted;
 
         return (quickFilters.completed && isCompleted)
-          || (quickFilters.inProgress && isInProgress)
-          || (quickFilters.notImported && !set.imported);
+          || (quickFilters.inProgress && isInProgress);
       });
     }
 
@@ -2776,8 +2914,7 @@ function createDashSetCard(set, summary) {
   if (viewButton) {
     viewButton.addEventListener('click', (event) => {
       event.stopPropagation();
-      dom.selector.value = set.setId;
-      navigate(`set/${set.setId}`);
+      navigateToSearchResultSet(set);
     });
   }
 
@@ -2800,9 +2937,7 @@ function createDashSetCard(set, summary) {
   }
 
   card.addEventListener('click', () => {
-    if (!set.imported) return;
-    dom.selector.value = set.setId;
-    navigate(`set/${set.setId}`);
+    navigateToSearchResultSet(set);
   });
 
   if (set.imported) {
@@ -2900,6 +3035,7 @@ function scheduleAutoImportUiRefresh() {
     state.autoImportRefreshTimer = null;
     try {
       renderSearchSetFilterOptions();
+      renderSetSelectorOptions(state.currentSet?.setId || dom.selector?.value || '');
       if (dom.viewDashboard && !dom.viewDashboard.classList.contains('hidden')) {
         await renderDashboard();
       }
@@ -3110,12 +3246,14 @@ function ensureSetSelectorOption(set) {
   const existingOption = Array.from(dom.selector.options || []).find((option) => option.value === set.setId);
   if (existingOption) {
     if (set?.setName) existingOption.textContent = set.setName;
+    existingOption.dataset.imported = String(toBoolean(set.imported));
     return;
   }
 
+  const isImported = toBoolean(set.imported);
   const groupInfo = getSetSeriesGroupInfo(set);
-  const groupLabel = groupInfo.label || 'Weitere Sets';
-  const groupKey = groupInfo.key || 'weitere-sets';
+  const groupLabel = isImported ? (groupInfo.label || 'Weitere Sets') : 'Weitere Sets (noch nicht importiert)';
+  const groupKey = isImported ? (groupInfo.key || 'weitere-sets') : 'not-imported';
   let group = Array.from(dom.selector.querySelectorAll('optgroup')).find((entry) => (entry.dataset.seriesKey || '') === groupKey);
   if (!group) {
     group = document.createElement('optgroup');
@@ -3127,7 +3265,9 @@ function ensureSetSelectorOption(set) {
   const option = document.createElement('option');
   option.value = set.setId;
   option.textContent = set.setName || set.setId;
-  if (!toBoolean(set.imported)) {
+  option.dataset.imported = String(isImported);
+  if (!isImported) {
+    option.classList.add('option-not-imported');
     option.dataset.source = 'search-api';
   }
   group.appendChild(option);
@@ -3868,12 +4008,12 @@ function buildLegacyImportPreviewText(plan) {
   }
 
   lines.push('');
-  lines.push('Der Import setzt die betroffenen Sets exakt auf den XLSX-Stand (G/RH) – inklusive Entfernen nicht markierter Treffer in diesen Sets.');
+  lines.push('Der Import setzt die betroffenen Sets exakt auf den Altbestand-Stand (G/RH) – inklusive Entfernen nicht markierter Treffer in diesen Sets.');
   return lines.join('\n');
 }
 
-async function prepareLegacyWorkbookImport(file) {
-  if (!file) throw new Error('Keine XLSX-Datei ausgewählt.');
+async function prepareLegacyWorkbookImport(workbook, sourceLabel = 'Altbestand') {
+  if (!workbook) throw new Error('Keine Altbestand-Quelle ausgewählt.');
   if (!state.allSets?.length) {
     await loadSets();
   }
@@ -3881,10 +4021,9 @@ async function prepareLegacyWorkbookImport(file) {
     throw new Error('Sets konnten vor der Analyse nicht geladen werden.');
   }
 
-  const workbook = await loadLegacyWorkbookFromFile(file);
   const parsedWorkbook = parseLegacyWorkbook(workbook);
   if (!parsedWorkbook.sheets.length) {
-    throw new Error('In der XLSX-Datei wurden keine markierten Karten gefunden.');
+    throw new Error(`In ${sourceLabel} wurden keine markierten Karten gefunden.`);
   }
 
   const preflight = buildLegacyImportPlan({
@@ -3903,7 +4042,7 @@ async function prepareLegacyWorkbookImport(file) {
   for (let index = 0; index < uniqueSetIds.length; index++) {
     const setId = uniqueSetIds[index];
     const setMeta = getSetById(setId);
-    setGlobalStatus(`Analysiere XLSX ${index + 1}/${uniqueSetIds.length}: ${setMeta?.setName || setId}`);
+    setGlobalStatus(`Analysiere ${sourceLabel} ${index + 1}/${uniqueSetIds.length}: ${setMeta?.setName || setId}`);
     const cards = await fetchMergedCards(setId);
     if (!Array.isArray(cards) || !cards.length) {
       throw new Error(`Kartenkatalog für ${setMeta?.setName || setId} konnte nicht geladen werden.`);
@@ -3920,6 +4059,8 @@ async function prepareLegacyWorkbookImport(file) {
   return { parsedWorkbook, cardsBySetId, plan };
 }
 
+let legacyImportSelectionDialogState = null;
+
 async function applyLegacyImportPlan(plan, cardsBySetId) {
   if (!plan?.ok) {
     throw new Error('Der Dry-Run enthält noch Konflikte.');
@@ -3931,13 +4072,13 @@ async function applyLegacyImportPlan(plan, cardsBySetId) {
 
   if (missingSets.length) {
     await importSetsSequential(missingSets, {
-      successMessage: '{count} fehlende Sets für den XLSX-Import importiert.'
+      successMessage: '{count} fehlende Sets für den Altbestand-Import importiert.'
     });
     await loadSets();
   }
 
   try {
-    await createAutoSnapshot(`Legacy XLSX Import (${plan.matchedSets.length} Sets)`, state.collection || {});
+    await createAutoSnapshot(`Legacy Altbestand Import (${plan.matchedSets.length} Sets)`, state.collection || {});
   } catch (err) {
     console.warn('[applyLegacyImportPlan] snapshot failed', err);
   }
@@ -3952,23 +4093,24 @@ async function applyLegacyImportPlan(plan, cardsBySetId) {
         throw new Error(`Ziel-Set ${matchedSet.setId} ist nach dem Vorimport nicht verfügbar.`);
       }
 
-      setGlobalStatus(`XLSX-Import ${setIndex + 1}/${plan.matchedSets.length}: ${liveSet.setName}`);
+      setGlobalStatus(`Altbestand-Import ${setIndex + 1}/${plan.matchedSets.length}: ${liveSet.setName}`);
       const liveMap = await readSetCollectionMap(liveSet.setName).catch(() => new Map());
-      const targetByCard = new Map(
-        (matchedSet.cards || []).map((entry) => [normalizeCardNumber(entry.cardId), entry])
-      );
       const setCards = Array.isArray(cardsBySetId?.[matchedSet.setId]) ? cardsBySetId[matchedSet.setId] : [];
+      const setCardLookup = new Map();
+      setCards.forEach((sourceCard) => {
+        const cardId = pickCanonicalCardId(sourceCard);
+        if (!cardId) return;
+        setCardLookup.set(normalizeCardNumber(cardId), sourceCard);
+      });
       const pendingCellUpdates = [];
 
-      for (const sourceCard of setCards) {
-        const cardId = pickCanonicalCardId(sourceCard);
+      for (const target of (matchedSet.cards || [])) {
+        const normalizedCardId = normalizeCardNumber(target?.cardId || target?.sourceCardId);
+        const sourceCard = setCardLookup.get(normalizedCardId) || null;
+        const cardId = pickCanonicalCardId(sourceCard) || String(target?.cardId || target?.sourceCardId || '').trim();
         if (!cardId) continue;
 
-        const normalizedCardId = normalizeCardNumber(cardId);
-        const target = targetByCard.get(normalizedCardId) || { g: false, rh: false };
         let entry = liveMap.get(normalizedCardId) || null;
-
-        if (!entry && !target.g && !target.rh) continue;
         if (!entry) {
           entry = await ensureCollectionEntry(liveSet.setName, cardId);
           liveMap.set(normalizedCardId, entry);
@@ -4012,12 +4154,292 @@ async function applyLegacyImportPlan(plan, cardsBySetId) {
   showToast(`Altbestand importiert: ${plan.matchedSets.length} Sets synchronisiert, ${updatedCells} Änderungen geschrieben.`, 'success', 5000);
 }
 
-async function startLegacyWorkbookImport(file) {
-  if (!file) return;
+function setLegacySheetDialogError(message = '') {
+  if (!dom.legacySheetError) return;
+  dom.legacySheetError.textContent = message;
+  dom.legacySheetError.classList.toggle('hidden', !message);
+}
+
+function escapeLegacyImportSelectionHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function syncLegacyImportSelectionSetState(setEntry) {
+  if (!setEntry || !Array.isArray(setEntry.cards)) return 0;
+  const selectedCards = setEntry.cards.filter((card) => card?.selected !== false).length;
+  setEntry.selected = selectedCards > 0;
+  return selectedCards;
+}
+
+function getLegacyImportSelectionStats(tree) {
+  const sets = Array.isArray(tree?.sets) ? tree.sets : [];
+  const totalSetCount = sets.length;
+  const totalCardCount = sets.reduce((sum, set) => sum + (Array.isArray(set?.cards) ? set.cards.length : 0), 0);
+  const selectedSetCount = sets.filter((set) => Array.isArray(set?.cards) && set.cards.some((card) => card?.selected !== false)).length;
+  const selectedCardCount = sets.reduce((sum, set) => sum + (Array.isArray(set?.cards) ? set.cards.filter((card) => card?.selected !== false).length : 0), 0);
+  const autoImportSetCount = sets.filter((set) => !set?.imported && Array.isArray(set?.cards) && set.cards.some((card) => card?.selected !== false)).length;
+  return { totalSetCount, totalCardCount, selectedSetCount, selectedCardCount, autoImportSetCount };
+}
+
+function renderLegacyImportSelectionDialog() {
+  const session = legacyImportSelectionDialogState;
+  if (!session || !dom.legacySelectionTree) return;
+
+  const query = String(dom.legacySelectionSearch?.value || '').trim().toLowerCase();
+  const stats = getLegacyImportSelectionStats(session.tree);
+
+  if (dom.legacySelectionSummary) {
+    dom.legacySelectionSummary.innerHTML = `
+      <div class="legacy-selection-stat"><strong>${stats.selectedSetCount}</strong><span>Sets</span></div>
+      <div class="legacy-selection-stat"><strong>${stats.selectedCardCount}</strong><span>Karten</span></div>
+      <div class="legacy-selection-stat"><strong>${stats.autoImportSetCount}</strong><span>Vorimporte</span></div>
+    `;
+  }
+
+  if (dom.legacySelectionInfo) {
+    dom.legacySelectionInfo.textContent = stats.selectedCardCount > 0
+      ? `${stats.selectedCardCount} von ${stats.totalCardCount} Karten aus ${stats.selectedSetCount} von ${stats.totalSetCount} Sets werden übernommen.${stats.autoImportSetCount ? ` ${stats.autoImportSetCount} Sets werden dafür bei Bedarf zuerst importiert.` : ''}`
+      : 'Bitte mindestens ein Set oder eine Karte auswählen.';
+  }
+
+  if (dom.btnLegacySelectionConfirm) {
+    dom.btnLegacySelectionConfirm.disabled = stats.selectedCardCount === 0;
+    dom.btnLegacySelectionConfirm.textContent = stats.selectedCardCount > 0
+      ? `Ausgewählte importieren (${stats.selectedCardCount})`
+      : 'Ausgewählte importieren';
+  }
+
+  const setMarkup = (session.tree.sets || []).map((setEntry, setIndex) => {
+    const selectedCount = syncLegacyImportSelectionSetState(setEntry);
+    const setSearchText = [setEntry.setName, setEntry.sheetName, setEntry.setId].join(' ').toLowerCase();
+    const setMatches = !query || setSearchText.includes(query);
+    const visibleCards = (setEntry.cards || [])
+      .map((card, cardIndex) => ({ card, cardIndex }))
+      .filter(({ card }) => !query || setMatches || [card.name, card.cardId, card.sourceCardId].join(' ').toLowerCase().includes(query));
+
+    if (query && !setMatches && !visibleCards.length) return '';
+
+    const shouldOpen = query ? true : Boolean(setEntry.expanded);
+    const cardsMarkup = shouldOpen
+      ? visibleCards.map(({ card, cardIndex }) => {
+          const badgeHtml = [
+            card.g ? '<span class="legacy-tree-badge is-collected">G</span>' : '',
+            card.rh ? '<span class="legacy-tree-badge is-reverse">RH</span>' : ''
+          ].join('');
+          const cardNumber = escapeLegacyImportSelectionHtml(card.sourceCardId || card.cardId || '—');
+          const cardName = escapeLegacyImportSelectionHtml(card.name || card.cardId || 'Unbenannte Karte');
+          return `
+            <label class="legacy-tree-card">
+              <input type="checkbox" data-selection-type="card" data-set-index="${setIndex}" data-card-index="${cardIndex}" ${card.selected !== false ? 'checked' : ''} />
+              <span class="legacy-tree-card-id">#${cardNumber}</span>
+              <span class="legacy-tree-card-name">${cardName}</span>
+              <span class="legacy-tree-card-flags">${badgeHtml}</span>
+            </label>
+          `;
+        }).join('')
+      : '';
+
+    const summaryLabel = escapeLegacyImportSelectionHtml(setEntry.setName || setEntry.sheetName || setEntry.setId || 'Unbekanntes Set');
+    const summaryMeta = escapeLegacyImportSelectionHtml(setEntry.sheetName && setEntry.sheetName !== setEntry.setName
+      ? `${setEntry.sheetName} · ${setEntry.setId}`
+      : `Set-ID: ${setEntry.setId}`);
+
+    return `
+      <details class="legacy-tree-set" data-set-index="${setIndex}" ${shouldOpen ? 'open' : ''}>
+        <summary class="legacy-tree-set-summary">
+          <label class="legacy-tree-summary-check">
+            <input class="legacy-tree-set-toggle" type="checkbox" data-selection-type="set" data-set-index="${setIndex}" ${selectedCount > 0 ? 'checked' : ''} />
+          </label>
+          <div class="legacy-tree-set-copy">
+            <strong>${summaryLabel}</strong>
+            <small>${summaryMeta}</small>
+          </div>
+          <div class="legacy-tree-set-meta">
+            <span class="legacy-tree-pill ${setEntry.imported ? '' : 'is-accent'}">${setEntry.imported ? 'bereits importiert' : 'wird vorimportiert'}</span>
+            <span class="legacy-tree-count">${selectedCount}/${setEntry.cards.length}</span>
+          </div>
+        </summary>
+        <div class="legacy-tree-card-list" role="group">
+          ${cardsMarkup || '<p class="legacy-selection-empty">Keine Karten für diesen Filter.</p>'}
+        </div>
+      </details>
+    `;
+  }).filter(Boolean).join('');
+
+  dom.legacySelectionTree.innerHTML = setMarkup || '<p class="legacy-selection-empty">Keine Sets oder Karten für diesen Filter gefunden.</p>';
+
+  dom.legacySelectionTree.querySelectorAll('.legacy-tree-set-toggle').forEach((checkbox) => {
+    const setIndex = Number(checkbox.dataset.setIndex || '-1');
+    const setEntry = session.tree.sets[setIndex];
+    if (!setEntry) return;
+    const total = Array.isArray(setEntry.cards) ? setEntry.cards.length : 0;
+    const selected = Array.isArray(setEntry.cards) ? setEntry.cards.filter((card) => card?.selected !== false).length : 0;
+    checkbox.checked = selected > 0;
+    checkbox.indeterminate = selected > 0 && selected < total;
+  });
+}
+
+function closeLegacyImportSelectionDialog(result = null) {
+  const resolver = legacyImportSelectionDialogState?.resolve || null;
+  legacyImportSelectionDialogState = null;
+  dom.legacySelectionDialog?.close();
+  if (dom.legacySelectionSearch) dom.legacySelectionSearch.value = '';
+  if (dom.legacySelectionTree) dom.legacySelectionTree.innerHTML = '';
+  if (dom.legacySelectionSummary) dom.legacySelectionSummary.innerHTML = '';
+  if (dom.legacySelectionInfo) dom.legacySelectionInfo.textContent = '';
+  if (typeof resolver === 'function') resolver(result);
+}
+
+function setAllLegacyImportSelections(selected) {
+  const session = legacyImportSelectionDialogState;
+  if (!session) return;
+  session.tree.sets.forEach((setEntry) => {
+    setEntry.selected = Boolean(selected);
+    (setEntry.cards || []).forEach((card) => {
+      card.selected = Boolean(selected);
+    });
+  });
+  renderLegacyImportSelectionDialog();
+}
+
+function confirmLegacyImportSelectionDialog() {
+  const session = legacyImportSelectionDialogState;
+  if (!session) return;
+  const filteredPlan = filterLegacyImportPlanBySelection(session.plan, session.tree);
+  const summary = summarizeLegacyImportPlan(filteredPlan);
+  if (!summary.checkedCardCount) {
+    renderLegacyImportSelectionDialog();
+    return;
+  }
+  closeLegacyImportSelectionDialog(filteredPlan);
+}
+
+function handleLegacyImportSelectionTreeChange(event) {
+  const target = event.target;
+  const session = legacyImportSelectionDialogState;
+  if (!(target instanceof HTMLInputElement) || target.type !== 'checkbox' || !session) return;
+
+  const setIndex = Number(target.dataset.setIndex || '-1');
+  const setEntry = session.tree.sets[setIndex];
+  if (!setEntry) return;
+
+  if (target.dataset.selectionType === 'set') {
+    setEntry.selected = target.checked;
+    (setEntry.cards || []).forEach((card) => {
+      card.selected = target.checked;
+    });
+  } else if (target.dataset.selectionType === 'card') {
+    const cardIndex = Number(target.dataset.cardIndex || '-1');
+    const cardEntry = setEntry.cards?.[cardIndex];
+    if (!cardEntry) return;
+    cardEntry.selected = target.checked;
+    syncLegacyImportSelectionSetState(setEntry);
+  }
+
+  renderLegacyImportSelectionDialog();
+}
+
+function handleLegacyImportSelectionTreeToggle(event) {
+  const session = legacyImportSelectionDialogState;
+  const details = event.target;
+  if (!(details instanceof HTMLDetailsElement) || !session) return;
+  const setIndex = Number(details.dataset.setIndex || '-1');
+  const setEntry = session.tree.sets?.[setIndex];
+  if (!setEntry) return;
+  setEntry.expanded = Boolean(details.open);
+  renderLegacyImportSelectionDialog();
+}
+
+function openLegacyImportSelectionDialog(plan, cardsBySetId) {
+  if (!dom.legacySelectionDialog || !dom.legacySelectionTree) {
+    const ok = window.confirm(`${buildLegacyImportPreviewText(plan)}\n\nImport jetzt anwenden?`);
+    return Promise.resolve(ok ? plan : null);
+  }
+
+  const tree = buildLegacyImportSelectionTree(plan, cardsBySetId);
+  tree.sets.forEach(syncLegacyImportSelectionSetState);
+  legacyImportSelectionDialogState = {
+    plan,
+    tree,
+    resolve: null
+  };
+
+  if (dom.legacySelectionSearch) {
+    dom.legacySelectionSearch.value = '';
+  }
+
+  renderLegacyImportSelectionDialog();
+  dom.legacySelectionDialog.showModal();
+  dom.legacySelectionSearch?.focus();
+
+  return new Promise((resolve) => {
+    legacyImportSelectionDialogState.resolve = resolve;
+  });
+}
+
+function openLegacySheetImportDialog() {
+  setLegacySheetDialogError('');
+  if (dom.legacySheetInput) {
+    dom.legacySheetInput.value = '';
+  }
+  dom.legacySheetDialog?.showModal();
+  dom.legacySheetInput?.focus();
+}
+
+async function submitLegacySheetImportDialog() {
+  const rawInput = String(dom.legacySheetInput?.value || '').trim();
+  const spreadsheetId = extractLegacySpreadsheetId(rawInput);
+  if (!spreadsheetId) {
+    setLegacySheetDialogError('Bitte einen gültigen Google-Sheets-Link oder eine Spreadsheet-ID eingeben.');
+    dom.legacySheetInput?.focus();
+    return;
+  }
+
+  dom.legacySheetDialog?.close();
+  await startLegacyWorkbookImport({
+    spreadsheetInput: spreadsheetId,
+    sourceLabel: 'Google Sheet'
+  });
+}
+
+async function startLegacyWorkbookImport(source = {}) {
+  const sourceFile = source instanceof Blob ? source : source?.file || null;
+  const spreadsheetInput = typeof source === 'string' ? source : source?.spreadsheetInput || '';
+  const sourceLabel = String(source?.sourceLabel || (sourceFile ? 'XLSX' : 'Google Sheet')).trim();
+  if (!sourceFile && !spreadsheetInput) return;
 
   setLoading(true, 'Analysiere Altbestand…');
   try {
-    const { plan, cardsBySetId } = await prepareLegacyWorkbookImport(file);
+    let workbook;
+    if (sourceFile) {
+      workbook = await loadLegacyWorkbookFromFile(sourceFile);
+    } else {
+      try {
+        workbook = await loadLegacyWorkbookFromSpreadsheetInput(spreadsheetInput);
+      } catch (err) {
+        if (err?.code !== 'legacy-drive-export-scope-required') throw err;
+
+        setGlobalStatus('Altbestand-Import benötigt eine einmalige Google-Freigabe…');
+        const allowUpgrade = window.confirm('Damit der Sheets-Link exakt wie der XLSX-Import ausgewertet wird, braucht der Tracker einmalig zusätzliche Google-Drive-Leseberechtigung. Jetzt Google-Freigabe aktualisieren?');
+        if (!allowUpgrade) {
+          throw new Error('Google-Berechtigung für den direkten Sheets-Link-Import wurde nicht erteilt.');
+        }
+
+        const reauthOk = await signIn({ forceConsent: true });
+        if (!reauthOk) {
+          throw new Error('Google-Anmeldung wurde nicht abgeschlossen. Bitte Popup erlauben und erneut versuchen.');
+        }
+
+        workbook = await loadLegacyWorkbookFromSpreadsheetInput(spreadsheetInput);
+      }
+    }
+
+    const { plan, cardsBySetId } = await prepareLegacyWorkbookImport(workbook, sourceLabel);
     const summary = summarizeLegacyImportPlan(plan);
 
     if (!summary.ok) {
@@ -4033,14 +4455,16 @@ async function startLegacyWorkbookImport(file) {
       return;
     }
 
-    const ok = window.confirm(`${buildLegacyImportPreviewText(plan)}\n\nImport jetzt anwenden?`);
-    if (!ok) {
+    setLoading(false);
+    setGlobalStatus(`Altbestand analysiert: ${summary.sheetCount} Sets, ${summary.checkedCardCount} markierte Karten. Bitte Auswahl prüfen.`);
+    const selectedPlan = await openLegacyImportSelectionDialog(plan, cardsBySetId);
+    if (!selectedPlan) {
       setGlobalStatus('Altbestand-Analyse abgeschlossen – Import nicht angewendet.');
       showToast('Altbestand analysiert. Es wurden noch keine Änderungen geschrieben.', 'info', 4500);
       return;
     }
 
-    await applyLegacyImportPlan(plan, cardsBySetId);
+    await applyLegacyImportPlan(selectedPlan, cardsBySetId);
   } catch (err) {
     const message = getErrorMessage(err, 'Unbekannter Fehler');
     console.error('[startLegacyWorkbookImport]', err);
@@ -4055,6 +4479,30 @@ function initBackupImportExport() {
   dom.btnExportBackup?.addEventListener('click', exportCollectionBackup);
   dom.btnImportBackup?.addEventListener('click', () => dom.backupFileInput?.click());
   dom.btnImportLegacyXlsx?.addEventListener('click', () => dom.legacyImportFileInput?.click());
+  dom.btnImportLegacySheet?.addEventListener('click', openLegacySheetImportDialog);
+  dom.btnLegacySheetCancel?.addEventListener('click', () => dom.legacySheetDialog?.close());
+  dom.btnLegacySheetImportConfirm?.addEventListener('click', submitLegacySheetImportDialog);
+  dom.legacySheetInput?.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    submitLegacySheetImportDialog();
+  });
+  dom.btnLegacySelectionAll?.addEventListener('click', () => setAllLegacyImportSelections(true));
+  dom.btnLegacySelectionNone?.addEventListener('click', () => setAllLegacyImportSelections(false));
+  dom.btnLegacySelectionCancel?.addEventListener('click', () => closeLegacyImportSelectionDialog(null));
+  dom.btnLegacySelectionConfirm?.addEventListener('click', confirmLegacyImportSelectionDialog);
+  dom.legacySelectionSearch?.addEventListener('input', renderLegacyImportSelectionDialog);
+  dom.legacySelectionTree?.addEventListener('change', handleLegacyImportSelectionTreeChange);
+  dom.legacySelectionTree?.addEventListener('click', (event) => {
+    if (event.target?.closest?.('.legacy-tree-summary-check')) {
+      event.stopPropagation();
+    }
+  }, true);
+  dom.legacySelectionTree?.addEventListener('toggle', handleLegacyImportSelectionTreeToggle, true);
+  dom.legacySelectionDialog?.addEventListener('cancel', (event) => {
+    event.preventDefault();
+    closeLegacyImportSelectionDialog(null);
+  });
 
   dom.backupFileInput?.addEventListener('change', async () => {
     const file = dom.backupFileInput.files?.[0];
@@ -4152,6 +4600,13 @@ function initDashboardControls() {
     renderDashboard();
   });
   dom.btnOpenSettings?.addEventListener('click', openSettingsDialog);
+  dom.btnOpenSupportHub?.addEventListener('click', openSupportHubDialog);
+  dom.supportHubDialog?.querySelectorAll('[data-support-kind]').forEach((button) => {
+    button.addEventListener('click', () => openSupportChannel(button.dataset.supportKind));
+  });
+  dom.supportHubDialog?.querySelectorAll('[data-action="close-support-hub"]').forEach((button) => {
+    button.addEventListener('click', () => dom.supportHubDialog.close());
+  });
   dom.btnOverviewSync?.addEventListener('click', syncOverviewFromApi);
   dom.btnOverviewPowerRefresh?.addEventListener('click', powerRefreshOverviewFromApi);
   dom.btnImportBatch?.addEventListener('click', openBatchImportDialog);
@@ -4877,8 +5332,156 @@ function hasRichCardDetails(card = {}) {
 function needsApiCardEnrichment(cards = []) {
   const sample = (Array.isArray(cards) ? cards : []).filter(Boolean).slice(0, 12);
   if (!sample.length) return false;
+
   const richCount = sample.filter((card) => hasRichCardDetails(card)).length;
-  return richCount < Math.max(1, Math.ceil(sample.length * 0.4));
+  const needsCardmarketUpgrade = sample.some((card) => {
+    const cardmarketUrl = String(card?.cardmarketUrl || card?.vera_cardmarket_url || card?.tcgdex_cardmarket_url || '').trim();
+    return !cardmarketUrl || isGeneratedCardmarketSearchUrl(cardmarketUrl);
+  });
+
+  return richCount < Math.max(1, Math.ceil(sample.length * 0.4)) || needsCardmarketUpgrade;
+}
+
+function sortSearchResults(results = []) {
+  return results.sort((left, right) => {
+    if (right.score !== left.score) return right.score - left.score;
+    const setCompare = String(left.set?.setName || '').localeCompare(String(right.set?.setName || ''), 'de', { sensitivity: 'base' });
+    if (setCompare !== 0) return setCompare;
+    return String(left.card?.number || '').localeCompare(String(right.card?.number || ''), undefined, { numeric: true, sensitivity: 'base' });
+  });
+}
+
+function getSearchResultKey(card = {}, set = null) {
+  const setId = String(set?.setId || '').trim();
+  const cardNumber = normalizeCardNumber(card?.number || '');
+  const fallbackName = normalizeSearchText(card?.name || '');
+  return `${setId}::${cardNumber || fallbackName || 'card'}`;
+}
+
+function getSearchResultsInOrder(resultsMap, orderedKeys = []) {
+  if (!(resultsMap instanceof Map)) return [];
+  if (!Array.isArray(orderedKeys) || !orderedKeys.length) {
+    return Array.from(resultsMap.values());
+  }
+
+  const orderedResults = [];
+  const seenKeys = new Set();
+
+  orderedKeys.forEach((key) => {
+    if (!resultsMap.has(key)) return;
+    orderedResults.push(resultsMap.get(key));
+    seenKeys.add(key);
+  });
+
+  resultsMap.forEach((value, key) => {
+    if (!seenKeys.has(key)) {
+      orderedResults.push(value);
+    }
+  });
+
+  return orderedResults;
+}
+
+function renderSearchToolbarMeta({
+  rawQuery = '',
+  searchScopeMode = SEARCH_SCOPE_IMPORTED,
+  resultCount = 0,
+  setsProcessed = 0,
+  totalSets = 0,
+  isSearching = false,
+  emptyMessage = '',
+} = {}) {
+  if (!dom.searchToolbarMeta) return;
+
+  const modeMeta = getSearchModeMeta(searchScopeMode);
+  const safeResultCount = Number.isFinite(resultCount) ? Math.max(0, resultCount) : 0;
+  const progressSuffix = totalSets > 0
+    ? ` · ${Math.min(setsProcessed, totalSets)}/${totalSets} Sets`
+    : '';
+
+  let statusText = emptyMessage || 'Suchbegriff oben eingeben.';
+  if (!emptyMessage && rawQuery) {
+    if (isSearching) {
+      statusText = `${safeResultCount || '…'} Ergebnis${safeResultCount === 1 ? '' : 'se'} · Suche läuft${progressSuffix}`;
+    } else if (safeResultCount > 0) {
+      statusText = `${safeResultCount} Ergebnis${safeResultCount === 1 ? '' : 'se'} gefunden`;
+    } else {
+      statusText = `Keine Treffer${progressSuffix}`;
+    }
+  }
+
+  dom.searchToolbarMeta.innerHTML = `
+    <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
+    <span class="search-meta-pill${isSearching ? ' is-live' : ''}">${statusText}</span>
+  `;
+}
+
+function renderSearchResultsList(results = [], searchScopeMode, options = {}) {
+  if (!dom.searchResults) return;
+
+  const {
+    rawQuery = '',
+    setsProcessed = 0,
+    totalSets = 0,
+    isSearching = false,
+  } = options;
+
+  const safeResults = Array.isArray(results) ? results : [];
+  const modeMeta = getSearchModeMeta(searchScopeMode);
+  const progressSuffix = totalSets > 0
+    ? ` (${Math.min(setsProcessed, totalSets)}/${totalSets} Sets geprüft)`
+    : '';
+
+  renderSearchToolbarMeta({
+    rawQuery,
+    searchScopeMode,
+    resultCount: safeResults.length,
+    setsProcessed,
+    totalSets,
+    isSearching,
+  });
+
+  if (!safeResults.length) {
+    if (isSearching) {
+      dom.searchResults.innerHTML = `
+        <div class="search-results-head">
+          <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
+        </div>
+        <p class="loading-placeholder">Suche läuft…${progressSuffix}</p>
+      `;
+      return;
+    }
+
+    dom.searchResults.innerHTML = `
+      <div class="search-results-head">
+        <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
+      </div>
+      <p class="empty-state">Keine Karten für „${rawQuery}“ gefunden (durchsucht: ${totalSets} Sets, ${modeMeta.hint}).</p>
+    `;
+    return;
+  }
+
+  dom.searchResults.innerHTML = `
+    <div class="search-results-head">
+      <p class="search-result-count">${safeResults.length} Ergebnis${safeResults.length !== 1 ? 'se' : ''}${isSearching ? ' · Suche läuft…' : ''}</p>
+      <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
+    </div>
+  `;
+
+  const frag = document.createDocumentFragment();
+  safeResults.forEach(({ card, set, dbMap, apiOnly }) => {
+    const key = normalizeCardNumber(card.number);
+    frag.appendChild(createSearchResultCard(card, key, dbMap.get(key), set, apiOnly));
+  });
+
+  if (isSearching) {
+    const loading = document.createElement('p');
+    loading.className = 'loading-placeholder';
+    loading.textContent = `Suche läuft…${progressSuffix}`;
+    frag.appendChild(loading);
+  }
+
+  dom.searchResults.appendChild(frag);
 }
 
 async function runSearch(options = {}) {
@@ -4897,6 +5500,10 @@ async function runSearch(options = {}) {
   const searchScopeMode = getSearchScopeMode();
   if (!query) {
     state.lastSearchResults = [];
+    renderSearchToolbarMeta({
+      searchScopeMode,
+      emptyMessage: 'Suchbegriff oben eingeben.'
+    });
     dom.searchResults.innerHTML = '<p class="empty-state">Suchbegriff eingeben.</p>';
     return;
   }
@@ -4913,6 +5520,11 @@ async function runSearch(options = {}) {
   const mixedQuery = !structuredQuery ? parseMixedQuery(rawQuery) : null;
   if (!force && !structuredQuery && !mixedQuery && query.length < 2) {
     state.lastSearchResults = [];
+    renderSearchToolbarMeta({
+      rawQuery,
+      searchScopeMode,
+      emptyMessage: 'Mindestens 2 Zeichen eingeben oder Enter drücken.'
+    });
     dom.searchResults.innerHTML = '<p class="empty-state">Mindestens 2 Zeichen eingeben oder Enter drücken.</p>';
     return;
   }
@@ -4926,114 +5538,221 @@ async function runSearch(options = {}) {
     ? [baseSetsToSearch.find((s) => s.setId === structuredQuery.setId) ?? structuredQuery.set]
     : baseSetsToSearch;
   if (!setsToSearch.length) {
+    renderSearchToolbarMeta({
+      rawQuery,
+      searchScopeMode,
+      emptyMessage: 'Keine passenden Sets verfügbar.'
+    });
     dom.searchResults.innerHTML = '<p class="empty-state">Keine passenden Sets verfügbar.</p>';
     return;
   }
-  dom.searchResults.innerHTML = '<p class="loading-placeholder">Suche\u2026</p>';
-  const results = [];
+  renderSearchResultsList([], searchScopeMode, {
+    rawQuery,
+    setsProcessed: 0,
+    totalSets: setsToSearch.length,
+    isSearching: true,
+  });
+
+  const resultsMap = new Map();
+  const apiPhaseQueue = [];
+  let apiRenderOrderKeys = null;
+  let searchedSetsCount = 0;
+  let shouldStopSearch = false;
+
+  const upsertMatches = (cards, set, dbMap) => {
+    (Array.isArray(cards) ? cards : []).forEach((card) => {
+      const score = computeSearchScore(card, query, structuredQuery, mixedQuery, set);
+      if (score < 0) return;
+      const resultKey = getSearchResultKey(card, set);
+      const hadKey = resultsMap.has(resultKey);
+      resultsMap.set(resultKey, {
+        card,
+        set,
+        dbMap,
+        score,
+        apiOnly: Boolean(card?.__searchApiOnly),
+        resultKey,
+      });
+      if (!hadKey && Array.isArray(apiRenderOrderKeys) && !apiRenderOrderKeys.includes(resultKey)) {
+        apiRenderOrderKeys.push(resultKey);
+      }
+    });
+  };
+
+  const renderCurrentResults = ({ isSearching = false, preserveSortedPrefix = false } = {}) => {
+    const currentResults = preserveSortedPrefix
+      ? getSearchResultsInOrder(resultsMap, apiRenderOrderKeys)
+      : Array.from(resultsMap.values());
+
+    if (!currentResults.length) return;
+    state.lastSearchResults = currentResults.slice(0, 60);
+    if (isStale() || isAborted()) return;
+    renderSearchResultsList(currentResults, searchScopeMode, {
+      rawQuery,
+      setsProcessed: searchedSetsCount,
+      totalSets: setsToSearch.length,
+      isSearching,
+    });
+  };
+
   for (const set of setsToSearch) {
     if (isStale() || isAborted()) return;
     try {
       const cacheKey = `cards_${set.setId}`;
       const dbCardsCacheKey = `db_cards_${set.setId}`;
+      const dbCacheKey = `db_${set.setId}`;
       const searchCacheKey = `${set.setId}::${searchScopeMode}`;
       const useApiForSet = shouldUseApiForSearchSet(searchScopeMode, set);
-      let cards;
-      if (state.searchCache.has(searchCacheKey)) {
-        cards = state.searchCache.get(searchCacheKey);
+
+      let dbCards = [];
+      if (cache.has(dbCardsCacheKey)) {
+        dbCards = cache.get(dbCardsCacheKey) || [];
       } else {
-        let dbCards = [];
-        if (cache.has(dbCardsCacheKey)) {
-          dbCards = cache.get(dbCardsCacheKey) || [];
-        } else {
-          dbCards = await readDbCardsForSet(set.setId).catch(() => []);
-          if (Array.isArray(dbCards) && dbCards.length > 0) {
-            cache.set(dbCardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
-          }
+        dbCards = await readDbCardsForSet(set.setId).catch(() => []);
+        if (Array.isArray(dbCards) && dbCards.length > 0) {
+          cache.set(dbCardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
         }
-
-        const hasDbCards = Array.isArray(dbCards) && dbCards.length > 0;
-        const shouldFetchApiCards = useApiForSet || (searchScopeMode === SEARCH_SCOPE_ALL && !hasDbCards);
-
-        if (shouldFetchApiCards) {
-          let apiCards = [];
-          if (cache.has(cacheKey)) {
-            apiCards = cache.get(cacheKey) || [];
-          } else {
-            const apiPayload = await fetchMergedCardsWithSetMeta(set.setId, { signal: abortController.signal }).catch(() => ({ cards: [], setMetaPatch: null }));
-            apiCards = Array.isArray(apiPayload?.cards) ? apiPayload.cards : [];
-            if (apiCards.length > 0) {
-              cache.set(cacheKey, apiCards, CONFIG.CACHE_TTL_MS);
-            }
-          }
-          cards = searchScopeMode === SEARCH_SCOPE_ONLINE
-            ? mergeSearchCards([], apiCards)
-            : mergeSearchCards(dbCards, apiCards);
-        } else {
-          cards = hasDbCards ? dbCards : [];
-        }
-
-        state.searchCache.set(searchCacheKey, cards || []);
       }
-      if (!cards || !cards.length) continue;
-      if (isStale() || isAborted()) return;
+
       let dbMap = new Map();
-      const dbCacheKey = `db_${set.setId}`;
       if (cache.has(dbCacheKey)) dbMap = cache.get(dbCacheKey);
       else {
         dbMap = await readSetCollectionMap(set.setName).catch(() => new Map());
         cache.set(dbCacheKey, dbMap, CONFIG.CACHE_TTL_MS);
       }
-      if (isStale() || isAborted()) return;
-      cards.forEach((card) => {
-        const score = computeSearchScore(card, query, structuredQuery, mixedQuery, set);
-        if (score >= 0) {
-          results.push({ card, set, dbMap, score, apiOnly: Boolean(card?.__searchApiOnly) });
-        }
-      });
-      if (!structuredQuery && !mixedQuery && results.length >= 200 && searchScopeMode === SEARCH_SCOPE_IMPORTED) break;
-      // Exakter Set+Nummer-Treffer (ohne Namensfilter) — kann frühzeitig abbrechen
-      if (structuredQuery?.cardNumber && !structuredQuery?.namePart && results.length >= 1) break;
+
+      const hasDbCards = Array.isArray(dbCards) && dbCards.length > 0;
+      const shouldFetchApiCards = shouldFetchApiCardsForSearchSet(searchScopeMode, set, hasDbCards);
+      const dbSearchCards = !useApiForSet && hasDbCards ? dbCards : [];
+
+      if (dbSearchCards.length > 0) {
+        upsertMatches(dbSearchCards, set, dbMap);
+        state.searchCache.set(searchCacheKey, dbSearchCards);
+      }
+
+      if (shouldFetchApiCards) {
+        apiPhaseQueue.push({ set, dbCards, dbMap, cacheKey, searchCacheKey });
+      }
+
+      if (!structuredQuery && !mixedQuery && resultsMap.size >= 200 && searchScopeMode === SEARCH_SCOPE_IMPORTED) {
+        shouldStopSearch = true;
+      }
+      if (structuredQuery?.cardNumber && !structuredQuery?.namePart && resultsMap.size >= 1 && !shouldFetchApiCards) {
+        shouldStopSearch = true;
+      }
     } catch (err) {
       if (err?.name === 'AbortError') {
         return;
       }
       console.warn('[runSearch] error for set', set.setId, err);
     }
+
+    searchedSetsCount += 1;
+
+    if (resultsMap.size > 0) {
+      renderCurrentResults({
+        isSearching: searchedSetsCount < setsToSearch.length || (!shouldStopSearch && apiPhaseQueue.length > 0),
+      });
+    }
+
+    if (shouldStopSearch) break;
   }
-  if (!results.length) {
+
+  if (shouldStopSearch) {
+    apiPhaseQueue.length = 0;
+  }
+
+  const hasPendingApiPhase = apiPhaseQueue.length > 0;
+  if (resultsMap.size > 0) {
+    const dbSortedResults = sortSearchResults(Array.from(resultsMap.values()));
+    apiRenderOrderKeys = hasPendingApiPhase
+      ? dbSortedResults.map((entry) => entry.resultKey)
+      : null;
+    state.lastSearchResults = dbSortedResults.slice(0, 60);
+
+    if (isStale() || isAborted()) return;
+    renderSearchResultsList(dbSortedResults, searchScopeMode, {
+      rawQuery,
+      setsProcessed: searchedSetsCount,
+      totalSets: setsToSearch.length,
+      isSearching: hasPendingApiPhase,
+    });
+  }
+
+  if (!shouldStopSearch && hasPendingApiPhase) {
+    for (let apiIndex = 0; apiIndex < apiPhaseQueue.length; apiIndex += 1) {
+      if (isStale() || isAborted()) return;
+      const { set, dbCards, dbMap, cacheKey, searchCacheKey } = apiPhaseQueue[apiIndex];
+
+      try {
+        let apiCards = [];
+        if (cache.has(cacheKey)) {
+          apiCards = cache.get(cacheKey) || [];
+        } else {
+          const apiPayload = await fetchMergedCardsWithSetMeta(set.setId, { signal: abortController.signal }).catch(() => ({ cards: [], setMetaPatch: null }));
+          apiCards = Array.isArray(apiPayload?.cards) ? apiPayload.cards : [];
+          if (apiCards.length > 0) {
+            cache.set(cacheKey, apiCards, CONFIG.CACHE_TTL_MS);
+          }
+        }
+
+        const mergedCards = searchScopeMode === SEARCH_SCOPE_ONLINE
+          ? mergeSearchCards([], apiCards)
+          : mergeSearchCards(dbCards, apiCards);
+
+        state.searchCache.set(searchCacheKey, mergedCards || []);
+
+        if (mergedCards.length > 0) {
+          upsertMatches(mergedCards, set, dbMap);
+          renderCurrentResults({
+            isSearching: apiIndex < apiPhaseQueue.length - 1,
+            preserveSortedPrefix: true,
+          });
+        }
+
+        if (structuredQuery?.cardNumber && !structuredQuery?.namePart && resultsMap.size >= 1) {
+          shouldStopSearch = true;
+        }
+      } catch (err) {
+        if (err?.name === 'AbortError') {
+          return;
+        }
+        console.warn('[runSearch] api phase error for set', set.setId, err);
+      }
+
+      if (shouldStopSearch) break;
+    }
+  }
+
+  if (!resultsMap.size) {
     const modeMeta = getSearchModeMeta(searchScopeMode);
+    renderSearchToolbarMeta({
+      rawQuery,
+      searchScopeMode,
+      resultCount: 0,
+      setsProcessed: setsToSearch.length,
+      totalSets: setsToSearch.length,
+      emptyMessage: `Keine Treffer · ${setsToSearch.length} Sets geprüft`
+    });
     dom.searchResults.innerHTML = `
       <div class="search-results-head">
         <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
       </div>
-      <p class="empty-state">Keine Karten f\u00fcr \u201e${rawQuery}\u201c gefunden (durchsucht: ${setsToSearch.length} Sets, ${modeMeta.hint}).</p>
+      <p class="empty-state">Keine Karten für „${rawQuery}“ gefunden (durchsucht: ${setsToSearch.length} Sets, ${modeMeta.hint}).</p>
     `;
     return;
   }
-  results.sort((left, right) => {
-    if (right.score !== left.score) return right.score - left.score;
-    const setCompare = String(left.set?.setName || '').localeCompare(String(right.set?.setName || ''), 'de', { sensitivity: 'base' });
-    if (setCompare !== 0) return setCompare;
-    return String(left.card?.number || '').localeCompare(String(right.card?.number || ''), undefined, { numeric: true, sensitivity: 'base' });
-  });
 
-  state.lastSearchResults = results.slice(0, 60);
+  const finalResults = sortSearchResults(Array.from(resultsMap.values()));
+  state.lastSearchResults = finalResults.slice(0, 60);
 
   if (isStale() || isAborted()) return;
-  const modeMeta = getSearchModeMeta(searchScopeMode);
-  dom.searchResults.innerHTML = `
-    <div class="search-results-head">
-      <p class="search-result-count">${results.length} Ergebnis${results.length !== 1 ? 'se' : ''}</p>
-      <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
-    </div>
-  `;
-  const frag = document.createDocumentFragment();
-  results.forEach(({ card, set, dbMap, apiOnly }) => {
-    const key = normalizeCardNumber(card.number);
-    frag.appendChild(createSearchResultCard(card, key, dbMap.get(key), set, apiOnly));
+  renderSearchResultsList(finalResults, searchScopeMode, {
+    rawQuery,
+    setsProcessed: setsToSearch.length,
+    totalSets: setsToSearch.length,
+    isSearching: false,
   });
-  dom.searchResults.appendChild(frag);
 }
 
 function createSearchResultCard(card, key, db, set, apiOnly = false) {
@@ -5117,8 +5836,7 @@ async function openSearchResultLightbox(card, set, { apiOnly = false } = {}) {
         }
 
         const hasDbCards = Array.isArray(dbCards) && dbCards.length > 0;
-        const shouldFetchApiCards = useApiForSet
-          || (searchScopeMode === SEARCH_SCOPE_ALL && !hasDbCards)
+        const shouldFetchApiCards = shouldFetchApiCardsForSearchSet(searchScopeMode, set, hasDbCards)
           || needsApiCardEnrichment(dbCards);
 
         if (!shouldFetchApiCards) {
@@ -5166,12 +5884,35 @@ async function openSearchResultLightbox(card, set, { apiOnly = false } = {}) {
   if (targetIndex < 0) return;
 
   state.currentSet = set;
+  syncRefreshControls();
   state.cards = cards;
   state.dbMap = dbMap;
   state.lightboxIndex = targetIndex;
   state.pendingSearchSetImport = Boolean(apiOnly || !set?.imported);
 
   openLightbox(targetIndex);
+}
+
+function shouldDismissMobileSearchKeyboard() {
+  try {
+    return Boolean(
+      window.matchMedia?.('(pointer: coarse)')?.matches
+      || /android|iphone|ipad|ipod|mobile/i.test(navigator.userAgent || '')
+    );
+  } catch {
+    return false;
+  }
+}
+
+function dismissSearchAutocomplete({ blurInput = false } = {}) {
+  const list = document.getElementById('search-autocomplete');
+  if (list) {
+    list.classList.add('hidden');
+  }
+
+  if (blurInput && dom.searchInput && typeof dom.searchInput.blur === 'function') {
+    window.requestAnimationFrame(() => dom.searchInput?.blur());
+  }
 }
 
 function initSearch() {
@@ -5199,6 +5940,7 @@ function initSearch() {
   dom.searchInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       clearTimeout(debounce);
+      dismissSearchAutocomplete({ blurInput: shouldDismissMobileSearchKeyboard() });
       runSearch({ force: true });
     }
   });
@@ -5389,6 +6131,7 @@ function createCardElement(card, key, db, index) {
     cm.textContent = '\uD83D\uDED2 CM';
     cm.title = isFallbackCardmarket ? 'Generierter Cardmarket-Suchlink' : 'Cardmarket-Produktseite';
     meta.appendChild(cm);
+    hydrateCardmarketLink(cm, card, { compact: true });
   }
 
   article.append(imgWrap, meta);
@@ -5411,9 +6154,88 @@ function createCardElement(card, key, db, index) {
   return article;
 }
 
+const cardmarketPriceSummaryCache = new Map();
+const cardmarketPriceSummaryPending = new Map();
+
 function isGeneratedCardmarketSearchUrl(url) {
   const value = String(url || '').trim().toLowerCase();
   return value.includes('cardmarket.com') && value.includes('/products/search') && value.includes('searchstring=');
+}
+
+function applyCardmarketPriceSummary(linkEl, summary, { compact = false } = {}) {
+  if (!(linkEl instanceof HTMLElement) || !summary) return;
+  if (summary.url) {
+    linkEl.href = summary.url;
+    linkEl.dataset.cardmarketUrl = summary.url;
+    linkEl.classList.toggle('card-cm-link-fallback', isGeneratedCardmarketSearchUrl(summary.url));
+  }
+  if (summary.title) linkEl.title = summary.title;
+  if (summary.label) {
+    linkEl.textContent = compact ? `🛒 CM · ${summary.label}` : `🛒 Cardmarket · ${summary.label}`;
+  }
+}
+
+async function loadCardmarketPriceSummary(card = {}) {
+  const normalizedUrl = String(card?.cardmarketUrl || '').trim();
+  const cacheKey = normalizedUrl || `${String(card?.setId || '').trim()}::${String(card?.number || '').trim()}::${String(card?.name || '').trim()}`;
+  if (!cacheKey.trim()) return null;
+
+  if (cardmarketPriceSummaryCache.has(cacheKey)) {
+    return cardmarketPriceSummaryCache.get(cacheKey);
+  }
+
+  if (cardmarketPriceSummaryPending.has(cacheKey)) {
+    return cardmarketPriceSummaryPending.get(cacheKey);
+  }
+
+  const pending = resolveCardmarketEntryForCard(card, {
+    cards: Array.isArray(state?.cards) ? state.cards : []
+  })
+    .then((entry) => {
+      const directUrl = entry?.cardmarketProductId
+        ? buildCardmarketProductUrl(entry.cardmarketProductId)
+        : normalizedUrl;
+      const summary = entry
+        ? {
+            label: formatCardmarketEntryLabel(entry),
+            title: formatCardmarketEntryTitle(entry),
+            url: directUrl
+          }
+        : null;
+      cardmarketPriceSummaryCache.set(cacheKey, summary);
+      cardmarketPriceSummaryPending.delete(cacheKey);
+      return summary;
+    })
+    .catch((error) => {
+      cardmarketPriceSummaryPending.delete(cacheKey);
+      throw error;
+    });
+
+  cardmarketPriceSummaryPending.set(cacheKey, pending);
+  return pending;
+}
+
+function hydrateCardmarketLink(linkEl, card, { compact = false } = {}) {
+  const cardmarketUrl = String(card?.cardmarketUrl || '').trim();
+  if (!(linkEl instanceof HTMLElement) || !cardmarketUrl) {
+    return;
+  }
+
+  const cacheKey = cardmarketUrl || `${String(card?.setId || '').trim()}::${String(card?.number || '').trim()}::${String(card?.name || '').trim()}`;
+  linkEl.dataset.cardmarketUrl = cardmarketUrl;
+  if (cardmarketPriceSummaryCache.has(cacheKey)) {
+    applyCardmarketPriceSummary(linkEl, cardmarketPriceSummaryCache.get(cacheKey), { compact });
+    return;
+  }
+
+  loadCardmarketPriceSummary(card)
+    .then((summary) => {
+      if (linkEl.dataset.cardmarketUrl !== cardmarketUrl) return;
+      applyCardmarketPriceSummary(linkEl, summary, { compact });
+    })
+    .catch((error) => {
+      console.warn('[cardmarket] price lookup failed', error);
+    });
 }
 
 function makeCheckbox(labelText, type, checked, disabled) {
@@ -5440,7 +6262,45 @@ function attachCheckboxListeners(article, db, key) {
   const gInput  = article.querySelector('input[data-type="g"]');
   const rhInput = article.querySelector('input[data-type="rh"]');
 
-  async function ensureDbEntry() {
+  async function ensureDbEntry({ checked = false, source = 'set-view' } = {}) {
+    const shouldAutoImport = shouldAutoImportForCollectionToggle({
+      checked,
+      pendingSearchSetImport: state.pendingSearchSetImport,
+      currentSetImported: state.currentSet?.imported
+    });
+
+    if (shouldAutoImport) {
+      const setToImport = state.currentSet;
+      const setId = String(setToImport?.setId || '').trim();
+      if (!setId) {
+        throw new Error('Set-ID für den automatischen Import fehlt.');
+      }
+
+      setLoading(true, `Importiere ${setToImport.setName}…`);
+      try {
+        const importPayload = await fetchMergedCardsWithSetMeta(setId).catch(() => ({ cards: [], setMetaPatch: null }));
+        const importCards = Array.isArray(importPayload?.cards) ? importPayload.cards : [];
+        if (!importCards.length) {
+          throw new Error('Keine Kartendaten für den automatischen Set-Import gefunden.');
+        }
+
+        const refreshedSet = await ensureSetImportedFromApi(setToImport, importCards, {
+          setMetaPatch: importPayload?.setMetaPatch || null,
+          showSuccessToast: true,
+          successMessage: `${setToImport.setName} wurde automatisch importiert.`,
+          source
+        });
+
+        state.currentSet = refreshedSet || { ...setToImport, imported: true };
+        state.pendingSearchSetImport = false;
+        state.dbMap = await readSetCollectionMap(state.currentSet.setName).catch(() => new Map());
+        cache.set(`db_${setId}`, state.dbMap, CONFIG.CACHE_TTL_MS);
+        db = state.dbMap.get(key) || db;
+      } finally {
+        setLoading(false);
+      }
+    }
+
     if (db?.gCell && db?.rhCell) return db;
     const ensured = await ensureCollectionEntry(state.currentSet.setName, db?.displayId || key);
     db.g = Boolean(db?.g);
@@ -5459,7 +6319,7 @@ function attachCheckboxListeners(article, db, key) {
     setCardSaveState(article, 'saving');
     beginTrackedWrite(`Karte #${db?.displayId || key} speichern`);
     try {
-      await ensureDbEntry();
+      await ensureDbEntry({ checked, source: 'set-grid' });
       const nextState = resolveCollectionToggleState(db, { isG: true, checked });
       await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, nextState.g);
       if (db?.rhCell && nextState.rh !== Boolean(db?.rh)) {
@@ -5490,13 +6350,13 @@ function attachCheckboxListeners(article, db, key) {
 
   rhInput.addEventListener('change', async () => {
     if (state.bulkMode) { rhInput.checked = !rhInput.checked; return; }
-    if (!db?.rhCell) { rhInput.checked = false; return; }
     const checked = rhInput.checked;
     const prevState = { g: Boolean(db?.g), rh: Boolean(db?.rh) };
     setCardSaveState(article, 'saving');
     beginTrackedWrite(`Karte #${db?.displayId || key} RH speichern`);
     try {
-      await ensureDbEntry();
+      await ensureDbEntry({ checked, source: 'set-grid-rh' });
+      if (!db?.rhCell) { rhInput.checked = false; return; }
       const nextState = resolveCollectionToggleState(db, { isG: false, checked });
       if (nextState.g !== Boolean(db?.g)) {
         await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, nextState.g);
@@ -5661,6 +6521,7 @@ function renderLightbox(index) {
     dom.lightboxCmLink.title = isFallbackCardmarket ? 'Generierter Cardmarket-Suchlink' : 'Cardmarket-Produktseite';
     dom.lightboxCmLink.classList.toggle('lightbox-cm-link-fallback', isFallbackCardmarket);
     dom.lightboxCmLink.classList.remove('hidden');
+    hydrateCardmarketLink(dom.lightboxCmLink, card, { compact: false });
   } else {
     dom.lightboxCmLink.classList.add('hidden');
     dom.lightboxCmLink.classList.remove('lightbox-cm-link-fallback');
@@ -6170,6 +7031,7 @@ async function loadCurrentSet(forceRefresh = false) {
   ensureSetSelectorOption(selected);
 
   state.currentSet = selected;
+  syncRefreshControls();
   sessionStorage.setItem('tcg_last_set', setId);
   syncSetNavLink(selected);
 
@@ -6199,9 +7061,6 @@ async function loadCurrentSet(forceRefresh = false) {
 
   try {
     const cardsCacheKey = `db_cards_${setId}`, dbCacheKey = `db_${setId}`;
-    const shouldAutoImportCurrentView = shouldAutoImportCurrentSet(selected, {
-      fromSearchJump: Boolean(state.pendingSearchSetImport)
-    });
     const allowApiFallback = getSearchScopeMode() === SEARCH_SCOPE_ONLINE || Boolean(state.pendingSearchSetImport) || !Boolean(selected.imported);
     if (forceRefresh) { cache.del(cardsCacheKey); cache.del(dbCacheKey); }
 
@@ -6221,15 +7080,6 @@ async function loadCurrentSet(forceRefresh = false) {
             const mergedCards = apiCards.length > 0 ? mergeSearchCards(dbCards, apiCards) : dbCards;
             cache.set(cardsCacheKey, mergedCards, CONFIG.CACHE_TTL_MS);
 
-            if (apiCards.length > 0 && shouldAutoImportCurrentView) {
-              ensureSetImportedFromApi(selected, apiCards, {
-                setMetaPatch: apiPayload?.setMetaPatch || null,
-                source: state.pendingSearchSetImport ? 'search-jump' : 'set-view'
-              }).catch((autoImportErr) => {
-                console.warn('[loadCurrentSet] auto-import failed for set', setId, autoImportErr);
-              });
-            }
-
             return mergedCards;
           }
           if (allowApiFallback) {
@@ -6237,14 +7087,6 @@ async function loadCurrentSet(forceRefresh = false) {
             const apiCards = Array.isArray(apiPayload?.cards) ? apiPayload.cards : [];
             if (apiCards.length > 0) {
               cache.set(cardsCacheKey, apiCards, CONFIG.CACHE_TTL_MS);
-              if (shouldAutoImportCurrentView) {
-                ensureSetImportedFromApi(selected, apiCards, {
-                  setMetaPatch: apiPayload?.setMetaPatch || null,
-                  source: state.pendingSearchSetImport ? 'search-jump' : 'set-view'
-                }).catch((autoImportErr) => {
-                  console.warn('[loadCurrentSet] auto-import failed for set', setId, autoImportErr);
-                });
-              }
             }
             return apiCards;
           }
@@ -6255,14 +7097,6 @@ async function loadCurrentSet(forceRefresh = false) {
 
     if (!Array.isArray(cards) || cards.length === 0) {
       throw new Error('Keine Kartendaten in der Datenbank gefunden. Bitte Set importieren/aktualisieren oder API-Fallback aktivieren.');
-    }
-
-    if (shouldAutoImportCurrentView && allowApiFallback && cards.length > 0) {
-      ensureSetImportedFromApi(selected, cards, {
-        source: state.pendingSearchSetImport ? 'search-jump-cache' : 'set-view-cache'
-      }).catch((autoImportErr) => {
-        console.warn('[loadCurrentSet] deferred auto-import failed for set', setId, autoImportErr);
-      });
     }
 
     state.cards = cards;
@@ -6956,6 +7790,7 @@ async function bootstrap() {
         return;
       }
       state.currentSet = null; state.cards = []; state.dbMap = new Map();
+      syncRefreshControls();
       syncSetNavLink(null);
       dom.cards.innerHTML = '';
       dom.statsSection.classList.add('hidden');
@@ -7337,68 +8172,11 @@ function initDashboardHoverPreview() {
   if (_featureInitFlags.hoverPreview) return;
   _featureInitFlags.hoverPreview = true;
 
-  if (window.matchMedia('(hover: none)').matches) return;
-  const grid = document.getElementById('dashboard-grid');
-  if (!grid) return;
-
-  let tip = document.getElementById('dash-hover-tip');
-  if (!tip) {
-    tip = document.createElement('div');
-    tip.id = 'dash-hover-tip';
-    tip.className = 'dash-hover-tip hidden';
-    document.body.appendChild(tip);
-  }
-
-  let currentCard = null;
-
-  grid.addEventListener('mouseover', (event) => {
-    const card = event.target.closest('.dash-set-card');
-    if (!card || card === currentCard) return;
-    currentCard = card;
-
-    let data = {};
-    try { data = JSON.parse(card.dataset.hoverData || '{}'); } catch (_) { data = {}; }
-    if (!data.name) return;
-
-    tip.innerHTML = data.imported
-      ? `
-        <p class="dhp-name">${data.name}</p>
-        <p class="dhp-hint">${data.series || ''}</p>
-        <div class="dhp-pct-bar"><div class="dhp-pct-fill" style="width:${data.percent || 0}%"></div></div>
-        <div class="dhp-row"><span>Gesammelt</span><strong>${data.collected || 0}/${data.total || 0}</strong></div>
-        <div class="dhp-row"><span>Fortschritt</span><strong>${data.percent || 0}%</strong></div>
-        ${data.rh > 0 ? `<div class="dhp-row"><span>Reverse Holos</span><strong>${data.rh}</strong></div>` : ''}
-      `
-      : `
-        <p class="dhp-name">${data.name}</p>
-        <p class="dhp-hint">Noch nicht importiert · ${data.total || '?'} Karten</p>
-      `;
-
-    tip.classList.remove('hidden');
-  });
-
-  grid.addEventListener('mousemove', (event) => {
-    if (!currentCard || tip.classList.contains('hidden')) return;
-    const margin = 12;
-    const tipW = tip.offsetWidth || 220;
-    const tipH = tip.offsetHeight || 140;
-    let left = event.clientX + margin;
-    let top = event.clientY + margin;
-    if (left + tipW > window.innerWidth) left = event.clientX - tipW - margin;
-    if (top + tipH > window.innerHeight) top = event.clientY - tipH - margin;
-    tip.style.left = `${Math.max(8, left)}px`;
-    tip.style.top = `${Math.max(8, top)}px`;
-  });
-
-  const hideTip = () => {
-    currentCard = null;
+  const tip = document.getElementById('dash-hover-tip');
+  if (tip) {
     tip.classList.add('hidden');
-  };
-
-  grid.addEventListener('mouseleave', hideTip);
-  grid.addEventListener('mouseout', (event) => {
-    if (!grid.contains(event.relatedTarget)) hideTip();
-  });
+    tip.remove();
+  }
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -7684,6 +8462,7 @@ function initSearchAutocomplete() {
     const items = [...list.querySelectorAll('.search-ac-item')];
     if (!items.length || list.classList.contains('hidden')) {
       if (event.key === 'Escape') hideList();
+      if (event.key === 'Enter') dismissSearchAutocomplete({ blurInput: shouldDismissMobileSearchKeyboard() });
       return;
     }
 
@@ -7693,9 +8472,13 @@ function initSearchAutocomplete() {
     } else if (event.key === 'ArrowUp') {
       event.preventDefault();
       selectedIndex = Math.max(selectedIndex - 1, 0);
-    } else if (event.key === 'Enter' && selectedIndex >= 0) {
+    } else if (event.key === 'Enter') {
       event.preventDefault();
-      applySelection(activeItems[selectedIndex]);
+      if (selectedIndex >= 0) {
+        applySelection(activeItems[selectedIndex]);
+      } else {
+        dismissSearchAutocomplete({ blurInput: shouldDismissMobileSearchKeyboard() });
+      }
       return;
     } else if (event.key === 'Escape') {
       hideList();

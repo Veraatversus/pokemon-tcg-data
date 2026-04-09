@@ -4,24 +4,23 @@
 
 export function initQuickFiltersUI(initialState = {}) {
   const filterContainer = document.getElementById('quick-filters-container');
-  if (!filterContainer) return;
+  const filterBar = document.getElementById('dashboard-view-tabs');
+  if (!filterContainer || !filterBar) return;
 
   const filters = [
-    { id: 'filter-completed', label: '✅ Abgeschlossen', key: 'completed' },
-    { id: 'filter-progress', label: '⏳ In Bearbeitung', key: 'inProgress' },
-    { id: 'filter-not-imported', label: '📦 Nicht importiert', key: 'notImported' },
-    { id: 'filter-favorites', label: '⭐ Favoriten', key: 'favoritesOnly' }
+    { id: 'filter-completed', label: 'Abgeschlossen', icon: '✓', key: 'completed', tone: 'done' },
+    { id: 'filter-progress', label: 'In Bearbeitung', icon: '◔', key: 'inProgress', tone: 'live' }
   ];
 
+  filterBar.classList.add('dashboard-filter-bar--ready');
   filterContainer.innerHTML = `
-    <div class="quick-filters-toolbar" role="toolbar" aria-label="Schnellfilter">
-      <span class="quick-filters-label">Schnellfilter:</span>
-      <div class="quick-filters-buttons">
-        ${filters
-          .map((f) => `<button class="quick-filter-btn" data-filter="${f.key}" id="${f.id}" type="button" aria-pressed="false">${f.label}</button>`)
-          .join('')}
-      </div>
-      <button class="quick-filter-reset btn-secondary" type="button">Zurücksetzen</button>
+    <div class="dashboard-status-cluster" role="group" aria-label="Statusfilter">
+      ${filters
+        .map((f) => `<button class="quick-filter-btn dashboard-filter-chip" data-filter="${f.key}" data-chip-tone="${f.tone}" id="${f.id}" type="button" aria-pressed="false" title="${f.label}"><span class="dashboard-filter-glyph" aria-hidden="true">${f.icon}</span><span>${f.label}</span></button>`)
+        .join('')}
+      <button class="quick-filter-reset btn-secondary dashboard-filter-reset" type="button" aria-label="Filter zurücksetzen" title="Filter zurücksetzen">
+        <span class="quick-filter-reset-icon" aria-hidden="true">↺</span>
+      </button>
     </div>
   `;
 
@@ -221,18 +220,6 @@ export function createSettingsPanel(currentSettings = {}, onSave) {
     { key: 'notificationsEnabled', label: 'Benachrichtigungen' }
   ];
 
-  const normalizeAutoImportMode = (value) => {
-    const normalized = String(value || '').trim().toLowerCase();
-    if (normalized === 'never' || normalized === 'always') return normalized;
-    return 'jump';
-  };
-
-  const autoImportOptions = [
-    { value: 'jump', label: 'Nur bei „Zum Set“' },
-    { value: 'never', label: 'Nie automatisch importieren' },
-    { value: 'always', label: 'Immer beim Öffnen importieren' }
-  ];
-
   const resolverOptions = [
     { value: 'tcgdex|vera|legacy', label: 'TCGDex > Vera > Legacy' },
     { value: 'vera|tcgdex|legacy', label: 'Vera > TCGDex > Legacy' },
@@ -258,7 +245,6 @@ export function createSettingsPanel(currentSettings = {}, onSave) {
   ];
 
   const currentMatrix = currentSettings.resolverMatrix || { set: {}, card: {} };
-  const currentAutoImportMode = normalizeAutoImportMode(currentSettings.autoImportMode);
 
   const toolGroups = [
     {
@@ -292,7 +278,8 @@ export function createSettingsPanel(currentSettings = {}, onSave) {
         ['dashboard-action-parity', '🧪 Pokecode-Parity-Test'],
         ['btn-export-backup', '💾 Backup exportieren'],
         ['btn-import-backup', '📥 Backup importieren'],
-        ['btn-import-legacy-xlsx', '🧬 Altbestand (.xlsx)']
+        ['btn-import-legacy-xlsx', '🧬 Altbestand (.xlsx)'],
+        ['btn-import-legacy-sheet', '🔗 Altbestand (Sheets-Link)']
       ]
     }
   ];
@@ -321,16 +308,6 @@ export function createSettingsPanel(currentSettings = {}, onSave) {
           <span>${s.label}</span>
         </label>
       `).join('')}
-
-      <div style="border:1px solid var(--color-border); border-radius:8px; padding:10px 12px; background: var(--color-surface); display:flex; flex-direction:column; gap:8px;">
-        <label for="settings-auto-import-mode" style="font-weight:600;">Auto-Import für API-Sets</label>
-        <select id="settings-auto-import-mode" data-key="autoImportMode" style="max-width: 320px;">
-          ${autoImportOptions.map((opt) => `<option value="${opt.value}" ${opt.value === currentAutoImportMode ? 'selected' : ''}>${opt.label}</option>`).join('')}
-        </select>
-        <p style="font-size:12px; color:var(--color-muted); margin:0; line-height:1.45;">
-          Standard ist <strong>nur bei „Zum Set“</strong>. Im Modus <strong>Immer</strong> bleibt der Hintergrund-Import bewusst über eine sichtbare Warteschlange gebremst.
-        </p>
-      </div>
 
       <div style="border:1px solid var(--color-border); border-radius:8px; padding:10px 12px; background: var(--color-surface);">
         <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600;">
@@ -385,6 +362,16 @@ export function createSettingsPanel(currentSettings = {}, onSave) {
       </div>
     </details>
 
+    <details style="border:1px solid var(--color-border); border-radius:8px; padding:10px 12px; background: var(--color-surface);">
+      <summary style="cursor:pointer; font-weight:700;">💬 Hilfe & Kontakt</summary>
+      <p style="font-size:12px; color:var(--color-muted); margin:8px 0 10px; line-height:1.45;">
+        Öffnet den Support-Hub für Bug-Reports, Feature-Wünsche und frühzeitige Zugangs-Anfragen.
+      </p>
+      <div style="display:flex; flex-wrap:wrap; gap:8px;">
+        <button class="btn-secondary" type="button" data-proxy-click="btn-open-support-hub">💬 Feedback & Zugang</button>
+      </div>
+    </details>
+
     <div style="display:flex; gap:8px; margin-top: 4px; flex-wrap: wrap;">
       <button class="btn-secondary" type="button" data-action="clear-history">🗑️ Suchverlauf löschen</button>
       <button class="btn-primary" type="button" data-action="save">💾 Speichern</button>
@@ -415,9 +402,6 @@ export function createSettingsPanel(currentSettings = {}, onSave) {
     panel.querySelectorAll('input[type="checkbox"]').forEach((input) => {
       updated[input.dataset.key] = input.checked;
     });
-
-    const autoImportSelect = panel.querySelector('select[data-key="autoImportMode"]');
-    updated.autoImportMode = normalizeAutoImportMode(autoImportSelect?.value);
 
     const matrix = { set: {}, card: {} };
     panel.querySelectorAll('select[data-resolver-scope][data-resolver-field]').forEach((select) => {

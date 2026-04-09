@@ -4,71 +4,60 @@
 [![Patreon](https://img.shields.io/badge/Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white)](https://www.patreon.com/bePatron?u=8336557)
 [![Ko-Fi](https://img.shields.io/badge/Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/Z8Z25AVR)
 
+This fork contains the raw data found within the [Pokémon TCG API](https://pokemontcg.io/) and adds Vera's automated branch pipeline plus Cardmarket enrichment for the tracker.
 
-This is a fork of the data found within the [Pokémon TCG API](https://pokemontcg.io/). Currently, the raw JSON files for all the card information can be found here.
+## Automation overview
 
-**🔄 Automatische Synchronisation:** Dieses Repository wird täglich automatisch mit dem Fork-Parent [JulienGitHub/pokemon-tcg-data](https://github.com/JulienGitHub/pokemon-tcg-data) synchronisiert (und folgt damit weiterhin der Originaldatenbasis).
+- **`master`** – minimal integration branch; receives the daily dual-upstream sync and the rebuilt static `cardmarket/` API artifacts.
+- **`dev`** – default development and preview branch; keeps the full app/docs and is verified before release.
+- **`release`** – stable deployment branch for GitHub Pages and the production snapshot.
 
-**🌐 GitHub Pages:** Die Daten sind auch über GitHub Pages verfügbar: [https://veraatversus.github.io/pokemon-tcg-data/](https://veraatversus.github.io/pokemon-tcg-data/)
+## Cardmarket static API
 
-If you find this data useful, consider donating via one of the links above to support the original project. All donations are greatly appreciated!
+The generated Cardmarket data lives at repo root under `cardmarket/` and is rebuilt from the current upstream Cardmarket feeds:
 
-# Downloading the data
+- `products_singles_6.json`
+- `price_guide_6.json`
 
-The easiest way to stay up to date and interact with the data is via the [Pokémon TCG API](http://pokemontcg.io/) and one of the associated SDKs. 
+Generated outputs include:
 
-**Alternative Möglichkeiten:**
-- **GitHub Pages:** Direkter Zugriff auf JSON-Dateien über [https://veraatversus.github.io/pokemon-tcg-data/](https://veraatversus.github.io/pokemon-tcg-data/)
-- **Git Clone:** `git clone https://github.com/Veraatversus/pokemon-tcg-data.git`
-- **Download:** Download als ZIP vom `release` Branch (stabile Version)
+- `cardmarket/meta.json`
+- `cardmarket/index/products.json`
+- `cardmarket/index/names.json`
+- `cardmarket/index/sets.json`
+- `cardmarket/index/tracker.json`
+- `cardmarket/sets/<setId>.json`
 
-# Version 1 and 2 Data
+Further operational details are documented in [`docs/`](docs/README.md).
 
-Version 1 data is no longer being maintained. The API for V1 will continue to receive new sets until August 1st, 2021. At this time, V1 of the API will be taken offline, and you MUST be using V2. You have a 6 month window to migrate to V2.
+## Downloading the data
 
-If you rely on the V1 data, I have provided a `v2_to_v1.rb` Ruby script that you can run to generate all the json files in v1 format.
+The easiest way to stay up to date and interact with the data is via the [Pokémon TCG API](http://pokemontcg.io/) and one of the associated SDKs. Otherwise, feel free to clone this repository or download a zip from the releases.
+
+## Version 1 and 2 Data
+
+Version 1 data is no longer being maintained. The API for V1 will continue to receive new sets until August 1st, 2021. At this time, V1 of the API will be taken offline, and you MUST be using V2.
+
+If you rely on the V1 data, the `v2_to_v1.rb` Ruby script can generate all JSON files in v1 format.
 
 To install Ruby: https://www.ruby-lang.org/en/documentation/installation/
 
 You will also need the `json` gem: `gem install json`.
 
-Finally, to run the script:
+Run the script with:
 
-```
+```bash
 ruby v2_to_v1.rb
 ```
 
-This will output all of the card data into `/cards/en/v1`.
+This outputs the card data into `/cards/en/v1`.
 
-# Branch Structure
+## Contributing
 
-Dieses Repository verwendet eine strukturierte Branch-Strategie:
+Please contribute when you see missing or incorrect data.
 
-- **`master`** - Spiegel-Branch, synchronisiert mit dem upstream Repository
-- **`dev`** - Standard-Entwicklungsbranch für eigene Änderungen
-- **`release`** - Stabiler Branch für GitHub Pages Deployment
-- **`feature/*`** - Feature-Branches für neue Funktionen
-
-📖 **Ausführliche Dokumentation:** Siehe [docs/README.md](docs/README.md) für den Dokumentationsindex und [docs/WORKFLOW_DOCUMENTATION.md](docs/WORKFLOW_DOCUMENTATION.md) für Details zu Workflows und Branch-Strategie.
-
-# Automated Workflows
-
-- **🔄 Sync with Upstream:** Täglich um 2:00 UTC automatische Synchronisation mit dem Original-Repository
-- **🔀 Merge to Release:** Automatisches Merge von `dev` zu `release` bei Updates
-- **🚀 Deploy Pages:** Automatisches Deployment zu GitHub Pages bei `release` Updates
-
-Alle Workflows können auch manuell über GitHub Actions getriggert werden.
-
-# Contributing
-
-Please contribute when you see missing and/or incorrect data.
-
-**For this fork:**
-1. Fork it ( https://github.com/Veraatversus/pokemon-tcg-data/fork )
-2. Create your feature branch (git checkout -b feature/my-new-feature)
-3. Commit your changes (git commit -am 'Add some feature')
-4. Push to the branch (git push origin feature/my-new-feature)
-5. Create a new Pull Request **against the `dev` branch**
-
-**For the original project:**
-- Please contribute directly to [PokemonTCG/pokemon-tcg-data](https://github.com/PokemonTCG/pokemon-tcg-data)
+1. Fork it (`https://github.com/[my-github-username]/pokemon-tcg-data/fork`)
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create a Pull Request

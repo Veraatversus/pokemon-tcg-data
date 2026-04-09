@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
-import { findMatchingTcgdexSet, resolvePreferredTcgdexSetBases } from '../js/pokecode-compat.js';
-import { buildCardRecordFromSources, resolveDisplayCard, resolveSeriesGroupInfo } from '../js/data/schema-contract.js';
+import { combineSetsForOverviewCompat, findMatchingTcgdexSet, resolvePreferredTcgdexSetBases } from '../js/pokecode-compat.js';
+import { buildCardRecordFromSources, resolveDisplayCard, resolveDisplaySet, resolveSeriesGroupInfo } from '../js/data/schema-contract.js';
 import { getCollectionUiState, resolveCollectionToggleState } from '../js/core/collection-state.js';
 import {
   buildCombinedSearchDropdownOptions,
   createSpreadsheetSwitchStatePatch,
-  resolveCombinedSearchSelection
+  resolveCombinedSearchSelection,
+  shouldFetchApiCardsForSearchSet
 } from '../js/core/utils.js';
 import { filterSetsBySeriesKey, getStatsSeriesLabel } from '../js/ui/stats-series.js';
 
@@ -111,6 +112,44 @@ function testSeriesGroupingUsesStableTcgdexKeyAcrossLocalizedLabels() {
   assert.equal(germanDisplay.label, 'Schwert & Schild', 'When a localized Vera label exists, it should remain available for UI display.');
 }
 
+function testGermanTcgdexSetAssetsFallbackToEnglishSummaryAssets() {
+  const [combined] = combineSetsForOverviewCompat({
+    primarySets: [{
+      id: 'sv1',
+      name: 'Karmesin & Purpur',
+      series: 'Karmesin & Purpur',
+      total: 198,
+      printedTotal: 198,
+      images: { logo: '', symbol: '' },
+      legalities: {},
+      releaseDate: '2023-03-31',
+      ptcgoCode: 'SVI'
+    }],
+    tcgdexSets: [{
+      id: 'sv1',
+      name: 'Scarlet & Violet',
+      logo: 'https://assets.tcgdex.net/en/sv/sv1/logo.webp',
+      symbol: 'https://assets.tcgdex.net/en/sv/sv1/symbol.webp',
+      abbreviation: { official: 'SVI' },
+      serie: { id: 'sv', name: 'Scarlet & Violet' }
+    }],
+    tcgdexResolvedSets: [{
+      id: 'sv1',
+      name: 'Karmesin & Purpur',
+      logo: '',
+      symbol: '',
+      abbreviation: { official: 'SVI' },
+      serie: { id: 'sv', name: 'Karmesin & Purpur' }
+    }],
+    customMappings: {},
+    mapPrimarySetToOverviewModel: (set) => ({ setId: set.id }),
+    toNumber: Number
+  }).map((set) => resolveDisplaySet(set));
+
+  assert.equal(combined.logoUrl, 'https://assets.tcgdex.net/en/sv/sv1/logo.webp');
+  assert.equal(combined.symbolUrl, 'https://assets.tcgdex.net/en/sv/sv1/symbol.webp');
+}
+
 function testCardResolverUsesTcgdexDetailFieldsWhenPrimaryDataIsMissing() {
   const merged = buildCardRecordFromSources({
     setId: 'swsh12pt5gg',
@@ -169,6 +208,21 @@ function testCardImageResolverDefaultsToTcgdexFirstPriority() {
 
   assert.equal(display.image, 'https://assets.tcgdex.net/de/sv/sv01/001/low.webp');
   assert.equal(display.imageLarge, 'https://assets.tcgdex.net/de/sv/sv01/001/high.webp');
+}
+
+function testCardmarketResolverPrefersDirectProductLinksOverSearchFallbacks() {
+  const display = resolveDisplayCard({
+    vera_number: '001',
+    vera_name: 'Tannza',
+    vera_cardmarket_url: 'https://www.cardmarket.com/de/Pokemon/Products/Singles?idProduct=696421',
+    tcgdex_cardmarket_url: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchString=SVI+001+Tannza'
+  });
+
+  assert.equal(
+    display.cardmarketUrl,
+    'https://www.cardmarket.com/de/Pokemon/Products/Singles?idProduct=696421',
+    'Display cards should surface the stable product URL when one source has already resolved it.'
+  );
 }
 
 function testCollectionUiKeepsRhToggleAvailableWithoutCollectedFlag() {
@@ -250,15 +304,22 @@ function testCombinedSearchSelectionKeepsModesAndImportedSetTargetsDistinct() {
     mode: 'imported',
     setId: 'sv1'
   });
+
+  assert.deepEqual(resolveCombinedSearchSelection('set:all:sv4'), {
+    mode: 'all',
+    setId: 'sv4'
+  });
 }
 
 function testCombinedSearchDropdownOptionsIncludeGlobalModesAndImportedSets() {
   const groups = buildCombinedSearchDropdownOptions([
-    { setId: 'sv1', setName: 'Scarlet & Violet' },
-    { setId: 'pal', setName: 'Paldea Evolved' }
+    { setId: 'sv1', setName: 'Scarlet & Violet', imported: true },
+    { setId: 'pal', setName: 'Paldea Evolved', imported: true },
+    { setId: 'sv4', setName: 'Paradox Rift', imported: false },
+    { setId: 'sv3', setName: 'Obsidian Flames', imported: false }
   ]);
 
-  assert.equal(groups.length, 2, 'Combined search dropdown should render one group for search scopes and one for imported sets.');
+  assert.equal(groups.length, 3, 'Combined search dropdown should render search scopes, imported sets, and marked non-imported sets.');
   assert.equal(groups[0]?.label, 'Suchbereich');
   assert.deepEqual(
     groups[0]?.options?.map((entry) => entry.value),
@@ -269,6 +330,33 @@ function testCombinedSearchDropdownOptionsIncludeGlobalModesAndImportedSets() {
     groups[1]?.options?.map((entry) => entry.value),
     ['sv1', 'pal']
   );
+  assert.equal(groups[2]?.label, 'Weitere Sets (noch nicht importiert)');
+  assert.deepEqual(
+    groups[2]?.options?.map((entry) => entry.value),
+    ['set:all:sv3', 'set:all:sv4']
+  );
+  assert.deepEqual(
+    groups[2]?.options?.map((entry) => entry.label),
+    ['Obsidian Flames', 'Paradox Rift']
+  );
+  assert.ok(
+    groups[2]?.options?.every((entry) => entry.mode === 'all' && entry.imported === false),
+    'Non-imported set options should stay selectable via all/API mode and be marked through metadata instead of verbose label text.'
+  );
+}
+
+function testImportedSearchFallsBackToApiWhenImportedSetHasNoDbCards() {
+  assert.equal(
+    shouldFetchApiCardsForSearchSet('imported', { imported: true, setId: 'sv11' }, false),
+    true,
+    'Imported-set search should still query the API when an imported set currently has no local DB cards.'
+  );
+
+  assert.equal(
+    shouldFetchApiCardsForSearchSet('imported', { imported: true, setId: 'sv11' }, true),
+    false,
+    'Imported-set search should stay on the DB path once imported cards are available locally.'
+  );
 }
 
 try {
@@ -277,14 +365,17 @@ try {
   testExactEnglishNameBeatsConflictingCode();
   testLocaleResolutionSkipsGerman404WhenSetIsKnownEnOnly();
   testSeriesGroupingUsesStableTcgdexKeyAcrossLocalizedLabels();
+  testGermanTcgdexSetAssetsFallbackToEnglishSummaryAssets();
   testCardResolverUsesTcgdexDetailFieldsWhenPrimaryDataIsMissing();
   testCardImageResolverDefaultsToTcgdexFirstPriority();
+  testCardmarketResolverPrefersDirectProductLinksOverSearchFallbacks();
   testCollectionUiKeepsRhToggleAvailableWithoutCollectedFlag();
   testStatsSeriesHelpersPreferDisplayNamesOverIds();
   testRhToggleAutoEnablesCollectedStatus();
   testSpreadsheetSwitchStatePatchClearsStaleCollectionState();
   testCombinedSearchSelectionKeepsModesAndImportedSetTargetsDistinct();
   testCombinedSearchDropdownOptionsIncludeGlobalModesAndImportedSets();
+  testImportedSearchFallsBackToApiWhenImportedSetHasNoDbCards();
   console.log('set-match-regression: ok');
 } catch (error) {
   console.error('set-match-regression: failed');

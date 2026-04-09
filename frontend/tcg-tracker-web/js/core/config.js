@@ -46,7 +46,7 @@ export const CONFIG = {
     'https://sheets.googleapis.com/$discovery/rest?version=v4',
     'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'
   ],
-  SCOPES: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.metadata.readonly',
+  SCOPES: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/drive.readonly',
 
   // ── Sheet-Namen ─────────────────────────────────────────────
   SHEETS: {
@@ -70,6 +70,21 @@ export const CONFIG = {
     TCGDEX_DE: 'https://api.tcgdex.net/v2/de',  // kein trailing slash!
     TCGDEX_EN: 'https://api.tcgdex.net/v2/en',
     VERA_BASE: 'https://veraatversus.github.io/pokemon-tcg-data'
+  },
+
+  // ── Support & Kontakt ───────────────────────────────────────
+  SUPPORT: {
+    CONTACT_EMAIL: 'veraatversus+tcg@gmail.com',
+    channels: {
+      bug: 'https://docs.google.com/forms/d/e/1FAIpQLSeDSU0GRKB6pDZPSXMoOwlsqXFjk0kcnGYyVAuB7zSJDO_HCw/viewform',
+      feature: 'https://docs.google.com/forms/d/e/1FAIpQLSeDSU0GRKB6pDZPSXMoOwlsqXFjk0kcnGYyVAuB7zSJDO_HCw/viewform',
+      access: 'https://docs.google.com/forms/d/e/1FAIpQLSeDSU0GRKB6pDZPSXMoOwlsqXFjk0kcnGYyVAuB7zSJDO_HCw/viewform'
+    },
+    fallbackUrls: {
+      bug: './impressum.html#projektkontakt',
+      feature: './impressum.html#projektkontakt',
+      access: './impressum.html#projektkontakt'
+    }
   },
 
   // ── Vera-API-Einstellungen ───────────────────────────────────

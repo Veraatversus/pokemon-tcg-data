@@ -7,6 +7,7 @@ import {
   resolvePreferredTcgdexSetBases
 } from '../pokecode-compat.js?v=20260507a';
 import { buildSetRecordFromSources, resolveDisplayCard, resolveDisplaySet } from './schema-contract.js?v=20260507a';
+import { promoteCardmarketUrlsForCards } from './cardmarket-data.js?v=20260510-cardmarket7';
 
 // ── Interne Hilfsfunktionen ──────────────────────────────────────
 
@@ -295,7 +296,13 @@ export async function fetchMergedCardsWithSetMeta(setId, { signal } = {}) {
     fetchJson: fetchJsonWithSignal
   });
 
-  const cards = naturalSort((allCards || []).map((card) => resolveDisplayCard(card)), 'number');
+  let cardRecords = allCards || [];
+  try {
+    cardRecords = await promoteCardmarketUrlsForCards(allCards || [], { signal });
+  } catch (error) {
+    console.warn('[cardmarket] direct-link promotion skipped', error);
+  }
+  const cards = naturalSort((cardRecords || []).map((card) => resolveDisplayCard(card)), 'number');
 
   // Set-Meta-Patch aus den beim Kartenabruf vorhandenen Setdaten zusammenbauen,
   // damit Overview/DB keine leeren tcgdex-Felder behalten.

@@ -1,7 +1,8 @@
-import { CONFIG, scopedStorageKey } from './config.js';
+import { CONFIG, scopedStorageKey } from './config.js?v=20260409-treeview1';
 
 const STORAGE_KEY = scopedStorageKey('tcg_tracker_token');
 const REDIRECT_STATE_KEY = scopedStorageKey('oauth_redirect_state');
+const AUTO_LOGIN_KEY = scopedStorageKey('tcg_tracker_auto_login');
 
 let tokenClient = null;
 let accessToken = null;
@@ -86,20 +87,31 @@ function saveToken(tokenResponse) {
     expires_at: Date.now() + expiresIn * 1000 - 60_000  // 1 Min. Puffer
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  localStorage.setItem(AUTO_LOGIN_KEY, '1');
   accessToken = tokenResponse.access_token;
   globalThis.gapi?.client?.setToken(tokenResponse);
 }
 
-function clearToken() {
+function clearToken(options = {}) {
+  const clearPersistentLogin = Boolean(options?.clearPersistentLogin);
   localStorage.removeItem(STORAGE_KEY);
+  if (clearPersistentLogin) localStorage.removeItem(AUTO_LOGIN_KEY);
   accessToken = null;
   globalThis.gapi?.client?.setToken(null);
+}
+
+function shouldAttemptAutoLogin() {
+  return localStorage.getItem(AUTO_LOGIN_KEY) === '1';
 }
 
 function buildRedirectOAuthUrl(forceConsent = false) {
   const redirectUri = `${location.origin}${location.pathname}`;
   const state = `oauth-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
   sessionStorage.setItem(REDIRECT_STATE_KEY, state);
+
+  const prompt = forceConsent
+    ? 'consent'
+    : (shouldAttemptAutoLogin() || accessToken ? '' : 'select_account');
 
   const params = new URLSearchParams({
     client_id: CONFIG.GOOGLE_CLIENT_ID,
@@ -108,7 +120,7 @@ function buildRedirectOAuthUrl(forceConsent = false) {
     scope: CONFIG.SCOPES,
     include_granted_scopes: 'true',
     state,
-    prompt: forceConsent || !accessToken ? 'consent' : ''
+    prompt
   });
 
   return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
@@ -163,6 +175,59 @@ async function tryRestoreToken() {
   }
 }
 
+async function trySilentSignIn() {
+  if (!gapiInited || !gisInited || !tokenClient || !shouldAttemptAutoLogin()) return false;
+
+  return new Promise((resolve) => {
+    let finished = false;
+    const finish = (result) => {
+      if (finished) return;
+      finished = true;
+      clearTimeout(timeout);
+      tokenClient.callback = () => {};
+      tokenClient.error_callback = undefined;
+      resolve(Boolean(result));
+    };
+
+    const timeout = setTimeout(() => {
+      console.warn('[trySilentSignIn] timed out');
+      finish(false);
+    }, 12000);
+
+    tokenClient.callback = async (response) => {
+      if (response?.error) {
+        console.warn('[trySilentSignIn] callback error:', response.error);
+        finish(false);
+        return;
+      }
+      try {
+        saveToken(response);
+        try {
+          await loadDiscoveryDocs();
+        } catch (discErr) {
+          console.warn('[trySilentSignIn] Discovery load failed, continuing:', discErr);
+        }
+        finish(true);
+      } catch (err) {
+        console.error('[trySilentSignIn]', err);
+        finish(false);
+      }
+    };
+
+    tokenClient.error_callback = (error) => {
+      console.warn('[trySilentSignIn] error_callback:', error);
+      finish(false);
+    };
+
+    try {
+      tokenClient.requestAccessToken({ prompt: '' });
+    } catch (err) {
+      console.warn('[trySilentSignIn requestAccessToken]', err);
+      finish(false);
+    }
+  });
+}
+
 // ── Öffentliche API ───────────────────────────────────────────────────────────
 
 /**
@@ -210,8 +275,21 @@ export async function initAuth() {
     console.log('[initAuth] attempting restore from localStorage...');
     const restored = await tryRestoreToken();
     console.log('[initAuth] restore result:', restored);
+    if (restored) {
+      console.log('[initAuth] complete');
+      return true;
+    }
+
+    if (shouldAttemptAutoLogin()) {
+      console.log('[initAuth] attempting silent reauth...');
+      const silentlyReauthed = await trySilentSignIn();
+      console.log('[initAuth] silent reauth result:', silentlyReauthed);
+      console.log('[initAuth] complete');
+      return silentlyReauthed;
+    }
+
     console.log('[initAuth] complete');
-    return restored;
+    return false;
   } catch (err) {
     console.error('[initAuth] failed:', err);
     throw err;
@@ -271,9 +349,10 @@ export function signIn(options = {}) {
     };
 
     try {
-      tokenClient.requestAccessToken({
-        prompt: forceConsent || !accessToken ? 'consent' : ''
-      });
+      const prompt = forceConsent
+        ? 'consent'
+        : (shouldAttemptAutoLogin() || accessToken ? '' : 'select_account');
+      tokenClient.requestAccessToken({ prompt });
     } catch (err) {
       console.error('[signIn requestAccessToken]', err);
       finish(false);
@@ -288,7 +367,7 @@ export function signOut() {
   if (accessToken && globalThis.google?.accounts?.oauth2?.revoke) {
     globalThis.google.accounts.oauth2.revoke(accessToken, () => {});
   }
-  clearToken();
+  clearToken({ clearPersistentLogin: true });
 }
 
 /** @returns {boolean} */

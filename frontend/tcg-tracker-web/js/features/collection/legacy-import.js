@@ -1,6 +1,6 @@
 import { normalizeCardNumber, toBoolean, colToA1 } from '../../core/utils.js';
 import { normalizeSetId, buildSetIdAliasCandidates } from '../../pokecode-compat.js';
-import { CONFIG } from '../../core/config.js';
+import { CONFIG } from '../../core/config.js?v=20260409-treeview1';
 
 const LEGACY_IGNORED_SHEETS = new Set([
   CONFIG.SHEETS.OVERVIEW,
@@ -34,6 +34,67 @@ function cleanLegacySetHeaderValue(value) {
     .trim();
 }
 
+function normalizeDriveFileBaseName(value) {
+  return String(value || '')
+    .trim()
+    .replace(/\.xlsx$/i, '')
+    .replace(/\s+/g, ' ')
+    .toLowerCase();
+}
+
+function isDriveXlsxFile(file = {}) {
+  const mimeType = String(file?.mimeType || '').trim().toLowerCase();
+  const extension = String(file?.fileExtension || '').trim().toLowerCase();
+  const name = String(file?.name || '').trim().toLowerCase();
+  return mimeType === LEGACY_XLSX_MIME || extension === 'xlsx' || name.endsWith('.xlsx');
+}
+
+export function pickPreferredLegacyDriveXlsxFile(sourceFile = {}, files = []) {
+  const targetBaseName = normalizeDriveFileBaseName(sourceFile?.name || '');
+  if (!targetBaseName) return null;
+
+  const sourceParents = new Set(Array.isArray(sourceFile?.parents) ? sourceFile.parents.filter(Boolean) : []);
+  const candidates = (Array.isArray(files) ? files : [])
+    .filter((file) => file?.id && isDriveXlsxFile(file))
+    .map((file) => {
+      const fileName = String(file?.name || '').trim();
+      const fileBaseName = normalizeDriveFileBaseName(fileName);
+      const candidateParents = Array.isArray(file?.parents) ? file.parents.filter(Boolean) : [];
+      let score = 0;
+
+      if (fileBaseName === targetBaseName) score += 300;
+      if (fileName.toLowerCase() === `${targetBaseName}.xlsx`) score += 40;
+      if (candidateParents.some((parentId) => sourceParents.has(parentId))) score += 80;
+      if (fileBaseName.includes(targetBaseName) || targetBaseName.includes(fileBaseName)) score += 10;
+
+      return {
+        file,
+        score,
+        modifiedAt: Date.parse(file?.modifiedTime || '') || 0
+      };
+    })
+    .filter((entry) => entry.score > 0)
+    .sort((left, right) => (right.score - left.score) || (right.modifiedAt - left.modifiedAt));
+
+  return candidates[0]?.file || null;
+}
+
+function escapeDriveQueryValue(value) {
+  return String(value || '')
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'");
+}
+
+export function extractLegacySpreadsheetId(input) {
+  const text = String(input || '').trim();
+  if (!text) return null;
+
+  const urlMatch = text.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/i);
+  if (urlMatch) return String(urlMatch[1]).trim();
+  if (/^[a-zA-Z0-9_-]{20,}$/.test(text)) return text;
+  return null;
+}
+
 function getSheetCell(sheet, address) {
   if (!sheet || typeof sheet !== 'object') return null;
   return sheet[address] ?? null;
@@ -51,11 +112,20 @@ function getSheetCellValue(sheet, address) {
 
 function getCellCommentText(cell) {
   if (!cell || typeof cell !== 'object') return '';
-  if (!Array.isArray(cell.c)) return '';
-  return cell.c
-    .map((entry) => String(entry?.t || entry?.text || '').trim())
-    .filter(Boolean)
-    .join('\n');
+  const parts = [];
+
+  const noteText = String(cell.note || cell.comment || '').trim();
+  if (noteText) parts.push(noteText);
+
+  if (Array.isArray(cell.c)) {
+    parts.push(
+      ...cell.c
+        .map((entry) => String(entry?.t || entry?.text || '').trim())
+        .filter(Boolean)
+    );
+  }
+
+  return parts.join('\n');
 }
 
 function extractSetIdFromText(text) {
@@ -328,6 +398,461 @@ export function summarizeLegacyImportPlan(plan) {
     unresolvedSheetCount: Array.isArray(plan?.unresolvedSheets) ? plan.unresolvedSheets.length : 0,
     unresolvedCardCount: Array.isArray(plan?.unresolvedCards) ? plan.unresolvedCards.length : 0
   };
+}
+
+function resolveLegacyCardDisplayName(card, fallback = '') {
+  return uniqueStrings([
+    card?.name,
+    card?.vera_name,
+    card?.tcgdex_name,
+    card?.localName,
+    fallback
+  ])[0] || String(fallback || '').trim();
+}
+
+export function buildLegacyImportSelectionTree(plan, cardsBySetId = {}) {
+  const matchedSets = Array.isArray(plan?.matchedSets) ? plan.matchedSets : [];
+
+  return {
+    sets: matchedSets.map((matchedSet) => {
+      const catalog = Array.isArray(cardsBySetId?.[matchedSet.setId]) ? cardsBySetId[matchedSet.setId] : [];
+      const cardNameByIdentifier = new Map();
+
+      catalog.forEach((card) => {
+        const fallbackId = pickCanonicalCardId(card);
+        const displayName = resolveLegacyCardDisplayName(card, fallbackId);
+        collectCardIdentifierCandidates(card).forEach((identifier) => {
+          if (identifier && !cardNameByIdentifier.has(identifier)) {
+            cardNameByIdentifier.set(identifier, displayName);
+          }
+        });
+      });
+
+      const cards = Array.isArray(matchedSet?.cards)
+        ? matchedSet.cards.map((card, index) => {
+            const normalizedCardId = normalizeCardNumber(card?.cardId || card?.sourceCardId || `${index + 1}`);
+            const fallbackName = String(card?.cardId || card?.sourceCardId || `Karte ${index + 1}`).trim();
+            return {
+              key: `${matchedSet.setId}:${normalizedCardId}:${index}`,
+              cardId: String(card?.cardId || '').trim(),
+              sourceCardId: String(card?.sourceCardId || '').trim(),
+              normalizedCardId,
+              name: cardNameByIdentifier.get(normalizedCardId) || resolveLegacyCardDisplayName(card, fallbackName),
+              g: Boolean(card?.g),
+              rh: Boolean(card?.g && card?.rh),
+              selected: true
+            };
+          })
+        : [];
+
+      return {
+        setId: String(matchedSet?.setId || '').trim(),
+        setName: String(matchedSet?.setName || '').trim(),
+        sheetName: String(matchedSet?.sheetName || '').trim(),
+        imported: Boolean(matchedSet?.imported),
+        selected: true,
+        expanded: false,
+        cards
+      };
+    })
+  };
+}
+
+export function filterLegacyImportPlanBySelection(plan, selectionTree) {
+  const matchedSets = Array.isArray(plan?.matchedSets) ? plan.matchedSets : [];
+  const selectedSets = Array.isArray(selectionTree?.sets) ? selectionTree.sets : [];
+  if (!selectedSets.length) {
+    return {
+      ...plan,
+      matchedSets: [],
+      missingSetIds: [],
+      stats: {
+        ...(plan?.stats || {}),
+        sheetCount: 0,
+        checkedCardCount: 0,
+        matchedCardCount: 0,
+        missingSetCount: 0
+      }
+    };
+  }
+
+  const selectedSetByKey = new Map(
+    selectedSets.map((set) => [`${String(set?.setId || '').trim()}::${String(set?.sheetName || '').trim()}`, set])
+  );
+
+  const filteredMatchedSets = matchedSets
+    .map((matchedSet) => {
+      const selection = selectedSetByKey.get(`${String(matchedSet?.setId || '').trim()}::${String(matchedSet?.sheetName || '').trim()}`);
+      if (selection?.selected === false) return null;
+
+      const selectedCards = Array.isArray(selection?.cards) ? selection.cards : [];
+      const selectedCardKeys = new Set(
+        selectedCards
+          .filter((card) => card?.selected !== false)
+          .map((card) => `${String(card?.key || '').trim()}::${String(card?.cardId || '').trim()}::${String(card?.sourceCardId || '').trim()}::${String(card?.normalizedCardId || '').trim()}`)
+      );
+
+      const cards = Array.isArray(matchedSet?.cards)
+        ? matchedSet.cards.filter((card, index) => {
+            if (!selectedCards.length) return true;
+            const normalizedCardId = normalizeCardNumber(card?.cardId || card?.sourceCardId || `${index + 1}`);
+            const key = `${String(matchedSet?.setId || '').trim()}:${normalizedCardId}:${index}`;
+            const compositeKey = `${key}::${String(card?.cardId || '').trim()}::${String(card?.sourceCardId || '').trim()}::${normalizedCardId}`;
+            return selectedCardKeys.has(compositeKey);
+          })
+        : [];
+
+      if (!cards.length) return null;
+      return {
+        ...matchedSet,
+        cards
+      };
+    })
+    .filter(Boolean);
+
+  const selectedSetIds = new Set(filteredMatchedSets.map((set) => set.setId));
+  const checkedCardCount = filteredMatchedSets.reduce((sum, set) => sum + (Array.isArray(set?.cards) ? set.cards.length : 0), 0);
+  const missingSetIds = (Array.isArray(plan?.missingSetIds) ? plan.missingSetIds : []).filter((setId) => selectedSetIds.has(setId));
+
+  return {
+    ...plan,
+    matchedSets: filteredMatchedSets,
+    missingSetIds,
+    stats: {
+      ...(plan?.stats || {}),
+      sheetCount: filteredMatchedSets.length,
+      checkedCardCount,
+      matchedCardCount: checkedCardCount,
+      missingSetCount: missingSetIds.length
+    }
+  };
+}
+
+function getGoogleSheetsCellValue(cellData = {}) {
+  const effective = cellData?.effectiveValue || cellData?.userEnteredValue || {};
+
+  if (typeof effective.boolValue === 'boolean') return effective.boolValue;
+  if (typeof cellData?.formattedValue === 'string' && cellData.formattedValue.trim()) return cellData.formattedValue;
+  if (typeof effective.stringValue === 'string') return effective.stringValue;
+  if (typeof effective.numberValue === 'number') return cellData?.formattedValue ?? effective.numberValue;
+  if (typeof effective.formulaValue === 'string') return effective.formulaValue;
+  return '';
+}
+
+const LEGACY_XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function ensureLegacySheetsApiReady(timeoutMs = 15000) {
+  const started = Date.now();
+  let discoveryAttempted = false;
+
+  while (Date.now() - started < timeoutMs) {
+    const gapiRef = globalThis.gapi;
+    const client = gapiRef?.client;
+    const sheetsGet = client?.sheets?.spreadsheets?.get;
+    if (typeof sheetsGet === 'function') {
+      return sheetsGet.bind(client.sheets.spreadsheets);
+    }
+
+    if (!discoveryAttempted && typeof client?.load === 'function') {
+      discoveryAttempted = true;
+      try {
+        await client.load('https://sheets.googleapis.com/$discovery/rest?version=v4');
+        const discoveredGet = client?.sheets?.spreadsheets?.get;
+        if (typeof discoveredGet === 'function') {
+          return discoveredGet.bind(client.sheets.spreadsheets);
+        }
+      } catch (err) {
+        console.warn('[ensureLegacySheetsApiReady] discovery load failed', err);
+      }
+    }
+
+    await sleep(150);
+  }
+
+  return null;
+}
+
+export function buildWorkbookFromGoogleSheetsSpreadsheet(spreadsheet) {
+  const workbook = { SheetNames: [], Sheets: {} };
+  const sheets = Array.isArray(spreadsheet?.sheets) ? spreadsheet.sheets : [];
+
+  sheets.forEach((sheetEntry, index) => {
+    const title = String(sheetEntry?.properties?.title || `Sheet ${index + 1}`).trim();
+    if (!title) return;
+
+    const rowData = Array.isArray(sheetEntry?.data?.[0]?.rowData) ? sheetEntry.data[0].rowData : [];
+    const sheet = {};
+    let maxCol = 1;
+    let maxRow = 1;
+
+    rowData.forEach((row, rowIndex) => {
+      const values = Array.isArray(row?.values) ? row.values : [];
+      if (values.length) {
+        maxCol = Math.max(maxCol, values.length);
+        maxRow = Math.max(maxRow, rowIndex + 1);
+      }
+
+      values.forEach((cellData, colIndex) => {
+        const value = getGoogleSheetsCellValue(cellData);
+        const note = String(cellData?.note || '').trim();
+        const hasValue = !(value === '' || value == null);
+        if (!hasValue && !note) return;
+
+        const address = `${colToA1(colIndex + 1)}${rowIndex + 1}`;
+        const cell = {};
+        if (hasValue) {
+          cell.v = value;
+          if (typeof cellData?.formattedValue === 'string' && cellData.formattedValue !== String(value)) {
+            cell.w = cellData.formattedValue;
+          }
+        }
+        if (note) {
+          cell.note = note;
+          cell.c = [{ t: note }];
+        }
+        sheet[address] = cell;
+      });
+    });
+
+    sheet['!ref'] = `A1:${colToA1(Math.max(maxCol, 1))}${Math.max(maxRow, 1)}`;
+    workbook.SheetNames.push(title);
+    workbook.Sheets[title] = sheet;
+  });
+
+  return workbook;
+}
+
+async function downloadDriveFileBlob(fileId, accessToken) {
+  const url = `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?alt=media`;
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  if (!response.ok) {
+    let detail = '';
+    try {
+      const payload = await response.json();
+      detail = String(payload?.error?.message || '').trim();
+    } catch {
+      detail = '';
+    }
+
+    const error = new Error(detail || response.statusText || `Drive-Download fehlgeschlagen (${response.status})`);
+    error.status = response.status;
+    throw error;
+  }
+
+  return response.blob();
+}
+
+async function tryLoadLegacyWorkbookFromSiblingDriveXlsx(spreadsheetId) {
+  const token = globalThis.gapi?.client?.getToken?.() || null;
+  const accessToken = String(token?.access_token || '').trim();
+  const oauthRef = globalThis.google?.accounts?.oauth2;
+
+  if (!accessToken) {
+    if (!oauthRef) return null;
+    const err = new Error('Für den direkten Google-Sheets-Import wird einmalig zusätzliche Google-Drive-Leseberechtigung benötigt.');
+    err.code = 'legacy-drive-export-scope-required';
+    throw err;
+  }
+
+  let metaResponse;
+  try {
+    metaResponse = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(spreadsheetId)}?fields=id,name,mimeType,parents`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      }
+    );
+  } catch (err) {
+    console.warn('[tryLoadLegacyWorkbookFromSiblingDriveXlsx] metadata fetch failed', err);
+    return null;
+  }
+
+  if (!metaResponse.ok) {
+    let detail = '';
+    try {
+      const payload = await metaResponse.json();
+      detail = String(payload?.error?.message || '').trim();
+    } catch {
+      detail = '';
+    }
+
+    if (metaResponse.status === 401 || /insufficient authentication scopes/i.test(detail)) {
+      const err = new Error('Für den direkten Google-Sheets-Import wird einmalig zusätzliche Google-Drive-Leseberechtigung benötigt.');
+      err.code = 'legacy-drive-export-scope-required';
+      throw err;
+    }
+
+    console.warn('[tryLoadLegacyWorkbookFromSiblingDriveXlsx] metadata lookup failed', metaResponse.status, detail || metaResponse.statusText);
+    return null;
+  }
+
+  const sourceFile = await metaResponse.json();
+  const sourceName = String(sourceFile?.name || '').trim();
+  if (!sourceName) return null;
+
+  const exactXlsxName = sourceName.toLowerCase().endsWith('.xlsx') ? sourceName : `${sourceName}.xlsx`;
+  const query = [
+    'trashed = false',
+    `mimeType = '${LEGACY_XLSX_MIME}'`,
+    `name = '${escapeDriveQueryValue(exactXlsxName)}'`
+  ].join(' and ');
+
+  let listResponse;
+  try {
+    listResponse = await fetch(
+      `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,mimeType,fileExtension,parents,modifiedTime)&pageSize=25&orderBy=modifiedTime desc`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      }
+    );
+  } catch (err) {
+    console.warn('[tryLoadLegacyWorkbookFromSiblingDriveXlsx] sibling list failed', err);
+    return null;
+  }
+
+  if (!listResponse.ok) {
+    let detail = '';
+    try {
+      const payload = await listResponse.json();
+      detail = String(payload?.error?.message || '').trim();
+    } catch {
+      detail = '';
+    }
+
+    if (listResponse.status === 401 || /insufficient authentication scopes/i.test(detail)) {
+      const err = new Error('Für den direkten Google-Sheets-Import wird einmalig zusätzliche Google-Drive-Leseberechtigung benötigt.');
+      err.code = 'legacy-drive-export-scope-required';
+      throw err;
+    }
+
+    console.warn('[tryLoadLegacyWorkbookFromSiblingDriveXlsx] sibling search failed', listResponse.status, detail || listResponse.statusText);
+    return null;
+  }
+
+  const listPayload = await listResponse.json();
+  const preferredFile = pickPreferredLegacyDriveXlsxFile(sourceFile, listPayload?.files || []);
+  if (!preferredFile?.id || preferredFile.id === spreadsheetId) return null;
+
+  try {
+    const blob = await downloadDriveFileBlob(preferredFile.id, accessToken);
+    if (blob && blob.size > 0) {
+      return loadLegacyWorkbookFromFile(blob);
+    }
+  } catch (err) {
+    if (err?.status === 401 || /insufficient authentication scopes/i.test(String(err?.message || ''))) {
+      const scopeErr = new Error('Für den direkten Google-Sheets-Import wird einmalig zusätzliche Google-Drive-Leseberechtigung benötigt.');
+      scopeErr.code = 'legacy-drive-export-scope-required';
+      throw scopeErr;
+    }
+    console.warn('[tryLoadLegacyWorkbookFromSiblingDriveXlsx] sibling download failed', err);
+  }
+
+  return null;
+}
+
+async function tryLoadLegacyWorkbookFromDriveExport(spreadsheetId) {
+  const token = globalThis.gapi?.client?.getToken?.() || null;
+  const accessToken = String(token?.access_token || '').trim();
+  const oauthRef = globalThis.google?.accounts?.oauth2;
+
+  if (!accessToken) {
+    if (!oauthRef) return null;
+    const err = new Error('Für den direkten Google-Sheets-Import wird einmalig zusätzliche Google-Drive-Leseberechtigung benötigt.');
+    err.code = 'legacy-drive-export-scope-required';
+    throw err;
+  }
+
+  const exportUrl = `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(spreadsheetId)}/export?mimeType=${encodeURIComponent(LEGACY_XLSX_MIME)}`;
+
+  let response;
+  try {
+    response = await fetch(exportUrl, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    });
+  } catch (err) {
+    console.warn('[tryLoadLegacyWorkbookFromDriveExport] export fetch failed', err);
+    return null;
+  }
+
+  if (response.ok) {
+    const blob = await response.blob();
+    if (blob && blob.size > 0) {
+      return loadLegacyWorkbookFromFile(blob);
+    }
+    return null;
+  }
+
+  let detail = '';
+  try {
+    const payload = await response.json();
+    detail = String(payload?.error?.message || '').trim();
+  } catch {
+    detail = '';
+  }
+
+  if (response.status === 401 || /insufficient authentication scopes/i.test(detail)) {
+    const err = new Error('Für den direkten Google-Sheets-Import wird einmalig zusätzliche Google-Drive-Leseberechtigung benötigt.');
+    err.code = 'legacy-drive-export-scope-required';
+    throw err;
+  }
+
+  console.warn('[tryLoadLegacyWorkbookFromDriveExport] falling back to grid data', response.status, detail || response.statusText);
+  return null;
+}
+
+export async function loadLegacyWorkbookFromSpreadsheetInput(input) {
+  const spreadsheetId = extractLegacySpreadsheetId(input);
+  if (!spreadsheetId) {
+    throw new Error('Ungültiger Google-Sheets-Link oder Spreadsheet-ID.');
+  }
+
+  const siblingXlsxWorkbook = await tryLoadLegacyWorkbookFromSiblingDriveXlsx(spreadsheetId);
+  if (siblingXlsxWorkbook) {
+    return siblingXlsxWorkbook;
+  }
+
+  const exportedWorkbook = await tryLoadLegacyWorkbookFromDriveExport(spreadsheetId);
+  if (exportedWorkbook) {
+    return exportedWorkbook;
+  }
+
+  const sheetsGet = await ensureLegacySheetsApiReady();
+  if (typeof sheetsGet !== 'function') {
+    throw new Error('Google Sheets API ist nicht bereit. Bitte kurz warten oder erneut anmelden.');
+  }
+
+  let response;
+  try {
+    response = await sheetsGet({
+      spreadsheetId,
+      includeGridData: true,
+      fields: 'sheets.properties(title),sheets.data.rowData.values(userEnteredValue,effectiveValue,formattedValue,note)'
+    });
+  } catch (err) {
+    const detail = err?.result?.error?.message || err?.message || err;
+    throw new Error(`Google-Sheet konnte nicht gelesen werden: ${detail}`);
+  }
+
+  const workbook = buildWorkbookFromGoogleSheetsSpreadsheet(response?.result || response);
+  if (!Array.isArray(workbook?.SheetNames) || !workbook.SheetNames.length) {
+    throw new Error('Im verknüpften Google-Sheet wurden keine Tabellenblätter gefunden.');
+  }
+  return workbook;
 }
 
 export async function loadLegacyWorkbookFromFile(file) {

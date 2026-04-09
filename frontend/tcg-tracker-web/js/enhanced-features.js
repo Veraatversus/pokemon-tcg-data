@@ -12,8 +12,7 @@ const DEFAULT_SETTINGS = {
   compactMode: false,
   autoBackup: false,
   notificationsEnabled: false,
-  expertResolverMode: false,
-  autoImportMode: 'jump'
+  expertResolverMode: false
 };
 
 function readJson(key, fallback) {
@@ -98,16 +97,22 @@ export function generateCollectionReport(collection = {}, sets = []) {
 }
 
 // Settings
+function sanitizeSettings(settings = {}) {
+  const normalized = settings && typeof settings === 'object' ? { ...settings } : {};
+  delete normalized.autoImportMode;
+  return normalized;
+}
+
 export function loadSettings() {
-  const stored = readJson(STORAGE_KEYS.settings, {});
+  const stored = sanitizeSettings(readJson(STORAGE_KEYS.settings, {}));
   return {
     ...DEFAULT_SETTINGS,
-    ...(stored && typeof stored === 'object' ? stored : {})
+    ...stored
   };
 }
 
 export function saveSettings(settings) {
-  return writeJson(STORAGE_KEYS.settings, settings || {});
+  return writeJson(STORAGE_KEYS.settings, sanitizeSettings(settings));
 }
 
 export function updateSetting(key, value) {

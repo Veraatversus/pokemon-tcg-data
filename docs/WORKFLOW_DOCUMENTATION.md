@@ -1,263 +1,167 @@
 # Branch-Strategie und Workflow-Dokumentation
 
-## Übersicht
+## Überblick
 
-Dieses Repository verwendet eine strukturierte Branch-Strategie, um automatische Updates vom Original-Repository zu ermöglichen und gleichzeitig eine stabile Version über GitHub Pages bereitzustellen.
+Dieses Repository nutzt eine feste Automationskette für Datenintegration, Cardmarket-Anreicherung und die Auslieferung der App:
 
-## Branch-Struktur
-
-### 🔵 `master` Branch (upstream)
-- **Zweck:** Spiegel des Original‑Repositories; wird automatisch vom upstream aktualisiert
-- **Updates:** Läuft täglich oder manuell durch den Sync‑Workflow gegen JulienGitHub/pokemon-tcg-data
-- **Verwendung:** Darf **nicht** für eigene Änderungen verwendet werden; dient nur zur Übernahme von upstream-Inhalten
-
-### 🟣 `dev` Branch (Default)
-- **Zweck:** Standard-Branch für Entwicklung und Pull Requests
-- **Updates:** Erhält eigene Änderungen über PRs/Merges
-- **Verwendung:** Basis für `feature/*` Branches und Merge-Quelle für `release`
-
-### 🟢 `release` Branch
-- **Zweck:** Stabiler Branch für GitHub Pages Deployment
-- **Updates:** Wird automatisch mit Änderungen aus `dev` aktualisiert
-- **Verwendung:** Dient als Quelle für GitHub Pages
-
-### 🟡 `feature/*` Branches
-- **Zweck:** Entwicklung neuer Features oder Änderungen
-- **Verwendung:** Temporäre Branches für Pull Requests gegen `dev` (der persönliche Arbeitsbranch)
-
-## Workflow-Diagramm
-
-```
-┌─────────────────────────────────────────────────────────┐
-│  Upstream Repository (JulienGitHub/pokemon-tcg-data)    │
-└────────────────────┬────────────────────────────────────┘
-                     │ Automatische Synchronisation
-                     │ (täglich um 2:00 UTC + manuell)
-                     ▼
-┌─────────────────────────────────────────────────────────┐
-│  master Branch                                           │
-│  - Empfängt Updates vom Upstream                        │
-│  - Wird nur als Referenz benutzt                        │
-└────────────────────┬────────────────────────────────────┘
-                     │ Manueller Merge
-                     ▼
-┌─────────────────────────────────────────────────────────┐
-│  dev Branch (eigene Basis)                              │
-│  - Ableitung von release als Ausgangspunkt             │
-│  - Hier werden Features zusammengeführt                │
-└────────────────────┬────────────────────────────────────┘
-                     │ Manueller Merge
-                     │ (workflow_dispatch)
-                     ▼
-┌─────────────────────────────────────────────────────────┐
-│  release Branch                                          │
-│  - Stabiler Branch                                       │
-│  - Quelle für GitHub Pages                              │
-└────────────────────┬────────────────────────────────────┘
-                     │ Automatisches Deployment
-                     │ (bei jedem Push)
-                     ▼
-┌─────────────────────────────────────────────────────────┐
-│  GitHub Pages                                            │
-│  https://veraatversus.github.io/pokemon-tcg-data/       │
-└─────────────────────────────────────────────────────────┘
+```text
+PokemonTCG + JulienGitHub
+  -> master
+  -> Build Cardmarket Data
+  -> dev
+  -> Verify Dev Preview
+  -> release
+  -> GitHub Pages
 ```
 
-## GitHub Actions Workflows
+## Branch-Rollen
 
-### 1. 🔄 Sync with Upstream (`sync-upstream.yml`)
+### 🔵 `master`
+- **Zweck:** minimaler Integrations- und Build-Branch
+- **Inhalt:** Rohdaten, `cardmarket/` Endpunkte, Build-Skripte, CI-Workflows
+- **Updates:** täglicher Dual-Upstream-Sync + automatischer Cardmarket-Rebuild
+- **Wichtig:** `frontend/` und `docs/` werden hier bewusst schlank gehalten
 
-**Trigger:**
-- Täglich um 2:00 UTC (automatisch)
-- Manuell über GitHub Actions UI
+### 🟣 `dev`
+- **Zweck:** Standard-Entwicklung, Preview und Review-Branch
+- **Inhalt:** vollständige App, Tests, Doku und Cardmarket-Integration
+- **Updates:** erhält `master` automatisch über den Promote-Workflow; bewahrt dabei `frontend/` und `docs/`
 
-**Ablauf:**
-1. Checkout des `master` Branches
-2. Hinzufügen des upstream Remotes (JulienGitHub/pokemon-tcg-data)
-3. Abrufen der neuesten Änderungen vom Upstream
-4. Überprüfung auf Updates
-5. Merge der upstream Änderungen in `master`
-6. Push zu origin/master
-7. Aktualisierung von `dev` erfolgt bewusst getrennt (manueller Merge/PR), damit eigene Änderungen kontrolliert bleiben.
+### 🟢 `release`
+- **Zweck:** stabile Produktionsversion für GitHub Pages
+- **Updates:** wird nach erfolgreicher `dev`-Verifikation automatisch oder manuell aus `dev` aktualisiert
+- **Hinweis:** die in GitHub sichtbaren Workflow-Definitionen werden aktuell von diesem Branch registriert
 
-**Bei Konflikten:**
-- Workflow schlägt fehl
-- Automatisches Erstellen eines GitHub Issues
-- Manuelle Konfliktlösung erforderlich
+### 🟡 `feature/*`
+- **Zweck:** isolierte Entwicklungsarbeit vor dem Merge nach `dev`
 
-### 2. 🔀 Merge to Release (`merge-to-release.yml`)
+---
 
-**Trigger:**
-- Manuell über GitHub Actions UI (`workflow_dispatch`)
+## Automationskette im Detail
 
-**Ablauf:**
-1. Checkout des `release` Branches
-2. Merge von `dev` in `release`
-3. Push zu origin/release
-4. Automatisches Triggern des GitHub Pages Deployments
-
-**Bei Konflikten:**
-- Workflow schlägt fehl
-- Automatisches Erstellen eines GitHub Issues
-- Manuelle Konfliktlösung erforderlich
-
-### 3. 🚀 Deploy to GitHub Pages (`deploy-pages.yml`)
-
-**Trigger:**
-- Bei jedem Push zum `release` Branch
-- Bei jedem Push zum `dev` Branch (Preview unter `/dev`)
-- Manuell über GitHub Actions UI
+### 1. 🔄 `Daily Sync All Upstreams to Master` (`sync-upstream.yml`)
+**Trigger:** täglich 02:00 UTC oder manuell per `workflow_dispatch`
 
 **Ablauf:**
-1. Checkout des `release` Branches
-2. Konfiguration von GitHub Pages
-3. Upload aller Dateien als Pages Artifact
-4. Deployment zu GitHub Pages
+1. Checkout von `master`
+2. Merge von `PokemonTCG/pokemon-tcg-data`
+3. Merge von `JulienGitHub/pokemon-tcg-data`
+4. Push nach `origin/master`
+5. Bei Konflikten: automatisches Issue mit Hinweisen zur manuellen Auflösung
 
-## Verwendung
+### 2. 💸 `Build Cardmarket Data` (`build-cardmarket-data.yml`)
+**Trigger:** automatisch nach erfolgreichem Upstream-Sync oder manuell
 
-### Manuelles Triggern von Workflows
+**Ablauf:**
+1. Root-Regressionen für die Cardmarket-Helfer laufen
+2. Aktuelle Cardmarket-Feeds werden geladen:
+   - `products_singles_6.json`
+   - `price_guide_6.json`
+3. Die statischen JSON-Endpunkte unter `cardmarket/` werden neu erzeugt
+4. Änderungen werden bei Bedarf direkt auf `master` committed
 
-1. Gehe zu "Actions" im GitHub Repository
-2. Wähle den gewünschten Workflow aus der Liste
-3. Klicke auf "Run workflow"
-4. Wähle den Branch (meist `master` für Sync oder `release` für manuellen Merge-Workflow)
-5. Klicke auf "Run workflow"
+### 3. 🔁 `Promote Master to Dev` (`propagate-master-to-dev-release.yml`)
+**Trigger:** automatisch nach erfolgreichem Cardmarket-Build oder manuell
 
-### Konfliktlösung
+**Ablauf:**
+1. Merge von `master` nach `dev`
+2. Wiederherstellung von `frontend/` und `docs/` aus dem vorherigen `dev`-Stand
+3. Push nach `origin/dev`
 
-#### Upstream Sync Konflikt
+### 4. ✅ `Verify Dev Preview` (`verify-dev-preview.yml`)
+**Trigger:** bei jedem Push nach `dev` oder manuell
+
+**Prüft:**
+- Cardmarket-Builder-Tests
+- gemeinsame Cardmarket-Helfer
+- Set-/Tracker-Regressionen
+- Vorhandensein der generierten `cardmarket`-Metadaten
+
+### 5. 🚀 `Promote Dev to Release` (`promote-dev-to-release.yml`)
+**Trigger:** automatisch nach erfolgreichem `Verify Dev Preview` oder manuell
+
+**Ablauf:**
+1. Merge von `dev` nach `release`
+2. Push nach `origin/release`
+3. dadurch anschließendes Pages-Deployment
+
+### 6. 🌐 `Deploy Pages (release root + dev preview)` (`deploy-pages.yml`)
+**Trigger:** Push nach `release` oder `dev`, zusätzlich manuell triggerbar
+
+**Ergebnis:**
+- `release` wird auf GitHub Pages im Root veröffentlicht
+- `dev` wird parallel als Vorschau unter `/dev` bereitgestellt
+
+### 7. 🛠️ `Manual Merge Dev to Release` (`merge-to-release.yml`)
+**Zweck:** manueller Fallback, falls die automatische Promotion bewusst ersetzt oder erneut ausgeführt werden soll
+
+---
+
+## Empfohlener manueller Testablauf
+
+Wenn die gesamte Pipeline in der richtigen Reihenfolge geprüft werden soll:
+
+1. **Actions → `Daily Sync All Upstreams to Master` → `Run workflow`**
+2. Abschluss von `Build Cardmarket Data` abwarten
+3. Prüfen, dass `Promote Master to Dev` gelaufen ist
+4. Prüfen, dass `Verify Dev Preview` für `dev` grün ist
+5. Optional: `Promote Dev to Release` oder `Manual Merge Dev to Release` auslösen
+6. `Deploy Pages (release root + dev preview)` kontrollieren
+
+---
+
+## Konfliktlösung
+
+### Upstream-Konflikt auf `master`
 
 ```bash
-# 1. Lokales Repository aktualisieren
-git fetch origin
 git checkout master
-git pull origin master
-
-# 2. Upstream hinzufügen (falls noch nicht vorhanden)
-git remote add upstream https://github.com/JulienGitHub/pokemon-tcg-data.git
-
-# 3. Upstream Änderungen abrufen
-git fetch upstream
-
-# 4. Merge und Konflikte lösen
-git merge upstream/master
-# Konflikte manuell in den betroffenen Dateien lösen
-
-# 5. Commit und Push
+git fetch --all
+git merge pokemontcg/master
+git merge julien/master
+# Konflikte lösen
 git add .
-git commit -m "Resolve merge conflict with upstream"
+git commit -m "Resolve dual-upstream sync conflict"
 git push origin master
 ```
 
-#### Release Merge Konflikt
+### Promotion-Konflikt `dev -> release`
 
 ```bash
-# 1. Lokales Repository aktualisieren
-git fetch origin
 git checkout release
-git pull origin release
-
-# 2. dev Branch mergen
-git merge origin/dev
-# Konflikte manuell in den betroffenen Dateien lösen
-
-# 3. Commit und Push
+git fetch origin dev
+git merge -X theirs origin/dev
+# Konflikte lösen
 git add .
-git commit -m "Resolve merge conflict from dev"
+git commit -m "Resolve dev to release promotion conflict"
 git push origin release
 ```
 
-### Eigene Änderungen beitragen
+---
 
-1. **Fork und Clone:**
-   ```bash
-   git clone https://github.com/Veraatversus/pokemon-tcg-data.git
-   cd pokemon-tcg-data
-   ```
+## Repository-Einstellungen
 
-2. **Feature Branch erstellen:**
-   ```bash
-   git checkout dev
-   git pull origin dev
-   git checkout -b feature/meine-aenderung
-   ```
+### Erforderlich
+1. **GitHub Pages** → Source: `GitHub Actions`
+2. **Actions permissions** → `Read and write permissions`
+3. **Branch Protection Rules** für `dev` und `release` empfohlen
 
-3. **Änderungen vornehmen und committen:**
-   ```bash
-   git add .
-   git commit -m "Beschreibung der Änderung"
-   git push origin feature/meine-aenderung
-   ```
-
-4. **Pull Request erstellen:**
-   - Gehe zu GitHub
-   - Erstelle einen Pull Request gegen den `dev` Branch
-   - Beschreibe deine Änderungen
-
-## Konfiguration
-
-### Erforderliche Repository-Einstellungen
-
-1. **GitHub Pages aktivieren:**
-   - Settings → Pages
-   - Source: "GitHub Actions"
-
-2. **Branch Protection Rules (empfohlen):**
-   - Schütze `master` und `release` Branches
-   - Require pull request reviews
-   - Require status checks to pass
-
-3. **Secrets (optional):**
-   - Keine zusätzlichen Secrets erforderlich
-   - `GITHUB_TOKEN` wird automatisch bereitgestellt
-
-### Anpassung der Sync-Zeit
-
-Um die automatische Sync-Zeit zu ändern, bearbeite `.github/workflows/sync-upstream.yml`:
+### Anpassung des Sync-Zeitplans
 
 ```yaml
 on:
   schedule:
-    # Format: "Minute Stunde * * *" (UTC)
-    - cron: '0 2 * * *'  # 2:00 UTC
-    # Beispiele:
-    # - cron: '0 */6 * * *'  # Alle 6 Stunden
-    # - cron: '0 0 * * 0'    # Jeden Sonntag um Mitternacht
+    - cron: '0 2 * * *'  # täglich 02:00 UTC
 ```
 
-## Fehlerbehandlung
-
-### Workflow schlägt fehl
-
-1. Prüfe die Workflow-Logs in GitHub Actions
-2. Suche nach automatisch erstellten Issues
-3. Folge den Anweisungen im Issue zur Behebung
-
-### Pages werden nicht aktualisiert
-
-1. Prüfe, ob der `release` Branch aktuell ist
-2. Prüfe die Logs des "Deploy to GitHub Pages" Workflows
-3. Stelle sicher, dass GitHub Pages in den Settings aktiviert ist
-
-### Upstream Repository hat sich geändert
-
-Falls sich die URL oder Struktur des upstream Repositories ändert:
-
-```bash
-# Upstream URL aktualisieren
-git remote set-url upstream <neue-upstream-url>
-
-# Workflow-Datei anpassen falls nötig
-# .github/workflows/sync-upstream.yml
-```
+---
 
 ## Best Practices
 
-1. **Nie direkt in `release` pushen** - Alle Änderungen sollten über `dev` erfolgen
-2. **Feature Branches verwenden** - Für alle Änderungen Feature Branches erstellen
-3. **Pull Requests nutzen** - Immer Pull Requests für Code Reviews verwenden
-4. **Workflows testen** - Workflows manuell triggern um sie zu testen
+1. **Nicht direkt auf `release` entwickeln**
+2. **Features zuerst über `dev` reviewen**
+3. **Den vollständigen Chain-Test mit dem Upstream-Sync starten**
+4. **`master` schlank halten; App-Logik bleibt in `dev`/`release`**
 5. **Issues beobachten** - Automatisch erstellte Issues zeitnah bearbeiten
 
 ## Wartung
@@ -282,8 +186,8 @@ uses: actions/checkout@v4
 ## Support und Dokumentation
 
 - **GitHub Issues:** Für Bugs und Feature Requests
-- **Fork-Parent (Workflow Upstream):** [JulienGitHub/pokemon-tcg-data](https://github.com/JulienGitHub/pokemon-tcg-data)
-- **Original Repository:** [PokemonTCG/pokemon-tcg-data](https://github.com/PokemonTCG/pokemon-tcg-data)
+- **Primärer Upstream:** [PokemonTCG/pokemon-tcg-data](https://github.com/PokemonTCG/pokemon-tcg-data)
+- **Sekundärer Overlay-Upstream:** [JulienGitHub/pokemon-tcg-data](https://github.com/JulienGitHub/pokemon-tcg-data)
 - **GitHub Pages:** [https://veraatversus.github.io/pokemon-tcg-data/](https://veraatversus.github.io/pokemon-tcg-data/)
 
 ## Lizenz
