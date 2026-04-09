@@ -3,6 +3,7 @@ cards/en/v1/
 .playwright-mcp/
 .playwright/
 .playwright-cli/
+*.swp
 generated/
 frontend/tcg-tracker-web/generated/
 frontend/tcg-tracker-web/cardmarket/
