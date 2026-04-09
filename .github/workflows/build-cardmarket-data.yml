@@ -51,7 +51,7 @@ jobs:
       - name: Commit generated Cardmarket data if changed
         id: commit_generated
         run: |
-          git add cardmarket frontend/tcg-tracker-web/cardmarket
+          git add cardmarket
           if git diff --cached --quiet; then
             echo "changed=false" >> $GITHUB_OUTPUT
             echo "No generated Cardmarket changes to commit"
