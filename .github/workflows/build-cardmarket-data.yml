@@ -1,0 +1,92 @@
+name: Build Cardmarket Data
+
+on:
+  workflow_run:
+    workflows:
+      - Daily Sync All Upstreams to Master
+    types:
+      - completed
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  build_cardmarket_data:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Verify Cardmarket build helper tests
+        run: node --test scripts/cardmarket/build-cardmarket-data.test.mjs
+
+      - name: Verify Cardmarket shared helper tests
+        run: node --test scripts/cardmarket/cardmarket-ui-helpers.test.mjs
+
+      - name: Verify tracker set-match regressions
+        run: node --test scripts/cardmarket/set-match-regression.test.mjs
+
+      - name: Build Cardmarket static JSON endpoints
+        run: node scripts/cardmarket/build-cardmarket-data.mjs
+
+      - name: Validate generated output exists
+        run: |
+          test -f cardmarket/meta.json
+          test -f cardmarket/index/sets.json
+          test -f cardmarket/index/products.json
+          test -f cardmarket/index/names.json
+          test -f cardmarket/index/tracker.json
+
+      - name: Commit generated Cardmarket data if changed
+        id: commit_generated
+        run: |
+          git add cardmarket
+          if git diff --cached --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No generated Cardmarket changes to commit"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git commit -m "chore: refresh generated cardmarket data"
+            git push origin master
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create issue on Cardmarket build failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '💸 Cardmarket Build Failed - Manual Review Required',
+              body: `The automated Cardmarket data build failed on \`master\`.
+
+              **Action Required:**
+              Please inspect the workflow logs, fix the build or schema issue, and rerun the workflow.
+
+              **Expected outputs:**
+              - \`cardmarket/meta.json\`
+              - \`cardmarket/index/sets.json\`
+              - \`cardmarket/index/products.json\`
+              - \`cardmarket/index/names.json\`
+              - \`cardmarket/index/tracker.json\`
+              - \`cardmarket/sets/<setId>.json\`
+              `,
+              labels: ['cardmarket', 'manual-action-required']
+            });
+            console.log('Created issue:', issue.data.number);
