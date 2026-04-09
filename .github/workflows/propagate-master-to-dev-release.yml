@@ -30,7 +30,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Merge master into dev
+      - name: Merge master into dev while preserving app/docs
         id: promote
         run: |
           echo "dev_updated=false" >> $GITHUB_OUTPUT
@@ -41,6 +41,11 @@ jobs:
           if git merge -X theirs origin/master --no-edit; then
             AFTER_COMMIT=$(git rev-parse HEAD)
             if [ "$BEFORE_COMMIT" != "$AFTER_COMMIT" ]; then
+              git restore --source="$BEFORE_COMMIT" --staged --worktree -- frontend docs || true
+              if ! git diff --quiet || ! git diff --cached --quiet; then
+                git add frontend docs
+                git commit --amend --no-edit
+              fi
               git push origin dev
               echo "dev_updated=true" >> $GITHUB_OUTPUT
             else

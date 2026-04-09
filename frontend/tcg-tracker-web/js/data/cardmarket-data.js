@@ -1,4 +1,15 @@
 import { CONFIG } from '../core/config.js';
+import {
+  buildCardmarketProductUrl as sharedBuildCardmarketProductUrl,
+  extractCardmarketProductId as sharedExtractCardmarketProductId,
+  formatCardmarketEntryLabel as sharedFormatCardmarketEntryLabel,
+  formatCardmarketEntryTitle as sharedFormatCardmarketEntryTitle,
+  getCardmarketBaseUrl as sharedGetCardmarketBaseUrl,
+  inferCardmarketExpansionIdFromCards as sharedInferCardmarketExpansionIdFromCards,
+  promoteCardmarketUrlsForCards as sharedPromoteCardmarketUrlsForCards,
+  resolveCardmarketEntryForCardFromSetPayload as sharedResolveCardmarketEntryForCardFromSetPayload,
+  resolveCardmarketEntryFromSetPayload as sharedResolveCardmarketEntryFromSetPayload,
+} from '../../../../scripts/cardmarket/lib/cardmarket-ui-helpers.mjs';
 
 const REMOTE_CARDMARKET_BASE = `${String(CONFIG?.APIS?.VERA_BASE || '').replace(/\/$/, '')}/cardmarket`;
 
@@ -19,22 +30,11 @@ function isLocalOrigin(origin = '') {
 }
 
 export function getCardmarketBaseUrl({ origin = globalThis?.location?.origin } = {}) {
-  const normalizedOrigin = String(origin || '').trim().replace(/\/$/, '');
-  if (isLocalOrigin(normalizedOrigin)) {
-    return `${normalizedOrigin}/cardmarket`;
-  }
-  return REMOTE_CARDMARKET_BASE;
+  return sharedGetCardmarketBaseUrl({ origin, remoteBase: REMOTE_CARDMARKET_BASE });
 }
 
 export function extractCardmarketProductId(url = '') {
-  const text = String(url || '').trim();
-  if (!text) return '';
-
-  const queryMatch = text.match(/[?&]idProduct=(\d+)/i);
-  if (queryMatch) return queryMatch[1];
-
-  const pathMatch = text.match(/\/(\d+)(?:[/?#]|$)/);
-  return pathMatch ? pathMatch[1] : '';
+  return sharedExtractCardmarketProductId(url);
 }
 
 function getCardmarketUrlFromCard(card = {}) {
@@ -47,18 +47,11 @@ function isGeneratedCardmarketSearchUrl(url = '') {
 }
 
 export function buildCardmarketProductUrl(productId, { language = 'de' } = {}) {
-  const normalizedProductId = String(productId || '').trim();
-  if (!/^\d+$/.test(normalizedProductId)) return '';
-  const normalizedLanguage = String(language || 'de').trim().toLowerCase() || 'de';
-  return `https://www.cardmarket.com/${encodeURIComponent(normalizedLanguage)}/Pokemon/Products?idProduct=${normalizedProductId}`;
+  return sharedBuildCardmarketProductUrl(productId, { language });
 }
 
 export function resolveCardmarketEntryFromSetPayload(setPayload = {}, productId = '') {
-  const normalizedProductId = String(productId || '').trim();
-  if (!normalizedProductId) return null;
-
-  const cards = Array.isArray(setPayload?.cards) ? setPayload.cards : [];
-  return cards.find((entry) => String(entry?.cardmarketProductId || '').trim() === normalizedProductId) || null;
+  return sharedResolveCardmarketEntryFromSetPayload(setPayload, productId);
 }
 
 function normalizeMatcherText(value = '') {
@@ -128,111 +121,11 @@ function extractPotentialPtcgoCodes(cards = []) {
 }
 
 export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {}, { nameIndex = null, trackerSetIndex = null } = {}) {
-  if (!Array.isArray(cards) || !cards.length) {
-    return '';
-  }
-
-  const counts = new Map();
-  cards.forEach((card) => {
-    const productId = extractCardmarketProductId(getCardmarketUrlFromCard(card));
-    if (!productId) return;
-
-    const expansionId = String(productIndex?.[productId]?.expansionId || '').trim();
-    if (!expansionId) return;
-
-    counts.set(expansionId, (counts.get(expansionId) || 0) + 1);
-  });
-
-  const highestDirectCount = counts.size ? Math.max(...counts.values()) : 0;
-
-  if (trackerSetIndex && typeof trackerSetIndex === 'object' && highestDirectCount < 2) {
-    const setIds = Array.from(new Set(cards.map((card) => String(card?.setId || '').trim().toLowerCase()).filter(Boolean)));
-    setIds.forEach((setId) => {
-      const expansionId = String(trackerSetIndex?.bySetId?.[setId] || '').trim();
-      if (!expansionId) return;
-      counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length, 3));
-    });
-
-    extractPotentialPtcgoCodes(cards).forEach((code) => {
-      const expansionId = String(trackerSetIndex?.byPtcgoCode?.[code] || '').trim();
-      if (!expansionId) return;
-      counts.set(expansionId, (counts.get(expansionId) || 0) + 2);
-    });
-  }
-
-  const highestCount = counts.size ? Math.max(...counts.values()) : 0;
-  if ((!counts.size || highestCount < 2) && nameIndex && typeof nameIndex === 'object') {
-    cards.forEach((card) => {
-      const normalizedNames = [card?.name, card?.vera_name, card?.tcgdex_name]
-        .map((value) => normalizeMatcherText(value))
-        .filter(Boolean);
-
-      normalizedNames.forEach((name) => {
-        const expansionIds = Array.isArray(nameIndex?.[name]) ? nameIndex[name] : [];
-        expansionIds.forEach((expansionId) => {
-          const normalizedExpansionId = String(expansionId || '').trim();
-          if (!normalizedExpansionId) return;
-          counts.set(normalizedExpansionId, (counts.get(normalizedExpansionId) || 0) + 1);
-        });
-      });
-    });
-  }
-
-  let resolvedExpansionId = '';
-  let resolvedCount = 0;
-  counts.forEach((count, expansionId) => {
-    if (count > resolvedCount) {
-      resolvedExpansionId = expansionId;
-      resolvedCount = count;
-    }
-  });
-
-  return resolvedExpansionId;
+  return sharedInferCardmarketExpansionIdFromCards(cards, productIndex, { nameIndex, trackerSetIndex });
 }
 
 export function resolveCardmarketEntryForCardFromSetPayload(card = {}, setPayload = {}) {
-  const normalizedCardNames = Array.from(new Set(
-    [card?.name, card?.vera_name, card?.tcgdex_name]
-      .map((value) => normalizeMatcherText(value))
-      .filter(Boolean)
-  ));
-  if (!normalizedCardNames.length) return null;
-
-  const cards = Array.isArray(setPayload?.cards) ? setPayload.cards : [];
-  if (!cards.length) return null;
-
-  const exactNameMatches = cards.filter((entry) => {
-    const normalizedEntryName = normalizeMatcherText(extractEntryBaseName(entry?.name || ''));
-    return normalizedEntryName && normalizedCardNames.includes(normalizedEntryName);
-  });
-  const candidatePool = exactNameMatches.length
-    ? exactNameMatches
-    : cards.filter((entry) => {
-        const normalizedEntryName = normalizeMatcherText(extractEntryBaseName(entry?.name || ''));
-        return normalizedEntryName && normalizedCardNames.some((normalizedCardName) => (
-          normalizedEntryName.includes(normalizedCardName) || normalizedCardName.includes(normalizedEntryName)
-        ));
-      });
-
-  if (!candidatePool.length) return null;
-  if (candidatePool.length === 1) return candidatePool[0];
-
-  const cardHintTokens = extractCardHintTokens(card);
-  const scoredCandidates = candidatePool
-    .map((entry, index) => {
-      const entryHintTokens = extractEntryHintTokens(entry?.name || '');
-      const overlapCount = cardHintTokens.filter((token) => entryHintTokens.includes(token)).length;
-      return {
-        entry,
-        index,
-        score: overlapCount,
-      };
-    })
-    .sort((left, right) => right.score - left.score || left.index - right.index);
-
-  if (!scoredCandidates.length) return null;
-  if (scoredCandidates[0].score > 0) return scoredCandidates[0].entry;
-  return scoredCandidates[0].entry;
+  return sharedResolveCardmarketEntryForCardFromSetPayload(card, setPayload);
 }
 
 function toFinitePrice(value) {
@@ -246,31 +139,11 @@ function formatEuroPrice(value) {
 }
 
 export function formatCardmarketEntryLabel(entry = {}) {
-  const prices = entry?.prices || {};
-  return formatEuroPrice(
-    prices.trend
-      ?? prices.avg
-      ?? prices.avg1
-      ?? prices.avg7
-      ?? prices.avg30
-      ?? prices.suggested
-      ?? prices.low
-  );
+  return sharedFormatCardmarketEntryLabel(entry);
 }
 
 export function formatCardmarketEntryTitle(entry = {}) {
-  const prices = entry?.prices || {};
-  const parts = [];
-
-  const trend = formatEuroPrice(prices.trend);
-  const avg = formatEuroPrice(prices.avg ?? prices.avg30 ?? prices.avg7 ?? prices.avg1);
-  const low = formatEuroPrice(prices.low);
-
-  if (trend) parts.push(`Trend ${trend}`);
-  if (avg) parts.push(`AVG ${avg}`);
-  if (low) parts.push(`Low ${low}`);
-
-  return parts.length ? `Cardmarket: ${parts.join(' · ')}` : 'Cardmarket-Produktseite';
+  return sharedFormatCardmarketEntryTitle(entry);
 }
 
 export async function loadCardmarketProductIndex({ signal, forceRefresh = false } = {}) {
@@ -357,43 +230,14 @@ export async function resolveCardmarketEntryForCard(card = {}, { cards = [], sig
 }
 
 export async function promoteCardmarketUrlsForCards(cards = [], { productIndex = null, setPayload = null, signal, forceRefresh = false } = {}) {
-  if (!Array.isArray(cards) || !cards.length) return Array.isArray(cards) ? cards : [];
-
-  const needsPromotion = cards.some((card) => isGeneratedCardmarketSearchUrl(getCardmarketUrlFromCard(card)));
-  if (!needsPromotion) return cards;
-
-  let resolvedSetPayload = setPayload;
-  if (!resolvedSetPayload) {
-    const [resolvedProductIndex, resolvedNameIndex, resolvedTrackerSetIndex] = await Promise.all([
-      productIndex ? Promise.resolve(productIndex) : loadCardmarketProductIndex({ signal, forceRefresh }),
-      loadCardmarketNameIndex({ signal, forceRefresh }),
-      loadCardmarketTrackerSetIndex({ signal, forceRefresh })
-    ]);
-    const expansionId = inferCardmarketExpansionIdFromCards(cards, resolvedProductIndex, {
-      nameIndex: resolvedNameIndex,
-      trackerSetIndex: resolvedTrackerSetIndex,
-    });
-    if (!expansionId) return cards;
-    resolvedSetPayload = await loadCardmarketSetPayload(expansionId, { signal, forceRefresh });
-  }
-
-  if (!resolvedSetPayload) return cards;
-
-  return cards.map((card) => {
-    const currentUrl = getCardmarketUrlFromCard(card);
-    if (!isGeneratedCardmarketSearchUrl(currentUrl)) return card;
-
-    const matchedEntry = resolveCardmarketEntryForCardFromSetPayload(card, resolvedSetPayload);
-    const directUrl = buildCardmarketProductUrl(matchedEntry?.cardmarketProductId);
-    if (!directUrl) return card;
-
-    return {
-      ...card,
-      cardmarketUrl: directUrl,
-      vera_cardmarket_url: directUrl,
-      tcgdex_cardmarket_url: directUrl,
-      cardmarketProductId: Number(matchedEntry?.cardmarketProductId || 0) || null,
-      cardmarketResolvedName: String(matchedEntry?.name || '').trim(),
-    };
+  return sharedPromoteCardmarketUrlsForCards(cards, {
+    productIndex,
+    setPayload,
+    signal,
+    forceRefresh,
+    loadProductIndex: productIndex ? null : ({ signal, forceRefresh } = {}) => loadCardmarketProductIndex({ signal, forceRefresh }),
+    loadNameIndex: ({ signal, forceRefresh } = {}) => loadCardmarketNameIndex({ signal, forceRefresh }),
+    loadTrackerSetIndex: ({ signal, forceRefresh } = {}) => loadCardmarketTrackerSetIndex({ signal, forceRefresh }),
+    loadSetPayload: (expansionId, { signal, forceRefresh } = {}) => loadCardmarketSetPayload(expansionId, { signal, forceRefresh }),
   });
 }

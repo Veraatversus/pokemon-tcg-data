@@ -11,7 +11,7 @@ import {
   promoteCardmarketUrlsForCards,
   resolveCardmarketEntryForCardFromSetPayload,
   resolveCardmarketEntryFromSetPayload,
-} from '../../../scripts/cardmarket/lib/cardmarket-ui-helpers.mjs';
+} from './lib/cardmarket-ui-helpers.mjs';
 
 test('getCardmarketBaseUrl prefers the local app origin during localhost development', () => {
   assert.equal(getCardmarketBaseUrl({ origin: 'http://localhost:8080' }), 'http://localhost:8080/cardmarket');

@@ -28,8 +28,8 @@ jobs:
       - name: Verify Cardmarket helper regressions
         run: node --test scripts/cardmarket/build-cardmarket-data.test.mjs
 
-      - name: Verify Cardmarket frontend helper regressions
-        run: node --test frontend/tcg-tracker-web/tests/cardmarket-data.test.mjs
+      - name: Verify Cardmarket shared helper regressions
+        run: node --test scripts/cardmarket/cardmarket-ui-helpers.test.mjs
 
       - name: Verify tracker set-match regressions
         run: node frontend/tcg-tracker-web/tests/set-match-regression.mjs
