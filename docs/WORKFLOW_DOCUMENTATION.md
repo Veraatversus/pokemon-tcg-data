@@ -78,7 +78,7 @@ PokemonTCG + JulienGitHub
 - Vorhandensein der generierten `cardmarket`-Metadaten
 
 ### 5. 🚀 `Promote Dev to Release` (`promote-dev-to-release.yml`)
-**Trigger:** automatisch nach erfolgreichem `Verify Dev Preview` oder manuell
+**Trigger:** bewusst **nur manuell** nach erfolgreichem `Verify Dev Preview`
 
 **Ablauf:**
 1. Merge von `dev` nach `release`
@@ -159,10 +159,12 @@ on:
 ## Best Practices
 
 1. **Nicht direkt auf `release` entwickeln**
-2. **Features zuerst über `dev` reviewen**
-3. **Den vollständigen Chain-Test mit dem Upstream-Sync starten**
-4. **`master` schlank halten; App-Logik bleibt in `dev`/`release`**
-5. **Issues beobachten** - Automatisch erstellte Issues zeitnah bearbeiten
+2. **Für neue Arbeit bevorzugt `feature/*` von `dev` abzweigen**
+3. **`dev -> release` bewusst manuell auslösen, nicht bei jedem Arbeits-Push**
+4. **Kein automatisches `release -> dev` bauen** - das würde unnötige Zyklen und Trigger-Kaskaden erzeugen
+5. **Den vollständigen Chain-Test mit dem Upstream-Sync starten**
+6. **`master` schlank halten; App-Logik bleibt in `dev`/`release`**
+7. **Issues beobachten** - Automatisch erstellte Issues zeitnah bearbeiten
 
 ## Wartung
 

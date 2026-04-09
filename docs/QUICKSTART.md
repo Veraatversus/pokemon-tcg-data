@@ -21,7 +21,7 @@ Wenn die komplette Pipeline in der korrekten Reihenfolge getestet oder ausgefüh
 | **Build Cardmarket Data** | nach erfolgreichem Sync + manuell | lädt aktuelle Cardmarket-Feeds und baut `cardmarket/` neu |
 | **Promote Master to Dev** | nach erfolgreichem Cardmarket-Build + manuell | übernimmt neue Integrationsstände nach `dev` |
 | **Verify Dev Preview** | bei jedem Push nach `dev` + manuell | überprüft die Preview-/Regressionstests |
-| **Promote Dev to Release** | nach erfolgreicher `dev`-Verifikation + manuell | bringt `dev` nach `release` |
+| **Promote Dev to Release** | manuell nach erfolgreicher `dev`-Verifikation | bringt `dev` nach `release` |
 | **Deploy Pages (release root + dev preview)** | Push zu `release`/`dev` + manuell | veröffentlicht Root + `/dev` Preview |
 
 ---
