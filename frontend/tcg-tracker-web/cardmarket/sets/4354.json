@@ -1,0 +1,389 @@
+{
+  "expansionId": 4354,
+  "cards": [
+    {
+      "cardmarketProductId": 571131,
+      "name": "Flareon [Fury Swipes | Burst Tail]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4354,
+      "metacardId": 343625,
+      "dateAdded": "2021-06-30 12:40:36",
+      "prices": {
+        "avg": 112.5,
+        "low": 89.99,
+        "trend": 89.08,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 571132,
+      "name": "Vaporeon [Healing Mist | Muddy Water]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4354,
+      "metacardId": 343626,
+      "dateAdded": "2021-06-30 12:40:59",
+      "prices": {
+        "avg": 162.49,
+        "low": null,
+        "trend": 127.24,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 571133,
+      "name": "Jolteon [Quick Attack | Raging Thunder]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4354,
+      "metacardId": 343627,
+      "dateAdded": "2021-06-30 12:41:34",
+      "prices": {
+        "avg": 165,
+        "low": 189,
+        "trend": 127.13,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 571134,
+      "name": "Slowpoke [Pound | Lazy Headbutt]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4354,
+      "metacardId": 343628,
+      "dateAdded": "2021-06-30 12:42:16",
+      "prices": {
+        "avg": 90,
+        "low": null,
+        "trend": 51.97,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 571135,
+      "name": "Slowbro [Oblivious | Hypnoblast]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4354,
+      "metacardId": 343629,
+      "dateAdded": "2021-06-30 12:42:43",
+      "prices": {
+        "avg": 154.95,
+        "low": 139.98,
+        "trend": 55.77,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 571136,
+      "name": "Slowking [Test of Luck | Madkinesis]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4354,
+      "metacardId": 343630,
+      "dateAdded": "2021-06-30 12:43:08",
+      "prices": {
+        "avg": 89.99,
+        "low": 300,
+        "trend": 36.5,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 571137,
+      "name": "Bayleef [Miracle Powder | Double Razor Leaf]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4354,
+      "metacardId": 343631,
+      "dateAdded": "2021-06-30 12:43:51",
+      "prices": {
+        "avg": 152.49,
+        "low": 275,
+        "trend": 58.32,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 571138,
+      "name": "Quilava [Shoot Embers | Take Down]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4354,
+      "metacardId": 343632,
+      "dateAdded": "2021-06-30 12:44:15",
+      "prices": {
+        "avg": 90,
+        "low": 225,
+        "trend": 37.4,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 571139,
+      "name": "Croconaw [Big Bite | Surf]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4354,
+      "metacardId": 343633,
+      "dateAdded": "2021-06-30 12:44:38",
+      "prices": {
+        "avg": 90,
+        "low": 70,
+        "trend": 60.54,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 571140,
+      "name": "Ivysaur [Poison Vine | Stomp]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4354,
+      "metacardId": 343634,
+      "dateAdded": "2021-06-30 12:45:16",
+      "prices": {
+        "avg": 45.63,
+        "low": 160,
+        "trend": 44.28,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 571141,
+      "name": "Charmeleon [Singe | Flame Tail]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4354,
+      "metacardId": 343635,
+      "dateAdded": "2021-06-30 12:45:49",
+      "prices": {
+        "avg": 66.5,
+        "low": 129,
+        "trend": 54.41,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 571142,
+      "name": "Wartortle [Wave Splash | Rapid Spin]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4354,
+      "metacardId": 343636,
+      "dateAdded": "2021-06-30 12:46:14",
+      "prices": {
+        "avg": 29.99,
+        "low": 350,
+        "trend": 40.83,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 571143,
+      "name": "Moltres [Fire Immunity | Energy Share | Super Singe]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4354,
+      "metacardId": 343637,
+      "dateAdded": "2021-06-30 12:46:44",
+      "prices": {
+        "avg": 92.45,
+        "low": 139.95,
+        "trend": 80.89,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 571144,
+      "name": "Articuno [Water Immunity | Energy Share | Para-Freeze]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4354,
+      "metacardId": 343638,
+      "dateAdded": "2021-06-30 12:47:14",
+      "prices": {
+        "avg": 212.49,
+        "low": 200,
+        "trend": 92.7,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 571145,
+      "name": "Zapdos [Anti-Lightning | Energy Share | Spark Shot]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4354,
+      "metacardId": 343639,
+      "dateAdded": "2021-06-30 12:47:42",
+      "prices": {
+        "avg": 118.31,
+        "low": 349.99,
+        "trend": 75.82,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 571146,
+      "name": "Dratini [Energy Draw | Dragon Bind]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4354,
+      "metacardId": 343640,
+      "dateAdded": "2021-06-30 12:50:48",
+      "prices": {
+        "avg": 265,
+        "low": 299.99,
+        "trend": 107.04,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 571147,
+      "name": "Dragonair [Dragon Shift | Hypnoblast]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4354,
+      "metacardId": 343641,
+      "dateAdded": "2021-06-30 12:51:14",
+      "prices": {
+        "avg": 160,
+        "low": 399.99,
+        "trend": 119.06,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 571148,
+      "name": "Dragonite [Dragon Aura | Spiral Wind]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4354,
+      "metacardId": 343642,
+      "dateAdded": "2021-06-30 12:51:51",
+      "prices": {
+        "avg": 732.5,
+        "low": 4000,
+        "trend": 477.99,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 571149,
+      "name": "Larvitar [Sand Attack]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4354,
+      "metacardId": 343643,
+      "dateAdded": "2021-06-30 12:52:21",
+      "prices": {
+        "avg": 31.25,
+        "low": 29.95,
+        "trend": 36.24,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 571150,
+      "name": "Pupitar [Rock Smash]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4354,
+      "metacardId": 343644,
+      "dateAdded": "2021-06-30 12:52:40",
+      "prices": {
+        "avg": 19.99,
+        "low": 15,
+        "trend": 16.78,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 571151,
+      "name": "Tyranitar ex [Scratch | Critical Crush]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4354,
+      "metacardId": 343645,
+      "dateAdded": "2021-06-30 12:53:10",
+      "prices": {
+        "avg": 33.99,
+        "low": 39.99,
+        "trend": 54.83,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 571152,
+      "name": "Imakuni?'s Whismur [Prevent from Talking | Whisper]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4354,
+      "metacardId": 343646,
+      "dateAdded": "2021-06-30 12:53:54",
+      "prices": {
+        "avg": 59.9,
+        "low": 33.9,
+        "trend": 45.65,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 571153,
+      "name": "Imakuni?'s Loudred [DecaVoice | \"\"______\"\" (←Write your name)]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4354,
+      "metacardId": 343647,
+      "dateAdded": "2021-06-30 12:54:39",
+      "prices": {
+        "avg": 48.88,
+        "low": 59.89,
+        "trend": 45.72,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 571154,
+      "name": "Imakuni?'s Exploud ex [Jaw Drop | \"\"______\"\" (←Write the name of a person you like)]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4354,
+      "metacardId": 343648,
+      "dateAdded": "2021-06-30 12:57:04",
+      "prices": {
+        "avg": 287.5,
+        "low": null,
+        "trend": 158.21,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    }
+  ]
+}

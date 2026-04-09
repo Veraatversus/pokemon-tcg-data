@@ -1,0 +1,501 @@
+{
+  "expansionId": 4248,
+  "cards": [
+    {
+      "cardmarketProductId": 564775,
+      "name": "Psyduck [Headache]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 267937,
+      "dateAdded": "2021-05-18 16:54:07",
+      "prices": {
+        "avg": 0.7,
+        "low": null,
+        "trend": 0.65,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564776,
+      "name": "Horsea [Water Arrow]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 226305,
+      "dateAdded": "2021-05-18 16:54:35",
+      "prices": {
+        "avg": 2.99,
+        "low": 2.99,
+        "trend": 2.99,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564777,
+      "name": "Staryu [Spinning Attack]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 234580,
+      "dateAdded": "2021-05-18 16:54:59",
+      "prices": {
+        "avg": null,
+        "low": 4,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564778,
+      "name": "Starmie GX [Star Stream | Spinning Attack | Hydro Pump GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 279897,
+      "dateAdded": "2021-05-18 16:55:30",
+      "prices": {
+        "avg": 3.5,
+        "low": 2.5,
+        "trend": 2.34,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564779,
+      "name": "Magikarp [Water Splash]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 265036,
+      "dateAdded": "2021-05-18 16:56:21",
+      "prices": {
+        "avg": 2,
+        "low": null,
+        "trend": 2.06,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564780,
+      "name": "Gyarados [Commotion | Wild Tail]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 265037,
+      "dateAdded": "2021-05-18 16:56:42",
+      "prices": {
+        "avg": 4.99,
+        "low": 4.99,
+        "trend": 5.04,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564781,
+      "name": "Lapras [Confuse Ray | Hydro Pump]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 267942,
+      "dateAdded": "2021-05-18 16:57:02",
+      "prices": {
+        "avg": null,
+        "low": 2.99,
+        "trend": 3.52,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564782,
+      "name": "Geodude [Tackle]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 279557,
+      "dateAdded": "2021-05-18 16:57:26",
+      "prices": {
+        "avg": 0.5,
+        "low": 0.5,
+        "trend": 0.5,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564783,
+      "name": "Graveler [Tackle | Mudslide]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 279587,
+      "dateAdded": "2021-05-18 16:57:49",
+      "prices": {
+        "avg": 0.5,
+        "low": null,
+        "trend": 0.5,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564784,
+      "name": "Golem [Rock Slide | Land Crush]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 279597,
+      "dateAdded": "2021-05-18 16:58:12",
+      "prices": {
+        "avg": 0.5,
+        "low": null,
+        "trend": 0.5,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564785,
+      "name": "Onix GX [Bind | Heavy Impact | Rocky Avalanche GX]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 279927,
+      "dateAdded": "2021-05-18 16:58:35",
+      "prices": {
+        "avg": 8.15,
+        "low": 15,
+        "trend": 7.86,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564786,
+      "name": "Cubone [Burdensome Bone]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 261239,
+      "dateAdded": "2021-05-18 16:58:58",
+      "prices": {
+        "avg": 4.98,
+        "low": null,
+        "trend": 4.98,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564787,
+      "name": "Rhyhorn [Lunge Out | Horn Drill]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 226338,
+      "dateAdded": "2021-05-18 16:59:15",
+      "prices": {
+        "avg": null,
+        "low": 2,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564788,
+      "name": "Rhydon [Rock Tumble | Megahorn]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 226405,
+      "dateAdded": "2021-05-18 16:59:35",
+      "prices": {
+        "avg": 0.5,
+        "low": null,
+        "trend": 1.08,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564789,
+      "name": "Sudowoodo [Reply Strongly]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 266269,
+      "dateAdded": "2021-05-18 16:59:53",
+      "prices": {
+        "avg": 0.5,
+        "low": null,
+        "trend": 0.5,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564790,
+      "name": "Acro Bike",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 211514,
+      "dateAdded": "2021-05-18 17:00:09",
+      "prices": {
+        "avg": null,
+        "low": null,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564791,
+      "name": "Nest Ball",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 224772,
+      "dateAdded": "2021-05-18 17:00:27",
+      "prices": {
+        "avg": 0.5,
+        "low": null,
+        "trend": 0.5,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564792,
+      "name": "Ultra Ball",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 218103,
+      "dateAdded": "2021-05-18 17:00:42",
+      "prices": {
+        "avg": null,
+        "low": 0.2,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564793,
+      "name": "Switch",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 224028,
+      "dateAdded": "2021-05-18 17:00:59",
+      "prices": {
+        "avg": null,
+        "low": 0.35,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564794,
+      "name": "Pokémon Catcher",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 218975,
+      "dateAdded": "2021-05-18 17:01:20",
+      "prices": {
+        "avg": null,
+        "low": 0.5,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564795,
+      "name": "Misty's Water Command",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 279957,
+      "dateAdded": "2021-05-18 17:01:37",
+      "prices": {
+        "avg": 6.99,
+        "low": 30,
+        "trend": 4.31,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564796,
+      "name": "Misty's Determination",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 224020,
+      "dateAdded": "2021-05-18 17:01:50",
+      "prices": {
+        "avg": 1,
+        "low": null,
+        "trend": 1.14,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564797,
+      "name": "Cynthia",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 236558,
+      "dateAdded": "2021-05-18 17:02:04",
+      "prices": {
+        "avg": 0.6,
+        "low": 0.45,
+        "trend": 0.5,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564798,
+      "name": "Brock's Grit",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 224013,
+      "dateAdded": "2021-05-18 17:02:17",
+      "prices": {
+        "avg": 2,
+        "low": 3,
+        "trend": 2,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564799,
+      "name": "Brock's Training",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 279627,
+      "dateAdded": "2021-05-18 17:02:31",
+      "prices": {
+        "avg": 4.99,
+        "low": 1.99,
+        "trend": 4.56,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564800,
+      "name": "Hau",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 224769,
+      "dateAdded": "2021-05-18 17:02:45",
+      "prices": {
+        "avg": null,
+        "low": 1.99,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564801,
+      "name": "Pokémon Center Lady",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 234717,
+      "dateAdded": "2021-05-18 17:02:57",
+      "prices": {
+        "avg": 2.5,
+        "low": null,
+        "trend": 2.5,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564802,
+      "name": "Lillie",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 224771,
+      "dateAdded": "2021-05-18 17:03:10",
+      "prices": {
+        "avg": 0.4,
+        "low": 0.4,
+        "trend": 0.4,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564803,
+      "name": "Misty's Cerulean City Gym",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 279522,
+      "dateAdded": "2021-05-18 17:03:25",
+      "prices": {
+        "avg": 2,
+        "low": null,
+        "trend": 2,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564804,
+      "name": "Brock's Pewter City Gym",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 279527,
+      "dateAdded": "2021-05-18 17:03:43",
+      "prices": {
+        "avg": null,
+        "low": 1,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564805,
+      "name": "Double Colorless Energy",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4248,
+      "metacardId": 224607,
+      "dateAdded": "2021-05-18 17:03:59",
+      "prices": {
+        "avg": null,
+        "low": 1.5,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    }
+  ]
+}

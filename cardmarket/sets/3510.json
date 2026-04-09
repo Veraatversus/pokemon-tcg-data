@@ -1,0 +1,85 @@
+{
+  "expansionId": 3510,
+  "cards": [
+    {
+      "cardmarketProductId": 506930,
+      "name": "Pikachu on the Ball [Tail Whap | Lightning Shot]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 3510,
+      "metacardId": 320395,
+      "dateAdded": "2020-10-19 15:54:35",
+      "prices": {
+        "avg": 175.73,
+        "low": 84,
+        "trend": 158.25,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 506935,
+      "name": "Eevee on the Ball [Make the Assist | Tackle]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 3510,
+      "metacardId": 320400,
+      "dateAdded": "2020-10-19 15:55:18",
+      "prices": {
+        "avg": 107.53,
+        "low": 54.99,
+        "trend": 87.64,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 506940,
+      "name": "Grookey on the Ball [Tenacious Defense | Razor Leaf]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 3510,
+      "metacardId": 320405,
+      "dateAdded": "2020-10-19 15:55:55",
+      "prices": {
+        "avg": 19.83,
+        "low": 17.99,
+        "trend": 20.71,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 569468,
+      "name": "Scorbunny on the Ball [Fiery Dribbling | Reckless Charge]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 3510,
+      "metacardId": 342833,
+      "dateAdded": "2021-06-17 10:15:24",
+      "prices": {
+        "avg": 17.36,
+        "low": 18.95,
+        "trend": 14.9,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 574871,
+      "name": "Sobble on the Ball [Spectacular Save | Rain Splash]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 3510,
+      "metacardId": 345396,
+      "dateAdded": "2021-09-07 16:30:10",
+      "prices": {
+        "avg": 20.6,
+        "low": 16.5,
+        "trend": 32.22,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    }
+  ]
+}

@@ -325,10 +325,23 @@ function buildCardmarketSearchUrl({ cardName = '', setTag = '', setName = '', ca
   return `https://www.cardmarket.com/de/Pokemon/Products/Search?searchString=${encodeCardmarketSearchString(searchString)}`;
 }
 
-function resolveCardmarketUrl({ tcgdexUrl = null, primaryUrl = null, cardName = '', setTag = '', setName = '', cardNumber = '' } = {}) {
-  const direct = [tcgdexUrl, primaryUrl]
+function isGeneratedCardmarketSearchUrl(url = '') {
+  const value = String(url || '').trim().toLowerCase();
+  return value.includes('cardmarket.com') && value.includes('/products/search') && value.includes('searchstring=');
+}
+
+function resolvePreferredCardmarketUrl(candidates = []) {
+  const normalized = candidates
     .map((value) => String(value || '').trim())
-    .find((value) => /^https?:\/\//i.test(value));
+    .filter((value) => /^https?:\/\//i.test(value));
+
+  if (!normalized.length) return '';
+  const direct = normalized.find((value) => !isGeneratedCardmarketSearchUrl(value));
+  return direct || normalized[0] || '';
+}
+
+function resolveCardmarketUrl({ tcgdexUrl = null, primaryUrl = null, cardName = '', setTag = '', setName = '', cardNumber = '' } = {}) {
+  const direct = resolvePreferredCardmarketUrl([primaryUrl, tcgdexUrl]);
 
   if (direct) return direct;
   return buildCardmarketSearchUrl({ cardName, setTag, setName, cardNumber });

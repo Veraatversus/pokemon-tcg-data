@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&display=swap" rel="stylesheet" />
   <link rel="apple-touch-icon" href="./assets/branding/logo-veras-pokemon.jpg?v=8" />
-  <link rel="stylesheet" href="./css/main.css?v=20260409-supporthub1" />
+  <link rel="stylesheet" href="./css/main.css?v=20260509-discoverybar2" />
   <link rel="stylesheet" href="./css/trading-marketplace.css?v=20260505e" />
 </head>
 <body class="dark">
@@ -226,23 +226,38 @@
     <div id="view-dashboard" class="view">
       <div class="view-header">
         <h2>Meine Sammlung</h2>
-        <div class="view-controls">
-          <input id="dash-filter" type="search" placeholder="Set, Code oder Serie suchen…" class="dash-filter-input" />
-          <select id="dash-series-filter">
-            <option value="">Alle Serien</option>
-          </select>
-          <select id="dash-sort">
-            <option value="series-date">Serie / Datum</option>
-            <option value="completion">Vollständigkeit</option>
-            <option value="name">Name A–Z</option>
-          </select>
-        </div>
-        <div id="dashboard-view-tabs" class="dashboard-view-tabs" role="tablist" aria-label="Dashboard-Ansicht">
-          <button class="dashboard-view-tab active" type="button" data-dashboard-view="all" aria-selected="true">Alle</button>
-          <button class="dashboard-view-tab" type="button" data-dashboard-view="imported" aria-selected="false">Importiert</button>
-          <button class="dashboard-view-tab" type="button" data-dashboard-view="not-imported" aria-selected="false">Nicht importiert</button>
-          <button class="dashboard-view-tab" type="button" data-dashboard-view="favorites" aria-selected="false">Favoriten</button>
-          <button id="btn-dashboard-compact" class="dashboard-view-tab" type="button" aria-pressed="false" title="Ansichtsdichte wechseln">Komfort</button>
+        <div class="dashboard-discovery-bar" aria-label="Suche und Filter">
+          <div class="view-controls dashboard-discovery-controls">
+            <input id="dash-filter" type="search" placeholder="Set, Code oder Serie suchen…" class="dash-filter-input" />
+            <select id="dash-series-filter">
+              <option value="">Alle Serien</option>
+            </select>
+            <select id="dash-sort">
+              <option value="series-date">Serie / Datum</option>
+              <option value="completion">Vollständigkeit</option>
+              <option value="name">Name A–Z</option>
+            </select>
+          </div>
+          <div id="dashboard-view-tabs" class="dashboard-view-tabs dashboard-filter-strip" role="toolbar" aria-label="Suchfilter">
+            <span class="dashboard-filter-kicker">Finder</span>
+            <div class="dashboard-filter-rail" role="group" aria-label="Dashboard-Filter">
+              <div class="dashboard-filter-segment dashboard-filter-segment--views">
+                <span class="dashboard-filter-caption">Ansicht</span>
+                <button class="dashboard-view-tab active" type="button" data-dashboard-view="all" aria-selected="true">Alle</button>
+                <button class="dashboard-view-tab" type="button" data-dashboard-view="imported" aria-selected="false">Importiert</button>
+                <button class="dashboard-view-tab" type="button" data-dashboard-view="not-imported" aria-selected="false">Nicht importiert</button>
+                <button class="dashboard-view-tab" type="button" data-dashboard-view="favorites" aria-selected="false">Favoriten</button>
+              </div>
+              <div class="dashboard-filter-segment dashboard-filter-segment--status">
+                <span class="dashboard-filter-caption">Status</span>
+                <div id="quick-filters-container" class="dashboard-inline-status" aria-label="Statusfilter"></div>
+              </div>
+              <div class="dashboard-filter-segment dashboard-filter-segment--density">
+                <span class="dashboard-filter-caption">Layout</span>
+                <button id="btn-dashboard-compact" class="dashboard-view-tab" type="button" aria-pressed="false" title="Ansichtsdichte wechseln">Komfort</button>
+              </div>
+            </div>
+          </div>
         </div>
         <details class="dashboard-tools hidden" hidden aria-hidden="true">
           <summary>🧰 Tools</summary>
@@ -333,7 +348,6 @@
           </div>
         </dialog>
       </div>
-      <div id="quick-filters-container"></div>
       <div id="dashboard-grid" class="dashboard-grid">
         <p class="empty-state">Bitte anmelden.</p>
       </div>
@@ -589,5 +603,5 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://apis.google.com/js/api.js" async defer></script>
-  <script type="module" src="./js/app.js?v=20260409-supporthub1"></script>
+  <script type="module" src="./js/app.js?v=20260510-cardmarket-ui2"></script>
 </html>

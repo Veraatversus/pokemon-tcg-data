@@ -15,8 +15,14 @@ import {
   syncOverviewWithApiSets,
   resetSheetsDataCaches,
 } from './data/sheets-db.js?v=20260407-login1';
-import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260507a';
-import { resolveSeriesGroupInfo } from './data/schema-contract.js?v=20260507a';
+import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260510d';
+import { resolveSeriesGroupInfo } from './data/schema-contract.js?v=20260510b';
+import {
+  buildCardmarketProductUrl,
+  resolveCardmarketEntryForCard,
+  formatCardmarketEntryLabel,
+  formatCardmarketEntryTitle
+} from './data/cardmarket-data.js?v=20260510-cardmarket7';
 import {
   buildCombinedSearchDropdownOptions,
   createSpreadsheetSwitchStatePatch,
@@ -66,7 +72,7 @@ import {
   initQuickFiltersUI, createSearchHistoryWidget, createStatisticsPanel,
   createExportDialog, createSettingsPanel,
   createBulkActionsToolbar
-} from './ui/components.js?v=20260509-settings1';
+} from './ui/components.js?v=20260509-discoverybar1';
 import {
   AdvancedSearch, SyncIndicator, CardCollectionTools,
   generateCollectionInsights, generateSetComparison,
@@ -361,8 +367,6 @@ const state = {
   quickFilters: {
     completed: false,
     inProgress: false,
-    notImported: false,
-    favoritesOnly: false,
   },
   realtimeClientId: null,
   realtime: null,
@@ -926,14 +930,20 @@ function loadDashboardPreferences() {
       state.dashboardDensity = parsed.dashboardCompact ? 'compact' : 'comfortable';
     }
 
+    const legacyNotImported = Boolean(parsed?.quickFilters?.notImported);
+    const legacyFavoritesOnly = Boolean(parsed?.quickFilters?.favoritesOnly);
+
     if (parsed?.quickFilters && typeof parsed.quickFilters === 'object') {
       state.quickFilters = {
         ...state.quickFilters,
         completed: Boolean(parsed.quickFilters.completed),
         inProgress: Boolean(parsed.quickFilters.inProgress),
-        notImported: Boolean(parsed.quickFilters.notImported),
-        favoritesOnly: Boolean(parsed.quickFilters.favoritesOnly),
       };
+    }
+
+    if (state.dashboardView === 'all') {
+      if (legacyFavoritesOnly) state.dashboardView = 'favorites';
+      else if (legacyNotImported) state.dashboardView = 'not-imported';
     }
   } catch (err) {
     console.warn('[loadDashboardPreferences]', err);
@@ -945,7 +955,10 @@ function saveDashboardPreferences() {
     const payload = {
       dashboardView: state.dashboardView,
       dashboardDensity: state.dashboardDensity,
-      quickFilters: state.quickFilters,
+      quickFilters: {
+        completed: Boolean(state.quickFilters?.completed),
+        inProgress: Boolean(state.quickFilters?.inProgress),
+      },
     };
     localStorage.setItem(DASHBOARD_PREFS_STORAGE_KEY, JSON.stringify(payload));
   } catch (err) {
@@ -2750,18 +2763,12 @@ async function renderDashboard() {
     }
 
     const quickFilters = state.quickFilters || {};
-    const hasStatusQuickFilter = Boolean(
-      quickFilters.completed || quickFilters.inProgress || quickFilters.notImported
-    );
-
-    if (quickFilters.favoritesOnly) {
-      sets = sets.filter((set) => isFavorite(set.setId));
-    }
+    const hasStatusQuickFilter = Boolean(quickFilters.completed || quickFilters.inProgress);
 
     if (hasStatusQuickFilter) {
       sets = sets.filter((set) => {
         if (!set.imported) {
-          return Boolean(quickFilters.notImported);
+          return false;
         }
 
         const summary = summaryByName.get(set.setName) || summaryByName.get(set.setId);
@@ -2771,8 +2778,7 @@ async function renderDashboard() {
         const isInProgress = collected > 0 && !isCompleted;
 
         return (quickFilters.completed && isCompleted)
-          || (quickFilters.inProgress && isInProgress)
-          || (quickFilters.notImported && !set.imported);
+          || (quickFilters.inProgress && isInProgress);
       });
     }
 
@@ -5326,8 +5332,14 @@ function hasRichCardDetails(card = {}) {
 function needsApiCardEnrichment(cards = []) {
   const sample = (Array.isArray(cards) ? cards : []).filter(Boolean).slice(0, 12);
   if (!sample.length) return false;
+
   const richCount = sample.filter((card) => hasRichCardDetails(card)).length;
-  return richCount < Math.max(1, Math.ceil(sample.length * 0.4));
+  const needsCardmarketUpgrade = sample.some((card) => {
+    const cardmarketUrl = String(card?.cardmarketUrl || card?.vera_cardmarket_url || card?.tcgdex_cardmarket_url || '').trim();
+    return !cardmarketUrl || isGeneratedCardmarketSearchUrl(cardmarketUrl);
+  });
+
+  return richCount < Math.max(1, Math.ceil(sample.length * 0.4)) || needsCardmarketUpgrade;
 }
 
 function sortSearchResults(results = []) {
@@ -6119,6 +6131,7 @@ function createCardElement(card, key, db, index) {
     cm.textContent = '\uD83D\uDED2 CM';
     cm.title = isFallbackCardmarket ? 'Generierter Cardmarket-Suchlink' : 'Cardmarket-Produktseite';
     meta.appendChild(cm);
+    hydrateCardmarketLink(cm, card, { compact: true });
   }
 
   article.append(imgWrap, meta);
@@ -6141,9 +6154,88 @@ function createCardElement(card, key, db, index) {
   return article;
 }
 
+const cardmarketPriceSummaryCache = new Map();
+const cardmarketPriceSummaryPending = new Map();
+
 function isGeneratedCardmarketSearchUrl(url) {
   const value = String(url || '').trim().toLowerCase();
   return value.includes('cardmarket.com') && value.includes('/products/search') && value.includes('searchstring=');
+}
+
+function applyCardmarketPriceSummary(linkEl, summary, { compact = false } = {}) {
+  if (!(linkEl instanceof HTMLElement) || !summary) return;
+  if (summary.url) {
+    linkEl.href = summary.url;
+    linkEl.dataset.cardmarketUrl = summary.url;
+    linkEl.classList.toggle('card-cm-link-fallback', isGeneratedCardmarketSearchUrl(summary.url));
+  }
+  if (summary.title) linkEl.title = summary.title;
+  if (summary.label) {
+    linkEl.textContent = compact ? `🛒 CM · ${summary.label}` : `🛒 Cardmarket · ${summary.label}`;
+  }
+}
+
+async function loadCardmarketPriceSummary(card = {}) {
+  const normalizedUrl = String(card?.cardmarketUrl || '').trim();
+  const cacheKey = normalizedUrl || `${String(card?.setId || '').trim()}::${String(card?.number || '').trim()}::${String(card?.name || '').trim()}`;
+  if (!cacheKey.trim()) return null;
+
+  if (cardmarketPriceSummaryCache.has(cacheKey)) {
+    return cardmarketPriceSummaryCache.get(cacheKey);
+  }
+
+  if (cardmarketPriceSummaryPending.has(cacheKey)) {
+    return cardmarketPriceSummaryPending.get(cacheKey);
+  }
+
+  const pending = resolveCardmarketEntryForCard(card, {
+    cards: Array.isArray(state?.cards) ? state.cards : []
+  })
+    .then((entry) => {
+      const directUrl = entry?.cardmarketProductId
+        ? buildCardmarketProductUrl(entry.cardmarketProductId)
+        : normalizedUrl;
+      const summary = entry
+        ? {
+            label: formatCardmarketEntryLabel(entry),
+            title: formatCardmarketEntryTitle(entry),
+            url: directUrl
+          }
+        : null;
+      cardmarketPriceSummaryCache.set(cacheKey, summary);
+      cardmarketPriceSummaryPending.delete(cacheKey);
+      return summary;
+    })
+    .catch((error) => {
+      cardmarketPriceSummaryPending.delete(cacheKey);
+      throw error;
+    });
+
+  cardmarketPriceSummaryPending.set(cacheKey, pending);
+  return pending;
+}
+
+function hydrateCardmarketLink(linkEl, card, { compact = false } = {}) {
+  const cardmarketUrl = String(card?.cardmarketUrl || '').trim();
+  if (!(linkEl instanceof HTMLElement) || !cardmarketUrl) {
+    return;
+  }
+
+  const cacheKey = cardmarketUrl || `${String(card?.setId || '').trim()}::${String(card?.number || '').trim()}::${String(card?.name || '').trim()}`;
+  linkEl.dataset.cardmarketUrl = cardmarketUrl;
+  if (cardmarketPriceSummaryCache.has(cacheKey)) {
+    applyCardmarketPriceSummary(linkEl, cardmarketPriceSummaryCache.get(cacheKey), { compact });
+    return;
+  }
+
+  loadCardmarketPriceSummary(card)
+    .then((summary) => {
+      if (linkEl.dataset.cardmarketUrl !== cardmarketUrl) return;
+      applyCardmarketPriceSummary(linkEl, summary, { compact });
+    })
+    .catch((error) => {
+      console.warn('[cardmarket] price lookup failed', error);
+    });
 }
 
 function makeCheckbox(labelText, type, checked, disabled) {
@@ -6429,6 +6521,7 @@ function renderLightbox(index) {
     dom.lightboxCmLink.title = isFallbackCardmarket ? 'Generierter Cardmarket-Suchlink' : 'Cardmarket-Produktseite';
     dom.lightboxCmLink.classList.toggle('lightbox-cm-link-fallback', isFallbackCardmarket);
     dom.lightboxCmLink.classList.remove('hidden');
+    hydrateCardmarketLink(dom.lightboxCmLink, card, { compact: false });
   } else {
     dom.lightboxCmLink.classList.add('hidden');
     dom.lightboxCmLink.classList.remove('lightbox-cm-link-fallback');

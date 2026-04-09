@@ -4,24 +4,23 @@
 
 export function initQuickFiltersUI(initialState = {}) {
   const filterContainer = document.getElementById('quick-filters-container');
-  if (!filterContainer) return;
+  const filterBar = document.getElementById('dashboard-view-tabs');
+  if (!filterContainer || !filterBar) return;
 
   const filters = [
-    { id: 'filter-completed', label: '✅ Abgeschlossen', key: 'completed' },
-    { id: 'filter-progress', label: '⏳ In Bearbeitung', key: 'inProgress' },
-    { id: 'filter-not-imported', label: '📦 Nicht importiert', key: 'notImported' },
-    { id: 'filter-favorites', label: '⭐ Favoriten', key: 'favoritesOnly' }
+    { id: 'filter-completed', label: 'Abgeschlossen', icon: '✓', key: 'completed', tone: 'done' },
+    { id: 'filter-progress', label: 'In Bearbeitung', icon: '◔', key: 'inProgress', tone: 'live' }
   ];
 
+  filterBar.classList.add('dashboard-filter-bar--ready');
   filterContainer.innerHTML = `
-    <div class="quick-filters-toolbar" role="toolbar" aria-label="Schnellfilter">
-      <span class="quick-filters-label">Schnellfilter:</span>
-      <div class="quick-filters-buttons">
-        ${filters
-          .map((f) => `<button class="quick-filter-btn" data-filter="${f.key}" id="${f.id}" type="button" aria-pressed="false">${f.label}</button>`)
-          .join('')}
-      </div>
-      <button class="quick-filter-reset btn-secondary" type="button">Zurücksetzen</button>
+    <div class="dashboard-status-cluster" role="group" aria-label="Statusfilter">
+      ${filters
+        .map((f) => `<button class="quick-filter-btn dashboard-filter-chip" data-filter="${f.key}" data-chip-tone="${f.tone}" id="${f.id}" type="button" aria-pressed="false" title="${f.label}"><span class="dashboard-filter-glyph" aria-hidden="true">${f.icon}</span><span>${f.label}</span></button>`)
+        .join('')}
+      <button class="quick-filter-reset btn-secondary dashboard-filter-reset" type="button" aria-label="Filter zurücksetzen" title="Filter zurücksetzen">
+        <span class="quick-filter-reset-icon" aria-hidden="true">↺</span>
+      </button>
     </div>
   `;
 

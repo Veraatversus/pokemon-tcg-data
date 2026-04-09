@@ -1,9 +1,11 @@
-name: Propagate Master to Dev and Release
+name: Promote Master to Dev
 
 on:
-  push:
-    branches:
-      - master
+  workflow_run:
+    workflows:
+      - Build Cardmarket Data
+    types:
+      - completed
   workflow_dispatch:
 
 permissions:
@@ -11,14 +13,15 @@ permissions:
   issues: write
 
 jobs:
-  propagate:
+  promote_master_to_dev:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout master
+      - name: Checkout dev
         uses: actions/checkout@v4
         with:
-          ref: master
+          ref: dev
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -27,55 +30,47 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Merge master into dev and release
-        id: propagate
+      - name: Merge master into dev
+        id: promote
         run: |
-          echo "conflict_target=" >> $GITHUB_OUTPUT
+          echo "dev_updated=false" >> $GITHUB_OUTPUT
 
-          merge_target () {
-            TARGET="$1"
-            git fetch origin "$TARGET" || true
+          git fetch origin master
+          BEFORE_COMMIT=$(git rev-parse HEAD)
 
-            if git ls-remote --exit-code --heads origin "$TARGET" >/dev/null 2>&1; then
-              git checkout -B "$TARGET" "origin/$TARGET"
+          if git merge -X theirs origin/master --no-edit; then
+            AFTER_COMMIT=$(git rev-parse HEAD)
+            if [ "$BEFORE_COMMIT" != "$AFTER_COMMIT" ]; then
+              git push origin dev
+              echo "dev_updated=true" >> $GITHUB_OUTPUT
             else
-              git checkout -B "$TARGET" master
+              echo "Dev is already up to date with master"
             fi
-
-            if git merge -X theirs master --no-edit; then
-              git push origin "$TARGET"
-            else
-              git merge --abort
-              echo "conflict_target=$TARGET" >> $GITHUB_OUTPUT
-              exit 1
-            fi
-          }
-
-          merge_target dev
-          merge_target release
+          else
+            git merge --abort || true
+            exit 1
+          fi
 
       - name: Create issue on propagation conflict
         if: failure()
-        env:
-          PROPAGATE_CONFLICT: ${{ steps.propagate.outputs.conflict_target }}
         uses: actions/github-script@v7
         with:
           script: |
-            const target = process.env.PROPAGATE_CONFLICT || 'unknown';
             const issue = await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: '🔁 Master Propagation Conflict - Manual Resolution Required',
-              body: `The propagation workflow could not merge \`master\` into \`${target}\`.
+              title: '🔁 Master-to-Dev Promotion Conflict - Manual Resolution Required',
+              body: `The automated promotion from \`master\` to \`dev\` encountered a conflict.
 
               **Action Required:**
-              Please resolve the conflict manually.
+              Please resolve the conflict manually on \`dev\` and rerun the promotion workflow.
 
-              **Steps:**
-              1. \`git checkout ${target}\`
-              2. \`git merge -X theirs master\`
-              3. Resolve conflicts if needed
-              4. \`git push origin ${target}\``,
+              **Suggested steps:**
+              1. \`git checkout dev\`
+              2. \`git fetch origin master\`
+              3. \`git merge -X theirs origin/master\`
+              4. Resolve conflicts if needed and \`git push origin dev\`
+              `,
               labels: ['propagation', 'manual-action-required']
             });
             console.log('Created issue:', issue.data.number);

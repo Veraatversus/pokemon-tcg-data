@@ -210,6 +210,21 @@ function testCardImageResolverDefaultsToTcgdexFirstPriority() {
   assert.equal(display.imageLarge, 'https://assets.tcgdex.net/de/sv/sv01/001/high.webp');
 }
 
+function testCardmarketResolverPrefersDirectProductLinksOverSearchFallbacks() {
+  const display = resolveDisplayCard({
+    vera_number: '001',
+    vera_name: 'Tannza',
+    vera_cardmarket_url: 'https://www.cardmarket.com/de/Pokemon/Products/Singles?idProduct=696421',
+    tcgdex_cardmarket_url: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchString=SVI+001+Tannza'
+  });
+
+  assert.equal(
+    display.cardmarketUrl,
+    'https://www.cardmarket.com/de/Pokemon/Products/Singles?idProduct=696421',
+    'Display cards should surface the stable product URL when one source has already resolved it.'
+  );
+}
+
 function testCollectionUiKeepsRhToggleAvailableWithoutCollectedFlag() {
   const uiState = getCollectionUiState({
     g: false,
@@ -353,6 +368,7 @@ try {
   testGermanTcgdexSetAssetsFallbackToEnglishSummaryAssets();
   testCardResolverUsesTcgdexDetailFieldsWhenPrimaryDataIsMissing();
   testCardImageResolverDefaultsToTcgdexFirstPriority();
+  testCardmarketResolverPrefersDirectProductLinksOverSearchFallbacks();
   testCollectionUiKeepsRhToggleAvailableWithoutCollectedFlag();
   testStatsSeriesHelpersPreferDisplayNamesOverIds();
   testRhToggleAutoEnablesCollectedStatus();

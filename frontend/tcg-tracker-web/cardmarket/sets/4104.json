@@ -1,0 +1,165 @@
+{
+  "expansionId": 4104,
+  "cards": [
+    {
+      "cardmarketProductId": 563254,
+      "name": "Noivern [Tuning | Air Slash]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4104,
+      "metacardId": 340250,
+      "dateAdded": "2021-05-06 12:57:32",
+      "prices": {
+        "avg": 1.99,
+        "low": 0.45,
+        "trend": 1.52,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 563255,
+      "name": "Noivern BREAK [Synchro Woofer]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4104,
+      "metacardId": 221223,
+      "dateAdded": "2021-05-06 12:58:12",
+      "prices": {
+        "avg": 4.45,
+        "low": 1.99,
+        "trend": 4.54,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 563256,
+      "name": "Chatot [Sing | Aerial Ace]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4104,
+      "metacardId": 340251,
+      "dateAdded": "2021-05-06 12:58:40",
+      "prices": {
+        "avg": null,
+        "low": 1,
+        "trend": 1,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 563257,
+      "name": "Noibat [Mysterious Beam | Gust]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4104,
+      "metacardId": 340252,
+      "dateAdded": "2021-05-06 12:59:06",
+      "prices": {
+        "avg": 1.38,
+        "low": 0.75,
+        "trend": 1.01,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 563258,
+      "name": "Super Rod",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4104,
+      "metacardId": 224641,
+      "dateAdded": "2021-05-06 12:59:20",
+      "prices": {
+        "avg": 1.5,
+        "low": 1.5,
+        "trend": 1.5,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 563259,
+      "name": "Professor's Letter",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4104,
+      "metacardId": 221256,
+      "dateAdded": "2021-05-06 12:59:37",
+      "prices": {
+        "avg": null,
+        "low": 2.5,
+        "trend": 2.99,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 563260,
+      "name": "Reserved Ticket",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4104,
+      "metacardId": 221257,
+      "dateAdded": "2021-05-06 12:59:52",
+      "prices": {
+        "avg": null,
+        "low": 1.5,
+        "trend": 1.5,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 563261,
+      "name": "Level Ball",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4104,
+      "metacardId": 224639,
+      "dateAdded": "2021-05-06 13:00:11",
+      "prices": {
+        "avg": null,
+        "low": 1.99,
+        "trend": 2.99,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 563262,
+      "name": "Judge",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4104,
+      "metacardId": 217094,
+      "dateAdded": "2021-05-06 13:00:29",
+      "prices": {
+        "avg": null,
+        "low": 2.5,
+        "trend": 2.59,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 563263,
+      "name": "Skyla",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4104,
+      "metacardId": 221932,
+      "dateAdded": "2021-05-06 13:00:47",
+      "prices": {
+        "avg": 3.35,
+        "low": 3.35,
+        "trend": 3.37,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    }
+  ]
+}

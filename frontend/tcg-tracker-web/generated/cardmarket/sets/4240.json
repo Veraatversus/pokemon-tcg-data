@@ -1,0 +1,133 @@
+{
+  "expansionId": 4240,
+  "cards": [
+    {
+      "cardmarketProductId": 564177,
+      "name": "Flareon VMAX [Max Detonate]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4240,
+      "metacardId": 340677,
+      "dateAdded": "2021-05-14 12:14:14",
+      "prices": {
+        "avg": 6.41,
+        "low": 6.4,
+        "trend": 6.84,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564178,
+      "name": "Vaporeon VMAX [Bubble Pod | Max Torrent]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4240,
+      "metacardId": 340678,
+      "dateAdded": "2021-05-14 12:14:47",
+      "prices": {
+        "avg": 16.18,
+        "low": 7.5,
+        "trend": 15.81,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564179,
+      "name": "Jolteon VMAX [Max Thunder Rumble]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4240,
+      "metacardId": 340679,
+      "dateAdded": "2021-05-14 12:15:18",
+      "prices": {
+        "avg": 7.71,
+        "low": 6.5,
+        "trend": 9.85,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564180,
+      "name": "Espeon VMAX [Solar Revelation | Max Mindstorm]",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4240,
+      "metacardId": 340676,
+      "dateAdded": "2021-05-14 12:15:57",
+      "prices": {
+        "avg": 13,
+        "low": 7,
+        "trend": 19.91,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564181,
+      "name": "Fire Energy",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4240,
+      "metacardId": 211654,
+      "dateAdded": "2021-05-14 12:16:21",
+      "prices": {
+        "avg": null,
+        "low": 0.1,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564182,
+      "name": "Water Energy",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4240,
+      "metacardId": 222965,
+      "dateAdded": "2021-05-14 12:16:37",
+      "prices": {
+        "avg": null,
+        "low": 0.02,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564183,
+      "name": "Lightning Energy",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4240,
+      "metacardId": 211656,
+      "dateAdded": "2021-05-14 12:16:50",
+      "prices": {
+        "avg": null,
+        "low": 0.05,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    },
+    {
+      "cardmarketProductId": 564184,
+      "name": "Psychic Energy",
+      "categoryId": 51,
+      "categoryName": "Pokémon Single",
+      "expansionId": 4240,
+      "metacardId": 211657,
+      "dateAdded": "2021-05-14 12:17:03",
+      "prices": {
+        "avg": null,
+        "low": 0.18,
+        "trend": 0,
+        "reverseHoloSell": null,
+        "suggested": null
+      }
+    }
+  ]
+}

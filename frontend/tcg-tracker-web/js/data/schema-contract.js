@@ -355,10 +355,29 @@ function buildCardmarketFallback({ cardName = '', setTag = '', setName = '', car
   return `https://www.cardmarket.com/de/Pokemon/Products/Search?searchString=${encodeURIComponent(searchString).replace(/%20/g, '+')}`;
 }
 
-function resolveCardmarketUrl(primaryCard, tcgdexCard, fallbackMeta = {}) {
-  const direct = [tcgdexCard?.links?.cardmarket, primaryCard?.cardmarket?.url]
+function isGeneratedCardmarketSearchUrl(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  return normalized.includes('cardmarket.com') && normalized.includes('/products/search') && normalized.includes('searchstring=');
+}
+
+function resolvePreferredCardmarketUrl(candidates = []) {
+  const normalized = candidates
     .map((value) => String(value || '').trim())
-    .find((value) => /^https?:\/\//i.test(value));
+    .filter((value) => /^https?:\/\//i.test(value));
+
+  if (!normalized.length) return '';
+  const direct = normalized.find((value) => !isGeneratedCardmarketSearchUrl(value));
+  return direct || normalized[0] || '';
+}
+
+function resolveCardmarketUrl(primaryCard, tcgdexCard, fallbackMeta = {}) {
+  const direct = resolvePreferredCardmarketUrl([
+    primaryCard?.cardmarketUrl,
+    primaryCard?.vera_cardmarket_url,
+    primaryCard?.cardmarket?.url,
+    tcgdexCard?.links?.cardmarket,
+    primaryCard?.tcgdex_cardmarket_url
+  ]);
   if (direct) return direct;
   return buildCardmarketFallback(fallbackMeta);
 }
@@ -631,10 +650,14 @@ export function resolveDisplayCard(cardRecord = {}) {
   });
   const imageLarge = imageLargeCandidates[0] || image || '';
 
-  const cardmarketUrl = resolveFieldByPriority(matrix.cardmarketUrl, {
+  const cardmarketUrlCandidates = collectValuesByPriority(matrix.cardmarketUrl, {
     tcgdex: cardRecord.tcgdex_cardmarket_url,
-    vera: cardRecord.vera_cardmarket_url
-  }, { fallback: cardRecord.vera_cardmarket_url || cardRecord.tcgdex_cardmarket_url || '' });
+    vera: cardRecord.vera_cardmarket_url,
+    legacy: cardRecord.cardmarketUrl || cardRecord.cardmarket_url || cardRecord.cardmarket?.url || ''
+  }, {
+    fallback: cardRecord.cardmarketUrl || cardRecord.vera_cardmarket_url || cardRecord.tcgdex_cardmarket_url || ''
+  });
+  const cardmarketUrl = resolvePreferredCardmarketUrl(cardmarketUrlCandidates);
 
   const rarity = resolveFieldByPriority(matrix.rarity, {
     tcgdex: cardRecord.tcgdex_rarity,
