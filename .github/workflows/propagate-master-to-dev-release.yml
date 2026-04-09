@@ -9,6 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: write
   contents: write
   issues: write
 
@@ -55,6 +56,40 @@ jobs:
             git merge --abort || true
             exit 1
           fi
+
+      - name: Trigger dev verification workflow
+        if: steps.promote.outputs.dev_updated == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'verify-dev-preview.yml',
+                ref: 'dev'
+              });
+              core.info('Triggered verify-dev-preview workflow on dev');
+            } catch (error) {
+              core.warning(`Could not trigger verify-dev-preview.yml: ${error.message}`);
+            }
+
+      - name: Trigger preview deploy workflow
+        if: steps.promote.outputs.dev_updated == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'deploy-pages.yml',
+                ref: 'dev'
+              });
+              core.info('Triggered deploy-pages workflow for dev preview');
+            } catch (error) {
+              core.warning(`Could not trigger deploy-pages.yml for dev: ${error.message}`);
+            }
 
       - name: Create issue on propagation conflict
         if: failure()

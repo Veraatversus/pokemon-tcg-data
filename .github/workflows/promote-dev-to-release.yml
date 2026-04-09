@@ -9,6 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: write
   contents: write
   issues: write
 
@@ -49,6 +50,23 @@ jobs:
             git merge --abort || true
             exit 1
           fi
+
+      - name: Trigger deploy-pages workflow
+        if: steps.promote_release.outputs.release_updated == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'deploy-pages.yml',
+                ref: 'release'
+              });
+              core.info('Triggered deploy-pages workflow on release');
+            } catch (error) {
+              core.warning(`Could not trigger deploy-pages.yml: ${error.message}`);
+            }
 
       - name: Create issue on release promotion conflict
         if: failure()
