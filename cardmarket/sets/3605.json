@@ -11,7 +11,7 @@
       "dateAdded": "2020-12-02 15:07:22",
       "prices": {
         "avg": null,
-        "low": 0.5,
+        "low": 0.35,
         "trend": 0.81,
         "reverseHoloSell": null,
         "suggested": null
@@ -27,7 +27,7 @@
       "dateAdded": "2020-12-02 15:08:37",
       "prices": {
         "avg": 1,
-        "low": 0.39,
+        "low": 0.48,
         "trend": 0.79,
         "reverseHoloSell": null,
         "suggested": null
@@ -75,7 +75,7 @@
       "dateAdded": "2020-12-02 15:11:07",
       "prices": {
         "avg": 0.5,
-        "low": 0.45,
+        "low": 0.48,
         "trend": 0.42,
         "reverseHoloSell": null,
         "suggested": null
@@ -91,7 +91,7 @@
       "dateAdded": "2020-12-02 15:11:22",
       "prices": {
         "avg": 0.5,
-        "low": 0.47,
+        "low": 0.5,
         "trend": 0.53,
         "reverseHoloSell": null,
         "suggested": null

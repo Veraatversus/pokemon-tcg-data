@@ -155,7 +155,7 @@
       "dateAdded": "2026-04-08 12:02:16",
       "prices": {
         "avg": null,
-        "low": null,
+        "low": 2,
         "trend": 0,
         "reverseHoloSell": null,
         "suggested": null

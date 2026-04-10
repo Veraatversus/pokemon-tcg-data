@@ -140,7 +140,7 @@
       "prices": {
         "avg": 3.25,
         "low": 1.9,
-        "trend": 5.69,
+        "trend": 5.56,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -412,7 +412,7 @@
       "prices": {
         "avg": 3,
         "low": 1,
-        "trend": 2.79,
+        "trend": 2.85,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -540,7 +540,7 @@
       "prices": {
         "avg": 0.15,
         "low": null,
-        "trend": 1.52,
+        "trend": 1.46,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -1035,7 +1035,7 @@
       "dateAdded": "2021-05-07 13:16:34",
       "prices": {
         "avg": 135,
-        "low": 245,
+        "low": 199.99,
         "trend": 123.27,
         "reverseHoloSell": null,
         "suggested": null

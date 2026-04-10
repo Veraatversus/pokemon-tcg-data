@@ -28,7 +28,7 @@
       "prices": {
         "avg": 2,
         "low": 0.2,
-        "trend": 1.81,
+        "trend": 1.74,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -74,9 +74,9 @@
       "metacardId": 216193,
       "dateAdded": "2023-01-03 21:39:01",
       "prices": {
-        "avg": 0.89,
-        "low": 0.55,
-        "trend": 1.01,
+        "avg": 0.8,
+        "low": 0.45,
+        "trend": 0.95,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -140,7 +140,7 @@
       "prices": {
         "avg": 1.29,
         "low": 0.75,
-        "trend": 0.35,
+        "trend": 0.81,
         "reverseHoloSell": null,
         "suggested": null
       }
