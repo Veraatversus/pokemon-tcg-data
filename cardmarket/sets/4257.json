@@ -251,7 +251,7 @@
       "dateAdded": "2021-05-20 12:37:41",
       "prices": {
         "avg": null,
-        "low": null,
+        "low": 3,
         "trend": 0,
         "reverseHoloSell": null,
         "suggested": null

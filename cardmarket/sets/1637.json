@@ -58,9 +58,9 @@
       "metacardId": 340863,
       "dateAdded": "0000-00-00 00:00:00",
       "prices": {
-        "avg": 1.26,
+        "avg": 0.88,
         "low": 0.02,
-        "trend": 0.66,
+        "trend": 0.6,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -74,9 +74,9 @@
       "metacardId": 340864,
       "dateAdded": "0000-00-00 00:00:00",
       "prices": {
-        "avg": 1.94,
+        "avg": 2.03,
         "low": 0.29,
-        "trend": 2.38,
+        "trend": 2.41,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -122,7 +122,7 @@
       "metacardId": 218947,
       "dateAdded": "0000-00-00 00:00:00",
       "prices": {
-        "avg": 0.27,
+        "avg": 0.11,
         "low": 0.02,
         "trend": 0.28,
         "reverseHoloSell": null,
@@ -138,7 +138,7 @@
       "metacardId": 340867,
       "dateAdded": "0000-00-00 00:00:00",
       "prices": {
-        "avg": 0.21,
+        "avg": 0.26,
         "low": 0.02,
         "trend": 0.19,
         "reverseHoloSell": null,
@@ -154,7 +154,7 @@
       "metacardId": 340868,
       "dateAdded": "0000-00-00 00:00:00",
       "prices": {
-        "avg": 1.15,
+        "avg": 1.45,
         "low": 0.1,
         "trend": 1.09,
         "reverseHoloSell": null,
@@ -218,7 +218,7 @@
       "metacardId": 340871,
       "dateAdded": "0000-00-00 00:00:00",
       "prices": {
-        "avg": 3.97,
+        "avg": 3.43,
         "low": 0.2,
         "trend": 4.15,
         "reverseHoloSell": null,
@@ -348,7 +348,7 @@
       "prices": {
         "avg": 0.66,
         "low": 0.02,
-        "trend": 0.54,
+        "trend": 0.49,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -364,7 +364,7 @@
       "prices": {
         "avg": 0.61,
         "low": 0.02,
-        "trend": 0.58,
+        "trend": 0.56,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -428,7 +428,7 @@
       "prices": {
         "avg": 7.26,
         "low": 1,
-        "trend": 5.61,
+        "trend": 5.22,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -522,7 +522,7 @@
       "metacardId": 340569,
       "dateAdded": "0000-00-00 00:00:00",
       "prices": {
-        "avg": 1.7,
+        "avg": 3.88,
         "low": 0.5,
         "trend": 2.9,
         "reverseHoloSell": null,
@@ -588,7 +588,7 @@
       "prices": {
         "avg": 0.06,
         "low": 0.02,
-        "trend": 0.08,
+        "trend": 0.14,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -604,7 +604,7 @@
       "prices": {
         "avg": 0.14,
         "low": 0.02,
-        "trend": 0.14,
+        "trend": 0.11,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -620,7 +620,7 @@
       "prices": {
         "avg": 0.11,
         "low": 0.02,
-        "trend": 0.1,
+        "trend": 0.09,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -716,7 +716,7 @@
       "prices": {
         "avg": 0.82,
         "low": 0.1,
-        "trend": 0.55,
+        "trend": 0.58,
         "reverseHoloSell": null,
         "suggested": null
       }

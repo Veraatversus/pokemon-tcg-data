@@ -1339,7 +1339,7 @@
       "dateAdded": "2025-11-21 19:32:34",
       "prices": {
         "avg": null,
-        "low": null,
+        "low": 2,
         "trend": 0,
         "reverseHoloSell": null,
         "suggested": null
