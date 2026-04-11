@@ -906,8 +906,8 @@
       "metacardId": 265063,
       "dateAdded": "2025-12-10 11:13:45",
       "prices": {
-        "avg": null,
-        "low": 4.95,
+        "avg": 4.95,
+        "low": null,
         "trend": 0,
         "reverseHoloSell": null,
         "suggested": null
