@@ -108,7 +108,7 @@
       "prices": {
         "avg": 69.96,
         "low": 19,
-        "trend": 67.29,
+        "trend": 71.11,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -187,7 +187,7 @@
       "dateAdded": "0000-00-00 00:00:00",
       "prices": {
         "avg": 18.89,
-        "low": 14,
+        "low": 16,
         "trend": 20.01,
         "reverseHoloSell": null,
         "suggested": null
@@ -235,8 +235,8 @@
       "dateAdded": "0000-00-00 00:00:00",
       "prices": {
         "avg": 7.75,
-        "low": 8.49,
-        "trend": 8.42,
+        "low": 9.75,
+        "trend": 8.61,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -379,7 +379,7 @@
       "dateAdded": "2020-03-31 09:56:36",
       "prices": {
         "avg": 10.5,
-        "low": 13.49,
+        "low": 12.99,
         "trend": 14.23,
         "reverseHoloSell": null,
         "suggested": null
@@ -506,7 +506,7 @@
       "metacardId": 213270,
       "dateAdded": "2020-04-01 13:53:28",
       "prices": {
-        "avg": 99.9,
+        "avg": 184.89,
         "low": 80,
         "trend": 135.34,
         "reverseHoloSell": null,
@@ -522,7 +522,7 @@
       "metacardId": 213270,
       "dateAdded": "2022-01-12 11:58:22",
       "prices": {
-        "avg": 80,
+        "avg": 120,
         "low": 65,
         "trend": 101.42,
         "reverseHoloSell": null,
@@ -555,7 +555,7 @@
       "dateAdded": "2022-01-12 11:59:56",
       "prices": {
         "avg": 81,
-        "low": 59.99,
+        "low": 120,
         "trend": 254.68,
         "reverseHoloSell": null,
         "suggested": null
@@ -939,7 +939,7 @@
       "dateAdded": "2024-06-12 11:07:32",
       "prices": {
         "avg": null,
-        "low": 30.08,
+        "low": 30.16,
         "trend": 0,
         "reverseHoloSell": null,
         "suggested": null
@@ -1371,7 +1371,7 @@
       "dateAdded": "2026-02-16 17:35:55",
       "prices": {
         "avg": null,
-        "low": 24.9,
+        "low": 24,
         "trend": 0,
         "reverseHoloSell": null,
         "suggested": null

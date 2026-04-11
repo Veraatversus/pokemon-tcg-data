@@ -746,9 +746,9 @@
       "metacardId": 226297,
       "dateAdded": "2026-04-06 09:56:27",
       "prices": {
-        "avg": null,
+        "avg": 390,
         "low": 98.99,
-        "trend": 0,
+        "trend": 390,
         "reverseHoloSell": null,
         "suggested": null
       }

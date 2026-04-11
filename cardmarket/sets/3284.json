@@ -602,8 +602,8 @@
       "metacardId": 302048,
       "dateAdded": "2020-06-08 10:10:59",
       "prices": {
-        "avg": 6.49,
-        "low": 5.5,
+        "avg": 5.5,
+        "low": 6,
         "trend": 6.49,
         "reverseHoloSell": null,
         "suggested": null
@@ -924,7 +924,7 @@
       "prices": {
         "avg": 0.2,
         "low": 0.02,
-        "trend": 0.13,
+        "trend": 0.14,
         "reverseHoloSell": null,
         "suggested": null
       }
