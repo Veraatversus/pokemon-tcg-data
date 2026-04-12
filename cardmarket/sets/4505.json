@@ -11,7 +11,7 @@
       "dateAdded": "2022-01-12 12:24:38",
       "prices": {
         "avg": 500,
-        "low": 1999,
+        "low": null,
         "trend": 528.93,
         "reverseHoloSell": null,
         "suggested": null

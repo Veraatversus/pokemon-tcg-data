@@ -11,7 +11,7 @@
       "dateAdded": "2021-04-21 16:32:21",
       "prices": {
         "avg": 47.37,
-        "low": 40,
+        "low": 33,
         "trend": 39.15,
         "reverseHoloSell": null,
         "suggested": null
@@ -27,7 +27,7 @@
       "dateAdded": "2021-04-21 16:34:20",
       "prices": {
         "avg": 3,
-        "low": 5,
+        "low": 3,
         "trend": 8.02,
         "reverseHoloSell": null,
         "suggested": null
@@ -91,7 +91,7 @@
       "dateAdded": "2021-04-21 16:36:49",
       "prices": {
         "avg": 174,
-        "low": 35,
+        "low": 34,
         "trend": 73.84,
         "reverseHoloSell": null,
         "suggested": null
@@ -155,8 +155,8 @@
       "dateAdded": "2021-04-21 16:39:18",
       "prices": {
         "avg": 161.2,
-        "low": 89.99,
-        "trend": 188.17,
+        "low": 165,
+        "trend": 181.84,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -203,7 +203,7 @@
       "dateAdded": "2021-04-21 16:44:00",
       "prices": {
         "avg": 52.5,
-        "low": 130,
+        "low": 11,
         "trend": 35.78,
         "reverseHoloSell": null,
         "suggested": null
@@ -299,7 +299,7 @@
       "dateAdded": "2021-04-21 16:47:40",
       "prices": {
         "avg": 1,
-        "low": 0.9,
+        "low": 0.5,
         "trend": 0.98,
         "reverseHoloSell": null,
         "suggested": null
@@ -331,7 +331,7 @@
       "dateAdded": "2021-04-21 16:48:17",
       "prices": {
         "avg": 1,
-        "low": 0.45,
+        "low": 0.9,
         "trend": 1,
         "reverseHoloSell": null,
         "suggested": null
@@ -395,7 +395,7 @@
       "dateAdded": "2021-04-21 16:49:39",
       "prices": {
         "avg": 1,
-        "low": 0.8,
+        "low": 0.79,
         "trend": 1,
         "reverseHoloSell": null,
         "suggested": null
@@ -443,7 +443,7 @@
       "dateAdded": "2021-04-21 16:50:26",
       "prices": {
         "avg": 42.5,
-        "low": 50,
+        "low": 33,
         "trend": 47.64,
         "reverseHoloSell": null,
         "suggested": null

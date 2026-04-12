@@ -283,7 +283,7 @@
       "dateAdded": "2024-08-15 17:46:13",
       "prices": {
         "avg": 190,
-        "low": 7.98,
+        "low": 7.5,
         "trend": 38.13,
         "reverseHoloSell": null,
         "suggested": null
@@ -298,7 +298,7 @@
       "metacardId": 214620,
       "dateAdded": "2024-08-15 17:46:31",
       "prices": {
-        "avg": null,
+        "avg": 740,
         "low": 800,
         "trend": 770,
         "reverseHoloSell": null,
@@ -428,7 +428,7 @@
       "prices": {
         "avg": 61.24,
         "low": 22,
-        "trend": 70.22,
+        "trend": 65.22,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -667,7 +667,7 @@
       "dateAdded": "2024-08-15 18:03:05",
       "prices": {
         "avg": 19,
-        "low": 7,
+        "low": 9.5,
         "trend": 20.94,
         "reverseHoloSell": null,
         "suggested": null
@@ -843,7 +843,7 @@
       "dateAdded": "2024-08-15 18:06:32",
       "prices": {
         "avg": 12,
-        "low": 7.9,
+        "low": 10.08,
         "trend": 12.26,
         "reverseHoloSell": null,
         "suggested": null
@@ -923,7 +923,7 @@
       "dateAdded": "2024-08-15 18:08:00",
       "prices": {
         "avg": 8,
-        "low": 15.11,
+        "low": 19.99,
         "trend": 13.7,
         "reverseHoloSell": null,
         "suggested": null
@@ -1019,7 +1019,7 @@
       "dateAdded": "2024-08-15 18:10:01",
       "prices": {
         "avg": 14.5,
-        "low": 14.11,
+        "low": 10,
         "trend": 15.85,
         "reverseHoloSell": null,
         "suggested": null
@@ -1115,8 +1115,8 @@
       "dateAdded": "2024-08-15 18:13:04",
       "prices": {
         "avg": 2.5,
-        "low": 1.49,
-        "trend": 4.6,
+        "low": 1,
+        "trend": 4.03,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -1211,7 +1211,7 @@
       "dateAdded": "2024-08-15 18:14:48",
       "prices": {
         "avg": 0.98,
-        "low": 0.3,
+        "low": 0.2,
         "trend": 1.03,
         "reverseHoloSell": null,
         "suggested": null
