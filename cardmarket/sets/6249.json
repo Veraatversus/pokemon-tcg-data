@@ -330,7 +330,7 @@
       "metacardId": 406181,
       "dateAdded": "2025-08-07 10:35:52",
       "prices": {
-        "avg": 0.37,
+        "avg": 0.44,
         "low": 0.29,
         "trend": 0.41,
         "reverseHoloSell": null,
@@ -618,7 +618,7 @@
       "metacardId": 413050,
       "dateAdded": "2025-08-07 10:49:39",
       "prices": {
-        "avg": 0.1,
+        "avg": 0.08,
         "low": 0.02,
         "trend": 0.07,
         "reverseHoloSell": null,
@@ -650,7 +650,7 @@
       "metacardId": 414879,
       "dateAdded": "2025-08-07 10:50:48",
       "prices": {
-        "avg": 0.34,
+        "avg": 0.42,
         "low": 0.12,
         "trend": 0.41,
         "reverseHoloSell": null,
@@ -1194,9 +1194,9 @@
       "metacardId": 413072,
       "dateAdded": "2025-08-07 11:20:26",
       "prices": {
-        "avg": 0.38,
+        "avg": 0.41,
         "low": 0.2,
-        "trend": 0.33,
+        "trend": 0.29,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -1212,7 +1212,7 @@
       "prices": {
         "avg": null,
         "low": 0.02,
-        "trend": 0.05,
+        "trend": 0.09,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -1370,9 +1370,9 @@
       "metacardId": 411508,
       "dateAdded": "2025-08-07 11:32:29",
       "prices": {
-        "avg": 0.94,
-        "low": 0.5,
-        "trend": 0.97,
+        "avg": 0.9,
+        "low": 0.4,
+        "trend": 0.95,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -1530,7 +1530,7 @@
       "metacardId": 409742,
       "dateAdded": "2025-08-07 11:38:28",
       "prices": {
-        "avg": 0.42,
+        "avg": 0.47,
         "low": 0.25,
         "trend": 0.44,
         "reverseHoloSell": null,
@@ -1562,7 +1562,7 @@
       "metacardId": 348179,
       "dateAdded": "2025-08-07 11:39:20",
       "prices": {
-        "avg": 0.47,
+        "avg": 0.52,
         "low": 0.25,
         "trend": 0.43,
         "reverseHoloSell": null,
@@ -1611,7 +1611,7 @@
       "dateAdded": "2025-08-07 11:45:36",
       "prices": {
         "avg": 0.2,
-        "low": 0.04,
+        "low": 0.02,
         "trend": 0.22,
         "reverseHoloSell": null,
         "suggested": null
@@ -1802,8 +1802,8 @@
       "metacardId": 412438,
       "dateAdded": "2025-08-07 11:49:45",
       "prices": {
-        "avg": 0.59,
-        "low": 0.05,
+        "avg": 0.1,
+        "low": 0.08,
         "trend": 0.58,
         "reverseHoloSell": null,
         "suggested": null
@@ -2108,7 +2108,7 @@
       "prices": {
         "avg": 1.03,
         "low": 0.5,
-        "trend": 1.05,
+        "trend": 1.06,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -2122,7 +2122,7 @@
       "metacardId": 401447,
       "dateAdded": "2025-08-07 12:35:00",
       "prices": {
-        "avg": 1.04,
+        "avg": 1.05,
         "low": 0.5,
         "trend": 1.1,
         "reverseHoloSell": null,
@@ -2204,7 +2204,7 @@
       "prices": {
         "avg": 5.78,
         "low": 5.5,
-        "trend": 6.14,
+        "trend": 6.28,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -2300,7 +2300,7 @@
       "prices": {
         "avg": 4.11,
         "low": 3.7,
-        "trend": 4.35,
+        "trend": 4.31,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -2331,8 +2331,8 @@
       "dateAdded": "2025-08-07 12:40:51",
       "prices": {
         "avg": 154.25,
-        "low": 124,
-        "trend": 154.96,
+        "low": 123.95,
+        "trend": 151.74,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -2474,7 +2474,7 @@
       "metacardId": 414879,
       "dateAdded": "2025-08-07 12:45:32",
       "prices": {
-        "avg": 9.99,
+        "avg": 11,
         "low": 10,
         "trend": 10.6,
         "reverseHoloSell": null,
@@ -2506,7 +2506,7 @@
       "metacardId": 348179,
       "dateAdded": "2025-08-07 12:46:06",
       "prices": {
-        "avg": 9.2,
+        "avg": 9.16,
         "low": 8.98,
         "trend": 8.88,
         "reverseHoloSell": null,

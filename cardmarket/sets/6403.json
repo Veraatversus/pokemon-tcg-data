@@ -2747,7 +2747,7 @@
       "dateAdded": "2026-04-09 10:22:34",
       "prices": {
         "avg": null,
-        "low": null,
+        "low": 2.9,
         "trend": 0,
         "reverseHoloSell": null,
         "suggested": null

@@ -91,7 +91,7 @@
       "dateAdded": "2021-12-29 17:25:22",
       "prices": {
         "avg": 3.09,
-        "low": 4,
+        "low": 3.2,
         "trend": 7.03,
         "reverseHoloSell": null,
         "suggested": null
@@ -123,8 +123,8 @@
       "dateAdded": "2021-12-29 17:26:06",
       "prices": {
         "avg": 2.35,
-        "low": 2,
-        "trend": 2.39,
+        "low": 2.1,
+        "trend": 2.23,
         "reverseHoloSell": null,
         "suggested": null
       }

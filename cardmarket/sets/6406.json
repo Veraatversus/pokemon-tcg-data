@@ -26,9 +26,9 @@
       "metacardId": 289381,
       "dateAdded": "2026-01-26 16:30:04",
       "prices": {
-        "avg": 1,
-        "low": 2.99,
-        "trend": 1,
+        "avg": 2.99,
+        "low": null,
+        "trend": 2.99,
         "reverseHoloSell": null,
         "suggested": null
       }

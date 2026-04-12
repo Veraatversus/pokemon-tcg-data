@@ -907,7 +907,7 @@
       "dateAdded": "2026-01-27 12:22:05",
       "prices": {
         "avg": 3.99,
-        "low": 5,
+        "low": null,
         "trend": 0,
         "reverseHoloSell": null,
         "suggested": null
@@ -939,7 +939,7 @@
       "dateAdded": "2026-01-27 12:22:33",
       "prices": {
         "avg": 4.99,
-        "low": 5,
+        "low": null,
         "trend": 0,
         "reverseHoloSell": null,
         "suggested": null

@@ -474,7 +474,7 @@
       "metacardId": 224722,
       "dateAdded": "2021-04-22 16:28:22",
       "prices": {
-        "avg": 1,
+        "avg": 0.3,
         "low": 0.3,
         "trend": 0.88,
         "reverseHoloSell": null,
@@ -538,8 +538,8 @@
       "metacardId": 224737,
       "dateAdded": "2021-04-22 16:31:53",
       "prices": {
-        "avg": 0.1,
-        "low": 0.08,
+        "avg": 0.15,
+        "low": 0.05,
         "trend": 0.16,
         "reverseHoloSell": null,
         "suggested": null

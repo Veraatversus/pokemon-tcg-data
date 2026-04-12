@@ -4922,7 +4922,7 @@
       "metacardId": 316935,
       "dateAdded": "2020-09-07 14:35:34",
       "prices": {
-        "avg": 0.1,
+        "avg": 0.15,
         "low": 0.09,
         "trend": 0.09,
         "reverseHoloSell": null,
@@ -6330,7 +6330,7 @@
       "metacardId": 406164,
       "dateAdded": "2022-04-01 11:07:42",
       "prices": {
-        "avg": 0.02,
+        "avg": 0.1,
         "low": 0.02,
         "trend": 0.03,
         "reverseHoloSell": null,
@@ -6459,7 +6459,7 @@
       "dateAdded": "2022-06-22 10:44:13",
       "prices": {
         "avg": 2,
-        "low": 0.1,
+        "low": 0.05,
         "trend": 0.43,
         "reverseHoloSell": null,
         "suggested": null
@@ -7002,7 +7002,7 @@
       "metacardId": 415639,
       "dateAdded": "2023-01-10 12:52:06",
       "prices": {
-        "avg": 0.25,
+        "avg": 0.3,
         "low": 0.29,
         "trend": 0.31,
         "reverseHoloSell": null,

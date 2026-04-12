@@ -171,7 +171,7 @@
       "dateAdded": "2024-08-20 14:01:59",
       "prices": {
         "avg": 0.38,
-        "low": 0.25,
+        "low": 0.2,
         "trend": 0.79,
         "reverseHoloSell": null,
         "suggested": null
@@ -380,7 +380,7 @@
       "prices": {
         "avg": null,
         "low": 9.99,
-        "trend": 52.97,
+        "trend": 63.6,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -395,8 +395,8 @@
       "dateAdded": "2024-08-20 14:08:11",
       "prices": {
         "avg": 1.05,
-        "low": 0.3,
-        "trend": 1.03,
+        "low": 0.2,
+        "trend": 0.97,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -491,7 +491,7 @@
       "dateAdded": "2024-08-20 14:10:03",
       "prices": {
         "avg": 1.95,
-        "low": 0.49,
+        "low": 0.2,
         "trend": 1.27,
         "reverseHoloSell": null,
         "suggested": null
@@ -572,7 +572,7 @@
       "prices": {
         "avg": 1,
         "low": 0.05,
-        "trend": 1.15,
+        "trend": 1.22,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -780,7 +780,7 @@
       "prices": {
         "avg": 22,
         "low": 7.98,
-        "trend": 30.16,
+        "trend": 28.54,
         "reverseHoloSell": null,
         "suggested": null
       }
