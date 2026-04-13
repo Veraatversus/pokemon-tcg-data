@@ -156,7 +156,7 @@
       "prices": {
         "avg": 1.81,
         "low": 0.4,
-        "trend": 1.1,
+        "trend": 0.94,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -186,7 +186,7 @@
       "metacardId": 407836,
       "dateAdded": "2025-07-03 15:24:39",
       "prices": {
-        "avg": 2.39,
+        "avg": 1.2,
         "low": 0.5,
         "trend": 1.43,
         "reverseHoloSell": null,
@@ -202,7 +202,7 @@
       "metacardId": 412436,
       "dateAdded": "2025-07-03 15:26:40",
       "prices": {
-        "avg": 4.05,
+        "avg": 3.89,
         "low": 3,
         "trend": 3.62,
         "reverseHoloSell": null,
@@ -250,7 +250,7 @@
       "metacardId": 418750,
       "dateAdded": "2025-07-03 15:28:54",
       "prices": {
-        "avg": 0.49,
+        "avg": 0.5,
         "low": 0.24,
         "trend": 0.49,
         "reverseHoloSell": null,
@@ -282,7 +282,7 @@
       "metacardId": 417429,
       "dateAdded": "2025-07-03 15:30:20",
       "prices": {
-        "avg": 0.19,
+        "avg": 0.17,
         "low": 0.15,
         "trend": 0.15,
         "reverseHoloSell": null,
@@ -1323,7 +1323,7 @@
       "dateAdded": "2025-07-03 16:25:29",
       "prices": {
         "avg": 2.49,
-        "low": 1.9,
+        "low": 1,
         "trend": 3.14,
         "reverseHoloSell": null,
         "suggested": null
@@ -1354,7 +1354,7 @@
       "metacardId": 339335,
       "dateAdded": "2025-07-03 16:26:40",
       "prices": {
-        "avg": 0.99,
+        "avg": 1.24,
         "low": 0.5,
         "trend": 2.24,
         "reverseHoloSell": null,
@@ -1419,7 +1419,7 @@
       "dateAdded": "2025-07-03 16:29:36",
       "prices": {
         "avg": 1.05,
-        "low": 0.9,
+        "low": 0.5,
         "trend": 1.05,
         "reverseHoloSell": null,
         "suggested": null
@@ -1563,7 +1563,7 @@
       "dateAdded": "2025-07-03 16:37:35",
       "prices": {
         "avg": 4.39,
-        "low": 0.99,
+        "low": 0.5,
         "trend": 3.74,
         "reverseHoloSell": null,
         "suggested": null

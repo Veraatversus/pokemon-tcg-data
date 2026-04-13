@@ -219,8 +219,8 @@
       "dateAdded": "2020-04-01 13:57:27",
       "prices": {
         "avg": 11.79,
-        "low": 9.99,
-        "trend": 14.55,
+        "low": 12,
+        "trend": 14.96,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -555,7 +555,7 @@
       "dateAdded": "2024-04-19 16:44:04",
       "prices": {
         "avg": 13,
-        "low": 7,
+        "low": 13,
         "trend": 9.09,
         "reverseHoloSell": null,
         "suggested": null
@@ -603,7 +603,7 @@
       "dateAdded": "2024-04-19 16:46:39",
       "prices": {
         "avg": 14,
-        "low": 9.49,
+        "low": 9.99,
         "trend": 11.84,
         "reverseHoloSell": null,
         "suggested": null
@@ -619,7 +619,7 @@
       "dateAdded": "2024-04-19 16:47:01",
       "prices": {
         "avg": 13,
-        "low": 9.49,
+        "low": 10.53,
         "trend": 12.41,
         "reverseHoloSell": null,
         "suggested": null
@@ -635,7 +635,7 @@
       "dateAdded": "2024-04-19 16:47:16",
       "prices": {
         "avg": 13,
-        "low": 10.99,
+        "low": 11.99,
         "trend": 9.09,
         "reverseHoloSell": null,
         "suggested": null
@@ -746,7 +746,7 @@
       "metacardId": 439728,
       "dateAdded": "2025-01-09 10:39:15",
       "prices": {
-        "avg": 94.75,
+        "avg": 44.25,
         "low": 8.99,
         "trend": 36.62,
         "reverseHoloSell": null,
@@ -891,7 +891,7 @@
       "dateAdded": "2025-07-03 15:47:00",
       "prices": {
         "avg": null,
-        "low": 0.2,
+        "low": 14.5,
         "trend": 0,
         "reverseHoloSell": null,
         "suggested": null
@@ -955,7 +955,7 @@
       "dateAdded": "2025-09-16 15:22:17",
       "prices": {
         "avg": null,
-        "low": 140,
+        "low": 149,
         "trend": 0,
         "reverseHoloSell": null,
         "suggested": null
@@ -1003,7 +1003,7 @@
       "dateAdded": "2026-03-18 14:21:29",
       "prices": {
         "avg": null,
-        "low": 24.99,
+        "low": 15,
         "trend": 0,
         "reverseHoloSell": null,
         "suggested": null
@@ -1019,7 +1019,7 @@
       "dateAdded": "2026-03-18 14:23:24",
       "prices": {
         "avg": 115,
-        "low": 24.5,
+        "low": 15,
         "trend": 115,
         "reverseHoloSell": null,
         "suggested": null

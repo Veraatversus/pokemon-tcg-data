@@ -27,7 +27,7 @@
       "dateAdded": "2026-04-03 10:39:40",
       "prices": {
         "avg": 4.99,
-        "low": 4.99,
+        "low": 4.5,
         "trend": 4.99,
         "reverseHoloSell": null,
         "suggested": null
@@ -74,7 +74,7 @@
       "metacardId": 263045,
       "dateAdded": "2026-04-03 10:40:15",
       "prices": {
-        "avg": null,
+        "avg": 0.9,
         "low": 0.9,
         "trend": 0,
         "reverseHoloSell": null,
@@ -427,7 +427,7 @@
       "dateAdded": "2026-04-03 10:47:06",
       "prices": {
         "avg": null,
-        "low": 324.95,
+        "low": 125,
         "trend": 0,
         "reverseHoloSell": null,
         "suggested": null

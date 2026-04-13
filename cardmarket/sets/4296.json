@@ -59,7 +59,7 @@
       "dateAdded": "2022-10-04 16:25:51",
       "prices": {
         "avg": 0.2,
-        "low": 0.8,
+        "low": 0.5,
         "trend": 0.79,
         "reverseHoloSell": null,
         "suggested": null
@@ -75,7 +75,7 @@
       "dateAdded": "2022-10-04 16:26:15",
       "prices": {
         "avg": 0.45,
-        "low": 0.75,
+        "low": 0.35,
         "trend": 0.95,
         "reverseHoloSell": null,
         "suggested": null
@@ -139,7 +139,7 @@
       "dateAdded": "2022-10-04 16:28:01",
       "prices": {
         "avg": null,
-        "low": 0.84,
+        "low": 0.5,
         "trend": 0,
         "reverseHoloSell": null,
         "suggested": null

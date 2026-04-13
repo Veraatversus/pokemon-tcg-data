@@ -235,7 +235,7 @@
       "dateAdded": "2025-12-09 16:32:16",
       "prices": {
         "avg": null,
-        "low": null,
+        "low": 15,
         "trend": 0,
         "reverseHoloSell": null,
         "suggested": null
@@ -763,7 +763,7 @@
       "dateAdded": "2025-12-09 16:44:28",
       "prices": {
         "avg": null,
-        "low": 145,
+        "low": 140,
         "trend": 0,
         "reverseHoloSell": null,
         "suggested": null

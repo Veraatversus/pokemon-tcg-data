@@ -43,7 +43,7 @@
       "dateAdded": "2024-08-20 20:51:10",
       "prices": {
         "avg": 6.95,
-        "low": 2.29,
+        "low": 2,
         "trend": 8.21,
         "reverseHoloSell": null,
         "suggested": null
@@ -60,7 +60,7 @@
       "prices": {
         "avg": 52.73,
         "low": 22.5,
-        "trend": 56.47,
+        "trend": 53.72,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -315,7 +315,7 @@
       "dateAdded": "2024-08-20 20:55:13",
       "prices": {
         "avg": 184.97,
-        "low": 25,
+        "low": 29.99,
         "trend": 100.07,
         "reverseHoloSell": null,
         "suggested": null

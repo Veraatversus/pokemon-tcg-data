@@ -139,7 +139,7 @@
       "dateAdded": "2025-09-16 10:30:15",
       "prices": {
         "avg": 1.04,
-        "low": 0.9,
+        "low": 0.85,
         "trend": 0.95,
         "reverseHoloSell": null,
         "suggested": null
@@ -554,7 +554,7 @@
       "metacardId": 236362,
       "dateAdded": "2025-09-16 11:12:35",
       "prices": {
-        "avg": 0.79,
+        "avg": 0.9,
         "low": 0.75,
         "trend": 0.89,
         "reverseHoloSell": null,
@@ -603,7 +603,7 @@
       "dateAdded": "2025-09-16 11:13:21",
       "prices": {
         "avg": 3.73,
-        "low": 3,
+        "low": 2.5,
         "trend": 3.94,
         "reverseHoloSell": null,
         "suggested": null
@@ -698,7 +698,7 @@
       "metacardId": 266339,
       "dateAdded": "2025-09-16 11:16:37",
       "prices": {
-        "avg": 0.1,
+        "avg": 0.25,
         "low": 0.2,
         "trend": 0.1,
         "reverseHoloSell": null,
@@ -730,7 +730,7 @@
       "metacardId": 261284,
       "dateAdded": "2025-09-16 11:17:18",
       "prices": {
-        "avg": null,
+        "avg": 0.99,
         "low": 0.99,
         "trend": 0,
         "reverseHoloSell": null,
@@ -906,7 +906,7 @@
       "metacardId": 268055,
       "dateAdded": "2025-09-16 11:20:27",
       "prices": {
-        "avg": null,
+        "avg": 0.99,
         "low": 0.99,
         "trend": 0,
         "reverseHoloSell": null,
@@ -988,7 +988,7 @@
       "prices": {
         "avg": null,
         "low": 1.99,
-        "trend": 2.73,
+        "trend": 3.25,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -1083,7 +1083,7 @@
       "dateAdded": "2025-09-16 11:25:30",
       "prices": {
         "avg": null,
-        "low": 6,
+        "low": 19,
         "trend": 0,
         "reverseHoloSell": null,
         "suggested": null
@@ -1147,7 +1147,7 @@
       "dateAdded": "2025-09-16 11:26:28",
       "prices": {
         "avg": 27.5,
-        "low": 34.95,
+        "low": 30,
         "trend": 20,
         "reverseHoloSell": null,
         "suggested": null
