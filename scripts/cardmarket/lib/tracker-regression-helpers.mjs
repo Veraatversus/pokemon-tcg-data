@@ -736,14 +736,15 @@ export function buildCardRecordFromSources({
     || primaryCard?.images?.large
     || fallbackImageLarge
     || imageUrl;
+  const isOnlyTcgdex = Boolean(tcgdexCard && !primaryCard);
+  const vera_name_val_pre = primaryCard?.name || (isOnlyTcgdex ? (tcgdexCard?.name || '') : '');
   const cardmarketUrl = resolveCardmarketUrl(primaryCard, tcgdexCard, {
-    cardName: tcgdexCard?.name || primaryCard?.name || normalizedNumber,
+    cardName: vera_name_val_pre || primaryCard?.name || tcgdexCard?.name || normalizedNumber,
     setTag: fallbackSetTag,
     setName: fallbackSetName,
     cardNumber: normalizedNumber,
   });
-  const isOnlyTcgdex = Boolean(tcgdexCard && !primaryCard);
-  const vera_name_val = primaryCard?.name || (isOnlyTcgdex ? (tcgdexCard?.name || '') : '');
+  const vera_name_val = vera_name_val_pre;
   const vera_supertype_val = primaryCard?.supertype || '';
   const vera_hp_val = primaryCard?.hp ? String(primaryCard.hp) : (isOnlyTcgdex && tcgdexCard?.hp != null && tcgdexCard?.hp !== '' ? String(tcgdexCard.hp) : '');
   const primarySubtypes = normalizeStringList(primaryCard?.subtypes);

@@ -457,8 +457,10 @@ export function buildCardRecordFromSources({
     || primaryCard?.images?.large
     || fallbackImageLarge
     || imageUrl;
+  const isOnlyTcgdex = Boolean(tcgdexCard && !primaryCard);
+  const vera_name_val_pre = primaryCard?.name || (isOnlyTcgdex ? (tcgdexCard?.name || '') : '');
   const cardmarketUrl = resolveCardmarketUrl(primaryCard, tcgdexCard, {
-    cardName: tcgdexCard?.name || primaryCard?.name || normalizedNumber,
+    cardName: vera_name_val_pre || primaryCard?.name || tcgdexCard?.name || normalizedNumber,
     setTag: fallbackSetTag,
     setName: fallbackSetName,
     cardNumber: normalizedNumber
@@ -473,7 +475,7 @@ export function buildCardRecordFromSources({
     isTcgdexOnly: Boolean(tcgdexCard && !primaryCard),
     // vera-Felder
     vera_id: primaryCard?.id || '',
-    vera_name: primaryCard?.name || '',
+    vera_name: vera_name_val_pre || primaryCard?.name || '',
     vera_supertype: primaryCard?.supertype || '',
     vera_subtypes: normalizeStringList(primaryCard?.subtypes),
     vera_hp: primaryCard?.hp ? String(primaryCard.hp) : '',
