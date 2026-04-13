@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import {
   buildCardRecordFromSources,
+  buildSetRecordFromSources,
   buildCombinedSearchDropdownOptions,
   combineSetsForOverviewCompat,
   createSpreadsheetSwitchStatePatch,
@@ -306,4 +307,55 @@ test('imported search falls back to API when imported set has no DB cards', () =
     shouldFetchApiCardsForSearchSet('imported', { imported: true, setId: 'sv11' }, true),
     false
   );
+});
+
+test('TCGDex-only set fills missing vera_* fields with English TCGDex values', () => {
+  const rec = buildSetRecordFromSources({
+    setId: 'TCGDEX-sample',
+    primarySet: null,
+    tcgdexSet: {
+      id: 'sample',
+      name: 'English Set Name',
+      serie: { id: 's', name: 'Series Name' },
+      abbreviation: { official: 'ESN' },
+      releaseDate: '2024-01-01',
+      logo: 'https://assets.tcgdex.net/en/s/sample/logo.webp',
+      symbol: 'https://assets.tcgdex.net/en/s/sample/symbol.webp',
+      cardCount: { total: 123 },
+      legal: { standard: 'legal' },
+    },
+    isTcgdexOnly: true,
+  });
+
+  assert.equal(rec.vera_name, 'English Set Name');
+  assert.equal(rec.vera_ptcgoCode, 'ESN');
+  assert.equal(rec.vera_total, 123);
+  assert.equal(rec.vera_images_logo, rec.tcgdex_logo);
+});
+
+test('TCGDex-only card fills missing vera_* fields with English TCGDex values', () => {
+  const rec = buildCardRecordFromSources({
+    setId: 's-sample',
+    primaryCard: null,
+    tcgdexCard: {
+      id: 's-sample-1',
+      localId: '001',
+      name: 'Samplemon',
+      rarity: 'Rare',
+      hp: 70,
+      types: ['Fire'],
+      illustrator: 'Jane Artist',
+      description: 'A sample pokémon.',
+      image: 'https://assets.tcgdex.net/en/s/s-sample/001',
+    },
+    tcgdexSetId: 's-sample',
+    tcgdexSeriesId: 's',
+  });
+
+  assert.equal(rec.vera_name, 'Samplemon');
+  assert.equal(rec.vera_number, '001');
+  assert.equal(rec.vera_artist, 'Jane Artist');
+  assert.equal(rec.vera_rarity, 'Rare');
+  assert.equal(rec.vera_hp, '70');
+  assert.deepEqual(rec.vera_types, ['Fire']);
 });

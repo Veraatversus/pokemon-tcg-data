@@ -661,6 +661,20 @@ export function buildSetRecordFromSources({
     ? SET_MATCH_STATUS.MATCHED
     : (isTcgdexOnly ? SET_MATCH_STATUS.TCGDEX_ONLY : SET_MATCH_STATUS.PRIMARY_ONLY);
   const resolvedSetId = String(setId || primarySet?.id || (tcgdexSet?.id ? `TCGDEX-${tcgdexSet.id}` : '')).trim();
+  // Prepare fallback values: if this is a TCGDex-only record, fill empty vera_* fields
+  const tcgdexLogo = normalizeTcgdexSetAssetUrl(tcgdexSet?.logo || '');
+  const tcgdexSymbol = normalizeTcgdexSetAssetUrl(tcgdexSet?.symbol || '');
+
+  const vera_name_val = primarySet?.name || (isTcgdexOnly ? (tcgdexSet?.name || '') : '');
+  const vera_series_val = primarySet?.series || (isTcgdexOnly ? (tcgdexSet?.serie?.name || '') : '');
+  const vera_printedTotal_val = toNumber(primarySet?.printedTotal);
+  const vera_total_val = toNumber(primarySet?.total) || (isTcgdexOnly ? toNumber(tcgdexSet?.cardCount?.total) : 0);
+  const vera_ptcgoCode_val = primarySet?.ptcgoCode || primarySet?.code || (isTcgdexOnly ? (tcgdexSet?.abbreviation?.official || '') : '');
+  const vera_releaseDate_val = primarySet?.releaseDate || (isTcgdexOnly ? (tcgdexSet?.releaseDate || '') : '');
+  const vera_legalities_val = primarySet?.legalities || (isTcgdexOnly ? (tcgdexSet?.legal || null) : null);
+  const vera_images_symbol_val = primarySet?.images?.symbol || primarySet?.symbol || (isTcgdexOnly ? tcgdexSymbol : '');
+  const vera_images_logo_val = primarySet?.images?.logo || primarySet?.logo || (isTcgdexOnly ? tcgdexLogo : '');
+
   return {
     setId: resolvedSetId,
     imported: Boolean(imported),
@@ -668,15 +682,15 @@ export function buildSetRecordFromSources({
     matchStatus,
     isTcgdexOnly: Boolean(isTcgdexOnly),
     vera_id: primarySet?.id || '',
-    vera_name: primarySet?.name || '',
-    vera_series: primarySet?.series || '',
-    vera_printedTotal: toNumber(primarySet?.printedTotal),
-    vera_total: toNumber(primarySet?.total),
-    vera_ptcgoCode: primarySet?.ptcgoCode || primarySet?.code || '',
-    vera_releaseDate: primarySet?.releaseDate || '',
-    vera_legalities: primarySet?.legalities || null,
-    vera_images_symbol: primarySet?.images?.symbol || primarySet?.symbol || '',
-    vera_images_logo: primarySet?.images?.logo || primarySet?.logo || '',
+    vera_name: vera_name_val,
+    vera_series: vera_series_val,
+    vera_printedTotal: vera_printedTotal_val,
+    vera_total: vera_total_val,
+    vera_ptcgoCode: vera_ptcgoCode_val,
+    vera_releaseDate: vera_releaseDate_val,
+    vera_legalities: vera_legalities_val,
+    vera_images_symbol: vera_images_symbol_val,
+    vera_images_logo: vera_images_logo_val,
     tcgdex_id: tcgdexSet?.id || '',
     tcgdex_name: tcgdexSet?.name || '',
     tcgdex_serie_id: tcgdexSet?.serie?.id || '',
@@ -684,8 +698,8 @@ export function buildSetRecordFromSources({
     tcgdex_abbreviation_official: tcgdexSet?.abbreviation?.official || '',
     tcgdex_releaseDate: tcgdexSet?.releaseDate || '',
     tcgdex_legal: tcgdexSet?.legal || null,
-    tcgdex_logo: normalizeTcgdexSetAssetUrl(tcgdexSet?.logo || ''),
-    tcgdex_symbol: normalizeTcgdexSetAssetUrl(tcgdexSet?.symbol || ''),
+    tcgdex_logo: tcgdexLogo,
+    tcgdex_symbol: tcgdexSymbol,
     tcgdex_cardCount_official: toNumber(tcgdexSet?.cardCount?.official),
     tcgdex_cardCount_total: toNumber(tcgdexSet?.cardCount?.total),
     tcgdex_cardCount_holo: toNumber(tcgdexSet?.cardCount?.holo),
@@ -728,6 +742,33 @@ export function buildCardRecordFromSources({
     setName: fallbackSetName,
     cardNumber: normalizedNumber,
   });
+  const isOnlyTcgdex = Boolean(tcgdexCard && !primaryCard);
+  const vera_name_val = primaryCard?.name || (isOnlyTcgdex ? (tcgdexCard?.name || '') : '');
+  const vera_supertype_val = primaryCard?.supertype || '';
+  const vera_hp_val = primaryCard?.hp ? String(primaryCard.hp) : (isOnlyTcgdex && tcgdexCard?.hp != null && tcgdexCard?.hp !== '' ? String(tcgdexCard.hp) : '');
+  const primarySubtypes = normalizeStringList(primaryCard?.subtypes);
+  const tcgdexTypes = normalizeStringList(tcgdexCard?.types);
+  const vera_subtypes_val = primarySubtypes.length ? primarySubtypes : (isOnlyTcgdex ? tcgdexTypes : []);
+  const primaryTypes = normalizeStringList(primaryCard?.types);
+  const vera_types_val = primaryTypes.length ? primaryTypes : (isOnlyTcgdex ? tcgdexTypes : []);
+  const vera_evolvesFrom_val = primaryCard?.evolvesFrom || (isOnlyTcgdex ? (tcgdexCard?.evolvesFrom || tcgdexCard?.evolveFrom || '') : '');
+  const vera_abilities_val = Array.isArray(primaryCard?.abilities) && primaryCard.abilities.length ? primaryCard.abilities : (isOnlyTcgdex ? (Array.isArray(tcgdexCard?.abilities) ? tcgdexCard.abilities : []) : []);
+  const vera_attacks_val = Array.isArray(primaryCard?.attacks) && primaryCard.attacks.length ? primaryCard.attacks : [];
+  const vera_weaknesses_val = Array.isArray(primaryCard?.weaknesses) && primaryCard.weaknesses.length ? primaryCard.weaknesses : [];
+  const vera_resistances_val = Array.isArray(primaryCard?.resistances) && primaryCard.resistances.length ? primaryCard.resistances : [];
+  const vera_retreatCost_val = normalizeStringList(primaryCard?.retreatCost).length ? normalizeStringList(primaryCard?.retreatCost) : [];
+  const vera_convertedRetreatCost_val = toNumber(primaryCard?.convertedRetreatCost);
+  const vera_number_val = primaryCard?.number || (isOnlyTcgdex ? (tcgdexCard?.localId || tcgdexCard?.id || '') : '');
+  const vera_artist_val = primaryCard?.artist || (isOnlyTcgdex ? (tcgdexCard?.illustrator || '') : '');
+  const vera_rarity_val = primaryCard?.rarity || (isOnlyTcgdex ? (tcgdexCard?.rarity || '') : '');
+  const vera_flavorText_val = primaryCard?.flavorText || (isOnlyTcgdex ? (typeof tcgdexCard?.description === 'string' ? tcgdexCard.description : (tcgdexCard?.description?.en || Object.values(tcgdexCard?.description || {}).find(Boolean) || '')) : '');
+  const vera_nationalPokedexNumbers_val = Array.isArray(primaryCard?.nationalPokedexNumbers) ? primaryCard.nationalPokedexNumbers : [];
+  const vera_legalities_val = primaryCard?.legalities || (isOnlyTcgdex ? (tcgdexCard?.legalities || null) : null);
+  const vera_regulationMark_val = primaryCard?.regulationMark || (isOnlyTcgdex ? (tcgdexCard?.regulationMark || '') : '');
+  const vera_rules_val = Array.isArray(primaryCard?.rules) ? primaryCard.rules : [];
+  const vera_images_small_val = primaryCard?.images?.small || (isOnlyTcgdex ? (tcgdexImageSmall || fallbackImageSmall || '') : '');
+  const vera_images_large_val = primaryCard?.images?.large || (isOnlyTcgdex ? (tcgdexImageLarge || fallbackImageLarge || imageLargeUrl || '') : '');
+  const vera_cardmarket_url_val = cardmarketUrl || '';
 
   return {
     setId: String(setId || '').trim(),
@@ -737,29 +778,29 @@ export function buildCardRecordFromSources({
     isPrimaryOnly: Boolean(primaryCard && !tcgdexCard),
     isTcgdexOnly: Boolean(tcgdexCard && !primaryCard),
     vera_id: primaryCard?.id || '',
-    vera_name: primaryCard?.name || '',
-    vera_supertype: primaryCard?.supertype || '',
-    vera_subtypes: normalizeStringList(primaryCard?.subtypes),
-    vera_hp: primaryCard?.hp ? String(primaryCard.hp) : '',
-    vera_types: normalizeStringList(primaryCard?.types),
-    vera_evolvesFrom: primaryCard?.evolvesFrom || '',
-    vera_abilities: Array.isArray(primaryCard?.abilities) ? primaryCard.abilities : [],
-    vera_attacks: Array.isArray(primaryCard?.attacks) ? primaryCard.attacks : [],
-    vera_weaknesses: Array.isArray(primaryCard?.weaknesses) ? primaryCard.weaknesses : [],
-    vera_resistances: Array.isArray(primaryCard?.resistances) ? primaryCard.resistances : [],
-    vera_retreatCost: normalizeStringList(primaryCard?.retreatCost),
-    vera_convertedRetreatCost: toNumber(primaryCard?.convertedRetreatCost),
-    vera_number: primaryCard?.number || '',
-    vera_artist: primaryCard?.artist || '',
-    vera_rarity: primaryCard?.rarity || '',
-    vera_flavorText: primaryCard?.flavorText || '',
-    vera_nationalPokedexNumbers: Array.isArray(primaryCard?.nationalPokedexNumbers) ? primaryCard.nationalPokedexNumbers : [],
-    vera_legalities: primaryCard?.legalities || null,
-    vera_regulationMark: primaryCard?.regulationMark || '',
-    vera_rules: Array.isArray(primaryCard?.rules) ? primaryCard.rules : [],
-    vera_images_small: primaryCard?.images?.small || '',
-    vera_images_large: primaryCard?.images?.large || '',
-    vera_cardmarket_url: cardmarketUrl || '',
+    vera_name: vera_name_val,
+    vera_supertype: vera_supertype_val,
+    vera_subtypes: vera_subtypes_val,
+    vera_hp: vera_hp_val,
+    vera_types: vera_types_val,
+    vera_evolvesFrom: vera_evolvesFrom_val,
+    vera_abilities: vera_abilities_val,
+    vera_attacks: vera_attacks_val,
+    vera_weaknesses: vera_weaknesses_val,
+    vera_resistances: vera_resistances_val,
+    vera_retreatCost: vera_retreatCost_val,
+    vera_convertedRetreatCost: vera_convertedRetreatCost_val,
+    vera_number: vera_number_val,
+    vera_artist: vera_artist_val,
+    vera_rarity: vera_rarity_val,
+    vera_flavorText: vera_flavorText_val,
+    vera_nationalPokedexNumbers: vera_nationalPokedexNumbers_val,
+    vera_legalities: vera_legalities_val,
+    vera_regulationMark: vera_regulationMark_val,
+    vera_rules: vera_rules_val,
+    vera_images_small: vera_images_small_val,
+    vera_images_large: vera_images_large_val,
+    vera_cardmarket_url: vera_cardmarket_url_val,
     tcgdex_id: tcgdexCard?.id || '',
     tcgdex_name: tcgdexCard?.name || '',
     tcgdex_localId: tcgdexCard?.localId || '',
@@ -780,6 +821,8 @@ export function buildCardRecordFromSources({
       : (tcgdexCard?.description?.en || Object.values(tcgdexCard?.description || {}).find(Boolean) || ''),
     tcgdex_effect: tcgdexCard?.effect || null,
   };
+
+  // (old return removed) - values are returned above with tcgdex fallbacks applied
 }
 
 export function resolveDisplaySet(setRecord = {}) {
