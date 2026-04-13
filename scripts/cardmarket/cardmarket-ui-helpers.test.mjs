@@ -95,7 +95,7 @@ test('inferCardmarketExpansionIdFromCards uses the generated tracker set index w
   assert.equal(inferCardmarketExpansionIdFromCards(cards, productIndex, { trackerSetIndex }), '2001');
 });
 
-test('inferCardmarketExpansionIdFromCards prefers unique tracker bySetName match over bySetId and byPtcgoCode', () => {
+test('inferCardmarketExpansionIdFromCards keeps bySetId and byPtcgoCode precedence when available', () => {
   const cards = [
     {
       setId: 'mystery-set',
@@ -109,6 +109,26 @@ test('inferCardmarketExpansionIdFromCards prefers unique tracker bySetName match
   const trackerSetIndex = {
     bySetId: { 'mystery-set': '2001' },
     byPtcgoCode: { tr: '2001' },
+    bySetName: { 'team rocket': '1528' }
+  };
+
+  assert.equal(inferCardmarketExpansionIdFromCards(cards, productIndex, { trackerSetIndex }), '2001');
+});
+
+test('inferCardmarketExpansionIdFromCards falls back to bySetName when neither bySetId nor byPtcgoCode match', () => {
+  const cards = [
+    {
+      setId: 'mystery-set',
+      setName: 'Team Rocket',
+      name: 'Dark Charizard',
+      cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchString=TR+004'
+    }
+  ];
+
+  const productIndex = {};
+  const trackerSetIndex = {
+    bySetId: {},
+    byPtcgoCode: {},
     bySetName: { 'team rocket': '1528' }
   };
 
