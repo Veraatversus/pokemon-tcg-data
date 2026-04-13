@@ -170,7 +170,7 @@ export async function loadCardmarketTrackerSetIndex({ signal, forceRefresh = fal
   try {
     trackerSetIndexCache = await fetchJson(`${baseUrl}/index/tracker.json`, { signal });
   } catch {
-    trackerSetIndexCache = { bySetId: {}, byPtcgoCode: {} };
+    trackerSetIndexCache = { bySetId: {}, byPtcgoCode: {}, bySetName: {} };
   }
   return trackerSetIndexCache;
 }
