@@ -23,7 +23,7 @@ jobs:
         with:
           ref: dev
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PROMOTION_PAT != '' && secrets.PROMOTION_PAT || secrets.GITHUB_TOKEN }}
 
       - name: Configure Git
         run: |
@@ -90,7 +90,7 @@ jobs:
         with:
           ref: release
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PROMOTION_PAT != '' && secrets.PROMOTION_PAT || secrets.GITHUB_TOKEN }}
 
       - name: Configure Git
         run: |
