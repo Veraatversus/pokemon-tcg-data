@@ -47,6 +47,7 @@ jobs:
           test -f cardmarket/meta.json
           test -f cardmarket/index/sets.json
           test -f cardmarket/index/products.json
+          test -f cardmarket/index/nonsingles-products.json
           test -f cardmarket/index/names.json
           test -f cardmarket/index/tracker.json
 
@@ -83,6 +84,7 @@ jobs:
               - \`cardmarket/meta.json\`
               - \`cardmarket/index/sets.json\`
               - \`cardmarket/index/products.json\`
+              - \`cardmarket/index/nonsingles-products.json\`
               - \`cardmarket/index/names.json\`
               - \`cardmarket/index/tracker.json\`
               - \`cardmarket/sets/<setId>.json\`

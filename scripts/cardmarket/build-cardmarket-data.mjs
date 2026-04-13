@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { buildCardmarketArtifacts, writeArtifactsToDirectory } from './lib/build-helpers.mjs';
 
 const DEFAULT_SINGLES_URL = 'https://downloads.s3.cardmarket.com/productCatalog/productList/products_singles_6.json';
+const DEFAULT_NONSINGLES_URL = 'https://downloads.s3.cardmarket.com/productCatalog/productList/products_nonsingles_6.json';
 const DEFAULT_PRICE_GUIDE_URL = 'https://downloads.s3.cardmarket.com/productCatalog/priceGuide/price_guide_6.json';
 
 async function fetchJson(url) {
@@ -26,6 +27,7 @@ function validateArtifacts(artifacts) {
   if (!artifacts?.meta) throw new Error('Missing artifacts.meta');
   if (!artifacts?.index?.sets) throw new Error('Missing artifacts.index.sets');
   if (!artifacts?.index?.products) throw new Error('Missing artifacts.index.products');
+  if (!artifacts?.index?.nonsinglesProducts) throw new Error('Missing artifacts.index.nonsinglesProducts');
   if (!artifacts?.index?.names) throw new Error('Missing artifacts.index.names');
   if (!artifacts?.index?.tracker) throw new Error('Missing artifacts.index.tracker');
   if (!Number.isFinite(artifacts.meta.singlesCount) || artifacts.meta.singlesCount <= 0) {
@@ -36,6 +38,9 @@ function validateArtifacts(artifacts) {
   }
   if (!Number.isFinite(artifacts.meta.productIndexCount) || artifacts.meta.productIndexCount <= 0) {
     throw new Error('Cardmarket product lookup index is empty');
+  }
+  if (!Number.isFinite(artifacts.meta.nonsinglesCount) || artifacts.meta.nonsinglesCount < 0) {
+    throw new Error('Cardmarket nonsingles feed produced an invalid count');
   }
 }
 
@@ -87,16 +92,18 @@ async function resolveDefaultOutputDirs(repoRoot) {
   return dirs;
 }
 
-export async function buildDailyCardmarketData({ singlesUrl = DEFAULT_SINGLES_URL, priceGuideUrl = DEFAULT_PRICE_GUIDE_URL, outputDir, outputDirs = [], repoRoot } = {}) {
+export async function buildDailyCardmarketData({ singlesUrl = DEFAULT_SINGLES_URL, nonsinglesUrl = DEFAULT_NONSINGLES_URL, priceGuideUrl = DEFAULT_PRICE_GUIDE_URL, outputDir, outputDirs = [], repoRoot } = {}) {
   const resolvedRepoRoot = repoRoot ? path.resolve(repoRoot) : path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-  const [singlesPayload, priceGuidePayload, trackerReference] = await Promise.all([
+  const [singlesPayload, nonsinglesPayload, priceGuidePayload, trackerReference] = await Promise.all([
     fetchJson(singlesUrl),
+    fetchJson(nonsinglesUrl),
     fetchJson(priceGuideUrl),
     loadTrackerReferenceData(resolvedRepoRoot),
   ]);
 
   const artifacts = buildCardmarketArtifacts({
     singlesPayload,
+    nonsinglesPayload,
     priceGuidePayload,
     trackerSets: trackerReference.trackerSets,
     trackerCardsBySet: trackerReference.trackerCardsBySet,

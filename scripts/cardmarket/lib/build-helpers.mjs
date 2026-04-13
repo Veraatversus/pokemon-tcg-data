@@ -59,6 +59,55 @@ function normalizeCodeKey(value = '') {
   return normalizeMatcherText(value).replace(/\s+/g, '');
 }
 
+function buildUniqueStringLookup(pairs = []) {
+  const lookup = {};
+  const conflicts = new Set();
+
+  (Array.isArray(pairs) ? pairs : []).forEach(([rawKey, rawValue]) => {
+    const key = String(rawKey || '').trim();
+    const value = String(rawValue || '').trim();
+    if (!key || !value) return;
+
+    if (!lookup[key]) {
+      lookup[key] = value;
+      return;
+    }
+
+    if (lookup[key] !== value) {
+      conflicts.add(key);
+    }
+  });
+
+  conflicts.forEach((key) => {
+    delete lookup[key];
+  });
+
+  return lookup;
+}
+
+function extractBoosterNameLookup(nonsinglesProducts = []) {
+  const pairs = [];
+
+  (Array.isArray(nonsinglesProducts) ? nonsinglesProducts : []).forEach((product) => {
+    const expansionId = String(Number(product?.idExpansion || product?.expansionId || 0) || '').trim();
+    if (!expansionId) return;
+
+    const categoryName = normalizeMatcherText(product?.categoryName || '');
+    const productName = String(product?.name || '').trim();
+    if (!productName) return;
+
+    const isBoosterProduct = categoryName.includes('booster') || /\bbooster\b/i.test(productName);
+    if (!isBoosterProduct) return;
+
+    const baseName = normalizeMatcherText(productName.replace(/\s+booster\s*$/i, ''));
+    if (!baseName) return;
+
+    pairs.push([baseName, expansionId]);
+  });
+
+  return buildUniqueStringLookup(pairs);
+}
+
 function pickBestExpansionId(counts = new Map()) {
   let resolvedExpansionId = '';
   let resolvedCount = 0;
@@ -91,9 +140,10 @@ function inferExpansionIdFromTrackerCards(trackerCards = [], nameIndex = {}) {
   return pickBestExpansionId(counts);
 }
 
-function buildTrackerSetIndex(trackerSets = [], trackerCardsBySet = {}, nameIndex = {}) {
+function buildTrackerSetIndex(trackerSets = [], trackerCardsBySet = {}, nameIndex = {}, boosterNameLookup = {}) {
   const bySetId = {};
   const byPtcgoCode = {};
+  const bySetName = { ...(boosterNameLookup || {}) };
 
   (Array.isArray(trackerSets) ? trackerSets : []).forEach((set) => {
     const setId = String(set?.id || '').trim();
@@ -108,22 +158,30 @@ function buildTrackerSetIndex(trackerSets = [], trackerCardsBySet = {}, nameInde
     if (ptcgoCode) {
       byPtcgoCode[ptcgoCode] = expansionId;
     }
+
+    const setNameKey = normalizeMatcherText(set?.name || '');
+    if (setNameKey && (!bySetName[setNameKey] || bySetName[setNameKey] === expansionId)) {
+      bySetName[setNameKey] = expansionId;
+    }
   });
 
-  return { bySetId, byPtcgoCode };
+  return { bySetId, byPtcgoCode, bySetName };
 }
 
-export function buildCardmarketArtifacts({ singlesPayload, priceGuidePayload, trackerSets = [], trackerCardsBySet = {} } = {}) {
+export function buildCardmarketArtifacts({ singlesPayload, nonsinglesPayload, priceGuidePayload, trackerSets = [], trackerCardsBySet = {} } = {}) {
   const products = extractProductsList(singlesPayload);
+  const nonsinglesProducts = extractProductsList(nonsinglesPayload);
   const priceRows = extractPriceGuideList(priceGuidePayload);
   const priceMap = buildPriceMap(priceRows);
 
   const groupedSets = {};
   const productIndex = {};
   const nameIndex = {};
+  const nonsinglesProductsIndex = {};
 
-  for (const product of products) {
-    const expansionId = Number(product.idExpansion || product.expansionId || 0) || 0;
+  const allProducts = [...products, ...nonsinglesProducts];
+  allProducts.forEach((product) => {
+    const expansionId = Number(product?.idExpansion || product?.expansionId || 0) || 0;
     const expansionKey = String(expansionId || 'unknown');
     if (!groupedSets[expansionKey]) {
       groupedSets[expansionKey] = {
@@ -132,9 +190,21 @@ export function buildCardmarketArtifacts({ singlesPayload, priceGuidePayload, tr
       };
     }
 
+    const cardmarketProductId = Number(product?.idProduct || product?.productId || 0) || null;
+    if (cardmarketProductId && !productIndex[String(cardmarketProductId)]) {
+      productIndex[String(cardmarketProductId)] = {
+        expansionId,
+        path: `sets/${expansionKey}.json`,
+      };
+    }
+  });
+
+  for (const product of products) {
+    const expansionId = Number(product.idExpansion || product.expansionId || 0) || 0;
+    const expansionKey = String(expansionId || 'unknown');
+
     const cardmarketProductId = Number(product.idProduct || product.productId || 0) || null;
     const price = cardmarketProductId ? priceMap.get(cardmarketProductId) : null;
-    const setPath = `sets/${expansionKey}.json`;
 
     groupedSets[expansionKey].cards.push({
       cardmarketProductId,
@@ -153,13 +223,6 @@ export function buildCardmarketArtifacts({ singlesPayload, priceGuidePayload, tr
       },
     });
 
-    if (cardmarketProductId && !productIndex[String(cardmarketProductId)]) {
-      productIndex[String(cardmarketProductId)] = {
-        expansionId,
-        path: setPath,
-      };
-    }
-
     const normalizedName = normalizeMatcherText(extractBaseCardName(product.name || ''));
     if (normalizedName) {
       if (!nameIndex[normalizedName]) {
@@ -169,11 +232,29 @@ export function buildCardmarketArtifacts({ singlesPayload, priceGuidePayload, tr
     }
   }
 
+  for (const product of nonsinglesProducts) {
+    const cardmarketProductId = Number(product.idProduct || product.productId || 0) || null;
+    if (!cardmarketProductId) continue;
+
+    const expansionId = Number(product.idExpansion || product.expansionId || 0) || 0;
+    const expansionKey = String(expansionId || 'unknown');
+    nonsinglesProductsIndex[String(cardmarketProductId)] = {
+      name: String(product.name || '').trim(),
+      categoryId: Number(product.idCategory || 0) || null,
+      categoryName: String(product.categoryName || '').trim(),
+      expansionId,
+      metacardId: Number(product.idMetacard || 0) || null,
+      dateAdded: String(product.dateAdded || '').trim(),
+      path: `sets/${expansionKey}.json`,
+    };
+  }
+
   const normalizedNameIndex = Object.fromEntries(
     Object.entries(nameIndex)
       .map(([name, expansionIds]) => [name, Array.from(expansionIds).sort((left, right) => Number(left) - Number(right))])
   );
-  const trackerIndex = buildTrackerSetIndex(trackerSets, trackerCardsBySet, normalizedNameIndex);
+  const boosterNameLookup = extractBoosterNameLookup(nonsinglesProducts);
+  const trackerIndex = buildTrackerSetIndex(trackerSets, trackerCardsBySet, normalizedNameIndex, boosterNameLookup);
 
   const indexSets = Object.values(groupedSets)
     .map((entry) => ({
@@ -188,8 +269,10 @@ export function buildCardmarketArtifacts({ singlesPayload, priceGuidePayload, tr
       schemaVersion: 2,
       generatedAt: new Date().toISOString(),
       singlesSourceCreatedAt: singlesPayload?.createdAt || null,
+      nonsinglesSourceCreatedAt: nonsinglesPayload?.createdAt || null,
       priceGuideSourceCreatedAt: priceGuidePayload?.createdAt || null,
       singlesCount: products.length,
+      nonsinglesCount: nonsinglesProducts.length,
       priceGuideCount: priceRows.length,
       setCount: indexSets.length,
       productIndexCount: Object.keys(productIndex).length,
@@ -198,6 +281,7 @@ export function buildCardmarketArtifacts({ singlesPayload, priceGuidePayload, tr
       sets: indexSets,
       products: productIndex,
       names: normalizedNameIndex,
+      nonsinglesProducts: nonsinglesProductsIndex,
       tracker: trackerIndex,
     },
     sets: groupedSets,
@@ -214,8 +298,9 @@ export async function writeArtifactsToDirectory(artifacts, outputDir) {
   await fs.writeFile(path.join(outputDir, 'meta.json'), JSON.stringify(artifacts.meta, null, 2) + '\n', 'utf8');
   await fs.writeFile(path.join(indexDir, 'sets.json'), JSON.stringify({ sets: artifacts.index?.sets || [] }, null, 2) + '\n', 'utf8');
   await fs.writeFile(path.join(indexDir, 'products.json'), JSON.stringify(artifacts.index?.products || {}, null, 2) + '\n', 'utf8');
+  await fs.writeFile(path.join(indexDir, 'nonsingles-products.json'), JSON.stringify(artifacts.index?.nonsinglesProducts || {}, null, 2) + '\n', 'utf8');
   await fs.writeFile(path.join(indexDir, 'names.json'), JSON.stringify(artifacts.index?.names || {}, null, 2) + '\n', 'utf8');
-  await fs.writeFile(path.join(indexDir, 'tracker.json'), JSON.stringify(artifacts.index?.tracker || { bySetId: {}, byPtcgoCode: {} }, null, 2) + '\n', 'utf8');
+  await fs.writeFile(path.join(indexDir, 'tracker.json'), JSON.stringify(artifacts.index?.tracker || { bySetId: {}, byPtcgoCode: {}, bySetName: {} }, null, 2) + '\n', 'utf8');
 
   await Promise.all(
     Object.entries(artifacts.sets).map(([expansionKey, payload]) =>
