@@ -170,9 +170,9 @@
       "metacardId": 345916,
       "dateAdded": "2023-01-18 15:24:45",
       "prices": {
-        "avg": null,
+        "avg": 0.59,
         "low": 0.48,
-        "trend": 1.07,
+        "trend": 0.91,
         "reverseHoloSell": null,
         "suggested": null
       }

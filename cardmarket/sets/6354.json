@@ -26,9 +26,9 @@
       "metacardId": 317965,
       "dateAdded": "2025-10-16 10:07:29",
       "prices": {
-        "avg": null,
+        "avg": 3,
         "low": 1.99,
-        "trend": 0,
+        "trend": 3,
         "reverseHoloSell": null,
         "suggested": null
       }

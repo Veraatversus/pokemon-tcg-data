@@ -794,7 +794,7 @@
       "metacardId": 262756,
       "dateAdded": "2018-06-04 16:57:36",
       "prices": {
-        "avg": 1.82,
+        "avg": 1.96,
         "low": 0.5,
         "trend": 1.47,
         "reverseHoloSell": null,
@@ -906,9 +906,9 @@
       "metacardId": 236544,
       "dateAdded": "2018-06-04 17:00:45",
       "prices": {
-        "avg": 1.19,
-        "low": 0.25,
-        "trend": 1.84,
+        "avg": 0.25,
+        "low": 0.99,
+        "trend": 1.49,
         "reverseHoloSell": null,
         "suggested": null
       }

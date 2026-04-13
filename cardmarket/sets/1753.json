@@ -475,7 +475,7 @@
       "dateAdded": "2026-02-07 12:45:33",
       "prices": {
         "avg": 20,
-        "low": 20,
+        "low": 16,
         "trend": 20,
         "reverseHoloSell": null,
         "suggested": null
@@ -1387,7 +1387,7 @@
       "dateAdded": "2026-02-07 13:20:03",
       "prices": {
         "avg": 0.49,
-        "low": 0.44,
+        "low": 2.49,
         "trend": 0.49,
         "reverseHoloSell": null,
         "suggested": null

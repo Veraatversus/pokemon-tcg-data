@@ -123,7 +123,7 @@
       "dateAdded": "2023-03-26 18:37:50",
       "prices": {
         "avg": 0.34,
-        "low": 0.25,
+        "low": 0.15,
         "trend": 0.02,
         "reverseHoloSell": null,
         "suggested": null
@@ -1243,7 +1243,7 @@
       "dateAdded": "2024-09-23 10:36:00",
       "prices": {
         "avg": null,
-        "low": 0.25,
+        "low": 0.26,
         "trend": 0,
         "reverseHoloSell": null,
         "suggested": null

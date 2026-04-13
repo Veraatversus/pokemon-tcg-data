@@ -1338,9 +1338,9 @@
       "metacardId": 212365,
       "dateAdded": "2026-01-23 10:49:54",
       "prices": {
-        "avg": null,
-        "low": 0.5,
-        "trend": 0,
+        "avg": 0.5,
+        "low": 1,
+        "trend": 0.5,
         "reverseHoloSell": null,
         "suggested": null
       }

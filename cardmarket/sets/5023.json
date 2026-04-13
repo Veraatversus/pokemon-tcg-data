@@ -28,7 +28,7 @@
       "prices": {
         "avg": 3.7,
         "low": 1.95,
-        "trend": 3.57,
+        "trend": 3.69,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -522,9 +522,9 @@
       "metacardId": 213019,
       "dateAdded": "2022-04-14 16:38:40",
       "prices": {
-        "avg": 6.45,
-        "low": 4.99,
-        "trend": 5.67,
+        "avg": 4,
+        "low": 2.99,
+        "trend": 5.71,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -588,7 +588,7 @@
       "prices": {
         "avg": 4.38,
         "low": 2.5,
-        "trend": 4.05,
+        "trend": 4.13,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -762,8 +762,8 @@
       "metacardId": 212913,
       "dateAdded": "2022-04-14 17:12:27",
       "prices": {
-        "avg": 11,
-        "low": 7.39,
+        "avg": 12.97,
+        "low": 7.5,
         "trend": 12.49,
         "reverseHoloSell": null,
         "suggested": null
@@ -780,7 +780,7 @@
       "prices": {
         "avg": 165.29,
         "low": 32,
-        "trend": 109.59,
+        "trend": 106.19,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -843,8 +843,8 @@
       "dateAdded": "2022-04-14 17:20:38",
       "prices": {
         "avg": 57.5,
-        "low": null,
-        "trend": 112.38,
+        "low": 349,
+        "trend": 153.21,
         "reverseHoloSell": null,
         "suggested": null
       }
@@ -1115,7 +1115,7 @@
       "dateAdded": "2022-04-14 17:38:58",
       "prices": {
         "avg": 54.99,
-        "low": 35,
+        "low": 30,
         "trend": 53.3,
         "reverseHoloSell": null,
         "suggested": null
@@ -1164,7 +1164,7 @@
       "prices": {
         "avg": 439.6,
         "low": 124.9,
-        "trend": 200.55,
+        "trend": 206.5,
         "reverseHoloSell": null,
         "suggested": null
       }
