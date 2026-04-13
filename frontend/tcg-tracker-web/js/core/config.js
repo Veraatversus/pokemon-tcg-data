@@ -81,9 +81,9 @@ export const CONFIG = {
       access: 'https://docs.google.com/forms/d/e/1FAIpQLSeDSU0GRKB6pDZPSXMoOwlsqXFjk0kcnGYyVAuB7zSJDO_HCw/viewform'
     },
     fallbackUrls: {
-      bug: './impressum.html#projektkontakt',
-      feature: './impressum.html#projektkontakt',
-      access: './impressum.html#projektkontakt'
+      bug: '../../kontakt.html#projektkontakt',
+      feature: '../../kontakt.html#projektkontakt',
+      access: '../../kontakt.html#projektkontakt'
     }
   },
 

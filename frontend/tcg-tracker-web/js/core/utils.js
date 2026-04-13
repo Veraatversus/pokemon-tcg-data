@@ -97,10 +97,10 @@ const COMBINED_SEARCH_SCOPE_VALUES = new Set(['imported', 'all', 'online']);
  * direkt ihre `setId` (importiert) oder `set:all:<setId>` für noch nicht
  * importierte/API-Sets.
  * @param {string} value
- * @param {string} [fallbackMode='imported']
+ * @param {string} [fallbackMode='all']
  * @returns {{ mode: string, setId: string }}
  */
-export function resolveCombinedSearchSelection(value, fallbackMode = 'imported') {
+export function resolveCombinedSearchSelection(value, fallbackMode = 'all') {
   const raw = String(value || '').trim();
   if (!raw) {
     return { mode: fallbackMode, setId: '' };
@@ -135,8 +135,8 @@ export function buildCombinedSearchDropdownOptions(sets = []) {
     {
       label: 'Suchbereich',
       options: [
-        { value: 'scope:imported', label: 'Importierte Sets' },
         { value: 'scope:all', label: 'Alle Sets' },
+        { value: 'scope:imported', label: 'Importierte Sets' },
         { value: 'scope:online', label: 'Online-Suche' }
       ]
     }
@@ -204,6 +204,42 @@ export function shouldFetchApiCardsForSearchSet(mode, set = {}, hasDbCards = fal
   }
 
   return false;
+}
+
+/**
+ * Baut einen kompakten Fortschrittstext für die Suche auf.
+ * Gezählt werden nur Sets, deren Suche bereits vollständig abgeschlossen ist –
+ * also lokale DB-Treffer plus bereits fertig nachgeladene API-Sets.
+ * @param {{setsProcessed?: number, totalSets?: number, apiProcessed?: number, totalApiSets?: number}} [progress]
+ * @returns {string}
+ */
+export function buildSearchProgressLabel(progress = {}) {
+  const {
+    setsProcessed = 0,
+    totalSets = 0,
+    apiProcessed = 0,
+    totalApiSets = 0,
+  } = progress;
+
+  const safeTotalSets = Number.isFinite(totalSets) ? Math.max(0, totalSets) : 0;
+  const safeSetsProcessed = safeTotalSets > 0
+    ? Math.min(Math.max(0, setsProcessed), safeTotalSets)
+    : 0;
+  const safeApiTotal = Number.isFinite(totalApiSets) ? Math.max(0, totalApiSets) : 0;
+  const safeApiProcessed = safeApiTotal > 0
+    ? Math.min(Math.max(0, apiProcessed), safeApiTotal)
+    : 0;
+
+  if (safeTotalSets <= 0) {
+    return '';
+  }
+
+  const completedSets = Math.min(
+    safeTotalSets,
+    Math.max(0, safeSetsProcessed - safeApiTotal + safeApiProcessed)
+  );
+
+  return ` · ${completedSets}/${safeTotalSets} Sets`;
 }
 
 /**

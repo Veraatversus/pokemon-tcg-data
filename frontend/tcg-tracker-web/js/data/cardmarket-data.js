@@ -9,7 +9,7 @@ import {
   promoteCardmarketUrlsForCards as sharedPromoteCardmarketUrlsForCards,
   resolveCardmarketEntryForCardFromSetPayload as sharedResolveCardmarketEntryForCardFromSetPayload,
   resolveCardmarketEntryFromSetPayload as sharedResolveCardmarketEntryFromSetPayload,
-} from '../../../../scripts/cardmarket/lib/cardmarket-ui-helpers.mjs';
+} from './cardmarket-ui-helpers.js';
 
 const REMOTE_CARDMARKET_BASE = `${String(CONFIG?.APIS?.VERA_BASE || '').replace(/\/$/, '')}/cardmarket`;
 

@@ -1,4 +1,4 @@
-﻿import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js?v=20260409-driveexport2';
+﻿import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js?v=20260410-authredirect2';
 import {
   listImportedSets,
   listSetsOverviewData,
@@ -15,22 +15,23 @@ import {
   syncOverviewWithApiSets,
   resetSheetsDataCaches,
 } from './data/sheets-db.js?v=20260407-login1';
-import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260510d';
+import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260410-loginfix1';
 import { resolveSeriesGroupInfo } from './data/schema-contract.js?v=20260510b';
 import {
   buildCardmarketProductUrl,
   resolveCardmarketEntryForCard,
   formatCardmarketEntryLabel,
   formatCardmarketEntryTitle
-} from './data/cardmarket-data.js?v=20260510-cardmarket7';
+} from './data/cardmarket-data.js?v=20260410-loginmime1';
 import {
   buildCombinedSearchDropdownOptions,
+  buildSearchProgressLabel,
   createSpreadsheetSwitchStatePatch,
   normalizeCardNumber,
   resolveCombinedSearchSelection,
   shouldFetchApiCardsForSearchSet,
   toBoolean
-} from './core/utils.js?v=20260409-searchscope2';
+} from './core/utils.js?v=20260410-searchrerenderhits1';
 import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle } from './core/collection-state.js?v=20260509a';
 import * as cache from './core/cache.js';
 import { CONFIG, scopedStorageKey } from './core/config.js?v=20260409-treeview1';
@@ -72,7 +73,7 @@ import {
   initQuickFiltersUI, createSearchHistoryWidget, createStatisticsPanel,
   createExportDialog, createSettingsPanel,
   createBulkActionsToolbar
-} from './ui/components.js?v=20260509-discoverybar1';
+} from './ui/components.js?v=20260410-menu-template2';
 import {
   AdvancedSearch, SyncIndicator, CardCollectionTools,
   generateCollectionInsights, generateSetComparison,
@@ -438,8 +439,8 @@ function updateAutoImportQueueUi() {
 }
 
 function getSearchSelectionState() {
-  const fallbackValue = `scope:${SEARCH_SCOPE_IMPORTED}`;
-  return resolveCombinedSearchSelection(dom.searchSetFilter?.value || fallbackValue, SEARCH_SCOPE_IMPORTED);
+  const fallbackValue = `scope:${SEARCH_SCOPE_ALL}`;
+  return resolveCombinedSearchSelection(dom.searchSetFilter?.value || fallbackValue, SEARCH_SCOPE_ALL);
 }
 
 function getSearchScopeMode() {
@@ -496,8 +497,8 @@ function getSearchModeMeta(mode) {
 function renderSearchSetFilterOptions() {
   if (!dom.searchSetFilter) return;
 
-  const previousValue = String(dom.searchSetFilter.value || `scope:${SEARCH_SCOPE_IMPORTED}`);
-  const previousSelection = resolveCombinedSearchSelection(previousValue, SEARCH_SCOPE_IMPORTED);
+  const previousValue = String(dom.searchSetFilter.value || `scope:${SEARCH_SCOPE_ALL}`);
+  const previousSelection = resolveCombinedSearchSelection(previousValue, SEARCH_SCOPE_ALL);
   const selectedSetId = String(previousSelection.setId || '').trim();
   const knownSets = state.allSets?.length ? state.allSets : (state.sets || []);
   const selectedSet = selectedSetId
@@ -538,7 +539,7 @@ function renderSearchSetFilterOptions() {
     dom.searchSetFilter.appendChild(optgroup);
   });
 
-  const fallbackValue = `scope:${SEARCH_SCOPE_IMPORTED}`;
+  const fallbackValue = `scope:${SEARCH_SCOPE_ALL}`;
   dom.searchSetFilter.value = availableValues.includes(desiredValue) ? desiredValue : fallbackValue;
 
   if (dom.searchScopeMode) {
@@ -1537,7 +1538,7 @@ function isConfiguredSupportUrl(url) {
 function resolveSupportTarget(kind) {
   const supportConfig = CONFIG.SUPPORT || {};
   const directUrl = String(supportConfig.channels?.[kind] || '').trim();
-  const fallbackUrl = String(supportConfig.fallbackUrls?.[kind] || './impressum.html#projektkontakt').trim();
+  const fallbackUrl = String(supportConfig.fallbackUrls?.[kind] || '../../kontakt.html#projektkontakt').trim();
   return {
     directUrl,
     fallbackUrl: new URL(fallbackUrl, window.location.href).toString()
@@ -5388,6 +5389,8 @@ function renderSearchToolbarMeta({
   resultCount = 0,
   setsProcessed = 0,
   totalSets = 0,
+  apiProcessed = 0,
+  totalApiSets = 0,
   isSearching = false,
   emptyMessage = '',
 } = {}) {
@@ -5395,9 +5398,12 @@ function renderSearchToolbarMeta({
 
   const modeMeta = getSearchModeMeta(searchScopeMode);
   const safeResultCount = Number.isFinite(resultCount) ? Math.max(0, resultCount) : 0;
-  const progressSuffix = totalSets > 0
-    ? ` · ${Math.min(setsProcessed, totalSets)}/${totalSets} Sets`
-    : '';
+  const progressSuffix = buildSearchProgressLabel({
+    setsProcessed,
+    totalSets,
+    apiProcessed,
+    totalApiSets,
+  });
 
   let statusText = emptyMessage || 'Suchbegriff oben eingeben.';
   if (!emptyMessage && rawQuery) {
@@ -5423,14 +5429,20 @@ function renderSearchResultsList(results = [], searchScopeMode, options = {}) {
     rawQuery = '',
     setsProcessed = 0,
     totalSets = 0,
+    apiProcessed = 0,
+    totalApiSets = 0,
     isSearching = false,
   } = options;
 
   const safeResults = Array.isArray(results) ? results : [];
   const modeMeta = getSearchModeMeta(searchScopeMode);
-  const progressSuffix = totalSets > 0
-    ? ` (${Math.min(setsProcessed, totalSets)}/${totalSets} Sets geprüft)`
-    : '';
+  const progressDetails = buildSearchProgressLabel({
+    setsProcessed,
+    totalSets,
+    apiProcessed,
+    totalApiSets,
+  }).replace(/^ · /, '');
+  const progressSuffix = progressDetails ? ` (${progressDetails})` : '';
 
   renderSearchToolbarMeta({
     rawQuery,
@@ -5438,6 +5450,8 @@ function renderSearchResultsList(results = [], searchScopeMode, options = {}) {
     resultCount: safeResults.length,
     setsProcessed,
     totalSets,
+    apiProcessed,
+    totalApiSets,
     isSearching,
   });
 
@@ -5557,12 +5571,17 @@ async function runSearch(options = {}) {
   const apiPhaseQueue = [];
   let apiRenderOrderKeys = null;
   let searchedSetsCount = 0;
+  let apiProcessedCount = 0;
   let shouldStopSearch = false;
 
   const upsertMatches = (cards, set, dbMap) => {
+    let matchCount = 0;
+
     (Array.isArray(cards) ? cards : []).forEach((card) => {
       const score = computeSearchScore(card, query, structuredQuery, mixedQuery, set);
       if (score < 0) return;
+
+      matchCount += 1;
       const resultKey = getSearchResultKey(card, set);
       const hadKey = resultsMap.has(resultKey);
       resultsMap.set(resultKey, {
@@ -5577,9 +5596,16 @@ async function runSearch(options = {}) {
         apiRenderOrderKeys.push(resultKey);
       }
     });
+
+    return matchCount;
   };
 
-  const renderCurrentResults = ({ isSearching = false, preserveSortedPrefix = false } = {}) => {
+  const renderCurrentResults = ({
+    isSearching = false,
+    preserveSortedPrefix = false,
+    apiProcessed = apiProcessedCount,
+    totalApiSets = 0,
+  } = {}) => {
     const currentResults = preserveSortedPrefix
       ? getSearchResultsInOrder(resultsMap, apiRenderOrderKeys)
       : Array.from(resultsMap.values());
@@ -5591,12 +5617,16 @@ async function runSearch(options = {}) {
       rawQuery,
       setsProcessed: searchedSetsCount,
       totalSets: setsToSearch.length,
+      apiProcessed,
+      totalApiSets,
       isSearching,
     });
   };
 
   for (const set of setsToSearch) {
     if (isStale() || isAborted()) return;
+    let setMatchCount = 0;
+
     try {
       const cacheKey = `cards_${set.setId}`;
       const dbCardsCacheKey = `db_cards_${set.setId}`;
@@ -5626,7 +5656,7 @@ async function runSearch(options = {}) {
       const dbSearchCards = !useApiForSet && hasDbCards ? dbCards : [];
 
       if (dbSearchCards.length > 0) {
-        upsertMatches(dbSearchCards, set, dbMap);
+        setMatchCount = upsertMatches(dbSearchCards, set, dbMap);
         state.searchCache.set(searchCacheKey, dbSearchCards);
       }
 
@@ -5649,7 +5679,7 @@ async function runSearch(options = {}) {
 
     searchedSetsCount += 1;
 
-    if (resultsMap.size > 0) {
+    if (setMatchCount > 0 && resultsMap.size > 0) {
       renderCurrentResults({
         isSearching: searchedSetsCount < setsToSearch.length || (!shouldStopSearch && apiPhaseQueue.length > 0),
       });
@@ -5675,6 +5705,8 @@ async function runSearch(options = {}) {
       rawQuery,
       setsProcessed: searchedSetsCount,
       totalSets: setsToSearch.length,
+      apiProcessed: 0,
+      totalApiSets: apiPhaseQueue.length,
       isSearching: hasPendingApiPhase,
     });
   }
@@ -5702,11 +5734,18 @@ async function runSearch(options = {}) {
 
         state.searchCache.set(searchCacheKey, mergedCards || []);
 
+        let apiMatchCount = 0;
         if (mergedCards.length > 0) {
-          upsertMatches(mergedCards, set, dbMap);
+          apiMatchCount = upsertMatches(mergedCards, set, dbMap);
+        }
+
+        apiProcessedCount = apiIndex + 1;
+        if (apiMatchCount > 0 && resultsMap.size > 0) {
           renderCurrentResults({
-            isSearching: apiIndex < apiPhaseQueue.length - 1,
+            isSearching: apiProcessedCount < apiPhaseQueue.length,
             preserveSortedPrefix: true,
+            apiProcessed: apiProcessedCount,
+            totalApiSets: apiPhaseQueue.length,
           });
         }
 

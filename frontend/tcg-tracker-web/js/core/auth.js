@@ -105,7 +105,7 @@ function shouldAttemptAutoLogin() {
 }
 
 function buildRedirectOAuthUrl(forceConsent = false) {
-  const redirectUri = `${location.origin}${location.pathname}`;
+  const redirectUri = new URL('./', location.href).toString();
   const state = `oauth-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
   sessionStorage.setItem(REDIRECT_STATE_KEY, state);
 
@@ -148,6 +148,18 @@ function consumeRedirectTokenIfPresent() {
     access_token: token,
     expires_in: Number.isFinite(expiresIn) && expiresIn > 0 ? expiresIn : 3600
   };
+}
+
+function startRedirectSignIn(forceConsent = false) {
+  try {
+    const targetUrl = buildRedirectOAuthUrl(forceConsent);
+    console.info('[signIn] popup unavailable, switching to same-window redirect flow');
+    globalThis.location.assign(targetUrl);
+    return true;
+  } catch (err) {
+    console.error('[signIn redirect fallback]', err);
+    return false;
+  }
 }
 
 /** Versucht einen gespeicherten Token zu laden. Gibt true zurück wenn erfolgreich. */
@@ -317,7 +329,8 @@ export function signIn(options = {}) {
     };
 
     const timeout = setTimeout(() => {
-      console.warn(`[signIn] popup flow timed out after ${SIGN_IN_TIMEOUT_MS}ms; same-window fallback remains disabled`);
+      console.warn(`[signIn] popup flow timed out after ${SIGN_IN_TIMEOUT_MS}ms; falling back to same-window redirect`);
+      if (startRedirectSignIn(forceConsent)) return;
       finish(false);
     }, SIGN_IN_TIMEOUT_MS);
 
@@ -345,6 +358,9 @@ export function signIn(options = {}) {
       const reason = error?.type || 'error_callback';
       console.error('[signIn error_callback]', error);
       console.warn('[signIn] popup-only flow aborted:', reason);
+      if (reason === 'popup_failed_to_open') {
+        if (startRedirectSignIn(forceConsent)) return;
+      }
       finish(false);
     };
 

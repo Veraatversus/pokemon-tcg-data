@@ -4,6 +4,7 @@ import { buildCardRecordFromSources, resolveDisplayCard, resolveDisplaySet, reso
 import { getCollectionUiState, resolveCollectionToggleState } from '../js/core/collection-state.js';
 import {
   buildCombinedSearchDropdownOptions,
+  buildSearchProgressLabel,
   createSpreadsheetSwitchStatePatch,
   resolveCombinedSearchSelection,
   shouldFetchApiCardsForSearchSet
@@ -285,6 +286,11 @@ function testSpreadsheetSwitchStatePatchClearsStaleCollectionState() {
 }
 
 function testCombinedSearchSelectionKeepsModesAndImportedSetTargetsDistinct() {
+  assert.deepEqual(resolveCombinedSearchSelection('', 'all'), {
+    mode: 'all',
+    setId: ''
+  });
+
   assert.deepEqual(resolveCombinedSearchSelection('scope:imported'), {
     mode: 'imported',
     setId: ''
@@ -323,7 +329,7 @@ function testCombinedSearchDropdownOptionsIncludeGlobalModesAndImportedSets() {
   assert.equal(groups[0]?.label, 'Suchbereich');
   assert.deepEqual(
     groups[0]?.options?.map((entry) => entry.value),
-    ['scope:imported', 'scope:all', 'scope:online']
+    ['scope:all', 'scope:imported', 'scope:online']
   );
   assert.equal(groups[1]?.label, 'Importierte Sets');
   assert.deepEqual(
@@ -359,6 +365,19 @@ function testImportedSearchFallsBackToApiWhenImportedSetHasNoDbCards() {
   );
 }
 
+function testSearchProgressLabelIncludesApiPhaseAfterSetScanFinishes() {
+  assert.equal(
+    buildSearchProgressLabel({
+      setsProcessed: 215,
+      totalSets: 215,
+      apiProcessed: 66,
+      totalApiSets: 174
+    }),
+    ' · 107/215 Sets',
+    'The live search pill should show unified progress across imported and API-backed set searches.'
+  );
+}
+
 try {
   testDoesNotFalseMatchSubsetName();
   testDirectIdWinsWhenEnglishFallbackSetExists();
@@ -376,6 +395,7 @@ try {
   testCombinedSearchSelectionKeepsModesAndImportedSetTargetsDistinct();
   testCombinedSearchDropdownOptionsIncludeGlobalModesAndImportedSets();
   testImportedSearchFallsBackToApiWhenImportedSetHasNoDbCards();
+  testSearchProgressLabelIncludesApiPhaseAfterSetScanFinishes();
   console.log('set-match-regression: ok');
 } catch (error) {
   console.error('set-match-regression: failed');
