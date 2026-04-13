@@ -95,6 +95,26 @@ test('inferCardmarketExpansionIdFromCards uses the generated tracker set index w
   assert.equal(inferCardmarketExpansionIdFromCards(cards, productIndex, { trackerSetIndex }), '2001');
 });
 
+test('inferCardmarketExpansionIdFromCards prefers unique tracker bySetName match over bySetId and byPtcgoCode', () => {
+  const cards = [
+    {
+      setId: 'mystery-set',
+      setName: 'Team Rocket',
+      name: 'Dark Charizard',
+      cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchString=TR+004'
+    }
+  ];
+
+  const productIndex = {};
+  const trackerSetIndex = {
+    bySetId: { 'mystery-set': '2001' },
+    byPtcgoCode: { tr: '2001' },
+    bySetName: { 'team rocket': '1528' }
+  };
+
+  assert.equal(inferCardmarketExpansionIdFromCards(cards, productIndex, { trackerSetIndex }), '1528');
+});
+
 test('resolveCardmarketEntryForCardFromSetPayload disambiguates same-name cards using attack names', () => {
   const card = {
     vera_name: 'Pikachu',

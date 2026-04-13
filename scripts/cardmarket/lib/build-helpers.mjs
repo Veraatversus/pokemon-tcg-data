@@ -59,6 +59,169 @@ function normalizeCodeKey(value = '') {
   return normalizeMatcherText(value).replace(/\s+/g, '');
 }
 
+const CATEGORY_BASE_SCORES = {
+  'pokemon booster': 100,
+  'pokemon box set': 54,
+  'pokemon theme deck': 52,
+  'pokemon trainer kits': 50,
+  'pokemon tins': 48,
+};
+
+function addScoredCandidate(candidateMap, candidateName = '', score = 0) {
+  const normalizedName = normalizeMatcherText(candidateName);
+  if (!normalizedName || score <= 0) return;
+
+  const currentScore = candidateMap.get(normalizedName) || 0;
+  if (score > currentScore) {
+    candidateMap.set(normalizedName, score);
+  }
+}
+
+function removePattern(value = '', pattern) {
+  const nextValue = normalizeMatcherText(String(value || '').replace(pattern, ' '));
+  return nextValue && nextValue !== value ? nextValue : '';
+}
+
+function addDerivedAliases(candidateMap, baseName = '', baseScore = 0) {
+  const queue = [{ name: normalizeMatcherText(baseName), score: baseScore }];
+  const seen = new Set();
+
+  while (queue.length) {
+    const current = queue.shift();
+    const currentName = normalizeMatcherText(current?.name || '');
+    const currentScore = Number(current?.score || 0);
+    if (!currentName || currentScore <= 0 || seen.has(currentName)) continue;
+    seen.add(currentName);
+    addScoredCandidate(candidateMap, currentName, currentScore);
+
+    [
+      { pattern: /^the\s+/, penalty: 4 },
+      { pattern: /^ex\s+/, penalty: 4 },
+      { pattern: /^pokemon card\s+/, penalty: 6 },
+      { pattern: /\s+enhanced expansion pack$/, penalty: 8 },
+      { pattern: /\s+expansion pack$/, penalty: 14 },
+      { pattern: /\s+collection$/, penalty: 8 },
+      { pattern: /\s+sleeved$/, penalty: 10 },
+      { pattern: /\s+dollar tree$/, penalty: 10 },
+      { pattern: /\s+promo$/, penalty: 10 },
+      { pattern: /\s+jumbo$/, penalty: 12 },
+      { pattern: /\s+mini tins?$/, penalty: 16 },
+      { pattern: /\s+tins?$/, penalty: 16 },
+      { pattern: /\s+elite trainer box$/, penalty: 18 },
+      { pattern: /\s+build battle box$/, penalty: 18 },
+      { pattern: /\s+box set$/, penalty: 18 },
+      { pattern: /\s+theme deck$/, penalty: 18 },
+      { pattern: /\s+trainer kits?$/, penalty: 18 },
+      { pattern: /\s+special set$/, penalty: 18 },
+      { pattern: /\s+set$/, penalty: 8 },
+    ].forEach(({ pattern, penalty }) => {
+      const nextName = removePattern(currentName, pattern);
+      if (!nextName) return;
+      queue.push({ name: nextName, score: currentScore - penalty });
+    });
+  }
+}
+
+function buildExpansionNameCandidates(nonsinglesProducts = []) {
+  const candidatesByExpansionId = new Map();
+
+  (Array.isArray(nonsinglesProducts) ? nonsinglesProducts : []).forEach((product) => {
+    const expansionId = String(Number(product?.idExpansion || product?.expansionId || 0) || '').trim();
+    if (!expansionId) return;
+
+    const categoryName = normalizeMatcherText(product?.categoryName || '');
+    const productName = String(product?.name || '').trim();
+    if (!productName) return;
+
+    const baseScore = CATEGORY_BASE_SCORES[categoryName] || 0;
+    if (!baseScore) return;
+
+    const strippedProductName = String(productName || '')
+      .replace(/\([^)]*\)/g, ' ')
+      .replace(/^[A-Za-z0-9]+\s*:\s*/, ' ')
+      .trim();
+
+    const candidateMap = candidatesByExpansionId.get(expansionId) || new Map();
+    const normalizedName = normalizeMatcherText(strippedProductName);
+    if (!normalizedName) return;
+
+    if (categoryName === 'pokemon booster' && /\bbooster\b/i.test(strippedProductName)) {
+      const boosterBaseName = normalizeMatcherText(strippedProductName.replace(/\bbooster\b/ig, ' '));
+      addDerivedAliases(candidateMap, boosterBaseName, baseScore);
+    }
+
+    addDerivedAliases(candidateMap, normalizedName, Math.max(baseScore - 20, 1));
+    candidatesByExpansionId.set(expansionId, candidateMap);
+  });
+
+  return candidatesByExpansionId;
+}
+
+function scoreSetNameCandidate(setNameKey = '', candidateName = '', candidateScore = 0, preferredExpansion = false) {
+  const normalizedSetName = normalizeMatcherText(setNameKey);
+  const normalizedCandidateName = normalizeMatcherText(candidateName);
+  if (!normalizedSetName || !normalizedCandidateName || candidateScore <= 0) return 0;
+
+  let score = 0;
+  if (normalizedCandidateName === normalizedSetName) {
+    score = candidateScore + 100;
+  }
+
+  if (score <= 0) return 0;
+  return preferredExpansion ? score + 15 : score;
+}
+
+function resolveTrackerSetNameExpansionId(setNameKey = '', preferredExpansionId = '', expansionNameCandidates = new Map()) {
+  const matches = [];
+
+  expansionNameCandidates.forEach((candidateMap, expansionId) => {
+    let bestScore = 0;
+    candidateMap.forEach((candidateScore, candidateName) => {
+      const score = scoreSetNameCandidate(setNameKey, candidateName, candidateScore, expansionId === preferredExpansionId);
+      if (score > bestScore) {
+        bestScore = score;
+      }
+    });
+
+    if (bestScore > 0) {
+      matches.push({ expansionId, score: bestScore });
+    }
+  });
+
+  matches.sort((left, right) => {
+    if (right.score !== left.score) return right.score - left.score;
+    return Number(left.expansionId) - Number(right.expansionId);
+  });
+
+  if (!matches.length) return '';
+  if (matches.length === 1) return matches[0].expansionId;
+
+  if (matches[0].score === matches[1].score) {
+    if (preferredExpansionId && matches.some((match) => match.expansionId === preferredExpansionId && match.score === matches[0].score)) {
+      return preferredExpansionId;
+    }
+    return '';
+  }
+
+  return matches[0].expansionId;
+}
+
+function isFallbackEligibleTrackerSet(setNameKey = '', setId = '') {
+  const normalizedSetName = normalizeMatcherText(setNameKey);
+  const normalizedSetId = String(setId || '').trim().toLowerCase();
+  if (!normalizedSetName && !normalizedSetId) return false;
+
+  return (
+    /black star promos/.test(normalizedSetName) ||
+    /mcdonald s collection \d{4}/.test(normalizedSetName) ||
+    /trainer kit/.test(normalizedSetName) ||
+    /^hs\s+/.test(normalizedSetName) ||
+    /shiny vault|trainer gallery|galarian gallery/.test(normalizedSetName) ||
+    /classic collection|futsal collection|starter set|pokemon rumble|energies|best of game/.test(normalizedSetName) ||
+    /tk\d[a-z]|mcd\d{2}|hgss\d+/.test(normalizedSetId)
+  );
+}
+
 function pickBestExpansionId(counts = new Map()) {
   let resolvedExpansionId = '';
   let resolvedCount = 0;
@@ -91,39 +254,89 @@ function inferExpansionIdFromTrackerCards(trackerCards = [], nameIndex = {}) {
   return pickBestExpansionId(counts);
 }
 
-function buildTrackerSetIndex(trackerSets = [], trackerCardsBySet = {}, nameIndex = {}) {
+function buildTrackerSetIndex(trackerSets = [], trackerCardsBySet = {}, nameIndex = {}, expansionNameCandidates = new Map()) {
   const bySetId = {};
   const byPtcgoCode = {};
+  const bySetName = {};
+  const inferredExpansionIdBySetId = {};
+  const resolvedExpansionIdBySetId = {};
+  const byPtcgoCodeCandidates = {};
 
   (Array.isArray(trackerSets) ? trackerSets : []).forEach((set) => {
     const setId = String(set?.id || '').trim();
     if (!setId) return;
 
+    const normalizedSetId = setId.toLowerCase();
+
     const expansionId = inferExpansionIdFromTrackerCards(trackerCardsBySet?.[setId] || [], nameIndex);
-    if (!expansionId) return;
+    if (expansionId) {
+      inferredExpansionIdBySetId[normalizedSetId] = expansionId;
+    }
 
-    bySetId[setId.toLowerCase()] = expansionId;
+    const setNameKey = normalizeMatcherText(set?.name || '');
+    if (!setNameKey) return;
 
-    const ptcgoCode = normalizeCodeKey(set?.ptcgoCode || set?.code || '');
-    if (ptcgoCode) {
-      byPtcgoCode[ptcgoCode] = expansionId;
+    let resolvedSetNameExpansionId = resolveTrackerSetNameExpansionId(
+      setNameKey,
+      inferredExpansionIdBySetId[normalizedSetId] || '',
+      expansionNameCandidates
+    );
+
+    if (!resolvedSetNameExpansionId && isFallbackEligibleTrackerSet(setNameKey, setId)) {
+      resolvedSetNameExpansionId =
+        inferredExpansionIdBySetId[normalizedSetId] ||
+        '';
+    }
+
+    if (resolvedSetNameExpansionId) {
+      resolvedExpansionIdBySetId[normalizedSetId] = resolvedSetNameExpansionId;
+      bySetName[setNameKey] = resolvedSetNameExpansionId;
     }
   });
 
-  return { bySetId, byPtcgoCode };
+  (Array.isArray(trackerSets) ? trackerSets : []).forEach((set) => {
+    const setId = String(set?.id || '').trim();
+    if (!setId) return;
+
+    const normalizedSetId = setId.toLowerCase();
+    const resolvedExpansionId = String(resolvedExpansionIdBySetId[normalizedSetId] || '').trim();
+    if (!resolvedExpansionId) return;
+
+    bySetId[normalizedSetId] = resolvedExpansionId;
+
+    const ptcgoCode = normalizeCodeKey(set?.ptcgoCode || set?.code || '');
+    if (ptcgoCode) {
+      if (!byPtcgoCodeCandidates[ptcgoCode]) {
+        byPtcgoCodeCandidates[ptcgoCode] = new Set();
+      }
+      byPtcgoCodeCandidates[ptcgoCode].add(resolvedExpansionId);
+    }
+  });
+
+  Object.entries(byPtcgoCodeCandidates).forEach(([ptcgoCode, expansionIds]) => {
+    const uniqueExpansionIds = Array.from(expansionIds || []);
+    if (uniqueExpansionIds.length === 1) {
+      byPtcgoCode[ptcgoCode] = uniqueExpansionIds[0];
+    }
+  });
+
+  return { bySetId, byPtcgoCode, bySetName };
 }
 
-export function buildCardmarketArtifacts({ singlesPayload, priceGuidePayload, trackerSets = [], trackerCardsBySet = {} } = {}) {
+export function buildCardmarketArtifacts({ singlesPayload, nonsinglesPayload, priceGuidePayload, trackerSets = [], trackerCardsBySet = {} } = {}) {
   const products = extractProductsList(singlesPayload);
+  const nonsinglesProducts = extractProductsList(nonsinglesPayload);
   const priceRows = extractPriceGuideList(priceGuidePayload);
   const priceMap = buildPriceMap(priceRows);
 
   const groupedSets = {};
   const productIndex = {};
   const nameIndex = {};
+  const nonsinglesProductsIndex = {};
 
-  for (const product of products) {
-    const expansionId = Number(product.idExpansion || product.expansionId || 0) || 0;
+  const allProducts = [...products, ...nonsinglesProducts];
+  allProducts.forEach((product) => {
+    const expansionId = Number(product?.idExpansion || product?.expansionId || 0) || 0;
     const expansionKey = String(expansionId || 'unknown');
     if (!groupedSets[expansionKey]) {
       groupedSets[expansionKey] = {
@@ -132,9 +345,21 @@ export function buildCardmarketArtifacts({ singlesPayload, priceGuidePayload, tr
       };
     }
 
+    const cardmarketProductId = Number(product?.idProduct || product?.productId || 0) || null;
+    if (cardmarketProductId && !productIndex[String(cardmarketProductId)]) {
+      productIndex[String(cardmarketProductId)] = {
+        expansionId,
+        path: `sets/${expansionKey}.json`,
+      };
+    }
+  });
+
+  for (const product of products) {
+    const expansionId = Number(product.idExpansion || product.expansionId || 0) || 0;
+    const expansionKey = String(expansionId || 'unknown');
+
     const cardmarketProductId = Number(product.idProduct || product.productId || 0) || null;
     const price = cardmarketProductId ? priceMap.get(cardmarketProductId) : null;
-    const setPath = `sets/${expansionKey}.json`;
 
     groupedSets[expansionKey].cards.push({
       cardmarketProductId,
@@ -153,13 +378,6 @@ export function buildCardmarketArtifacts({ singlesPayload, priceGuidePayload, tr
       },
     });
 
-    if (cardmarketProductId && !productIndex[String(cardmarketProductId)]) {
-      productIndex[String(cardmarketProductId)] = {
-        expansionId,
-        path: setPath,
-      };
-    }
-
     const normalizedName = normalizeMatcherText(extractBaseCardName(product.name || ''));
     if (normalizedName) {
       if (!nameIndex[normalizedName]) {
@@ -169,11 +387,29 @@ export function buildCardmarketArtifacts({ singlesPayload, priceGuidePayload, tr
     }
   }
 
+  for (const product of nonsinglesProducts) {
+    const cardmarketProductId = Number(product.idProduct || product.productId || 0) || null;
+    if (!cardmarketProductId) continue;
+
+    const expansionId = Number(product.idExpansion || product.expansionId || 0) || 0;
+    const expansionKey = String(expansionId || 'unknown');
+    nonsinglesProductsIndex[String(cardmarketProductId)] = {
+      name: String(product.name || '').trim(),
+      categoryId: Number(product.idCategory || 0) || null,
+      categoryName: String(product.categoryName || '').trim(),
+      expansionId,
+      metacardId: Number(product.idMetacard || 0) || null,
+      dateAdded: String(product.dateAdded || '').trim(),
+      path: `sets/${expansionKey}.json`,
+    };
+  }
+
   const normalizedNameIndex = Object.fromEntries(
     Object.entries(nameIndex)
       .map(([name, expansionIds]) => [name, Array.from(expansionIds).sort((left, right) => Number(left) - Number(right))])
   );
-  const trackerIndex = buildTrackerSetIndex(trackerSets, trackerCardsBySet, normalizedNameIndex);
+  const expansionNameCandidates = buildExpansionNameCandidates(nonsinglesProducts);
+  const trackerIndex = buildTrackerSetIndex(trackerSets, trackerCardsBySet, normalizedNameIndex, expansionNameCandidates);
 
   const indexSets = Object.values(groupedSets)
     .map((entry) => ({
@@ -188,8 +424,10 @@ export function buildCardmarketArtifacts({ singlesPayload, priceGuidePayload, tr
       schemaVersion: 2,
       generatedAt: new Date().toISOString(),
       singlesSourceCreatedAt: singlesPayload?.createdAt || null,
+      nonsinglesSourceCreatedAt: nonsinglesPayload?.createdAt || null,
       priceGuideSourceCreatedAt: priceGuidePayload?.createdAt || null,
       singlesCount: products.length,
+      nonsinglesCount: nonsinglesProducts.length,
       priceGuideCount: priceRows.length,
       setCount: indexSets.length,
       productIndexCount: Object.keys(productIndex).length,
@@ -198,6 +436,7 @@ export function buildCardmarketArtifacts({ singlesPayload, priceGuidePayload, tr
       sets: indexSets,
       products: productIndex,
       names: normalizedNameIndex,
+      nonsinglesProducts: nonsinglesProductsIndex,
       tracker: trackerIndex,
     },
     sets: groupedSets,
@@ -211,15 +450,16 @@ export async function writeArtifactsToDirectory(artifacts, outputDir) {
   await fs.mkdir(indexDir, { recursive: true });
   await fs.mkdir(setsDir, { recursive: true });
 
-  await fs.writeFile(path.join(outputDir, 'meta.json'), JSON.stringify(artifacts.meta, null, 2) + '\n', 'utf8');
-  await fs.writeFile(path.join(indexDir, 'sets.json'), JSON.stringify({ sets: artifacts.index?.sets || [] }, null, 2) + '\n', 'utf8');
-  await fs.writeFile(path.join(indexDir, 'products.json'), JSON.stringify(artifacts.index?.products || {}, null, 2) + '\n', 'utf8');
-  await fs.writeFile(path.join(indexDir, 'names.json'), JSON.stringify(artifacts.index?.names || {}, null, 2) + '\n', 'utf8');
-  await fs.writeFile(path.join(indexDir, 'tracker.json'), JSON.stringify(artifacts.index?.tracker || { bySetId: {}, byPtcgoCode: {} }, null, 2) + '\n', 'utf8');
+  await fs.writeFile(path.join(outputDir, 'meta.json'), JSON.stringify(artifacts.meta), 'utf8');
+  await fs.writeFile(path.join(indexDir, 'sets.json'), JSON.stringify({ sets: artifacts.index?.sets || [] }), 'utf8');
+  await fs.writeFile(path.join(indexDir, 'products.json'), JSON.stringify(artifacts.index?.products || {}), 'utf8');
+  await fs.writeFile(path.join(indexDir, 'nonsingles-products.json'), JSON.stringify(artifacts.index?.nonsinglesProducts || {}), 'utf8');
+  await fs.writeFile(path.join(indexDir, 'names.json'), JSON.stringify(artifacts.index?.names || {}), 'utf8');
+  await fs.writeFile(path.join(indexDir, 'tracker.json'), JSON.stringify(artifacts.index?.tracker || { bySetId: {}, byPtcgoCode: {}, bySetName: {} }), 'utf8');
 
   await Promise.all(
     Object.entries(artifacts.sets).map(([expansionKey, payload]) =>
-      fs.writeFile(path.join(setsDir, `${expansionKey}.json`), JSON.stringify(payload, null, 2) + '\n', 'utf8')
+      fs.writeFile(path.join(setsDir, `${expansionKey}.json`), JSON.stringify(payload), 'utf8')
     )
   );
 }
