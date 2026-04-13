@@ -97,7 +97,7 @@ test('buildCardmarketArtifacts groups singles by expansion and merges price data
   assert.deepEqual(artifacts.index.names.bulbasaur, ['2001']);
   assert.equal(artifacts.index.tracker.bySetId.sv1, '2001');
   assert.equal(artifacts.index.tracker.byPtcgoCode.svi, '2001');
-  assert.equal(artifacts.index.tracker.bySetName['scarlet violet'], '2001');
+  assert.equal(artifacts.index.tracker.bySetName['scarlet violet'], undefined);
   assert.equal(artifacts.sets['2001'].cards.length, 1);
   assert.equal(artifacts.sets['2001'].cards[0].cardmarketProductId, 1001);
   assert.equal(artifacts.sets['2001'].cards[0].prices.avg, 2.5);
@@ -180,6 +180,7 @@ test('buildCardmarketArtifacts indexes nonsingles and extends tracker bySetName 
   assert.equal(artifacts.meta.productIndexCount, 3);
   assert.equal(artifacts.index.tracker.bySetId.base5, '1528');
   assert.equal(artifacts.index.tracker.bySetName['team rocket'], '1528');
+  assert.equal(artifacts.index.tracker.bySetName['team rocket booster box'], undefined);
   assert.equal(artifacts.index.nonsinglesProducts['271874'].expansionId, 1528);
   assert.equal(artifacts.index.nonsinglesProducts['271874'].name, 'Team Rocket Booster');
   assert.equal(artifacts.index.nonsinglesProducts['271875'].categoryName, 'Pokémon Theme Deck');

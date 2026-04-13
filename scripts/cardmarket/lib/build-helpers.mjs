@@ -96,8 +96,8 @@ function extractBoosterNameLookup(nonsinglesProducts = []) {
     const productName = String(product?.name || '').trim();
     if (!productName) return;
 
-    const isBoosterProduct = categoryName.includes('booster') || /\bbooster\b/i.test(productName);
-    if (!isBoosterProduct) return;
+    if (categoryName !== 'pokemon booster') return;
+    if (!/\s+booster\s*$/i.test(productName)) return;
 
     const baseName = normalizeMatcherText(productName.replace(/\s+booster\s*$/i, ''));
     if (!baseName) return;
@@ -157,11 +157,6 @@ function buildTrackerSetIndex(trackerSets = [], trackerCardsBySet = {}, nameInde
     const ptcgoCode = normalizeCodeKey(set?.ptcgoCode || set?.code || '');
     if (ptcgoCode) {
       byPtcgoCode[ptcgoCode] = expansionId;
-    }
-
-    const setNameKey = normalizeMatcherText(set?.name || '');
-    if (setNameKey && (!bySetName[setNameKey] || bySetName[setNameKey] === expansionId)) {
-      bySetName[setNameKey] = expansionId;
     }
   });
 
