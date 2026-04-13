@@ -14,7 +14,8 @@ import {
   upsertOverviewSet,
   syncOverviewWithApiSets,
   resetSheetsDataCaches,
-} from './data/sheets-db.js?v=20260407-login1';
+    recoverImportedIdsFromOverview,
+  } from './data/sheets-db.js?v=20260606-setfix1';
 import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260410-loginfix1';
 import { resolveSeriesGroupInfo } from './data/schema-contract.js?v=20260510b';
 import {
@@ -2091,7 +2092,7 @@ function initCustomSelects() {
       root.classList.toggle('is-disabled', Boolean(select.disabled));
     };
 
-    button.addEventListener('click', () => {
+    const toggleDropdownOpen = () => {
       if (button.disabled) return;
       const shouldOpen = !root.classList.contains('is-open');
       closeAll(root);
@@ -2099,8 +2100,21 @@ function initCustomSelects() {
       button.setAttribute('aria-expanded', String(shouldOpen));
       if (shouldOpen) {
         const selectedNode = list.querySelector('.custom-select-option.is-selected');
-        selectedNode?.scrollIntoView({ block: 'nearest' });
+        if (selectedNode) {
+          const optionTop = selectedNode.offsetTop;
+          const optionBottom = optionTop + selectedNode.offsetHeight;
+          const viewTop = list.scrollTop;
+          const viewBottom = viewTop + list.clientHeight;
+          if (optionTop < viewTop) list.scrollTop = optionTop;
+          else if (optionBottom > viewBottom) list.scrollTop = optionBottom - list.clientHeight;
+        }
       }
+    };
+
+    button.addEventListener('click', (event) => {
+      if (button.disabled) return;
+      event.preventDefault();
+      toggleDropdownOpen();
     });
 
     button.addEventListener('keydown', (event) => {
@@ -2110,7 +2124,7 @@ function initCustomSelects() {
       }
       if ((event.key === 'Enter' || event.key === ' ') && !root.classList.contains('is-open')) {
         event.preventDefault();
-        button.click();
+        toggleDropdownOpen();
       }
       if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
         event.preventDefault();
@@ -2498,10 +2512,9 @@ async function applySpreadsheetSelection(id) {
     resetRuntimeUiForSpreadsheetSwitch();
     updateSpreadsheetInfoBar();
     await loadSets();
-    if (!dom.viewSearch?.classList.contains('hidden') && String(dom.searchInput?.value || '').trim()) {
-      await runSearch({ force: true });
-    }
-    dom.dialog.close();
+      resetSheetsDataCaches,
+      recoverImportedIdsFromOverview,
+    } from './data/sheets-db.js?v=20260606-setfix1';
     setSpreadsheetDialogError('');
   } catch (err) {
     CONFIG.SPREADSHEET_ID = previousId;
@@ -6038,6 +6051,11 @@ function applyFilter() {
     const db = state.dbMap.get(article.dataset.cardId);
     let visible = true;
     if (state.filter === 'missing')   visible = !db?.g;
+    if (state.filter === 'missing-rh') {
+      const isMissingCard = !db?.g;
+      const isMissingReverse = Boolean(db?.g && db?.rhCell && !db?.rh);
+      visible = isMissingCard || isMissingReverse;
+    }
     if (state.filter === 'collected') visible = Boolean(db?.g);
     article.classList.toggle('hidden', !visible);
   });

@@ -34,7 +34,6 @@ const SPREADSHEET_ID_KEY = scopedStorageKey('tcg_spreadsheet_id');
 export const CONFIG = {
   // ── Google API ──────────────────────────────────────────────
   GOOGLE_CLIENT_ID: 'REDACTED_GOOGLE_CLIENT_ID',
-  GOOGLE_API_KEY: 'REDACTED_GOOGLE_API_KEY',
   get SPREADSHEET_ID() {
     return localStorage.getItem(SPREADSHEET_ID_KEY) || '';
   },

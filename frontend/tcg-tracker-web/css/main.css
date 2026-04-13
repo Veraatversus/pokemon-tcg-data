@@ -4627,7 +4627,7 @@ select {
 
 .custom-select-list {
   position: absolute;
-  top: calc(100% + 6px);
+  top: 100%;
   left: 0;
   right: 0;
   z-index: 2100;
@@ -4999,7 +4999,7 @@ body.topbar-collapsed .status-bar {
 #view-search .view-controls .custom-select {
   display: flex;
   align-items: stretch;
-  align-self: center;
+  align-self: stretch;
 }
 
 #view-search .view-controls .custom-select-trigger {
@@ -5007,8 +5007,7 @@ body.topbar-collapsed .status-bar {
   align-items: center;
   min-height: 100%;
   height: 100%;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
+  padding: 8px 36px 8px 12px;
 }
 
 @media (max-width: 1200px) {
@@ -7742,6 +7741,96 @@ textarea::placeholder {
   box-shadow: none !important;
   transition: none !important;
   overflow: hidden !important;
+}
+
+/* Search view: stable set-filter behavior across size modes */
+#view-search .view-controls .search-ac-wrap,
+#view-search .view-controls .custom-select.from-id-search-set-filter {
+  min-width: 0;
+}
+
+#view-search .view-controls .custom-select.from-id-search-set-filter .custom-select-list {
+  top: 100% !important;
+  margin-top: 0 !important;
+}
+
+/* Mode 1: wide layout -> equal widths for input and dropdown */
+@media (min-width: 901px) {
+  #view-search .view-controls {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  #view-search .view-controls .search-ac-wrap,
+  #view-search .view-controls .custom-select.from-id-search-set-filter,
+  #view-search .view-controls select#search-set-filter {
+    grid-column: auto;
+    flex: 1 1 0 !important;
+    flex-basis: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  #view-search .view-controls .custom-select.from-id-search-set-filter .custom-select-trigger {
+    min-height: 46px !important;
+    height: 46px !important;
+    padding: 8px 36px 8px 12px !important;
+  }
+}
+
+/* Mode 2: medium layout -> compact second column + guaranteed clickability */
+@media (max-width: 900px) and (min-width: 381px) {
+  #view-search .view-controls {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) clamp(136px, 40vw, 156px);
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  #view-search .view-controls .custom-select.from-id-search-set-filter {
+    position: relative;
+    z-index: 220;
+    pointer-events: auto;
+  }
+
+  #view-search .view-controls .custom-select.from-id-search-set-filter .custom-select-trigger {
+    position: relative;
+    z-index: 221;
+    pointer-events: auto;
+  }
+
+  #view-search .view-controls .custom-select.from-id-search-set-filter.is-open {
+    z-index: 230;
+  }
+
+  #view-search .view-controls .custom-select.from-id-search-set-filter.is-open .custom-select-list {
+    z-index: 4000 !important;
+  }
+}
+
+/* Mode 3: narrow layout -> prevent collapsed trigger + keep popup close */
+@media (max-width: 380px) {
+  #view-search .view-controls {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  #view-search .view-controls .search-ac-wrap,
+  #view-search .view-controls .custom-select.from-id-search-set-filter,
+  #view-search .view-controls select#search-set-filter {
+    grid-column: 1;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  #view-search .view-controls .custom-select.from-id-search-set-filter .custom-select-trigger {
+    min-height: 46px !important;
+    height: 46px !important;
+    padding: 8px 36px 8px 12px !important;
+  }
 }
 
 

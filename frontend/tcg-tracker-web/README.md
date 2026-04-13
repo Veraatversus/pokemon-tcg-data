@@ -35,7 +35,6 @@ Kein Server, kein Build-Schritt – direkt auf GitHub Pages deploybar.
 2. **Google Sheets API** aktivieren
 3. **OAuth 2.0 Client-ID** anlegen (Typ: Web-Anwendung):
    - Autorisierte JS-Ursprünge: `http://localhost:8080` + deine GitHub-Pages-URL
-4. **API-Schlüssel** anlegen → Einschränken auf Google Sheets API
 
 ### 2. Google Spreadsheet
 
@@ -56,7 +55,6 @@ Das Spreadsheet braucht folgende Sheets (exakte Namen):
 ```js
 // frontend/tcg-tracker-web/js/config.js
 GOOGLE_CLIENT_ID: 'DEINE_CLIENT_ID.apps.googleusercontent.com',
-GOOGLE_API_KEY:   'REDACTED_PLACEHOLDER',
 SPREADSHEET_ID:   'AUS_DER_SHEETS-URL',
 ```
 
