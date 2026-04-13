@@ -207,7 +207,7 @@ export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {
   return resolvedExpansionId;
 }
 
-export function resolveCardmarketEntryForCardFromSetPayload(card = {}, setPayload = {}) {
+export function resolveCardmarketEntryForCardFromSetPayload(card = {}, setPayload = {}, { usedProductIds = null } = {}) {
   const normalizedCardNames = Array.from(new Set(
     [card?.name, card?.vera_name, card?.tcgdex_name]
       .map((value) => normalizeMatcherText(value))
@@ -232,23 +232,31 @@ export function resolveCardmarketEntryForCardFromSetPayload(card = {}, setPayloa
       });
 
   if (!candidatePool.length) return null;
-  if (candidatePool.length === 1) return candidatePool[0];
+
+  // Prefer candidates that haven't been used already (avoid linking duplicates to the same product)
+  const usedSet = usedProductIds instanceof Set ? usedProductIds : null;
+  let availableCandidates = candidatePool;
+  if (usedSet) {
+    const filtered = candidatePool.filter((entry) => !usedSet.has(String(entry?.cardmarketProductId || '')));
+    if (filtered.length) availableCandidates = filtered;
+  }
+
+  if (availableCandidates.length === 1) return availableCandidates[0];
 
   const cardHintTokens = extractCardHintTokens(card);
-  const scoredCandidates = candidatePool
-    .map((entry, index) => {
+  const scoredCandidates = (availableCandidates.length ? availableCandidates : candidatePool)
+    .map((entry) => {
       const entryHintTokens = extractEntryHintTokens(entry?.name || '');
       const overlapCount = cardHintTokens.filter((token) => entryHintTokens.includes(token)).length;
       return {
         entry,
-        index,
+        originalIndex: Array.isArray(cards) ? cards.indexOf(entry) : -1,
         score: overlapCount,
       };
     })
-    .sort((left, right) => right.score - left.score || left.index - right.index);
+    .sort((left, right) => right.score - left.score || left.originalIndex - right.originalIndex);
 
   if (!scoredCandidates.length) return null;
-  if (scoredCandidates[0].score > 0) return scoredCandidates[0].entry;
   return scoredCandidates[0].entry;
 }
 
@@ -333,13 +341,17 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
 
   if (!resolvedSetPayload) return cards;
 
+  const usedProductIds = new Set();
+
   return cards.map((card) => {
     const currentUrl = getCardmarketUrlFromCard(card);
     if (!isGeneratedCardmarketSearchUrl(currentUrl)) return card;
 
-    const matchedEntry = resolveCardmarketEntryForCardFromSetPayload(card, resolvedSetPayload);
+    const matchedEntry = resolveCardmarketEntryForCardFromSetPayload(card, resolvedSetPayload, { usedProductIds });
     const directUrl = buildCardmarketProductUrl(matchedEntry?.cardmarketProductId);
     if (!directUrl) return card;
+
+    if (matchedEntry?.cardmarketProductId) usedProductIds.add(String(matchedEntry.cardmarketProductId));
 
     return {
       ...card,

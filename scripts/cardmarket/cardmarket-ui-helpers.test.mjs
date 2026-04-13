@@ -239,6 +239,38 @@ test('promoteCardmarketUrlsForCards upgrades search fallbacks to direct product 
   assert.equal(promoted[0].vera_cardmarket_url, 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=1001');
 });
 
+test('promoteCardmarketUrlsForCards assigns distinct products for repeated names in the same set', async () => {
+  const cards = [
+    {
+      setId: 'xy1',
+      number: '001',
+      vera_name: 'Mystery Trainer',
+      cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=XY+001',
+      vera_attacks: [],
+      vera_abilities: []
+    },
+    {
+      setId: 'xy1',
+      number: '002',
+      vera_name: 'Mystery Trainer',
+      cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=XY+002'
+    }
+  ];
+
+  const promoted = await promoteCardmarketUrlsForCards(cards, {
+    setPayload: {
+      expansionId: 2001,
+      cards: [
+        { cardmarketProductId: 2001, name: 'Mystery Trainer', prices: {} },
+        { cardmarketProductId: 2002, name: 'Mystery Trainer', prices: {} }
+      ]
+    }
+  });
+
+  assert.equal(promoted[0].cardmarketProductId, 2001);
+  assert.equal(promoted[1].cardmarketProductId, 2002);
+});
+
 test('formatCardmarketEntryLabel prefers the trend price for compact UI badges', () => {
   const entry = {
     prices: { avg: 5.0, low: 3.0, trend: 4.6 }
