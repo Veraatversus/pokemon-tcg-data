@@ -9,7 +9,7 @@ import {
   promoteCardmarketUrlsForCards as sharedPromoteCardmarketUrlsForCards,
   resolveCardmarketEntryForCardFromSetPayload as sharedResolveCardmarketEntryForCardFromSetPayload,
   resolveCardmarketEntryFromSetPayload as sharedResolveCardmarketEntryFromSetPayload,
-} from '../../../../scripts/cardmarket/lib/cardmarket-ui-helpers.mjs';
+} from './cardmarket-ui-helpers.js';
 
 const REMOTE_CARDMARKET_BASE = `${String(CONFIG?.APIS?.VERA_BASE || '').replace(/\/$/, '')}/cardmarket`;
 
@@ -170,7 +170,7 @@ export async function loadCardmarketTrackerSetIndex({ signal, forceRefresh = fal
   try {
     trackerSetIndexCache = await fetchJson(`${baseUrl}/index/tracker.json`, { signal });
   } catch {
-    trackerSetIndexCache = { bySetId: {}, byPtcgoCode: {} };
+    trackerSetIndexCache = { bySetId: {}, byPtcgoCode: {}, bySetName: {} };
   }
   return trackerSetIndexCache;
 }

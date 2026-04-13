@@ -34,7 +34,6 @@ const SPREADSHEET_ID_KEY = scopedStorageKey('tcg_spreadsheet_id');
 export const CONFIG = {
   // ── Google API ──────────────────────────────────────────────
   GOOGLE_CLIENT_ID: 'REDACTED_GOOGLE_CLIENT_ID',
-  GOOGLE_API_KEY: 'REDACTED_GOOGLE_API_KEY',
   get SPREADSHEET_ID() {
     return localStorage.getItem(SPREADSHEET_ID_KEY) || '';
   },
@@ -81,9 +80,9 @@ export const CONFIG = {
       access: 'https://docs.google.com/forms/d/e/1FAIpQLSeDSU0GRKB6pDZPSXMoOwlsqXFjk0kcnGYyVAuB7zSJDO_HCw/viewform'
     },
     fallbackUrls: {
-      bug: './impressum.html#projektkontakt',
-      feature: './impressum.html#projektkontakt',
-      access: './impressum.html#projektkontakt'
+      bug: '../../kontakt.html#projektkontakt',
+      feature: '../../kontakt.html#projektkontakt',
+      access: '../../kontakt.html#projektkontakt'
     }
   },
 

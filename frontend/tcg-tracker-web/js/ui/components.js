@@ -2,6 +2,34 @@
 // QUICK FILTERS & UI ENHANCEMENTS MODULE
 // ══════════════════════════════════════════════════════════════════════════
 
+const escapeTrackerMenuText = (value = '') => String(value)
+  .replaceAll('&', '&amp;')
+  .replaceAll('<', '&lt;')
+  .replaceAll('>', '&gt;')
+  .replaceAll('"', '&quot;')
+  .replaceAll("'", '&#39;');
+
+export function buildTrackerMenuChip({ id = '', label = '', icon = '', className = '', attributes = {} } = {}) {
+  const extraAttributes = Object.entries(attributes)
+    .map(([key, value]) => ` ${key}="${escapeTrackerMenuText(value)}"`)
+    .join('');
+
+  return `<button class="${['quick-filter-btn', 'dashboard-filter-chip', 'tracker-menu-chip', className].filter(Boolean).join(' ')}"${id ? ` id="${escapeTrackerMenuText(id)}"` : ''} type="button"${extraAttributes}>${icon ? `<span class="dashboard-filter-glyph tracker-menu-glyph" aria-hidden="true">${escapeTrackerMenuText(icon)}</span>` : ''}<span>${escapeTrackerMenuText(label)}</span></button>`;
+}
+
+export function buildTrackerMenuSection({ label = '', modifier = '', content = '' } = {}) {
+  const sectionClasses = ['dashboard-filter-segment', 'tracker-menu-section'];
+  if (modifier) {
+    sectionClasses.push(`dashboard-filter-segment--${modifier}`, `tracker-menu-section--${modifier}`);
+  }
+
+  const captionMarkup = label
+    ? `<span class="dashboard-filter-caption tracker-menu-caption">${escapeTrackerMenuText(label)}</span>`
+    : '';
+
+  return `<div class="${sectionClasses.join(' ')}">${captionMarkup}${content}</div>`;
+}
+
 export function initQuickFiltersUI(initialState = {}) {
   const filterContainer = document.getElementById('quick-filters-container');
   const filterBar = document.getElementById('dashboard-view-tabs');
@@ -14,11 +42,22 @@ export function initQuickFiltersUI(initialState = {}) {
 
   filterBar.classList.add('dashboard-filter-bar--ready');
   filterContainer.innerHTML = `
-    <div class="dashboard-status-cluster" role="group" aria-label="Statusfilter">
+    <div class="dashboard-status-cluster tracker-menu-chip-group" role="group" aria-label="Statusfilter">
       ${filters
-        .map((f) => `<button class="quick-filter-btn dashboard-filter-chip" data-filter="${f.key}" data-chip-tone="${f.tone}" id="${f.id}" type="button" aria-pressed="false" title="${f.label}"><span class="dashboard-filter-glyph" aria-hidden="true">${f.icon}</span><span>${f.label}</span></button>`)
+        .map((f) => buildTrackerMenuChip({
+          id: f.id,
+          label: f.label,
+          icon: f.icon,
+          className: 'dashboard-filter-chip',
+          attributes: {
+            'data-filter': f.key,
+            'data-chip-tone': f.tone,
+            'aria-pressed': 'false',
+            title: f.label
+          }
+        }))
         .join('')}
-      <button class="quick-filter-reset btn-secondary dashboard-filter-reset" type="button" aria-label="Filter zurücksetzen" title="Filter zurücksetzen">
+      <button class="quick-filter-reset btn-secondary dashboard-filter-reset tracker-menu-reset" type="button" aria-label="Filter zurücksetzen" title="Filter zurücksetzen">
         <span class="quick-filter-reset-icon" aria-hidden="true">↺</span>
       </button>
     </div>

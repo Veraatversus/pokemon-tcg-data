@@ -13,13 +13,13 @@ assert.ok(
 );
 
 assert.ok(
-  html.includes('./privacy.html'),
+  html.includes('../../privacy.html'),
   'Der Footer soll einen direkten Link zur Datenschutzerklärung enthalten.'
 );
 
 assert.ok(
-  html.includes('./impressum.html'),
-  'Der Footer soll einen direkten Link zum Impressum enthalten.'
+  html.includes('../../kontakt.html'),
+  'Der Footer soll einen direkten Link zur Kontaktseite enthalten.'
 );
 
 console.log('✅ legal footer links regression ok');

@@ -14,6 +14,10 @@ import {
   resolveDisplaySet,
   resolveDisplayCard
 } from './schema-contract.js?v=20260507a';
+import {
+  planSetScopedUpsert,
+  planSetScopedDedup
+} from './set-scoped-upsert.js';
 
 function quoteSheetName(sheetName) {
   const name = String(sheetName ?? '').replace(/'/g, "''");
@@ -188,6 +192,10 @@ async function resolveSheetNames() {
   );
   if (!overview) {
     overview = await detectOverviewByContent(nonDbTitles);
+  }
+  // Last resort: exactly one non-DB, non-settings sheet → use it as overview
+  if (!overview && nonDbTitles.length === 1) {
+    overview = nonDbTitles[0];
   }
 
   const summary = pickSheetTitle(
@@ -688,6 +696,47 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+function buildEmptyRow(columnCount) {
+  return Array.from({ length: columnCount }, () => '');
+}
+
+function findLastRowIndex(rows, predicate) {
+  for (let index = rows.length - 1; index >= 0; index -= 1) {
+    if (predicate(rows[index], index)) return index;
+  }
+  return -1;
+}
+
+async function applySetScopedPlan(sheetName, columnCount, plan) {
+  if (!plan) return;
+  const updates = Array.isArray(plan.updates) ? plan.updates : [];
+  const clearIndices = Array.isArray(plan.clearIndices) ? plan.clearIndices : [];
+  const appendRows = Array.isArray(plan.appendRows) ? plan.appendRows : [];
+
+  if (updates.length > 0) {
+    await batchPutValues(updates.map((update) => ({
+      range: buildRange(sheetName, `A${update.rowIndex + 2}:${colToA1(columnCount)}${update.rowIndex + 2}`),
+      values: [update.rowValues]
+    })));
+  }
+
+  if (clearIndices.length > 0) {
+    const emptyRow = buildEmptyRow(columnCount);
+    await batchPutValues(clearIndices.map((rowIndex) => ({
+      range: buildRange(sheetName, `A${rowIndex + 2}:${colToA1(columnCount)}${rowIndex + 2}`),
+      values: [emptyRow]
+    })));
+  }
+
+  if (appendRows.length > 0) {
+    await appendDbRows(sheetName, columnCount, appendRows);
+  }
+
+  if (updates.length > 0 || clearIndices.length > 0 || appendRows.length > 0) {
+    await readDbRows(sheetName, columnCount, true);
+  }
+}
+
 // Format-Erkennung für Rückwärtskompatibilität mit Pre-Schema-Zeilen
 function isNewSetFormat(row) {
   // Altes Format: row[1] = setName (kein Boolean)
@@ -752,17 +801,38 @@ async function upsertDbSet(setMeta, imported = false) {
     toPersistableMediaString(setMeta?.tcgdex_symbol ?? '')                   // [29] tcgdex_symbol
   ];
 
-  const existingIndex = rows.findIndex((row) => toSafeCellString(row[0]).toLowerCase() === setId.toLowerCase());
-  if (existingIndex >= 0) {
-    const rowNo = existingIndex + 2;
-    const existingRow = rows[existingIndex];
+  const existingIndices = [];
+  rows.forEach((row, rowIndex) => {
+    if (toSafeCellString(row[0]).toLowerCase() === setId.toLowerCase()) {
+      existingIndices.push(rowIndex);
+    }
+  });
+
+  if (existingIndices.length > 0) {
+    const keepIndex = existingIndices[existingIndices.length - 1];
+    const rowNo = keepIndex + 2;
+    const existingRow = rows[keepIndex];
     // imported-Status erhalten: altes Format hat imported bei [8], neues bei [1]
     const existingImported = isNewSetFormat(existingRow)
       ? toBoolean(existingRow[1])
       : toBoolean(existingRow[8]);
     target[1] = imported === false ? false : Boolean(imported || existingImported);
     await putValues(buildRange(DB_SHEETS.sets, `A${rowNo}:${colToA1(DB_HEADERS.sets.length)}${rowNo}`), [target]);
-    rows[existingIndex] = target;
+    rows[keepIndex] = target;
+
+    if (existingIndices.length > 1) {
+      const emptyRow = buildEmptyRow(DB_HEADERS.sets.length);
+      const duplicateRanges = existingIndices
+        .slice(0, -1)
+        .map((index) => ({
+          range: buildRange(DB_SHEETS.sets, `A${index + 2}:${colToA1(DB_HEADERS.sets.length)}${index + 2}`),
+          values: [emptyRow]
+        }));
+      await batchPutValues(duplicateRanges);
+      existingIndices.slice(0, -1).forEach((index) => {
+        rows[index] = emptyRow.slice();
+      });
+    }
   } else {
     const rowNo = rows.length + 2;
     await putValues(buildRange(DB_SHEETS.sets, `A${rowNo}:${colToA1(DB_HEADERS.sets.length)}${rowNo}`), [target]);
@@ -831,7 +901,20 @@ async function writeDbCardsForSet(setId, cards) {
     toSafeJsonString(card.vera_resistances),                                   // [33] vera_resistances
     toSafeJsonString(card.vera_rules)                                          // [34] vera_rules
   ]);
-  await appendDbRows(DB_SHEETS.cards, DB_HEADERS.cards.length, setRows);
+  const currentRows = await readDbRows(DB_SHEETS.cards, DB_HEADERS.cards.length, true);
+  const upsertPlan = planSetScopedUpsert({
+    rows: currentRows,
+    setId,
+    incomingRows: setRows,
+    clearMissing: true
+  });
+  await applySetScopedPlan(DB_SHEETS.cards, DB_HEADERS.cards.length, upsertPlan);
+
+  const refreshedRows = await readDbRows(DB_SHEETS.cards, DB_HEADERS.cards.length, true);
+  const dedupPlan = planSetScopedDedup({ rows: refreshedRows, setId });
+  if (dedupPlan.clearIndices.length > 0) {
+    await applySetScopedPlan(DB_SHEETS.cards, DB_HEADERS.cards.length, dedupPlan);
+  }
 }
 
 async function writeDbCollectionForSet(setId, cards, existingMap = new Map()) {
@@ -843,7 +926,20 @@ async function writeDbCollectionForSet(setId, cards, existingMap = new Map()) {
     const rh = Boolean(existing?.rh && g);
     return [setId, toSafeCellString(card.number), g, rh, nowIso()];
   });
-  await appendDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, setRows);
+  const currentRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
+  const upsertPlan = planSetScopedUpsert({
+    rows: currentRows,
+    setId,
+    incomingRows: setRows,
+    clearMissing: true
+  });
+  await applySetScopedPlan(DB_SHEETS.collection, DB_HEADERS.collection.length, upsertPlan);
+
+  const refreshedRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
+  const dedupPlan = planSetScopedDedup({ rows: refreshedRows, setId });
+  if (dedupPlan.clearIndices.length > 0) {
+    await applySetScopedPlan(DB_SHEETS.collection, DB_HEADERS.collection.length, dedupPlan);
+  }
 }
 
 /**
@@ -1487,7 +1583,7 @@ export async function ensureCollectionEntry(setSheetName, cardNumber) {
   const normalizedCard = normalizeCardNumber(cardNumber);
   const currentRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
 
-  const existingIndex = currentRows.findIndex((row) => {
+  const existingIndex = findLastRowIndex(currentRows, (row) => {
     const rowSetId = toSafeCellString(row[0]).toLowerCase();
     const rowCard = normalizeCardNumber(toSafeCellString(row[1]));
     return rowSetId === setId.toLowerCase() && rowCard === normalizedCard;
@@ -1504,12 +1600,16 @@ export async function ensureCollectionEntry(setSheetName, cardNumber) {
     };
   }
 
-  await appendDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, [
-    [setId, toSafeCellString(cardNumber), false, false, nowIso()]
-  ]);
+  const upsertPlan = planSetScopedUpsert({
+    rows: currentRows,
+    setId,
+    incomingRows: [[setId, toSafeCellString(cardNumber), false, false, nowIso()]],
+    clearMissing: false
+  });
+  await applySetScopedPlan(DB_SHEETS.collection, DB_HEADERS.collection.length, upsertPlan);
 
   const refreshedRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
-  const newIndex = refreshedRows.findIndex((row) => {
+  const newIndex = findLastRowIndex(refreshedRows, (row) => {
     const rowSetId = toSafeCellString(row[0]).toLowerCase();
     const rowCard = normalizeCardNumber(toSafeCellString(row[1]));
     return rowSetId === setId.toLowerCase() && rowCard === normalizedCard;
@@ -1620,4 +1720,23 @@ export async function writeSetting(key, value) {
     const nextRow = keys.length + 2;
     await putValues(buildRange(sheets.settings, `A${nextRow}:B${nextRow}`), [[key, value]]);
   }
+}
+
+/**
+ * Reads the legacy overview sheet and returns the set IDs of all rows previously
+ * marked as imported (column I / index 8).
+ * Used for one-time migration when db_sets was reset and imported flags were lost.
+ * @returns {Promise<Set<string>>}
+ */
+export async function recoverImportedIdsFromOverview() {
+  const sheets = await resolveSheetNames();
+  const rows = await getOverviewRows(sheets);
+  const importedCol = CONFIG.GRID.IMPORTED_COL_INDEX - 1; // 0-based (col I = index 8)
+  const ids = new Set(
+    rows
+      .filter((row) => row[0] && toBoolean(row[importedCol]))
+      .map((row) => extractDisplayTextFromHyperlink(row[0]))
+      .filter(Boolean)
+  );
+  return ids;
 }

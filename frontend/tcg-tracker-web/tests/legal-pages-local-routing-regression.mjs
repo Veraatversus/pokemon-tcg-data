@@ -15,18 +15,18 @@ for (const fileName of ['landingpage.html', 'privacy.html', 'impressum.html']) {
 }
 
 assert.ok(
-  appIndex.includes('./landingpage.html'),
-  'Der App-Footer soll für die Landingpage auf eine lokale Routing-Seite zeigen.'
+  appIndex.includes('../../landingpage.html'),
+  'Der App-Footer soll für die Landingpage auf die Root-Seite zeigen.'
 );
 
 assert.ok(
-  appIndex.includes('./privacy.html'),
-  'Der App-Footer soll für Datenschutz auf eine lokale Routing-Seite zeigen.'
+  appIndex.includes('../../privacy.html'),
+  'Der App-Footer soll für Datenschutz auf die Root-Seite zeigen.'
 );
 
 assert.ok(
-  appIndex.includes('./impressum.html'),
-  'Der App-Footer soll für Impressum auf eine lokale Routing-Seite zeigen.'
+  appIndex.includes('../../kontakt.html'),
+  'Der App-Footer soll für Kontakt auf die Root-Seite zeigen.'
 );
 
 console.log('✅ legal pages local routing regression ok');

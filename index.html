@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vera's Pokémon TCG Tracker · Landingpage</title>
+  <meta name="description" content="Öffentliche Landingpage für Vera's Pokémon TCG Tracker auf GitHub Pages – mit Datenschutz, Kontakt und direktem Einstieg in die Web-App.">
+  <link rel="stylesheet" href="assets/legal-site.css?v=20260413-pill1">
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="brandmark">
+        <div class="brandmark-badge">🎴</div>
+        <span data-site="brandName">Vera's Pokémon TCG Tracker</span>
+      </div>
+      <nav class="topnav" aria-label="Seitennavigation">
+        <a href="./index.html">Landingpage</a>
+        <a class="nav-cta" href="./frontend/tcg-tracker-web/">Web-App</a>
+        <a href="./privacy.html">Datenschutz</a>
+        <a href="./kontakt.html">Kontakt</a>
+        <a data-site-href="githubUrl" href="https://github.com/Veraatversus/pokemon-tcg-data">GitHub</a>
+      </nav>
+    </div>
+
+    <header class="hero">
+      <div class="eyebrow">Collector vault · Google Sheets based · GitHub Pages ready</div>
+
+      <div class="hero-grid">
+        <div>
+          <h1>Deine Karten. Dein Sheet. Eine saubere öffentliche Landingpage für Google & Nutzer.</h1>
+          <p class="lead">
+            <span data-site="brandName">Vera's Pokémon TCG Tracker</span> ist eine inoffizielle Web-App zur Verwaltung einer persönlichen
+            Pokémon-TCG-Sammlung. Die Anwendung verbindet ein vom Nutzer kontrolliertes Google Spreadsheet mit einer übersichtlichen,
+            filterbaren Webansicht für Sets, Karten und Sammlungsstände und verwendet Google OAuth ausschließlich nach ausdrücklicher Zustimmung.
+          </p>
+
+          <div class="hero-actions">
+            <a class="button button-primary" href="./frontend/tcg-tracker-web/">Web-App öffnen</a>
+            <a class="button button-secondary" href="./privacy.html">Datenschutz ansehen</a>
+            <a class="button button-ghost" href="./kontakt.html">Kontakt & Hinweise</a>
+          </div>
+
+          <div class="pill-row">
+            <span class="pill">OAuth nur nach Zustimmung</span>
+            <span class="pill">Google Sheets als Datenbasis</span>
+            <span class="pill">öffentliche GitHub-Pages-Seite</span>
+          </div>
+
+          <nav class="anchor-nav hero-jumpnav" aria-label="Schnellsprünge">
+            <a href="#funktionen">Funktionen</a>
+            <a href="#daten">Datennutzung</a>
+            <a href="#checkliste">Checkliste</a>
+          </nav>
+        </div>
+
+        <aside class="hero-panel">
+          <span class="kicker">Tracker flow</span>
+          <h2>Release-Readiness auf einen Blick</h2>
+          <ul class="meta-list">
+            <li><span>Hosting</span><strong>GitHub Pages</strong></li>
+            <li><span>Support-Mail</span><strong><a data-email href="mailto:veraatversus+tcg@gmail.com">veraatversus+tcg@gmail.com</a></strong></li>
+            <li><span>Public legal pages</span><strong>aktiv</strong></li>
+            <li><span>OAuth-Doku</span><strong><a data-site-href="verificationGuideUrl" href="https://github.com/Veraatversus/pokemon-tcg-data/blob/main/docs/GOOGLE_OAUTH_VERIFICATION_GUIDE.md">Guide öffnen</a></strong></li>
+          </ul>
+        </aside>
+      </div>
+    </header>
+
+    <section class="section" id="funktionen">
+      <h2 class="section-title">Was die App sichtbar für Nutzer leistet</h2>
+      <div class="grid-three">
+        <article class="info-card">
+          <span class="kicker">Search & overview</span>
+          <h3 class="card-title">Sets und Karten schnell durchsuchen</h3>
+          <p>Die Web-App bündelt Setdaten, Suchlogik und Sammlungsstatus in einer klaren Oberfläche für tägliche Nutzung.</p>
+        </article>
+
+        <article class="info-card">
+          <span class="kicker">Personal data ownership</span>
+          <h3 class="card-title">Eigene Google-Tabelle als Quelle</h3>
+          <p>Die Sammlung bleibt im eigenen Spreadsheet des Nutzers. Die App dient als komfortable Oberfläche zum Lesen und Aktualisieren.</p>
+        </article>
+
+        <article class="info-card">
+          <span class="kicker">Production preparation</span>
+          <h3 class="card-title">Öffentliche Seiten für die Google-Prüfung</h3>
+          <p>Landingpage, Datenschutz und Kontaktseite sind vorbereitet, damit das Projekt den Testmodus verlassen kann.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section grid-two" id="daten">
+      <article class="info-card">
+        <span class="kicker">Datennutzung</span>
+        <h3 class="card-title">Begrenzt auf die Kernfunktion</h3>
+        <ul class="clean-list">
+          <li>Spreadsheet auswählen bzw. verbinden</li>
+          <li>Karten- und Setdaten lesen</li>
+          <li>Sammlungsstatus und Einstellungen zurückschreiben</li>
+        </ul>
+      </article>
+
+      <article class="info-card">
+        <span class="kicker">Wichtig für Google</span>
+        <h3 class="card-title">Nutzerzentriert, sichtbar, nicht werblich</h3>
+        <p>
+          Die angeforderten Google-Berechtigungen sind direkt mit den sichtbaren Produktfunktionen verknüpft und nicht für Werbung,
+          Profiling oder Weitergabe an Dritte gedacht.
+        </p>
+      </article>
+    </section>
+
+    <section class="section" id="checkliste">
+      <h2 class="section-title">Checkliste vor dem Wechsel aus dem Testmodus</h2>
+      <div class="grid-two">
+        <div class="checklist">
+          <ol class="clean-list">
+            <li>GitHub Pages live und öffentlich erreichbar halten</li>
+            <li>Datenschutz- und Kontaktseite öffentlich verlinken und Support-Mail aktuell halten</li>
+            <li>Google Search Console für die Pages-URL bestätigen</li>
+            <li>OAuth-Branding, Audience und Data Access in Google Auth Platform sauber eintragen</li>
+            <li>Demo-Video für den Consent- und Nutzungsfluss aufnehmen</li>
+            <li>Danach erst <strong>Publish app</strong> und <strong>Submit for verification</strong> auslösen</li>
+          </ol>
+        </div>
+
+        <div class="notice-box warning">
+          <strong>Technischer Hinweis:</strong><br>
+          Solange <code class="inline">drive.metadata.readonly</code> im Projekt aktiv bleibt, ist die Google-Prüfung strenger.
+          Wenn die App ohne diesen Drive-Metadaten-Scope auskommt, wird die Freigabe in der Regel deutlich einfacher.
+        </div>
+      </div>
+    </section>
+
+    <section class="section grid-two">
+      <div class="notice-box">
+        <strong>Support & Rückfragen</strong><br>
+        Kontakt aktuell über <a data-email href="mailto:veraatversus+tcg@gmail.com">veraatversus+tcg@gmail.com</a>
+      </div>
+      <div class="notice-box">
+        <strong>Projektlinks</strong><br>
+        <a data-site-href="githubUrl" href="https://github.com/Veraatversus/pokemon-tcg-data">Repository</a>
+        ·
+        <a data-site-href="upstreamUrl" href="https://github.com/PokemonTCG/pokemon-tcg-data">Upstream</a>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <span>© <span data-current-year></span> <span data-site="brandName">Vera's Pokémon TCG Tracker</span></span>
+        <span>
+          <a href="./privacy.html">Datenschutz</a> ·
+          <a href="./kontakt.html">Kontakt</a> ·
+          <a href="./frontend/tcg-tracker-web/">App</a>
+        </span>
+      </div>
+    </footer>
+  </div>
+
+  <script src="assets/legal-site.js?v=20260413-pill1"></script>
+</body>
+</html>

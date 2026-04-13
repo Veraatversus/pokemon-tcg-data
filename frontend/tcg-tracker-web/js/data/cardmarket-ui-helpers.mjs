@@ -113,19 +113,6 @@ function extractPotentialPtcgoCodes(cards = []) {
   return Array.from(codes);
 }
 
-function extractPotentialSetNameKeys(cards = []) {
-  const names = new Set();
-
-  cards.forEach((card) => {
-    [card?.setName, card?.set_name, card?.vera_set_name, card?.tcgdex_set_name]
-      .map((value) => normalizeMatcherText(value))
-      .filter(Boolean)
-      .forEach((value) => names.add(value));
-  });
-
-  return Array.from(names);
-}
-
 export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {}, { nameIndex = null, trackerSetIndex = null } = {}) {
   if (!Array.isArray(cards) || !cards.length) {
     return '';
@@ -145,36 +132,18 @@ export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {
   const highestDirectCount = counts.size ? Math.max(...counts.values()) : 0;
 
   if (trackerSetIndex && typeof trackerSetIndex === 'object' && highestDirectCount < 2) {
-    const setIdMatchedExpansionIds = [];
     const setIds = Array.from(new Set(cards.map((card) => String(card?.setId || '').trim().toLowerCase()).filter(Boolean)));
     setIds.forEach((setId) => {
       const expansionId = String(trackerSetIndex?.bySetId?.[setId] || '').trim();
       if (!expansionId) return;
-      setIdMatchedExpansionIds.push(expansionId);
       counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length, 3));
     });
 
-    const ptcgoMatchedExpansionIds = [];
     extractPotentialPtcgoCodes(cards).forEach((code) => {
       const expansionId = String(trackerSetIndex?.byPtcgoCode?.[code] || '').trim();
       if (!expansionId) return;
-      ptcgoMatchedExpansionIds.push(expansionId);
       counts.set(expansionId, (counts.get(expansionId) || 0) + 2);
     });
-
-    const hasIdOrCodeMatch = setIdMatchedExpansionIds.length > 0 || ptcgoMatchedExpansionIds.length > 0;
-    if (!hasIdOrCodeMatch) {
-      const matchedSetNameExpansionIds = Array.from(new Set(
-        extractPotentialSetNameKeys(cards)
-          .map((setNameKey) => String(trackerSetIndex?.bySetName?.[setNameKey] || '').trim())
-          .filter(Boolean)
-      ));
-
-      if (matchedSetNameExpansionIds.length === 1) {
-        const expansionId = matchedSetNameExpansionIds[0];
-        counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length, 5));
-      }
-    }
   }
 
   const highestCount = counts.size ? Math.max(...counts.values()) : 0;

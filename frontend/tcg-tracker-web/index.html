@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&display=swap" rel="stylesheet" />
   <link rel="apple-touch-icon" href="./assets/branding/logo-veras-pokemon.jpg?v=8" />
-  <link rel="stylesheet" href="./css/main.css?v=20260509-discoverybar2" />
+    <link rel="stylesheet" href="./css/main.css?v=20260410-menu-template10" />
   <link rel="stylesheet" href="./css/trading-marketplace.css?v=20260505e" />
 </head>
 <body class="dark">
@@ -226,8 +226,8 @@
     <div id="view-dashboard" class="view">
       <div class="view-header">
         <h2>Meine Sammlung</h2>
-        <div class="dashboard-discovery-bar" aria-label="Suche und Filter">
-          <div class="view-controls dashboard-discovery-controls">
+        <div class="dashboard-discovery-bar tracker-menu-shell" aria-label="Suche und Filter">
+          <div class="view-controls dashboard-discovery-controls tracker-menu-controls">
             <input id="dash-filter" type="search" placeholder="Set, Code oder Serie suchen…" class="dash-filter-input" />
             <select id="dash-series-filter">
               <option value="">Alle Serien</option>
@@ -238,22 +238,22 @@
               <option value="name">Name A–Z</option>
             </select>
           </div>
-          <div id="dashboard-view-tabs" class="dashboard-view-tabs dashboard-filter-strip" role="toolbar" aria-label="Suchfilter">
-            <span class="dashboard-filter-kicker">Finder</span>
-            <div class="dashboard-filter-rail" role="group" aria-label="Dashboard-Filter">
-              <div class="dashboard-filter-segment dashboard-filter-segment--views">
-                <span class="dashboard-filter-caption">Ansicht</span>
+          <div id="dashboard-view-tabs" class="dashboard-view-tabs dashboard-filter-strip tracker-menu-bar" role="toolbar" aria-label="Suchfilter">
+            <span class="dashboard-filter-kicker tracker-menu-kicker">Finder</span>
+            <div class="dashboard-filter-rail tracker-menu-rail" role="group" aria-label="Dashboard-Filter">
+              <div class="dashboard-filter-segment dashboard-filter-segment--views tracker-menu-section tracker-menu-section--views">
+                <span class="dashboard-filter-caption tracker-menu-caption">Ansicht</span>
                 <button class="dashboard-view-tab active" type="button" data-dashboard-view="all" aria-selected="true">Alle</button>
                 <button class="dashboard-view-tab" type="button" data-dashboard-view="imported" aria-selected="false">Importiert</button>
                 <button class="dashboard-view-tab" type="button" data-dashboard-view="not-imported" aria-selected="false">Nicht importiert</button>
                 <button class="dashboard-view-tab" type="button" data-dashboard-view="favorites" aria-selected="false">Favoriten</button>
               </div>
-              <div class="dashboard-filter-segment dashboard-filter-segment--status">
-                <span class="dashboard-filter-caption">Status</span>
-                <div id="quick-filters-container" class="dashboard-inline-status" aria-label="Statusfilter"></div>
+              <div class="dashboard-filter-segment dashboard-filter-segment--status tracker-menu-section tracker-menu-section--status">
+                <span class="dashboard-filter-caption tracker-menu-caption">Status</span>
+                <div id="quick-filters-container" class="dashboard-inline-status tracker-menu-chip-group" aria-label="Statusfilter"></div>
               </div>
-              <div class="dashboard-filter-segment dashboard-filter-segment--density">
-                <span class="dashboard-filter-caption">Layout</span>
+              <div class="dashboard-filter-segment dashboard-filter-segment--density tracker-menu-section tracker-menu-section--density">
+                <span class="dashboard-filter-caption tracker-menu-caption">Layout</span>
                 <button id="btn-dashboard-compact" class="dashboard-view-tab" type="button" aria-pressed="false" title="Ansichtsdichte wechseln">Komfort</button>
               </div>
             </div>
@@ -359,45 +359,48 @@
       <!-- Sidebar -->
       <aside class="panel sidebar">
         <h2>Set wählen</h2>
-        <div class="row">
-          <label for="set-selector">Set</label>
-          <select id="set-selector" disabled>
-            <option value="">Bitte wählen…</option>
-          </select>
-        </div>
-        <div id="set-logo-wrap" class="set-logo-wrap hidden">
-          <img id="set-logo" src="" alt="Set-Logo" class="set-logo" />
-          <img id="set-symbol" src="" alt="Set-Symbol" class="set-symbol" />
-        </div>
-        <div class="row row-set-actions">
-          <button id="btn-load" disabled>Laden</button>
-          <div id="refresh-split" class="split-action-group">
-            <button id="btn-refresh" disabled>🔄 Neu laden</button>
-            <button
-              id="btn-refresh-menu"
-              class="btn-icon split-action-toggle"
-              type="button"
-              aria-label="Weitere Neu-laden-Optionen"
-              aria-haspopup="menu"
-              aria-controls="refresh-menu"
-              aria-expanded="false"
-              disabled
-            >
-              <span class="split-action-caret" aria-hidden="true">▾</span>
-            </button>
-            <div id="refresh-menu" class="action-dropdown hidden" role="menu" aria-label="Neu laden Optionen">
-              <div class="action-dropdown-note">Schnell aktualisieren oder direkt mit frischem API-Reimport.</div>
-              <button id="btn-refresh-reimport" class="btn-secondary action-dropdown-item" type="button" role="menuitem">
-                <span class="action-dropdown-label">♻️ Mit API-Reimport</span>
-                <small>Holt neue Kartendaten und lädt das Set anschließend erneut.</small>
+        <div class="tracker-menu-shell tracker-menu-shell--compact set-sidebar-shell" aria-label="Set-Steuerung">
+          <div class="row tracker-menu-section tracker-menu-section--stack set-picker-group">
+            <span class="dashboard-filter-caption tracker-menu-caption">Auswahl</span>
+            <label for="set-selector">Set</label>
+            <select id="set-selector" class="tracker-menu-select" disabled>
+              <option value="">Bitte wählen…</option>
+            </select>
+          </div>
+          <div id="set-logo-wrap" class="set-logo-wrap hidden">
+            <img id="set-logo" src="" alt="Set-Logo" class="set-logo" />
+            <img id="set-symbol" src="" alt="Set-Symbol" class="set-symbol" />
+          </div>
+          <div class="row row-set-actions tracker-menu-controls tracker-menu-controls--set-actions">
+            <button id="btn-load" disabled>Laden</button>
+            <div id="refresh-split" class="split-action-group">
+              <button id="btn-refresh" disabled>🔄 Neu laden</button>
+              <button
+                id="btn-refresh-menu"
+                class="btn-icon split-action-toggle"
+                type="button"
+                aria-label="Weitere Neu-laden-Optionen"
+                aria-haspopup="menu"
+                aria-controls="refresh-menu"
+                aria-expanded="false"
+                disabled
+              >
+                <span class="split-action-caret" aria-hidden="true">▾</span>
               </button>
+              <div id="refresh-menu" class="action-dropdown hidden" role="menu" aria-label="Neu laden Optionen">
+                <div class="action-dropdown-note">Schnell aktualisieren oder direkt mit frischem API-Reimport.</div>
+                <button id="btn-refresh-reimport" class="btn-secondary action-dropdown-item" type="button" role="menuitem">
+                  <span class="action-dropdown-label">♻️ Mit API-Reimport</span>
+                  <small>Holt neue Kartendaten und lädt das Set anschließend erneut.</small>
+                </button>
+              </div>
             </div>
           </div>
+          <p id="status" class="status tracker-menu-note">Nicht angemeldet.</p>
         </div>
-        <p id="status" class="status">Nicht angemeldet.</p>
 
         <!-- Fortschrittsanzeige -->
-        <section id="stats-section" class="stats-section hidden">
+        <section id="stats-section" class="stats-section tracker-menu-section tracker-menu-section--stack hidden">
           <h3>Sammlung</h3>
           <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
             <div id="progress-fill" class="progress-fill"></div>
@@ -412,19 +415,20 @@
         </section>
 
         <!-- Filter-Buttons -->
-        <section id="filter-section" class="filter-section hidden">
-          <h3>Filter</h3>
-          <div class="filter-buttons">
-            <button class="filter-btn active" data-filter="all">Alle</button>
-            <button class="filter-btn" data-filter="missing">Fehlend</button>
-            <button class="filter-btn" data-filter="collected">Gesammelt</button>
+        <section id="filter-section" class="filter-section tracker-menu-shell tracker-menu-shell--compact tracker-menu-section tracker-menu-section--stack hidden">
+          <h3 class="tracker-menu-heading">Filter</h3>
+          <div class="filter-buttons tracker-menu-chip-group">
+            <button class="filter-btn tracker-menu-chip active" data-filter="all">Alle</button>
+            <button class="filter-btn tracker-menu-chip" data-filter="missing">Fehlend</button>
+            <button class="filter-btn tracker-menu-chip" data-filter="missing-rh">Fehlend + RH fehlt</button>
+            <button class="filter-btn tracker-menu-chip" data-filter="collected">Gesammelt</button>
           </div>
         </section>
 
         <!-- Sortierung -->
-        <section class="sort-section hidden" id="sort-section">
-          <h3>Sortierung</h3>
-          <select id="card-sort" class="full-width-select">
+        <section class="sort-section tracker-menu-shell tracker-menu-shell--compact tracker-menu-section tracker-menu-section--stack hidden" id="sort-section">
+          <h3 class="tracker-menu-heading">Sortierung</h3>
+          <select id="card-sort" class="full-width-select tracker-menu-select">
             <option value="number">Nach Nummer</option>
             <option value="name">Nach Name</option>
             <option value="status">Nach Status</option>
@@ -475,22 +479,25 @@
     <div id="view-search" class="view hidden">
       <div class="view-header">
         <h2>🔍 Kartensuche</h2>
-        <div class="view-controls">
-             <div class="search-ac-wrap">
-               <input id="search-input" type="search" placeholder="Karten-, Setname oder Nummer (DE/EN) eingeben…"
-                 class="search-main-input" autofocus autocomplete="off" />
-               <ul id="search-autocomplete" class="search-autocomplete hidden" role="listbox" aria-label="Suchvorschläge"></ul>
-             </div>
-             <select id="search-set-filter" aria-label="Suchbereich oder Set">
-            <option value="scope:imported">Importierte Sets</option>
-          </select>
-        </div>
-        <div id="search-toolbar-meta" class="search-toolbar-meta" aria-live="polite">
-          <span class="search-mode-badge imported">Importierte Sets</span>
-          <span class="search-meta-pill search-meta-pill--muted">Suchbegriff oben eingeben.</span>
+        <div class="tracker-menu-shell tracker-menu-shell--compact search-menu-shell" aria-label="Sucheinstellungen">
+          <div class="view-controls tracker-menu-controls search-menu-controls">
+            <div class="search-ac-wrap">
+              <input id="search-input" type="search" placeholder="Karten-, Setname oder Nummer (DE/EN) eingeben…"
+                class="search-main-input" autofocus autocomplete="off" />
+              <ul id="search-autocomplete" class="search-autocomplete hidden" role="listbox" aria-label="Suchvorschläge"></ul>
+            </div>
+            <select id="search-set-filter" class="tracker-menu-select" aria-label="Suchbereich oder Set">
+              <option value="scope:all">Alle Sets</option>
+            </select>
+          </div>
+          <div id="search-toolbar-meta" class="search-toolbar-meta tracker-menu-section tracker-menu-section--status search-menu-meta" aria-live="polite">
+            <span class="dashboard-filter-caption tracker-menu-caption">Modus</span>
+            <span class="search-mode-badge all tracker-menu-chip tracker-menu-chip--static">Alle Sets</span>
+            <span class="search-meta-pill search-meta-pill--muted tracker-menu-chip tracker-menu-chip--muted">Suchbegriff oben eingeben.</span>
+          </div>
         </div>
       </div>
-      <p class="search-hint">Im Dropdown wählst du zwischen importierten Sets, allen Sets, Online-Suche oder einem bestimmten Set. Noch nicht importierte Sets stehen am Ende der Liste und sind entsprechend markiert.</p>
+      <p class="search-hint tracker-menu-note">Im Dropdown wählst du zwischen importierten Sets, allen Sets, Online-Suche oder einem bestimmten Set. Noch nicht importierte Sets stehen am Ende der Liste und sind entsprechend markiert.</p>
       <div id="search-results" class="cards search-results">
         <p class="empty-state">Suchbegriff oben eingeben.</p>
       </div>
@@ -503,9 +510,9 @@
       <span class="app-legal-footer__label">Hilfe & Seiten</span>
       <div class="app-legal-footer__links">
         <button id="btn-open-support-hub" class="app-legal-footer__action" type="button">Feedback & Zugang</button>
-        <a href="./landingpage.html" target="_blank" rel="noreferrer noopener">Landingpage</a>
-        <a href="./privacy.html" target="_blank" rel="noreferrer noopener">Datenschutz</a>
-        <a href="./impressum.html" target="_blank" rel="noreferrer noopener">Impressum</a>
+        <a href="../../landingpage.html" target="_blank" rel="noreferrer noopener">Landingpage</a>
+        <a href="../../privacy.html" target="_blank" rel="noreferrer noopener">Datenschutz</a>
+        <a href="../../kontakt.html" target="_blank" rel="noreferrer noopener">Kontakt</a>
       </div>
     </div>
   </footer>
@@ -603,5 +610,5 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://apis.google.com/js/api.js" async defer></script>
-  <script type="module" src="./js/app.js?v=20260510-cardmarket-ui2"></script>
+  <script type="module" src="./js/app.js?v=20260413-set-filter-rh1"></script>
 </html>
