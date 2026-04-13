@@ -14,8 +14,8 @@ import {
   upsertOverviewSet,
   syncOverviewWithApiSets,
   resetSheetsDataCaches,
-    recoverImportedIdsFromOverview,
-  } from './data/sheets-db.js?v=20260606-setfix1';
+  recoverImportedIdsFromOverview,
+} from './data/sheets-db.js?v=20260606-setfix1';
 import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260410-loginfix1';
 import { resolveSeriesGroupInfo } from './data/schema-contract.js?v=20260510b';
 import {
@@ -2512,9 +2512,6 @@ async function applySpreadsheetSelection(id) {
     resetRuntimeUiForSpreadsheetSwitch();
     updateSpreadsheetInfoBar();
     await loadSets();
-      resetSheetsDataCaches,
-      recoverImportedIdsFromOverview,
-    } from './data/sheets-db.js?v=20260606-setfix1';
     setSpreadsheetDialogError('');
   } catch (err) {
     CONFIG.SPREADSHEET_ID = previousId;
@@ -2601,7 +2598,7 @@ function initSpreadsheetDialog() {
 async function loadSets() {
   setLoading(true, 'Lade Sets\u2026');
   try {
-    const [importedSets, initialOverviewSets] = await Promise.all([
+    let [importedSets, initialOverviewSets] = await Promise.all([
       listImportedSets(),
       listSetsOverviewData().catch(() => [])
     ]);
@@ -2615,6 +2612,24 @@ async function loadSets() {
       const importedIds = new Set(importedSets.map((set) => set.setId));
       await syncOverviewWithApiSets(apiSets, importedIds);
       overviewSets = await listSetsOverviewData().catch(() => []);
+    }
+
+    // Legacy-Migration: importierte Sets aus dem Übersichtssheet wiederherstellen,
+    // falls db_sets zuvor normalisiert wurde und alle Import-Flags verloren gingen.
+    if (importedSets.length === 0 && overviewSets.length > 0) {
+      try {
+        const legacyIds = await recoverImportedIdsFromOverview();
+        if (legacyIds.size > 0) {
+          console.log('[loadSets] Migriere', legacyIds.size, 'importierte Sets aus dem Übersichtssheet');
+          const apiSets = await fetchAllAvailableSets();
+          await syncOverviewWithApiSets(apiSets, legacyIds);
+          overviewSets = await listSetsOverviewData().catch(() => []);
+          importedSets = overviewSets.filter((set) => toBoolean(set.imported));
+          state.sets = importedSets;
+        }
+      } catch (err) {
+        console.warn('[loadSets] Migration fehlgeschlagen:', err);
+      }
     }
 
     const importedById = new Map(importedSets.map((set) => [set.setId, set]));
@@ -2659,7 +2674,7 @@ async function loadSets() {
     const settings = await readSettings();
     if (settings.lastSetId) dom.selector.value = settings.lastSetId;
 
-    setGlobalStatus(`${importedSets.length} von ${state.allSets.length} Sets geladen.`);
+    setGlobalStatus(`${state.sets.length} von ${state.allSets.length} Sets geladen.`);
     dom.mainNav.classList.remove('hidden');
 
     if (!window.location.hash || window.location.hash === '#') {
