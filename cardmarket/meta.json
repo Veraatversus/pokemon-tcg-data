@@ -1,10 +1,12 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-04-13T03:11:21.375Z",
-  "singlesSourceCreatedAt": "2026-04-12T10:03:02+0200",
+  "generatedAt": "2026-04-13T15:18:41.856Z",
+  "singlesSourceCreatedAt": "2026-04-13T10:40:38+0200",
+  "nonsinglesSourceCreatedAt": "2026-04-13T10:40:40+0200",
   "priceGuideSourceCreatedAt": "2026-04-13T02:49:19+0200",
   "singlesCount": 67320,
+  "nonsinglesCount": 4791,
   "priceGuideCount": 72111,
-  "setCount": 738,
-  "productIndexCount": 67320
+  "setCount": 745,
+  "productIndexCount": 72111
 }
