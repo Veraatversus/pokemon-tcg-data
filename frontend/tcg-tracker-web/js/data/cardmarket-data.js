@@ -226,7 +226,7 @@ export async function resolveCardmarketEntryForCard(card = {}, { cards = [], sig
   if (!expansionId) return null;
 
   const setPayload = await loadCardmarketSetPayload(expansionId, { signal, forceRefresh });
-  return resolveCardmarketEntryForCardFromSetPayload(card, setPayload);
+  return resolveCardmarketEntryForCardFromSetPayload(card, setPayload, { sourceCards: cards });
 }
 
 export async function promoteCardmarketUrlsForCards(cards = [], { productIndex = null, setPayload = null, signal, forceRefresh = false } = {}) {

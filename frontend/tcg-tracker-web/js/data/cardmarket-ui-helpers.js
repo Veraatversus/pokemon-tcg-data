@@ -88,6 +88,86 @@ function extractCardHintTokens(card = {}) {
   return Array.from(tokens);
 }
 
+function normalizeCardNumberForMatching(value = '') {
+  let normalized = String(value || '').trim();
+  if (!normalized) return '';
+
+  const slashIndex = normalized.indexOf('/');
+  if (slashIndex > 0) {
+    normalized = normalized.slice(0, slashIndex).trim();
+  }
+
+  const match = normalized.match(/^([a-zA-Z._-]*?)(\d+)([a-zA-Z._-]*)$/);
+  if (!match) return normalized.toLowerCase();
+
+  const prefix = match[1].toLowerCase();
+  const numericPart = String(parseInt(match[2], 10));
+  const suffix = match[3].toLowerCase();
+  return `${prefix}${numericPart}${suffix}`;
+}
+
+function extractCardMatchNumber(card = {}) {
+  return normalizeCardNumberForMatching(
+    card?.number
+    || card?.vera_number
+    || card?.tcgdex_localId
+    || card?.localId
+    || ''
+  );
+}
+
+function compareCardMatchNumbers(left = '', right = '') {
+  if (left && right) {
+    return left.localeCompare(right, undefined, { numeric: true, sensitivity: 'base' });
+  }
+  if (left) return -1;
+  if (right) return 1;
+  return 0;
+}
+
+function resolveDuplicateNameMatchIndex(card = {}, sourceCards = []) {
+  if (!Array.isArray(sourceCards) || sourceCards.length < 2) return -1;
+
+  const normalizedCardNames = Array.from(new Set(
+    [card?.name, card?.vera_name, card?.tcgdex_name]
+      .map((value) => normalizeMatcherText(value))
+      .filter(Boolean)
+  ));
+  if (!normalizedCardNames.length) return -1;
+
+  const matchingCards = sourceCards
+    .map((sourceCard, originalIndex) => {
+      const sourceNames = Array.from(new Set(
+        [sourceCard?.name, sourceCard?.vera_name, sourceCard?.tcgdex_name]
+          .map((value) => normalizeMatcherText(value))
+          .filter(Boolean)
+      ));
+      const overlaps = sourceNames.some((name) => normalizedCardNames.includes(name));
+      if (!overlaps) return null;
+
+      return {
+        sourceCard,
+        originalIndex,
+        cardNumber: extractCardMatchNumber(sourceCard),
+      };
+    })
+    .filter(Boolean)
+    .sort((left, right) => compareCardMatchNumbers(left.cardNumber, right.cardNumber) || left.originalIndex - right.originalIndex);
+
+  if (matchingCards.length < 2) return -1;
+
+  const sameObjectIndex = matchingCards.findIndex((entry) => entry.sourceCard === card);
+  if (sameObjectIndex >= 0) return sameObjectIndex;
+
+  const targetCardNumber = extractCardMatchNumber(card);
+  if (!targetCardNumber) return -1;
+
+  const sameNumberMatches = matchingCards.filter((entry) => entry.cardNumber === targetCardNumber);
+  if (sameNumberMatches.length !== 1) return -1;
+
+  return matchingCards.indexOf(sameNumberMatches[0]);
+}
+
 function normalizeCodeKey(value = '') {
   return normalizeMatcherText(value).replace(/\s+/g, '');
 }
@@ -200,7 +280,7 @@ export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {
   return resolvedExpansionId;
 }
 
-export function resolveCardmarketEntryForCardFromSetPayload(card = {}, setPayload = {}) {
+export function resolveCardmarketEntryForCardFromSetPayload(card = {}, setPayload = {}, { sourceCards = [] } = {}) {
   const normalizedCardNames = Array.from(new Set(
     [card?.name, card?.vera_name, card?.tcgdex_name]
       .map((value) => normalizeMatcherText(value))
@@ -242,6 +322,12 @@ export function resolveCardmarketEntryForCardFromSetPayload(card = {}, setPayloa
 
   if (!scoredCandidates.length) return null;
   if (scoredCandidates[0].score > 0) return scoredCandidates[0].entry;
+
+  const duplicateMatchIndex = resolveDuplicateNameMatchIndex(card, sourceCards);
+  if (duplicateMatchIndex >= 0) {
+    return candidatePool[Math.min(duplicateMatchIndex, candidatePool.length - 1)] || scoredCandidates[0].entry;
+  }
+
   return scoredCandidates[0].entry;
 }
 
@@ -330,7 +416,7 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
     const currentUrl = getCardmarketUrlFromCard(card);
     if (!isGeneratedCardmarketSearchUrl(currentUrl)) return card;
 
-    const matchedEntry = resolveCardmarketEntryForCardFromSetPayload(card, resolvedSetPayload);
+    const matchedEntry = resolveCardmarketEntryForCardFromSetPayload(card, resolvedSetPayload, { sourceCards: cards });
     const directUrl = buildCardmarketProductUrl(matchedEntry?.cardmarketProductId);
     if (!directUrl) return card;
 

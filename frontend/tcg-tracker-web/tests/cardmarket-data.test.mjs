@@ -95,7 +95,7 @@ test('inferCardmarketExpansionIdFromCards uses the generated tracker set index w
   assert.equal(inferCardmarketExpansionIdFromCards(cards, productIndex, { trackerSetIndex }), '2001');
 });
 
-test('inferCardmarketExpansionIdFromCards prefers unique tracker bySetName match over bySetId and byPtcgoCode', () => {
+test('inferCardmarketExpansionIdFromCards keeps bySetId and byPtcgoCode precedence when available', () => {
   const cards = [
     {
       setId: 'mystery-set',
@@ -109,6 +109,26 @@ test('inferCardmarketExpansionIdFromCards prefers unique tracker bySetName match
   const trackerSetIndex = {
     bySetId: { 'mystery-set': '2001' },
     byPtcgoCode: { tr: '2001' },
+    bySetName: { 'team rocket': '1528' }
+  };
+
+  assert.equal(inferCardmarketExpansionIdFromCards(cards, productIndex, { trackerSetIndex }), '2001');
+});
+
+test('inferCardmarketExpansionIdFromCards falls back to bySetName when neither bySetId nor byPtcgoCode match', () => {
+  const cards = [
+    {
+      setId: 'mystery-set',
+      setName: 'Team Rocket',
+      name: 'Dark Charizard',
+      cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchString=TR+004'
+    }
+  ];
+
+  const productIndex = {};
+  const trackerSetIndex = {
+    bySetId: {},
+    byPtcgoCode: {},
     bySetName: { 'team rocket': '1528' }
   };
 
@@ -174,6 +194,42 @@ test('resolveCardmarketEntryForCardFromSetPayload falls back to source names whe
   assert.equal(result?.prices?.trend, 0.18);
 });
 
+test('resolveCardmarketEntryForCardFromSetPayload uses source-card occurrence for duplicate names', () => {
+  const cards = [
+    {
+      number: '15',
+      vera_name: 'Professor Oak',
+      tcgdex_name: 'Professor Oak',
+    },
+    {
+      number: '88',
+      vera_name: 'Professor Oak',
+      tcgdex_name: 'Professor Oak',
+    }
+  ];
+
+  const setPayload = {
+    expansionId: 2001,
+    cards: [
+      {
+        cardmarketProductId: 1015,
+        name: 'Professor Oak',
+        prices: { trend: 1.2 }
+      },
+      {
+        cardmarketProductId: 1088,
+        name: 'Professor Oak',
+        prices: { trend: 4.6 }
+      }
+    ]
+  };
+
+  const result = resolveCardmarketEntryForCardFromSetPayload(cards[1], setPayload, { sourceCards: cards });
+
+  assert.equal(result?.cardmarketProductId, 1088);
+  assert.equal(result?.prices?.trend, 4.6);
+});
+
 test('buildCardmarketProductUrl creates a stable direct product link from the product id', () => {
   assert.equal(
     buildCardmarketProductUrl(1001),
@@ -217,6 +273,41 @@ test('promoteCardmarketUrlsForCards upgrades search fallbacks to direct product 
 
   assert.equal(promoted[0].cardmarketUrl, 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=1001');
   assert.equal(promoted[0].vera_cardmarket_url, 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=1001');
+});
+
+test('promoteCardmarketUrlsForCards keeps duplicate same-name cards aligned to their occurrence in the set', async () => {
+  const cards = [
+    {
+      setId: 'base1',
+      number: '15',
+      vera_name: 'Professor Oak',
+      tcgdex_name: 'Professor Oak',
+      cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=BS+015',
+      vera_cardmarket_url: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=BS+015'
+    },
+    {
+      setId: 'base1',
+      number: '88',
+      vera_name: 'Professor Oak',
+      tcgdex_name: 'Professor Oak',
+      cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=BS+088',
+      vera_cardmarket_url: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=BS+088'
+    }
+  ];
+
+  const promoted = await promoteCardmarketUrlsForCards(cards, {
+    productIndex: {},
+    setPayload: {
+      expansionId: 1523,
+      cards: [
+        { cardmarketProductId: 1015, name: 'Professor Oak', prices: { trend: 1.2 } },
+        { cardmarketProductId: 1088, name: 'Professor Oak', prices: { trend: 4.6 } }
+      ]
+    }
+  });
+
+  assert.equal(promoted[0].cardmarketUrl, 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=1015');
+  assert.equal(promoted[1].cardmarketUrl, 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=1088');
 });
 
 test('formatCardmarketEntryLabel prefers the trend price for compact UI badges', () => {
