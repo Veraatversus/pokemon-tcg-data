@@ -277,7 +277,7 @@ export async function fetchMergedCardsWithSetMeta(setId, { signal } = {}) {
 
   const fetchJsonWithSignal = (url) => fetchJson(url, { signal });
 
-  const { allCards, tcgdexDetailedSet, matchingTcgdexSet } = await loadCardsForSetCompat({
+  const { allCards, tcgdexDetailedSet, tcgdexEnglishDetailedSet, matchingTcgdexSet } = await loadCardsForSetCompat({
     setId,
     setName: primarySet?.name || setId,
     useVeraApi: CONFIG.USE_VERA_API,
@@ -311,6 +311,7 @@ export async function fetchMergedCardsWithSetMeta(setId, { signal } = {}) {
     setId,
     primarySet,
     tcgdexSet,
+    tcgdexFallbackSet: tcgdexEnglishDetailedSet || matchingTcgdexSet || null,
     isTcgdexOnly,
     imported: false
   }));

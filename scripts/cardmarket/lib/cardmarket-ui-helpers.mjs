@@ -88,6 +88,94 @@ function extractCardHintTokens(card = {}) {
   return Array.from(tokens);
 }
 
+function extractPreferredCardNames(card = {}) {
+  return Array.from(new Set(
+    [card?.vera_name, card?.tcgdex_name, card?.name]
+      .map((value) => normalizeMatcherText(value))
+      .filter(Boolean)
+  ));
+}
+
+function extractPreferredSetNames(card = {}) {
+  return Array.from(new Set(
+    [card?.vera_set_name, card?.tcgdex_set_name, card?.setName, card?.set_name]
+      .map((value) => normalizeMatcherText(value))
+      .filter(Boolean)
+  ));
+}
+
+function normalizeCardNumberForMatching(value = '') {
+  let normalized = String(value || '').trim();
+  if (!normalized) return '';
+
+  const slashIndex = normalized.indexOf('/');
+  if (slashIndex > 0) {
+    normalized = normalized.slice(0, slashIndex).trim();
+  }
+
+  const match = normalized.match(/^([a-zA-Z._-]*?)(\d+)([a-zA-Z._-]*)$/);
+  if (!match) return normalized.toLowerCase();
+
+  const prefix = match[1].toLowerCase();
+  const numericPart = String(parseInt(match[2], 10));
+  const suffix = match[3].toLowerCase();
+  return `${prefix}${numericPart}${suffix}`;
+}
+
+function extractCardMatchNumber(card = {}) {
+  return normalizeCardNumberForMatching(
+    card?.number
+    || card?.vera_number
+    || card?.tcgdex_localId
+    || card?.localId
+    || ''
+  );
+}
+
+function compareCardMatchNumbers(left = '', right = '') {
+  if (left && right) {
+    return left.localeCompare(right, undefined, { numeric: true, sensitivity: 'base' });
+  }
+  if (left) return -1;
+  if (right) return 1;
+  return 0;
+}
+
+function resolveDuplicateNameMatchIndex(card = {}, sourceCards = []) {
+  if (!Array.isArray(sourceCards) || sourceCards.length < 2) return -1;
+
+  const normalizedCardNames = extractPreferredCardNames(card);
+  if (!normalizedCardNames.length) return -1;
+
+  const matchingCards = sourceCards
+    .map((sourceCard, originalIndex) => {
+      const sourceNames = extractPreferredCardNames(sourceCard);
+      const overlaps = sourceNames.some((name) => normalizedCardNames.includes(name));
+      if (!overlaps) return null;
+
+      return {
+        sourceCard,
+        originalIndex,
+        cardNumber: extractCardMatchNumber(sourceCard),
+      };
+    })
+    .filter(Boolean)
+    .sort((left, right) => compareCardMatchNumbers(left.cardNumber, right.cardNumber) || left.originalIndex - right.originalIndex);
+
+  if (matchingCards.length < 2) return -1;
+
+  const sameObjectIndex = matchingCards.findIndex((entry) => entry.sourceCard === card);
+  if (sameObjectIndex >= 0) return sameObjectIndex;
+
+  const targetCardNumber = extractCardMatchNumber(card);
+  if (!targetCardNumber) return -1;
+
+  const sameNumberMatches = matchingCards.filter((entry) => entry.cardNumber === targetCardNumber);
+  if (sameNumberMatches.length !== 1) return -1;
+
+  return matchingCards.indexOf(sameNumberMatches[0]);
+}
+
 function normalizeCodeKey(value = '') {
   return normalizeMatcherText(value).replace(/\s+/g, '');
 }
@@ -117,10 +205,7 @@ function extractPotentialSetNameKeys(cards = []) {
   const names = new Set();
 
   cards.forEach((card) => {
-    [card?.setName, card?.set_name, card?.vera_set_name, card?.tcgdex_set_name]
-      .map((value) => normalizeMatcherText(value))
-      .filter(Boolean)
-      .forEach((value) => names.add(value));
+    extractPreferredSetNames(card).forEach((value) => names.add(value));
   });
 
   return Array.from(names);
@@ -180,9 +265,7 @@ export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {
   const highestCount = counts.size ? Math.max(...counts.values()) : 0;
   if ((!counts.size || highestCount < 2) && nameIndex && typeof nameIndex === 'object') {
     cards.forEach((card) => {
-      const normalizedNames = [card?.name, card?.vera_name, card?.tcgdex_name]
-        .map((value) => normalizeMatcherText(value))
-        .filter(Boolean);
+      const normalizedNames = extractPreferredCardNames(card);
 
       normalizedNames.forEach((name) => {
         const expansionIds = Array.isArray(nameIndex?.[name]) ? nameIndex[name] : [];
@@ -207,12 +290,8 @@ export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {
   return resolvedExpansionId;
 }
 
-export function resolveCardmarketEntryForCardFromSetPayload(card = {}, setPayload = {}, { usedProductIds = null } = {}) {
-  const normalizedCardNames = Array.from(new Set(
-    [card?.name, card?.vera_name, card?.tcgdex_name]
-      .map((value) => normalizeMatcherText(value))
-      .filter(Boolean)
-  ));
+export function resolveCardmarketEntryForCardFromSetPayload(card = {}, setPayload = {}, { sourceCards = [] } = {}) {
+  const normalizedCardNames = extractPreferredCardNames(card);
   if (!normalizedCardNames.length) return null;
 
   const cards = Array.isArray(setPayload?.cards) ? setPayload.cards : [];
@@ -232,31 +311,29 @@ export function resolveCardmarketEntryForCardFromSetPayload(card = {}, setPayloa
       });
 
   if (!candidatePool.length) return null;
-
-  // Prefer candidates that haven't been used already (avoid linking duplicates to the same product)
-  const usedSet = usedProductIds instanceof Set ? usedProductIds : null;
-  let availableCandidates = candidatePool;
-  if (usedSet) {
-    const filtered = candidatePool.filter((entry) => !usedSet.has(String(entry?.cardmarketProductId || '')));
-    if (filtered.length) availableCandidates = filtered;
-  }
-
-  if (availableCandidates.length === 1) return availableCandidates[0];
+  if (candidatePool.length === 1) return candidatePool[0];
 
   const cardHintTokens = extractCardHintTokens(card);
-  const scoredCandidates = (availableCandidates.length ? availableCandidates : candidatePool)
-    .map((entry) => {
+  const scoredCandidates = candidatePool
+    .map((entry, index) => {
       const entryHintTokens = extractEntryHintTokens(entry?.name || '');
       const overlapCount = cardHintTokens.filter((token) => entryHintTokens.includes(token)).length;
       return {
         entry,
-        originalIndex: Array.isArray(cards) ? cards.indexOf(entry) : -1,
+        index,
         score: overlapCount,
       };
     })
-    .sort((left, right) => right.score - left.score || left.originalIndex - right.originalIndex);
+    .sort((left, right) => right.score - left.score || left.index - right.index);
 
   if (!scoredCandidates.length) return null;
+  if (scoredCandidates[0].score > 0) return scoredCandidates[0].entry;
+
+  const duplicateMatchIndex = resolveDuplicateNameMatchIndex(card, sourceCards);
+  if (duplicateMatchIndex >= 0) {
+    return candidatePool[Math.min(duplicateMatchIndex, candidatePool.length - 1)] || scoredCandidates[0].entry;
+  }
+
   return scoredCandidates[0].entry;
 }
 
@@ -341,17 +418,13 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
 
   if (!resolvedSetPayload) return cards;
 
-  const usedProductIds = new Set();
-
   return cards.map((card) => {
     const currentUrl = getCardmarketUrlFromCard(card);
     if (!isGeneratedCardmarketSearchUrl(currentUrl)) return card;
 
-    const matchedEntry = resolveCardmarketEntryForCardFromSetPayload(card, resolvedSetPayload, { usedProductIds });
+    const matchedEntry = resolveCardmarketEntryForCardFromSetPayload(card, resolvedSetPayload, { sourceCards: cards });
     const directUrl = buildCardmarketProductUrl(matchedEntry?.cardmarketProductId);
     if (!directUrl) return card;
-
-    if (matchedEntry?.cardmarketProductId) usedProductIds.add(String(matchedEntry.cardmarketProductId));
 
     return {
       ...card,

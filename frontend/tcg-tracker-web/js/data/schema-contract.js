@@ -382,10 +382,31 @@ function resolveCardmarketUrl(primaryCard, tcgdexCard, fallbackMeta = {}) {
   return buildCardmarketFallback(fallbackMeta);
 }
 
+function resolveTcgdexSetFallbackValues(tcgdexSet = null, tcgdexFallbackSet = null) {
+  const fallbackSet = tcgdexFallbackSet && typeof tcgdexFallbackSet === 'object' ? tcgdexFallbackSet : {};
+  const currentSet = tcgdexSet && typeof tcgdexSet === 'object' ? tcgdexSet : {};
+
+  return {
+    name: String(fallbackSet?.name || currentSet?.en?.name || currentSet?.name || '').trim(),
+    series: String(fallbackSet?.serie?.name || currentSet?.en?.serie?.name || currentSet?.serie?.name || '').trim(),
+  };
+}
+
+function resolveTcgdexCardFallbackValues(tcgdexCard = null, tcgdexFallbackCard = null) {
+  const fallbackCard = tcgdexFallbackCard && typeof tcgdexFallbackCard === 'object' ? tcgdexFallbackCard : {};
+  const currentCard = tcgdexCard && typeof tcgdexCard === 'object' ? tcgdexCard : {};
+  const sourceCard = Object.keys(fallbackCard).length ? fallbackCard : currentCard;
+
+  return {
+    name: String(sourceCard?.name || currentCard?.name || '').trim(),
+  };
+}
+
 export function buildSetRecordFromSources({
   setId,
   primarySet = null,
   tcgdexSet = null,
+  tcgdexFallbackSet = null,
   isTcgdexOnly = false,
   imported = false,
   updatedAt = null
@@ -394,6 +415,10 @@ export function buildSetRecordFromSources({
     ? SET_MATCH_STATUS.MATCHED
     : (isTcgdexOnly ? SET_MATCH_STATUS.TCGDEX_ONLY : SET_MATCH_STATUS.PRIMARY_ONLY);
   const resolvedSetId = String(setId || primarySet?.id || (tcgdexSet?.id ? `TCGDEX-${tcgdexSet.id}` : '')).trim();
+  const fallbackSetValues = !primarySet
+    ? resolveTcgdexSetFallbackValues(tcgdexSet, tcgdexFallbackSet)
+    : null;
+
   return {
     setId: resolvedSetId,
     imported: Boolean(imported),
@@ -402,8 +427,8 @@ export function buildSetRecordFromSources({
     isTcgdexOnly: Boolean(isTcgdexOnly),
     // vera-Felder
     vera_id: primarySet?.id || '',
-    vera_name: primarySet?.name || '',
-    vera_series: primarySet?.series || '',
+    vera_name: primarySet?.name || fallbackSetValues?.name || '',
+    vera_series: primarySet?.series || fallbackSetValues?.series || '',
     vera_printedTotal: toNumber(primarySet?.printedTotal),
     vera_total: toNumber(primarySet?.total),
     vera_ptcgoCode: primarySet?.ptcgoCode || primarySet?.code || '',
@@ -434,6 +459,7 @@ export function buildCardRecordFromSources({
   setId,
   primaryCard = null,
   tcgdexCard = null,
+  tcgdexFallbackCard = null,
   tcgdexSetId = '',
   tcgdexSeriesId = '',
   fallbackSetName = '',
@@ -449,6 +475,9 @@ export function buildCardRecordFromSources({
   const rules = normalizeRules(primaryCard, tcgdexCard);
   const tcgdexImageSmall = resolveTcgdexImage(tcgdexCard, 'low', { setId: tcgdexSetId || setId, seriesId: tcgdexSeriesId });
   const tcgdexImageLarge = resolveTcgdexImage(tcgdexCard, 'high', { setId: tcgdexSetId || setId, seriesId: tcgdexSeriesId });
+  const fallbackCardValues = !primaryCard
+    ? resolveTcgdexCardFallbackValues(tcgdexCard, tcgdexFallbackCard)
+    : null;
   const imageUrl = tcgdexImageSmall
     || primaryCard?.images?.small
     || fallbackImageSmall
@@ -457,10 +486,8 @@ export function buildCardRecordFromSources({
     || primaryCard?.images?.large
     || fallbackImageLarge
     || imageUrl;
-  const isOnlyTcgdex = Boolean(tcgdexCard && !primaryCard);
-  const vera_name_val_pre = primaryCard?.name || (isOnlyTcgdex ? (tcgdexCard?.name || '') : '');
-  const cardmarketUrl = resolveCardmarketUrl(primaryCard, tcgdexCard, {
-    cardName: vera_name_val_pre || primaryCard?.name || tcgdexCard?.name || normalizedNumber,
+  const cardmarketUrl = resolveCardmarketUrl(primaryCard, tcgdexFallbackCard || tcgdexCard, {
+    cardName: tcgdexFallbackCard?.name || tcgdexCard?.name || primaryCard?.name || normalizedNumber,
     setTag: fallbackSetTag,
     setName: fallbackSetName,
     cardNumber: normalizedNumber
@@ -475,11 +502,11 @@ export function buildCardRecordFromSources({
     isTcgdexOnly: Boolean(tcgdexCard && !primaryCard),
     // vera-Felder
     vera_id: primaryCard?.id || '',
-    vera_name: vera_name_val_pre || primaryCard?.name || '',
+    vera_name: primaryCard?.name || fallbackCardValues?.name || '',
     vera_supertype: primaryCard?.supertype || '',
-    vera_subtypes: normalizeStringList(primaryCard?.subtypes),
+    vera_subtypes: Array.isArray(primaryCard?.subtypes) ? primaryCard.subtypes : [],
     vera_hp: primaryCard?.hp ? String(primaryCard.hp) : '',
-    vera_types: normalizeStringList(primaryCard?.types),
+    vera_types: Array.isArray(primaryCard?.types) ? primaryCard.types : [],
     vera_evolvesFrom: primaryCard?.evolvesFrom || '',
     vera_abilities: Array.isArray(primaryCard?.abilities) ? primaryCard.abilities : [],
     vera_attacks: Array.isArray(primaryCard?.attacks) ? primaryCard.attacks : [],

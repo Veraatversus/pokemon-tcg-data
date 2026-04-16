@@ -143,6 +143,33 @@ test('German TCGDex set assets fall back to English summary assets', () => {
   assert.equal(combined.symbolUrl, 'https://assets.tcgdex.net/en/sv/sv1/symbol.webp');
 });
 
+test('tcgdex-only sets backfill english names into vera name fields only', () => {
+  const record = buildSetRecordFromSources({
+    setId: 'TCGDEX-sv1',
+    primarySet: null,
+    tcgdexSet: {
+      id: 'sv1',
+      name: 'Karmesin & Purpur',
+      serie: { id: 'sv', name: 'Karmesin & Purpur' },
+      abbreviation: { official: 'SVI' },
+      cardCount: { official: 198, total: 258 },
+      releaseDate: '2023-03-31',
+    },
+    tcgdexFallbackSet: {
+      id: 'sv1',
+      name: 'Scarlet & Violet',
+      serie: { id: 'sv', name: 'Scarlet & Violet' },
+    },
+    isTcgdexOnly: true,
+  });
+
+  assert.equal(record.vera_name, 'Scarlet & Violet');
+  assert.equal(record.vera_series, 'Scarlet & Violet');
+  assert.equal(record.vera_ptcgoCode, '');
+  assert.equal(record.vera_releaseDate, '');
+  assert.equal(record.vera_total, 0);
+});
+
 test('card resolver uses TCGDex detail fields when primary data is missing', () => {
   const merged = buildCardRecordFromSources({
     setId: 'swsh12pt5gg',
@@ -185,6 +212,33 @@ test('card resolver uses TCGDex detail fields when primary data is missing', () 
   assert.equal(display.regulationMark, 'F');
   assert.ok(Array.isArray(display.rules) && display.rules.some((entry) => String(entry).includes('Spark mouse Pokémon.')));
   assert.equal(display.flavorText, 'Spark mouse Pokémon.');
+});
+
+test('tcgdex-only cards backfill english names into vera_name only', () => {
+  const record = buildCardRecordFromSources({
+    setId: 'sv1',
+    primaryCard: null,
+    tcgdexCard: {
+      id: 'sv1-1',
+      localId: '001',
+      name: 'Tannza',
+      category: 'Pokemon',
+      image: 'https://assets.tcgdex.net/de/sv/sv1/001',
+    },
+    tcgdexFallbackCard: {
+      id: 'sv1-1',
+      localId: '001',
+      name: 'Tarountula',
+    },
+    tcgdexSetId: 'sv1',
+    tcgdexSeriesId: 'sv',
+  });
+
+  assert.equal(record.vera_name, 'Tarountula');
+  assert.equal(record.vera_supertype, '');
+  assert.equal(record.vera_hp, '');
+  assert.deepEqual(record.vera_types, []);
+  assert.equal(record.vera_images_small, '');
 });
 
 test('card image resolver defaults to TCGDex first priority', () => {
@@ -307,55 +361,4 @@ test('imported search falls back to API when imported set has no DB cards', () =
     shouldFetchApiCardsForSearchSet('imported', { imported: true, setId: 'sv11' }, true),
     false
   );
-});
-
-test('TCGDex-only set fills missing vera_* fields with English TCGDex values', () => {
-  const rec = buildSetRecordFromSources({
-    setId: 'TCGDEX-sample',
-    primarySet: null,
-    tcgdexSet: {
-      id: 'sample',
-      name: 'English Set Name',
-      serie: { id: 's', name: 'Series Name' },
-      abbreviation: { official: 'ESN' },
-      releaseDate: '2024-01-01',
-      logo: 'https://assets.tcgdex.net/en/s/sample/logo.webp',
-      symbol: 'https://assets.tcgdex.net/en/s/sample/symbol.webp',
-      cardCount: { total: 123 },
-      legal: { standard: 'legal' },
-    },
-    isTcgdexOnly: true,
-  });
-
-  assert.equal(rec.vera_name, 'English Set Name');
-  assert.equal(rec.vera_ptcgoCode, 'ESN');
-  assert.equal(rec.vera_total, 123);
-  assert.equal(rec.vera_images_logo, rec.tcgdex_logo);
-});
-
-test('TCGDex-only card fills missing vera_* fields with English TCGDex values', () => {
-  const rec = buildCardRecordFromSources({
-    setId: 's-sample',
-    primaryCard: null,
-    tcgdexCard: {
-      id: 's-sample-1',
-      localId: '001',
-      name: 'Samplemon',
-      rarity: 'Rare',
-      hp: 70,
-      types: ['Fire'],
-      illustrator: 'Jane Artist',
-      description: 'A sample pokémon.',
-      image: 'https://assets.tcgdex.net/en/s/s-sample/001',
-    },
-    tcgdexSetId: 's-sample',
-    tcgdexSeriesId: 's',
-  });
-
-  assert.equal(rec.vera_name, 'Samplemon');
-  assert.equal(rec.vera_number, '001');
-  assert.equal(rec.vera_artist, 'Jane Artist');
-  assert.equal(rec.vera_rarity, 'Rare');
-  assert.equal(rec.vera_hp, '70');
-  assert.deepEqual(rec.vera_types, ['Fire']);
 });

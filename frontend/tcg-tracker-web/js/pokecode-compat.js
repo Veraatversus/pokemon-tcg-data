@@ -265,25 +265,53 @@ export function resolvePreferredTcgdexSetBases(tcgdexSetId, apis = {}) {
     .filter((value, index, array) => array.indexOf(value) === index);
 }
 
-async function fetchTcgdexSetDetailsWithFallback(tcgdexSetId, apis = {}, fetchJson) {
+async function fetchTcgdexSetDetail(base, tcgdexSetId, fetchJson) {
+  return fetchJson(`${base}/sets/${encodeURIComponent(tcgdexSetId)}`);
+}
+
+async function fetchTcgdexSetDetailsWithLocaleInfo(tcgdexSetId, apis = {}, fetchJson) {
   const normalizedSetId = String(tcgdexSetId || '').trim();
-  if (!normalizedSetId || typeof fetchJson !== 'function') return null;
+  if (!normalizedSetId || typeof fetchJson !== 'function') {
+    return { preferredDetail: null, englishDetail: null };
+  }
 
   const bases = resolvePreferredTcgdexSetBases(normalizedSetId, apis);
   if (!bases.length) {
-    return null;
+    return { preferredDetail: null, englishDetail: null };
   }
+
+  let preferredDetail = null;
+  let preferredBase = '';
 
   for (const base of bases) {
     try {
-      const detail = await fetchJson(`${base}/sets/${encodeURIComponent(normalizedSetId)}`);
-      if (detail?.id) return detail;
+      const detail = await fetchTcgdexSetDetail(base, normalizedSetId, fetchJson);
+      if (detail?.id) {
+        preferredDetail = detail;
+        preferredBase = base;
+        break;
+      }
     } catch (_error) {
       // try next locale fallback only when the locale is actually plausible
     }
   }
 
-  return null;
+  const englishBase = String(apis?.tcgdexFallbackBase || '').trim();
+  let englishDetail = null;
+  if (englishBase) {
+    if (preferredBase === englishBase && preferredDetail?.id) {
+      englishDetail = preferredDetail;
+    } else {
+      try {
+        const detail = await fetchTcgdexSetDetail(englishBase, normalizedSetId, fetchJson);
+        if (detail?.id) englishDetail = detail;
+      } catch (_error) {
+        // English fallback is optional enrichment only
+      }
+    }
+  }
+
+  return { preferredDetail, englishDetail };
 }
 
 function resolveOfficialSetTag({ setTag = '', tcgdexSet = null, primarySet = null, fallbackSetId = '' } = {}) {
@@ -347,12 +375,21 @@ function resolveCardmarketUrl({ tcgdexUrl = null, primaryUrl = null, cardName = 
   return buildCardmarketSearchUrl({ cardName, setTag, setName, cardNumber });
 }
 
-function mapTcgdexCardToMerged(tcgdexSetId, tcgdexCard, fallbackImageSmall = null, fallbackImageLarge = null, fallbackSetName = '', fallbackSetTag = '', tcgdexSeriesId = '') {
+function buildTcgdexCardsMap(cards = []) {
+  const map = new Map();
+  (Array.isArray(cards) ? cards : []).forEach((card) => {
+    map.set(normalizeCardNumber(card?.localId || card?.id), card);
+  });
+  return map;
+}
+
+function mapTcgdexCardToMerged(tcgdexSetId, tcgdexCard, fallbackImageSmall = null, fallbackImageLarge = null, fallbackSetName = '', fallbackSetTag = '', tcgdexSeriesId = '', tcgdexFallbackCard = null) {
   return buildCardRecordFromSources({
     setId: tcgdexSetId,
     tcgdexSetId,
     tcgdexSeriesId,
     tcgdexCard,
+    tcgdexFallbackCard,
     fallbackImageSmall: resolveTcgdexImageUrl(tcgdexSetId, tcgdexCard, { quality: 'low', seriesId: tcgdexSeriesId }) || fallbackImageSmall || '',
     fallbackImageLarge: resolveTcgdexImageUrl(tcgdexSetId, tcgdexCard, { quality: 'high', seriesId: tcgdexSeriesId }) || fallbackImageLarge || fallbackImageSmall || '',
     fallbackSetName,
@@ -417,6 +454,7 @@ export async function loadCardsForSetCompat({
   let allCards = [];
   const cardmarketData = {};
   let tcgdexDetailedSet = null;
+  let tcgdexEnglishDetailedSet = null;
   const primaryDetailedSet = primarySet || null;
 
   const isTcgdexOnlySet = String(setId || '').startsWith('TCGDEX-');
@@ -426,10 +464,9 @@ export async function loadCardsForSetCompat({
       throw new Error(`TCGDex-Set nicht verfügbar: ${tcgdexActualSetId}`);
     }
     const tcgdexSummaryFallback = findTcgdexSetById(tcgdexSets, tcgdexActualSetId);
-    tcgdexDetailedSet = mergeTcgdexSetWithFallback(
-      await fetchTcgdexSetDetailsWithFallback(tcgdexActualSetId, apis, fetchJson),
-      tcgdexSummaryFallback
-    );
+    const { preferredDetail, englishDetail } = await fetchTcgdexSetDetailsWithLocaleInfo(tcgdexActualSetId, apis, fetchJson);
+    tcgdexDetailedSet = mergeTcgdexSetWithFallback(preferredDetail, tcgdexSummaryFallback);
+    tcgdexEnglishDetailedSet = mergeTcgdexSetWithFallback(englishDetail, tcgdexSummaryFallback);
     if (!tcgdexDetailedSet) {
       throw new Error(`TCGDex-Set nicht verfügbar: ${tcgdexActualSetId}`);
     }
@@ -438,9 +475,22 @@ export async function loadCardsForSetCompat({
       fallbackSetId: tcgdexActualSetId
     });
     const cards = tcgdexDetailedSet?.cards || [];
-    allCards = cards.map((card) => mapTcgdexCardToMerged(tcgdexActualSetId, card, null, tcgdexDetailedSet?.name || setName || '', officialSetTag));
+    const englishCardsMap = buildTcgdexCardsMap(tcgdexEnglishDetailedSet?.cards || []);
+    allCards = cards.map((card) => {
+      const normalizedCardNumber = normalizeCardNumber(card?.localId || card?.id);
+      return mapTcgdexCardToMerged(
+        tcgdexActualSetId,
+        card,
+        null,
+        null,
+        tcgdexEnglishDetailedSet?.name || tcgdexDetailedSet?.name || setName || '',
+        officialSetTag,
+        tcgdexDetailedSet?.serie?.id || tcgdexEnglishDetailedSet?.serie?.id || '',
+        englishCardsMap.get(normalizedCardNumber) || null
+      );
+    });
     allCards.sort((a, b) => naturalSort(a.number || '', b.number || ''));
-    return { allCards, cardmarketData, tcgdexDetailedSet, primaryDetailedSet, matchingTcgdexSet: null };
+    return { allCards, cardmarketData, tcgdexDetailedSet, tcgdexEnglishDetailedSet, primaryDetailedSet, matchingTcgdexSet: null };
   }
 
   const pokemontcgSetId = setId;
@@ -466,22 +516,22 @@ export async function loadCardsForSetCompat({
 
   const tcgdexId = matchingTcgdexSet?.id || customMappings?.[String(pokemontcgSetId).toLowerCase()] || pokemontcgSetId;
   const tcgdexSummaryFallback = matchingTcgdexSet || findTcgdexSetById(tcgdexSets, tcgdexId);
-  tcgdexDetailedSet = tcgdexId
-    ? mergeTcgdexSetWithFallback(
-        await fetchTcgdexSetDetailsWithFallback(tcgdexId, apis, fetchJson),
-        tcgdexSummaryFallback
-      )
-    : tcgdexSummaryFallback || null;
+  if (tcgdexId) {
+    const { preferredDetail, englishDetail } = await fetchTcgdexSetDetailsWithLocaleInfo(tcgdexId, apis, fetchJson);
+    tcgdexDetailedSet = mergeTcgdexSetWithFallback(preferredDetail, tcgdexSummaryFallback);
+    tcgdexEnglishDetailedSet = mergeTcgdexSetWithFallback(englishDetail, tcgdexSummaryFallback);
+  } else {
+    tcgdexDetailedSet = tcgdexSummaryFallback || null;
+    tcgdexEnglishDetailedSet = tcgdexSummaryFallback || null;
+  }
   const officialSetTag = resolveOfficialSetTag({
     tcgdexSet: tcgdexDetailedSet || matchingTcgdexSet,
     primarySet: primaryDetailedSet,
     fallbackSetId: pokemontcgSetId
   });
 
-  const tcgdexCardsMap = new Map();
-  (tcgdexDetailedSet?.cards || []).forEach((card) => {
-    tcgdexCardsMap.set(normalizeCardNumber(card.localId || card.id), card);
-  });
+  const tcgdexCardsMap = buildTcgdexCardsMap(tcgdexDetailedSet?.cards || []);
+  const tcgdexEnglishCardsMap = buildTcgdexCardsMap(tcgdexEnglishDetailedSet?.cards || []);
 
   allCards = primaryCards.map((primaryCard) => {
     const number = normalizeCardNumber(primaryCard.number);
@@ -511,6 +561,7 @@ export async function loadCardsForSetCompat({
       setId: pokemontcgSetId,
       primaryCard,
       tcgdexCard,
+      tcgdexFallbackCard: tcgdexEnglishCardsMap.get(number) || null,
       tcgdexSetId: matchingTcgdexSet?.id || tcgdexId,
       tcgdexSeriesId: tcgdexDetailedSet?.serie?.id || matchingTcgdexSet?.serie?.id || '',
       fallbackImageSmall: generatedTcgdexImageSmall
@@ -537,9 +588,10 @@ export async function loadCardsForSetCompat({
           tcgdexCard,
           `https://images.pokemontcg.io/${pokemontcgSetId}/${normalizedTcgdexNumber}.png`,
           `https://images.pokemontcg.io/${pokemontcgSetId}/${normalizedTcgdexNumber}.png`,
-          primaryDetailedSet?.name || matchingTcgdexSet?.name || setName || '',
+          primaryDetailedSet?.name || tcgdexEnglishDetailedSet?.name || matchingTcgdexSet?.name || setName || '',
           officialSetTag,
-          tcgdexDetailedSet?.serie?.id || matchingTcgdexSet?.serie?.id || ''
+          tcgdexDetailedSet?.serie?.id || tcgdexEnglishDetailedSet?.serie?.id || matchingTcgdexSet?.serie?.id || '',
+          tcgdexEnglishCardsMap.get(normalizedTcgdexNumber) || null
         )
       });
       const resolvedTcgdexCardmarketUrl = resolveCardmarketUrl({
@@ -570,7 +622,7 @@ export async function loadCardsForSetCompat({
   });
 
   allCards.sort((a, b) => naturalSort(a.number || '', b.number || ''));
-  return { allCards, cardmarketData, tcgdexDetailedSet, primaryDetailedSet, matchingTcgdexSet: matchingTcgdexSet || null };
+  return { allCards, cardmarketData, tcgdexDetailedSet, tcgdexEnglishDetailedSet, primaryDetailedSet, matchingTcgdexSet: matchingTcgdexSet || null };
 }
 
 export function combineSetsForOverviewCompat({
@@ -649,6 +701,7 @@ export function combineSetsForOverviewCompat({
         setId: model.setId,
         primarySet,
         tcgdexSet,
+        tcgdexFallbackSet: tcgdexSet ? findTcgdexSetById(tcgdexSets, tcgdexSet?.id) : null,
         isTcgdexOnly: false
       }));
       return;
@@ -659,6 +712,7 @@ export function combineSetsForOverviewCompat({
         setId: `TCGDEX-${tcgdexSet.id}`,
         primarySet: null,
         tcgdexSet,
+        tcgdexFallbackSet: findTcgdexSetById(tcgdexSets, tcgdexSet?.id),
         isTcgdexOnly: true
       }));
     }
