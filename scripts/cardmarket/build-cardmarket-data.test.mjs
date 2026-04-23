@@ -66,8 +66,17 @@ test('buildCardmarketArtifacts groups singles by expansion and merges price data
       {
         idProduct: 1001,
         avg: 2.5,
+        avg1: 2.3,
+        avg7: 2.4,
+        avg30: 2.45,
         low: 1.2,
         trendPrice: 2.3,
+        'avg-holo': 3.7,
+        'avg1-holo': 3.5,
+        'avg7-holo': 3.6,
+        'avg30-holo': 3.65,
+        'low-holo': 1.9,
+        'trend-holo': 3.8,
       },
     ],
   };
@@ -105,8 +114,17 @@ test('buildCardmarketArtifacts groups singles by expansion and merges price data
   assert.equal(artifacts.sets['2001'].cards.length, 1);
   assert.equal(artifacts.sets['2001'].cards[0].cardmarketProductId, 1001);
   assert.equal(artifacts.sets['2001'].cards[0].prices.avg, 2.5);
+  assert.equal(artifacts.sets['2001'].cards[0].prices.avg1, 2.3);
+  assert.equal(artifacts.sets['2001'].cards[0].prices.avg7, 2.4);
+  assert.equal(artifacts.sets['2001'].cards[0].prices.avg30, 2.45);
   assert.equal(artifacts.sets['2001'].cards[0].prices.low, 1.2);
   assert.equal(artifacts.sets['2001'].cards[0].prices.trend, 2.3);
+  assert.equal(artifacts.sets['2001'].cards[0].prices.avgHolo, 3.7);
+  assert.equal(artifacts.sets['2001'].cards[0].prices.avg1Holo, 3.5);
+  assert.equal(artifacts.sets['2001'].cards[0].prices.avg7Holo, 3.6);
+  assert.equal(artifacts.sets['2001'].cards[0].prices.avg30Holo, 3.65);
+  assert.equal(artifacts.sets['2001'].cards[0].prices.lowHolo, 1.9);
+  assert.equal(artifacts.sets['2001'].cards[0].prices.trendHolo, 3.8);
   assert.deepEqual(artifacts.index.nonsinglesProducts, {});
 });
 
