@@ -135,14 +135,20 @@ function resolveDuplicateNameMatchIndex(card = {}, sourceCards = []) {
   ));
   if (!normalizedCardNames.length) return -1;
 
-  const matchingCards = sourceCards
+    const matchingCards = sourceCards
     .map((sourceCard, originalIndex) => {
       const sourceNames = Array.from(new Set(
         [sourceCard?.name, sourceCard?.vera_name, sourceCard?.tcgdex_name]
           .map((value) => normalizeMatcherText(value))
           .filter(Boolean)
       ));
-      const overlaps = sourceNames.some((name) => normalizedCardNames.includes(name));
+        const overlaps = sourceNames.some((name) => normalizedCardNames.includes(name))
+          || (
+            normalizedCandidateNames.length > 0
+            && sourceNames.some((sourceName) => normalizedCandidateNames.some((candidateName) => (
+              sourceName.includes(candidateName) || candidateName.includes(sourceName)
+            )))
+          );
       if (!overlaps) return null;
 
       return {
@@ -299,7 +305,7 @@ export function resolveCardmarketEntryForCardFromSetPayload(card = {}, setPayloa
   if (!scoredCandidates.length) return null;
   if (scoredCandidates[0].score > 0) return scoredCandidates[0].entry;
 
-  const duplicateMatchIndex = resolveDuplicateNameMatchIndex(card, sourceCards);
+  const duplicateMatchIndex = resolveDuplicateNameMatchIndex(card, sourceCards, candidatePool);
   if (duplicateMatchIndex >= 0) {
     return candidatePool[Math.min(duplicateMatchIndex, candidatePool.length - 1)] || scoredCandidates[0].entry;
   }

@@ -19,6 +19,7 @@ Kein Server, kein Build-Schritt – direkt auf GitHub Pages deploybar.
 | Inkrementelle Karten-Updates (kein Full-Rerender) | ✅ |
 | In-Memory TTL-Cache (kein unnötiger Netzwerk-Traffic) | ✅ |
 | Sammlungsfortschritt & Statistiken | ✅ |
+| Cardmarket Preisradar in Statistiken (Lazy Loading) | ✅ |
 | Filter: Alle / Fehlend / Gesammelt | ✅ |
 | Toast-Benachrichtigungen (Erfolg / Fehler) | ✅ |
 | Lade-Overlay mit Spinner | ✅ |
@@ -117,6 +118,28 @@ loadCurrentSet(setId)
   └─ readSetCollectionMap(sheetName)   sheets-db.js
        └─ gapi.client.sheets → Grid-Werte lesen
             → Map<normalizedNumber, {g, rh, gCell, rhCell}>
+```
+
+## Statistik: Cardmarket Preisradar
+
+Die Statistikansicht enthält einen zusätzlichen Preisbereich auf Basis der vorhandenen Cardmarket-Resolver.
+
+- Die Kern-Statistik rendert zuerst ohne Blockierung.
+- Preisdaten werden danach chunk-basiert nachgeladen.
+- Der Panel-Status wechselt über `data-state` von `loading` nach `partial` und `final`.
+- Request-Guards (`requestId`) verhindern stale DOM-Updates bei View-Wechseln.
+
+### Relevante Parameter
+
+- `STATS_PRICE_CHUNK_SIZE = 25`
+- `STATS_PRICE_CONCURRENCY = 4`
+
+### Tests
+
+```bash
+node --test frontend/tcg-tracker-web/tests/stats-price-analytics.test.mjs
+node --test frontend/tcg-tracker-web/tests/stats-price-lazy-loading-regression.mjs
+node --test frontend/tcg-tracker-web/tests/cardmarket-data.test.mjs
 ```
 
 ---

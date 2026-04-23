@@ -62,6 +62,10 @@ import {
 import { initCommandPalette } from './ui/command-palette.js';
 import { filterSetsBySeriesKey, getStatsSeriesLabel } from './ui/stats-series.js?v=20260407a';
 import {
+  computePriceAnalyticsFromSummaries,
+  pickCardPriceFromSummary,
+} from './ui/stats-price-analytics.js?v=20260423a';
+import {
   loadFavorites, saveFavorites, toggleFavorite, isFavorite,
   loadSearchHistory, addSearchHistory, clearSearchHistory,
   createCollectionSnapshot, generateCollectionReport,
@@ -389,6 +393,16 @@ const state = {
   undoStack: [],
   auditEntries: [],
   devCompletionMode: false,
+  statsPrice: {
+    requestId: '',
+    status: 'idle',
+    totals: null,
+    bySet: [],
+    topCards: [],
+    loadedCards: 0,
+    totalCards: 0,
+    errors: 0,
+  },
 };
 
 let focusedCardIndex = -1;
@@ -409,6 +423,8 @@ const SEARCH_SCOPE_IMPORTED = 'imported';
 const SEARCH_SCOPE_ALL = 'all';
 const SEARCH_SCOPE_ONLINE = 'online';
 const AUTO_IMPORT_QUEUE_LIMIT = 3;
+const STATS_PRICE_CHUNK_SIZE = 25;
+const STATS_PRICE_CONCURRENCY = 4;
 
 function resolveAutoImportSetLabel(setId) {
   const match = getSetById(setId)
@@ -4909,6 +4925,8 @@ async function renderStats() {
         </div>
       </section>
 
+      <section id="stats-price-analytics" class="stats-price-panel-shell" data-state="loading" aria-live="polite"></section>
+
       <div class="stats-charts-row">
         <div class="stats-chart-wrap">
           <div class="stats-section-kicker">Visualisierung</div>
@@ -4959,10 +4977,330 @@ async function renderStats() {
 
     initStatsCharts(totalCollected, totalCards, seriesMap);
     initStatsDrillDown();
+    const statsPriceRequestId = `stats-price-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+    renderStatsPriceLoading({ requestId: statsPriceRequestId, loadedCards: 0, totalCards: 0 });
+    loadStatsPriceAnalyticsLazy({ requestId: statsPriceRequestId })
+      .catch((error) => {
+        if (state.statsPrice.requestId !== statsPriceRequestId) return;
+        renderStatsPriceError(error?.message || 'Preisanalysen konnten nicht geladen werden.');
+      });
   } catch (err) {
     console.error('[renderStats]', err);
     dom.statsContent.innerHTML = `<p class="empty-state">\u2715 Fehler beim Laden der Statistiken</p>`;
   }
+}
+
+function getStatsPriceContainer() {
+  return dom.statsContent?.querySelector('#stats-price-analytics') || null;
+}
+
+function formatStatsPriceEuro(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric) || numeric <= 0) return 'n/a';
+  return `${numeric.toFixed(2).replace('.', ',')} EUR`;
+}
+
+function formatStatsPriceNumber(value) {
+  return Number(value || 0).toLocaleString('de-DE');
+}
+
+function isActiveStatsPriceRequest(requestId) {
+  return state.statsPrice.requestId === requestId;
+}
+
+function renderStatsPriceSnapshot({
+  status = 'loading',
+  analytics = null,
+  loadedCards = 0,
+  totalCards = 0,
+  errors = 0,
+  message = ''
+} = {}) {
+  const container = getStatsPriceContainer();
+  if (!container) return;
+
+  const progress = totalCards > 0 ? Math.round((loadedCards / totalCards) * 100) : 0;
+  const topSetRows = Array.isArray(analytics?.setBreakdown) ? analytics.setBreakdown.slice(0, 5) : [];
+  const topSetMarkup = topSetRows.length
+    ? topSetRows.map((entry) => {
+      const setId = String(entry?.setId || '').trim();
+      const safeSetName = String(entry?.setName || 'Unbekanntes Set');
+      const navAction = setId ? ` data-set-id="${setId.replace(/"/g, '&quot;')}"` : '';
+      return `
+        <li class="stats-price-set-item"${navAction}>
+          <div class="stats-price-set-main">
+            <strong>${safeSetName}</strong>
+            <span>${formatStatsPriceEuro(entry?.value)}</span>
+          </div>
+          <small>${formatStatsPriceNumber(entry?.pricedCards)} mit Preis · ${formatStatsPriceNumber(entry?.collectedCards)} gesammelt</small>
+        </li>`;
+    }).join('')
+    : '<li class="stats-price-empty">Noch keine Set-Preise verfuegbar.</li>';
+
+  const topCard = analytics?.topCard || null;
+  const totalValue = analytics?.totalValue || 0;
+  const averageValue = analytics?.avgCollectedCardValue || 0;
+  const collectedCards = analytics?.collectedCards || 0;
+  const pricedCollectedCards = analytics?.pricedCollectedCards || 0;
+  const completionLabel = totalCards > 0
+    ? `${formatStatsPriceNumber(loadedCards)} / ${formatStatsPriceNumber(totalCards)} Karten geladen`
+    : 'Sammlung wird analysiert';
+
+  container.dataset.state = status;
+  container.innerHTML = `
+    <article class="stats-price-panel ${status === 'final' ? 'stats-price-enter' : ''}">
+      <header class="stats-price-head">
+        <div>
+          <span class="stats-price-kicker">Cardmarket Analyse</span>
+          <h3>Preisradar fuer deine Sammlung</h3>
+          <p>${message || completionLabel}</p>
+        </div>
+        <div class="stats-price-progress-wrap">
+          <strong>${progress}%</strong>
+          <div class="stats-price-progress"><span style="width:${progress}%"></span></div>
+        </div>
+      </header>
+
+      <div class="stats-price-grid">
+        <section class="stats-price-kpi-cluster">
+          <article class="stats-price-card">
+            <span>Gesamtwert</span>
+            <strong>${formatStatsPriceEuro(totalValue)}</strong>
+          </article>
+          <article class="stats-price-card">
+            <span>Durchschnitt pro Karte</span>
+            <strong>${formatStatsPriceEuro(averageValue)}</strong>
+          </article>
+          <article class="stats-price-card">
+            <span>Karten mit Preis</span>
+            <strong>${formatStatsPriceNumber(pricedCollectedCards)}</strong>
+            <small>von ${formatStatsPriceNumber(collectedCards)} gesammelt</small>
+          </article>
+          <article class="stats-price-card">
+            <span>Unaufgeloeste Preise</span>
+            <strong>${formatStatsPriceNumber(errors)}</strong>
+          </article>
+        </section>
+
+        <section class="stats-price-featured-card">
+          <span class="stats-price-featured-kicker">Top Karte</span>
+          <strong>${topCard ? topCard.cardName : 'Noch keine Preisdaten'}</strong>
+          <p>${topCard ? `${topCard.setName} · ${formatStatsPriceEuro(topCard.value)}` : 'Sobald Preise geladen sind, erscheint hier dein Spitzenwert.'}</p>
+        </section>
+
+        <section class="stats-price-sets">
+          <div class="stats-price-sets-head">
+            <span>Top Sets nach Wert</span>
+            <strong>${analytics?.topSet ? analytics.topSet.setName : '—'}</strong>
+          </div>
+          <ol class="stats-price-set-list">${topSetMarkup}</ol>
+        </section>
+      </div>
+    </article>`;
+
+  container.querySelectorAll('.stats-price-set-item[data-set-id]').forEach((item) => {
+    item.addEventListener('click', () => {
+      const setId = item.dataset.setId;
+      if (!setId) return;
+      navigate(`set/${encodeURIComponent(setId)}`);
+    });
+  });
+}
+
+function renderStatsPriceLoading({ requestId, loadedCards = 0, totalCards = 0 } = {}) {
+  state.statsPrice.requestId = String(requestId || '');
+  state.statsPrice.status = 'loading';
+  state.statsPrice.loadedCards = Number(loadedCards || 0);
+  state.statsPrice.totalCards = Number(totalCards || 0);
+  state.statsPrice.errors = 0;
+  renderStatsPriceSnapshot({
+    status: 'loading',
+    loadedCards,
+    totalCards,
+    errors: 0,
+    message: 'Preiswerte werden schrittweise geladen...'
+  });
+}
+
+function renderStatsPricePartial(analytics, { requestId, loadedCards = 0, totalCards = 0, errors = 0 } = {}) {
+  if (!isActiveStatsPriceRequest(requestId)) return;
+  state.statsPrice.status = 'partial';
+  state.statsPrice.totals = analytics;
+  state.statsPrice.bySet = analytics?.setBreakdown || [];
+  state.statsPrice.loadedCards = Number(loadedCards || 0);
+  state.statsPrice.totalCards = Number(totalCards || 0);
+  state.statsPrice.errors = Number(errors || 0);
+  renderStatsPriceSnapshot({
+    status: 'partial',
+    analytics,
+    loadedCards,
+    totalCards,
+    errors,
+    message: 'Teilresultate werden laufend aktualisiert.'
+  });
+}
+
+function renderStatsPriceFinal(analytics, { requestId, loadedCards = 0, totalCards = 0, errors = 0 } = {}) {
+  if (!isActiveStatsPriceRequest(requestId)) return;
+  state.statsPrice.status = 'final';
+  state.statsPrice.totals = analytics;
+  state.statsPrice.bySet = analytics?.setBreakdown || [];
+  state.statsPrice.topCards = analytics?.topCard ? [analytics.topCard] : [];
+  state.statsPrice.loadedCards = Number(loadedCards || 0);
+  state.statsPrice.totalCards = Number(totalCards || 0);
+  state.statsPrice.errors = Number(errors || 0);
+  renderStatsPriceSnapshot({
+    status: 'final',
+    analytics,
+    loadedCards,
+    totalCards,
+    errors,
+    message: 'Preisradar abgeschlossen.'
+  });
+}
+
+function renderStatsPriceError(message = 'Preisanalysen konnten nicht geladen werden.') {
+  const container = getStatsPriceContainer();
+  if (!container) return;
+  state.statsPrice.status = 'error';
+  container.dataset.state = 'error';
+  container.innerHTML = `<p class="stats-price-error">${message}</p>`;
+}
+
+async function mapWithConcurrency(items = [], concurrency = 4, mapper = async (item) => item) {
+  const safeItems = Array.isArray(items) ? items : [];
+  if (!safeItems.length) return [];
+
+  const limit = Math.max(1, Number(concurrency) || 1);
+  const results = new Array(safeItems.length);
+  let nextIndex = 0;
+
+  const workers = Array.from({ length: Math.min(limit, safeItems.length) }, async () => {
+    while (true) {
+      const index = nextIndex;
+      nextIndex += 1;
+      if (index >= safeItems.length) return;
+      results[index] = await mapper(safeItems[index], index);
+    }
+  });
+
+  await Promise.all(workers);
+  return results;
+}
+
+async function buildCollectedCardCandidates() {
+  const importedSets = (state.sets || [])
+    .filter((set) => toBoolean(set?.imported) && String(set?.setId || '').trim() && String(set?.setName || '').trim());
+
+  const candidates = [];
+  const dedupe = new Set();
+
+  for (const set of importedSets) {
+    const setId = String(set.setId || '').trim();
+    const setName = String(set.setName || '').trim();
+    if (!setId || !setName) continue;
+
+    const [cards, collectionMap] = await Promise.all([
+      readDbCardsForSet(setId).catch(() => []),
+      readSetCollectionMap(setName).catch(() => new Map())
+    ]);
+
+    (Array.isArray(cards) ? cards : []).forEach((card) => {
+      const normalizedNumber = normalizeCardNumber(card?.number || '');
+      if (!normalizedNumber) return;
+
+      const mapEntry = collectionMap.get(normalizedNumber) || {};
+      const isCollected = Boolean(mapEntry?.g);
+      if (!isCollected) return;
+
+      const cardKey = `${setId}::${normalizedNumber}`;
+      if (dedupe.has(cardKey)) return;
+      dedupe.add(cardKey);
+
+      candidates.push({
+        cardKey,
+        setId,
+        setName,
+        cardName: String(card?.name || card?.vera_name || card?.number || 'Unbekannte Karte'),
+        card: { ...card, setId },
+        isCollected,
+        isReverseHolo: Boolean(mapEntry?.rh && mapEntry?.g)
+      });
+    });
+  }
+
+  return candidates;
+}
+
+async function loadStatsPriceAnalyticsLazy({ requestId } = {}) {
+  const normalizedRequestId = String(requestId || '').trim();
+  if (!normalizedRequestId) return;
+
+  state.statsPrice.requestId = normalizedRequestId;
+  state.statsPrice.status = 'loading';
+
+  const candidates = await buildCollectedCardCandidates();
+  if (!isActiveStatsPriceRequest(normalizedRequestId)) return;
+
+  const totalCards = candidates.length;
+  if (!totalCards) {
+    renderStatsPriceFinal(computePriceAnalyticsFromSummaries([]), {
+      requestId: normalizedRequestId,
+      loadedCards: 0,
+      totalCards: 0,
+      errors: 0,
+    });
+    return;
+  }
+
+  renderStatsPriceLoading({ requestId: normalizedRequestId, loadedCards: 0, totalCards });
+
+  let loadedCards = 0;
+  let errors = 0;
+  const resolvedItems = [];
+
+  for (let offset = 0; offset < candidates.length; offset += STATS_PRICE_CHUNK_SIZE) {
+    const chunk = candidates.slice(offset, offset + STATS_PRICE_CHUNK_SIZE);
+
+    const chunkResults = await mapWithConcurrency(chunk, STATS_PRICE_CONCURRENCY, async (candidate) => {
+      try {
+        const summary = await loadCardmarketPriceSummary(candidate.card);
+        const value = pickCardPriceFromSummary(summary, { preferReverseHolo: candidate.isReverseHolo });
+        return {
+          ...candidate,
+          value,
+        };
+      } catch {
+        return {
+          ...candidate,
+          value: null,
+          failed: true,
+        };
+      }
+    });
+
+    if (!isActiveStatsPriceRequest(normalizedRequestId)) return;
+
+    loadedCards += chunkResults.length;
+    errors += chunkResults.filter((item) => item?.failed).length;
+    resolvedItems.push(...chunkResults);
+
+    const partialAnalytics = computePriceAnalyticsFromSummaries(resolvedItems);
+    renderStatsPricePartial(partialAnalytics, {
+      requestId: normalizedRequestId,
+      loadedCards,
+      totalCards,
+      errors,
+    });
+  }
+
+  const finalAnalytics = computePriceAnalyticsFromSummaries(resolvedItems);
+  renderStatsPriceFinal(finalAnalytics, {
+    requestId: normalizedRequestId,
+    loadedCards,
+    totalCards,
+    errors,
+  });
 }
 
 // ══════════════════════════════════════════════════════════════════════════

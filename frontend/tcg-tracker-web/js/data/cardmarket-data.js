@@ -124,8 +124,8 @@ export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {
   return sharedInferCardmarketExpansionIdFromCards(cards, productIndex, { nameIndex, trackerSetIndex });
 }
 
-export function resolveCardmarketEntryForCardFromSetPayload(card = {}, setPayload = {}) {
-  return sharedResolveCardmarketEntryForCardFromSetPayload(card, setPayload);
+export function resolveCardmarketEntryForCardFromSetPayload(card = {}, setPayload = {}, { sourceCards = [] } = {}) {
+  return sharedResolveCardmarketEntryForCardFromSetPayload(card, setPayload, { sourceCards });
 }
 
 function toFinitePrice(value) {

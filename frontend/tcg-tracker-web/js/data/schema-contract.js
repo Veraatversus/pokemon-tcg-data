@@ -347,11 +347,12 @@ function resolveTcgdexImage(tcgdexCard, quality = 'low', { setId = '', seriesId 
 }
 
 function buildCardmarketFallback({ cardName = '', setTag = '', setName = '', cardNumber = '' } = {}) {
-  const normalizedSetTag = String(setTag || '').trim();
-  const normalizedCardNumber = String(cardNumber || '').trim();
-  if (!normalizedSetTag || !normalizedCardNumber) return '';
-  const searchString = `${normalizedSetTag} ${normalizedCardNumber}`;
-  return `https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=${encodeURIComponent(searchString).replace(/%20/g, '+')}`;
+  const searchString = [setTag && cardNumber ? `${setTag} ${cardNumber}` : '', cardName, setName]
+    .filter(Boolean)
+    .join(' ')
+    .trim();
+  if (!searchString) return '';
+  return `https://www.cardmarket.com/de/Pokemon/Products/Search?searchString=${encodeURIComponent(searchString).replace(/%20/g, '+')}`;
 }
 
 function isGeneratedCardmarketSearchUrl(value) {
@@ -467,7 +468,6 @@ export function buildCardRecordFromSources({
   fallbackImageLarge = '',
   updatedAt = null
 } = {}) {
-  const originalCardNumber = String(primaryCard?.number || tcgdexCard?.localId || tcgdexCard?.id || '').trim();
   const normalizedNumber = normalizeCardNumber(primaryCard?.number || tcgdexCard?.localId || tcgdexCard?.id || '');
   const matchStatus = primaryCard && tcgdexCard
     ? CARD_MATCH_STATUS.MATCHED
@@ -490,7 +490,7 @@ export function buildCardRecordFromSources({
     cardName: tcgdexFallbackCard?.name || tcgdexCard?.name || primaryCard?.name || normalizedNumber,
     setTag: fallbackSetTag,
     setName: fallbackSetName,
-    cardNumber: originalCardNumber
+    cardNumber: normalizedNumber
   });
 
   return {
