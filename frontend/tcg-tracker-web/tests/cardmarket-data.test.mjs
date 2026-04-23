@@ -349,6 +349,45 @@ test('frontend wrapper forwards sourceCards for duplicate-name disambiguation', 
   assert.equal(result?.prices?.trend, 4.6);
 });
 
+test('resolveCardmarketEntryForCardFromSetPayload disambiguates using variant-name occurrence when candidates share base names', () => {
+  const cards = [
+    {
+      number: '79',
+      name: 'Nidoran F',
+      vera_name: 'Nidoran F',
+      tcgdex_name: 'Nidoran F',
+    },
+    {
+      number: '80',
+      name: 'Nidoran M',
+      vera_name: 'Nidoran M',
+      tcgdex_name: 'Nidoran M',
+    }
+  ];
+
+  const setPayload = {
+    expansionId: 1538,
+    cards: [
+      {
+        cardmarketProductId: 275339,
+        name: 'Nidoran [F] [Call for Family | Scratch | e-card]',
+        prices: { trend: 27.88 }
+      },
+      {
+        cardmarketProductId: 275340,
+        name: 'Nidoran [F] [Poison Sting | e-card]',
+        prices: { trend: 50.0 }
+      }
+    ]
+  };
+
+  const result1 = resolveCardmarketEntryForCardFromSetPayload(cards[0], setPayload, { sourceCards: cards });
+  const result2 = resolveCardmarketEntryForCardFromSetPayload(cards[1], setPayload, { sourceCards: cards });
+
+  assert.equal(result1?.cardmarketProductId, 275339);
+  assert.equal(result2?.cardmarketProductId, 275340);
+});
+
 test('formatCardmarketEntryLabel prefers the trend price for compact UI badges', () => {
   const entry = {
     prices: { avg: 5.0, low: 3.0, trend: 4.6 }
@@ -363,4 +402,45 @@ test('formatCardmarketEntryTitle summarizes the available price points for toolt
   };
 
   assert.equal(formatCardmarketEntryTitle(entry), 'Cardmarket: Trend 4,60 € · AVG 5,00 € · Low 3,00 €');
+
+test('resolveCardmarketEntryForCardFromSetPayload disambiguates identically-named products in frontend', () => {
+  const cards = [
+    {
+      number: '2',
+      name: 'Alakazam',
+      vera_name: 'Alakazam',
+      tcgdex_name: 'Alakazam',
+    },
+    {
+      number: 'H1',
+      name: 'Alakazam',
+      vera_name: 'Alakazam',
+      tcgdex_name: 'Alakazam',
+    }
+  ];
+
+  const setPayload = {
+    expansionId: 1538,
+    cards: [
+      {
+        cardmarketProductId: 275238,
+        name: 'Alakazam [Energy Jump | Psychic]',
+        prices: { trend: 12.5 }
+      },
+      {
+        cardmarketProductId: 275260,
+        name: 'Alakazam [Energy Jump | Psychic]',
+        prices: { trend: 8.3 }
+      }
+    ]
+  };
+
+  // Card #2 should match first occurrence
+  const result1 = resolveCardmarketEntryForCardFromSetPayload(cards[0], setPayload, { sourceCards: cards });
+  assert.equal(result1?.cardmarketProductId, 275238);
+
+  // Card #H1 should match second occurrence
+  const result2 = resolveCardmarketEntryForCardFromSetPayload(cards[1], setPayload, { sourceCards: cards });
+  assert.equal(result2?.cardmarketProductId, 275260);
+});
 });

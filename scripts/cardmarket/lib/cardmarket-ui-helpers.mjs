@@ -141,16 +141,28 @@ function compareCardMatchNumbers(left = '', right = '') {
   return 0;
 }
 
-function resolveDuplicateNameMatchIndex(card = {}, sourceCards = []) {
+function resolveDuplicateNameMatchIndex(card = {}, sourceCards = [], candidatePool = []) {
   if (!Array.isArray(sourceCards) || sourceCards.length < 2) return -1;
 
   const normalizedCardNames = extractPreferredCardNames(card);
   if (!normalizedCardNames.length) return -1;
 
+  const normalizedCandidateNames = Array.from(new Set(
+    (Array.isArray(candidatePool) ? candidatePool : [])
+      .map((entry) => normalizeMatcherText(extractEntryBaseName(entry?.name || '')))
+      .filter(Boolean)
+  ));
+
   const matchingCards = sourceCards
     .map((sourceCard, originalIndex) => {
       const sourceNames = extractPreferredCardNames(sourceCard);
-      const overlaps = sourceNames.some((name) => normalizedCardNames.includes(name));
+      const overlaps = sourceNames.some((name) => normalizedCardNames.includes(name))
+        || (
+          normalizedCandidateNames.length > 0
+          && sourceNames.some((sourceName) => normalizedCandidateNames.some((candidateName) => (
+            sourceName.includes(candidateName) || candidateName.includes(sourceName)
+          )))
+        );
       if (!overlaps) return null;
 
       return {
@@ -329,9 +341,14 @@ export function resolveCardmarketEntryForCardFromSetPayload(card = {}, setPayloa
   if (!scoredCandidates.length) return null;
   if (scoredCandidates[0].score > 0) return scoredCandidates[0].entry;
 
-  const duplicateMatchIndex = resolveDuplicateNameMatchIndex(card, sourceCards);
-  if (duplicateMatchIndex >= 0) {
-    return candidatePool[Math.min(duplicateMatchIndex, candidatePool.length - 1)] || scoredCandidates[0].entry;
+  const topScore = scoredCandidates[0]?.score ?? -1;
+  const hasMultipleTopMatches = scoredCandidates.filter((c) => c.score === topScore).length > 1;
+  
+  if (hasMultipleTopMatches || topScore === 0) {
+    const duplicateMatchIndex = resolveDuplicateNameMatchIndex(card, sourceCards, candidatePool);
+    if (duplicateMatchIndex >= 0) {
+      return candidatePool[Math.min(duplicateMatchIndex, candidatePool.length - 1)] || scoredCandidates[0].entry;
+    }
   }
 
   return scoredCandidates[0].entry;
@@ -355,6 +372,7 @@ export function formatCardmarketEntryLabel(entry = {}) {
       ?? prices.avg1
       ?? prices.avg7
       ?? prices.avg30
+      ?? prices.suggested
       ?? prices.low
   );
 }

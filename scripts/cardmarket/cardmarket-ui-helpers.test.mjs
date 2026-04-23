@@ -371,4 +371,43 @@ test('formatCardmarketEntryTitle summarizes the available price points for toolt
   };
 
   assert.equal(formatCardmarketEntryTitle(entry), 'Cardmarket: Trend 4,60 € · AVG 5,00 € · Low 3,00 €');
+
+test('resolveCardmarketEntryForCardFromSetPayload disambiguates identically-named products using card variants', () => {
+  const cards = [
+    {
+      number: '2',
+      vera_name: 'Alakazam',
+      tcgdex_name: 'Alakazam',
+    },
+    {
+      number: 'H1',
+      vera_name: 'Alakazam',
+      tcgdex_name: 'Alakazam',
+    }
+  ];
+
+  const setPayload = {
+    expansionId: 1538,
+    cards: [
+      {
+        cardmarketProductId: 275238,
+        name: 'Alakazam [Energy Jump | Psychic]',
+        prices: { trend: 12.5 }
+      },
+      {
+        cardmarketProductId: 275260,
+        name: 'Alakazam [Energy Jump | Psychic]',
+        prices: { trend: 8.3 }
+      }
+    ]
+  };
+
+  // Card #2 should match first occurrence
+  const result1 = resolveCardmarketEntryForCardFromSetPayload(cards[0], setPayload, { sourceCards: cards });
+  assert.equal(result1?.cardmarketProductId, 275238);
+
+  // Card #H1 should match second occurrence
+  const result2 = resolveCardmarketEntryForCardFromSetPayload(cards[1], setPayload, { sourceCards: cards });
+  assert.equal(result2?.cardmarketProductId, 275260);
+});
 });

@@ -323,9 +323,14 @@ export function resolveCardmarketEntryForCardFromSetPayload(card = {}, setPayloa
   if (!scoredCandidates.length) return null;
   if (scoredCandidates[0].score > 0) return scoredCandidates[0].entry;
 
-  const duplicateMatchIndex = resolveDuplicateNameMatchIndex(card, sourceCards);
-  if (duplicateMatchIndex >= 0) {
-    return candidatePool[Math.min(duplicateMatchIndex, candidatePool.length - 1)] || scoredCandidates[0].entry;
+  const topScore = scoredCandidates[0]?.score ?? -1;
+  const hasMultipleTopMatches = scoredCandidates.filter((c) => c.score === topScore).length > 1;
+  
+  if (hasMultipleTopMatches || topScore === 0) {
+    const duplicateMatchIndex = resolveDuplicateNameMatchIndex(card, sourceCards, candidatePool);
+    if (duplicateMatchIndex >= 0) {
+      return candidatePool[Math.min(duplicateMatchIndex, candidatePool.length - 1)] || scoredCandidates[0].entry;
+    }
   }
 
   return scoredCandidates[0].entry;
