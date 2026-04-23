@@ -135,6 +135,27 @@ test('inferCardmarketExpansionIdFromCards falls back to bySetName when neither b
   assert.equal(inferCardmarketExpansionIdFromCards(cards, productIndex, { trackerSetIndex }), '1528');
 });
 
+test('inferCardmarketExpansionIdFromCards prefers vera_set_name for set-name fallback matching', () => {
+  const cards = [
+    {
+      setId: 'mystery-set',
+      setName: 'Team Rocket auf Deutsch',
+      vera_set_name: 'Team Rocket',
+      name: 'Dark Charizard',
+      cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchString=TR+004'
+    }
+  ];
+
+  const productIndex = {};
+  const trackerSetIndex = {
+    bySetId: {},
+    byPtcgoCode: {},
+    bySetName: { 'team rocket': '1528' }
+  };
+
+  assert.equal(inferCardmarketExpansionIdFromCards(cards, productIndex, { trackerSetIndex }), '1528');
+});
+
 test('resolveCardmarketEntryForCardFromSetPayload disambiguates same-name cards using attack names', () => {
   const card = {
     vera_name: 'Pikachu',
@@ -194,6 +215,68 @@ test('resolveCardmarketEntryForCardFromSetPayload falls back to source names whe
   assert.equal(result?.prices?.trend, 0.18);
 });
 
+test('resolveCardmarketEntryForCardFromSetPayload prefers vera_name over localized card name', () => {
+  const card = {
+    name: 'Tannza',
+    vera_name: 'Tarountula',
+    tcgdex_name: '',
+    vera_attacks: [],
+    vera_abilities: []
+  };
+
+  const setPayload = {
+    expansionId: 5223,
+    cards: [
+      {
+        cardmarketProductId: 702298,
+        name: 'Tarountula',
+        prices: { trend: 0.18 }
+      }
+    ]
+  };
+
+  const result = resolveCardmarketEntryForCardFromSetPayload(card, setPayload);
+
+  assert.equal(result?.cardmarketProductId, 702298);
+  assert.equal(result?.prices?.trend, 0.18);
+});
+
+test('resolveCardmarketEntryForCardFromSetPayload uses source-card occurrence for duplicate names', () => {
+  const cards = [
+    {
+      number: '15',
+      vera_name: 'Professor Oak',
+      tcgdex_name: 'Professor Oak',
+    },
+    {
+      number: '88',
+      vera_name: 'Professor Oak',
+      tcgdex_name: 'Professor Oak',
+    }
+  ];
+
+  const setPayload = {
+    expansionId: 2001,
+    cards: [
+      {
+        cardmarketProductId: 1015,
+        name: 'Professor Oak',
+        prices: { trend: 1.2 }
+      },
+      {
+        cardmarketProductId: 1088,
+        name: 'Professor Oak',
+        prices: { trend: 4.6 }
+      }
+    ]
+  };
+
+  const result = resolveCardmarketEntryForCardFromSetPayload(cards[1], setPayload, { sourceCards: cards });
+
+  assert.equal(result?.cardmarketProductId, 1088);
+  assert.equal(result?.prices?.trend, 4.6);
+});
+
 test('buildCardmarketProductUrl creates a stable direct product link from the product id', () => {
   assert.equal(
     buildCardmarketProductUrl(1001),
@@ -239,6 +322,41 @@ test('promoteCardmarketUrlsForCards upgrades search fallbacks to direct product 
   assert.equal(promoted[0].vera_cardmarket_url, 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=1001');
 });
 
+test('promoteCardmarketUrlsForCards keeps duplicate same-name cards aligned to their occurrence in the set', async () => {
+  const cards = [
+    {
+      setId: 'base1',
+      number: '15',
+      vera_name: 'Professor Oak',
+      tcgdex_name: 'Professor Oak',
+      cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=BS+015',
+      vera_cardmarket_url: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=BS+015'
+    },
+    {
+      setId: 'base1',
+      number: '88',
+      vera_name: 'Professor Oak',
+      tcgdex_name: 'Professor Oak',
+      cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=BS+088',
+      vera_cardmarket_url: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=BS+088'
+    }
+  ];
+
+  const promoted = await promoteCardmarketUrlsForCards(cards, {
+    productIndex: {},
+    setPayload: {
+      expansionId: 1523,
+      cards: [
+        { cardmarketProductId: 1015, name: 'Professor Oak', prices: { trend: 1.2 } },
+        { cardmarketProductId: 1088, name: 'Professor Oak', prices: { trend: 4.6 } }
+      ]
+    }
+  });
+
+  assert.equal(promoted[0].cardmarketUrl, 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=1015');
+  assert.equal(promoted[1].cardmarketUrl, 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=1088');
+});
+
 test('formatCardmarketEntryLabel prefers the trend price for compact UI badges', () => {
   const entry = {
     prices: { avg: 5.0, low: 3.0, trend: 4.6 }
@@ -253,4 +371,43 @@ test('formatCardmarketEntryTitle summarizes the available price points for toolt
   };
 
   assert.equal(formatCardmarketEntryTitle(entry), 'Cardmarket: Trend 4,60 € · AVG 5,00 € · Low 3,00 €');
+
+test('resolveCardmarketEntryForCardFromSetPayload disambiguates identically-named products using card variants', () => {
+  const cards = [
+    {
+      number: '2',
+      vera_name: 'Alakazam',
+      tcgdex_name: 'Alakazam',
+    },
+    {
+      number: 'H1',
+      vera_name: 'Alakazam',
+      tcgdex_name: 'Alakazam',
+    }
+  ];
+
+  const setPayload = {
+    expansionId: 1538,
+    cards: [
+      {
+        cardmarketProductId: 275238,
+        name: 'Alakazam [Energy Jump | Psychic]',
+        prices: { trend: 12.5 }
+      },
+      {
+        cardmarketProductId: 275260,
+        name: 'Alakazam [Energy Jump | Psychic]',
+        prices: { trend: 8.3 }
+      }
+    ]
+  };
+
+  // Card #2 should match first occurrence
+  const result1 = resolveCardmarketEntryForCardFromSetPayload(cards[0], setPayload, { sourceCards: cards });
+  assert.equal(result1?.cardmarketProductId, 275238);
+
+  // Card #H1 should match second occurrence
+  const result2 = resolveCardmarketEntryForCardFromSetPayload(cards[1], setPayload, { sourceCards: cards });
+  assert.equal(result2?.cardmarketProductId, 275260);
+});
 });

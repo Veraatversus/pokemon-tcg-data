@@ -649,10 +649,39 @@ function resolveCardmarketUrl(primaryCard, tcgdexCard, fallbackMeta = {}) {
   return buildCardmarketFallback(fallbackMeta);
 }
 
+function resolveTcgdexSetFallbackValues(tcgdexSet = null, tcgdexFallbackSet = null) {
+  const fallbackSet = tcgdexFallbackSet && typeof tcgdexFallbackSet === 'object' ? tcgdexFallbackSet : {};
+  const currentSet = tcgdexSet && typeof tcgdexSet === 'object' ? tcgdexSet : {};
+
+  return {
+    name: String(fallbackSet?.name || currentSet?.en?.name || currentSet?.name || '').trim(),
+    series: String(fallbackSet?.serie?.name || currentSet?.en?.serie?.name || currentSet?.serie?.name || '').trim(),
+  };
+}
+
+function resolveTcgdexDescriptionValue(tcgdexCard = null) {
+  if (typeof tcgdexCard?.description === 'string') {
+    return tcgdexCard.description;
+  }
+
+  return String(tcgdexCard?.description?.en || Object.values(tcgdexCard?.description || {}).find(Boolean) || '').trim();
+}
+
+function resolveTcgdexCardFallbackValues(tcgdexCard = null, tcgdexFallbackCard = null) {
+  const fallbackCard = tcgdexFallbackCard && typeof tcgdexFallbackCard === 'object' ? tcgdexFallbackCard : {};
+  const currentCard = tcgdexCard && typeof tcgdexCard === 'object' ? tcgdexCard : {};
+  const sourceCard = Object.keys(fallbackCard).length ? fallbackCard : currentCard;
+
+  return {
+    name: String(sourceCard?.name || currentCard?.name || '').trim(),
+  };
+}
+
 export function buildSetRecordFromSources({
   setId,
   primarySet = null,
   tcgdexSet = null,
+  tcgdexFallbackSet = null,
   isTcgdexOnly = false,
   imported = false,
   updatedAt = null,
@@ -661,6 +690,10 @@ export function buildSetRecordFromSources({
     ? SET_MATCH_STATUS.MATCHED
     : (isTcgdexOnly ? SET_MATCH_STATUS.TCGDEX_ONLY : SET_MATCH_STATUS.PRIMARY_ONLY);
   const resolvedSetId = String(setId || primarySet?.id || (tcgdexSet?.id ? `TCGDEX-${tcgdexSet.id}` : '')).trim();
+  const fallbackSetValues = !primarySet
+    ? resolveTcgdexSetFallbackValues(tcgdexSet, tcgdexFallbackSet)
+    : null;
+
   return {
     setId: resolvedSetId,
     imported: Boolean(imported),
@@ -668,8 +701,8 @@ export function buildSetRecordFromSources({
     matchStatus,
     isTcgdexOnly: Boolean(isTcgdexOnly),
     vera_id: primarySet?.id || '',
-    vera_name: primarySet?.name || '',
-    vera_series: primarySet?.series || '',
+    vera_name: primarySet?.name || fallbackSetValues?.name || '',
+    vera_series: primarySet?.series || fallbackSetValues?.series || '',
     vera_printedTotal: toNumber(primarySet?.printedTotal),
     vera_total: toNumber(primarySet?.total),
     vera_ptcgoCode: primarySet?.ptcgoCode || primarySet?.code || '',
@@ -699,6 +732,7 @@ export function buildCardRecordFromSources({
   setId,
   primaryCard = null,
   tcgdexCard = null,
+  tcgdexFallbackCard = null,
   tcgdexSetId = '',
   tcgdexSeriesId = '',
   fallbackSetName = '',
@@ -714,6 +748,9 @@ export function buildCardRecordFromSources({
   const rules = normalizeRules(primaryCard, tcgdexCard);
   const tcgdexImageSmall = resolveTcgdexImage(tcgdexCard, 'low', { setId: tcgdexSetId || setId, seriesId: tcgdexSeriesId });
   const tcgdexImageLarge = resolveTcgdexImage(tcgdexCard, 'high', { setId: tcgdexSetId || setId, seriesId: tcgdexSeriesId });
+  const fallbackCardValues = !primaryCard
+    ? resolveTcgdexCardFallbackValues(tcgdexCard, tcgdexFallbackCard)
+    : null;
   const imageUrl = tcgdexImageSmall
     || primaryCard?.images?.small
     || fallbackImageSmall
@@ -722,8 +759,8 @@ export function buildCardRecordFromSources({
     || primaryCard?.images?.large
     || fallbackImageLarge
     || imageUrl;
-  const cardmarketUrl = resolveCardmarketUrl(primaryCard, tcgdexCard, {
-    cardName: tcgdexCard?.name || primaryCard?.name || normalizedNumber,
+  const cardmarketUrl = resolveCardmarketUrl(primaryCard, tcgdexFallbackCard || tcgdexCard, {
+    cardName: tcgdexFallbackCard?.name || tcgdexCard?.name || primaryCard?.name || normalizedNumber,
     setTag: fallbackSetTag,
     setName: fallbackSetName,
     cardNumber: normalizedNumber,
@@ -737,11 +774,11 @@ export function buildCardRecordFromSources({
     isPrimaryOnly: Boolean(primaryCard && !tcgdexCard),
     isTcgdexOnly: Boolean(tcgdexCard && !primaryCard),
     vera_id: primaryCard?.id || '',
-    vera_name: primaryCard?.name || '',
+    vera_name: primaryCard?.name || fallbackCardValues?.name || '',
     vera_supertype: primaryCard?.supertype || '',
-    vera_subtypes: normalizeStringList(primaryCard?.subtypes),
+    vera_subtypes: Array.isArray(primaryCard?.subtypes) ? primaryCard.subtypes : [],
     vera_hp: primaryCard?.hp ? String(primaryCard.hp) : '',
-    vera_types: normalizeStringList(primaryCard?.types),
+    vera_types: Array.isArray(primaryCard?.types) ? primaryCard.types : [],
     vera_evolvesFrom: primaryCard?.evolvesFrom || '',
     vera_abilities: Array.isArray(primaryCard?.abilities) ? primaryCard.abilities : [],
     vera_attacks: Array.isArray(primaryCard?.attacks) ? primaryCard.attacks : [],
@@ -775,9 +812,7 @@ export function buildCardRecordFromSources({
     tcgdex_evolvesFrom: tcgdexCard?.evolveFrom || tcgdexCard?.evolvesFrom || '',
     tcgdex_illustrator: tcgdexCard?.illustrator || '',
     tcgdex_regulationMark: tcgdexCard?.regulationMark || '',
-    tcgdex_description: typeof tcgdexCard?.description === 'string'
-      ? tcgdexCard.description
-      : (tcgdexCard?.description?.en || Object.values(tcgdexCard?.description || {}).find(Boolean) || ''),
+    tcgdex_description: resolveTcgdexDescriptionValue(tcgdexCard),
     tcgdex_effect: tcgdexCard?.effect || null,
   };
 }
@@ -1089,6 +1124,7 @@ export function combineSetsForOverviewCompat({
         setId: model.setId,
         primarySet,
         tcgdexSet,
+        tcgdexFallbackSet: tcgdexSet ? findTcgdexSetById(tcgdexSets, tcgdexSet?.id) : null,
         isTcgdexOnly: false,
       }));
       return;
@@ -1099,6 +1135,7 @@ export function combineSetsForOverviewCompat({
         setId: `TCGDEX-${tcgdexSet.id}`,
         primarySet: null,
         tcgdexSet,
+        tcgdexFallbackSet: findTcgdexSetById(tcgdexSets, tcgdexSet?.id),
         isTcgdexOnly: true,
       }));
     }
