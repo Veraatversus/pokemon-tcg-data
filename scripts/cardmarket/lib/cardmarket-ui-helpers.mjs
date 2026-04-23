@@ -270,7 +270,6 @@ export function formatCardmarketEntryLabel(entry = {}) {
       ?? prices.avg1
       ?? prices.avg7
       ?? prices.avg30
-      ?? prices.suggested
       ?? prices.low
   );
 }
