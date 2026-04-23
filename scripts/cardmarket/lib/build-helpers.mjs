@@ -37,10 +37,18 @@ function normalizePriceRow(row = {}) {
   return {
     cardmarketProductId: Number(row.idProduct || row.productId || 0) || null,
     average: toNumberOrNull(row.avg ?? row.avgPrice ?? row.average),
+    average1: toNumberOrNull(row.avg1),
+    average7: toNumberOrNull(row.avg7),
+    average30: toNumberOrNull(row.avg30),
     low: toNumberOrNull(row.low ?? row.lowPrice),
     trend: toNumberOrNull(row.trendPrice ?? row.trend),
+    averageHolo: toNumberOrNull(row['avg-holo'] ?? row.avgHolo),
+    average1Holo: toNumberOrNull(row['avg1-holo'] ?? row.avg1Holo),
+    average7Holo: toNumberOrNull(row['avg7-holo'] ?? row.avg7Holo),
+    average30Holo: toNumberOrNull(row['avg30-holo'] ?? row.avg30Holo),
+    lowHolo: toNumberOrNull(row['low-holo'] ?? row.lowHolo),
+    trendHolo: toNumberOrNull(row['trend-holo'] ?? row.trendHolo),
     reverseHoloSell: toNumberOrNull(row.reverseHoloSell),
-    suggested: toNumberOrNull(row.suggestedPrice ?? row.suggested),
     raw: row,
   };
 }
@@ -371,10 +379,18 @@ export function buildCardmarketArtifacts({ singlesPayload, nonsinglesPayload, pr
       dateAdded: String(product.dateAdded || '').trim(),
       prices: {
         avg: price?.average ?? null,
+        avg1: price?.average1 ?? null,
+        avg7: price?.average7 ?? null,
+        avg30: price?.average30 ?? null,
         low: price?.low ?? null,
         trend: price?.trend ?? null,
+        avgHolo: price?.averageHolo ?? null,
+        avg1Holo: price?.average1Holo ?? null,
+        avg7Holo: price?.average7Holo ?? null,
+        avg30Holo: price?.average30Holo ?? null,
+        lowHolo: price?.lowHolo ?? null,
+        trendHolo: price?.trendHolo ?? null,
         reverseHoloSell: price?.reverseHoloSell ?? null,
-        suggested: price?.suggested ?? null,
       },
     });
 
