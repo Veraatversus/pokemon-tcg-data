@@ -216,7 +216,7 @@ function testCardmarketResolverPrefersDirectProductLinksOverSearchFallbacks() {
     vera_number: '001',
     vera_name: 'Tannza',
     vera_cardmarket_url: 'https://www.cardmarket.com/de/Pokemon/Products/Singles?idProduct=696421',
-    tcgdex_cardmarket_url: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchString=SVI+001+Tannza'
+    tcgdex_cardmarket_url: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=SVI+001'
   });
 
   assert.equal(
@@ -224,6 +224,53 @@ function testCardmarketResolverPrefersDirectProductLinksOverSearchFallbacks() {
     'https://www.cardmarket.com/de/Pokemon/Products/Singles?idProduct=696421',
     'Display cards should surface the stable product URL when one source has already resolved it.'
   );
+}
+
+function testGeneratedCardmarketFallbackKeepsOriginalCardNumberFormat() {
+  const merged = buildCardRecordFromSources({
+    setId: 'swsh12pt5gg',
+    primaryCard: {
+      id: 'swsh12pt5gg-GG03',
+      number: 'GG03',
+      name: 'Magnezone',
+      images: { small: '', large: '' }
+    },
+    tcgdexCard: null,
+    fallbackSetTag: 'CRZ'
+  });
+
+  assert.equal(
+    merged.vera_cardmarket_url,
+    'https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=CRZ+GG03',
+    'Generated fallback links must preserve original card ids like GG03 instead of normalized values.'
+  );
+}
+
+function testGeneratedCardmarketFallbackRequiresSetTagAndCardNumber() {
+  const missingSetTag = buildCardRecordFromSources({
+    setId: 'sv1',
+    primaryCard: {
+      id: 'sv1-001',
+      number: '001',
+      name: 'Bulbasaur',
+      images: { small: '', large: '' }
+    },
+    fallbackSetTag: ''
+  });
+
+  const missingCardNumber = buildCardRecordFromSources({
+    setId: 'sv1',
+    primaryCard: {
+      id: 'sv1-custom',
+      number: '',
+      name: 'Bulbasaur',
+      images: { small: '', large: '' }
+    },
+    fallbackSetTag: 'SVI'
+  });
+
+  assert.equal(missingSetTag.vera_cardmarket_url, '', 'Missing set tags must not fall back to name-based Cardmarket search links.');
+  assert.equal(missingCardNumber.vera_cardmarket_url, '', 'Missing card numbers must not fall back to name-based Cardmarket search links.');
 }
 
 function testCollectionUiKeepsRhToggleAvailableWithoutCollectedFlag() {
@@ -388,6 +435,8 @@ try {
   testCardResolverUsesTcgdexDetailFieldsWhenPrimaryDataIsMissing();
   testCardImageResolverDefaultsToTcgdexFirstPriority();
   testCardmarketResolverPrefersDirectProductLinksOverSearchFallbacks();
+  testGeneratedCardmarketFallbackKeepsOriginalCardNumberFormat();
+  testGeneratedCardmarketFallbackRequiresSetTagAndCardNumber();
   testCollectionUiKeepsRhToggleAvailableWithoutCollectedFlag();
   testStatsSeriesHelpersPreferDisplayNamesOverIds();
   testRhToggleAutoEnablesCollectedStatus();

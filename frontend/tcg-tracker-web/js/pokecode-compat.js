@@ -337,20 +337,9 @@ function encodeCardmarketSearchString(value) {
 function buildCardmarketSearchUrl({ cardName = '', setTag = '', setName = '', cardNumber = '' } = {}) {
   const normalizedTag = String(setTag || '').trim();
   const normalizedNumber = String(cardNumber || '').trim();
-  const normalizedName = String(cardName || '').trim();
-  const normalizedSetName = String(setName || '').trim();
-
-  if (normalizedTag && normalizedNumber) {
-    const searchString = `${normalizedTag} ${normalizedNumber}`;
-    return `https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=${encodeCardmarketSearchString(searchString)}`;
-  }
-
-  const searchString = [normalizedName, normalizedSetName, normalizedNumber]
-    .filter(Boolean)
-    .join(' ');
-
-  if (!searchString) return null;
-  return `https://www.cardmarket.com/de/Pokemon/Products/Search?searchString=${encodeCardmarketSearchString(searchString)}`;
+  if (!normalizedTag || !normalizedNumber) return null;
+  const searchString = `${normalizedTag} ${normalizedNumber}`;
+  return `https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=${encodeCardmarketSearchString(searchString)}`;
 }
 
 function isGeneratedCardmarketSearchUrl(url = '') {
@@ -536,6 +525,7 @@ export async function loadCardsForSetCompat({
   allCards = primaryCards.map((primaryCard) => {
     const number = normalizeCardNumber(primaryCard.number);
     const tcgdexCard = tcgdexCardsMap.get(number);
+    const rawNumber = String(primaryCard?.number || tcgdexCard?.localId || tcgdexCard?.id || '').trim();
     const generatedTcgdexImageSmall = tcgdexCard
       ? resolveTcgdexImageUrl(matchingTcgdexSet?.id || tcgdexId, tcgdexCard, {
           quality: 'low',
@@ -554,7 +544,7 @@ export async function loadCardsForSetCompat({
       cardName: tcgdexCard?.name || primaryCard.name || number,
       setTag: officialSetTag,
       setName: primaryDetailedSet?.name || matchingTcgdexSet?.name || setName || '',
-      cardNumber: number
+      cardNumber: rawNumber
     });
 
     return buildCardRecordFromSources({
@@ -580,6 +570,7 @@ export async function loadCardsForSetCompat({
     const existingCardNumbers = new Set(primaryCards.map((card) => normalizeCardNumber(card.number)));
     tcgdexDetailedSet.cards.forEach((tcgdexCard) => {
       const normalizedTcgdexNumber = normalizeCardNumber(tcgdexCard.localId || tcgdexCard.id);
+      const rawNumber = String(tcgdexCard?.localId || tcgdexCard?.id || '').trim();
       if (existingCardNumbers.has(normalizedTcgdexNumber)) return;
       const tcgdexCardmarketUrl = tcgdexCard.links?.cardmarket || null;
       allCards.push({
@@ -599,7 +590,7 @@ export async function loadCardsForSetCompat({
         cardName: tcgdexCard?.name || normalizedTcgdexNumber,
         setTag: officialSetTag,
         setName: primaryDetailedSet?.name || matchingTcgdexSet?.name || setName || '',
-        cardNumber: normalizedTcgdexNumber
+        cardNumber: rawNumber
       });
       if (resolvedTcgdexCardmarketUrl) {
         cardmarketData[normalizedTcgdexNumber] = { cardmarketUrl: resolvedTcgdexCardmarketUrl };
@@ -609,12 +600,13 @@ export async function loadCardsForSetCompat({
 
   primaryCards.forEach((card) => {
     const normalizedNumber = normalizeCardNumber(card.number);
+    const rawNumber = String(card?.number || '').trim();
     const resolvedCardmarketUrl = resolveCardmarketUrl({
       primaryUrl: card.cardmarket?.url || null,
       cardName: card?.name || normalizedNumber,
       setTag: officialSetTag,
       setName: primaryDetailedSet?.name || matchingTcgdexSet?.name || setName || '',
-      cardNumber: normalizedNumber
+      cardNumber: rawNumber
     });
     if (resolvedCardmarketUrl) {
       cardmarketData[normalizedNumber] = { cardmarketUrl: resolvedCardmarketUrl };

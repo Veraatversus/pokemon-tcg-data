@@ -24,7 +24,7 @@ test('extractCardmarketProductId reads numeric product ids from Cardmarket produ
 });
 
 test('extractCardmarketProductId returns empty string for non-product URLs', () => {
-  const url = 'https://www.cardmarket.com/en/Pokemon/Products/Search?searchString=Gardevoir';
+  const url = 'https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&searchString=Gardevoir';
 
   assert.equal(extractCardmarketProductId(url), '');
 });
@@ -81,9 +81,9 @@ test('inferCardmarketExpansionIdFromCards uses anchored product urls from the cu
 
 test('inferCardmarketExpansionIdFromCards uses the generated tracker set index when no direct product urls are available', () => {
   const cards = [
-    { setId: 'sv1', number: '001', name: 'Bulbasaur', cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchString=SVI+001' },
-    { setId: 'sv1', number: '002', name: 'Ivysaur', cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchString=SVI+002' },
-    { setId: 'sv1', number: '003', name: 'Venusaur', cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchString=SVI+003' }
+    { setId: 'sv1', number: '001', name: 'Bulbasaur', cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=SVI+001' },
+    { setId: 'sv1', number: '002', name: 'Ivysaur', cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=SVI+002' },
+    { setId: 'sv1', number: '003', name: 'Venusaur', cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=SVI+003' }
   ];
 
   const productIndex = {};
@@ -101,7 +101,7 @@ test('inferCardmarketExpansionIdFromCards keeps bySetId and byPtcgoCode preceden
       setId: 'mystery-set',
       setName: 'Team Rocket',
       name: 'Dark Charizard',
-      cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchString=TR+004'
+      cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=TR+004'
     }
   ];
 
@@ -121,7 +121,7 @@ test('inferCardmarketExpansionIdFromCards falls back to bySetName when neither b
       setId: 'mystery-set',
       setName: 'Team Rocket',
       name: 'Dark Charizard',
-      cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchString=TR+004'
+      cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=TR+004'
     }
   ];
 
@@ -318,10 +318,26 @@ test('formatCardmarketEntryLabel prefers the trend price for compact UI badges',
   assert.equal(formatCardmarketEntryLabel(entry), '4,60 €');
 });
 
+test('formatCardmarketEntryLabel falls back to avg and low when trend is missing', () => {
+  const withAvgOnly = { prices: { avg: 2.75 } };
+  const withLowOnly = { prices: { low: 1.25 } };
+
+  assert.equal(formatCardmarketEntryLabel(withAvgOnly), '2,75 €');
+  assert.equal(formatCardmarketEntryLabel(withLowOnly), '1,25 €');
+});
+
 test('formatCardmarketEntryTitle summarizes the available price points for tooltips', () => {
   const entry = {
     prices: { avg: 5.0, low: 3.0, trend: 4.6 }
   };
 
   assert.equal(formatCardmarketEntryTitle(entry), 'Cardmarket: Trend 4,60 € · AVG 5,00 € · Low 3,00 €');
+});
+
+test('formatCardmarketEntryTitle uses avg30 fallback and omits missing fields', () => {
+  const entry = {
+    prices: { avg30: 4.1 }
+  };
+
+  assert.equal(formatCardmarketEntryTitle(entry), 'Cardmarket: AVG 4,10 €');
 });
