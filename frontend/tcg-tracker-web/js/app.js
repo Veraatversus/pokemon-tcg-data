@@ -306,6 +306,9 @@ const dom = {
   lightboxRegulationMark: document.getElementById('lightbox-regulation-mark'),
   lightboxRules:    document.getElementById('lightbox-rules'),
   lightboxFlavorText: document.getElementById('lightbox-flavor-text'),
+  lightboxPricePanel: document.getElementById('lightbox-price-panel'),
+  lightboxPriceMode: document.getElementById('lightbox-price-mode'),
+  lightboxPriceGrid: document.getElementById('lightbox-price-grid'),
   lightboxCmLink:   document.getElementById('lightbox-cm-link'),
   lightboxGCheck:   document.getElementById('lightbox-g-check'),
   lightboxRhCheck:  document.getElementById('lightbox-rh-check'),
@@ -5837,20 +5840,39 @@ function createSearchResultCard(card, key, db, set, apiOnly = false) {
 
   const meta    = document.createElement('div'); meta.className = 'meta';
   const setTag  = document.createElement('span'); setTag.className = 'search-set-tag'; setTag.textContent = set.setName;
-  const title   = document.createElement('div'); title.className = 'title'; title.textContent = `${card.number} \u2013 ${card.name || '?'}`;
-  const status  = document.createElement('div'); status.className = 'search-status';
-  const actions = document.createElement('div'); actions.className = 'search-actions';
+  const cardLabel = `${card.number} \u2013 ${card.name || '?'}`;
+  const title   = document.createElement('div'); title.className = 'title'; title.textContent = cardLabel; title.title = cardLabel;
+
+  const isEditable = Boolean(set?.setName && set?.imported);
+  const checksDiv = document.createElement('div'); checksDiv.className = 'checks search-checks-bar';
+  checksDiv.append(
+    makeCheckbox('G', 'g', db?.g ?? false, !isEditable),
+    makeCheckbox('RH', 'rh', db?.rh ?? false, !isEditable || !db?.rhCell)
+  );
+
   const goToSetBtn = document.createElement('button');
   goToSetBtn.type = 'button';
-  goToSetBtn.className = 'btn-secondary';
-  goToSetBtn.textContent = 'Zum Set';
+  goToSetBtn.className = 'btn-goto-set';
+  goToSetBtn.textContent = '↗';
   goToSetBtn.title = `${set.setName} öffnen`;
-  status.textContent = db?.rh ? '\uD83D\uDD35 RH' : db?.g ? '\u2705 G' : (apiOnly ? '🌐 API' : '\u2610 Fehlend');
-  actions.append(goToSetBtn);
-  meta.append(setTag, title, status, actions);
+  checksDiv.appendChild(goToSetBtn);
+  meta.append(setTag, title, checksDiv);
+
+  if (card.cardmarketUrl) {
+    const isFallbackCardmarket = isGeneratedCardmarketSearchUrl(card.cardmarketUrl);
+    const cm = document.createElement('a');
+    cm.href = card.cardmarketUrl; cm.target = '_blank'; cm.rel = 'noopener noreferrer';
+    cm.className = `card-cm-link${isFallbackCardmarket ? ' card-cm-link-fallback' : ''}`;
+    cm.textContent = '\uD83D\uDED2 CM';
+    cm.title = isFallbackCardmarket ? 'Generierter Cardmarket-Suchlink' : 'Cardmarket-Produktseite';
+    meta.appendChild(cm);
+    hydrateCardmarketLink(cm, card, { compact: true, preferReverseHolo: Boolean(db?.rh) });
+  }
+
   article.append(imgWrap, meta);
 
-  article.addEventListener('click', async () => {
+  article.addEventListener('click', async (e) => {
+    if (e.target instanceof HTMLElement && e.target.closest('input, a, label, button')) return;
     try {
       await openSearchResultLightbox(card, set, { apiOnly });
     } catch (err) {
@@ -5863,7 +5885,104 @@ function createSearchResultCard(card, key, db, set, apiOnly = false) {
     navigateToSearchResultSet(set, card);
   });
 
+  if (isEditable) {
+    attachSearchResultCheckboxListeners(article, db, key, set, card);
+  }
+
   return article;
+}
+
+function attachSearchResultCheckboxListeners(article, db, key, set, card) {
+  const gInput  = article.querySelector('input[data-type="g"]');
+  const rhInput = article.querySelector('input[data-type="rh"]');
+
+  async function ensureDbEntry({ checked = false } = {}) {
+    if (db?.gCell && db?.rhCell) return db;
+    const ensured = await ensureCollectionEntry(set.setName, db?.displayId || key);
+    db.g = Boolean(db?.g);
+    db.rh = Boolean(db?.rh && db?.g);
+    db.gCell = ensured.gCell;
+    db.rhCell = ensured.rhCell;
+    db.displayId = ensured.displayId || db.displayId || key;
+    return db;
+  }
+
+  function updateSearchCardState() {
+    syncCollectionCheckboxUi(gInput, rhInput, db, { isEditable: true });
+    article.classList.toggle('reverse',   Boolean(db?.rh));
+    article.classList.toggle('collected', Boolean(db?.g) && !db?.rh);
+    const cm = article.querySelector('.card-cm-link');
+    if (cm) {
+      hydrateCardmarketLink(cm, card, { compact: true, preferReverseHolo: Boolean(db?.rh) });
+    }
+  }
+
+  gInput.addEventListener('change', async () => {
+    if (state.bulkMode) { gInput.checked = !gInput.checked; return; }
+    const checked = gInput.checked;
+    const prevState = { g: Boolean(db?.g), rh: Boolean(db?.rh) };
+    setCardSaveState(article, 'saving');
+    beginTrackedWrite(`Karte #${db?.displayId || key} speichern`);
+    try {
+      await ensureDbEntry({ checked });
+      const nextState = resolveCollectionToggleState(db, { isG: true, checked });
+      await updateCellBoolean(set.setName, db.gCell.row, db.gCell.col, nextState.g);
+      if (db?.rhCell && nextState.rh !== Boolean(db?.rh)) {
+        await updateCellBoolean(set.setName, db.rhCell.row, db.rhCell.col, nextState.rh);
+      }
+      db.g = nextState.g;
+      db.rh = nextState.rh;
+      updateSearchCardState();
+      pushUndoEntry({
+        setId: set?.setId,
+        setName: set?.setName,
+        label: 'Kartenstatus geändert',
+        changes: [{ key, prev: prevState, next: { g: Boolean(db.g), rh: Boolean(db.rh) } }]
+      });
+      updateUndoUi();
+      setCardSaveState(article, 'saved');
+      finishTrackedWrite(`Karte #${db?.displayId || key} speichern`, null);
+    } catch (err) {
+      showToast(`Speichern fehlgeschlagen: ${err.message}`, 'error');
+      gInput.checked = !checked;
+      setCardSaveState(article, 'error');
+      finishTrackedWrite(`Karte #${db?.displayId || key} speichern`, err);
+    }
+  });
+
+  rhInput.addEventListener('change', async () => {
+    if (state.bulkMode) { rhInput.checked = !rhInput.checked; return; }
+    const checked = rhInput.checked;
+    const prevState = { g: Boolean(db?.g), rh: Boolean(db?.rh) };
+    setCardSaveState(article, 'saving');
+    beginTrackedWrite(`Karte #${db?.displayId || key} RH speichern`);
+    try {
+      await ensureDbEntry({ checked });
+      if (!db?.rhCell) { rhInput.checked = false; return; }
+      const nextState = resolveCollectionToggleState(db, { isG: false, checked });
+      if (nextState.g !== Boolean(db?.g)) {
+        await updateCellBoolean(set.setName, db.gCell.row, db.gCell.col, nextState.g);
+      }
+      await updateCellBoolean(set.setName, db.rhCell.row, db.rhCell.col, nextState.rh);
+      db.g = nextState.g;
+      db.rh = nextState.rh;
+      updateSearchCardState();
+      pushUndoEntry({
+        setId: set?.setId,
+        setName: set?.setName,
+        label: 'RH-Status geändert',
+        changes: [{ key, prev: prevState, next: { g: Boolean(db.g), rh: Boolean(db.rh) } }]
+      });
+      updateUndoUi();
+      setCardSaveState(article, 'saved');
+      finishTrackedWrite(`Karte #${db?.displayId || key} RH speichern`, null);
+    } catch (err) {
+      showToast(`Speichern fehlgeschlagen: ${err.message}`, 'error');
+      rhInput.checked = !checked;
+      setCardSaveState(article, 'error');
+      finishTrackedWrite(`Karte #${db?.displayId || key} RH speichern`, err);
+    }
+  });
 }
 
 function navigateToSearchResultSet(set, card = null) {
@@ -6203,7 +6322,7 @@ function createCardElement(card, key, db, index) {
     cm.textContent = '\uD83D\uDED2 CM';
     cm.title = isFallbackCardmarket ? 'Generierter Cardmarket-Suchlink' : 'Cardmarket-Produktseite';
     meta.appendChild(cm);
-    hydrateCardmarketLink(cm, card, { compact: true });
+    hydrateCardmarketLink(cm, card, { compact: true, preferReverseHolo: Boolean(dbEntry?.rh) });
   }
 
   article.append(imgWrap, meta);
@@ -6234,22 +6353,211 @@ function isGeneratedCardmarketSearchUrl(url) {
   return value.includes('cardmarket.com') && value.includes('/products/search') && value.includes('searchstring=');
 }
 
-function applyCardmarketPriceSummary(linkEl, summary, { compact = false } = {}) {
+function toFinitePrice(value) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
+}
+
+function formatEuroPrice(value) {
+  const numeric = toFinitePrice(value);
+  return numeric == null ? '' : `${numeric.toFixed(2).replace('.', ',')} €`;
+}
+
+function getCardmarketPriceValue(prices = {}, ...keys) {
+  for (const key of keys) {
+    if (prices?.[key] == null) continue;
+    const numeric = toFinitePrice(prices[key]);
+    if (numeric != null) return numeric;
+  }
+  return null;
+}
+
+function getCardmarketPriceCacheKey(card = {}) {
+  const normalizedUrl = String(card?.cardmarketUrl || '').trim();
+  return normalizedUrl || `${String(card?.setId || '').trim()}::${String(card?.number || '').trim()}::${String(card?.name || '').trim()}`;
+}
+
+function getCardmarketPriceDetails(prices = {}, { reverseHolo = false } = {}) {
+  const fields = reverseHolo
+    ? [
+        [['trendHolo'], 'Trend'],
+        [['averageHolo', 'avgHolo'], 'Ø'],
+        [['average1Holo', 'avg1Holo'], 'Ø1'],
+        [['average7Holo', 'avg7Holo'], 'Ø7'],
+        [['average30Holo', 'avg30Holo'], 'Ø30'],
+        [['lowHolo'], 'Low'],
+        [['reverseHoloSell'], 'Sell']
+      ]
+    : [
+        [['trend'], 'Trend'],
+        [['average', 'avg'], 'Ø'],
+        [['average1', 'avg1'], 'Ø1'],
+        [['average7', 'avg7'], 'Ø7'],
+        [['average30', 'avg30'], 'Ø30'],
+        [['low'], 'Low']
+      ];
+
+  return fields
+    .map(([keys, label]) => {
+      const value = formatEuroPrice(getCardmarketPriceValue(prices, ...keys));
+      if (!value) return null;
+      return `${label}: ${value}`;
+    })
+    .filter(Boolean);
+}
+
+function buildCardmarketLinkPresentation(summary, { preferReverseHolo = false } = {}) {
+  if (!summary?.entry) return null;
+
+  const entry = summary.entry;
+  const prices = entry?.prices || {};
+  const reverseCandidates = [
+    [['trendHolo'], 'RH Trend'],
+    [['averageHolo', 'avgHolo'], 'RH Ø'],
+    [['lowHolo'], 'RH Low'],
+    [['reverseHoloSell'], 'RH Sell']
+  ];
+  const normalCandidates = [
+    [['trend'], 'Trend'],
+    [['average', 'avg'], 'Ø'],
+    [['low'], 'Low']
+  ];
+
+  const pickPrice = (candidates = []) => {
+    for (const [keys, label] of candidates) {
+      const value = formatEuroPrice(getCardmarketPriceValue(prices, ...keys));
+      if (value) return { label, value };
+    }
+    return null;
+  };
+
+  const reversePick = pickPrice(reverseCandidates);
+  const normalPick = pickPrice(normalCandidates);
+  const activePick = (preferReverseHolo && reversePick) || normalPick || reversePick;
+  const activeMode = preferReverseHolo && reversePick ? 'Reverse Holo' : 'Normal';
+
+  const label = activePick
+    ? `${activePick.label} ${activePick.value}`
+    : formatCardmarketEntryLabel(entry);
+
+  const reverseDetails = getCardmarketPriceDetails(prices, { reverseHolo: true });
+  const normalDetails = getCardmarketPriceDetails(prices, { reverseHolo: false });
+  const detailParts = [];
+  if (normalDetails.length) detailParts.push(`Normal: ${normalDetails.join(' · ')}`);
+  if (reverseDetails.length) detailParts.push(`Reverse Holo: ${reverseDetails.join(' · ')}`);
+
+  const title = detailParts.length
+    ? `Cardmarket (${activeMode}) · ${detailParts.join(' | ')}`
+    : formatCardmarketEntryTitle(entry);
+
+  return {
+    label,
+    title,
+    url: summary.url || ''
+  };
+}
+
+function renderLightboxCardmarketPrices(summary, { preferReverseHolo = false } = {}) {
+  if (!dom.lightboxPriceMode || !dom.lightboxPriceGrid) return;
+
+  dom.lightboxPriceMode.textContent = preferReverseHolo ? 'Reverse Holo aktiv' : 'Normal aktiv';
+  dom.lightboxPriceGrid.innerHTML = '';
+
+  if (!summary) {
+    const loading = document.createElement('p');
+    loading.className = 'lightbox-price-loading';
+    loading.textContent = 'Preise werden geladen…';
+    dom.lightboxPriceGrid.appendChild(loading);
+    return;
+  }
+
+  const prices = summary?.entry?.prices;
+  if (!prices || typeof prices !== 'object') {
+    const empty = document.createElement('p');
+    empty.className = 'lightbox-price-empty';
+    empty.textContent = 'Keine Preisdetails verfügbar.';
+    dom.lightboxPriceGrid.appendChild(empty);
+    return;
+  }
+
+  const createPriceGroup = (title, rows) => {
+    const group = document.createElement('section');
+    group.className = 'lightbox-price-group';
+
+    const heading = document.createElement('h4');
+    heading.textContent = title;
+    group.appendChild(heading);
+
+    let visibleRows = 0;
+    rows.forEach(([label, value]) => {
+      const formatted = formatEuroPrice(value);
+      if (!formatted) return;
+
+      const row = document.createElement('div');
+      row.className = 'lightbox-price-row';
+
+      const labelNode = document.createElement('span');
+      labelNode.textContent = label;
+      const valueNode = document.createElement('strong');
+      valueNode.textContent = formatted;
+
+      row.append(labelNode, valueNode);
+      group.appendChild(row);
+      visibleRows += 1;
+    });
+
+    return visibleRows ? group : null;
+  };
+
+  const groups = [
+    createPriceGroup('Normal', [
+      ['Trend', getCardmarketPriceValue(prices, 'trend')],
+      ['Durchschnitt', getCardmarketPriceValue(prices, 'average', 'avg')],
+      ['Ø 1 Tag', getCardmarketPriceValue(prices, 'average1', 'avg1')],
+      ['Ø 7 Tage', getCardmarketPriceValue(prices, 'average7', 'avg7')],
+      ['Ø 30 Tage', getCardmarketPriceValue(prices, 'average30', 'avg30')],
+      ['Low', getCardmarketPriceValue(prices, 'low')]
+    ]),
+    createPriceGroup('Reverse Holo', [
+      ['Trend', getCardmarketPriceValue(prices, 'trendHolo')],
+      ['Durchschnitt', getCardmarketPriceValue(prices, 'averageHolo', 'avgHolo')],
+      ['Ø 1 Tag', getCardmarketPriceValue(prices, 'average1Holo', 'avg1Holo')],
+      ['Ø 7 Tage', getCardmarketPriceValue(prices, 'average7Holo', 'avg7Holo')],
+      ['Ø 30 Tage', getCardmarketPriceValue(prices, 'average30Holo', 'avg30Holo')],
+      ['Low', getCardmarketPriceValue(prices, 'lowHolo')],
+      ['Sell', getCardmarketPriceValue(prices, 'reverseHoloSell')]
+    ])
+  ].filter(Boolean);
+
+  if (!groups.length) {
+    const empty = document.createElement('p');
+    empty.className = 'lightbox-price-empty';
+    empty.textContent = 'Keine Preisdetails verfügbar.';
+    dom.lightboxPriceGrid.appendChild(empty);
+    return;
+  }
+
+  groups.forEach((group) => dom.lightboxPriceGrid.appendChild(group));
+}
+
+function applyCardmarketPriceSummary(linkEl, summary, { compact = false, preferReverseHolo = false } = {}) {
   if (!(linkEl instanceof HTMLElement) || !summary) return;
+  const presentation = buildCardmarketLinkPresentation(summary, { preferReverseHolo });
+  if (!presentation) return;
+
   if (summary.url) {
     linkEl.href = summary.url;
     linkEl.dataset.cardmarketUrl = summary.url;
     linkEl.classList.toggle('card-cm-link-fallback', isGeneratedCardmarketSearchUrl(summary.url));
   }
-  if (summary.title) linkEl.title = summary.title;
-  if (summary.label) {
-    linkEl.textContent = compact ? `🛒 CM · ${summary.label}` : `🛒 Cardmarket · ${summary.label}`;
+  if (presentation.title) linkEl.title = presentation.title;
+  if (presentation.label) {
+    linkEl.textContent = compact ? `🛒 CM · ${presentation.label}` : `🛒 Cardmarket · ${presentation.label}`;
   }
 }
 
 async function loadCardmarketPriceSummary(card = {}) {
-  const normalizedUrl = String(card?.cardmarketUrl || '').trim();
-  const cacheKey = normalizedUrl || `${String(card?.setId || '').trim()}::${String(card?.number || '').trim()}::${String(card?.name || '').trim()}`;
+  const cacheKey = getCardmarketPriceCacheKey(card);
   if (!cacheKey.trim()) return null;
 
   if (cardmarketPriceSummaryCache.has(cacheKey)) {
@@ -6264,16 +6572,11 @@ async function loadCardmarketPriceSummary(card = {}) {
     cards: Array.isArray(state?.cards) ? state.cards : []
   })
     .then((entry) => {
+      const normalizedUrl = String(card?.cardmarketUrl || '').trim();
       const directUrl = entry?.cardmarketProductId
         ? buildCardmarketProductUrl(entry.cardmarketProductId)
         : normalizedUrl;
-      const summary = entry
-        ? {
-            label: formatCardmarketEntryLabel(entry),
-            title: formatCardmarketEntryTitle(entry),
-            url: directUrl
-          }
-        : null;
+      const summary = entry ? { entry, url: directUrl } : null;
       cardmarketPriceSummaryCache.set(cacheKey, summary);
       cardmarketPriceSummaryPending.delete(cacheKey);
       return summary;
@@ -6287,23 +6590,23 @@ async function loadCardmarketPriceSummary(card = {}) {
   return pending;
 }
 
-function hydrateCardmarketLink(linkEl, card, { compact = false } = {}) {
+function hydrateCardmarketLink(linkEl, card, { compact = false, preferReverseHolo = false } = {}) {
   const cardmarketUrl = String(card?.cardmarketUrl || '').trim();
   if (!(linkEl instanceof HTMLElement) || !cardmarketUrl) {
     return;
   }
 
-  const cacheKey = cardmarketUrl || `${String(card?.setId || '').trim()}::${String(card?.number || '').trim()}::${String(card?.name || '').trim()}`;
+  const cacheKey = getCardmarketPriceCacheKey(card);
   linkEl.dataset.cardmarketUrl = cardmarketUrl;
   if (cardmarketPriceSummaryCache.has(cacheKey)) {
-    applyCardmarketPriceSummary(linkEl, cardmarketPriceSummaryCache.get(cacheKey), { compact });
+    applyCardmarketPriceSummary(linkEl, cardmarketPriceSummaryCache.get(cacheKey), { compact, preferReverseHolo });
     return;
   }
 
   loadCardmarketPriceSummary(card)
     .then((summary) => {
       if (linkEl.dataset.cardmarketUrl !== cardmarketUrl) return;
-      applyCardmarketPriceSummary(linkEl, summary, { compact });
+      applyCardmarketPriceSummary(linkEl, summary, { compact, preferReverseHolo });
     })
     .catch((error) => {
       console.warn('[cardmarket] price lookup failed', error);
@@ -6464,6 +6767,12 @@ function updateCardState(article, db) {
   syncCollectionCheckboxUi(gInput, rhInput, db);
   article.classList.toggle('reverse',   Boolean(db?.rh));
   article.classList.toggle('collected', Boolean(db?.g) && !db?.rh);
+  const cardmarketLink = article?.querySelector('.card-cm-link');
+  const cardIndex = Number.parseInt(article?.dataset?.cardIndex || '-1', 10);
+  const card = Number.isFinite(cardIndex) && cardIndex >= 0 ? state.cards[cardIndex] : null;
+  if (card && cardmarketLink) {
+    hydrateCardmarketLink(cardmarketLink, card, { compact: true, preferReverseHolo: Boolean(db?.rh) });
+  }
   if (dom.lightboxDialog.open) {
     const idx = parseInt(article.dataset.cardIndex, 10);
     if (state.lightboxIndex === idx) renderLightbox(idx);
@@ -6587,16 +6896,28 @@ function renderLightbox(index) {
   setFact(dom.lightboxRules, rulesText, { longText: true });
   setFact(dom.lightboxFlavorText, card.flavorText, { longText: true });
   if (card.cardmarketUrl) {
+    const preferReverseHolo = Boolean(db?.rh);
     const isFallbackCardmarket = isGeneratedCardmarketSearchUrl(card.cardmarketUrl);
     dom.lightboxCmLink.href = card.cardmarketUrl;
     dom.lightboxCmLink.textContent = '🛒 Cardmarket';
     dom.lightboxCmLink.title = isFallbackCardmarket ? 'Generierter Cardmarket-Suchlink' : 'Cardmarket-Produktseite';
     dom.lightboxCmLink.classList.toggle('lightbox-cm-link-fallback', isFallbackCardmarket);
     dom.lightboxCmLink.classList.remove('hidden');
-    hydrateCardmarketLink(dom.lightboxCmLink, card, { compact: false });
+    renderLightboxCardmarketPrices(null, { preferReverseHolo });
+    hydrateCardmarketLink(dom.lightboxCmLink, card, { compact: false, preferReverseHolo });
+    loadCardmarketPriceSummary(card)
+      .then((summary) => {
+        const liveCard = state.cards[state.lightboxIndex];
+        if (!liveCard || liveCard.number !== card.number) return;
+        renderLightboxCardmarketPrices(summary, { preferReverseHolo: Boolean((state.dbMap.get(key) || {}).rh) });
+      })
+      .catch(() => {
+        renderLightboxCardmarketPrices({ entry: null }, { preferReverseHolo });
+      });
   } else {
     dom.lightboxCmLink.classList.add('hidden');
     dom.lightboxCmLink.classList.remove('lightbox-cm-link-fallback');
+    renderLightboxCardmarketPrices({ entry: null }, { preferReverseHolo: Boolean(db?.rh) });
   }
   syncCollectionCheckboxUi(dom.lightboxGCheck, dom.lightboxRhCheck, db, {
     isEditable: Boolean(state.currentSet?.setName)

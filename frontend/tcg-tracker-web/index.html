@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&display=swap" rel="stylesheet" />
   <link rel="apple-touch-icon" href="./assets/branding/logo-veras-pokemon.jpg?v=8" />
-    <link rel="stylesheet" href="./css/main.css?v=20260410-menu-template10" />
+    <link rel="stylesheet" href="./css/main.css?v=20260423-search-compact" />
   <link rel="stylesheet" href="./css/trading-marketplace.css?v=20260505e" />
 </head>
 <body class="dark">
@@ -126,6 +126,13 @@
           <div class="lightbox-fact-row"><dt>Regeln</dt><dd id="lightbox-rules">—</dd></div>
           <div class="lightbox-fact-row"><dt>Flavortext</dt><dd id="lightbox-flavor-text">—</dd></div>
         </dl>
+        <section id="lightbox-price-panel" class="lightbox-price-panel" aria-label="Cardmarket Preise">
+          <div class="lightbox-price-head">
+            <p class="lightbox-price-kicker">Cardmarket</p>
+            <strong id="lightbox-price-mode" class="lightbox-price-mode">Normal aktiv</strong>
+          </div>
+          <div id="lightbox-price-grid" class="lightbox-price-grid"></div>
+        </section>
         <a id="lightbox-cm-link" href="#" target="_blank" rel="noopener noreferrer"
            class="lightbox-cm-link hidden">🛒 Cardmarket</a>
         <p class="lightbox-hint">← → navigieren / im Bildbereich links-rechts wischen / nach unten schließen &nbsp;|&nbsp; Bild antippen = Vollbild</p>
@@ -610,5 +617,5 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://apis.google.com/js/api.js" async defer></script>
-  <script type="module" src="./js/app.js?v=20260413-set-filter-rh1"></script>
+  <script type="module" src="./js/app.js?v=20260423-search-compact"></script>
 </html>
