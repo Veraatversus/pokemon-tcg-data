@@ -372,6 +372,7 @@ export function buildCardmarketArtifacts({ singlesPayload, nonsinglesPayload, pr
     groupedSets[expansionKey].cards.push({
       cardmarketProductId,
       name: String(product.name || '').trim(),
+      collectorNumber: String(product.collectorNumber || product.number || '').trim() || null,
       categoryId: Number(product.idCategory || 0) || null,
       categoryName: String(product.categoryName || '').trim(),
       expansionId,

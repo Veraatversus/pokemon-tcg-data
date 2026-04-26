@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  buildSetCardAssignmentMap,
   buildCardmarketProductUrl,
   extractCardmarketProductId,
   formatCardmarketEntryLabel,
@@ -357,6 +358,40 @@ test('promoteCardmarketUrlsForCards keeps duplicate same-name cards aligned to t
   assert.equal(promoted[1].cardmarketUrl, 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=1088');
 });
 
+test('promoteCardmarketUrlsForCards reconciles stale direct links for duplicate same-name cards', async () => {
+  const cards = [
+    {
+      setId: 'ecard3',
+      number: '2',
+      vera_name: 'Alakazam',
+      tcgdex_name: 'Alakazam',
+      cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=275238',
+      vera_cardmarket_url: 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=275238'
+    },
+    {
+      setId: 'ecard3',
+      number: 'H1',
+      vera_name: 'Alakazam',
+      tcgdex_name: 'Alakazam',
+      cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=275238',
+      vera_cardmarket_url: 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=275238'
+    }
+  ];
+
+  const promoted = await promoteCardmarketUrlsForCards(cards, {
+    setPayload: {
+      expansionId: 1538,
+      cards: [
+        { cardmarketProductId: 275260, name: 'Alakazam [Energy Jump | Psychic]', prices: { trend: 39.22 } },
+        { cardmarketProductId: 275238, name: 'Alakazam [Energy Jump | Psychic]', prices: { trend: 335.66 } }
+      ]
+    }
+  });
+
+  assert.equal(promoted[0].cardmarketUrl, 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=275260');
+  assert.equal(promoted[1].cardmarketUrl, 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=275238');
+});
+
 test('formatCardmarketEntryLabel prefers the trend price for compact UI badges', () => {
   const entry = {
     prices: { avg: 5.0, low: 3.0, trend: 4.6 }
@@ -371,9 +406,131 @@ test('formatCardmarketEntryTitle summarizes the available price points for toolt
   };
 
   assert.equal(formatCardmarketEntryTitle(entry), 'Cardmarket: Trend 4,60 € · AVG 5,00 € · Low 3,00 €');
+});
 
-test('resolveCardmarketEntryForCardFromSetPayload disambiguates identically-named products using card variants', () => {
+test('resolveCardmarketEntryForCardFromSetPayload disambiguates identically-named products using stored collector numbers', () => {
   const cards = [
+    {
+      number: '2',
+      rarity: 'Rare',
+      vera_name: 'Alakazam',
+      tcgdex_name: 'Alakazam',
+    },
+    {
+      number: 'H1',
+      rarity: 'Holo Rare',
+      vera_name: 'Alakazam',
+      tcgdex_name: 'Alakazam',
+    }
+  ];
+
+  const setPayload = {
+    expansionId: 1538,
+    cards: [
+      {
+        cardmarketProductId: 275238,
+        name: 'Alakazam [Energy Jump | Psychic]',
+        collectorNumber: 'H1',
+        prices: { trend: 12.5 }
+      },
+      {
+        cardmarketProductId: 275260,
+        name: 'Alakazam [Energy Jump | Psychic]',
+        collectorNumber: '2',
+        prices: { trend: 8.3 }
+      }
+    ]
+  };
+
+  const result1 = resolveCardmarketEntryForCardFromSetPayload(cards[0], setPayload, { sourceCards: cards });
+  assert.equal(result1?.cardmarketProductId, 275260);
+
+  const result2 = resolveCardmarketEntryForCardFromSetPayload(cards[1], setPayload, { sourceCards: cards });
+  assert.equal(result2?.cardmarketProductId, 275238);
+});
+
+test('resolveCardmarketEntryForCardFromSetPayload uses occurrence order for duplicates when collector numbers are unavailable', () => {
+  const cards = [
+    {
+      number: '2',
+      rarity: 'Rare',
+      vera_name: 'Alakazam',
+      tcgdex_name: 'Alakazam',
+    },
+    {
+      number: 'H1',
+      rarity: 'Holo Rare',
+      vera_name: 'Alakazam',
+      tcgdex_name: 'Alakazam',
+    }
+  ];
+
+  // Cardmarket data is in the same order as the cards sorted by number:
+  // #2 (regular) comes before H1 (holo) numerically, so regular entry is first.
+  const setPayload = {
+    expansionId: 1538,
+    cards: [
+      {
+        cardmarketProductId: 275260,
+        name: 'Alakazam [Energy Jump | Psychic]',
+        prices: { trend: 39.22, trendHolo: 73.9 }
+      },
+      {
+        cardmarketProductId: 275238,
+        name: 'Alakazam [Energy Jump | Psychic]',
+        prices: { trend: 335.66, trendHolo: 50.03 }
+      }
+    ]
+  };
+
+  const result1 = resolveCardmarketEntryForCardFromSetPayload(cards[0], setPayload, { sourceCards: cards });
+  assert.equal(result1?.cardmarketProductId, 275260);
+
+  const result2 = resolveCardmarketEntryForCardFromSetPayload(cards[1], setPayload, { sourceCards: cards });
+  assert.equal(result2?.cardmarketProductId, 275238);
+});
+
+test('resolveCardmarketEntryForCardFromSetPayload follows sourceCards order and does not re-sort duplicates by number', () => {
+  const cards = [
+    {
+      number: 'H1',
+      rarity: 'Holo Rare',
+      vera_name: 'Alakazam',
+      tcgdex_name: 'Alakazam',
+    },
+    {
+      number: '2',
+      rarity: 'Rare',
+      vera_name: 'Alakazam',
+      tcgdex_name: 'Alakazam',
+    }
+  ];
+
+  const setPayload = {
+    expansionId: 1538,
+    cards: [
+      {
+        cardmarketProductId: 275260,
+        name: 'Alakazam [Energy Jump | Psychic]',
+        prices: { trend: 39.22 }
+      },
+      {
+        cardmarketProductId: 275238,
+        name: 'Alakazam [Energy Jump | Psychic]',
+        prices: { trend: 335.66 }
+      }
+    ]
+  };
+
+  const result1 = resolveCardmarketEntryForCardFromSetPayload(cards[0], setPayload, { sourceCards: cards });
+  assert.equal(result1?.cardmarketProductId, 275260);
+
+  const result2 = resolveCardmarketEntryForCardFromSetPayload(cards[1], setPayload, { sourceCards: cards });
+  assert.equal(result2?.cardmarketProductId, 275238);
+});
+
+test('resolveCardmarketEntryForCardFromSetPayload maps duplicates by id suffix when number is missing', () => {
+  const sourceCards = [
     {
       number: '2',
       vera_name: 'Alakazam',
@@ -386,28 +543,153 @@ test('resolveCardmarketEntryForCardFromSetPayload disambiguates identically-name
     }
   ];
 
+  const renderedCard = {
+    id: 'ecard3-H1',
+    name: 'Simsala',
+    vera_name: 'Alakazam',
+    tcgdex_name: 'Alakazam',
+  };
+
+  const setPayload = {
+    expansionId: 1538,
+    cards: [
+      { cardmarketProductId: 275260, name: 'Alakazam [Energy Jump | Psychic]', prices: { trend: 39.22 } },
+      { cardmarketProductId: 275238, name: 'Alakazam [Energy Jump | Psychic]', prices: { trend: 335.66 } }
+    ]
+  };
+
+  const result = resolveCardmarketEntryForCardFromSetPayload(renderedCard, setPayload, { sourceCards });
+  assert.equal(result?.cardmarketProductId, 275238);
+});
+
+test('buildSetCardAssignmentMap keeps Skyridge holo and non-holo duplicates aligned by holo profile', () => {
+  const sourceCards = [
+    {
+      id: 'ecard3-28',
+      number: '28',
+      rarity: 'Rare',
+      vera_name: 'Raikou',
+      tcgdex_name: 'Raikou',
+    },
+    {
+      id: 'ecard3-H26',
+      number: 'H26',
+      rarity: 'Rare Holo',
+      vera_name: 'Raikou',
+      tcgdex_name: 'Raikou',
+    }
+  ];
+
   const setPayload = {
     expansionId: 1538,
     cards: [
       {
-        cardmarketProductId: 275238,
-        name: 'Alakazam [Energy Jump | Psychic]',
-        prices: { trend: 12.5 }
+        cardmarketProductId: 275247,
+        name: 'Raikou [Pure Body | Lightning Sphere]',
+        metacardId: 213147,
+        prices: { trend: 824.71, trendHolo: 51.1 }
       },
       {
-        cardmarketProductId: 275260,
-        name: 'Alakazam [Energy Jump | Psychic]',
-        prices: { trend: 8.3 }
+        cardmarketProductId: 275286,
+        name: 'Raikou [Pure Body | Lightning Sphere]',
+        metacardId: 213147,
+        prices: { trend: 9.96, trendHolo: 30.2 }
       }
     ]
   };
 
-  // Card #2 should match first occurrence
-  const result1 = resolveCardmarketEntryForCardFromSetPayload(cards[0], setPayload, { sourceCards: cards });
-  assert.equal(result1?.cardmarketProductId, 275238);
+  const assignmentMap = buildSetCardAssignmentMap(sourceCards, setPayload);
 
-  // Card #H1 should match second occurrence
-  const result2 = resolveCardmarketEntryForCardFromSetPayload(cards[1], setPayload, { sourceCards: cards });
-  assert.equal(result2?.cardmarketProductId, 275260);
+  assert.equal(assignmentMap.get(sourceCards[0])?.cardmarketProductId, 275286);
+  assert.equal(assignmentMap.get(sourceCards[1])?.cardmarketProductId, 275247);
 });
+
+test('buildSetCardAssignmentMap falls back to normal-price ranking for holo duplicates without collector numbers', () => {
+  const sourceCards = [
+    {
+      id: 'ecard3-30',
+      number: '30',
+      rarity: 'Rare',
+      vera_name: 'Starmie',
+      tcgdex_name: 'Starmie',
+    },
+    {
+      id: 'ecard3-H28',
+      number: 'H28',
+      rarity: 'Rare Holo',
+      vera_name: 'Starmie',
+      tcgdex_name: 'Starmie',
+    }
+  ];
+
+  const setPayload = {
+    expansionId: 1538,
+    cards: [
+      {
+        cardmarketProductId: 275254,
+        name: 'Starmie [Energy Burst | Star Back]',
+        metacardId: 213149,
+        prices: { trend: 128.26, avg: 341.65, trendHolo: 41.33 }
+      },
+      {
+        cardmarketProductId: 275288,
+        name: 'Starmie [Energy Burst | Star Back]',
+        metacardId: 213149,
+        prices: { trend: 39.29, avg: 42.37, trendHolo: 16.37 }
+      }
+    ]
+  };
+
+  const assignmentMap = buildSetCardAssignmentMap(sourceCards, setPayload);
+
+  assert.equal(assignmentMap.get(sourceCards[0])?.cardmarketProductId, 275288);
+  assert.equal(assignmentMap.get(sourceCards[1])?.cardmarketProductId, 275254);
+});
+
+test('buildSetCardAssignmentMap ignores unrelated same-name metacard groups when duplicate count differs', () => {
+  const sourceCards = [
+    {
+      id: 'ecard3-30',
+      number: '30',
+      rarity: 'Rare',
+      vera_name: 'Starmie',
+      tcgdex_name: 'Starmie',
+    },
+    {
+      id: 'ecard3-H28',
+      number: 'H28',
+      rarity: 'Rare Holo',
+      vera_name: 'Starmie',
+      tcgdex_name: 'Starmie',
+    }
+  ];
+
+  const setPayload = {
+    expansionId: 1538,
+    cards: [
+      {
+        cardmarketProductId: 275254,
+        name: 'Starmie [Energy Burst | Star Back]',
+        metacardId: 213149,
+        prices: { trend: 128.26, avg: 341.65, trendHolo: 41.33 }
+      },
+      {
+        cardmarketProductId: 275288,
+        name: 'Starmie [Energy Burst | Star Back]',
+        metacardId: 213149,
+        prices: { trend: 39.29, avg: 42.37, trendHolo: 16.37 }
+      },
+      {
+        cardmarketProductId: 275302,
+        name: 'Starmie [Random Legacy Variant]',
+        metacardId: 999999,
+        prices: { trend: 3.07, avg: 3.01, trendHolo: 18.78 }
+      }
+    ]
+  };
+
+  const assignmentMap = buildSetCardAssignmentMap(sourceCards, setPayload);
+
+  assert.equal(assignmentMap.get(sourceCards[0])?.cardmarketProductId, 275288);
+  assert.equal(assignmentMap.get(sourceCards[1])?.cardmarketProductId, 275254);
 });
