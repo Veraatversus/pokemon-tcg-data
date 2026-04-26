@@ -334,23 +334,14 @@ function encodeCardmarketSearchString(value) {
   return encodeURIComponent(String(value || '').trim()).replace(/%20/g, '+');
 }
 
-function buildCardmarketSearchUrl({ cardName = '', setTag = '', setName = '', cardNumber = '' } = {}) {
+function buildCardmarketSearchUrl({ setTag = '', cardNumber = '' } = {}) {
   const normalizedTag = String(setTag || '').trim();
   const normalizedNumber = String(cardNumber || '').trim();
-  const normalizedName = String(cardName || '').trim();
-  const normalizedSetName = String(setName || '').trim();
 
-  if (normalizedTag && normalizedNumber) {
-    const searchString = `${normalizedTag} ${normalizedNumber}`;
-    return `https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=${encodeCardmarketSearchString(searchString)}`;
-  }
+  if (!normalizedTag || !normalizedNumber) return null;
 
-  const searchString = [normalizedName, normalizedSetName, normalizedNumber]
-    .filter(Boolean)
-    .join(' ');
-
-  if (!searchString) return null;
-  return `https://www.cardmarket.com/de/Pokemon/Products/Search?searchString=${encodeCardmarketSearchString(searchString)}`;
+  const searchString = `${normalizedTag} ${normalizedNumber}`;
+  return `https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=${encodeCardmarketSearchString(searchString)}`;
 }
 
 function isGeneratedCardmarketSearchUrl(url = '') {
@@ -372,7 +363,7 @@ function resolveCardmarketUrl({ tcgdexUrl = null, primaryUrl = null, cardName = 
   const direct = resolvePreferredCardmarketUrl([primaryUrl, tcgdexUrl]);
 
   if (direct) return direct;
-  return buildCardmarketSearchUrl({ cardName, setTag, setName, cardNumber });
+  return buildCardmarketSearchUrl({ setTag, cardNumber });
 }
 
 function buildTcgdexCardsMap(cards = []) {

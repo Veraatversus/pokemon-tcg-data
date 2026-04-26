@@ -399,6 +399,8 @@ const state = {
     totals: null,
     bySet: [],
     topCards: [],
+    items: [],
+    activeTab: 'dashboard',
     loadedCards: 0,
     totalCards: 0,
     errors: 0,
@@ -5005,6 +5007,280 @@ function formatStatsPriceNumber(value) {
   return Number(value || 0).toLocaleString('de-DE');
 }
 
+const STATS_PRICE_TABS = [
+  { id: 'dashboard', label: 'Dashboard' },
+  { id: 'top-values', label: 'Top-Werte' },
+  { id: 'trends', label: 'Trends' },
+  { id: 'comparisons', label: 'Vergleiche' },
+  { id: 'watchlist', label: 'Watchlist' },
+  { id: 'timeline', label: 'Timeline/Story' },
+  { id: 'drilldown', label: 'Fehler-Drilldown' },
+];
+
+function escapeHtml(value = '') {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function getStatsPriceTimeline(analytics = null, { loadedCards = 0, totalCards = 0, errors = 0 } = {}) {
+  const collectedCards = Number(analytics?.collectedCards || 0);
+  const pricedCards = Number(analytics?.pricedCollectedCards || 0);
+  const coverage = Number(analytics?.priceCoverage || 0);
+  const topSet = analytics?.topSet;
+  const topCard = Array.isArray(analytics?.topCards) ? analytics.topCards[0] : null;
+  const milestones = [
+    {
+      title: 'Scanner gestartet',
+      detail: totalCards > 0
+        ? `${formatStatsPriceNumber(totalCards)} gesammelte Karten in der Analyse-Pipeline.`
+        : 'Sammlung wird für den Preisradar vorbereitet.',
+      tone: 'cold',
+    },
+    {
+      title: 'Bewertungsquote',
+      detail: `${Math.round(coverage)}% bewertet (${formatStatsPriceNumber(pricedCards)} von ${formatStatsPriceNumber(collectedCards)}).`,
+      tone: coverage >= 90 ? 'hot' : coverage >= 60 ? 'warm' : 'cold',
+    },
+    {
+      title: 'Stärkstes Set',
+      detail: topSet
+        ? `${topSet.setName} führt mit ${formatStatsPriceEuro(topSet.value)} bei ${formatStatsPriceNumber(topSet.pricedCards)} Karten.`
+        : 'Noch kein Set mit Preisdominanz ermittelt.',
+      tone: topSet ? 'hot' : 'cold',
+    },
+    {
+      title: 'Headline-Karte',
+      detail: topCard
+        ? `${topCard.cardName} (${topCard.setName}) markiert aktuell ${formatStatsPriceEuro(topCard.value)}.`
+        : 'Es wurden noch keine Karten mit belastbaren Preisen gefunden.',
+      tone: topCard ? 'warm' : 'cold',
+    },
+    {
+      title: 'Qualitätssignal',
+      detail: errors > 0
+        ? `${formatStatsPriceNumber(errors)} Lookup-Fehler in der letzten Analyse entdeckt.`
+        : 'Keine Lookup-Fehler - verbleibende Lücken sind fachliche Zuordnungsthemen.',
+      tone: errors > 0 ? 'alert' : 'calm',
+    },
+    {
+      title: 'Pipeline-Status',
+      detail: totalCards > 0
+        ? `${formatStatsPriceNumber(loadedCards)} von ${formatStatsPriceNumber(totalCards)} Karten wurden verarbeitet.`
+        : 'Warte auf neue Preisläufe.',
+      tone: loadedCards >= totalCards && totalCards > 0 ? 'hot' : 'warm',
+    },
+  ];
+
+  return milestones;
+}
+
+function buildStatsPriceTabContent({
+  activeTab = 'dashboard',
+  analytics = null,
+  status = 'loading',
+  loadedCards = 0,
+  totalCards = 0,
+  errors = 0,
+  message = '',
+} = {}) {
+  const safeItems = Array.isArray(state.statsPrice.items) ? state.statsPrice.items : [];
+  const pricedItems = safeItems.filter((item) => Number(item?.value) > 0);
+  const missingItems = safeItems.filter((item) => item?.value == null);
+  const bySet = Array.isArray(analytics?.setBreakdown) ? analytics.setBreakdown : [];
+  const topCards = Array.isArray(analytics?.topCards) ? analytics.topCards : [];
+  const coverage = Number(analytics?.priceCoverage || 0);
+  const avgValue = Number(analytics?.avgCollectedCardValue || 0);
+  const watchlistItems = pricedItems
+    .filter((item) => Number(item?.value) >= Math.max(avgValue * 1.8, 20))
+    .sort((a, b) => Number(b?.value || 0) - Number(a?.value || 0))
+    .slice(0, 24);
+
+  const tabsMarkup = STATS_PRICE_TABS.map((tab) => `
+    <button class="stats-price-tab-btn ${tab.id === activeTab ? 'is-active' : ''}" type="button" data-stats-price-tab="${tab.id}">
+      ${escapeHtml(tab.label)}
+    </button>`).join('');
+
+  const chartRows = bySet.slice(0, 8).map((entry, index) => {
+    const setId = String(entry?.setId || '').trim();
+    const pct = Math.max(2, Math.round((Number(entry?.value || 0) / Math.max(1, Number(analytics?.totalValue || 1))) * 100));
+    return `
+      <li class="stats-price-compare-row" data-set-id="${escapeHtml(setId)}">
+        <span class="stats-price-compare-rank">${index + 1}</span>
+        <div class="stats-price-compare-main">
+          <strong>${escapeHtml(entry?.setName || 'Unbekanntes Set')}</strong>
+          <small>${formatStatsPriceNumber(entry?.pricedCards)} bewertet</small>
+        </div>
+        <div class="stats-price-compare-bar"><span style="width:${pct}%"></span></div>
+        <strong class="stats-price-compare-value">${formatStatsPriceEuro(entry?.value)}</strong>
+      </li>`;
+  }).join('');
+
+  const drilldownBySet = missingItems.reduce((acc, item) => {
+    const key = String(item?.setId || '').trim() || 'unknown';
+    if (!acc.has(key)) {
+      acc.set(key, {
+        setId: key,
+        setName: String(item?.setName || 'Unbekanntes Set').trim(),
+        items: [],
+      });
+    }
+    acc.get(key).items.push(item);
+    return acc;
+  }, new Map());
+
+  const drilldownMarkup = Array.from(drilldownBySet.values())
+    .sort((a, b) => b.items.length - a.items.length)
+    .map((group) => `
+      <details class="stats-price-drill-group">
+        <summary>
+          <strong>${escapeHtml(group.setName)}</strong>
+          <small>${formatStatsPriceNumber(group.items.length)} ohne Preis</small>
+        </summary>
+        <ul class="stats-price-drill-list">
+          ${group.items
+            .slice(0, 120)
+            .map((item) => `
+              <li class="stats-price-drill-item" data-set-id="${escapeHtml(item?.setId || '')}">
+                <span class="stats-price-drill-number">${escapeHtml(item?.card?.number || item?.cardName || item?.cardKey || '')}</span>
+                <strong>${escapeHtml(item?.cardName || item?.card?.name || 'Unbekannte Karte')}</strong>
+                <small>${item?.failed ? 'Lookup-Fehler' : 'Kein Mapping-Eintrag'}</small>
+              </li>
+            `)
+            .join('')}
+        </ul>
+      </details>
+    `)
+    .join('');
+
+  const timelineMarkup = getStatsPriceTimeline(analytics, { loadedCards, totalCards, errors })
+    .map((step, index) => `
+      <li class="stats-price-story-item tone-${escapeHtml(step.tone)}">
+        <span class="stats-price-story-dot">${index + 1}</span>
+        <div>
+          <strong>${escapeHtml(step.title)}</strong>
+          <p>${escapeHtml(step.detail)}</p>
+        </div>
+      </li>
+    `)
+    .join('');
+
+  const dashboardHighlights = `
+    <section class="stats-price-tab-panel is-visible" data-tab-panel="dashboard">
+      <div class="stats-price-panel-grid">
+        <article class="stats-price-surface-card">
+          <h4>Werttreiber</h4>
+          <p>${analytics?.topSet ? `${escapeHtml(analytics.topSet.setName)} bleibt mit ${formatStatsPriceEuro(analytics.topSet.value)} dein stärkster Block.` : 'Noch kein Werttreiber erkannt.'}</p>
+        </article>
+        <article class="stats-price-surface-card">
+          <h4>Momentum</h4>
+          <p>${Math.round(coverage)}% Preisabdeckung, ${formatStatsPriceNumber(missingItems.length)} offene Lücken und ${formatStatsPriceNumber(errors)} technische Fehler.</p>
+        </article>
+        <article class="stats-price-surface-card">
+          <h4>Watchlist-Signal</h4>
+          <p>${watchlistItems.length > 0 ? `${formatStatsPriceNumber(watchlistItems.length)} Hochwert-Karten aktuell im Fokus.` : 'Sobald High-Value-Karten erkannt werden, erscheint hier eine Prioritätenliste.'}</p>
+        </article>
+      </div>
+    </section>`;
+
+  const topValuesMarkup = `
+    <section class="stats-price-tab-panel" data-tab-panel="top-values">
+      <ol class="stats-price-rich-list">
+        ${topCards
+          .slice(0, 20)
+          .map((card, index) => `
+            <li class="stats-price-rich-item" data-set-id="${escapeHtml(card?.setId || '')}">
+              <span class="stats-price-rich-rank">${index + 1}</span>
+              <div class="stats-price-rich-main">
+                <strong>${escapeHtml(card?.cardName || 'Unbekannte Karte')}</strong>
+                <small>${escapeHtml(card?.setName || 'Unbekanntes Set')}</small>
+              </div>
+              <strong class="stats-price-rich-value">${formatStatsPriceEuro(card?.value)}</strong>
+            </li>
+          `)
+          .join('') || '<li class="stats-price-empty">Noch keine Top-Werte verfügbar.</li>'}
+      </ol>
+    </section>`;
+
+  const trendsMarkup = `
+    <section class="stats-price-tab-panel" data-tab-panel="trends">
+      <div class="stats-price-trend-grid">
+        <article class="stats-price-surface-card">
+          <h4>Preisabdeckung</h4>
+          <p>${Math.round(coverage)}% der gesammelten Karten sind bepreist.</p>
+        </article>
+        <article class="stats-price-surface-card">
+          <h4>Preis-Mitte</h4>
+          <p>Durchschnitt aktuell ${formatStatsPriceEuro(avgValue)} pro bewerteter Karte.</p>
+        </article>
+        <article class="stats-price-surface-card">
+          <h4>Volatilität</h4>
+          <p>${topCards.length > 0 ? `Spanne reicht bis ${formatStatsPriceEuro(topCards[0].value)} im oberen Segment.` : 'Noch keine Daten für Volatilität.'}</p>
+        </article>
+      </div>
+    </section>`;
+
+  const comparisonsMarkup = `
+    <section class="stats-price-tab-panel" data-tab-panel="comparisons">
+      <ul class="stats-price-compare-list">
+        ${chartRows || '<li class="stats-price-empty">Noch keine Set-Vergleiche verfügbar.</li>'}
+      </ul>
+    </section>`;
+
+  const watchlistMarkup = `
+    <section class="stats-price-tab-panel" data-tab-panel="watchlist">
+      <ol class="stats-price-rich-list">
+        ${watchlistItems
+          .map((item, index) => `
+            <li class="stats-price-rich-item" data-set-id="${escapeHtml(item?.setId || '')}">
+              <span class="stats-price-rich-rank">${index + 1}</span>
+              <div class="stats-price-rich-main">
+                <strong>${escapeHtml(item?.cardName || 'Unbekannte Karte')}</strong>
+                <small>${escapeHtml(item?.setName || 'Unbekanntes Set')}</small>
+              </div>
+              <strong class="stats-price-rich-value">${formatStatsPriceEuro(item?.value)}</strong>
+            </li>
+          `)
+          .join('') || '<li class="stats-price-empty">Noch keine Watchlist-Kandidaten erkannt.</li>'}
+      </ol>
+    </section>`;
+
+  const timelinePanelMarkup = `
+    <section class="stats-price-tab-panel" data-tab-panel="timeline">
+      <ol class="stats-price-story-list">${timelineMarkup}</ol>
+    </section>`;
+
+  const drilldownPanelMarkup = `
+    <section class="stats-price-tab-panel" data-tab-panel="drilldown">
+      <div class="stats-price-drill-headline">
+        <strong>${formatStatsPriceNumber(missingItems.length)} Karten ohne Preis</strong>
+        <small>${errors > 0 ? `${formatStatsPriceNumber(errors)} technische Fehler` : 'Keine technischen Fehler gemeldet'}</small>
+      </div>
+      <div class="stats-price-drill-groups">
+        ${drilldownMarkup || '<p class="stats-price-empty">Keine Drilldown-Lücken vorhanden.</p>'}
+      </div>
+    </section>`;
+
+  const panelMap = {
+    dashboard: dashboardHighlights,
+    'top-values': topValuesMarkup,
+    trends: trendsMarkup,
+    comparisons: comparisonsMarkup,
+    watchlist: watchlistMarkup,
+    timeline: timelinePanelMarkup,
+    drilldown: drilldownPanelMarkup,
+  };
+
+  return {
+    tabsMarkup,
+    contentMarkup: panelMap[activeTab] || panelMap.dashboard,
+    completionLabel: message || (status === 'final' ? 'Preisradar abgeschlossen.' : `${formatStatsPriceNumber(loadedCards)} / ${formatStatsPriceNumber(totalCards)} Karten geladen`),
+  };
+}
+
 function isActiveStatsPriceRequest(requestId) {
   return state.statsPrice.requestId === requestId;
 }
@@ -5021,64 +5297,23 @@ function renderStatsPriceSnapshot({
   if (!container) return;
 
   const progress = totalCards > 0 ? Math.round((loadedCards / totalCards) * 100) : 0;
-  const topSetRows = Array.isArray(analytics?.setBreakdown) ? analytics.setBreakdown.slice(0, 5) : [];
-  const topSetMarkup = topSetRows.length
-    ? topSetRows.map((entry) => {
-      const setId = String(entry?.setId || '').trim();
-      const safeSetName = String(entry?.setName || 'Unbekanntes Set');
-      const navAction = setId ? ` data-set-id="${setId.replace(/"/g, '&quot;')}"` : '';
-      return `
-        <li class="stats-price-set-item"${navAction}>
-          <div class="stats-price-set-main">
-            <strong>${safeSetName}</strong>
-            <span>${formatStatsPriceEuro(entry?.value)}</span>
-          </div>
-          <small>${formatStatsPriceNumber(entry?.pricedCards)} mit Preis · ${formatStatsPriceNumber(entry?.collectedCards)} gesammelt</small>
-        </li>`;
-    }).join('')
-    : '<li class="stats-price-empty">Noch keine Set-Preise verfuegbar.</li>';
-
   const totalValue = analytics?.totalValue || 0;
   const averageValue = analytics?.avgCollectedCardValue || 0;
   const collectedCards = analytics?.collectedCards || 0;
   const pricedCollectedCards = analytics?.pricedCollectedCards || 0;
   const priceCoverage = analytics?.priceCoverage || 0;
-  const topCards = Array.isArray(analytics?.topCards) ? analytics.topCards.slice(0, 5) : [];
-  const distribution = analytics?.distribution || { under1: 0, from1to5: 0, from5to20: 0, over20: 0 };
-  const completionLabel = totalCards > 0
-    ? `${formatStatsPriceNumber(loadedCards)} / ${formatStatsPriceNumber(totalCards)} Karten geladen`
-    : 'Sammlung wird analysiert';
-
-  const topCardsMarkup = topCards.length
-    ? topCards.map((card, index) => `
-        <li class="stats-price-top-card-item" data-set-id="${String(card.setId || '').replace(/"/g, '&quot;')}">
-          <span class="stats-price-top-rank">${index + 1}</span>
-          <div class="stats-price-top-info">
-            <strong>${card.cardName}</strong>
-            <small>${card.setName}</small>
-          </div>
-          <strong class="stats-price-top-value">${formatStatsPriceEuro(card.value)}</strong>
-        </li>`).join('')
-    : '<li class="stats-price-empty">Noch keine Karten bewertet.</li>';
-
-  const distTotal = Math.max(1, distribution.under1 + distribution.from1to5 + distribution.from5to20 + distribution.over20);
-  const distBuckets = [
-    { label: '< 1\u00a0\u20ac', count: distribution.under1, cls: 'tier-low' },
-    { label: '1\u20135\u00a0\u20ac', count: distribution.from1to5, cls: 'tier-mid' },
-    { label: '5\u201320\u00a0\u20ac', count: distribution.from5to20, cls: 'tier-high' },
-    { label: '> 20\u00a0\u20ac', count: distribution.over20, cls: 'tier-rare' },
-  ];
-  const distMarkup = distBuckets.map((bucket) => {
-    const pct = Math.round((bucket.count / distTotal) * 100);
-    return `
-      <div class="stats-price-dist-row">
-        <span class="stats-price-dist-label">${bucket.label}</span>
-        <div class="stats-price-dist-bar-wrap">
-          <div class="stats-price-dist-bar ${bucket.cls}" style="width:${pct}%"></div>
-        </div>
-        <span class="stats-price-dist-meta">${formatStatsPriceNumber(bucket.count)}<small> (${pct}%)</small></span>
-      </div>`;
-  }).join('');
+  const activeTab = STATS_PRICE_TABS.some((tab) => tab.id === state.statsPrice.activeTab)
+    ? state.statsPrice.activeTab
+    : 'dashboard';
+  const tabContent = buildStatsPriceTabContent({
+    activeTab,
+    analytics,
+    status,
+    loadedCards,
+    totalCards,
+    errors,
+    message,
+  });
 
   container.dataset.state = status;
   container.innerHTML = `
@@ -5087,7 +5322,7 @@ function renderStatsPriceSnapshot({
         <div>
           <span class="stats-price-kicker">Cardmarket Analyse</span>
           <h3>Preisradar f&#xfc;r deine Sammlung</h3>
-          <p>${message || completionLabel}</p>
+          <p>${tabContent.completionLabel}</p>
         </div>
         <div class="stats-price-progress-wrap">
           <strong>${progress}%</strong>
@@ -5116,41 +5351,34 @@ function renderStatsPriceSnapshot({
             <small>${errors > 0 ? `${formatStatsPriceNumber(errors)} Fehler` : 'keine Fehler'}</small>
           </article>
         </section>
-
-        <section class="stats-price-sets">
-          <div class="stats-price-sets-head">
-            <span>Top Sets nach Wert</span>
-            <strong>${analytics?.topSet ? analytics.topSet.setName : '&#8212;'}</strong>
-          </div>
-          <ol class="stats-price-set-list">${topSetMarkup}</ol>
-        </section>
       </div>
 
-      <section class="stats-price-bottom-row">
-        <div class="stats-price-top-cards">
-          <div class="stats-price-sub-head">
-            <span class="stats-price-kicker">Wertvollste Karten</span>
-          </div>
-          <ol class="stats-price-top-card-list">${topCardsMarkup}</ol>
-        </div>
-        <div class="stats-price-distribution">
-          <div class="stats-price-sub-head">
-            <span class="stats-price-kicker">Preisverteilung</span>
-          </div>
-          <div class="stats-price-dist-grid">${distMarkup}</div>
-        </div>
+      <section class="stats-price-tabs" aria-label="Preis-Insights Tabs">
+        ${tabContent.tabsMarkup}
+      </section>
+
+      <section class="stats-price-tab-content">
+        ${tabContent.contentMarkup}
       </section>
     </article>`;
 
-  container.querySelectorAll('.stats-price-set-item[data-set-id]').forEach((item) => {
-    item.addEventListener('click', () => {
-      const setId = item.dataset.setId;
-      if (!setId) return;
-      navigate(`set/${encodeURIComponent(setId)}`);
+  container.querySelectorAll('.stats-price-tab-btn[data-stats-price-tab]').forEach((tabButton) => {
+    tabButton.addEventListener('click', () => {
+      const nextTab = String(tabButton.dataset.statsPriceTab || '').trim();
+      if (!nextTab || nextTab === state.statsPrice.activeTab) return;
+      state.statsPrice.activeTab = nextTab;
+      renderStatsPriceSnapshot({
+        status,
+        analytics,
+        loadedCards,
+        totalCards,
+        errors,
+        message,
+      });
     });
   });
 
-  container.querySelectorAll('.stats-price-top-card-item[data-set-id]').forEach((item) => {
+  container.querySelectorAll('[data-set-id]').forEach((item) => {
     item.addEventListener('click', () => {
       const setId = item.dataset.setId;
       if (!setId) return;
@@ -5162,6 +5390,7 @@ function renderStatsPriceSnapshot({
 function renderStatsPriceLoading({ requestId, loadedCards = 0, totalCards = 0 } = {}) {
   state.statsPrice.requestId = String(requestId || '');
   state.statsPrice.status = 'loading';
+  state.statsPrice.items = [];
   state.statsPrice.loadedCards = Number(loadedCards || 0);
   state.statsPrice.totalCards = Number(totalCards || 0);
   state.statsPrice.errors = 0;
@@ -5174,11 +5403,12 @@ function renderStatsPriceLoading({ requestId, loadedCards = 0, totalCards = 0 } 
   });
 }
 
-function renderStatsPricePartial(analytics, { requestId, loadedCards = 0, totalCards = 0, errors = 0 } = {}) {
+function renderStatsPricePartial(analytics, { requestId, loadedCards = 0, totalCards = 0, errors = 0, items = [] } = {}) {
   if (!isActiveStatsPriceRequest(requestId)) return;
   state.statsPrice.status = 'partial';
   state.statsPrice.totals = analytics;
   state.statsPrice.bySet = analytics?.setBreakdown || [];
+  state.statsPrice.items = Array.isArray(items) ? items : [];
   state.statsPrice.loadedCards = Number(loadedCards || 0);
   state.statsPrice.totalCards = Number(totalCards || 0);
   state.statsPrice.errors = Number(errors || 0);
@@ -5192,12 +5422,13 @@ function renderStatsPricePartial(analytics, { requestId, loadedCards = 0, totalC
   });
 }
 
-function renderStatsPriceFinal(analytics, { requestId, loadedCards = 0, totalCards = 0, errors = 0 } = {}) {
+function renderStatsPriceFinal(analytics, { requestId, loadedCards = 0, totalCards = 0, errors = 0, items = [] } = {}) {
   if (!isActiveStatsPriceRequest(requestId)) return;
   state.statsPrice.status = 'final';
   state.statsPrice.totals = analytics;
   state.statsPrice.bySet = analytics?.setBreakdown || [];
   state.statsPrice.topCards = analytics?.topCard ? [analytics.topCard] : [];
+  state.statsPrice.items = Array.isArray(items) ? items : [];
   state.statsPrice.loadedCards = Number(loadedCards || 0);
   state.statsPrice.totalCards = Number(totalCards || 0);
   state.statsPrice.errors = Number(errors || 0);
@@ -5292,6 +5523,8 @@ async function loadStatsPriceAnalyticsLazy({ requestId } = {}) {
 
   state.statsPrice.requestId = normalizedRequestId;
   state.statsPrice.status = 'loading';
+  state.statsPrice.activeTab = state.statsPrice.activeTab || 'dashboard';
+  state.statsPrice.items = [];
 
   const candidates = await buildCollectedCardCandidates();
   if (!isActiveStatsPriceRequest(normalizedRequestId)) return;
@@ -5303,6 +5536,7 @@ async function loadStatsPriceAnalyticsLazy({ requestId } = {}) {
       loadedCards: 0,
       totalCards: 0,
       errors: 0,
+      items: [],
     });
     return;
   }
@@ -5348,6 +5582,7 @@ async function loadStatsPriceAnalyticsLazy({ requestId } = {}) {
       loadedCards,
       totalCards,
       errors,
+      items: resolvedItems,
     });
   }
 
@@ -5357,6 +5592,7 @@ async function loadStatsPriceAnalyticsLazy({ requestId } = {}) {
     loadedCards,
     totalCards,
     errors,
+    items: resolvedItems,
   });
 }
 
