@@ -1,6 +1,7 @@
 import { CONFIG } from '../core/config.js';
 import {
   buildCardmarketProductUrl as sharedBuildCardmarketProductUrl,
+  buildSetCardAssignmentMap as sharedBuildSetCardAssignmentMap,
   extractCardmarketProductId as sharedExtractCardmarketProductId,
   formatCardmarketEntryLabel as sharedFormatCardmarketEntryLabel,
   formatCardmarketEntryTitle as sharedFormatCardmarketEntryTitle,
@@ -9,7 +10,7 @@ import {
   promoteCardmarketUrlsForCards as sharedPromoteCardmarketUrlsForCards,
   resolveCardmarketEntryForCardFromSetPayload as sharedResolveCardmarketEntryForCardFromSetPayload,
   resolveCardmarketEntryFromSetPayload as sharedResolveCardmarketEntryFromSetPayload,
-} from './cardmarket-ui-helpers.js';
+} from './cardmarket-ui-helpers.js?v=20260426-duplicate-price-rank3';
 
 const REMOTE_CARDMARKET_BASE = `${String(CONFIG?.APIS?.VERA_BASE || '').replace(/\/$/, '')}/cardmarket`;
 
@@ -18,6 +19,7 @@ let nameIndexCache = null;
 let trackerSetIndexCache = null;
 const setPayloadCache = new Map();
 const inferredExpansionCache = new Map();
+const setAssignmentMapCache = new Map(); // expansionId → { sourceCards, map }
 
 async function fetchJson(url, { signal } = {}) {
   const response = await fetch(url, { signal });
@@ -93,6 +95,32 @@ function extractCardHintTokens(card = {}) {
   });
 
   return Array.from(tokens);
+}
+
+function extractPreferredCardNames(card = {}) {
+  return Array.from(new Set(
+    [card?.vera_name, card?.tcgdex_name, card?.name]
+      .map((value) => normalizeMatcherText(value))
+      .filter(Boolean)
+  ));
+}
+
+function hasDuplicateNameContext(card = {}, sourceCards = []) {
+  if (!Array.isArray(sourceCards) || sourceCards.length < 2) return false;
+
+  const targetNames = extractPreferredCardNames(card);
+  if (!targetNames.length) return false;
+
+  let matchCount = 0;
+  for (const sourceCard of sourceCards) {
+    const sourceNames = extractPreferredCardNames(sourceCard);
+    if (sourceNames.some((name) => targetNames.includes(name))) {
+      matchCount += 1;
+      if (matchCount > 1) return true;
+    }
+  }
+
+  return false;
 }
 
 function normalizeCodeKey(value = '') {
@@ -203,10 +231,6 @@ export async function resolveCardmarketEntryByUrl(cardmarketUrl, { signal, force
 
 export async function resolveCardmarketEntryForCard(card = {}, { cards = [], signal, forceRefresh = false } = {}) {
   const directUrl = getCardmarketUrlFromCard(card);
-  if (directUrl) {
-    const directEntry = await resolveCardmarketEntryByUrl(directUrl, { signal, forceRefresh });
-    if (directEntry) return directEntry;
-  }
 
   const setId = String(card?.setId || '').trim();
   let expansionId = !forceRefresh && setId ? inferredExpansionCache.get(setId) : '';
@@ -223,10 +247,26 @@ export async function resolveCardmarketEntryForCard(card = {}, { cards = [], sig
     }
   }
 
-  if (!expansionId) return null;
+  if (!expansionId) {
+    return directUrl ? resolveCardmarketEntryByUrl(directUrl, { signal, forceRefresh }) : null;
+  }
 
   const setPayload = await loadCardmarketSetPayload(expansionId, { signal, forceRefresh });
-  return resolveCardmarketEntryForCardFromSetPayload(card, setPayload, { sourceCards: cards });
+
+  // Build or reuse the set-level assignment map (blacklisting already-assigned products per set)
+  const cached = !forceRefresh && setAssignmentMapCache.get(expansionId);
+  let assignmentMap;
+  if (cached && cached.sourceCards === cards) {
+    assignmentMap = cached.map;
+  } else {
+    assignmentMap = sharedBuildSetCardAssignmentMap(cards, setPayload);
+    setAssignmentMapCache.set(expansionId, { sourceCards: cards, map: assignmentMap });
+  }
+
+  const matchedEntry = assignmentMap.get(card) ?? null;
+  if (matchedEntry) return matchedEntry;
+
+  return directUrl ? resolveCardmarketEntryByUrl(directUrl, { signal, forceRefresh }) : null;
 }
 
 export async function promoteCardmarketUrlsForCards(cards = [], { productIndex = null, setPayload = null, signal, forceRefresh = false } = {}) {

@@ -7,7 +7,7 @@ import {
   resolvePreferredTcgdexSetBases
 } from '../pokecode-compat.js?v=20260507a';
 import { buildSetRecordFromSources, resolveDisplayCard, resolveDisplaySet } from './schema-contract.js?v=20260507a';
-import { promoteCardmarketUrlsForCards } from './cardmarket-data.js?v=20260410-loginfix1';
+import { promoteCardmarketUrlsForCards } from './cardmarket-data.js?v=20260426-duplicate-price-rank3';
 
 // ── Interne Hilfsfunktionen ──────────────────────────────────────
 

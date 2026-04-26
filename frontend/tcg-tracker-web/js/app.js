@@ -23,7 +23,7 @@ import {
   resolveCardmarketEntryForCard,
   formatCardmarketEntryLabel,
   formatCardmarketEntryTitle
-} from './data/cardmarket-data.js?v=20260410-loginmime1';
+} from './data/cardmarket-data.js?v=20260426-duplicate-price-rank3';
 import {
   buildCombinedSearchDropdownOptions,
   buildSearchProgressLabel,
@@ -2532,6 +2532,7 @@ async function applySpreadsheetSelection(id) {
     updateSpreadsheetInfoBar();
     await loadSets();
     setSpreadsheetDialogError('');
+    dom.dialog?.close();
   } catch (err) {
     CONFIG.SPREADSHEET_ID = previousId;
     resetSheetsDataCaches();
@@ -5037,14 +5038,47 @@ function renderStatsPriceSnapshot({
     }).join('')
     : '<li class="stats-price-empty">Noch keine Set-Preise verfuegbar.</li>';
 
-  const topCard = analytics?.topCard || null;
   const totalValue = analytics?.totalValue || 0;
   const averageValue = analytics?.avgCollectedCardValue || 0;
   const collectedCards = analytics?.collectedCards || 0;
   const pricedCollectedCards = analytics?.pricedCollectedCards || 0;
+  const priceCoverage = analytics?.priceCoverage || 0;
+  const topCards = Array.isArray(analytics?.topCards) ? analytics.topCards.slice(0, 5) : [];
+  const distribution = analytics?.distribution || { under1: 0, from1to5: 0, from5to20: 0, over20: 0 };
   const completionLabel = totalCards > 0
     ? `${formatStatsPriceNumber(loadedCards)} / ${formatStatsPriceNumber(totalCards)} Karten geladen`
     : 'Sammlung wird analysiert';
+
+  const topCardsMarkup = topCards.length
+    ? topCards.map((card, index) => `
+        <li class="stats-price-top-card-item" data-set-id="${String(card.setId || '').replace(/"/g, '&quot;')}">
+          <span class="stats-price-top-rank">${index + 1}</span>
+          <div class="stats-price-top-info">
+            <strong>${card.cardName}</strong>
+            <small>${card.setName}</small>
+          </div>
+          <strong class="stats-price-top-value">${formatStatsPriceEuro(card.value)}</strong>
+        </li>`).join('')
+    : '<li class="stats-price-empty">Noch keine Karten bewertet.</li>';
+
+  const distTotal = Math.max(1, distribution.under1 + distribution.from1to5 + distribution.from5to20 + distribution.over20);
+  const distBuckets = [
+    { label: '< 1\u00a0\u20ac', count: distribution.under1, cls: 'tier-low' },
+    { label: '1\u20135\u00a0\u20ac', count: distribution.from1to5, cls: 'tier-mid' },
+    { label: '5\u201320\u00a0\u20ac', count: distribution.from5to20, cls: 'tier-high' },
+    { label: '> 20\u00a0\u20ac', count: distribution.over20, cls: 'tier-rare' },
+  ];
+  const distMarkup = distBuckets.map((bucket) => {
+    const pct = Math.round((bucket.count / distTotal) * 100);
+    return `
+      <div class="stats-price-dist-row">
+        <span class="stats-price-dist-label">${bucket.label}</span>
+        <div class="stats-price-dist-bar-wrap">
+          <div class="stats-price-dist-bar ${bucket.cls}" style="width:${pct}%"></div>
+        </div>
+        <span class="stats-price-dist-meta">${formatStatsPriceNumber(bucket.count)}<small> (${pct}%)</small></span>
+      </div>`;
+  }).join('');
 
   container.dataset.state = status;
   container.innerHTML = `
@@ -5052,7 +5086,7 @@ function renderStatsPriceSnapshot({
       <header class="stats-price-head">
         <div>
           <span class="stats-price-kicker">Cardmarket Analyse</span>
-          <h3>Preisradar fuer deine Sammlung</h3>
+          <h3>Preisradar f&#xfc;r deine Sammlung</h3>
           <p>${message || completionLabel}</p>
         </div>
         <div class="stats-price-progress-wrap">
@@ -5068,37 +5102,55 @@ function renderStatsPriceSnapshot({
             <strong>${formatStatsPriceEuro(totalValue)}</strong>
           </article>
           <article class="stats-price-card">
-            <span>Durchschnitt pro Karte</span>
+            <span>&#216; Preis / bewertet</span>
             <strong>${formatStatsPriceEuro(averageValue)}</strong>
           </article>
           <article class="stats-price-card">
-            <span>Karten mit Preis</span>
-            <strong>${formatStatsPriceNumber(pricedCollectedCards)}</strong>
-            <small>von ${formatStatsPriceNumber(collectedCards)} gesammelt</small>
+            <span>Bewertet</span>
+            <strong>${Math.round(priceCoverage)}%</strong>
+            <small>${formatStatsPriceNumber(pricedCollectedCards)} von ${formatStatsPriceNumber(collectedCards)}</small>
           </article>
           <article class="stats-price-card">
-            <span>Unaufgeloeste Preise</span>
-            <strong>${formatStatsPriceNumber(errors)}</strong>
+            <span>Ohne Preis</span>
+            <strong>${formatStatsPriceNumber(collectedCards - pricedCollectedCards)}</strong>
+            <small>${errors > 0 ? `${formatStatsPriceNumber(errors)} Fehler` : 'keine Fehler'}</small>
           </article>
-        </section>
-
-        <section class="stats-price-featured-card">
-          <span class="stats-price-featured-kicker">Top Karte</span>
-          <strong>${topCard ? topCard.cardName : 'Noch keine Preisdaten'}</strong>
-          <p>${topCard ? `${topCard.setName} · ${formatStatsPriceEuro(topCard.value)}` : 'Sobald Preise geladen sind, erscheint hier dein Spitzenwert.'}</p>
         </section>
 
         <section class="stats-price-sets">
           <div class="stats-price-sets-head">
             <span>Top Sets nach Wert</span>
-            <strong>${analytics?.topSet ? analytics.topSet.setName : '—'}</strong>
+            <strong>${analytics?.topSet ? analytics.topSet.setName : '&#8212;'}</strong>
           </div>
           <ol class="stats-price-set-list">${topSetMarkup}</ol>
         </section>
       </div>
+
+      <section class="stats-price-bottom-row">
+        <div class="stats-price-top-cards">
+          <div class="stats-price-sub-head">
+            <span class="stats-price-kicker">Wertvollste Karten</span>
+          </div>
+          <ol class="stats-price-top-card-list">${topCardsMarkup}</ol>
+        </div>
+        <div class="stats-price-distribution">
+          <div class="stats-price-sub-head">
+            <span class="stats-price-kicker">Preisverteilung</span>
+          </div>
+          <div class="stats-price-dist-grid">${distMarkup}</div>
+        </div>
+      </section>
     </article>`;
 
   container.querySelectorAll('.stats-price-set-item[data-set-id]').forEach((item) => {
+    item.addEventListener('click', () => {
+      const setId = item.dataset.setId;
+      if (!setId) return;
+      navigate(`set/${encodeURIComponent(setId)}`);
+    });
+  });
+
+  container.querySelectorAll('.stats-price-top-card-item[data-set-id]').forEach((item) => {
     item.addEventListener('click', () => {
       const setId = item.dataset.setId;
       if (!setId) return;
@@ -6711,8 +6763,15 @@ function getCardmarketPriceValue(prices = {}, ...keys) {
 }
 
 function getCardmarketPriceCacheKey(card = {}) {
+  const setId = String(card?.setId || '').trim();
+  const number = String(card?.number || '').trim();
+  const name = String(card?.name || '').trim();
+  if (setId || number || name) {
+    return `${setId}::${number}::${name}`;
+  }
+
   const normalizedUrl = String(card?.cardmarketUrl || '').trim();
-  return normalizedUrl || `${String(card?.setId || '').trim()}::${String(card?.number || '').trim()}::${String(card?.name || '').trim()}`;
+  return normalizedUrl;
 }
 
 function getCardmarketPriceDetails(prices = {}, { reverseHolo = false } = {}) {
@@ -6893,6 +6952,7 @@ function applyCardmarketPriceSummary(linkEl, summary, { compact = false, preferR
     linkEl.textContent = compact ? `🛒 CM · ${presentation.label}` : `🛒 Cardmarket · ${presentation.label}`;
   }
 }
+
 
 async function loadCardmarketPriceSummary(card = {}) {
   const cacheKey = getCardmarketPriceCacheKey(card);

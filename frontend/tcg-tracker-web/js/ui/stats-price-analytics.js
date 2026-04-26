@@ -29,7 +29,8 @@ export function computePriceAnalyticsFromSummaries(items = []) {
   let collectedCards = 0;
   let pricedCollectedCards = 0;
   let totalValue = 0;
-  let topCard = null;
+  const pricedItems = [];
+  const distribution = { under1: 0, from1to5: 0, from5to20: 0, over20: 0 };
 
   for (const item of safeItems) {
     if (!item?.isCollected) continue;
@@ -59,16 +60,23 @@ export function computePriceAnalyticsFromSummaries(items = []) {
     setEntry.value += value;
     setEntry.pricedCards += 1;
 
-    if (!topCard || value > topCard.value) {
-      topCard = {
-        cardKey: String(item?.cardKey || '').trim(),
-        cardName: String(item?.cardName || '').trim() || 'Unbekannte Karte',
-        setId,
-        setName,
-        value,
-      };
-    }
+    if (value < 1) distribution.under1 += 1;
+    else if (value < 5) distribution.from1to5 += 1;
+    else if (value < 20) distribution.from5to20 += 1;
+    else distribution.over20 += 1;
+
+    pricedItems.push({
+      cardKey: String(item?.cardKey || '').trim(),
+      cardName: String(item?.cardName || '').trim() || 'Unbekannte Karte',
+      setId,
+      setName,
+      value,
+    });
   }
+
+  const topCards = pricedItems
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 10);
 
   const setBreakdown = Array.from(setTotals.values())
     .sort((a, b) => {
@@ -91,9 +99,12 @@ export function computePriceAnalyticsFromSummaries(items = []) {
     collectedCards,
     pricedCollectedCards,
     totalValue,
-    avgCollectedCardValue: collectedCards > 0 ? totalValue / collectedCards : 0,
+    avgCollectedCardValue: pricedCollectedCards > 0 ? totalValue / pricedCollectedCards : 0,
+    priceCoverage: collectedCards > 0 ? (pricedCollectedCards / collectedCards) * 100 : 0,
     topSet,
-    topCard,
+    topCard: topCards[0] || null,
+    topCards,
     setBreakdown,
+    distribution,
   };
 }
