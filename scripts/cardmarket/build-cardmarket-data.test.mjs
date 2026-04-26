@@ -10,6 +10,9 @@ import {
   buildCardmarketArtifacts,
   writeArtifactsToDirectory,
 } from './lib/build-helpers.mjs';
+import {
+  enrichSinglesWithCollectorNumbers,
+} from './build-cardmarket-data.mjs';
 
 test('extractProductsList supports Cardmarket object payloads', () => {
   const payload = {
@@ -490,6 +493,44 @@ test('buildCardmarketArtifacts falls back to inferred expansion ids for HS set n
 
   assert.equal(artifacts.index.tracker.bySetId.hgss2, '1567');
   assert.equal(artifacts.index.tracker.bySetName['hs unleashed'], '1567');
+});
+
+test('enrichSinglesWithCollectorNumbers annotates duplicate metacards from product page titles', async () => {
+  const singlesPayload = {
+    products: [
+      {
+        idProduct: 275238,
+        name: 'Alakazam [Energy Jump | Psychic]',
+        idExpansion: 1538,
+        idMetacard: 213121,
+      },
+      {
+        idProduct: 275260,
+        name: 'Alakazam [Energy Jump | Psychic]',
+        idExpansion: 1538,
+        idMetacard: 213121,
+      },
+      {
+        idProduct: 275259,
+        name: 'Aerodactyl [Ancient Wind | Rising Lunge]',
+        idExpansion: 1538,
+        idMetacard: 213120,
+      }
+    ]
+  };
+
+  const enriched = await enrichSinglesWithCollectorNumbers(singlesPayload, {
+    fetchProductPage: async (productId) => {
+      if (String(productId) === '275238') return '<title>Simsala (SK H1) - Cardmarket</title>';
+      if (String(productId) === '275260') return '<title>Simsala (SK 2) - Cardmarket</title>';
+      throw new Error(`Unexpected product page fetch: ${productId}`);
+    }
+  });
+
+  const byProductId = Object.fromEntries(enriched.products.map((product) => [String(product.idProduct), product]));
+  assert.equal(byProductId['275238'].collectorNumber, 'H1');
+  assert.equal(byProductId['275260'].collectorNumber, '2');
+  assert.equal(byProductId['275259'].collectorNumber, undefined);
 });
 
 test('writeArtifactsToDirectory minifies generated json files', async () => {
