@@ -1558,7 +1558,7 @@ function isConfiguredSupportUrl(url) {
 function resolveSupportTarget(kind) {
   const supportConfig = CONFIG.SUPPORT || {};
   const directUrl = String(supportConfig.channels?.[kind] || '').trim();
-  const fallbackUrl = String(supportConfig.fallbackUrls?.[kind] || '../../kontakt.html#projektkontakt').trim();
+  const fallbackUrl = String(supportConfig.fallbackUrls?.[kind] || '../kontakt.html#projektkontakt').trim();
   return {
     directUrl,
     fallbackUrl: new URL(fallbackUrl, window.location.href).toString()
@@ -5275,6 +5275,8 @@ async function buildCollectedCardCandidates() {
         setName,
         cardName: String(card?.name || card?.vera_name || card?.number || 'Unbekannte Karte'),
         card: { ...card, setId },
+        sourceCard: card,
+        sourceCards: Array.isArray(cards) ? cards : [],
         isCollected,
         isReverseHolo: Boolean(mapEntry?.rh && mapEntry?.g)
       });
@@ -5316,7 +5318,10 @@ async function loadStatsPriceAnalyticsLazy({ requestId } = {}) {
 
     const chunkResults = await mapWithConcurrency(chunk, STATS_PRICE_CONCURRENCY, async (candidate) => {
       try {
-        const summary = await loadCardmarketPriceSummary(candidate.card);
+        const summary = await loadCardmarketPriceSummary(candidate.card, {
+          cards: candidate.sourceCards,
+          resolverCard: candidate.sourceCard,
+        });
         const value = pickCardPriceFromSummary(summary, { preferReverseHolo: candidate.isReverseHolo });
         return {
           ...candidate,
@@ -6954,7 +6959,7 @@ function applyCardmarketPriceSummary(linkEl, summary, { compact = false, preferR
 }
 
 
-async function loadCardmarketPriceSummary(card = {}) {
+async function loadCardmarketPriceSummary(card = {}, { cards = null, resolverCard = null } = {}) {
   const cacheKey = getCardmarketPriceCacheKey(card);
   if (!cacheKey.trim()) return null;
 
@@ -6966,9 +6971,16 @@ async function loadCardmarketPriceSummary(card = {}) {
     return cardmarketPriceSummaryPending.get(cacheKey);
   }
 
-  const pending = resolveCardmarketEntryForCard(card, {
-    cards: Array.isArray(state?.cards) ? state.cards : []
-  })
+  const sourceCards = Array.isArray(cards)
+    ? cards
+    : (Array.isArray(state?.cards) ? state.cards : []);
+
+  const pending = resolveCardmarketEntryForCard(
+    resolverCard && typeof resolverCard === 'object' ? resolverCard : card,
+    {
+    cards: sourceCards
+    }
+  )
     .then((entry) => {
       const normalizedUrl = String(card?.cardmarketUrl || '').trim();
       const directUrl = entry?.cardmarketProductId

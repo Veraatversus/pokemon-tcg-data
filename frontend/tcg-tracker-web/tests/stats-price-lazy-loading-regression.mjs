@@ -37,3 +37,12 @@ test('request guard protects against stale async updates', async () => {
   assert.match(source, /if \(!isActiveStatsPriceRequest\(requestId\)\) return;/);
   assert.match(source, /if \(!isActiveStatsPriceRequest\(normalizedRequestId\)\) return;/);
 });
+
+test('stats lazy loading resolves prices with set-scoped sourceCards context', async () => {
+  const source = await readAppSource();
+
+  assert.match(
+    source,
+    /loadCardmarketPriceSummary\(candidate\.card,\s*\{\s*cards:\s*candidate\.sourceCards,\s*resolverCard:\s*candidate\.sourceCard,?\s*\}\)/
+  );
+});

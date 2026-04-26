@@ -138,7 +138,7 @@ test('inferCardmarketExpansionIdFromCards falls back to bySetName when neither b
   assert.equal(inferCardmarketExpansionIdFromCards(cards, productIndex, { trackerSetIndex }), '1528');
 });
 
-test('resolveCardmarketEntryForCardFromSetPayload disambiguates same-name cards using attack names', () => {
+test('resolveCardmarketEntryForCardFromSetPayload nimmt bei gleichnamigen Treffern immer das erste Vorkommen', () => {
   const card = {
     vera_name: 'Pikachu',
     tcgdex_name: 'Pikachu',
@@ -167,8 +167,8 @@ test('resolveCardmarketEntryForCardFromSetPayload disambiguates same-name cards 
 
   const result = resolveCardmarketEntryForCardFromSetPayload(card, setPayload);
 
-  assert.equal(result?.cardmarketProductId, 1002);
-  assert.equal(result?.prices?.trend, 4.6);
+  assert.equal(result?.cardmarketProductId, 1001);
+  assert.equal(result?.prices?.trend, 1.2);
 });
 
 test('resolveCardmarketEntryForCardFromSetPayload falls back to source names when the localized display name differs', () => {
@@ -349,7 +349,7 @@ test('frontend wrapper forwards sourceCards for duplicate-name disambiguation', 
   assert.equal(result?.prices?.trend, 4.6);
 });
 
-test('resolveCardmarketEntryForCardFromSetPayload disambiguates using variant-name occurrence when candidates share base names', () => {
+test('resolveCardmarketEntryForCardFromSetPayload nutzt sourceCards-Vorkommen ohne Variantenheuristik', () => {
   const cards = [
     {
       number: '79',
@@ -385,7 +385,7 @@ test('resolveCardmarketEntryForCardFromSetPayload disambiguates using variant-na
   const result2 = resolveCardmarketEntryForCardFromSetPayload(cards[1], setPayload, { sourceCards: cards });
 
   assert.equal(result1?.cardmarketProductId, 275339);
-  assert.equal(result2?.cardmarketProductId, 275340);
+  assert.equal(result2?.cardmarketProductId, 275339);
 });
 
 test('formatCardmarketEntryLabel prefers the trend price for compact UI badges', () => {
@@ -404,7 +404,7 @@ test('formatCardmarketEntryTitle summarizes the available price points for toolt
   assert.equal(formatCardmarketEntryTitle(entry), 'Cardmarket: Trend 4,60 € · AVG 5,00 € · Low 3,00 €');
 });
 
-test('resolveCardmarketEntryForCardFromSetPayload disambiguates identically-named products in frontend using stored collector numbers', () => {
+test('resolveCardmarketEntryForCardFromSetPayload in frontend ordnet gleichnamige Produkte nur nach Vorkommen zu', () => {
   const cards = [
     {
       number: '2',
@@ -441,10 +441,10 @@ test('resolveCardmarketEntryForCardFromSetPayload disambiguates identically-name
   };
 
   const result1 = resolveCardmarketEntryForCardFromSetPayload(cards[0], setPayload, { sourceCards: cards });
-  assert.equal(result1?.cardmarketProductId, 275260);
+  assert.equal(result1?.cardmarketProductId, 275238);
 
   const result2 = resolveCardmarketEntryForCardFromSetPayload(cards[1], setPayload, { sourceCards: cards });
-  assert.equal(result2?.cardmarketProductId, 275238);
+  assert.equal(result2?.cardmarketProductId, 275260);
 });
 
 test('resolveCardmarketEntryForCardFromSetPayload in frontend uses occurrence order when collector numbers are unavailable', () => {
@@ -529,7 +529,7 @@ test('resolveCardmarketEntryForCardFromSetPayload in frontend follows sourceCard
   assert.equal(result2?.cardmarketProductId, 275238);
 });
 
-test('resolveCardmarketEntryForCardFromSetPayload in frontend maps duplicates by id suffix when number is missing', () => {
+test('resolveCardmarketEntryForCardFromSetPayload in frontend nutzt ohne Objekt-Match das erste Vorkommen', () => {
   const sourceCards = [
     {
       number: '2',
@@ -561,10 +561,10 @@ test('resolveCardmarketEntryForCardFromSetPayload in frontend maps duplicates by
   };
 
   const result = resolveCardmarketEntryForCardFromSetPayload(renderedCard, setPayload, { sourceCards });
-  assert.equal(result?.cardmarketProductId, 275238);
+  assert.equal(result?.cardmarketProductId, 275260);
 });
 
-test('resolveCardmarketEntryForCardFromSetPayload in frontend falls back to normal-price ranking for holo duplicates without collector numbers', () => {
+test('resolveCardmarketEntryForCardFromSetPayload in frontend nutzt bei Duplikaten keine Preis-Heuristik', () => {
   const cards = [
     {
       id: 'ecard3-30',
@@ -603,13 +603,13 @@ test('resolveCardmarketEntryForCardFromSetPayload in frontend falls back to norm
   };
 
   const result1 = resolveCardmarketEntryForCardFromSetPayload(cards[0], setPayload, { sourceCards: cards });
-  assert.equal(result1?.cardmarketProductId, 275288);
+  assert.equal(result1?.cardmarketProductId, 275254);
 
   const result2 = resolveCardmarketEntryForCardFromSetPayload(cards[1], setPayload, { sourceCards: cards });
-  assert.equal(result2?.cardmarketProductId, 275254);
+  assert.equal(result2?.cardmarketProductId, 275288);
 });
 
-test('resolveCardmarketEntryForCardFromSetPayload in frontend narrows to the matching metacard duplicate group', () => {
+test('resolveCardmarketEntryForCardFromSetPayload in frontend ignoriert Metacard-Gruppen und nutzt Reihenfolge', () => {
   const cards = [
     {
       id: 'ecard3-30',
@@ -654,8 +654,8 @@ test('resolveCardmarketEntryForCardFromSetPayload in frontend narrows to the mat
   };
 
   const result1 = resolveCardmarketEntryForCardFromSetPayload(cards[0], setPayload, { sourceCards: cards });
-  assert.equal(result1?.cardmarketProductId, 275288);
+  assert.equal(result1?.cardmarketProductId, 275254);
 
   const result2 = resolveCardmarketEntryForCardFromSetPayload(cards[1], setPayload, { sourceCards: cards });
-  assert.equal(result2?.cardmarketProductId, 275254);
+  assert.equal(result2?.cardmarketProductId, 275288);
 });

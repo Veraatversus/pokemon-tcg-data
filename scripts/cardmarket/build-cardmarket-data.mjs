@@ -4,7 +4,6 @@ import { fileURLToPath } from 'node:url';
 
 import {
   buildCardmarketArtifacts,
-  extractProductsList,
   writeArtifactsToDirectory,
 } from './lib/build-helpers.mjs';
 
@@ -27,125 +26,6 @@ async function fetchJson(url) {
   return response.json();
 }
 
-async function fetchProductPage(productId, { timeoutMs = 15000 } = {}) {
-  const timeoutSignal = Number.isFinite(timeoutMs) && timeoutMs > 0
-    ? AbortSignal.timeout(timeoutMs)
-    : undefined;
-  const response = await fetch(`https://www.cardmarket.com/de/Pokemon/Products?idProduct=${encodeURIComponent(productId)}`, {
-    signal: timeoutSignal,
-    headers: {
-      'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36',
-      accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      'accept-language': 'de-DE,de;q=0.9,en;q=0.8',
-      referer: 'https://www.cardmarket.com/de/Pokemon',
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch Cardmarket product ${productId}: ${response.status} ${response.statusText}`);
-  }
-
-  return response.text();
-}
-
-function normalizeMatcherText(value = '') {
-  return String(value || '')
-    .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim();
-}
-
-function extractBaseCardName(value = '') {
-  return String(value || '').split('[')[0].trim();
-}
-
-function decodeHtmlEntities(value = '') {
-  return String(value || '')
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/&#39;/gi, "'")
-    .replace(/&quot;/gi, '"')
-    .replace(/&lt;/gi, '<')
-    .replace(/&gt;/gi, '>');
-}
-
-export function extractCollectorNumberFromProductPageHtml(html = '') {
-  const titleMatch = String(html || '').match(/<title[^>]*>([^<]+)<\/title>/i);
-  const titleText = decodeHtmlEntities(titleMatch?.[1] || '');
-  const titleNumberMatch = titleText.match(/\(([A-Z0-9-]+\s+)?([A-Z]*\d+[A-Z]*)\)/i);
-  if (titleNumberMatch?.[2]) {
-    return String(titleNumberMatch[2]).trim().toUpperCase();
-  }
-
-  const plainText = decodeHtmlEntities(String(html || '').replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ');
-  const plainNumberMatch = plainText.match(/\bNummer\b\s*([A-Z]*\d+[A-Z]*)/i);
-  if (plainNumberMatch?.[1]) {
-    return String(plainNumberMatch[1]).trim().toUpperCase();
-  }
-
-  return '';
-}
-
-export async function enrichSinglesWithCollectorNumbers(singlesPayload, { fetchProductPage: fetchProductPageOverride = fetchProductPage } = {}) {
-  const products = extractProductsList(singlesPayload);
-  if (!Array.isArray(products) || !products.length) return singlesPayload;
-
-  const clonedProducts = products.map((product) => ({ ...product }));
-  const duplicateGroups = new Map();
-
-  clonedProducts.forEach((product, index) => {
-    const expansionId = String(product?.idExpansion || product?.expansionId || '').trim();
-    const metacardId = String(product?.idMetacard || product?.metacardId || '').trim();
-    const baseName = normalizeMatcherText(extractBaseCardName(product?.name || ''));
-    if (!expansionId || !metacardId || !baseName) return;
-
-    const key = `${expansionId}::${metacardId}::${baseName}`;
-    const group = duplicateGroups.get(key) || [];
-    group.push({ product, index });
-    duplicateGroups.set(key, group);
-  });
-
-  for (const group of duplicateGroups.values()) {
-    if (!Array.isArray(group) || group.length < 2) continue;
-
-    for (const entry of group) {
-      const productId = String(entry?.product?.idProduct || entry?.product?.productId || '').trim();
-      if (!productId) continue;
-
-      try {
-        const html = await fetchProductPageOverride(productId);
-        const collectorNumber = extractCollectorNumberFromProductPageHtml(html);
-        if (collectorNumber) {
-          clonedProducts[entry.index].collectorNumber = collectorNumber;
-        }
-      } catch {
-        // leave the duplicate unresolved when Cardmarket blocks an individual product page
-      }
-    }
-  }
-
-  if (Array.isArray(singlesPayload)) {
-    return clonedProducts;
-  }
-
-  if (Array.isArray(singlesPayload?.products)) {
-    return {
-      ...singlesPayload,
-      products: clonedProducts,
-    };
-  }
-
-  if (Array.isArray(singlesPayload?.productList)) {
-    return {
-      ...singlesPayload,
-      productList: clonedProducts,
-    };
-  }
-
-  return singlesPayload;
-}
 
 function validateArtifacts(artifacts) {
   if (!artifacts?.meta) throw new Error('Missing artifacts.meta');
@@ -197,77 +77,6 @@ async function loadTrackerReferenceData(repoRoot) {
   return { trackerSets, trackerCardsBySet };
 }
 
-export async function backfillCollectorNumbersInArtifactsDir(outputDir, {
-  fetchProductPage: fetchProductPageOverride = fetchProductPage,
-  setIds = null,
-} = {}) {
-  const setsDir = path.join(path.resolve(outputDir), 'sets');
-  let setFiles = [];
-  try {
-    setFiles = (await fs.readdir(setsDir)).filter((fileName) => fileName.endsWith('.json'));
-  } catch {
-    return { filesUpdated: 0, productsAnnotated: 0 };
-  }
-
-  let filesUpdated = 0;
-  let productsAnnotated = 0;
-
-  for (const fileName of setFiles) {
-    const setIdFromFile = String(fileName || '').replace(/\.json$/i, '').trim();
-    if (Array.isArray(setIds) && setIds.length && !setIds.includes(setIdFromFile)) {
-      continue;
-    }
-
-    const filePath = path.join(setsDir, fileName);
-    const payload = JSON.parse(await fs.readFile(filePath, 'utf8'));
-    const cards = Array.isArray(payload?.cards) ? payload.cards.map((card) => ({ ...card })) : [];
-    const groups = new Map();
-
-    cards.forEach((card, index) => {
-      const expansionId = String(card?.expansionId || '').trim();
-      const metacardId = String(card?.metacardId || '').trim();
-      const baseName = normalizeMatcherText(extractBaseCardName(card?.name || ''));
-      if (!expansionId || !metacardId || !baseName) return;
-
-      const key = `${expansionId}::${metacardId}::${baseName}`;
-      const group = groups.get(key) || [];
-      group.push({ card, index });
-      groups.set(key, group);
-    });
-
-    let changed = false;
-    for (const group of groups.values()) {
-      if (!Array.isArray(group) || group.length < 2) continue;
-      if (!group.some(({ card }) => !String(card?.collectorNumber || '').trim())) continue;
-
-      for (const entry of group) {
-        if (String(entry.card?.collectorNumber || '').trim()) continue;
-        const productId = String(entry.card?.cardmarketProductId || '').trim();
-        if (!productId) continue;
-
-        try {
-          const html = await fetchProductPageOverride(productId);
-          const collectorNumber = extractCollectorNumberFromProductPageHtml(html);
-          if (!collectorNumber) continue;
-
-          cards[entry.index].collectorNumber = collectorNumber;
-          productsAnnotated += 1;
-          changed = true;
-        } catch {
-          // skip individual product pages that Cardmarket rejects during local backfills
-        }
-      }
-    }
-
-    if (changed) {
-      filesUpdated += 1;
-      await fs.writeFile(filePath, JSON.stringify({ ...payload, cards }), 'utf8');
-    }
-  }
-
-  return { filesUpdated, productsAnnotated };
-}
-
 async function resolveDefaultOutputDirs(repoRoot) {
   const dirs = [process.env.CARDMARKET_OUTPUT_DIR || path.join(repoRoot, 'cardmarket')];
   const frontendOutputDir = process.env.CARDMARKET_FRONTEND_OUTPUT_DIR || path.join(repoRoot, 'frontend', 'tcg-tracker-web', 'cardmarket');
@@ -296,7 +105,7 @@ export async function buildDailyCardmarketData({ singlesUrl = DEFAULT_SINGLES_UR
     loadTrackerReferenceData(resolvedRepoRoot),
   ]);
 
-  const singlesPayload = await enrichSinglesWithCollectorNumbers(rawSinglesPayload);
+  const singlesPayload = rawSinglesPayload;
 
   const artifacts = buildCardmarketArtifacts({
     singlesPayload,
