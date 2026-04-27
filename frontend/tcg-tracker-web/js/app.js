@@ -80,6 +80,13 @@ import {
   createBulkActionsToolbar
 } from './ui/components.js?v=20260410-menu-template2';
 import {
+  createInitialSheetsRetryMetrics,
+  initSheetsWriteFeedback as initSheetsWriteFeedbackUi,
+  resetSheetsRetryMetrics as resetSheetsRetryMetricsUi,
+  renderSheetsRetryReport as renderSheetsRetryReportUi,
+  openSheetsRetryReportDialog as openSheetsRetryReportDialogUi
+} from './ui/sheets-retry-report.js';
+import {
   AdvancedSearch, SyncIndicator, CardCollectionTools,
   generateCollectionInsights, generateSetComparison,
   NotificationManager, PerformanceTracker
@@ -383,13 +390,7 @@ const state = {
   lastSaveError: null,
   saveStateTimer: null,
   manageSetsSelection: new Set(),
-  sheetsRetryMetrics: {
-    totalWrites: 0,
-    totalRetries: 0,
-    totalFailures: 0,
-    maxAttemptSeen: 0,
-    events: []
-  },
+  sheetsRetryMetrics: createInitialSheetsRetryMetrics(),
   undoStack: [],
   auditEntries: [],
   devCompletionMode: false,
@@ -777,121 +778,24 @@ function createDashboardVirtualFooter(total, visible) {
 }
 
 function initSheetsWriteFeedback() {
-  const pushRetryEvent = (type, details = {}) => {
-    const metrics = state.sheetsRetryMetrics;
-    const entry = {
-      type,
-      at: new Date().toISOString(),
-      ...details
-    };
-    metrics.events.unshift(entry);
-    if (metrics.events.length > 120) metrics.events.length = 120;
-    renderSheetsRetryReport();
-  };
-
-  window.addEventListener('sheets-write-retry', (event) => {
-    const details = event?.detail || {};
-    state.sheetsRetryMetrics.totalRetries += 1;
-    state.sheetsRetryMetrics.maxAttemptSeen = Math.max(
-      state.sheetsRetryMetrics.maxAttemptSeen,
-      Number(details.attempt || 0)
-    );
-    pushRetryEvent('retry', {
-      range: details.range || '',
-      attempt: Number(details.attempt || 0),
-      maxRetries: Number(details.maxRetries || 0),
-      delayMs: Number(details.delayMs || 0),
-      status: details.status || null
-    });
-    const retryLabel = `${details.attempt || '?'} / ${details.maxRetries || '?'}`;
-    const waitSeconds = Math.max(1, Math.ceil((Number(details.delayMs) || 0) / 1000));
-    const message = `Sheets-Write Retry ${retryLabel} (warte ${waitSeconds}s)`;
-    setGlobalStatus(message);
-    if (state.activeJob) {
-      updateJob(state.activeJob, state.activeJob.current, message);
-    }
-  });
-
-  window.addEventListener('sheets-write-success', (event) => {
-    const details = event?.detail || {};
-    state.sheetsRetryMetrics.totalWrites += 1;
-    state.sheetsRetryMetrics.maxAttemptSeen = Math.max(
-      state.sheetsRetryMetrics.maxAttemptSeen,
-      Number(details.attemptsUsed || 1)
-    );
-    if (Number(details.attemptsUsed || 1) > 1) {
-      pushRetryEvent('recovered', {
-        range: details.range || '',
-        attemptsUsed: Number(details.attemptsUsed || 1)
-      });
-    }
-  });
-
-  window.addEventListener('sheets-write-failed', (event) => {
-    const details = event?.detail || {};
-    state.sheetsRetryMetrics.totalFailures += 1;
-    pushRetryEvent('failed', {
-      range: details.range || '',
-      status: details.status || null,
-      message: details.message || ''
-    });
-    const message = `Sheets-Write fehlgeschlagen (${details.status || 'unbekannt'}): ${details.range || 'Range unbekannt'}`;
-    setGlobalStatus(message);
-    if (state.activeJob) {
-      updateJob(state.activeJob, state.activeJob.current, message);
-    }
+  initSheetsWriteFeedbackUi({
+    state,
+    renderSheetsRetryReport,
+    setGlobalStatus,
+    updateJob,
   });
 }
 
 function resetSheetsRetryMetrics() {
-  state.sheetsRetryMetrics = {
-    totalWrites: 0,
-    totalRetries: 0,
-    totalFailures: 0,
-    maxAttemptSeen: 0,
-    events: []
-  };
-  renderSheetsRetryReport();
+  resetSheetsRetryMetricsUi(state, renderSheetsRetryReport);
 }
 
 function renderSheetsRetryReport() {
-  if (dom.sheetsRetryStats) {
-    const metrics = state.sheetsRetryMetrics;
-    const retryRate = metrics.totalWrites > 0
-      ? Math.round((metrics.totalRetries / metrics.totalWrites) * 100)
-      : 0;
-    dom.sheetsRetryStats.innerHTML = `
-      <li><strong>Writes:</strong> ${metrics.totalWrites}</li>
-      <li><strong>Retries:</strong> ${metrics.totalRetries}</li>
-      <li><strong>Failures:</strong> ${metrics.totalFailures}</li>
-      <li><strong>Retry-Rate:</strong> ${retryRate}%</li>
-      <li><strong>Max Attempts:</strong> ${metrics.maxAttemptSeen || 1}</li>
-    `;
-  }
-
-  if (dom.sheetsRetryHistory) {
-    const events = state.sheetsRetryMetrics.events || [];
-    if (!events.length) {
-      dom.sheetsRetryHistory.innerHTML = '<li class="retry-empty">Noch keine Sheets-Retry-Ereignisse.</li>';
-      return;
-    }
-    dom.sheetsRetryHistory.innerHTML = events.map((entry) => {
-      const time = new Date(entry.at).toLocaleTimeString('de-DE');
-      const kind = entry.type === 'failed' ? 'Fehler' : entry.type === 'recovered' ? 'Erholt' : 'Retry';
-      const detail = entry.type === 'retry'
-        ? `Versuch ${entry.attempt || '?'} / ${entry.maxRetries || '?'} · ${(Math.ceil((entry.delayMs || 0) / 1000) || 0)}s`
-        : entry.type === 'failed'
-          ? `${entry.status || 'unbekannt'} · ${entry.message || 'ohne Fehlermeldung'}`
-          : `nach ${entry.attemptsUsed || '?'} Versuchen erfolgreich`;
-      return `<li class="retry-entry ${entry.type}"><span class="retry-time">${time}</span><span class="retry-kind">${kind}</span><span class="retry-detail">${detail}</span><span class="retry-range">${entry.range || 'Range unbekannt'}</span></li>`;
-    }).join('');
-  }
+  renderSheetsRetryReportUi({ dom, state });
 }
 
 function openSheetsRetryReportDialog() {
-  if (!dom.sheetsRetryDialog) return;
-  renderSheetsRetryReport();
-  dom.sheetsRetryDialog.showModal();
+  openSheetsRetryReportDialogUi(dom, renderSheetsRetryReport);
 }
 
 function initAuditAndSaveUi() {
@@ -2642,7 +2546,6 @@ async function loadSets() {
       try {
         const legacyIds = await recoverImportedIdsFromOverview();
         if (legacyIds.size > 0) {
-          console.log('[loadSets] Migriere', legacyIds.size, 'importierte Sets aus dem Übersichtssheet');
           const apiSets = await fetchAllAvailableSets();
           await syncOverviewWithApiSets(apiSets, legacyIds);
           overviewSets = await listSetsOverviewData().catch(() => []);
@@ -3338,7 +3241,6 @@ async function importSetsSequential(sets, options = {}) {
     const snapshotCount = (loadSnapshots() || []).length;
     const action = `Import: ${validSets.map(s => s.setName).join(', ')}${snapshotCount > 15 ? ' (oldest will be removed)' : ''}`;
     await createAutoSnapshot(action, currentCollection);
-    console.log('✅ Auto-snapshot vor Import erstellt');
   } catch (err) {
     console.warn('⚠️ Auto-snapshot vor Import fehlgeschlagen:', err);
     // Fehler blockiert nicht den Import
@@ -3447,7 +3349,6 @@ async function powerRefreshOverviewFromApi() {
     const currentCollection = state.collection || {};
     const action = `Power-Refresh: Sets Overview aktualisiert`;
     await createAutoSnapshot(action, currentCollection);
-    console.log('✅ Auto-snapshot vor Power-Refresh erstellt');
   } catch (err) {
     console.warn('⚠️ Auto-snapshot vor Power-Refresh fehlgeschlagen:', err);
     // Fehler blockiert nicht den Refresh
@@ -3469,14 +3370,7 @@ async function powerRefreshOverviewFromApi() {
     showToast(msg, 'success', 5000);
 
     if (report.changedSets.length) {
-      console.group('[PowerRefresh] geänderte Sets');
-      report.changedSets.slice(0, 50).forEach((entry) => {
-        console.log(`${entry.setId} (${entry.setName}): ${entry.changedFields.join(', ')}`);
-      });
-      if (report.changedSets.length > 50) {
-        console.log(`…und ${report.changedSets.length - 50} weitere`);
-      }
-      console.groupEnd();
+      setGlobalStatus(`${msg} (${report.changedSets.length} Sets mit Detailänderungen)`);
     }
   } catch (err) {
     console.error('[powerRefreshOverviewFromApi]', err);
@@ -3912,7 +3806,6 @@ async function runDataHealthCheck({ autoFix = false } = {}) {
     const currentCollection = state.collection || {};
     const action = `Auto-Fix: ${mismatchSets.length} Set(s) mit Abweichungen`;
     await createAutoSnapshot(action, currentCollection);
-    console.log('✅ Auto-snapshot vor Auto-Fix erstellt');
   } catch (err) {
     console.warn('⚠️ Auto-snapshot vor Auto-Fix fehlgeschlagen:', err);
     // Fehler blockiert nicht das Auto-Fix
@@ -8214,7 +8107,6 @@ async function bootstrap() {
       clientId: state.realtimeClientId,
       onEvent: applyIncomingRealtimeUpdate
     });
-    console.log('✅ Realtime sync initialized');
   } catch (err) {
     console.warn('⚠️ Realtime sync init failed:', err);
   }
@@ -8231,7 +8123,6 @@ async function bootstrap() {
       saveDashboardPreferences();
       renderDashboard();
     });
-    console.log('✅ Quick Filters initialized');
   } catch (err) {
     console.warn('⚠️ Quick Filters init failed:', err);
   }
@@ -8280,9 +8171,8 @@ async function bootstrap() {
     'parity-test': async () => {
       showToast('Parity-Test wird ausgeführt...', 'info');
       try {
-        const result = await runPokecodeParityCheck();
-        console.log('Parity-Test Result:', result);
-        showToast('Parity-Test abgeschlossen! Siehe Konsole.', 'success', 4000);
+        await runPokecodeParityCheck();
+        showToast('Parity-Test abgeschlossen.', 'success', 4000);
       } catch (err) {
         showToast(`Parity-Test fehlgeschlagen: ${err.message}`, 'error', 5000);
       }
@@ -8607,7 +8497,7 @@ async function bootstrap() {
         btn.style.cssText = 'padding: 12px; cursor: pointer;';
         btn.textContent = `${rarity.emoji} ${rarity.name}`;
         btn.addEventListener('click', () => {
-          console.log(`Filtere nach Raritär: ${rarity.id}`);
+          showToast(`Raritätsfilter ausgewählt: ${rarity.name}`, 'info', 2000);
         });
         grid.appendChild(btn);
       });
@@ -8719,7 +8609,6 @@ async function bootstrap() {
   };
   try {
     initCommandPalette(commandHandlers);
-    console.log('✅ Command Palette initialized');
   } catch (err) {
     console.warn('⚠️ Command Palette init failed:', err);
   }
@@ -8918,7 +8807,6 @@ if ('serviceWorker' in navigator) {
       const registration = await navigator.serviceWorker.register('./service-worker.js', {
         scope: './'
       });
-      console.log('✅ Service Worker registered:', registration);
 
       if (registration.waiting) {
         registration.waiting.postMessage({ type: 'SKIP_WAITING' });
@@ -8990,7 +8878,6 @@ window.addEventListener('beforeinstallprompt', (e) => {
 
 // Handle app installed event
 window.addEventListener('appinstalled', () => {
-  console.log('✅ PWA installfiert');
   showToast('🎉 App erfolgreich installiert!', 'success', 4000);
 });
 

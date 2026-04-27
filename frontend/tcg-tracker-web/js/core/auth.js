@@ -41,13 +41,10 @@ function gapiLoadClient() {
         throw new Error('gapi or gapi.load not available');
       }
 
-      console.log('[gapiLoadClient] calling gapi.load...');
       gapiRef.load('client', () => {
         clearTimeout(timeout);
         try {
-          console.log('[gapiLoadClient] gapi.load callback fired');
           gapiRef.client.init({}).then(() => {
-            console.log('[gapiLoadClient] gapi.client.init success');
             resolve();
           }).catch((error) => {
             console.error('[gapiLoadClient init error]', error);
@@ -153,7 +150,6 @@ function consumeRedirectTokenIfPresent() {
 function startRedirectSignIn(forceConsent = false) {
   try {
     const targetUrl = buildRedirectOAuthUrl(forceConsent);
-    console.info('[signIn] popup unavailable, switching to same-window redirect flow');
     globalThis.location.assign(targetUrl);
     return true;
   } catch (err) {
@@ -249,19 +245,10 @@ async function trySilentSignIn() {
  */
 export async function initAuth() {
   try {
-    console.log('[initAuth] start');
-    console.log('[initAuth] checking globals:', {
-      gapi: typeof gapi !== 'undefined',
-      google: typeof google !== 'undefined'
-    });
-    
     await waitForGlobal(() => Boolean(globalThis.gapi?.load), 'gapi.load');
-    console.log('[initAuth] loading gapi.client...');
     await gapiLoadClient();
-    console.log('[initAuth] gapi.client loaded');
     gapiInited = true;
 
-    console.log('[initAuth] initializing gis tokenClient...');
     await waitForGlobal(() => Boolean(globalThis.google?.accounts?.oauth2), 'google.accounts.oauth2');
     tokenClient = globalThis.google.accounts.oauth2.initTokenClient({
       client_id: CONFIG.GOOGLE_CLIENT_ID,
@@ -269,12 +256,10 @@ export async function initAuth() {
       ux_mode: 'popup',
       callback: () => {}  // wird pro Request überschrieben
     });
-    console.log('[initAuth] tokenClient created');
     gisInited = true;
 
     const redirectToken = consumeRedirectTokenIfPresent();
     if (redirectToken) {
-      console.log('[initAuth] consumed redirect token');
       saveToken(redirectToken);
       try {
         await loadDiscoveryDocs();
@@ -284,23 +269,16 @@ export async function initAuth() {
       return true;
     }
 
-    console.log('[initAuth] attempting restore from localStorage...');
     const restored = await tryRestoreToken();
-    console.log('[initAuth] restore result:', restored);
     if (restored) {
-      console.log('[initAuth] complete');
       return true;
     }
 
     if (shouldAttemptAutoLogin()) {
-      console.log('[initAuth] attempting silent reauth...');
       const silentlyReauthed = await trySilentSignIn();
-      console.log('[initAuth] silent reauth result:', silentlyReauthed);
-      console.log('[initAuth] complete');
       return silentlyReauthed;
     }
 
-    console.log('[initAuth] complete');
     return false;
   } catch (err) {
     console.error('[initAuth] failed:', err);

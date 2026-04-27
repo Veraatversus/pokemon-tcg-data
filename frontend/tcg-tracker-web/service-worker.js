@@ -8,6 +8,13 @@ const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v45`;
 const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v45`;
 const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v45`;
 
+const SW_DEBUG = false;
+
+function swDebug(...args) {
+  if (!SW_DEBUG) return;
+  console.log(...args);
+}
+
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -43,7 +50,7 @@ const STATIC_ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Caching static assets');
+      swDebug('[SW] Caching static assets');
       return cache.addAll(STATIC_ASSETS).catch((err) => {
         console.warn('[SW] Some static assets could not be cached:', err);
         // Don't fail install if some files are missing
@@ -62,7 +69,7 @@ self.addEventListener('activate', (event) => {
         cacheNames
           .filter((name) => name !== CACHE_NAME && name !== RUNTIME_CACHE && name !== IMAGE_CACHE)
           .map((name) => {
-            console.log('[SW] Deleting old cache:', name);
+            swDebug('[SW] Deleting old cache:', name);
             return caches.delete(name);
           })
       );
@@ -150,7 +157,7 @@ self.addEventListener('fetch', (event) => {
             // Try cache
             return caches.match(request).then((response) => {
               if (response) {
-                console.log('[SW] Serving from cache:', request.url);
+                swDebug('[SW] Serving from cache:', request.url);
                 return response;
               }
 
@@ -193,7 +200,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       caches.match(request).then((response) => {
         if (response) {
-          console.log('[SW] Serving from cache:', request.url);
+          swDebug('[SW] Serving from cache:', request.url);
           return response;
         }
 
@@ -278,4 +285,4 @@ self.addEventListener('push', (event) => {
   );
 });
 
-console.log('[SW] Service Worker loaded and ready');
+swDebug('[SW] Service Worker loaded and ready');
