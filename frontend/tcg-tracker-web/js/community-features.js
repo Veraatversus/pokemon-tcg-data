@@ -2,7 +2,7 @@
 // COMMUNITY & PUBLIC SHARING FEATURES
 // ══════════════════════════════════════════════════════════════════════════
 
-import { scopedStorageKey } from './config.js';
+import { scopedStorageKey } from './core/config.js';
 
 const STORAGE_KEYS = {
   shared_collections: scopedStorageKey('shared-collections'),

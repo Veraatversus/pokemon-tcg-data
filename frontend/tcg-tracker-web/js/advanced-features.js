@@ -2,7 +2,7 @@
 // VOICE COMMANDS & GESTURE RECOGNITION
 // ══════════════════════════════════════════════════════════════════════════
 
-import { scopedStoragePrefix } from './config.js';
+import { scopedStoragePrefix } from './core/config.js';
 
 export class VoiceCommandRecognizer {
   constructor(onCommand) {
@@ -43,7 +43,6 @@ export class VoiceCommandRecognizer {
 
     this.recognition.onstart = () => {
       this.isListening = true;
-      console.log('🎤 Listening...');
     };
 
     this.recognition.onresult = (event) => {
@@ -71,17 +70,12 @@ export class VoiceCommandRecognizer {
   }
 
   processVoiceCommand(transcript) {
-    console.log('🎤 Detected:', transcript);
-
     for (const [phrase, command] of Object.entries(this.commands)) {
       if (transcript.includes(phrase)) {
-        console.log('✅ Command:', command);
         this.onCommand(command);
         return;
       }
     }
-
-    console.log('⚠️ Unknown command');
   }
 
   start() {

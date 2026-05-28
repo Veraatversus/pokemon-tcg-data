@@ -10,7 +10,7 @@ import {
   promoteCardmarketUrlsForCards as sharedPromoteCardmarketUrlsForCards,
   resolveCardmarketEntryForCardFromSetPayload as sharedResolveCardmarketEntryForCardFromSetPayload,
   resolveCardmarketEntryFromSetPayload as sharedResolveCardmarketEntryFromSetPayload,
-} from './cardmarket-ui-helpers.js?v=20260426-duplicate-price-rank3';
+} from './cardmarket-ui-helpers.js?v=20260427-wave3-central-v1';
 
 const REMOTE_CARDMARKET_BASE = `${String(CONFIG?.APIS?.VERA_BASE || '').replace(/\/$/, '')}/cardmarket`;
 

@@ -2,7 +2,7 @@
 // COLLECTION SHARING, WISHLISTS & SOCIAL FEATURES
 // ══════════════════════════════════════════════════════════════════════════
 
-import { scopedStorageKey, scopedStoragePrefix } from './config.js';
+import { scopedStorageKey, scopedStoragePrefix } from './core/config.js';
 
 const STORAGE_KEYS = {
   wishlists: scopedStorageKey('wishlists'),

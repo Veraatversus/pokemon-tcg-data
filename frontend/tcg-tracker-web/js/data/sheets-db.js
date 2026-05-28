@@ -1,5 +1,10 @@
-import { CONFIG } from '../core/config.js';
+﻿import { CONFIG } from '../core/config.js';
 import { signIn } from '../core/auth.js';
+import {
+  EVENT_SHEETS_WRITE_FAILED,
+  EVENT_SHEETS_WRITE_RETRY,
+  EVENT_SHEETS_WRITE_SUCCESS,
+} from '../core/storage-keys.js';
 import {
   normalizeCardNumber,
   toBoolean,
@@ -13,7 +18,7 @@ import {
   CARD_MATCH_STATUS,
   resolveDisplaySet,
   resolveDisplayCard
-} from './schema-contract.js?v=20260507a';
+} from './schema-contract.js?v=20260427-wave3-central-v1';
 import {
   planSetScopedUpsert,
   planSetScopedDedup
@@ -150,7 +155,7 @@ async function detectOverviewByContent(titles) {
       const score = scoreOverviewRows(rows.slice(0, 80));
       if (score > best.score) best = { title, score };
     } catch {
-      // Blatt passt nicht für dieses Schema – ignorieren
+      // Blatt passt nicht fÃ¼r dieses Schema â€“ ignorieren
     }
   }
   return best.score > 0 ? best.title : null;
@@ -160,7 +165,7 @@ async function resolveSheetNames() {
   if (resolvedSheetsCache) return resolvedSheetsCache;
 
   if (!gapi?.client?.sheets?.spreadsheets?.get) {
-    throw new Error('Sheets API nicht initialisiert – bitte zuerst anmelden.');
+    throw new Error('Sheets API nicht initialisiert â€“ bitte zuerst anmelden.');
   }
 
   const meta = await gapi.client.sheets.spreadsheets.get({
@@ -187,13 +192,13 @@ async function resolveSheetNames() {
   let overview = pickSheetTitle(
     nonDbTitles,
     CONFIG.SHEETS.OVERVIEW,
-    ['Set Overview', 'Pokémon TCG Sets Übersicht', 'Pokemon TCG Sets Übersicht', 'Sets Übersicht'],
-    (name) => (name.includes('set') || name.includes('sets')) && (name.includes('overview') || name.includes('übersicht'))
+    ['Set Overview', 'PokÃ©mon TCG Sets Ãœbersicht', 'Pokemon TCG Sets Ãœbersicht', 'Sets Ãœbersicht'],
+    (name) => (name.includes('set') || name.includes('sets')) && (name.includes('overview') || name.includes('Ã¼bersicht'))
   );
   if (!overview) {
     overview = await detectOverviewByContent(nonDbTitles);
   }
-  // Last resort: exactly one non-DB, non-settings sheet → use it as overview
+  // Last resort: exactly one non-DB, non-settings sheet â†’ use it as overview
   if (!overview && nonDbTitles.length === 1) {
     overview = nonDbTitles[0];
   }
@@ -201,7 +206,7 @@ async function resolveSheetNames() {
   const summary = pickSheetTitle(
     nonDbTitles,
     CONFIG.SHEETS.SUMMARY,
-    ['Summary', 'Collection', 'Sammlungsübersicht'],
+    ['Summary', 'Collection', 'SammlungsÃ¼bersicht'],
     (name) => name.includes('summary') || name.includes('zusammenfassung') || name.includes('sammlung')
   );
 
@@ -211,7 +216,6 @@ async function resolveSheetNames() {
     settings,
     titles
   };
-  console.log('[resolveSheetNames]', resolvedSheetsCache);
   return resolvedSheetsCache;
 }
 
@@ -236,10 +240,9 @@ async function getOverviewRows(sheets) {
         const rows = await getFormulas(buildRange(title, 'A3:J'));
         sheets.overview = title;
         resolvedSheetsCache = sheets;
-        console.log('[getOverviewRows] fallback overview selected:', title);
         return rows;
       } catch {
-        // nächstes Blatt probieren
+        // nÃ¤chstes Blatt probieren
       }
     }
 
@@ -251,7 +254,7 @@ async function getValues(range, renderOption = 'UNFORMATTED_VALUE', suppressErro
   const maxRetries = 6;
   try {
     if (!gapi?.client?.sheets?.spreadsheets?.values?.get) {
-      throw new Error('Sheets API nicht initialisiert – bitte melden Sie sich an');
+      throw new Error('Sheets API nicht initialisiert â€“ bitte melden Sie sich an');
     }
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
@@ -276,7 +279,7 @@ async function getValues(range, renderOption = 'UNFORMATTED_VALUE', suppressErro
   }
 }
 
-// Formeln müssen mit FORMULA gelesen werden (z.B. HYPERLINK in Overview)
+// Formeln mÃ¼ssen mit FORMULA gelesen werden (z.B. HYPERLINK in Overview)
 async function getFormulas(range) {
   return getValues(range, 'FORMULA');
 }
@@ -298,6 +301,14 @@ function isAuthWriteError(err) {
     || message.includes('auth');
 }
 
+function buildAuthWriteRecoveryError(err) {
+  const wrapped = new Error('Google-Anmeldung abgelaufen. Bitte oben erneut anmelden und die Aktion wiederholen.');
+  wrapped.cause = err;
+  wrapped.code = 'AUTH_RELOGIN_REQUIRED';
+  wrapped.status = Number(err?.status || err?.result?.error?.code || 0) || 401;
+  return wrapped;
+}
+
 function emitWriteEvent(type, detail) {
   if (typeof window === 'undefined' || !window.dispatchEvent || typeof CustomEvent === 'undefined') return;
   window.dispatchEvent(new CustomEvent(type, { detail }));
@@ -308,7 +319,7 @@ async function putValues(range, values) {
   let reauthedOnce = false;
   try {
     if (!gapi?.client?.sheets?.spreadsheets?.values?.update) {
-      throw new Error('Sheets API nicht initialisiert – bitte melden Sie sich an');
+      throw new Error('Sheets API nicht initialisiert â€“ bitte melden Sie sich an');
     }
     return await enqueueSheetsMutation(async () => {
       for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -319,7 +330,7 @@ async function putValues(range, values) {
             valueInputOption: 'USER_ENTERED',
             resource: { values }
           });
-          emitWriteEvent('sheets-write-success', {
+          emitWriteEvent(EVENT_SHEETS_WRITE_SUCCESS, {
             range,
             attemptsUsed: attempt + 1,
             maxRetries
@@ -328,9 +339,12 @@ async function putValues(range, values) {
         } catch (err) {
           if (isAuthWriteError(err) && !reauthedOnce) {
             reauthedOnce = true;
-            const reauthed = await signIn({ forceConsent: true }).catch(() => false);
+            const canAttemptInteractiveReauth = typeof document === 'undefined' || document.visibilityState === 'visible';
+            const reauthed = canAttemptInteractiveReauth
+              ? await signIn({ forceConsent: false }).catch(() => false)
+              : false;
             if (reauthed) {
-              emitWriteEvent('sheets-write-retry', {
+              emitWriteEvent(EVENT_SHEETS_WRITE_RETRY, {
                 range,
                 attempt: attempt + 1,
                 maxRetries,
@@ -339,10 +353,11 @@ async function putValues(range, values) {
               });
               continue;
             }
+            throw buildAuthWriteRecoveryError(err);
           }
           if (!isRetryableWriteError(err) || attempt >= maxRetries) throw err;
           const delay = Math.min(10000, 500 * Math.pow(2, attempt)) + Math.floor(Math.random() * 150);
-          emitWriteEvent('sheets-write-retry', {
+          emitWriteEvent(EVENT_SHEETS_WRITE_RETRY, {
             range,
             attempt: attempt + 1,
             maxRetries,
@@ -354,7 +369,7 @@ async function putValues(range, values) {
       }
     });
   } catch (err) {
-    emitWriteEvent('sheets-write-failed', {
+    emitWriteEvent(EVENT_SHEETS_WRITE_FAILED, {
       range,
       status: Number(err?.status || err?.result?.error?.code || 0) || null,
       message: String(err?.result?.error?.message || err?.message || 'Unbekannter Fehler')
@@ -390,7 +405,7 @@ async function batchPutValues(updates = []) {
               data: normalizedUpdates.map((entry) => ({ range: entry.range, values: entry.values }))
             }
           });
-          emitWriteEvent('sheets-write-success', {
+          emitWriteEvent(EVENT_SHEETS_WRITE_SUCCESS, {
             range: rangeLabel,
             attemptsUsed: attempt + 1,
             maxRetries
@@ -399,9 +414,12 @@ async function batchPutValues(updates = []) {
         } catch (err) {
           if (isAuthWriteError(err) && !reauthedOnce) {
             reauthedOnce = true;
-            const reauthed = await signIn({ forceConsent: true }).catch(() => false);
+            const canAttemptInteractiveReauth = typeof document === 'undefined' || document.visibilityState === 'visible';
+            const reauthed = canAttemptInteractiveReauth
+              ? await signIn({ forceConsent: false }).catch(() => false)
+              : false;
             if (reauthed) {
-              emitWriteEvent('sheets-write-retry', {
+              emitWriteEvent(EVENT_SHEETS_WRITE_RETRY, {
                 range: rangeLabel,
                 attempt: attempt + 1,
                 maxRetries,
@@ -410,10 +428,11 @@ async function batchPutValues(updates = []) {
               });
               continue;
             }
+            throw buildAuthWriteRecoveryError(err);
           }
           if (!isRetryableWriteError(err) || attempt >= maxRetries) throw err;
           const delay = Math.min(10000, 500 * Math.pow(2, attempt)) + Math.floor(Math.random() * 150);
-          emitWriteEvent('sheets-write-retry', {
+          emitWriteEvent(EVENT_SHEETS_WRITE_RETRY, {
             range: rangeLabel,
             attempt: attempt + 1,
             maxRetries,
@@ -425,7 +444,7 @@ async function batchPutValues(updates = []) {
       }
     });
   } catch (err) {
-    emitWriteEvent('sheets-write-failed', {
+    emitWriteEvent(EVENT_SHEETS_WRITE_FAILED, {
       range: rangeLabel,
       status: Number(err?.status || err?.result?.error?.code || 0) || null,
       message: String(err?.result?.error?.message || err?.message || 'Unbekannter Fehler')
@@ -498,7 +517,7 @@ async function ensureSheetWithHeader(sheetName, header) {
 
 async function clearSheetDataRows(sheetName) {
   if (!gapi?.client?.sheets?.spreadsheets?.values?.clear) {
-    throw new Error('Sheets API nicht initialisiert – bitte melden Sie sich an');
+    throw new Error('Sheets API nicht initialisiert â€“ bitte melden Sie sich an');
   }
   await gapi.client.sheets.spreadsheets.values.clear({
     spreadsheetId: CONFIG.SPREADSHEET_ID,
@@ -737,10 +756,10 @@ async function applySetScopedPlan(sheetName, columnCount, plan) {
   }
 }
 
-// Format-Erkennung für Rückwärtskompatibilität mit Pre-Schema-Zeilen
+// Format-Erkennung fÃ¼r RÃ¼ckwÃ¤rtskompatibilitÃ¤t mit Pre-Schema-Zeilen
 function isNewSetFormat(row) {
   // Altes Format: row[1] = setName (kein Boolean)
-  // Neues Format: row[1] = imported (Boolean → 'true'/'false')
+  // Neues Format: row[1] = imported (Boolean â†’ 'true'/'false')
   const v = String(row?.[1] ?? '').toLowerCase().trim();
   return v === 'true' || v === 'false';
 }
@@ -943,8 +962,8 @@ async function writeDbCollectionForSet(setId, cards, existingMap = new Map()) {
 }
 
 /**
- * Gibt alle importierten Sets aus dem "Sets Overview"-Sheet zurück.
- * Liest Spalten A–J (Formeln für HYPERLINK-IDs nötig).
+ * Gibt alle importierten Sets aus dem "Sets Overview"-Sheet zurÃ¼ck.
+ * Liest Spalten Aâ€“J (Formeln fÃ¼r HYPERLINK-IDs nÃ¶tig).
  * @returns {Promise<Array<{setId, setName, series, releaseDate, totalCards, ptcgoCode, imported}>>}
  */
 export async function listImportedSets() {
@@ -953,8 +972,8 @@ export async function listImportedSets() {
 }
 
 /**
- * Liest Karten für ein Set direkt aus db_cards.
- * Wird für performante, API-arme Suchläufe verwendet.
+ * Liest Karten fÃ¼r ein Set direkt aus db_cards.
+ * Wird fÃ¼r performante, API-arme SuchlÃ¤ufe verwendet.
  * @param {string} setId
  * @returns {Promise<Array<{number, name, image, cardmarketUrl, rarity}>>}
  */
@@ -975,7 +994,7 @@ export async function readDbCardsForSet(setId) {
   return Array.from(latestPerCard.values())
     .map((row) => {
       if (isNewCardFormat(row)) {
-        // CARD_DB_HEADERS format; unterstützt altes Bild-Schema (ohne tcgdex_image_large) rückwärtskompatibel.
+        // CARD_DB_HEADERS format; unterstÃ¼tzt altes Bild-Schema (ohne tcgdex_image_large) rÃ¼ckwÃ¤rtskompatibel.
         const hasSplitImageSchema = isCardImageSplitFormat(row);
         const offset = hasSplitImageSchema ? 1 : 0;
         return resolveDisplayCard({
@@ -1067,8 +1086,8 @@ export async function readDbCardsForSet(setId) {
 }
 
 /**
- * Gibt ALLE Sets (auch nicht importierte) mit vollständigen Metadaten zurück.
- * Nützlich zum Anzeigen einer vollständigen Set-Liste.
+ * Gibt ALLE Sets (auch nicht importierte) mit vollstÃ¤ndigen Metadaten zurÃ¼ck.
+ * NÃ¼tzlich zum Anzeigen einer vollstÃ¤ndigen Set-Liste.
  * @returns {Promise<Array<{setId, setName, series, releaseDate, totalCards, ptcgoCode, imported}>>}
  */
 export async function listSetsOverviewData() {
@@ -1442,16 +1461,16 @@ export async function syncOverviewWithApiSets(sets, importedSetIds = []) {
 
 /**
  * Importiert ein Set in die Sammlung:
- * - trägt/aktualisiert das Set in der Overview
- * - erstellt (falls nötig) das Set-Blatt
- * - schreibt das Karten-Grid gemäß pokecode-Schema
+ * - trÃ¤gt/aktualisiert das Set in der Overview
+ * - erstellt (falls nÃ¶tig) das Set-Blatt
+ * - schreibt das Karten-Grid gemÃ¤ÃŸ pokecode-Schema
  */
 export async function importSetIntoCollection(setMeta, cards) {
   if (!setMeta?.setId || !setMeta?.setName) {
-    throw new Error('Set-Metadaten unvollständig (setId/setName fehlen).');
+    throw new Error('Set-Metadaten unvollstÃ¤ndig (setId/setName fehlen).');
   }
   if (!Array.isArray(cards) || cards.length === 0) {
-    throw new Error(`Keine Karten für Set ${setMeta.setId} gefunden.`);
+    throw new Error(`Keine Karten fÃ¼r Set ${setMeta.setId} gefunden.`);
   }
 
   const setId = toSafeCellString(setMeta.setId);
@@ -1577,7 +1596,7 @@ export async function ensureCollectionEntry(setSheetName, cardNumber) {
   await ensureNormalizedSchema();
   const setId = await resolveSetIdFromName(setSheetName);
   if (!setId) {
-    throw new Error(`Set-ID für „${setSheetName}“ konnte nicht aufgelöst werden.`);
+    throw new Error(`Set-ID fÃ¼r â€ž${setSheetName}â€œ konnte nicht aufgelÃ¶st werden.`);
   }
 
   const normalizedCard = normalizeCardNumber(cardNumber);
@@ -1616,7 +1635,7 @@ export async function ensureCollectionEntry(setSheetName, cardNumber) {
   });
 
   if (newIndex < 0) {
-    throw new Error(`Collection-Eintrag für Karte ${cardNumber} konnte nicht erstellt werden.`);
+    throw new Error(`Collection-Eintrag fÃ¼r Karte ${cardNumber} konnte nicht erstellt werden.`);
   }
 
   const rowNo = newIndex + 2;
@@ -1740,3 +1759,4 @@ export async function recoverImportedIdsFromOverview() {
   );
   return ids;
 }
+

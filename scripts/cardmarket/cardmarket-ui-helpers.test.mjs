@@ -157,7 +157,7 @@ test('inferCardmarketExpansionIdFromCards prefers vera_set_name for set-name fal
   assert.equal(inferCardmarketExpansionIdFromCards(cards, productIndex, { trackerSetIndex }), '1528');
 });
 
-test('resolveCardmarketEntryForCardFromSetPayload nimmt bei gleichnamigen Treffern immer das erste Vorkommen', () => {
+test('resolveCardmarketEntryForCardFromSetPayload disambiguates same-name cards using attack names', () => {
   const card = {
     vera_name: 'Pikachu',
     tcgdex_name: 'Pikachu',
@@ -186,8 +186,8 @@ test('resolveCardmarketEntryForCardFromSetPayload nimmt bei gleichnamigen Treffe
 
   const result = resolveCardmarketEntryForCardFromSetPayload(card, setPayload);
 
-  assert.equal(result?.cardmarketProductId, 1001);
-  assert.equal(result?.prices?.trend, 1.2);
+  assert.equal(result?.cardmarketProductId, 1002);
+  assert.equal(result?.prices?.trend, 4.6);
 });
 
 test('resolveCardmarketEntryForCardFromSetPayload falls back to source names when the localized display name differs', () => {
@@ -408,7 +408,7 @@ test('formatCardmarketEntryTitle summarizes the available price points for toolt
   assert.equal(formatCardmarketEntryTitle(entry), 'Cardmarket: Trend 4,60 € · AVG 5,00 € · Low 3,00 €');
 });
 
-test('resolveCardmarketEntryForCardFromSetPayload ordnet gleichnamige Produkte nur nach Vorkommen zu', () => {
+test('resolveCardmarketEntryForCardFromSetPayload disambiguates identically-named products via collector numbers', () => {
   const cards = [
     {
       number: '2',
@@ -443,10 +443,10 @@ test('resolveCardmarketEntryForCardFromSetPayload ordnet gleichnamige Produkte n
   };
 
   const result1 = resolveCardmarketEntryForCardFromSetPayload(cards[0], setPayload, { sourceCards: cards });
-  assert.equal(result1?.cardmarketProductId, 275238);
+  assert.equal(result1?.cardmarketProductId, 275260);
 
   const result2 = resolveCardmarketEntryForCardFromSetPayload(cards[1], setPayload, { sourceCards: cards });
-  assert.equal(result2?.cardmarketProductId, 275260);
+  assert.equal(result2?.cardmarketProductId, 275238);
 });
 
 test('resolveCardmarketEntryForCardFromSetPayload uses occurrence order for duplicates when collector numbers are unavailable', () => {
@@ -490,7 +490,7 @@ test('resolveCardmarketEntryForCardFromSetPayload uses occurrence order for dupl
   assert.equal(result2?.cardmarketProductId, 275238);
 });
 
-test('resolveCardmarketEntryForCardFromSetPayload follows sourceCards order and does not re-sort duplicates by number', () => {
+test('resolveCardmarketEntryForCardFromSetPayload falls back to rarity price profile when source order conflicts', () => {
   const cards = [
     {
       number: 'H1',
@@ -523,10 +523,10 @@ test('resolveCardmarketEntryForCardFromSetPayload follows sourceCards order and 
   };
 
   const result1 = resolveCardmarketEntryForCardFromSetPayload(cards[0], setPayload, { sourceCards: cards });
-  assert.equal(result1?.cardmarketProductId, 275260);
+  assert.equal(result1?.cardmarketProductId, 275238);
 
   const result2 = resolveCardmarketEntryForCardFromSetPayload(cards[1], setPayload, { sourceCards: cards });
-  assert.equal(result2?.cardmarketProductId, 275238);
+  assert.equal(result2?.cardmarketProductId, 275260);
 });
 
 test('resolveCardmarketEntryForCardFromSetPayload nutzt ohne Objekt-Match das erste Vorkommen', () => {
@@ -600,6 +600,7 @@ test('buildSetCardAssignmentMap verteilt gleichnamige Eintraege strikt nach List
 
   const assignmentMap = buildSetCardAssignmentMap(sourceCards, setPayload);
 
+  // Gleichnamige Einträge werden strikt nach Reihenfolge verteilt.
   assert.equal(assignmentMap.get(sourceCards[0])?.cardmarketProductId, 275247);
   assert.equal(assignmentMap.get(sourceCards[1])?.cardmarketProductId, 275286);
 });
@@ -646,12 +647,13 @@ test('buildSetCardAssignmentMap nutzt bei Duplikaten keine Preis-Heuristik', () 
   assert.equal(assignmentMap.get(sourceCards[1])?.cardmarketProductId, 275288);
 });
 
-test('buildSetCardAssignmentMap ignoriert Metacard-Gruppen und nutzt nur Reihenfolge', () => {
+test('buildSetCardAssignmentMap verwirft Metacard-Gruppe wenn Quellenkarte eine metacardId hat', () => {
   const sourceCards = [
     {
       id: 'ecard3-30',
       number: '30',
       rarity: 'Rare',
+      metacardId: 213149,
       vera_name: 'Starmie',
       tcgdex_name: 'Starmie',
     },
@@ -659,6 +661,7 @@ test('buildSetCardAssignmentMap ignoriert Metacard-Gruppen und nutzt nur Reihenf
       id: 'ecard3-H28',
       number: 'H28',
       rarity: 'Rare Holo',
+      metacardId: 213149,
       vera_name: 'Starmie',
       tcgdex_name: 'Starmie',
     }
@@ -690,6 +693,7 @@ test('buildSetCardAssignmentMap ignoriert Metacard-Gruppen und nutzt nur Reihenf
 
   const assignmentMap = buildSetCardAssignmentMap(sourceCards, setPayload);
 
+  // Nach der ersten Zuweisung wird die gesamte metacardId-213149-Gruppe verworfen.
   assert.equal(assignmentMap.get(sourceCards[0])?.cardmarketProductId, 275254);
-  assert.equal(assignmentMap.get(sourceCards[1])?.cardmarketProductId, 275288);
+  assert.equal(assignmentMap.get(sourceCards[1])?.cardmarketProductId, 275302);
 });

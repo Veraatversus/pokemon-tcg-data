@@ -138,7 +138,7 @@ test('inferCardmarketExpansionIdFromCards falls back to bySetName when neither b
   assert.equal(inferCardmarketExpansionIdFromCards(cards, productIndex, { trackerSetIndex }), '1528');
 });
 
-test('resolveCardmarketEntryForCardFromSetPayload nimmt bei gleichnamigen Treffern immer das erste Vorkommen', () => {
+test('resolveCardmarketEntryForCardFromSetPayload disambiguates same-name cards using attack names', () => {
   const card = {
     vera_name: 'Pikachu',
     tcgdex_name: 'Pikachu',
@@ -167,8 +167,8 @@ test('resolveCardmarketEntryForCardFromSetPayload nimmt bei gleichnamigen Treffe
 
   const result = resolveCardmarketEntryForCardFromSetPayload(card, setPayload);
 
-  assert.equal(result?.cardmarketProductId, 1001);
-  assert.equal(result?.prices?.trend, 1.2);
+  assert.equal(result?.cardmarketProductId, 1002);
+  assert.equal(result?.prices?.trend, 4.6);
 });
 
 test('resolveCardmarketEntryForCardFromSetPayload falls back to source names when the localized display name differs', () => {
@@ -349,7 +349,7 @@ test('frontend wrapper forwards sourceCards for duplicate-name disambiguation', 
   assert.equal(result?.prices?.trend, 4.6);
 });
 
-test('resolveCardmarketEntryForCardFromSetPayload nutzt sourceCards-Vorkommen ohne Variantenheuristik', () => {
+test('resolveCardmarketEntryForCardFromSetPayload disambiguates using variant-name occurrence when candidates share base names', () => {
   const cards = [
     {
       number: '79',
@@ -385,7 +385,7 @@ test('resolveCardmarketEntryForCardFromSetPayload nutzt sourceCards-Vorkommen oh
   const result2 = resolveCardmarketEntryForCardFromSetPayload(cards[1], setPayload, { sourceCards: cards });
 
   assert.equal(result1?.cardmarketProductId, 275339);
-  assert.equal(result2?.cardmarketProductId, 275339);
+  assert.equal(result2?.cardmarketProductId, 275340);
 });
 
 test('formatCardmarketEntryLabel prefers the trend price for compact UI badges', () => {
@@ -404,7 +404,7 @@ test('formatCardmarketEntryTitle summarizes the available price points for toolt
   assert.equal(formatCardmarketEntryTitle(entry), 'Cardmarket: Trend 4,60 € · AVG 5,00 € · Low 3,00 €');
 });
 
-test('resolveCardmarketEntryForCardFromSetPayload in frontend ordnet gleichnamige Produkte nur nach Vorkommen zu', () => {
+test('resolveCardmarketEntryForCardFromSetPayload disambiguates identically-named products in frontend using stored collector numbers', () => {
   const cards = [
     {
       number: '2',
@@ -441,13 +441,13 @@ test('resolveCardmarketEntryForCardFromSetPayload in frontend ordnet gleichnamig
   };
 
   const result1 = resolveCardmarketEntryForCardFromSetPayload(cards[0], setPayload, { sourceCards: cards });
-  assert.equal(result1?.cardmarketProductId, 275238);
+  assert.equal(result1?.cardmarketProductId, 275260);
 
   const result2 = resolveCardmarketEntryForCardFromSetPayload(cards[1], setPayload, { sourceCards: cards });
-  assert.equal(result2?.cardmarketProductId, 275260);
+  assert.equal(result2?.cardmarketProductId, 275238);
 });
 
-test('resolveCardmarketEntryForCardFromSetPayload in frontend uses occurrence order when collector numbers are unavailable', () => {
+test('resolveCardmarketEntryForCardFromSetPayload in frontend falls back to holo-vs-regular price profiles when collector numbers are unavailable', () => {
   const cards = [
     {
       number: '2',
@@ -469,55 +469,16 @@ test('resolveCardmarketEntryForCardFromSetPayload in frontend uses occurrence or
     expansionId: 1538,
     cards: [
       {
-        cardmarketProductId: 275260,
-        name: 'Alakazam [Energy Jump | Psychic]',
-        prices: { trend: 39.22, trendHolo: 73.9 }
-      },
-      {
         cardmarketProductId: 275238,
         name: 'Alakazam [Energy Jump | Psychic]',
+        metacardId: 213121,
         prices: { trend: 335.66, trendHolo: 50.03 }
-      }
-    ]
-  };
-
-  const result1 = resolveCardmarketEntryForCardFromSetPayload(cards[0], setPayload, { sourceCards: cards });
-  assert.equal(result1?.cardmarketProductId, 275260);
-
-  const result2 = resolveCardmarketEntryForCardFromSetPayload(cards[1], setPayload, { sourceCards: cards });
-  assert.equal(result2?.cardmarketProductId, 275238);
-});
-
-test('resolveCardmarketEntryForCardFromSetPayload in frontend follows sourceCards order and does not re-sort duplicates by number', () => {
-  const cards = [
-    {
-      number: 'H1',
-      name: 'Alakazam',
-      rarity: 'Holo Rare',
-      vera_name: 'Alakazam',
-      tcgdex_name: 'Alakazam',
-    },
-    {
-      number: '2',
-      name: 'Alakazam',
-      rarity: 'Rare',
-      vera_name: 'Alakazam',
-      tcgdex_name: 'Alakazam',
-    }
-  ];
-
-  const setPayload = {
-    expansionId: 1538,
-    cards: [
+      },
       {
         cardmarketProductId: 275260,
         name: 'Alakazam [Energy Jump | Psychic]',
-        prices: { trend: 39.22 }
-      },
-      {
-        cardmarketProductId: 275238,
-        name: 'Alakazam [Energy Jump | Psychic]',
-        prices: { trend: 335.66 }
+        metacardId: 213121,
+        prices: { trend: 39.22, trendHolo: 73.9 }
       }
     ]
   };
@@ -527,135 +488,4 @@ test('resolveCardmarketEntryForCardFromSetPayload in frontend follows sourceCard
 
   const result2 = resolveCardmarketEntryForCardFromSetPayload(cards[1], setPayload, { sourceCards: cards });
   assert.equal(result2?.cardmarketProductId, 275238);
-});
-
-test('resolveCardmarketEntryForCardFromSetPayload in frontend nutzt ohne Objekt-Match das erste Vorkommen', () => {
-  const sourceCards = [
-    {
-      number: '2',
-      name: 'Alakazam',
-      vera_name: 'Alakazam',
-      tcgdex_name: 'Alakazam',
-    },
-    {
-      number: 'H1',
-      name: 'Alakazam',
-      vera_name: 'Alakazam',
-      tcgdex_name: 'Alakazam',
-    }
-  ];
-
-  const renderedCard = {
-    id: 'ecard3-H1',
-    name: 'Simsala',
-    vera_name: 'Alakazam',
-    tcgdex_name: 'Alakazam',
-  };
-
-  const setPayload = {
-    expansionId: 1538,
-    cards: [
-      { cardmarketProductId: 275260, name: 'Alakazam [Energy Jump | Psychic]', prices: { trend: 39.22 } },
-      { cardmarketProductId: 275238, name: 'Alakazam [Energy Jump | Psychic]', prices: { trend: 335.66 } }
-    ]
-  };
-
-  const result = resolveCardmarketEntryForCardFromSetPayload(renderedCard, setPayload, { sourceCards });
-  assert.equal(result?.cardmarketProductId, 275260);
-});
-
-test('resolveCardmarketEntryForCardFromSetPayload in frontend nutzt bei Duplikaten keine Preis-Heuristik', () => {
-  const cards = [
-    {
-      id: 'ecard3-30',
-      number: '30',
-      name: 'Starmie',
-      rarity: 'Rare',
-      vera_name: 'Starmie',
-      tcgdex_name: 'Starmie',
-    },
-    {
-      id: 'ecard3-H28',
-      number: 'H28',
-      name: 'Starmie',
-      rarity: 'Rare Holo',
-      vera_name: 'Starmie',
-      tcgdex_name: 'Starmie',
-    }
-  ];
-
-  const setPayload = {
-    expansionId: 1538,
-    cards: [
-      {
-        cardmarketProductId: 275254,
-        name: 'Starmie [Energy Burst | Star Back]',
-        metacardId: 213149,
-        prices: { trend: 128.26, avg: 341.65, trendHolo: 41.33 }
-      },
-      {
-        cardmarketProductId: 275288,
-        name: 'Starmie [Energy Burst | Star Back]',
-        metacardId: 213149,
-        prices: { trend: 39.29, avg: 42.37, trendHolo: 16.37 }
-      }
-    ]
-  };
-
-  const result1 = resolveCardmarketEntryForCardFromSetPayload(cards[0], setPayload, { sourceCards: cards });
-  assert.equal(result1?.cardmarketProductId, 275254);
-
-  const result2 = resolveCardmarketEntryForCardFromSetPayload(cards[1], setPayload, { sourceCards: cards });
-  assert.equal(result2?.cardmarketProductId, 275288);
-});
-
-test('resolveCardmarketEntryForCardFromSetPayload in frontend ignoriert Metacard-Gruppen und nutzt Reihenfolge', () => {
-  const cards = [
-    {
-      id: 'ecard3-30',
-      number: '30',
-      name: 'Starmie',
-      rarity: 'Rare',
-      vera_name: 'Starmie',
-      tcgdex_name: 'Starmie',
-    },
-    {
-      id: 'ecard3-H28',
-      number: 'H28',
-      name: 'Starmie',
-      rarity: 'Rare Holo',
-      vera_name: 'Starmie',
-      tcgdex_name: 'Starmie',
-    }
-  ];
-
-  const setPayload = {
-    expansionId: 1538,
-    cards: [
-      {
-        cardmarketProductId: 275254,
-        name: 'Starmie [Energy Burst | Star Back]',
-        metacardId: 213149,
-        prices: { trend: 128.26, avg: 341.65, trendHolo: 41.33 }
-      },
-      {
-        cardmarketProductId: 275288,
-        name: 'Starmie [Energy Burst | Star Back]',
-        metacardId: 213149,
-        prices: { trend: 39.29, avg: 42.37, trendHolo: 16.37 }
-      },
-      {
-        cardmarketProductId: 275302,
-        name: 'Starmie [Random Legacy Variant]',
-        metacardId: 999999,
-        prices: { trend: 3.07, avg: 3.01, trendHolo: 18.78 }
-      }
-    ]
-  };
-
-  const result1 = resolveCardmarketEntryForCardFromSetPayload(cards[0], setPayload, { sourceCards: cards });
-  assert.equal(result1?.cardmarketProductId, 275254);
-
-  const result2 = resolveCardmarketEntryForCardFromSetPayload(cards[1], setPayload, { sourceCards: cards });
-  assert.equal(result2?.cardmarketProductId, 275288);
 });

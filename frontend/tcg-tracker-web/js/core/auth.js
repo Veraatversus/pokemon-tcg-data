@@ -1,4 +1,4 @@
-import { CONFIG, scopedStorageKey } from './config.js?v=20260409-treeview1';
+import { CONFIG, scopedStorageKey } from './config.js?v=20260427-wave3-central-v1';
 
 const STORAGE_KEY = scopedStorageKey('tcg_tracker_token');
 const REDIRECT_STATE_KEY = scopedStorageKey('oauth_redirect_state');
@@ -41,13 +41,10 @@ function gapiLoadClient() {
         throw new Error('gapi or gapi.load not available');
       }
 
-      console.log('[gapiLoadClient] calling gapi.load...');
       gapiRef.load('client', () => {
         clearTimeout(timeout);
         try {
-          console.log('[gapiLoadClient] gapi.load callback fired');
           gapiRef.client.init({}).then(() => {
-            console.log('[gapiLoadClient] gapi.client.init success');
             resolve();
           }).catch((error) => {
             console.error('[gapiLoadClient init error]', error);
@@ -104,6 +101,13 @@ function shouldAttemptAutoLogin() {
   return localStorage.getItem(AUTO_LOGIN_KEY) === '1';
 }
 
+function isLikelyPopupIsolationNoise(error) {
+  const text = String(error?.message || error?.type || error || '').toLowerCase();
+  return text.includes('cross-origin-opener-policy')
+    || text.includes('popup')
+    || text.includes('window.closed');
+}
+
 function buildRedirectOAuthUrl(forceConsent = false) {
   const redirectUri = new URL('./', location.href).toString();
   const state = `oauth-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
@@ -153,7 +157,6 @@ function consumeRedirectTokenIfPresent() {
 function startRedirectSignIn(forceConsent = false) {
   try {
     const targetUrl = buildRedirectOAuthUrl(forceConsent);
-    console.info('[signIn] popup unavailable, switching to same-window redirect flow');
     globalThis.location.assign(targetUrl);
     return true;
   } catch (err) {
@@ -249,19 +252,10 @@ async function trySilentSignIn() {
  */
 export async function initAuth() {
   try {
-    console.log('[initAuth] start');
-    console.log('[initAuth] checking globals:', {
-      gapi: typeof gapi !== 'undefined',
-      google: typeof google !== 'undefined'
-    });
-    
     await waitForGlobal(() => Boolean(globalThis.gapi?.load), 'gapi.load');
-    console.log('[initAuth] loading gapi.client...');
     await gapiLoadClient();
-    console.log('[initAuth] gapi.client loaded');
     gapiInited = true;
 
-    console.log('[initAuth] initializing gis tokenClient...');
     await waitForGlobal(() => Boolean(globalThis.google?.accounts?.oauth2), 'google.accounts.oauth2');
     tokenClient = globalThis.google.accounts.oauth2.initTokenClient({
       client_id: CONFIG.GOOGLE_CLIENT_ID,
@@ -269,12 +263,10 @@ export async function initAuth() {
       ux_mode: 'popup',
       callback: () => {}  // wird pro Request überschrieben
     });
-    console.log('[initAuth] tokenClient created');
     gisInited = true;
 
     const redirectToken = consumeRedirectTokenIfPresent();
     if (redirectToken) {
-      console.log('[initAuth] consumed redirect token');
       saveToken(redirectToken);
       try {
         await loadDiscoveryDocs();
@@ -284,23 +276,16 @@ export async function initAuth() {
       return true;
     }
 
-    console.log('[initAuth] attempting restore from localStorage...');
     const restored = await tryRestoreToken();
-    console.log('[initAuth] restore result:', restored);
     if (restored) {
-      console.log('[initAuth] complete');
       return true;
     }
 
     if (shouldAttemptAutoLogin()) {
-      console.log('[initAuth] attempting silent reauth...');
       const silentlyReauthed = await trySilentSignIn();
-      console.log('[initAuth] silent reauth result:', silentlyReauthed);
-      console.log('[initAuth] complete');
       return silentlyReauthed;
     }
 
-    console.log('[initAuth] complete');
     return false;
   } catch (err) {
     console.error('[initAuth] failed:', err);
@@ -356,7 +341,11 @@ export function signIn(options = {}) {
 
     tokenClient.error_callback = (error) => {
       const reason = error?.type || 'error_callback';
-      console.error('[signIn error_callback]', error);
+      if (isLikelyPopupIsolationNoise(error)) {
+        console.warn('[signIn] popup flow interruption (likely COOP/browser policy):', reason);
+      } else {
+        console.error('[signIn error_callback]', error);
+      }
       console.warn('[signIn] popup-only flow aborted:', reason);
       if (reason === 'popup_failed_to_open') {
         if (startRedirectSignIn(forceConsent)) return;
