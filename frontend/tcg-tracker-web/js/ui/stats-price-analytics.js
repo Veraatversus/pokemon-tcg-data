@@ -11,6 +11,18 @@ function pickFirstFinite(prices = {}, keys = []) {
   return null;
 }
 
+function quantile(sortedValues = [], q = 0.5) {
+  if (!Array.isArray(sortedValues) || sortedValues.length === 0) return 0;
+  const clampedQ = Math.min(1, Math.max(0, Number(q) || 0));
+  const index = (sortedValues.length - 1) * clampedQ;
+  const lo = Math.floor(index);
+  const hi = Math.ceil(index);
+  if (lo === hi) return sortedValues[lo] || 0;
+  const loValue = sortedValues[lo] || 0;
+  const hiValue = sortedValues[hi] || 0;
+  return loValue + ((hiValue - loValue) * (index - lo));
+}
+
 export function pickCardPriceFromSummary(summary = null, { preferReverseHolo = false } = {}) {
   const prices = summary?.entry?.prices || {};
   const reverseCandidates = ['trendHolo', 'averageHolo', 'avgHolo', 'lowHolo', 'reverseHoloSell'];
@@ -78,6 +90,29 @@ export function computePriceAnalyticsFromSummaries(items = []) {
     .sort((a, b) => b.value - a.value)
     .slice(0, 10);
 
+  const sortedValues = pricedItems
+    .map((item) => toFinitePrice(item?.value))
+    .filter((value) => value != null)
+    .sort((a, b) => a - b);
+
+  const minValue = sortedValues[0] || 0;
+  const maxValue = sortedValues[sortedValues.length - 1] || 0;
+  const q1Value = quantile(sortedValues, 0.25);
+  const q3Value = quantile(sortedValues, 0.75);
+  const iqrValue = Math.max(0, q3Value - q1Value);
+  const medianValue = quantile(sortedValues, 0.5);
+  const p90Value = quantile(sortedValues, 0.9);
+  const absoluteDeviations = sortedValues
+    .map((value) => Math.abs(value - medianValue))
+    .sort((a, b) => a - b);
+  const madValue = quantile(absoluteDeviations, 0.5);
+  const topFiveValue = topCards
+    .slice(0, 5)
+    .reduce((sum, card) => sum + (toFinitePrice(card?.value) || 0), 0);
+  const lowerFence = q1Value - (1.5 * iqrValue);
+  const upperFence = q3Value + (1.5 * iqrValue);
+  const outlierCount = sortedValues.filter((value) => value < lowerFence || value > upperFence).length;
+
   const setBreakdown = Array.from(setTotals.values())
     .sort((a, b) => {
       const valueDiff = b.value - a.value;
@@ -95,6 +130,17 @@ export function computePriceAnalyticsFromSummaries(items = []) {
       }
     : null;
 
+  const pricedSets = setBreakdown.filter((entry) => Number(entry?.pricedCards || 0) > 0).length;
+  const totalCollectedSets = setBreakdown.filter((entry) => Number(entry?.collectedCards || 0) > 0).length;
+  const topFiveValueShare = totalValue > 0 ? (topFiveValue / totalValue) * 100 : 0;
+  const priceSpreadRatio = minValue > 0 ? (maxValue / minValue) : 0;
+  const setHhi = totalValue > 0
+    ? setBreakdown.reduce((sum, entry) => {
+      const setShare = Number(entry?.value || 0) / totalValue;
+      return sum + (setShare * setShare);
+    }, 0)
+    : 0;
+
   return {
     collectedCards,
     pricedCollectedCards,
@@ -106,5 +152,23 @@ export function computePriceAnalyticsFromSummaries(items = []) {
     topCards,
     setBreakdown,
     distribution,
+    details: {
+      medianValue,
+      q1Value,
+      q3Value,
+      iqrValue,
+      p90Value,
+      madValue,
+      minValue,
+      maxValue,
+      outlierCount,
+      priceSpreadRatio,
+      topFiveValue,
+      topFiveValueShare,
+      pricedSets,
+      totalCollectedSets,
+      setHhi,
+      pricedSetCoverage: totalCollectedSets > 0 ? (pricedSets / totalCollectedSets) * 100 : 0,
+    },
   };
 }

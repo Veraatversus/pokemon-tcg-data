@@ -111,9 +111,6 @@ function resolveFieldByPriority(priority, sourceValues, options = {}) {
 function normalizeTcgdexSetAssetUrl(value) {
   const text = typeof value === 'string' ? value.trim() : '';
   if (!text) return '';
-  if (/^https?:\/\/assets\.tcgdex\.net\/.+\/(logo|symbol)$/i.test(text)) {
-    return `${text}.webp`;
-  }
   return text;
 }
 
@@ -314,29 +311,39 @@ function normalizeRules(primaryCard, tcgdexCard) {
   return [];
 }
 
-function normalizeTcgdexAssetBase(imageValue) {
-  if (typeof imageValue === 'string' && imageValue.trim()) {
-    return imageValue.trim().replace(/\/(low|high)\.(png|jpe?g|webp)$/i, '');
+function rewriteTcgdexImageQuality(url, quality) {
+  const text = String(url || '').trim();
+  if (!text) return '';
+  const withExplicitExt = text.match(/\/(low|high)\.(png|jpe?g|webp)$/i);
+  if (withExplicitExt) {
+    const ext = String(withExplicitExt[2] || 'webp').toLowerCase();
+    return text.replace(/\/(low|high)\.(png|jpe?g|webp)$/i, `/${quality}.${ext}`);
   }
-  if (imageValue && typeof imageValue === 'object') {
-    if (typeof imageValue.base === 'string' && imageValue.base.trim()) {
-      return imageValue.base.trim();
-    }
-    if (typeof imageValue.low === 'string' && imageValue.low.trim()) {
-      return imageValue.low.trim().replace(/\/(low|high)\.(png|jpe?g|webp)$/i, '');
-    }
-    if (typeof imageValue.high === 'string' && imageValue.high.trim()) {
-      return imageValue.high.trim().replace(/\/(low|high)\.(png|jpe?g|webp)$/i, '');
-    }
+  if (/\/(low|high)$/i.test(text)) {
+    return text.replace(/\/(low|high)$/i, `/${quality}`);
   }
-  return '';
+  return `${text}/${quality}.webp`;
 }
 
 function resolveTcgdexImage(tcgdexCard, quality = 'low', { setId = '', seriesId = '', language = 'en' } = {}) {
   const normalizedQuality = String(quality || '').toLowerCase() === 'high' ? 'high' : 'low';
-  const base = normalizeTcgdexAssetBase(tcgdexCard?.image);
-  if (base) {
-    return `${base}/${normalizedQuality}.webp`;
+  const imageValue = tcgdexCard?.image;
+  if (typeof imageValue === 'string' && imageValue.trim()) {
+    return rewriteTcgdexImageQuality(imageValue, normalizedQuality);
+  }
+  if (imageValue && typeof imageValue === 'object') {
+    if (typeof imageValue[normalizedQuality] === 'string' && imageValue[normalizedQuality].trim()) {
+      return imageValue[normalizedQuality].trim();
+    }
+    if (typeof imageValue.base === 'string' && imageValue.base.trim()) {
+      return `${imageValue.base.trim()}/${normalizedQuality}.webp`;
+    }
+    if (typeof imageValue.low === 'string' && imageValue.low.trim()) {
+      return rewriteTcgdexImageQuality(imageValue.low, normalizedQuality);
+    }
+    if (typeof imageValue.high === 'string' && imageValue.high.trim()) {
+      return rewriteTcgdexImageQuality(imageValue.high, normalizedQuality);
+    }
   }
 
   const localId = normalizeCardNumber(tcgdexCard?.localId || tcgdexCard?.id || '');

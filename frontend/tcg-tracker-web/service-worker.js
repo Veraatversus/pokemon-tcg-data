@@ -4,9 +4,9 @@
 
 const SW_SCOPE_PATH = new URL(self.registration.scope).pathname.toLowerCase();
 const SW_SCOPE = /(^|\/)dev(\/|$)/.test(SW_SCOPE_PATH) ? 'dev' : 'release';
-const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v45`;
-const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v45`;
-const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v45`;
+const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v52`;
+const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v52`;
+const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v52`;
 
 const SW_DEBUG = false;
 
@@ -19,31 +19,10 @@ const STATIC_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './css/main.css',
-  './css/trading-marketplace.css',
   './assets/branding/logo-veras-pokemon.jpg',
-  './js/app.js',
-  './js/auth.js',
-  './js/sheets-db.js',
-  './js/pokemon-api.js',
-  './js/cache.js',
-  './js/config.js',
-  './js/utils.js',
-  './js/smart-engine.js',
-  './js/collection-versioning.js',
-  './js/command-palette.js',
-  './js/enhanced-features.js',
-  './js/ui-components.js',
-  './js/advanced-tools.js',
-  './js/social-features.js',
-  './js/social-ui.js',
-  './js/advanced-features.js',
-  './js/community-features.js',
-  './js/community-ui.js',
-  './js/card-filters.js',
-  './js/trading-system.js',
-  './js/trading-ui.js',
-  './js/realtime-sync.js'
+  './index-landingpage.html',
+  './privacy.html',
+  './kontakt.html'
 ];
 
 // Install event: cache static assets
@@ -231,7 +210,10 @@ self.addEventListener('message', (event) => {
   }
   if (event.data.type === 'CLEAR_CACHE') {
     caches.delete(RUNTIME_CACHE).then(() => {
-      event.ports[0].postMessage({ success: true });
+      const replyPort = event.ports && event.ports[0];
+      if (replyPort) {
+        replyPort.postMessage({ success: true });
+      }
     });
   }
   if (event.data.type === 'CACHE_URLS') {

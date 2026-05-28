@@ -2,7 +2,7 @@
 // TRADING MARKETPLACE & EXCHANGE SYSTEM
 // ══════════════════════════════════════════════════════════════════════════
 
-import { scopedStorageKey } from './config.js';
+import { scopedStorageKey } from './core/config.js';
 
 const STORAGE_KEYS = {
   trades: scopedStorageKey('trades'),

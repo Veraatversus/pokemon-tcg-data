@@ -3,6 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "check:imports": "node scripts/check-import-health.mjs",
+    "version:sync": "node scripts/sync-version-query.mjs",
     "test:smoke": "node tests/regression-smoke.mjs",
     "test:smoke:full-ui": "node tests/full-ui-smoke.mjs",
     "test:smoke:auth": "node tests/auth-smoke.mjs",

@@ -217,6 +217,18 @@ export function resolveCardmarketEntryForCardFromSetPayload(card = {}, setPayloa
   return candidatePool[Math.min(sourceOccurrenceIndex, candidatePool.length - 1)] || candidatePool[0];
 }
 
+function normalizeNonEmptyMetacardId(value) {
+  if (value == null) return null;
+  const normalized = String(value).trim();
+  if (!normalized) return null;
+  const numeric = Number(normalized);
+  if (Number.isFinite(numeric)) {
+    if (numeric <= 0) return null;
+    return String(numeric);
+  }
+  return normalized;
+}
+
 export function buildSetCardAssignmentMap(sourceCards = [], setPayload = {}) {
   const payloadCards = Array.isArray(setPayload?.cards) ? setPayload.cards : [];
   if (!payloadCards.length || !Array.isArray(sourceCards) || !sourceCards.length) {
@@ -235,6 +247,20 @@ export function buildSetCardAssignmentMap(sourceCards = [], setPayload = {}) {
     const [assigned] = availableEntries.splice(matchIndex, 1);
     if (!assigned) continue;
     result.set(card, assigned);
+
+    const sourceMetacardId = normalizeNonEmptyMetacardId(
+      card?.metacardId
+      ?? card?.metaCardId
+      ?? card?.cardmarketMetacardId
+    );
+    if (!sourceMetacardId) continue;
+
+    for (let i = availableEntries.length - 1; i >= 0; i--) {
+      const entryMetacardId = normalizeNonEmptyMetacardId(availableEntries[i]?.metacardId);
+      if (entryMetacardId && entryMetacardId === sourceMetacardId) {
+        availableEntries.splice(i, 1);
+      }
+    }
   }
 
   return result;

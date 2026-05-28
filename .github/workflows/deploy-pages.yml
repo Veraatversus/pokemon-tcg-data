@@ -59,11 +59,11 @@ jobs:
                 --exclude='.git' \
                 --exclude='node_modules' \
                 --exclude='tests' \
+                --exclude='scripts/manual' \
                 --exclude='package-lock.json' \
                 --exclude='package.json' \
                 --exclude='README.md' \
                 --exclude='QUICKSTART.md' \
-                --exclude='test-sync-fix.mjs' \
                 --exclude='server-endpoints.txt' \
                 "$SRC_ROOT/frontend/tcg-tracker-web/" "$DEST_ROOT/"
             fi

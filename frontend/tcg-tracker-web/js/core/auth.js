@@ -1,4 +1,4 @@
-import { CONFIG, scopedStorageKey } from './config.js?v=20260409-treeview1';
+import { CONFIG, scopedStorageKey } from './config.js?v=20260427-wave3-central-v1';
 
 const STORAGE_KEY = scopedStorageKey('tcg_tracker_token');
 const REDIRECT_STATE_KEY = scopedStorageKey('oauth_redirect_state');
@@ -99,6 +99,13 @@ function clearToken(options = {}) {
 
 function shouldAttemptAutoLogin() {
   return localStorage.getItem(AUTO_LOGIN_KEY) === '1';
+}
+
+function isLikelyPopupIsolationNoise(error) {
+  const text = String(error?.message || error?.type || error || '').toLowerCase();
+  return text.includes('cross-origin-opener-policy')
+    || text.includes('popup')
+    || text.includes('window.closed');
 }
 
 function buildRedirectOAuthUrl(forceConsent = false) {
@@ -334,7 +341,11 @@ export function signIn(options = {}) {
 
     tokenClient.error_callback = (error) => {
       const reason = error?.type || 'error_callback';
-      console.error('[signIn error_callback]', error);
+      if (isLikelyPopupIsolationNoise(error)) {
+        console.warn('[signIn] popup flow interruption (likely COOP/browser policy):', reason);
+      } else {
+        console.error('[signIn error_callback]', error);
+      }
       console.warn('[signIn] popup-only flow aborted:', reason);
       if (reason === 'popup_failed_to_open') {
         if (startRedirectSignIn(forceConsent)) return;

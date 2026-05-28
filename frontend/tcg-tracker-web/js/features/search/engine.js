@@ -226,7 +226,6 @@ export async function initSmartEngine() {
   try {
     await initOfflineDb();
     initSyncQueue();
-    console.log('✨ Smart Engine initialized (Offline-First, Auto-Healing)');
     return true;
   } catch (err) {
     console.warn('⚠️ Smart Engine partial init:', err);

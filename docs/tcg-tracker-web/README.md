@@ -28,6 +28,7 @@ Fundament-Schicht – keine Abhängigkeiten zu anderen Modulen.
 | [modules/core/config.md](modules/core/config.md) | Konfigurationskonstanten, STORAGE_SCOPE, scopedStorageKey |
 | [modules/core/auth.md](modules/core/auth.md) | Google OAuth2 / GAPI-Authentifizierung |
 | [modules/core/cache.md](modules/core/cache.md) | In-Memory TTL-Cache |
+| [modules/core/storage-keys.md](modules/core/storage-keys.md) | Storage-Key- und Event-Registry |
 | [modules/core/utils.md](modules/core/utils.md) | Gemeinsame Hilfsfunktionen |
 
 ### data/

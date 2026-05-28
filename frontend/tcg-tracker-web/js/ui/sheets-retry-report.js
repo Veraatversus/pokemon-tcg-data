@@ -1,3 +1,9 @@
+import {
+  EVENT_SHEETS_WRITE_FAILED,
+  EVENT_SHEETS_WRITE_RETRY,
+  EVENT_SHEETS_WRITE_SUCCESS,
+} from '../core/storage-keys.js';
+
 export function createInitialSheetsRetryMetrics() {
   return {
     totalWrites: 0,
@@ -23,7 +29,7 @@ export function initSheetsWriteFeedback({ state, renderSheetsRetryReport, setGlo
     renderSheetsRetryReport();
   };
 
-  window.addEventListener('sheets-write-retry', (event) => {
+  window.addEventListener(EVENT_SHEETS_WRITE_RETRY, (event) => {
     const details = event?.detail || {};
     state.sheetsRetryMetrics.totalRetries += 1;
     state.sheetsRetryMetrics.maxAttemptSeen = Math.max(
@@ -46,7 +52,7 @@ export function initSheetsWriteFeedback({ state, renderSheetsRetryReport, setGlo
     }
   });
 
-  window.addEventListener('sheets-write-success', (event) => {
+  window.addEventListener(EVENT_SHEETS_WRITE_SUCCESS, (event) => {
     const details = event?.detail || {};
     state.sheetsRetryMetrics.totalWrites += 1;
     state.sheetsRetryMetrics.maxAttemptSeen = Math.max(
@@ -61,7 +67,7 @@ export function initSheetsWriteFeedback({ state, renderSheetsRetryReport, setGlo
     }
   });
 
-  window.addEventListener('sheets-write-failed', (event) => {
+  window.addEventListener(EVENT_SHEETS_WRITE_FAILED, (event) => {
     const details = event?.detail || {};
     state.sheetsRetryMetrics.totalFailures += 1;
     pushRetryEvent('failed', {

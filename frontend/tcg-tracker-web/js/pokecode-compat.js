@@ -1,5 +1,5 @@
-import { normalizeCardNumber, naturalSort } from './utils.js';
-import { buildCardRecordFromSources, buildSetRecordFromSources } from './data/schema-contract.js?v=20260507a';
+import { normalizeCardNumber, naturalSort } from './core/utils.js';
+import { buildCardRecordFromSources, buildSetRecordFromSources } from './data/schema-contract.js?v=20260427-wave3-central-v1';
 
 export function normalizeString(str) {
   if (str === null || typeof str === 'undefined') {
@@ -161,18 +161,31 @@ export function resolveTcgdexImageUrl(tcgdexSetId, tcgdexCard, options = {}) {
   const seriesId = String(config.seriesId || tcgdexCard?.set?.serie?.id || tcgdexCard?.serie?.id || '').trim();
 
   const imageValue = tcgdexCard?.image;
+  const rewriteTcgdexImageQuality = (url) => {
+    const text = String(url || '').trim();
+    if (!text) return '';
+    const withExplicitExt = text.match(/\/(low|high)\.(png|jpe?g|webp)$/i);
+    if (withExplicitExt) {
+      const ext = String(withExplicitExt[2] || 'webp').toLowerCase();
+      return text.replace(/\/(low|high)\.(png|jpe?g|webp)$/i, `/${quality}.${ext}`);
+    }
+    if (/\/(low|high)$/i.test(text)) {
+      return text.replace(/\/(low|high)$/i, `/${quality}`);
+    }
+    return `${text}/${quality}.webp`;
+  };
+
   if (typeof imageValue === 'string' && imageValue.trim()) {
-    const trimmed = imageValue.trim().replace(/\/(low|high)\.(png|jpe?g|webp)$/i, '');
-    return `${trimmed}/${quality}.webp`;
+    return rewriteTcgdexImageQuality(imageValue);
   }
   if (imageValue && typeof imageValue === 'object') {
     if (typeof imageValue[quality] === 'string' && imageValue[quality].trim()) return imageValue[quality].trim();
     if (typeof imageValue.base === 'string' && imageValue.base.trim()) return `${imageValue.base.trim()}/${quality}.webp`;
     if (typeof imageValue.low === 'string' && imageValue.low.trim()) {
-      return imageValue.low.trim().replace(/\/(low|high)\.(png|jpe?g|webp)$/i, `/${quality}.webp`);
+      return rewriteTcgdexImageQuality(imageValue.low);
     }
     if (typeof imageValue.high === 'string' && imageValue.high.trim()) {
-      return imageValue.high.trim().replace(/\/(low|high)\.(png|jpe?g|webp)$/i, `/${quality}.webp`);
+      return rewriteTcgdexImageQuality(imageValue.high);
     }
   }
   const localId = normalizeCardNumber(tcgdexCard?.localId || tcgdexCard?.id || '');

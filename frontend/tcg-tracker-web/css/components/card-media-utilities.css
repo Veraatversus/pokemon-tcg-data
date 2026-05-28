@@ -1,0 +1,4 @@
+.img-fallback {
+  opacity: 0.45;
+  filter: grayscale(1);
+}

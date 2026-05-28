@@ -1,0 +1,241 @@
+dialog > p,
+.dialog-error,
+.job-status-text,
+.global-status,
+.empty-state,
+.loading-placeholder {
+  color: var(--color-text-secondary) !important;
+}
+
+button,
+select,
+input,
+textarea {
+  font-family: var(--font-body) !important;
+}
+
+button:not(.btn-secondary):not(.btn-danger):not(.btn-icon):not(.nav-set-toggle):not(.lightbox-nav):not(.lightbox-close):not(.custom-select-option):not(.custom-select-trigger):not(.dashboard-view-tab):not(.quick-filter-btn):not(.tracker-menu-chip):not(.filter-btn) {
+  background: var(--gradient-brand-primary) !important;
+  color: #fff !important;
+  border: 1px solid var(--gradient-brand-border) !important;
+  box-shadow: var(--shadow-brand-control) !important;
+}
+
+button:not(.btn-secondary):not(.btn-danger):not(.btn-icon):not(.nav-set-toggle):not(.lightbox-nav):not(.lightbox-close):not(.custom-select-option):not(.custom-select-trigger):not(.dashboard-view-tab):not(.quick-filter-btn):not(.tracker-menu-chip):not(.filter-btn):hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 24px rgba(255, 107, 53, 0.45),
+    0 10px 24px rgba(0, 0, 0, 0.28) !important;
+}
+
+#refresh-split.split-action-group {
+  overflow: visible;
+  z-index: 5;
+  gap: 0;
+  border: 1px solid var(--gradient-brand-border);
+  border-radius: 10px;
+  background: var(--gradient-brand-primary) !important;
+  box-shadow: var(--shadow-brand-control);
+}
+
+#refresh-split.split-action-group > button {
+  min-height: 40px;
+  border: 0 !important;
+  background: transparent !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+#refresh-split > #btn-refresh {
+  text-align: left;
+  padding-left: 14px;
+  padding-right: 12px;
+  border-right: 1px solid rgba(7, 16, 31, 0.16) !important;
+}
+
+#refresh-split > #btn-refresh-menu {
+  width: 34px;
+  min-width: 34px;
+  margin-left: 0;
+  padding: 0 !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+#refresh-split > button:hover:not(:disabled),
+#refresh-split > button:focus-visible:not(:disabled),
+#refresh-split > #btn-refresh-menu[aria-expanded="true"] {
+  background: rgba(7, 16, 31, 0.08) !important;
+  box-shadow: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+#refresh-split .split-action-caret {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+button.btn-secondary,
+.btn-secondary {
+  background: rgba(15, 22, 39, 0.88) !important;
+  color: var(--color-water) !important;
+  border: 1px solid rgba(0, 212, 255, 0.42) !important;
+}
+
+button.btn-secondary:hover,
+.btn-secondary:hover {
+  background: rgba(0, 212, 255, 0.10) !important;
+  box-shadow: var(--shadow-glow-water) !important;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.custom-select-trigger:focus-visible,
+.custom-select-option:focus-visible {
+  outline: 2px solid var(--color-gold) !important;
+  outline-offset: 2px !important;
+}
+
+.ss-input,
+input,
+textarea,
+select {
+  background: rgba(26, 31, 53, 0.88) !important;
+  color: var(--color-text-primary) !important;
+  border-color: rgba(0, 212, 255, 0.28) !important;
+}
+
+.ss-input::placeholder,
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-text-muted) !important;
+}
+
+.custom-select {
+  position: relative;
+  width: 100%;
+  display: inline-block;
+}
+
+.custom-select .cs-native {
+  position: absolute !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.custom-select-trigger {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 36px 8px 12px !important;
+  border: 1px solid rgba(0, 212, 255, 0.48) !important;
+  border-radius: var(--radius-md) !important;
+  background: rgba(26, 31, 53, 0.92) !important;
+  color: var(--color-text-primary) !important;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.custom-select-trigger::after {
+  content: '\25be';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-gold);
+  font-size: 11px;
+}
+
+.custom-select.is-open .custom-select-trigger {
+  border-color: rgba(168, 85, 247, 0.72) !important;
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.24) !important;
+}
+
+.custom-select-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 2100;
+  max-height: 320px;
+  overflow-y: auto;
+  display: none !important;
+  visibility: hidden !important;
+  border: 1px solid rgba(168, 85, 247, 0.52) !important;
+  border-radius: var(--radius-md) !important;
+  background: rgba(15, 22, 39, 0.98) !important;
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.4),
+    0 0 18px rgba(168, 85, 247, 0.18) !important;
+  padding: 6px !important;
+}
+
+.custom-select.is-open .custom-select-list {
+  display: block !important;
+  visibility: visible !important;
+}
+
+.custom-select-option {
+  width: 100% !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-radius: var(--radius-sm) !important;
+  color: var(--color-text-secondary) !important;
+}
+
+.custom-select-option.is-not-imported {
+  color: var(--color-text-muted) !important;
+}
+
+.custom-select-option.is-not-imported::after {
+  content: '\25cc';
+  color: rgba(148, 163, 184, 0.9);
+  font-size: 11px;
+  flex: 0 0 auto;
+}
+
+.custom-select-trigger.is-not-imported {
+  color: var(--color-text-secondary) !important;
+  border-color: rgba(148, 163, 184, 0.45) !important;
+}
+
+.custom-select-trigger.is-not-imported::before {
+  content: '';
+  position: absolute;
+  right: 28px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  transform: translateY(-50%);
+  background: rgba(148, 163, 184, 0.75);
+}
+
+.custom-select-option:hover,
+.custom-select-option:focus-visible {
+  background: rgba(255, 107, 53, 0.16) !important;
+  color: var(--color-fire) !important;
+  border-color: rgba(255, 107, 53, 0.35) !important;
+}
+
+.custom-select-option.is-not-imported:hover,
+.custom-select-option.is-not-imported:focus-visible {
+  color: #dbe7f5 !important;
+}
+
+.custom-select-option.is-selected {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.22), rgba(0, 212, 255, 0.10)) !important;
+  color: var(--color-text-primary) !important;
+  border-color: rgba(168, 85, 247, 0.42) !important;
+  font-weight: 600;
+}
