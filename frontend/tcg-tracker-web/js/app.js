@@ -272,7 +272,7 @@ const dom = {
   btnSheetsRetryReset: document.getElementById('btn-sheets-retry-reset'),
   btnSheetsRetryClose: document.getElementById('btn-sheets-retry-close'),
   dashboardGrid:    document.getElementById('dashboard-grid'),
-  // Set detail � sidebar
+  // Set detail - sidebar
   selector:         document.getElementById('set-selector'),
   load:             document.getElementById('btn-load'),
   refresh:          document.getElementById('btn-refresh'),
@@ -295,7 +295,7 @@ const dom = {
   statRh:           document.getElementById('stat-rh'),
   statMissing:      document.getElementById('stat-missing'),
   cardSort:         document.getElementById('card-sort'),
-  // Set detail � toolbar
+  // Set detail - toolbar
   btnBulkEdit:      document.getElementById('btn-bulk-edit'),
   btnUndoLast:      document.getElementById('btn-undo-last'),
   btnAuditPanel:    document.getElementById('btn-audit-panel'),
@@ -532,7 +532,7 @@ function updateAutoImportQueueUi() {
   dom.jobPanel.classList.remove('hidden');
   dom.jobTitle.textContent = 'Auto-Import Queue';
   const activeLabel = activeSetId ? `Aktiv: ${resolveAutoImportSetLabel(activeSetId)}` : 'Wartet auf freien Slot';
-  const waitingLabel = queuedIds.length ? ` � ${queuedIds.length} wartend` : '';
+  const waitingLabel = queuedIds.length ? ` - ${queuedIds.length} wartend` : '';
   dom.jobStatusText.textContent = `${activeLabel}${waitingLabel}`;
   if (dom.btnJobCancel) dom.btnJobCancel.disabled = true;
 }
@@ -834,7 +834,7 @@ function createDashboardVirtualFooter(total, visible) {
   const remaining = Math.max(0, total - visible);
 
   wrapper.innerHTML = `
-    <p>Zeige ${visible} von ${total} Sets${remaining > 0 ? ` � ${remaining} weitere` : ''}</p>
+    <p>Zeige ${visible} von ${total} Sets${remaining > 0 ? ` - ${remaining} weitere` : ''}</p>
     <div class="dashboard-virtual-actions">
       <button class="btn-secondary" type="button" data-action="more">Mehr laden (+${DASHBOARD_VIRTUAL_PAGE_SIZE})</button>
       <button class="btn-secondary" type="button" data-action="all">Alle laden</button>
@@ -980,8 +980,8 @@ function startJob(title, totalSteps = 0) {
   };
   state.activeJob = job;
   dom.jobPanel?.classList.remove('hidden');
-  if (dom.jobTitle) dom.jobTitle.textContent = title;
-  if (dom.jobStatusText) dom.jobStatusText.textContent = 'Gestartet�';
+  if (dom.jobTitle) dom.jobTitle.textContent = normalizeUiText(title);
+  if (dom.jobStatusText) dom.jobStatusText.textContent = 'Gestartet...';
   if (dom.jobProgressFill) dom.jobProgressFill.style.width = '0%';
   if (dom.btnJobCancel) dom.btnJobCancel.disabled = false;
   return job;
@@ -990,7 +990,7 @@ function startJob(title, totalSteps = 0) {
 function pushJobHistory(text) {
   if (!dom.jobHistory) return;
   const item = document.createElement('li');
-  item.textContent = text;
+  item.textContent = normalizeUiText(text);
   dom.jobHistory.prepend(item);
   while (dom.jobHistory.children.length > 30) {
     dom.jobHistory.removeChild(dom.jobHistory.lastChild);
@@ -1002,17 +1002,17 @@ function updateJob(job, current, text) {
   job.current = Math.max(0, Number(current) || 0);
   const pct = job.totalSteps > 0 ? Math.min(100, Math.round((job.current / job.totalSteps) * 100)) : 0;
   if (dom.jobProgressFill) dom.jobProgressFill.style.width = `${pct}%`;
-  if (dom.jobStatusText) dom.jobStatusText.textContent = text || `${job.current}/${job.totalSteps}`;
+  if (dom.jobStatusText) dom.jobStatusText.textContent = normalizeUiText(text || `${job.current}/${job.totalSteps}`);
 }
 
 function finishJob(job, summary, isError = false) {
   if (!job || state.activeJob?.id !== job.id) return;
-  if (dom.jobStatusText) dom.jobStatusText.textContent = summary;
+  if (dom.jobStatusText) dom.jobStatusText.textContent = normalizeUiText(summary);
   if (dom.btnJobCancel) dom.btnJobCancel.disabled = true;
   if (dom.jobProgressFill && job.totalSteps > 0) {
     dom.jobProgressFill.style.width = isError ? dom.jobProgressFill.style.width : '100%';
   }
-  pushJobHistory(`${new Date().toLocaleTimeString('de-DE')} � ${job.title}: ${summary}`);
+  pushJobHistory(`${new Date().toLocaleTimeString('de-DE')} - ${job.title}: ${summary}`);
   state.activeJob = null;
 }
 
@@ -1030,7 +1030,7 @@ function updateQueueUiState() {
 
 function enqueueAction(label, action) {
   state.queuedActions.push({ id: Date.now() + Math.random(), label, action });
-  pushJobHistory(`${new Date().toLocaleTimeString('de-DE')} � Queue hinzugef�gt: ${label}`);
+  pushJobHistory(`${new Date().toLocaleTimeString('de-DE')} - Queue hinzugefuegt: ${label}`);
   updateQueueUiState();
 }
 
@@ -1052,18 +1052,18 @@ async function runQueuedActions() {
   try {
     while (state.queuedActions.length > 0) {
       if (state.queueCancelRequested) {
-        pushJobHistory(`${new Date().toLocaleTimeString('de-DE')} � Queue abgebrochen`);
+        pushJobHistory(`${new Date().toLocaleTimeString('de-DE')} - Queue abgebrochen`);
         break;
       }
       const next = state.queuedActions.shift();
       updateQueueUiState();
       if (dom.jobStatusText) dom.jobStatusText.textContent = `Queue: ${next.label}`;
-      pushJobHistory(`${new Date().toLocaleTimeString('de-DE')} � Queue startet: ${next.label}`);
+      pushJobHistory(`${new Date().toLocaleTimeString('de-DE')} - Queue startet: ${next.label}`);
       try {
         await next.action();
       } catch (err) {
-        pushJobHistory(`${new Date().toLocaleTimeString('de-DE')} � Queue-Fehler: ${next.label} (${err.message})`);
-        showToast(`Queue gestoppt: ${next.label} � ${err.message}`, 'error', 6000);
+        pushJobHistory(`${new Date().toLocaleTimeString('de-DE')} - Queue-Fehler: ${next.label} (${err.message})`);
+        showToast(`Queue gestoppt: ${next.label} - ${err.message}`, 'error', 6000);
         break;
       }
     }
@@ -1092,13 +1092,13 @@ function getQueueBuilderActionsCatalog() {
     {
       id: 'power-refresh',
       label: 'Power-Refresh Overview',
-      description: 'Overview-Update mit �nderungsreport',
+      description: 'Overview-Update mit Aenderungsreport',
       action: () => powerRefreshOverviewFromApi()
     },
     {
       id: 'health-check',
       label: 'Datencheck',
-      description: 'Pr�ft importierte Sets auf API/Sheet-Mismatch',
+      description: 'Prueft importierte Sets auf API/Sheet-Mismatch',
       action: () => runDataHealthCheck({ autoFix: false })
     },
     {
@@ -1164,7 +1164,7 @@ function renderQueuePresetSelect() {
 
 function saveCurrentQueuePreset() {
   if (!state.queueBuilderSequence.length) {
-    showToast('Keine Aktionen f�r Preset ausgew�hlt.', 'info');
+    showToast('Keine Aktionen fuer Preset ausgewaehlt.', 'info');
     return;
   }
   const name = window.prompt('Preset-Name:');
@@ -1191,13 +1191,13 @@ function deleteSelectedQueuePreset() {
     return;
   }
   const presetName = state.queuePresets[idx].name;
-  const ok = window.confirm(`Preset �${presetName}� l�schen?`);
+  const ok = window.confirm(`Preset ${presetName} loeschen?`);
   if (!ok) return;
   state.queuePresets.splice(idx, 1);
   persistQueuePresets();
   renderQueuePresetSelect();
   if (dom.queuePresetSelect) dom.queuePresetSelect.value = '';
-  showToast(`Preset gel�scht: ${presetName}`, 'info', 2500);
+  showToast(`Preset geloescht: ${presetName}`, 'info', 2500);
 }
 
 function renameSelectedQueuePreset() {
@@ -1213,7 +1213,7 @@ function renameSelectedQueuePreset() {
   if (!trimmedName) return;
   const collision = state.queuePresets.findIndex((p, i) => i !== idx && p.name.toLowerCase() === trimmedName.toLowerCase());
   if (collision >= 0) {
-    showToast(`Name �${trimmedName}" wird bereits verwendet.`, 'error', 3500);
+    showToast(`Name ${trimmedName}" wird bereits verwendet.`, 'error', 3500);
     return;
   }
   preset.name = trimmedName;
@@ -1237,7 +1237,7 @@ function duplicateSelectedQueuePreset() {
   if (!trimmedName) return;
   const collision = state.queuePresets.findIndex((p) => p.name.toLowerCase() === trimmedName.toLowerCase());
   if (collision >= 0) {
-    showToast(`Name �${trimmedName}" wird bereits verwendet.`, 'error', 3500);
+    showToast(`Name ${trimmedName}" wird bereits verwendet.`, 'error', 3500);
     return;
   }
   const copy = { name: trimmedName, actionIds: [...preset.actionIds] };
@@ -1327,7 +1327,7 @@ function renderQueueBuilderSelected(catalog) {
   if (!state.queueBuilderSequence.length) {
     const empty = document.createElement('li');
     empty.className = 'queue-selected-empty';
-    empty.textContent = 'Noch keine Aktion ausgew�hlt.';
+    empty.textContent = 'Noch keine Aktion ausgewaehlt.';
     dom.queueBuilderSelected.appendChild(empty);
     return;
   }
@@ -1463,7 +1463,7 @@ function initQueueBuilderDialog() {
       const parsed = JSON.parse(text);
       const imported = normalizeImportedPresets(parsed);
       if (!imported.length) {
-        showToast('Keine g�ltigen Presets im Import gefunden.', 'error', 4500);
+        showToast('Keine gueltigen Presets im Import gefunden.', 'error', 4500);
         return;
       }
       const { added, updated } = mergeQueuePresets(imported);
@@ -1484,13 +1484,13 @@ function initQueueBuilderDialog() {
       .filter(Boolean);
 
     if (!selected.length) {
-      showToast('Bitte mindestens eine Aktion w�hlen.', 'info');
+      showToast('Bitte mindestens eine Aktion waehlen.', 'info');
       return;
     }
 
     selected.forEach((item) => enqueueAction(item.label, item.action));
     dom.queueBuilderDialog.close();
-    showToast(`${selected.length} Aktion(en) in Reihenfolge zur Queue hinzugef�gt.`, 'success', 3000);
+    showToast(`${selected.length} Aktion(en) in Reihenfolge zur Queue hinzugefuegt.`, 'success', 3000);
   });
 }
 
@@ -1508,7 +1508,7 @@ function setLoading(show, text = 'Lade\u2026') {
   if (!dom.loadingOverlay) return;
   const safeText = normalizeUiText(text);
   if (dom.loadingText) dom.loadingText.textContent = safeText;
-  // OVERLAY DISABLED: Always hide immediately � start directly on page
+  // OVERLAY DISABLED: Always hide immediately - start directly on page
   dom.loadingOverlay.classList.add('hidden');
   dom.loadingOverlay.setAttribute('aria-hidden', 'true');
 }
@@ -1525,12 +1525,33 @@ function normalizeUiText(value) {
   let text = String(value ?? '');
   if (!text) return '';
 
+  const wordFixes = [
+    [/f\uFFFDr/g, 'fuer'],
+    [/ausgew\uFFFDhlt/g, 'ausgewaehlt'],
+    [/gel\uFFFDscht/g, 'geloescht'],
+    [/l\uFFFDschen/g, 'loeschen'],
+    [/m\uFFFDglich/g, 'moeglich'],
+    [/w\uFFFDhlen/g, 'waehlen'],
+    [/g\uFFFDltig/g, 'gueltig'],
+    [/r\uFFFDckg\uFFFDngig/g, 'rueckgaengig'],
+    [/l\uFFFDuft/g, 'laeuft'],
+    [/verf\uFFFDgbar/g, 'verfuegbar'],
+    [/enth\uFFFDlt/g, 'enthaelt'],
+    [/\uFFFDffnen/g, 'oeffnen'],
+    [/\uFFFDffnet/g, 'oeffnet'],
+    [/\uFFFDffne/g, 'oeffne'],
+    [/\uFFFDbersicht/g, 'Uebersicht'],
+    [/\uFFFDnderung/g, 'aenderung'],
+    [/\uFFFDnderungen/g, 'aenderungen']
+  ];
+
   const replacements = [
     [/\?\?\s+/g, ''],
-    [/�([\w])/g, '$1'],
-    [/([\w])�/g, '$1'],
-    [/\s+�\s+/g, ' - '],
-    [/�/g, ''],
+    ...wordFixes,
+    [/\s+\uFFFD\s+/g, ' - '],
+    [/\uFFFD([\w])/g, '$1'],
+    [/([\w])\uFFFD/g, '$1'],
+    [/\uFFFD/g, ''],
     [/\s{2,}/g, ' ']
   ];
 
@@ -1539,6 +1560,89 @@ function normalizeUiText(value) {
   }
 
   return text.trim();
+}
+
+function sanitizeMojibakeTextNode(node) {
+  if (!node || node.nodeType !== Node.TEXT_NODE) return;
+  const current = String(node.nodeValue ?? '');
+  if (!current || (!current.includes('\uFFFD') && !current.includes('??'))) return;
+  const normalized = normalizeUiText(current);
+  if (normalized !== current) node.nodeValue = normalized;
+}
+
+function sanitizeMojibakeAttributes(el) {
+  if (!el || el.nodeType !== Node.ELEMENT_NODE) return;
+  const attrNames = ['title', 'aria-label', 'placeholder'];
+  for (const attr of attrNames) {
+    const raw = el.getAttribute(attr);
+    if (!raw || (!raw.includes('\uFFFD') && !raw.includes('??'))) continue;
+    el.setAttribute(attr, normalizeUiText(raw));
+  }
+}
+
+function sanitizeMojibakeInDom(root = document.body) {
+  if (!root) return;
+
+  if (root.nodeType === Node.TEXT_NODE) {
+    sanitizeMojibakeTextNode(root);
+    return;
+  }
+
+  sanitizeMojibakeAttributes(root);
+
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  let textNode = walker.nextNode();
+  while (textNode) {
+    sanitizeMojibakeTextNode(textNode);
+    textNode = walker.nextNode();
+  }
+
+  if (root.querySelectorAll) {
+    root.querySelectorAll('*').forEach((el) => sanitizeMojibakeAttributes(el));
+  }
+}
+
+let _mojibakeObserver = null;
+let _dialogNormalizerInstalled = false;
+
+function installMojibakeSanitizer() {
+  if (!_dialogNormalizerInstalled) {
+    _dialogNormalizerInstalled = true;
+    const nativeConfirm = window.confirm.bind(window);
+    const nativePrompt = window.prompt.bind(window);
+    const nativeAlert = window.alert.bind(window);
+
+    window.confirm = (message) => nativeConfirm(normalizeUiText(message));
+    window.prompt = (message, defaultValue = '') => nativePrompt(normalizeUiText(message), normalizeUiText(defaultValue));
+    window.alert = (message) => nativeAlert(normalizeUiText(message));
+  }
+
+  sanitizeMojibakeInDom(document.body);
+
+  if (_mojibakeObserver) return;
+  _mojibakeObserver = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      if (mutation.type === 'characterData') {
+        sanitizeMojibakeTextNode(mutation.target);
+        continue;
+      }
+      if (mutation.type === 'attributes') {
+        sanitizeMojibakeAttributes(mutation.target);
+        continue;
+      }
+      for (const node of mutation.addedNodes || []) {
+        sanitizeMojibakeInDom(node);
+      }
+    }
+  });
+
+  _mojibakeObserver.observe(document.body, {
+    childList: true,
+    subtree: true,
+    characterData: true,
+    attributes: true,
+    attributeFilter: ['title', 'aria-label', 'placeholder']
+  });
 }
 
 function closeOtherOpenDialogs(except = []) {
@@ -1556,15 +1660,15 @@ function closeOtherOpenDialogs(except = []) {
 const SUPPORT_CHANNEL_META = Object.freeze({
   bug: {
     title: 'Bug melden',
-    fallbackMessage: 'Bug-Formular noch nicht hinterlegt � ich �ffne vorerst die Kontaktseite.'
+    fallbackMessage: 'Bug-Formular noch nicht hinterlegt - ich oeffne vorerst die Kontaktseite.'
   },
   feature: {
-    title: 'Feature w�nschen',
-    fallbackMessage: 'Feature-Formular noch nicht hinterlegt � ich �ffne vorerst die Kontaktseite.'
+    title: 'Feature wuenschen',
+    fallbackMessage: 'Feature-Formular noch nicht hinterlegt - ich oeffne vorerst die Kontaktseite.'
   },
   access: {
     title: 'Zugang beantragen',
-    fallbackMessage: 'Access-Formular noch nicht hinterlegt � ich �ffne vorerst die Kontaktseite.'
+    fallbackMessage: 'Access-Formular noch nicht hinterlegt - ich oeffne vorerst die Kontaktseite.'
   }
 });
 
@@ -1698,24 +1802,24 @@ function updateUndoUi() {
   if (!dom.btnUndoLast) return;
   const count = state.undoStack.length;
   dom.btnUndoLast.disabled = count === 0;
-  dom.btnUndoLast.title = count > 0 ? `Letzte �nderung r�ckg�ngig (${count})` : 'Keine �nderung zum R�ckg�ngigmachen';
+  dom.btnUndoLast.title = count > 0 ? `Letzte aenderung rueckgaengig (${count})` : 'Keine aenderung zum Rckgngigmachen';
 }
 
 async function undoLastChange() {
   const entry = state.undoStack.pop();
   updateUndoUi();
   if (!entry) {
-    showToast('Keine �nderung zum R�ckg�ngigmachen.', 'info', 2200);
+    showToast('Keine aenderung zum Rckgngigmachen.', 'info', 2200);
     return;
   }
 
   if (!state.currentSet || (entry.setId && state.currentSet.setId !== entry.setId)) {
-    showToast('Undo ist nur im gleichen Set m�glich.', 'info', 2600);
+    showToast('Undo ist nur im gleichen Set moeglich.', 'info', 2600);
     return;
   }
 
   beginTrackedWrite('Undo');
-  setLoading(true, 'Undo l�uft�');
+  setLoading(true, 'Undo laeuft');
   let reverted = 0;
   try {
     for (const change of entry.changes) {
@@ -1882,7 +1986,7 @@ function attachImageFallback(img, card, setIdHint = '') {
     img.style.display = '';
     img.src = './assets/pokeball-fallback.svg';
     img.classList.add('img-fallback');
-    img.alt = `Kein Kartenbild f�r ${card?.name || card?.number || 'diese Karte'}`;
+    img.alt = `Kein Kartenbild fuer ${card?.name || card?.number || 'diese Karte'}`;
   };
 
   if (wrap) {
@@ -2052,9 +2156,9 @@ function initCustomSelects() {
     item.className = 'custom-select-option';
     item.dataset.value = option.value;
     const isNotImported = option.dataset.imported === 'false';
-    const rawLabel = option.textContent?.trim() || '�';
+    const rawLabel = option.textContent?.trim() || '';
     const visibleLabel = isNotImported
-      ? rawLabel.replace(/\s*[�-]\s*noch nicht importiert$/i, '').trim()
+      ? rawLabel.replace(/\s*[-]\s*noch nicht importiert$/i, '').trim()
       : rawLabel;
     item.textContent = visibleLabel || rawLabel;
     item.setAttribute('role', 'option');
@@ -2578,10 +2682,10 @@ async function applySpreadsheetSelection(id) {
 }
 
 async function createAndUseSpreadsheet() {
-  const title = String(dom.dialogNewNameInput?.value || '').trim() || `Pok�mon TCG Tracker ${new Date().toLocaleDateString('de-DE')}`;
+  const title = String(dom.dialogNewNameInput?.value || '').trim() || `Pokemon TCG Tracker ${new Date().toLocaleDateString('de-DE')}`;
   try {
     dom.btnSpreadsheetCreate && (dom.btnSpreadsheetCreate.disabled = true);
-    setSpreadsheetDialogError('Neue Tabelle wird erstellt�', false);
+    setSpreadsheetDialogError('Neue Tabelle wird erstellt...', false);
 
     const response = await gapi.client.sheets.spreadsheets.create({
       properties: { title }
@@ -2589,7 +2693,7 @@ async function createAndUseSpreadsheet() {
 
     const spreadsheetId = String(response?.result?.spreadsheetId || '').trim();
     if (!spreadsheetId) {
-      throw new Error('Spreadsheet-ID wurde nicht zur�ckgegeben.');
+      throw new Error('Spreadsheet-ID wurde nicht zurueckgegeben.');
     }
 
     await applySpreadsheetSelection(spreadsheetId);
@@ -2666,7 +2770,7 @@ async function loadSets() {
       listSetsOverviewData().catch(() => [])
     ]);
 
-    if (!Array.isArray(importedSets)) throw new Error('Ung�ltiges Sets-Format');
+    if (!Array.isArray(importedSets)) throw new Error('Ungueltiges Sets-Format');
     state.sets = importedSets;
 
     let overviewSets = Array.isArray(initialOverviewSets) ? initialOverviewSets : [];
@@ -2677,7 +2781,7 @@ async function loadSets() {
       overviewSets = await listSetsOverviewData().catch(() => []);
     }
 
-    // Legacy-Migration: importierte Sets aus dem �bersichtssheet wiederherstellen,
+    // Legacy-Migration: importierte Sets aus dem Uebersichtssheet wiederherstellen,
     // falls db_sets zuvor normalisiert wurde und alle Import-Flags verloren gingen.
     if (importedSets.length === 0 && overviewSets.length > 0) {
       try {
@@ -2708,7 +2812,7 @@ async function loadSets() {
       mergedMap.set(set.setId, {
         ...current,
         ...set,
-        // ptcgoCode nicht mit einem leeren Sheets-Wert �berschreiben
+        // ptcgoCode nicht mit einem leeren Sheets-Wert ueberschreiben
         ptcgoCode: set.ptcgoCode || current.ptcgoCode || '',
         imported: true
       });
@@ -3023,7 +3127,7 @@ function createDashSetCard(set, summary) {
       event.stopPropagation();
       const isFav = toggleFavorite(set.setId);
       favoriteButton.textContent = isFav ? '★' : '☆';
-      showToast(isFav ? `${set.setName} zu Favoriten hinzugef�gt` : `${set.setName} aus Favoriten entfernt`, 'success', 2000);
+      showToast(isFav ? `${set.setName} zu Favoriten hinzugefuegt` : `${set.setName} aus Favoriten entfernt`, 'success', 2000);
     });
   }
 
@@ -3190,7 +3294,7 @@ async function ensureSetImportedFromApi(setMeta, cards, options = {}) {
       state.autoImportQueuedSetIds = state.autoImportQueuedSetIds.filter((id) => id !== setId);
       state.autoImportActiveSetId = setId;
       updateAutoImportQueueUi();
-      setGlobalStatus(`Auto-Importiere ${mergedSet.setName || setId}�`);
+      setGlobalStatus(`Auto-Importiere ${mergedSet.setName || setId}`);
 
       await importSetIntoCollection(mergedSet, safeCards);
       cache.del(`cards_${setId}`);
@@ -3255,8 +3359,8 @@ async function importSetFromOverview(set) {
   const queuedJob = state.manualImportQueue
     .catch(() => undefined)
     .then(async () => {
-      setLoading(true, `Importiere ${set.setName}�`);
-      setGlobalStatus(`Importiere ${set.setName}�`);
+      setLoading(true, `Importiere ${set.setName}`);
+      setGlobalStatus(`Importiere ${set.setName}`);
       try {
         await importSetIntoCollectionWithBackoff(set, set.setName || set.setId);
         cache.del(`cards_${set.setId}`);
@@ -3301,26 +3405,26 @@ async function importSetFromOverview(set) {
 async function deleteSetFromCollection(set, options = {}) {
   const { skipReload = false, skipConfirm = false } = options;
   if (!set?.setId || !set.imported) {
-    showToast('Set kann nicht gel�scht werden.', 'error', 3000);
+    showToast('Set kann nicht geloescht werden.', 'error', 3000);
     return;
   }
 
-  const confirmMsg = `${set.setName} wirklich aus deiner Sammlung l�schen? Diese Aktion kann nicht r�ckg�ngig gemacht werden.`;
+  const confirmMsg = `${set.setName} wirklich aus deiner Sammlung loeschen? Diese Aktion kann nicht rueckgaengig gemacht werden.`;
   if (!skipConfirm && !window.confirm(confirmMsg)) {
     return;
   }
 
-  setLoading(true, `L�sche ${set.setName}�`);
-  setGlobalStatus(`L�sche ${set.setName}�`);
+  setLoading(true, `Loesche ${set.setName}`);
+  setGlobalStatus(`Loesche ${set.setName}`);
   
   try {
-    // Auto-Snapshot vor dem L�schen erstellen
+    // Auto-Snapshot vor dem Loeschen erstellen
     try {
       const currentCollection = state.collection || {};
       const action = `Delete Set: ${set.setName}`;
       await createAutoSnapshot(action, currentCollection);
     } catch (err) {
-      console.warn('?? Auto-snapshot vor L�schung fehlgeschlagen:', err);
+      console.warn('Auto-snapshot vor Loeschung fehlgeschlagen:', err);
     }
 
     // Entferne das Set aus der Sammlung
@@ -3351,12 +3455,12 @@ async function deleteSetFromCollection(set, options = {}) {
       await renderDashboard();
     }
     
-    showToast(`${set.setName} wurde gel�scht.`, 'success', 3000);
-    setGlobalStatus(`${set.setName} wurde gel�scht.`);
+    showToast(`${set.setName} wurde geloescht.`, 'success', 3000);
+    setGlobalStatus(`${set.setName} wurde geloescht.`);
   } catch (err) {
     console.error('[deleteSetFromCollection]', err);
-    showToast(`L�schen fehlgeschlagen: ${err.message}`, 'error', 5000);
-    setGlobalStatus(`Fehler beim L�schen: ${set.setName}`);
+    showToast(`Loeschen fehlgeschlagen: ${err.message}`, 'error', 5000);
+    setGlobalStatus(`Fehler beim Loeschen: ${set.setName}`);
   } finally {
     setLoading(false);
   }
@@ -3423,7 +3527,7 @@ async function importSetsSequential(sets, options = {}) {
     const action = `Import: ${validSets.map(s => s.setName).join(', ')}${snapshotCount > 15 ? ' (oldest will be removed)' : ''}`;
     await createAutoSnapshot(action, currentCollection);
   } catch (err) {
-    console.warn('?? Auto-snapshot vor Import fehlgeschlagen:', err);
+    console.warn('Auto-snapshot vor Import fehlgeschlagen:', err);
     // Fehler blockiert nicht den Import
   }
 
@@ -3432,7 +3536,7 @@ async function importSetsSequential(sets, options = {}) {
   let consecutiveQuotaErrors = 0;
   let pausedForAuth = false;
   const job = startJob('Import', validSets.length);
-  setLoading(true, 'Import l�uft�');
+  setLoading(true, 'Import laeuft');
   try {
     for (let index = 0; index < validSets.length; index++) {
       assertJobNotCancelled(job);
@@ -3509,7 +3613,7 @@ async function syncOverviewFromApi() {
     showToast('Bitte zuerst anmelden.', 'info');
     return;
   }
-  setLoading(true, 'Synchronisiere Overview�');
+  setLoading(true, 'Synchronisiere Overview...');
   try {
     const apiSets = await fetchAllAvailableSets();
     const importedIds = new Set(state.sets.map((set) => set.setId));
@@ -3560,7 +3664,7 @@ function summarizeOverviewChanges(oldOverviewSets, apiSets) {
 }
 
 async function powerRefreshOverviewFromApi() {
-  setLoading(true, 'Power-Refresh l�uft�');
+  setLoading(true, 'Power-Refresh laeuft');
   
   // Auto-Snapshot vor dem Power-Refresh erstellen
   try {
@@ -3568,7 +3672,7 @@ async function powerRefreshOverviewFromApi() {
     const action = `Power-Refresh: Sets Overview aktualisiert`;
     await createAutoSnapshot(action, currentCollection);
   } catch (err) {
-    console.warn('?? Auto-snapshot vor Power-Refresh fehlgeschlagen:', err);
+    console.warn('Auto-snapshot vor Power-Refresh fehlgeschlagen:', err);
     // Fehler blockiert nicht den Refresh
   }
 
@@ -3583,12 +3687,12 @@ async function powerRefreshOverviewFromApi() {
     await syncOverviewWithApiSets(apiSets, importedIds);
     await loadSets();
 
-    const msg = `Power-Refresh: +${report.added} neu, ${report.changed} ge�ndert, ${report.unchanged} unver�ndert.`;
+    const msg = `Power-Refresh: +${report.added} neu, ${report.changed} geaendert, ${report.unchanged} unveraendert.`;
     setGlobalStatus(msg);
     showToast(msg, 'success', 5000);
 
     if (report.changedSets.length) {
-      setGlobalStatus(`${msg} (${report.changedSets.length} Sets mit Detail�nderungen)`);
+      setGlobalStatus(`${msg} (${report.changedSets.length} Sets mit Detailaenderungen)`);
     }
   } catch (err) {
     console.error('[powerRefreshOverviewFromApi]', err);
@@ -3616,7 +3720,7 @@ function getBatchCandidates() {
 function updateBatchInfo() {
   const selected = state.batchSelection.size;
   dom.batchInfo.classList.remove('hidden');
-  dom.batchInfo.textContent = `${selected} Set${selected === 1 ? '' : 's'} ausgew�hlt`;
+  dom.batchInfo.textContent = `${selected} Set${selected === 1 ? '' : 's'} ausgewaehlt`;
 }
 
 function renderBatchDialogList() {
@@ -3652,11 +3756,11 @@ function renderBatchDialogList() {
 
     const title = document.createElement('span');
     title.className = 'batch-item-title';
-    title.textContent = `${set.setId} � ${set.setName}`;
+    title.textContent = `${set.setId} - ${set.setName}`;
 
     const sub = document.createElement('span');
     sub.className = 'batch-item-sub';
-    sub.textContent = `${set.series || 'Serie unbekannt'} � ${set.totalCards || '?'} Karten`;
+    sub.textContent = `${set.series || 'Serie unbekannt'} - ${set.totalCards || '?'} Karten`;
 
     main.append(title, sub);
     row.append(input, main);
@@ -3682,7 +3786,7 @@ function initBatchImportDialog() {
     checkboxes.forEach((checkbox) => {
       checkbox.checked = true;
       const label = checkbox.closest('.batch-item')?.querySelector('.batch-item-title')?.textContent || '';
-      const setId = label.split(' � ')[0] || '';
+      const setId = label.split(' - ')[0] || '';
       if (setId) state.batchSelection.add(setId);
     });
     updateBatchInfo();
@@ -3714,7 +3818,7 @@ function getImportedSetsForManagement() {
 function updateManageSetsInfo(filtered = []) {
   if (!dom.manageSetsInfo) return;
   const selectedCount = state.manageSetsSelection.size;
-  dom.manageSetsInfo.textContent = `${selectedCount} ausgew�hlt � ${filtered.length} sichtbar`;
+  dom.manageSetsInfo.textContent = `${selectedCount} ausgewaehlt - ${filtered.length} sichtbar`;
 }
 
 function renderManageImportedSetsList() {
@@ -3754,11 +3858,11 @@ function renderManageImportedSetsList() {
 
     const title = document.createElement('span');
     title.className = 'batch-item-title';
-    title.textContent = `${set.setId} � ${set.setName}`;
+    title.textContent = `${set.setId} - ${set.setName}`;
 
     const sub = document.createElement('span');
     sub.className = 'batch-item-sub';
-    sub.textContent = `${set.series || 'Serie unbekannt'} � ${set.totalCards || '?'} Karten`;
+    sub.textContent = `${set.series || 'Serie unbekannt'} - ${set.totalCards || '?'} Karten`;
 
     main.append(title, sub);
     row.append(input, main);
@@ -3786,7 +3890,7 @@ async function reimportSelectedImportedSets() {
 
   const selectedSets = selectedIds.map((id) => getSetById(id)).filter(Boolean);
   dom.manageSetsDialog?.close();
-  await importSetsSequential(selectedSets, { successMessage: '{count} ausgew�hlte Sets aktualisiert.' });
+  await importSetsSequential(selectedSets, { successMessage: '{count} ausgewaehlte Sets aktualisiert.' });
 }
 
 async function deleteSelectedImportedSets() {
@@ -3801,15 +3905,15 @@ async function deleteSelectedImportedSets() {
     .filter((set) => set && toBoolean(set.imported));
 
   if (!selectedSets.length) {
-    showToast('Keine l�schbaren importierten Sets ausgew�hlt.', 'info');
+    showToast('Keine lschbaren importierten Sets ausgewaehlt.', 'info');
     return;
   }
 
-  const ok = window.confirm(`${selectedSets.length} importierte Sets wirklich l�schen?`);
+  const ok = window.confirm(`${selectedSets.length} importierte Sets wirklich loeschen?`);
   if (!ok) return;
 
   dom.manageSetsDialog?.close();
-  setLoading(true, 'L�sche ausgew�hlte Sets�');
+  setLoading(true, 'Loesche ausgewaehlte Sets');
   let deleted = 0;
   let failed = 0;
   try {
@@ -3829,7 +3933,7 @@ async function deleteSelectedImportedSets() {
   state.summaryData = null;
   await loadSets();
   await renderDashboard();
-  showToast(`${deleted} gel�scht${failed ? `, ${failed} Fehler` : ''}.`, failed ? 'error' : 'success', 4500);
+  showToast(`${deleted} geloescht${failed ? `, ${failed} Fehler` : ''}.`, failed ? 'error' : 'success', 4500);
 }
 
 function initManageImportedSetsDialog() {
@@ -3838,7 +3942,7 @@ function initManageImportedSetsDialog() {
   dom.btnManageSetsSelectVisible?.addEventListener('click', () => {
     dom.manageSetsList?.querySelectorAll('.batch-item input[type="checkbox"]').forEach((input) => {
       const label = input.closest('.batch-item')?.querySelector('.batch-item-title')?.textContent || '';
-      const setId = label.split(' � ')[0] || '';
+      const setId = label.split(' - ')[0] || '';
       if (setId) state.manageSetsSelection.add(setId);
     });
     renderManageImportedSetsList();
@@ -3903,11 +4007,11 @@ async function exportCollectionSummaryCsv() {
 
 async function exportCollectionBackup() {
   if (!state.sets.length) {
-    showToast('Keine importierten Sets f�r Backup vorhanden.', 'info');
+    showToast('Keine importierten Sets fuer Backup vorhanden.', 'info');
     return;
   }
 
-  setLoading(true, 'Erstelle Backup�');
+  setLoading(true, 'Erstelle Backup...');
   try {
     const backupSets = [];
     for (let index = 0; index < state.sets.length; index++) {
@@ -3942,11 +4046,11 @@ async function exportCollectionBackup() {
 
 async function runDataHealthCheck({ autoFix = false } = {}) {
   if (!state.sets.length) {
-    showToast('Keine importierten Sets f�r Datencheck.', 'info');
+    showToast('Keine importierten Sets fuer Datencheck.', 'info');
     return;
   }
 
-  setLoading(true, 'Datencheck l�uft�');
+  setLoading(true, 'Datencheck laeuft');
   const report = {
     createdAt: new Date().toISOString(),
     checkedSets: state.sets.length,
@@ -3994,7 +4098,7 @@ async function runDataHealthCheck({ autoFix = false } = {}) {
 
   if (!report.mismatches.length && !report.errors.length) {
     finishJob(job, 'Keine Abweichungen gefunden', false);
-    showToast(`Datencheck ok: ${report.checkedSets} Sets gepr�ft, keine Abweichungen.`, 'success', 4500);
+    showToast(`Datencheck ok: ${report.checkedSets} Sets geprft, keine Abweichungen.`, 'success', 4500);
     return;
   }
 
@@ -4025,13 +4129,13 @@ async function runDataHealthCheck({ autoFix = false } = {}) {
     const action = `Auto-Fix: ${mismatchSets.length} Set(s) mit Abweichungen`;
     await createAutoSnapshot(action, currentCollection);
   } catch (err) {
-    console.warn('?? Auto-snapshot vor Auto-Fix fehlgeschlagen:', err);
+    console.warn('Auto-snapshot vor Auto-Fix fehlgeschlagen:', err);
     // Fehler blockiert nicht das Auto-Fix
   }
 
   const uniqueSets = Array.from(new Map(mismatchSets.map((set) => [set.setId, set])).values());
   await importSetsSequential(uniqueSets, { successMessage: '{count} Mismatch-Set(s) automatisch repariert.' });
-  finishJob(job, `Auto-Fix ausgef�hrt (${uniqueSets.length} Sets)`, false);
+  finishJob(job, `Auto-Fix ausgefuehrt (${uniqueSets.length} Sets)`, false);
 }
 
 async function runPokecodeParityTest({ skipPrompt = false, maxSets: presetMaxSets = null } = {}) {
@@ -4039,13 +4143,13 @@ async function runPokecodeParityTest({ skipPrompt = false, maxSets: presetMaxSet
   if (Number.isFinite(presetMaxSets) && presetMaxSets > 0) {
     maxSets = Math.min(Number(presetMaxSets), 50);
   } else if (!skipPrompt) {
-    const input = window.prompt('Wie viele Sets sollen gepr�ft werden? (Standard: 10)', '10');
+    const input = window.prompt('Wie viele Sets sollen geprft werden? (Standard: 10)', '10');
     const parsed = Number.parseInt(String(input || '10'), 10);
     maxSets = Number.isFinite(parsed) && parsed > 0 ? Math.min(parsed, 50) : 10;
   }
 
-  setLoading(true, 'Pokecode-Parity-Test l�uft�');
-  setGlobalStatus(`Parity-Test l�uft (max. ${maxSets} Sets)�`);
+  setLoading(true, 'Pokecode-Parity-Test laeuft');
+  setGlobalStatus(`Parity-Test laeuft (max. ${maxSets} Sets)`);
   const job = startJob('Pokecode-Parity-Test', maxSets);
 
   try {
@@ -4075,15 +4179,15 @@ async function runPokecodeParityTest({ skipPrompt = false, maxSets: presetMaxSet
 
 function parseBackupPayload(rawText) {
   const parsed = JSON.parse(rawText);
-  if (!parsed || typeof parsed !== 'object') throw new Error('Ung�ltiges Backup-Format.');
-  if (!Array.isArray(parsed.sets)) throw new Error('Backup enth�lt keine Set-Daten.');
+  if (!parsed || typeof parsed !== 'object') throw new Error('Ungueltiges Backup-Format.');
+  if (!Array.isArray(parsed.sets)) throw new Error('Backup enthaelt keine Set-Daten.');
   return parsed;
 }
 
 async function applyCollectionBackup(payload) {
   const sets = payload.sets || [];
   if (!sets.length) {
-    showToast('Backup enth�lt keine Sets.', 'info');
+    showToast('Backup enthaelt keine Sets.', 'info');
     return;
   }
 
@@ -4091,7 +4195,7 @@ async function applyCollectionBackup(payload) {
   let updated = 0;
   let skipped = 0;
 
-  setLoading(true, 'Spiele Backup ein�');
+  setLoading(true, 'Spiele Backup ein...');
   try {
     for (let setIndex = 0; setIndex < sets.length; setIndex++) {
       const backupSet = sets[setIndex];
@@ -4131,13 +4235,13 @@ async function applyCollectionBackup(payload) {
   if (state.currentSet) {
     await loadCurrentSet(true).catch(() => {});
   }
-  showToast(`Backup eingespielt. �nderungen: ${updated}, �bersprungen: ${skipped}.`, skipped ? 'info' : 'success', 5000);
+  showToast(`Backup eingespielt. aenderungen: ${updated}, uebersprungen: ${skipped}.`, skipped ? 'info' : 'success', 5000);
 }
 
 function buildLegacyImportPreviewText(plan) {
   const summary = summarizeLegacyImportPlan(plan);
   const lines = [
-    `Set-Bl�tter erkannt: ${summary.sheetCount}`,
+    `Set-Blaetter erkannt: ${summary.sheetCount}`,
     `Markierte Karten (G/RH): ${summary.checkedCardCount}`,
     `Eindeutig zuordenbar: ${summary.matchedCardCount}`,
     `Fehlende Sets zum Vorimport: ${summary.missingSetCount}`
@@ -4152,7 +4256,7 @@ function buildLegacyImportPreviewText(plan) {
       lines.push('');
       lines.push('Set-Probleme:');
       plan.unresolvedSheets.slice(0, 5).forEach((entry) => {
-        lines.push(`� ${entry.sheetName}: ${entry.reason}`);
+        lines.push(` ${entry.sheetName}: ${entry.reason}`);
       });
     }
 
@@ -4160,22 +4264,22 @@ function buildLegacyImportPreviewText(plan) {
       lines.push('');
       lines.push('Karten-Probleme:');
       plan.unresolvedCards.slice(0, 8).forEach((entry) => {
-        lines.push(`� ${entry.setId} / ${entry.sourceCardId}: ${entry.reason}`);
+        lines.push(` ${entry.setId} / ${entry.sourceCardId}: ${entry.reason}`);
       });
     }
 
     lines.push('');
-    lines.push('Der Import wurde blockiert, bis alle Konflikte eindeutig gel�st sind.');
+    lines.push('Der Import wurde blockiert, bis alle Konflikte eindeutig geloest sind.');
     return lines.join('\n');
   }
 
   lines.push('');
-  lines.push('Der Import setzt die betroffenen Sets exakt auf den Altbestand-Stand (G/RH) � inklusive Entfernen nicht markierter Treffer in diesen Sets.');
+  lines.push('Der Import setzt die betroffenen Sets exakt auf den Altbestand-Stand (G/RH) - inklusive Entfernen nicht markierter Treffer in diesen Sets.');
   return lines.join('\n');
 }
 
 async function prepareLegacyWorkbookImport(workbook, sourceLabel = 'Altbestand') {
-  if (!workbook) throw new Error('Keine Altbestand-Quelle ausgew�hlt.');
+  if (!workbook) throw new Error('Keine Altbestand-Quelle ausgewaehlt.');
   if (!state.allSets?.length) {
     await loadSets();
   }
@@ -4207,7 +4311,7 @@ async function prepareLegacyWorkbookImport(workbook, sourceLabel = 'Altbestand')
     setGlobalStatus(`Analysiere ${sourceLabel} ${index + 1}/${uniqueSetIds.length}: ${setMeta?.setName || setId}`);
     const cards = await fetchMergedCards(setId);
     if (!Array.isArray(cards) || !cards.length) {
-      throw new Error(`Kartenkatalog f�r ${setMeta?.setName || setId} konnte nicht geladen werden.`);
+      throw new Error(`Kartenkatalog fuer ${setMeta?.setName || setId} konnte nicht geladen werden.`);
     }
     cardsBySetId[setId] = cards;
   }
@@ -4225,7 +4329,7 @@ let legacyImportSelectionDialogState = null;
 
 async function applyLegacyImportPlan(plan, cardsBySetId) {
   if (!plan?.ok) {
-    throw new Error('Der Dry-Run enth�lt noch Konflikte.');
+    throw new Error('Der Dry-Run enthaelt noch Konflikte.');
   }
 
   const missingSets = plan.missingSetIds
@@ -4234,7 +4338,7 @@ async function applyLegacyImportPlan(plan, cardsBySetId) {
 
   if (missingSets.length) {
     await importSetsSequential(missingSets, {
-      successMessage: '{count} fehlende Sets f�r den Altbestand-Import importiert.'
+      successMessage: '{count} fehlende Sets fuer den Altbestand-Import importiert.'
     });
     await loadSets();
   }
@@ -4246,13 +4350,13 @@ async function applyLegacyImportPlan(plan, cardsBySetId) {
   }
 
   let updatedCells = 0;
-  setLoading(true, 'Synchronisiere Altbestand�');
+  setLoading(true, 'Synchronisiere Altbestand...');
   try {
     for (let setIndex = 0; setIndex < plan.matchedSets.length; setIndex++) {
       const matchedSet = plan.matchedSets[setIndex];
       const liveSet = getSetById(matchedSet.setId);
       if (!liveSet?.setName) {
-        throw new Error(`Ziel-Set ${matchedSet.setId} ist nach dem Vorimport nicht verf�gbar.`);
+        throw new Error(`Ziel-Set ${matchedSet.setId} ist nach dem Vorimport nicht verfuegbar.`);
       }
 
       setGlobalStatus(`Altbestand-Import ${setIndex + 1}/${plan.matchedSets.length}: ${liveSet.setName}`);
@@ -4312,8 +4416,8 @@ async function applyLegacyImportPlan(plan, cardsBySetId) {
     await loadCurrentSet(true).catch(() => {});
   }
 
-  setGlobalStatus(`Altbestand importiert: ${plan.matchedSets.length} Sets, ${updatedCells} �nderungen.`);
-  showToast(`Altbestand importiert: ${plan.matchedSets.length} Sets synchronisiert, ${updatedCells} �nderungen geschrieben.`, 'success', 5000);
+  setGlobalStatus(`Altbestand importiert: ${plan.matchedSets.length} Sets, ${updatedCells} aenderungen.`);
+  showToast(`Altbestand importiert: ${plan.matchedSets.length} Sets synchronisiert, ${updatedCells} aenderungen geschrieben.`, 'success', 5000);
 }
 
 function setLegacySheetDialogError(message = '') {
@@ -4365,15 +4469,15 @@ function renderLegacyImportSelectionDialog() {
 
   if (dom.legacySelectionInfo) {
     dom.legacySelectionInfo.textContent = stats.selectedCardCount > 0
-      ? `${stats.selectedCardCount} von ${stats.totalCardCount} Karten aus ${stats.selectedSetCount} von ${stats.totalSetCount} Sets werden �bernommen.${stats.autoImportSetCount ? ` ${stats.autoImportSetCount} Sets werden daf�r bei Bedarf zuerst importiert.` : ''}`
+      ? `${stats.selectedCardCount} von ${stats.totalCardCount} Karten aus ${stats.selectedSetCount} von ${stats.totalSetCount} Sets werden uebernommen.${stats.autoImportSetCount ? ` ${stats.autoImportSetCount} Sets werden dafuer bei Bedarf zuerst importiert.` : ''}`
       : 'Bitte mindestens ein Set oder eine Karte auswaehlen.';
   }
 
   if (dom.btnLegacySelectionConfirm) {
     dom.btnLegacySelectionConfirm.disabled = stats.selectedCardCount === 0;
     dom.btnLegacySelectionConfirm.textContent = stats.selectedCardCount > 0
-      ? `Ausgew�hlte importieren (${stats.selectedCardCount})`
-      : 'Ausgew�hlte importieren';
+      ? `Ausgewaehlte importieren (${stats.selectedCardCount})`
+      : 'Ausgewaehlte importieren';
   }
 
   const setMarkup = (session.tree.sets || []).map((setEntry, setIndex) => {
@@ -4393,7 +4497,7 @@ function renderLegacyImportSelectionDialog() {
             card.g ? '<span class="legacy-tree-badge is-collected">G</span>' : '',
             card.rh ? '<span class="legacy-tree-badge is-reverse">RH</span>' : ''
           ].join('');
-          const cardNumber = escapeLegacyImportSelectionHtml(card.sourceCardId || card.cardId || '�');
+          const cardNumber = escapeLegacyImportSelectionHtml(card.sourceCardId || card.cardId || '');
           const cardName = escapeLegacyImportSelectionHtml(card.name || card.cardId || 'Unbenannte Karte');
           return `
             <label class="legacy-tree-card">
@@ -4408,7 +4512,7 @@ function renderLegacyImportSelectionDialog() {
 
     const summaryLabel = escapeLegacyImportSelectionHtml(setEntry.setName || setEntry.sheetName || setEntry.setId || 'Unbekanntes Set');
     const summaryMeta = escapeLegacyImportSelectionHtml(setEntry.sheetName && setEntry.sheetName !== setEntry.setName
-      ? `${setEntry.sheetName} � ${setEntry.setId}`
+      ? `${setEntry.sheetName} - ${setEntry.setId}`
       : `Set-ID: ${setEntry.setId}`);
 
     return `
@@ -4427,13 +4531,13 @@ function renderLegacyImportSelectionDialog() {
           </div>
         </summary>
         <div class="legacy-tree-card-list" role="group">
-          ${cardsMarkup || '<p class="legacy-selection-empty">Keine Karten f�r diesen Filter.</p>'}
+          ${cardsMarkup || '<p class="legacy-selection-empty">Keine Karten fuer diesen Filter.</p>'}
         </div>
       </details>
     `;
   }).filter(Boolean).join('');
 
-  dom.legacySelectionTree.innerHTML = setMarkup || '<p class="legacy-selection-empty">Keine Sets oder Karten f�r diesen Filter gefunden.</p>';
+  dom.legacySelectionTree.innerHTML = setMarkup || '<p class="legacy-selection-empty">Keine Sets oder Karten fuer diesen Filter gefunden.</p>';
 
   dom.legacySelectionTree.querySelectorAll('.legacy-tree-set-toggle').forEach((checkbox) => {
     const setIndex = Number(checkbox.dataset.setIndex || '-1');
@@ -4557,7 +4661,7 @@ async function submitLegacySheetImportDialog() {
   const rawInput = String(dom.legacySheetInput?.value || '').trim();
   const spreadsheetId = extractLegacySpreadsheetId(rawInput);
   if (!spreadsheetId) {
-    setLegacySheetDialogError('Bitte einen g�ltigen Google-Sheets-Link oder eine Spreadsheet-ID eingeben.');
+    setLegacySheetDialogError('Bitte einen gueltigen Google-Sheets-Link oder eine Spreadsheet-ID eingeben.');
     dom.legacySheetInput?.focus();
     return;
   }
@@ -4575,7 +4679,7 @@ async function startLegacyWorkbookImport(source = {}) {
   const sourceLabel = String(source?.sourceLabel || (sourceFile ? 'XLSX' : 'Google Sheet')).trim();
   if (!sourceFile && !spreadsheetInput) return;
 
-  setLoading(true, 'Analysiere Altbestand�');
+  setLoading(true, 'Analysiere Altbestand...');
   try {
     let workbook;
     if (sourceFile) {
@@ -4586,10 +4690,10 @@ async function startLegacyWorkbookImport(source = {}) {
       } catch (err) {
         if (err?.code !== 'legacy-drive-export-scope-required') throw err;
 
-        setGlobalStatus('Altbestand-Import ben�tigt eine einmalige Google-Freigabe�');
-        const allowUpgrade = window.confirm('Damit der Sheets-Link exakt wie der XLSX-Import ausgewertet wird, braucht der Tracker einmalig zus�tzliche Google-Drive-Leseberechtigung. Jetzt Google-Freigabe aktualisieren?');
+        setGlobalStatus('Altbestand-Import benoetigt eine einmalige Google-Freigabe');
+        const allowUpgrade = window.confirm('Damit der Sheets-Link exakt wie der XLSX-Import ausgewertet wird, braucht der Tracker einmalig zusaetzliche Google-Drive-Leseberechtigung. Jetzt Google-Freigabe aktualisieren?');
         if (!allowUpgrade) {
-          throw new Error('Google-Berechtigung f�r den direkten Sheets-Link-Import wurde nicht erteilt.');
+          throw new Error('Google-Berechtigung fuer den direkten Sheets-Link-Import wurde nicht erteilt.');
         }
 
         const reauthOk = await signIn({ forceConsent: true });
@@ -4613,16 +4717,16 @@ async function startLegacyWorkbookImport(source = {}) {
       });
       setGlobalStatus(`Altbestand blockiert: ${summary.unresolvedSheetCount} Set-, ${summary.unresolvedCardCount} Kartenkonflikte.`);
       window.alert(buildLegacyImportPreviewText(plan));
-      showToast(`Import blockiert: ${summary.unresolvedSheetCount} Set- und ${summary.unresolvedCardCount} Kartenkonflikte. Pr�fbericht exportiert.`, 'error', 7000);
+      showToast(`Import blockiert: ${summary.unresolvedSheetCount} Set- und ${summary.unresolvedCardCount} Kartenkonflikte. Pruefbericht exportiert.`, 'error', 7000);
       return;
     }
 
     setLoading(false);
-    setGlobalStatus(`Altbestand analysiert: ${summary.sheetCount} Sets, ${summary.checkedCardCount} markierte Karten. Bitte Auswahl pr�fen.`);
+    setGlobalStatus(`Altbestand analysiert: ${summary.sheetCount} Sets, ${summary.checkedCardCount} markierte Karten. Bitte Auswahl pruefen.`);
     const selectedPlan = await openLegacyImportSelectionDialog(plan, cardsBySetId);
     if (!selectedPlan) {
-      setGlobalStatus('Altbestand-Analyse abgeschlossen � Import nicht angewendet.');
-      showToast('Altbestand analysiert. Es wurden noch keine �nderungen geschrieben.', 'info', 4500);
+      setGlobalStatus('Altbestand-Analyse abgeschlossen - Import nicht angewendet.');
+      showToast('Altbestand analysiert. Es wurden noch keine aenderungen geschrieben.', 'info', 4500);
       return;
     }
 
@@ -4787,7 +4891,7 @@ function initDashboardControls() {
   dom.btnQueueAutofixRefresh?.addEventListener('click', () => {
     enqueueAction('Datencheck + Auto-Fix', () => runDataHealthCheck({ autoFix: true }));
     enqueueAction('Power-Refresh Overview', () => powerRefreshOverviewFromApi());
-    showToast('Queue-Preset hinzugef�gt (Auto-Fix ? Refresh).', 'info', 3000);
+    showToast('Queue-Preset hinzugefuegt (Auto-Fix ? Refresh).', 'info', 3000);
   });
   dom.btnQueueRun?.addEventListener('click', runQueuedActions);
   dom.btnQueueClear?.addEventListener('click', clearQueuedActions);
@@ -4800,7 +4904,7 @@ function initDashboardControls() {
     }
     if (!state.activeJob && !state.queueRunning) return;
     if (dom.btnJobCancel) dom.btnJobCancel.disabled = true;
-    if (dom.jobStatusText) dom.jobStatusText.textContent = 'Abbruch angefordert�';
+    if (dom.jobStatusText) dom.jobStatusText.textContent = 'Abbruch angefordert...';
   });
 
   updateQueueUiState();
@@ -5721,7 +5825,7 @@ function buildStatsPriceTabContent({
         <small>${errors > 0 ? `${formatStatsPriceNumber(errors)} technische Fehler` : 'Keine technischen Fehler gemeldet'}</small>
       </div>
       <div class="stats-price-drill-groups">
-        ${drilldownMarkup || '<p class="stats-price-empty">Keine Drilldown-L�cken vorhanden.</p>'}
+        ${drilldownMarkup || '<p class="stats-price-empty">Keine Drilldown-Lcken vorhanden.</p>'}
       </div>
     </section>`;
 
@@ -6172,7 +6276,7 @@ function parseStructuredSearchQuery(rawQuery, availableSets = []) {
 
 /**
  * Erkennt freie Kombinationen aus Kartennummer + Namenstokens, z.B. "57 Digda" oder "Digda 57".
- * Gibt null zur�ck, wenn kein sinnvolles gemischtes Muster erkannt wird.
+ * Gibt null zurck, wenn kein sinnvolles gemischtes Muster erkannt wird.
  */
 function parseMixedQuery(rawQuery) {
   const normalized = normalizeSearchText(rawQuery).trim();
@@ -6187,7 +6291,7 @@ function parseMixedQuery(rawQuery) {
   const hasSetLikeMarker = parts.some((token) => token === 'set' || token === 'series' || token === 'serie');
   if (hasSetLikeMarker) return null;
 
-  // Tokens die wie eine Kartennummer aussehen: optionale alpha-Pr�fix + Zahlen + optionales Suffix
+  // Tokens die wie eine Kartennummer aussehen: optionale alpha-Praefix + Zahlen + optionales Suffix
   const numberTokens = parts.filter((p) => /^[a-z._-]*\d+[a-z._-]*$/.test(p));
   const nameTokensRaw = parts.filter((p) => !/^[a-z._-]*\d+[a-z._-]*$/.test(p));
   const nameTokens = extractMeaningfulNameTokens(nameTokensRaw);
@@ -6704,27 +6808,27 @@ async function runSearch(options = {}) {
   const baseSetsToSearch = setFilter
     ? availableSetsForSearch.filter((s) => s.setId === setFilter)
     : availableSetsForSearch;
-  // F�r ptcgoCode-Lookup state.allSets nutzen (hat zuverl�ssige Daten aus den JSON-Dateien),
+  // Fr ptcgoCode-Lookup state.allSets nutzen (hat zuverlaessige Daten aus den JSON-Dateien),
   // da state.sets (aus Google Sheets) ptcgoCode leer haben kann.
   const lookupPool = state.allSets?.length ? state.allSets : baseSetsToSearch;
   const structuredQuery = parseStructuredSearchQuery(rawQuery, lookupPool);
-  // Freie Kombinations-Suche (z.B. "57 Digda") nur wenn kein Set-Pr�fix erkannt wurde
+  // Freie Kombinations-Suche (z.B. "57 Digda") nur wenn kein Set-Praefix erkannt wurde
   const mixedQuery = !structuredQuery ? parseMixedQuery(rawQuery) : null;
   if (!force && !structuredQuery && !mixedQuery && query.length < 2) {
     state.lastSearchResults = [];
     renderSearchToolbarMeta({
       rawQuery,
       searchScopeMode,
-      emptyMessage: 'Mindestens 2 Zeichen eingeben oder Enter dr�cken.'
+      emptyMessage: 'Mindestens 2 Zeichen eingeben oder Enter druecken.'
     });
-    dom.searchResults.innerHTML = '<p class="empty-state">Mindestens 2 Zeichen eingeben oder Enter dr�cken.</p>';
+    dom.searchResults.innerHTML = '<p class="empty-state">Mindestens 2 Zeichen eingeben oder Enter druecken.</p>';
     return;
   }
 
   if (force || structuredQuery || mixedQuery || rawQuery.length >= 3) {
     window.SEARCH_HISTORY = addSearchHistory(rawQuery);
   }
-  // F�r die eigentliche Suche das importierte Set bevorzugen (hat Collection-Daten),
+  // Fr die eigentliche Suche das importierte Set bevorzugen (hat Collection-Daten),
   // fallback auf das Set aus allSets falls nicht importiert.
   const setsToSearch = structuredQuery
     ? [baseSetsToSearch.find((s) => s.setId === structuredQuery.setId) ?? structuredQuery.set]
@@ -6733,9 +6837,9 @@ async function runSearch(options = {}) {
     renderSearchToolbarMeta({
       rawQuery,
       searchScopeMode,
-      emptyMessage: 'Keine passenden Sets verf�gbar.'
+      emptyMessage: 'Keine passenden Sets verfuegbar.'
     });
-    dom.searchResults.innerHTML = '<p class="empty-state">Keine passenden Sets verf�gbar.</p>';
+    dom.searchResults.innerHTML = '<p class="empty-state">Keine passenden Sets verfuegbar.</p>';
     return;
   }
   renderSearchResultsList([], searchScopeMode, {
@@ -6949,13 +7053,13 @@ async function runSearch(options = {}) {
       resultCount: 0,
       setsProcessed: setsToSearch.length,
       totalSets: setsToSearch.length,
-      emptyMessage: `Keine Treffer � ${setsToSearch.length} Sets gepr�ft`
+      emptyMessage: `Keine Treffer - ${setsToSearch.length} Sets geprft`
     });
     dom.searchResults.innerHTML = `
       <div class="search-results-head">
         <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
       </div>
-      <p class="empty-state">Keine Karten f�r �${rawQuery}� gefunden (durchsucht: ${setsToSearch.length} Sets, ${modeMeta.hint}).</p>
+      <p class="empty-state">Keine Karten fuer ${rawQuery} gefunden (durchsucht: ${setsToSearch.length} Sets, ${modeMeta.hint}).</p>
     `;
     return;
   }
@@ -7027,7 +7131,7 @@ function createSearchResultCard(card, key, db, set, apiOnly = false) {
     try {
       await openSearchResultLightbox(card, set, { apiOnly });
     } catch (err) {
-      showToast(`Karte konnte nicht ge�ffnet werden: ${err.message}`, 'error');
+      showToast(`Karte konnte nicht geoeffnet werden: ${err.message}`, 'error');
     }
   });
 
@@ -7087,7 +7191,7 @@ function attachSearchResultCheckboxListeners(article, db, key, set, card) {
       pushUndoEntry({
         setId: set?.setId,
         setName: set?.setName,
-        label: 'Kartenstatus ge�ndert',
+        label: 'Kartenstatus geaendert',
         changes: [{ key, prev: prevState, next: { g: Boolean(db.g), rh: Boolean(db.rh) } }]
       });
       updateUndoUi();
@@ -7121,7 +7225,7 @@ function attachSearchResultCheckboxListeners(article, db, key, set, card) {
       pushUndoEntry({
         setId: set?.setId,
         setName: set?.setName,
-        label: 'RH-Status ge�ndert',
+        label: 'RH-Status geaendert',
         changes: [{ key, prev: prevState, next: { g: Boolean(db.g), rh: Boolean(db.rh) } }]
       });
       updateUndoUi();
@@ -7212,7 +7316,7 @@ async function openSearchResultLightbox(card, set, { apiOnly = false } = {}) {
   ]);
 
   if (!Array.isArray(cards) || cards.length === 0) {
-    showToast('Keine Kartendaten f�r dieses Set gefunden.', 'info', 4500);
+    showToast('Keine Kartendaten fuer dieses Set gefunden.', 'info', 4500);
     return;
   }
 
@@ -7818,15 +7922,15 @@ function attachCheckboxListeners(article, db, key) {
       const setToImport = state.currentSet;
       const setId = String(setToImport?.setId || '').trim();
       if (!setId) {
-        throw new Error('Set-ID f�r den automatischen Import fehlt.');
+        throw new Error('Set-ID fuer den automatischen Import fehlt.');
       }
 
-      setLoading(true, `Importiere ${setToImport.setName}�`);
+      setLoading(true, `Importiere ${setToImport.setName}`);
       try {
         const importPayload = await fetchMergedCardsWithSetMeta(setId).catch(() => ({ cards: [], setMetaPatch: null }));
         const importCards = Array.isArray(importPayload?.cards) ? importPayload.cards : [];
         if (!importCards.length) {
-          throw new Error('Keine Kartendaten f�r den automatischen Set-Import gefunden.');
+          throw new Error('Keine Kartendaten fuer den automatischen Set-Import gefunden.');
         }
 
         const refreshedSet = await ensureSetImportedFromApi(setToImport, importCards, {
@@ -7878,7 +7982,7 @@ function attachCheckboxListeners(article, db, key) {
       pushUndoEntry({
         setId: state.currentSet?.setId,
         setName: state.currentSet?.setName,
-        label: 'Kartenstatus ge�ndert',
+        label: 'Kartenstatus geaendert',
         changes: [{ key, prev: prevState, next: { g: Boolean(db.g), rh: Boolean(db.rh) } }]
       });
       updateUndoUi();
@@ -7915,7 +8019,7 @@ function attachCheckboxListeners(article, db, key) {
       pushUndoEntry({
         setId: state.currentSet?.setId,
         setName: state.currentSet?.setName,
-        label: 'RH-Status ge�ndert',
+        label: 'RH-Status geaendert',
         changes: [{ key, prev: prevState, next: { g: Boolean(db.g), rh: Boolean(db.rh) } }]
       });
       updateUndoUi();
@@ -7989,7 +8093,7 @@ function applyIncomingRealtimeUpdate(payload) {
 
   updateStats();
   state.summaryData = null;
-  showToast(`?? Live-Update empfangen: #${payload.cardNumber}`, 'info', 2000);
+  showToast(`Live-Update empfangen: #${payload.cardNumber}`, 'info', 2000);
 }
 
 // --------------------------------------------------------------------------
@@ -8361,12 +8465,12 @@ function initLightbox() {
       const setToImport = state.currentSet;
       const setId = setToImport?.setId;
       if (!setId) return;
-      setLoading(true, `Importiere ${setToImport.setName}�`);
+      setLoading(true, `Importiere ${setToImport.setName}`);
       try {
         const importPayload = await fetchMergedCardsWithSetMeta(setId).catch(() => ({ cards: [], setMetaPatch: null }));
         const importCards = Array.isArray(importPayload?.cards) ? importPayload.cards : [];
         if (!importCards.length) {
-          throw new Error('Keine Kartendaten f�r den automatischen Set-Import gefunden.');
+          throw new Error('Keine Kartendaten fuer den automatischen Set-Import gefunden.');
         }
         const refreshedSet = await ensureSetImportedFromApi(setToImport, importCards, {
           setMetaPatch: importPayload?.setMetaPatch || null,
@@ -8417,7 +8521,7 @@ function initLightbox() {
       pushUndoEntry({
         setId: state.currentSet?.setId,
         setName: state.currentSet?.setName,
-        label: 'Lightbox-�nderung',
+        label: 'Lightbox-aenderung',
         changes: [{ key, prev: prevState, next: { g: Boolean(db.g), rh: Boolean(db.rh) } }]
       });
       updateUndoUi();
@@ -8461,9 +8565,9 @@ function updateBulkCount() {
 }
 
 async function bulkUpdate(g, rh) {
-  if (!state.bulkSelected.size) { showToast('Keine Karten ausgew�hlt.', 'info'); return; }
+  if (!state.bulkSelected.size) { showToast('Keine Karten ausgewaehlt.', 'info'); return; }
   beginTrackedWrite('Bulk-Update');
-  setLoading(true, 'Massenaktion�');
+  setLoading(true, 'Massenaktion...');
   let updated = 0, errors = 0;
   const undoChanges = [];
   try {
@@ -8499,7 +8603,7 @@ async function bulkUpdate(g, rh) {
     pushUndoEntry({
       setId: state.currentSet?.setId,
       setName: state.currentSet?.setName,
-      label: 'Bulk-�nderung',
+      label: 'Bulk-aenderung',
       changes: undoChanges
     });
     updateUndoUi();
@@ -8833,6 +8937,8 @@ async function bootstrap() {
   const bootstrapController = createBootstrapRuntimeController();
   await bootstrapController.bootstrapCore();
 
+  installMojibakeSanitizer();
+
   initLightbox();
   initBulkEdit();
   initKeyboardNav();
@@ -8930,7 +9036,7 @@ if ('serviceWorker' in navigator) {
       
       // Handle controller change (new SW ready)
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        showToast('?? App wurde aktualisiert', 'success', 1500);
+        showToast('App wurde aktualisiert', 'success', 1500);
         window.setTimeout(() => {
           window.location.reload();
         }, 300);
@@ -8939,7 +9045,7 @@ if ('serviceWorker' in navigator) {
       // Listen for messages from Service Worker
       navigator.serviceWorker.addEventListener('message', (event) => {
         if (event.data.type === 'sync-complete') {
-          showToast('? Daten synchronisiert', 'success', 2000);
+          showToast('Daten synchronisiert', 'success', 2000);
         }
       });
     } catch (err) {
@@ -8950,14 +9056,29 @@ if ('serviceWorker' in navigator) {
 
 // PWA Install Prompt Handler
 let deferredPrompt;
+let installBtn = null;
+const isAppInstalled = () => {
+  const isStandalone = Boolean(navigator.standalone);
+  const hasMatchMedia = typeof window.matchMedia === 'function';
+  const isDisplayStandalone = hasMatchMedia && window.matchMedia('(display-mode: standalone)').matches;
+  return isStandalone || isDisplayStandalone;
+};
+const removeInstallButton = () => {
+  if (installBtn?.parentElement) {
+    installBtn.parentElement.removeChild(installBtn);
+  }
+  installBtn = null;
+};
+
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
   
   // Show install button
-  const installBtn = document.createElement('button');
+  removeInstallButton();
+  installBtn = document.createElement('button');
   installBtn.className = 'btn-primary';
-  installBtn.textContent = '?? App installieren';
+  installBtn.textContent = 'App installieren';
   installBtn.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 100;';
   
   installBtn.addEventListener('click', async () => {
@@ -8965,21 +9086,23 @@ window.addEventListener('beforeinstallprompt', (e) => {
       deferredPrompt.prompt();
       const choice = await deferredPrompt.userChoice;
       if (choice.outcome === 'accepted') {
-        showToast('? App installiert!', 'success', 3000);
+        showToast('App installiert!', 'success', 3000);
+        removeInstallButton();
       }
       deferredPrompt = null;
     }
   });
   
   // Only show if not already installed
-  if (document.body && !navigator.standalone) {
+  if (document.body && !isAppInstalled()) {
     document.body.appendChild(installBtn);
   }
 });
 
 // Handle app installed event
 window.addEventListener('appinstalled', () => {
-  showToast('?? App erfolgreich installiert!', 'success', 4000);
+  removeInstallButton();
+  showToast('App erfolgreich installiert!', 'success', 4000);
 });
 
 const _featureInitFlags = {
@@ -9055,7 +9178,7 @@ function initStatsCharts(totalCollected, totalCards, seriesMap) {
       data: {
         labels: topSeries.map(([key, group]) => {
           const label = getStatsSeriesLabel(key, group);
-          return label.length > 16 ? `${label.slice(0, 14)}�` : label;
+          return label.length > 16 ? `${label.slice(0, 14)}` : label;
         }),
         datasets: [{
           label: 'Gesammelt %',
@@ -9146,7 +9269,7 @@ async function probeAppConnectivity(options = {}) {
     _connectivityState.lastError = null;
     renderOfflineIndicator();
     if (!silent && wasOffline) {
-      showToast('?? Verbindung zu Google Sheets wiederhergestellt', 'success', 2500);
+      showToast('Verbindung zu Google Sheets wiederhergestellt', 'success', 2500);
     }
   } catch (err) {
     _connectivityState.lastError = err;
@@ -9155,7 +9278,7 @@ async function probeAppConnectivity(options = {}) {
       _connectivityState.appOnline = false;
       renderOfflineIndicator();
       if (!silent && wasOnline) {
-        showToast('?? Keine Verbindung zu Google Sheets � gespeicherte Daten werden angezeigt', 'info', 3500);
+        showToast('Keine Verbindung zu Google Sheets - gespeicherte Daten werden angezeigt', 'info', 3500);
       }
     } else {
       // Auth/config problems are not the same as offline mode.
@@ -9211,7 +9334,7 @@ function initDashboardHoverPreview() {
 // --------------------------------------------------------------------------
 function triggerCompletionCelebration(setId, cardEl) {
   const setName = cardEl.querySelector('.dash-set-name')?.textContent || setId;
-  showToast(`?? ${setName} vollst�ndig gesammelt!`, 'success', 5000);
+  showToast(`${setName} vollstaendig gesammelt!`, 'success', 5000);
 
   if (window.confetti) {
     const rect = cardEl.getBoundingClientRect();
@@ -9583,7 +9706,7 @@ function initStatsDrillDown() {
     panel.dataset.series = seriesKey;
 
     panel.innerHTML = `
-      <h4>?? ${seriesLabel} � ${seriesSets.length} Sets</h4>
+      <h4>${seriesLabel} - ${seriesSets.length} Sets</h4>
       <div class="stats-drilldown-grid">
         ${seriesSets.map((set) => {
           const summary = summaryRows.find((entry) => entry.setName === set.setName) || {};
@@ -9618,17 +9741,17 @@ function initStatsDrillDown() {
 // FEATURE 8: Keyboard-Shortcuts Overlay
 // --------------------------------------------------------------------------
 const KEYBOARD_SHORTCUTS = [
-  ['D', 'Dashboard �ffnen'],
-  ['S', 'Set-Ansicht �ffnen'],
-  ['T', 'Statistiken �ffnen'],
+  ['D', 'Dashboard oeffnen'],
+  ['S', 'Set-Ansicht oeffnen'],
+  ['T', 'Statistiken oeffnen'],
   ['/', 'Suche fokussieren'],
   ['? / ?', 'Karte navigieren'],
   ['Leertaste', 'Normal (G) togglen'],
   ['R', 'Reverse Holo (RH) togglen'],
   ['I', 'Kartendetails / Bild-Zoom'],
-  ['Cmd/Strg K', 'Command Palette �ffnen'],
-  ['?', 'Diese Shortcut-�bersicht'],
-  ['Esc', 'Dialog / Overlay schlie�en'],
+  ['Cmd/Strg K', 'Command Palette oeffnen'],
+  ['?', 'Diese Shortcut-Uebersicht'],
+  ['Esc', 'Dialog / Overlay schliessen'],
 ];
 
 function showShortcutsOverlay() {
@@ -9643,8 +9766,8 @@ function showShortcutsOverlay() {
   overlay.className = 'shortcuts-overlay';
   overlay.innerHTML = `
     <div class="shortcuts-panel" role="dialog" aria-modal="true" aria-label="Keyboard Shortcuts">
-      <h2>?? Keyboard Shortcuts</h2>
-      <p>Tippe au�erhalb von Eingabefeldern</p>
+      <h2>Keyboard Shortcuts</h2>
+      <p>Tippe ausserhalb von Eingabefeldern</p>
       <table class="shortcut-table">
         <tbody>
           ${KEYBOARD_SHORTCUTS.map(([key, desc]) => `
@@ -9655,7 +9778,7 @@ function showShortcutsOverlay() {
           `).join('')}
         </tbody>
       </table>
-      <p class="shortcuts-close-hint">Esc oder ? oder Klick au�erhalb zum Schlie�en</p>
+      <p class="shortcuts-close-hint">Esc oder ? oder Klick ausserhalb zum Schliessen</p>
     </div>
   `;
 

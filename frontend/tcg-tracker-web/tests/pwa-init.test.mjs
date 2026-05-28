@@ -81,3 +81,86 @@ test('initPwaFeatures wires listeners using injected browser refs', async () => 
   assert.equal(updateCalls, 0);
   assert.equal(toasts.length, 0);
 });
+
+test('initPwaFeatures removes install button after successful install', async () => {
+  const listeners = new Map();
+  const toasts = [];
+  let clickHandler = null;
+  let createdButton = null;
+  let appendCount = 0;
+  let removeCount = 0;
+
+  const windowRef = {
+    addEventListener: (name, fn) => {
+      listeners.set(name, fn);
+    },
+    setTimeout: (fn) => fn(),
+    location: { reload: () => {} },
+  };
+
+  const documentRef = {
+    body: {
+      appendChild: (node) => {
+        appendCount += 1;
+        node.parentElement = documentRef.body;
+      },
+      removeChild: (node) => {
+        removeCount += 1;
+        node.parentElement = null;
+      },
+    },
+    createElement: () => {
+      createdButton = {
+        className: '',
+        textContent: '',
+        style: { cssText: '' },
+        parentElement: null,
+        addEventListener: (name, fn) => {
+          if (name === 'click') clickHandler = fn;
+        },
+      };
+      return createdButton;
+    },
+  };
+
+  const navigatorRef = {
+    standalone: false,
+    serviceWorker: {
+      controller: null,
+      addEventListener: () => {},
+      register: async () => ({
+        waiting: null,
+        installing: null,
+        addEventListener: () => {},
+        update: async () => {},
+      }),
+    },
+  };
+
+  initPwaFeatures({
+    showToast: (...args) => toasts.push(args),
+    windowRef,
+    navigatorRef,
+    documentRef,
+    setIntervalRef: () => 1,
+  });
+
+  const installEvent = {
+    preventDefault: () => {},
+    prompt: async () => {},
+    userChoice: Promise.resolve({ outcome: 'accepted' }),
+  };
+
+  await listeners.get('beforeinstallprompt')(installEvent);
+  assert.equal(appendCount, 1);
+  assert.equal(createdButton?.textContent, 'App installieren');
+  assert.equal(typeof clickHandler, 'function');
+
+  await clickHandler();
+  assert.equal(removeCount, 1);
+  assert.ok(toasts.some(([message]) => message === 'App installiert!'));
+
+  listeners.get('appinstalled')();
+  assert.equal(removeCount, 1);
+  assert.ok(toasts.some(([message]) => message === 'App erfolgreich installiert!'));
+});

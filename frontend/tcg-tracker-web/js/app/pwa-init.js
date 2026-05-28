@@ -54,14 +54,29 @@ export function initPwaFeatures({
   }
 
   let deferredPrompt;
+  let installBtn = null;
+  const isAppInstalled = () => {
+    const isStandalone = Boolean(navigatorRef.standalone);
+    const hasMatchMedia = typeof windowRef.matchMedia === 'function';
+    const isDisplayStandalone = hasMatchMedia && windowRef.matchMedia('(display-mode: standalone)').matches;
+    return isStandalone || isDisplayStandalone;
+  };
+  const removeInstallButton = () => {
+    if (installBtn?.parentElement) {
+      installBtn.parentElement.removeChild(installBtn);
+    }
+    installBtn = null;
+  };
+
   windowRef.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
 
     // Show install button
-    const installBtn = documentRef.createElement('button');
+    removeInstallButton();
+    installBtn = documentRef.createElement('button');
     installBtn.className = 'btn-primary';
-    installBtn.textContent = '📱 App installieren';
+    installBtn.textContent = 'App installieren';
     installBtn.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 100;';
 
     installBtn.addEventListener('click', async () => {
@@ -69,19 +84,21 @@ export function initPwaFeatures({
         deferredPrompt.prompt();
         const choice = await deferredPrompt.userChoice;
         if (choice.outcome === 'accepted') {
-          showToast('✅ App installiert!', 'success', 3000);
+          showToast('App installiert!', 'success', 3000);
+          removeInstallButton();
         }
         deferredPrompt = null;
       }
     });
 
     // Only show if not already installed
-    if (documentRef.body && !navigatorRef.standalone) {
+    if (documentRef.body && !isAppInstalled()) {
       documentRef.body.appendChild(installBtn);
     }
   });
 
   windowRef.addEventListener('appinstalled', () => {
-    showToast('🎉 App erfolgreich installiert!', 'success', 4000);
+    removeInstallButton();
+    showToast('App erfolgreich installiert!', 'success', 4000);
   });
 }

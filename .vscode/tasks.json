@@ -15,6 +15,26 @@
 				"kind": "test",
 				"isDefault": true
 			}
+		},
+		{
+			"label": "cleanup-app-mojibake",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"scripts/cleanup-app-mojibake.mjs"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "ui-encoding-regression-tests",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--test",
+				"frontend/tcg-tracker-web/tests/ui-text-regression.test.mjs",
+				"frontend/tcg-tracker-web/tests/pwa-init.test.mjs"
+			],
+			"isBackground": false
 		}
 	]
 }
