@@ -60,6 +60,118 @@ function extractEntryBaseName(value = '') {
   return String(value || '').split('[')[0].trim();
 }
 
+function extractEntryHintTokens(value = '') {
+  const tokens = [];
+  const matches = String(value || '').match(/\[([^\]]+)\]/g) || [];
+  matches.forEach((chunk) => {
+    const inner = String(chunk || '').replace(/^\[/, '').replace(/\]$/, '');
+    inner
+      .split('|')
+      .map((token) => normalizeMatcherText(token))
+      .filter(Boolean)
+      .forEach((token) => tokens.push(token));
+  });
+  return tokens;
+}
+
+function extractCardHintTokens(card = {}) {
+  const tokens = new Set();
+  const add = (value) => {
+    const normalized = normalizeMatcherText(value);
+    if (normalized) tokens.add(normalized);
+  };
+
+  (Array.isArray(card?.vera_abilities) ? card.vera_abilities : []).forEach((ability) => {
+    add(ability?.name);
+  });
+  (Array.isArray(card?.vera_attacks) ? card.vera_attacks : []).forEach((attack) => {
+    add(attack?.name);
+  });
+
+  return Array.from(tokens);
+}
+
+function normalizeCollectorNumber(value = '') {
+  return String(value || '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, '')
+    .trim();
+}
+
+function normalizeCollectorNumeric(value = '') {
+  const normalized = normalizeCollectorNumber(value);
+  if (!/^\d+$/.test(normalized)) return '';
+  return String(Number(normalized));
+}
+
+function entryCollectorMatchesCard(entry = {}, card = {}) {
+  const cardCollectors = [card?.number, card?.collectorNumber, card?.vera_number, card?.tcgdex_number]
+    .map((value) => String(value || '').trim())
+    .filter(Boolean);
+  if (!cardCollectors.length) return false;
+
+  const entryCollectors = [entry?.collectorNumber, entry?.number, entry?.cardNumber]
+    .map((value) => String(value || '').trim())
+    .filter(Boolean);
+  if (!entryCollectors.length) return false;
+
+  const normalizedCard = cardCollectors.map(normalizeCollectorNumber).filter(Boolean);
+  const normalizedCardNumeric = cardCollectors.map(normalizeCollectorNumeric).filter(Boolean);
+  const normalizedEntry = entryCollectors.map(normalizeCollectorNumber).filter(Boolean);
+  const normalizedEntryNumeric = entryCollectors.map(normalizeCollectorNumeric).filter(Boolean);
+
+  return normalizedCard.some((value) => normalizedEntry.includes(value))
+    || normalizedCardNumeric.some((value) => normalizedEntryNumeric.includes(value));
+}
+
+function resolveByCardHints(card = {}, candidatePool = []) {
+  const cardHints = extractCardHintTokens(card);
+  if (!cardHints.length || candidatePool.length < 2) return null;
+
+  let bestEntry = null;
+  let bestScore = 0;
+  let tie = false;
+
+  candidatePool.forEach((entry) => {
+    const entryHints = extractEntryHintTokens(entry?.name || '');
+    if (!entryHints.length) return;
+    const score = cardHints.reduce((acc, hint) => acc + (entryHints.includes(hint) ? 1 : 0), 0);
+    if (score <= 0) return;
+    if (score > bestScore) {
+      bestEntry = entry;
+      bestScore = score;
+      tie = false;
+    } else if (score === bestScore) {
+      tie = true;
+    }
+  });
+
+  if (!bestEntry || tie) return null;
+  return bestEntry;
+}
+
+function resolveByRarityPriceProfile(card = {}, candidatePool = []) {
+  if (candidatePool.length < 2) return null;
+  const rarity = normalizeMatcherText(card?.rarity || card?.vera_rarity || card?.tcgdex_rarity || '');
+  if (!rarity) return null;
+
+  const withTrend = candidatePool
+    .map((entry) => ({ entry, trend: toFinitePrice(entry?.prices?.trend) }))
+    .filter((item) => item.trend != null);
+  if (withTrend.length < 2) return null;
+
+  const isHolo = rarity.includes('holo');
+  const sorted = [...withTrend].sort((left, right) => left.trend - right.trend);
+  return isHolo ? sorted[sorted.length - 1].entry : sorted[0].entry;
+}
+
+function namesLooselyOverlap(left = '', right = '') {
+  const a = normalizeMatcherText(left);
+  const b = normalizeMatcherText(right);
+  if (!a || !b) return false;
+  return a === b || a.includes(b) || b.includes(a);
+}
+
 function extractPreferredCardNames(card = {}) {
   return Array.from(new Set(
     [card?.vera_name, card?.tcgdex_name, card?.name]
@@ -212,19 +324,50 @@ export function resolveCardmarketEntryForCardFromSetPayload(card = {}, setPayloa
 
   const candidatePool = cards.filter((entry) => entryMatchesAnyCardName(entry, normalizedCardNames));
   if (!candidatePool.length) return null;
+  if (candidatePool.length === 1) return candidatePool[0];
+
+  const collectorMatched = candidatePool.filter((entry) => entryCollectorMatchesCard(entry, card));
+  if (collectorMatched.length === 1) return collectorMatched[0];
+
+  const hintMatched = resolveByCardHints(card, candidatePool);
+  if (hintMatched) return hintMatched;
+
+  const rarityMatched = resolveByRarityPriceProfile(card, candidatePool);
+  if (rarityMatched) return rarityMatched;
 
   if (!Array.isArray(sourceCards) || sourceCards.length < 2) {
     return candidatePool[0];
   }
 
+  const candidateBaseNames = Array.from(new Set(
+    candidatePool
+      .map((entry) => normalizeMatcherText(extractEntryBaseName(entry?.name || '')))
+      .filter(Boolean)
+  ));
+
   const matchingSourceCards = sourceCards.filter((sourceCard) => {
     const sourceNames = extractPreferredCardNames(sourceCard);
-    return sourceNames.some((name) => normalizedCardNames.includes(name));
+    return sourceNames.some((sourceName) => (
+      normalizedCardNames.includes(sourceName)
+      || candidateBaseNames.some((baseName) => namesLooselyOverlap(sourceName, baseName))
+    ));
   });
   if (!matchingSourceCards.length) return candidatePool[0];
 
   const sourceOccurrenceIndex = Math.max(0, matchingSourceCards.findIndex((sourceCard) => sourceCard === card));
   return candidatePool[Math.min(sourceOccurrenceIndex, candidatePool.length - 1)] || candidatePool[0];
+}
+
+function normalizeNonEmptyMetacardId(value) {
+  if (value == null) return null;
+  const normalized = String(value).trim();
+  if (!normalized) return null;
+  const numeric = Number(normalized);
+  if (Number.isFinite(numeric)) {
+    if (numeric <= 0) return null;
+    return String(numeric);
+  }
+  return normalized;
 }
 
 export function buildSetCardAssignmentMap(sourceCards = [], setPayload = {}) {
@@ -246,6 +389,20 @@ export function buildSetCardAssignmentMap(sourceCards = [], setPayload = {}) {
     const [assigned] = availableEntries.splice(matchIndex, 1);
     if (!assigned) continue;
     result.set(card, assigned);
+
+    const sourceMetacardId = normalizeNonEmptyMetacardId(
+      card?.metacardId
+      ?? card?.metaCardId
+      ?? card?.cardmarketMetacardId
+    );
+    if (!sourceMetacardId) continue;
+
+    for (let i = availableEntries.length - 1; i >= 0; i--) {
+      const entryMetacardId = normalizeNonEmptyMetacardId(availableEntries[i]?.metacardId);
+      if (entryMetacardId && entryMetacardId === sourceMetacardId) {
+        availableEntries.splice(i, 1);
+      }
+    }
   }
 
   return result;
