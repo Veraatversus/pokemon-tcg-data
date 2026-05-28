@@ -1,0 +1,82 @@
+name: Deploy Pages (release root + dev preview)
+
+on:
+  push:
+    branches:
+      - release
+      - dev
+  workflow_dispatch: # Allow manual trigger
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout release branch
+        uses: actions/checkout@v4
+        with:
+          ref: release
+          path: release_src
+
+      - name: Checkout dev branch
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          path: dev_src
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Build pages artifact content
+        run: |
+          build_target () {
+            SRC_ROOT="$1"
+            DEST_ROOT="$2"
+
+            mkdir -p "$DEST_ROOT"
+
+            rsync -a --delete \
+              --exclude='.git' \
+              --exclude='frontend' \
+              "$SRC_ROOT/" "$DEST_ROOT/"
+
+            if [ -d "$SRC_ROOT/frontend/tcg-tracker-web" ]; then
+              rsync -a \
+                --exclude='.git' \
+                --exclude='node_modules' \
+                --exclude='tests' \
+                --exclude='scripts/manual' \
+                --exclude='package-lock.json' \
+                --exclude='package.json' \
+                --exclude='README.md' \
+                --exclude='QUICKSTART.md' \
+                --exclude='server-endpoints.txt' \
+                "$SRC_ROOT/frontend/tcg-tracker-web/" "$DEST_ROOT/"
+            fi
+          }
+
+          build_target release_src _site
+          build_target dev_src _site/dev
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
