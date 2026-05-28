@@ -111,9 +111,6 @@ function resolveFieldByPriority(priority, sourceValues, options = {}) {
 function normalizeTcgdexSetAssetUrl(value) {
   const text = typeof value === 'string' ? value.trim() : '';
   if (!text) return '';
-  if (/^https?:\/\/assets\.tcgdex\.net\/.+\/(logo|symbol)$/i.test(text)) {
-    return `${text}.webp`;
-  }
   return text;
 }
 
@@ -314,29 +311,39 @@ function normalizeRules(primaryCard, tcgdexCard) {
   return [];
 }
 
-function normalizeTcgdexAssetBase(imageValue) {
-  if (typeof imageValue === 'string' && imageValue.trim()) {
-    return imageValue.trim().replace(/\/(low|high)\.(png|jpe?g|webp)$/i, '');
+function rewriteTcgdexImageQuality(url, quality) {
+  const text = String(url || '').trim();
+  if (!text) return '';
+  const withExplicitExt = text.match(/\/(low|high)\.(png|jpe?g|webp)$/i);
+  if (withExplicitExt) {
+    const ext = String(withExplicitExt[2] || 'webp').toLowerCase();
+    return text.replace(/\/(low|high)\.(png|jpe?g|webp)$/i, `/${quality}.${ext}`);
   }
-  if (imageValue && typeof imageValue === 'object') {
-    if (typeof imageValue.base === 'string' && imageValue.base.trim()) {
-      return imageValue.base.trim();
-    }
-    if (typeof imageValue.low === 'string' && imageValue.low.trim()) {
-      return imageValue.low.trim().replace(/\/(low|high)\.(png|jpe?g|webp)$/i, '');
-    }
-    if (typeof imageValue.high === 'string' && imageValue.high.trim()) {
-      return imageValue.high.trim().replace(/\/(low|high)\.(png|jpe?g|webp)$/i, '');
-    }
+  if (/\/(low|high)$/i.test(text)) {
+    return text.replace(/\/(low|high)$/i, `/${quality}`);
   }
-  return '';
+  return `${text}/${quality}.webp`;
 }
 
 function resolveTcgdexImage(tcgdexCard, quality = 'low', { setId = '', seriesId = '', language = 'en' } = {}) {
   const normalizedQuality = String(quality || '').toLowerCase() === 'high' ? 'high' : 'low';
-  const base = normalizeTcgdexAssetBase(tcgdexCard?.image);
-  if (base) {
-    return `${base}/${normalizedQuality}.webp`;
+  const imageValue = tcgdexCard?.image;
+  if (typeof imageValue === 'string' && imageValue.trim()) {
+    return rewriteTcgdexImageQuality(imageValue, normalizedQuality);
+  }
+  if (imageValue && typeof imageValue === 'object') {
+    if (typeof imageValue[normalizedQuality] === 'string' && imageValue[normalizedQuality].trim()) {
+      return imageValue[normalizedQuality].trim();
+    }
+    if (typeof imageValue.base === 'string' && imageValue.base.trim()) {
+      return `${imageValue.base.trim()}/${normalizedQuality}.webp`;
+    }
+    if (typeof imageValue.low === 'string' && imageValue.low.trim()) {
+      return rewriteTcgdexImageQuality(imageValue.low, normalizedQuality);
+    }
+    if (typeof imageValue.high === 'string' && imageValue.high.trim()) {
+      return rewriteTcgdexImageQuality(imageValue.high, normalizedQuality);
+    }
   }
 
   const localId = normalizeCardNumber(tcgdexCard?.localId || tcgdexCard?.id || '');
@@ -346,13 +353,13 @@ function resolveTcgdexImage(tcgdexCard, quality = 'low', { setId = '', seriesId 
   return `https://assets.tcgdex.net/${language}/${encodeURIComponent(normalizedSeriesId)}/${encodeURIComponent(normalizedSetId)}/${encodeURIComponent(localId)}/${normalizedQuality}.webp`;
 }
 
-function buildCardmarketFallback({ cardName = '', setTag = '', setName = '', cardNumber = '' } = {}) {
-  const searchString = [setTag && cardNumber ? `${setTag} ${cardNumber}` : '', cardName, setName]
-    .filter(Boolean)
-    .join(' ')
-    .trim();
-  if (!searchString) return '';
-  return `https://www.cardmarket.com/de/Pokemon/Products/Search?searchString=${encodeURIComponent(searchString).replace(/%20/g, '+')}`;
+function buildCardmarketFallback({ setTag = '', cardNumber = '' } = {}) {
+  const normalizedSetTag = String(setTag || '').trim();
+  const normalizedCardNumber = String(cardNumber || '').trim();
+  if (!normalizedSetTag || !normalizedCardNumber) return '';
+
+  const searchString = `${normalizedSetTag} ${normalizedCardNumber}`;
+  return `https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=${encodeURIComponent(searchString).replace(/%20/g, '+')}`;
 }
 
 function isGeneratedCardmarketSearchUrl(value) {
@@ -382,10 +389,31 @@ function resolveCardmarketUrl(primaryCard, tcgdexCard, fallbackMeta = {}) {
   return buildCardmarketFallback(fallbackMeta);
 }
 
+function resolveTcgdexSetFallbackValues(tcgdexSet = null, tcgdexFallbackSet = null) {
+  const fallbackSet = tcgdexFallbackSet && typeof tcgdexFallbackSet === 'object' ? tcgdexFallbackSet : {};
+  const currentSet = tcgdexSet && typeof tcgdexSet === 'object' ? tcgdexSet : {};
+
+  return {
+    name: String(fallbackSet?.name || currentSet?.en?.name || currentSet?.name || '').trim(),
+    series: String(fallbackSet?.serie?.name || currentSet?.en?.serie?.name || currentSet?.serie?.name || '').trim(),
+  };
+}
+
+function resolveTcgdexCardFallbackValues(tcgdexCard = null, tcgdexFallbackCard = null) {
+  const fallbackCard = tcgdexFallbackCard && typeof tcgdexFallbackCard === 'object' ? tcgdexFallbackCard : {};
+  const currentCard = tcgdexCard && typeof tcgdexCard === 'object' ? tcgdexCard : {};
+  const sourceCard = Object.keys(fallbackCard).length ? fallbackCard : currentCard;
+
+  return {
+    name: String(sourceCard?.name || currentCard?.name || '').trim(),
+  };
+}
+
 export function buildSetRecordFromSources({
   setId,
   primarySet = null,
   tcgdexSet = null,
+  tcgdexFallbackSet = null,
   isTcgdexOnly = false,
   imported = false,
   updatedAt = null
@@ -394,6 +422,10 @@ export function buildSetRecordFromSources({
     ? SET_MATCH_STATUS.MATCHED
     : (isTcgdexOnly ? SET_MATCH_STATUS.TCGDEX_ONLY : SET_MATCH_STATUS.PRIMARY_ONLY);
   const resolvedSetId = String(setId || primarySet?.id || (tcgdexSet?.id ? `TCGDEX-${tcgdexSet.id}` : '')).trim();
+  const fallbackSetValues = !primarySet
+    ? resolveTcgdexSetFallbackValues(tcgdexSet, tcgdexFallbackSet)
+    : null;
+
   return {
     setId: resolvedSetId,
     imported: Boolean(imported),
@@ -402,8 +434,8 @@ export function buildSetRecordFromSources({
     isTcgdexOnly: Boolean(isTcgdexOnly),
     // vera-Felder
     vera_id: primarySet?.id || '',
-    vera_name: primarySet?.name || '',
-    vera_series: primarySet?.series || '',
+    vera_name: primarySet?.name || fallbackSetValues?.name || '',
+    vera_series: primarySet?.series || fallbackSetValues?.series || '',
     vera_printedTotal: toNumber(primarySet?.printedTotal),
     vera_total: toNumber(primarySet?.total),
     vera_ptcgoCode: primarySet?.ptcgoCode || primarySet?.code || '',
@@ -434,6 +466,7 @@ export function buildCardRecordFromSources({
   setId,
   primaryCard = null,
   tcgdexCard = null,
+  tcgdexFallbackCard = null,
   tcgdexSetId = '',
   tcgdexSeriesId = '',
   fallbackSetName = '',
@@ -442,6 +475,7 @@ export function buildCardRecordFromSources({
   fallbackImageLarge = '',
   updatedAt = null
 } = {}) {
+  const sourceCardNumber = String(primaryCard?.number || tcgdexCard?.localId || tcgdexCard?.id || '').trim();
   const normalizedNumber = normalizeCardNumber(primaryCard?.number || tcgdexCard?.localId || tcgdexCard?.id || '');
   const matchStatus = primaryCard && tcgdexCard
     ? CARD_MATCH_STATUS.MATCHED
@@ -449,6 +483,9 @@ export function buildCardRecordFromSources({
   const rules = normalizeRules(primaryCard, tcgdexCard);
   const tcgdexImageSmall = resolveTcgdexImage(tcgdexCard, 'low', { setId: tcgdexSetId || setId, seriesId: tcgdexSeriesId });
   const tcgdexImageLarge = resolveTcgdexImage(tcgdexCard, 'high', { setId: tcgdexSetId || setId, seriesId: tcgdexSeriesId });
+  const fallbackCardValues = !primaryCard
+    ? resolveTcgdexCardFallbackValues(tcgdexCard, tcgdexFallbackCard)
+    : null;
   const imageUrl = tcgdexImageSmall
     || primaryCard?.images?.small
     || fallbackImageSmall
@@ -457,11 +494,11 @@ export function buildCardRecordFromSources({
     || primaryCard?.images?.large
     || fallbackImageLarge
     || imageUrl;
-  const cardmarketUrl = resolveCardmarketUrl(primaryCard, tcgdexCard, {
-    cardName: tcgdexCard?.name || primaryCard?.name || normalizedNumber,
+  const cardmarketUrl = resolveCardmarketUrl(primaryCard, tcgdexFallbackCard || tcgdexCard, {
+    cardName: tcgdexFallbackCard?.name || tcgdexCard?.name || primaryCard?.name || normalizedNumber,
     setTag: fallbackSetTag,
     setName: fallbackSetName,
-    cardNumber: normalizedNumber
+    cardNumber: sourceCardNumber
   });
 
   return {
@@ -473,11 +510,11 @@ export function buildCardRecordFromSources({
     isTcgdexOnly: Boolean(tcgdexCard && !primaryCard),
     // vera-Felder
     vera_id: primaryCard?.id || '',
-    vera_name: primaryCard?.name || '',
+    vera_name: primaryCard?.name || fallbackCardValues?.name || '',
     vera_supertype: primaryCard?.supertype || '',
-    vera_subtypes: normalizeStringList(primaryCard?.subtypes),
+    vera_subtypes: Array.isArray(primaryCard?.subtypes) ? primaryCard.subtypes : [],
     vera_hp: primaryCard?.hp ? String(primaryCard.hp) : '',
-    vera_types: normalizeStringList(primaryCard?.types),
+    vera_types: Array.isArray(primaryCard?.types) ? primaryCard.types : [],
     vera_evolvesFrom: primaryCard?.evolvesFrom || '',
     vera_abilities: Array.isArray(primaryCard?.abilities) ? primaryCard.abilities : [],
     vera_attacks: Array.isArray(primaryCard?.attacks) ? primaryCard.attacks : [],

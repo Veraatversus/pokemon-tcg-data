@@ -6,9 +6,9 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const appRoot = path.resolve(__dirname, '..');
 
-const landing = await readFile(path.join(appRoot, 'landingpage.html'), 'utf8');
+const landing = await readFile(path.join(appRoot, 'index-landingpage.html'), 'utf8');
 const privacy = await readFile(path.join(appRoot, 'privacy.html'), 'utf8');
-const impressum = await readFile(path.join(appRoot, 'impressum.html'), 'utf8');
+const kontakt = await readFile(path.join(appRoot, 'kontakt.html'), 'utf8');
 
 assert.ok(
   landing.includes("Vera's Pokémon TCG Tracker") || landing.includes("Vera's Pokemon TCG Tracker"),
@@ -21,19 +21,19 @@ assert.ok(
 );
 
 assert.ok(
-  impressum.includes('Kontakt & rechtliche Hinweise'),
-  'Die lokale Impressum-/Kontaktseite soll den echten Hinweistex enthalten.'
+  kontakt.includes('Kontakt & rechtliche Hinweise'),
+  'Die lokale Kontaktseite soll den echten Hinweistext enthalten.'
 );
 
 assert.ok(
-  privacy.includes('veraatversus+tcg@gmail.com') && impressum.includes('veraatversus+tcg@gmail.com'),
+  privacy.includes('veraatversus+tcg@gmail.com') && kontakt.includes('veraatversus+tcg@gmail.com'),
   'Die lokalen Legal-Seiten sollen die aktuelle Kontaktmail anzeigen.'
 );
 
 assert.ok(
   !landing.includes('window.location.replace(finalTarget)') &&
     !privacy.includes('window.location.replace(finalTarget)') &&
-    !impressum.includes('window.location.replace(finalTarget)'),
+    !kontakt.includes('window.location.replace(finalTarget)'),
   'Die lokalen Legal-Seiten sollen zur Laufzeit nicht sofort auf eine externe URL umleiten.'
 );
 

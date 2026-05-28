@@ -1,0 +1,143 @@
+/* Keyboard Shortcuts Overlay */
+.shortcuts-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.15s ease;
+}
+
+.shortcuts-panel {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 14px;
+  padding: 28px 32px;
+  width: min(560px, 92vw);
+  color: #e2e8f0;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.65);
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.shortcuts-panel h2 {
+  margin: 0 0 4px;
+  font-size: 17px;
+}
+
+.shortcuts-panel > p {
+  margin: 0 0 18px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.shortcut-group-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #475569;
+  margin: 16px 0 6px;
+}
+
+.shortcut-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.shortcut-table tr:last-child td {
+  border-bottom: none;
+}
+
+.shortcut-table td {
+  padding: 7px 4px;
+  font-size: 13px;
+  border-bottom: 1px solid #1e293b;
+  vertical-align: middle;
+}
+
+.shortcut-table td:first-child {
+  width: 44%;
+  padding-right: 12px;
+}
+
+.shortcut-key {
+  display: inline-block;
+  background: #1e293b;
+  border: 1px solid #475569;
+  border-radius: 5px;
+  padding: 2px 8px;
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  font-size: 12px;
+  color: #f1f5f9;
+  margin-right: 2px;
+}
+
+.shortcut-desc {
+  color: #94a3b8;
+}
+
+.shortcuts-close-hint {
+  margin: 16px 0 0;
+  font-size: 12px;
+  color: #475569;
+  text-align: center;
+}
+
+/* Share Button & Dialog */
+.btn-share-link {
+  font-size: 15px;
+  min-height: 36px;
+  padding: 6px 10px;
+}
+
+.share-url-wrap {
+  display: flex;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.share-url-input {
+  flex: 1;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  padding: 9px 12px;
+  color: #e2e8f0;
+  font-size: 13px;
+  font-family: ui-monospace, monospace;
+  white-space: nowrap;
+  overflow-x: auto;
+  cursor: text;
+  outline: none;
+}
+
+.share-url-input:focus {
+  border-color: #0ea5e9;
+}
+
+.share-copy-btn {
+  background: #0ea5e9;
+  border: none;
+  border-radius: 6px;
+  padding: 9px 16px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.share-copy-btn:hover {
+  background: #0284c7;
+}
+
+.share-info {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+}

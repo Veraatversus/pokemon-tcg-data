@@ -2,6 +2,12 @@
 // QUICK FILTERS & UI ENHANCEMENTS MODULE
 // ══════════════════════════════════════════════════════════════════════════
 
+import { eventBus } from '../core/event-bus.js';
+import {
+  EVENT_CLEAR_SEARCH_HISTORY,
+  EVENT_QUICK_FILTERS_CHANGED,
+} from '../core/storage-keys.js';
+
 const escapeTrackerMenuText = (value = '') => String(value)
   .replaceAll('&', '&amp;')
   .replaceAll('<', '&lt;')
@@ -78,6 +84,13 @@ export function initQuickFiltersUI(initialState = {}) {
     });
   };
 
+  const emitQuickFiltersChanged = () => {
+    const payload = { ...activeFilters };
+    eventBus.emit(EVENT_QUICK_FILTERS_CHANGED, payload);
+    // Keep DOM event compatibility for old listeners during migration.
+    window.dispatchEvent(new CustomEvent(EVENT_QUICK_FILTERS_CHANGED, { detail: payload }));
+  };
+
   syncButtons();
 
   filterContainer.addEventListener('click', (e) => {
@@ -86,9 +99,7 @@ export function initQuickFiltersUI(initialState = {}) {
       const filterKey = btn.dataset.filter;
       activeFilters[filterKey] = !activeFilters[filterKey];
       syncButtons();
-
-      // Dispatch custom event for the main app to listen to
-      window.dispatchEvent(new CustomEvent('quick-filters-changed', { detail: { ...activeFilters } }));
+      emitQuickFiltersChanged();
       return;
     }
 
@@ -99,9 +110,7 @@ export function initQuickFiltersUI(initialState = {}) {
       activeFilters[key] = false;
     });
     syncButtons();
-
-    // Dispatch custom event for the main app to listen to
-    window.dispatchEvent(new CustomEvent('quick-filters-changed', { detail: { ...activeFilters } }));
+    emitQuickFiltersChanged();
   });
 
   return { container: filterContainer, activeFilters };
@@ -133,10 +142,14 @@ export function createSearchHistoryWidget(searchInput, onSelect) {
     const history = window.SEARCH_HISTORY || [];
     
     if (query === '' && history.length > 0) {
-      dropdown.innerHTML = history
-        .slice(0, 10)
-        .map(h => `<div class="search-history-item" style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid var(--color-bg); hover:background: var(--color-bg);">${h}</div>`)
-        .join('');
+      dropdown.innerHTML = '';
+      history.slice(0, 10).forEach((entry) => {
+        const item = document.createElement('div');
+        item.className = 'search-history-item';
+        item.style.cssText = 'padding: 8px 12px; cursor: pointer; border-bottom: 1px solid var(--color-bg);';
+        item.textContent = String(entry || '');
+        dropdown.appendChild(item);
+      });
       
       dropdown.classList.remove('hidden');
       dropdown.querySelectorAll('.search-history-item').forEach(item => {
@@ -205,10 +218,11 @@ export function createStatisticsPanel(stats) {
 export function createExportDialog(report) {
   const dialog = document.createElement('dialog');
   dialog.className = 'export-dialog ss-dialog';
+  const escapedReport = escapeTrackerMenuText(JSON.stringify(report, null, 2));
   dialog.innerHTML = `
     <h2>📊 Sammlung exportieren</h2>
     <div style="max-height: 300px; overflow-y: auto; border: 1px solid var(--color-border); border-radius: 4px; padding: 12px; margin: 12px 0; background: var(--color-bg); font-size: 12px; font-family: monospace; white-space: pre-wrap; word-break: break-all;">
-      ${JSON.stringify(report, null, 2)}
+      ${escapedReport}
     </div>
     <div style="margin: 12px 0;">
       <p style="font-size: 12px; color: var(--color-muted);">
@@ -464,7 +478,7 @@ export function createSettingsPanel(currentSettings = {}, onSave) {
 
   panel.querySelector('[data-action="clear-history"]').addEventListener('click', () => {
     if (window.confirm('Suchverlauf wirklich löschen?')) {
-      window.dispatchEvent(new Event('clear-search-history'));
+      window.dispatchEvent(new Event(EVENT_CLEAR_SEARCH_HISTORY));
     }
   });
 

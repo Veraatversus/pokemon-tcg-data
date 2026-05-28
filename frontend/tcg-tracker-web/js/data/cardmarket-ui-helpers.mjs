@@ -60,32 +60,25 @@ function extractEntryBaseName(value = '') {
   return String(value || '').split('[')[0].trim();
 }
 
-function extractEntryHintTokens(value = '') {
-  const bracketMatch = String(value || '').match(/\[([^\]]+)\]/);
-  if (!bracketMatch?.[1]) return [];
-
-  return bracketMatch[1]
-    .split('|')
-    .map((token) => normalizeMatcherText(token))
-    .filter(Boolean);
+function extractPreferredCardNames(card = {}) {
+  return Array.from(new Set(
+    [card?.vera_name, card?.tcgdex_name, card?.name]
+      .map((value) => normalizeMatcherText(value))
+      .filter(Boolean)
+  ));
 }
 
-function extractCardHintTokens(card = {}) {
-  const tokens = new Set();
-  const pushToken = (value) => {
-    const normalized = normalizeMatcherText(value);
-    if (normalized) tokens.add(normalized);
-  };
+function entryMatchesAnyCardName(entry = {}, normalizedCardNames = []) {
+  if (!Array.isArray(normalizedCardNames) || !normalizedCardNames.length) return false;
 
-  (Array.isArray(card?.vera_abilities) ? card.vera_abilities : []).forEach((ability) => {
-    pushToken(ability?.name || '');
-  });
+  const normalizedEntryName = normalizeMatcherText(extractEntryBaseName(entry?.name || ''));
+  if (!normalizedEntryName) return false;
 
-  (Array.isArray(card?.vera_attacks) ? card.vera_attacks : []).forEach((attack) => {
-    pushToken(attack?.name || '');
-  });
+  if (normalizedCardNames.includes(normalizedEntryName)) return true;
 
-  return Array.from(tokens);
+  return normalizedCardNames.some((normalizedCardName) => (
+    normalizedEntryName.includes(normalizedCardName) || normalizedCardName.includes(normalizedEntryName)
+  ));
 }
 
 function normalizeCodeKey(value = '') {
@@ -176,49 +169,28 @@ export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {
   return resolvedExpansionId;
 }
 
-export function resolveCardmarketEntryForCardFromSetPayload(card = {}, setPayload = {}) {
-  const normalizedCardNames = Array.from(new Set(
-    [card?.name, card?.vera_name, card?.tcgdex_name]
-      .map((value) => normalizeMatcherText(value))
-      .filter(Boolean)
-  ));
+export function resolveCardmarketEntryForCardFromSetPayload(card = {}, setPayload = {}, { sourceCards = [] } = {}) {
+  const normalizedCardNames = extractPreferredCardNames(card);
   if (!normalizedCardNames.length) return null;
 
   const cards = Array.isArray(setPayload?.cards) ? setPayload.cards : [];
   if (!cards.length) return null;
 
-  const exactNameMatches = cards.filter((entry) => {
-    const normalizedEntryName = normalizeMatcherText(extractEntryBaseName(entry?.name || ''));
-    return normalizedEntryName && normalizedCardNames.includes(normalizedEntryName);
-  });
-  const candidatePool = exactNameMatches.length
-    ? exactNameMatches
-    : cards.filter((entry) => {
-        const normalizedEntryName = normalizeMatcherText(extractEntryBaseName(entry?.name || ''));
-        return normalizedEntryName && normalizedCardNames.some((normalizedCardName) => (
-          normalizedEntryName.includes(normalizedCardName) || normalizedCardName.includes(normalizedEntryName)
-        ));
-      });
-
+  const candidatePool = cards.filter((entry) => entryMatchesAnyCardName(entry, normalizedCardNames));
   if (!candidatePool.length) return null;
-  if (candidatePool.length === 1) return candidatePool[0];
 
-  const cardHintTokens = extractCardHintTokens(card);
-  const scoredCandidates = candidatePool
-    .map((entry, index) => {
-      const entryHintTokens = extractEntryHintTokens(entry?.name || '');
-      const overlapCount = cardHintTokens.filter((token) => entryHintTokens.includes(token)).length;
-      return {
-        entry,
-        index,
-        score: overlapCount,
-      };
-    })
-    .sort((left, right) => right.score - left.score || left.index - right.index);
+  if (!Array.isArray(sourceCards) || sourceCards.length < 2) {
+    return candidatePool[0];
+  }
 
-  if (!scoredCandidates.length) return null;
-  if (scoredCandidates[0].score > 0) return scoredCandidates[0].entry;
-  return scoredCandidates[0].entry;
+  const matchingSourceCards = sourceCards.filter((sourceCard) => {
+    const sourceNames = extractPreferredCardNames(sourceCard);
+    return sourceNames.some((name) => normalizedCardNames.includes(name));
+  });
+  if (!matchingSourceCards.length) return candidatePool[0];
+
+  const sourceOccurrenceIndex = Math.max(0, matchingSourceCards.findIndex((sourceCard) => sourceCard === card));
+  return candidatePool[Math.min(sourceOccurrenceIndex, candidatePool.length - 1)] || candidatePool[0];
 }
 
 function toFinitePrice(value) {
@@ -274,7 +246,16 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
   if (!Array.isArray(cards) || !cards.length) return Array.isArray(cards) ? cards : [];
 
   const needsPromotion = cards.some((card) => isGeneratedCardmarketSearchUrl(getCardmarketUrlFromCard(card)));
-  if (!needsPromotion) return cards;
+  const hasDuplicateSourceNames = (() => {
+    const counts = new Map();
+    cards.forEach((card) => {
+      const preferred = extractPreferredCardNames(card)[0] || '';
+      if (!preferred) return;
+      counts.set(preferred, (counts.get(preferred) || 0) + 1);
+    });
+    return Array.from(counts.values()).some((count) => count > 1);
+  })();
+  if (!needsPromotion && !hasDuplicateSourceNames) return cards;
 
   let resolvedProductIndex = productIndex;
   let resolvedNameIndex = nameIndex;
@@ -302,13 +283,33 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
 
   if (!resolvedSetPayload) return cards;
 
+  const assignmentMap = new Map();
+  const availableEntries = Array.isArray(resolvedSetPayload?.cards) ? [...resolvedSetPayload.cards] : [];
+  for (const sourceCard of cards) {
+    const sourceNames = extractPreferredCardNames(sourceCard);
+    if (!sourceNames.length) continue;
+    const idx = availableEntries.findIndex((entry) => entryMatchesAnyCardName(entry, sourceNames));
+    if (idx < 0) continue;
+    const [assigned] = availableEntries.splice(idx, 1);
+    if (!assigned) continue;
+    assignmentMap.set(sourceCard, assigned);
+  }
+
   return cards.map((card) => {
     const currentUrl = getCardmarketUrlFromCard(card);
-    if (!isGeneratedCardmarketSearchUrl(currentUrl)) return card;
+    const isSearchFallback = isGeneratedCardmarketSearchUrl(currentUrl);
+    const shouldReconcileDirectUrl = !isSearchFallback && hasDuplicateSourceNames;
+    if (!isSearchFallback && !shouldReconcileDirectUrl) return card;
 
-    const matchedEntry = resolveCardmarketEntryForCardFromSetPayload(card, resolvedSetPayload);
+    const matchedEntry = assignmentMap.get(card) || null;
     const directUrl = buildCardmarketProductUrl(matchedEntry?.cardmarketProductId);
     if (!directUrl) return card;
+
+    const currentProductId = extractCardmarketProductId(currentUrl);
+    const matchedProductId = String(matchedEntry?.cardmarketProductId || '').trim();
+    if (currentProductId && matchedProductId && currentProductId === matchedProductId) {
+      return card;
+    }
 
     return {
       ...card,

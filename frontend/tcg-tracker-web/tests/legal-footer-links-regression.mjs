@@ -13,12 +13,12 @@ assert.ok(
 );
 
 assert.ok(
-  html.includes('../../privacy.html'),
+  html.includes('./privacy.html'),
   'Der Footer soll einen direkten Link zur Datenschutzerklärung enthalten.'
 );
 
 assert.ok(
-  html.includes('../../kontakt.html'),
+  html.includes('./kontakt.html'),
   'Der Footer soll einen direkten Link zur Kontaktseite enthalten.'
 );
 

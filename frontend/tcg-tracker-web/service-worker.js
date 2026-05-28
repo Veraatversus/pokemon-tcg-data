@@ -4,46 +4,32 @@
 
 const SW_SCOPE_PATH = new URL(self.registration.scope).pathname.toLowerCase();
 const SW_SCOPE = /(^|\/)dev(\/|$)/.test(SW_SCOPE_PATH) ? 'dev' : 'release';
-const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v45`;
-const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v45`;
-const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v45`;
+const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v52`;
+const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v52`;
+const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v52`;
+
+const SW_DEBUG = false;
+
+function swDebug(...args) {
+  if (!SW_DEBUG) return;
+  console.log(...args);
+}
 
 const STATIC_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './css/main.css',
-  './css/trading-marketplace.css',
   './assets/branding/logo-veras-pokemon.jpg',
-  './js/app.js',
-  './js/auth.js',
-  './js/sheets-db.js',
-  './js/pokemon-api.js',
-  './js/cache.js',
-  './js/config.js',
-  './js/utils.js',
-  './js/smart-engine.js',
-  './js/collection-versioning.js',
-  './js/command-palette.js',
-  './js/enhanced-features.js',
-  './js/ui-components.js',
-  './js/advanced-tools.js',
-  './js/social-features.js',
-  './js/social-ui.js',
-  './js/advanced-features.js',
-  './js/community-features.js',
-  './js/community-ui.js',
-  './js/card-filters.js',
-  './js/trading-system.js',
-  './js/trading-ui.js',
-  './js/realtime-sync.js'
+  './index-landingpage.html',
+  './privacy.html',
+  './kontakt.html'
 ];
 
 // Install event: cache static assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Caching static assets');
+      swDebug('[SW] Caching static assets');
       return cache.addAll(STATIC_ASSETS).catch((err) => {
         console.warn('[SW] Some static assets could not be cached:', err);
         // Don't fail install if some files are missing
@@ -62,7 +48,7 @@ self.addEventListener('activate', (event) => {
         cacheNames
           .filter((name) => name !== CACHE_NAME && name !== RUNTIME_CACHE && name !== IMAGE_CACHE)
           .map((name) => {
-            console.log('[SW] Deleting old cache:', name);
+            swDebug('[SW] Deleting old cache:', name);
             return caches.delete(name);
           })
       );
@@ -150,7 +136,7 @@ self.addEventListener('fetch', (event) => {
             // Try cache
             return caches.match(request).then((response) => {
               if (response) {
-                console.log('[SW] Serving from cache:', request.url);
+                swDebug('[SW] Serving from cache:', request.url);
                 return response;
               }
 
@@ -193,7 +179,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       caches.match(request).then((response) => {
         if (response) {
-          console.log('[SW] Serving from cache:', request.url);
+          swDebug('[SW] Serving from cache:', request.url);
           return response;
         }
 
@@ -224,7 +210,10 @@ self.addEventListener('message', (event) => {
   }
   if (event.data.type === 'CLEAR_CACHE') {
     caches.delete(RUNTIME_CACHE).then(() => {
-      event.ports[0].postMessage({ success: true });
+      const replyPort = event.ports && event.ports[0];
+      if (replyPort) {
+        replyPort.postMessage({ success: true });
+      }
     });
   }
   if (event.data.type === 'CACHE_URLS') {
@@ -278,4 +267,4 @@ self.addEventListener('push', (event) => {
   );
 });
 
-console.log('[SW] Service Worker loaded and ready');
+swDebug('[SW] Service Worker loaded and ready');

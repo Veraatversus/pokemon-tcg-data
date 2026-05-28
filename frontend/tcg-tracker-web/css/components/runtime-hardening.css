@@ -1,0 +1,82 @@
+/* Loading Overlay: FINAL STATE - UNOVERRIDEABLE */
+.loading-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 99999 !important;
+  background: rgba(8, 12, 24, 0.92) !important;
+  backdrop-filter: blur(3px) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+.loading-overlay.hidden {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.spinner {
+  position: relative !important;
+  width: 56px !important;
+  height: 56px !important;
+  border: none !important;
+  background: transparent !important;
+  animation: none !important;
+  z-index: 1 !important;
+}
+
+.spinner::before {
+  content: '' !important;
+  position: absolute !important;
+  inset: 0 !important;
+  border: 3px solid rgba(255, 107, 53, 0.24) !important;
+  border-top-color: #ff6f35 !important;
+  border-right-color: #ffd166 !important;
+  border-radius: 50% !important;
+  animation: compass-rotate 1.5s linear infinite !important;
+}
+
+.spinner::after {
+  content: '' !important;
+  position: absolute !important;
+  inset: 8px !important;
+  border: 2px solid rgba(0, 212, 255, 0.22) !important;
+  border-bottom-color: #00e4ff !important;
+  border-left-color: #ffd166 !important;
+  border-radius: 50% !important;
+  animation: compass-rotate 2s linear infinite reverse !important;
+}
+
+#loading-text {
+  margin: 0 !important;
+  font-size: 14px !important;
+  opacity: 1 !important;
+  z-index: 2 !important;
+}
+
+/* Brand Logo: FINAL STATE - UNOVERRIDEABLE */
+.brand-logo {
+  display: inline-block !important;
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  min-height: 34px !important;
+  max-width: 34px !important;
+  max-height: 34px !important;
+  border-radius: 6px !important;
+  background-image: url('../../assets/branding/logo-veras-pokemon.jpg') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  flex-shrink: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  transition: none !important;
+  overflow: hidden !important;
+}

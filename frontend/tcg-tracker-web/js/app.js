@@ -1,4 +1,4 @@
-﻿import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js?v=20260410-authredirect2';
+import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js?v=20260410-authredirect2';
 import {
   listImportedSets,
   listSetsOverviewData,
@@ -23,7 +23,7 @@ import {
   resolveCardmarketEntryForCard,
   formatCardmarketEntryLabel,
   formatCardmarketEntryTitle
-} from './data/cardmarket-data.js?v=20260410-loginmime1';
+} from './data/cardmarket-data.js?v=20260426-duplicate-price-rank3';
 import {
   buildCombinedSearchDropdownOptions,
   buildSearchProgressLabel,
@@ -62,6 +62,10 @@ import {
 import { initCommandPalette } from './ui/command-palette.js';
 import { filterSetsBySeriesKey, getStatsSeriesLabel } from './ui/stats-series.js?v=20260407a';
 import {
+  computePriceAnalyticsFromSummaries,
+  pickCardPriceFromSummary,
+} from './ui/stats-price-analytics.js?v=20260423a';
+import {
   loadFavorites, saveFavorites, toggleFavorite, isFavorite,
   loadSearchHistory, addSearchHistory, clearSearchHistory,
   createCollectionSnapshot, generateCollectionReport,
@@ -75,6 +79,13 @@ import {
   createExportDialog, createSettingsPanel,
   createBulkActionsToolbar
 } from './ui/components.js?v=20260410-menu-template2';
+import {
+  createInitialSheetsRetryMetrics,
+  initSheetsWriteFeedback as initSheetsWriteFeedbackUi,
+  resetSheetsRetryMetrics as resetSheetsRetryMetricsUi,
+  renderSheetsRetryReport as renderSheetsRetryReportUi,
+  openSheetsRetryReportDialog as openSheetsRetryReportDialogUi
+} from './ui/sheets-retry-report.js';
 import {
   AdvancedSearch, SyncIndicator, CardCollectionTools,
   generateCollectionInsights, generateSetComparison,
@@ -129,9 +140,20 @@ import {
   initRealtimeSync,
   buildCollectionUpdateEvent
 } from './features/community/index.js';
-// ══════════════════════════════════════════════════════════════════════════
+import {
+  formatSpreadsheetOptionLabel,
+  isSpreadsheetAccessDeniedError,
+  normalizeSpreadsheetDisplayText,
+  resolveSpreadsheetSelectionErrorMessage,
+} from './features/settings/spreadsheet-dialog-helpers.js';
+import { sanitizeDisplayText } from './core/display-text.js';
+import { runWithRetry, isRetryableError } from './core/retry.js';
+import { createBootstrapController } from './app/bootstrap-controller.js';
+import { isSheetsQuotaError, getImportCooldownMs } from './features/collection/import-rate-limit.js';
+import { isAuthReloginRequiredError, getAuthReloginImportMessage } from './features/collection/import-auth-guard.js';
+// --------------------------------------------------------------------------
 // DOM-REFERENZEN
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 const dom = {
   // Global
   auth:             document.getElementById('btn-auth'),
@@ -250,7 +272,7 @@ const dom = {
   btnSheetsRetryReset: document.getElementById('btn-sheets-retry-reset'),
   btnSheetsRetryClose: document.getElementById('btn-sheets-retry-close'),
   dashboardGrid:    document.getElementById('dashboard-grid'),
-  // Set detail – sidebar
+  // Set detail - sidebar
   selector:         document.getElementById('set-selector'),
   load:             document.getElementById('btn-load'),
   refresh:          document.getElementById('btn-refresh'),
@@ -273,7 +295,7 @@ const dom = {
   statRh:           document.getElementById('stat-rh'),
   statMissing:      document.getElementById('stat-missing'),
   cardSort:         document.getElementById('card-sort'),
-  // Set detail – toolbar
+  // Set detail - toolbar
   btnBulkEdit:      document.getElementById('btn-bulk-edit'),
   btnUndoLast:      document.getElementById('btn-undo-last'),
   btnAuditPanel:    document.getElementById('btn-audit-panel'),
@@ -306,6 +328,9 @@ const dom = {
   lightboxRegulationMark: document.getElementById('lightbox-regulation-mark'),
   lightboxRules:    document.getElementById('lightbox-rules'),
   lightboxFlavorText: document.getElementById('lightbox-flavor-text'),
+  lightboxPricePanel: document.getElementById('lightbox-price-panel'),
+  lightboxPriceMode: document.getElementById('lightbox-price-mode'),
+  lightboxPriceGrid: document.getElementById('lightbox-price-grid'),
   lightboxCmLink:   document.getElementById('lightbox-cm-link'),
   lightboxGCheck:   document.getElementById('lightbox-g-check'),
   lightboxRhCheck:  document.getElementById('lightbox-rh-check'),
@@ -326,9 +351,9 @@ const dom = {
   searchToolbarMeta: document.getElementById('search-toolbar-meta'),
 };
 
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 // APP-STATE
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 const state = {
   loggedIn:     false,
   sets:         [],
@@ -350,6 +375,9 @@ const state = {
   pendingSearchCardFocusKey: null,
   autoImportJobs: new Map(),
   autoImportQueue: Promise.resolve(),
+  manualImportJobs: new Map(),
+  manualImportQueue: Promise.resolve(),
+  importAuthBlocked: false,
   autoImportQueuedSetIds: [],
   autoImportActiveSetId: null,
   autoImportLastLimitToastAt: 0,
@@ -376,19 +404,26 @@ const state = {
   lastSaveError: null,
   saveStateTimer: null,
   manageSetsSelection: new Set(),
-  sheetsRetryMetrics: {
-    totalWrites: 0,
-    totalRetries: 0,
-    totalFailures: 0,
-    maxAttemptSeen: 0,
-    events: []
-  },
+  sheetsRetryMetrics: createInitialSheetsRetryMetrics(),
   undoStack: [],
   auditEntries: [],
   devCompletionMode: false,
+  statsPrice: {
+    requestId: '',
+    status: 'idle',
+    totals: null,
+    bySet: [],
+    topCards: [],
+    items: [],
+    activeTab: 'dashboard',
+    loadedCards: 0,
+    totalCards: 0,
+    errors: 0,
+  },
 };
 
 let focusedCardIndex = -1;
+let spreadsheetDialogReturnFocusEl = null;
 
 const LOADING_MAX_BLOCK_MS = 12000;
 let loadingFailsafeTimer = null;
@@ -406,6 +441,69 @@ const SEARCH_SCOPE_IMPORTED = 'imported';
 const SEARCH_SCOPE_ALL = 'all';
 const SEARCH_SCOPE_ONLINE = 'online';
 const AUTO_IMPORT_QUEUE_LIMIT = 3;
+const IMPORT_BASE_GAP_MS = 1200;
+const IMPORT_QUOTA_BASE_DELAY_MS = 12000;
+const IMPORT_MAX_DELAY_MS = 45000;
+const IMPORT_RETRY_ATTEMPTS = 3;
+const IMPORT_WRITE_PREFLIGHT_KEY = 'runtime_last_write_probe';
+const STATS_PRICE_CHUNK_SIZE = 25;
+const STATS_PRICE_CONCURRENCY = 4;
+
+function waitMs(ms) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, Math.max(0, Number(ms) || 0));
+  });
+}
+
+function isImportRetryableError(error) {
+  return isSheetsQuotaError(error) || isRetryableError(error);
+}
+
+function resolveQuotaCooldownMs(consecutiveQuotaErrors = 0) {
+  return getImportCooldownMs({
+    consecutiveQuotaErrors,
+    baseDelayMs: IMPORT_BASE_GAP_MS,
+    quotaBaseDelayMs: IMPORT_QUOTA_BASE_DELAY_MS,
+    maxDelayMs: IMPORT_MAX_DELAY_MS,
+  });
+}
+
+async function importSetIntoCollectionWithBackoff(set, contextLabel = '') {
+  return runWithRetry(async () => {
+    const { cards, setMetaPatch } = await fetchMergedCardsWithSetMeta(set.setId);
+    await importSetIntoCollection({ ...set, ...(setMetaPatch || {}) }, cards);
+    return { cards, setMetaPatch };
+  }, {
+    attempts: IMPORT_RETRY_ATTEMPTS,
+    baseDelayMs: 900,
+    maxDelayMs: 7000,
+    shouldRetry: isImportRetryableError,
+    onRetry: (error, retryState) => {
+      const nextWaitSeconds = Math.ceil(Number(retryState?.nextDelayMs || 0) / 1000);
+      if (!Number.isFinite(nextWaitSeconds) || nextWaitSeconds <= 0) return;
+      const prefix = contextLabel ? `${contextLabel}: ` : '';
+      const reason = isSheetsQuotaError(error) ? 'API-Quota' : 'temporarer Fehler';
+      setGlobalStatus(`${prefix}Wiederhole (${reason}) in ${nextWaitSeconds}s`);
+    },
+  });
+}
+
+async function runImportWritePreflight(contextLabel = 'Import') {
+  try {
+    await writeSetting(IMPORT_WRITE_PREFLIGHT_KEY, new Date().toISOString());
+    state.importAuthBlocked = false;
+    return true;
+  } catch (error) {
+    if (isAuthReloginRequiredError(error)) {
+      state.importAuthBlocked = true;
+      const message = getAuthReloginImportMessage();
+      showToast(message, 'error', 7000);
+      setGlobalStatus(`${contextLabel}: ${message}`);
+      return false;
+    }
+    throw error;
+  }
+}
 
 function resolveAutoImportSetLabel(setId) {
   const match = getSetById(setId)
@@ -434,7 +532,7 @@ function updateAutoImportQueueUi() {
   dom.jobPanel.classList.remove('hidden');
   dom.jobTitle.textContent = 'Auto-Import Queue';
   const activeLabel = activeSetId ? `Aktiv: ${resolveAutoImportSetLabel(activeSetId)}` : 'Wartet auf freien Slot';
-  const waitingLabel = queuedIds.length ? ` • ${queuedIds.length} wartend` : '';
+  const waitingLabel = queuedIds.length ? ` - ${queuedIds.length} wartend` : '';
   dom.jobStatusText.textContent = `${activeLabel}${waitingLabel}`;
   if (dom.btnJobCancel) dom.btnJobCancel.disabled = true;
 }
@@ -476,20 +574,20 @@ function shouldUseApiForSearchSet(mode, set) {
 function getSearchModeMeta(mode) {
   if (mode === SEARCH_SCOPE_ONLINE) {
     return {
-      label: '⚡ Modus: Online-Suche',
+      label: 'Modus: Online-Suche',
       className: 'online',
-      hint: 'Nur API für alle Sets'
+      hint: 'Nur API fuer alle Sets'
     };
   }
   if (mode === SEARCH_SCOPE_ALL) {
     return {
-      label: '🌐 Modus: Alle Sets',
+      label: 'Modus: Alle Sets',
       className: 'all',
       hint: 'Importierte aus DB, nicht importierte online'
     };
   }
   return {
-    label: '📦 Modus: Importierte Sets',
+    label: 'Modus: Importierte Sets',
     className: 'imported',
     hint: 'Nur importierte Sets/DB'
   };
@@ -563,7 +661,7 @@ function renderSetSelectorOptions(preferredValue = '') {
       sensitivity: 'base'
     }));
 
-  dom.selector.innerHTML = '<option value="">Bitte wählen…</option>';
+  dom.selector.innerHTML = '<option value="">Bitte wählen...</option>';
 
   const seriesMap = buildSeriesMap(importedSets);
   seriesMap.forEach((groupInfo) => {
@@ -736,7 +834,7 @@ function createDashboardVirtualFooter(total, visible) {
   const remaining = Math.max(0, total - visible);
 
   wrapper.innerHTML = `
-    <p>Zeige ${visible} von ${total} Sets${remaining > 0 ? ` • ${remaining} weitere` : ''}</p>
+    <p>Zeige ${visible} von ${total} Sets${remaining > 0 ? ` - ${remaining} weitere` : ''}</p>
     <div class="dashboard-virtual-actions">
       <button class="btn-secondary" type="button" data-action="more">Mehr laden (+${DASHBOARD_VIRTUAL_PAGE_SIZE})</button>
       <button class="btn-secondary" type="button" data-action="all">Alle laden</button>
@@ -756,121 +854,24 @@ function createDashboardVirtualFooter(total, visible) {
 }
 
 function initSheetsWriteFeedback() {
-  const pushRetryEvent = (type, details = {}) => {
-    const metrics = state.sheetsRetryMetrics;
-    const entry = {
-      type,
-      at: new Date().toISOString(),
-      ...details
-    };
-    metrics.events.unshift(entry);
-    if (metrics.events.length > 120) metrics.events.length = 120;
-    renderSheetsRetryReport();
-  };
-
-  window.addEventListener('sheets-write-retry', (event) => {
-    const details = event?.detail || {};
-    state.sheetsRetryMetrics.totalRetries += 1;
-    state.sheetsRetryMetrics.maxAttemptSeen = Math.max(
-      state.sheetsRetryMetrics.maxAttemptSeen,
-      Number(details.attempt || 0)
-    );
-    pushRetryEvent('retry', {
-      range: details.range || '',
-      attempt: Number(details.attempt || 0),
-      maxRetries: Number(details.maxRetries || 0),
-      delayMs: Number(details.delayMs || 0),
-      status: details.status || null
-    });
-    const retryLabel = `${details.attempt || '?'} / ${details.maxRetries || '?'}`;
-    const waitSeconds = Math.max(1, Math.ceil((Number(details.delayMs) || 0) / 1000));
-    const message = `Sheets-Write Retry ${retryLabel} (warte ${waitSeconds}s)`;
-    setGlobalStatus(message);
-    if (state.activeJob) {
-      updateJob(state.activeJob, state.activeJob.current, message);
-    }
-  });
-
-  window.addEventListener('sheets-write-success', (event) => {
-    const details = event?.detail || {};
-    state.sheetsRetryMetrics.totalWrites += 1;
-    state.sheetsRetryMetrics.maxAttemptSeen = Math.max(
-      state.sheetsRetryMetrics.maxAttemptSeen,
-      Number(details.attemptsUsed || 1)
-    );
-    if (Number(details.attemptsUsed || 1) > 1) {
-      pushRetryEvent('recovered', {
-        range: details.range || '',
-        attemptsUsed: Number(details.attemptsUsed || 1)
-      });
-    }
-  });
-
-  window.addEventListener('sheets-write-failed', (event) => {
-    const details = event?.detail || {};
-    state.sheetsRetryMetrics.totalFailures += 1;
-    pushRetryEvent('failed', {
-      range: details.range || '',
-      status: details.status || null,
-      message: details.message || ''
-    });
-    const message = `Sheets-Write fehlgeschlagen (${details.status || 'unbekannt'}): ${details.range || 'Range unbekannt'}`;
-    setGlobalStatus(message);
-    if (state.activeJob) {
-      updateJob(state.activeJob, state.activeJob.current, message);
-    }
+  initSheetsWriteFeedbackUi({
+    state,
+    renderSheetsRetryReport,
+    setGlobalStatus,
+    updateJob,
   });
 }
 
 function resetSheetsRetryMetrics() {
-  state.sheetsRetryMetrics = {
-    totalWrites: 0,
-    totalRetries: 0,
-    totalFailures: 0,
-    maxAttemptSeen: 0,
-    events: []
-  };
-  renderSheetsRetryReport();
+  resetSheetsRetryMetricsUi(state, renderSheetsRetryReport);
 }
 
 function renderSheetsRetryReport() {
-  if (dom.sheetsRetryStats) {
-    const metrics = state.sheetsRetryMetrics;
-    const retryRate = metrics.totalWrites > 0
-      ? Math.round((metrics.totalRetries / metrics.totalWrites) * 100)
-      : 0;
-    dom.sheetsRetryStats.innerHTML = `
-      <li><strong>Writes:</strong> ${metrics.totalWrites}</li>
-      <li><strong>Retries:</strong> ${metrics.totalRetries}</li>
-      <li><strong>Failures:</strong> ${metrics.totalFailures}</li>
-      <li><strong>Retry-Rate:</strong> ${retryRate}%</li>
-      <li><strong>Max Attempts:</strong> ${metrics.maxAttemptSeen || 1}</li>
-    `;
-  }
-
-  if (dom.sheetsRetryHistory) {
-    const events = state.sheetsRetryMetrics.events || [];
-    if (!events.length) {
-      dom.sheetsRetryHistory.innerHTML = '<li class="retry-empty">Noch keine Sheets-Retry-Ereignisse.</li>';
-      return;
-    }
-    dom.sheetsRetryHistory.innerHTML = events.map((entry) => {
-      const time = new Date(entry.at).toLocaleTimeString('de-DE');
-      const kind = entry.type === 'failed' ? 'Fehler' : entry.type === 'recovered' ? 'Erholt' : 'Retry';
-      const detail = entry.type === 'retry'
-        ? `Versuch ${entry.attempt || '?'} / ${entry.maxRetries || '?'} · ${(Math.ceil((entry.delayMs || 0) / 1000) || 0)}s`
-        : entry.type === 'failed'
-          ? `${entry.status || 'unbekannt'} · ${entry.message || 'ohne Fehlermeldung'}`
-          : `nach ${entry.attemptsUsed || '?'} Versuchen erfolgreich`;
-      return `<li class="retry-entry ${entry.type}"><span class="retry-time">${time}</span><span class="retry-kind">${kind}</span><span class="retry-detail">${detail}</span><span class="retry-range">${entry.range || 'Range unbekannt'}</span></li>`;
-    }).join('');
-  }
+  renderSheetsRetryReportUi({ dom, state });
 }
 
 function openSheetsRetryReportDialog() {
-  if (!dom.sheetsRetryDialog) return;
-  renderSheetsRetryReport();
-  dom.sheetsRetryDialog.showModal();
+  openSheetsRetryReportDialogUi(dom, renderSheetsRetryReport);
 }
 
 function initAuditAndSaveUi() {
@@ -979,8 +980,8 @@ function startJob(title, totalSteps = 0) {
   };
   state.activeJob = job;
   dom.jobPanel?.classList.remove('hidden');
-  if (dom.jobTitle) dom.jobTitle.textContent = title;
-  if (dom.jobStatusText) dom.jobStatusText.textContent = 'Gestartet…';
+  if (dom.jobTitle) dom.jobTitle.textContent = normalizeUiText(title);
+  if (dom.jobStatusText) dom.jobStatusText.textContent = 'Gestartet...';
   if (dom.jobProgressFill) dom.jobProgressFill.style.width = '0%';
   if (dom.btnJobCancel) dom.btnJobCancel.disabled = false;
   return job;
@@ -989,7 +990,7 @@ function startJob(title, totalSteps = 0) {
 function pushJobHistory(text) {
   if (!dom.jobHistory) return;
   const item = document.createElement('li');
-  item.textContent = text;
+  item.textContent = normalizeUiText(text);
   dom.jobHistory.prepend(item);
   while (dom.jobHistory.children.length > 30) {
     dom.jobHistory.removeChild(dom.jobHistory.lastChild);
@@ -1001,17 +1002,17 @@ function updateJob(job, current, text) {
   job.current = Math.max(0, Number(current) || 0);
   const pct = job.totalSteps > 0 ? Math.min(100, Math.round((job.current / job.totalSteps) * 100)) : 0;
   if (dom.jobProgressFill) dom.jobProgressFill.style.width = `${pct}%`;
-  if (dom.jobStatusText) dom.jobStatusText.textContent = text || `${job.current}/${job.totalSteps}`;
+  if (dom.jobStatusText) dom.jobStatusText.textContent = normalizeUiText(text || `${job.current}/${job.totalSteps}`);
 }
 
 function finishJob(job, summary, isError = false) {
   if (!job || state.activeJob?.id !== job.id) return;
-  if (dom.jobStatusText) dom.jobStatusText.textContent = summary;
+  if (dom.jobStatusText) dom.jobStatusText.textContent = normalizeUiText(summary);
   if (dom.btnJobCancel) dom.btnJobCancel.disabled = true;
   if (dom.jobProgressFill && job.totalSteps > 0) {
     dom.jobProgressFill.style.width = isError ? dom.jobProgressFill.style.width : '100%';
   }
-  pushJobHistory(`${new Date().toLocaleTimeString('de-DE')} • ${job.title}: ${summary}`);
+  pushJobHistory(`${new Date().toLocaleTimeString('de-DE')} - ${job.title}: ${summary}`);
   state.activeJob = null;
 }
 
@@ -1029,7 +1030,7 @@ function updateQueueUiState() {
 
 function enqueueAction(label, action) {
   state.queuedActions.push({ id: Date.now() + Math.random(), label, action });
-  pushJobHistory(`${new Date().toLocaleTimeString('de-DE')} • Queue hinzugefügt: ${label}`);
+  pushJobHistory(`${new Date().toLocaleTimeString('de-DE')} - Queue hinzugefuegt: ${label}`);
   updateQueueUiState();
 }
 
@@ -1051,18 +1052,18 @@ async function runQueuedActions() {
   try {
     while (state.queuedActions.length > 0) {
       if (state.queueCancelRequested) {
-        pushJobHistory(`${new Date().toLocaleTimeString('de-DE')} • Queue abgebrochen`);
+        pushJobHistory(`${new Date().toLocaleTimeString('de-DE')} - Queue abgebrochen`);
         break;
       }
       const next = state.queuedActions.shift();
       updateQueueUiState();
       if (dom.jobStatusText) dom.jobStatusText.textContent = `Queue: ${next.label}`;
-      pushJobHistory(`${new Date().toLocaleTimeString('de-DE')} • Queue startet: ${next.label}`);
+      pushJobHistory(`${new Date().toLocaleTimeString('de-DE')} - Queue startet: ${next.label}`);
       try {
         await next.action();
       } catch (err) {
-        pushJobHistory(`${new Date().toLocaleTimeString('de-DE')} • Queue-Fehler: ${next.label} (${err.message})`);
-        showToast(`Queue gestoppt: ${next.label} – ${err.message}`, 'error', 6000);
+        pushJobHistory(`${new Date().toLocaleTimeString('de-DE')} - Queue-Fehler: ${next.label} (${err.message})`);
+        showToast(`Queue gestoppt: ${next.label} - ${err.message}`, 'error', 6000);
         break;
       }
     }
@@ -1091,13 +1092,13 @@ function getQueueBuilderActionsCatalog() {
     {
       id: 'power-refresh',
       label: 'Power-Refresh Overview',
-      description: 'Overview-Update mit Änderungsreport',
+      description: 'Overview-Update mit Aenderungsreport',
       action: () => powerRefreshOverviewFromApi()
     },
     {
       id: 'health-check',
       label: 'Datencheck',
-      description: 'Prüft importierte Sets auf API/Sheet-Mismatch',
+      description: 'Prueft importierte Sets auf API/Sheet-Mismatch',
       action: () => runDataHealthCheck({ autoFix: false })
     },
     {
@@ -1152,7 +1153,7 @@ function persistQueuePresets() {
 
 function renderQueuePresetSelect() {
   if (!dom.queuePresetSelect) return;
-  dom.queuePresetSelect.innerHTML = '<option value="">Preset laden…</option>';
+  dom.queuePresetSelect.innerHTML = '<option value="">Preset laden...</option>';
   state.queuePresets.forEach((preset, index) => {
     const option = document.createElement('option');
     option.value = String(index);
@@ -1163,7 +1164,7 @@ function renderQueuePresetSelect() {
 
 function saveCurrentQueuePreset() {
   if (!state.queueBuilderSequence.length) {
-    showToast('Keine Aktionen für Preset ausgewählt.', 'info');
+    showToast('Keine Aktionen fuer Preset ausgewaehlt.', 'info');
     return;
   }
   const name = window.prompt('Preset-Name:');
@@ -1186,23 +1187,23 @@ function saveCurrentQueuePreset() {
 function deleteSelectedQueuePreset() {
   const idx = Number(dom.queuePresetSelect?.value ?? '-1');
   if (!Number.isInteger(idx) || idx < 0 || idx >= state.queuePresets.length) {
-    showToast('Bitte ein Preset auswählen.', 'info');
+    showToast('Bitte ein Preset auswaehlen.', 'info');
     return;
   }
   const presetName = state.queuePresets[idx].name;
-  const ok = window.confirm(`Preset „${presetName}“ löschen?`);
+  const ok = window.confirm(`Preset ${presetName} loeschen?`);
   if (!ok) return;
   state.queuePresets.splice(idx, 1);
   persistQueuePresets();
   renderQueuePresetSelect();
   if (dom.queuePresetSelect) dom.queuePresetSelect.value = '';
-  showToast(`Preset gelöscht: ${presetName}`, 'info', 2500);
+  showToast(`Preset geloescht: ${presetName}`, 'info', 2500);
 }
 
 function renameSelectedQueuePreset() {
   const idx = Number(dom.queuePresetSelect?.value ?? '-1');
   if (!Number.isInteger(idx) || idx < 0 || idx >= state.queuePresets.length) {
-    showToast('Bitte ein Preset auswählen.', 'info');
+    showToast('Bitte ein Preset auswaehlen.', 'info');
     return;
   }
   const preset = state.queuePresets[idx];
@@ -1212,7 +1213,7 @@ function renameSelectedQueuePreset() {
   if (!trimmedName) return;
   const collision = state.queuePresets.findIndex((p, i) => i !== idx && p.name.toLowerCase() === trimmedName.toLowerCase());
   if (collision >= 0) {
-    showToast(`Name „${trimmedName}" wird bereits verwendet.`, 'error', 3500);
+    showToast(`Name ${trimmedName}" wird bereits verwendet.`, 'error', 3500);
     return;
   }
   preset.name = trimmedName;
@@ -1225,7 +1226,7 @@ function renameSelectedQueuePreset() {
 function duplicateSelectedQueuePreset() {
   const idx = Number(dom.queuePresetSelect?.value ?? '-1');
   if (!Number.isInteger(idx) || idx < 0 || idx >= state.queuePresets.length) {
-    showToast('Bitte ein Preset auswählen.', 'info');
+    showToast('Bitte ein Preset auswaehlen.', 'info');
     return;
   }
   const preset = state.queuePresets[idx];
@@ -1236,7 +1237,7 @@ function duplicateSelectedQueuePreset() {
   if (!trimmedName) return;
   const collision = state.queuePresets.findIndex((p) => p.name.toLowerCase() === trimmedName.toLowerCase());
   if (collision >= 0) {
-    showToast(`Name „${trimmedName}" wird bereits verwendet.`, 'error', 3500);
+    showToast(`Name ${trimmedName}" wird bereits verwendet.`, 'error', 3500);
     return;
   }
   const copy = { name: trimmedName, actionIds: [...preset.actionIds] };
@@ -1326,7 +1327,7 @@ function renderQueueBuilderSelected(catalog) {
   if (!state.queueBuilderSequence.length) {
     const empty = document.createElement('li');
     empty.className = 'queue-selected-empty';
-    empty.textContent = 'Noch keine Aktion ausgewählt.';
+    empty.textContent = 'Noch keine Aktion ausgewaehlt.';
     dom.queueBuilderSelected.appendChild(empty);
     return;
   }
@@ -1462,7 +1463,7 @@ function initQueueBuilderDialog() {
       const parsed = JSON.parse(text);
       const imported = normalizeImportedPresets(parsed);
       if (!imported.length) {
-        showToast('Keine gültigen Presets im Import gefunden.', 'error', 4500);
+        showToast('Keine gueltigen Presets im Import gefunden.', 'error', 4500);
         return;
       }
       const { added, updated } = mergeQueuePresets(imported);
@@ -1483,28 +1484,31 @@ function initQueueBuilderDialog() {
       .filter(Boolean);
 
     if (!selected.length) {
-      showToast('Bitte mindestens eine Aktion wählen.', 'info');
+      showToast('Bitte mindestens eine Aktion waehlen.', 'info');
       return;
     }
 
     selected.forEach((item) => enqueueAction(item.label, item.action));
     dom.queueBuilderDialog.close();
-    showToast(`${selected.length} Aktion(en) in Reihenfolge zur Queue hinzugefügt.`, 'success', 3000);
+    showToast(`${selected.length} Aktion(en) in Reihenfolge zur Queue hinzugefuegt.`, 'success', 3000);
   });
 }
 
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 // UI-HELFER
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 function setGlobalStatus(text) {
-  if (dom.globalStatus) dom.globalStatus.textContent = text;
-  if (dom.status)       dom.status.textContent = text;
-  console.info('[Status]', text);
+  const safeText = normalizeUiText(text);
+  if (dom.globalStatus) dom.globalStatus.textContent = safeText;
+  if (dom.status)       dom.status.textContent = safeText;
+  console.info('[Status]', safeText);
 }
 
 function setLoading(show, text = 'Lade\u2026') {
   if (!dom.loadingOverlay) return;
-  // OVERLAY DISABLED: Always hide immediately – start directly on page
+  const safeText = normalizeUiText(text);
+  if (dom.loadingText) dom.loadingText.textContent = safeText;
+  // OVERLAY DISABLED: Always hide immediately - start directly on page
   dom.loadingOverlay.classList.add('hidden');
   dom.loadingOverlay.setAttribute('aria-hidden', 'true');
 }
@@ -1512,23 +1516,159 @@ function setLoading(show, text = 'Lade\u2026') {
 function showToast(message, type = 'info', durationMs = 3000) {
   const el = document.createElement('div');
   el.className = `toast ${type}`;
-  el.textContent = message;
+  el.textContent = normalizeUiText(message);
   dom.toastContainer.appendChild(el);
   setTimeout(() => el.remove(), durationMs);
+}
+
+function normalizeUiText(value) {
+  let text = String(value ?? '');
+  if (!text) return '';
+
+  const wordFixes = [
+    [/f\uFFFDr/g, 'fuer'],
+    [/ausgew\uFFFDhlt/g, 'ausgewaehlt'],
+    [/gel\uFFFDscht/g, 'geloescht'],
+    [/l\uFFFDschen/g, 'loeschen'],
+    [/m\uFFFDglich/g, 'moeglich'],
+    [/w\uFFFDhlen/g, 'waehlen'],
+    [/g\uFFFDltig/g, 'gueltig'],
+    [/r\uFFFDckg\uFFFDngig/g, 'rueckgaengig'],
+    [/l\uFFFDuft/g, 'laeuft'],
+    [/verf\uFFFDgbar/g, 'verfuegbar'],
+    [/enth\uFFFDlt/g, 'enthaelt'],
+    [/\uFFFDffnen/g, 'oeffnen'],
+    [/\uFFFDffnet/g, 'oeffnet'],
+    [/\uFFFDffne/g, 'oeffne'],
+    [/\uFFFDbersicht/g, 'Uebersicht'],
+    [/\uFFFDnderung/g, 'aenderung'],
+    [/\uFFFDnderungen/g, 'aenderungen']
+  ];
+
+  const replacements = [
+    [/\?\?\s+/g, ''],
+    ...wordFixes,
+    [/\s+\uFFFD\s+/g, ' - '],
+    [/\uFFFD([\w])/g, '$1'],
+    [/([\w])\uFFFD/g, '$1'],
+    [/\uFFFD/g, ''],
+    [/\s{2,}/g, ' ']
+  ];
+
+  for (const [pattern, replacement] of replacements) {
+    text = text.replace(pattern, replacement);
+  }
+
+  return text.trim();
+}
+
+function sanitizeMojibakeTextNode(node) {
+  if (!node || node.nodeType !== Node.TEXT_NODE) return;
+  const current = String(node.nodeValue ?? '');
+  if (!current || (!current.includes('\uFFFD') && !current.includes('??'))) return;
+  const normalized = normalizeUiText(current);
+  if (normalized !== current) node.nodeValue = normalized;
+}
+
+function sanitizeMojibakeAttributes(el) {
+  if (!el || el.nodeType !== Node.ELEMENT_NODE) return;
+  const attrNames = ['title', 'aria-label', 'placeholder'];
+  for (const attr of attrNames) {
+    const raw = el.getAttribute(attr);
+    if (!raw || (!raw.includes('\uFFFD') && !raw.includes('??'))) continue;
+    el.setAttribute(attr, normalizeUiText(raw));
+  }
+}
+
+function sanitizeMojibakeInDom(root = document.body) {
+  if (!root) return;
+
+  if (root.nodeType === Node.TEXT_NODE) {
+    sanitizeMojibakeTextNode(root);
+    return;
+  }
+
+  sanitizeMojibakeAttributes(root);
+
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  let textNode = walker.nextNode();
+  while (textNode) {
+    sanitizeMojibakeTextNode(textNode);
+    textNode = walker.nextNode();
+  }
+
+  if (root.querySelectorAll) {
+    root.querySelectorAll('*').forEach((el) => sanitizeMojibakeAttributes(el));
+  }
+}
+
+let _mojibakeObserver = null;
+let _dialogNormalizerInstalled = false;
+
+function installMojibakeSanitizer() {
+  if (!_dialogNormalizerInstalled) {
+    _dialogNormalizerInstalled = true;
+    const nativeConfirm = window.confirm.bind(window);
+    const nativePrompt = window.prompt.bind(window);
+    const nativeAlert = window.alert.bind(window);
+
+    window.confirm = (message) => nativeConfirm(normalizeUiText(message));
+    window.prompt = (message, defaultValue = '') => nativePrompt(normalizeUiText(message), normalizeUiText(defaultValue));
+    window.alert = (message) => nativeAlert(normalizeUiText(message));
+  }
+
+  sanitizeMojibakeInDom(document.body);
+
+  if (_mojibakeObserver) return;
+  _mojibakeObserver = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      if (mutation.type === 'characterData') {
+        sanitizeMojibakeTextNode(mutation.target);
+        continue;
+      }
+      if (mutation.type === 'attributes') {
+        sanitizeMojibakeAttributes(mutation.target);
+        continue;
+      }
+      for (const node of mutation.addedNodes || []) {
+        sanitizeMojibakeInDom(node);
+      }
+    }
+  });
+
+  _mojibakeObserver.observe(document.body, {
+    childList: true,
+    subtree: true,
+    characterData: true,
+    attributes: true,
+    attributeFilter: ['title', 'aria-label', 'placeholder']
+  });
+}
+
+function closeOtherOpenDialogs(except = []) {
+  const keep = new Set(except.filter(Boolean));
+  document.querySelectorAll('dialog[open]').forEach((dialog) => {
+    if (keep.has(dialog)) return;
+    try {
+      dialog.close();
+    } catch {
+      // ignore dialogs that cannot be closed in the current state
+    }
+  });
 }
 
 const SUPPORT_CHANNEL_META = Object.freeze({
   bug: {
     title: 'Bug melden',
-    fallbackMessage: 'Bug-Formular noch nicht hinterlegt – ich öffne vorerst die Kontaktseite.'
+    fallbackMessage: 'Bug-Formular noch nicht hinterlegt - ich oeffne vorerst die Kontaktseite.'
   },
   feature: {
-    title: 'Feature wünschen',
-    fallbackMessage: 'Feature-Formular noch nicht hinterlegt – ich öffne vorerst die Kontaktseite.'
+    title: 'Feature wuenschen',
+    fallbackMessage: 'Feature-Formular noch nicht hinterlegt - ich oeffne vorerst die Kontaktseite.'
   },
   access: {
     title: 'Zugang beantragen',
-    fallbackMessage: 'Access-Formular noch nicht hinterlegt – ich öffne vorerst die Kontaktseite.'
+    fallbackMessage: 'Access-Formular noch nicht hinterlegt - ich oeffne vorerst die Kontaktseite.'
   }
 });
 
@@ -1539,7 +1679,7 @@ function isConfiguredSupportUrl(url) {
 function resolveSupportTarget(kind) {
   const supportConfig = CONFIG.SUPPORT || {};
   const directUrl = String(supportConfig.channels?.[kind] || '').trim();
-  const fallbackUrl = String(supportConfig.fallbackUrls?.[kind] || '../../kontakt.html#projektkontakt').trim();
+  const fallbackUrl = String(supportConfig.fallbackUrls?.[kind] || '../kontakt.html#projektkontakt').trim();
   return {
     directUrl,
     fallbackUrl: new URL(fallbackUrl, window.location.href).toString()
@@ -1547,6 +1687,7 @@ function resolveSupportTarget(kind) {
 }
 
 function openSupportHubDialog() {
+  closeOtherOpenDialogs([dom.supportHubDialog]);
   dom.supportHubDialog?.showModal();
 }
 
@@ -1595,7 +1736,7 @@ function updateSaveStatePill() {
   dom.saveStatePill.classList.remove('is-pending', 'is-error', 'is-saved');
 
   if (pending > 0) {
-    dom.saveStatePill.textContent = `Speichert… (${pending})`;
+    dom.saveStatePill.textContent = `Speichert... (${pending})`;
     dom.saveStatePill.classList.add('is-pending');
     return;
   }
@@ -1661,24 +1802,24 @@ function updateUndoUi() {
   if (!dom.btnUndoLast) return;
   const count = state.undoStack.length;
   dom.btnUndoLast.disabled = count === 0;
-  dom.btnUndoLast.title = count > 0 ? `Letzte Änderung rückgängig (${count})` : 'Keine Änderung zum Rückgängigmachen';
+  dom.btnUndoLast.title = count > 0 ? `Letzte aenderung rueckgaengig (${count})` : 'Keine aenderung zum Rckgngigmachen';
 }
 
 async function undoLastChange() {
   const entry = state.undoStack.pop();
   updateUndoUi();
   if (!entry) {
-    showToast('Keine Änderung zum Rückgängigmachen.', 'info', 2200);
+    showToast('Keine aenderung zum Rckgngigmachen.', 'info', 2200);
     return;
   }
 
   if (!state.currentSet || (entry.setId && state.currentSet.setId !== entry.setId)) {
-    showToast('Undo ist nur im gleichen Set möglich.', 'info', 2600);
+    showToast('Undo ist nur im gleichen Set moeglich.', 'info', 2600);
     return;
   }
 
   beginTrackedWrite('Undo');
-  setLoading(true, 'Undo läuft…');
+  setLoading(true, 'Undo laeuft');
   let reverted = 0;
   try {
     for (const change of entry.changes) {
@@ -1746,10 +1887,6 @@ function sanitizeSetAssetUrl(url, setIdHint = '') {
   const value = String(url || '').trim();
   if (!value) return '';
 
-  if (/^https?:\/\/assets\.tcgdex\.net\/.+\/(logo|symbol)$/i.test(value)) {
-    return `${value}.webp`;
-  }
-
   const normalized = value.toLowerCase();
   if (
     normalized === '0'
@@ -1763,6 +1900,14 @@ function sanitizeSetAssetUrl(url, setIdHint = '') {
 
   if (brokenSetAssetUrls.has(value)) return '';
 
+  const withTcgdexExtension = (() => {
+    if (/\.(?:webp|png|jpe?g|svg)(?:[?#]|$)/i.test(value)) return value;
+    if (!/^https?:\/\/assets\.tcgdex\.net\//i.test(value)) return value;
+    if (!/\/(?:logo|symbol)(?:[?#].*)?$/i.test(value)) return value;
+    const match = value.match(/^([^?#]+)([?#].*)?$/);
+    return match ? `${match[1]}.webp${match[2] || ''}` : value;
+  })();
+
   const setId = String(setIdHint || '').trim();
   if (/^https?:\/\/images\.pokedata\.ovh\//i.test(value)) {
     if (setId && !setId.startsWith('TCGDEX-')) {
@@ -1771,8 +1916,13 @@ function sanitizeSetAssetUrl(url, setIdHint = '') {
     return '';
   }
 
-  if (/^https?:\/\//i.test(value) || value.startsWith('/') || value.startsWith('./') || value.startsWith('../')) {
-    return value;
+  if (
+    /^https?:\/\//i.test(withTcgdexExtension)
+    || withTcgdexExtension.startsWith('/')
+    || withTcgdexExtension.startsWith('./')
+    || withTcgdexExtension.startsWith('../')
+  ) {
+    return withTcgdexExtension;
   }
 
   return '';
@@ -1829,14 +1979,14 @@ function attachImageFallback(img, card, setIdHint = '') {
     if (wrap) {
       wrap.classList.add('missing-image');
       wrap.dataset.placeholder = card?.number
-        ? `${card.number} · Kein Kartenbild`
+        ? `${card.number} - Kein Kartenbild`
         : 'Kein Kartenbild';
     }
     img.onerror = null;
     img.style.display = '';
     img.src = './assets/pokeball-fallback.svg';
     img.classList.add('img-fallback');
-    img.alt = `Kein Kartenbild für ${card?.name || card?.number || 'diese Karte'}`;
+    img.alt = `Kein Kartenbild fuer ${card?.name || card?.number || 'diese Karte'}`;
   };
 
   if (wrap) {
@@ -1858,7 +2008,12 @@ function attachImageFallback(img, card, setIdHint = '') {
   }
 
   const activeImage = String(img?.src || '').trim();
+  const sameAsDocument = activeImage && activeImage === window.location.href;
   if (!activeImage || /pokeball-fallback\.svg/i.test(activeImage)) {
+    applyVisualFallback();
+    return;
+  }
+  if (sameAsDocument) {
     applyVisualFallback();
     return;
   }
@@ -1930,9 +2085,9 @@ function resetRuntimeUiForSpreadsheetSwitch() {
   setEmptyState(true);
 }
 
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 // GRID ZOOM
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 const GRID_ZOOM_STORAGE_KEY = 'gridZoom';
 
 function applyGridZoom(value) {
@@ -2001,9 +2156,9 @@ function initCustomSelects() {
     item.className = 'custom-select-option';
     item.dataset.value = option.value;
     const isNotImported = option.dataset.imported === 'false';
-    const rawLabel = option.textContent?.trim() || '—';
+    const rawLabel = option.textContent?.trim() || '';
     const visibleLabel = isNotImported
-      ? rawLabel.replace(/\s*[·-]\s*noch nicht importiert$/i, '').trim()
+      ? rawLabel.replace(/\s*[-]\s*noch nicht importiert$/i, '').trim()
       : rawLabel;
     item.textContent = visibleLabel || rawLabel;
     item.setAttribute('role', 'option');
@@ -2069,7 +2224,7 @@ function initCustomSelects() {
       options.forEach((option) => createOptionNode({ option, select, list, button, root }));
       if (!button.textContent) {
         const selectedOption = options.find((option) => option.selected) || options[0];
-        button.textContent = selectedOption?.textContent?.trim() || 'Auswählen…';
+        button.textContent = selectedOption?.textContent?.trim() || 'Auswaehlen...';
       }
       button.disabled = select.disabled;
       root.classList.toggle('is-disabled', Boolean(select.disabled));
@@ -2084,7 +2239,7 @@ function initCustomSelects() {
         optionNode.setAttribute('aria-selected', String(isSelected));
         if (isSelected) {
           selectedNode = optionNode;
-          button.textContent = optionNode.textContent || 'Auswählen…';
+          button.textContent = optionNode.textContent || 'Auswaehlen...';
         }
       });
       applyTriggerSelectionState(button, selectedNode);
@@ -2279,9 +2434,9 @@ function initAutoHideTopbar() {
   window.addEventListener('scroll', onScroll, { passive: true });
 }
 
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 // HASH-ROUTER / VIEW-MANAGEMENT
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 const VIEWS = ['dashboard', 'set', 'stats', 'search'];
 
 function showView(viewId) {
@@ -2343,9 +2498,9 @@ function handleRouteChange() {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 // SPREADSHEET DIALOG
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 function extractSpreadsheetId(input) {
   if (!input) return null;
   const match = input.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
@@ -2359,15 +2514,20 @@ function openSpreadsheetDialog(required = false) {
   dom.dialogError.classList.add('hidden');
   dom.dialogInput.value = CONFIG.SPREADSHEET_ID || '';
   if (dom.dialogNewNameInput) dom.dialogNewNameInput.value = '';
+  spreadsheetDialogReturnFocusEl = document.activeElement instanceof HTMLElement
+    ? document.activeElement
+    : null;
+  if (dom.dialog) dom.dialog.dataset.required = required ? 'true' : 'false';
   dom.btnDialogCancel.disabled = required;
   dom.btnDialogCancel.style.display = required ? 'none' : '';
+  closeOtherOpenDialogs([dom.dialog]);
   dom.dialog.showModal();
   refreshSpreadsheetList();
 }
 
 function setSpreadsheetDialogError(message = '', isError = true) {
   if (!dom.dialogError) return;
-  dom.dialogError.textContent = message;
+  dom.dialogError.textContent = normalizeUiText(message);
   dom.dialogError.style.color = isError ? 'var(--color-danger)' : 'var(--color-muted)';
   dom.dialogError.classList.toggle('hidden', !message);
 }
@@ -2375,8 +2535,8 @@ function setSpreadsheetDialogError(message = '', isError = true) {
 function parseDriveSpreadsheetFile(file, sourceLabel) {
   return {
     id: String(file?.id || '').trim(),
-    name: String(file?.name || 'Unbenannte Tabelle').trim(),
-    source: sourceLabel
+    name: normalizeSpreadsheetDisplayText(file?.name || 'Unbenannte Tabelle') || 'Unbenannte Tabelle',
+    source: normalizeSpreadsheetDisplayText(sourceLabel)
   };
 }
 
@@ -2433,7 +2593,7 @@ async function listAccessibleSpreadsheets() {
 function renderSpreadsheetOptions(items = []) {
   if (!dom.dialogExistingSelect) return;
   const currentId = CONFIG.SPREADSHEET_ID || '';
-  dom.dialogExistingSelect.innerHTML = '<option value="">Bitte Tabelle auswählen…</option>';
+  dom.dialogExistingSelect.innerHTML = '<option value="">Bitte Tabelle auswaehlen...</option>';
 
   if (!items.length) {
     const empty = document.createElement('option');
@@ -2447,7 +2607,7 @@ function renderSpreadsheetOptions(items = []) {
   items.forEach((item) => {
     const option = document.createElement('option');
     option.value = item.id;
-    option.textContent = `${item.name} — ${item.source}`;
+    option.textContent = formatSpreadsheetOptionLabel(item.name, item.source);
     dom.dialogExistingSelect.appendChild(option);
   });
 
@@ -2464,19 +2624,15 @@ async function refreshSpreadsheetList(options = {}) {
   try {
     dom.dialogExistingSelect.disabled = true;
     dom.btnSpreadsheetRefresh && (dom.btnSpreadsheetRefresh.disabled = true);
-    setSpreadsheetDialogError('Tabellen werden geladen…', false);
+    setSpreadsheetDialogError('Tabellen werden geladen...', false);
     const items = await listAccessibleSpreadsheets();
     renderSpreadsheetOptions(items);
     setSpreadsheetDialogError('');
   } catch (err) {
     console.error('[refreshSpreadsheetList]', err);
 
-    const status = err?.status || err?.result?.error?.code;
-    const reason = err?.result?.error?.status || '';
-    const missingScope = status === 401 || status === 403 || reason === 'PERMISSION_DENIED';
-
-    if (allowReauth && missingScope) {
-      setSpreadsheetDialogError('Berechtigungen werden aktualisiert…', false);
+    if (allowReauth && isSpreadsheetAccessDeniedError(err)) {
+      setSpreadsheetDialogError('Berechtigungen werden aktualisiert...', false);
       const reauthed = await signIn({ forceConsent: true });
       if (reauthed) {
         await refreshSpreadsheetList({ allowReauth: false });
@@ -2484,7 +2640,7 @@ async function refreshSpreadsheetList(options = {}) {
       }
     }
 
-    setSpreadsheetDialogError('Tabellen konnten nicht geladen werden. Falls nötig bitte einmal neu einloggen.');
+    setSpreadsheetDialogError('Tabellen konnten nicht geladen werden. Bitte Login und Freigaben pruefen.');
   } finally {
     dom.dialogExistingSelect.disabled = false;
     dom.btnSpreadsheetRefresh && (dom.btnSpreadsheetRefresh.disabled = false);
@@ -2493,7 +2649,7 @@ async function refreshSpreadsheetList(options = {}) {
 
 async function applySpreadsheetSelection(id) {
   if (!id) {
-    setSpreadsheetDialogError('Bitte eine Tabelle auswählen oder ID/URL eingeben.');
+    setSpreadsheetDialogError('Bitte eine Tabelle waehlen oder ID/URL eingeben.');
     return;
   }
 
@@ -2501,7 +2657,7 @@ async function applySpreadsheetSelection(id) {
   const previousId = CONFIG.SPREADSHEET_ID;
 
   try {
-    setSpreadsheetDialogError('Prüfe Tabellenzugriff…', false);
+    setSpreadsheetDialogError('Pruefe Tabellenzugriff...', false);
     await gapi.client.sheets.spreadsheets.get({
       spreadsheetId: nextId,
       fields: 'spreadsheetId,properties(title)'
@@ -2513,22 +2669,23 @@ async function applySpreadsheetSelection(id) {
     updateSpreadsheetInfoBar();
     await loadSets();
     setSpreadsheetDialogError('');
+    dom.dialog?.close();
   } catch (err) {
     CONFIG.SPREADSHEET_ID = previousId;
     resetSheetsDataCaches();
     updateSpreadsheetInfoBar();
     console.error('[applySpreadsheetSelection]', err);
-    setSpreadsheetDialogError(`Tabelle konnte nicht verwendet werden: ${err.message || err}`);
+    setSpreadsheetDialogError(resolveSpreadsheetSelectionErrorMessage(err, nextId));
     showToast('Tabellenauswahl fehlgeschlagen.', 'error', 3200);
     throw err;
   }
 }
 
 async function createAndUseSpreadsheet() {
-  const title = String(dom.dialogNewNameInput?.value || '').trim() || `Pokémon TCG Tracker ${new Date().toLocaleDateString('de-DE')}`;
+  const title = String(dom.dialogNewNameInput?.value || '').trim() || `Pokemon TCG Tracker ${new Date().toLocaleDateString('de-DE')}`;
   try {
     dom.btnSpreadsheetCreate && (dom.btnSpreadsheetCreate.disabled = true);
-    setSpreadsheetDialogError('Neue Tabelle wird erstellt…', false);
+    setSpreadsheetDialogError('Neue Tabelle wird erstellt...', false);
 
     const response = await gapi.client.sheets.spreadsheets.create({
       properties: { title }
@@ -2536,7 +2693,7 @@ async function createAndUseSpreadsheet() {
 
     const spreadsheetId = String(response?.result?.spreadsheetId || '').trim();
     if (!spreadsheetId) {
-      throw new Error('Spreadsheet-ID wurde nicht zurückgegeben.');
+      throw new Error('Spreadsheet-ID wurde nicht zurueckgegeben.');
     }
 
     await applySpreadsheetSelection(spreadsheetId);
@@ -2561,13 +2718,23 @@ function updateSpreadsheetInfoBar() {
 }
 
 function initSpreadsheetDialog() {
+  dom.dialog?.addEventListener('close', () => {
+    if (spreadsheetDialogReturnFocusEl && typeof spreadsheetDialogReturnFocusEl.focus === 'function') {
+      spreadsheetDialogReturnFocusEl.focus();
+    }
+    spreadsheetDialogReturnFocusEl = null;
+  });
+  dom.dialog?.addEventListener('cancel', (e) => {
+    const required = dom.dialog?.dataset?.required === 'true';
+    if (required) e.preventDefault();
+  });
   dom.dialog?.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !dom.btnDialogCancel.disabled) dom.dialog.close();
   });
   dom.btnDialogSave?.addEventListener('click', async () => {
     const id = extractSpreadsheetId(dom.dialogInput?.value?.trim());
     if (!id) {
-      setSpreadsheetDialogError('Ungültige Spreadsheet-ID oder URL.');
+      setSpreadsheetDialogError('Ungueltige Spreadsheet-ID oder URL.');
       return;
     }
     try {
@@ -2592,9 +2759,9 @@ function initSpreadsheetDialog() {
   });
 }
 
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 // SETS LADEN
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 async function loadSets() {
   setLoading(true, 'Lade Sets\u2026');
   try {
@@ -2603,7 +2770,7 @@ async function loadSets() {
       listSetsOverviewData().catch(() => [])
     ]);
 
-    if (!Array.isArray(importedSets)) throw new Error('Ungültiges Sets-Format');
+    if (!Array.isArray(importedSets)) throw new Error('Ungueltiges Sets-Format');
     state.sets = importedSets;
 
     let overviewSets = Array.isArray(initialOverviewSets) ? initialOverviewSets : [];
@@ -2614,13 +2781,12 @@ async function loadSets() {
       overviewSets = await listSetsOverviewData().catch(() => []);
     }
 
-    // Legacy-Migration: importierte Sets aus dem Übersichtssheet wiederherstellen,
+    // Legacy-Migration: importierte Sets aus dem Uebersichtssheet wiederherstellen,
     // falls db_sets zuvor normalisiert wurde und alle Import-Flags verloren gingen.
     if (importedSets.length === 0 && overviewSets.length > 0) {
       try {
         const legacyIds = await recoverImportedIdsFromOverview();
         if (legacyIds.size > 0) {
-          console.log('[loadSets] Migriere', legacyIds.size, 'importierte Sets aus dem Übersichtssheet');
           const apiSets = await fetchAllAvailableSets();
           await syncOverviewWithApiSets(apiSets, legacyIds);
           overviewSets = await listSetsOverviewData().catch(() => []);
@@ -2646,7 +2812,7 @@ async function loadSets() {
       mergedMap.set(set.setId, {
         ...current,
         ...set,
-        // ptcgoCode nicht mit einem leeren Sheets-Wert überschreiben
+        // ptcgoCode nicht mit einem leeren Sheets-Wert ueberschreiben
         ptcgoCode: set.ptcgoCode || current.ptcgoCode || '',
         imported: true
       });
@@ -2726,9 +2892,9 @@ function buildSeriesMap(sets) {
   return map;
 }
 
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 // DASHBOARD
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 async function renderDashboard() {
   dom.dashboardGrid.innerHTML = '<p class="loading-placeholder">Lade \u00dcbersicht\u2026</p>';
   try {
@@ -2924,10 +3090,10 @@ function createDashSetCard(set, summary) {
       ${rh > 0 ? `<p class="dash-rh-text">RH: ${rh}</p>` : ''}
       <div class="dash-card-actions">
         ${set.imported 
-          ? `<button class="btn-secondary dash-view-btn" type="button" title="Ansehen">👁️</button>
-             <button class="btn-secondary dash-favorite-btn" type="button" title="Favorit">${isFavorite(set.setId) ? '⭐' : '☆'}</button>
-             <button class="btn-secondary dash-delete-btn" type="button" title="Löschen">🗑️</button>`
-          : `<button class="btn-primary dash-import-btn" type="button">➕ Importieren</button>`}
+         ? `<button class="btn-secondary dash-view-btn" type="button" title="Ansehen">👁️</button>
+           <button class="btn-secondary dash-favorite-btn" type="button" title="Favorit">${isFavorite(set.setId) ? '★' : '☆'}</button>
+           <button class="btn-secondary dash-delete-btn" type="button" title="Löschen">🗑️</button>`
+         : `<button class="btn-primary dash-import-btn" type="button">➕ Importieren</button>`}
       </div>
     </div>`;
 
@@ -2960,8 +3126,8 @@ function createDashSetCard(set, summary) {
     favoriteButton.addEventListener('click', async (event) => {
       event.stopPropagation();
       const isFav = toggleFavorite(set.setId);
-      favoriteButton.textContent = isFav ? '⭐' : '☆';
-      showToast(isFav ? `${set.setName} zu Favoriten hinzugefügt` : `${set.setName} aus Favoriten entfernt`, 'success', 2000);
+      favoriteButton.textContent = isFav ? '★' : '☆';
+      showToast(isFav ? `${set.setName} zu Favoriten hinzugefuegt` : `${set.setName} aus Favoriten entfernt`, 'success', 2000);
     });
   }
 
@@ -3128,7 +3294,7 @@ async function ensureSetImportedFromApi(setMeta, cards, options = {}) {
       state.autoImportQueuedSetIds = state.autoImportQueuedSetIds.filter((id) => id !== setId);
       state.autoImportActiveSetId = setId;
       updateAutoImportQueueUi();
-      setGlobalStatus(`Auto-Importiere ${mergedSet.setName || setId}…`);
+      setGlobalStatus(`Auto-Importiere ${mergedSet.setName || setId}`);
 
       await importSetIntoCollection(mergedSet, safeCards);
       cache.del(`cards_${setId}`);
@@ -3175,55 +3341,90 @@ async function importSetFromOverview(set) {
     return;
   }
 
-  setLoading(true, `Importiere ${set.setName}…`);
-  setGlobalStatus(`Importiere ${set.setName}…`);
-  try {
-    const { cards, setMetaPatch } = await fetchMergedCardsWithSetMeta(set.setId);
-    await importSetIntoCollection({ ...set, ...(setMetaPatch || {}) }, cards);
-    cache.del(`cards_${set.setId}`);
-    cache.del(`db_cards_${set.setId}`);
-    cache.del(`db_${set.setId}`);
-    state.searchCache.clear();
-    state.summaryData = null;
-
-    await loadSets();
-    markSetAsRecent(set);
-    await renderDashboard();
-    setGlobalStatus(`${set.setName} wurde importiert.`);
-    showToast(`${set.setName} wurde importiert.`, 'success', 3000);
-  } catch (err) {
-    console.error('[importSetFromOverview]', err);
-    const reason = getErrorMessage(err);
-    showToast(`Import fehlgeschlagen: ${reason}`, 'error', 5000);
-    setGlobalStatus(`Import fehlgeschlagen: ${set.setName}`);
-  } finally {
-    setLoading(false);
+  if (state.manualImportJobs.has(set.setId)) {
+    return state.manualImportJobs.get(set.setId);
   }
+
+  if (state.importAuthBlocked) {
+    const ok = await runImportWritePreflight('Import-Preflight').catch(() => false);
+    if (!ok) return;
+  } else {
+    const ok = await runImportWritePreflight('Import-Preflight').catch((error) => {
+      console.error('[importSetFromOverview:preflight]', error);
+      return false;
+    });
+    if (!ok) return;
+  }
+
+  const queuedJob = state.manualImportQueue
+    .catch(() => undefined)
+    .then(async () => {
+      setLoading(true, `Importiere ${set.setName}`);
+      setGlobalStatus(`Importiere ${set.setName}`);
+      try {
+        await importSetIntoCollectionWithBackoff(set, set.setName || set.setId);
+        cache.del(`cards_${set.setId}`);
+        cache.del(`db_cards_${set.setId}`);
+        cache.del(`db_${set.setId}`);
+        state.searchCache.clear();
+        state.summaryData = null;
+
+        await loadSets();
+        markSetAsRecent(set);
+        await renderDashboard();
+        setGlobalStatus(`${set.setName} wurde importiert.`);
+        showToast(`${set.setName} wurde importiert.`, 'success', 3000);
+      } catch (err) {
+        console.error('[importSetFromOverview]', err);
+        if (isAuthReloginRequiredError(err)) {
+          state.importAuthBlocked = true;
+          const message = getAuthReloginImportMessage();
+          showToast(message, 'error', 7000);
+          setGlobalStatus(message);
+          return;
+        }
+        const reason = getErrorMessage(err);
+        showToast(`Import fehlgeschlagen: ${reason}`, 'error', 5000);
+        setGlobalStatus(`Import fehlgeschlagen: ${set.setName}`);
+      } finally {
+        setLoading(false);
+      }
+
+      await waitMs(IMPORT_BASE_GAP_MS);
+    });
+
+  const trackedJob = queuedJob.finally(() => {
+    state.manualImportJobs.delete(set.setId);
+  });
+
+  state.manualImportQueue = queuedJob.catch(() => undefined);
+  state.manualImportJobs.set(set.setId, trackedJob);
+  return trackedJob;
 }
 
 async function deleteSetFromCollection(set, options = {}) {
   const { skipReload = false, skipConfirm = false } = options;
   if (!set?.setId || !set.imported) {
-    showToast('Set kann nicht gelöscht werden.', 'error', 3000);
+    showToast('Set kann nicht geloescht werden.', 'error', 3000);
     return;
   }
 
-  const confirmMsg = `${set.setName} wirklich aus deiner Sammlung löschen? Diese Aktion kann nicht rückgängig gemacht werden.`;
+  const confirmMsg = `${set.setName} wirklich aus deiner Sammlung loeschen? Diese Aktion kann nicht rueckgaengig gemacht werden.`;
   if (!skipConfirm && !window.confirm(confirmMsg)) {
     return;
   }
 
-  setLoading(true, `Lösche ${set.setName}…`);
-  setGlobalStatus(`Lösche ${set.setName}…`);
+  setLoading(true, `Loesche ${set.setName}`);
+  setGlobalStatus(`Loesche ${set.setName}`);
   
   try {
-    // Auto-Snapshot vor dem Löschen erstellen
+    // Auto-Snapshot vor dem Loeschen erstellen
     try {
       const currentCollection = state.collection || {};
       const action = `Delete Set: ${set.setName}`;
       await createAutoSnapshot(action, currentCollection);
     } catch (err) {
-      console.warn('⚠️ Auto-snapshot vor Löschung fehlgeschlagen:', err);
+      console.warn('Auto-snapshot vor Loeschung fehlgeschlagen:', err);
     }
 
     // Entferne das Set aus der Sammlung
@@ -3254,12 +3455,12 @@ async function deleteSetFromCollection(set, options = {}) {
       await renderDashboard();
     }
     
-    showToast(`${set.setName} wurde gelöscht.`, 'success', 3000);
-    setGlobalStatus(`${set.setName} wurde gelöscht.`);
+    showToast(`${set.setName} wurde geloescht.`, 'success', 3000);
+    setGlobalStatus(`${set.setName} wurde geloescht.`);
   } catch (err) {
     console.error('[deleteSetFromCollection]', err);
-    showToast(`Löschen fehlgeschlagen: ${err.message}`, 'error', 5000);
-    setGlobalStatus(`Fehler beim Löschen: ${set.setName}`);
+    showToast(`Loeschen fehlgeschlagen: ${err.message}`, 'error', 5000);
+    setGlobalStatus(`Fehler beim Loeschen: ${set.setName}`);
   } finally {
     setLoading(false);
   }
@@ -3310,22 +3511,32 @@ async function importSetsSequential(sets, options = {}) {
     return;
   }
 
+  const preflightOk = await runImportWritePreflight('Batch-Preflight').catch((error) => {
+    console.error('[importSetsSequential:preflight]', error);
+    showToast(`Preflight fehlgeschlagen: ${getErrorMessage(error)}`, 'error', 6000);
+    return false;
+  });
+  if (!preflightOk) {
+    return;
+  }
+
   // Auto-Snapshot vor dem Import erstellen
   try {
     const currentCollection = state.collection || {};
     const snapshotCount = (loadSnapshots() || []).length;
     const action = `Import: ${validSets.map(s => s.setName).join(', ')}${snapshotCount > 15 ? ' (oldest will be removed)' : ''}`;
     await createAutoSnapshot(action, currentCollection);
-    console.log('✅ Auto-snapshot vor Import erstellt');
   } catch (err) {
-    console.warn('⚠️ Auto-snapshot vor Import fehlgeschlagen:', err);
+    console.warn('Auto-snapshot vor Import fehlgeschlagen:', err);
     // Fehler blockiert nicht den Import
   }
 
   let done = 0;
   let failed = 0;
+  let consecutiveQuotaErrors = 0;
+  let pausedForAuth = false;
   const job = startJob('Import', validSets.length);
-  setLoading(true, 'Import läuft…');
+  setLoading(true, 'Import laeuft');
   try {
     for (let index = 0; index < validSets.length; index++) {
       assertJobNotCancelled(job);
@@ -3333,23 +3544,58 @@ async function importSetsSequential(sets, options = {}) {
       setGlobalStatus(`Importiere ${index + 1}/${validSets.length}: ${set.setName}`);
       updateJob(job, index, `Importiere ${index + 1}/${validSets.length}: ${set.setName}`);
       try {
-        const { cards, setMetaPatch } = await fetchMergedCardsWithSetMeta(set.setId);
-        await importSetIntoCollection({ ...set, ...(setMetaPatch || {}) }, cards);
+        await importSetIntoCollectionWithBackoff(set, `${index + 1}/${validSets.length}`);
         cache.del(`cards_${set.setId}`);
         cache.del(`db_${set.setId}`);
+        cache.del(`db_cards_${set.setId}`);
+        consecutiveQuotaErrors = 0;
         done++;
       } catch (err) {
         console.warn('[importSetsSequential] import failed for', set.setId, err);
+        if (isAuthReloginRequiredError(err)) {
+          state.importAuthBlocked = true;
+          pausedForAuth = true;
+          const message = getAuthReloginImportMessage();
+          setGlobalStatus(message);
+          updateJob(job, index, `Pausiert: Re-Login erforderlich bei ${set.setName}`);
+          break;
+        }
+
         failed++;
+        if (isSheetsQuotaError(err)) {
+          consecutiveQuotaErrors += 1;
+          const cooldownMs = resolveQuotaCooldownMs(consecutiveQuotaErrors);
+          const waitSeconds = Math.ceil(cooldownMs / 1000);
+          setGlobalStatus(`Sheets-Rate-Limit erkannt. Warte ${waitSeconds}s vor dem naechsten Import`);
+          updateJob(job, index, `Rate-Limit bei ${set.setName}. Cooldown ${waitSeconds}s`);
+          await waitMs(cooldownMs);
+        } else {
+          consecutiveQuotaErrors = 0;
+        }
+      }
+
+      if (index < validSets.length - 1) {
+        await waitMs(IMPORT_BASE_GAP_MS);
       }
     }
-    updateJob(job, validSets.length, `Import abgeschlossen: ${done} erfolgreich, ${failed} Fehler`);
-    finishJob(job, `Import abgeschlossen (${done}/${validSets.length})`, failed > 0);
+    if (pausedForAuth) {
+      const message = getAuthReloginImportMessage();
+      updateJob(job, done + failed, 'Import pausiert: Re-Login erforderlich');
+      finishJob(job, message, true);
+    } else {
+      updateJob(job, validSets.length, `Import abgeschlossen: ${done} erfolgreich, ${failed} Fehler`);
+      finishJob(job, `Import abgeschlossen (${done}/${validSets.length})`, failed > 0);
+    }
   } catch (err) {
     finishJob(job, getErrorMessage(err, 'Import abgebrochen'), true);
     throw err;
   } finally {
     setLoading(false);
+  }
+
+  if (pausedForAuth) {
+    showToast(getAuthReloginImportMessage(), 'error', 7000);
+    return;
   }
 
   state.summaryData = null;
@@ -3367,7 +3613,7 @@ async function syncOverviewFromApi() {
     showToast('Bitte zuerst anmelden.', 'info');
     return;
   }
-  setLoading(true, 'Synchronisiere Overview…');
+  setLoading(true, 'Synchronisiere Overview...');
   try {
     const apiSets = await fetchAllAvailableSets();
     const importedIds = new Set(state.sets.map((set) => set.setId));
@@ -3418,16 +3664,15 @@ function summarizeOverviewChanges(oldOverviewSets, apiSets) {
 }
 
 async function powerRefreshOverviewFromApi() {
-  setLoading(true, 'Power-Refresh läuft…');
+  setLoading(true, 'Power-Refresh laeuft');
   
   // Auto-Snapshot vor dem Power-Refresh erstellen
   try {
     const currentCollection = state.collection || {};
     const action = `Power-Refresh: Sets Overview aktualisiert`;
     await createAutoSnapshot(action, currentCollection);
-    console.log('✅ Auto-snapshot vor Power-Refresh erstellt');
   } catch (err) {
-    console.warn('⚠️ Auto-snapshot vor Power-Refresh fehlgeschlagen:', err);
+    console.warn('Auto-snapshot vor Power-Refresh fehlgeschlagen:', err);
     // Fehler blockiert nicht den Refresh
   }
 
@@ -3442,19 +3687,12 @@ async function powerRefreshOverviewFromApi() {
     await syncOverviewWithApiSets(apiSets, importedIds);
     await loadSets();
 
-    const msg = `Power-Refresh: +${report.added} neu, ${report.changed} geändert, ${report.unchanged} unverändert.`;
+    const msg = `Power-Refresh: +${report.added} neu, ${report.changed} geaendert, ${report.unchanged} unveraendert.`;
     setGlobalStatus(msg);
     showToast(msg, 'success', 5000);
 
     if (report.changedSets.length) {
-      console.group('[PowerRefresh] geänderte Sets');
-      report.changedSets.slice(0, 50).forEach((entry) => {
-        console.log(`${entry.setId} (${entry.setName}): ${entry.changedFields.join(', ')}`);
-      });
-      if (report.changedSets.length > 50) {
-        console.log(`…und ${report.changedSets.length - 50} weitere`);
-      }
-      console.groupEnd();
+      setGlobalStatus(`${msg} (${report.changedSets.length} Sets mit Detailaenderungen)`);
     }
   } catch (err) {
     console.error('[powerRefreshOverviewFromApi]', err);
@@ -3482,7 +3720,7 @@ function getBatchCandidates() {
 function updateBatchInfo() {
   const selected = state.batchSelection.size;
   dom.batchInfo.classList.remove('hidden');
-  dom.batchInfo.textContent = `${selected} Set${selected === 1 ? '' : 's'} ausgewählt`;
+  dom.batchInfo.textContent = `${selected} Set${selected === 1 ? '' : 's'} ausgewaehlt`;
 }
 
 function renderBatchDialogList() {
@@ -3518,11 +3756,11 @@ function renderBatchDialogList() {
 
     const title = document.createElement('span');
     title.className = 'batch-item-title';
-    title.textContent = `${set.setId} — ${set.setName}`;
+    title.textContent = `${set.setId} - ${set.setName}`;
 
     const sub = document.createElement('span');
     sub.className = 'batch-item-sub';
-    sub.textContent = `${set.series || 'Serie unbekannt'} • ${set.totalCards || '?'} Karten`;
+    sub.textContent = `${set.series || 'Serie unbekannt'} - ${set.totalCards || '?'} Karten`;
 
     main.append(title, sub);
     row.append(input, main);
@@ -3548,7 +3786,7 @@ function initBatchImportDialog() {
     checkboxes.forEach((checkbox) => {
       checkbox.checked = true;
       const label = checkbox.closest('.batch-item')?.querySelector('.batch-item-title')?.textContent || '';
-      const setId = label.split(' — ')[0] || '';
+      const setId = label.split(' - ')[0] || '';
       if (setId) state.batchSelection.add(setId);
     });
     updateBatchInfo();
@@ -3564,7 +3802,7 @@ function initBatchImportDialog() {
   dom.btnBatchImportSelected?.addEventListener('click', async () => {
     const selectedIds = Array.from(state.batchSelection);
     if (!selectedIds.length) {
-      showToast('Bitte mindestens ein Set auswählen.', 'info');
+      showToast('Bitte mindestens ein Set auswaehlen.', 'info');
       return;
     }
     dom.batchDialog.close();
@@ -3580,7 +3818,7 @@ function getImportedSetsForManagement() {
 function updateManageSetsInfo(filtered = []) {
   if (!dom.manageSetsInfo) return;
   const selectedCount = state.manageSetsSelection.size;
-  dom.manageSetsInfo.textContent = `${selectedCount} ausgewählt • ${filtered.length} sichtbar`;
+  dom.manageSetsInfo.textContent = `${selectedCount} ausgewaehlt - ${filtered.length} sichtbar`;
 }
 
 function renderManageImportedSetsList() {
@@ -3596,7 +3834,7 @@ function renderManageImportedSetsList() {
     );
 
   if (!filtered.length) {
-    dom.manageSetsList.innerHTML = '<p class="empty-state">Keine importierten Sets für den aktuellen Filter.</p>';
+    dom.manageSetsList.innerHTML = '<p class="empty-state">Keine importierten Sets fuer den aktuellen Filter.</p>';
     updateManageSetsInfo(filtered);
     return;
   }
@@ -3620,11 +3858,11 @@ function renderManageImportedSetsList() {
 
     const title = document.createElement('span');
     title.className = 'batch-item-title';
-    title.textContent = `${set.setId} — ${set.setName}`;
+    title.textContent = `${set.setId} - ${set.setName}`;
 
     const sub = document.createElement('span');
     sub.className = 'batch-item-sub';
-    sub.textContent = `${set.series || 'Serie unbekannt'} • ${set.totalCards || '?'} Karten`;
+    sub.textContent = `${set.series || 'Serie unbekannt'} - ${set.totalCards || '?'} Karten`;
 
     main.append(title, sub);
     row.append(input, main);
@@ -3646,19 +3884,19 @@ function openManageImportedSetsDialog() {
 async function reimportSelectedImportedSets() {
   const selectedIds = Array.from(state.manageSetsSelection);
   if (!selectedIds.length) {
-    showToast('Bitte mindestens ein Set auswählen.', 'info');
+    showToast('Bitte mindestens ein Set auswaehlen.', 'info');
     return;
   }
 
   const selectedSets = selectedIds.map((id) => getSetById(id)).filter(Boolean);
   dom.manageSetsDialog?.close();
-  await importSetsSequential(selectedSets, { successMessage: '{count} ausgewählte Sets aktualisiert.' });
+  await importSetsSequential(selectedSets, { successMessage: '{count} ausgewaehlte Sets aktualisiert.' });
 }
 
 async function deleteSelectedImportedSets() {
   const selectedIds = Array.from(state.manageSetsSelection);
   if (!selectedIds.length) {
-    showToast('Bitte mindestens ein Set auswählen.', 'info');
+    showToast('Bitte mindestens ein Set auswaehlen.', 'info');
     return;
   }
 
@@ -3667,15 +3905,15 @@ async function deleteSelectedImportedSets() {
     .filter((set) => set && toBoolean(set.imported));
 
   if (!selectedSets.length) {
-    showToast('Keine löschbaren importierten Sets ausgewählt.', 'info');
+    showToast('Keine lschbaren importierten Sets ausgewaehlt.', 'info');
     return;
   }
 
-  const ok = window.confirm(`${selectedSets.length} importierte Sets wirklich löschen?`);
+  const ok = window.confirm(`${selectedSets.length} importierte Sets wirklich loeschen?`);
   if (!ok) return;
 
   dom.manageSetsDialog?.close();
-  setLoading(true, 'Lösche ausgewählte Sets…');
+  setLoading(true, 'Loesche ausgewaehlte Sets');
   let deleted = 0;
   let failed = 0;
   try {
@@ -3695,7 +3933,7 @@ async function deleteSelectedImportedSets() {
   state.summaryData = null;
   await loadSets();
   await renderDashboard();
-  showToast(`${deleted} gelöscht${failed ? `, ${failed} Fehler` : ''}.`, failed ? 'error' : 'success', 4500);
+  showToast(`${deleted} geloescht${failed ? `, ${failed} Fehler` : ''}.`, failed ? 'error' : 'success', 4500);
 }
 
 function initManageImportedSetsDialog() {
@@ -3704,7 +3942,7 @@ function initManageImportedSetsDialog() {
   dom.btnManageSetsSelectVisible?.addEventListener('click', () => {
     dom.manageSetsList?.querySelectorAll('.batch-item input[type="checkbox"]').forEach((input) => {
       const label = input.closest('.batch-item')?.querySelector('.batch-item-title')?.textContent || '';
-      const setId = label.split(' — ')[0] || '';
+      const setId = label.split(' - ')[0] || '';
       if (setId) state.manageSetsSelection.add(setId);
     });
     renderManageImportedSetsList();
@@ -3769,11 +4007,11 @@ async function exportCollectionSummaryCsv() {
 
 async function exportCollectionBackup() {
   if (!state.sets.length) {
-    showToast('Keine importierten Sets für Backup vorhanden.', 'info');
+    showToast('Keine importierten Sets fuer Backup vorhanden.', 'info');
     return;
   }
 
-  setLoading(true, 'Erstelle Backup…');
+  setLoading(true, 'Erstelle Backup...');
   try {
     const backupSets = [];
     for (let index = 0; index < state.sets.length; index++) {
@@ -3808,11 +4046,11 @@ async function exportCollectionBackup() {
 
 async function runDataHealthCheck({ autoFix = false } = {}) {
   if (!state.sets.length) {
-    showToast('Keine importierten Sets für Datencheck.', 'info');
+    showToast('Keine importierten Sets fuer Datencheck.', 'info');
     return;
   }
 
-  setLoading(true, 'Datencheck läuft…');
+  setLoading(true, 'Datencheck laeuft');
   const report = {
     createdAt: new Date().toISOString(),
     checkedSets: state.sets.length,
@@ -3860,7 +4098,7 @@ async function runDataHealthCheck({ autoFix = false } = {}) {
 
   if (!report.mismatches.length && !report.errors.length) {
     finishJob(job, 'Keine Abweichungen gefunden', false);
-    showToast(`Datencheck ok: ${report.checkedSets} Sets geprüft, keine Abweichungen.`, 'success', 4500);
+    showToast(`Datencheck ok: ${report.checkedSets} Sets geprft, keine Abweichungen.`, 'success', 4500);
     return;
   }
 
@@ -3890,15 +4128,14 @@ async function runDataHealthCheck({ autoFix = false } = {}) {
     const currentCollection = state.collection || {};
     const action = `Auto-Fix: ${mismatchSets.length} Set(s) mit Abweichungen`;
     await createAutoSnapshot(action, currentCollection);
-    console.log('✅ Auto-snapshot vor Auto-Fix erstellt');
   } catch (err) {
-    console.warn('⚠️ Auto-snapshot vor Auto-Fix fehlgeschlagen:', err);
+    console.warn('Auto-snapshot vor Auto-Fix fehlgeschlagen:', err);
     // Fehler blockiert nicht das Auto-Fix
   }
 
   const uniqueSets = Array.from(new Map(mismatchSets.map((set) => [set.setId, set])).values());
   await importSetsSequential(uniqueSets, { successMessage: '{count} Mismatch-Set(s) automatisch repariert.' });
-  finishJob(job, `Auto-Fix ausgeführt (${uniqueSets.length} Sets)`, false);
+  finishJob(job, `Auto-Fix ausgefuehrt (${uniqueSets.length} Sets)`, false);
 }
 
 async function runPokecodeParityTest({ skipPrompt = false, maxSets: presetMaxSets = null } = {}) {
@@ -3906,13 +4143,13 @@ async function runPokecodeParityTest({ skipPrompt = false, maxSets: presetMaxSet
   if (Number.isFinite(presetMaxSets) && presetMaxSets > 0) {
     maxSets = Math.min(Number(presetMaxSets), 50);
   } else if (!skipPrompt) {
-    const input = window.prompt('Wie viele Sets sollen geprüft werden? (Standard: 10)', '10');
+    const input = window.prompt('Wie viele Sets sollen geprft werden? (Standard: 10)', '10');
     const parsed = Number.parseInt(String(input || '10'), 10);
     maxSets = Number.isFinite(parsed) && parsed > 0 ? Math.min(parsed, 50) : 10;
   }
 
-  setLoading(true, 'Pokecode-Parity-Test läuft…');
-  setGlobalStatus(`Parity-Test läuft (max. ${maxSets} Sets)…`);
+  setLoading(true, 'Pokecode-Parity-Test laeuft');
+  setGlobalStatus(`Parity-Test laeuft (max. ${maxSets} Sets)`);
   const job = startJob('Pokecode-Parity-Test', maxSets);
 
   try {
@@ -3942,15 +4179,15 @@ async function runPokecodeParityTest({ skipPrompt = false, maxSets: presetMaxSet
 
 function parseBackupPayload(rawText) {
   const parsed = JSON.parse(rawText);
-  if (!parsed || typeof parsed !== 'object') throw new Error('Ungültiges Backup-Format.');
-  if (!Array.isArray(parsed.sets)) throw new Error('Backup enthält keine Set-Daten.');
+  if (!parsed || typeof parsed !== 'object') throw new Error('Ungueltiges Backup-Format.');
+  if (!Array.isArray(parsed.sets)) throw new Error('Backup enthaelt keine Set-Daten.');
   return parsed;
 }
 
 async function applyCollectionBackup(payload) {
   const sets = payload.sets || [];
   if (!sets.length) {
-    showToast('Backup enthält keine Sets.', 'info');
+    showToast('Backup enthaelt keine Sets.', 'info');
     return;
   }
 
@@ -3958,7 +4195,7 @@ async function applyCollectionBackup(payload) {
   let updated = 0;
   let skipped = 0;
 
-  setLoading(true, 'Spiele Backup ein…');
+  setLoading(true, 'Spiele Backup ein...');
   try {
     for (let setIndex = 0; setIndex < sets.length; setIndex++) {
       const backupSet = sets[setIndex];
@@ -3998,13 +4235,13 @@ async function applyCollectionBackup(payload) {
   if (state.currentSet) {
     await loadCurrentSet(true).catch(() => {});
   }
-  showToast(`Backup eingespielt. Änderungen: ${updated}, übersprungen: ${skipped}.`, skipped ? 'info' : 'success', 5000);
+  showToast(`Backup eingespielt. aenderungen: ${updated}, uebersprungen: ${skipped}.`, skipped ? 'info' : 'success', 5000);
 }
 
 function buildLegacyImportPreviewText(plan) {
   const summary = summarizeLegacyImportPlan(plan);
   const lines = [
-    `Set-Blätter erkannt: ${summary.sheetCount}`,
+    `Set-Blaetter erkannt: ${summary.sheetCount}`,
     `Markierte Karten (G/RH): ${summary.checkedCardCount}`,
     `Eindeutig zuordenbar: ${summary.matchedCardCount}`,
     `Fehlende Sets zum Vorimport: ${summary.missingSetCount}`
@@ -4019,7 +4256,7 @@ function buildLegacyImportPreviewText(plan) {
       lines.push('');
       lines.push('Set-Probleme:');
       plan.unresolvedSheets.slice(0, 5).forEach((entry) => {
-        lines.push(`• ${entry.sheetName}: ${entry.reason}`);
+        lines.push(` ${entry.sheetName}: ${entry.reason}`);
       });
     }
 
@@ -4027,22 +4264,22 @@ function buildLegacyImportPreviewText(plan) {
       lines.push('');
       lines.push('Karten-Probleme:');
       plan.unresolvedCards.slice(0, 8).forEach((entry) => {
-        lines.push(`• ${entry.setId} / ${entry.sourceCardId}: ${entry.reason}`);
+        lines.push(` ${entry.setId} / ${entry.sourceCardId}: ${entry.reason}`);
       });
     }
 
     lines.push('');
-    lines.push('Der Import wurde blockiert, bis alle Konflikte eindeutig gelöst sind.');
+    lines.push('Der Import wurde blockiert, bis alle Konflikte eindeutig geloest sind.');
     return lines.join('\n');
   }
 
   lines.push('');
-  lines.push('Der Import setzt die betroffenen Sets exakt auf den Altbestand-Stand (G/RH) – inklusive Entfernen nicht markierter Treffer in diesen Sets.');
+  lines.push('Der Import setzt die betroffenen Sets exakt auf den Altbestand-Stand (G/RH) - inklusive Entfernen nicht markierter Treffer in diesen Sets.');
   return lines.join('\n');
 }
 
 async function prepareLegacyWorkbookImport(workbook, sourceLabel = 'Altbestand') {
-  if (!workbook) throw new Error('Keine Altbestand-Quelle ausgewählt.');
+  if (!workbook) throw new Error('Keine Altbestand-Quelle ausgewaehlt.');
   if (!state.allSets?.length) {
     await loadSets();
   }
@@ -4074,7 +4311,7 @@ async function prepareLegacyWorkbookImport(workbook, sourceLabel = 'Altbestand')
     setGlobalStatus(`Analysiere ${sourceLabel} ${index + 1}/${uniqueSetIds.length}: ${setMeta?.setName || setId}`);
     const cards = await fetchMergedCards(setId);
     if (!Array.isArray(cards) || !cards.length) {
-      throw new Error(`Kartenkatalog für ${setMeta?.setName || setId} konnte nicht geladen werden.`);
+      throw new Error(`Kartenkatalog fuer ${setMeta?.setName || setId} konnte nicht geladen werden.`);
     }
     cardsBySetId[setId] = cards;
   }
@@ -4092,7 +4329,7 @@ let legacyImportSelectionDialogState = null;
 
 async function applyLegacyImportPlan(plan, cardsBySetId) {
   if (!plan?.ok) {
-    throw new Error('Der Dry-Run enthält noch Konflikte.');
+    throw new Error('Der Dry-Run enthaelt noch Konflikte.');
   }
 
   const missingSets = plan.missingSetIds
@@ -4101,7 +4338,7 @@ async function applyLegacyImportPlan(plan, cardsBySetId) {
 
   if (missingSets.length) {
     await importSetsSequential(missingSets, {
-      successMessage: '{count} fehlende Sets für den Altbestand-Import importiert.'
+      successMessage: '{count} fehlende Sets fuer den Altbestand-Import importiert.'
     });
     await loadSets();
   }
@@ -4113,13 +4350,13 @@ async function applyLegacyImportPlan(plan, cardsBySetId) {
   }
 
   let updatedCells = 0;
-  setLoading(true, 'Synchronisiere Altbestand…');
+  setLoading(true, 'Synchronisiere Altbestand...');
   try {
     for (let setIndex = 0; setIndex < plan.matchedSets.length; setIndex++) {
       const matchedSet = plan.matchedSets[setIndex];
       const liveSet = getSetById(matchedSet.setId);
       if (!liveSet?.setName) {
-        throw new Error(`Ziel-Set ${matchedSet.setId} ist nach dem Vorimport nicht verfügbar.`);
+        throw new Error(`Ziel-Set ${matchedSet.setId} ist nach dem Vorimport nicht verfuegbar.`);
       }
 
       setGlobalStatus(`Altbestand-Import ${setIndex + 1}/${plan.matchedSets.length}: ${liveSet.setName}`);
@@ -4179,8 +4416,8 @@ async function applyLegacyImportPlan(plan, cardsBySetId) {
     await loadCurrentSet(true).catch(() => {});
   }
 
-  setGlobalStatus(`Altbestand importiert: ${plan.matchedSets.length} Sets, ${updatedCells} Änderungen.`);
-  showToast(`Altbestand importiert: ${plan.matchedSets.length} Sets synchronisiert, ${updatedCells} Änderungen geschrieben.`, 'success', 5000);
+  setGlobalStatus(`Altbestand importiert: ${plan.matchedSets.length} Sets, ${updatedCells} aenderungen.`);
+  showToast(`Altbestand importiert: ${plan.matchedSets.length} Sets synchronisiert, ${updatedCells} aenderungen geschrieben.`, 'success', 5000);
 }
 
 function setLegacySheetDialogError(message = '') {
@@ -4232,15 +4469,15 @@ function renderLegacyImportSelectionDialog() {
 
   if (dom.legacySelectionInfo) {
     dom.legacySelectionInfo.textContent = stats.selectedCardCount > 0
-      ? `${stats.selectedCardCount} von ${stats.totalCardCount} Karten aus ${stats.selectedSetCount} von ${stats.totalSetCount} Sets werden übernommen.${stats.autoImportSetCount ? ` ${stats.autoImportSetCount} Sets werden dafür bei Bedarf zuerst importiert.` : ''}`
-      : 'Bitte mindestens ein Set oder eine Karte auswählen.';
+      ? `${stats.selectedCardCount} von ${stats.totalCardCount} Karten aus ${stats.selectedSetCount} von ${stats.totalSetCount} Sets werden uebernommen.${stats.autoImportSetCount ? ` ${stats.autoImportSetCount} Sets werden dafuer bei Bedarf zuerst importiert.` : ''}`
+      : 'Bitte mindestens ein Set oder eine Karte auswaehlen.';
   }
 
   if (dom.btnLegacySelectionConfirm) {
     dom.btnLegacySelectionConfirm.disabled = stats.selectedCardCount === 0;
     dom.btnLegacySelectionConfirm.textContent = stats.selectedCardCount > 0
-      ? `Ausgewählte importieren (${stats.selectedCardCount})`
-      : 'Ausgewählte importieren';
+      ? `Ausgewaehlte importieren (${stats.selectedCardCount})`
+      : 'Ausgewaehlte importieren';
   }
 
   const setMarkup = (session.tree.sets || []).map((setEntry, setIndex) => {
@@ -4260,7 +4497,7 @@ function renderLegacyImportSelectionDialog() {
             card.g ? '<span class="legacy-tree-badge is-collected">G</span>' : '',
             card.rh ? '<span class="legacy-tree-badge is-reverse">RH</span>' : ''
           ].join('');
-          const cardNumber = escapeLegacyImportSelectionHtml(card.sourceCardId || card.cardId || '—');
+          const cardNumber = escapeLegacyImportSelectionHtml(card.sourceCardId || card.cardId || '');
           const cardName = escapeLegacyImportSelectionHtml(card.name || card.cardId || 'Unbenannte Karte');
           return `
             <label class="legacy-tree-card">
@@ -4275,7 +4512,7 @@ function renderLegacyImportSelectionDialog() {
 
     const summaryLabel = escapeLegacyImportSelectionHtml(setEntry.setName || setEntry.sheetName || setEntry.setId || 'Unbekanntes Set');
     const summaryMeta = escapeLegacyImportSelectionHtml(setEntry.sheetName && setEntry.sheetName !== setEntry.setName
-      ? `${setEntry.sheetName} · ${setEntry.setId}`
+      ? `${setEntry.sheetName} - ${setEntry.setId}`
       : `Set-ID: ${setEntry.setId}`);
 
     return `
@@ -4294,13 +4531,13 @@ function renderLegacyImportSelectionDialog() {
           </div>
         </summary>
         <div class="legacy-tree-card-list" role="group">
-          ${cardsMarkup || '<p class="legacy-selection-empty">Keine Karten für diesen Filter.</p>'}
+          ${cardsMarkup || '<p class="legacy-selection-empty">Keine Karten fuer diesen Filter.</p>'}
         </div>
       </details>
     `;
   }).filter(Boolean).join('');
 
-  dom.legacySelectionTree.innerHTML = setMarkup || '<p class="legacy-selection-empty">Keine Sets oder Karten für diesen Filter gefunden.</p>';
+  dom.legacySelectionTree.innerHTML = setMarkup || '<p class="legacy-selection-empty">Keine Sets oder Karten fuer diesen Filter gefunden.</p>';
 
   dom.legacySelectionTree.querySelectorAll('.legacy-tree-set-toggle').forEach((checkbox) => {
     const setIndex = Number(checkbox.dataset.setIndex || '-1');
@@ -4424,7 +4661,7 @@ async function submitLegacySheetImportDialog() {
   const rawInput = String(dom.legacySheetInput?.value || '').trim();
   const spreadsheetId = extractLegacySpreadsheetId(rawInput);
   if (!spreadsheetId) {
-    setLegacySheetDialogError('Bitte einen gültigen Google-Sheets-Link oder eine Spreadsheet-ID eingeben.');
+    setLegacySheetDialogError('Bitte einen gueltigen Google-Sheets-Link oder eine Spreadsheet-ID eingeben.');
     dom.legacySheetInput?.focus();
     return;
   }
@@ -4442,7 +4679,7 @@ async function startLegacyWorkbookImport(source = {}) {
   const sourceLabel = String(source?.sourceLabel || (sourceFile ? 'XLSX' : 'Google Sheet')).trim();
   if (!sourceFile && !spreadsheetInput) return;
 
-  setLoading(true, 'Analysiere Altbestand…');
+  setLoading(true, 'Analysiere Altbestand...');
   try {
     let workbook;
     if (sourceFile) {
@@ -4453,10 +4690,10 @@ async function startLegacyWorkbookImport(source = {}) {
       } catch (err) {
         if (err?.code !== 'legacy-drive-export-scope-required') throw err;
 
-        setGlobalStatus('Altbestand-Import benötigt eine einmalige Google-Freigabe…');
-        const allowUpgrade = window.confirm('Damit der Sheets-Link exakt wie der XLSX-Import ausgewertet wird, braucht der Tracker einmalig zusätzliche Google-Drive-Leseberechtigung. Jetzt Google-Freigabe aktualisieren?');
+        setGlobalStatus('Altbestand-Import benoetigt eine einmalige Google-Freigabe');
+        const allowUpgrade = window.confirm('Damit der Sheets-Link exakt wie der XLSX-Import ausgewertet wird, braucht der Tracker einmalig zusaetzliche Google-Drive-Leseberechtigung. Jetzt Google-Freigabe aktualisieren?');
         if (!allowUpgrade) {
-          throw new Error('Google-Berechtigung für den direkten Sheets-Link-Import wurde nicht erteilt.');
+          throw new Error('Google-Berechtigung fuer den direkten Sheets-Link-Import wurde nicht erteilt.');
         }
 
         const reauthOk = await signIn({ forceConsent: true });
@@ -4480,16 +4717,16 @@ async function startLegacyWorkbookImport(source = {}) {
       });
       setGlobalStatus(`Altbestand blockiert: ${summary.unresolvedSheetCount} Set-, ${summary.unresolvedCardCount} Kartenkonflikte.`);
       window.alert(buildLegacyImportPreviewText(plan));
-      showToast(`Import blockiert: ${summary.unresolvedSheetCount} Set- und ${summary.unresolvedCardCount} Kartenkonflikte. Prüfbericht exportiert.`, 'error', 7000);
+      showToast(`Import blockiert: ${summary.unresolvedSheetCount} Set- und ${summary.unresolvedCardCount} Kartenkonflikte. Pruefbericht exportiert.`, 'error', 7000);
       return;
     }
 
     setLoading(false);
-    setGlobalStatus(`Altbestand analysiert: ${summary.sheetCount} Sets, ${summary.checkedCardCount} markierte Karten. Bitte Auswahl prüfen.`);
+    setGlobalStatus(`Altbestand analysiert: ${summary.sheetCount} Sets, ${summary.checkedCardCount} markierte Karten. Bitte Auswahl pruefen.`);
     const selectedPlan = await openLegacyImportSelectionDialog(plan, cardsBySetId);
     if (!selectedPlan) {
-      setGlobalStatus('Altbestand-Analyse abgeschlossen – Import nicht angewendet.');
-      showToast('Altbestand analysiert. Es wurden noch keine Änderungen geschrieben.', 'info', 4500);
+      setGlobalStatus('Altbestand-Analyse abgeschlossen - Import nicht angewendet.');
+      showToast('Altbestand analysiert. Es wurden noch keine aenderungen geschrieben.', 'info', 4500);
       return;
     }
 
@@ -4567,7 +4804,7 @@ async function reimportCurrentSetFromApi() {
     return;
   }
   const set = getSetById(state.currentSet.setId) || state.currentSet;
-  const ok = window.confirm(`Set „${set.setName}“ neu importieren? Vorhandene Sammel-Checks bleiben erhalten.`);
+  const ok = window.confirm(`Set "${set.setName}" neu importieren? Vorhandene Sammel-Checks bleiben erhalten.`);
   if (!ok) return;
 
   await importSetsSequential([set], { successMessage: 'Set erfolgreich reimportiert.' });
@@ -4585,11 +4822,13 @@ function openSettingsDialog() {
   });
 
   const dialog = document.createElement('dialog');
+  dialog.id = 'dialog-settings';
   dialog.className = 'ss-dialog';
   dialog.style.cssText = 'width: min(92vw, 760px); max-height: 88vh;';
-  dialog.innerHTML = '<h2>⚙️ Einstellungen</h2>';
+  dialog.innerHTML = '<h2>Einstellungen</h2>';
   dialog.appendChild(settingsPanel);
   document.body.appendChild(dialog);
+  closeOtherOpenDialogs([dialog]);
   dialog.showModal();
   dialog.addEventListener('close', () => dialog.remove());
 }
@@ -4652,7 +4891,7 @@ function initDashboardControls() {
   dom.btnQueueAutofixRefresh?.addEventListener('click', () => {
     enqueueAction('Datencheck + Auto-Fix', () => runDataHealthCheck({ autoFix: true }));
     enqueueAction('Power-Refresh Overview', () => powerRefreshOverviewFromApi());
-    showToast('Queue-Preset hinzugefügt (Auto-Fix → Refresh).', 'info', 3000);
+    showToast('Queue-Preset hinzugefuegt (Auto-Fix ? Refresh).', 'info', 3000);
   });
   dom.btnQueueRun?.addEventListener('click', runQueuedActions);
   dom.btnQueueClear?.addEventListener('click', clearQueuedActions);
@@ -4665,15 +4904,15 @@ function initDashboardControls() {
     }
     if (!state.activeJob && !state.queueRunning) return;
     if (dom.btnJobCancel) dom.btnJobCancel.disabled = true;
-    if (dom.jobStatusText) dom.jobStatusText.textContent = 'Abbruch angefordert…';
+    if (dom.jobStatusText) dom.jobStatusText.textContent = 'Abbruch angefordert...';
   });
 
   updateQueueUiState();
 }
 
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 // STATISTIKEN
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 async function renderStats() {
   dom.statsContent.innerHTML = '<p class="loading-placeholder">Lade Statistiken\u2026</p>';
   try {
@@ -4798,13 +5037,13 @@ async function renderStats() {
         <div class="stats-hero-copy">
           <span class="stats-eyebrow">SAMMLUNGSPULS</span>
           <span class="stats-hero-badge">${collectionPhase}</span>
-          <h3>Deine Collection wirkt jetzt wie ein echtes Langzeitprojekt – <strong>${formatNumber(totalCollected)}</strong> von <strong>${formatNumber(totalCards)}</strong> Karten sind bereits gesichert.</h3>
+          <h3>Deine Collection wirkt jetzt wie ein echtes Langzeitprojekt - <strong>${formatNumber(totalCollected)}</strong> von <strong>${formatNumber(totalCards)}</strong> Karten sind bereits gesichert.</h3>
           <p>${overallPct}% Gesamtfortschritt, ${completedSets} ${completedSets === 1 ? 'komplettes Set' : 'komplette Sets'}, ${formatNumber(totalRh)} Reverse Holos und ${activeSets} aktive Sets machen aus der Statistik endlich eine richtige Trophäenwand.</p>
           <div class="stats-pill-row">
-            <span class="stats-pill primary">📦 ${formatNumber(data.length)} importierte Sets</span>
-            <span class="stats-pill success">🏆 ${completedSets} komplett</span>
-            <span class="stats-pill">✨ Ø ${averageSetCompletion}% pro Set</span>
-            ${nextMilestone ? `<span class="stats-pill warning">🎯 Noch ${formatNumber(cardsToNextMilestone)} Karten bis ${nextMilestone}%</span>` : '<span class="stats-pill success">✅ 100% erreicht</span>'}
+            <span class="stats-pill primary">${formatNumber(data.length)} importierte Sets</span>
+            <span class="stats-pill success">${completedSets} komplett</span>
+            <span class="stats-pill">Ø ${averageSetCompletion}% pro Set</span>
+            ${nextMilestone ? `<span class="stats-pill warning">Noch ${formatNumber(cardsToNextMilestone)} Karten bis ${nextMilestone}%</span>` : '<span class="stats-pill success">100% erreicht</span>'}
           </div>
         </div>
         <div class="stats-hero-meter">
@@ -4844,7 +5083,7 @@ async function renderStats() {
         </article>
         <article class="stat-card">
           <span class="stat-card-value">${averageSetCompletion}%</span>
-          <span class="stat-card-label">Ø Set-Fortschritt</span>
+          <span class="stat-card-label">Set-Fortschritt</span>
           <span class="stat-card-meta">${formatNumber(missingCards)} Karten bis 100%</span>
         </article>
         <article class="stat-card">
@@ -4859,9 +5098,9 @@ async function renderStats() {
           <div class="stats-section-kicker">Highlights</div>
           <h3>Was gerade am meisten glänzt</h3>
           <ul class="stats-insight-list">
-            <li><span>Bestes Set</span><strong>${leadingSet ? `${leadingSet.setName} · ${getSetPct(leadingSet)}%` : '—'}</strong></li>
-            <li><span>Stärkste Serie</span><strong>${topSeriesEntry ? `${getStatsSeriesLabel(topSeriesEntry[0], topSeriesEntry[1])} · ${Math.round((topSeriesEntry[1].collected / Math.max(1, topSeriesEntry[1].total)) * 100)}%` : '—'}</strong></li>
-            <li><span>Größter Kartenblock</span><strong>${largestSeriesEntry ? `${getStatsSeriesLabel(largestSeriesEntry[0], largestSeriesEntry[1])} · ${formatNumber(largestSeriesEntry[1].collected)} Karten` : '—'}</strong></li>
+            <li><span>Bestes Set</span><strong>${leadingSet ? `${leadingSet.setName} - ${getSetPct(leadingSet)}%` : '-'}</strong></li>
+            <li><span>Stärkste Serie</span><strong>${topSeriesEntry ? `${getStatsSeriesLabel(topSeriesEntry[0], topSeriesEntry[1])} - ${Math.round((topSeriesEntry[1].collected / Math.max(1, topSeriesEntry[1].total)) * 100)}%` : '-'}</strong></li>
+            <li><span>Größter Kartenblock</span><strong>${largestSeriesEntry ? `${getStatsSeriesLabel(largestSeriesEntry[0], largestSeriesEntry[1])} - ${formatNumber(largestSeriesEntry[1].collected)} Karten` : '-'}</strong></li>
           </ul>
         </section>
 
@@ -4876,7 +5115,7 @@ async function renderStats() {
                   <span>${formatNumber((row.total || 0) - (row.collected || 0))} fehlen</span>
                 </div>
                 <div class="stats-mini-track"><div class="stats-mini-fill" style="width:${getSetPct(row)}%"></div></div>
-                <small>${formatNumber(row.collected || 0)}/${formatNumber(row.total || 0)} · ${getSetPct(row)}%</small>
+                <small>${formatNumber(row.collected || 0)}/${formatNumber(row.total || 0)} - ${getSetPct(row)}%</small>
               </article>
             `).join('') : '<p class="stats-empty-note">Sobald ein Set kurz vor dem Abschluss steht, erscheint es hier.</p>'}
           </div>
@@ -4888,7 +5127,7 @@ async function renderStats() {
           <ul class="stats-insight-list compact">
             <li><span>Bis 100%</span><strong>${formatNumber(missingCards)} Karten</strong></li>
             <li><span>${nextMilestone ? `Bis ${nextMilestone}%` : 'Status'}</span><strong>${nextMilestone ? `${formatNumber(cardsToNextMilestone)} Karten` : 'Meilenstein erreicht'}</strong></li>
-            <li><span>Größte Baustelle</span><strong>${top5Missing[0] ? `${top5Missing[0].setName} · ${formatNumber((top5Missing[0].total || 0) - (top5Missing[0].collected || 0))} fehlend` : 'Keine offenen Baustellen'}</strong></li>
+            <li><span>Größte Baustelle</span><strong>${top5Missing[0] ? `${top5Missing[0].setName} - ${formatNumber((top5Missing[0].total || 0) - (top5Missing[0].collected || 0))} fehlend` : 'Keine offenen Baustellen'}</strong></li>
           </ul>
         </section>
       </div>
@@ -4906,11 +5145,13 @@ async function renderStats() {
         </div>
       </section>
 
+      <section id="stats-price-analytics" class="stats-price-panel-shell" data-state="loading" aria-live="polite"></section>
+
       <div class="stats-charts-row">
         <div class="stats-chart-wrap">
           <div class="stats-section-kicker">Visualisierung</div>
           <h3>Gesamtfortschritt</h3>
-          <p>Gesammelt gegen fehlend – als schneller Blick auf den gesamten Binder.</p>
+          <p>Gesammelt gegen fehlend - als schneller Blick auf den gesamten Binder.</p>
           <canvas id="chart-overall" height="220"></canvas>
         </div>
         <div class="stats-chart-wrap">
@@ -4956,15 +5197,1028 @@ async function renderStats() {
 
     initStatsCharts(totalCollected, totalCards, seriesMap);
     initStatsDrillDown();
+    const statsPriceRequestId = `stats-price-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+    renderStatsPriceLoading({ requestId: statsPriceRequestId, loadedCards: 0, totalCards: 0 });
+    loadStatsPriceAnalyticsLazy({ requestId: statsPriceRequestId })
+      .catch((error) => {
+        if (state.statsPrice.requestId !== statsPriceRequestId) return;
+        renderStatsPriceError(error?.message || 'Preisanalysen konnten nicht geladen werden.');
+      });
   } catch (err) {
     console.error('[renderStats]', err);
     dom.statsContent.innerHTML = `<p class="empty-state">\u2715 Fehler beim Laden der Statistiken</p>`;
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════
+function getStatsPriceContainer() {
+  return dom.statsContent?.querySelector('#stats-price-analytics') || null;
+}
+
+function formatStatsPriceEuro(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric) || numeric <= 0) return 'n/a';
+  return `${numeric.toFixed(2).replace('.', ',')} EUR`;
+}
+
+function formatStatsPriceNumber(value) {
+  return Number(value || 0).toLocaleString('de-DE');
+}
+
+const STATS_PRICE_TABS = [
+  { id: 'dashboard', label: 'Dashboard' },
+  { id: 'top-values', label: 'Top-Werte' },
+  { id: 'trends', label: 'Trends' },
+  { id: 'comparisons', label: 'Vergleiche' },
+  { id: 'advanced', label: 'Advanced' },
+  { id: 'watchlist', label: 'Watchlist' },
+  { id: 'timeline', label: 'Timeline/Story' },
+  { id: 'drilldown', label: 'Fehler-Drilldown' },
+];
+
+function escapeHtml(value = '') {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function getStatsPriceTimeline(analytics = null, { loadedCards = 0, totalCards = 0, errors = 0 } = {}) {
+  const collectedCards = Number(analytics?.collectedCards || 0);
+  const pricedCards = Number(analytics?.pricedCollectedCards || 0);
+  const coverage = Number(analytics?.priceCoverage || 0);
+  const topSet = analytics?.topSet;
+  const topCard = Array.isArray(analytics?.topCards) ? analytics.topCards[0] : null;
+  const milestones = [
+    {
+      title: 'Scanner gestartet',
+      detail: totalCards > 0
+        ? `${formatStatsPriceNumber(totalCards)} gesammelte Karten in der Analyse-Pipeline.`
+        : 'Sammlung wird für den Preisradar vorbereitet.',
+      tone: 'cold',
+    },
+    {
+      title: 'Bewertungsquote',
+      detail: `${Math.round(coverage)}% bewertet (${formatStatsPriceNumber(pricedCards)} von ${formatStatsPriceNumber(collectedCards)}).`,
+      tone: coverage >= 90 ? 'hot' : coverage >= 60 ? 'warm' : 'cold',
+    },
+    {
+      title: 'Stärkstes Set',
+      detail: topSet
+        ? `${topSet.setName} führt mit ${formatStatsPriceEuro(topSet.value)} bei ${formatStatsPriceNumber(topSet.pricedCards)} Karten.`
+        : 'Noch kein Set mit Preisdominanz ermittelt.',
+      tone: topSet ? 'hot' : 'cold',
+    },
+    {
+      title: 'Headline-Karte',
+      detail: topCard
+        ? `${topCard.cardName} (${topCard.setName}) markiert aktuell ${formatStatsPriceEuro(topCard.value)}.`
+        : 'Es wurden noch keine Karten mit belastbaren Preisen gefunden.',
+      tone: topCard ? 'warm' : 'cold',
+    },
+    {
+      title: 'Qualitätssignal',
+      detail: errors > 0
+        ? `${formatStatsPriceNumber(errors)} Lookup-Fehler in der letzten Analyse entdeckt.`
+        : 'Keine Lookup-Fehler - verbleibende Lücken sind fachliche Zuordnungsthemen.',
+      tone: errors > 0 ? 'alert' : 'calm',
+    },
+    {
+      title: 'Pipeline-Status',
+      detail: totalCards > 0
+        ? `${formatStatsPriceNumber(loadedCards)} von ${formatStatsPriceNumber(totalCards)} Karten wurden verarbeitet.`
+        : 'Warte auf neue Preisläufe.',
+      tone: loadedCards >= totalCards && totalCards > 0 ? 'hot' : 'warm',
+    },
+  ];
+
+  return milestones;
+}
+
+function toFinitePositive(value) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
+}
+
+function getValueBandKey(value) {
+  const numeric = toFinitePositive(value);
+  if (numeric == null) return 'missing';
+  if (numeric < 1) return 'under1';
+  if (numeric < 5) return 'from1to5';
+  if (numeric < 20) return 'from5to20';
+  return 'over20';
+}
+
+function getValueBandLabel(valueBand) {
+  if (valueBand === 'under1') return '< 1 EUR';
+  if (valueBand === 'from1to5') return '1-5 EUR';
+  if (valueBand === 'from5to20') return '5-20 EUR';
+  if (valueBand === 'over20') return '> 20 EUR';
+  return 'Ohne Preis';
+}
+
+function normalizeAdvancedFilters(filters = {}) {
+  const source = filters && typeof filters === 'object' ? filters : {};
+  return {
+    setId: String(source.setId || 'all'),
+    valueBand: String(source.valueBand || 'all'),
+    quantile: String(source.quantile || 'all'),
+    quality: String(source.quality || 'all'),
+    sortBy: String(source.sortBy || 'value-desc'),
+    groupBy: String(source.groupBy || 'set'),
+  };
+}
+
+function matchesQuantileBucket(percentile = 0, quantile = 'all') {
+  if (quantile === 'all') return true;
+  if (quantile === 'top1') return percentile <= 1;
+  if (quantile === 'top5') return percentile <= 5;
+  if (quantile === 'top10') return percentile <= 10;
+  if (quantile === 'bottom20') return percentile > 80;
+  return true;
+}
+
+function computeAdvancedWorkspace(items = [], filters = {}) {
+  const safeItems = Array.isArray(items) ? items : [];
+  const normalizedFilters = normalizeAdvancedFilters(filters);
+
+  const withIds = safeItems.map((item, index) => ({
+    ...item,
+    __advancedId: String(item?.cardKey || `${item?.setId || 'unknown'}::${item?.cardName || 'card'}::${index}`),
+  }));
+
+  const pricedSorted = withIds
+    .filter((item) => toFinitePositive(item?.value) != null)
+    .sort((a, b) => Number(b?.value || 0) - Number(a?.value || 0));
+
+  const quantileById = new Map();
+  pricedSorted.forEach((item, index) => {
+    const pct = ((index + 1) / Math.max(1, pricedSorted.length)) * 100;
+    quantileById.set(item.__advancedId, pct);
+  });
+
+  const filteredItems = withIds.filter((item) => {
+    const setId = String(item?.setId || '').trim();
+    const value = toFinitePositive(item?.value);
+    const valueBand = getValueBandKey(value);
+    const percentile = quantileById.get(item.__advancedId) || 100;
+
+    if (normalizedFilters.setId !== 'all' && setId !== normalizedFilters.setId) return false;
+    if (normalizedFilters.quality === 'priced-only' && value == null) return false;
+    if (normalizedFilters.quality === 'missing-only' && value != null) return false;
+    if (normalizedFilters.quality === 'failed-only' && !item?.failed) return false;
+    if (normalizedFilters.valueBand !== 'all' && normalizedFilters.valueBand !== valueBand) return false;
+    if (!matchesQuantileBucket(percentile, normalizedFilters.quantile)) return false;
+
+    return true;
+  });
+
+  const byGroup = new Map();
+  const getGroupKeyAndLabel = (item) => {
+    if (normalizedFilters.groupBy === 'value-band') {
+      const band = getValueBandKey(item?.value);
+      return { key: `band:${band}`, label: getValueBandLabel(band) };
+    }
+    if (normalizedFilters.groupBy === 'quantile') {
+      const percentile = quantileById.get(item.__advancedId) || 100;
+      const label = percentile <= 1
+        ? 'Top 1%'
+        : percentile <= 5
+          ? 'Top 5%'
+          : percentile <= 10
+            ? 'Top 10%'
+            : percentile > 80
+              ? 'Bottom 20%'
+              : 'Mittelbereich';
+      return { key: `quantile:${label}`, label };
+    }
+    const setId = String(item?.setId || '').trim();
+    const setName = String(item?.setName || '').trim() || 'Unbekanntes Set';
+    return { key: `set:${setId || setName}`, label: setName, setId };
+  };
+
+  filteredItems.forEach((item) => {
+    const grouping = getGroupKeyAndLabel(item);
+    if (!byGroup.has(grouping.key)) {
+      byGroup.set(grouping.key, {
+        key: grouping.key,
+        label: grouping.label,
+        setId: grouping.setId || '',
+        totalValue: 0,
+        pricedCount: 0,
+        missingCount: 0,
+        failedCount: 0,
+        items: [],
+      });
+    }
+    const group = byGroup.get(grouping.key);
+    const value = toFinitePositive(item?.value);
+    group.items.push(item);
+    if (value != null) {
+      group.totalValue += value;
+      group.pricedCount += 1;
+    } else {
+      group.missingCount += 1;
+    }
+    if (item?.failed) group.failedCount += 1;
+  });
+
+  const groups = Array.from(byGroup.values());
+  const sortBy = normalizedFilters.sortBy;
+  groups.sort((a, b) => {
+    if (sortBy === 'value-asc') return a.totalValue - b.totalValue;
+    if (sortBy === 'count-desc') return b.items.length - a.items.length;
+    if (sortBy === 'gap-desc') return (b.missingCount - b.pricedCount) - (a.missingCount - a.pricedCount);
+    return b.totalValue - a.totalValue;
+  });
+
+  const filteredPriced = filteredItems.filter((item) => toFinitePositive(item?.value) != null);
+  const setIds = new Set(filteredItems.map((item) => String(item?.setId || '').trim()).filter(Boolean));
+
+  return {
+    filters: normalizedFilters,
+    groups,
+    summary: {
+      cards: filteredItems.length,
+      pricedCards: filteredPriced.length,
+      missingCards: filteredItems.length - filteredPriced.length,
+      setCount: setIds.size,
+    },
+  };
+}
+
+function buildStatsPriceTabContent({
+  activeTab = 'dashboard',
+  analytics = null,
+  status = 'loading',
+  loadedCards = 0,
+  totalCards = 0,
+  errors = 0,
+  message = '',
+} = {}) {
+  const safeItems = Array.isArray(state.statsPrice.items) ? state.statsPrice.items : [];
+  const advancedState = state.statsPrice.advanced || (state.statsPrice.advanced = {
+    filters: normalizeAdvancedFilters(),
+    selectedGroupKey: '',
+    detailMode: 'summary',
+  });
+  advancedState.filters = normalizeAdvancedFilters(advancedState.filters);
+  advancedState.detailMode = String(advancedState.detailMode || 'summary');
+
+  const pricedItems = safeItems.filter((item) => Number(item?.value) > 0);
+  const missingItems = safeItems.filter((item) => item?.value == null);
+  const bySet = Array.isArray(analytics?.setBreakdown) ? analytics.setBreakdown : [];
+  const topCards = Array.isArray(analytics?.topCards) ? analytics.topCards : [];
+  const coverage = Number(analytics?.priceCoverage || 0);
+  const avgValue = Number(analytics?.avgCollectedCardValue || 0);
+  const detailStats = analytics?.details || {};
+  const medianValue = Number(detailStats?.medianValue || 0);
+  const p90Value = Number(detailStats?.p90Value || 0);
+  const topFiveShare = Number(detailStats?.topFiveValueShare || 0);
+  const pricedSetCoverage = Number(detailStats?.pricedSetCoverage || 0);
+  const spreadRatio = Number(detailStats?.priceSpreadRatio || 0);
+  const watchlistItems = pricedItems
+    .filter((item) => Number(item?.value) >= Math.max(avgValue * 1.8, 20))
+    .sort((a, b) => Number(b?.value || 0) - Number(a?.value || 0))
+    .slice(0, 24);
+  const advancedWorkspace = computeAdvancedWorkspace(safeItems, advancedState.filters);
+  const advancedGroups = advancedWorkspace.groups;
+  if (!advancedGroups.some((group) => group.key === advancedState.selectedGroupKey)) {
+    advancedState.selectedGroupKey = advancedGroups[0]?.key || '';
+  }
+  const activeAdvancedGroup = advancedGroups.find((group) => group.key === advancedState.selectedGroupKey) || null;
+
+  const tabsMarkup = STATS_PRICE_TABS.map((tab) => `
+    <button class="stats-price-tab-btn ${tab.id === activeTab ? 'is-active' : ''}" type="button" data-stats-price-tab="${tab.id}">
+      ${escapeHtml(tab.label)}
+    </button>`).join('');
+
+  const chartRows = bySet.slice(0, 8).map((entry, index) => {
+    const setId = String(entry?.setId || '').trim();
+    const pct = Math.max(2, Math.round((Number(entry?.value || 0) / Math.max(1, Number(analytics?.totalValue || 1))) * 100));
+    return `
+      <li class="stats-price-compare-row" data-set-id="${escapeHtml(setId)}">
+        <span class="stats-price-compare-rank">${index + 1}</span>
+        <div class="stats-price-compare-main">
+          <strong>${escapeHtml(entry?.setName || 'Unbekanntes Set')}</strong>
+          <small>${formatStatsPriceNumber(entry?.pricedCards)} bewertet</small>
+        </div>
+        <div class="stats-price-compare-bar"><span style="width:${pct}%"></span></div>
+        <strong class="stats-price-compare-value">${formatStatsPriceEuro(entry?.value)}</strong>
+      </li>`;
+  }).join('');
+
+  const drilldownBySet = missingItems.reduce((acc, item) => {
+    const key = String(item?.setId || '').trim() || 'unknown';
+    if (!acc.has(key)) {
+      acc.set(key, {
+        setId: key,
+        setName: String(item?.setName || 'Unbekanntes Set').trim(),
+        items: [],
+      });
+    }
+    acc.get(key).items.push(item);
+    return acc;
+  }, new Map());
+
+  const drilldownMarkup = Array.from(drilldownBySet.values())
+    .sort((a, b) => b.items.length - a.items.length)
+    .map((group) => `
+      <details class="stats-price-drill-group">
+        <summary>
+          <strong>${escapeHtml(group.setName)}</strong>
+          <small>${formatStatsPriceNumber(group.items.length)} ohne Preis</small>
+        </summary>
+        <ul class="stats-price-drill-list">
+          ${group.items
+            .slice(0, 120)
+            .map((item) => `
+              <li class="stats-price-drill-item" data-set-id="${escapeHtml(item?.setId || '')}">
+                <span class="stats-price-drill-number">${escapeHtml(item?.card?.number || item?.cardName || item?.cardKey || '')}</span>
+                <strong>${escapeHtml(item?.cardName || item?.card?.name || 'Unbekannte Karte')}</strong>
+                <small>${item?.failed ? 'Lookup-Fehler' : 'Kein Mapping-Eintrag'}</small>
+              </li>
+            `)
+            .join('')}
+        </ul>
+      </details>
+    `)
+    .join('');
+
+  const timelineMarkup = getStatsPriceTimeline(analytics, { loadedCards, totalCards, errors })
+    .map((step, index) => `
+      <li class="stats-price-story-item tone-${escapeHtml(step.tone)}">
+        <span class="stats-price-story-dot">${index + 1}</span>
+        <div>
+          <strong>${escapeHtml(step.title)}</strong>
+          <p>${escapeHtml(step.detail)}</p>
+        </div>
+      </li>
+    `)
+    .join('');
+
+  const dashboardHighlights = `
+    <section class="stats-price-tab-panel is-visible" data-tab-panel="dashboard">
+      <div class="stats-price-panel-grid">
+        <article class="stats-price-surface-card">
+          <h4>Werttreiber</h4>
+          <p>${analytics?.topSet ? `${escapeHtml(analytics.topSet.setName)} bleibt mit ${formatStatsPriceEuro(analytics.topSet.value)} dein stärkster Block.` : 'Noch kein Werttreiber erkannt.'}</p>
+        </article>
+        <article class="stats-price-surface-card">
+          <h4>Momentum</h4>
+          <p>${Math.round(coverage)}% Preisabdeckung, ${formatStatsPriceNumber(missingItems.length)} offene Lücken und ${formatStatsPriceNumber(errors)} technische Fehler.</p>
+        </article>
+        <article class="stats-price-surface-card">
+          <h4>Detail-Signal</h4>
+          <p>${pricedItems.length > 0
+      ? `Median ${formatStatsPriceEuro(medianValue)} · P90 ${formatStatsPriceEuro(p90Value)} · Top-5 tragen ${Math.round(topFiveShare)}% vom Wert.`
+      : 'Sobald High-Value-Karten erkannt werden, erscheint hier eine Prioritätenliste.'}</p>
+        </article>
+      </div>
+    </section>`;
+
+  const topValuesMarkup = `
+    <section class="stats-price-tab-panel" data-tab-panel="top-values">
+      <ol class="stats-price-rich-list">
+        ${topCards
+          .slice(0, 20)
+          .map((card, index) => `
+            <li class="stats-price-rich-item" data-set-id="${escapeHtml(card?.setId || '')}">
+              <span class="stats-price-rich-rank">${index + 1}</span>
+              <div class="stats-price-rich-main">
+                <strong>${escapeHtml(card?.cardName || 'Unbekannte Karte')}</strong>
+                <small>${escapeHtml(card?.setName || 'Unbekanntes Set')}</small>
+              </div>
+              <strong class="stats-price-rich-value">${formatStatsPriceEuro(card?.value)}</strong>
+            </li>
+          `)
+          .join('') || '<li class="stats-price-empty">Noch keine Top-Werte verfügbar.</li>'}
+      </ol>
+    </section>`;
+
+  const trendsMarkup = `
+    <section class="stats-price-tab-panel" data-tab-panel="trends">
+      <div class="stats-price-trend-grid">
+        <article class="stats-price-surface-card">
+          <h4>Preisabdeckung</h4>
+          <p>${Math.round(coverage)}% der gesammelten Karten sind bepreist.</p>
+        </article>
+        <article class="stats-price-surface-card">
+          <h4>Preis-Mitte</h4>
+          <p>Durchschnitt aktuell ${formatStatsPriceEuro(avgValue)} pro bewerteter Karte.</p>
+        </article>
+        <article class="stats-price-surface-card">
+          <h4>Volatilität</h4>
+          <p>${topCards.length > 0 ? `Spanne: ${formatStatsPriceEuro(detailStats?.minValue)} bis ${formatStatsPriceEuro(detailStats?.maxValue)} (x${spreadRatio > 0 ? spreadRatio.toFixed(1).replace('.', ',') : '0,0'}).` : 'Noch keine Daten für Volatilität.'}</p>
+        </article>
+        <article class="stats-price-surface-card">
+          <h4>Set-Abdeckung</h4>
+          <p>${Math.round(pricedSetCoverage)}% der Sets haben mindestens eine bewertete Karte.</p>
+        </article>
+      </div>
+    </section>`;
+
+  const comparisonsMarkup = `
+    <section class="stats-price-tab-panel" data-tab-panel="comparisons">
+      <ul class="stats-price-compare-list">
+        ${chartRows || '<li class="stats-price-empty">Noch keine Set-Vergleiche verfügbar.</li>'}
+      </ul>
+    </section>`;
+
+  const watchlistMarkup = `
+    <section class="stats-price-tab-panel" data-tab-panel="watchlist">
+      <ol class="stats-price-rich-list">
+        ${watchlistItems
+          .map((item, index) => `
+            <li class="stats-price-rich-item" data-set-id="${escapeHtml(item?.setId || '')}">
+              <span class="stats-price-rich-rank">${index + 1}</span>
+              <div class="stats-price-rich-main">
+                <strong>${escapeHtml(item?.cardName || 'Unbekannte Karte')}</strong>
+                <small>${escapeHtml(item?.setName || 'Unbekanntes Set')}</small>
+              </div>
+              <strong class="stats-price-rich-value">${formatStatsPriceEuro(item?.value)}</strong>
+            </li>
+          `)
+          .join('') || '<li class="stats-price-empty">Noch keine Watchlist-Kandidaten erkannt.</li>'}
+      </ol>
+    </section>`;
+
+  const advancedGroupsMarkup = advancedGroups
+    .map((group) => {
+      const isActive = group.key === advancedState.selectedGroupKey;
+      return `
+          <li class="stats-price-advanced-group ${isActive ? 'is-active' : ''}" data-advanced-group-key="${escapeHtml(group.key)}" ${group.setId ? `data-set-id="${escapeHtml(group.setId)}"` : ''}>
+            <div class="stats-price-advanced-group-main">
+              <strong>${escapeHtml(group.label)}</strong>
+              <small>${formatStatsPriceNumber(group.items.length)} Karten · ${formatStatsPriceNumber(group.pricedCount)} bepreist · ${formatStatsPriceNumber(group.missingCount)} ohne Preis</small>
+            </div>
+            <strong class="stats-price-advanced-group-value">${formatStatsPriceEuro(group.totalValue)}</strong>
+          </li>`;
+    })
+    .join('');
+
+  const advancedDetailMode = advancedState.detailMode;
+  const activeGroupItems = Array.isArray(activeAdvancedGroup?.items) ? activeAdvancedGroup.items : [];
+  const activeGroupPriced = activeGroupItems.filter((item) => toFinitePositive(item?.value) != null);
+  const activeGroupMissing = activeGroupItems.filter((item) => toFinitePositive(item?.value) == null);
+
+  const advancedDetailSummaryMarkup = `
+      <div class="stats-price-advanced-summary-grid">
+        <article class="stats-price-surface-card">
+          <h4>Gruppe</h4>
+          <p>${activeAdvancedGroup ? `${escapeHtml(activeAdvancedGroup.label)} mit ${formatStatsPriceNumber(activeGroupItems.length)} Karten.` : 'Keine Gruppe ausgewählt.'}</p>
+        </article>
+        <article class="stats-price-surface-card">
+          <h4>Wert</h4>
+          <p>${activeAdvancedGroup ? `${formatStatsPriceEuro(activeAdvancedGroup.totalValue)} Gesamtwert bei ${formatStatsPriceNumber(activeAdvancedGroup.pricedCount)} bewerteten Karten.` : 'n/a'}</p>
+        </article>
+        <article class="stats-price-surface-card">
+          <h4>Risiko</h4>
+          <p>${activeAdvancedGroup ? `${formatStatsPriceNumber(activeAdvancedGroup.missingCount)} unbewertete Karten, ${formatStatsPriceNumber(activeAdvancedGroup.failedCount)} technische Fehler.` : 'n/a'}</p>
+        </article>
+      </div>`;
+
+  const advancedDetailTopMarkup = `
+      <ol class="stats-price-rich-list">
+        ${activeGroupPriced
+      .slice()
+      .sort((a, b) => Number(b?.value || 0) - Number(a?.value || 0))
+      .slice(0, 20)
+      .map((item, index) => `
+            <li class="stats-price-rich-item" ${item?.setId ? `data-set-id="${escapeHtml(item.setId)}"` : ''}>
+              <span class="stats-price-rich-rank">${index + 1}</span>
+              <div class="stats-price-rich-main">
+                <strong>${escapeHtml(item?.cardName || item?.card?.name || 'Unbekannte Karte')}</strong>
+                <small>${escapeHtml(item?.setName || 'Unbekanntes Set')}</small>
+              </div>
+              <strong class="stats-price-rich-value">${formatStatsPriceEuro(item?.value)}</strong>
+            </li>
+          `)
+      .join('') || '<li class="stats-price-empty">Keine bepreisten Karten in dieser Auswahl.</li>'}
+      </ol>`;
+
+  const advancedDetailMissingMarkup = `
+      <ul class="stats-price-drill-list">
+        ${activeGroupMissing
+      .slice(0, 60)
+      .map((item) => `
+            <li class="stats-price-drill-item" ${item?.setId ? `data-set-id="${escapeHtml(item.setId)}"` : ''}>
+              <span class="stats-price-drill-number">${escapeHtml(item?.card?.number || item?.cardKey || '')}</span>
+              <strong>${escapeHtml(item?.cardName || item?.card?.name || 'Unbekannte Karte')}</strong>
+              <small>${item?.failed ? 'Lookup-Fehler' : 'Kein Preis-Mapping'}</small>
+            </li>
+          `)
+      .join('') || '<li class="stats-price-empty">Keine Missing-Items in dieser Auswahl.</li>'}
+      </ul>`;
+
+  const advancedDistributionByBand = activeGroupItems.reduce((acc, item) => {
+    const band = getValueBandKey(item?.value);
+    acc.set(band, (acc.get(band) || 0) + 1);
+    return acc;
+  }, new Map());
+  const advancedDetailDistributionMarkup = `
+      <ul class="stats-price-advanced-distribution">
+        ${['under1', 'from1to5', 'from5to20', 'over20', 'missing'].map((band) => `
+          <li>
+            <span>${getValueBandLabel(band)}</span>
+            <strong>${formatStatsPriceNumber(advancedDistributionByBand.get(band) || 0)}</strong>
+          </li>
+        `).join('')}
+      </ul>`;
+
+  let advancedDetailContent = advancedDetailSummaryMarkup;
+  if (advancedDetailMode === 'top') advancedDetailContent = advancedDetailTopMarkup;
+  if (advancedDetailMode === 'missing') advancedDetailContent = advancedDetailMissingMarkup;
+  if (advancedDetailMode === 'distribution') advancedDetailContent = advancedDetailDistributionMarkup;
+
+  const advancedMarkup = `
+    <section class="stats-price-tab-panel" data-tab-panel="advanced">
+      <div class="stats-price-advanced-toolbar">
+        <label>Set
+          <select data-advanced-filter="setId">
+            <option value="all" ${advancedWorkspace.filters.setId === 'all' ? 'selected' : ''}>Alle Sets</option>
+            ${Array.from(new Map(bySet.map((entry) => [String(entry?.setId || '').trim(), entry])).values())
+      .filter((entry) => String(entry?.setId || '').trim())
+      .map((entry) => `<option value="${escapeHtml(entry.setId)}" ${advancedWorkspace.filters.setId === String(entry.setId) ? 'selected' : ''}>${escapeHtml(entry.setName || entry.setId)}</option>`)
+      .join('')}
+          </select>
+        </label>
+        <label>Preisband
+          <select data-advanced-filter="valueBand">
+            <option value="all" ${advancedWorkspace.filters.valueBand === 'all' ? 'selected' : ''}>Alle</option>
+            <option value="under1" ${advancedWorkspace.filters.valueBand === 'under1' ? 'selected' : ''}>&lt; 1 EUR</option>
+            <option value="from1to5" ${advancedWorkspace.filters.valueBand === 'from1to5' ? 'selected' : ''}>1-5 EUR</option>
+            <option value="from5to20" ${advancedWorkspace.filters.valueBand === 'from5to20' ? 'selected' : ''}>5-20 EUR</option>
+            <option value="over20" ${advancedWorkspace.filters.valueBand === 'over20' ? 'selected' : ''}>&gt; 20 EUR</option>
+            <option value="missing" ${advancedWorkspace.filters.valueBand === 'missing' ? 'selected' : ''}>Ohne Preis</option>
+          </select>
+        </label>
+        <label>Quantil
+          <select data-advanced-filter="quantile">
+            <option value="all" ${advancedWorkspace.filters.quantile === 'all' ? 'selected' : ''}>Alle</option>
+            <option value="top1" ${advancedWorkspace.filters.quantile === 'top1' ? 'selected' : ''}>Top 1%</option>
+            <option value="top5" ${advancedWorkspace.filters.quantile === 'top5' ? 'selected' : ''}>Top 5%</option>
+            <option value="top10" ${advancedWorkspace.filters.quantile === 'top10' ? 'selected' : ''}>Top 10%</option>
+            <option value="bottom20" ${advancedWorkspace.filters.quantile === 'bottom20' ? 'selected' : ''}>Bottom 20%</option>
+          </select>
+        </label>
+        <label>Qualität
+          <select data-advanced-filter="quality">
+            <option value="all" ${advancedWorkspace.filters.quality === 'all' ? 'selected' : ''}>Alles</option>
+            <option value="priced-only" ${advancedWorkspace.filters.quality === 'priced-only' ? 'selected' : ''}>Nur bepreist</option>
+            <option value="missing-only" ${advancedWorkspace.filters.quality === 'missing-only' ? 'selected' : ''}>Nur fehlende Preise</option>
+            <option value="failed-only" ${advancedWorkspace.filters.quality === 'failed-only' ? 'selected' : ''}>Nur Lookup-Fehler</option>
+          </select>
+        </label>
+        <label>Gruppierung
+          <select data-advanced-filter="groupBy">
+            <option value="set" ${advancedWorkspace.filters.groupBy === 'set' ? 'selected' : ''}>Nach Set</option>
+            <option value="value-band" ${advancedWorkspace.filters.groupBy === 'value-band' ? 'selected' : ''}>Nach Preisband</option>
+            <option value="quantile" ${advancedWorkspace.filters.groupBy === 'quantile' ? 'selected' : ''}>Nach Quantil</option>
+          </select>
+        </label>
+        <label>Sortierung
+          <select data-advanced-filter="sortBy">
+            <option value="value-desc" ${advancedWorkspace.filters.sortBy === 'value-desc' ? 'selected' : ''}>Wert absteigend</option>
+            <option value="value-asc" ${advancedWorkspace.filters.sortBy === 'value-asc' ? 'selected' : ''}>Wert aufsteigend</option>
+            <option value="count-desc" ${advancedWorkspace.filters.sortBy === 'count-desc' ? 'selected' : ''}>Kartenanzahl</option>
+            <option value="gap-desc" ${advancedWorkspace.filters.sortBy === 'gap-desc' ? 'selected' : ''}>Coverage Gap</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="stats-price-advanced-summary">
+        <article class="stats-price-card"><span>Treffer</span><strong>${formatStatsPriceNumber(advancedWorkspace.summary.cards)}</strong></article>
+        <article class="stats-price-card"><span>Bepreist</span><strong>${formatStatsPriceNumber(advancedWorkspace.summary.pricedCards)}</strong></article>
+        <article class="stats-price-card"><span>Fehlend</span><strong>${formatStatsPriceNumber(advancedWorkspace.summary.missingCards)}</strong></article>
+        <article class="stats-price-card"><span>Set-Abdeckung</span><strong>${formatStatsPriceNumber(advancedWorkspace.summary.setCount)}</strong></article>
+      </div>
+
+      <div class="stats-price-advanced-layout">
+        <aside>
+          <ul class="stats-price-advanced-groups">
+            ${advancedGroupsMarkup || '<li class="stats-price-empty">Keine Gruppen für den aktuellen Filter.</li>'}
+          </ul>
+        </aside>
+        <section class="stats-price-advanced-detail">
+          <div class="stats-price-advanced-detail-tabs">
+            <button type="button" data-advanced-detail-mode="summary" class="${advancedDetailMode === 'summary' ? 'is-active' : ''}">Summary</button>
+            <button type="button" data-advanced-detail-mode="top" class="${advancedDetailMode === 'top' ? 'is-active' : ''}">Top Cards</button>
+            <button type="button" data-advanced-detail-mode="missing" class="${advancedDetailMode === 'missing' ? 'is-active' : ''}">Missing</button>
+            <button type="button" data-advanced-detail-mode="distribution" class="${advancedDetailMode === 'distribution' ? 'is-active' : ''}">Distribution</button>
+          </div>
+          ${advancedDetailContent}
+        </section>
+      </div>
+    </section>`;
+
+  const timelinePanelMarkup = `
+    <section class="stats-price-tab-panel" data-tab-panel="timeline">
+      <ol class="stats-price-story-list">${timelineMarkup}</ol>
+    </section>`;
+
+  const drilldownPanelMarkup = `
+    <section class="stats-price-tab-panel" data-tab-panel="drilldown">
+      <div class="stats-price-drill-headline">
+        <strong>${formatStatsPriceNumber(missingItems.length)} Karten ohne Preis</strong>
+        <small>${errors > 0 ? `${formatStatsPriceNumber(errors)} technische Fehler` : 'Keine technischen Fehler gemeldet'}</small>
+      </div>
+      <div class="stats-price-drill-groups">
+        ${drilldownMarkup || '<p class="stats-price-empty">Keine Drilldown-Lcken vorhanden.</p>'}
+      </div>
+    </section>`;
+
+  const panelMap = {
+    dashboard: dashboardHighlights,
+    'top-values': topValuesMarkup,
+    trends: trendsMarkup,
+    comparisons: comparisonsMarkup,
+    advanced: advancedMarkup,
+    watchlist: watchlistMarkup,
+    timeline: timelinePanelMarkup,
+    drilldown: drilldownPanelMarkup,
+  };
+
+  return {
+    tabsMarkup,
+    contentMarkup: panelMap[activeTab] || panelMap.dashboard,
+    completionLabel: message || (status === 'final' ? 'Preisradar abgeschlossen.' : `${formatStatsPriceNumber(loadedCards)} / ${formatStatsPriceNumber(totalCards)} Karten geladen`),
+  };
+}
+
+function isActiveStatsPriceRequest(requestId) {
+  return state.statsPrice.requestId === requestId;
+}
+
+function renderStatsPriceSnapshot({
+  status = 'loading',
+  analytics = null,
+  loadedCards = 0,
+  totalCards = 0,
+  errors = 0,
+  message = ''
+} = {}) {
+  const container = getStatsPriceContainer();
+  if (!container) return;
+
+  const progress = totalCards > 0 ? Math.round((loadedCards / totalCards) * 100) : 0;
+  const totalValue = analytics?.totalValue || 0;
+  const averageValue = analytics?.avgCollectedCardValue || 0;
+  const collectedCards = analytics?.collectedCards || 0;
+  const pricedCollectedCards = analytics?.pricedCollectedCards || 0;
+  const priceCoverage = analytics?.priceCoverage || 0;
+  const activeTab = STATS_PRICE_TABS.some((tab) => tab.id === state.statsPrice.activeTab)
+    ? state.statsPrice.activeTab
+    : 'dashboard';
+  const tabContent = buildStatsPriceTabContent({
+    activeTab,
+    analytics,
+    status,
+    loadedCards,
+    totalCards,
+    errors,
+    message,
+  });
+
+  container.dataset.state = status;
+  container.innerHTML = `
+    <article class="stats-price-panel ${status === 'final' ? 'stats-price-enter' : ''}">
+      <header class="stats-price-head">
+        <div>
+          <span class="stats-price-kicker">Cardmarket Analyse</span>
+          <h3>Preisradar f&#xfc;r deine Sammlung</h3>
+          <p>${tabContent.completionLabel}</p>
+        </div>
+        <div class="stats-price-progress-wrap">
+          <strong>${progress}%</strong>
+          <div class="stats-price-progress"><span style="width:${progress}%"></span></div>
+        </div>
+      </header>
+
+      <div class="stats-price-grid">
+        <section class="stats-price-kpi-cluster">
+          <article class="stats-price-card">
+            <span>Gesamtwert</span>
+            <strong>${formatStatsPriceEuro(totalValue)}</strong>
+          </article>
+          <article class="stats-price-card">
+            <span>&#216; Preis / bewertet</span>
+            <strong>${formatStatsPriceEuro(averageValue)}</strong>
+          </article>
+          <article class="stats-price-card">
+            <span>Bewertet</span>
+            <strong>${Math.round(priceCoverage)}%</strong>
+            <small>${formatStatsPriceNumber(pricedCollectedCards)} von ${formatStatsPriceNumber(collectedCards)}</small>
+          </article>
+          <article class="stats-price-card">
+            <span>Ohne Preis</span>
+            <strong>${formatStatsPriceNumber(collectedCards - pricedCollectedCards)}</strong>
+            <small>${errors > 0 ? `${formatStatsPriceNumber(errors)} Fehler` : 'keine Fehler'}</small>
+          </article>
+        </section>
+      </div>
+
+      <section class="stats-price-tabs" aria-label="Preis-Insights Tabs">
+        ${tabContent.tabsMarkup}
+      </section>
+
+      <section class="stats-price-tab-content">
+        ${tabContent.contentMarkup}
+      </section>
+    </article>`;
+
+  container.querySelectorAll('.stats-price-tab-btn[data-stats-price-tab]').forEach((tabButton) => {
+    tabButton.addEventListener('click', () => {
+      const nextTab = String(tabButton.dataset.statsPriceTab || '').trim();
+      if (!nextTab || nextTab === state.statsPrice.activeTab) return;
+      state.statsPrice.activeTab = nextTab;
+      renderStatsPriceSnapshot({
+        status,
+        analytics,
+        loadedCards,
+        totalCards,
+        errors,
+        message,
+      });
+    });
+  });
+
+  container.querySelectorAll('select[data-advanced-filter]').forEach((select) => {
+    select.addEventListener('change', () => {
+      const filterKey = String(select.dataset.advancedFilter || '').trim();
+      if (!filterKey) return;
+      state.statsPrice.advanced = state.statsPrice.advanced || { filters: {}, selectedGroupKey: '', detailMode: 'summary' };
+      const nextFilters = normalizeAdvancedFilters(state.statsPrice.advanced.filters);
+      nextFilters[filterKey] = String(select.value || 'all');
+      state.statsPrice.advanced.filters = nextFilters;
+      state.statsPrice.advanced.selectedGroupKey = '';
+      renderStatsPriceSnapshot({
+        status,
+        analytics,
+        loadedCards,
+        totalCards,
+        errors,
+        message,
+      });
+    });
+  });
+
+  container.querySelectorAll('[data-advanced-group-key]').forEach((groupButton) => {
+    groupButton.addEventListener('click', () => {
+      const nextGroupKey = String(groupButton.dataset.advancedGroupKey || '').trim();
+      if (!nextGroupKey) return;
+      state.statsPrice.advanced = state.statsPrice.advanced || { filters: {}, selectedGroupKey: '', detailMode: 'summary' };
+      state.statsPrice.advanced.selectedGroupKey = nextGroupKey;
+      renderStatsPriceSnapshot({
+        status,
+        analytics,
+        loadedCards,
+        totalCards,
+        errors,
+        message,
+      });
+    });
+  });
+
+  container.querySelectorAll('[data-advanced-detail-mode]').forEach((detailButton) => {
+    detailButton.addEventListener('click', () => {
+      const nextMode = String(detailButton.dataset.advancedDetailMode || '').trim();
+      if (!nextMode) return;
+      state.statsPrice.advanced = state.statsPrice.advanced || { filters: {}, selectedGroupKey: '', detailMode: 'summary' };
+      state.statsPrice.advanced.detailMode = nextMode;
+      renderStatsPriceSnapshot({
+        status,
+        analytics,
+        loadedCards,
+        totalCards,
+        errors,
+        message,
+      });
+    });
+  });
+
+  container.querySelectorAll('[data-set-id]').forEach((item) => {
+    item.addEventListener('click', () => {
+      const setId = item.dataset.setId;
+      if (!setId) return;
+      navigate(`set/${encodeURIComponent(setId)}`);
+    });
+  });
+}
+
+function renderStatsPriceLoading({ requestId, loadedCards = 0, totalCards = 0 } = {}) {
+  state.statsPrice.requestId = String(requestId || '');
+  state.statsPrice.status = 'loading';
+  state.statsPrice.items = [];
+  state.statsPrice.loadedCards = Number(loadedCards || 0);
+  state.statsPrice.totalCards = Number(totalCards || 0);
+  state.statsPrice.errors = 0;
+  renderStatsPriceSnapshot({
+    status: 'loading',
+    loadedCards,
+    totalCards,
+    errors: 0,
+    message: 'Preiswerte werden schrittweise geladen...'
+  });
+}
+
+function renderStatsPricePartial(analytics, { requestId, loadedCards = 0, totalCards = 0, errors = 0, items = [] } = {}) {
+  if (!isActiveStatsPriceRequest(requestId)) return;
+  state.statsPrice.status = 'partial';
+  state.statsPrice.totals = analytics;
+  state.statsPrice.bySet = analytics?.setBreakdown || [];
+  state.statsPrice.items = Array.isArray(items) ? items : [];
+  state.statsPrice.loadedCards = Number(loadedCards || 0);
+  state.statsPrice.totalCards = Number(totalCards || 0);
+  state.statsPrice.errors = Number(errors || 0);
+  renderStatsPriceSnapshot({
+    status: 'partial',
+    analytics,
+    loadedCards,
+    totalCards,
+    errors,
+    message: 'Teilresultate werden laufend aktualisiert.'
+  });
+}
+
+function renderStatsPriceFinal(analytics, { requestId, loadedCards = 0, totalCards = 0, errors = 0, items = [] } = {}) {
+  if (!isActiveStatsPriceRequest(requestId)) return;
+  state.statsPrice.status = 'final';
+  state.statsPrice.totals = analytics;
+  state.statsPrice.bySet = analytics?.setBreakdown || [];
+  state.statsPrice.topCards = analytics?.topCard ? [analytics.topCard] : [];
+  state.statsPrice.items = Array.isArray(items) ? items : [];
+  state.statsPrice.loadedCards = Number(loadedCards || 0);
+  state.statsPrice.totalCards = Number(totalCards || 0);
+  state.statsPrice.errors = Number(errors || 0);
+  renderStatsPriceSnapshot({
+    status: 'final',
+    analytics,
+    loadedCards,
+    totalCards,
+    errors,
+    message: 'Preisradar abgeschlossen.'
+  });
+}
+
+function renderStatsPriceError(message = 'Preisanalysen konnten nicht geladen werden.') {
+  const container = getStatsPriceContainer();
+  if (!container) return;
+  state.statsPrice.status = 'error';
+  container.dataset.state = 'error';
+  container.innerHTML = `<p class="stats-price-error">${message}</p>`;
+}
+
+async function mapWithConcurrency(items = [], concurrency = 4, mapper = async (item) => item) {
+  const safeItems = Array.isArray(items) ? items : [];
+  if (!safeItems.length) return [];
+
+  const limit = Math.max(1, Number(concurrency) || 1);
+  const results = new Array(safeItems.length);
+  let nextIndex = 0;
+
+  const workers = Array.from({ length: Math.min(limit, safeItems.length) }, async () => {
+    while (true) {
+      const index = nextIndex;
+      nextIndex += 1;
+      if (index >= safeItems.length) return;
+      results[index] = await mapper(safeItems[index], index);
+    }
+  });
+
+  await Promise.all(workers);
+  return results;
+}
+
+async function buildCollectedCardCandidates() {
+  const importedSets = (state.sets || [])
+    .filter((set) => toBoolean(set?.imported) && String(set?.setId || '').trim() && String(set?.setName || '').trim());
+
+  const candidates = [];
+  const dedupe = new Set();
+
+  for (const set of importedSets) {
+    const setId = String(set.setId || '').trim();
+    const setName = String(set.setName || '').trim();
+    if (!setId || !setName) continue;
+
+    const [cards, collectionMap] = await Promise.all([
+      readDbCardsForSet(setId).catch(() => []),
+      readSetCollectionMap(setName).catch(() => new Map())
+    ]);
+
+    (Array.isArray(cards) ? cards : []).forEach((card) => {
+      const normalizedNumber = normalizeCardNumber(card?.number || '');
+      if (!normalizedNumber) return;
+
+      const mapEntry = collectionMap.get(normalizedNumber) || {};
+      const isCollected = Boolean(mapEntry?.g);
+      if (!isCollected) return;
+
+      const cardKey = `${setId}::${normalizedNumber}`;
+      if (dedupe.has(cardKey)) return;
+      dedupe.add(cardKey);
+
+      candidates.push({
+        cardKey,
+        setId,
+        setName,
+        cardName: String(card?.name || card?.vera_name || card?.number || 'Unbekannte Karte'),
+        card: { ...card, setId },
+        sourceCard: card,
+        sourceCards: Array.isArray(cards) ? cards : [],
+        isCollected,
+        isReverseHolo: Boolean(mapEntry?.rh && mapEntry?.g)
+      });
+    });
+  }
+
+  return candidates;
+}
+
+async function loadStatsPriceAnalyticsLazy({ requestId } = {}) {
+  const normalizedRequestId = String(requestId || '').trim();
+  if (!normalizedRequestId) return;
+
+  state.statsPrice.requestId = normalizedRequestId;
+  state.statsPrice.status = 'loading';
+  state.statsPrice.activeTab = state.statsPrice.activeTab || 'dashboard';
+  state.statsPrice.items = [];
+
+  const candidates = await buildCollectedCardCandidates();
+  if (!isActiveStatsPriceRequest(normalizedRequestId)) return;
+
+  const totalCards = candidates.length;
+  if (!totalCards) {
+    renderStatsPriceFinal(computePriceAnalyticsFromSummaries([]), {
+      requestId: normalizedRequestId,
+      loadedCards: 0,
+      totalCards: 0,
+      errors: 0,
+      items: [],
+    });
+    return;
+  }
+
+  renderStatsPriceLoading({ requestId: normalizedRequestId, loadedCards: 0, totalCards });
+
+  let loadedCards = 0;
+  let errors = 0;
+  const resolvedItems = [];
+
+  for (let offset = 0; offset < candidates.length; offset += STATS_PRICE_CHUNK_SIZE) {
+    const chunk = candidates.slice(offset, offset + STATS_PRICE_CHUNK_SIZE);
+
+    const chunkResults = await mapWithConcurrency(chunk, STATS_PRICE_CONCURRENCY, async (candidate) => {
+      try {
+        const summary = await loadCardmarketPriceSummary(candidate.card, {
+          cards: candidate.sourceCards,
+          resolverCard: candidate.sourceCard,
+        });
+        const value = pickCardPriceFromSummary(summary, { preferReverseHolo: candidate.isReverseHolo });
+        return {
+          ...candidate,
+          value,
+        };
+      } catch {
+        return {
+          ...candidate,
+          value: null,
+          failed: true,
+        };
+      }
+    });
+
+    if (!isActiveStatsPriceRequest(normalizedRequestId)) return;
+
+    loadedCards += chunkResults.length;
+    errors += chunkResults.filter((item) => item?.failed).length;
+    resolvedItems.push(...chunkResults);
+
+    const partialAnalytics = computePriceAnalyticsFromSummaries(resolvedItems);
+    renderStatsPricePartial(partialAnalytics, {
+      requestId: normalizedRequestId,
+      loadedCards,
+      totalCards,
+      errors,
+      items: resolvedItems,
+    });
+  }
+
+  const finalAnalytics = computePriceAnalyticsFromSummaries(resolvedItems);
+  renderStatsPriceFinal(finalAnalytics, {
+    requestId: normalizedRequestId,
+    loadedCards,
+    totalCards,
+    errors,
+    items: resolvedItems,
+  });
+}
+
+// --------------------------------------------------------------------------
 // SUCHE (cross-set)
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 const SEARCH_NOISE_TOKENS = new Set([
   'karte', 'karten', 'kartennummer', 'kartennr', 'nummer', 'nr', 'no', 'num',
   'pokemon', 'pokemontcg', 'tcg', 'set', 'im', 'in', 'von', 'die', 'der', 'das'
@@ -5022,7 +6276,7 @@ function parseStructuredSearchQuery(rawQuery, availableSets = []) {
 
 /**
  * Erkennt freie Kombinationen aus Kartennummer + Namenstokens, z.B. "57 Digda" oder "Digda 57".
- * Gibt null zurück, wenn kein sinnvolles gemischtes Muster erkannt wird.
+ * Gibt null zurck, wenn kein sinnvolles gemischtes Muster erkannt wird.
  */
 function parseMixedQuery(rawQuery) {
   const normalized = normalizeSearchText(rawQuery).trim();
@@ -5037,7 +6291,7 @@ function parseMixedQuery(rawQuery) {
   const hasSetLikeMarker = parts.some((token) => token === 'set' || token === 'series' || token === 'serie');
   if (hasSetLikeMarker) return null;
 
-  // Tokens die wie eine Kartennummer aussehen: optionale alpha-Präfix + Zahlen + optionales Suffix
+  // Tokens die wie eine Kartennummer aussehen: optionale alpha-Praefix + Zahlen + optionales Suffix
   const numberTokens = parts.filter((p) => /^[a-z._-]*\d+[a-z._-]*$/.test(p));
   const nameTokensRaw = parts.filter((p) => !/^[a-z._-]*\d+[a-z._-]*$/.test(p));
   const nameTokens = extractMeaningfulNameTokens(nameTokensRaw);
@@ -5436,7 +6690,7 @@ function renderSearchToolbarMeta({
   let statusText = emptyMessage || 'Suchbegriff oben eingeben.';
   if (!emptyMessage && rawQuery) {
     if (isSearching) {
-      statusText = `${safeResultCount || '…'} Ergebnis${safeResultCount === 1 ? '' : 'se'} · Suche läuft${progressSuffix}`;
+      statusText = `${safeResultCount || '0'} Ergebnis${safeResultCount === 1 ? '' : 'se'} - Suche läuft${progressSuffix}`;
     } else if (safeResultCount > 0) {
       statusText = `${safeResultCount} Ergebnis${safeResultCount === 1 ? '' : 'se'} gefunden`;
     } else {
@@ -5489,7 +6743,7 @@ function renderSearchResultsList(results = [], searchScopeMode, options = {}) {
         <div class="search-results-head">
           <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
         </div>
-        <p class="loading-placeholder">Suche läuft…${progressSuffix}</p>
+        <p class="loading-placeholder">Suche laeuft...${progressSuffix}</p>
       `;
       return;
     }
@@ -5498,14 +6752,14 @@ function renderSearchResultsList(results = [], searchScopeMode, options = {}) {
       <div class="search-results-head">
         <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
       </div>
-      <p class="empty-state">Keine Karten für „${rawQuery}“ gefunden (durchsucht: ${totalSets} Sets, ${modeMeta.hint}).</p>
+      <p class="empty-state">Keine Karten fuer "${rawQuery}" gefunden (durchsucht: ${totalSets} Sets, ${modeMeta.hint}).</p>
     `;
     return;
   }
 
   dom.searchResults.innerHTML = `
     <div class="search-results-head">
-      <p class="search-result-count">${safeResults.length} Ergebnis${safeResults.length !== 1 ? 'se' : ''}${isSearching ? ' · Suche läuft…' : ''}</p>
+      <p class="search-result-count">${safeResults.length} Ergebnis${safeResults.length !== 1 ? 'se' : ''}${isSearching ? ' · Suche laeuft...' : ''}</p>
       <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
     </div>
   `;
@@ -5519,7 +6773,7 @@ function renderSearchResultsList(results = [], searchScopeMode, options = {}) {
   if (isSearching) {
     const loading = document.createElement('p');
     loading.className = 'loading-placeholder';
-    loading.textContent = `Suche läuft…${progressSuffix}`;
+    loading.textContent = `Suche laeuft...${progressSuffix}`;
     frag.appendChild(loading);
   }
 
@@ -5554,27 +6808,27 @@ async function runSearch(options = {}) {
   const baseSetsToSearch = setFilter
     ? availableSetsForSearch.filter((s) => s.setId === setFilter)
     : availableSetsForSearch;
-  // Für ptcgoCode-Lookup state.allSets nutzen (hat zuverlässige Daten aus den JSON-Dateien),
+  // Fr ptcgoCode-Lookup state.allSets nutzen (hat zuverlaessige Daten aus den JSON-Dateien),
   // da state.sets (aus Google Sheets) ptcgoCode leer haben kann.
   const lookupPool = state.allSets?.length ? state.allSets : baseSetsToSearch;
   const structuredQuery = parseStructuredSearchQuery(rawQuery, lookupPool);
-  // Freie Kombinations-Suche (z.B. "57 Digda") nur wenn kein Set-Präfix erkannt wurde
+  // Freie Kombinations-Suche (z.B. "57 Digda") nur wenn kein Set-Praefix erkannt wurde
   const mixedQuery = !structuredQuery ? parseMixedQuery(rawQuery) : null;
   if (!force && !structuredQuery && !mixedQuery && query.length < 2) {
     state.lastSearchResults = [];
     renderSearchToolbarMeta({
       rawQuery,
       searchScopeMode,
-      emptyMessage: 'Mindestens 2 Zeichen eingeben oder Enter drücken.'
+      emptyMessage: 'Mindestens 2 Zeichen eingeben oder Enter druecken.'
     });
-    dom.searchResults.innerHTML = '<p class="empty-state">Mindestens 2 Zeichen eingeben oder Enter drücken.</p>';
+    dom.searchResults.innerHTML = '<p class="empty-state">Mindestens 2 Zeichen eingeben oder Enter druecken.</p>';
     return;
   }
 
   if (force || structuredQuery || mixedQuery || rawQuery.length >= 3) {
     window.SEARCH_HISTORY = addSearchHistory(rawQuery);
   }
-  // Für die eigentliche Suche das importierte Set bevorzugen (hat Collection-Daten),
+  // Fr die eigentliche Suche das importierte Set bevorzugen (hat Collection-Daten),
   // fallback auf das Set aus allSets falls nicht importiert.
   const setsToSearch = structuredQuery
     ? [baseSetsToSearch.find((s) => s.setId === structuredQuery.setId) ?? structuredQuery.set]
@@ -5583,9 +6837,9 @@ async function runSearch(options = {}) {
     renderSearchToolbarMeta({
       rawQuery,
       searchScopeMode,
-      emptyMessage: 'Keine passenden Sets verfügbar.'
+      emptyMessage: 'Keine passenden Sets verfuegbar.'
     });
-    dom.searchResults.innerHTML = '<p class="empty-state">Keine passenden Sets verfügbar.</p>';
+    dom.searchResults.innerHTML = '<p class="empty-state">Keine passenden Sets verfuegbar.</p>';
     return;
   }
   renderSearchResultsList([], searchScopeMode, {
@@ -5799,13 +7053,13 @@ async function runSearch(options = {}) {
       resultCount: 0,
       setsProcessed: setsToSearch.length,
       totalSets: setsToSearch.length,
-      emptyMessage: `Keine Treffer · ${setsToSearch.length} Sets geprüft`
+      emptyMessage: `Keine Treffer - ${setsToSearch.length} Sets geprft`
     });
     dom.searchResults.innerHTML = `
       <div class="search-results-head">
         <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
       </div>
-      <p class="empty-state">Keine Karten für „${rawQuery}“ gefunden (durchsucht: ${setsToSearch.length} Sets, ${modeMeta.hint}).</p>
+      <p class="empty-state">Keine Karten fuer ${rawQuery} gefunden (durchsucht: ${setsToSearch.length} Sets, ${modeMeta.hint}).</p>
     `;
     return;
   }
@@ -5831,30 +7085,53 @@ function createSearchResultCard(card, key, db, set, apiOnly = false) {
   const imgWrap = document.createElement('div');
   imgWrap.className = 'card-img-wrap';
   const img = document.createElement('img');
-  img.src = card.image || ''; img.alt = card.name || key; img.loading = 'lazy';
+  const cardImage = String(card.image || '').trim();
+  if (cardImage) img.src = cardImage;
+  else img.removeAttribute('src');
+  img.alt = card.name || key;
+  img.loading = 'lazy';
   attachImageFallback(img, card, set?.setId || '');
   imgWrap.appendChild(img);
 
   const meta    = document.createElement('div'); meta.className = 'meta';
   const setTag  = document.createElement('span'); setTag.className = 'search-set-tag'; setTag.textContent = set.setName;
-  const title   = document.createElement('div'); title.className = 'title'; title.textContent = `${card.number} \u2013 ${card.name || '?'}`;
-  const status  = document.createElement('div'); status.className = 'search-status';
-  const actions = document.createElement('div'); actions.className = 'search-actions';
+  const cardLabel = `${card.number} \u2013 ${card.name || '?'}`;
+  const title   = document.createElement('div'); title.className = 'title'; title.textContent = cardLabel; title.title = cardLabel;
+
+  const isEditable = Boolean(set?.setName && set?.imported);
+  const checksDiv = document.createElement('div'); checksDiv.className = 'checks search-checks-bar';
+  checksDiv.append(
+    makeCheckbox('G', 'g', db?.g ?? false, !isEditable),
+    makeCheckbox('RH', 'rh', db?.rh ?? false, !isEditable || !db?.rhCell)
+  );
+
   const goToSetBtn = document.createElement('button');
   goToSetBtn.type = 'button';
-  goToSetBtn.className = 'btn-secondary';
-  goToSetBtn.textContent = 'Zum Set';
-  goToSetBtn.title = `${set.setName} öffnen`;
-  status.textContent = db?.rh ? '\uD83D\uDD35 RH' : db?.g ? '\u2705 G' : (apiOnly ? '🌐 API' : '\u2610 Fehlend');
-  actions.append(goToSetBtn);
-  meta.append(setTag, title, status, actions);
+  goToSetBtn.className = 'btn-goto-set';
+  goToSetBtn.textContent = '↗';
+  goToSetBtn.title = `${set.setName} oeffnen`;
+  checksDiv.appendChild(goToSetBtn);
+  meta.append(setTag, title, checksDiv);
+
+  if (card.cardmarketUrl) {
+    const isFallbackCardmarket = isGeneratedCardmarketSearchUrl(card.cardmarketUrl);
+    const cm = document.createElement('a');
+    cm.href = card.cardmarketUrl; cm.target = '_blank'; cm.rel = 'noopener noreferrer';
+    cm.className = `card-cm-link${isFallbackCardmarket ? ' card-cm-link-fallback' : ''}`;
+    cm.textContent = '\uD83D\uDED2 CM';
+    cm.title = isFallbackCardmarket ? 'Generierter Cardmarket-Suchlink' : 'Cardmarket-Produktseite';
+    meta.appendChild(cm);
+    hydrateCardmarketLink(cm, card, { compact: true, preferReverseHolo: Boolean(db?.rh) });
+  }
+
   article.append(imgWrap, meta);
 
-  article.addEventListener('click', async () => {
+  article.addEventListener('click', async (e) => {
+    if (e.target instanceof HTMLElement && e.target.closest('input, a, label, button')) return;
     try {
       await openSearchResultLightbox(card, set, { apiOnly });
     } catch (err) {
-      showToast(`Karte konnte nicht geöffnet werden: ${err.message}`, 'error');
+      showToast(`Karte konnte nicht geoeffnet werden: ${err.message}`, 'error');
     }
   });
 
@@ -5863,7 +7140,104 @@ function createSearchResultCard(card, key, db, set, apiOnly = false) {
     navigateToSearchResultSet(set, card);
   });
 
+  if (isEditable) {
+    attachSearchResultCheckboxListeners(article, db, key, set, card);
+  }
+
   return article;
+}
+
+function attachSearchResultCheckboxListeners(article, db, key, set, card) {
+  const gInput  = article.querySelector('input[data-type="g"]');
+  const rhInput = article.querySelector('input[data-type="rh"]');
+
+  async function ensureDbEntry({ checked = false } = {}) {
+    if (db?.gCell && db?.rhCell) return db;
+    const ensured = await ensureCollectionEntry(set.setName, db?.displayId || key);
+    db.g = Boolean(db?.g);
+    db.rh = Boolean(db?.rh && db?.g);
+    db.gCell = ensured.gCell;
+    db.rhCell = ensured.rhCell;
+    db.displayId = ensured.displayId || db.displayId || key;
+    return db;
+  }
+
+  function updateSearchCardState() {
+    syncCollectionCheckboxUi(gInput, rhInput, db, { isEditable: true });
+    article.classList.toggle('reverse',   Boolean(db?.rh));
+    article.classList.toggle('collected', Boolean(db?.g) && !db?.rh);
+    const cm = article.querySelector('.card-cm-link');
+    if (cm) {
+      hydrateCardmarketLink(cm, card, { compact: true, preferReverseHolo: Boolean(db?.rh) });
+    }
+  }
+
+  gInput.addEventListener('change', async () => {
+    if (state.bulkMode) { gInput.checked = !gInput.checked; return; }
+    const checked = gInput.checked;
+    const prevState = { g: Boolean(db?.g), rh: Boolean(db?.rh) };
+    setCardSaveState(article, 'saving');
+    beginTrackedWrite(`Karte #${db?.displayId || key} speichern`);
+    try {
+      await ensureDbEntry({ checked });
+      const nextState = resolveCollectionToggleState(db, { isG: true, checked });
+      await updateCellBoolean(set.setName, db.gCell.row, db.gCell.col, nextState.g);
+      if (db?.rhCell && nextState.rh !== Boolean(db?.rh)) {
+        await updateCellBoolean(set.setName, db.rhCell.row, db.rhCell.col, nextState.rh);
+      }
+      db.g = nextState.g;
+      db.rh = nextState.rh;
+      updateSearchCardState();
+      pushUndoEntry({
+        setId: set?.setId,
+        setName: set?.setName,
+        label: 'Kartenstatus geaendert',
+        changes: [{ key, prev: prevState, next: { g: Boolean(db.g), rh: Boolean(db.rh) } }]
+      });
+      updateUndoUi();
+      setCardSaveState(article, 'saved');
+      finishTrackedWrite(`Karte #${db?.displayId || key} speichern`, null);
+    } catch (err) {
+      showToast(`Speichern fehlgeschlagen: ${err.message}`, 'error');
+      gInput.checked = !checked;
+      setCardSaveState(article, 'error');
+      finishTrackedWrite(`Karte #${db?.displayId || key} speichern`, err);
+    }
+  });
+
+  rhInput.addEventListener('change', async () => {
+    if (state.bulkMode) { rhInput.checked = !rhInput.checked; return; }
+    const checked = rhInput.checked;
+    const prevState = { g: Boolean(db?.g), rh: Boolean(db?.rh) };
+    setCardSaveState(article, 'saving');
+    beginTrackedWrite(`Karte #${db?.displayId || key} RH speichern`);
+    try {
+      await ensureDbEntry({ checked });
+      if (!db?.rhCell) { rhInput.checked = false; return; }
+      const nextState = resolveCollectionToggleState(db, { isG: false, checked });
+      if (nextState.g !== Boolean(db?.g)) {
+        await updateCellBoolean(set.setName, db.gCell.row, db.gCell.col, nextState.g);
+      }
+      await updateCellBoolean(set.setName, db.rhCell.row, db.rhCell.col, nextState.rh);
+      db.g = nextState.g;
+      db.rh = nextState.rh;
+      updateSearchCardState();
+      pushUndoEntry({
+        setId: set?.setId,
+        setName: set?.setName,
+        label: 'RH-Status geaendert',
+        changes: [{ key, prev: prevState, next: { g: Boolean(db.g), rh: Boolean(db.rh) } }]
+      });
+      updateUndoUi();
+      setCardSaveState(article, 'saved');
+      finishTrackedWrite(`Karte #${db?.displayId || key} RH speichern`, null);
+    } catch (err) {
+      showToast(`Speichern fehlgeschlagen: ${err.message}`, 'error');
+      rhInput.checked = !checked;
+      setCardSaveState(article, 'error');
+      finishTrackedWrite(`Karte #${db?.displayId || key} RH speichern`, err);
+    }
+  });
 }
 
 function navigateToSearchResultSet(set, card = null) {
@@ -5942,7 +7316,7 @@ async function openSearchResultLightbox(card, set, { apiOnly = false } = {}) {
   ]);
 
   if (!Array.isArray(cards) || cards.length === 0) {
-    showToast('Keine Kartendaten für dieses Set gefunden.', 'info', 4500);
+    showToast('Keine Kartendaten fuer dieses Set gefunden.', 'info', 4500);
     return;
   }
 
@@ -6013,9 +7387,9 @@ function initSearch() {
   });
 }
 
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 // SET-DETAIL: STATS & FILTER
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 function updateStats() {
   const total = state.cards.length;
   let collected = 0, rh = 0;
@@ -6112,9 +7486,9 @@ function initSortControl() {
   });
 }
 
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 // SET-DETAIL: KARTEN-RENDERING
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 function renderCards() {
   dom.cards.innerHTML = '';
   if (!state.cards.length) { setEmptyState(true); return; }
@@ -6164,7 +7538,7 @@ function createCardElement(card, key, db, index) {
   if (dbEntry?.rh)     article.classList.add('reverse');
   else if (dbEntry?.g) article.classList.add('collected');
 
-  // Image wrap (click → lightbox)
+  // Image wrap (click ? lightbox)
   const imgWrap = document.createElement('div');
   imgWrap.className = 'card-img-wrap';
   imgWrap.addEventListener('click', (e) => {
@@ -6174,7 +7548,11 @@ function createCardElement(card, key, db, index) {
   });
 
   const img = document.createElement('img');
-  img.src = card.image || ''; img.alt = card.name || key; img.loading = 'lazy';
+  const cardImage = String(card.image || '').trim();
+  if (cardImage) img.src = cardImage;
+  else img.removeAttribute('src');
+  img.alt = card.name || key;
+  img.loading = 'lazy';
   attachImageFallback(img, card, state.currentSet?.setId || '');
   imgWrap.appendChild(img);
 
@@ -6203,7 +7581,7 @@ function createCardElement(card, key, db, index) {
     cm.textContent = '\uD83D\uDED2 CM';
     cm.title = isFallbackCardmarket ? 'Generierter Cardmarket-Suchlink' : 'Cardmarket-Produktseite';
     meta.appendChild(cm);
-    hydrateCardmarketLink(cm, card, { compact: true });
+    hydrateCardmarketLink(cm, card, { compact: true, preferReverseHolo: Boolean(dbEntry?.rh) });
   }
 
   article.append(imgWrap, meta);
@@ -6234,22 +7612,219 @@ function isGeneratedCardmarketSearchUrl(url) {
   return value.includes('cardmarket.com') && value.includes('/products/search') && value.includes('searchstring=');
 }
 
-function applyCardmarketPriceSummary(linkEl, summary, { compact = false } = {}) {
+function toFinitePrice(value) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
+}
+
+function formatEuroPrice(value) {
+  const numeric = toFinitePrice(value);
+  return numeric == null ? '' : `${numeric.toFixed(2).replace('.', ',')} EUR`;
+}
+
+function getCardmarketPriceValue(prices = {}, ...keys) {
+  for (const key of keys) {
+    if (prices?.[key] == null) continue;
+    const numeric = toFinitePrice(prices[key]);
+    if (numeric != null) return numeric;
+  }
+  return null;
+}
+
+function getCardmarketPriceCacheKey(card = {}) {
+  const setId = String(card?.setId || '').trim();
+  const number = String(card?.number || '').trim();
+  const name = String(card?.name || '').trim();
+  if (setId || number || name) {
+    return `${setId}::${number}::${name}`;
+  }
+
+  const normalizedUrl = String(card?.cardmarketUrl || '').trim();
+  return normalizedUrl;
+}
+
+function getCardmarketPriceDetails(prices = {}, { reverseHolo = false } = {}) {
+  const fields = reverseHolo
+    ? [
+        [['trendHolo'], 'Trend'],
+        [['averageHolo', 'avgHolo'], 'Avg'],
+        [['average1Holo', 'avg1Holo'], 'Avg 1d'],
+        [['average7Holo', 'avg7Holo'], 'Avg 7d'],
+        [['average30Holo', 'avg30Holo'], 'Avg 30d'],
+        [['lowHolo'], 'Low'],
+        [['reverseHoloSell'], 'Sell']
+      ]
+    : [
+        [['trend'], 'Trend'],
+        [['average', 'avg'], 'Avg'],
+        [['average1', 'avg1'], 'Avg 1d'],
+        [['average7', 'avg7'], 'Avg 7d'],
+        [['average30', 'avg30'], 'Avg 30d'],
+        [['low'], 'Low']
+      ];
+
+  return fields
+    .map(([keys, label]) => {
+      const value = formatEuroPrice(getCardmarketPriceValue(prices, ...keys));
+      if (!value) return null;
+      return `${label}: ${value}`;
+    })
+    .filter(Boolean);
+}
+
+function buildCardmarketLinkPresentation(summary, { preferReverseHolo = false } = {}) {
+  if (!summary?.entry) return null;
+
+  const entry = summary.entry;
+  const prices = entry?.prices || {};
+  const reverseCandidates = [
+    [['trendHolo'], 'RH Trend'],
+    [['averageHolo', 'avgHolo'], 'RH Avg'],
+    [['lowHolo'], 'RH Low'],
+    [['reverseHoloSell'], 'RH Sell']
+  ];
+  const normalCandidates = [
+    [['trend'], 'Trend'],
+    [['average', 'avg'], 'Avg'],
+    [['low'], 'Low']
+  ];
+
+  const pickPrice = (candidates = []) => {
+    for (const [keys, label] of candidates) {
+      const value = formatEuroPrice(getCardmarketPriceValue(prices, ...keys));
+      if (value) return { label, value };
+    }
+    return null;
+  };
+
+  const reversePick = pickPrice(reverseCandidates);
+  const normalPick = pickPrice(normalCandidates);
+  const activePick = (preferReverseHolo && reversePick) || normalPick || reversePick;
+  const activeMode = preferReverseHolo && reversePick ? 'Reverse Holo' : 'Normal';
+
+  const label = activePick
+    ? `${activePick.label} ${activePick.value}`
+    : formatCardmarketEntryLabel(entry);
+
+  const reverseDetails = getCardmarketPriceDetails(prices, { reverseHolo: true });
+  const normalDetails = getCardmarketPriceDetails(prices, { reverseHolo: false });
+  const detailParts = [];
+  if (normalDetails.length) detailParts.push(`Normal: ${normalDetails.join(' | ')}`);
+  if (reverseDetails.length) detailParts.push(`Reverse Holo: ${reverseDetails.join(' | ')}`);
+
+  const title = detailParts.length
+    ? `Cardmarket (${activeMode}) - ${detailParts.join(' | ')}`
+    : formatCardmarketEntryTitle(entry);
+
+  return {
+    label,
+    title,
+    url: summary.url || ''
+  };
+}
+
+function renderLightboxCardmarketPrices(summary, { preferReverseHolo = false } = {}) {
+  if (!dom.lightboxPriceMode || !dom.lightboxPriceGrid) return;
+
+  dom.lightboxPriceMode.textContent = preferReverseHolo ? 'Reverse Holo aktiv' : 'Normal aktiv';
+  dom.lightboxPriceGrid.innerHTML = '';
+
+  if (!summary) {
+    const loading = document.createElement('p');
+    loading.className = 'lightbox-price-loading';
+    loading.textContent = 'Preise werden geladen...';
+    dom.lightboxPriceGrid.appendChild(loading);
+    return;
+  }
+
+  const prices = summary?.entry?.prices;
+  if (!prices || typeof prices !== 'object') {
+    const empty = document.createElement('p');
+    empty.className = 'lightbox-price-empty';
+    empty.textContent = 'Keine Preisdetails verfuegbar.';
+    dom.lightboxPriceGrid.appendChild(empty);
+    return;
+  }
+
+  const createPriceGroup = (title, rows) => {
+    const group = document.createElement('section');
+    group.className = 'lightbox-price-group';
+
+    const heading = document.createElement('h4');
+    heading.textContent = title;
+    group.appendChild(heading);
+
+    let visibleRows = 0;
+    rows.forEach(([label, value]) => {
+      const formatted = formatEuroPrice(value);
+      if (!formatted) return;
+
+      const row = document.createElement('div');
+      row.className = 'lightbox-price-row';
+
+      const labelNode = document.createElement('span');
+      labelNode.textContent = label;
+      const valueNode = document.createElement('strong');
+      valueNode.textContent = formatted;
+
+      row.append(labelNode, valueNode);
+      group.appendChild(row);
+      visibleRows += 1;
+    });
+
+    return visibleRows ? group : null;
+  };
+
+  const groups = [
+    createPriceGroup('Normal', [
+      ['Trend', getCardmarketPriceValue(prices, 'trend')],
+      ['Durchschnitt', getCardmarketPriceValue(prices, 'average', 'avg')],
+      ['Avg 1 Tag', getCardmarketPriceValue(prices, 'average1', 'avg1')],
+      ['Avg 7 Tage', getCardmarketPriceValue(prices, 'average7', 'avg7')],
+      ['Avg 30 Tage', getCardmarketPriceValue(prices, 'average30', 'avg30')],
+      ['Low', getCardmarketPriceValue(prices, 'low')]
+    ]),
+    createPriceGroup('Reverse Holo', [
+      ['Trend', getCardmarketPriceValue(prices, 'trendHolo')],
+      ['Durchschnitt', getCardmarketPriceValue(prices, 'averageHolo', 'avgHolo')],
+      ['Avg 1 Tag', getCardmarketPriceValue(prices, 'average1Holo', 'avg1Holo')],
+      ['Avg 7 Tage', getCardmarketPriceValue(prices, 'average7Holo', 'avg7Holo')],
+      ['Avg 30 Tage', getCardmarketPriceValue(prices, 'average30Holo', 'avg30Holo')],
+      ['Low', getCardmarketPriceValue(prices, 'lowHolo')],
+      ['Sell', getCardmarketPriceValue(prices, 'reverseHoloSell')]
+    ])
+  ].filter(Boolean);
+
+  if (!groups.length) {
+    const empty = document.createElement('p');
+    empty.className = 'lightbox-price-empty';
+    empty.textContent = 'Keine Preisdetails verfuegbar.';
+    dom.lightboxPriceGrid.appendChild(empty);
+    return;
+  }
+
+  groups.forEach((group) => dom.lightboxPriceGrid.appendChild(group));
+}
+
+function applyCardmarketPriceSummary(linkEl, summary, { compact = false, preferReverseHolo = false } = {}) {
   if (!(linkEl instanceof HTMLElement) || !summary) return;
+  const presentation = buildCardmarketLinkPresentation(summary, { preferReverseHolo });
+  if (!presentation) return;
+
   if (summary.url) {
     linkEl.href = summary.url;
     linkEl.dataset.cardmarketUrl = summary.url;
     linkEl.classList.toggle('card-cm-link-fallback', isGeneratedCardmarketSearchUrl(summary.url));
   }
-  if (summary.title) linkEl.title = summary.title;
-  if (summary.label) {
-    linkEl.textContent = compact ? `🛒 CM · ${summary.label}` : `🛒 Cardmarket · ${summary.label}`;
+  if (presentation.title) linkEl.title = presentation.title;
+  if (presentation.label) {
+    linkEl.textContent = compact ? `CM - ${presentation.label}` : `Cardmarket - ${presentation.label}`;
   }
 }
 
-async function loadCardmarketPriceSummary(card = {}) {
-  const normalizedUrl = String(card?.cardmarketUrl || '').trim();
-  const cacheKey = normalizedUrl || `${String(card?.setId || '').trim()}::${String(card?.number || '').trim()}::${String(card?.name || '').trim()}`;
+
+async function loadCardmarketPriceSummary(card = {}, { cards = null, resolverCard = null } = {}) {
+  const cacheKey = getCardmarketPriceCacheKey(card);
   if (!cacheKey.trim()) return null;
 
   if (cardmarketPriceSummaryCache.has(cacheKey)) {
@@ -6260,20 +7835,22 @@ async function loadCardmarketPriceSummary(card = {}) {
     return cardmarketPriceSummaryPending.get(cacheKey);
   }
 
-  const pending = resolveCardmarketEntryForCard(card, {
-    cards: Array.isArray(state?.cards) ? state.cards : []
-  })
+  const sourceCards = Array.isArray(cards)
+    ? cards
+    : (Array.isArray(state?.cards) ? state.cards : []);
+
+  const pending = resolveCardmarketEntryForCard(
+    resolverCard && typeof resolverCard === 'object' ? resolverCard : card,
+    {
+    cards: sourceCards
+    }
+  )
     .then((entry) => {
+      const normalizedUrl = String(card?.cardmarketUrl || '').trim();
       const directUrl = entry?.cardmarketProductId
         ? buildCardmarketProductUrl(entry.cardmarketProductId)
         : normalizedUrl;
-      const summary = entry
-        ? {
-            label: formatCardmarketEntryLabel(entry),
-            title: formatCardmarketEntryTitle(entry),
-            url: directUrl
-          }
-        : null;
+      const summary = entry ? { entry, url: directUrl } : null;
       cardmarketPriceSummaryCache.set(cacheKey, summary);
       cardmarketPriceSummaryPending.delete(cacheKey);
       return summary;
@@ -6287,23 +7864,23 @@ async function loadCardmarketPriceSummary(card = {}) {
   return pending;
 }
 
-function hydrateCardmarketLink(linkEl, card, { compact = false } = {}) {
+function hydrateCardmarketLink(linkEl, card, { compact = false, preferReverseHolo = false } = {}) {
   const cardmarketUrl = String(card?.cardmarketUrl || '').trim();
   if (!(linkEl instanceof HTMLElement) || !cardmarketUrl) {
     return;
   }
 
-  const cacheKey = cardmarketUrl || `${String(card?.setId || '').trim()}::${String(card?.number || '').trim()}::${String(card?.name || '').trim()}`;
+  const cacheKey = getCardmarketPriceCacheKey(card);
   linkEl.dataset.cardmarketUrl = cardmarketUrl;
   if (cardmarketPriceSummaryCache.has(cacheKey)) {
-    applyCardmarketPriceSummary(linkEl, cardmarketPriceSummaryCache.get(cacheKey), { compact });
+    applyCardmarketPriceSummary(linkEl, cardmarketPriceSummaryCache.get(cacheKey), { compact, preferReverseHolo });
     return;
   }
 
   loadCardmarketPriceSummary(card)
     .then((summary) => {
       if (linkEl.dataset.cardmarketUrl !== cardmarketUrl) return;
-      applyCardmarketPriceSummary(linkEl, summary, { compact });
+      applyCardmarketPriceSummary(linkEl, summary, { compact, preferReverseHolo });
     })
     .catch((error) => {
       console.warn('[cardmarket] price lookup failed', error);
@@ -6345,15 +7922,15 @@ function attachCheckboxListeners(article, db, key) {
       const setToImport = state.currentSet;
       const setId = String(setToImport?.setId || '').trim();
       if (!setId) {
-        throw new Error('Set-ID für den automatischen Import fehlt.');
+        throw new Error('Set-ID fuer den automatischen Import fehlt.');
       }
 
-      setLoading(true, `Importiere ${setToImport.setName}…`);
+      setLoading(true, `Importiere ${setToImport.setName}`);
       try {
         const importPayload = await fetchMergedCardsWithSetMeta(setId).catch(() => ({ cards: [], setMetaPatch: null }));
         const importCards = Array.isArray(importPayload?.cards) ? importPayload.cards : [];
         if (!importCards.length) {
-          throw new Error('Keine Kartendaten für den automatischen Set-Import gefunden.');
+          throw new Error('Keine Kartendaten fuer den automatischen Set-Import gefunden.');
         }
 
         const refreshedSet = await ensureSetImportedFromApi(setToImport, importCards, {
@@ -6405,7 +7982,7 @@ function attachCheckboxListeners(article, db, key) {
       pushUndoEntry({
         setId: state.currentSet?.setId,
         setName: state.currentSet?.setName,
-        label: 'Kartenstatus geändert',
+        label: 'Kartenstatus geaendert',
         changes: [{ key, prev: prevState, next: { g: Boolean(db.g), rh: Boolean(db.rh) } }]
       });
       updateUndoUi();
@@ -6442,7 +8019,7 @@ function attachCheckboxListeners(article, db, key) {
       pushUndoEntry({
         setId: state.currentSet?.setId,
         setName: state.currentSet?.setName,
-        label: 'RH-Status geändert',
+        label: 'RH-Status geaendert',
         changes: [{ key, prev: prevState, next: { g: Boolean(db.g), rh: Boolean(db.rh) } }]
       });
       updateUndoUi();
@@ -6464,6 +8041,12 @@ function updateCardState(article, db) {
   syncCollectionCheckboxUi(gInput, rhInput, db);
   article.classList.toggle('reverse',   Boolean(db?.rh));
   article.classList.toggle('collected', Boolean(db?.g) && !db?.rh);
+  const cardmarketLink = article?.querySelector('.card-cm-link');
+  const cardIndex = Number.parseInt(article?.dataset?.cardIndex || '-1', 10);
+  const card = Number.isFinite(cardIndex) && cardIndex >= 0 ? state.cards[cardIndex] : null;
+  if (card && cardmarketLink) {
+    hydrateCardmarketLink(cardmarketLink, card, { compact: true, preferReverseHolo: Boolean(db?.rh) });
+  }
   if (dom.lightboxDialog.open) {
     const idx = parseInt(article.dataset.cardIndex, 10);
     if (state.lightboxIndex === idx) renderLightbox(idx);
@@ -6510,12 +8093,12 @@ function applyIncomingRealtimeUpdate(payload) {
 
   updateStats();
   state.summaryData = null;
-  showToast(`🔄 Live-Update empfangen: #${payload.cardNumber}`, 'info', 2000);
+  showToast(`Live-Update empfangen: #${payload.cardNumber}`, 'info', 2000);
 }
 
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 // LIGHTBOX
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 function syncLightboxModalState() {
   const shouldLockScroll = Boolean(dom.lightboxDialog?.open || dom.lightboxImageDialog?.open);
   document.documentElement.classList.toggle('modal-scroll-locked', shouldLockScroll);
@@ -6570,7 +8153,9 @@ function renderLightbox(index) {
       ? card.imageLargeCandidates
       : (Array.isArray(card.imageCandidates) ? card.imageCandidates : [])
   };
-  dom.lightboxImg.src              = lightboxCard.image || '';
+  const lightboxImage = String(lightboxCard.image || '').trim();
+  if (lightboxImage) dom.lightboxImg.src = lightboxImage;
+  else dom.lightboxImg.removeAttribute('src');
   attachImageFallback(dom.lightboxImg, lightboxCard, state.currentSet?.setId || '');
   dom.lightboxImg.alt              = card.name  || key;
   dom.lightboxTitle.textContent    = card.name  || 'Unbekannt';
@@ -6587,16 +8172,28 @@ function renderLightbox(index) {
   setFact(dom.lightboxRules, rulesText, { longText: true });
   setFact(dom.lightboxFlavorText, card.flavorText, { longText: true });
   if (card.cardmarketUrl) {
+    const preferReverseHolo = Boolean(db?.rh);
     const isFallbackCardmarket = isGeneratedCardmarketSearchUrl(card.cardmarketUrl);
     dom.lightboxCmLink.href = card.cardmarketUrl;
-    dom.lightboxCmLink.textContent = '🛒 Cardmarket';
+    dom.lightboxCmLink.textContent = 'Cardmarket';
     dom.lightboxCmLink.title = isFallbackCardmarket ? 'Generierter Cardmarket-Suchlink' : 'Cardmarket-Produktseite';
     dom.lightboxCmLink.classList.toggle('lightbox-cm-link-fallback', isFallbackCardmarket);
     dom.lightboxCmLink.classList.remove('hidden');
-    hydrateCardmarketLink(dom.lightboxCmLink, card, { compact: false });
+    renderLightboxCardmarketPrices(null, { preferReverseHolo });
+    hydrateCardmarketLink(dom.lightboxCmLink, card, { compact: false, preferReverseHolo });
+    loadCardmarketPriceSummary(card)
+      .then((summary) => {
+        const liveCard = state.cards[state.lightboxIndex];
+        if (!liveCard || liveCard.number !== card.number) return;
+        renderLightboxCardmarketPrices(summary, { preferReverseHolo: Boolean((state.dbMap.get(key) || {}).rh) });
+      })
+      .catch(() => {
+        renderLightboxCardmarketPrices({ entry: null }, { preferReverseHolo });
+      });
   } else {
     dom.lightboxCmLink.classList.add('hidden');
     dom.lightboxCmLink.classList.remove('lightbox-cm-link-fallback');
+    renderLightboxCardmarketPrices({ entry: null }, { preferReverseHolo: Boolean(db?.rh) });
   }
   syncCollectionCheckboxUi(dom.lightboxGCheck, dom.lightboxRhCheck, db, {
     isEditable: Boolean(state.currentSet?.setName)
@@ -6721,7 +8318,9 @@ function initLightbox() {
           ? card.imageLargeCandidates
           : (Array.isArray(card.imageCandidates) ? card.imageCandidates : [])
       };
-      dom.lightboxImageFull.src = fullscreenCard.image || '';
+      const fullscreenImage = String(fullscreenCard.image || '').trim();
+      if (fullscreenImage) dom.lightboxImageFull.src = fullscreenImage;
+      else dom.lightboxImageFull.removeAttribute('src');
       attachImageFallback(dom.lightboxImageFull, fullscreenCard, state.currentSet?.setId || '');
       dom.lightboxImageFull.alt = card.name || '';
       if (resetTransform) resetFullscreenTransform();
@@ -6866,12 +8465,12 @@ function initLightbox() {
       const setToImport = state.currentSet;
       const setId = setToImport?.setId;
       if (!setId) return;
-      setLoading(true, `Importiere ${setToImport.setName}…`);
+      setLoading(true, `Importiere ${setToImport.setName}`);
       try {
         const importPayload = await fetchMergedCardsWithSetMeta(setId).catch(() => ({ cards: [], setMetaPatch: null }));
         const importCards = Array.isArray(importPayload?.cards) ? importPayload.cards : [];
         if (!importCards.length) {
-          throw new Error('Keine Kartendaten für den automatischen Set-Import gefunden.');
+          throw new Error('Keine Kartendaten fuer den automatischen Set-Import gefunden.');
         }
         const refreshedSet = await ensureSetImportedFromApi(setToImport, importCards, {
           setMetaPatch: importPayload?.setMetaPatch || null,
@@ -6922,7 +8521,7 @@ function initLightbox() {
       pushUndoEntry({
         setId: state.currentSet?.setId,
         setName: state.currentSet?.setName,
-        label: 'Lightbox-Änderung',
+        label: 'Lightbox-aenderung',
         changes: [{ key, prev: prevState, next: { g: Boolean(db.g), rh: Boolean(db.rh) } }]
       });
       updateUndoUi();
@@ -6942,9 +8541,9 @@ function initLightbox() {
   dom.lightboxRhCheck.addEventListener('change', () => lightboxToggle(false, dom.lightboxRhCheck.checked));
 }
 
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 // BULK-EDIT
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 function toggleBulkMode(on) {
   state.bulkMode = on;
   state.bulkSelected.clear();
@@ -6966,9 +8565,9 @@ function updateBulkCount() {
 }
 
 async function bulkUpdate(g, rh) {
-  if (!state.bulkSelected.size) { showToast('Keine Karten ausgewählt.', 'info'); return; }
+  if (!state.bulkSelected.size) { showToast('Keine Karten ausgewaehlt.', 'info'); return; }
   beginTrackedWrite('Bulk-Update');
-  setLoading(true, 'Massenaktion…');
+  setLoading(true, 'Massenaktion...');
   let updated = 0, errors = 0;
   const undoChanges = [];
   try {
@@ -7004,7 +8603,7 @@ async function bulkUpdate(g, rh) {
     pushUndoEntry({
       setId: state.currentSet?.setId,
       setName: state.currentSet?.setName,
-      label: 'Bulk-Änderung',
+      label: 'Bulk-aenderung',
       changes: undoChanges
     });
     updateUndoUi();
@@ -7022,9 +8621,9 @@ function initBulkEdit() {
   dom.btnBulkUnmark.addEventListener('click', () => bulkUpdate(false, false));
 }
 
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 // FEHLENDE KARTEN EXPORTIEREN
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 function getMissingCards() {
   return state.cards.filter((card) => !state.dbMap.get(normalizeCardNumber(card.number))?.g);
 }
@@ -7042,9 +8641,9 @@ function exportMissingCards() {
   showToast(`${missing.length} fehlende Karten als CSV exportiert.`, 'success', 4000);
 }
 
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 // TASTATURNAVIGATION
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 function initKeyboardNav() {
   document.addEventListener('keydown', (e) => {
     if (dom.viewSet.classList.contains('hidden')) return;
@@ -7091,9 +8690,9 @@ function initKeyboardNav() {
   }, true);
 }
 
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 // SET LADEN
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 async function loadCurrentSet(forceRefresh = false) {
   const setId   = dom.selector.value;
   if (!setId) return;
@@ -7205,682 +8804,146 @@ async function loadCurrentSet(forceRefresh = false) {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 // BOOTSTRAP
-// ══════════════════════════════════════════════════════════════════════════
-async function bootstrap() {
-  loadDashboardPreferences();
-  state.recentSets = loadRecentSets();
+// --------------------------------------------------------------------------
+const RUNTIME_BOOTSTRAP_NOOP = () => {};
+const RUNTIME_BOOTSTRAP_EMPTY = () => ({});
 
-  try {
-    await initSmartEngine();
-  } catch (err) {
-    console.warn('Smart Engine init:', err);
-  }
-  initAutoHideTopbar();
-  initGridZoom();
-  initCustomSelects();
-  initFilterButtons();
-  initSpreadsheetDialog();
-  initBatchImportDialog();
-  initManageImportedSetsDialog();
-  initBackupImportExport();
-  initQueueBuilderDialog();
+const RUNTIME_BOOTSTRAP_STUBS = {
+  initSetViewController: RUNTIME_BOOTSTRAP_NOOP,
+  createSetViewInjections: RUNTIME_BOOTSTRAP_EMPTY,
+  createDashboardRenderer: RUNTIME_BOOTSTRAP_EMPTY,
+  createStatsRenderer: RUNTIME_BOOTSTRAP_EMPTY,
+  createSettingsController: RUNTIME_BOOTSTRAP_EMPTY,
+  createStatsPriceViewController: RUNTIME_BOOTSTRAP_EMPTY,
+  dashboardRendererDeps: {},
+  statsRendererDeps: {},
+  settingsControllerDeps: {},
+  assignDashboardRenderer: RUNTIME_BOOTSTRAP_NOOP,
+  assignStatsRenderer: RUNTIME_BOOTSTRAP_NOOP,
+  assignSettingsController: RUNTIME_BOOTSTRAP_NOOP,
+};
+
+function createBootstrapRuntimeController() {
+  return createBootstrapController({
+    state,
+    dom,
+    config: CONFIG,
+    eventBus: {
+      on: (eventName, handler) => {
+        window.addEventListener(eventName, (event) => {
+          handler(event?.detail || {});
+        });
+      },
+    },
+    eventQuickFiltersChanged: 'quick-filters-changed',
+    eventClearSearchHistory: 'clear-search-history',
+    loadDashboardPreferences,
+    loadRecentSets,
+    initSmartEngine,
+    initAutoHideTopbar,
+    initGridZoom,
+    initCustomSelects,
+    initFilterButtons,
+    spreadsheetDialogController: {
+      initSpreadsheetDialog,
+    },
+    initBatchImportDialog,
+    initManageImportedSetsDialog,
+    initBackupImportExport,
+    initQueueBuilderDialog,
+    ...RUNTIME_BOOTSTRAP_STUBS,
+    initDashboardControls,
+    initSheetsWriteFeedback,
+    initAuditAndSaveUi,
+    initDevCompletionMode,
+    initSortControl,
+    initSearch,
+    initOfflineIndicator,
+    initDashboardHoverPreview,
+    initSearchAutocomplete,
+    initShareButton,
+    initRealtimeSync,
+    realtimeClientStorageKey: REALTIME_CLIENT_STORAGE_KEY,
+    applyIncomingRealtimeUpdate,
+    initQuickFiltersUI,
+    resetDashboardVirtualization,
+    saveDashboardPreferences,
+    renderDashboard,
+    loadSearchHistory,
+    clearSearchHistory,
+    showToast,
+    openBatchImportDialog,
+    runDataHealthCheck,
+    downloadJson,
+    runPokecodeParityTest,
+    loadSnapshots,
+    openSettingsDialog,
+    generateCollectionReport,
+    createExportDialog,
+    createWishlistPanel,
+    createSharingDialog,
+    createTradingLogPanel,
+    calculateCollectionStats,
+    createAchievementsPanel,
+    createCSVExportPanel,
+    createLocalBackup,
+    getLocalBackups,
+    createCommunityStatsBanner,
+    createCommunityTrendingPanel,
+    createCommunitySearchPanel,
+    createPublicShare,
+    getTrendingCollections,
+    createSharedCollectionCard,
+    createTradeStatsCard,
+    createTradeMarketplacePanel,
+    createTradeSuggestionsPanel,
+    createWantedCardsPanel,
+    getAvailableRarities,
+    getCollectionValueStats,
+    getTradePlaceSummary,
+    userIdStorageKey: USER_ID_STORAGE_KEY,
+    getUserProfile,
+    createUserProfile,
+    createUserProfileCard,
+    initCommandPalette,
+    getEngineMetrics,
+    navigate,
+    setRecentSetsDropdownOpen,
+    setRefreshMenuOpen,
+    positionRecentSetsDropdown,
+    handleRouteChange,
+    setLoading,
+    setGlobalStatus,
+    initAuth,
+    syncAuthButtonLabel,
+    signIn,
+    signOut,
+    resetToLoggedOut,
+    isSignedIn,
+    loadCurrentSet,
+    reimportCurrentSetFromApi,
+    exportMissingCards,
+    onLoginSuccess,
+    showView,
+    syncRefreshControls,
+    syncSetNavLink,
+    setEmptyState,
+  });
+}
+
+async function bootstrap() {
+  const bootstrapController = createBootstrapRuntimeController();
+  await bootstrapController.bootstrapCore();
+
+  installMojibakeSanitizer();
+
   initLightbox();
   initBulkEdit();
   initKeyboardNav();
-  initDashboardControls();
-  initSheetsWriteFeedback();
-  initAuditAndSaveUi();
-  initDevCompletionMode();
-  initSortControl();
-  initSearch();
-  initOfflineIndicator();
-  initDashboardHoverPreview();
-  initSearchAutocomplete();
-  initShareButton();
 
-  try {
-    state.realtimeClientId = localStorage.getItem(REALTIME_CLIENT_STORAGE_KEY) || `client_${Date.now()}`;
-    localStorage.setItem(REALTIME_CLIENT_STORAGE_KEY, state.realtimeClientId);
-    state.realtime = initRealtimeSync({
-      clientId: state.realtimeClientId,
-      onEvent: applyIncomingRealtimeUpdate
-    });
-    console.log('✅ Realtime sync initialized');
-  } catch (err) {
-    console.warn('⚠️ Realtime sync init failed:', err);
-  }
-  
-  // Initialize Quick Filters
-  try {
-    initQuickFiltersUI(state.quickFilters);
-    window.addEventListener('quick-filters-changed', (e) => {
-      state.quickFilters = {
-        ...state.quickFilters,
-        ...(e?.detail || {})
-      };
-      resetDashboardVirtualization();
-      saveDashboardPreferences();
-      renderDashboard();
-    });
-    console.log('✅ Quick Filters initialized');
-  } catch (err) {
-    console.warn('⚠️ Quick Filters init failed:', err);
-  }
-
-  // Store search history globally
-  window.SEARCH_HISTORY = loadSearchHistory();
-  
-  // Clear search history on event
-  window.addEventListener('clear-search-history', () => {
-    clearSearchHistory();
-    window.SEARCH_HISTORY = [];
-    showToast('Suchverlauf gelöscht', 'success', 2000);
-  });
-  
-  // Shortcuts Overlay: wird durch showShortcutsOverlay() bereitgestellt (Feature 8)
-  
-  // Initialize Command Palette with handlers
-  const commandHandlers = {
-    'sync': async () => {
-      showToast('Sync-Funktion noch nicht implementiert', 'info');
-    },
-    'import-batch': () => openBatchImportDialog(),
-    'health-check': () => runDataHealthCheck({ autoFix: false }),
-    'backup-download': async () => {
-      const sets = state.sets.slice(0, 3); // Begrenzt auf 3 Sets zur Demo
-      if (!sets.length) {
-        showToast('Keine Sets zum Exportieren.', 'info');
-        return;
-      }
-      const backupSets = sets.map((set) => ({
-        setId: set.setId,
-        setName: set.setName,
-        imported: set.imported || true
-      }));
-      const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 16);
-      const payload = {
-        app: 'poke-tcg-try4',
-        version: 1,
-        createdAt: stamp,
-        spreadsheetId: CONFIG.SPREADSHEET_ID,
-        sets: backupSets
-      };
-      downloadJson(`poke_backup_${stamp}.json`, payload);
-      showToast(`Backup exportiert (${sets.length} Sets).`, 'success', 4000);
-    },
-    'parity-test': async () => {
-      showToast('Parity-Test wird ausgeführt...', 'info');
-      try {
-        const result = await runPokecodeParityCheck();
-        console.log('Parity-Test Result:', result);
-        showToast('Parity-Test abgeschlossen! Siehe Konsole.', 'success', 4000);
-      } catch (err) {
-        showToast(`Parity-Test fehlgeschlagen: ${err.message}`, 'error', 5000);
-      }
-    },
-    'search': () => {
-      dom.search?.focus();
-      showToast('Suchfeld aktiviert', 'info', 2000);
-    },
-    'snapshots': () => {
-      showToast('Snapshots: ' + (loadSnapshots() || []).length + ' verfügbar', 'info', 3000);
-    },
-    'settings': () => openSettingsDialog(),
-    'export-collection': async () => {
-      if (!state.collection || !state.sets.length) {
-        showToast('Keine Sammlung zum Exportieren', 'error', 3000);
-        return;
-      }
-      
-      const report = generateCollectionReport(state.collection, state.sets);
-      const dialog = createExportDialog(report);
-      document.body.appendChild(dialog);
-      dialog.showModal();
-      
-      dialog.addEventListener('close', () => dialog.remove());
-    },
-    'help': () => {
-      showToast('Verfügbare Befehle: import, health-check, backup, parity, search, snapshots, settings, export', 'info', 5000);
-    },
-    'wishlists': () => {
-      const panel = createWishlistPanel();
-      const dialog = document.createElement('dialog');
-      dialog.className = 'ss-dialog';
-      dialog.style.cssText = 'width: 90vw; max-width: 600px;';
-      dialog.appendChild(panel);
-      document.body.appendChild(dialog);
-      dialog.showModal();
-      dialog.addEventListener('close', () => dialog.remove());
-    },
-    'share-collection': () => {
-      if (!state.allSets || state.allSets.length === 0) {
-        showToast('Keine Collection zum Teilen', 'error');
-        return;
-      }
-      const collectionData = {}; // Würde hier echte Collection-Daten laden
-      const panel = createSharingDialog(collectionData, state.allSets);
-      const dialog = document.createElement('dialog');
-      dialog.className = 'ss-dialog';
-      dialog.style.cssText = 'width: 90vw; max-width: 600px;';
-      dialog.appendChild(panel);
-      document.body.appendChild(dialog);
-      dialog.showModal();
-      dialog.addEventListener('close', () => dialog.remove());
-    },
-    'trading-log': () => {
-      const panel = createTradingLogPanel();
-      const dialog = document.createElement('dialog');
-      dialog.className = 'ss-dialog';
-      dialog.style.cssText = 'width: 90vw; max-width: 700px;';
-      dialog.appendChild(panel);
-      document.body.appendChild(dialog);
-      dialog.showModal();
-      dialog.addEventListener('close', () => dialog.remove());
-    },
-    'achievements': async () => {
-      const stats = calculateCollectionStats(state.summaryData || []);
-      const panel = createAchievementsPanel(stats);
-      const dialog = document.createElement('dialog');
-      dialog.className = 'ss-dialog';
-      dialog.style.cssText = 'width: 90vw; max-width: 600px;';
-      dialog.appendChild(panel);
-      document.body.appendChild(dialog);
-      dialog.showModal();
-      dialog.addEventListener('close', () => dialog.remove());
-    },
-    'csv-export': () => {
-      if (!state.allSets || state.allSets.length === 0) {
-        showToast('Keine Sets zum Exportieren', 'error');
-        return;
-      }
-      const collectionData = {}; // Würde echte Collection-Daten laden
-      const panel = createCSVExportPanel(collectionData, state.allSets);
-      const dialog = document.createElement('dialog');
-      dialog.className = 'ss-dialog';
-      dialog.style.cssText = 'width: 90vw; max-width: 600px;';
-      dialog.appendChild(panel);
-      document.body.appendChild(dialog);
-      dialog.showModal();
-      dialog.addEventListener('close', () => dialog.remove());
-    },
-    'local-backup': () => {
-      try {
-        const backupData = {
-          sets: state.allSets,
-          imported: state.sets,
-          timestamp: new Date().toISOString()
-        };
-        const backupKey = createLocalBackup(backupData, `Backup ${new Date().toLocaleDateString()}`);
-        if (backupKey) {
-          showToast('💾 Lokale Sicherung erstellt', 'success', 3000);
-        } else {
-          showToast('Sicherung fehlgeschlagen', 'error');
-        }
-      } catch (err) {
-        showToast(`Sicherungsfehler: ${err.message}`, 'error');
-      }
-    },
-    'show-backups': () => {
-      const backups = getLocalBackups();
-      if (backups.length === 0) {
-        showToast('Keine lokalen Sicherungen gefunden', 'info');
-        return;
-      }
-
-      const list = document.createElement('div');
-      list.style.cssText = 'max-height: 400px; overflow-y: auto;';
-
-      backups.forEach((backup) => {
-        const item = document.createElement('div');
-        item.style.cssText = 'padding: 12px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center;';
-        item.innerHTML = `
-          <div>
-            <strong>${backup.name}</strong><br/>
-            <small style="color: var(--color-muted);">${new Date(backup.timestamp).toLocaleString('de-DE')}</small>
-          </div>
-          <button style="padding: 6px 12px; background: var(--color-primary); color: white; border: none; border-radius: 4px; cursor: pointer;">
-            Wiederherstellen
-          </button>
-        `;
-        list.appendChild(item);
-      });
-
-      const dialog = document.createElement('dialog');
-      dialog.className = 'ss-dialog';
-      dialog.style.cssText = 'width: 90vw; max-width: 500px;';
-      dialog.innerHTML = '<h3>💾 Lokale Sicherungen</h3>';
-      dialog.appendChild(list);
-      document.body.appendChild(dialog);
-      dialog.showModal();
-      dialog.addEventListener('close', () => dialog.remove());
-    },
-    'community': () => {
-      const container = document.createElement('div');
-      container.style.cssText = 'max-height: 80vh; overflow-y: auto; padding: 20px;';
-
-      const banner = createCommunityStatsBanner();
-      const trending = createCommunityTrendingPanel();
-      const search = createCommunitySearchPanel();
-
-      container.appendChild(banner);
-      container.appendChild(trending);
-      container.appendChild(search);
-
-      const dialog = document.createElement('dialog');
-      dialog.className = 'ss-dialog';
-      dialog.style.cssText = 'width: 90vw; max-width: 900px;';
-      dialog.appendChild(container);
-      document.body.appendChild(dialog);
-      dialog.showModal();
-      dialog.addEventListener('close', () => dialog.remove());
-    },
-    'profile': () => {
-      // Generate or get current user ID (in real app, from auth)
-      const userId = localStorage.getItem(USER_ID_STORAGE_KEY) || 'user_' + Date.now();
-      localStorage.setItem(USER_ID_STORAGE_KEY, userId);
-
-      let profile = getUserProfile(userId);
-      if (!profile) {
-        profile = createUserProfile('collector', 'Pokémon Sammler', 'Meine Pokémon TCG Collection');
-        localStorage.setItem(USER_ID_STORAGE_KEY, profile.userId);
-      }
-
-      const card = createUserProfileCard(profile.userId, profile.userId);
-
-      const dialog = document.createElement('dialog');
-      dialog.className = 'ss-dialog';
-      dialog.style.cssText = 'width: 90vw; max-width: 500px;';
-      dialog.appendChild(card);
-      document.body.appendChild(dialog);
-      dialog.showModal();
-      dialog.addEventListener('close', () => dialog.remove());
-    },
-    'publish-collection': () => {
-      if (!state.allSets || state.allSets.length === 0) {
-        showToast('Keine Sets zum Veröffentlichen', 'error');
-        return;
-      }
-
-      const userId = localStorage.getItem(USER_ID_STORAGE_KEY) || 'user_' + Date.now();
-      const collectionData = {}; // Würde echte Collection laden
-
-      const form = document.createElement('div');
-      form.style.cssText = 'padding: 20px;';
-
-      const titleEl = document.createElement('input');
-      titleEl.type = 'text';
-      titleEl.placeholder = 'Collection-Titel';
-      titleEl.value = 'Meine Pokémon Collection';
-      titleEl.style.cssText = 'width: 100%; padding: 10px; border: 1px solid var(--color-border); border-radius: 6px; margin-bottom: 12px;';
-
-      const descEl = document.createElement('textarea');
-      descEl.placeholder = 'Beschreibung...';
-      descEl.style.cssText = 'width: 100%; padding: 10px; border: 1px solid var(--color-border); border-radius: 6px; margin-bottom: 12px; min-height: 100px;';
-
-      const publishBtn = document.createElement('button');
-      publishBtn.textContent = '🌍 Veröffentlichen';
-      publishBtn.style.cssText = `
-        width: 100%;
-        padding: 12px;
-        background: var(--color-primary);
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: bold;
-      `;
-
-      publishBtn.addEventListener('click', () => {
-        const share = createPublicShare(userId, collectionData, state.allSets, titleEl.value, descEl.value);
-        if (share) {
-          showToast('✅ Collection veröffentlicht!', 'success', 3000);
-          publishBtn.textContent = '✅ Veröffentlicht!';
-          setTimeout(() => dialog.close(), 1500);
-        } else {
-          showToast('Fehler beim Veröffentlichen', 'error');
-        }
-      });
-
-      form.appendChild(titleEl);
-      form.appendChild(descEl);
-      form.appendChild(publishBtn);
-
-      const dialog = document.createElement('dialog');
-      dialog.className = 'ss-dialog';
-      dialog.style.cssText = 'width: 90vw; max-width: 500px;';
-      dialog.innerHTML = '<h3>🌍 Collection veröffentlichen</h3>';
-      dialog.appendChild(form);
-      document.body.appendChild(dialog);
-      dialog.showModal();
-      dialog.addEventListener('close', () => dialog.remove());
-    },
-    'trending': () => {
-      const trending = getTrendingCollections(20);
-
-      const container = document.createElement('div');
-      container.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; padding: 20px;';
-
-      if (trending.length === 0) {
-        container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--color-muted);">Noch keine Collections veröffentlicht</p>';
-      } else {
-        trending.forEach((share) => {
-          const card = createSharedCollectionCard(share);
-          container.appendChild(card);
-        });
-      }
-
-      const dialog = document.createElement('dialog');
-      dialog.className = 'ss-dialog';
-      dialog.style.cssText = 'width: 90vw; max-width: 1000px; max-height: 80vh; overflow-y: auto;';
-      dialog.innerHTML = '<h3 style="padding: 20px; margin: 0; border-bottom: 1px solid var(--color-border);">🔥 Trending Collections</h3>';
-      dialog.appendChild(container);
-      document.body.appendChild(dialog);
-  
-      dialog.showModal();
-      dialog.addEventListener('close', () => dialog.remove());
-    },
-    'marketplace': () => {
-      const dialog = document.createElement('dialog');
-      dialog.className = 'ss-dialog';
-      dialog.style.cssText = 'width: 90vw; max-width: 1200px; max-height: 80vh; overflow-y: auto;';
-      
-      const container = document.createElement('div');
-      container.style.cssText = 'padding: 20px;';
-      
-      const statsCard = createTradeStatsCard('current-user');
-      const marketplace = createTradeMarketplacePanel();
-      const suggestions = createTradeSuggestionsPanel('current-user', []);
-      
-      container.appendChild(statsCard);
-      container.appendChild(marketplace);
-      container.appendChild(suggestions);
-      
-      dialog.innerHTML = '<h3 style="padding: 20px 20px 0 20px; margin: 0; border-bottom: 1px solid var(--color-border);">💱 Trading Marketplace</h3>';
-      dialog.appendChild(container);
-      document.body.appendChild(dialog);
-      dialog.showModal();
-      dialog.addEventListener('close', () => dialog.remove());
-    },
-    'wanted': () => {
-      const dialog = document.createElement('dialog');
-      dialog.className = 'ss-dialog';
-      
-      const container = document.createElement('div');
-      container.style.cssText = 'padding: 20px;';
-      container.appendChild(createWantedCardsPanel());
-      
-      dialog.innerHTML = '<h3 style="padding: 20px 20px 0 20px; margin: 0; border-bottom: 1px solid var(--color-border);">🎯 Gesuchte Karten</h3>';
-      dialog.appendChild(container);
-      document.body.appendChild(dialog);
-      dialog.showModal();
-      dialog.addEventListener('close', () => dialog.remove());
-    },
-    'rarity': () => {
-      const dialog = document.createElement('dialog');
-      dialog.className = 'ss-dialog';
-      
-      const availableRarities = getAvailableRarities();
-      
-      const container = document.createElement('div');
-      container.style.cssText = 'padding: 20px;';
-      
-      const header = document.createElement('div');
-      header.style.cssText = 'margin-bottom: 20px;';
-      header.innerHTML = '<h4>Verfügbare Raritäten</h4>';
-      container.appendChild(header);
-      
-      const grid = document.createElement('div');
-      grid.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px;';
-      
-      availableRarities.forEach((rarity) => {
-        const btn = document.createElement('button');
-        btn.className = 'btn-secondary';
-        btn.style.cssText = 'padding: 12px; cursor: pointer;';
-        btn.textContent = `${rarity.emoji} ${rarity.name}`;
-        btn.addEventListener('click', () => {
-          console.log(`Filtere nach Raritär: ${rarity.id}`);
-        });
-        grid.appendChild(btn);
-      });
-      
-      container.appendChild(grid);
-      
-      dialog.innerHTML = '<h3 style="padding: 20px 20px 0 20px; margin: 0; border-bottom: 1px solid var(--color-border);">✨ Raritätsfilter</h3>';
-      dialog.appendChild(container);
-      document.body.appendChild(dialog);
-      dialog.showModal();
-      dialog.addEventListener('close', () => dialog.remove());
-    },
-    'collection-value': () => {
-      const dialog = document.createElement('dialog');
-      dialog.className = 'ss-dialog';
-      
-      const container = document.createElement('div');
-      container.style.cssText = 'padding: 20px;';
-      
-      // Placeholder - würde in vollständiger Integration die echten Cards verwenden
-      const stats = getCollectionValueStats([]);
-      
-      const info = document.createElement('div');
-      info.style.cssText = 'background: var(--bg-secondary); padding: 16px; border-radius: 8px; text-align: center;';
-      info.innerHTML = `
-        <h3>Kollektionswert</h3>
-        <div style="font-size: 2em; font-weight: bold; color: var(--color-success); margin: 10px 0;">
-          €${stats.totalValue?.toFixed(2) || '0.00'}
-        </div>
-        <div style="color: var(--text-secondary);">
-          <p>Karten: ${stats.cardCount || 0}</p>
-          <p>Durchschnittswert: €${stats.averageValue?.toFixed(2) || '0.00'}</p>
-        </div>
-      `;
-      
-      container.appendChild(info);
-      
-      dialog.innerHTML = '<h3 style="padding: 20px 20px 0 20px; margin: 0; border-bottom: 1px solid var(--color-border);">💰 Kollektionswert</h3>';
-      dialog.appendChild(container);
-      document.body.appendChild(dialog);
-      dialog.showModal();
-      dialog.addEventListener('close', () => dialog.remove());
-    },
-    'live-dashboard': () => {
-      const dialog = document.createElement('dialog');
-      dialog.className = 'ss-dialog';
-      dialog.style.cssText = 'width: 90vw; max-width: 900px; max-height: 80vh; overflow-y: auto;';
-
-      const body = document.createElement('div');
-      body.style.cssText = 'padding: 20px; display: grid; gap: 12px;';
-
-      const headline = document.createElement('div');
-      headline.style.cssText = 'padding: 12px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-bg-secondary);';
-      body.appendChild(headline);
-
-      const metricsGrid = document.createElement('div');
-      metricsGrid.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;';
-      body.appendChild(metricsGrid);
-
-      const refreshUI = () => {
-        const metrics = getEngineMetrics();
-        const market = getTradePlaceSummary();
-        const summaryRows = state.summaryData || [];
-        const totals = summaryRows.reduce((acc, row) => {
-          acc.total += Number(row.total || 0);
-          acc.collected += Number(row.collected || 0);
-          acc.rh += Number(row.rh || 0);
-          return acc;
-        }, { total: 0, collected: 0, rh: 0 });
-
-        const progress = totals.total > 0 ? Math.round((totals.collected / totals.total) * 100) : 0;
-
-        headline.innerHTML = `
-          <div style="font-weight: 700;">📡 Live Dashboard</div>
-          <div style="color: var(--color-muted); font-size: 13px;">Aktualisiert: ${new Date().toLocaleTimeString('de-DE')}</div>
-        `;
-
-        const cards = [
-          ['Status', metrics.status === 'online' ? '🟢 Online' : '🔴 Offline'],
-          ['Cache Hit Rate', `${metrics.cacheHitRate}%`],
-          ['Gesamtfortschritt', `${progress}%`],
-          ['Gesammelt', `${totals.collected} / ${totals.total}`],
-          ['Reverse Holos', `${totals.rh}`],
-          ['Aktive Angebote', `${market.activeOffers || 0}`],
-          ['Gesuchte Karten', `${market.totalWantedCards || 0}`],
-          ['Queue', `${(metrics.syncQueue || []).length}`]
-        ];
-
-        metricsGrid.innerHTML = cards.map(([label, value]) => `
-          <div style="padding: 12px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-bg-secondary);">
-            <div style="font-size: 12px; color: var(--color-muted);">${label}</div>
-            <div style="font-size: 20px; font-weight: 700; margin-top: 4px;">${value}</div>
-          </div>
-        `).join('');
-      };
-
-      refreshUI();
-      const timer = setInterval(refreshUI, 3000);
-
-      dialog.innerHTML = '<h3 style="padding: 20px 20px 0 20px; margin: 0; border-bottom: 1px solid var(--color-border);">📊 Advanced Live Dashboard</h3>';
-      dialog.appendChild(body);
-      document.body.appendChild(dialog);
-      dialog.showModal();
-      dialog.addEventListener('close', () => {
-        clearInterval(timer);
-        dialog.remove();
-      });
-    }
-  };
-  try {
-    initCommandPalette(commandHandlers);
-    console.log('✅ Command Palette initialized');
-  } catch (err) {
-    console.warn('⚠️ Command Palette init failed:', err);
-  }
-
-  // Start Smart Engine metrics update loop
-  setInterval(() => {
-    try {
-      const metrics = getEngineMetrics();
-      const metricsEl = document.getElementById('engine-metrics');
-      if (metricsEl) {
-        metricsEl.classList.remove('hidden');
-        const rateEl = document.getElementById('metric-cache-rate');
-        const statusEl = document.getElementById('metric-api-status');
-        if (rateEl) rateEl.textContent = metrics.cacheHitRate;
-        if (statusEl) statusEl.textContent = metrics.status === 'online' ? '🟢 online' : '🔴 offline';
-      }
-    } catch (err) {
-      console.warn('[metrics update]', err);
-    }
-  }, 5000);
-
-  document.querySelectorAll('.nav-link').forEach((link) => {
-    if (link.dataset.navToggle) return;
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      navigate(link.dataset.view);
-    });
-  });
-  dom.btnNavSetToggle?.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (dom.btnNavSetToggle.disabled) return;
-    setRecentSetsDropdownOpen(!dom.navSetSplit?.classList.contains('open'));
-  });
-  document.addEventListener('click', (event) => {
-    if (!(event.target instanceof Node)) return;
-    if (!dom.navSetSplit?.contains(event.target)) {
-      setRecentSetsDropdownOpen(false);
-    }
-    if (!dom.refreshSplit?.contains(event.target)) {
-      setRefreshMenuOpen(false);
-    }
-  });
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') {
-      setRecentSetsDropdownOpen(false);
-      setRefreshMenuOpen(false);
-    }
-  });
-  window.addEventListener('resize', positionRecentSetsDropdown, { passive: true });
-  window.addEventListener('scroll', positionRecentSetsDropdown, { passive: true });
-  window.addEventListener('hashchange', handleRouteChange);
-
-  setLoading(true, 'Initialisiere\u2026');
-  setGlobalStatus('Initialisiere Google API\u2026');
-
-  try {
-    const autoLoggedIn = await initAuth();
-
-    syncAuthButtonLabel();
-    window.addEventListener('resize', syncAuthButtonLabel, { passive: true });
-
-    dom.auth.addEventListener('click', async () => {
-      if (dom.auth.dataset.state === 'out') { signOut(); resetToLoggedOut(); return; }
-      dom.auth.disabled = true;
-      setGlobalStatus('Bitte Google-Login im Popup abschließen…');
-      showToast('Google-Login im Popup geöffnet.', 'info', 2600);
-      const ok = await signIn();
-      if (!ok) { dom.auth.disabled = false; showToast('Login fehlgeschlagen oder abgebrochen.', 'error'); setGlobalStatus('Login fehlgeschlagen oder abgebrochen.'); return; }
-      onLoginSuccess();
-    });
-
-    dom.load.addEventListener('click', async () => {
-      if (!isSignedIn()) return;
-      setRefreshMenuOpen(false);
-      const setId = dom.selector.value;
-      if (setId) navigate(`set/${setId}`);
-      await loadCurrentSet(false);
-    });
-
-    dom.refresh.addEventListener('click', async () => {
-      if (!isSignedIn() || !state.currentSet) return;
-      setRefreshMenuOpen(false);
-      await loadCurrentSet(true);
-    });
-
-    dom.btnRefreshMenu?.addEventListener('click', (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      if (!isSignedIn() || dom.btnRefreshMenu.disabled || !state.currentSet) return;
-      setRefreshMenuOpen(dom.refreshMenu?.classList.contains('hidden'));
-    });
-
-    dom.btnRefreshReimport?.addEventListener('click', async (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      setRefreshMenuOpen(false);
-      if (!isSignedIn() || !state.currentSet) return;
-      await reimportCurrentSetFromApi();
-    });
-
-    dom.selector.addEventListener('change', () => {
-      setRefreshMenuOpen(false);
-      const setId = dom.selector.value;
-      if (setId) {
-        navigate(`set/${setId}`);
-        return;
-      }
-      state.currentSet = null; state.cards = []; state.dbMap = new Map();
-      syncRefreshControls();
-      syncSetNavLink(null);
-      dom.cards.innerHTML = '';
-      dom.statsSection.classList.add('hidden');
-      dom.filterSection.classList.add('hidden');
-      dom.sortSection.classList.add('hidden');
-      dom.setLogoWrap.classList.add('hidden');
-      setEmptyState(true);
-    });
-
-    dom.btnMissingExport.addEventListener('click', exportMissingCards);
-
-    if (autoLoggedIn) { onLoginSuccess(); }
-    else { setLoading(false); setGlobalStatus('Bereit. Bitte anmelden.'); showView('dashboard'); }
-  } catch (err) {
-    setLoading(false);
-    showToast(`Init-Fehler: ${err.message}`, 'error');
-    setGlobalStatus(`Fehler: ${err.message}`);
-  }
+  await bootstrapController.bootstrapPostCore();
 }
 
 async function onLoginSuccess() {
@@ -7941,9 +9004,9 @@ bootstrap().catch((err) => {
   setLoading(false);
 });
 
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 // SERVICE WORKER REGISTRATION
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
@@ -7951,7 +9014,6 @@ if ('serviceWorker' in navigator) {
       const registration = await navigator.serviceWorker.register('./service-worker.js', {
         scope: './'
       });
-      console.log('✅ Service Worker registered:', registration);
 
       if (registration.waiting) {
         registration.waiting.postMessage({ type: 'SKIP_WAITING' });
@@ -7974,7 +9036,7 @@ if ('serviceWorker' in navigator) {
       
       // Handle controller change (new SW ready)
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        showToast('🔄 App wurde aktualisiert', 'success', 1500);
+        showToast('App wurde aktualisiert', 'success', 1500);
         window.setTimeout(() => {
           window.location.reload();
         }, 300);
@@ -7983,7 +9045,7 @@ if ('serviceWorker' in navigator) {
       // Listen for messages from Service Worker
       navigator.serviceWorker.addEventListener('message', (event) => {
         if (event.data.type === 'sync-complete') {
-          showToast('✅ Daten synchronisiert', 'success', 2000);
+          showToast('Daten synchronisiert', 'success', 2000);
         }
       });
     } catch (err) {
@@ -7994,14 +9056,29 @@ if ('serviceWorker' in navigator) {
 
 // PWA Install Prompt Handler
 let deferredPrompt;
+let installBtn = null;
+const isAppInstalled = () => {
+  const isStandalone = Boolean(navigator.standalone);
+  const hasMatchMedia = typeof window.matchMedia === 'function';
+  const isDisplayStandalone = hasMatchMedia && window.matchMedia('(display-mode: standalone)').matches;
+  return isStandalone || isDisplayStandalone;
+};
+const removeInstallButton = () => {
+  if (installBtn?.parentElement) {
+    installBtn.parentElement.removeChild(installBtn);
+  }
+  installBtn = null;
+};
+
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
   
   // Show install button
-  const installBtn = document.createElement('button');
+  removeInstallButton();
+  installBtn = document.createElement('button');
   installBtn.className = 'btn-primary';
-  installBtn.textContent = '📱 App installieren';
+  installBtn.textContent = 'App installieren';
   installBtn.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 100;';
   
   installBtn.addEventListener('click', async () => {
@@ -8009,22 +9086,23 @@ window.addEventListener('beforeinstallprompt', (e) => {
       deferredPrompt.prompt();
       const choice = await deferredPrompt.userChoice;
       if (choice.outcome === 'accepted') {
-        showToast('✅ App installiert!', 'success', 3000);
+        showToast('App installiert!', 'success', 3000);
+        removeInstallButton();
       }
       deferredPrompt = null;
     }
   });
   
   // Only show if not already installed
-  if (document.body && !navigator.standalone) {
+  if (document.body && !isAppInstalled()) {
     document.body.appendChild(installBtn);
   }
 });
 
 // Handle app installed event
 window.addEventListener('appinstalled', () => {
-  console.log('✅ PWA installfiert');
-  showToast('🎉 App erfolgreich installiert!', 'success', 4000);
+  removeInstallButton();
+  showToast('App erfolgreich installiert!', 'success', 4000);
 });
 
 const _featureInitFlags = {
@@ -8044,9 +9122,9 @@ const _connectivityState = {
   pollTimer: null
 };
 
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 // FEATURE 2: Charts in Statistiken (Chart.js)
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 const _statsChartInstances = {};
 
 function initStatsCharts(totalCollected, totalCards, seriesMap) {
@@ -8100,7 +9178,7 @@ function initStatsCharts(totalCollected, totalCards, seriesMap) {
       data: {
         labels: topSeries.map(([key, group]) => {
           const label = getStatsSeriesLabel(key, group);
-          return label.length > 16 ? `${label.slice(0, 14)}…` : label;
+          return label.length > 16 ? `${label.slice(0, 14)}` : label;
         }),
         datasets: [{
           label: 'Gesammelt %',
@@ -8134,9 +9212,9 @@ function initStatsCharts(totalCollected, totalCards, seriesMap) {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 // FEATURE 3: Offline-Status-Indikator
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 function isOfflineLikeError(err) {
   const status = Number(err?.status || err?.result?.error?.code || 0);
   if (status === 0) return true;
@@ -8191,7 +9269,7 @@ async function probeAppConnectivity(options = {}) {
     _connectivityState.lastError = null;
     renderOfflineIndicator();
     if (!silent && wasOffline) {
-      showToast('🟢 Verbindung zu Google Sheets wiederhergestellt', 'success', 2500);
+      showToast('Verbindung zu Google Sheets wiederhergestellt', 'success', 2500);
     }
   } catch (err) {
     _connectivityState.lastError = err;
@@ -8200,7 +9278,7 @@ async function probeAppConnectivity(options = {}) {
       _connectivityState.appOnline = false;
       renderOfflineIndicator();
       if (!silent && wasOnline) {
-        showToast('📴 Keine Verbindung zu Google Sheets – gespeicherte Daten werden angezeigt', 'info', 3500);
+        showToast('Keine Verbindung zu Google Sheets - gespeicherte Daten werden angezeigt', 'info', 3500);
       }
     } else {
       // Auth/config problems are not the same as offline mode.
@@ -8237,9 +9315,9 @@ function initOfflineIndicator() {
   }, 30000);
 }
 
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 // FEATURE 4: Set-Card Hover-Preview
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 function initDashboardHoverPreview() {
   if (_featureInitFlags.hoverPreview) return;
   _featureInitFlags.hoverPreview = true;
@@ -8251,12 +9329,12 @@ function initDashboardHoverPreview() {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 // FEATURE 5: Set-Completion Celebration
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 function triggerCompletionCelebration(setId, cardEl) {
   const setName = cardEl.querySelector('.dash-set-name')?.textContent || setId;
-  showToast(`🎉 ${setName} vollständig gesammelt!`, 'success', 5000);
+  showToast(`${setName} vollstaendig gesammelt!`, 'success', 5000);
 
   if (window.confetti) {
     const rect = cardEl.getBoundingClientRect();
@@ -8287,9 +9365,9 @@ function checkSetCompletion(setId, percent, cardEl) {
   setTimeout(() => triggerCompletionCelebration(setId, cardEl), delay);
 }
 
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 // FEATURE 6: Suche-Autocomplete
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 function initSearchAutocomplete() {
   if (_featureInitFlags.autocomplete) return;
   _featureInitFlags.autocomplete = true;
@@ -8329,9 +9407,20 @@ function initSearchAutocomplete() {
 
   const pushCandidate = (map, candidate, score = 0) => {
     if (!candidate?.key || !candidate?.label) return;
+    const label = sanitizeDisplayText(candidate.label);
+    if (!label) return;
+    const meta = sanitizeDisplayText(candidate.meta || '');
+    const badge = sanitizeDisplayText(candidate.badge || '');
+
     const existing = map.get(candidate.key);
     if (!existing || score > existing.score) {
-      map.set(candidate.key, { ...candidate, score });
+      map.set(candidate.key, {
+        ...candidate,
+        label,
+        meta,
+        badge,
+        score
+      });
     }
   };
 
@@ -8453,7 +9542,7 @@ function initSearchAutocomplete() {
       const altNames = nameValues.filter((value) => value !== labelNorm).slice(0, 2);
       const metaParts = [
         set?.setName || set?.series || '',
-        altNames.length ? `Alias: ${altNames.join(' · ')}` : ''
+        altNames.length ? `Alias: ${altNames.join(' - ')}` : ''
       ].filter(Boolean);
 
       pushCandidate(entries, {
@@ -8461,7 +9550,7 @@ function initSearchAutocomplete() {
         label,
         value: label,
         badge: card?.number || card?.tcgdex_localId || 'Karte',
-        meta: metaParts.join(' · '),
+        meta: metaParts.join(' - '),
         type: 'card',
         setId: set?.setId || ''
       }, score);
@@ -8484,15 +9573,20 @@ function initSearchAutocomplete() {
       return;
     }
 
-    list.innerHTML = items.map((item, idx) => `
+    list.innerHTML = items.map((item, idx) => {
+      const safeLabel = sanitizeDisplayText(item.label);
+      const safeMeta = sanitizeDisplayText(item.meta || '');
+      const safeBadge = sanitizeDisplayText(item.badge || '');
+      return `
       <li class="search-ac-item search-ac-item--${escapeHtml(item.type)}" role="option" data-idx="${idx}">
         <span class="ac-main">
-          <span class="ac-label">${escapeHtml(item.label)}</span>
-          ${item.meta ? `<small class="ac-meta">${escapeHtml(item.meta)}</small>` : ''}
+          <span class="ac-label">${escapeHtml(safeLabel)}</span>
+          ${safeMeta ? `<small class="ac-meta">${escapeHtml(safeMeta)}</small>` : ''}
         </span>
-        <span class="ac-badge">${escapeHtml(item.badge || '')}</span>
+        <span class="ac-badge">${escapeHtml(safeBadge)}</span>
       </li>
-    `).join('');
+    `;
+    }).join('');
     list.classList.remove('hidden');
   };
 
@@ -8579,9 +9673,9 @@ function initSearchAutocomplete() {
   });
 }
 
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 // FEATURE 7: Statistiken Drill-Down
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 function initStatsDrillDown() {
   const statsContent = document.getElementById('stats-content');
   if (!statsContent || _featureInitFlags.statsDrilldown) return;
@@ -8612,7 +9706,7 @@ function initStatsDrillDown() {
     panel.dataset.series = seriesKey;
 
     panel.innerHTML = `
-      <h4>📦 ${seriesLabel} – ${seriesSets.length} Sets</h4>
+      <h4>${seriesLabel} - ${seriesSets.length} Sets</h4>
       <div class="stats-drilldown-grid">
         ${seriesSets.map((set) => {
           const summary = summaryRows.find((entry) => entry.setName === set.setName) || {};
@@ -8643,21 +9737,21 @@ function initStatsDrillDown() {
   });
 }
 
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 // FEATURE 8: Keyboard-Shortcuts Overlay
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 const KEYBOARD_SHORTCUTS = [
-  ['D', 'Dashboard öffnen'],
-  ['S', 'Set-Ansicht öffnen'],
-  ['T', 'Statistiken öffnen'],
+  ['D', 'Dashboard oeffnen'],
+  ['S', 'Set-Ansicht oeffnen'],
+  ['T', 'Statistiken oeffnen'],
   ['/', 'Suche fokussieren'],
-  ['← / →', 'Karte navigieren'],
+  ['? / ?', 'Karte navigieren'],
   ['Leertaste', 'Normal (G) togglen'],
   ['R', 'Reverse Holo (RH) togglen'],
   ['I', 'Kartendetails / Bild-Zoom'],
-  ['Cmd/Strg K', 'Command Palette öffnen'],
-  ['?', 'Diese Shortcut-Übersicht'],
-  ['Esc', 'Dialog / Overlay schließen'],
+  ['Cmd/Strg K', 'Command Palette oeffnen'],
+  ['?', 'Diese Shortcut-Uebersicht'],
+  ['Esc', 'Dialog / Overlay schliessen'],
 ];
 
 function showShortcutsOverlay() {
@@ -8672,8 +9766,8 @@ function showShortcutsOverlay() {
   overlay.className = 'shortcuts-overlay';
   overlay.innerHTML = `
     <div class="shortcuts-panel" role="dialog" aria-modal="true" aria-label="Keyboard Shortcuts">
-      <h2>⌨️ Keyboard Shortcuts</h2>
-      <p>Tippe außerhalb von Eingabefeldern</p>
+      <h2>Keyboard Shortcuts</h2>
+      <p>Tippe ausserhalb von Eingabefeldern</p>
       <table class="shortcut-table">
         <tbody>
           ${KEYBOARD_SHORTCUTS.map(([key, desc]) => `
@@ -8684,7 +9778,7 @@ function showShortcutsOverlay() {
           `).join('')}
         </tbody>
       </table>
-      <p class="shortcuts-close-hint">Esc oder ? oder Klick außerhalb zum Schließen</p>
+      <p class="shortcuts-close-hint">Esc oder ? oder Klick ausserhalb zum Schliessen</p>
     </div>
   `;
 
@@ -8764,9 +9858,9 @@ function initShortcutsOverlay() {
 
 initShortcutsOverlay();
 
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 // FEATURE 9: Sammlung teilen (ShareURL)
-// ══════════════════════════════════════════════════════════════════════════
+// --------------------------------------------------------------------------
 function initShareButton() {
   if (_featureInitFlags.share) return;
   _featureInitFlags.share = true;
@@ -8795,6 +9889,7 @@ function initShareButton() {
 function showShareDialog(url) {
   const existing = document.getElementById('dialog-share');
   if (existing) {
+    closeOtherOpenDialogs([existing]);
     existing.showModal();
     return;
   }
@@ -8803,11 +9898,11 @@ function showShareDialog(url) {
   dialog.id = 'dialog-share';
   dialog.className = 'ss-dialog share-dialog';
   dialog.innerHTML = `
-    <h2>🔗 Sammlung teilen</h2>
+    <h2>Sammlung teilen</h2>
     <p>Der Link enthält deine Spreadsheet-ID und funktioniert für Personen mit Zugriff auf dein Sheet.</p>
     <div class="share-url-wrap">
       <input class="share-url-input" type="text" readonly value="${url.replace(/"/g, '&quot;')}" />
-      <button class="share-copy-btn" type="button">📋 Kopieren</button>
+      <button class="share-copy-btn" type="button">Link kopieren</button>
     </div>
     <div class="dialog-actions">
       <button class="btn-secondary" type="button" onclick="this.closest('dialog').close()">Schließen</button>
@@ -8822,11 +9917,12 @@ function showShareDialog(url) {
       input.select();
       document.execCommand('copy');
     }
-    showToast('📋 Link kopiert!', 'success', 2500);
+    showToast('Link kopiert!', 'success', 2500);
   });
 
   dialog.addEventListener('close', () => dialog.remove());
   document.body.appendChild(dialog);
+  closeOtherOpenDialogs([dialog]);
   dialog.showModal();
 }
 

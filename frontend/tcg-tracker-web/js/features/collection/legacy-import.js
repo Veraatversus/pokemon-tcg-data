@@ -1,6 +1,6 @@
 import { normalizeCardNumber, toBoolean, colToA1 } from '../../core/utils.js';
 import { normalizeSetId, buildSetIdAliasCandidates } from '../../pokecode-compat.js';
-import { CONFIG } from '../../core/config.js?v=20260409-treeview1';
+import { CONFIG } from '../../core/config.js?v=20260427-wave3-central-v1';
 
 const LEGACY_IGNORED_SHEETS = new Set([
   CONFIG.SHEETS.OVERVIEW,

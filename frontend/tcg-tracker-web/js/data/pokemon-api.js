@@ -5,9 +5,9 @@ import {
   combineSetsForOverviewCompat,
   fetchAllPrimaryCardsForSet,
   resolvePreferredTcgdexSetBases
-} from '../pokecode-compat.js?v=20260507a';
-import { buildSetRecordFromSources, resolveDisplayCard, resolveDisplaySet } from './schema-contract.js?v=20260507a';
-import { promoteCardmarketUrlsForCards } from './cardmarket-data.js?v=20260410-loginfix1';
+} from '../pokecode-compat.js?v=20260427-wave3-central-v1';
+import { buildSetRecordFromSources, resolveDisplayCard, resolveDisplaySet } from './schema-contract.js?v=20260427-wave3-central-v1';
+import { promoteCardmarketUrlsForCards } from './cardmarket-data.js?v=20260427-wave3-central-v1';
 
 // ── Interne Hilfsfunktionen ──────────────────────────────────────
 
@@ -277,7 +277,7 @@ export async function fetchMergedCardsWithSetMeta(setId, { signal } = {}) {
 
   const fetchJsonWithSignal = (url) => fetchJson(url, { signal });
 
-  const { allCards, tcgdexDetailedSet, matchingTcgdexSet } = await loadCardsForSetCompat({
+  const { allCards, tcgdexDetailedSet, tcgdexEnglishDetailedSet, matchingTcgdexSet } = await loadCardsForSetCompat({
     setId,
     setName: primarySet?.name || setId,
     useVeraApi: CONFIG.USE_VERA_API,
@@ -311,6 +311,7 @@ export async function fetchMergedCardsWithSetMeta(setId, { signal } = {}) {
     setId,
     primarySet,
     tcgdexSet,
+    tcgdexFallbackSet: tcgdexEnglishDetailedSet || matchingTcgdexSet || null,
     isTcgdexOnly,
     imported: false
   }));
