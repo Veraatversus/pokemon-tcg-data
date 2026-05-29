@@ -6,13 +6,21 @@ import {
   buildCardmarketArtifacts,
   writeArtifactsToDirectory,
 } from './lib/build-helpers.mjs';
+import { applyCustomSetScripts } from './apply-custom-set-scripts.mjs';
 
 const DEFAULT_SINGLES_URL = 'https://downloads.s3.cardmarket.com/productCatalog/productList/products_singles_6.json';
 const DEFAULT_NONSINGLES_URL = 'https://downloads.s3.cardmarket.com/productCatalog/productList/products_nonsingles_6.json';
 const DEFAULT_PRICE_GUIDE_URL = 'https://downloads.s3.cardmarket.com/productCatalog/priceGuide/price_guide_6.json';
+const DEFAULT_FETCH_TIMEOUT_MS = 30000;
 
-async function fetchJson(url) {
+async function fetchJson(url, { timeoutMs = DEFAULT_FETCH_TIMEOUT_MS } = {}) {
+  const parsedTimeout = Number(timeoutMs);
+  const effectiveTimeout = Number.isFinite(parsedTimeout) && parsedTimeout > 0
+    ? parsedTimeout
+    : DEFAULT_FETCH_TIMEOUT_MS;
+
   const response = await fetch(url, {
+    signal: AbortSignal.timeout(effectiveTimeout),
     headers: {
       'user-agent': 'veraatversus-cardmarket-builder/1.0',
       accept: 'application/json',
@@ -96,12 +104,12 @@ async function resolveDefaultOutputDirs(repoRoot) {
   return dirs;
 }
 
-export async function buildDailyCardmarketData({ singlesUrl = DEFAULT_SINGLES_URL, nonsinglesUrl = DEFAULT_NONSINGLES_URL, priceGuideUrl = DEFAULT_PRICE_GUIDE_URL, outputDir, outputDirs = [], repoRoot } = {}) {
+export async function buildDailyCardmarketData({ singlesUrl = DEFAULT_SINGLES_URL, nonsinglesUrl = DEFAULT_NONSINGLES_URL, priceGuideUrl = DEFAULT_PRICE_GUIDE_URL, outputDir, outputDirs = [], repoRoot, customScriptsDir, fetchTimeoutMs = Number(process.env.CARDMARKET_FETCH_TIMEOUT_MS) || DEFAULT_FETCH_TIMEOUT_MS } = {}) {
   const resolvedRepoRoot = repoRoot ? path.resolve(repoRoot) : path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
   const [rawSinglesPayload, nonsinglesPayload, priceGuidePayload, trackerReference] = await Promise.all([
-    fetchJson(singlesUrl),
-    fetchJson(nonsinglesUrl),
-    fetchJson(priceGuideUrl),
+    fetchJson(singlesUrl, { timeoutMs: fetchTimeoutMs }),
+    fetchJson(nonsinglesUrl, { timeoutMs: fetchTimeoutMs }),
+    fetchJson(priceGuideUrl, { timeoutMs: fetchTimeoutMs }),
     loadTrackerReferenceData(resolvedRepoRoot),
   ]);
 
@@ -114,6 +122,12 @@ export async function buildDailyCardmarketData({ singlesUrl = DEFAULT_SINGLES_UR
     trackerSets: trackerReference.trackerSets,
     trackerCardsBySet: trackerReference.trackerCardsBySet,
   });
+
+  await applyCustomSetScripts(artifacts, {
+    scriptsDir: customScriptsDir,
+    logger: console,
+  });
+
   validateArtifacts(artifacts);
 
   const resolvedOutputDirs = [...new Set([
