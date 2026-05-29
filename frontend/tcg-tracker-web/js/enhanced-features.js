@@ -8,11 +8,29 @@ const STORAGE_KEYS = {
 };
 
 const MAX_SEARCH_HISTORY = 20;
+const CARDMARKET_BASE_PRICE_DEFAULT = 'trend';
+const CARDMARKET_BASE_PRICE_ALLOWED = new Set([
+  'trend',
+  'average',
+  'average1',
+  'average7',
+  'average30',
+  'low'
+]);
+
+function normalizeCardmarketBasePriceType(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  return CARDMARKET_BASE_PRICE_ALLOWED.has(normalized)
+    ? normalized
+    : CARDMARKET_BASE_PRICE_DEFAULT;
+}
+
 const DEFAULT_SETTINGS = {
   compactMode: false,
   autoBackup: false,
   notificationsEnabled: false,
-  expertResolverMode: false
+  expertResolverMode: false,
+  cardmarketBasePriceType: CARDMARKET_BASE_PRICE_DEFAULT
 };
 
 function readJson(key, fallback) {
@@ -100,6 +118,7 @@ export function generateCollectionReport(collection = {}, sets = []) {
 function sanitizeSettings(settings = {}) {
   const normalized = settings && typeof settings === 'object' ? { ...settings } : {};
   delete normalized.autoImportMode;
+  normalized.cardmarketBasePriceType = normalizeCardmarketBasePriceType(normalized.cardmarketBasePriceType);
   return normalized;
 }
 

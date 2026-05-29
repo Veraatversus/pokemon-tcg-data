@@ -6166,6 +6166,7 @@ async function loadStatsPriceAnalyticsLazy({ requestId } = {}) {
   let loadedCards = 0;
   let errors = 0;
   const resolvedItems = [];
+  const basePriceType = getCurrentCardmarketBasePriceType();
 
   for (let offset = 0; offset < candidates.length; offset += STATS_PRICE_CHUNK_SIZE) {
     const chunk = candidates.slice(offset, offset + STATS_PRICE_CHUNK_SIZE);
@@ -6176,7 +6177,10 @@ async function loadStatsPriceAnalyticsLazy({ requestId } = {}) {
           cards: candidate.sourceCards,
           resolverCard: candidate.sourceCard,
         });
-        const value = pickCardPriceFromSummary(summary, { preferReverseHolo: candidate.isReverseHolo });
+        const value = pickCardPriceFromSummary(summary, {
+          preferReverseHolo: candidate.isReverseHolo,
+          basePriceType
+        });
         return {
           ...candidate,
           value,
@@ -7631,6 +7635,95 @@ function getCardmarketPriceValue(prices = {}, ...keys) {
   return null;
 }
 
+const CARDMARKET_BASE_PRICE_DEFAULT = 'trend';
+const CARDMARKET_BASE_PRICE_ALLOWED = new Set([
+  'trend',
+  'average',
+  'average1',
+  'average7',
+  'average30',
+  'low'
+]);
+
+const CARDMARKET_LINK_FALLBACK_NORMAL = [
+  [['trend'], 'Trend'],
+  [['average', 'avg'], 'Avg'],
+  [['average1', 'avg1'], 'Avg 1d'],
+  [['average7', 'avg7'], 'Avg 7d'],
+  [['average30', 'avg30'], 'Avg 30d'],
+  [['low'], 'Low']
+];
+
+const CARDMARKET_LINK_FALLBACK_REVERSE = [
+  [['trendHolo'], 'RH Trend'],
+  [['averageHolo', 'avgHolo'], 'RH Avg'],
+  [['average1Holo', 'avg1Holo'], 'RH Avg 1d'],
+  [['average7Holo', 'avg7Holo'], 'RH Avg 7d'],
+  [['average30Holo', 'avg30Holo'], 'RH Avg 30d'],
+  [['lowHolo'], 'RH Low'],
+  [['reverseHoloSell'], 'RH Sell']
+];
+
+const CARDMARKET_BASE_TO_CANDIDATE = {
+  trend: {
+    normal: [['trend'], 'Trend'],
+    reverseHolo: [['trendHolo'], 'RH Trend']
+  },
+  average: {
+    normal: [['average', 'avg'], 'Avg'],
+    reverseHolo: [['averageHolo', 'avgHolo'], 'RH Avg']
+  },
+  average1: {
+    normal: [['average1', 'avg1'], 'Avg 1d'],
+    reverseHolo: [['average1Holo', 'avg1Holo'], 'RH Avg 1d']
+  },
+  average7: {
+    normal: [['average7', 'avg7'], 'Avg 7d'],
+    reverseHolo: [['average7Holo', 'avg7Holo'], 'RH Avg 7d']
+  },
+  average30: {
+    normal: [['average30', 'avg30'], 'Avg 30d'],
+    reverseHolo: [['average30Holo', 'avg30Holo'], 'RH Avg 30d']
+  },
+  low: {
+    normal: [['low'], 'Low'],
+    reverseHolo: [['lowHolo'], 'RH Low']
+  }
+};
+
+function normalizeCardmarketBasePriceType(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  return CARDMARKET_BASE_PRICE_ALLOWED.has(normalized)
+    ? normalized
+    : CARDMARKET_BASE_PRICE_DEFAULT;
+}
+
+function getCurrentCardmarketBasePriceType() {
+  try {
+    return normalizeCardmarketBasePriceType(loadSettings()?.cardmarketBasePriceType);
+  } catch {
+    return CARDMARKET_BASE_PRICE_DEFAULT;
+  }
+}
+
+function getCardmarketPrimaryCandidates({ reverseHolo = false, basePriceType = CARDMARKET_BASE_PRICE_DEFAULT } = {}) {
+  const normalizedType = normalizeCardmarketBasePriceType(basePriceType);
+  const selected = reverseHolo
+    ? CARDMARKET_BASE_TO_CANDIDATE[normalizedType]?.reverseHolo
+    : CARDMARKET_BASE_TO_CANDIDATE[normalizedType]?.normal;
+  const fallback = reverseHolo ? CARDMARKET_LINK_FALLBACK_REVERSE : CARDMARKET_LINK_FALLBACK_NORMAL;
+  const seen = new Set();
+
+  return [selected, ...fallback]
+    .filter((candidate) => Array.isArray(candidate?.[0]))
+    .filter((candidate) => {
+      const signature = candidate[0].join('|');
+      if (seen.has(signature)) return false;
+      seen.add(signature);
+      return true;
+    });
+}
+
 function getCardmarketPriceCacheKey(card = {}) {
   const setId = String(card?.setId || '').trim();
   const number = String(card?.number || '').trim();
@@ -7677,17 +7770,9 @@ function buildCardmarketLinkPresentation(summary, { preferReverseHolo = false } 
 
   const entry = summary.entry;
   const prices = entry?.prices || {};
-  const reverseCandidates = [
-    [['trendHolo'], 'RH Trend'],
-    [['averageHolo', 'avgHolo'], 'RH Avg'],
-    [['lowHolo'], 'RH Low'],
-    [['reverseHoloSell'], 'RH Sell']
-  ];
-  const normalCandidates = [
-    [['trend'], 'Trend'],
-    [['average', 'avg'], 'Avg'],
-    [['low'], 'Low']
-  ];
+  const basePriceType = getCurrentCardmarketBasePriceType();
+  const reverseCandidates = getCardmarketPrimaryCandidates({ reverseHolo: true, basePriceType });
+  const normalCandidates = getCardmarketPrimaryCandidates({ reverseHolo: false, basePriceType });
 
   const pickPrice = (candidates = []) => {
     for (const [keys, label] of candidates) {

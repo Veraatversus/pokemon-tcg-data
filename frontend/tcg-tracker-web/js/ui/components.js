@@ -284,6 +284,15 @@ export function createSettingsPanel(currentSettings = {}, onSave) {
 
   const getResolverDefaultOrder = () => 'tcgdex|vera|legacy';
 
+  const cardmarketBasePriceOptions = [
+    { value: 'trend', label: 'Trend' },
+    { value: 'average', label: 'Durchschnitt (Ø)' },
+    { value: 'average1', label: 'Durchschnitt 1 Tag (Ø1)' },
+    { value: 'average7', label: 'Durchschnitt 7 Tage (Ø7)' },
+    { value: 'average30', label: 'Durchschnitt 30 Tage (Ø30)' },
+    { value: 'low', label: 'Low' }
+  ];
+
   const fieldGroups = [
     {
       scope: 'set',
@@ -385,6 +394,17 @@ export function createSettingsPanel(currentSettings = {}, onSave) {
       <div style="font-size:12px; color:var(--color-muted); border-left:3px solid rgba(37,99,235,.45); padding:8px 10px; background: rgba(37,99,235,.06); border-radius:6px; margin-bottom:10px;">
         Sicherer Standard: Namen und Bilder bevorzugen meist <strong>TCGDex</strong>. Für <strong>Logo/Symbol</strong> sowie <strong>Kartenbild groß</strong> kannst du Vera- und TCGDex-Werte jetzt getrennt priorisieren.
       </div>
+      <div style="margin: 10px 0 14px; border:1px solid var(--color-border); border-radius:8px; padding:10px 12px; background: var(--color-bg);">
+        <label style="display:flex; flex-direction:column; gap:6px;">
+          <span style="font-size:12px; font-weight:700;">Standard-Grundpreis (Cardmarket)</span>
+          <select data-key="cardmarketBasePriceType" style="max-width: 290px;">
+            ${cardmarketBasePriceOptions.map((opt) => `<option value="${opt.value}" ${opt.value === String(currentSettings.cardmarketBasePriceType || 'trend') ? 'selected' : ''}>${opt.label}</option>`).join('')}
+          </select>
+          <span style="font-size:12px; color:var(--color-muted); line-height:1.45;">
+            Dieser Basispreis steuert Cardmarket-Buttons/Links sowie die Preisstatistik. Wenn der gewählte Wert fehlt, greifen automatische Fallbacks.
+          </span>
+        </label>
+      </div>
       ${fieldGroups.map((group) => `
         <div style="margin: 10px 0 14px;">
           <div style="font-size:12px; font-weight:700; margin-bottom:4px;">${group.title}</div>
@@ -442,7 +462,7 @@ export function createSettingsPanel(currentSettings = {}, onSave) {
       expertDetails.style.display = enabled ? 'block' : 'none';
       if (enabled) expertDetails.open = true;
     }
-    panel.querySelectorAll('select[data-resolver-scope][data-resolver-field], [data-action="resolver-defaults"]').forEach((el) => {
+    panel.querySelectorAll('select[data-resolver-scope][data-resolver-field], select[data-key="cardmarketBasePriceType"], [data-action="resolver-defaults"]').forEach((el) => {
       el.disabled = !enabled;
     });
   };
@@ -454,6 +474,9 @@ export function createSettingsPanel(currentSettings = {}, onSave) {
     const updated = { ...currentSettings };
     panel.querySelectorAll('input[type="checkbox"]').forEach((input) => {
       updated[input.dataset.key] = input.checked;
+    });
+    panel.querySelectorAll('select[data-key]').forEach((select) => {
+      updated[select.dataset.key] = String(select.value || '').trim();
     });
 
     const matrix = { set: {}, card: {} };
