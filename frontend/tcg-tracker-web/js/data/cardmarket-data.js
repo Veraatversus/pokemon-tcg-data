@@ -14,10 +14,10 @@ import {
 
 const REMOTE_CARDMARKET_BASE = `${String(CONFIG?.APIS?.VERA_BASE || '').replace(/\/$/, '')}/cardmarket`;
 
-let productIndexCache = null;
-let nameIndexCache = null;
-let trackerSetIndexCache = null;
-const setPayloadCache = new Map();
+let productIndexCachePromise = null;
+let nameIndexCachePromise = null;
+let trackerSetIndexCachePromise = null;
+const setPayloadCachePromise = new Map(); // expansionId → Promise<payload>
 const inferredExpansionCache = new Map();
 const setAssignmentMapCache = new Map(); // expansionId → { sourceCards, map }
 
@@ -174,47 +174,43 @@ export function formatCardmarketEntryTitle(entry = {}) {
   return sharedFormatCardmarketEntryTitle(entry);
 }
 
-export async function loadCardmarketProductIndex({ signal, forceRefresh = false } = {}) {
-  if (!forceRefresh && productIndexCache) return productIndexCache;
+export function loadCardmarketProductIndex({ signal, forceRefresh = false } = {}) {
+  if (!forceRefresh && productIndexCachePromise) return productIndexCachePromise;
   const baseUrl = getCardmarketBaseUrl();
-  productIndexCache = await fetchJson(`${baseUrl}/index/products.json`, { signal });
-  return productIndexCache;
+  productIndexCachePromise = fetchJson(`${baseUrl}/index/products.json`, { signal })
+    .catch((err) => { productIndexCachePromise = null; throw err; });
+  return productIndexCachePromise;
 }
 
-export async function loadCardmarketNameIndex({ signal, forceRefresh = false } = {}) {
-  if (!forceRefresh && nameIndexCache) return nameIndexCache;
+export function loadCardmarketNameIndex({ signal, forceRefresh = false } = {}) {
+  if (!forceRefresh && nameIndexCachePromise) return nameIndexCachePromise;
   const baseUrl = getCardmarketBaseUrl();
-  try {
-    nameIndexCache = await fetchJson(`${baseUrl}/index/names.json`, { signal });
-  } catch {
-    nameIndexCache = {};
-  }
-  return nameIndexCache;
+  nameIndexCachePromise = fetchJson(`${baseUrl}/index/names.json`, { signal })
+    .catch(() => { nameIndexCachePromise = null; return {}; });
+  return nameIndexCachePromise;
 }
 
-export async function loadCardmarketTrackerSetIndex({ signal, forceRefresh = false } = {}) {
-  if (!forceRefresh && trackerSetIndexCache) return trackerSetIndexCache;
+export function loadCardmarketTrackerSetIndex({ signal, forceRefresh = false } = {}) {
+  if (!forceRefresh && trackerSetIndexCachePromise) return trackerSetIndexCachePromise;
   const baseUrl = getCardmarketBaseUrl();
-  try {
-    trackerSetIndexCache = await fetchJson(`${baseUrl}/index/tracker.json`, { signal });
-  } catch {
-    trackerSetIndexCache = { bySetId: {}, byPtcgoCode: {}, bySetName: {} };
-  }
-  return trackerSetIndexCache;
+  trackerSetIndexCachePromise = fetchJson(`${baseUrl}/index/tracker.json`, { signal })
+    .catch(() => { trackerSetIndexCachePromise = null; return { bySetId: {}, byPtcgoCode: {}, bySetName: {} }; });
+  return trackerSetIndexCachePromise;
 }
 
-export async function loadCardmarketSetPayload(expansionId, { signal, forceRefresh = false } = {}) {
+export function loadCardmarketSetPayload(expansionId, { signal, forceRefresh = false } = {}) {
   const normalizedExpansionId = String(expansionId || '').trim();
-  if (!normalizedExpansionId) return null;
+  if (!normalizedExpansionId) return Promise.resolve(null);
 
-  if (!forceRefresh && setPayloadCache.has(normalizedExpansionId)) {
-    return setPayloadCache.get(normalizedExpansionId);
+  if (!forceRefresh && setPayloadCachePromise.has(normalizedExpansionId)) {
+    return setPayloadCachePromise.get(normalizedExpansionId);
   }
 
   const baseUrl = getCardmarketBaseUrl();
-  const payload = await fetchJson(`${baseUrl}/sets/${encodeURIComponent(normalizedExpansionId)}.json`, { signal });
-  setPayloadCache.set(normalizedExpansionId, payload);
-  return payload;
+  const promise = fetchJson(`${baseUrl}/sets/${encodeURIComponent(normalizedExpansionId)}.json`, { signal })
+    .catch((err) => { setPayloadCachePromise.delete(normalizedExpansionId); throw err; });
+  setPayloadCachePromise.set(normalizedExpansionId, promise);
+  return promise;
 }
 
 export async function resolveCardmarketEntryByUrl(cardmarketUrl, { signal, forceRefresh = false } = {}) {

@@ -23,7 +23,7 @@ import {
   resolveCardmarketEntryForCard,
   formatCardmarketEntryLabel,
   formatCardmarketEntryTitle
-} from './data/cardmarket-data.js?v=20260426-duplicate-price-rank3';
+} from './data/cardmarket-data.js?v=20260427-wave3-central-v1';
 import {
   buildCombinedSearchDropdownOptions,
   buildSearchProgressLabel,
