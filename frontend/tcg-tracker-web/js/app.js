@@ -419,6 +419,13 @@ const state = {
     loadedCards: 0,
     totalCards: 0,
     errors: 0,
+    watchlist: {
+      filters: {},
+      visibleCount: 0,
+      debounceTimers: {},
+      autoLoadBudget: 0,
+      autoLoadInFlight: false,
+    },
   },
 };
 
@@ -448,6 +455,8 @@ const IMPORT_RETRY_ATTEMPTS = 3;
 const IMPORT_WRITE_PREFLIGHT_KEY = 'runtime_last_write_probe';
 const STATS_PRICE_CHUNK_SIZE = 25;
 const STATS_PRICE_CONCURRENCY = 4;
+const STATS_PRICE_WATCHLIST_BATCH_SIZE = 60;
+const STATS_PRICE_WATCHLIST_INPUT_DEBOUNCE_MS = 520;
 
 function waitMs(ms) {
   return new Promise((resolve) => {
@@ -5224,6 +5233,18 @@ function formatStatsPriceNumber(value) {
   return Number(value || 0).toLocaleString('de-DE');
 }
 
+function getItemCardmarketUrl(item = {}) {
+  return String(
+    item?.card?.cardmarketUrl
+    || item?.card?.vera_cardmarket_url
+    || item?.card?.tcgdex_cardmarket_url
+    || item?.cardmarketUrl
+    || item?.vera_cardmarket_url
+    || item?.tcgdex_cardmarket_url
+    || ''
+  ).trim();
+}
+
 const STATS_PRICE_TABS = [
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'top-values', label: 'Top-Werte' },
@@ -5448,6 +5469,146 @@ function computeAdvancedWorkspace(items = [], filters = {}) {
   };
 }
 
+function normalizeWatchlistFilters(filters = {}) {
+  const source = filters && typeof filters === 'object' ? filters : {};
+  return {
+    search: String(source.search || '').trim(),
+    setId: String(source.setId || 'all'),
+    variant: String(source.variant || 'all'),
+    valueBand: String(source.valueBand || 'all'),
+    quantile: String(source.quantile || 'all'),
+    quality: String(source.quality || 'all'),
+    cardmarket: String(source.cardmarket || 'all'),
+    minValue: String(source.minValue || '').trim(),
+    maxValue: String(source.maxValue || '').trim(),
+    sortBy: String(source.sortBy || 'value-desc'),
+  };
+}
+
+function parseWatchlistNumber(value) {
+  if (value === '' || value == null) return null;
+  const normalized = String(value).replace(',', '.').trim();
+  if (!normalized) return null;
+  const numeric = Number(normalized);
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+function getStatsPriceItemImageUrl(item = {}) {
+  const card = item?.card || {};
+  const candidates = [
+    item?.image,
+    item?.imageUrl,
+    card?.imageSmall,
+    card?.image,
+    card?.imageUrl,
+    card?.imageLarge,
+    card?.images?.small,
+    card?.images?.large,
+  ];
+  for (const candidate of candidates) {
+    const value = String(candidate || '').trim();
+    if (value) return value;
+  }
+  return '';
+}
+
+function computeWatchlistWorkspace(items = [], filters = {}, analytics = null) {
+  const safeItems = Array.isArray(items) ? items : [];
+  const normalizedFilters = normalizeWatchlistFilters(filters);
+  const minValue = parseWatchlistNumber(normalizedFilters.minValue);
+  const maxValue = parseWatchlistNumber(normalizedFilters.maxValue);
+
+  const withIds = safeItems.map((item, index) => ({
+    ...item,
+    __watchId: String(item?.cardKey || `${item?.setId || 'unknown'}::${item?.cardName || 'card'}::${index}`),
+  }));
+
+  const pricedSorted = withIds
+    .filter((item) => toFinitePositive(item?.value) != null)
+    .sort((a, b) => Number(b?.value || 0) - Number(a?.value || 0));
+  const quantileById = new Map();
+  pricedSorted.forEach((item, index) => {
+    const pct = ((index + 1) / Math.max(1, pricedSorted.length)) * 100;
+    quantileById.set(item.__watchId, pct);
+  });
+
+  const searchToken = normalizedFilters.search.toLocaleLowerCase('de-DE');
+  const filtered = withIds.filter((item) => {
+    const setId = String(item?.setId || '').trim();
+    const value = toFinitePositive(item?.value);
+    const valueBand = getValueBandKey(value);
+    const percentile = quantileById.get(item.__watchId) || 100;
+    const cardmarketUrl = getItemCardmarketUrl(item);
+    const searchable = [
+      item?.cardName,
+      item?.setName,
+      item?.card?.name,
+      item?.card?.number,
+      item?.cardKey,
+    ].map((entry) => String(entry || '').toLocaleLowerCase('de-DE')).join(' ');
+
+    if (searchToken && !searchable.includes(searchToken)) return false;
+    if (normalizedFilters.setId !== 'all' && normalizedFilters.setId !== setId) return false;
+    if (normalizedFilters.variant === 'holo-only' && item?.isReverseHolo) return false;
+    if (normalizedFilters.variant === 'reverse-holo-only' && !item?.isReverseHolo) return false;
+    if (normalizedFilters.valueBand !== 'all' && normalizedFilters.valueBand !== valueBand) return false;
+    if (!matchesQuantileBucket(percentile, normalizedFilters.quantile)) return false;
+    if (normalizedFilters.quality === 'priced-only' && value == null) return false;
+    if (normalizedFilters.quality === 'missing-only' && value != null) return false;
+    if (normalizedFilters.quality === 'failed-only' && !item?.failed) return false;
+    if (normalizedFilters.cardmarket === 'with-link' && !cardmarketUrl) return false;
+    if (normalizedFilters.cardmarket === 'without-link' && cardmarketUrl) return false;
+    if (minValue != null && (value == null || value < minValue)) return false;
+    if (maxValue != null && (value == null || value > maxValue)) return false;
+
+    return true;
+  });
+
+  const sortBy = normalizedFilters.sortBy;
+  filtered.sort((a, b) => {
+    const valueA = Number(a?.value || 0);
+    const valueB = Number(b?.value || 0);
+    if (sortBy === 'value-asc') return valueA - valueB;
+    if (sortBy === 'card-asc') {
+      return String(a?.cardName || a?.card?.name || '')
+        .localeCompare(String(b?.cardName || b?.card?.name || ''), 'de-DE', { sensitivity: 'base' });
+    }
+    if (sortBy === 'set-asc') {
+      return String(a?.setName || '')
+        .localeCompare(String(b?.setName || ''), 'de-DE', { sensitivity: 'base' });
+    }
+    if (sortBy === 'number-asc') {
+      return String(a?.card?.number || a?.cardKey || '')
+        .localeCompare(String(b?.card?.number || b?.cardKey || ''), 'de-DE', { numeric: true, sensitivity: 'base' });
+    }
+    if (sortBy === 'watch-score-desc') {
+      const avgValue = Math.max(1, Number(analytics?.avgCollectedCardValue || 0));
+      const scoreA = valueA <= 0 ? 0 : valueA / avgValue;
+      const scoreB = valueB <= 0 ? 0 : valueB / avgValue;
+      return scoreB - scoreA;
+    }
+    return valueB - valueA;
+  });
+
+  const pricedCards = filtered.filter((item) => toFinitePositive(item?.value) != null).length;
+  const failedCards = filtered.filter((item) => item?.failed).length;
+  const linkedCards = filtered.filter((item) => Boolean(getItemCardmarketUrl(item))).length;
+  const setIds = new Set(filtered.map((item) => String(item?.setId || '').trim()).filter(Boolean));
+
+  return {
+    filters: normalizedFilters,
+    items: filtered,
+    summary: {
+      cards: filtered.length,
+      pricedCards,
+      missingCards: filtered.length - pricedCards,
+      failedCards,
+      linkedCards,
+      setCount: setIds.size,
+    },
+  };
+}
+
 function buildStatsPriceTabContent({
   activeTab = 'dashboard',
   analytics = null,
@@ -5461,10 +5622,21 @@ function buildStatsPriceTabContent({
   const advancedState = state.statsPrice.advanced || (state.statsPrice.advanced = {
     filters: normalizeAdvancedFilters(),
     selectedGroupKey: '',
-    detailMode: 'summary',
+    detailMode: 'top',
+  });
+  const watchlistState = state.statsPrice.watchlist || (state.statsPrice.watchlist = {
+    filters: normalizeWatchlistFilters(),
+    visibleCount: STATS_PRICE_WATCHLIST_BATCH_SIZE,
+    debounceTimers: {},
+    autoLoadBudget: 0,
+    autoLoadInFlight: false,
   });
   advancedState.filters = normalizeAdvancedFilters(advancedState.filters);
-  advancedState.detailMode = String(advancedState.detailMode || 'summary');
+  advancedState.detailMode = String(advancedState.detailMode || 'top');
+  watchlistState.filters = normalizeWatchlistFilters(watchlistState.filters);
+  watchlistState.visibleCount = Math.max(STATS_PRICE_WATCHLIST_BATCH_SIZE, Number(watchlistState.visibleCount || STATS_PRICE_WATCHLIST_BATCH_SIZE));
+  watchlistState.autoLoadBudget = Math.max(0, Number(watchlistState.autoLoadBudget || 0));
+  watchlistState.autoLoadInFlight = Boolean(watchlistState.autoLoadInFlight);
 
   const pricedItems = safeItems.filter((item) => Number(item?.value) > 0);
   const missingItems = safeItems.filter((item) => item?.value == null);
@@ -5478,10 +5650,10 @@ function buildStatsPriceTabContent({
   const topFiveShare = Number(detailStats?.topFiveValueShare || 0);
   const pricedSetCoverage = Number(detailStats?.pricedSetCoverage || 0);
   const spreadRatio = Number(detailStats?.priceSpreadRatio || 0);
-  const watchlistItems = pricedItems
-    .filter((item) => Number(item?.value) >= Math.max(avgValue * 1.8, 20))
-    .sort((a, b) => Number(b?.value || 0) - Number(a?.value || 0))
-    .slice(0, 24);
+  const watchlistWorkspace = computeWatchlistWorkspace(safeItems, watchlistState.filters, analytics);
+  const watchlistItems = watchlistWorkspace.items;
+  const watchlistVisibleItems = watchlistItems.slice(0, watchlistState.visibleCount);
+  const watchlistRemaining = Math.max(0, watchlistItems.length - watchlistVisibleItems.length);
   const advancedWorkspace = computeAdvancedWorkspace(safeItems, advancedState.filters);
   const advancedGroups = advancedWorkspace.groups;
   if (!advancedGroups.some((group) => group.key === advancedState.selectedGroupKey)) {
@@ -5494,7 +5666,7 @@ function buildStatsPriceTabContent({
       ${escapeHtml(tab.label)}
     </button>`).join('');
 
-  const chartRows = bySet.slice(0, 8).map((entry, index) => {
+  const chartRows = bySet.slice().map((entry, index) => {
     const setId = String(entry?.setId || '').trim();
     const pct = Math.max(2, Math.round((Number(entry?.value || 0) / Math.max(1, Number(analytics?.totalValue || 1))) * 100));
     return `
@@ -5530,9 +5702,8 @@ function buildStatsPriceTabContent({
           <strong>${escapeHtml(group.setName)}</strong>
           <small>${formatStatsPriceNumber(group.items.length)} ohne Preis</small>
         </summary>
-        <ul class="stats-price-drill-list">
+        <ul class="stats-price-drill-list stats-price-scroll-region">
           ${group.items
-            .slice(0, 120)
             .map((item) => `
               <li class="stats-price-drill-item" data-set-id="${escapeHtml(item?.setId || '')}">
                 <span class="stats-price-drill-number">${escapeHtml(item?.card?.number || item?.cardName || item?.cardKey || '')}</span>
@@ -5580,16 +5751,19 @@ function buildStatsPriceTabContent({
 
   const topValuesMarkup = `
     <section class="stats-price-tab-panel" data-tab-panel="top-values">
-      <ol class="stats-price-rich-list">
+      <ol class="stats-price-rich-list stats-price-scroll-region">
         ${topCards
-          .slice(0, 20)
+          .slice()
           .map((card, index) => `
             <li class="stats-price-rich-item" data-set-id="${escapeHtml(card?.setId || '')}">
               <span class="stats-price-rich-rank">${index + 1}</span>
               <div class="stats-price-rich-main">
                 <strong>${escapeHtml(card?.cardName || 'Unbekannte Karte')}</strong>
-                <small>${escapeHtml(card?.setName || 'Unbekanntes Set')}</small>
+                <small>${escapeHtml(card?.setName || 'Unbekanntes Set')} · #${escapeHtml(card?.card?.number || card?.cardNumber || card?.cardKey || '')}</small>
               </div>
+              ${getItemCardmarketUrl(card)
+      ? `<a class="stats-price-cardmarket-link" href="${escapeHtml(getItemCardmarketUrl(card))}" target="_blank" rel="noopener noreferrer" data-cardmarket-link="1">Cardmarket</a>`
+      : ''}
               <strong class="stats-price-rich-value">${formatStatsPriceEuro(card?.value)}</strong>
             </li>
           `)
@@ -5621,27 +5795,126 @@ function buildStatsPriceTabContent({
 
   const comparisonsMarkup = `
     <section class="stats-price-tab-panel" data-tab-panel="comparisons">
-      <ul class="stats-price-compare-list">
+      <ul class="stats-price-compare-list stats-price-scroll-region">
         ${chartRows || '<li class="stats-price-empty">Noch keine Set-Vergleiche verfügbar.</li>'}
       </ul>
     </section>`;
 
   const watchlistMarkup = `
     <section class="stats-price-tab-panel" data-tab-panel="watchlist">
-      <ol class="stats-price-rich-list">
-        ${watchlistItems
-          .map((item, index) => `
-            <li class="stats-price-rich-item" data-set-id="${escapeHtml(item?.setId || '')}">
-              <span class="stats-price-rich-rank">${index + 1}</span>
+      <div class="stats-price-watchlist-toolbar">
+        <label>Suche
+          <input type="search" value="${escapeHtml(watchlistWorkspace.filters.search)}" data-watchlist-filter="search" placeholder="Karte, Set, Nummer" autocomplete="off" />
+        </label>
+        <label>Set
+          <select data-watchlist-filter="setId">
+            <option value="all" ${watchlistWorkspace.filters.setId === 'all' ? 'selected' : ''}>Alle Sets</option>
+            ${Array.from(new Map(bySet.map((entry) => [String(entry?.setId || '').trim(), entry])).values())
+      .filter((entry) => String(entry?.setId || '').trim())
+      .map((entry) => `<option value="${escapeHtml(entry.setId)}" ${watchlistWorkspace.filters.setId === String(entry.setId) ? 'selected' : ''}>${escapeHtml(entry.setName || entry.setId)}</option>`)
+      .join('')}
+          </select>
+        </label>
+        <label>Variante
+          <select data-watchlist-filter="variant">
+            <option value="all" ${watchlistWorkspace.filters.variant === 'all' ? 'selected' : ''}>Alle</option>
+            <option value="holo-only" ${watchlistWorkspace.filters.variant === 'holo-only' ? 'selected' : ''}>Holo</option>
+            <option value="reverse-holo-only" ${watchlistWorkspace.filters.variant === 'reverse-holo-only' ? 'selected' : ''}>Reverse Holo</option>
+          </select>
+        </label>
+        <label>Preisband
+          <select data-watchlist-filter="valueBand">
+            <option value="all" ${watchlistWorkspace.filters.valueBand === 'all' ? 'selected' : ''}>Alle</option>
+            <option value="under1" ${watchlistWorkspace.filters.valueBand === 'under1' ? 'selected' : ''}>&lt; 1 EUR</option>
+            <option value="from1to5" ${watchlistWorkspace.filters.valueBand === 'from1to5' ? 'selected' : ''}>1-5 EUR</option>
+            <option value="from5to20" ${watchlistWorkspace.filters.valueBand === 'from5to20' ? 'selected' : ''}>5-20 EUR</option>
+            <option value="over20" ${watchlistWorkspace.filters.valueBand === 'over20' ? 'selected' : ''}>&gt; 20 EUR</option>
+            <option value="missing" ${watchlistWorkspace.filters.valueBand === 'missing' ? 'selected' : ''}>Ohne Preis</option>
+          </select>
+        </label>
+        <label>Quantil
+          <select data-watchlist-filter="quantile">
+            <option value="all" ${watchlistWorkspace.filters.quantile === 'all' ? 'selected' : ''}>Alle</option>
+            <option value="top1" ${watchlistWorkspace.filters.quantile === 'top1' ? 'selected' : ''}>Top 1%</option>
+            <option value="top5" ${watchlistWorkspace.filters.quantile === 'top5' ? 'selected' : ''}>Top 5%</option>
+            <option value="top10" ${watchlistWorkspace.filters.quantile === 'top10' ? 'selected' : ''}>Top 10%</option>
+            <option value="bottom20" ${watchlistWorkspace.filters.quantile === 'bottom20' ? 'selected' : ''}>Bottom 20%</option>
+          </select>
+        </label>
+        <label>Qualität
+          <select data-watchlist-filter="quality">
+            <option value="all" ${watchlistWorkspace.filters.quality === 'all' ? 'selected' : ''}>Alles</option>
+            <option value="priced-only" ${watchlistWorkspace.filters.quality === 'priced-only' ? 'selected' : ''}>Nur bepreist</option>
+            <option value="missing-only" ${watchlistWorkspace.filters.quality === 'missing-only' ? 'selected' : ''}>Nur fehlend</option>
+            <option value="failed-only" ${watchlistWorkspace.filters.quality === 'failed-only' ? 'selected' : ''}>Nur Fehler</option>
+          </select>
+        </label>
+        <label>Cardmarket
+          <select data-watchlist-filter="cardmarket">
+            <option value="all" ${watchlistWorkspace.filters.cardmarket === 'all' ? 'selected' : ''}>Alle</option>
+            <option value="with-link" ${watchlistWorkspace.filters.cardmarket === 'with-link' ? 'selected' : ''}>Mit Link</option>
+            <option value="without-link" ${watchlistWorkspace.filters.cardmarket === 'without-link' ? 'selected' : ''}>Ohne Link</option>
+          </select>
+        </label>
+        <label>Min EUR
+          <input type="text" inputmode="decimal" value="${escapeHtml(watchlistWorkspace.filters.minValue)}" data-watchlist-filter="minValue" placeholder="z. B. 10" />
+        </label>
+        <label>Max EUR
+          <input type="text" inputmode="decimal" value="${escapeHtml(watchlistWorkspace.filters.maxValue)}" data-watchlist-filter="maxValue" placeholder="z. B. 250" />
+        </label>
+        <label>Sortierung
+          <select data-watchlist-filter="sortBy">
+            <option value="value-desc" ${watchlistWorkspace.filters.sortBy === 'value-desc' ? 'selected' : ''}>Wert absteigend</option>
+            <option value="value-asc" ${watchlistWorkspace.filters.sortBy === 'value-asc' ? 'selected' : ''}>Wert aufsteigend</option>
+            <option value="watch-score-desc" ${watchlistWorkspace.filters.sortBy === 'watch-score-desc' ? 'selected' : ''}>Watch-Score</option>
+            <option value="card-asc" ${watchlistWorkspace.filters.sortBy === 'card-asc' ? 'selected' : ''}>Karte A-Z</option>
+            <option value="set-asc" ${watchlistWorkspace.filters.sortBy === 'set-asc' ? 'selected' : ''}>Set A-Z</option>
+            <option value="number-asc" ${watchlistWorkspace.filters.sortBy === 'number-asc' ? 'selected' : ''}>Nummer</option>
+          </select>
+        </label>
+        <button type="button" class="stats-price-watchlist-reset" data-watchlist-reset="1">Filter zurücksetzen</button>
+      </div>
+
+      <div class="stats-price-watchlist-summary">
+        <article class="stats-price-card"><span>Treffer</span><strong>${formatStatsPriceNumber(watchlistWorkspace.summary.cards)}</strong></article>
+        <article class="stats-price-card"><span>Bepreist</span><strong>${formatStatsPriceNumber(watchlistWorkspace.summary.pricedCards)}</strong></article>
+        <article class="stats-price-card"><span>Mit Link</span><strong>${formatStatsPriceNumber(watchlistWorkspace.summary.linkedCards)}</strong></article>
+        <article class="stats-price-card"><span>Sets</span><strong>${formatStatsPriceNumber(watchlistWorkspace.summary.setCount)}</strong></article>
+      </div>
+
+      <ol class="stats-price-rich-list stats-price-scroll-region stats-price-watchlist-scroll" data-watchlist-scroll-region="1" data-watchlist-total="${watchlistItems.length}">
+        ${watchlistVisibleItems
+          .map((item, index) => {
+            const imageUrl = getStatsPriceItemImageUrl(item);
+            const globalRank = index + 1;
+            return `
+            <li class="stats-price-rich-item stats-price-rich-item--thumb" data-set-id="${escapeHtml(item?.setId || '')}">
+              <span class="stats-price-rich-rank">${globalRank}</span>
+              <span class="stats-price-thumb" aria-hidden="true">
+                ${imageUrl
+      ? `<img src="${escapeHtml(imageUrl)}" alt="" loading="lazy" decoding="async" />`
+      : '<span class="stats-price-thumb-fallback">?</span>'}
+              </span>
               <div class="stats-price-rich-main">
-                <strong>${escapeHtml(item?.cardName || 'Unbekannte Karte')}</strong>
-                <small>${escapeHtml(item?.setName || 'Unbekanntes Set')}</small>
+                <strong>${escapeHtml(item?.cardName || item?.card?.name || 'Unbekannte Karte')}</strong>
+                <small>${escapeHtml(item?.setName || 'Unbekanntes Set')} · #${escapeHtml(item?.card?.number || item?.cardKey || '')}</small>
               </div>
+              ${getItemCardmarketUrl(item)
+      ? `<a class="stats-price-cardmarket-link" href="${escapeHtml(getItemCardmarketUrl(item))}" target="_blank" rel="noopener noreferrer" data-cardmarket-link="1">Cardmarket</a>`
+      : ''}
               <strong class="stats-price-rich-value">${formatStatsPriceEuro(item?.value)}</strong>
-            </li>
-          `)
-          .join('') || '<li class="stats-price-empty">Noch keine Watchlist-Kandidaten erkannt.</li>'}
+            </li>`;
+          })
+          .join('') || '<li class="stats-price-empty">Keine Treffer f\u00fcr aktuelle Filter.</li>'}
+        ${watchlistRemaining > 0 ? '<li class="stats-price-watchlist-sentinel" data-watchlist-sentinel="1" aria-hidden="true"></li>' : ''}
       </ol>
+
+      <div class="stats-price-watchlist-footer">
+        <small>${formatStatsPriceNumber(watchlistVisibleItems.length)} von ${formatStatsPriceNumber(watchlistItems.length)} Karten geladen</small>
+        ${watchlistRemaining > 0
+      ? `<button type="button" class="stats-price-watchlist-more" data-watchlist-load-more="1">Mehr laden (${formatStatsPriceNumber(watchlistRemaining)} verbleibend)</button>`
+      : '<span class="stats-price-watchlist-end">Ende der Liste erreicht</span>'}
+      </div>
     </section>`;
 
   const advancedGroupsMarkup = advancedGroups
@@ -5680,18 +5953,20 @@ function buildStatsPriceTabContent({
       </div>`;
 
   const advancedDetailTopMarkup = `
-      <ol class="stats-price-rich-list">
+      <ol class="stats-price-rich-list stats-price-scroll-region">
         ${activeGroupPriced
       .slice()
       .sort((a, b) => Number(b?.value || 0) - Number(a?.value || 0))
-      .slice(0, 20)
       .map((item, index) => `
             <li class="stats-price-rich-item" ${item?.setId ? `data-set-id="${escapeHtml(item.setId)}"` : ''}>
               <span class="stats-price-rich-rank">${index + 1}</span>
               <div class="stats-price-rich-main">
                 <strong>${escapeHtml(item?.cardName || item?.card?.name || 'Unbekannte Karte')}</strong>
-                <small>${escapeHtml(item?.setName || 'Unbekanntes Set')}</small>
+                <small>${escapeHtml(item?.setName || 'Unbekanntes Set')} · #${escapeHtml(item?.card?.number || item?.cardKey || '')}</small>
               </div>
+              ${getItemCardmarketUrl(item)
+      ? `<a class="stats-price-cardmarket-link" href="${escapeHtml(getItemCardmarketUrl(item))}" target="_blank" rel="noopener noreferrer" data-cardmarket-link="1">Cardmarket</a>`
+      : ''}
               <strong class="stats-price-rich-value">${formatStatsPriceEuro(item?.value)}</strong>
             </li>
           `)
@@ -5699,9 +5974,9 @@ function buildStatsPriceTabContent({
       </ol>`;
 
   const advancedDetailMissingMarkup = `
-      <ul class="stats-price-drill-list">
+      <ul class="stats-price-drill-list stats-price-scroll-region">
         ${activeGroupMissing
-      .slice(0, 60)
+      .slice()
       .map((item) => `
             <li class="stats-price-drill-item" ${item?.setId ? `data-set-id="${escapeHtml(item.setId)}"` : ''}>
               <span class="stats-price-drill-number">${escapeHtml(item?.card?.number || item?.cardKey || '')}</span>
@@ -5797,7 +6072,7 @@ function buildStatsPriceTabContent({
 
       <div class="stats-price-advanced-layout">
         <aside>
-          <ul class="stats-price-advanced-groups">
+          <ul class="stats-price-advanced-groups stats-price-scroll-region">
             ${advancedGroupsMarkup || '<li class="stats-price-empty">Keine Gruppen für den aktuellen Filter.</li>'}
           </ul>
         </aside>
@@ -5857,10 +6132,19 @@ function renderStatsPriceSnapshot({
   loadedCards = 0,
   totalCards = 0,
   errors = 0,
-  message = ''
+  message = '',
+  preserveWatchlistScroll = undefined,
 } = {}) {
   const container = getStatsPriceContainer();
   if (!container) return;
+
+  const captureWatchlistScrollSnapshot = () => {
+    const scrollRegion = container.querySelector('[data-watchlist-scroll-region]');
+    if (!scrollRegion) return null;
+    return {
+      scrollTop: Math.max(0, Number(scrollRegion.scrollTop || 0)),
+    };
+  };
 
   const progress = totalCards > 0 ? Math.round((loadedCards / totalCards) * 100) : 0;
   const totalValue = analytics?.totalValue || 0;
@@ -5871,6 +6155,11 @@ function renderStatsPriceSnapshot({
   const activeTab = STATS_PRICE_TABS.some((tab) => tab.id === state.statsPrice.activeTab)
     ? state.statsPrice.activeTab
     : 'dashboard';
+  const effectiveWatchlistScrollSnapshot = preserveWatchlistScroll === false
+    ? null
+    : (preserveWatchlistScroll && typeof preserveWatchlistScroll === 'object'
+      ? preserveWatchlistScroll
+      : (activeTab === 'watchlist' ? captureWatchlistScrollSnapshot() : null));
   const tabContent = buildStatsPriceTabContent({
     activeTab,
     analytics,
@@ -5928,6 +6217,27 @@ function renderStatsPriceSnapshot({
       </section>
     </article>`;
 
+  const restoreWatchlistScrollSnapshot = (snapshot) => {
+    if (!snapshot || activeTab !== 'watchlist') return;
+
+    const applySnapshot = () => {
+      const scrollRegion = container.querySelector('[data-watchlist-scroll-region]');
+      if (!scrollRegion) return;
+      const maxScrollTop = Math.max(0, scrollRegion.scrollHeight - scrollRegion.clientHeight);
+      const targetScrollTop = Math.max(0, Math.min(maxScrollTop, Number(snapshot.scrollTop || 0)));
+      scrollRegion.scrollTop = targetScrollTop;
+    };
+
+    applySnapshot();
+    if (typeof window.requestAnimationFrame === 'function') {
+      window.requestAnimationFrame(() => {
+        applySnapshot();
+      });
+    }
+  };
+
+  restoreWatchlistScrollSnapshot(effectiveWatchlistScrollSnapshot);
+
   container.querySelectorAll('.stats-price-tab-btn[data-stats-price-tab]').forEach((tabButton) => {
     tabButton.addEventListener('click', () => {
       const nextTab = String(tabButton.dataset.statsPriceTab || '').trim();
@@ -5948,7 +6258,7 @@ function renderStatsPriceSnapshot({
     select.addEventListener('change', () => {
       const filterKey = String(select.dataset.advancedFilter || '').trim();
       if (!filterKey) return;
-      state.statsPrice.advanced = state.statsPrice.advanced || { filters: {}, selectedGroupKey: '', detailMode: 'summary' };
+      state.statsPrice.advanced = state.statsPrice.advanced || { filters: {}, selectedGroupKey: '', detailMode: 'top' };
       const nextFilters = normalizeAdvancedFilters(state.statsPrice.advanced.filters);
       nextFilters[filterKey] = String(select.value || 'all');
       state.statsPrice.advanced.filters = nextFilters;
@@ -5968,7 +6278,7 @@ function renderStatsPriceSnapshot({
     groupButton.addEventListener('click', () => {
       const nextGroupKey = String(groupButton.dataset.advancedGroupKey || '').trim();
       if (!nextGroupKey) return;
-      state.statsPrice.advanced = state.statsPrice.advanced || { filters: {}, selectedGroupKey: '', detailMode: 'summary' };
+      state.statsPrice.advanced = state.statsPrice.advanced || { filters: {}, selectedGroupKey: '', detailMode: 'top' };
       state.statsPrice.advanced.selectedGroupKey = nextGroupKey;
       renderStatsPriceSnapshot({
         status,
@@ -5985,7 +6295,7 @@ function renderStatsPriceSnapshot({
     detailButton.addEventListener('click', () => {
       const nextMode = String(detailButton.dataset.advancedDetailMode || '').trim();
       if (!nextMode) return;
-      state.statsPrice.advanced = state.statsPrice.advanced || { filters: {}, selectedGroupKey: '', detailMode: 'summary' };
+      state.statsPrice.advanced = state.statsPrice.advanced || { filters: {}, selectedGroupKey: '', detailMode: 'top' };
       state.statsPrice.advanced.detailMode = nextMode;
       renderStatsPriceSnapshot({
         status,
@@ -5998,11 +6308,208 @@ function renderStatsPriceSnapshot({
     });
   });
 
+  container.querySelectorAll('[data-watchlist-filter]').forEach((control) => {
+    const applyWatchlistFilter = () => {
+      const filterKey = String(control.dataset.watchlistFilter || '').trim();
+      if (!filterKey) return;
+      state.statsPrice.watchlist = state.statsPrice.watchlist || {
+        filters: normalizeWatchlistFilters(),
+        visibleCount: STATS_PRICE_WATCHLIST_BATCH_SIZE,
+        debounceTimers: {},
+        autoLoadBudget: 0,
+        autoLoadInFlight: false,
+      };
+      const nextFilters = normalizeWatchlistFilters(state.statsPrice.watchlist.filters);
+      nextFilters[filterKey] = String(control.value || '').trim();
+      state.statsPrice.watchlist.filters = nextFilters;
+      state.statsPrice.watchlist.visibleCount = STATS_PRICE_WATCHLIST_BATCH_SIZE;
+      renderStatsPriceSnapshot({
+        status,
+        analytics,
+        loadedCards,
+        totalCards,
+        errors,
+        message,
+        preserveWatchlistScroll: false,
+      });
+    };
+
+    const debounceable = control.tagName === 'INPUT';
+    const scheduleWatchlistFilter = () => {
+      const filterKey = String(control.dataset.watchlistFilter || '').trim();
+      if (!filterKey) return;
+      state.statsPrice.watchlist = state.statsPrice.watchlist || {
+        filters: normalizeWatchlistFilters(),
+        visibleCount: STATS_PRICE_WATCHLIST_BATCH_SIZE,
+        debounceTimers: {},
+        autoLoadBudget: 0,
+        autoLoadInFlight: false,
+      };
+      const timers = state.statsPrice.watchlist.debounceTimers || (state.statsPrice.watchlist.debounceTimers = {});
+      if (timers[filterKey]) {
+        window.clearTimeout(timers[filterKey]);
+      }
+      timers[filterKey] = window.setTimeout(() => {
+        timers[filterKey] = 0;
+        applyWatchlistFilter();
+      }, STATS_PRICE_WATCHLIST_INPUT_DEBOUNCE_MS);
+    };
+
+    if (control.tagName === 'INPUT') {
+      control.addEventListener('input', scheduleWatchlistFilter);
+      control.addEventListener('change', () => {
+        const filterKey = String(control.dataset.watchlistFilter || '').trim();
+        if (filterKey && state.statsPrice.watchlist?.debounceTimers?.[filterKey]) {
+          window.clearTimeout(state.statsPrice.watchlist.debounceTimers[filterKey]);
+          state.statsPrice.watchlist.debounceTimers[filterKey] = 0;
+        }
+        applyWatchlistFilter();
+      });
+    } else {
+      control.addEventListener('change', applyWatchlistFilter);
+    }
+
+    if (debounceable) {
+      control.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter') return;
+        const filterKey = String(control.dataset.watchlistFilter || '').trim();
+        if (filterKey && state.statsPrice.watchlist?.debounceTimers?.[filterKey]) {
+          window.clearTimeout(state.statsPrice.watchlist.debounceTimers[filterKey]);
+          state.statsPrice.watchlist.debounceTimers[filterKey] = 0;
+        }
+        applyWatchlistFilter();
+      });
+    }
+  });
+
+  const loadMoreWatchlistItems = ({ source = 'manual' } = {}) => {
+    const scrollRegion = container.querySelector('[data-watchlist-scroll-region]');
+    if (!scrollRegion) return false;
+
+    const total = Number(scrollRegion.dataset.watchlistTotal || 0);
+    if (!Number.isFinite(total) || total <= 0) return false;
+
+    state.statsPrice.watchlist = state.statsPrice.watchlist || {
+      filters: normalizeWatchlistFilters(),
+      visibleCount: STATS_PRICE_WATCHLIST_BATCH_SIZE,
+      debounceTimers: {},
+      autoLoadBudget: 0,
+      autoLoadInFlight: false,
+    };
+    if (source === 'scroll' && state.statsPrice.watchlist.autoLoadInFlight) return false;
+    const visible = Number(state.statsPrice.watchlist.visibleCount || STATS_PRICE_WATCHLIST_BATCH_SIZE);
+    if (visible >= total) return false;
+
+    if (source === 'scroll') {
+      state.statsPrice.watchlist.autoLoadInFlight = true;
+      state.statsPrice.watchlist.autoLoadBudget = 0;
+    }
+
+    const captureCurrentWatchlistScrollSnapshot = () => {
+      return {
+        scrollTop: Math.max(0, Number(scrollRegion.scrollTop || 0)),
+      };
+    };
+    const scrollSnapshot = captureCurrentWatchlistScrollSnapshot();
+
+    state.statsPrice.watchlist.visibleCount = Math.min(total, visible + STATS_PRICE_WATCHLIST_BATCH_SIZE);
+    renderStatsPriceSnapshot({
+      status,
+      analytics,
+      loadedCards,
+      totalCards,
+      errors,
+      message,
+      preserveWatchlistScroll: scrollSnapshot,
+    });
+    if (source === 'scroll' && state.statsPrice.watchlist) {
+      state.statsPrice.watchlist.autoLoadInFlight = false;
+      state.statsPrice.watchlist.autoLoadBudget = 0;
+    }
+    return true;
+  };
+
+  container.querySelectorAll('[data-watchlist-reset]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const nextFilters = normalizeWatchlistFilters();
+      state.statsPrice.watchlist = {
+        filters: nextFilters,
+        visibleCount: STATS_PRICE_WATCHLIST_BATCH_SIZE,
+        debounceTimers: {},
+        autoLoadBudget: 0,
+        autoLoadInFlight: false,
+      };
+      renderStatsPriceSnapshot({
+        status,
+        analytics,
+        loadedCards,
+        totalCards,
+        errors,
+        message,
+        preserveWatchlistScroll: false,
+      });
+    });
+  });
+
+  container.querySelectorAll('[data-watchlist-load-more]').forEach((button) => {
+    button.addEventListener('click', () => {
+      loadMoreWatchlistItems({ source: 'button' });
+    });
+  });
+
+  container.querySelectorAll('[data-watchlist-scroll-region]').forEach((scrollRegion) => {
+    const armWatchlistAutoLoad = () => {
+      state.statsPrice.watchlist = state.statsPrice.watchlist || {
+        filters: normalizeWatchlistFilters(),
+        visibleCount: STATS_PRICE_WATCHLIST_BATCH_SIZE,
+        debounceTimers: {},
+        autoLoadBudget: 0,
+        autoLoadInFlight: false,
+      };
+      if (state.statsPrice.watchlist.autoLoadInFlight) return;
+      state.statsPrice.watchlist.autoLoadBudget = 1;
+    };
+
+    scrollRegion.addEventListener('wheel', armWatchlistAutoLoad, { passive: true });
+    scrollRegion.addEventListener('touchmove', armWatchlistAutoLoad, { passive: true });
+    scrollRegion.addEventListener('pointerdown', armWatchlistAutoLoad, { passive: true });
+    scrollRegion.addEventListener('keydown', (event) => {
+      if (!['ArrowDown', 'PageDown', 'End', ' '].includes(event.key)) return;
+      armWatchlistAutoLoad();
+    });
+
+    let wasNearBottom = scrollRegion.scrollTop + scrollRegion.clientHeight >= scrollRegion.scrollHeight - 72;
+
+    scrollRegion.addEventListener('scroll', () => {
+      const nearBottom = scrollRegion.scrollTop + scrollRegion.clientHeight >= scrollRegion.scrollHeight - 72;
+      if (nearBottom && !wasNearBottom) {
+        const watchlist = state.statsPrice.watchlist || {
+          filters: normalizeWatchlistFilters(),
+          visibleCount: STATS_PRICE_WATCHLIST_BATCH_SIZE,
+          debounceTimers: {},
+          autoLoadBudget: 0,
+          autoLoadInFlight: false,
+        };
+        const budget = Math.max(0, Number(watchlist.autoLoadBudget || 0));
+        if (budget > 0 && !watchlist.autoLoadInFlight) {
+          loadMoreWatchlistItems({ source: 'scroll' });
+        }
+      }
+      wasNearBottom = nearBottom;
+    });
+  });
+
   container.querySelectorAll('[data-set-id]').forEach((item) => {
     item.addEventListener('click', () => {
       const setId = item.dataset.setId;
       if (!setId) return;
       navigate(`set/${encodeURIComponent(setId)}`);
+    });
+  });
+
+  container.querySelectorAll('[data-cardmarket-link]').forEach((link) => {
+    link.addEventListener('click', (event) => {
+      event.stopPropagation();
     });
   });
 }
@@ -6011,6 +6518,13 @@ function renderStatsPriceLoading({ requestId, loadedCards = 0, totalCards = 0 } 
   state.statsPrice.requestId = String(requestId || '');
   state.statsPrice.status = 'loading';
   state.statsPrice.items = [];
+  state.statsPrice.watchlist = {
+    filters: normalizeWatchlistFilters(state.statsPrice.watchlist?.filters),
+    visibleCount: STATS_PRICE_WATCHLIST_BATCH_SIZE,
+    debounceTimers: {},
+    autoLoadBudget: 0,
+    autoLoadInFlight: false,
+  };
   state.statsPrice.loadedCards = Number(loadedCards || 0);
   state.statsPrice.totalCards = Number(totalCards || 0);
   state.statsPrice.errors = 0;
@@ -6029,6 +6543,13 @@ function renderStatsPricePartial(analytics, { requestId, loadedCards = 0, totalC
   state.statsPrice.totals = analytics;
   state.statsPrice.bySet = analytics?.setBreakdown || [];
   state.statsPrice.items = Array.isArray(items) ? items : [];
+  state.statsPrice.watchlist = state.statsPrice.watchlist || {
+    filters: normalizeWatchlistFilters(),
+    visibleCount: STATS_PRICE_WATCHLIST_BATCH_SIZE,
+    debounceTimers: {},
+    autoLoadBudget: 0,
+    autoLoadInFlight: false,
+  };
   state.statsPrice.loadedCards = Number(loadedCards || 0);
   state.statsPrice.totalCards = Number(totalCards || 0);
   state.statsPrice.errors = Number(errors || 0);
@@ -6049,6 +6570,13 @@ function renderStatsPriceFinal(analytics, { requestId, loadedCards = 0, totalCar
   state.statsPrice.bySet = analytics?.setBreakdown || [];
   state.statsPrice.topCards = analytics?.topCard ? [analytics.topCard] : [];
   state.statsPrice.items = Array.isArray(items) ? items : [];
+  state.statsPrice.watchlist = state.statsPrice.watchlist || {
+    filters: normalizeWatchlistFilters(),
+    visibleCount: STATS_PRICE_WATCHLIST_BATCH_SIZE,
+    debounceTimers: {},
+    autoLoadBudget: 0,
+    autoLoadInFlight: false,
+  };
   state.statsPrice.loadedCards = Number(loadedCards || 0);
   state.statsPrice.totalCards = Number(totalCards || 0);
   state.statsPrice.errors = Number(errors || 0);

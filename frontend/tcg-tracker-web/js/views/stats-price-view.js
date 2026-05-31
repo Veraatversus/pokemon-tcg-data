@@ -28,6 +28,18 @@ function formatStatsPriceNumber(value) {
   return Number(value || 0).toLocaleString('de-DE');
 }
 
+function getItemCardmarketUrl(item = {}) {
+  return String(
+    item?.card?.cardmarketUrl
+    || item?.card?.vera_cardmarket_url
+    || item?.card?.tcgdex_cardmarket_url
+    || item?.cardmarketUrl
+    || item?.vera_cardmarket_url
+    || item?.tcgdex_cardmarket_url
+    || ''
+  ).trim();
+}
+
 function getStatsPriceTimeline(analytics = null, { loadedCards = 0, totalCards = 0, errors = 0 } = {}) {
   const collectedCards = Number(analytics?.collectedCards || 0);
   const pricedCards = Number(analytics?.pricedCollectedCards || 0);
@@ -258,7 +270,7 @@ export function createStatsPriceViewController({
     const advancedState = state.statsPrice.advanced || (state.statsPrice.advanced = {
       filters: normalizeAdvancedFilters(),
       selectedGroupKey: '',
-      detailMode: 'summary',
+      detailMode: 'top',
     });
     advancedState.filters = normalizeAdvancedFilters(advancedState.filters);
     advancedState.detailMode = String(advancedState.detailMode || 'summary');
@@ -278,7 +290,7 @@ export function createStatsPriceViewController({
     const watchlistItems = pricedItems
       .filter((item) => Number(item?.value) >= Math.max(avgValue * 1.8, 20))
       .sort((a, b) => Number(b?.value || 0) - Number(a?.value || 0))
-      .slice(0, 24);
+      .slice();
     const advancedWorkspace = computeAdvancedWorkspace(safeItems, advancedState.filters);
     const advancedGroups = advancedWorkspace.groups;
     if (!advancedGroups.some((group) => group.key === advancedState.selectedGroupKey)) {
@@ -291,7 +303,7 @@ export function createStatsPriceViewController({
         ${escapeHtml(tab.label)}
       </button>`).join('');
 
-    const chartRows = bySet.slice(0, 8).map((entry, index) => {
+    const chartRows = bySet.slice().map((entry, index) => {
       const setId = String(entry?.setId || '').trim();
       const pct = Math.max(2, Math.round((Number(entry?.value || 0) / Math.max(1, Number(analytics?.totalValue || 1))) * 100));
       return `
@@ -327,9 +339,8 @@ export function createStatsPriceViewController({
           <strong>${escapeHtml(group.setName)}</strong>
           <small>${formatStatsPriceNumber(group.items.length)} ohne Preis</small>
         </summary>
-        <ul class="stats-price-drill-list">
+        <ul class="stats-price-drill-list stats-price-scroll-region">
           ${group.items
-            .slice(0, 120)
             .map((item) => `
               <li class="stats-price-drill-item" data-set-id="${escapeHtml(item?.setId || '')}">
                 <span class="stats-price-drill-number">${escapeHtml(item?.card?.number || item?.cardName || item?.cardKey || '')}</span>
@@ -377,16 +388,19 @@ export function createStatsPriceViewController({
 
     const topValuesMarkup = `
     <section class="stats-price-tab-panel" data-tab-panel="top-values">
-      <ol class="stats-price-rich-list">
+      <ol class="stats-price-rich-list stats-price-scroll-region">
         ${topCards
-          .slice(0, 20)
+          .slice()
           .map((card, index) => `
             <li class="stats-price-rich-item" data-set-id="${escapeHtml(card?.setId || '')}">
               <span class="stats-price-rich-rank">${index + 1}</span>
               <div class="stats-price-rich-main">
                 <strong>${escapeHtml(card?.cardName || 'Unbekannte Karte')}</strong>
-                <small>${escapeHtml(card?.setName || 'Unbekanntes Set')}</small>
+                <small>${escapeHtml(card?.setName || 'Unbekanntes Set')} · #${escapeHtml(card?.card?.number || card?.cardNumber || card?.cardKey || '')}</small>
               </div>
+              ${getItemCardmarketUrl(card)
+                ? `<a class="stats-price-cardmarket-link" href="${escapeHtml(getItemCardmarketUrl(card))}" target="_blank" rel="noopener noreferrer" data-cardmarket-link="1">Cardmarket</a>`
+                : ''}
               <strong class="stats-price-rich-value">${formatStatsPriceEuro(card?.value)}</strong>
             </li>
           `)
@@ -418,22 +432,25 @@ export function createStatsPriceViewController({
 
     const comparisonsMarkup = `
     <section class="stats-price-tab-panel" data-tab-panel="comparisons">
-      <ul class="stats-price-compare-list">
+      <ul class="stats-price-compare-list stats-price-scroll-region">
         ${chartRows || '<li class="stats-price-empty">Noch keine Set-Vergleiche verfügbar.</li>'}
       </ul>
     </section>`;
 
     const watchlistMarkup = `
     <section class="stats-price-tab-panel" data-tab-panel="watchlist">
-      <ol class="stats-price-rich-list">
+      <ol class="stats-price-rich-list stats-price-scroll-region">
         ${watchlistItems
           .map((item, index) => `
             <li class="stats-price-rich-item" data-set-id="${escapeHtml(item?.setId || '')}">
               <span class="stats-price-rich-rank">${index + 1}</span>
               <div class="stats-price-rich-main">
                 <strong>${escapeHtml(item?.cardName || 'Unbekannte Karte')}</strong>
-                <small>${escapeHtml(item?.setName || 'Unbekanntes Set')}</small>
+                <small>${escapeHtml(item?.setName || 'Unbekanntes Set')} · #${escapeHtml(item?.card?.number || item?.cardKey || '')}</small>
               </div>
+              ${getItemCardmarketUrl(item)
+                ? `<a class="stats-price-cardmarket-link" href="${escapeHtml(getItemCardmarketUrl(item))}" target="_blank" rel="noopener noreferrer" data-cardmarket-link="1">Cardmarket</a>`
+                : ''}
               <strong class="stats-price-rich-value">${formatStatsPriceEuro(item?.value)}</strong>
             </li>
           `)
@@ -477,18 +494,20 @@ export function createStatsPriceViewController({
       </div>`;
 
     const advancedDetailTopMarkup = `
-      <ol class="stats-price-rich-list">
+      <ol class="stats-price-rich-list stats-price-scroll-region">
         ${activeGroupPriced
           .slice()
           .sort((a, b) => Number(b?.value || 0) - Number(a?.value || 0))
-          .slice(0, 20)
           .map((item, index) => `
             <li class="stats-price-rich-item" ${item?.setId ? `data-set-id="${escapeHtml(item.setId)}"` : ''}>
               <span class="stats-price-rich-rank">${index + 1}</span>
               <div class="stats-price-rich-main">
                 <strong>${escapeHtml(item?.cardName || item?.card?.name || 'Unbekannte Karte')}</strong>
-                <small>${escapeHtml(item?.setName || 'Unbekanntes Set')}</small>
+                <small>${escapeHtml(item?.setName || 'Unbekanntes Set')} · #${escapeHtml(item?.card?.number || item?.cardKey || '')}</small>
               </div>
+              ${getItemCardmarketUrl(item)
+                ? `<a class="stats-price-cardmarket-link" href="${escapeHtml(getItemCardmarketUrl(item))}" target="_blank" rel="noopener noreferrer" data-cardmarket-link="1">Cardmarket</a>`
+                : ''}
               <strong class="stats-price-rich-value">${formatStatsPriceEuro(item?.value)}</strong>
             </li>
           `)
@@ -496,9 +515,9 @@ export function createStatsPriceViewController({
       </ol>`;
 
     const advancedDetailMissingMarkup = `
-      <ul class="stats-price-drill-list">
+      <ul class="stats-price-drill-list stats-price-scroll-region">
         ${activeGroupMissing
-          .slice(0, 60)
+          .slice()
           .map((item) => `
             <li class="stats-price-drill-item" ${item?.setId ? `data-set-id="${escapeHtml(item.setId)}"` : ''}>
               <span class="stats-price-drill-number">${escapeHtml(item?.card?.number || item?.cardKey || '')}</span>
@@ -594,7 +613,7 @@ export function createStatsPriceViewController({
 
       <div class="stats-price-advanced-layout">
         <aside>
-          <ul class="stats-price-advanced-groups">
+          <ul class="stats-price-advanced-groups stats-price-scroll-region">
             ${advancedGroupsMarkup || '<li class="stats-price-empty">Keine Gruppen für den aktuellen Filter.</li>'}
           </ul>
         </aside>
@@ -741,7 +760,7 @@ export function createStatsPriceViewController({
       select.addEventListener('change', () => {
         const filterKey = String(select.dataset.advancedFilter || '').trim();
         if (!filterKey) return;
-        state.statsPrice.advanced = state.statsPrice.advanced || { filters: {}, selectedGroupKey: '', detailMode: 'summary' };
+        state.statsPrice.advanced = state.statsPrice.advanced || { filters: {}, selectedGroupKey: '', detailMode: 'top' };
         const nextFilters = normalizeAdvancedFilters(state.statsPrice.advanced.filters);
         nextFilters[filterKey] = String(select.value || 'all');
         state.statsPrice.advanced.filters = nextFilters;
@@ -761,7 +780,7 @@ export function createStatsPriceViewController({
       groupButton.addEventListener('click', () => {
         const nextGroupKey = String(groupButton.dataset.advancedGroupKey || '').trim();
         if (!nextGroupKey) return;
-        state.statsPrice.advanced = state.statsPrice.advanced || { filters: {}, selectedGroupKey: '', detailMode: 'summary' };
+        state.statsPrice.advanced = state.statsPrice.advanced || { filters: {}, selectedGroupKey: '', detailMode: 'top' };
         state.statsPrice.advanced.selectedGroupKey = nextGroupKey;
         renderStatsPriceSnapshot({
           status,
@@ -778,7 +797,7 @@ export function createStatsPriceViewController({
       detailButton.addEventListener('click', () => {
         const nextMode = String(detailButton.dataset.advancedDetailMode || '').trim();
         if (!nextMode) return;
-        state.statsPrice.advanced = state.statsPrice.advanced || { filters: {}, selectedGroupKey: '', detailMode: 'summary' };
+        state.statsPrice.advanced = state.statsPrice.advanced || { filters: {}, selectedGroupKey: '', detailMode: 'top' };
         state.statsPrice.advanced.detailMode = nextMode;
         renderStatsPriceSnapshot({
           status,
@@ -796,6 +815,12 @@ export function createStatsPriceViewController({
         const setId = item.dataset.setId;
         if (!setId) return;
         navigate(`set/${encodeURIComponent(setId)}`);
+      });
+    });
+
+    container.querySelectorAll('[data-cardmarket-link]').forEach((link) => {
+      link.addEventListener('click', (event) => {
+        event.stopPropagation();
       });
     });
   }
