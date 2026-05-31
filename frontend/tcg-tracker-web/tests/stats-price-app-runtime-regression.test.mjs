@@ -40,6 +40,13 @@ test('app runtime exposes optional Cardmarket links and prevents set navigation 
   assert.match(source, /event\.stopPropagation\(\)/);
 });
 
+test('app runtime renders the card set in the lightbox facts', async () => {
+  const source = await readAppSource();
+
+  assert.match(source, /setFact\(dom\.lightboxSet,/);
+  assert.match(source, /lightbox-set/);
+});
+
 test('app runtime supports dynamic watchlist loading with filters and thumbnails', async () => {
   const source = await readAppSource();
 
@@ -53,6 +60,9 @@ test('app runtime supports dynamic watchlist loading with filters and thumbnails
   assert.match(source, /data-watchlist-scroll-region=/);
   assert.match(source, /data-watchlist-sentinel="1"/);
   assert.match(source, /data-watchlist-load-more=/);
+  assert.match(source, /data-watchlist-open-set="1"/);
+  assert.match(source, /container\.querySelectorAll\('\[data-watchlist-open-set\]'\)/);
+  assert.match(source, /openSearchResultLightbox\(resolved\.card, resolved\.set/);
   assert.match(source, /preserveWatchlistScroll\s*=\s*undefined/);
   assert.match(source, /const effectiveWatchlistScrollSnapshot = preserveWatchlistScroll === false/);
   assert.match(source, /const restoreWatchlistScrollSnapshot = \(snapshot\) => \{/);

@@ -146,6 +146,15 @@ import {
   normalizeSpreadsheetDisplayText,
   resolveSpreadsheetSelectionErrorMessage,
 } from './features/settings/spreadsheet-dialog-helpers.js';
+import {
+  SETTINGS_RESET_ACTIONS,
+  clearCookiesBestEffort,
+  clearServiceWorkerRuntimeCaches,
+  getOauthRedirectStateKey,
+  getResetLocalStorageKeys,
+  listMatchingLocalStorageKeys,
+  removeLocalStorageKeys,
+} from './features/settings/runtime-reset.js';
 import { sanitizeDisplayText } from './core/display-text.js';
 import { runWithRetry, isRetryableError } from './core/retry.js';
 import { createBootstrapController } from './app/bootstrap-controller.js';
@@ -318,6 +327,7 @@ const dom = {
   lightboxTitle:    document.getElementById('lightbox-title'),
   lightboxSubtitle: document.getElementById('lightbox-subtitle'),
   lightboxCounter:  document.getElementById('lightbox-counter'),
+  lightboxSet:      document.getElementById('lightbox-set'),
   lightboxRarity:   document.getElementById('lightbox-rarity'),
   lightboxHp:       document.getElementById('lightbox-hp'),
   lightboxTypes:    document.getElementById('lightbox-types'),
@@ -4828,6 +4838,8 @@ function openSettingsDialog() {
     saveSettings(updated);
     showToast('Einstellungen gespeichert', 'success', 2000);
     window.location.reload();
+  }, {
+    onAction: handleSettingsAction,
   });
 
   const dialog = document.createElement('dialog');
@@ -4840,6 +4852,149 @@ function openSettingsDialog() {
   closeOtherOpenDialogs([dialog]);
   dialog.showModal();
   dialog.addEventListener('close', () => dialog.remove());
+}
+
+function removeScopedSessionRuntimeData() {
+  try {
+    sessionStorage.removeItem(getOauthRedirectStateKey());
+  } catch {
+    // Ignore browser storage access edge cases.
+  }
+}
+
+function removeCacheInvalidationRuntimeKeys() {
+  const keys = listMatchingLocalStorageKeys(localStorage);
+  if (!keys.length) return;
+  removeLocalStorageKeys(localStorage, keys);
+}
+
+function scheduleReload(delayMs = 900) {
+  window.setTimeout(() => {
+    window.location.reload();
+  }, delayMs);
+}
+
+async function clearAppRuntimeCaches() {
+  const swResult = await clearServiceWorkerRuntimeCaches({
+    serviceWorkerController: navigator.serviceWorker?.controller,
+  });
+
+  cache.clear();
+  resetSheetsDataCaches();
+  removeCacheInvalidationRuntimeKeys();
+
+  if (!swResult.success && swResult.reason !== 'no-controller') {
+    console.warn('[settings reset] SW cache clear not fully acknowledged:', swResult);
+  }
+
+  return swResult;
+}
+
+function removeStorageForFullRuntimeReset({ includeLoginData }) {
+  const keys = getResetLocalStorageKeys({
+    includeAuthKeys: Boolean(includeLoginData),
+    includeSpreadsheetKey: Boolean(includeLoginData),
+  });
+  removeLocalStorageKeys(localStorage, keys);
+  removeCacheInvalidationRuntimeKeys();
+}
+
+async function runCompleteRuntimeReset({ includeLoginData }) {
+  await clearAppRuntimeCaches();
+  removeScopedSessionRuntimeData();
+
+  const removedCookies = clearCookiesBestEffort({ documentRef: document });
+
+  if (includeLoginData) {
+    try {
+      signOut();
+    } catch (error) {
+      console.warn('[settings reset] signOut failed during full reset:', error);
+    }
+  }
+
+  removeStorageForFullRuntimeReset({ includeLoginData });
+
+  if (includeLoginData) {
+    resetToLoggedOut();
+    showToast(`Kompletter Reset abgeschlossen (${removedCookies} Cookie(s) geloescht).`, 'success', 3500);
+  } else {
+    showToast(`Reset abgeschlossen (${removedCookies} Cookie(s) geloescht). Login bleibt erhalten.`, 'success', 3500);
+  }
+
+  scheduleReload(1000);
+}
+
+async function handleSettingsAction(action) {
+  switch (action) {
+    case 'clear-history': {
+      clearSearchHistory();
+      window.SEARCH_HISTORY = [];
+      showToast('Suchverlauf geloescht', 'success', 2200);
+      return;
+    }
+    case SETTINGS_RESET_ACTIONS.SEARCH_HISTORY: {
+      if (!window.confirm('Suchverlauf wirklich loeschen?')) return;
+      clearSearchHistory();
+      window.SEARCH_HISTORY = [];
+      showToast('Suchverlauf geloescht', 'success', 2200);
+      return;
+    }
+    case SETTINGS_RESET_ACTIONS.FAVORITES: {
+      if (!window.confirm('Favoriten wirklich loeschen?')) return;
+      removeLocalStorageKeys(localStorage, [scopedStorageKey('favorites-sets')]);
+      showToast('Favoriten geloescht', 'success', 2200);
+      return;
+    }
+    case SETTINGS_RESET_ACTIONS.SETTINGS: {
+      if (!window.confirm('Lokale App-Einstellungen wirklich loeschen?')) return;
+      removeLocalStorageKeys(localStorage, [
+        scopedStorageKey('user-settings'),
+        DASHBOARD_PREFS_STORAGE_KEY,
+        QUEUE_PRESETS_STORAGE_KEY,
+        RECENT_SETS_STORAGE_KEY,
+        DEV_COMPLETION_STORAGE_KEY,
+        'gridZoom',
+      ]);
+      showToast('Lokale Einstellungen geloescht', 'success', 2400);
+      return;
+    }
+    case SETTINGS_RESET_ACTIONS.SYNC_STATUS: {
+      if (!window.confirm('Sync-Status wirklich loeschen?')) return;
+      removeLocalStorageKeys(localStorage, [
+        scopedStorageKey('sync-status'),
+        'tcg_tracker:sync:last_sheets_sync',
+        'tcg_tracker:sync:last_api_sync',
+      ]);
+      showToast('Sync-Status geloescht', 'success', 2400);
+      return;
+    }
+    case SETTINGS_RESET_ACTIONS.CACHE: {
+      if (!window.confirm('App-Cache wirklich leeren? Die Seite wird danach neu geladen.')) return;
+      await clearAppRuntimeCaches();
+      showToast('Cache geleert. Seite wird neu geladen.', 'success', 2600);
+      scheduleReload(800);
+      return;
+    }
+    case SETTINGS_RESET_ACTIONS.COOKIES: {
+      if (!window.confirm('Cookies dieser App-Domain wirklich loeschen?')) return;
+      const removed = clearCookiesBestEffort({ documentRef: document });
+      showToast(`Cookies geloescht: ${removed}`, 'success', 2400);
+      return;
+    }
+    case SETTINGS_RESET_ACTIONS.ALL_KEEP_LOGIN: {
+      if (!window.confirm('Reset all ausfuehren und Login behalten? Tabelle bleibt unangetastet.')) return;
+      await runCompleteRuntimeReset({ includeLoginData: false });
+      return;
+    }
+    case SETTINGS_RESET_ACTIONS.ALL_FULL: {
+      if (!window.confirm('Kompletten Reset inkl. Google-Logout ausfuehren? Tabelle bleibt unangetastet.')) return;
+      await runCompleteRuntimeReset({ includeLoginData: true });
+      return;
+    }
+    default:
+      console.warn('[settings] Unknown settings action:', action);
+  }
 }
 
 function initDashboardControls() {
@@ -5887,8 +6042,9 @@ function buildStatsPriceTabContent({
           .map((item, index) => {
             const imageUrl = getStatsPriceItemImageUrl(item);
             const globalRank = index + 1;
+            const watchlistCardNumber = String(item?.card?.number || item?.cardKey || '').trim();
             return `
-            <li class="stats-price-rich-item stats-price-rich-item--thumb" data-set-id="${escapeHtml(item?.setId || '')}">
+            <li class="stats-price-rich-item stats-price-rich-item--thumb" data-set-id="${escapeHtml(item?.setId || '')}" data-watchlist-card="1" data-watchlist-card-number="${escapeHtml(watchlistCardNumber)}">
               <span class="stats-price-rich-rank">${globalRank}</span>
               <span class="stats-price-thumb" aria-hidden="true">
                 ${imageUrl
@@ -5899,6 +6055,7 @@ function buildStatsPriceTabContent({
                 <strong>${escapeHtml(item?.cardName || item?.card?.name || 'Unbekannte Karte')}</strong>
                 <small>${escapeHtml(item?.setName || 'Unbekanntes Set')} · #${escapeHtml(item?.card?.number || item?.cardKey || '')}</small>
               </div>
+              <button type="button" class="btn-goto-set stats-price-open-set-btn" data-watchlist-open-set="1" title="Setansicht oeffnen">↗</button>
               ${getItemCardmarketUrl(item)
       ? `<a class="stats-price-cardmarket-link" href="${escapeHtml(getItemCardmarketUrl(item))}" target="_blank" rel="noopener noreferrer" data-cardmarket-link="1">Cardmarket</a>`
       : ''}
@@ -6499,10 +6656,69 @@ function renderStatsPriceSnapshot({
     });
   });
 
+  const resolveWatchlistSetAndCard = (sourceEl) => {
+    const watchlistRow = sourceEl instanceof Element ? sourceEl.closest('[data-watchlist-card="1"]') : null;
+    if (!watchlistRow) return null;
+
+    const setId = String(watchlistRow.dataset.setId || '').trim();
+    if (!setId) return null;
+
+    const cardNumberRaw = String(watchlistRow.dataset.watchlistCardNumber || '').trim();
+    const targetCardKey = normalizeCardNumber(cardNumberRaw);
+    if (!targetCardKey) return null;
+
+    const sourceItems = Array.isArray(state.statsPrice.items) ? state.statsPrice.items : [];
+    const matched = sourceItems.find((item) => {
+      const itemSetId = String(item?.setId || '').trim();
+      if (itemSetId !== setId) return false;
+      const itemCardKey = normalizeCardNumber(item?.card?.number || item?.cardKey || '');
+      return itemCardKey === targetCardKey;
+    }) || null;
+
+    const setMeta = getSetById(setId) || {
+      setId,
+      setName: matched?.setName || setId,
+      imported: false,
+    };
+    const cardMeta = {
+      ...(matched?.card || {}),
+      number: matched?.card?.number || cardNumberRaw,
+      name: matched?.cardName || matched?.card?.name || cardNumberRaw,
+      image: getStatsPriceItemImageUrl(matched || {}),
+      cardmarketUrl: getItemCardmarketUrl(matched || null),
+    };
+
+    return {
+      set: setMeta,
+      card: cardMeta,
+    };
+  };
+
+  container.querySelectorAll('[data-watchlist-open-set]').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const resolved = resolveWatchlistSetAndCard(button);
+      if (!resolved?.set?.setId) return;
+      navigateToSearchResultSet(resolved.set, resolved.card);
+    });
+  });
+
   container.querySelectorAll('[data-set-id]').forEach((item) => {
-    item.addEventListener('click', () => {
+    item.addEventListener('click', async () => {
       const setId = item.dataset.setId;
       if (!setId) return;
+
+      if (item.matches('[data-watchlist-card="1"]')) {
+        const resolved = resolveWatchlistSetAndCard(item);
+        if (!resolved?.set?.setId || !resolved?.card?.number) return;
+        try {
+          await openSearchResultLightbox(resolved.card, resolved.set, { apiOnly: !resolved.set?.imported });
+        } catch (error) {
+          showToast(`Karte konnte nicht geoeffnet werden: ${error.message}`, 'error');
+        }
+        return;
+      }
+
       navigate(`set/${encodeURIComponent(setId)}`);
     });
   });
@@ -8774,6 +8990,9 @@ function renderLightbox(index) {
   dom.lightboxTitle.textContent    = card.name  || 'Unbekannt';
   dom.lightboxSubtitle.textContent = `#${card.number}`;
   dom.lightboxCounter.textContent  = `${index + 1}\u202f/\u202f${state.cards.length}`;
+  const setName = card.setName || state.currentSet?.setName || '';
+  const setId = card.setId || state.currentSet?.setId || '';
+  setFact(dom.lightboxSet, setName && setId ? `${setName} (${setId})` : (setName || setId));
   setFact(dom.lightboxRarity, card.rarity);
   setFact(dom.lightboxHp, card.hp);
   setFact(dom.lightboxTypes, listToText(card.types));

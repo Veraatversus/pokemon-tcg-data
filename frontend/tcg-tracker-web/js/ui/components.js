@@ -7,6 +7,7 @@ import {
   EVENT_CLEAR_SEARCH_HISTORY,
   EVENT_QUICK_FILTERS_CHANGED,
 } from '../core/storage-keys.js';
+import { SETTINGS_RESET_ACTIONS } from '../features/settings/runtime-reset.js';
 
 const escapeTrackerMenuText = (value = '') => String(value)
   .replaceAll('&', '&amp;')
@@ -254,7 +255,8 @@ export function createExportDialog(report) {
 // SETTINGS PANEL
 // ══════════════════════════════════════════════════════════════════════════
 
-export function createSettingsPanel(currentSettings = {}, onSave) {
+export function createSettingsPanel(currentSettings = {}, onSave, options = {}) {
+  const onAction = typeof options?.onAction === 'function' ? options.onAction : null;
   const panel = document.createElement('div');
   panel.className = 'settings-panel';
   panel.style.cssText = `
@@ -445,6 +447,33 @@ export function createSettingsPanel(currentSettings = {}, onSave) {
       </div>
     </details>
 
+    <details style="border:1px solid var(--color-border); border-radius:8px; padding:10px 12px; background: var(--color-surface);">
+      <summary style="cursor:pointer; font-weight:700;">Reset & Datenschutz</summary>
+      <p style="font-size:12px; color:var(--color-muted); margin:8px 0 10px; line-height:1.45;">
+        Diese Aktionen betreffen nur Browser-Cache und lokale Laufzeitdaten. Google-Sheets-Inhalte bleiben unangetastet.
+      </p>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <section>
+          <div style="font-size:12px; font-weight:700; margin-bottom:6px;">Einzeln zuruecksetzen</div>
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <button class="btn-secondary" type="button" data-reset-action="${SETTINGS_RESET_ACTIONS.SEARCH_HISTORY}">Suchverlauf loeschen</button>
+            <button class="btn-secondary" type="button" data-reset-action="${SETTINGS_RESET_ACTIONS.FAVORITES}">Favoriten loeschen</button>
+            <button class="btn-secondary" type="button" data-reset-action="${SETTINGS_RESET_ACTIONS.SETTINGS}">Einstellungen loeschen</button>
+            <button class="btn-secondary" type="button" data-reset-action="${SETTINGS_RESET_ACTIONS.SYNC_STATUS}">Sync-Status loeschen</button>
+            <button class="btn-secondary" type="button" data-reset-action="${SETTINGS_RESET_ACTIONS.CACHE}">App-Cache leeren</button>
+            <button class="btn-secondary" type="button" data-reset-action="${SETTINGS_RESET_ACTIONS.COOKIES}">Cookies loeschen</button>
+          </div>
+        </section>
+        <section>
+          <div style="font-size:12px; font-weight:700; margin-bottom:6px;">Komplette Resets</div>
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <button class="btn-secondary" type="button" data-reset-action="${SETTINGS_RESET_ACTIONS.ALL_KEEP_LOGIN}">Reset all (Login behalten)</button>
+            <button class="btn-secondary" type="button" data-reset-action="${SETTINGS_RESET_ACTIONS.ALL_FULL}" style="border-color: rgba(220,38,38,.45); color: #b91c1c;">Reset all komplett (inkl. Login)</button>
+          </div>
+        </section>
+      </div>
+    </details>
+
     <div style="display:flex; gap:8px; margin-top: 4px; flex-wrap: wrap;">
       <button class="btn-secondary" type="button" data-action="clear-history">🗑️ Suchverlauf löschen</button>
       <button class="btn-primary" type="button" data-action="save">💾 Speichern</button>
@@ -500,9 +529,34 @@ export function createSettingsPanel(currentSettings = {}, onSave) {
   });
 
   panel.querySelector('[data-action="clear-history"]').addEventListener('click', () => {
-    if (window.confirm('Suchverlauf wirklich löschen?')) {
-      window.dispatchEvent(new Event(EVENT_CLEAR_SEARCH_HISTORY));
+    if (!window.confirm('Suchverlauf wirklich löschen?')) return;
+    if (onAction) {
+      Promise.resolve(onAction('clear-history')).catch((error) => {
+        console.error('[settings-panel] clear-history action failed:', error);
+      });
+      return;
     }
+    window.dispatchEvent(new Event(EVENT_CLEAR_SEARCH_HISTORY));
+  });
+
+  panel.querySelectorAll('[data-reset-action]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const action = button.dataset.resetAction;
+      if (!action) return;
+      if (!onAction) {
+        console.warn('[settings-panel] Missing onAction handler for reset action:', action);
+        return;
+      }
+
+      button.disabled = true;
+      try {
+        await onAction(action);
+      } catch (error) {
+        console.error('[settings-panel] reset action failed:', action, error);
+      } finally {
+        button.disabled = false;
+      }
+    });
   });
 
   panel.querySelectorAll('[data-proxy-click]').forEach((button) => {

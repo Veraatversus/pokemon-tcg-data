@@ -2210,6 +2210,25 @@ dialog h2 {
   outline: none;
 }
 
+.stats-price-open-set-btn {
+  margin-left: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  border: 1px solid color-mix(in srgb, var(--stats-price-accent) 34%, transparent);
+  background: color-mix(in srgb, var(--stats-price-surface) 82%, #020617);
+  color: color-mix(in srgb, var(--stats-price-accent) 86%, #fff);
+  font-size: 0.78rem;
+  line-height: 1;
+}
+
+.stats-price-open-set-btn:hover,
+.stats-price-open-set-btn:focus-visible {
+  border-color: color-mix(in srgb, var(--stats-price-accent) 66%, #fff);
+  text-decoration: none;
+  outline: none;
+}
+
 .stats-price-watchlist-toolbar {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));

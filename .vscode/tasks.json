@@ -35,6 +35,16 @@
 				"frontend/tcg-tracker-web/tests/pwa-init.test.mjs"
 			],
 			"isBackground": false
+		},
+		{
+			"label": "runtime-reset-tests",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--test",
+				"frontend/tcg-tracker-web/tests/runtime-reset.test.mjs"
+			],
+			"isBackground": false
 		}
 	]
 }
