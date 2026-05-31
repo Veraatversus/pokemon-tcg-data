@@ -1038,6 +1038,9 @@ export function renderLightbox(injections = {}, index) {
   dom.lightboxCounter.textContent = `${index + 1}\u202f/\u202f${state.cards.length}`;
 
   setFact(dom.lightboxRarity, card.rarity);
+  const setName = card.setName || state.currentSet?.setName || '';
+  const setId = card.setId || state.currentSet?.setId || '';
+  setFact(dom.lightboxSet, setName && setId ? `${setName} (${setId})` : (setName || setId));
   setFact(dom.lightboxHp, card.hp);
   setFact(dom.lightboxTypes, listToText(card.types));
   setFact(dom.lightboxSupertype, card.supertype);

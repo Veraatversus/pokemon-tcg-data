@@ -11,6 +11,93 @@ function pickFirstFinite(prices = {}, keys = []) {
   return null;
 }
 
+const CARDMARKET_BASE_PRICE_DEFAULT = 'trend';
+const CARDMARKET_BASE_PRICE_ALLOWED = new Set([
+  'trend',
+  'average',
+  'average1',
+  'average7',
+  'average30',
+  'low',
+]);
+
+const NORMAL_CANDIDATES = [
+  ['trend'],
+  ['average', 'avg'],
+  ['average1', 'avg1'],
+  ['average7', 'avg7'],
+  ['average30', 'avg30'],
+  ['low'],
+];
+
+const REVERSE_HOLO_CANDIDATES = [
+  ['trendHolo'],
+  ['averageHolo', 'avgHolo'],
+  ['average1Holo', 'avg1Holo'],
+  ['average7Holo', 'avg7Holo'],
+  ['average30Holo', 'avg30Holo'],
+  ['lowHolo'],
+  ['reverseHoloSell'],
+];
+
+const BASE_TYPE_TO_KEYS = {
+  trend: {
+    normal: ['trend'],
+    reverseHolo: ['trendHolo'],
+  },
+  average: {
+    normal: ['average', 'avg'],
+    reverseHolo: ['averageHolo', 'avgHolo'],
+  },
+  average1: {
+    normal: ['average1', 'avg1'],
+    reverseHolo: ['average1Holo', 'avg1Holo'],
+  },
+  average7: {
+    normal: ['average7', 'avg7'],
+    reverseHolo: ['average7Holo', 'avg7Holo'],
+  },
+  average30: {
+    normal: ['average30', 'avg30'],
+    reverseHolo: ['average30Holo', 'avg30Holo'],
+  },
+  low: {
+    normal: ['low'],
+    reverseHolo: ['lowHolo'],
+  },
+};
+
+function normalizeCardmarketBasePriceType(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  return CARDMARKET_BASE_PRICE_ALLOWED.has(normalized)
+    ? normalized
+    : CARDMARKET_BASE_PRICE_DEFAULT;
+}
+
+function buildCandidates({ reverseHolo = false, basePriceType = CARDMARKET_BASE_PRICE_DEFAULT } = {}) {
+  const scope = reverseHolo ? 'reverseHolo' : 'normal';
+  const normalizedBaseType = normalizeCardmarketBasePriceType(basePriceType);
+  const preferred = BASE_TYPE_TO_KEYS[normalizedBaseType]?.[scope] || null;
+  const fallback = reverseHolo ? REVERSE_HOLO_CANDIDATES : NORMAL_CANDIDATES;
+  const ordered = [preferred, ...fallback].filter((keys) => Array.isArray(keys) && keys.length > 0);
+  const seen = new Set();
+
+  return ordered.filter((keys) => {
+    const signature = keys.join('|');
+    if (seen.has(signature)) return false;
+    seen.add(signature);
+    return true;
+  });
+}
+
+function pickFirstFiniteFromCandidates(prices = {}, candidates = []) {
+  for (const keys of candidates) {
+    const value = pickFirstFinite(prices, keys);
+    if (value != null) return value;
+  }
+  return null;
+}
+
 function quantile(sortedValues = [], q = 0.5) {
   if (!Array.isArray(sortedValues) || sortedValues.length === 0) return 0;
   const clampedQ = Math.min(1, Math.max(0, Number(q) || 0));
@@ -23,13 +110,16 @@ function quantile(sortedValues = [], q = 0.5) {
   return loValue + ((hiValue - loValue) * (index - lo));
 }
 
-export function pickCardPriceFromSummary(summary = null, { preferReverseHolo = false } = {}) {
+export function pickCardPriceFromSummary(summary = null, { preferReverseHolo = false, basePriceType = CARDMARKET_BASE_PRICE_DEFAULT } = {}) {
   const prices = summary?.entry?.prices || {};
-  const reverseCandidates = ['trendHolo', 'averageHolo', 'avgHolo', 'lowHolo', 'reverseHoloSell'];
-  const normalCandidates = ['trend', 'average', 'avg', 'low'];
-
-  const reverse = pickFirstFinite(prices, reverseCandidates);
-  const normal = pickFirstFinite(prices, normalCandidates);
+  const reverse = pickFirstFiniteFromCandidates(
+    prices,
+    buildCandidates({ reverseHolo: true, basePriceType })
+  );
+  const normal = pickFirstFiniteFromCandidates(
+    prices,
+    buildCandidates({ reverseHolo: false, basePriceType })
+  );
 
   return preferReverseHolo ? (reverse ?? normal) : (normal ?? reverse);
 }

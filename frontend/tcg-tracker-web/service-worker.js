@@ -209,12 +209,36 @@ self.addEventListener('message', (event) => {
     self.skipWaiting();
   }
   if (event.data.type === 'CLEAR_CACHE') {
-    caches.delete(RUNTIME_CACHE).then(() => {
-      const replyPort = event.ports && event.ports[0];
-      if (replyPort) {
-        replyPort.postMessage({ success: true });
-      }
-    });
+    const cacheTargets = [RUNTIME_CACHE, CACHE_NAME, IMAGE_CACHE];
+    Promise.allSettled(cacheTargets.map((name) => caches.delete(name)))
+      .then((results) => {
+        const cleared = [];
+        const failed = [];
+        results.forEach((result, index) => {
+          const name = cacheTargets[index];
+          if (result.status === 'fulfilled' && result.value === true) {
+            cleared.push(name);
+          } else if (result.status === 'rejected') {
+            failed.push(name);
+          }
+        });
+
+        const replyPort = event.ports && event.ports[0];
+        if (replyPort) {
+          replyPort.postMessage({
+            success: failed.length === 0,
+            cleared,
+            failed,
+            reason: failed.length ? 'partial-clear-failed' : null,
+          });
+        }
+      })
+      .catch(() => {
+        const replyPort = event.ports && event.ports[0];
+        if (replyPort) {
+          replyPort.postMessage({ success: false, cleared: [], failed: cacheTargets, reason: 'clear-cache-error' });
+        }
+      });
   }
   if (event.data.type === 'CACHE_URLS') {
     const urls = event.data.urls;

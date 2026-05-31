@@ -98,6 +98,50 @@ test('pickCardPriceFromSummary supports extended reverse-holo and avg fallbacks'
   assert.equal(pickCardPriceFromSummary(summaryWithReverseSell, { preferReverseHolo: true }), 5.1);
 });
 
+test('pickCardPriceFromSummary respects basePriceType for normal and reverse-holo cards', () => {
+  const summary = {
+    entry: {
+      prices: {
+        trend: 2.1,
+        average7: 3.7,
+        trendHolo: 7.5,
+        average7Holo: 8.4,
+      },
+    },
+  };
+
+  assert.equal(pickCardPriceFromSummary(summary, { preferReverseHolo: false, basePriceType: 'average7' }), 3.7);
+  assert.equal(pickCardPriceFromSummary(summary, { preferReverseHolo: true, basePriceType: 'average7' }), 8.4);
+});
+
+test('pickCardPriceFromSummary falls back when selected basePriceType is missing', () => {
+  const summary = {
+    entry: {
+      prices: {
+        trend: 2.4,
+        low: 1.1,
+        lowHolo: 5.2,
+      },
+    },
+  };
+
+  assert.equal(pickCardPriceFromSummary(summary, { preferReverseHolo: false, basePriceType: 'average7' }), 2.4);
+  assert.equal(pickCardPriceFromSummary(summary, { preferReverseHolo: true, basePriceType: 'average7' }), 5.2);
+});
+
+test('pickCardPriceFromSummary ignores unknown basePriceType and keeps trend-first default', () => {
+  const summary = {
+    entry: {
+      prices: {
+        trend: 3.3,
+        average30: 9.9,
+      },
+    },
+  };
+
+  assert.equal(pickCardPriceFromSummary(summary, { preferReverseHolo: false, basePriceType: 'not-valid' }), 3.3);
+});
+
 test('computePriceAnalyticsFromSummaries ignores uncollected and invalid prices safely', () => {
   const analytics = computePriceAnalyticsFromSummaries([
     {
