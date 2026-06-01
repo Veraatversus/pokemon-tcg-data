@@ -104,3 +104,122 @@ test('applyTcgdexOrderingToArtifacts enriches collectorNumber from helper when n
   assert.equal(artifacts.sets['1523'].cards[0].collectorNumber, '1');
   assert.equal(artifacts.sets['1523'].cards[1].collectorNumber, '2');
 });
+
+// --- Collector-first & zero-padding backend tests ---
+
+test('findMatchIndex matches H09 helper to H9 candidate via zero-padding normalization', () => {
+  const artifacts = {
+    sets: {
+      '1523': {
+        expansionId: 1523,
+        cards: [
+          { cardmarketProductId: 101, name: 'Alpha', collectorNumber: 'H9' },
+          { cardmarketProductId: 102, name: 'Beta', collectorNumber: '2' },
+        ],
+      },
+    },
+  };
+
+  const helperSetsByExpansionId = {
+    '1523': {
+      cards: [
+        { number: 'H09', name: { en: 'Alpha', de: null }, cardmarketId: null, tcgplayerId: null },
+        { number: '2', name: { en: 'Beta', de: null }, cardmarketId: null, tcgplayerId: null },
+      ],
+    },
+  };
+
+  const summary = applyTcgdexOrderingToArtifacts({ artifacts, helperSetsByExpansionId });
+
+  assert.equal(summary.totalMatchedCards, 2);
+  assert.equal(artifacts.sets['1523'].cards[0].cardmarketProductId, 101);
+  assert.equal(artifacts.sets['1523'].cards[1].cardmarketProductId, 102);
+});
+
+test('findMatchIndex matches 009 helper to 9 candidate via zero-padding normalization', () => {
+  const artifacts = {
+    sets: {
+      '1523': {
+        expansionId: 1523,
+        cards: [
+          { cardmarketProductId: 101, name: 'Alpha', collectorNumber: '9' },
+          { cardmarketProductId: 102, name: 'Beta', collectorNumber: '10' },
+        ],
+      },
+    },
+  };
+
+  const helperSetsByExpansionId = {
+    '1523': {
+      cards: [
+        { number: '009', name: { en: 'Alpha', de: null }, cardmarketId: null, tcgplayerId: null },
+        { number: '010', name: { en: 'Beta', de: null }, cardmarketId: null, tcgplayerId: null },
+      ],
+    },
+  };
+
+  const summary = applyTcgdexOrderingToArtifacts({ artifacts, helperSetsByExpansionId });
+
+  assert.equal(summary.totalMatchedCards, 2);
+  assert.equal(artifacts.sets['1523'].cards[0].cardmarketProductId, 101);
+  assert.equal(artifacts.sets['1523'].cards[1].cardmarketProductId, 102);
+});
+
+test('findMatchIndex uses name tiebreak when collector number matches multiple candidates', () => {
+  const artifacts = {
+    sets: {
+      '1523': {
+        expansionId: 1523,
+        cards: [
+          { cardmarketProductId: 101, name: 'Alpha', collectorNumber: 'H9' },
+          { cardmarketProductId: 102, name: 'Beta', collectorNumber: 'H9' },
+        ],
+      },
+    },
+  };
+
+  const helperSetsByExpansionId = {
+    '1523': {
+      cards: [
+        { number: 'H09', name: { en: 'Beta', de: null }, cardmarketId: null, tcgplayerId: null },
+        { number: 'H09', name: { en: 'Alpha', de: null }, cardmarketId: null, tcgplayerId: null },
+      ],
+    },
+  };
+
+  const summary = applyTcgdexOrderingToArtifacts({ artifacts, helperSetsByExpansionId });
+
+  assert.equal(summary.totalMatchedCards, 2);
+  // First helper (Beta) should match product 102, second helper (Alpha) should match product 101
+  assert.equal(artifacts.sets['1523'].cards[0].cardmarketProductId, 102);
+  assert.equal(artifacts.sets['1523'].cards[1].cardmarketProductId, 101);
+});
+
+test('findMatchIndex falls back to name when collector number is absent', () => {
+  const artifacts = {
+    sets: {
+      '1523': {
+        expansionId: 1523,
+        cards: [
+          { cardmarketProductId: 101, name: 'Alpha', collectorNumber: null },
+          { cardmarketProductId: 102, name: 'Beta', collectorNumber: null },
+        ],
+      },
+    },
+  };
+
+  const helperSetsByExpansionId = {
+    '1523': {
+      cards: [
+        { number: '1', name: { en: 'Alpha', de: null }, cardmarketId: null, tcgplayerId: null },
+        { number: '2', name: { en: 'Beta', de: null }, cardmarketId: null, tcgplayerId: null },
+      ],
+    },
+  };
+
+  const summary = applyTcgdexOrderingToArtifacts({ artifacts, helperSetsByExpansionId });
+
+  assert.equal(summary.totalMatchedCards, 2);
+  assert.equal(artifacts.sets['1523'].cards[0].cardmarketProductId, 101);
+  assert.equal(artifacts.sets['1523'].cards[1].cardmarketProductId, 102);
+});
