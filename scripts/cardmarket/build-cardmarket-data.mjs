@@ -7,6 +7,7 @@ import {
   writeArtifactsToDirectory,
 } from './lib/build-helpers.mjs';
 import { applyCustomSetScripts } from './apply-custom-set-scripts.mjs';
+import { loadTcgdexHelperSetsByExpansionId, applyTcgdexOrderingToArtifacts } from './lib/tcgdex-ordering-helpers.mjs';
 
 const DEFAULT_SINGLES_URL = 'https://downloads.s3.cardmarket.com/productCatalog/productList/products_singles_6.json';
 const DEFAULT_NONSINGLES_URL = 'https://downloads.s3.cardmarket.com/productCatalog/productList/products_nonsingles_6.json';
@@ -127,6 +128,10 @@ export async function buildDailyCardmarketData({ singlesUrl = DEFAULT_SINGLES_UR
     scriptsDir: customScriptsDir,
     logger: console,
   });
+
+  const helpersRootDir = path.join(resolvedRepoRoot, 'scripts', 'cardmarket', 'helpers', 'tcgdex-data');
+  const helperSetsByExpansionId = await loadTcgdexHelperSetsByExpansionId({ helpersRootDir });
+  applyTcgdexOrderingToArtifacts({ artifacts, helperSetsByExpansionId });
 
   validateArtifacts(artifacts);
 
