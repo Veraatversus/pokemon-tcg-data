@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {
   buildSetCardAssignmentMap,
   buildCardmarketProductUrl,
+  entryCollectorMatchesCard,
   extractCardmarketProductId,
   formatCardmarketEntryLabel,
   formatCardmarketEntryTitle,
@@ -696,4 +697,184 @@ test('buildSetCardAssignmentMap verwirft Metacard-Gruppe wenn Quellenkarte eine 
   // Nach der ersten Zuweisung wird die gesamte metacardId-213149-Gruppe verworfen.
   assert.equal(assignmentMap.get(sourceCards[0])?.cardmarketProductId, 275254);
   assert.equal(assignmentMap.get(sourceCards[1])?.cardmarketProductId, 275302);
+});
+
+// --- Collector-first & zero-padding tests ---
+
+test('entryCollectorMatchesCard treats H09 and H9 as equivalent via zero-padding normalization', () => {
+  const card = { number: 'H09' };
+  const entry = { collectorNumber: 'H9' };
+  assert.equal(entryCollectorMatchesCard(entry, card), true);
+});
+
+test('entryCollectorMatchesCard treats 009 and 9 as equivalent via zero-padding normalization', () => {
+  const card = { number: '009' };
+  const entry = { collectorNumber: '9' };
+  assert.equal(entryCollectorMatchesCard(entry, card), true);
+});
+
+test('entryCollectorMatchesCard treats A001 and A1 as equivalent via zero-padding normalization', () => {
+  const card = { number: 'A001' };
+  const entry = { collectorNumber: 'A1' };
+  assert.equal(entryCollectorMatchesCard(entry, card), true);
+});
+
+test('entryCollectorMatchesCard still distinguishes H1 from H2', () => {
+  const card = { number: 'H1' };
+  const entry = { collectorNumber: 'H2' };
+  assert.equal(entryCollectorMatchesCard(entry, card), false);
+});
+
+test('resolveCardmarketEntryForCardFromSetPayload resolves by collector number before name when collector is unambiguous', () => {
+  const card = {
+    number: 'H09',
+    vera_name: 'Alakazam',
+    tcgdex_name: 'Alakazam',
+  };
+
+  const setPayload = {
+    expansionId: 1538,
+    cards: [
+      {
+        cardmarketProductId: 275238,
+        name: 'Alakazam [Energy Jump | Psychic]',
+        collectorNumber: 'H9',
+        prices: { trend: 12.5 }
+      },
+      {
+        cardmarketProductId: 275260,
+        name: 'Alakazam [Energy Jump | Psychic]',
+        collectorNumber: '2',
+        prices: { trend: 8.3 }
+      }
+    ]
+  };
+
+  const result = resolveCardmarketEntryForCardFromSetPayload(card, setPayload);
+  assert.equal(result?.cardmarketProductId, 275238);
+});
+
+test('resolveCardmarketEntryForCardFromSetPayload resolves by collector number across full set even when names differ', () => {
+  const card = {
+    number: '009',
+    vera_name: 'Bulbasaur',
+    tcgdex_name: 'Bulbasaur',
+  };
+
+  const setPayload = {
+    expansionId: 2001,
+    cards: [
+      {
+        cardmarketProductId: 1001,
+        name: 'Bulbasaur',
+        collectorNumber: '9',
+        prices: { trend: 1.2 }
+      },
+      {
+        cardmarketProductId: 1002,
+        name: 'Ivysaur',
+        collectorNumber: '10',
+        prices: { trend: 4.6 }
+      }
+    ]
+  };
+
+  const result = resolveCardmarketEntryForCardFromSetPayload(card, setPayload);
+  assert.equal(result?.cardmarketProductId, 1001);
+});
+
+test('resolveCardmarketEntryForCardFromSetPayload falls back to name when collector number is absent', () => {
+  const card = {
+    vera_name: 'Pikachu',
+    tcgdex_name: 'Pikachu',
+  };
+
+  const setPayload = {
+    expansionId: 2001,
+    cards: [
+      {
+        cardmarketProductId: 1001,
+        name: 'Pikachu [Thunder Jolt]',
+        prices: { trend: 1.2 }
+      },
+      {
+        cardmarketProductId: 1002,
+        name: 'Raichu',
+        prices: { trend: 4.6 }
+      }
+    ]
+  };
+
+  const result = resolveCardmarketEntryForCardFromSetPayload(card, setPayload);
+  assert.equal(result?.cardmarketProductId, 1001);
+});
+
+test('buildSetCardAssignmentMap uses collector number as primary match criterion', () => {
+  const sourceCards = [
+    {
+      number: 'H09',
+      vera_name: 'Alakazam',
+      tcgdex_name: 'Alakazam',
+    },
+    {
+      number: '2',
+      vera_name: 'Alakazam',
+      tcgdex_name: 'Alakazam',
+    }
+  ];
+
+  const setPayload = {
+    expansionId: 1538,
+    cards: [
+      {
+        cardmarketProductId: 275238,
+        name: 'Alakazam [Energy Jump | Psychic]',
+        collectorNumber: 'H9',
+        prices: { trend: 12.5 }
+      },
+      {
+        cardmarketProductId: 275260,
+        name: 'Alakazam [Energy Jump | Psychic]',
+        collectorNumber: '2',
+        prices: { trend: 8.3 }
+      }
+    ]
+  };
+
+  const assignmentMap = buildSetCardAssignmentMap(sourceCards, setPayload);
+  assert.equal(assignmentMap.get(sourceCards[0])?.cardmarketProductId, 275238);
+  assert.equal(assignmentMap.get(sourceCards[1])?.cardmarketProductId, 275260);
+});
+
+test('buildSetCardAssignmentMap falls back to name when collector number does not match', () => {
+  const sourceCards = [
+    {
+      vera_name: 'Pikachu',
+      tcgdex_name: 'Pikachu',
+    },
+    {
+      vera_name: 'Raichu',
+      tcgdex_name: 'Raichu',
+    }
+  ];
+
+  const setPayload = {
+    expansionId: 2001,
+    cards: [
+      {
+        cardmarketProductId: 1001,
+        name: 'Pikachu [Thunder Jolt]',
+        prices: { trend: 1.2 }
+      },
+      {
+        cardmarketProductId: 1002,
+        name: 'Raichu [Thunderbolt]',
+        prices: { trend: 4.6 }
+      }
+    ]
+  };
+
+  const assignmentMap = buildSetCardAssignmentMap(sourceCards, setPayload);
+  assert.equal(assignmentMap.get(sourceCards[0])?.cardmarketProductId, 1001);
+  assert.equal(assignmentMap.get(sourceCards[1])?.cardmarketProductId, 1002);
 });
