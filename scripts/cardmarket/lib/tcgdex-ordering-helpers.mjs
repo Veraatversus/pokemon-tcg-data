@@ -139,7 +139,17 @@ export function applyTcgdexOrderingToArtifacts({ artifacts, helperSetsByExpansio
       const matchIndex = findMatchIndex(helperCard, cards, usedIndexes);
       if (matchIndex < 0) continue;
       usedIndexes.add(matchIndex);
-      orderedCards.push(cards[matchIndex]);
+
+      const card = cards[matchIndex];
+      const enrichedCollectorNumber =
+        (card.collectorNumber == null && helperCard.number != null)
+          ? String(helperCard.number)
+          : card.collectorNumber;
+      orderedCards.push(
+        enrichedCollectorNumber !== card.collectorNumber
+          ? { ...card, collectorNumber: enrichedCollectorNumber }
+          : card
+      );
     }
 
     if (orderedCards.length === 0) {

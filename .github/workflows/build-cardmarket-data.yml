@@ -67,7 +67,8 @@ jobs:
       - name: Commit generated Cardmarket data if changed
         id: commit_generated
         run: |
-          git add cardmarket scripts/cardmarket/helpers/tcgdex-data
+          git add cardmarket
+                    git add cardmarket scripts/cardmarket/helpers/tcgdex-data
           if git diff --cached --quiet; then
             echo "changed=false" >> $GITHUB_OUTPUT
             echo "No generated Cardmarket changes to commit"

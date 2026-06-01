@@ -134,8 +134,7 @@ test('writeTcgdexHelperArtifacts writes set master and per-set files by cardmark
   const fallbackPayload = JSON.parse(await fs.readFile(fallbackSetPath, 'utf8'));
   assert.equal(fallbackPayload.cardmarketSetId, null);
   assert.equal(fallbackPayload.cards.length, 1);
-}
-);
+});
 
 test('runTcgdexHelperCli generates artifacts from a provided source directory', async () => {
   const fixtureRoot = await makeFixtureRepo();
