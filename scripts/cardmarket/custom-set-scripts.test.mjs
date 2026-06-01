@@ -5,7 +5,6 @@ import os from 'node:os';
 import path from 'node:path';
 
 import { applyCustomSetScripts } from './apply-custom-set-scripts.mjs';
-import { transformSet as transform1538 } from './custom-sets/1538.mjs';
 
 function createLogger() {
   const entries = [];
@@ -120,80 +119,3 @@ test('applyCustomSetScripts keeps original artifact when script export is invali
   }
 });
 
-test('transform1538 reorders cards with both requested block moves', () => {
-  const payload = {
-    expansionId: 1538,
-    cards: [
-      { cardmarketProductId: 275200 },
-      { cardmarketProductId: 275210 },
-      { cardmarketProductId: 275237 },
-      { cardmarketProductId: 275238 },
-      { cardmarketProductId: 275250 },
-      { cardmarketProductId: 275258 },
-      { cardmarketProductId: 275300 },
-      { cardmarketProductId: 275408 },
-      { cardmarketProductId: 275450 },
-    ],
-  };
-
-  const result = transform1538(payload, { logger: createLogger() });
-
-  assert.deepEqual(
-    result.cards.map((card) => card.cardmarketProductId),
-    [275300, 275408, 275238, 275250, 275258, 275450, 275200, 275210, 275237]
-  );
-});
-
-test('transform1538 returns original payload when required markers are missing', () => {
-  const logger = createLogger();
-  const payload = {
-    expansionId: 1538,
-    cards: [
-      { cardmarketProductId: 275200 },
-      { cardmarketProductId: 275300 },
-      { cardmarketProductId: 275408 },
-    ],
-  };
-
-  const result = transform1538(payload, { logger });
-
-  assert.equal(result, payload);
-  assert.equal(logger.entries.some((entry) => entry.level === 'warn'), true);
-});
-
-test('transform1538 returns original payload when second-step end marker is missing', () => {
-  const logger = createLogger();
-  const payload = {
-    expansionId: 1538,
-    cards: [
-      { cardmarketProductId: 275200 },
-      { cardmarketProductId: 275237 },
-      { cardmarketProductId: 275300 },
-      { cardmarketProductId: 275408 },
-    ],
-  };
-
-  const result = transform1538(payload, { logger });
-
-  assert.equal(result, payload);
-  assert.equal(logger.entries.some((entry) => entry.level === 'warn'), true);
-});
-
-test('transform1538 returns original payload when second-step anchor marker is missing', () => {
-  const logger = createLogger();
-  const payload = {
-    expansionId: 1538,
-    cards: [
-      { cardmarketProductId: 275200 },
-      { cardmarketProductId: 275237 },
-      { cardmarketProductId: 275238 },
-      { cardmarketProductId: 275258 },
-      { cardmarketProductId: 275450 },
-    ],
-  };
-
-  const result = transform1538(payload, { logger });
-
-  assert.equal(result, payload);
-  assert.equal(logger.entries.some((entry) => entry.level === 'warn'), true);
-});

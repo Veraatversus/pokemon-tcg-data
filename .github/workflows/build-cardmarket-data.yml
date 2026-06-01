@@ -42,6 +42,15 @@ jobs:
       - name: Verify custom cardmarket set scripts
         run: node --test scripts/cardmarket/custom-set-scripts.test.mjs
 
+      - name: Verify tcgdex helper generator tests
+        run: node --test scripts/cardmarket/tcgdex-helper.test.mjs
+
+      - name: Verify tcgdex ordering tests
+        run: node --test scripts/cardmarket/tcgdex-ordering.test.mjs
+
+      - name: Generate tcgdex helper lookup files
+        run: node scripts/cardmarket/tcgdex-helper/generate-tcgdex-helpers.mjs
+
       - name: Build Cardmarket static JSON endpoints
         run: node scripts/cardmarket/build-cardmarket-data.mjs
 
@@ -53,11 +62,12 @@ jobs:
           test -f cardmarket/index/nonsingles-products.json
           test -f cardmarket/index/names.json
           test -f cardmarket/index/tracker.json
+          test -f scripts/cardmarket/helpers/tcgdex-data/sets-master.json
 
       - name: Commit generated Cardmarket data if changed
         id: commit_generated
         run: |
-          git add cardmarket
+          git add cardmarket scripts/cardmarket/helpers/tcgdex-data
           if git diff --cached --quiet; then
             echo "changed=false" >> $GITHUB_OUTPUT
             echo "No generated Cardmarket changes to commit"
