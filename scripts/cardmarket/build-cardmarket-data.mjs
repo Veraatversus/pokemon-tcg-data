@@ -7,10 +7,6 @@ import {
   writeArtifactsToDirectory,
 } from './lib/build-helpers.mjs';
 import { applyCustomSetScripts } from './apply-custom-set-scripts.mjs';
-import {
-  applyTcgdexOrderingToArtifacts,
-  loadTcgdexHelperSetsByExpansionId,
-} from './lib/tcgdex-ordering-helpers.mjs';
 
 const DEFAULT_SINGLES_URL = 'https://downloads.s3.cardmarket.com/productCatalog/productList/products_singles_6.json';
 const DEFAULT_NONSINGLES_URL = 'https://downloads.s3.cardmarket.com/productCatalog/productList/products_nonsingles_6.json';
@@ -131,34 +127,6 @@ export async function buildDailyCardmarketData({ singlesUrl = DEFAULT_SINGLES_UR
     scriptsDir: customScriptsDir,
     logger: console,
   });
-
-  const helperRootDir = process.env.CARDMARKET_TCGDEX_HELPER_DIR
-    ? path.resolve(process.env.CARDMARKET_TCGDEX_HELPER_DIR)
-    : path.join(resolvedRepoRoot, 'scripts', 'cardmarket', 'helpers', 'tcgdex-data');
-
-  const helperSetsByExpansionId = await loadTcgdexHelperSetsByExpansionId({
-    helpersRootDir: helperRootDir,
-  });
-
-  const orderingSummary = applyTcgdexOrderingToArtifacts({
-    artifacts,
-    helperSetsByExpansionId,
-  });
-
-  if (orderingSummary.orderedSetCount > 0) {
-    console.log(
-      `[cardmarket-build] applied tcgdex ordering for ${orderingSummary.orderedSetCount} sets: matched=${orderingSummary.totalMatchedCards}, unmatched=${orderingSummary.totalUnmatchedCards} (unmatched cards appended at end)`
-    );
-
-    const topUnmatchedSets = (orderingSummary.setMetrics || [])
-      .filter((entry) => entry.unmatchedCardCount > 0)
-      .sort((left, right) => right.unmatchedCardCount - left.unmatchedCardCount)
-      .slice(0, 10);
-
-    if (topUnmatchedSets.length > 0) {
-      console.log(`[cardmarket-build] top sets with unmatched cards: ${topUnmatchedSets.map((entry) => `${entry.expansionId}:${entry.unmatchedCardCount}`).join(', ')}`);
-    }
-  }
 
   validateArtifacts(artifacts);
 
