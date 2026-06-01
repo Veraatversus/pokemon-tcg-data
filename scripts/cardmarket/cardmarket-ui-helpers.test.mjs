@@ -878,3 +878,70 @@ test('buildSetCardAssignmentMap falls back to name when collector number does no
   assert.equal(assignmentMap.get(sourceCards[0])?.cardmarketProductId, 1001);
   assert.equal(assignmentMap.get(sourceCards[1])?.cardmarketProductId, 1002);
 });
+
+test('resolveCardmarketEntryForCardFromSetPayload does not match collector number when name differs (cross-name collision)', () => {
+  const card = {
+    number: '2',
+    vera_name: 'Arkani',
+    tcgdex_name: 'Arkani',
+  };
+
+  const setPayload = {
+    expansionId: 1523,
+    cards: [
+      {
+        cardmarketProductId: 273697,
+        name: 'Blastoise [Rain Dance | Hydro Pump]',
+        collectorNumber: '2',
+        prices: { trend: 5.0 }
+      },
+      {
+        cardmarketProductId: 273698,
+        name: 'Arkani [Fire Spin | Flamethrower]',
+        collectorNumber: '3',
+        prices: { trend: 3.0 }
+      }
+    ]
+  };
+
+  // collectorNumber "2" matches Blastoise, but name is Arkani → should NOT match Blastoise
+  const result = resolveCardmarketEntryForCardFromSetPayload(card, setPayload);
+  assert.notEqual(result?.cardmarketProductId, 273697);
+});
+
+test('buildSetCardAssignmentMap uses name tiebreak when collector number matches multiple entries', () => {
+  const sourceCards = [
+    {
+      number: '2',
+      vera_name: 'Arkani',
+      tcgdex_name: 'Arkani',
+    },
+    {
+      number: '3',
+      vera_name: 'Blastoise',
+      tcgdex_name: 'Blastoise',
+    }
+  ];
+
+  const setPayload = {
+    expansionId: 1523,
+    cards: [
+      {
+        cardmarketProductId: 273697,
+        name: 'Blastoise [Rain Dance | Hydro Pump]',
+        collectorNumber: '2',
+        prices: { trend: 5.0 }
+      },
+      {
+        cardmarketProductId: 273698,
+        name: 'Arkani [Fire Spin | Flamethrower]',
+        collectorNumber: '2',
+        prices: { trend: 3.0 }
+      }
+    ]
+  };
+
+  const assignmentMap = buildSetCardAssignmentMap(sourceCards, setPayload);
+  // Arkani should match the Arkani entry by name tiebreak, not Blastoise by collectorNumber
+  assert.equal(assignmentMap.get(sourceCards[0])?.cardmarketProductId, 273698);
+});

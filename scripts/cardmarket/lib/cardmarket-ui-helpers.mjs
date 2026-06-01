@@ -337,7 +337,16 @@ export function resolveCardmarketEntryForCardFromSetPayload(card = {}, setPayloa
 
   // 1. Collector-number-first: try to resolve by collectorNumber across the full set
   const collectorMatched = cards.filter((entry) => entryCollectorMatchesCard(entry, card));
-  if (collectorMatched.length === 1) return collectorMatched[0];
+  if (collectorMatched.length === 1 && normalizedCardNames.length) {
+    // Single collector match — but verify name matches to avoid cross-name collisions
+    // (e.g. card "Arkani #2" should not match entry "Blastoise #2")
+    if (entryMatchesAnyCardName(collectorMatched[0], normalizedCardNames)) {
+      return collectorMatched[0];
+    }
+    // Name mismatch: fall through to name-based resolution
+  } else if (collectorMatched.length === 1 && !normalizedCardNames.length) {
+    return collectorMatched[0];
+  }
 
   // 2. Name-based candidate pool (original primary, now fallback when collector is ambiguous or absent)
   if (!normalizedCardNames.length) return null;
@@ -412,12 +421,30 @@ export function buildSetCardAssignmentMap(sourceCards = [], setPayload = {}) {
       card?.collectorNumber || card?.number || card?.vera_number || card?.tcgdex_number || ''
     );
     if (cardCollectorKey) {
-      matchIndex = availableEntries.findIndex((entry) => {
+      // Collect all collector-key matches
+      const keyMatches = [];
+      for (let i = 0; i < availableEntries.length; i += 1) {
+        const entry = availableEntries[i];
         const entryKey = normalizeCollectorKey(
           entry?.collectorNumber || entry?.number || entry?.cardNumber || ''
         );
-        return entryKey && entryKey === cardCollectorKey;
-      });
+        if (entryKey && entryKey === cardCollectorKey) {
+          keyMatches.push(i);
+        }
+      }
+
+      if (keyMatches.length === 1) {
+        matchIndex = keyMatches[0];
+      } else if (keyMatches.length > 1) {
+        // Tiebreak: prefer the entry whose name matches the card
+        for (const i of keyMatches) {
+          if (entryMatchesAnyCardName(availableEntries[i], normalizedCardNames)) {
+            matchIndex = i;
+            break;
+          }
+        }
+        // If no name match among collector candidates, fall through to name-based matching
+      }
     }
 
     // 2. Fallback: name-based match (original behavior)
