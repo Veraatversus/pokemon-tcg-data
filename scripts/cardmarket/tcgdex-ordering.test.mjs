@@ -76,3 +76,31 @@ test('applyTcgdexOrderingToArtifacts keeps unmatched-only sets unchanged', () =>
     [7]
   );
 });
+
+test('applyTcgdexOrderingToArtifacts enriches collectorNumber from helper when null', () => {
+  const artifacts = {
+    sets: {
+      '1523': {
+        expansionId: 1523,
+        cards: [
+          { cardmarketProductId: 101, name: 'Alpha', collectorNumber: null },
+          { cardmarketProductId: 102, name: 'Beta', collectorNumber: '2' },
+        ],
+      },
+    },
+  };
+
+  const helperSetsByExpansionId = {
+    '1523': {
+      cards: [
+        { number: '1', name: { en: 'Alpha', de: null }, cardmarketId: 101, tcgplayerId: null },
+        { number: '2', name: { en: 'Beta', de: null }, cardmarketId: 102, tcgplayerId: null },
+      ],
+    },
+  };
+
+  applyTcgdexOrderingToArtifacts({ artifacts, helperSetsByExpansionId });
+
+  assert.equal(artifacts.sets['1523'].cards[0].collectorNumber, '1');
+  assert.equal(artifacts.sets['1523'].cards[1].collectorNumber, '2');
+});
