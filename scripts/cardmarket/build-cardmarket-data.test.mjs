@@ -491,6 +491,117 @@ test('buildCardmarketArtifacts falls back to inferred expansion ids for HS set n
   assert.equal(artifacts.index.tracker.bySetName['hs unleashed'], '1567');
 });
 
+test('buildCardmarketArtifacts uses tcgdex sets-master as primary matching and falls back to name/card inference', () => {
+  // Simulate a tcgdex sets-master.json mapping: ecard3 (Skyridge) → 1538
+  const tcgdexMap = {
+    ecard3: '1538',
+    base1: '1523',
+  };
+
+  const singlesPayload = {
+    version: 1,
+    createdAt: '2026-04-13T00:00:00+0000',
+    products: [
+      {
+        idProduct: 700001,
+        name: 'Pikachu',
+        idCategory: 51,
+        categoryName: 'Pokémon Single',
+        idExpansion: 1523,
+        idMetacard: 0,
+        dateAdded: '2026-04-13 00:00:00'
+      },
+      {
+        idProduct: 700002,
+        name: 'Mewtwo',
+        idCategory: 51,
+        categoryName: 'Pokémon Single',
+        idExpansion: 1538,
+        idMetacard: 0,
+        dateAdded: '2026-04-13 00:00:00'
+      }
+    ]
+  };
+
+  const nonsinglesPayload = {
+    version: 1,
+    createdAt: '2026-04-13T00:00:00+0000',
+    products: [
+      {
+        idProduct: 700101,
+        name: 'Skyridge Booster',
+        idCategory: 52,
+        categoryName: 'Pokémon Booster',
+        idExpansion: 1538,
+        idMetacard: 0,
+        dateAdded: '2003-01-01 00:00:00'
+      }
+    ]
+  };
+
+  // Test 1: Primary tcgdex matching — ecard3 resolves to 1538 via tcgdexMap
+  // even though the tracker set name "Skyridge" would also match via nonsingles
+  const artifacts1 = buildCardmarketArtifacts({
+    singlesPayload,
+    nonsinglesPayload,
+    priceGuidePayload: { version: 1, createdAt: '2026-04-13T00:00:00+0000', priceGuides: [] },
+    trackerSets: [
+      { id: 'ecard3', name: 'Skyridge', ptcgoCode: 'SK' },
+    ],
+    trackerCardsBySet: { ecard3: [] },
+    tcgdexSetToCardmarketMap: tcgdexMap,
+  });
+
+  assert.equal(artifacts1.index.tracker.bySetId.ecard3, '1538');
+
+  // Test 2: Fallback matching — base1 resolves via tcgdexMap (not name inference)
+  const artifacts2 = buildCardmarketArtifacts({
+    singlesPayload,
+    nonsinglesPayload,
+    priceGuidePayload: { version: 1, createdAt: '2026-04-13T00:00:00+0000', priceGuides: [] },
+    trackerSets: [
+      { id: 'base1', name: 'Base', ptcgoCode: 'BS' },
+    ],
+    trackerCardsBySet: { base1: [] },
+    tcgdexSetToCardmarketMap: tcgdexMap,
+  });
+
+  assert.equal(artifacts2.index.tracker.bySetId.base1, '1523');
+
+  // Test 3: Fallback when tcgdexMap has no entry — set with no tcgdex entry
+  // should still resolve via card-name inference
+  const artifacts3 = buildCardmarketArtifacts({
+    singlesPayload,
+    nonsinglesPayload,
+    priceGuidePayload: { version: 1, createdAt: '2026-04-13T00:00:00+0000', priceGuides: [] },
+    trackerSets: [
+      { id: 'ecard3', name: 'Skyridge', ptcgoCode: 'SK' },
+    ],
+    trackerCardsBySet: {
+      ecard3: [{ name: 'Mewtwo' }]
+    },
+    tcgdexSetToCardmarketMap: {}, // empty — no tcgdex mapping available
+  });
+
+  // Without tcgdex map, should still resolve via card-name inference
+  assert.equal(artifacts3.index.tracker.bySetId.ecard3, '1538');
+
+  // Test 4: tcgdexMap takes precedence over name-based matching
+  // A wrong name should NOT override the tcgdex mapping
+  const artifacts4 = buildCardmarketArtifacts({
+    singlesPayload,
+    nonsinglesPayload,
+    priceGuidePayload: { version: 1, createdAt: '2026-04-13T00:00:00+0000', priceGuides: [] },
+    trackerSets: [
+      { id: 'ecard3', name: 'Totally Wrong Name', ptcgoCode: 'SK' },
+    ],
+    trackerCardsBySet: { ecard3: [] },
+    tcgdexSetToCardmarketMap: tcgdexMap,
+  });
+
+  assert.equal(artifacts4.index.tracker.bySetId.ecard3, '1538');
+});
+
 test('writeArtifactsToDirectory minifies generated json files', async () => {
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'cardmarket-build-test-'));
 
