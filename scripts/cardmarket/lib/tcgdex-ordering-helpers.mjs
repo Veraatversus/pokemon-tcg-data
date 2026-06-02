@@ -21,6 +21,16 @@ function normalizeCollectorNumber(value = '') {
     .replace(/\s+/g, '');
 }
 
+/**
+ * Strips leading zeros from each numeric segment of a collector number,
+ * producing a canonical key that treats H09 == H9, 009 == 9, A001 == A1.
+ */
+function normalizeCollectorKey(value = '') {
+  const normalized = normalizeCollectorNumber(value);
+  if (!normalized) return '';
+  return normalized.replace(/0+(\d+)/g, '$1');
+}
+
 async function fileExists(filePath) {
   try {
     await fs.access(filePath);
@@ -56,6 +66,7 @@ export async function loadTcgdexHelperSetsByExpansionId({ helpersRootDir } = {})
 function findMatchIndex(helperCard, cards, usedIndexes) {
   if (!helperCard) return -1;
 
+  // 1. Exact cardmarketProductId match (unchanged)
   const helperCardmarketId = Number(helperCard.cardmarketId || 0) || null;
   if (helperCardmarketId !== null) {
     for (let index = 0; index < cards.length; index += 1) {
@@ -68,9 +79,39 @@ function findMatchIndex(helperCard, cards, usedIndexes) {
   }
 
   const helperNumber = normalizeCollectorNumber(helperCard.number || '');
+  const helperKey = normalizeCollectorKey(helperCard.number || '');
   const helperNameEn = normalizeCardName(helperCard?.name?.en || '');
   const helperNameDe = normalizeCardName(helperCard?.name?.de || '');
 
+  // 2. Collector-number-first: try collectorKey match (zero-padding tolerant)
+  if (helperKey) {
+    const keyMatches = [];
+    for (let index = 0; index < cards.length; index += 1) {
+      if (usedIndexes.has(index)) continue;
+      const candidate = cards[index];
+      const candidateKey = normalizeCollectorKey(candidate?.collectorNumber || '');
+      if (candidateKey && candidateKey === helperKey) {
+        keyMatches.push(index);
+      }
+    }
+
+    // Single match → definitive
+    if (keyMatches.length === 1) return keyMatches[0];
+
+    // Multiple matches → tiebreak with name
+    if (keyMatches.length > 1) {
+      for (const index of keyMatches) {
+        const candidateName = normalizeCardName(cards[index]?.name || '');
+        if (candidateName && (candidateName === helperNameEn || candidateName === helperNameDe)) {
+          return index;
+        }
+      }
+      // Still ambiguous: return first key match
+      return keyMatches[0];
+    }
+  }
+
+  // 3. Legacy: collectorNumber + name (exact, zero-padding sensitive)
   if (helperNumber) {
     for (let index = 0; index < cards.length; index += 1) {
       if (usedIndexes.has(index)) continue;
@@ -86,6 +127,7 @@ function findMatchIndex(helperCard, cards, usedIndexes) {
     }
   }
 
+  // 4. Name-only fallback
   if (helperNameEn || helperNameDe) {
     for (let index = 0; index < cards.length; index += 1) {
       if (usedIndexes.has(index)) continue;
