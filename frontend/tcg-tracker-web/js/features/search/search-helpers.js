@@ -1,9 +1,11 @@
+import { isGeneratedCardmarketSearchUrl } from '../../data/cardmarket-url-utils.js';
+
 const SEARCH_NOISE_TOKENS = new Set([
   'karte', 'karten', 'kartennummer', 'kartennr', 'nummer', 'nr', 'no', 'num',
   'pokemon', 'pokemontcg', 'tcg', 'set', 'im', 'in', 'von', 'die', 'der', 'das'
 ]);
 
-export function createSearchHelpers({ normalizeCardNumber, isGeneratedCardmarketSearchUrl } = {}) {
+export function createSearchHelpers({ normalizeCardNumber } = {}) {
   function normalizeSearchText(value) {
     return String(value || '')
       .toLowerCase()

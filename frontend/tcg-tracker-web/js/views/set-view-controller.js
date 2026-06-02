@@ -13,6 +13,7 @@
  * - loadCurrentSet, renderCards, renderLightbox, etc.
  */
 
+import { isGeneratedCardmarketSearchUrl } from '../data/cardmarket-url-utils.js';
 import { sanitizeDisplayText } from '../core/display-text.js';
 
 let focusedCardIndex = -1;
@@ -672,11 +673,6 @@ function revealPendingSearchCardFocus(injections = {}) {
 /**
  * CARDMARKET PRICING
  */
-
-function isGeneratedCardmarketSearchUrl(url) {
-  const value = String(url || '').trim().toLowerCase();
-  return value.includes('cardmarket.com') && value.includes('/products/search') && value.includes('searchstring=');
-}
 
 function toFinitePrice(value) {
   const numeric = Number(value);

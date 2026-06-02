@@ -7,6 +7,7 @@ import {
   formatCardmarketEntryTitle as sharedFormatCardmarketEntryTitle,
   getCardmarketBaseUrl as sharedGetCardmarketBaseUrl,
   inferCardmarketExpansionIdFromCards as sharedInferCardmarketExpansionIdFromCards,
+  isGeneratedCardmarketSearchUrl,
   promoteCardmarketUrlsForCards as sharedPromoteCardmarketUrlsForCards,
   resolveCardmarketEntryForCardFromSetPayload as sharedResolveCardmarketEntryForCardFromSetPayload,
   resolveCardmarketEntryFromSetPayload as sharedResolveCardmarketEntryFromSetPayload,
@@ -41,11 +42,6 @@ export function extractCardmarketProductId(url = '') {
 
 function getCardmarketUrlFromCard(card = {}) {
   return String(card?.cardmarketUrl || card?.vera_cardmarket_url || card?.tcgdex_cardmarket_url || '').trim();
-}
-
-function isGeneratedCardmarketSearchUrl(url = '') {
-  const value = String(url || '').trim().toLowerCase();
-  return value.includes('cardmarket.com') && value.includes('/products/search') && value.includes('searchstring=');
 }
 
 export function buildCardmarketProductUrl(productId, { language = 'de' } = {}) {

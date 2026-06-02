@@ -1,9 +1,5 @@
 import { formatCardmarketEntryLabel, formatCardmarketEntryTitle } from '../data/cardmarket-data.js?v=20260427-wave3-central-v1';
-
-export function isGeneratedCardmarketSearchUrl(url) {
-  const value = String(url || '').trim().toLowerCase();
-  return value.includes('cardmarket.com') && value.includes('/products/search') && value.includes('searchstring=');
-}
+import { isGeneratedCardmarketSearchUrl } from '../data/cardmarket-url-utils.js';
 
 export function toFinitePrice(value) {
   const numeric = Number(value);

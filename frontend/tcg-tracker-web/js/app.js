@@ -1,3 +1,4 @@
+import { isGeneratedCardmarketSearchUrl } from './data/cardmarket-url-utils.js';
 import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js?v=20260410-authredirect2';
 import {
   listImportedSets,
@@ -8354,11 +8355,6 @@ function createCardElement(card, key, db, index) {
 
 const cardmarketPriceSummaryCache = new Map();
 const cardmarketPriceSummaryPending = new Map();
-
-function isGeneratedCardmarketSearchUrl(url) {
-  const value = String(url || '').trim().toLowerCase();
-  return value.includes('cardmarket.com') && value.includes('/products/search') && value.includes('searchstring=');
-}
 
 function toFinitePrice(value) {
   const numeric = Number(value);

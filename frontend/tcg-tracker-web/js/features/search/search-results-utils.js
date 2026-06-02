@@ -1,3 +1,5 @@
+import { isGeneratedCardmarketSearchUrl } from '../../data/cardmarket-url-utils.js';
+
 export function hasRichCardDetails(card = {}) {
   return Boolean(
     String(card?.rarity || '').trim()
@@ -10,7 +12,7 @@ export function hasRichCardDetails(card = {}) {
   );
 }
 
-export function needsApiCardEnrichment(cards = [], isGeneratedCardmarketSearchUrl) {
+export function needsApiCardEnrichment(cards = []) {
   const sample = (Array.isArray(cards) ? cards : []).filter(Boolean).slice(0, 12);
   if (!sample.length) return false;
 

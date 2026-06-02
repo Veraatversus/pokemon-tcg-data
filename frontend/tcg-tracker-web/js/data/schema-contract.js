@@ -1,5 +1,6 @@
 import { normalizeCardNumber } from '../core/utils.js';
 import { scopedStorageKey } from '../core/config.js';
+import { isGeneratedCardmarketSearchUrl } from './cardmarket-url-utils.js';
 
 const SETTINGS_STORAGE_KEY = scopedStorageKey('user-settings');
 const RESOLVER_SOURCES = ['tcgdex', 'vera', 'legacy'];
@@ -360,11 +361,6 @@ function buildCardmarketFallback({ setTag = '', cardNumber = '' } = {}) {
 
   const searchString = `${normalizedSetTag} ${normalizedCardNumber}`;
   return `https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=${encodeURIComponent(searchString).replace(/%20/g, '+')}`;
-}
-
-function isGeneratedCardmarketSearchUrl(value) {
-  const normalized = String(value || '').trim().toLowerCase();
-  return normalized.includes('cardmarket.com') && normalized.includes('/products/search') && normalized.includes('searchstring=');
 }
 
 function resolvePreferredCardmarketUrl(candidates = []) {

@@ -1,3 +1,8 @@
+import {
+  isGeneratedCardmarketSearchUrl,
+  isGeneratedCardmarketUrl,
+} from './cardmarket-url-utils.js';
+
 const DEFAULT_REMOTE_CARDMARKET_BASE = 'https://veraatversus.github.io/pokemon-tcg-data/cardmarket';
 
 export function isLocalOrigin(origin = '') {
@@ -27,10 +32,7 @@ export function getCardmarketUrlFromCard(card = {}) {
   return String(card?.cardmarketUrl || card?.vera_cardmarket_url || card?.tcgdex_cardmarket_url || '').trim();
 }
 
-export function isGeneratedCardmarketSearchUrl(url = '') {
-  const value = String(url || '').trim().toLowerCase();
-  return value.includes('cardmarket.com') && value.includes('/products/search') && value.includes('searchstring=');
-}
+export { isGeneratedCardmarketSearchUrl, isGeneratedCardmarketUrl };
 
 export function buildCardmarketProductUrl(productId, { language = 'de' } = {}) {
   const normalizedProductId = String(productId || '').trim();
@@ -411,7 +413,7 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
 } = {}) {
   if (!Array.isArray(cards) || !cards.length) return Array.isArray(cards) ? cards : [];
 
-  const needsPromotion = cards.some((card) => isGeneratedCardmarketSearchUrl(getCardmarketUrlFromCard(card)));
+  const needsPromotion = cards.some((card) => isGeneratedCardmarketUrl(getCardmarketUrlFromCard(card)));
   const hasDuplicateSourceNames = (() => {
     const counts = new Map();
     cards.forEach((card) => {
@@ -453,9 +455,9 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
 
   return cards.map((card) => {
     const currentUrl = getCardmarketUrlFromCard(card);
-    const isSearchFallback = isGeneratedCardmarketSearchUrl(currentUrl);
-    const shouldReconcileDirectUrl = !isSearchFallback && hasDuplicateSourceNames;
-    if (!isSearchFallback && !shouldReconcileDirectUrl) return card;
+    const isGeneratedUrl = isGeneratedCardmarketUrl(currentUrl);
+    const shouldReconcileDirectUrl = !isGeneratedUrl && hasDuplicateSourceNames;
+    if (!isGeneratedUrl && !shouldReconcileDirectUrl) return card;
 
     const matchedEntry = assignmentMap.get(card) || null;
     const directUrl = buildCardmarketProductUrl(matchedEntry?.cardmarketProductId);

@@ -1,3 +1,5 @@
+import { isGeneratedCardmarketSearchUrl } from '../../data/cardmarket-url-utils.js';
+
 export function createSearchResultActionsController({
   state,
   dom,
@@ -5,7 +7,6 @@ export function createSearchResultActionsController({
   config,
   attachImageFallback,
   makeCheckbox,
-  isGeneratedCardmarketSearchUrl,
   hydrateCardmarketLink,
   showToast,
   syncCollectionCheckboxUi,
