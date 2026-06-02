@@ -263,6 +263,9 @@ function inferExpansionIdFromTrackerCards(trackerCards = [], nameIndex = {}) {
 }
 
 function buildTrackerSetIndex(trackerSets = [], trackerCardsBySet = {}, nameIndex = {}, expansionNameCandidates = new Map(), tcgdexSetToCardmarketMap = {}) {
+  const tcgdexIdMap = tcgdexSetToCardmarketMap?.idMap || {};
+  const tcgdexNameMap = tcgdexSetToCardmarketMap?.nameMap || {};
+
   const bySetId = {};
   const byPtcgoCode = {};
   const bySetName = {};
@@ -270,15 +273,24 @@ function buildTrackerSetIndex(trackerSets = [], trackerCardsBySet = {}, nameInde
   const resolvedExpansionIdBySetId = {};
   const byPtcgoCodeCandidates = {};
 
-  // Phase 1: Primary matching via tcgdex sets-master.json (tcgdexSetId → cardmarketSetId)
+  // Phase 1: Primary matching via tcgdex sets-master.json
   (Array.isArray(trackerSets) ? trackerSets : []).forEach((set) => {
     const setId = String(set?.id || '').trim();
     if (!setId) return;
 
     const normalizedSetId = setId.toLowerCase();
-    const tcgdexCardmarketId = tcgdexSetToCardmarketMap[setId];
+
+    // 1a: Direct ID match (tcgdexSetId → cardmarketSetId)
+    const tcgdexCardmarketId = tcgdexIdMap[setId];
     if (tcgdexCardmarketId) {
       resolvedExpansionIdBySetId[normalizedSetId] = tcgdexCardmarketId;
+      return;
+    }
+
+    // 1b: English name match (tracker set name → tcgdex en name → cardmarketSetId)
+    const trackerEnName = normalizeMatcherText(set?.name || '');
+    if (trackerEnName && tcgdexNameMap[trackerEnName]) {
+      resolvedExpansionIdBySetId[normalizedSetId] = tcgdexNameMap[trackerEnName];
     }
   });
 
@@ -348,7 +360,7 @@ function buildTrackerSetIndex(trackerSets = [], trackerCardsBySet = {}, nameInde
   return { bySetId, byPtcgoCode, bySetName };
 }
 
-export function buildCardmarketArtifacts({ singlesPayload, nonsinglesPayload, priceGuidePayload, trackerSets = [], trackerCardsBySet = {}, tcgdexSetToCardmarketMap = {} } = {}) {
+export function buildCardmarketArtifacts({ singlesPayload, nonsinglesPayload, priceGuidePayload, trackerSets = [], trackerCardsBySet = {}, tcgdexSetToCardmarketMap = { idMap: {}, nameMap: {} } } = {}) {
   const products = extractProductsList(singlesPayload);
   const nonsinglesProducts = extractProductsList(nonsinglesPayload);
   const priceRows = extractPriceGuideList(priceGuidePayload);
@@ -511,16 +523,24 @@ export async function loadTcgdexSetToCardmarketMap(repoRoot) {
     const raw = await fs.readFile(setsMasterPath, 'utf8');
     const data = JSON.parse(raw);
     const sets = Array.isArray(data?.sets) ? data.sets : [];
-    const map = {};
+    const idMap = {};
+    const nameMap = {};
     for (const set of sets) {
       const tcgdexId = String(set?.tcgdexSetId || '').trim();
       const cardmarketId = set?.cardmarketSetId;
       if (tcgdexId && cardmarketId != null) {
-        map[tcgdexId] = String(Number(cardmarketId));
+        idMap[tcgdexId] = String(Number(cardmarketId));
+      }
+      const enName = normalizeMatcherText(set?.name?.en || '');
+      if (enName && cardmarketId != null) {
+        const cmId = String(Number(cardmarketId));
+        if (!nameMap[enName]) {
+          nameMap[enName] = cmId;
+        }
       }
     }
-    return map;
+    return { idMap, nameMap };
   } catch {
-    return {};
+    return { idMap: {}, nameMap: {} };
   }
 }
