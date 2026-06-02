@@ -124,14 +124,15 @@ export async function buildDailyCardmarketData({ singlesUrl = DEFAULT_SINGLES_UR
     trackerCardsBySet: trackerReference.trackerCardsBySet,
   });
 
+  const helpersRootDir = path.join(resolvedRepoRoot, 'scripts', 'cardmarket', 'helpers', 'tcgdex-data');
+  const helperSetsByExpansionId = await loadTcgdexHelperSetsByExpansionId({ helpersRootDir });
+  applyTcgdexOrderingToArtifacts({ artifacts, helperSetsByExpansionId });
+
+  // Apply custom set scripts AFTER tcgdex ordering so they take precedence
   await applyCustomSetScripts(artifacts, {
     scriptsDir: customScriptsDir,
     logger: console,
   });
-
-  const helpersRootDir = path.join(resolvedRepoRoot, 'scripts', 'cardmarket', 'helpers', 'tcgdex-data');
-  const helperSetsByExpansionId = await loadTcgdexHelperSetsByExpansionId({ helpersRootDir });
-  applyTcgdexOrderingToArtifacts({ artifacts, helperSetsByExpansionId });
 
   validateArtifacts(artifacts);
 
