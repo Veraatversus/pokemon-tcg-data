@@ -494,8 +494,8 @@ test('buildCardmarketArtifacts falls back to inferred expansion ids for HS set n
 test('buildCardmarketArtifacts uses tcgdex sets-master as primary matching and falls back to name/card inference', () => {
   // Simulate a tcgdex sets-master.json mapping: ecard3 (Skyridge) → 1538
   const tcgdexMap = {
-    ecard3: '1538',
-    base1: '1523',
+    idMap: { ecard3: '1538', base1: '1523' },
+    nameMap: { 'sky ridge': '1538', 'base set': '1523' },
   };
 
   const singlesPayload = {
@@ -580,7 +580,7 @@ test('buildCardmarketArtifacts uses tcgdex sets-master as primary matching and f
     trackerCardsBySet: {
       ecard3: [{ name: 'Mewtwo' }]
     },
-    tcgdexSetToCardmarketMap: {}, // empty — no tcgdex mapping available
+    tcgdexSetToCardmarketMap: { idMap: {}, nameMap: {} }, // empty — no tcgdex mapping available
   });
 
   // Without tcgdex map, should still resolve via card-name inference
