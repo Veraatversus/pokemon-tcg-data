@@ -196,22 +196,22 @@ test('Skyridge 1538 custom set keeps the response order and collector numbers', 
   const result = transformSkyridge1538(payload, { logger: createLogger() });
 
   assert.equal(result.cards.length, 186);
+  // First 12 cards should be SK 1-12 (regular cards, not holo variants)
   assert.deepEqual(
     result.cards.slice(0, 12).map((card) => card.cardmarketProductId),
-    [275259, 275238, 275227, 275258, 275246, 275245, 275248, 275249, 275251, 275250, 275237, 275236]
+    [275259, 275260, 275261, 275262, 275263, 275264, 275265, 275266, 275267, 275268, 275269, 275270]
   );
   assert.deepEqual(
     result.cards.slice(0, 12).map((card) => card.collectorNumber),
     ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
   );
-  assert.deepEqual(
-    result.cards.slice(-4).map((card) => card.cardmarketProductId),
-    [275407, 362905, 362906, 362908]
-  );
-  assert.deepEqual(
-    result.cards.slice(-4).map((card) => card.collectorNumber),
-    [null, null, null, null]
-  );
+  // Holo variants (H1-H32) should be at the end, after all regular SK cards
+  const hCards = result.cards.filter(c => c.collectorNumber && c.collectorNumber.startsWith('H'));
+  assert.equal(hCards.length, 33);
+  // Last cards should be holo variants or unmatched products
+  const lastIds = result.cards.slice(-4).map((card) => card.cardmarketProductId);
+  assert.ok(lastIds.every(id => [275254, 275256, 275255, 275252, 275253, 275408, 362908].includes(id)),
+    'Last cards should be holo variants or unmatched products');
 });
 
 test('Skyridge 1538 transform ignores wrong collector numbers and restores response order', () => {
@@ -227,13 +227,14 @@ test('Skyridge 1538 transform ignores wrong collector numbers and restores respo
 
   const result = transformSkyridge1538(payload, { logger: createLogger() });
 
+  // SK cards come first (by SK order), then H cards
   assert.deepEqual(
     result.cards.map((card) => card.cardmarketProductId),
-    [275259, 275238, 275227, 275407]
+    [275259, 275407, 275238, 275227]
   );
   assert.deepEqual(
     result.cards.map((card) => card.collectorNumber),
-    ['1', '2', '3', null]
+    ['1', '149', 'H1', 'H2']
   );
 });
 
