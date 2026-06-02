@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 import {
   buildCardmarketArtifacts,
+  loadTcgdexSetToCardmarketMap,
   writeArtifactsToDirectory,
 } from './lib/build-helpers.mjs';
 import { applyCustomSetScripts } from './apply-custom-set-scripts.mjs';
@@ -107,11 +108,12 @@ async function resolveDefaultOutputDirs(repoRoot) {
 
 export async function buildDailyCardmarketData({ singlesUrl = DEFAULT_SINGLES_URL, nonsinglesUrl = DEFAULT_NONSINGLES_URL, priceGuideUrl = DEFAULT_PRICE_GUIDE_URL, outputDir, outputDirs = [], repoRoot, customScriptsDir, fetchTimeoutMs = Number(process.env.CARDMARKET_FETCH_TIMEOUT_MS) || DEFAULT_FETCH_TIMEOUT_MS } = {}) {
   const resolvedRepoRoot = repoRoot ? path.resolve(repoRoot) : path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-  const [rawSinglesPayload, nonsinglesPayload, priceGuidePayload, trackerReference] = await Promise.all([
+  const [rawSinglesPayload, nonsinglesPayload, priceGuidePayload, trackerReference, tcgdexSetToCardmarketMap] = await Promise.all([
     fetchJson(singlesUrl, { timeoutMs: fetchTimeoutMs }),
     fetchJson(nonsinglesUrl, { timeoutMs: fetchTimeoutMs }),
     fetchJson(priceGuideUrl, { timeoutMs: fetchTimeoutMs }),
     loadTrackerReferenceData(resolvedRepoRoot),
+    loadTcgdexSetToCardmarketMap(resolvedRepoRoot),
   ]);
 
   const singlesPayload = rawSinglesPayload;
@@ -122,6 +124,7 @@ export async function buildDailyCardmarketData({ singlesUrl = DEFAULT_SINGLES_UR
     priceGuidePayload,
     trackerSets: trackerReference.trackerSets,
     trackerCardsBySet: trackerReference.trackerCardsBySet,
+    tcgdexSetToCardmarketMap,
   });
 
   const helpersRootDir = path.join(resolvedRepoRoot, 'scripts', 'cardmarket', 'helpers', 'tcgdex-data');

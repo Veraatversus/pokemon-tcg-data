@@ -262,7 +262,7 @@ function inferExpansionIdFromTrackerCards(trackerCards = [], nameIndex = {}) {
   return pickBestExpansionId(counts);
 }
 
-function buildTrackerSetIndex(trackerSets = [], trackerCardsBySet = {}, nameIndex = {}, expansionNameCandidates = new Map()) {
+function buildTrackerSetIndex(trackerSets = [], trackerCardsBySet = {}, nameIndex = {}, expansionNameCandidates = new Map(), tcgdexSetToCardmarketMap = {}) {
   const bySetId = {};
   const byPtcgoCode = {};
   const bySetName = {};
@@ -270,11 +270,27 @@ function buildTrackerSetIndex(trackerSets = [], trackerCardsBySet = {}, nameInde
   const resolvedExpansionIdBySetId = {};
   const byPtcgoCodeCandidates = {};
 
+  // Phase 1: Primary matching via tcgdex sets-master.json (tcgdexSetId → cardmarketSetId)
   (Array.isArray(trackerSets) ? trackerSets : []).forEach((set) => {
     const setId = String(set?.id || '').trim();
     if (!setId) return;
 
     const normalizedSetId = setId.toLowerCase();
+    const tcgdexCardmarketId = tcgdexSetToCardmarketMap[setId];
+    if (tcgdexCardmarketId) {
+      resolvedExpansionIdBySetId[normalizedSetId] = tcgdexCardmarketId;
+    }
+  });
+
+  // Phase 2: Fallback matching via card-name inference + set-name scoring
+  (Array.isArray(trackerSets) ? trackerSets : []).forEach((set) => {
+    const setId = String(set?.id || '').trim();
+    if (!setId) return;
+
+    const normalizedSetId = setId.toLowerCase();
+
+    // Skip if already resolved by primary tcgdex matching
+    if (resolvedExpansionIdBySetId[normalizedSetId]) return;
 
     const expansionId = inferExpansionIdFromTrackerCards(trackerCardsBySet?.[setId] || [], nameIndex);
     if (expansionId) {
@@ -302,6 +318,7 @@ function buildTrackerSetIndex(trackerSets = [], trackerCardsBySet = {}, nameInde
     }
   });
 
+  // Phase 3: Build final indices from resolved expansion IDs
   (Array.isArray(trackerSets) ? trackerSets : []).forEach((set) => {
     const setId = String(set?.id || '').trim();
     if (!setId) return;
@@ -331,7 +348,7 @@ function buildTrackerSetIndex(trackerSets = [], trackerCardsBySet = {}, nameInde
   return { bySetId, byPtcgoCode, bySetName };
 }
 
-export function buildCardmarketArtifacts({ singlesPayload, nonsinglesPayload, priceGuidePayload, trackerSets = [], trackerCardsBySet = {} } = {}) {
+export function buildCardmarketArtifacts({ singlesPayload, nonsinglesPayload, priceGuidePayload, trackerSets = [], trackerCardsBySet = {}, tcgdexSetToCardmarketMap = {} } = {}) {
   const products = extractProductsList(singlesPayload);
   const nonsinglesProducts = extractProductsList(nonsinglesPayload);
   const priceRows = extractPriceGuideList(priceGuidePayload);
@@ -426,7 +443,7 @@ export function buildCardmarketArtifacts({ singlesPayload, nonsinglesPayload, pr
       .map(([name, expansionIds]) => [name, Array.from(expansionIds).sort((left, right) => Number(left) - Number(right))])
   );
   const expansionNameCandidates = buildExpansionNameCandidates(nonsinglesProducts);
-  const trackerIndex = buildTrackerSetIndex(trackerSets, trackerCardsBySet, normalizedNameIndex, expansionNameCandidates);
+  const trackerIndex = buildTrackerSetIndex(trackerSets, trackerCardsBySet, normalizedNameIndex, expansionNameCandidates, tcgdexSetToCardmarketMap);
 
   const indexSets = Object.values(groupedSets)
     .map((entry) => ({
@@ -479,4 +496,31 @@ export async function writeArtifactsToDirectory(artifacts, outputDir) {
       fs.writeFile(path.join(setsDir, `${expansionKey}.json`), JSON.stringify(payload), 'utf8')
     )
   );
+}
+
+/**
+ * Loads the tcgdex sets-master.json and builds a lookup map:
+ *   tcgdexSetId (e.g. "ecard3") → cardmarketSetId (e.g. "1538")
+ *
+ * This is the authoritative primary matching source for tracker set resolution.
+ * Only entries with a non-null cardmarketSetId are included.
+ */
+export async function loadTcgdexSetToCardmarketMap(repoRoot) {
+  const setsMasterPath = path.join(repoRoot, 'scripts', 'cardmarket', 'helpers', 'tcgdex-data', 'sets-master.json');
+  try {
+    const raw = await fs.readFile(setsMasterPath, 'utf8');
+    const data = JSON.parse(raw);
+    const sets = Array.isArray(data?.sets) ? data.sets : [];
+    const map = {};
+    for (const set of sets) {
+      const tcgdexId = String(set?.tcgdexSetId || '').trim();
+      const cardmarketId = set?.cardmarketSetId;
+      if (tcgdexId && cardmarketId != null) {
+        map[tcgdexId] = String(Number(cardmarketId));
+      }
+    }
+    return map;
+  } catch {
+    return {};
+  }
 }
