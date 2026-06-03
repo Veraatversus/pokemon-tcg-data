@@ -198,7 +198,8 @@ export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {
     setIds.forEach((setId) => {
       const expansionId = String(trackerSetIndex?.bySetId?.[setId] || '').trim();
       if (!expansionId) return;
-      // Tracker index is more reliable than stale DB URLs — use higher weight`r`n      counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length * 2, 10));
+      // Tracker index is more reliable than stale DB URLs — use higher weight
+      counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length * 2, 10));
     });
 
     // Check both URL-extracted PTCGO codes AND the ptcgoCode field on cards
