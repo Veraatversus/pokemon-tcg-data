@@ -181,7 +181,8 @@ export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {
 
   const highestDirectCount = counts.size ? Math.max(...counts.values()) : 0;
 
-  if (trackerSetIndex && typeof trackerSetIndex === 'object' && highestDirectCount < 2) {
+  // Always consult the tracker index — more reliable than stale DB URLs
+  if (trackerSetIndex && typeof trackerSetIndex === 'object') {
     const matchedSetNameExpansionIds = Array.from(new Set(
       extractPotentialSetNameKeys(cards)
         .map((setNameKey) => String(trackerSetIndex?.bySetName?.[setNameKey] || '').trim())
