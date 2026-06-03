@@ -341,6 +341,11 @@ function buildTrackerSetIndex(trackerSets = [], trackerCardsBySet = {}, nameInde
 
     bySetId[normalizedSetId] = resolvedExpansionId;
 
+    const setNameKey = normalizeMatcherText(set?.name || '');
+    if (setNameKey && !bySetName[setNameKey]) {
+      bySetName[setNameKey] = resolvedExpansionId;
+    }
+
     const ptcgoCode = normalizeCodeKey(set?.ptcgoCode || set?.code || '');
     if (ptcgoCode) {
       if (!byPtcgoCodeCandidates[ptcgoCode]) {

@@ -29,7 +29,7 @@ export function getCardmarketUrlFromCard(card = {}) {
 
 export function isGeneratedCardmarketSearchUrl(url = '') {
   const value = String(url || '').trim().toLowerCase();
-  return value.includes('cardmarket.com') && value.includes('/products/search') && value.includes('searchstring=');
+  return (value.includes('cardmarket.com') && value.includes('/products/search') && value.includes('searchstring=')) || (value.includes('cardmarket.com') && value.includes('/pokemon/products') && value.includes('idproduct='));
 }
 
 export function buildCardmarketProductUrl(productId, { language = 'de' } = {}) {
