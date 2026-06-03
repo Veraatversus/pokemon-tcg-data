@@ -581,9 +581,20 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
     const shouldReconcileDirectUrl = !isSearchFallback && hasDuplicateSourceNames;
     if (!isSearchFallback && !shouldReconcileDirectUrl) return card;
 
-    const matchedEntry = assignmentMap.get(card) || null;
+    const matchedEntry = assignmentMap.get(card) ?? null;
     const directUrl = buildCardmarketProductUrl(matchedEntry?.cardmarketProductId);
-    if (!directUrl) return card;
+
+    // If matching failed for a generated URL, remove the stale URL rather than keeping the wrong one
+    if (!directUrl) {
+      if (isSearchFallback) {
+        const cleaned = { ...card };
+        delete cleaned.cardmarketUrl;
+        delete cleaned.vera_cardmarket_url;
+        delete cleaned.tcgdex_cardmarket_url;
+        return cleaned;
+      }
+      return card;
+    }
 
     const currentProductId = extractCardmarketProductId(currentUrl);
     const matchedProductId = String(matchedEntry?.cardmarketProductId || '').trim();
