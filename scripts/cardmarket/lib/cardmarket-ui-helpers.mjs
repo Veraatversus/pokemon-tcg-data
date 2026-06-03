@@ -276,15 +276,21 @@ export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {
       const expansionId = String(trackerSetIndex?.bySetId?.[setId] || '').trim();
       if (!expansionId) return;
       setIdMatchedExpansionIds.push(expansionId);
-      counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length, 3));
+      counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length * 2, 10));
     });
 
     const ptcgoMatchedExpansionIds = [];
-    extractPotentialPtcgoCodes(cards).forEach((code) => {
+    // Check both URL-extracted PTCGO codes AND the ptcgoCode field on cards
+    const ptcgoCodes = new Set(extractPotentialPtcgoCodes(cards));
+    cards.forEach((card) => {
+      const code = String(card?.ptcgoCode || '').trim().toLowerCase();
+      if (code) ptcgoCodes.add(code);
+    });
+    ptcgoCodes.forEach((code) => {
       const expansionId = String(trackerSetIndex?.byPtcgoCode?.[code] || '').trim();
       if (!expansionId) return;
-      ptcgoMatchedExpansionIds.push(expansionId);
-      counts.set(expansionId, (counts.get(expansionId) || 0) + 2);
+      // PTCGO code is very reliable — use high weight
+      counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length * 2, 10));
     });
 
     const hasIdOrCodeMatch = setIdMatchedExpansionIds.length > 0 || ptcgoMatchedExpansionIds.length > 0;

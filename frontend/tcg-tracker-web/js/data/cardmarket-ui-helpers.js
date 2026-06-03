@@ -198,13 +198,20 @@ export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {
     setIds.forEach((setId) => {
       const expansionId = String(trackerSetIndex?.bySetId?.[setId] || '').trim();
       if (!expansionId) return;
-      counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length, 3));
+      // Tracker index is more reliable than stale DB URLs — use higher weight`r`n      counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length * 2, 10));
     });
 
-    extractPotentialPtcgoCodes(cards).forEach((code) => {
+    // Check both URL-extracted PTCGO codes AND the ptcgoCode field on cards
+    const ptcgoCodes = new Set(extractPotentialPtcgoCodes(cards));
+    cards.forEach((card) => {
+      const code = String(card?.ptcgoCode || '').trim().toLowerCase();
+      if (code) ptcgoCodes.add(code);
+    });
+    ptcgoCodes.forEach((code) => {
       const expansionId = String(trackerSetIndex?.byPtcgoCode?.[code] || '').trim();
       if (!expansionId) return;
-      counts.set(expansionId, (counts.get(expansionId) || 0) + 2);
+      // PTCGO code is very reliable — use high weight
+      counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length * 2, 10));
     });
   }
 
