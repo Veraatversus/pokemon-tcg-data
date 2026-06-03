@@ -268,7 +268,8 @@ export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {
 
   const highestDirectCount = counts.size ? Math.max(...counts.values()) : 0;
 
-  if (trackerSetIndex && typeof trackerSetIndex === 'object' && highestDirectCount < 2) {
+  // Always consult the tracker index — more reliable than stale DB URLs
+  if (trackerSetIndex && typeof trackerSetIndex === 'object') {
     const setIdMatchedExpansionIds = [];
     const setIds = Array.from(new Set(cards.map((card) => String(card?.setId || '').trim().toLowerCase()).filter(Boolean)));
     setIds.forEach((setId) => {
