@@ -151,16 +151,12 @@ function extractPotentialPtcgoCodes(cards = []) {
 }
 
 function extractPotentialSetNameKeys(cards = []) {
-  const names = new Set();
-
-  cards.forEach((card) => {
-    [card?.vera_set_name, card?.tcgdex_set_name, card?.setName, card?.set_name]
-      .map((value) => normalizeMatcherText(value))
-      .filter(Boolean)
-      .forEach((value) => names.add(value));
-  });
-
-  return Array.from(names);
+  // Returns an empty array. Set name fields (vera_set_name, tcgdex_set_name, setName,
+  // set_name) are SET-level properties, not CARD-level. Cards do not carry them. The
+  // set name lookup uses the set record via resolveSetById (see Phase 1c). Kept as a
+  // no-op for backward-compat.
+  void cards;
+  return [];
 }
 
 function normalizeForTrackerBySetId(value = '') {
@@ -235,6 +231,71 @@ export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {
   }
 
   const counts = new Map();
+
+  // Phase 1: Tracker-first voting. Tracker index entries (bySetId, byPtcgoCode, bySetName)
+  // are the authoritative source — built from our DB (sets/en.json + tcgdex-helper).
+  // They get HIGH weight so they win over productIndex (built from Cardmarket's auto-feed,
+  // which can be wrong for cross-set listings).
+  if (trackerSetIndex && typeof trackerSetIndex === 'object') {
+    // 1a. bySetId: each card's setId → bySetId lookup
+    const setIds = Array.from(new Set(
+      cards.map((card) => normalizeForTrackerBySetId(card?.setId)).filter(Boolean)
+    ));
+    setIds.forEach((setId) => {
+      const expansionId = String(trackerSetIndex?.bySetId?.[setId] || '').trim();
+      if (!expansionId) return;
+      counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length * 2, 10));
+    });
+
+    // 1b. byPtcgoCode: priority order is
+    //     1. setRecord.ptcgoCode via resolveSetById (the canonical set code from the DB)
+    //     2. URL-extracted ptcgoCode from searchString (final fallback)
+    // Per-card ptcgoCode is NOT consulted because cards do not carry this field —
+    // the CARD_DB_HEADERS schema in schema-contract.js confirms it. The set-level
+    // ptcgoCode is canonical and is reached via the resolver.
+    const ptcgoCodes = [];
+    const seenPtcgo = new Set();
+    const addPtcgo = (code) => {
+      const normalized = normalizeCodeKey(code);
+      if (!normalized || seenPtcgo.has(normalized)) return;
+      seenPtcgo.add(normalized);
+      ptcgoCodes.push(normalized);
+    };
+    if (typeof resolveSetById === 'function' && currentSetId) {
+      const setRecord = resolveSetById(currentSetId);
+      if (setRecord) {
+        addPtcgo(setRecord.ptcgoCode);
+        addPtcgo(setRecord.code);
+      }
+    }
+    extractPotentialPtcgoCodes(cards).forEach(addPtcgo);
+
+    ptcgoCodes.forEach((code) => {
+      const expansionId = String(trackerSetIndex?.byPtcgoCode?.[code] || '').trim();
+      if (!expansionId) return;
+      counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length * 2, 10));
+    });
+
+    // 1c. bySetName: only via setRecord.name (the resolver).
+    //     Per-card set name fields do not exist (set-level properties), so we don't
+    //     scan cards here. Used as a soft fallback when neither setId nor ptcgoCode
+    //     matched.
+    const setNameKeys = new Set();
+    if (typeof resolveSetById === 'function' && currentSetId) {
+      const setRecord = resolveSetById(currentSetId);
+      const setNameKey = normalizeMatcherText(setRecord?.name || '');
+      if (setNameKey) setNameKeys.add(setNameKey);
+    }
+
+    setNameKeys.forEach((setNameKey) => {
+      const expansionId = String(trackerSetIndex?.bySetName?.[setNameKey] || '').trim();
+      if (!expansionId) return;
+      counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length, 5));
+    });
+  }
+
+  // Phase 2: ProductIndex voting. URL → productIndex is the LOWEST priority —
+  // only used as a last-resort fallback when the tracker has no answer.
   cards.forEach((card) => {
     const productId = extractCardmarketProductId(getCardmarketUrlFromCard(card));
     if (!productId) return;
@@ -246,42 +307,6 @@ export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {
   });
 
   const highestDirectCount = counts.size ? Math.max(...counts.values()) : 0;
-
-  // Fallback: only consult the tracker index when the direct URL/product votes
-  // are too weak to trust (0 or 1 votes) OR when no votes exist at all.
-  // When many direct URL votes point to the same expansion, trust that.
-  if (trackerSetIndex && typeof trackerSetIndex === 'object' && highestDirectCount < 2) {
-    const setIds = Array.from(new Set(
-      cards.map((card) => normalizeForTrackerBySetId(card?.setId)).filter(Boolean)
-    ));
-    setIds.forEach((setId) => {
-      const expansionId = String(trackerSetIndex?.bySetId?.[setId] || '').trim();
-      if (!expansionId) return;
-      counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length, 3));
-    });
-
-    const ptcgoCodes = new Set(extractPotentialPtcgoCodes(cards));
-    ptcgoCodes.forEach((code) => {
-      const expansionId = String(trackerSetIndex?.byPtcgoCode?.[code] || '').trim();
-      if (!expansionId) return;
-      counts.set(expansionId, (counts.get(expansionId) || 0) + 2);
-    });
-
-    const setIdMatched = setIds.length > 0;
-    const ptcgoMatched = ptcgoCodes.size > 0;
-    if (!setIdMatched && !ptcgoMatched) {
-      const matchedSetNameExpansionIds = Array.from(new Set(
-        extractPotentialSetNameKeys(cards)
-          .map((setNameKey) => String(trackerSetIndex?.bySetName?.[setNameKey] || '').trim())
-          .filter(Boolean)
-      ));
-
-      if (matchedSetNameExpansionIds.length === 1) {
-        const expansionId = matchedSetNameExpansionIds[0];
-        counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length, 5));
-      }
-    }
-  }
 
   const highestCount = counts.size ? Math.max(...counts.values()) : 0;
   if ((!counts.size || highestCount < 2) && nameIndex && typeof nameIndex === 'object') {
