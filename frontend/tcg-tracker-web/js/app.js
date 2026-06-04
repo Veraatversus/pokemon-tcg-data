@@ -8663,11 +8663,29 @@ async function loadCardmarketPriceSummary(card = {}, { cards = null, resolverCar
   const sourceCards = Array.isArray(cards)
     ? cards
     : (Array.isArray(state?.cards) ? state.cards : []);
+  const currentSetId = state?.currentSet?.setId || '';
+
+  // Build a set resolver from getSetById (state.sets / state.allSets).
+  // The tracker index needs ptcgoCode + name to map a set → cardmarket expansionId.
+  const resolveSetById = typeof getSetById === 'function'
+    ? (setId) => {
+        const set = getSetById(setId);
+        if (!set) return null;
+        return {
+          setId: set.setId || set.id || '',
+          name: set.setName || set.name || '',
+          ptcgoCode: set.ptcgoCode || set.code || '',
+          series: set.series || ''
+        };
+      }
+    : null;
 
   const pending = resolveCardmarketEntryForCard(
     resolverCard && typeof resolverCard === 'object' ? resolverCard : card,
     {
-    cards: sourceCards
+      cards: sourceCards,
+      resolveSetById,
+      currentSetId
     }
   )
     .then((entry) => {

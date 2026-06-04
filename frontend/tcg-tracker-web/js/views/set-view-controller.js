@@ -885,7 +885,7 @@ function applyCardmarketPriceSummary(linkEl, summary, { compact = false, preferR
 }
 
 async function loadCardmarketPriceSummary(injections = {}, card = {}) {
-  const { state, resolveCardmarketEntryForCard, buildCardmarketProductUrl } = injections;
+  const { state, resolveCardmarketEntryForCard, buildCardmarketProductUrl, getSetById } = injections;
   const cacheKey = getCardmarketPriceCacheKey(card);
   if (!cacheKey.trim()) return null;
 
@@ -898,8 +898,26 @@ async function loadCardmarketPriceSummary(injections = {}, card = {}) {
   }
 
   const sourceCards = Array.isArray(state?.cards) ? state.cards : [];
+  const currentSetId = state?.currentSet?.setId || '';
 
-  const pending = resolveCardmarketEntryForCard?.(card, { cards: sourceCards })
+  // Build a set resolver from getSetById(state) / state.currentSet.
+  // The tracker index needs ptcgoCode + name to map a set → cardmarket expansionId.
+  // If the caller didn't pass a resolver, the resolveCardmarketEntryForCard call
+  // falls back to URL/name heuristics (existing behavior).
+  const resolveSetById = typeof getSetById === 'function'
+    ? (setId) => {
+        const set = getSetById(setId);
+        if (!set) return null;
+        return {
+          setId: set.setId || set.id || '',
+          name: set.setName || set.name || '',
+          ptcgoCode: set.ptcgoCode || set.code || '',
+          series: set.series || ''
+        };
+      }
+    : null;
+
+  const pending = resolveCardmarketEntryForCard?.(card, { cards: sourceCards, resolveSetById, currentSetId })
     .then((entry) => {
       const normalizedUrl = String(card?.cardmarketUrl || '').trim();
       const directUrl = entry?.cardmarketProductId

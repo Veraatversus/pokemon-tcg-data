@@ -298,7 +298,33 @@ export async function fetchMergedCardsWithSetMeta(setId, { signal } = {}) {
 
   let cardRecords = allCards || [];
   try {
-    cardRecords = await promoteCardmarketUrlsForCards(allCards || [], { signal });
+    // Build a minimal set resolver from the already-loaded primarySet + matchingTcgdexSet.
+    // This lets inferCardmarketExpansionIdFromCards pick the correct set payload
+    // via set.ptcgoCode instead of relying on stale card URLs.
+    const resolveSetById = (resolvedSetId) => {
+      const normalized = String(resolvedSetId || '').replace(/^TCGDEX-/i, '').trim().toLowerCase();
+      if (!normalized) return null;
+      const candidates = [primarySet, tcgdexDetailedSet, tcgdexEnglishDetailedSet, matchingTcgdexSet];
+      for (const candidate of candidates) {
+        if (!candidate) continue;
+        const candidateId = String(candidate?.id || '').replace(/^TCGDEX-/i, '').trim().toLowerCase();
+        if (candidateId && candidateId === normalized) {
+          return {
+            setId: candidate?.id || '',
+            name: candidate?.name || '',
+            ptcgoCode: candidate?.ptcgoCode || candidate?.abbreviation?.official || candidate?.code || '',
+            series: candidate?.series || candidate?.serie?.name || ''
+          };
+        }
+      }
+      return null;
+    };
+
+    cardRecords = await promoteCardmarketUrlsForCards(allCards || [], {
+      signal,
+      resolveSetById,
+      currentSetId: setId
+    });
   } catch (error) {
     console.warn('[cardmarket] direct-link promotion skipped', error);
   }
