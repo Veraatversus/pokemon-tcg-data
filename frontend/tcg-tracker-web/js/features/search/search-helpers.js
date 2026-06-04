@@ -1,4 +1,4 @@
-import { isGeneratedCardmarketSearchUrl } from '../../data/cardmarket-url-utils.js';
+import { isGeneratedCardmarketSearchUrl, isGeneratedCardmarketUrl } from '../../data/cardmarket-url-utils.js';
 
 const SEARCH_NOISE_TOKENS = new Set([
   'karte', 'karten', 'kartennummer', 'kartennr', 'nummer', 'nr', 'no', 'num',
@@ -348,7 +348,9 @@ export function createSearchHelpers({ normalizeCardNumber } = {}) {
     const richCount = sample.filter((card) => hasRichCardDetails(card)).length;
     const needsCardmarketUpgrade = sample.some((card) => {
       const cardmarketUrl = String(card?.cardmarketUrl || card?.vera_cardmarket_url || card?.tcgdex_cardmarket_url || '').trim();
-      return !cardmarketUrl || isGeneratedCardmarketSearchUrl(cardmarketUrl);
+      // Bug fix: use isGeneratedCardmarketUrl (not just SearchUrl) so stale idProduct= URLs
+      // are also treated as auto-generated and trigger an API re-promotion.
+      return !cardmarketUrl || isGeneratedCardmarketUrl(cardmarketUrl);
     });
 
     return richCount < Math.max(1, Math.ceil(sample.length * 0.4)) || needsCardmarketUpgrade;
