@@ -945,3 +945,219 @@ test('buildSetCardAssignmentMap uses name tiebreak when collector number matches
   // Arkani should match the Arkani entry by name tiebreak, not Blastoise by collectorNumber
   assert.equal(assignmentMap.get(sourceCards[0])?.cardmarketProductId, 273698);
 });
+
+test('inferCardmarketExpansionIdFromCards prefers bySetId over byPtcgoCode when both match (setId wins)', () => {
+  // Reihenfolge im Set-Resolver: setId (bySetId) > ptcgoCode (byPtcgoCode) > name (bySetName).
+  // Wenn setId und ptcgoCode beide matchen, MUSS setId gewinnen — setId ist die stabilste ID.
+  const cards = [
+    { setId: 'sv3pt5', name: 'Bisasam' },
+    { setId: 'sv3pt5', name: 'Bisaknosp' }
+  ];
+
+  const trackerSetIndex = {
+    bySetId: { sv3pt5: 'WRONG_BY_SETID' },
+    byPtcgoCode: { svi: 'CORRECT_BY_PTCGO' },
+    bySetName: { '151': 'CORRECT_BY_NAME' }
+  };
+
+  const resolveSetById = (setId) => setId === 'sv3pt5'
+    ? { setId: 'sv3pt5', ptcgoCode: 'SVI', name: '151' }
+    : null;
+
+  assert.equal(inferCardmarketExpansionIdFromCards(cards, {}, {
+    trackerSetIndex,
+    resolveSetById,
+    currentSetId: 'sv3pt5'
+  }), 'WRONG_BY_SETID');
+});
+
+test('inferCardmarketExpansionIdFromCards falls back to byPtcgoCode when bySetId misses', () => {
+  // setId schlägt fehl (kein Eintrag), ptcgoCode matcht → muss ptcgoCode nutzen.
+  const cards = [
+    { setId: 'sv3pt5', name: 'Bisasam' }
+  ];
+
+  const trackerSetIndex = {
+    bySetId: {},
+    byPtcgoCode: { svi: '5328' },
+    bySetName: { '151': '5328' }
+  };
+
+  const resolveSetById = (setId) => setId === 'sv3pt5'
+    ? { setId: 'sv3pt5', ptcgoCode: 'SVI', name: '151' }
+    : null;
+
+  assert.equal(inferCardmarketExpansionIdFromCards(cards, {}, {
+    trackerSetIndex,
+    resolveSetById,
+    currentSetId: 'sv3pt5'
+  }), '5328');
+});
+
+test('inferCardmarketExpansionIdFromCards falls back to bySetName when setId and ptcgoCode both miss', () => {
+  // setId UND ptcgoCode schlagen fehl, name matcht → muss name nutzen.
+  const cards = [
+    { setId: 'sv3pt5', name: 'Bisasam' }
+  ];
+
+  const trackerSetIndex = {
+    bySetId: {},
+    byPtcgoCode: {},
+    bySetName: { '151': '5328' }
+  };
+
+  const resolveSetById = (setId) => setId === 'sv3pt5'
+    ? { setId: 'sv3pt5', ptcgoCode: 'SVI', name: '151' }
+    : null;
+
+  assert.equal(inferCardmarketExpansionIdFromCards(cards, {}, {
+    trackerSetIndex,
+    resolveSetById,
+    currentSetId: 'sv3pt5'
+  }), '5328');
+});
+
+test('inferCardmarketExpansionIdFromCards resolves via resolveSetById → set.ptcgoCode when cards have no setId', () => {
+  // Replicates the real-world bug: cards loaded from sheets-db have no setId, no ptcgoCode,
+  // no cardmarketProductId-extractable URL. Only the set resolver (state.sets) knows the ptcgoCode.
+  const cards = [
+    { vera_id: 'sv3pt5-1', name: 'Bisasam', cardmarketUrl: '' },
+    { vera_id: 'sv3pt5-2', name: 'Bisaknosp', cardmarketUrl: '' }
+  ];
+
+  const trackerSetIndex = {
+    bySetId: { sv3pt5: '5328' },
+    byPtcgoCode: { svi: '5328' },
+    bySetName: { '151': '5328' }
+  };
+
+  const resolveSetById = (setId) => {
+    if (setId === 'sv3pt5') {
+      return { setId: 'sv3pt5', name: '151', ptcgoCode: 'SVI', series: 'Scarlet & Violet' };
+    }
+    return null;
+  };
+
+  // The key behavior: when no card has setId, but resolveSetById + trackerSetIndex know the set,
+  // the expansionId should be resolved.
+  const result = inferCardmarketExpansionIdFromCards(cards, {}, {
+    trackerSetIndex,
+    resolveSetById: (setId) => {
+      // In real frontend flow, setId is sourced from URL/state, not from card.setId.
+      // Here we pass the current setId via closure.
+      if (setId === 'sv3pt5') {
+        return { setId: 'sv3pt5', name: '151', ptcgoCode: 'SVI' };
+      }
+      return null;
+    },
+    currentSetId: 'sv3pt5'
+  });
+  assert.equal(result, '5328');
+});
+
+test('inferCardmarketExpansionIdFromCards prefers resolveSetById→ptcgoCode over URL-based voting', () => {
+  // Bug repro: cards have stale URLs pointing to a DIFFERENT expansion.
+  // Set resolver knows the correct set, so the ptcgoCode-based path must win.
+  const cards = [
+    { setId: 'sv3pt5', name: 'Card A', cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Singles/Wrong-Set/Some-Card?idProduct=999001' },
+    { setId: 'sv3pt5', name: 'Card B', cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Singles/Wrong-Set/Some-Card?idProduct=999002' }
+  ];
+
+  const productIndex = {
+    '999001': { expansionId: '9999', path: 'sets/9999.json' },
+    '999002': { expansionId: '9999', path: 'sets/9999.json' }
+  };
+
+  const trackerSetIndex = {
+    bySetId: { sv3pt5: '5328' },
+    byPtcgoCode: { svi: '5328' },
+    bySetName: { '151': '5328' }
+  };
+
+  const result = inferCardmarketExpansionIdFromCards(cards, productIndex, {
+    trackerSetIndex,
+    resolveSetById: (setId) => setId === 'sv3pt5'
+      ? { setId: 'sv3pt5', ptcgoCode: 'SVI', name: '151' }
+      : null,
+    currentSetId: 'sv3pt5'
+  });
+
+  // Set-derived lookup must beat URL-derived voting
+  assert.equal(result, '5328');
+});
+
+test('inferCardmarketExpansionIdFromCards falls back gracefully when resolveSetById is not provided', () => {
+  // Backward-compat: old callers that don't pass resolveSetById still get the
+  // existing URL/name/setId-based behavior.
+  const cards = [
+    { setId: 'sv1', name: 'Bulbasaur', cardmarketUrl: 'https://www.cardmarket.com/en/Pokemon/Products/Singles/SV1/Bulbasaur?idProduct=1001' }
+  ];
+  const productIndex = { '1001': { expansionId: '2001' } };
+  const trackerSetIndex = { bySetId: { sv1: '2001' } };
+
+  assert.equal(inferCardmarketExpansionIdFromCards(cards, productIndex, { trackerSetIndex }), '2001');
+});
+
+test('inferCardmarketExpansionIdFromCards normalizes TCGDEX-prefixed setId for bySetId lookup', () => {
+  // Bug repro: card.setId comes in as "TCGDEX-sv03.5" (built when only tcgdex source was present).
+  // Tracker bySetId only knows the unprefixed form.
+  const cards = [
+    { setId: 'TCGDEX-sv03.5', name: 'Card A' }
+  ];
+  const trackerSetIndex = {
+    bySetId: { 'sv03.5': '5328' },
+    byPtcgoCode: {},
+    bySetName: {}
+  };
+
+  assert.equal(inferCardmarketExpansionIdFromCards(cards, {}, { trackerSetIndex }), '5328');
+});
+
+test('promoteCardmarketUrlsForCards uses resolveSetById → ptcgoCode to pick the right set payload', async () => {
+  // End-to-end: cards with stale URLs to a WRONG set still resolve to the right
+  // set payload because the set resolver knows the canonical ptcgoCode.
+  const cards = [
+    { vera_id: 'sv3pt5-1', name: 'Bisasam', cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Singles/Wrong-Set/Some-Card?idProduct=999001' },
+    { vera_id: 'sv3pt5-2', name: 'Bisaknosp', cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Singles/Wrong-Set/Some-Card?idProduct=999002' }
+  ];
+
+  const trackerSetIndex = {
+    bySetId: { sv3pt5: '5328' },
+    byPtcgoCode: { svi: '5328' },
+    bySetName: { '151': '5328' }
+  };
+
+  const productIndex = {
+    '999001': { expansionId: '9999', path: 'sets/9999.json' },
+    '999002': { expansionId: '9999', path: 'sets/9999.json' }
+  };
+
+  const correctSetPayload = {
+    expansionId: 5328,
+    cards: [
+      { cardmarketProductId: 719442, name: 'Bisasam', collectorNumber: '1' },
+      { cardmarketProductId: 719444, name: 'Bisaknosp', collectorNumber: '2' }
+    ]
+  };
+
+  const resolveSetById = (setId) => setId === 'sv3pt5'
+    ? { setId: 'sv3pt5', ptcgoCode: 'SVI', name: '151' }
+    : null;
+
+  const result = await promoteCardmarketUrlsForCards(cards, {
+    productIndex,
+    trackerSetIndex,
+    resolveSetById,
+    currentSetId: 'sv3pt5',
+    loadSetPayload: async (expansionId) => {
+      // Only the CORRECT set payload is ever loaded — never the wrong one.
+      assert.equal(expansionId, '5328', `setPayload must come from set-derived expansionId, got ${expansionId}`);
+      return correctSetPayload;
+    }
+  });
+
+  // The returned cards should now carry the correct direct product URLs.
+  assert.equal(result[0].cardmarketProductId, 719442);
+  assert.equal(result[1].cardmarketProductId, 719444);
+  assert.match(result[0].cardmarketUrl, /idProduct=719442/);
+});

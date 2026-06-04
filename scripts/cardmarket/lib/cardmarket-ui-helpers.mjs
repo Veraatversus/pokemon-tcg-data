@@ -250,9 +250,75 @@ function extractPotentialSetNameKeys(cards = []) {
   return Array.from(names);
 }
 
-export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {}, { nameIndex = null, trackerSetIndex = null } = {}) {
+function normalizeForTrackerBySetId(value = '') {
+  return String(value || '').replace(/^TCGDEX-/i, '').trim().toLowerCase();
+}
+
+function resolveSetLookupCandidates({ cards = [], currentSetId = '', resolveSetById = null } = {}) {
+  const candidates = [];
+  const seen = new Set();
+
+  const push = (setId, source) => {
+    const normalized = normalizeForTrackerBySetId(setId);
+    if (!normalized) return;
+    const key = `${normalized}::${source}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    candidates.push({ setId: normalized, source });
+  };
+
+  push(currentSetId, 'currentSetId');
+
+  if (typeof resolveSetById === 'function') {
+    push(currentSetId, 'resolveSetById-currentSetId');
+    (Array.isArray(cards) ? cards : []).forEach((card) => {
+      push(card?.setId, 'resolveSetById-cardSetId');
+    });
+  } else {
+    (Array.isArray(cards) ? cards : []).forEach((card) => {
+      push(card?.setId, 'cardSetId');
+    });
+  }
+
+  return candidates;
+}
+
+export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {}, { nameIndex = null, trackerSetIndex = null, resolveSetById = null, currentSetId = '' } = {}) {
   if (!Array.isArray(cards) || !cards.length) {
     return '';
+  }
+
+  // Phase 0: Resolve expansion directly from the set when a set resolver is available.
+  // This is the most reliable path: state.sets / sets/en.json carry canonical setId + ptcgoCode + name
+  // that don't depend on stale URL/DB state. It wins over URL-voting.
+  //
+  // Lookup precedence: setId (bySetId) > ptcgoCode (byPtcgoCode) > name (bySetName).
+  // setId is the most stable identifier (rarely changes, uniquely identifies an expansion),
+  // ptcgoCode is short but can shift between releases, name is the most volatile.
+  if (trackerSetIndex && typeof trackerSetIndex === 'object') {
+    const setCandidates = resolveSetLookupCandidates({ cards, currentSetId, resolveSetById });
+
+    for (const { setId } of setCandidates) {
+      // 1) setId → bySetId (highest trust)
+      const directExpansionId = String(trackerSetIndex?.bySetId?.[setId] || '').trim();
+      if (directExpansionId) return directExpansionId;
+
+      const setRecord = typeof resolveSetById === 'function' ? resolveSetById(setId) : null;
+      if (setRecord) {
+        // 2) set.ptcgoCode → byPtcgoCode
+        const ptcgoCode = normalizeCodeKey(setRecord?.ptcgoCode || setRecord?.code || '');
+        if (ptcgoCode) {
+          const expansionId = String(trackerSetIndex?.byPtcgoCode?.[ptcgoCode] || '').trim();
+          if (expansionId) return expansionId;
+        }
+        // 3) set.name → bySetName
+        const setNameKey = normalizeMatcherText(setRecord?.name || '');
+        if (setNameKey) {
+          const expansionId = String(trackerSetIndex?.bySetName?.[setNameKey] || '').trim();
+          if (expansionId) return expansionId;
+        }
+      }
+    }
   }
 
   const counts = new Map();
@@ -268,9 +334,14 @@ export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {
 
   const highestDirectCount = counts.size ? Math.max(...counts.values()) : 0;
 
+  // Fallback: only consult the tracker index when the direct URL/product votes
+  // are too weak to trust (0 or 1 votes) OR when no votes exist at all.
+  // When many direct URL votes point to the same expansion, trust that.
   if (trackerSetIndex && typeof trackerSetIndex === 'object' && highestDirectCount < 2) {
     const setIdMatchedExpansionIds = [];
-    const setIds = Array.from(new Set(cards.map((card) => String(card?.setId || '').trim().toLowerCase()).filter(Boolean)));
+    const setIds = Array.from(new Set(
+      cards.map((card) => normalizeForTrackerBySetId(card?.setId)).filter(Boolean)
+    ));
     setIds.forEach((setId) => {
       const expansionId = String(trackerSetIndex?.bySetId?.[setId] || '').trim();
       if (!expansionId) return;
@@ -279,7 +350,8 @@ export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {
     });
 
     const ptcgoMatchedExpansionIds = [];
-    extractPotentialPtcgoCodes(cards).forEach((code) => {
+    const ptcgoCodes = new Set(extractPotentialPtcgoCodes(cards));
+    ptcgoCodes.forEach((code) => {
       const expansionId = String(trackerSetIndex?.byPtcgoCode?.[code] || '').trim();
       if (!expansionId) return;
       ptcgoMatchedExpansionIds.push(expansionId);
@@ -523,6 +595,8 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
   loadNameIndex = null,
   loadTrackerSetIndex = null,
   loadSetPayload = null,
+  resolveSetById = null,
+  currentSetId = '',
   signal,
   forceRefresh = false,
 } = {}) {
@@ -559,6 +633,8 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
     const expansionId = inferCardmarketExpansionIdFromCards(cards, resolvedProductIndex || {}, {
       nameIndex: resolvedNameIndex,
       trackerSetIndex: resolvedTrackerSetIndex,
+      resolveSetById,
+      currentSetId,
     });
     if (!expansionId || typeof loadSetPayload !== 'function') return cards;
     resolvedSetPayload = await loadSetPayload(expansionId, { signal, forceRefresh });
@@ -574,9 +650,20 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
     const shouldReconcileDirectUrl = !isSearchFallback && hasDuplicateSourceNames;
     if (!isSearchFallback && !shouldReconcileDirectUrl) return card;
 
-    const matchedEntry = assignmentMap.get(card) || null;
+    const matchedEntry = assignmentMap.get(card) ?? null;
     const directUrl = buildCardmarketProductUrl(matchedEntry?.cardmarketProductId);
-    if (!directUrl) return card;
+
+    // If matching failed for a generated URL, remove the stale URL rather than keeping the wrong one
+    if (!directUrl) {
+      if (isSearchFallback) {
+        const cleaned = { ...card };
+        delete cleaned.cardmarketUrl;
+        delete cleaned.vera_cardmarket_url;
+        delete cleaned.tcgdex_cardmarket_url;
+        return cleaned;
+      }
+      return card;
+    }
 
     const currentProductId = extractCardmarketProductId(currentUrl);
     const matchedProductId = String(matchedEntry?.cardmarketProductId || '').trim();
