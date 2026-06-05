@@ -1,3 +1,8 @@
+import {
+  isGeneratedCardmarketSearchUrl,
+  isGeneratedCardmarketUrl,
+} from './cardmarket-url-utils.js';
+
 const DEFAULT_REMOTE_CARDMARKET_BASE = 'https://veraatversus.github.io/pokemon-tcg-data/cardmarket';
 
 export function isLocalOrigin(origin = '') {
@@ -27,10 +32,7 @@ export function getCardmarketUrlFromCard(card = {}) {
   return String(card?.cardmarketUrl || card?.vera_cardmarket_url || card?.tcgdex_cardmarket_url || '').trim();
 }
 
-export function isGeneratedCardmarketSearchUrl(url = '') {
-  const value = String(url || '').trim().toLowerCase();
-  return value.includes('cardmarket.com') && value.includes('/products/search') && value.includes('searchstring=');
-}
+export { isGeneratedCardmarketSearchUrl, isGeneratedCardmarketUrl };
 
 export function buildCardmarketProductUrl(productId, { language = 'de' } = {}) {
   const normalizedProductId = String(productId || '').trim();
@@ -81,6 +83,48 @@ function entryMatchesAnyCardName(entry = {}, normalizedCardNames = []) {
   ));
 }
 
+function normalizeCollectorNumber(value = '') {
+  return String(value || '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, '')
+    .trim();
+}
+
+function normalizeCollectorKey(value = '') {
+  const normalized = normalizeCollectorNumber(value);
+  if (!normalized) return '';
+  return normalized.replace(/0+(\d+)/g, '$1');
+}
+
+function normalizeCollectorNumeric(value = '') {
+  const normalized = normalizeCollectorNumber(value);
+  if (!/^\d+$/.test(normalized)) return '';
+  return String(Number(normalized));
+}
+
+export function entryCollectorMatchesCard(entry = {}, card = {}) {
+  const cardCollectors = [card?.number, card?.collectorNumber, card?.vera_number, card?.tcgdex_number]
+    .map((value) => String(value || '').trim())
+    .filter(Boolean);
+  if (!cardCollectors.length) return false;
+
+  const entryCollectors = [entry?.collectorNumber, entry?.number, entry?.cardNumber]
+    .map((value) => String(value || '').trim())
+    .filter(Boolean);
+  if (!entryCollectors.length) return false;
+
+  const normalizedCard = cardCollectors.map(normalizeCollectorNumber).filter(Boolean);
+  const normalizedCardKey = cardCollectors.map(normalizeCollectorKey).filter(Boolean);
+  const normalizedCardNumeric = cardCollectors.map(normalizeCollectorNumeric).filter(Boolean);
+  const normalizedEntry = entryCollectors.map(normalizeCollectorNumber).filter(Boolean);
+  const normalizedEntryKey = entryCollectors.map(normalizeCollectorKey).filter(Boolean);
+  const normalizedEntryNumeric = entryCollectors.map(normalizeCollectorNumeric).filter(Boolean);
+
+  return normalizedCard.some((value) => normalizedEntry.includes(value))
+    || normalizedCardKey.some((value) => normalizedEntryKey.includes(value))
+    || normalizedCardNumeric.some((value) => normalizedEntryNumeric.includes(value));
+}
+
 function normalizeCodeKey(value = '') {
   return normalizeMatcherText(value).replace(/\s+/g, '');
 }
@@ -107,24 +151,151 @@ function extractPotentialPtcgoCodes(cards = []) {
 }
 
 function extractPotentialSetNameKeys(cards = []) {
-  const names = new Set();
-
-  cards.forEach((card) => {
-    [card?.setName, card?.set_name, card?.vera_set_name, card?.tcgdex_set_name]
-      .map((value) => normalizeMatcherText(value))
-      .filter(Boolean)
-      .forEach((value) => names.add(value));
-  });
-
-  return Array.from(names);
+  // Returns an empty array. Set name fields (vera_set_name, tcgdex_set_name, setName,
+  // set_name) are SET-level properties, not CARD-level. Cards do not carry them. The
+  // set name lookup uses the set record via resolveSetById (see Phase 1c). Kept as a
+  // no-op for backward-compat.
+  void cards;
+  return [];
 }
 
-export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {}, { nameIndex = null, trackerSetIndex = null } = {}) {
+function normalizeForTrackerBySetId(value = '') {
+  return String(value || '').replace(/^TCGDEX-/i, '').trim().toLowerCase();
+}
+
+function resolveSetLookupCandidates({ cards = [], currentSetId = '', resolveSetById = null } = {}) {
+  const candidates = [];
+  const seen = new Set();
+
+  const push = (setId, source) => {
+    const normalized = normalizeForTrackerBySetId(setId);
+    if (!normalized) return;
+    const key = `${normalized}::${source}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    candidates.push({ setId: normalized, source });
+  };
+
+  push(currentSetId, 'currentSetId');
+
+  if (typeof resolveSetById === 'function') {
+    push(currentSetId, 'resolveSetById-currentSetId');
+    (Array.isArray(cards) ? cards : []).forEach((card) => {
+      push(card?.setId, 'resolveSetById-cardSetId');
+    });
+  } else {
+    (Array.isArray(cards) ? cards : []).forEach((card) => {
+      push(card?.setId, 'cardSetId');
+    });
+  }
+
+  return candidates;
+}
+
+export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {}, { nameIndex = null, trackerSetIndex = null, resolveSetById = null, currentSetId = '' } = {}) {
   if (!Array.isArray(cards) || !cards.length) {
     return '';
   }
 
+  // Phase 0: Resolve expansion directly from the set when a set resolver is available.
+  // This is the most reliable path: state.sets / sets/en.json carry canonical setId + ptcgoCode + name
+  // that don't depend on stale URL/DB state. It wins over URL-voting.
+  //
+  // Lookup precedence: setId (bySetId) > ptcgoCode (byPtcgoCode) > name (bySetName).
+  // setId is the most stable identifier (rarely changes, uniquely identifies an expansion),
+  // ptcgoCode is short but can shift between releases, name is the most volatile.
+  if (trackerSetIndex && typeof trackerSetIndex === 'object') {
+    const setCandidates = resolveSetLookupCandidates({ cards, currentSetId, resolveSetById });
+
+    for (const { setId } of setCandidates) {
+      // 1) setId → bySetId (highest trust)
+      const directExpansionId = String(trackerSetIndex?.bySetId?.[setId] || '').trim();
+      if (directExpansionId) return directExpansionId;
+
+      const setRecord = typeof resolveSetById === 'function' ? resolveSetById(setId) : null;
+      if (setRecord) {
+        // 2) set.ptcgoCode → byPtcgoCode
+        const ptcgoCode = normalizeCodeKey(setRecord?.ptcgoCode || setRecord?.code || '');
+        if (ptcgoCode) {
+          const expansionId = String(trackerSetIndex?.byPtcgoCode?.[ptcgoCode] || '').trim();
+          if (expansionId) return expansionId;
+        }
+        // 3) set.name → bySetName
+        const setNameKey = normalizeMatcherText(setRecord?.name || '');
+        if (setNameKey) {
+          const expansionId = String(trackerSetIndex?.bySetName?.[setNameKey] || '').trim();
+          if (expansionId) return expansionId;
+        }
+      }
+    }
+  }
+
   const counts = new Map();
+
+  // Phase 1: Tracker-first voting. Tracker index entries (bySetId, byPtcgoCode, bySetName)
+  // are the authoritative source — built from our DB (sets/en.json + tcgdex-helper).
+  // They get HIGH weight so they win over productIndex (built from Cardmarket's auto-feed,
+  // which can be wrong for cross-set listings).
+  if (trackerSetIndex && typeof trackerSetIndex === 'object') {
+    // 1a. bySetId: each card's setId → bySetId lookup
+    const setIds = Array.from(new Set(
+      cards.map((card) => normalizeForTrackerBySetId(card?.setId)).filter(Boolean)
+    ));
+    setIds.forEach((setId) => {
+      const expansionId = String(trackerSetIndex?.bySetId?.[setId] || '').trim();
+      if (!expansionId) return;
+      counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length * 2, 10));
+    });
+
+    // 1b. byPtcgoCode: priority order is
+    //     1. setRecord.ptcgoCode via resolveSetById (the canonical set code from the DB)
+    //     2. URL-extracted ptcgoCode from searchString (final fallback)
+    // Per-card ptcgoCode is NOT consulted because cards do not carry this field —
+    // the CARD_DB_HEADERS schema in schema-contract.js confirms it. The set-level
+    // ptcgoCode is canonical and is reached via the resolver.
+    const ptcgoCodes = [];
+    const seenPtcgo = new Set();
+    const addPtcgo = (code) => {
+      const normalized = normalizeCodeKey(code);
+      if (!normalized || seenPtcgo.has(normalized)) return;
+      seenPtcgo.add(normalized);
+      ptcgoCodes.push(normalized);
+    };
+    if (typeof resolveSetById === 'function' && currentSetId) {
+      const setRecord = resolveSetById(currentSetId);
+      if (setRecord) {
+        addPtcgo(setRecord.ptcgoCode);
+        addPtcgo(setRecord.code);
+      }
+    }
+    extractPotentialPtcgoCodes(cards).forEach(addPtcgo);
+
+    ptcgoCodes.forEach((code) => {
+      const expansionId = String(trackerSetIndex?.byPtcgoCode?.[code] || '').trim();
+      if (!expansionId) return;
+      counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length * 2, 10));
+    });
+
+    // 1c. bySetName: only via setRecord.name (the resolver).
+    //     Per-card set name fields do not exist (set-level properties), so we don't
+    //     scan cards here. Used as a soft fallback when neither setId nor ptcgoCode
+    //     matched.
+    const setNameKeys = new Set();
+    if (typeof resolveSetById === 'function' && currentSetId) {
+      const setRecord = resolveSetById(currentSetId);
+      const setNameKey = normalizeMatcherText(setRecord?.name || '');
+      if (setNameKey) setNameKeys.add(setNameKey);
+    }
+
+    setNameKeys.forEach((setNameKey) => {
+      const expansionId = String(trackerSetIndex?.bySetName?.[setNameKey] || '').trim();
+      if (!expansionId) return;
+      counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length, 5));
+    });
+  }
+
+  // Phase 2: ProductIndex voting. URL → productIndex is the LOWEST priority —
+  // only used as a last-resort fallback when the tracker has no answer.
   cards.forEach((card) => {
     const productId = extractCardmarketProductId(getCardmarketUrlFromCard(card));
     if (!productId) return;
@@ -136,32 +307,6 @@ export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {
   });
 
   const highestDirectCount = counts.size ? Math.max(...counts.values()) : 0;
-
-  if (trackerSetIndex && typeof trackerSetIndex === 'object' && highestDirectCount < 2) {
-    const matchedSetNameExpansionIds = Array.from(new Set(
-      extractPotentialSetNameKeys(cards)
-        .map((setNameKey) => String(trackerSetIndex?.bySetName?.[setNameKey] || '').trim())
-        .filter(Boolean)
-    ));
-
-    if (matchedSetNameExpansionIds.length === 1) {
-      const expansionId = matchedSetNameExpansionIds[0];
-      counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length, 5));
-    }
-
-    const setIds = Array.from(new Set(cards.map((card) => String(card?.setId || '').trim().toLowerCase()).filter(Boolean)));
-    setIds.forEach((setId) => {
-      const expansionId = String(trackerSetIndex?.bySetId?.[setId] || '').trim();
-      if (!expansionId) return;
-      counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length, 3));
-    });
-
-    extractPotentialPtcgoCodes(cards).forEach((code) => {
-      const expansionId = String(trackerSetIndex?.byPtcgoCode?.[code] || '').trim();
-      if (!expansionId) return;
-      counts.set(expansionId, (counts.get(expansionId) || 0) + 2);
-    });
-  }
 
   const highestCount = counts.size ? Math.max(...counts.values()) : 0;
   if ((!counts.size || highestCount < 2) && nameIndex && typeof nameIndex === 'object') {
@@ -195,13 +340,32 @@ export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {
 
 export function resolveCardmarketEntryForCardFromSetPayload(card = {}, setPayload = {}, { sourceCards = [] } = {}) {
   const normalizedCardNames = extractPreferredCardNames(card);
-  if (!normalizedCardNames.length) return null;
 
   const cards = Array.isArray(setPayload?.cards) ? setPayload.cards : [];
   if (!cards.length) return null;
 
+  // 1. Collector-number-first: try to resolve by collectorNumber across the full set
+  const collectorMatched = cards.filter((entry) => entryCollectorMatchesCard(entry, card));
+  if (collectorMatched.length === 1 && normalizedCardNames.length) {
+    if (entryMatchesAnyCardName(collectorMatched[0], normalizedCardNames)) {
+      return collectorMatched[0];
+    }
+  } else if (collectorMatched.length === 1 && !normalizedCardNames.length) {
+    return collectorMatched[0];
+  }
+
+  // 2. Name-based candidate pool (fallback when collector is ambiguous or absent)
+  if (!normalizedCardNames.length) return null;
+
   const candidatePool = cards.filter((entry) => entryMatchesAnyCardName(entry, normalizedCardNames));
   if (!candidatePool.length) return null;
+  if (candidatePool.length === 1) return candidatePool[0];
+
+  // 3. Collector disambiguation within name pool
+  if (collectorMatched.length > 1) {
+    const nameFilteredCollectors = collectorMatched.filter((entry) => entryMatchesAnyCardName(entry, normalizedCardNames));
+    if (nameFilteredCollectors.length === 1) return nameFilteredCollectors[0];
+  }
 
   if (!Array.isArray(sourceCards) || sourceCards.length < 2) {
     return candidatePool[0];
@@ -241,7 +405,39 @@ export function buildSetCardAssignmentMap(sourceCards = [], setPayload = {}) {
   for (const card of sourceCards) {
     const normalizedCardNames = extractPreferredCardNames(card);
     if (!normalizedCardNames.length) continue;
-    const matchIndex = availableEntries.findIndex((entry) => entryMatchesAnyCardName(entry, normalizedCardNames));
+
+    // 1. Collector-number-first: try to match by collectorNumber before name
+    let matchIndex = -1;
+    const cardCollectorKey = normalizeCollectorKey(
+      card?.collectorNumber || card?.number || card?.vera_number || card?.tcgdex_number || ''
+    );
+    if (cardCollectorKey) {
+      const keyMatches = [];
+      for (let i = 0; i < availableEntries.length; i += 1) {
+        const entry = availableEntries[i];
+        const entryKey = normalizeCollectorKey(
+          entry?.collectorNumber || entry?.number || entry?.cardNumber || ''
+        );
+        if (entryKey && entryKey === cardCollectorKey) {
+          keyMatches.push(i);
+        }
+      }
+      if (keyMatches.length === 1) {
+        matchIndex = keyMatches[0];
+      } else if (keyMatches.length > 1) {
+        for (const i of keyMatches) {
+          if (entryMatchesAnyCardName(availableEntries[i], normalizedCardNames)) {
+            matchIndex = i;
+            break;
+          }
+        }
+      }
+    }
+
+    // 2. Fallback: name-based match
+    if (matchIndex < 0) {
+      matchIndex = availableEntries.findIndex((entry) => entryMatchesAnyCardName(entry, normalizedCardNames));
+    }
     if (matchIndex < 0) continue;
 
     const [assigned] = availableEntries.splice(matchIndex, 1);
@@ -313,12 +509,14 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
   loadNameIndex = null,
   loadTrackerSetIndex = null,
   loadSetPayload = null,
+  resolveSetById = null,
+  currentSetId = '',
   signal,
   forceRefresh = false,
 } = {}) {
   if (!Array.isArray(cards) || !cards.length) return Array.isArray(cards) ? cards : [];
 
-  const needsPromotion = cards.some((card) => isGeneratedCardmarketSearchUrl(getCardmarketUrlFromCard(card)));
+  const needsPromotion = cards.some((card) => isGeneratedCardmarketUrl(getCardmarketUrlFromCard(card)));
   const hasDuplicateSourceNames = (() => {
     const counts = new Map();
     cards.forEach((card) => {
@@ -349,6 +547,8 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
     const expansionId = inferCardmarketExpansionIdFromCards(cards, resolvedProductIndex || {}, {
       nameIndex: resolvedNameIndex,
       trackerSetIndex: resolvedTrackerSetIndex,
+      resolveSetById,
+      currentSetId,
     });
     if (!expansionId || typeof loadSetPayload !== 'function') return cards;
     resolvedSetPayload = await loadSetPayload(expansionId, { signal, forceRefresh });
@@ -360,13 +560,24 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
 
   return cards.map((card) => {
     const currentUrl = getCardmarketUrlFromCard(card);
-    const isSearchFallback = isGeneratedCardmarketSearchUrl(currentUrl);
-    const shouldReconcileDirectUrl = !isSearchFallback && hasDuplicateSourceNames;
-    if (!isSearchFallback && !shouldReconcileDirectUrl) return card;
+    const isGeneratedUrl = isGeneratedCardmarketUrl(currentUrl);
+    const shouldReconcileDirectUrl = !isGeneratedUrl && hasDuplicateSourceNames;
+    if (!isGeneratedUrl && !shouldReconcileDirectUrl) return card;
 
-    const matchedEntry = assignmentMap.get(card) || null;
+    const matchedEntry = assignmentMap.get(card) ?? null;
     const directUrl = buildCardmarketProductUrl(matchedEntry?.cardmarketProductId);
-    if (!directUrl) return card;
+
+    // If matching failed for a generated URL, remove the stale URL rather than keeping the wrong one
+    if (!directUrl) {
+      if (isGeneratedUrl) {
+        const cleaned = { ...card };
+        delete cleaned.cardmarketUrl;
+        delete cleaned.vera_cardmarket_url;
+        delete cleaned.tcgdex_cardmarket_url;
+        return cleaned;
+      }
+      return card;
+    }
 
     const currentProductId = extractCardmarketProductId(currentUrl);
     const matchedProductId = String(matchedEntry?.cardmarketProductId || '').trim();

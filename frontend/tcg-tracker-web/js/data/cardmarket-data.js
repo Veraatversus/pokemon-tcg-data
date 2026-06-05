@@ -7,6 +7,7 @@ import {
   formatCardmarketEntryTitle as sharedFormatCardmarketEntryTitle,
   getCardmarketBaseUrl as sharedGetCardmarketBaseUrl,
   inferCardmarketExpansionIdFromCards as sharedInferCardmarketExpansionIdFromCards,
+  isGeneratedCardmarketSearchUrl,
   promoteCardmarketUrlsForCards as sharedPromoteCardmarketUrlsForCards,
   resolveCardmarketEntryForCardFromSetPayload as sharedResolveCardmarketEntryForCardFromSetPayload,
   resolveCardmarketEntryFromSetPayload as sharedResolveCardmarketEntryFromSetPayload,
@@ -41,11 +42,6 @@ export function extractCardmarketProductId(url = '') {
 
 function getCardmarketUrlFromCard(card = {}) {
   return String(card?.cardmarketUrl || card?.vera_cardmarket_url || card?.tcgdex_cardmarket_url || '').trim();
-}
-
-function isGeneratedCardmarketSearchUrl(url = '') {
-  const value = String(url || '').trim().toLowerCase();
-  return value.includes('cardmarket.com') && value.includes('/products/search') && value.includes('searchstring=');
 }
 
 export function buildCardmarketProductUrl(productId, { language = 'de' } = {}) {
@@ -225,11 +221,12 @@ export async function resolveCardmarketEntryByUrl(cardmarketUrl, { signal, force
   return resolveCardmarketEntryFromSetPayload(setPayload, productId);
 }
 
-export async function resolveCardmarketEntryForCard(card = {}, { cards = [], signal, forceRefresh = false } = {}) {
+export async function resolveCardmarketEntryForCard(card = {}, { cards = [], resolveSetById = null, currentSetId = '', signal, forceRefresh = false } = {}) {
   const directUrl = getCardmarketUrlFromCard(card);
 
   const setId = String(card?.setId || '').trim();
-  let expansionId = !forceRefresh && setId ? inferredExpansionCache.get(setId) : '';
+  const cacheLookupSetId = String(currentSetId || setId || '').trim();
+  let expansionId = !forceRefresh && cacheLookupSetId ? inferredExpansionCache.get(cacheLookupSetId) : '';
 
   if (!expansionId) {
     const [productIndex, nameIndex, trackerSetIndex] = await Promise.all([
@@ -237,9 +234,14 @@ export async function resolveCardmarketEntryForCard(card = {}, { cards = [], sig
       loadCardmarketNameIndex({ signal, forceRefresh }),
       loadCardmarketTrackerSetIndex({ signal, forceRefresh })
     ]);
-    expansionId = inferCardmarketExpansionIdFromCards(cards, productIndex, { nameIndex, trackerSetIndex });
-    if (setId && expansionId) {
-      inferredExpansionCache.set(setId, expansionId);
+    expansionId = inferCardmarketExpansionIdFromCards(cards, productIndex, {
+      nameIndex,
+      trackerSetIndex,
+      resolveSetById,
+      currentSetId
+    });
+    if (cacheLookupSetId && expansionId) {
+      inferredExpansionCache.set(cacheLookupSetId, expansionId);
     }
   }
 
@@ -265,10 +267,12 @@ export async function resolveCardmarketEntryForCard(card = {}, { cards = [], sig
   return directUrl ? resolveCardmarketEntryByUrl(directUrl, { signal, forceRefresh }) : null;
 }
 
-export async function promoteCardmarketUrlsForCards(cards = [], { productIndex = null, setPayload = null, signal, forceRefresh = false } = {}) {
+export async function promoteCardmarketUrlsForCards(cards = [], { productIndex = null, setPayload = null, resolveSetById = null, currentSetId = '', signal, forceRefresh = false } = {}) {
   return sharedPromoteCardmarketUrlsForCards(cards, {
     productIndex,
     setPayload,
+    resolveSetById,
+    currentSetId,
     signal,
     forceRefresh,
     loadProductIndex: productIndex ? null : ({ signal, forceRefresh } = {}) => loadCardmarketProductIndex({ signal, forceRefresh }),

@@ -1,3 +1,4 @@
+import { isGeneratedCardmarketSearchUrl, isGeneratedCardmarketUrl } from './data/cardmarket-url-utils.js';
 import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js?v=20260410-authredirect2';
 import {
   listImportedSets,
@@ -7367,7 +7368,9 @@ function needsApiCardEnrichment(cards = []) {
   const richCount = sample.filter((card) => hasRichCardDetails(card)).length;
   const needsCardmarketUpgrade = sample.some((card) => {
     const cardmarketUrl = String(card?.cardmarketUrl || card?.vera_cardmarket_url || card?.tcgdex_cardmarket_url || '').trim();
-    return !cardmarketUrl || isGeneratedCardmarketSearchUrl(cardmarketUrl);
+    // Bug fix: use isGeneratedCardmarketUrl (not just SearchUrl) so stale idProduct= URLs
+    // are also treated as auto-generated and trigger an API re-promotion via promoteCardmarketUrlsForCards.
+    return !cardmarketUrl || isGeneratedCardmarketUrl(cardmarketUrl);
   });
 
   return richCount < Math.max(1, Math.ceil(sample.length * 0.4)) || needsCardmarketUpgrade;
@@ -8355,11 +8358,6 @@ function createCardElement(card, key, db, index) {
 const cardmarketPriceSummaryCache = new Map();
 const cardmarketPriceSummaryPending = new Map();
 
-function isGeneratedCardmarketSearchUrl(url) {
-  const value = String(url || '').trim().toLowerCase();
-  return value.includes('cardmarket.com') && value.includes('/products/search') && value.includes('searchstring=');
-}
-
 function toFinitePrice(value) {
   const numeric = Number(value);
   return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
@@ -8667,11 +8665,34 @@ async function loadCardmarketPriceSummary(card = {}, { cards = null, resolverCar
   const sourceCards = Array.isArray(cards)
     ? cards
     : (Array.isArray(state?.cards) ? state.cards : []);
+  // Prefer the card's own setId (set in buildCollectedCardCandidates) so the
+  // resolver picks the correct expansionId for cross-set lists like the
+  // watchlist. Fall back to state.currentSet.setId only when the card has no
+  // own setId (e.g. lightbox/search lookups).
+  const cardSetId = String(card?.setId || '').trim();
+  const currentSetId = cardSetId || state?.currentSet?.setId || '';
+
+  // Build a set resolver from getSetById (state.sets / state.allSets).
+  // The tracker index needs ptcgoCode + name to map a set → cardmarket expansionId.
+  const resolveSetById = typeof getSetById === 'function'
+    ? (setId) => {
+        const set = getSetById(setId);
+        if (!set) return null;
+        return {
+          setId: set.setId || set.id || '',
+          name: set.setName || set.name || '',
+          ptcgoCode: set.ptcgoCode || set.code || '',
+          series: set.series || ''
+        };
+      }
+    : null;
 
   const pending = resolveCardmarketEntryForCard(
     resolverCard && typeof resolverCard === 'object' ? resolverCard : card,
     {
-    cards: sourceCards
+      cards: sourceCards,
+      resolveSetById,
+      currentSetId
     }
   )
     .then((entry) => {

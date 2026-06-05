@@ -81,6 +81,48 @@ function entryMatchesAnyCardName(entry = {}, normalizedCardNames = []) {
   ));
 }
 
+function normalizeCollectorNumber(value = '') {
+  return String(value || '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, '')
+    .trim();
+}
+
+function normalizeCollectorKey(value = '') {
+  const normalized = normalizeCollectorNumber(value);
+  if (!normalized) return '';
+  return normalized.replace(/0+(\d+)/g, '$1');
+}
+
+function normalizeCollectorNumeric(value = '') {
+  const normalized = normalizeCollectorNumber(value);
+  if (!/^\d+$/.test(normalized)) return '';
+  return String(Number(normalized));
+}
+
+export function entryCollectorMatchesCard(entry = {}, card = {}) {
+  const cardCollectors = [card?.number, card?.collectorNumber, card?.vera_number, card?.tcgdex_number]
+    .map((value) => String(value || '').trim())
+    .filter(Boolean);
+  if (!cardCollectors.length) return false;
+
+  const entryCollectors = [entry?.collectorNumber, entry?.number, entry?.cardNumber]
+    .map((value) => String(value || '').trim())
+    .filter(Boolean);
+  if (!entryCollectors.length) return false;
+
+  const normalizedCard = cardCollectors.map(normalizeCollectorNumber).filter(Boolean);
+  const normalizedCardKey = cardCollectors.map(normalizeCollectorKey).filter(Boolean);
+  const normalizedCardNumeric = cardCollectors.map(normalizeCollectorNumeric).filter(Boolean);
+  const normalizedEntry = entryCollectors.map(normalizeCollectorNumber).filter(Boolean);
+  const normalizedEntryKey = entryCollectors.map(normalizeCollectorKey).filter(Boolean);
+  const normalizedEntryNumeric = entryCollectors.map(normalizeCollectorNumeric).filter(Boolean);
+
+  return normalizedCard.some((value) => normalizedEntry.includes(value))
+    || normalizedCardKey.some((value) => normalizedEntryKey.includes(value))
+    || normalizedCardNumeric.some((value) => normalizedEntryNumeric.includes(value));
+}
+
 function normalizeCodeKey(value = '') {
   return normalizeMatcherText(value).replace(/\s+/g, '');
 }
@@ -171,13 +213,32 @@ export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {
 
 export function resolveCardmarketEntryForCardFromSetPayload(card = {}, setPayload = {}, { sourceCards = [] } = {}) {
   const normalizedCardNames = extractPreferredCardNames(card);
-  if (!normalizedCardNames.length) return null;
 
   const cards = Array.isArray(setPayload?.cards) ? setPayload.cards : [];
   if (!cards.length) return null;
 
+  // 1. Collector-number-first: try to resolve by collectorNumber across the full set
+  const collectorMatched = cards.filter((entry) => entryCollectorMatchesCard(entry, card));
+  if (collectorMatched.length === 1 && normalizedCardNames.length) {
+    if (entryMatchesAnyCardName(collectorMatched[0], normalizedCardNames)) {
+      return collectorMatched[0];
+    }
+  } else if (collectorMatched.length === 1 && !normalizedCardNames.length) {
+    return collectorMatched[0];
+  }
+
+  // 2. Name-based candidate pool (fallback when collector is ambiguous or absent)
+  if (!normalizedCardNames.length) return null;
+
   const candidatePool = cards.filter((entry) => entryMatchesAnyCardName(entry, normalizedCardNames));
   if (!candidatePool.length) return null;
+  if (candidatePool.length === 1) return candidatePool[0];
+
+  // 3. Collector disambiguation within name pool
+  if (collectorMatched.length > 1) {
+    const nameFilteredCollectors = collectorMatched.filter((entry) => entryMatchesAnyCardName(entry, normalizedCardNames));
+    if (nameFilteredCollectors.length === 1) return nameFilteredCollectors[0];
+  }
 
   if (!Array.isArray(sourceCards) || sourceCards.length < 2) {
     return candidatePool[0];

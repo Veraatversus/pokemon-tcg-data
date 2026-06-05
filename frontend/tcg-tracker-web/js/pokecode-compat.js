@@ -1,4 +1,5 @@
 import { normalizeCardNumber, naturalSort } from './core/utils.js';
+import { isGeneratedCardmarketSearchUrl } from './data/cardmarket-url-utils.js';
 import { buildCardRecordFromSources, buildSetRecordFromSources } from './data/schema-contract.js?v=20260427-wave3-central-v1';
 
 export function normalizeString(str) {
@@ -355,11 +356,6 @@ function buildCardmarketSearchUrl({ setTag = '', cardNumber = '' } = {}) {
 
   const searchString = `${normalizedTag} ${normalizedNumber}`;
   return `https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=${encodeCardmarketSearchString(searchString)}`;
-}
-
-function isGeneratedCardmarketSearchUrl(url = '') {
-  const value = String(url || '').trim().toLowerCase();
-  return value.includes('cardmarket.com') && value.includes('/products/search') && value.includes('searchstring=');
 }
 
 function resolvePreferredCardmarketUrl(candidates = []) {
