@@ -8665,7 +8665,12 @@ async function loadCardmarketPriceSummary(card = {}, { cards = null, resolverCar
   const sourceCards = Array.isArray(cards)
     ? cards
     : (Array.isArray(state?.cards) ? state.cards : []);
-  const currentSetId = state?.currentSet?.setId || '';
+  // Prefer the card's own setId (set in buildCollectedCardCandidates) so the
+  // resolver picks the correct expansionId for cross-set lists like the
+  // watchlist. Fall back to state.currentSet.setId only when the card has no
+  // own setId (e.g. lightbox/search lookups).
+  const cardSetId = String(card?.setId || '').trim();
+  const currentSetId = cardSetId || state?.currentSet?.setId || '';
 
   // Build a set resolver from getSetById (state.sets / state.allSets).
   // The tracker index needs ptcgoCode + name to map a set → cardmarket expansionId.

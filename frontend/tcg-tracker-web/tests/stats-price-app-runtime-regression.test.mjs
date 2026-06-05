@@ -84,3 +84,13 @@ test('app runtime supports dynamic watchlist loading with filters and thumbnails
   assert.match(source, /window\.setTimeout\(\(\) => \{/);
   assert.match(source, /stats-price-thumb/);
 });
+
+test('loadCardmarketPriceSummary derives currentSetId from card.setId first so the watchlist does not collapse to the active set', async () => {
+  const source = await readAppSource();
+
+  // The fix: the card's own setId wins over state.currentSet.setId.
+  assert.match(
+    source,
+    /const\s+cardSetId\s*=\s*String\(card\?\.setId\s*\|\|\s*''\)\.trim\(\);\s*const\s+currentSetId\s*=\s*cardSetId\s*\|\|\s*state\?\.currentSet\?\.setId\s*\|\|\s*''/
+  );
+});
