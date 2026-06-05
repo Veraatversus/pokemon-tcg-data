@@ -118,11 +118,12 @@ test('inferCardmarketExpansionIdFromCards keeps bySetId and byPtcgoCode preceden
   assert.equal(inferCardmarketExpansionIdFromCards(cards, productIndex, { trackerSetIndex }), '2001');
 });
 
-test('inferCardmarketExpansionIdFromCards falls back to bySetName when neither bySetId nor byPtcgoCode match', () => {
+test('inferCardmarketExpansionIdFromCards falls back to bySetName when neither bySetId nor byPtcgoCode match (via resolver)', () => {
+  // Set name comes from the set record via resolveSetById (the canonical source).
+  // Per-card setName/vera_set_name are not consulted (those fields don't exist on cards).
   const cards = [
     {
       setId: 'mystery-set',
-      setName: 'Team Rocket',
       name: 'Dark Charizard',
       cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchString=TR+004'
     }
@@ -134,8 +135,14 @@ test('inferCardmarketExpansionIdFromCards falls back to bySetName when neither b
     byPtcgoCode: {},
     bySetName: { 'team rocket': '1528' }
   };
+  const resolveSetById = (setId) => setId === 'mystery-set'
+    ? { setId: 'mystery-set', name: 'Team Rocket' }
+    : null;
 
-  assert.equal(inferCardmarketExpansionIdFromCards(cards, productIndex, { trackerSetIndex }), '1528');
+  assert.equal(
+    inferCardmarketExpansionIdFromCards(cards, productIndex, { trackerSetIndex, resolveSetById, currentSetId: 'mystery-set' }),
+    '1528'
+  );
 });
 
 test('resolveCardmarketEntryForCardFromSetPayload disambiguates same-name cards using attack names', () => {

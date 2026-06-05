@@ -117,11 +117,12 @@ test('inferCardmarketExpansionIdFromCards keeps bySetId and byPtcgoCode preceden
   assert.equal(inferCardmarketExpansionIdFromCards(cards, productIndex, { trackerSetIndex }), '2001');
 });
 
-test('inferCardmarketExpansionIdFromCards falls back to bySetName when neither bySetId nor byPtcgoCode match', () => {
+test('inferCardmarketExpansionIdFromCards falls back to bySetName when neither bySetId nor ptcgoCode match (via resolver)', () => {
+  // Set name comes from the set record via resolveSetById (the canonical source).
+  // Per-card setName/vera_set_name are not consulted (those fields don't exist on cards).
   const cards = [
     {
       setId: 'mystery-set',
-      setName: 'Team Rocket',
       name: 'Dark Charizard',
       cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchString=TR+004'
     }
@@ -133,11 +134,20 @@ test('inferCardmarketExpansionIdFromCards falls back to bySetName when neither b
     byPtcgoCode: {},
     bySetName: { 'team rocket': '1528' }
   };
+  const resolveSetById = (setId) => setId === 'mystery-set'
+    ? { setId: 'mystery-set', name: 'Team Rocket' }
+    : null;
 
-  assert.equal(inferCardmarketExpansionIdFromCards(cards, productIndex, { trackerSetIndex }), '1528');
+  assert.equal(
+    inferCardmarketExpansionIdFromCards(cards, productIndex, { trackerSetIndex, resolveSetById, currentSetId: 'mystery-set' }),
+    '1528'
+  );
 });
 
-test('inferCardmarketExpansionIdFromCards prefers vera_set_name for set-name fallback matching', () => {
+test('inferCardmarketExpansionIdFromCards: per-card setName/vera_set_name are NOT consulted (those fields do not exist on cards)', () => {
+  // Cards do not actually carry setName/vera_set_name/tcgdex_set_name/set_name.
+  // The CARD_DB_HEADERS schema in schema-contract.js confirms this. Therefore the
+  // per-card set name extraction in extractPotentialSetNameKeys is a no-op.
   const cards = [
     {
       setId: 'mystery-set',
@@ -155,7 +165,12 @@ test('inferCardmarketExpansionIdFromCards prefers vera_set_name for set-name fal
     bySetName: { 'team rocket': '1528' }
   };
 
-  assert.equal(inferCardmarketExpansionIdFromCards(cards, productIndex, { trackerSetIndex }), '1528');
+  // Without a resolver, per-card set names are dead code. Result is empty.
+  assert.equal(
+    inferCardmarketExpansionIdFromCards(cards, productIndex, { trackerSetIndex }),
+    '',
+    'per-card set name fields are dead code; resolver is the only way to source set name'
+  );
 });
 
 test('resolveCardmarketEntryForCardFromSetPayload disambiguates same-name cards using attack names', () => {
@@ -1160,4 +1175,154 @@ test('promoteCardmarketUrlsForCards uses resolveSetById → ptcgoCode to pick th
   assert.equal(result[0].cardmarketProductId, 719442);
   assert.equal(result[1].cardmarketProductId, 719444);
   assert.match(result[0].cardmarketUrl, /idProduct=719442/);
+});
+
+test('inferCardmarketExpansionIdFromCards: tracker byPtcgoCode wins over productIndex even when productIndex has many votes', () => {
+  // Bug repro: Phase 0 doesn't return (no setId, no resolver), so we fall into voting.
+  // ProductIndex has 3 votes for WRONG_PI. Tracker byPtcgoCode has 1 vote for CORRECT.
+  // Current code: highestDirectCount=3 → guard skips tracker → returns WRONG_PI (wrong).
+  // New priority: tracker should always be consulted and win.
+  // URL has searchString=MEW+NNN so the ptcgoCode can be extracted by the tracker path.
+  const cards = [
+    { name: 'Card A', cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=719442&searchString=MEW+001' },
+    { name: 'Card B', cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=719443&searchString=MEW+002' },
+    { name: 'Card C', cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=719444&searchString=MEW+003' }
+  ];
+
+  const productIndex = {
+    '719442': { expansionId: 'WRONG_PI' },
+    '719443': { expansionId: 'WRONG_PI' },
+    '719444': { expansionId: 'WRONG_PI' }
+  };
+
+  const trackerSetIndex = {
+    bySetId: {},
+    byPtcgoCode: { 'mew': 'CORRECT' },
+    bySetName: {}
+  };
+
+  assert.equal(
+    inferCardmarketExpansionIdFromCards(cards, productIndex, { trackerSetIndex }),
+    'CORRECT',
+    'tracker byPtcgoCode must win over productIndex even when productIndex has 3+ votes'
+  );
+});
+
+test('inferCardmarketExpansionIdFromCards: ptcgoCode priority is setRecord > URL extraction', () => {
+  // Both sources give a ptcgoCode, but they conflict.
+  // setRecord.ptcgoCode (via resolveSetById) should win over URL-extracted code.
+  // Note: ptcgoCodes are normalized via normalizeCodeKey (lowercase, no spaces,
+  // underscores and other non-alphanumerics become spaces which are then removed).
+  const cards = [
+    { name: 'Card A', cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchString=URL_CODE+001' }
+  ];
+
+  const productIndex = {};
+  const trackerSetIndex = {
+    bySetId: {},
+    byPtcgoCode: { 'setcode': 'CORRECT_SET', 'urlcode': 'WRONG_URL' },
+    bySetName: {}
+  };
+
+  const resolveSetById = (setId) => setId === 'myset'
+    ? { setId: 'myset', ptcgoCode: 'SET_CODE', name: 'MySet' }
+    : null;
+
+  assert.equal(
+    inferCardmarketExpansionIdFromCards(cards, productIndex, {
+      trackerSetIndex,
+      resolveSetById,
+      currentSetId: 'myset'
+    }),
+    'CORRECT_SET',
+    'setRecord.ptcgoCode must be used over URL-extracted ptcgoCode'
+  );
+});
+
+test('inferCardmarketExpansionIdFromCards: falls back to productIndex when tracker has no answer at all', () => {
+  // Backward compat: no trackerSetIndex, no resolver → productIndex should still work.
+  const cards = [
+    { name: 'Card A', cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=719442' },
+    { name: 'Card B', cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=719443' }
+  ];
+  const productIndex = {
+    '719442': { expansionId: '5328' },
+    '719443': { expansionId: '5328' }
+  };
+
+  assert.equal(
+    inferCardmarketExpansionIdFromCards(cards, productIndex, {}),
+    '5328',
+    'without trackerSetIndex, productIndex votes should still resolve'
+  );
+});
+
+test('inferCardmarketExpansionIdFromCards: per-card ptcgoCode is dead code (field does not exist on cards)', () => {
+  // The CARD_DB_HEADERS schema in schema-contract.js does NOT include a per-card
+  // ptcgoCode field. The byPtcgoCode path only uses setRecord.ptcgoCode (via
+  // resolveSetById) and URL extraction. Per-card ptcgoCode lookup was removed.
+  const cards = [
+    { ptcgoCode: 'CORRECT_CODE', name: 'Card A', cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchString=WRONG_CODE+001' }
+  ];
+  const productIndex = {};
+  const trackerSetIndex = {
+    bySetId: {},
+    byPtcgoCode: { 'correctcode': 'CORRECT', 'wrongcode': 'WRONG' },
+    bySetName: {}
+  };
+
+  // Without resolver, only URL extraction is used → 'wrongcode' → 'WRONG'
+  assert.equal(
+    inferCardmarketExpansionIdFromCards(cards, productIndex, { trackerSetIndex }),
+    'WRONG',
+    'per-card ptcgoCode is ignored; URL extraction is the only fallback when no resolver'
+  );
+});
+
+test('inferCardmarketExpansionIdFromCards: set name from resolveSetById wins over per-card set name', () => {
+  // setRecord.name (via resolver) should win over per-card vera_set_name/tcgdex_set_name.
+  // The resolver is the canonical source for the set's display name.
+  const cards = [
+    { setId: 'sv3pt5', vera_set_name: 'wrong name', name: 'Card A', cardmarketUrl: '' }
+  ];
+  const trackerSetIndex = {
+    bySetId: {},
+    byPtcgoCode: {},
+    bySetName: { '151': 'CORRECT_VIA_RESOLVER', 'wrong name': 'WRONG_VIA_CARD' }
+  };
+  const resolveSetById = (setId) => setId === 'sv3pt5'
+    ? { setId: 'sv3pt5', name: '151' }
+    : null;
+
+  assert.equal(
+    inferCardmarketExpansionIdFromCards(cards, {}, {
+      trackerSetIndex,
+      resolveSetById,
+      currentSetId: 'sv3pt5'
+    }),
+    'CORRECT_VIA_RESOLVER',
+    'setRecord.name (via resolver) must win over per-card vera_set_name/tcgdex_set_name'
+  );
+});
+
+test('inferCardmarketExpansionIdFromCards: per-card set name works as fallback when no resolver', () => {
+  // Cards do not actually carry vera_set_name / tcgdex_set_name / setName / set_name
+  // (CARD_DB_HEADERS in schema-contract.js). Per-card set-name extraction is therefore
+  // a no-op and cannot be used as a fallback. The bySetName lookup must succeed via
+  // the set record (resolveSetById) — when only per-card set name is provided
+  // (no resolver), the result is empty.
+  const cards = [
+    { setId: 'sv3pt5', vera_set_name: '151', name: 'Card A', cardmarketUrl: '' }
+  ];
+  const trackerSetIndex = {
+    bySetId: {},
+    byPtcgoCode: {},
+    bySetName: { '151': 'CORRECT_VIA_CARD' }
+  };
+
+  assert.equal(
+    inferCardmarketExpansionIdFromCards(cards, {}, { trackerSetIndex }),
+    '',
+    'per-card set name is dead code (fields do not exist on cards) — must return empty when no resolver'
+  );
 });
