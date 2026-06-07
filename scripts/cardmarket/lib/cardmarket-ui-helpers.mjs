@@ -195,11 +195,14 @@ function extractPreferredCardNames(card = {}) {
 }
 
 function extractPreferredSetNames(card = {}) {
-  return Array.from(new Set(
-    [card?.vera_set_name, card?.tcgdex_set_name, card?.setName, card?.set_name]
-      .map((value) => normalizeMatcherText(value))
-      .filter(Boolean)
-  ));
+  // Set name fields (vera_set_name, tcgdex_set_name, setName, set_name) are SET-level
+  // properties, not CARD-level. They do not exist on the card schema (see CARD_DB_HEADERS
+  // in schema-contract.js). The set name is sourced from the set record via resolveSetById
+  // (see Phase 1c in inferCardmarketExpansionIdFromCards). This function is kept for
+  // backward-compat with any external callers; it intentionally returns an empty array
+  // because real cards have no set-name fields.
+  void card;
+  return [];
 }
 
 function entryMatchesAnyCardName(entry = {}, normalizedCardNames = []) {
@@ -241,13 +244,12 @@ function extractPotentialPtcgoCodes(cards = []) {
 }
 
 function extractPotentialSetNameKeys(cards = []) {
-  const names = new Set();
-
-  cards.forEach((card) => {
-    extractPreferredSetNames(card).forEach((value) => names.add(value));
-  });
-
-  return Array.from(names);
+  // Returns an empty array. Set name fields (vera_set_name, tcgdex_set_name, setName,
+  // set_name) are SET-level properties, not CARD-level. Cards do not carry them. The
+  // set name lookup uses the set record via resolveSetById (see Phase 1c). Kept as a
+  // no-op for backward-compat.
+  void cards;
+  return [];
 }
 
 function normalizeForTrackerBySetId(value = '') {
@@ -322,6 +324,71 @@ export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {
   }
 
   const counts = new Map();
+
+  // Phase 1: Tracker-first voting. Tracker index entries (bySetId, byPtcgoCode, bySetName)
+  // are the authoritative source — built from our DB (sets/en.json + tcgdex-helper).
+  // They get HIGH weight so they win over productIndex (built from Cardmarket's auto-feed,
+  // which can be wrong for cross-set listings).
+  if (trackerSetIndex && typeof trackerSetIndex === 'object') {
+    // 1a. bySetId: each card's setId → bySetId lookup
+    const setIds = Array.from(new Set(
+      cards.map((card) => normalizeForTrackerBySetId(card?.setId)).filter(Boolean)
+    ));
+    setIds.forEach((setId) => {
+      const expansionId = String(trackerSetIndex?.bySetId?.[setId] || '').trim();
+      if (!expansionId) return;
+      counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length * 2, 10));
+    });
+
+    // 1b. byPtcgoCode: priority order is
+    //     1. setRecord.ptcgoCode via resolveSetById (the canonical set code from the DB)
+    //     2. URL-extracted ptcgoCode from searchString (final fallback)
+    // Per-card ptcgoCode is NOT consulted because cards do not carry this field —
+    // the CARD_DB_HEADERS schema in schema-contract.js confirms it. The set-level
+    // ptcgoCode is canonical and is reached via the resolver.
+    const ptcgoCodes = [];
+    const seenPtcgo = new Set();
+    const addPtcgo = (code) => {
+      const normalized = normalizeCodeKey(code);
+      if (!normalized || seenPtcgo.has(normalized)) return;
+      seenPtcgo.add(normalized);
+      ptcgoCodes.push(normalized);
+    };
+    if (typeof resolveSetById === 'function' && currentSetId) {
+      const setRecord = resolveSetById(currentSetId);
+      if (setRecord) {
+        addPtcgo(setRecord.ptcgoCode);
+        addPtcgo(setRecord.code);
+      }
+    }
+    extractPotentialPtcgoCodes(cards).forEach(addPtcgo);
+
+    ptcgoCodes.forEach((code) => {
+      const expansionId = String(trackerSetIndex?.byPtcgoCode?.[code] || '').trim();
+      if (!expansionId) return;
+      counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length * 2, 10));
+    });
+
+    // 1c. bySetName: only via setRecord.name (the resolver).
+    //     Per-card set name fields do not exist (set-level properties), so we don't
+    //     scan cards here. Used as a soft fallback when neither setId nor ptcgoCode
+    //     matched.
+    const setNameKeys = new Set();
+    if (typeof resolveSetById === 'function' && currentSetId) {
+      const setRecord = resolveSetById(currentSetId);
+      const setNameKey = normalizeMatcherText(setRecord?.name || '');
+      if (setNameKey) setNameKeys.add(setNameKey);
+    }
+
+    setNameKeys.forEach((setNameKey) => {
+      const expansionId = String(trackerSetIndex?.bySetName?.[setNameKey] || '').trim();
+      if (!expansionId) return;
+      counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length, 5));
+    });
+  }
+
+  // Phase 2: ProductIndex voting. URL → productIndex is the LOWEST priority —
+  // only used as a last-resort fallback when the tracker has no answer.
   cards.forEach((card) => {
     const productId = extractCardmarketProductId(getCardmarketUrlFromCard(card));
     if (!productId) return;
@@ -333,45 +400,6 @@ export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {
   });
 
   const highestDirectCount = counts.size ? Math.max(...counts.values()) : 0;
-
-  // Fallback: only consult the tracker index when the direct URL/product votes
-  // are too weak to trust (0 or 1 votes) OR when no votes exist at all.
-  // When many direct URL votes point to the same expansion, trust that.
-  if (trackerSetIndex && typeof trackerSetIndex === 'object' && highestDirectCount < 2) {
-    const setIdMatchedExpansionIds = [];
-    const setIds = Array.from(new Set(
-      cards.map((card) => normalizeForTrackerBySetId(card?.setId)).filter(Boolean)
-    ));
-    setIds.forEach((setId) => {
-      const expansionId = String(trackerSetIndex?.bySetId?.[setId] || '').trim();
-      if (!expansionId) return;
-      setIdMatchedExpansionIds.push(expansionId);
-      counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length, 3));
-    });
-
-    const ptcgoMatchedExpansionIds = [];
-    const ptcgoCodes = new Set(extractPotentialPtcgoCodes(cards));
-    ptcgoCodes.forEach((code) => {
-      const expansionId = String(trackerSetIndex?.byPtcgoCode?.[code] || '').trim();
-      if (!expansionId) return;
-      ptcgoMatchedExpansionIds.push(expansionId);
-      counts.set(expansionId, (counts.get(expansionId) || 0) + 2);
-    });
-
-    const hasIdOrCodeMatch = setIdMatchedExpansionIds.length > 0 || ptcgoMatchedExpansionIds.length > 0;
-    if (!hasIdOrCodeMatch) {
-      const matchedSetNameExpansionIds = Array.from(new Set(
-        extractPotentialSetNameKeys(cards)
-          .map((setNameKey) => String(trackerSetIndex?.bySetName?.[setNameKey] || '').trim())
-          .filter(Boolean)
-      ));
-
-      if (matchedSetNameExpansionIds.length === 1) {
-        const expansionId = matchedSetNameExpansionIds[0];
-        counts.set(expansionId, (counts.get(expansionId) || 0) + Math.max(cards.length, 5));
-      }
-    }
-  }
 
   const highestCount = counts.size ? Math.max(...counts.values()) : 0;
   if ((!counts.size || highestCount < 2) && nameIndex && typeof nameIndex === 'object') {
@@ -474,6 +502,42 @@ function normalizeNonEmptyMetacardId(value) {
   return normalized;
 }
 
+// Picks the index of the entry with the smallest cardmarketProductId from a
+// metacardId group. When two entries share a metacardId, only the smallest id
+// counts as the "canonical" candidate for that group. Among the resulting
+// groups, the smallest id overall wins. This gives a stable, order-independent
+// result regardless of how the set payload lists its cards — previously the
+// function took the first match in array order, which could be any id.
+function pickSmallestIdPerMetacardGroup(candidateIndices, entries) {
+  if (!Array.isArray(candidateIndices) || candidateIndices.length === 0) return -1;
+  if (candidateIndices.length === 1) return candidateIndices[0];
+
+  const grouped = new Map();
+  for (let k = 0; k < candidateIndices.length; k += 1) {
+    const i = candidateIndices[k];
+    const entry = entries[i];
+    const mcId = normalizeNonEmptyMetacardId(entry?.metacardId);
+    // Entries ohne metacardId bilden jeweils ihre eigene Gruppe — sie sind
+    // nicht zusammenführbar, weil wir sonst zwei unrelated Karten kollabieren.
+    const key = mcId !== null ? `mc:${mcId}` : `nomc:${k}`;
+    const productId = Number(entry?.cardmarketProductId) || Infinity;
+    const existing = grouped.get(key);
+    if (existing === undefined || productId < existing.productId) {
+      grouped.set(key, { index: i, productId });
+    }
+  }
+
+  let bestIndex = -1;
+  let bestProductId = Infinity;
+  for (const { index, productId } of grouped.values()) {
+    if (productId < bestProductId) {
+      bestIndex = index;
+      bestProductId = productId;
+    }
+  }
+  return bestIndex;
+}
+
 export function buildSetCardAssignmentMap(sourceCards = [], setPayload = {}) {
   const payloadCards = Array.isArray(setPayload?.cards) ? setPayload.cards : [];
   if (!payloadCards.length || !Array.isArray(sourceCards) || !sourceCards.length) {
@@ -508,20 +572,27 @@ export function buildSetCardAssignmentMap(sourceCards = [], setPayload = {}) {
       if (keyMatches.length === 1) {
         matchIndex = keyMatches[0];
       } else if (keyMatches.length > 1) {
-        // Tiebreak: prefer the entry whose name matches the card
-        for (const i of keyMatches) {
-          if (entryMatchesAnyCardName(availableEntries[i], normalizedCardNames)) {
-            matchIndex = i;
-            break;
-          }
+        // Tiebreak: prefer entries whose name matches the card, then the
+        // smallest cardmarketProductId per metacardId group.
+        const nameMatches = keyMatches.filter((i) => entryMatchesAnyCardName(availableEntries[i], normalizedCardNames));
+        if (nameMatches.length > 0) {
+          matchIndex = pickSmallestIdPerMetacardGroup(nameMatches, availableEntries);
         }
         // If no name match among collector candidates, fall through to name-based matching
       }
     }
 
-    // 2. Fallback: name-based match (original behavior)
+    // 2. Fallback: name-based match
     if (matchIndex < 0) {
-      matchIndex = availableEntries.findIndex((entry) => entryMatchesAnyCardName(entry, normalizedCardNames));
+      const nameMatches = [];
+      for (let i = 0; i < availableEntries.length; i += 1) {
+        if (entryMatchesAnyCardName(availableEntries[i], normalizedCardNames)) {
+          nameMatches.push(i);
+        }
+      }
+      if (nameMatches.length > 0) {
+        matchIndex = pickSmallestIdPerMetacardGroup(nameMatches, availableEntries);
+      }
     }
 
     if (matchIndex < 0) continue;
