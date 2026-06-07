@@ -5980,7 +5980,7 @@ function buildStatsPriceTabContent({
             const reverseClass = isReverse ? ' is-reverse' : '';
             const cardmarketUrl = getItemCardmarketUrl(card);
             return `
-            <li class="stats-price-rich-item${reverseClass}" data-set-id="${escapeHtml(card?.setId || '')}">
+            <li class="stats-price-rich-item${reverseClass}" data-set-id="${escapeHtml(card?.setId || '')}" data-stats-card-key="${escapeHtml(`${escapeHtml(card?.setId || '')}::${normalizeCardNumber(card?.card?.number || card?.cardNumber || card?.cardKey || '')}`)}">
               <span class="stats-price-rich-rank">${index + 1}</span>
               <div class="stats-price-rich-main">
                 <strong>${escapeHtml(card?.cardName || 'Unbekannte Karte')}${isReverse ? ' <span class="stats-price-rh-badge" title="Als Reverse Holo gesammelt">RH</span>' : ''}</strong>
@@ -6117,7 +6117,7 @@ function buildStatsPriceTabContent({
             const reverseClass = isReverse ? ' is-reverse' : '';
             const cardmarketUrl = getItemCardmarketUrl(item);
             return `
-            <li class="stats-price-rich-item stats-price-rich-item--thumb${reverseClass}" data-set-id="${escapeHtml(item?.setId || '')}" data-watchlist-card="1" data-watchlist-card-number="${escapeHtml(watchlistCardNumber)}">
+            <li class="stats-price-rich-item stats-price-rich-item--thumb${reverseClass}" data-set-id="${escapeHtml(item?.setId || '')}" data-stats-card-key="${escapeHtml(`${escapeHtml(item?.setId || '')}::${normalizeCardNumber(item?.card?.number || item?.cardKey || '')}`)}" data-watchlist-card="1" data-watchlist-card-number="${escapeHtml(watchlistCardNumber)}">
               <span class="stats-price-rich-rank">${globalRank}</span>
               <span class="stats-price-thumb" aria-hidden="true">
                 ${renderStatsPriceThumbMarkup(item)}
@@ -6190,7 +6190,7 @@ function buildStatsPriceTabContent({
         const reverseClass = isReverse ? ' is-reverse' : '';
         const cardmarketUrl = getItemCardmarketUrl(item);
         return `
-            <li class="stats-price-rich-item${reverseClass}" ${item?.setId ? `data-set-id="${escapeHtml(item.setId)}"` : ''}>
+            <li class="stats-price-rich-item${reverseClass}" ${item?.setId ? `data-set-id="${escapeHtml(item.setId)}" data-stats-card-key="${escapeHtml(`${escapeHtml(item.setId)}::${normalizeCardNumber(item?.card?.number || item?.cardKey || '')}`)}"` : ''}>
               <span class="stats-price-rich-rank">${index + 1}</span>
               <div class="stats-price-rich-main">
                 <strong>${escapeHtml(item?.cardName || item?.card?.name || 'Unbekannte Karte')}${isReverse ? ' <span class="stats-price-rh-badge" title="Als Reverse Holo gesammelt">RH</span>' : ''}</strong>
@@ -6359,6 +6359,50 @@ function isActiveStatsPriceRequest(requestId) {
   return state.statsPrice.requestId === requestId;
 }
 
+/**
+ * Aktualisiert nur die Progress-Anzeige und KPI-Karten im bestehenden
+ * Stats-View-DOM — wird bei jedem 'partial'-Chunk aufgerufen, damit der
+ * User live mitverfolgen kann, wie die Berechnung voranschreitet, ohne
+ * dass der ganze Container neu gebaut wird.
+ */
+function updateStatsPriceKpiDom(container, { progress, totalValue, averageValue, collectedCards, pricedCollectedCards, priceCoverage, errors, message, tabContent } = {}) {
+  const progressPct = container.querySelector('[data-stats-progress-pct]');
+  if (progressPct) progressPct.textContent = `${progress}%`;
+  const progressBar = container.querySelector('[data-stats-progress-bar]');
+  if (progressBar) progressBar.style.width = `${progress}%`;
+
+  // KPI-Cards per QuerySelector — die Labels sind statisch, nur die
+  // Werte werden ersetzt. data-stats-* Attribute sind beim Shell-Build
+  // gesetzt worden.
+  const totalValueEl = container.querySelector('[data-stats-total-value]');
+  if (totalValueEl) totalValueEl.textContent = formatStatsPriceEuro(totalValue);
+  const avgValueEl = container.querySelector('[data-stats-avg-value]');
+  if (avgValueEl) avgValueEl.textContent = formatStatsPriceEuro(averageValue);
+  const pricingEl = container.querySelector('[data-stats-pricing]');
+  if (pricingEl) pricingEl.textContent = `${Math.round(priceCoverage)}%`;
+  const pricingDetailEl = container.querySelector('[data-stats-pricing-detail]');
+  if (pricingDetailEl) pricingDetailEl.textContent = `${formatStatsPriceNumber(pricedCollectedCards)} von ${formatStatsPriceNumber(collectedCards)}`;
+  const missingEl = container.querySelector('[data-stats-missing]');
+  if (missingEl) missingEl.textContent = formatStatsPriceNumber(collectedCards - pricedCollectedCards);
+  const errorsDetailEl = container.querySelector('[data-stats-errors-detail]');
+  if (errorsDetailEl) errorsDetailEl.textContent = errors > 0 ? `${formatStatsPriceNumber(errors)} Fehler` : 'keine Fehler';
+
+  // Completion-Label (z.B. "100 / 200 Karten geladen")
+  if (tabContent?.completionLabel) {
+    const labelEl = container.querySelector('.stats-price-head p');
+    if (labelEl) labelEl.textContent = tabContent.completionLabel;
+  }
+
+  // Tab-Inhalt (Item-Listen) aktualisieren — bei partial werden die
+  // Listen länger, also muss der tab-content-Bereich neu gerendert werden.
+  // Das ist deutlich billiger als der ganze Container, weil das Shell,
+  // die KPI-Cards und die Tabs erhalten bleiben.
+  const tabContentEl = container.querySelector('[data-stats-tab-content]');
+  if (tabContentEl && tabContent?.contentMarkup) {
+    tabContentEl.innerHTML = tabContent.contentMarkup;
+  }
+}
+
 function renderStatsPriceSnapshot({
   status = 'loading',
   analytics = null,
@@ -6404,6 +6448,15 @@ function renderStatsPriceSnapshot({
   });
 
   container.dataset.state = status;
+  // Performance: bei 'partial' nur die Progress-/KPI-Werte im bestehenden
+  // DOM aktualisieren — KEIN kompletter innerHTML-Rebuild. Der wäre bei
+  // 7000+ Karten pro Chunk teuer und würde den Browser einfrieren lassen.
+  // Beim 'loading' (erster Aufruf) und 'final' rendern wir die Shell neu.
+  const partialLiveUpdate = status === 'partial'
+    && container.querySelector('[data-stats-progress-pct]') !== null;
+  if (partialLiveUpdate) {
+    updateStatsPriceKpiDom(container, { progress, totalValue, averageValue, collectedCards, pricedCollectedCards, priceCoverage, errors, message, tabContent });
+  } else {
   container.innerHTML = `
     <article class="stats-price-panel ${status === 'final' ? 'stats-price-enter' : ''}">
       <header class="stats-price-head">
@@ -6413,8 +6466,8 @@ function renderStatsPriceSnapshot({
           <p>${tabContent.completionLabel}</p>
         </div>
         <div class="stats-price-progress-wrap">
-          <strong>${progress}%</strong>
-          <div class="stats-price-progress"><span style="width:${progress}%"></span></div>
+          <strong data-stats-progress-pct>${progress}%</strong>
+          <div class="stats-price-progress"><span data-stats-progress-bar style="width:${progress}%"></span></div>
         </div>
       </header>
 
@@ -6445,10 +6498,11 @@ function renderStatsPriceSnapshot({
         ${tabContent.tabsMarkup}
       </section>
 
-      <section class="stats-price-tab-content">
+      <section class="stats-price-tab-content" data-stats-tab-content>
         ${tabContent.contentMarkup}
       </section>
     </article>`;
+  } // end if (!partialLiveUpdate)
 
   const restoreWatchlistScrollSnapshot = (snapshot) => {
     if (!snapshot || activeTab !== 'watchlist') return;
@@ -8975,12 +9029,87 @@ function updateCardState(article, db) {
   const cardIndex = Number.parseInt(article?.dataset?.cardIndex || '-1', 10);
   const card = Number.isFinite(cardIndex) && cardIndex >= 0 ? state.cards[cardIndex] : null;
   if (card && cardmarketLink) {
-    hydrateCardmarketLink(cardmarketLink, card, { compact: true, preferReverseHolo: Boolean(db?.rh) });
+    hydrateCardmarketLink(cardmarktLink, card, { compact: true, preferReverseHolo: Boolean(db?.rh) });
   }
   if (dom.lightboxDialog.open) {
     const idx = parseInt(article.dataset.cardIndex, 10);
     if (state.lightboxIndex === idx) renderLightbox(idx);
   }
+  // Live-Update der Stats-View: wenn die Karte in den analytics enthalten ist,
+  // müssen die Cardmarket-URL (mit `?isReverseHolo=Y`-Suffix) und der
+  // Sortier-/Filter-Status im Item aktualisiert werden. Sonst zeigt die
+  // Stats-View erst nach dem nächsten Analytics-Refresh den neuen Status.
+  if (card && state?.currentSet?.setId) {
+    refreshStatsPriceItem({
+      setId: state.currentSet.setId,
+      number: card?.number,
+      rh: Boolean(db?.rh),
+    });
+  }
+}
+
+/**
+ * Live-Update eines Eintrags in `state.statsPrice.items`, wenn der
+ * Sammelstatus einer Karte in der Set-Ansicht umgeschaltet wird. Findet
+ * das passende Item per `cardKey` (= `setId::normalizedNumber`), patcht
+ * `isReverseHolo` + `card.rh`, und aktualisiert — wenn die Stats-View
+ * gerade gerendert ist — das `<a class="stats-price-cardmarket-link">`-
+ * Element (mit neuem `?isReverseHolo=Y`-Suffix) sowie die
+ * `is-reverse`-Klasse und den RH-Badge.
+ */
+function refreshStatsPriceItem({ setId, number, rh = false } = {}) {
+  if (!state.statsPrice?.items?.length) return;
+  if (!setId) return;
+  const normalizedNumber = normalizeCardNumber(number || '');
+  if (!normalizedNumber) return;
+  const cardKey = `${setId}::${normalizedNumber}`;
+
+  const item = state.statsPrice.items.find((entry) => entry?.cardKey === cardKey);
+  if (!item) return;
+
+  item.isReverseHolo = Boolean(rh);
+  if (item.card && typeof item.card === 'object') {
+    item.card.rh = Boolean(rh);
+  }
+
+  // Nur wenn die Stats-View gerade sichtbar ist, das DOM patchen.
+  // Sonst genügt der State-Update; beim nächsten Render wird der Wert
+  // aus dem frischen State gelesen.
+  const container = getStatsPriceContainer();
+  if (!container || container.dataset.state === 'loading') return;
+  if (container.dataset.state === 'final' || container.dataset.state === 'partial') {
+    const li = container.querySelector(`.stats-price-rich-item[data-stats-card-key="${cssEscapeAttr(cardKey)}"]`);
+    if (li) {
+      li.classList.toggle('is-reverse', Boolean(rh));
+      // Cardmarket-Link in derselben Kachel
+      const link = li.querySelector('.stats-price-cardmarket-link');
+      if (link) {
+        const cardmarketUrl = getItemCardmarketUrl(item);
+        link.setAttribute('href', cardmarketUrl);
+        if (item?.card?.cardmarketUrl) link.setAttribute('data-cardmarket-url', item.card.cardmarketUrl);
+      }
+      // RH-Badge hinzufügen/entfernen — wir tauschen den Slot im Markup
+      const strong = li.querySelector('.stats-price-rich-main strong');
+      if (strong) {
+        const existingBadge = strong.querySelector('.stats-price-rh-badge');
+        if (rh && !existingBadge) {
+          const badge = document.createElement('span');
+          badge.className = 'stats-price-rh-badge';
+          badge.title = 'Als Reverse Holo gesammelt';
+          badge.textContent = 'RH';
+          strong.appendChild(badge);
+        } else if (!rh && existingBadge) {
+          existingBadge.remove();
+        }
+      }
+    }
+  }
+}
+
+function cssEscapeAttr(value) {
+  // Lightweight Escape für Attribut-Selektoren — reicht für unsere
+  // cardKey-Werte (setId::number).
+  return String(value || '').replace(/(["\\'])/g, '\\$1');
 }
 
 function broadcastRealtimeCardUpdate(cardNumber, db) {
