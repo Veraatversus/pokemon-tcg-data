@@ -1,4 +1,4 @@
-import { isGeneratedCardmarketSearchUrl, isGeneratedCardmarketUrl } from './data/cardmarket-url-utils.js';
+import { isGeneratedCardmarketSearchUrl, isGeneratedCardmarketUrl, applyReverseHoloQueryParam } from './data/cardmarket-url-utils.js';
 import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js?v=20260410-authredirect2';
 import {
   listImportedSets,
@@ -5390,7 +5390,7 @@ function formatStatsPriceNumber(value) {
 }
 
 function getItemCardmarketUrl(item = {}) {
-  return String(
+  const base = String(
     item?.card?.cardmarketUrl
     || item?.card?.vera_cardmarket_url
     || item?.card?.tcgdex_cardmarket_url
@@ -5399,6 +5399,9 @@ function getItemCardmarketUrl(item = {}) {
     || item?.tcgdex_cardmarket_url
     || ''
   ).trim();
+  // Hängt `?isReverseHolo=Y` an, wenn die Karte als Reverse Holo gesammelt
+  // ist — Cardmarket zeigt dann direkt die korrekte Variante an.
+  return applyReverseHoloQueryParam(base, Boolean(item?.isReverseHolo));
 }
 
 const STATS_PRICE_TABS = [
@@ -5668,6 +5671,68 @@ function getStatsPriceItemImageUrl(item = {}) {
   return '';
 }
 
+function getStatsPriceItemImageCandidates(item = {}) {
+  const card = item?.card || {};
+  // Vollständige Kandidatenkette in der Reihenfolge, die der Set-View
+  // (`attachImageFallback`) durchrotiert. Beim ersten onerror wird das
+  // nächste Bild probiert; am Ende pokeball-fallback.svg.
+  const candidates = [
+    item?.image,
+    item?.imageUrl,
+    card?.imageSmall,
+    card?.image,
+    card?.imageUrl,
+    card?.imageLarge,
+    card?.imageCandidates,
+    card?.images?.small,
+    card?.images?.large,
+  ];
+  const seen = new Set();
+  const out = [];
+  for (const list of candidates) {
+    if (Array.isArray(list)) {
+      for (const value of list) {
+        const trimmed = String(value || '').trim();
+        if (trimmed && !seen.has(trimmed)) {
+          seen.add(trimmed);
+          out.push(trimmed);
+        }
+      }
+    } else {
+      const trimmed = String(list || '').trim();
+      if (trimmed && !seen.has(trimmed)) {
+        seen.add(trimmed);
+        out.push(trimmed);
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * Rendert das Thumbnail-Markup für einen Stats-Price-Listeneintrag.
+ * Spiegelt das Verhalten von `attachImageFallback` aus dem Set-View:
+ * onerror rotiert durch `imageCandidates`, am Ende pokeball-fallback.svg.
+ * Markiert das Element zusätzlich mit `is-reverse`, wenn die Karte als
+ * Reverse Holo gesammelt ist — gleicher visueller Marker wie in der
+ * Set-Cell (Klasse `article.reverse`).
+ */
+function renderStatsPriceThumbMarkup(item = {}) {
+  const candidates = getStatsPriceItemImageCandidates(item);
+  if (!candidates.length) {
+    return '<span class="stats-price-thumb-fallback" aria-hidden="true">?</span>';
+  }
+
+  const [primary, ...rest] = candidates;
+  const altText = String(item?.cardName || item?.card?.name || item?.card?.number || 'Kartenbild').trim();
+  // data-candidates enthält die Fallback-Liste als JSON (Bild-URLs).
+  // Der onerror-Handler rotiert per Index, am Ende wird pokeball-fallback.svg
+  // geladen und die CSS-Klasse `img-fallback` gesetzt.
+  const dataAttr = ` data-image-candidates='${escapeHtml(JSON.stringify(rest))}'`;
+  const onerrorAttr = "this.onerror=null;var c=this.dataset.imageCandidates;if(c){var arr;try{arr=JSON.parse(c);}catch(e){arr=[];}if(Array.isArray(arr)&&arr.length){this.dataset.imageCandidates=JSON.stringify(arr.slice(1));this.src=arr[0];return;}}this.src='./assets/pokeball-fallback.svg';this.classList.add('img-fallback');this.closest('.stats-price-thumb')?.classList.add('stats-price-thumb--missing');";
+  return `<img class="stats-price-thumb-img" src="${escapeHtml(primary)}" alt="${escapeHtml(altText)}" loading="lazy" decoding="async"${dataAttr} onerror="${onerrorAttr}" />`;
+}
+
 function computeWatchlistWorkspace(items = [], filters = {}, analytics = null) {
   const safeItems = Array.isArray(items) ? items : [];
   const normalizedFilters = normalizeWatchlistFilters(filters);
@@ -5910,19 +5975,24 @@ function buildStatsPriceTabContent({
       <ol class="stats-price-rich-list stats-price-scroll-region">
         ${topCards
           .slice()
-          .map((card, index) => `
-            <li class="stats-price-rich-item" data-set-id="${escapeHtml(card?.setId || '')}">
+          .map((card, index) => {
+            const isReverse = Boolean(card?.isReverseHolo);
+            const reverseClass = isReverse ? ' is-reverse' : '';
+            const cardmarketUrl = getItemCardmarketUrl(card);
+            return `
+            <li class="stats-price-rich-item${reverseClass}" data-set-id="${escapeHtml(card?.setId || '')}">
               <span class="stats-price-rich-rank">${index + 1}</span>
               <div class="stats-price-rich-main">
-                <strong>${escapeHtml(card?.cardName || 'Unbekannte Karte')}</strong>
+                <strong>${escapeHtml(card?.cardName || 'Unbekannte Karte')}${isReverse ? ' <span class="stats-price-rh-badge" title="Als Reverse Holo gesammelt">RH</span>' : ''}</strong>
                 <small>${escapeHtml(card?.setName || 'Unbekanntes Set')} · #${escapeHtml(card?.card?.number || card?.cardNumber || card?.cardKey || '')}</small>
               </div>
-              ${getItemCardmarketUrl(card)
-      ? `<a class="stats-price-cardmarket-link" href="${escapeHtml(getItemCardmarketUrl(card))}" target="_blank" rel="noopener noreferrer" data-cardmarket-link="1">Cardmarket</a>`
+              ${cardmarketUrl
+      ? `<a class="stats-price-cardmarket-link" href="${escapeHtml(cardmarketUrl)}" target="_blank" rel="noopener noreferrer" data-cardmarket-link="1">Cardmarket</a>`
       : ''}
               <strong class="stats-price-rich-value">${formatStatsPriceEuro(card?.value)}</strong>
             </li>
-          `)
+          `;
+          })
           .join('') || '<li class="stats-price-empty">Noch keine Top-Werte verfügbar.</li>'}
       </ol>
     </section>`;
@@ -6041,29 +6111,29 @@ function buildStatsPriceTabContent({
       <ol class="stats-price-rich-list stats-price-scroll-region stats-price-watchlist-scroll" data-watchlist-scroll-region="1" data-watchlist-total="${watchlistItems.length}">
         ${watchlistVisibleItems
           .map((item, index) => {
-            const imageUrl = getStatsPriceItemImageUrl(item);
             const globalRank = index + 1;
             const watchlistCardNumber = String(item?.card?.number || item?.cardKey || '').trim();
+            const isReverse = Boolean(item?.isReverseHolo);
+            const reverseClass = isReverse ? ' is-reverse' : '';
+            const cardmarketUrl = getItemCardmarketUrl(item);
             return `
-            <li class="stats-price-rich-item stats-price-rich-item--thumb" data-set-id="${escapeHtml(item?.setId || '')}" data-watchlist-card="1" data-watchlist-card-number="${escapeHtml(watchlistCardNumber)}">
+            <li class="stats-price-rich-item stats-price-rich-item--thumb${reverseClass}" data-set-id="${escapeHtml(item?.setId || '')}" data-watchlist-card="1" data-watchlist-card-number="${escapeHtml(watchlistCardNumber)}">
               <span class="stats-price-rich-rank">${globalRank}</span>
               <span class="stats-price-thumb" aria-hidden="true">
-                ${imageUrl
-      ? `<img src="${escapeHtml(imageUrl)}" alt="" loading="lazy" decoding="async" />`
-      : '<span class="stats-price-thumb-fallback">?</span>'}
+                ${renderStatsPriceThumbMarkup(item)}
               </span>
               <div class="stats-price-rich-main">
-                <strong>${escapeHtml(item?.cardName || item?.card?.name || 'Unbekannte Karte')}</strong>
+                <strong>${escapeHtml(item?.cardName || item?.card?.name || 'Unbekannte Karte')}${isReverse ? ' <span class="stats-price-rh-badge" title="Als Reverse Holo gesammelt">RH</span>' : ''}</strong>
                 <small>${escapeHtml(item?.setName || 'Unbekanntes Set')} · #${escapeHtml(item?.card?.number || item?.cardKey || '')}</small>
               </div>
               <button type="button" class="btn-goto-set stats-price-open-set-btn" data-watchlist-open-set="1" title="Setansicht oeffnen">↗</button>
-              ${getItemCardmarketUrl(item)
-      ? `<a class="stats-price-cardmarket-link" href="${escapeHtml(getItemCardmarketUrl(item))}" target="_blank" rel="noopener noreferrer" data-cardmarket-link="1">Cardmarket</a>`
+              ${cardmarketUrl
+      ? `<a class="stats-price-cardmarket-link" href="${escapeHtml(cardmarketUrl)}" target="_blank" rel="noopener noreferrer" data-cardmarket-link="1">Cardmarket</a>`
       : ''}
               <strong class="stats-price-rich-value">${formatStatsPriceEuro(item?.value)}</strong>
             </li>`;
           })
-          .join('') || '<li class="stats-price-empty">Keine Treffer f\u00fcr aktuelle Filter.</li>'}
+          .join('') || '<li class="stats-price-empty">Keine Treffer ür aktuelle Filter.</li>'}
         ${watchlistRemaining > 0 ? '<li class="stats-price-watchlist-sentinel" data-watchlist-sentinel="1" aria-hidden="true"></li>' : ''}
       </ol>
 
@@ -6115,19 +6185,24 @@ function buildStatsPriceTabContent({
         ${activeGroupPriced
       .slice()
       .sort((a, b) => Number(b?.value || 0) - Number(a?.value || 0))
-      .map((item, index) => `
-            <li class="stats-price-rich-item" ${item?.setId ? `data-set-id="${escapeHtml(item.setId)}"` : ''}>
+      .map((item, index) => {
+        const isReverse = Boolean(item?.isReverseHolo);
+        const reverseClass = isReverse ? ' is-reverse' : '';
+        const cardmarketUrl = getItemCardmarketUrl(item);
+        return `
+            <li class="stats-price-rich-item${reverseClass}" ${item?.setId ? `data-set-id="${escapeHtml(item.setId)}"` : ''}>
               <span class="stats-price-rich-rank">${index + 1}</span>
               <div class="stats-price-rich-main">
-                <strong>${escapeHtml(item?.cardName || item?.card?.name || 'Unbekannte Karte')}</strong>
+                <strong>${escapeHtml(item?.cardName || item?.card?.name || 'Unbekannte Karte')}${isReverse ? ' <span class="stats-price-rh-badge" title="Als Reverse Holo gesammelt">RH</span>' : ''}</strong>
                 <small>${escapeHtml(item?.setName || 'Unbekanntes Set')} · #${escapeHtml(item?.card?.number || item?.cardKey || '')}</small>
               </div>
-              ${getItemCardmarketUrl(item)
-      ? `<a class="stats-price-cardmarket-link" href="${escapeHtml(getItemCardmarketUrl(item))}" target="_blank" rel="noopener noreferrer" data-cardmarket-link="1">Cardmarket</a>`
+              ${cardmarketUrl
+      ? `<a class="stats-price-cardmarket-link" href="${escapeHtml(cardmarketUrl)}" target="_blank" rel="noopener noreferrer" data-cardmarket-link="1">Cardmarket</a>`
       : ''}
               <strong class="stats-price-rich-value">${formatStatsPriceEuro(item?.value)}</strong>
             </li>
-          `)
+          `;
+      })
       .join('') || '<li class="stats-price-empty">Keine bepreisten Karten in dieser Auswahl.</li>'}
       </ol>`;
 
@@ -8639,9 +8714,14 @@ function applyCardmarketPriceSummary(linkEl, summary, { compact = false, preferR
   if (!presentation) return;
 
   if (summary.url) {
-    linkEl.href = summary.url;
-    linkEl.dataset.cardmarketUrl = summary.url;
-    linkEl.classList.toggle('card-cm-link-fallback', isGeneratedCardmarketSearchUrl(summary.url));
+    // Beim Rendern den `?isReverseHolo=Y`-Suffix anhängen, wenn die Karte als
+    // RH gesammelt ist. So landet der User direkt auf der richtigen
+    // Cardmarket-Produktseite. Search-URLs bleiben unverändert (apply…
+    // erkennt sie und passt nichts an).
+    const finalUrl = applyReverseHoloQueryParam(summary.url, preferReverseHolo);
+    linkEl.href = finalUrl;
+    linkEl.dataset.cardmarketUrl = finalUrl;
+    linkEl.classList.toggle('card-cm-link-fallback', isGeneratedCardmarketSearchUrl(finalUrl));
   }
   if (presentation.title) linkEl.title = presentation.title;
   if (presentation.label) {
