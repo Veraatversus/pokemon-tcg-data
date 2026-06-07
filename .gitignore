@@ -12,6 +12,8 @@ frontend/tcg-tracker-web/.playwright-cli/
 frontend/tcg-tracker-web/.playwright-profile/
 frontend/tcg-tracker-web/tests/*-output.txt
 frontend/tcg-tracker-web/tests/auth-localhost.json
-.claude/
-.github/skills
-.github/copilot-instructions.md
+frontend/tcg-tracker-web/smoke-error.log
+.gitignore
+frontend/tcg-tracker-web/smoke-out.log
+frontend/tcg-tracker-web/smoke-output.log
+scripts/cardmarket/custom-sets/inputs/

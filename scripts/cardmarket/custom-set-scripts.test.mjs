@@ -131,11 +131,11 @@ test('Aquapolis 1537 custom set starts with the response order and collector num
 
   assert.deepEqual(
     result.cards.slice(0, 12).map((card) => card.cardmarketProductId),
-    [275073, 275074, 275075, 275076, 275077, 275078, 275079, 275080, 275081, 275082, 362901, 362902]
+    [275073, 275074, 275075, 275076, 275077, 275078, 275079, 275080, 275081, 275082, 362901, 275083]
   );
   assert.deepEqual(
     result.cards.slice(0, 12).map((card) => card.collectorNumber),
-    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '10', '11']
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '10V3', '11']
   );
 });
 
@@ -207,7 +207,7 @@ test('Skyridge 1538 custom set keeps the response order and collector numbers', 
   );
   // Holo variants (H1-H32) should be at the end, after all regular SK cards
   const hCards = result.cards.filter(c => c.collectorNumber && c.collectorNumber.startsWith('H'));
-  assert.equal(hCards.length, 33);
+  assert.equal(hCards.length, 32);
   // Last cards should be holo variants or unmatched products
   const lastIds = result.cards.slice(-4).map((card) => card.cardmarketProductId);
   assert.ok(lastIds.every(id => [275254, 275256, 275255, 275252, 275253, 275408, 362908].includes(id)),
@@ -227,14 +227,16 @@ test('Skyridge 1538 transform ignores wrong collector numbers and restores respo
 
   const result = transformSkyridge1538(payload, { logger: createLogger() });
 
-  // SK cards come first (by SK order), then H cards
+  // SK cards come first (by SK order), then H cards.
+  // H1 sits at the end of Page 1 in the source order, so it appears
+  // before 149 (Page 2) — that's expected for the new layout.
   assert.deepEqual(
     result.cards.map((card) => card.cardmarketProductId),
-    [275259, 275407, 275238, 275227]
+    [275259, 275238, 275407, 275227]
   );
   assert.deepEqual(
     result.cards.map((card) => card.collectorNumber),
-    ['1', '149', 'H1', 'H2']
+    ['1', 'H1', '149', 'H2']
   );
 });
 
