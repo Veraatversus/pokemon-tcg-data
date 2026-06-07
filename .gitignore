@@ -15,3 +15,7 @@ frontend/tcg-tracker-web/tests/auth-localhost.json
 .claude/
 .github/skills
 .github/copilot-instructions.md
+scripts/cardmarket/custom-sets/inputs/
+frontend/tcg-tracker-web/smoke-error.log
+frontend/tcg-tracker-web/smoke-out.log
+frontend/tcg-tracker-web/smoke-output.log
