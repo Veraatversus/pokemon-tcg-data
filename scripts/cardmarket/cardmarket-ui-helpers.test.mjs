@@ -404,8 +404,8 @@ test('promoteCardmarketUrlsForCards reconciles stale direct links for duplicate 
     }
   });
 
-  assert.equal(promoted[0].cardmarketUrl, 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=275260');
-  assert.equal(promoted[1].cardmarketUrl, 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=275238');
+  assert.equal(promoted[0].cardmarketUrl, 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=275238');
+  assert.equal(promoted[1].cardmarketUrl, 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=275260');
 });
 
 test('formatCardmarketEntryLabel prefers the trend price for compact UI badges', () => {
@@ -712,6 +712,73 @@ test('buildSetCardAssignmentMap verwirft Metacard-Gruppe wenn Quellenkarte eine 
   // Nach der ersten Zuweisung wird die gesamte metacardId-213149-Gruppe verworfen.
   assert.equal(assignmentMap.get(sourceCards[0])?.cardmarketProductId, 275254);
   assert.equal(assignmentMap.get(sourceCards[1])?.cardmarketProductId, 275302);
+});
+
+test('buildSetCardAssignmentMap waehlt kleinste cardmarketProductId pro metacardId-Gruppe, nicht die Array-Reihenfolge', () => {
+  // Beide Set-Eintraege haben dieselbe metacardId und matchen per Name, aber
+  // die kleinere cardmarketProductId steht HINTER der groesseren im Payload.
+  // Frueher griff findIndex und nahm das erste Element (275288) — jetzt soll
+  // die kleinere ID (275254) gewinnen, damit das Ergebnis stabil ist und
+  // nicht von der Payload-Sortierung abhaengt.
+  const sourceCards = [
+    { vera_name: 'Starmie', tcgdex_name: 'Starmie' },
+  ];
+
+  const setPayload = {
+    expansionId: 1538,
+    cards: [
+      {
+        cardmarketProductId: 275288,
+        name: 'Starmie [Energy Burst | Star Back]',
+        metacardId: 213149,
+        prices: { trend: 39.29 }
+      },
+      {
+        cardmarketProductId: 275254,
+        name: 'Starmie [Energy Burst | Star Back]',
+        metacardId: 213149,
+        prices: { trend: 128.26 }
+      }
+    ]
+  };
+
+  const assignmentMap = buildSetCardAssignmentMap(sourceCards, setPayload);
+  assert.equal(assignmentMap.get(sourceCards[0])?.cardmarketProductId, 275254);
+});
+
+test('buildSetCardAssignmentMap zieht bei metacardId-Gruppen ohne Quellen-metacardId das kleinste ID vor, das Array-Order egal ist', () => {
+  // Quellenkarte hat KEINE metacardId, also wird die metacardId-Gruppe nach
+  // dem Match NICHT verworfen. Die zweite Quellenkarte soll trotzdem
+  // deterministisch die naechste (kleinere verbleibende) ID bekommen statt
+  // einfach die Reihenfolge im Array zu nehmen.
+  const sourceCards = [
+    { vera_name: 'Starmie', tcgdex_name: 'Starmie' },
+    { vera_name: 'Starmie', tcgdex_name: 'Starmie' }
+  ];
+
+  const setPayload = {
+    expansionId: 1538,
+    cards: [
+      {
+        cardmarketProductId: 275288,
+        name: 'Starmie [Energy Burst | Star Back]',
+        metacardId: 213149,
+        prices: {}
+      },
+      {
+        cardmarketProductId: 275254,
+        name: 'Starmie [Energy Burst | Star Back]',
+        metacardId: 213149,
+        prices: {}
+      }
+    ]
+  };
+
+  const assignmentMap = buildSetCardAssignmentMap(sourceCards, setPayload);
+  // Kleinste ID zuerst (275254), dann die naechste (275288) — unabhaengig von
+  // der Reihenfolge im Payload.
+  assert.equal(assignmentMap.get(sourceCards[0])?.cardmarketProductId, 275254);
+  assert.equal(assignmentMap.get(sourceCards[1])?.cardmarketProductId, 275288);
 });
 
 // --- Collector-first & zero-padding tests ---
