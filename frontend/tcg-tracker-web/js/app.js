@@ -6849,7 +6849,7 @@ async function buildCollectedCardCandidates() {
     if (!setId || !setName) continue;
 
     const [cards, collectionMap] = await Promise.all([
-      readDbCardsForSet(setId).catch(() => []),
+      loadSetCardsWithHydration(setId, { allowApiFallback: false }),
       readSetCollectionMap(setName).catch(() => new Map())
     ]);
 
@@ -9546,6 +9546,61 @@ function initKeyboardNav() {
 // --------------------------------------------------------------------------
 // SET LADEN
 // --------------------------------------------------------------------------
+
+/**
+ * Lädt die Karten für ein Set aus dem In-Memory-Cache oder aus der DB, optional
+ * mit API-Hydration. Wird sowohl vom Set-View (`loadCurrentSet`) als auch vom
+ * Stats-View (`buildCollectedCardCandidates`) benutzt, damit beide Pfade die
+ * identische Array-Referenz an den Cardmarket-Resolver reichen — das ist
+ * Voraussetzung dafür, dass `setAssignmentMapCache` per Reference-Identity
+ * (cardmarket-data.js) greift und die Pro-Set-Produkt-Blacklist erhalten bleibt.
+ *
+ * Cache-Key ist `db_cards_${setId}` (gleich wie der Set-View).
+ *
+ * @param {string} setId
+ * @param {object} [opts]
+ * @param {boolean} [opts.allowApiFallback=false]  Set-View setzt das auf true,
+ *   wenn der Such-Scope ONLINE ist, ein Search-Import ansteht oder das Set
+ *   noch nicht importiert ist. Der Stats-View lässt es auf false und
+ *   hydratisiert nur, wenn `needsApiCardEnrichment` es aktiv fordert.
+ * @param {boolean} [opts.forceRefresh=false]     Cache-Eintrag ignorieren und
+ *   neu laden.
+ * @returns {Promise<Array>}  Array der Karten (hydriert wenn nötig).
+ */
+async function loadSetCardsWithHydration(setId, { allowApiFallback = false, forceRefresh = false } = {}) {
+  const normalizedSetId = String(setId || '').trim();
+  if (!normalizedSetId) return [];
+
+  const cardsCacheKey = `db_cards_${normalizedSetId}`;
+  if (!forceRefresh && cache.has(cardsCacheKey)) {
+    return cache.get(cardsCacheKey);
+  }
+
+  const dbCards = await readDbCardsForSet(normalizedSetId).catch(() => []);
+
+  if (Array.isArray(dbCards) && dbCards.length > 0) {
+    const shouldHydrate = allowApiFallback || needsApiCardEnrichment(dbCards);
+    if (!shouldHydrate) {
+      cache.set(cardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
+      return dbCards;
+    }
+    const apiPayload = await fetchMergedCardsWithSetMeta(normalizedSetId).catch(() => ({ cards: [], setMetaPatch: null }));
+    const apiCards = Array.isArray(apiPayload?.cards) ? apiPayload.cards : [];
+    const mergedCards = apiCards.length > 0 ? mergeSearchCards(dbCards, apiCards) : dbCards;
+    cache.set(cardsCacheKey, mergedCards, CONFIG.CACHE_TTL_MS);
+    return mergedCards;
+  }
+
+  if (allowApiFallback) {
+    const apiPayload = await fetchMergedCardsWithSetMeta(normalizedSetId).catch(() => ({ cards: [], setMetaPatch: null }));
+    const apiCards = Array.isArray(apiPayload?.cards) ? apiPayload.cards : [];
+    if (apiCards.length > 0) cache.set(cardsCacheKey, apiCards, CONFIG.CACHE_TTL_MS);
+    return apiCards;
+  }
+
+  return [];
+}
+
 async function loadCurrentSet(forceRefresh = false) {
   const setId   = dom.selector.value;
   if (!setId) return;
@@ -9584,39 +9639,15 @@ async function loadCurrentSet(forceRefresh = false) {
   }
 
   try {
-    const cardsCacheKey = `db_cards_${setId}`, dbCacheKey = `db_${setId}`;
+    const dbCacheKey = `db_${setId}`;
     const allowApiFallback = getSearchScopeMode() === SEARCH_SCOPE_ONLINE || Boolean(state.pendingSearchSetImport) || !Boolean(selected.imported);
-    if (forceRefresh) { cache.del(cardsCacheKey); cache.del(dbCacheKey); }
+    if (forceRefresh) { cache.del(`db_cards_${setId}`); cache.del(dbCacheKey); }
 
     const [cards, dbMap] = await Promise.all([
-      cache.has(cardsCacheKey)
-        ? cache.get(cardsCacheKey)
-        : readDbCardsForSet(setId).then(async (dbCards) => {
-          if (Array.isArray(dbCards) && dbCards.length > 0) {
-            const shouldHydrateFromApi = allowApiFallback || needsApiCardEnrichment(dbCards);
-            if (!shouldHydrateFromApi) {
-              cache.set(cardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
-              return dbCards;
-            }
-
-            const apiPayload = await fetchMergedCardsWithSetMeta(setId).catch(() => ({ cards: [], setMetaPatch: null }));
-            const apiCards = Array.isArray(apiPayload?.cards) ? apiPayload.cards : [];
-            const mergedCards = apiCards.length > 0 ? mergeSearchCards(dbCards, apiCards) : dbCards;
-            cache.set(cardsCacheKey, mergedCards, CONFIG.CACHE_TTL_MS);
-
-            return mergedCards;
-          }
-          if (allowApiFallback) {
-            const apiPayload = await fetchMergedCardsWithSetMeta(setId).catch(() => ({ cards: [], setMetaPatch: null }));
-            const apiCards = Array.isArray(apiPayload?.cards) ? apiPayload.cards : [];
-            if (apiCards.length > 0) {
-              cache.set(cardsCacheKey, apiCards, CONFIG.CACHE_TTL_MS);
-            }
-            return apiCards;
-          }
-          return [];
-        }),
-      cache.has(dbCacheKey)    ? cache.get(dbCacheKey)    : readSetCollectionMap(selected.setName).then((m) => { cache.set(dbCacheKey, m, CONFIG.CACHE_TTL_MS); return m; }),
+      loadSetCardsWithHydration(setId, { allowApiFallback, forceRefresh }),
+      cache.has(dbCacheKey)
+        ? cache.get(dbCacheKey)
+        : readSetCollectionMap(selected.setName).then((m) => { cache.set(dbCacheKey, m, CONFIG.CACHE_TTL_MS); return m; }),
     ]);
 
     if (!Array.isArray(cards) || cards.length === 0) {
