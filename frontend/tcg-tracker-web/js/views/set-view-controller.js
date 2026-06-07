@@ -13,7 +13,7 @@
  * - loadCurrentSet, renderCards, renderLightbox, etc.
  */
 
-import { isGeneratedCardmarketSearchUrl } from '../data/cardmarket-url-utils.js';
+import { isGeneratedCardmarketSearchUrl, applyReverseHoloQueryParam } from '../data/cardmarket-url-utils.js';
 import { sanitizeDisplayText } from '../core/display-text.js';
 
 let focusedCardIndex = -1;
@@ -874,9 +874,14 @@ function applyCardmarketPriceSummary(linkEl, summary, { compact = false, preferR
   if (!presentation) return;
 
   if (summary.url) {
-    linkEl.href = summary.url;
-    linkEl.dataset.cardmarketUrl = summary.url;
-    linkEl.classList.toggle('card-cm-link-fallback', isGeneratedCardmarketSearchUrl(summary.url));
+    // Beim Rendern den `?isReverseHolo=Y`-Suffix anhängen, wenn die Karte als
+    // RH gesammelt ist. So landet der User direkt auf der richtigen
+    // Cardmarket-Produktseite. Search-URLs bleiben unverändert (apply…
+    // erkennt sie und passt nichts an).
+    const finalUrl = applyReverseHoloQueryParam(summary.url, preferReverseHolo);
+    linkEl.href = finalUrl;
+    linkEl.dataset.cardmarketUrl = finalUrl;
+    linkEl.classList.toggle('card-cm-link-fallback', isGeneratedCardmarketSearchUrl(finalUrl));
   }
   if (presentation.title) linkEl.title = presentation.title;
   if (presentation.label) {

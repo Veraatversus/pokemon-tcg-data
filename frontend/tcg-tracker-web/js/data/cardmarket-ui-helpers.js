@@ -393,6 +393,42 @@ function normalizeNonEmptyMetacardId(value) {
   return normalized;
 }
 
+// Picks the index of the entry with the smallest cardmarketProductId from a
+// metacardId group. When two entries share a metacardId, only the smallest id
+// counts as the "canonical" candidate for that group. Among the resulting
+// groups, the smallest id overall wins. This gives a stable, order-independent
+// result regardless of how the set payload lists its cards — previously the
+// function took the first match in array order, which could be any id.
+function pickSmallestIdPerMetacardGroup(candidateIndices, entries) {
+  if (!Array.isArray(candidateIndices) || candidateIndices.length === 0) return -1;
+  if (candidateIndices.length === 1) return candidateIndices[0];
+
+  const grouped = new Map();
+  for (let k = 0; k < candidateIndices.length; k += 1) {
+    const i = candidateIndices[k];
+    const entry = entries[i];
+    const mcId = normalizeNonEmptyMetacardId(entry?.metacardId);
+    // Entries ohne metacardId bilden jeweils ihre eigene Gruppe — sie sind
+    // nicht zusammenführbar, weil wir sonst zwei unrelated Karten kollabieren.
+    const key = mcId !== null ? `mc:${mcId}` : `nomc:${k}`;
+    const productId = Number(entry?.cardmarketProductId) || Infinity;
+    const existing = grouped.get(key);
+    if (existing === undefined || productId < existing.productId) {
+      grouped.set(key, { index: i, productId });
+    }
+  }
+
+  let bestIndex = -1;
+  let bestProductId = Infinity;
+  for (const { index, productId } of grouped.values()) {
+    if (productId < bestProductId) {
+      bestIndex = index;
+      bestProductId = productId;
+    }
+  }
+  return bestIndex;
+}
+
 export function buildSetCardAssignmentMap(sourceCards = [], setPayload = {}) {
   const payloadCards = Array.isArray(setPayload?.cards) ? setPayload.cards : [];
   if (!payloadCards.length || !Array.isArray(sourceCards) || !sourceCards.length) {
@@ -425,18 +461,27 @@ export function buildSetCardAssignmentMap(sourceCards = [], setPayload = {}) {
       if (keyMatches.length === 1) {
         matchIndex = keyMatches[0];
       } else if (keyMatches.length > 1) {
-        for (const i of keyMatches) {
-          if (entryMatchesAnyCardName(availableEntries[i], normalizedCardNames)) {
-            matchIndex = i;
-            break;
-          }
+        // Tiebreak: prefer entries whose name matches the card, then the
+        // smallest cardmarketProductId per metacardId group.
+        const nameMatches = keyMatches.filter((i) => entryMatchesAnyCardName(availableEntries[i], normalizedCardNames));
+        if (nameMatches.length > 0) {
+          matchIndex = pickSmallestIdPerMetacardGroup(nameMatches, availableEntries);
         }
+        // Otherwise fall through to the name-based fallback below.
       }
     }
 
     // 2. Fallback: name-based match
     if (matchIndex < 0) {
-      matchIndex = availableEntries.findIndex((entry) => entryMatchesAnyCardName(entry, normalizedCardNames));
+      const nameMatches = [];
+      for (let i = 0; i < availableEntries.length; i += 1) {
+        if (entryMatchesAnyCardName(availableEntries[i], normalizedCardNames)) {
+          nameMatches.push(i);
+        }
+      }
+      if (nameMatches.length > 0) {
+        matchIndex = pickSmallestIdPerMetacardGroup(nameMatches, availableEntries);
+      }
     }
     if (matchIndex < 0) continue;
 

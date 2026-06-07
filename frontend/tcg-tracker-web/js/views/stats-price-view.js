@@ -1,3 +1,5 @@
+import { applyReverseHoloQueryParam } from '../data/cardmarket-url-utils.js';
+
 const STATS_PRICE_TABS = [
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'top-values', label: 'Top-Werte' },
@@ -29,7 +31,7 @@ function formatStatsPriceNumber(value) {
 }
 
 function getItemCardmarketUrl(item = {}) {
-  return String(
+  const base = String(
     item?.card?.cardmarketUrl
     || item?.card?.vera_cardmarket_url
     || item?.card?.tcgdex_cardmarket_url
@@ -38,6 +40,50 @@ function getItemCardmarketUrl(item = {}) {
     || item?.tcgdex_cardmarket_url
     || ''
   ).trim();
+  // Hängt `?isReverseHolo=Y` an, wenn die Karte als Reverse Holo gesammelt
+  // ist — Cardmarket zeigt dann direkt die korrekte Variante an.
+  return applyReverseHoloQueryParam(base, Boolean(item?.isReverseHolo));
+}
+
+function getStatsPriceItemImageCandidates(item = {}) {
+  const card = item?.card || {};
+  const candidates = [
+    item?.image,
+    item?.imageUrl,
+    card?.imageSmall,
+    card?.image,
+    card?.imageUrl,
+    card?.imageLarge,
+    card?.imageCandidates,
+    card?.images?.small,
+    card?.images?.large,
+  ];
+  const seen = new Set();
+  const out = [];
+  for (const list of candidates) {
+    if (Array.isArray(list)) {
+      for (const value of list) {
+        const trimmed = String(value || '').trim();
+        if (trimmed && !seen.has(trimmed)) { seen.add(trimmed); out.push(trimmed); }
+      }
+    } else {
+      const trimmed = String(list || '').trim();
+      if (trimmed && !seen.has(trimmed)) { seen.add(trimmed); out.push(trimmed); }
+    }
+  }
+  return out;
+}
+
+function renderStatsPriceThumbMarkup(item = {}) {
+  const candidates = getStatsPriceItemImageCandidates(item);
+  if (!candidates.length) {
+    return '<span class="stats-price-thumb-fallback" aria-hidden="true">?</span>';
+  }
+  const [primary, ...rest] = candidates;
+  const altText = String(item?.cardName || item?.card?.name || item?.card?.number || 'Kartenbild').trim();
+  const dataAttr = ` data-image-candidates='${escapeHtml(JSON.stringify(rest))}'`;
+  const onerrorAttr = "this.onerror=null;var c=this.dataset.imageCandidates;if(c){var arr;try{arr=JSON.parse(c);}catch(e){arr=[];}if(Array.isArray(arr)&&arr.length){this.dataset.imageCandidates=JSON.stringify(arr.slice(1));this.src=arr[0];return;}}this.src='./assets/pokeball-fallback.svg';this.classList.add('img-fallback');this.closest('.stats-price-thumb')?.classList.add('stats-price-thumb--missing');";
+  return `<img class="stats-price-thumb-img" src="${escapeHtml(primary)}" alt="${escapeHtml(altText)}" loading="lazy" decoding="async"${dataAttr} onerror="${onerrorAttr}" />`;
 }
 
 function getStatsPriceTimeline(analytics = null, { loadedCards = 0, totalCards = 0, errors = 0 } = {}) {
@@ -441,19 +487,27 @@ export function createStatsPriceViewController({
     <section class="stats-price-tab-panel" data-tab-panel="watchlist">
       <ol class="stats-price-rich-list stats-price-scroll-region">
         ${watchlistItems
-          .map((item, index) => `
-            <li class="stats-price-rich-item" data-set-id="${escapeHtml(item?.setId || '')}">
+          .map((item, index) => {
+            const isReverse = Boolean(item?.isReverseHolo);
+            const reverseClass = isReverse ? ' is-reverse' : '';
+            const cardmarketUrl = getItemCardmarketUrl(item);
+            return `
+            <li class="stats-price-rich-item${reverseClass}" data-set-id="${escapeHtml(item?.setId || '')}">
               <span class="stats-price-rich-rank">${index + 1}</span>
+              <span class="stats-price-thumb" aria-hidden="true">
+                ${renderStatsPriceThumbMarkup(item)}
+              </span>
               <div class="stats-price-rich-main">
-                <strong>${escapeHtml(item?.cardName || 'Unbekannte Karte')}</strong>
+                <strong>${escapeHtml(item?.cardName || item?.card?.name || 'Unbekannte Karte')}${isReverse ? ' <span class="stats-price-rh-badge" title="Als Reverse Holo gesammelt">RH</span>' : ''}</strong>
                 <small>${escapeHtml(item?.setName || 'Unbekanntes Set')} · #${escapeHtml(item?.card?.number || item?.cardKey || '')}</small>
               </div>
-              ${getItemCardmarketUrl(item)
-                ? `<a class="stats-price-cardmarket-link" href="${escapeHtml(getItemCardmarketUrl(item))}" target="_blank" rel="noopener noreferrer" data-cardmarket-link="1">Cardmarket</a>`
+              ${cardmarketUrl
+                ? `<a class="stats-price-cardmarket-link" href="${escapeHtml(cardmarketUrl)}" target="_blank" rel="noopener noreferrer" data-cardmarket-link="1">Cardmarket</a>`
                 : ''}
               <strong class="stats-price-rich-value">${formatStatsPriceEuro(item?.value)}</strong>
             </li>
-          `)
+          `;
+          })
           .join('') || '<li class="stats-price-empty">Noch keine Watchlist-Kandidaten erkannt.</li>'}
       </ol>
     </section>`;
@@ -498,20 +552,25 @@ export function createStatsPriceViewController({
         ${activeGroupPriced
           .slice()
           .sort((a, b) => Number(b?.value || 0) - Number(a?.value || 0))
-          .map((item, index) => `
-            <li class="stats-price-rich-item" ${item?.setId ? `data-set-id="${escapeHtml(item.setId)}"` : ''}>
+          .map((item, index) => {
+        const isReverse = Boolean(item?.isReverseHolo);
+        const reverseClass = isReverse ? ' is-reverse' : '';
+        const cardmarketUrl = getItemCardmarketUrl(item);
+        return `
+            <li class="stats-price-rich-item${reverseClass}" ${item?.setId ? `data-set-id="${escapeHtml(item.setId)}"` : ''}>
               <span class="stats-price-rich-rank">${index + 1}</span>
               <div class="stats-price-rich-main">
-                <strong>${escapeHtml(item?.cardName || item?.card?.name || 'Unbekannte Karte')}</strong>
+                <strong>${escapeHtml(item?.cardName || item?.card?.name || 'Unbekannte Karte')}${isReverse ? ' <span class="stats-price-rh-badge" title="Als Reverse Holo gesammelt">RH</span>' : ''}</strong>
                 <small>${escapeHtml(item?.setName || 'Unbekanntes Set')} · #${escapeHtml(item?.card?.number || item?.cardKey || '')}</small>
               </div>
-              ${getItemCardmarketUrl(item)
-                ? `<a class="stats-price-cardmarket-link" href="${escapeHtml(getItemCardmarketUrl(item))}" target="_blank" rel="noopener noreferrer" data-cardmarket-link="1">Cardmarket</a>`
-                : ''}
+              ${cardmarketUrl
+      ? `<a class="stats-price-cardmarket-link" href="${escapeHtml(cardmarketUrl)}" target="_blank" rel="noopener noreferrer" data-cardmarket-link="1">Cardmarket</a>`
+      : ''}
               <strong class="stats-price-rich-value">${formatStatsPriceEuro(item?.value)}</strong>
             </li>
-          `)
-          .join('') || '<li class="stats-price-empty">Keine bepreisten Karten in dieser Auswahl.</li>'}
+          `;
+      })
+      .join('') || '<li class="stats-price-empty">Keine bepreisten Karten in dieser Auswahl.</li>'}
       </ol>`;
 
     const advancedDetailMissingMarkup = `
