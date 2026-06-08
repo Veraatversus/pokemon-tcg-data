@@ -1,4 +1,4 @@
-import { CONFIG, scopedStorageKey } from './config.js?v=20260427-wave3-central-v1';
+import { CONFIG, scopedStorageKey } from './config.js?v=20260608-stats-live-progress-rh-fix';
 
 const STORAGE_KEY = scopedStorageKey('tcg_tracker_token');
 const REDIRECT_STATE_KEY = scopedStorageKey('oauth_redirect_state');

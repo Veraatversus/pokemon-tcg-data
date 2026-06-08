@@ -1,6 +1,6 @@
 import { normalizeCardNumber, naturalSort } from './core/utils.js';
 import { isGeneratedCardmarketSearchUrl } from './data/cardmarket-url-utils.js';
-import { buildCardRecordFromSources, buildSetRecordFromSources } from './data/schema-contract.js?v=20260427-wave3-central-v1';
+import { buildCardRecordFromSources, buildSetRecordFromSources } from './data/schema-contract.js?v=20260608-stats-live-progress-rh-fix';
 
 export function normalizeString(str) {
   if (str === null || typeof str === 'undefined') {

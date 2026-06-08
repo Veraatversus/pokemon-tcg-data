@@ -1,5 +1,5 @@
 import { isGeneratedCardmarketSearchUrl, isGeneratedCardmarketUrl, applyReverseHoloQueryParam } from './data/cardmarket-url-utils.js';
-import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js?v=20260410-authredirect2';
+import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js?v=20260608-stats-live-progress-rh-fix';
 import {
   listImportedSets,
   listSetsOverviewData,
@@ -16,15 +16,15 @@ import {
   syncOverviewWithApiSets,
   resetSheetsDataCaches,
   recoverImportedIdsFromOverview,
-} from './data/sheets-db.js?v=20260606-setfix1';
-import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260410-loginfix1';
-import { resolveSeriesGroupInfo } from './data/schema-contract.js?v=20260510b';
+} from './data/sheets-db.js?v=20260608-stats-live-progress-rh-fix';
+import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260608-stats-live-progress-rh-fix';
+import { resolveSeriesGroupInfo } from './data/schema-contract.js?v=20260608-stats-live-progress-rh-fix';
 import {
   buildCardmarketProductUrl,
   resolveCardmarketEntryForCard,
   formatCardmarketEntryLabel,
   formatCardmarketEntryTitle
-} from './data/cardmarket-data.js?v=20260427-wave3-central-v1';
+} from './data/cardmarket-data.js?v=20260608-stats-live-progress-rh-fix';
 import {
   buildCombinedSearchDropdownOptions,
   buildSearchProgressLabel,
@@ -33,10 +33,10 @@ import {
   resolveCombinedSearchSelection,
   shouldFetchApiCardsForSearchSet,
   toBoolean
-} from './core/utils.js?v=20260410-searchrerenderhits1';
-import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle } from './core/collection-state.js?v=20260509a';
+} from './core/utils.js?v=20260608-stats-live-progress-rh-fix';
+import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle } from './core/collection-state.js?v=20260608-stats-live-progress-rh-fix';
 import * as cache from './core/cache.js';
-import { CONFIG, scopedStorageKey } from './core/config.js?v=20260409-treeview1';
+import { CONFIG, scopedStorageKey } from './core/config.js?v=20260608-stats-live-progress-rh-fix';
 import {
   initSmartEngine,
   startAutoHealing,
@@ -59,13 +59,13 @@ import {
   summarizeLegacyImportPlan,
   pickCanonicalCardId,
   extractLegacySpreadsheetId
-} from './features/collection/legacy-import.js?v=20260409-treeview1';
+} from './features/collection/legacy-import.js?v=20260608-stats-live-progress-rh-fix';
 import { initCommandPalette } from './ui/command-palette.js';
-import { filterSetsBySeriesKey, getStatsSeriesLabel } from './ui/stats-series.js?v=20260407a';
+import { filterSetsBySeriesKey, getStatsSeriesLabel } from './ui/stats-series.js?v=20260608-stats-live-progress-rh-fix';
 import {
   computePriceAnalyticsFromSummaries,
   pickCardPriceFromSummary,
-} from './ui/stats-price-analytics.js?v=20260423a';
+} from './ui/stats-price-analytics.js?v=20260608-stats-live-progress-rh-fix';
 import {
   loadFavorites, saveFavorites, toggleFavorite, isFavorite,
   loadSearchHistory, addSearchHistory, clearSearchHistory,
@@ -73,13 +73,13 @@ import {
   loadSettings, saveSettings, updateSetting,
   applyQuickFilters, calculateCollectionStats,
   getSyncStatus, setSyncStatus
-} from './enhanced-features.js?v=20260506b';
+} from './enhanced-features.js?v=20260608-stats-live-progress-rh-fix';
 
 import {
   initQuickFiltersUI, createSearchHistoryWidget, createStatisticsPanel,
   createExportDialog, createSettingsPanel,
   createBulkActionsToolbar
-} from './ui/components.js?v=20260410-menu-template2';
+} from './ui/components.js?v=20260608-stats-live-progress-rh-fix';
 import {
   createInitialSheetsRetryMetrics,
   initSheetsWriteFeedback as initSheetsWriteFeedbackUi,
