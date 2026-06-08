@@ -5,9 +5,9 @@ import {
   combineSetsForOverviewCompat,
   fetchAllPrimaryCardsForSet,
   resolvePreferredTcgdexSetBases
-} from '../pokecode-compat.js?v=20260427-wave3-central-v1';
-import { buildSetRecordFromSources, resolveDisplayCard, resolveDisplaySet } from './schema-contract.js?v=20260427-wave3-central-v1';
-import { promoteCardmarketUrlsForCards } from './cardmarket-data.js?v=20260427-wave3-central-v1';
+} from '../pokecode-compat.js?v=20260608-stats-live-progress-rh-fix';
+import { buildSetRecordFromSources, resolveDisplayCard, resolveDisplaySet } from './schema-contract.js?v=20260608-stats-live-progress-rh-fix';
+import { promoteCardmarketUrlsForCards } from './cardmarket-data.js?v=20260608-stats-live-progress-rh-fix';
 
 // ── Interne Hilfsfunktionen ──────────────────────────────────────
 

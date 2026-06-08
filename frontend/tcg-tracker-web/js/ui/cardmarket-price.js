@@ -1,4 +1,4 @@
-import { formatCardmarketEntryLabel, formatCardmarketEntryTitle } from '../data/cardmarket-data.js?v=20260427-wave3-central-v1';
+import { formatCardmarketEntryLabel, formatCardmarketEntryTitle } from '../data/cardmarket-data.js?v=20260608-stats-live-progress-rh-fix';
 import { isGeneratedCardmarketSearchUrl } from '../data/cardmarket-url-utils.js';
 
 export function toFinitePrice(value) {

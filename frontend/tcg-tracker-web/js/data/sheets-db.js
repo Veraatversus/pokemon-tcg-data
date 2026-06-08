@@ -18,7 +18,7 @@ import {
   CARD_MATCH_STATUS,
   resolveDisplaySet,
   resolveDisplayCard
-} from './schema-contract.js?v=20260427-wave3-central-v1';
+} from './schema-contract.js?v=20260608-stats-live-progress-rh-fix';
 import {
   planSetScopedUpsert,
   planSetScopedDedup
