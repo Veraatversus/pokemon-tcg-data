@@ -9029,7 +9029,7 @@ function updateCardState(article, db) {
   const cardIndex = Number.parseInt(article?.dataset?.cardIndex || '-1', 10);
   const card = Number.isFinite(cardIndex) && cardIndex >= 0 ? state.cards[cardIndex] : null;
   if (card && cardmarketLink) {
-    hydrateCardmarketLink(cardmarktLink, card, { compact: true, preferReverseHolo: Boolean(db?.rh) });
+    hydrateCardmarketLink(cardmarketLink, card, { compact: true, preferReverseHolo: Boolean(db?.rh) });
   }
   if (dom.lightboxDialog.open) {
     const idx = parseInt(article.dataset.cardIndex, 10);
