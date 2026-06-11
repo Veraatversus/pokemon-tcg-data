@@ -40,6 +40,10 @@ test('bootstrapCore initializes early runtime wiring and quick-filter handlers',
       return [{ setId: 'sv1' }];
     },
     initSmartEngine: async () => callLog.push('initSmartEngine'),
+    runCardmarketVersioningCheck: async () => {
+      callLog.push('runCardmarketVersioningCheck');
+      return { changed: false, reason: 'first-sync', previousStamp: '', currentStamp: '', reset: [] };
+    },
     initAutoHideTopbar: () => callLog.push('initAutoHideTopbar'),
     initGridZoom: () => callLog.push('initGridZoom'),
     initCustomSelects: () => callLog.push('initCustomSelects'),
@@ -168,6 +172,7 @@ test('bootstrapCore initializes early runtime wiring and quick-filter handlers',
   assert.equal(state.recentSets.length, 1);
   assert.equal(windowRef.SEARCH_HISTORY.length, 1);
   assert.ok(callLog.includes('initSmartEngine'));
+  assert.ok(callLog.includes('runCardmarketVersioningCheck'));
   assert.ok(callLog.includes('initRealtimeSync'));
   assert.ok(callLog.includes('initQuickFiltersUI'));
 

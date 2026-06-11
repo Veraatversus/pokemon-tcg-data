@@ -20,6 +20,16 @@ let focusedCardIndex = -1;
 const cardmarketPriceSummaryCache = new Map();
 const cardmarketPriceSummaryPending = new Map();
 
+/**
+ * Leert die Cardmarket-Price-Caches, die in der Set-View gehalten werden.
+ * Wird nach einem täglichen Cardmarket-Build-Wechsel aufgerufen, damit
+ * die UI keine veralteten Preise mehr anzeigt.
+ */
+export function resetCardmarketPriceCaches() {
+  cardmarketPriceSummaryCache.clear();
+  cardmarketPriceSummaryPending.clear();
+}
+
 export function isPointerInsideElement(eventLike, element) {
   if (!element || typeof element.getBoundingClientRect !== 'function') return false;
   const x = Number(eventLike?.clientX);

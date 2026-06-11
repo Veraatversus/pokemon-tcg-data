@@ -25,6 +25,7 @@ import {
   formatCardmarketEntryLabel,
   formatCardmarketEntryTitle
 } from './data/cardmarket-data.js?v=20260608-stats-live-progress-rh-fix';
+import { applyCardmarketBuildStampCheck } from './data/cardmarket-versioning.js?v=20260608-stats-live-progress-rh-fix';
 import {
   buildCombinedSearchDropdownOptions,
   buildSearchProgressLabel,
@@ -47,7 +48,8 @@ import {
 } from './features/search/index.js';
 import {
   createAutoSnapshot,
-  loadSnapshots
+  loadSnapshots,
+  applyDeleteSetCellUpdates
 } from './features/collection/index.js';
 import {
   loadLegacyWorkbookFromFile,
@@ -365,6 +367,31 @@ const dom = {
 // --------------------------------------------------------------------------
 // APP-STATE
 // --------------------------------------------------------------------------
+
+/**
+ * Prüft beim App-Start, ob die täglich generierten Cardmarket-Artefakte
+ * seit dem letzten Aufruf erneuert wurden, und invalidiert ggf. die
+ * In-Memory-Caches. Fire-and-forget – blockiert den Bootstrap nicht.
+ *
+ * @returns {Promise<{ changed: boolean, reason: string, previousStamp: string, currentStamp: string, reset: string[] }>}
+ */
+async function runCardmarketVersioningCheck() {
+  try {
+    const result = await applyCardmarketBuildStampCheck();
+    if (result.changed) {
+      console.info(
+        `[cardmarket-versioning] Caches invalidiert (reason=${result.reason}, `
+        + `previous=${result.previousStamp || '∅'}, current=${result.currentStamp}, `
+        + `subsysteme=${(result.reset || []).join(',') || '∅'}).`
+      );
+    }
+    return result;
+  } catch (err) {
+    console.warn('[cardmarket-versioning] check failed', err);
+    return { changed: false, reason: 'error', previousStamp: '', currentStamp: '', reset: [] };
+  }
+}
+
 const state = {
   loggedIn:     false,
   sets:         [],
@@ -3448,17 +3475,16 @@ async function deleteSetFromCollection(set, options = {}) {
     }
 
     // Entferne das Set aus der Sammlung
+    // Wir sammeln alle Cell-Updates zuerst und schicken sie gebündelt in EINEM
+    // batchUpdate an die Google-Sheets-API, um das Per-Request-Rate-Limit (429)
+    // bei großen Sets zu vermeiden (vgl. updateCellBooleansBatch).
     const range = await readSetCollectionMap(set.setName).catch(() => new Map());
-    if (range && range.size > 0) {
-      for (const [, db] of range) {
-        if (db?.gCell?.row && db?.gCell?.col) {
-          await updateCellBoolean(set.setName, db.gCell.row, db.gCell.col, false);
-        }
-        if (db?.rhCell?.row && db?.rhCell?.col) {
-          await updateCellBoolean(set.setName, db.rhCell.row, db.rhCell.col, false);
-        }
-      }
-    }
+    await applyDeleteSetCellUpdates({
+      setName: set.setName,
+      collectionMap: range,
+      updateCellBooleansBatch,
+      chunkSize: 250,
+    });
 
     await upsertOverviewSet(set, false);
 
@@ -8487,6 +8513,16 @@ function createCardElement(card, key, db, index) {
 const cardmarketPriceSummaryCache = new Map();
 const cardmarketPriceSummaryPending = new Map();
 
+/**
+ * Leert die Lightbox-eigenen Cardmarket-Price-Caches. Wird nach einem
+ * täglichen Cardmarket-Build-Wechsel aufgerufen, damit das Lightbox-
+ * Pre-Panel keine veralteten Preise mehr anzeigt.
+ */
+function resetLightboxCardmarketPriceCaches() {
+  cardmarketPriceSummaryCache.clear();
+  cardmarketPriceSummaryPending.clear();
+}
+
 function toFinitePrice(value) {
   const numeric = Number(value);
   return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
@@ -9935,6 +9971,7 @@ function createBootstrapRuntimeController() {
     loadDashboardPreferences,
     loadRecentSets,
     initSmartEngine,
+    runCardmarketVersioningCheck,
     initAutoHideTopbar,
     initGridZoom,
     initCustomSelects,

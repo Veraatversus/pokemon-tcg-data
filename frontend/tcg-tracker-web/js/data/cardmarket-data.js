@@ -281,3 +281,21 @@ export async function promoteCardmarketUrlsForCards(cards = [], { productIndex =
     loadSetPayload: (expansionId, { signal, forceRefresh } = {}) => loadCardmarketSetPayload(expansionId, { signal, forceRefresh }),
   });
 }
+
+/**
+ * Leert alle In-Memory-Caches dieses Moduls.
+ *
+ * Wird nach einem Versionswechsel der täglich neu erzeugten
+ * Cardmarket-Artefakte aufgerufen, damit Preise, Expansion-IDs und
+ * Set-Payloads neu vom Server geladen werden. Die TTL-Caches in
+ * `core/cache.js` sind davon nicht betroffen – sie laufen ohnehin
+ * nach `CACHE_TTL_MS` ab.
+ */
+export function resetCardmarketDataCaches() {
+  productIndexCachePromise = null;
+  nameIndexCachePromise = null;
+  trackerSetIndexCachePromise = null;
+  setPayloadCachePromise.clear();
+  inferredExpansionCache.clear();
+  setAssignmentMapCache.clear();
+}

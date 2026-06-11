@@ -27,6 +27,7 @@ test('bootstrapPostCore exposes post-core bootstrap stage for command/auth wirin
     loadDashboardPreferences: () => {},
     loadRecentSets: () => [],
     initSmartEngine: async () => {},
+    runCardmarketVersioningCheck: async () => ({ changed: false, reason: 'first-sync', previousStamp: '', currentStamp: '', reset: [] }),
     initAutoHideTopbar: () => {},
     initGridZoom: () => {},
     initCustomSelects: () => {},
