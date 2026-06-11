@@ -3397,7 +3397,7 @@ async function importSetFromOverview(set) {
     if (!ok) return;
   } else {
     const ok = await runImportWritePreflight('Import-Preflight').catch((error) => {
-      console.error('[importSetFromOverview:preflight]', error);
+      console.error('[importSetFromOverview:preflight]', getErrorMessage(error, error));
       return false;
     });
     if (!ok) return;
@@ -3422,7 +3422,7 @@ async function importSetFromOverview(set) {
         setGlobalStatus(`${set.setName} wurde importiert.`);
         showToast(`${set.setName} wurde importiert.`, 'success', 3000);
       } catch (err) {
-        console.error('[importSetFromOverview]', err);
+        console.error('[importSetFromOverview]', getErrorMessage(err, err));
         if (isAuthReloginRequiredError(err)) {
           state.importAuthBlocked = true;
           const message = getAuthReloginImportMessage();
@@ -3597,7 +3597,7 @@ async function importSetsSequential(sets, options = {}) {
         consecutiveQuotaErrors = 0;
         done++;
       } catch (err) {
-        console.warn('[importSetsSequential] import failed for', set.setId, err);
+        console.warn('[importSetsSequential] import failed for', set.setId, getErrorMessage(err, err));
         if (isAuthReloginRequiredError(err)) {
           state.importAuthBlocked = true;
           pausedForAuth = true;
