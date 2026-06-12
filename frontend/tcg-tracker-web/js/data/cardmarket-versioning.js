@@ -58,3 +58,33 @@ export async function applyCardmarketBuildStampCheck(options = {}) {
 
   return { changed, reason, previousStamp, currentStamp, reset };
 }
+
+/**
+ * Erzwingt einen manuellen Refresh der Cardmarket-Preise. Prueft den
+ * aktuellen Build-Stamp, meldet dem Aufrufer, ob ein neuer Drop
+ * vorliegt, und leert IMMER die In-Memory-Caches (damit auch Faelle
+ * abgedeckt sind, in denen der User weiss, dass die Vera/Cardmarket-
+ * Daten aktualisiert wurden, der Build-Stamp aber noch nicht neu
+ * geschrieben wurde – z. B. manuelle Aenderungen am Repo).
+ *
+ * @param {object} [options]
+ * @param {Function} [options.fetchImpl]  Test-Hook
+ * @param {Storage}   [options.storageRef]  Test-Hook
+ * @returns {Promise<{ changed: boolean, reason: string, previousStamp: string, currentStamp: string, reset: string[], forced: boolean }>}
+ */
+export async function forceRefreshCardmarketPrices(options = {}) {
+  const evaluation = await applyCardmarketBuildStampCheck(options);
+  const { changed, currentStamp, previousStamp, reason } = evaluation;
+
+  // Caches immer leeren – der User hat explizit "neu laden" gedrueckt.
+  const result = resetAllCardmarketCaches();
+
+  return {
+    changed,
+    reason,
+    previousStamp,
+    currentStamp,
+    reset: result.reset,
+    forced: true,
+  };
+}

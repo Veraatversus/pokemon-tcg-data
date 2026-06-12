@@ -25,7 +25,7 @@ import {
   formatCardmarketEntryLabel,
   formatCardmarketEntryTitle
 } from './data/cardmarket-data.js?v=20260608-stats-live-progress-rh-fix';
-import { applyCardmarketBuildStampCheck } from './data/cardmarket-versioning.js?v=20260608-stats-live-progress-rh-fix';
+import { applyCardmarketBuildStampCheck, forceRefreshCardmarketPrices } from './data/cardmarket-versioning.js?v=20260608-stats-live-progress-rh-fix';
 import {
   buildCombinedSearchDropdownOptions,
   buildSearchProgressLabel,
@@ -236,6 +236,7 @@ const dom = {
   btnQueueBuilder: document.getElementById('btn-queue-builder'),
   btnQueueRun: document.getElementById('btn-queue-run'),
   btnQueueClear: document.getElementById('btn-queue-clear'),
+  btnCardmarketReloadPrices: document.getElementById('btn-cardmarket-reload-prices'),
   btnDashboardCompact: document.getElementById('btn-dashboard-compact'),
   queueBuilderDialog: document.getElementById('dialog-queue-builder'),
   queueBuilderList: document.getElementById('queue-builder-list'),
@@ -390,6 +391,58 @@ async function runCardmarketVersioningCheck() {
   } catch (err) {
     console.warn('[cardmarket-versioning] check failed', err);
     return { changed: false, reason: 'error', previousStamp: '', currentStamp: '', reset: [] };
+  }
+}
+
+/**
+ * Manueller Cardmarket-Preis-Refresh, ausgeloest vom
+ * Settings-Button 'Preise neu laden'. Prueft den aktuellen Build-Stamp,
+ * informiert den User ueber Aenderungen und leert IMMER die In-Memory-
+ * Caches (damit auch Faelle abgedeckt sind, in denen der User weiss,
+ * dass die Vera-Daten aktualisiert wurden, der Build-Stamp aber noch
+ * nicht neu geschrieben wurde).
+ */
+async function reloadCardmarketPricesManually() {
+  const btn = dom.btnCardmarketReloadPrices;
+  if (!btn) return;
+
+  setLoading(true, 'Pruefe Cardmarket-Preise...');
+  btn.disabled = true;
+  try {
+    const result = await forceRefreshCardmarketPrices();
+    const stampLabel = result.currentStamp
+      ? new Date(result.currentStamp).toLocaleString('de-DE')
+      : '(unbekannt)';
+
+    if (result.changed) {
+      showToast(
+        `Cardmarket-Preise aktualisiert (${result.previousStamp || '∅'} → ${stampLabel}). Caches: ${(result.reset || []).join(', ') || '∅'}.`,
+        'success',
+        5000
+      );
+      console.info(
+        `[cardmarket-manual-refresh] Stamps differ – Caches invalidiert `
+        + `(reason=${result.reason}, current=${result.currentStamp}).`
+      );
+    } else {
+      // Stamp gleich, aber Caches wurden trotzdem geleert (force).
+      showToast(
+        `Cardmarket-Stamp ist aktuell (${stampLabel}). In-Memory-Caches wurden geleert – der naechste Karten-Preis-Lookup holt frische Daten.`,
+        'info',
+        4000
+      );
+      console.info(
+        `[cardmarket-manual-refresh] Stamp unchanged (${result.currentStamp}) `
+        + `– Caches zwangsweise geleert: ${(result.reset || []).join(', ') || '∅'}.`
+      );
+    }
+  } catch (err) {
+    const message = getErrorMessage(err, 'Unbekannter Fehler');
+    showToast(`Preis-Refresh fehlgeschlagen: ${message}`, 'error', 6000);
+    console.warn('[cardmarket-manual-refresh] failed', err);
+  } finally {
+    setLoading(false);
+    btn.disabled = false;
   }
 }
 
@@ -3601,10 +3654,23 @@ async function importSetsSequential(sets, options = {}) {
         if (allSetIdx >= 0 && !state.allSets[allSetIdx].imported) {
           state.allSets[allSetIdx] = { ...state.allSets[allSetIdx], imported: true };
         }
+        // Card-Level-Update: einzelne Dashboard-Card sofort umschalten
+        // (Button "Loeschen" statt "Importieren" wird sichtbar, Karten-Zaehler
+        // steigt). syncDashboardCardForSet ist ein leichtgewichtiger DOM-Patch,
+        // keine Sheets-Calls.
+        try {
+          syncDashboardCardForSet(state.allSets[allSetIdx] || set, {
+            total: Number(set.totalCards) || state.allSets[allSetIdx]?.totalCards || 0,
+            collected: 0,
+            rh: 0
+          });
+        } catch (cardErr) {
+          console.warn('[importSetsSequential] card-level update failed', cardErr);
+        }
         consecutiveQuotaErrors = 0;
         done++;
-        // Volles Dashboard-Refresh alle 10 Sets – balanciert UX mit
-        // Sheets-API-Last (loadSets ist nicht teuer, aber braucht ein paar Calls).
+        // Volles Dashboard-Refresh alle 10 Sets – fuer den 'X von Y'-Counter
+        // in der Topbar. Card-Level oben aktualisiert sich pro Set.
         if (done > 0 && done % 10 === 0) {
           try {
             await loadSets();
@@ -5092,6 +5158,7 @@ function initDashboardControls() {
   dom.btnExportSummaryCsv?.addEventListener('click', exportCollectionSummaryCsv);
   dom.btnDataHealthCheck?.addEventListener('click', () => runDataHealthCheck({ autoFix: false }));
   dom.btnDataHealthAutofix?.addEventListener('click', () => runDataHealthCheck({ autoFix: true }));
+  dom.btnCardmarketReloadPrices?.addEventListener('click', reloadCardmarketPricesManually);
   dom.btnParityCheck?.addEventListener('click', () => runPokecodeParityTest().catch((err) => {
     console.error('[runPokecodeParityTest]', err);
     showToast(`Parity-Test fehlgeschlagen: ${err.message}`, 'error', 6000);
