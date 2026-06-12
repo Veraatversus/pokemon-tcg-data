@@ -333,6 +333,12 @@ export function createSettingsPanel(currentSettings = {}, onSave, options = {}) 
       ]
     },
     {
+      title: 'Cardmarket',
+      buttons: [
+        ['btn-cardmarket-reload-prices', '💱 Preise neu laden']
+      ]
+    },
+    {
       title: 'Diagnose & Backup',
       buttons: [
         ['btn-export-summary-csv', '📤 Sammlung CSV'],

@@ -307,13 +307,6 @@
               </div>
             </section>
 
-            <section class="dashboard-tools-group" aria-label="Cardmarket">
-              <h3>Cardmarket</h3>
-              <div class="dashboard-tools-buttons">
-                <button id="btn-cardmarket-reload-prices" class="btn-secondary" type="button" title="Prueft cardmarket/meta.json auf einen neuen generatedAt-Stamp und leert die In-Memory-Preiscaches.">💱 Preise neu laden</button>
-              </div>
-            </section>
-
             <section class="dashboard-tools-group" aria-label="Diagnose und Backup">
               <h3>Diagnose & Backup</h3>
               <div class="dashboard-tools-buttons">
@@ -643,4 +636,10 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://apis.google.com/js/api.js" async defer></script>
   <script type="module" src="./js/app.js?v=20260608-stats-live-progress-rh-fix"></script>
+
+  <!-- Unsichtbarer Anker fuer den Settings-Proxy-Klick 'Preise neu laden'.
+       Der gleichnamige Button im Settings-Dialog rendert mit
+       data-proxy-click="btn-cardmarket-reload-prices" und loest einen Klick
+       auf dieses versteckte Element aus. -->
+  <button id="btn-cardmarket-reload-prices" type="button" class="hidden" aria-hidden="true" tabindex="-1" style="display:none !important;">Preise neu laden</button>
 </html>
