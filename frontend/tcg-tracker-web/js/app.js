@@ -49,7 +49,8 @@ import {
 import {
   createAutoSnapshot,
   loadSnapshots,
-  applyDeleteSetCellUpdates
+  applyDeleteSetCellUpdates,
+  tryAutoResumeImport
 } from './features/collection/index.js';
 import {
   loadLegacyWorkbookFromFile,
@@ -3594,8 +3595,24 @@ async function importSetsSequential(sets, options = {}) {
         cache.del(`cards_${set.setId}`);
         cache.del(`db_${set.setId}`);
         cache.del(`db_cards_${set.setId}`);
+        // Live-Update: state.allSets spiegelt den importierten Status sofort,
+        // damit das Dashboard-Card-Toggle ohne render-Roundtrip sichtbar wird.
+        const allSetIdx = state.allSets.findIndex((s) => s.setId === set.setId);
+        if (allSetIdx >= 0 && !state.allSets[allSetIdx].imported) {
+          state.allSets[allSetIdx] = { ...state.allSets[allSetIdx], imported: true };
+        }
         consecutiveQuotaErrors = 0;
         done++;
+        // Volles Dashboard-Refresh alle 10 Sets – balanciert UX mit
+        // Sheets-API-Last (loadSets ist nicht teuer, aber braucht ein paar Calls).
+        if (done > 0 && done % 10 === 0) {
+          try {
+            await loadSets();
+            await renderDashboard();
+          } catch (refreshErr) {
+            console.warn('[importSetsSequential] dashboard refresh failed', refreshErr);
+          }
+        }
       } catch (err) {
         console.warn('[importSetsSequential] import failed for', set.setId, getErrorMessage(err, err));
         if (isAuthReloginRequiredError(err)) {
@@ -10083,6 +10100,20 @@ async function onLoginSuccess() {
   if (!CONFIG.SPREADSHEET_ID) { openSpreadsheetDialog(true); setLoading(false); return; }
   updateSpreadsheetInfoBar();
   await loadSets();
+
+  // Wenn der letzte Bulk-Import wegen abgelaufenem Login pausiert wurde,
+  // automatisch fortsetzen – der User muss nicht erneut auf
+  // "Alle fehlenden importieren" klicken.
+  const wasBlocked = state.importAuthBlocked;
+  if (wasBlocked) {
+    state.importAuthBlocked = false;
+    await tryAutoResumeImport({
+      importAuthBlocked: true,
+      runImport: importAllMissingSets,
+      showToast,
+      setGlobalStatus,
+    });
+  }
 }
 
 function resetToLoggedOut() {

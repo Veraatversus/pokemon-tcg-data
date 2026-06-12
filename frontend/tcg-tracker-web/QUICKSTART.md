@@ -217,8 +217,15 @@ Grid: 5 Blocks × 3 Spalten × 4 Reihen = 60 Karten/Block
 ## 🎯 Kommandos (Dev)
 
 ```bash
-# Entwicklungs-Server
+# Standard Dev-Server (frontend/tcg-tracker-web)
 npx serve frontend/tcg-tracker-web --listen 8080
+
+# Dev-Server mit voller Repo-Root-Auslieferung — wichtig, wenn die
+# Cardmarket-Daten unter /cardmarket/*.json verfügbar sein sollen
+# (sonst hagelt es 404-Warnungen für Sets, die in Production existieren).
+npx serve . --listen 8080    # im Repo-Root ausgeführt
+# oder per npm-Skript:
+npm run start:dev:full        # serviert ../.. mit http-server
 
 # Production Build (optional)
 # (Derzeit: SPA lädt direkt von Quelle)
