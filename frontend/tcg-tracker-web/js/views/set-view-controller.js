@@ -13,8 +13,12 @@
  * - loadCurrentSet, renderCards, renderLightbox, etc.
  */
 
-import { isGeneratedCardmarketSearchUrl, applyReverseHoloQueryParam } from '../data/cardmarket-url-utils.js';
+import { isGeneratedCardmarketSearchUrl } from '../data/cardmarket-url-utils.js';
 import { sanitizeDisplayText } from '../core/display-text.js';
+import {
+  applyCardmarketPriceSummary as applyCardmarketPriceSummaryUi,
+  renderLightboxCardmarketPrices as renderLightboxCardmarketPricesUi,
+} from '../ui/cardmarket-price.js?v=20260613-tcgdex-merge-fix-v2';
 
 let focusedCardIndex = -1;
 const cardmarketPriceSummaryCache = new Map();
@@ -682,254 +686,30 @@ function revealPendingSearchCardFocus(injections = {}) {
 
 /**
  * CARDMARKET PRICING
+ *
+ * Die eigentliche Logik lebt in `js/ui/cardmarket-price.js` (single source of
+ * truth). Hier nur duenne Wrapper, die die Set-View-spezifischen Konventionen
+ * injizieren (Emoji-Prefix, Mittel-Punkt-Separator).
  */
 
-function toFinitePrice(value) {
-  const numeric = Number(value);
-  return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
+const CARDMARKET_LINK_LABEL_PREFIX = '🛒 ';
+const CARDMARKET_LINK_LABEL_SEPARATOR = ' · ';
+
+function applyCardmarketPriceSummary(linkEl, summary, opts = {}) {
+  return applyCardmarketPriceSummaryUi(linkEl, summary, {
+    ...opts,
+    labelPrefix: CARDMARKET_LINK_LABEL_PREFIX,
+    labelSeparator: CARDMARKET_LINK_LABEL_SEPARATOR
+  });
 }
 
-function formatEuroPrice(value) {
-  const numeric = toFinitePrice(value);
-  return numeric == null ? '' : `${numeric.toFixed(2).replace('.', ',')} €`;
-}
-
-function getCardmarketPriceValue(prices = {}, ...keys) {
-  for (const key of keys) {
-    if (prices?.[key] == null) continue;
-    const numeric = toFinitePrice(prices[key]);
-    if (numeric != null) return numeric;
-  }
-  return null;
-}
-
-function getCardmarketPriceCacheKey(card = {}) {
-  const setId = String(card?.setId || '').trim();
-  const number = String(card?.number || '').trim();
-  const name = String(card?.name || '').trim();
-  if (setId || number || name) {
-    return `${setId}::${number}::${name}`;
-  }
-  const normalizedUrl = String(card?.cardmarketUrl || '').trim();
-  return normalizedUrl;
-}
-
-// Siehe `hasReliableHoloPrices` in `js/ui/cardmarket-price.js`: Karten ohne
-// eigene Holo-Variante haben typischerweise `avgHolo == null`. Andere Holo-
-// Felder koennen in dem Fall trotzdem befuellt sein, gehoeren dann aber zu
-// einer anderen Variante und sind im Frontend nicht verwendbar.
-function hasReliableHoloPrices(prices = {}) {
-  if (toFinitePrice(prices?.avgHolo) != null) return true;
-  if (toFinitePrice(prices?.averageHolo) != null) return true;
-  return false;
-}
-
-function getCardmarketPriceDetails(prices = {}, { reverseHolo = false } = {}) {
-  // Fallback: Bei RH-Anforderung ohne verlaessliche Holo-Daten keine
-  // Detail-Zeilen fuer Reverse Holo ausgeben.
-  if (reverseHolo && !hasReliableHoloPrices(prices)) return [];
-
-  const fields = reverseHolo
-    ? [
-        [['trendHolo'], 'Trend'],
-        [['averageHolo', 'avgHolo'], 'Ø'],
-        [['average1Holo', 'avg1Holo'], 'Ø1'],
-        [['average7Holo', 'avg7Holo'], 'Ø7'],
-        [['average30Holo', 'avg30Holo'], 'Ø30'],
-        [['lowHolo'], 'Low'],
-        [['reverseHoloSell'], 'Sell']
-      ]
-    : [
-        [['trend'], 'Trend'],
-        [['average', 'avg'], 'Ø'],
-        [['average1', 'avg1'], 'Ø1'],
-        [['average7', 'avg7'], 'Ø7'],
-        [['average30', 'avg30'], 'Ø30'],
-        [['low'], 'Low']
-      ];
-
-  return fields
-    .map(([keys, label]) => {
-      const value = formatEuroPrice(getCardmarketPriceValue(prices, ...keys));
-      if (!value) return null;
-      return `${label}: ${value}`;
-    })
-    .filter(Boolean);
-}
-
-function buildCardmarketLinkPresentation(summary, { preferReverseHolo = false } = {}) {
-  if (!summary?.entry) return null;
-
-  const entry = summary.entry;
-  const prices = entry?.prices || {};
-  const reverseCandidates = [
-    [['trendHolo'], 'RH Trend'],
-    [['averageHolo', 'avgHolo'], 'RH Ø'],
-    [['lowHolo'], 'RH Low'],
-    [['reverseHoloSell'], 'RH Sell']
-  ];
-  const normalCandidates = [
-    [['trend'], 'Trend'],
-    [['average', 'avg'], 'Ø'],
-    [['low'], 'Low']
-  ];
-
-  const pickPrice = (candidates = []) => {
-    for (const [keys, label] of candidates) {
-      const value = formatEuroPrice(getCardmarketPriceValue(prices, ...keys));
-      if (value) return { label, value };
-    }
-    return null;
-  };
-
-  // Fallback: Karten ohne eigene Holo-Variante (avgHolo == null) verhalten
-  // sich fuer den Link-Pick so, als waere `preferReverseHolo` false.
-  const effectivePreferReverseHolo = preferReverseHolo && hasReliableHoloPrices(prices);
-
-  const reversePick = pickPrice(reverseCandidates);
-  const normalPick = pickPrice(normalCandidates);
-  const activePick = (effectivePreferReverseHolo && reversePick) || normalPick || reversePick;
-  const activeMode = effectivePreferReverseHolo && reversePick ? 'Reverse Holo' : 'Normal';
-
-  const label = activePick
-    ? `${activePick.label} ${activePick.value}`
-    : formatCardmarketEntryLabel?.(entry);
-
-  const reverseDetails = getCardmarketPriceDetails(prices, { reverseHolo: true });
-  const normalDetails = getCardmarketPriceDetails(prices, { reverseHolo: false });
-  const detailParts = [];
-  if (normalDetails.length) detailParts.push(`Normal: ${normalDetails.join(' · ')}`);
-  if (reverseDetails.length) detailParts.push(`Reverse Holo: ${reverseDetails.join(' · ')}`);
-
-  const title = detailParts.length
-    ? `Cardmarket (${activeMode}) · ${detailParts.join(' | ')}`
-    : formatCardmarketEntryTitle?.(entry);
-
-  return {
-    label,
-    title,
-    url: summary.url || ''
-  };
-}
-
-function renderLightboxCardmarketPrices(injections = {}, summary, { preferReverseHolo = false } = {}) {
+function renderLightboxCardmarketPrices(injections = {}, summary, opts = {}) {
   const { dom } = injections;
-  if (!dom.lightboxPriceMode || !dom.lightboxPriceGrid) return;
-
-  dom.lightboxPriceMode.textContent = preferReverseHolo ? 'Reverse Holo aktiv' : 'Normal aktiv';
-  dom.lightboxPriceGrid.innerHTML = '';
-
-  if (!summary) {
-    const loading = document.createElement('p');
-    loading.className = 'lightbox-price-loading';
-    loading.textContent = 'Preise werden geladen…';
-    dom.lightboxPriceGrid.appendChild(loading);
-    return;
-  }
-
-  const prices = summary?.entry?.prices;
-  if (!prices || typeof prices !== 'object') {
-    const empty = document.createElement('p');
-    empty.className = 'lightbox-price-empty';
-    empty.textContent = 'Keine Preisdetails verfügbar.';
-    dom.lightboxPriceGrid.appendChild(empty);
-    return;
-  }
-
-  // Siehe `hasReliableHoloPrices`: Wenn keine eigene Holo-Variante
-  // existiert (`avgHolo == null`), im "Reverse Holo"-Panel die normalen
-  // Kartenpreise anzeigen, damit der User ueberhaupt Werte sieht.
-  const reliableHolo = hasReliableHoloPrices(prices);
-  const reverseKeys = reliableHolo
-    ? [
-        ['Trend', getCardmarketPriceValue(prices, 'trendHolo')],
-        ['Durchschnitt', getCardmarketPriceValue(prices, 'averageHolo', 'avgHolo')],
-        ['Ø 1 Tag', getCardmarketPriceValue(prices, 'average1Holo', 'avg1Holo')],
-        ['Ø 7 Tage', getCardmarketPriceValue(prices, 'average7Holo', 'avg7Holo')],
-        ['Ø 30 Tage', getCardmarketPriceValue(prices, 'average30Holo', 'avg30Holo')],
-        ['Low', getCardmarketPriceValue(prices, 'lowHolo')],
-        ['Sell', getCardmarketPriceValue(prices, 'reverseHoloSell')]
-      ]
-    : [
-        ['Trend', getCardmarketPriceValue(prices, 'trend')],
-        ['Durchschnitt', getCardmarketPriceValue(prices, 'average', 'avg')],
-        ['Ø 1 Tag', getCardmarketPriceValue(prices, 'average1', 'avg1')],
-        ['Ø 7 Tage', getCardmarketPriceValue(prices, 'average7', 'avg7')],
-        ['Ø 30 Tage', getCardmarketPriceValue(prices, 'average30', 'avg30')],
-        ['Low', getCardmarketPriceValue(prices, 'low')]
-      ];
-
-  const createPriceGroup = (title, rows) => {
-    const group = document.createElement('section');
-    group.className = 'lightbox-price-group';
-
-    const heading = document.createElement('h4');
-    heading.textContent = title;
-    group.appendChild(heading);
-
-    let visibleRows = 0;
-    rows.forEach(([label, value]) => {
-      const formatted = formatEuroPrice(value);
-      if (!formatted) return;
-
-      const row = document.createElement('div');
-      row.className = 'lightbox-price-row';
-
-      const labelNode = document.createElement('span');
-      labelNode.textContent = label;
-      const valueNode = document.createElement('strong');
-      valueNode.textContent = formatted;
-
-      row.append(labelNode, valueNode);
-      group.appendChild(row);
-      visibleRows += 1;
-    });
-
-    return visibleRows ? group : null;
-  };
-
-  const groups = [
-    createPriceGroup('Normal', [
-      ['Trend', getCardmarketPriceValue(prices, 'trend')],
-      ['Durchschnitt', getCardmarketPriceValue(prices, 'average', 'avg')],
-      ['Ø 1 Tag', getCardmarketPriceValue(prices, 'average1', 'avg1')],
-      ['Ø 7 Tage', getCardmarketPriceValue(prices, 'average7', 'avg7')],
-      ['Ø 30 Tage', getCardmarketPriceValue(prices, 'average30', 'avg30')],
-      ['Low', getCardmarketPriceValue(prices, 'low')]
-    ]),
-    createPriceGroup('Reverse Holo', reverseKeys)
-  ].filter(Boolean);
-
-  if (!groups.length) {
-    const empty = document.createElement('p');
-    empty.className = 'lightbox-price-empty';
-    empty.textContent = 'Keine Preisdetails verfügbar.';
-    dom.lightboxPriceGrid.appendChild(empty);
-    return;
-  }
-
-  groups.forEach((group) => dom.lightboxPriceGrid.appendChild(group));
-}
-
-function applyCardmarketPriceSummary(linkEl, summary, { compact = false, preferReverseHolo = false } = {}) {
-  if (!(linkEl instanceof HTMLElement) || !summary) return;
-  const presentation = buildCardmarketLinkPresentation(summary, { preferReverseHolo });
-  if (!presentation) return;
-
-  if (summary.url) {
-    // Beim Rendern den `?isReverseHolo=Y`-Suffix anhängen, wenn die Karte als
-    // RH gesammelt ist. So landet der User direkt auf der richtigen
-    // Cardmarket-Produktseite. Search-URLs bleiben unverändert (apply…
-    // erkennt sie und passt nichts an).
-    const finalUrl = applyReverseHoloQueryParam(summary.url, preferReverseHolo);
-    linkEl.href = finalUrl;
-    linkEl.dataset.cardmarketUrl = finalUrl;
-    linkEl.classList.toggle('card-cm-link-fallback', isGeneratedCardmarketSearchUrl(finalUrl));
-  }
-  if (presentation.title) linkEl.title = presentation.title;
-  if (presentation.label) {
-    linkEl.textContent = compact ? `🛒 CM · ${presentation.label}` : `🛒 Cardmarket · ${presentation.label}`;
-  }
+  return renderLightboxCardmarketPricesUi(
+    { priceMode: dom?.lightboxPriceMode, priceGrid: dom?.lightboxPriceGrid },
+    summary,
+    opts
+  );
 }
 
 async function loadCardmarketPriceSummary(injections = {}, card = {}) {
