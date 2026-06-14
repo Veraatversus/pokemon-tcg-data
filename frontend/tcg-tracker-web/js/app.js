@@ -8727,7 +8727,22 @@ function getCardmarketPriceCacheKey(card = {}) {
   return normalizedUrl;
 }
 
+// Siehe `hasReliableHoloPrices` in `js/ui/cardmarket-price.js`: Karten ohne
+// eigene Holo-Variante haben typischerweise `avgHolo == null`. Andere Holo-
+// Felder koennen in dem Fall trotzdem befuellt sein, gehoeren dann aber zu
+// einer anderen Variante und sind im Frontend nicht verwendbar.
+function hasReliableHoloPrices(prices = {}) {
+  if (toFinitePrice(prices?.avgHolo) != null) return true;
+  if (toFinitePrice(prices?.averageHolo) != null) return true;
+  return false;
+}
+
 function getCardmarketPriceDetails(prices = {}, { reverseHolo = false } = {}) {
+  // Fallback: Bei RH-Anforderung ohne verlaessliche Holo-Daten keine
+  // Detail-Zeilen fuer Reverse Holo ausgeben (sonst wuerden Werte einer
+  // anderen Variante im Tooltip/Title landen).
+  if (reverseHolo && !hasReliableHoloPrices(prices)) return [];
+
   const fields = reverseHolo
     ? [
         [['trendHolo'], 'Trend'],
@@ -8773,10 +8788,16 @@ function buildCardmarketLinkPresentation(summary, { preferReverseHolo = false } 
     return null;
   };
 
+  // Fallback: Karten ohne eigene Holo-Variante (avgHolo == null) verhalten
+  // sich fuer den Link-Pick so, als waere `preferReverseHolo` false. Die
+  // Markierung als RH bleibt zwar erhalten, der angezeigte Preis stammt
+  // aber aus der normalen Variante.
+  const effectivePreferReverseHolo = preferReverseHolo && hasReliableHoloPrices(prices);
+
   const reversePick = pickPrice(reverseCandidates);
   const normalPick = pickPrice(normalCandidates);
-  const activePick = (preferReverseHolo && reversePick) || normalPick || reversePick;
-  const activeMode = preferReverseHolo && reversePick ? 'Reverse Holo' : 'Normal';
+  const activePick = (effectivePreferReverseHolo && reversePick) || normalPick || reversePick;
+  const activeMode = effectivePreferReverseHolo && reversePick ? 'Reverse Holo' : 'Normal';
 
   const label = activePick
     ? `${activePick.label} ${activePick.value}`
@@ -8822,6 +8843,30 @@ function renderLightboxCardmarketPrices(summary, { preferReverseHolo = false } =
     return;
   }
 
+  // Wenn der User die Karte als RH markiert hat, in Cardmarket aber keine
+  // eigene Holo-Variante existiert (`avgHolo == null`), wuerden die
+  // Holo-Zeilen mit Werten einer anderen Variante befuellt. Stattdessen
+  // zeigen wir im "Reverse Holo"-Panel die normalen Kartenpreise an.
+  const reliableHolo = hasReliableHoloPrices(prices);
+  const reverseKeys = reliableHolo
+    ? [
+        ['Trend', getCardmarketPriceValue(prices, 'trendHolo')],
+        ['Durchschnitt', getCardmarketPriceValue(prices, 'averageHolo', 'avgHolo')],
+        ['Avg 1 Tag', getCardmarketPriceValue(prices, 'average1Holo', 'avg1Holo')],
+        ['Avg 7 Tage', getCardmarketPriceValue(prices, 'average7Holo', 'avg7Holo')],
+        ['Avg 30 Tage', getCardmarketPriceValue(prices, 'average30Holo', 'avg30Holo')],
+        ['Low', getCardmarketPriceValue(prices, 'lowHolo')],
+        ['Sell', getCardmarketPriceValue(prices, 'reverseHoloSell')]
+      ]
+    : [
+        ['Trend', getCardmarketPriceValue(prices, 'trend')],
+        ['Durchschnitt', getCardmarketPriceValue(prices, 'average', 'avg')],
+        ['Avg 1 Tag', getCardmarketPriceValue(prices, 'average1', 'avg1')],
+        ['Avg 7 Tage', getCardmarketPriceValue(prices, 'average7', 'avg7')],
+        ['Avg 30 Tage', getCardmarketPriceValue(prices, 'average30', 'avg30')],
+        ['Low', getCardmarketPriceValue(prices, 'low')]
+      ];
+
   const createPriceGroup = (title, rows) => {
     const group = document.createElement('section');
     group.className = 'lightbox-price-group';
@@ -8860,15 +8905,7 @@ function renderLightboxCardmarketPrices(summary, { preferReverseHolo = false } =
       ['Avg 30 Tage', getCardmarketPriceValue(prices, 'average30', 'avg30')],
       ['Low', getCardmarketPriceValue(prices, 'low')]
     ]),
-    createPriceGroup('Reverse Holo', [
-      ['Trend', getCardmarketPriceValue(prices, 'trendHolo')],
-      ['Durchschnitt', getCardmarketPriceValue(prices, 'averageHolo', 'avgHolo')],
-      ['Avg 1 Tag', getCardmarketPriceValue(prices, 'average1Holo', 'avg1Holo')],
-      ['Avg 7 Tage', getCardmarketPriceValue(prices, 'average7Holo', 'avg7Holo')],
-      ['Avg 30 Tage', getCardmarketPriceValue(prices, 'average30Holo', 'avg30Holo')],
-      ['Low', getCardmarketPriceValue(prices, 'lowHolo')],
-      ['Sell', getCardmarketPriceValue(prices, 'reverseHoloSell')]
-    ])
+    createPriceGroup('Reverse Holo', reverseKeys)
   ].filter(Boolean);
 
   if (!groups.length) {

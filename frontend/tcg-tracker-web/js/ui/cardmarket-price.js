@@ -20,7 +20,31 @@ export function getCardmarketPriceValue(prices = {}, ...keys) {
   return null;
 }
 
+// Prueft, ob fuer eine Karte verlaessliche Holo-Preisdaten vorliegen.
+//
+// Hintergrund: Cardmarket fuehrt nicht fuer jede Karte eine eigene
+// "Reverse Holo"-Listings-Variante. Fehlt diese Variante, ist `avgHolo`
+// (bzw. sein Alias `averageHolo`) typischerweise `null`. Die restlichen
+// Holo-Felder (z.B. `trendHolo`, `avg1Holo`, `avg7Holo`, `lowHolo`) koennen
+// in dem Fall trotzdem mit Werten befuellt sein - diese stammen dann aber
+// von einer anderen Variante oder sind anderweitig unzuverlaessig und
+// duerfen im Frontend NICHT als Holo-Preis angezeigt werden.
+//
+// Wird eine Karte dennoch als "Reverse Holo" gesammelt, soll das Frontend
+// auf die normalen Kartenpreise zurueckfallen.
+export function hasReliableHoloPrices(prices = {}) {
+  if (toFinitePrice(prices?.avgHolo) != null) return true;
+  if (toFinitePrice(prices?.averageHolo) != null) return true;
+  return false;
+}
+
 export function getCardmarketPriceDetails(prices = {}, { reverseHolo = false } = {}) {
+  // Fallback: Wenn `reverseHolo` angefordert wird, aber keine verlaesslichen
+  // Holo-Preisdaten vorliegen, geben wir bewusst eine leere Liste zurueck,
+  // damit im Tooltip/Title kein "Reverse Holo: ..."-Block mit Werten
+  // erscheint, die zu einer anderen Variante gehoeren.
+  if (reverseHolo && !hasReliableHoloPrices(prices)) return [];
+
   const fields = reverseHolo
     ? [
         [['trendHolo'], 'Trend'],
@@ -74,10 +98,18 @@ export function buildCardmarketLinkPresentation(summary, { preferReverseHolo = f
     return null;
   };
 
+  // Fallback: Eine Karte kann zwar als "Reverse Holo" gesammelt sein, in
+  // Cardmarket aber keine eigene Holo-Variante haben. In dem Fall ist
+  // `avgHolo` typischerweise `null` und alle weiteren Holo-Felder sind
+  // unzuverlaessig (siehe `hasReliableHoloPrices`). Wir verhalten uns dann
+  // so, als waere `preferReverseHolo` false - der User sieht trotz
+  // RH-Markierung die normalen Kartenpreise.
+  const effectivePreferReverseHolo = preferReverseHolo && hasReliableHoloPrices(prices);
+
   const reversePick = pickPrice(reverseCandidates);
   const normalPick = pickPrice(normalCandidates);
-  const activePick = (preferReverseHolo && reversePick) || normalPick || reversePick;
-  const activeMode = preferReverseHolo && reversePick ? 'Reverse Holo' : 'Normal';
+  const activePick = (effectivePreferReverseHolo && reversePick) || normalPick || reversePick;
+  const activeMode = effectivePreferReverseHolo && reversePick ? 'Reverse Holo' : 'Normal';
 
   const label = activePick
     ? `${activePick.label} ${activePick.value}`

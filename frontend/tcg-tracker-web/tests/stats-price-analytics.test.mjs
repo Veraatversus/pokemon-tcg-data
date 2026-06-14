@@ -22,6 +22,44 @@ test('pickCardPriceFromSummary prefers reverse holo values when requested', () =
   assert.equal(pickCardPriceFromSummary(summary, { preferReverseHolo: false }), 2.1);
 });
 
+test('pickCardPriceFromSummary falls back to normal prices when avgHolo is null (no reliable holo data)', () => {
+  // avgHolo ist null => die Karte hat in Cardmarket keine eigene Holo-Variante.
+  // Die uebrigen Holo-Felder (trendHolo, avg1Holo, lowHolo) sind zwar
+  // befuellt, gehoeren aber zu einer anderen Variante und duerfen nicht als
+  // Holo-Preis verwendet werden. Wir erwarten den normalen Preis.
+  const summary = {
+    entry: {
+      prices: {
+        trend: 2.1,
+        average: 2.2,
+        avgHolo: null,
+        trendHolo: 7.5,
+        avg1Holo: 0.2,
+        lowHolo: 0.24,
+      },
+    },
+  };
+
+  assert.equal(pickCardPriceFromSummary(summary, { preferReverseHolo: true }), 2.1);
+  assert.equal(pickCardPriceFromSummary(summary, { preferReverseHolo: false }), 2.1);
+});
+
+test('pickCardPriceFromSummary still uses holo prices when avgHolo alias is set', () => {
+  // Falls die Datenquelle statt `avgHolo` den Alias `averageHolo` liefert,
+  // muessen wir die Holo-Preise weiterhin akzeptieren.
+  const summary = {
+    entry: {
+      prices: {
+        trend: 2.1,
+        averageHolo: 5.5,
+      },
+    },
+  };
+
+  assert.equal(pickCardPriceFromSummary(summary, { preferReverseHolo: true }), 5.5);
+  assert.equal(pickCardPriceFromSummary(summary, { preferReverseHolo: false }), 2.1);
+});
+
 test('computePriceAnalyticsFromSummaries aggregates totals, top set and top card', () => {
   const analytics = computePriceAnalyticsFromSummaries([
     {
@@ -84,9 +122,14 @@ test('pickCardPriceFromSummary supports extended reverse-holo and avg fallbacks'
     },
   };
 
+  // Realistische Karte mit eigener Holo-Variante: `avgHolo` ist gesetzt,
+  // damit der Holo-Pfad nicht in den avgHolo-Null-Fallback laeuft.
+  // `reverseHoloSell` ist nur ein zusaetzlicher Wert am Ende der
+  // Holo-Candidate-Liste und kommt hier nicht zum Zug.
   const summaryWithReverseSell = {
     entry: {
       prices: {
+        avgHolo: 5.5,
         reverseHoloSell: 5.1,
         low: 1.8,
       },
@@ -95,15 +138,18 @@ test('pickCardPriceFromSummary supports extended reverse-holo and avg fallbacks'
 
   assert.equal(pickCardPriceFromSummary(summaryWithReverseFallback, { preferReverseHolo: true }), 6.2);
   assert.equal(pickCardPriceFromSummary(summaryWithReverseFallback, { preferReverseHolo: false }), 2.9);
-  assert.equal(pickCardPriceFromSummary(summaryWithReverseSell, { preferReverseHolo: true }), 5.1);
+  assert.equal(pickCardPriceFromSummary(summaryWithReverseSell, { preferReverseHolo: true }), 5.5);
 });
 
 test('pickCardPriceFromSummary respects basePriceType for normal and reverse-holo cards', () => {
+  // Realistische Karte mit eigener Holo-Variante: `avgHolo` ist gesetzt,
+  // damit der Holo-Pfad nicht in den avgHolo-Null-Fallback laeuft.
   const summary = {
     entry: {
       prices: {
         trend: 2.1,
         average7: 3.7,
+        avgHolo: 7.0,
         trendHolo: 7.5,
         average7Holo: 8.4,
       },
@@ -115,18 +161,23 @@ test('pickCardPriceFromSummary respects basePriceType for normal and reverse-hol
 });
 
 test('pickCardPriceFromSummary falls back when selected basePriceType is missing', () => {
+  // Realistische Karte mit eigener Holo-Variante: `avgHolo` ist gesetzt,
+  // damit der Holo-Pfad nicht in den avgHolo-Null-Fallback laeuft. Mit
+  // `basePriceType: 'average7'` fehlt `average7Holo`; der Picker faellt
+  // auf den naechsten verfuegbaren Holo-Key zurueck (avgHolo vor lowHolo).
   const summary = {
     entry: {
       prices: {
         trend: 2.4,
         low: 1.1,
+        avgHolo: 5.0,
         lowHolo: 5.2,
       },
     },
   };
 
   assert.equal(pickCardPriceFromSummary(summary, { preferReverseHolo: false, basePriceType: 'average7' }), 2.4);
-  assert.equal(pickCardPriceFromSummary(summary, { preferReverseHolo: true, basePriceType: 'average7' }), 5.2);
+  assert.equal(pickCardPriceFromSummary(summary, { preferReverseHolo: true, basePriceType: 'average7' }), 5.0);
 });
 
 test('pickCardPriceFromSummary ignores unknown basePriceType and keeps trend-first default', () => {
