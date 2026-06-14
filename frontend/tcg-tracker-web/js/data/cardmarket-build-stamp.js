@@ -16,7 +16,7 @@
  * Stand beibehalten und beim nächsten Start erneut versucht.
  */
 
-import { CONFIG, scopedStorageKey } from '../core/config.js?v=20260608-stats-live-progress-rh-fix';
+import { CONFIG, scopedStorageKey } from '../core/config.js?v=20260613-tcgdex-merge-fix-v2';
 
 const BUILD_STAMP_STORAGE_KEY = scopedStorageKey('cardmarket-build-stamp');
 

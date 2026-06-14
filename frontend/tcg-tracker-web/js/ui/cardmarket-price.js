@@ -1,4 +1,4 @@
-import { formatCardmarketEntryLabel, formatCardmarketEntryTitle } from '../data/cardmarket-data.js?v=20260608-stats-live-progress-rh-fix';
+import { formatCardmarketEntryLabel, formatCardmarketEntryTitle } from '../data/cardmarket-data.js?v=20260613-tcgdex-merge-fix-v2';
 import { isGeneratedCardmarketSearchUrl } from '../data/cardmarket-url-utils.js';
 
 export function toFinitePrice(value) {

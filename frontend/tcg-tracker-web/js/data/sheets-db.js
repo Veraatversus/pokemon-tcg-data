@@ -18,7 +18,7 @@ import {
   CARD_MATCH_STATUS,
   resolveDisplaySet,
   resolveDisplayCard
-} from './schema-contract.js?v=20260608-stats-live-progress-rh-fix';
+} from './schema-contract.js?v=20260613-tcgdex-merge-fix-v2';
 import {
   planSetScopedUpsert,
   planSetScopedDedup

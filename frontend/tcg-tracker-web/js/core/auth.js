@@ -1,4 +1,4 @@
-import { CONFIG, scopedStorageKey } from './config.js?v=20260608-stats-live-progress-rh-fix';
+import { CONFIG, scopedStorageKey } from './config.js?v=20260613-tcgdex-merge-fix-v2';
 
 const STORAGE_KEY = scopedStorageKey('tcg_tracker_token');
 const REDIRECT_STATE_KEY = scopedStorageKey('oauth_redirect_state');

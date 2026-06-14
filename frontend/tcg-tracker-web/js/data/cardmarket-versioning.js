@@ -10,9 +10,9 @@
  * UI-Blocker läuft. Im Offline-Fall wird der bisherige Stand beibehalten.
  */
 
-import { syncCardmarketBuildStamp } from './cardmarket-build-stamp.js?v=20260608-stats-live-progress-rh-fix';
-import { resetCardmarketDataCaches } from './cardmarket-data.js?v=20260608-stats-live-progress-rh-fix';
-import { resetCardmarketPriceCaches } from '../views/set-view-controller.js?v=20260608-stats-live-progress-rh-fix';
+import { syncCardmarketBuildStamp } from './cardmarket-build-stamp.js?v=20260613-tcgdex-merge-fix-v2';
+import { resetCardmarketDataCaches } from './cardmarket-data.js?v=20260613-tcgdex-merge-fix-v2';
+import { resetCardmarketPriceCaches } from '../views/set-view-controller.js?v=20260613-tcgdex-merge-fix-v2';
 
 function safeInvoke(reset) {
   try {

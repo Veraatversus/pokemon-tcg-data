@@ -1,5 +1,5 @@
 import { isGeneratedCardmarketSearchUrl, isGeneratedCardmarketUrl, applyReverseHoloQueryParam } from './data/cardmarket-url-utils.js';
-import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js?v=20260608-stats-live-progress-rh-fix';
+import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js?v=20260613-tcgdex-merge-fix-v2';
 import {
   listImportedSets,
   listSetsOverviewData,
@@ -16,16 +16,16 @@ import {
   syncOverviewWithApiSets,
   resetSheetsDataCaches,
   recoverImportedIdsFromOverview,
-} from './data/sheets-db.js?v=20260608-stats-live-progress-rh-fix';
-import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260608-stats-live-progress-rh-fix';
-import { resolveSeriesGroupInfo } from './data/schema-contract.js?v=20260608-stats-live-progress-rh-fix';
+} from './data/sheets-db.js?v=20260613-tcgdex-merge-fix-v2';
+import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260613-tcgdex-merge-fix-v2';
+import { resolveSeriesGroupInfo } from './data/schema-contract.js?v=20260613-tcgdex-merge-fix-v2';
 import {
   buildCardmarketProductUrl,
   resolveCardmarketEntryForCard,
   formatCardmarketEntryLabel,
   formatCardmarketEntryTitle
-} from './data/cardmarket-data.js?v=20260608-stats-live-progress-rh-fix';
-import { applyCardmarketBuildStampCheck, forceRefreshCardmarketPrices } from './data/cardmarket-versioning.js?v=20260608-stats-live-progress-rh-fix';
+} from './data/cardmarket-data.js?v=20260613-tcgdex-merge-fix-v2';
+import { applyCardmarketBuildStampCheck, forceRefreshCardmarketPrices } from './data/cardmarket-versioning.js?v=20260613-tcgdex-merge-fix-v2';
 import {
   buildCombinedSearchDropdownOptions,
   buildSearchProgressLabel,
@@ -34,10 +34,10 @@ import {
   resolveCombinedSearchSelection,
   shouldFetchApiCardsForSearchSet,
   toBoolean
-} from './core/utils.js?v=20260608-stats-live-progress-rh-fix';
-import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle } from './core/collection-state.js?v=20260608-stats-live-progress-rh-fix';
+} from './core/utils.js?v=20260613-tcgdex-merge-fix-v2';
+import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle } from './core/collection-state.js?v=20260613-tcgdex-merge-fix-v2';
 import * as cache from './core/cache.js';
-import { CONFIG, scopedStorageKey } from './core/config.js?v=20260608-stats-live-progress-rh-fix';
+import { CONFIG, scopedStorageKey } from './core/config.js?v=20260613-tcgdex-merge-fix-v2';
 import {
   initSmartEngine,
   startAutoHealing,
@@ -62,13 +62,13 @@ import {
   summarizeLegacyImportPlan,
   pickCanonicalCardId,
   extractLegacySpreadsheetId
-} from './features/collection/legacy-import.js?v=20260608-stats-live-progress-rh-fix';
+} from './features/collection/legacy-import.js?v=20260613-tcgdex-merge-fix-v2';
 import { initCommandPalette } from './ui/command-palette.js';
-import { filterSetsBySeriesKey, getStatsSeriesLabel } from './ui/stats-series.js?v=20260608-stats-live-progress-rh-fix';
+import { filterSetsBySeriesKey, getStatsSeriesLabel } from './ui/stats-series.js?v=20260613-tcgdex-merge-fix-v2';
 import {
   computePriceAnalyticsFromSummaries,
   pickCardPriceFromSummary,
-} from './ui/stats-price-analytics.js?v=20260608-stats-live-progress-rh-fix';
+} from './ui/stats-price-analytics.js?v=20260613-tcgdex-merge-fix-v2';
 import {
   loadFavorites, saveFavorites, toggleFavorite, isFavorite,
   loadSearchHistory, addSearchHistory, clearSearchHistory,
@@ -76,13 +76,13 @@ import {
   loadSettings, saveSettings, updateSetting,
   applyQuickFilters, calculateCollectionStats,
   getSyncStatus, setSyncStatus
-} from './enhanced-features.js?v=20260608-stats-live-progress-rh-fix';
+} from './enhanced-features.js?v=20260613-tcgdex-merge-fix-v2';
 
 import {
   initQuickFiltersUI, createSearchHistoryWidget, createStatisticsPanel,
   createExportDialog, createSettingsPanel,
   createBulkActionsToolbar
-} from './ui/components.js?v=20260608-stats-live-progress-rh-fix';
+} from './ui/components.js?v=20260613-tcgdex-merge-fix-v2';
 import {
   createInitialSheetsRetryMetrics,
   initSheetsWriteFeedback as initSheetsWriteFeedbackUi,

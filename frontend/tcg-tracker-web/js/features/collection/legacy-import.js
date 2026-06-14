@@ -1,6 +1,6 @@
 import { normalizeCardNumber, toBoolean, colToA1 } from '../../core/utils.js';
 import { normalizeSetId, buildSetIdAliasCandidates } from '../../pokecode-compat.js';
-import { CONFIG } from '../../core/config.js?v=20260608-stats-live-progress-rh-fix';
+import { CONFIG } from '../../core/config.js?v=20260613-tcgdex-merge-fix-v2';
 
 const LEGACY_IGNORED_SHEETS = new Set([
   CONFIG.SHEETS.OVERVIEW,
