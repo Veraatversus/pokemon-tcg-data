@@ -71,6 +71,7 @@ import {
 } from './ui/stats-price-analytics.js?v=20260613-tcgdex-merge-fix-v2';
 import {
   applyCardmarketPriceSummary as applyCardmarketPriceSummaryUi,
+  getCardmarketPriceCacheKey,
   normalizeCardmarketBasePriceType,
   renderLightboxCardmarketPrices as renderLightboxCardmarketPricesUi,
   CARDMARKET_BASE_PRICE_DEFAULT,
@@ -7165,7 +7166,7 @@ async function loadStatsPriceAnalyticsLazy({ requestId } = {}) {
       try {
         const summary = await loadCardmarketPriceSummary(candidate.card, {
           cards: candidate.sourceCards,
-          resolverCard: candidate.sourceCard,
+          resolverCard: candidate.sourceCard
         });
         const value = pickCardPriceFromSummary(summary, {
           preferReverseHolo: candidate.isReverseHolo,

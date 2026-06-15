@@ -42,6 +42,20 @@ export function hasReliableHoloPrices(prices = {}) {
   return false;
 }
 
+// Stable cache key for a card's price summary. Uses setId/number/name when
+// available, falls back to the cardmarket URL for purely-URL-keyed lookups.
+// Imported by app.js and views/set-view-controller.js for the price summary
+// Map caches.
+export function getCardmarketPriceCacheKey(card = {}) {
+  const setId = String(card?.setId || '').trim();
+  const number = String(card?.number || '').trim();
+  const name = String(card?.name || '').trim();
+  if (setId || number || name) {
+    return `${setId}::${number}::${name}`;
+  }
+  return String(card?.cardmarketUrl || '').trim();
+}
+
 // ============================================================================
 // Base-Price-Type + Candidate-Listen
 // ============================================================================

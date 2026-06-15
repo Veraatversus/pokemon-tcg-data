@@ -17,6 +17,7 @@ import { isGeneratedCardmarketSearchUrl } from '../data/cardmarket-url-utils.js'
 import { sanitizeDisplayText } from '../core/display-text.js';
 import {
   applyCardmarketPriceSummary as applyCardmarketPriceSummaryUi,
+  getCardmarketPriceCacheKey,
   renderLightboxCardmarketPrices as renderLightboxCardmarketPricesUi,
 } from '../ui/cardmarket-price.js?v=20260613-tcgdex-merge-fix-v2';
 
@@ -745,7 +746,11 @@ async function loadCardmarketPriceSummary(injections = {}, card = {}) {
       }
     : null;
 
-  const pending = resolveCardmarketEntryForCard?.(card, { cards: sourceCards, resolveSetById, currentSetId })
+  const pending = resolveCardmarketEntryForCard?.(card, {
+    cards: sourceCards,
+    resolveSetById,
+    currentSetId
+  })
     .then((entry) => {
       const normalizedUrl = String(card?.cardmarketUrl || '').trim();
       const directUrl = entry?.cardmarketProductId
