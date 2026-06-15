@@ -284,7 +284,37 @@ export function createSettingsPanel(currentSettings = {}, onSave, options = {}) 
     { value: 'tcgdex|legacy|vera', label: 'TCGDex > Legacy > Vera' }
   ];
 
-  const getResolverDefaultOrder = () => 'tcgdex|vera|legacy';
+  // Image fields get an extra row of permutations that include the
+  // `cardmarket` source. Cardmarket product images are derived from
+  // `cardmarketProductId` + `categoryId` + `ptcgoCode` (see
+  // `buildCardmarketImageUrl` in cardmarket-ui-helpers.js).
+  const resolverImageOptions = [
+    { value: 'cardmarket|tcgdex|vera|legacy', label: 'Cardmarket > TCGDex > Vera > Legacy' },
+    { value: 'tcgdex|cardmarket|vera|legacy', label: 'TCGDex > Cardmarket > Vera > Legacy' },
+    { value: 'tcgdex|vera|cardmarket|legacy', label: 'TCGDex > Vera > Cardmarket > Legacy (Default)' },
+    { value: 'tcgdex|vera|legacy|cardmarket', label: 'TCGDex > Vera > Legacy > Cardmarket' }
+  ];
+
+  // Image fields get the `cardmarket` source option (URLs are built from
+  // cardmarketProductId + categoryId + ptcgoCode). The Cardmarket source is
+  // dev-only — in production we fall back to the standard 3-source options
+  // for image fields too, and the cardmarket permutations are not rendered
+  // in the dropdown.
+  const IMAGE_FIELDS = new Set(['image', 'imageLarge']);
+  const isDevMode = (() => {
+    try {
+      const host = String(globalThis?.location?.hostname || '').toLowerCase();
+      return host === 'localhost' || host === '127.0.0.1' || host === '::1';
+    } catch { return false; }
+  })();
+  const getResolverOptionsForField = (field) => (
+    IMAGE_FIELDS.has(field) && isDevMode ? resolverImageOptions : resolverOptions
+  );
+  const getResolverDefaultOrder = (scope, field) => (
+    IMAGE_FIELDS.has(field) && isDevMode
+      ? 'tcgdex|vera|cardmarket|legacy'
+      : 'tcgdex|vera|legacy'
+  );
 
   const cardmarketBasePriceOptions = [
     { value: 'trend', label: 'Trend' },
@@ -333,6 +363,12 @@ export function createSettingsPanel(currentSettings = {}, onSave, options = {}) 
       ]
     },
     {
+      title: 'Cardmarket',
+      buttons: [
+        ['btn-cardmarket-reload-prices', '💱 Preise neu laden']
+      ]
+    },
+    {
       title: 'Diagnose & Backup',
       buttons: [
         ['btn-export-summary-csv', '📤 Sammlung CSV'],
@@ -349,14 +385,15 @@ export function createSettingsPanel(currentSettings = {}, onSave, options = {}) 
   ];
 
   const buildResolverRows = (scope, fields) => fields.map((field) => {
+    const options = getResolverOptionsForField(field);
     const currentOrder = Array.isArray(currentMatrix?.[scope]?.[field]) && currentMatrix[scope][field].length
       ? currentMatrix[scope][field].join('|')
       : getResolverDefaultOrder(scope, field);
     return `
       <label style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin: 6px 0;">
         <span style="font-size:12px; color:var(--color-muted);">${scope}.${field}</span>
-        <select data-resolver-scope="${scope}" data-resolver-field="${field}" style="min-width: 210px;">
-          ${resolverOptions.map((opt) => `<option value="${opt.value}" ${opt.value === currentOrder ? 'selected' : ''}>${opt.label}</option>`).join('')}
+        <select data-resolver-scope="${scope}" data-resolver-field="${field}" style="min-width: 240px;">
+          ${options.map((opt) => `<option value="${opt.value}" ${opt.value === currentOrder ? 'selected' : ''}>${opt.label}</option>`).join('')}
         </select>
       </label>
     `;

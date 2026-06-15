@@ -98,6 +98,16 @@ function pickFirstFiniteFromCandidates(prices = {}, candidates = []) {
   return null;
 }
 
+// Siehe `hasReliableHoloPrices` in `js/ui/cardmarket-price.js`: Karten ohne
+// eigene Holo-Variante haben typischerweise `avgHolo == null`. Andere Holo-
+// Felder koennen in dem Fall trotzdem befuellt sein, gehoeren dann aber zu
+// einer anderen Variante und sind im Stats-Wert nicht verwendbar.
+function hasReliableHoloPrices(prices = {}) {
+  if (toFinitePrice(prices?.avgHolo) != null) return true;
+  if (toFinitePrice(prices?.averageHolo) != null) return true;
+  return false;
+}
+
 function quantile(sortedValues = [], q = 0.5) {
   if (!Array.isArray(sortedValues) || sortedValues.length === 0) return 0;
   const clampedQ = Math.min(1, Math.max(0, Number(q) || 0));
@@ -112,6 +122,11 @@ function quantile(sortedValues = [], q = 0.5) {
 
 export function pickCardPriceFromSummary(summary = null, { preferReverseHolo = false, basePriceType = CARDMARKET_BASE_PRICE_DEFAULT } = {}) {
   const prices = summary?.entry?.prices || {};
+  // Siehe `hasReliableHoloPrices`: Ohne verlaessliche Holo-Preisdaten
+  // (avgHolo == null) behandeln wir die Karte fuer den Stats-Pick so, als
+  // waere `preferReverseHolo` false. Sonst wuerden wir im Stats-Wert
+  // Holo-Eintraege anzeigen, die zu einer anderen Variante gehoeren.
+  const effectivePreferReverseHolo = preferReverseHolo && hasReliableHoloPrices(prices);
   const reverse = pickFirstFiniteFromCandidates(
     prices,
     buildCandidates({ reverseHolo: true, basePriceType })
@@ -121,7 +136,7 @@ export function pickCardPriceFromSummary(summary = null, { preferReverseHolo = f
     buildCandidates({ reverseHolo: false, basePriceType })
   );
 
-  return preferReverseHolo ? (reverse ?? normal) : (normal ?? reverse);
+  return effectivePreferReverseHolo ? (reverse ?? normal) : (normal ?? reverse);
 }
 
 export function computePriceAnalyticsFromSummaries(items = []) {

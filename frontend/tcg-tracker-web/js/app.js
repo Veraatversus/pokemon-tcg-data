@@ -1,5 +1,5 @@
 import { isGeneratedCardmarketSearchUrl, isGeneratedCardmarketUrl, applyReverseHoloQueryParam } from './data/cardmarket-url-utils.js';
-import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js?v=20260608-stats-live-progress-rh-fix';
+import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js?v=20260613-tcgdex-merge-fix-v2';
 import {
   listImportedSets,
   listSetsOverviewData,
@@ -16,15 +16,16 @@ import {
   syncOverviewWithApiSets,
   resetSheetsDataCaches,
   recoverImportedIdsFromOverview,
-} from './data/sheets-db.js?v=20260608-stats-live-progress-rh-fix';
-import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260608-stats-live-progress-rh-fix';
-import { resolveSeriesGroupInfo } from './data/schema-contract.js?v=20260608-stats-live-progress-rh-fix';
+} from './data/sheets-db.js?v=20260613-tcgdex-merge-fix-v2';
+import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260613-tcgdex-merge-fix-v2';
+import { resolveSeriesGroupInfo } from './data/schema-contract.js?v=20260613-tcgdex-merge-fix-v2';
 import {
   buildCardmarketProductUrl,
   resolveCardmarketEntryForCard,
   formatCardmarketEntryLabel,
   formatCardmarketEntryTitle
-} from './data/cardmarket-data.js?v=20260608-stats-live-progress-rh-fix';
+} from './data/cardmarket-data.js?v=20260613-tcgdex-merge-fix-v2';
+import { applyCardmarketBuildStampCheck, forceRefreshCardmarketPrices } from './data/cardmarket-versioning.js?v=20260613-tcgdex-merge-fix-v2';
 import {
   buildCombinedSearchDropdownOptions,
   buildSearchProgressLabel,
@@ -33,10 +34,10 @@ import {
   resolveCombinedSearchSelection,
   shouldFetchApiCardsForSearchSet,
   toBoolean
-} from './core/utils.js?v=20260608-stats-live-progress-rh-fix';
-import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle } from './core/collection-state.js?v=20260608-stats-live-progress-rh-fix';
+} from './core/utils.js?v=20260613-tcgdex-merge-fix-v2';
+import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle } from './core/collection-state.js?v=20260613-tcgdex-merge-fix-v2';
 import * as cache from './core/cache.js';
-import { CONFIG, scopedStorageKey } from './core/config.js?v=20260608-stats-live-progress-rh-fix';
+import { CONFIG, scopedStorageKey } from './core/config.js?v=20260613-tcgdex-merge-fix-v2';
 import {
   initSmartEngine,
   startAutoHealing,
@@ -47,7 +48,9 @@ import {
 } from './features/search/index.js';
 import {
   createAutoSnapshot,
-  loadSnapshots
+  loadSnapshots,
+  applyDeleteSetCellUpdates,
+  tryAutoResumeImport
 } from './features/collection/index.js';
 import {
   loadLegacyWorkbookFromFile,
@@ -59,13 +62,20 @@ import {
   summarizeLegacyImportPlan,
   pickCanonicalCardId,
   extractLegacySpreadsheetId
-} from './features/collection/legacy-import.js?v=20260608-stats-live-progress-rh-fix';
+} from './features/collection/legacy-import.js?v=20260613-tcgdex-merge-fix-v2';
 import { initCommandPalette } from './ui/command-palette.js';
-import { filterSetsBySeriesKey, getStatsSeriesLabel } from './ui/stats-series.js?v=20260608-stats-live-progress-rh-fix';
+import { filterSetsBySeriesKey, getStatsSeriesLabel } from './ui/stats-series.js?v=20260613-tcgdex-merge-fix-v2';
 import {
   computePriceAnalyticsFromSummaries,
   pickCardPriceFromSummary,
-} from './ui/stats-price-analytics.js?v=20260608-stats-live-progress-rh-fix';
+} from './ui/stats-price-analytics.js?v=20260613-tcgdex-merge-fix-v2';
+import {
+  applyCardmarketPriceSummary as applyCardmarketPriceSummaryUi,
+  getCardmarketPriceCacheKey,
+  normalizeCardmarketBasePriceType,
+  renderLightboxCardmarketPrices as renderLightboxCardmarketPricesUi,
+  CARDMARKET_BASE_PRICE_DEFAULT,
+} from './ui/cardmarket-price.js?v=20260613-tcgdex-merge-fix-v2';
 import {
   loadFavorites, saveFavorites, toggleFavorite, isFavorite,
   loadSearchHistory, addSearchHistory, clearSearchHistory,
@@ -73,13 +83,13 @@ import {
   loadSettings, saveSettings, updateSetting,
   applyQuickFilters, calculateCollectionStats,
   getSyncStatus, setSyncStatus
-} from './enhanced-features.js?v=20260608-stats-live-progress-rh-fix';
+} from './enhanced-features.js?v=20260613-tcgdex-merge-fix-v2';
 
 import {
   initQuickFiltersUI, createSearchHistoryWidget, createStatisticsPanel,
   createExportDialog, createSettingsPanel,
   createBulkActionsToolbar
-} from './ui/components.js?v=20260608-stats-live-progress-rh-fix';
+} from './ui/components.js?v=20260613-tcgdex-merge-fix-v2';
 import {
   createInitialSheetsRetryMetrics,
   initSheetsWriteFeedback as initSheetsWriteFeedbackUi,
@@ -233,6 +243,7 @@ const dom = {
   btnQueueBuilder: document.getElementById('btn-queue-builder'),
   btnQueueRun: document.getElementById('btn-queue-run'),
   btnQueueClear: document.getElementById('btn-queue-clear'),
+  btnCardmarketReloadPrices: document.getElementById('btn-cardmarket-reload-prices'),
   btnDashboardCompact: document.getElementById('btn-dashboard-compact'),
   queueBuilderDialog: document.getElementById('dialog-queue-builder'),
   queueBuilderList: document.getElementById('queue-builder-list'),
@@ -365,6 +376,83 @@ const dom = {
 // --------------------------------------------------------------------------
 // APP-STATE
 // --------------------------------------------------------------------------
+
+/**
+ * Prüft beim App-Start, ob die täglich generierten Cardmarket-Artefakte
+ * seit dem letzten Aufruf erneuert wurden, und invalidiert ggf. die
+ * In-Memory-Caches. Fire-and-forget – blockiert den Bootstrap nicht.
+ *
+ * @returns {Promise<{ changed: boolean, reason: string, previousStamp: string, currentStamp: string, reset: string[] }>}
+ */
+async function runCardmarketVersioningCheck() {
+  try {
+    const result = await applyCardmarketBuildStampCheck();
+    if (result.changed) {
+      console.info(
+        `[cardmarket-versioning] Caches invalidiert (reason=${result.reason}, `
+        + `previous=${result.previousStamp || '∅'}, current=${result.currentStamp}, `
+        + `subsysteme=${(result.reset || []).join(',') || '∅'}).`
+      );
+    }
+    return result;
+  } catch (err) {
+    console.warn('[cardmarket-versioning] check failed', err);
+    return { changed: false, reason: 'error', previousStamp: '', currentStamp: '', reset: [] };
+  }
+}
+
+/**
+ * Manueller Cardmarket-Preis-Refresh, ausgeloest vom
+ * Settings-Button 'Preise neu laden'. Prueft den aktuellen Build-Stamp,
+ * informiert den User ueber Aenderungen und leert IMMER die In-Memory-
+ * Caches (damit auch Faelle abgedeckt sind, in denen der User weiss,
+ * dass die Vera-Daten aktualisiert wurden, der Build-Stamp aber noch
+ * nicht neu geschrieben wurde).
+ */
+async function reloadCardmarketPricesManually() {
+  const btn = dom.btnCardmarketReloadPrices;
+  if (!btn) return;
+
+  setLoading(true, 'Pruefe Cardmarket-Preise...');
+  btn.disabled = true;
+  try {
+    const result = await forceRefreshCardmarketPrices();
+    const stampLabel = result.currentStamp
+      ? new Date(result.currentStamp).toLocaleString('de-DE')
+      : '(unbekannt)';
+
+    if (result.changed) {
+      showToast(
+        `Cardmarket-Preise aktualisiert (${result.previousStamp || '∅'} → ${stampLabel}). Caches: ${(result.reset || []).join(', ') || '∅'}.`,
+        'success',
+        5000
+      );
+      console.info(
+        `[cardmarket-manual-refresh] Stamps differ – Caches invalidiert `
+        + `(reason=${result.reason}, current=${result.currentStamp}).`
+      );
+    } else {
+      // Stamp gleich, aber Caches wurden trotzdem geleert (force).
+      showToast(
+        `Cardmarket-Stamp ist aktuell (${stampLabel}). In-Memory-Caches wurden geleert – der naechste Karten-Preis-Lookup holt frische Daten.`,
+        'info',
+        4000
+      );
+      console.info(
+        `[cardmarket-manual-refresh] Stamp unchanged (${result.currentStamp}) `
+        + `– Caches zwangsweise geleert: ${(result.reset || []).join(', ') || '∅'}.`
+      );
+    }
+  } catch (err) {
+    const message = getErrorMessage(err, 'Unbekannter Fehler');
+    showToast(`Preis-Refresh fehlgeschlagen: ${message}`, 'error', 6000);
+    console.warn('[cardmarket-manual-refresh] failed', err);
+  } finally {
+    setLoading(false);
+    btn.disabled = false;
+  }
+}
+
 const state = {
   loggedIn:     false,
   sets:         [],
@@ -3370,7 +3458,7 @@ async function importSetFromOverview(set) {
     if (!ok) return;
   } else {
     const ok = await runImportWritePreflight('Import-Preflight').catch((error) => {
-      console.error('[importSetFromOverview:preflight]', error);
+      console.error('[importSetFromOverview:preflight]', getErrorMessage(error, error));
       return false;
     });
     if (!ok) return;
@@ -3395,7 +3483,7 @@ async function importSetFromOverview(set) {
         setGlobalStatus(`${set.setName} wurde importiert.`);
         showToast(`${set.setName} wurde importiert.`, 'success', 3000);
       } catch (err) {
-        console.error('[importSetFromOverview]', err);
+        console.error('[importSetFromOverview]', getErrorMessage(err, err));
         if (isAuthReloginRequiredError(err)) {
           state.importAuthBlocked = true;
           const message = getAuthReloginImportMessage();
@@ -3448,17 +3536,16 @@ async function deleteSetFromCollection(set, options = {}) {
     }
 
     // Entferne das Set aus der Sammlung
+    // Wir sammeln alle Cell-Updates zuerst und schicken sie gebündelt in EINEM
+    // batchUpdate an die Google-Sheets-API, um das Per-Request-Rate-Limit (429)
+    // bei großen Sets zu vermeiden (vgl. updateCellBooleansBatch).
     const range = await readSetCollectionMap(set.setName).catch(() => new Map());
-    if (range && range.size > 0) {
-      for (const [, db] of range) {
-        if (db?.gCell?.row && db?.gCell?.col) {
-          await updateCellBoolean(set.setName, db.gCell.row, db.gCell.col, false);
-        }
-        if (db?.rhCell?.row && db?.rhCell?.col) {
-          await updateCellBoolean(set.setName, db.rhCell.row, db.rhCell.col, false);
-        }
-      }
-    }
+    await applyDeleteSetCellUpdates({
+      setName: set.setName,
+      collectionMap: range,
+      updateCellBooleansBatch,
+      chunkSize: 250,
+    });
 
     await upsertOverviewSet(set, false);
 
@@ -3568,10 +3655,39 @@ async function importSetsSequential(sets, options = {}) {
         cache.del(`cards_${set.setId}`);
         cache.del(`db_${set.setId}`);
         cache.del(`db_cards_${set.setId}`);
+        // Live-Update: state.allSets spiegelt den importierten Status sofort,
+        // damit das Dashboard-Card-Toggle ohne render-Roundtrip sichtbar wird.
+        const allSetIdx = state.allSets.findIndex((s) => s.setId === set.setId);
+        if (allSetIdx >= 0 && !state.allSets[allSetIdx].imported) {
+          state.allSets[allSetIdx] = { ...state.allSets[allSetIdx], imported: true };
+        }
+        // Card-Level-Update: einzelne Dashboard-Card sofort umschalten
+        // (Button "Loeschen" statt "Importieren" wird sichtbar, Karten-Zaehler
+        // steigt). syncDashboardCardForSet ist ein leichtgewichtiger DOM-Patch,
+        // keine Sheets-Calls.
+        try {
+          syncDashboardCardForSet(state.allSets[allSetIdx] || set, {
+            total: Number(set.totalCards) || state.allSets[allSetIdx]?.totalCards || 0,
+            collected: 0,
+            rh: 0
+          });
+        } catch (cardErr) {
+          console.warn('[importSetsSequential] card-level update failed', cardErr);
+        }
         consecutiveQuotaErrors = 0;
         done++;
+        // Volles Dashboard-Refresh alle 10 Sets – fuer den 'X von Y'-Counter
+        // in der Topbar. Card-Level oben aktualisiert sich pro Set.
+        if (done > 0 && done % 10 === 0) {
+          try {
+            await loadSets();
+            await renderDashboard();
+          } catch (refreshErr) {
+            console.warn('[importSetsSequential] dashboard refresh failed', refreshErr);
+          }
+        }
       } catch (err) {
-        console.warn('[importSetsSequential] import failed for', set.setId, err);
+        console.warn('[importSetsSequential] import failed for', set.setId, getErrorMessage(err, err));
         if (isAuthReloginRequiredError(err)) {
           state.importAuthBlocked = true;
           pausedForAuth = true;
@@ -5049,6 +5165,7 @@ function initDashboardControls() {
   dom.btnExportSummaryCsv?.addEventListener('click', exportCollectionSummaryCsv);
   dom.btnDataHealthCheck?.addEventListener('click', () => runDataHealthCheck({ autoFix: false }));
   dom.btnDataHealthAutofix?.addEventListener('click', () => runDataHealthCheck({ autoFix: true }));
+  dom.btnCardmarketReloadPrices?.addEventListener('click', reloadCardmarketPricesManually);
   dom.btnParityCheck?.addEventListener('click', () => runPokecodeParityTest().catch((err) => {
     console.error('[runPokecodeParityTest]', err);
     showToast(`Parity-Test fehlgeschlagen: ${err.message}`, 'error', 6000);
@@ -7049,7 +7166,7 @@ async function loadStatsPriceAnalyticsLazy({ requestId } = {}) {
       try {
         const summary = await loadCardmarketPriceSummary(candidate.card, {
           cards: candidate.sourceCards,
-          resolverCard: candidate.sourceCard,
+          resolverCard: candidate.sourceCard
         });
         const value = pickCardPriceFromSummary(summary, {
           preferReverseHolo: candidate.isReverseHolo,
@@ -8487,88 +8604,18 @@ function createCardElement(card, key, db, index) {
 const cardmarketPriceSummaryCache = new Map();
 const cardmarketPriceSummaryPending = new Map();
 
-function toFinitePrice(value) {
-  const numeric = Number(value);
-  return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
+/**
+ * Leert die Lightbox-eigenen Cardmarket-Price-Caches. Wird nach einem
+ * täglichen Cardmarket-Build-Wechsel aufgerufen, damit das Lightbox-
+ * Pre-Panel keine veralteten Preise mehr anzeigt.
+ */
+function resetLightboxCardmarketPriceCaches() {
+  cardmarketPriceSummaryCache.clear();
+  cardmarketPriceSummaryPending.clear();
 }
 
-function formatEuroPrice(value) {
-  const numeric = toFinitePrice(value);
-  return numeric == null ? '' : `${numeric.toFixed(2).replace('.', ',')} EUR`;
-}
-
-function getCardmarketPriceValue(prices = {}, ...keys) {
-  for (const key of keys) {
-    if (prices?.[key] == null) continue;
-    const numeric = toFinitePrice(prices[key]);
-    if (numeric != null) return numeric;
-  }
-  return null;
-}
-
-const CARDMARKET_BASE_PRICE_DEFAULT = 'trend';
-const CARDMARKET_BASE_PRICE_ALLOWED = new Set([
-  'trend',
-  'average',
-  'average1',
-  'average7',
-  'average30',
-  'low'
-]);
-
-const CARDMARKET_LINK_FALLBACK_NORMAL = [
-  [['trend'], 'Trend'],
-  [['average', 'avg'], 'Avg'],
-  [['average1', 'avg1'], 'Avg 1d'],
-  [['average7', 'avg7'], 'Avg 7d'],
-  [['average30', 'avg30'], 'Avg 30d'],
-  [['low'], 'Low']
-];
-
-const CARDMARKET_LINK_FALLBACK_REVERSE = [
-  [['trendHolo'], 'RH Trend'],
-  [['averageHolo', 'avgHolo'], 'RH Avg'],
-  [['average1Holo', 'avg1Holo'], 'RH Avg 1d'],
-  [['average7Holo', 'avg7Holo'], 'RH Avg 7d'],
-  [['average30Holo', 'avg30Holo'], 'RH Avg 30d'],
-  [['lowHolo'], 'RH Low'],
-  [['reverseHoloSell'], 'RH Sell']
-];
-
-const CARDMARKET_BASE_TO_CANDIDATE = {
-  trend: {
-    normal: [['trend'], 'Trend'],
-    reverseHolo: [['trendHolo'], 'RH Trend']
-  },
-  average: {
-    normal: [['average', 'avg'], 'Avg'],
-    reverseHolo: [['averageHolo', 'avgHolo'], 'RH Avg']
-  },
-  average1: {
-    normal: [['average1', 'avg1'], 'Avg 1d'],
-    reverseHolo: [['average1Holo', 'avg1Holo'], 'RH Avg 1d']
-  },
-  average7: {
-    normal: [['average7', 'avg7'], 'Avg 7d'],
-    reverseHolo: [['average7Holo', 'avg7Holo'], 'RH Avg 7d']
-  },
-  average30: {
-    normal: [['average30', 'avg30'], 'Avg 30d'],
-    reverseHolo: [['average30Holo', 'avg30Holo'], 'RH Avg 30d']
-  },
-  low: {
-    normal: [['low'], 'Low'],
-    reverseHolo: [['lowHolo'], 'RH Low']
-  }
-};
-
-function normalizeCardmarketBasePriceType(value) {
-  const normalized = String(value || '').trim().toLowerCase();
-  return CARDMARKET_BASE_PRICE_ALLOWED.has(normalized)
-    ? normalized
-    : CARDMARKET_BASE_PRICE_DEFAULT;
-}
-
+// Aktueller Basis-Preistyp aus den User-Settings. Wird an den kanonischen
+// Picker in `js/ui/cardmarket-price.js` durchgereicht.
 function getCurrentCardmarketBasePriceType() {
   try {
     return normalizeCardmarketBasePriceType(loadSettings()?.cardmarketBasePriceType);
@@ -8577,210 +8624,22 @@ function getCurrentCardmarketBasePriceType() {
   }
 }
 
-function getCardmarketPrimaryCandidates({ reverseHolo = false, basePriceType = CARDMARKET_BASE_PRICE_DEFAULT } = {}) {
-  const normalizedType = normalizeCardmarketBasePriceType(basePriceType);
-  const selected = reverseHolo
-    ? CARDMARKET_BASE_TO_CANDIDATE[normalizedType]?.reverseHolo
-    : CARDMARKET_BASE_TO_CANDIDATE[normalizedType]?.normal;
-  const fallback = reverseHolo ? CARDMARKET_LINK_FALLBACK_REVERSE : CARDMARKET_LINK_FALLBACK_NORMAL;
-  const seen = new Set();
-
-  return [selected, ...fallback]
-    .filter((candidate) => Array.isArray(candidate?.[0]))
-    .filter((candidate) => {
-      const signature = candidate[0].join('|');
-      if (seen.has(signature)) return false;
-      seen.add(signature);
-      return true;
-    });
+// Duenne Wrapper, die den globalen `dom`-State + aktuellen `basePriceType`
+// injizieren, damit die App-internen Call-Sites ihre Signaturen beibehalten
+// koennen. Die eigentliche Logik lebt in `js/ui/cardmarket-price.js`.
+function applyCardmarketPriceSummary(linkEl, summary, opts = {}) {
+  return applyCardmarketPriceSummaryUi(linkEl, summary, {
+    ...opts,
+    basePriceType: opts.basePriceType || getCurrentCardmarketBasePriceType()
+  });
 }
 
-function getCardmarketPriceCacheKey(card = {}) {
-  const setId = String(card?.setId || '').trim();
-  const number = String(card?.number || '').trim();
-  const name = String(card?.name || '').trim();
-  if (setId || number || name) {
-    return `${setId}::${number}::${name}`;
-  }
-
-  const normalizedUrl = String(card?.cardmarketUrl || '').trim();
-  return normalizedUrl;
-}
-
-function getCardmarketPriceDetails(prices = {}, { reverseHolo = false } = {}) {
-  const fields = reverseHolo
-    ? [
-        [['trendHolo'], 'Trend'],
-        [['averageHolo', 'avgHolo'], 'Avg'],
-        [['average1Holo', 'avg1Holo'], 'Avg 1d'],
-        [['average7Holo', 'avg7Holo'], 'Avg 7d'],
-        [['average30Holo', 'avg30Holo'], 'Avg 30d'],
-        [['lowHolo'], 'Low'],
-        [['reverseHoloSell'], 'Sell']
-      ]
-    : [
-        [['trend'], 'Trend'],
-        [['average', 'avg'], 'Avg'],
-        [['average1', 'avg1'], 'Avg 1d'],
-        [['average7', 'avg7'], 'Avg 7d'],
-        [['average30', 'avg30'], 'Avg 30d'],
-        [['low'], 'Low']
-      ];
-
-  return fields
-    .map(([keys, label]) => {
-      const value = formatEuroPrice(getCardmarketPriceValue(prices, ...keys));
-      if (!value) return null;
-      return `${label}: ${value}`;
-    })
-    .filter(Boolean);
-}
-
-function buildCardmarketLinkPresentation(summary, { preferReverseHolo = false } = {}) {
-  if (!summary?.entry) return null;
-
-  const entry = summary.entry;
-  const prices = entry?.prices || {};
-  const basePriceType = getCurrentCardmarketBasePriceType();
-  const reverseCandidates = getCardmarketPrimaryCandidates({ reverseHolo: true, basePriceType });
-  const normalCandidates = getCardmarketPrimaryCandidates({ reverseHolo: false, basePriceType });
-
-  const pickPrice = (candidates = []) => {
-    for (const [keys, label] of candidates) {
-      const value = formatEuroPrice(getCardmarketPriceValue(prices, ...keys));
-      if (value) return { label, value };
-    }
-    return null;
-  };
-
-  const reversePick = pickPrice(reverseCandidates);
-  const normalPick = pickPrice(normalCandidates);
-  const activePick = (preferReverseHolo && reversePick) || normalPick || reversePick;
-  const activeMode = preferReverseHolo && reversePick ? 'Reverse Holo' : 'Normal';
-
-  const label = activePick
-    ? `${activePick.label} ${activePick.value}`
-    : formatCardmarketEntryLabel(entry);
-
-  const reverseDetails = getCardmarketPriceDetails(prices, { reverseHolo: true });
-  const normalDetails = getCardmarketPriceDetails(prices, { reverseHolo: false });
-  const detailParts = [];
-  if (normalDetails.length) detailParts.push(`Normal: ${normalDetails.join(' | ')}`);
-  if (reverseDetails.length) detailParts.push(`Reverse Holo: ${reverseDetails.join(' | ')}`);
-
-  const title = detailParts.length
-    ? `Cardmarket (${activeMode}) - ${detailParts.join(' | ')}`
-    : formatCardmarketEntryTitle(entry);
-
-  return {
-    label,
-    title,
-    url: summary.url || ''
-  };
-}
-
-function renderLightboxCardmarketPrices(summary, { preferReverseHolo = false } = {}) {
-  if (!dom.lightboxPriceMode || !dom.lightboxPriceGrid) return;
-
-  dom.lightboxPriceMode.textContent = preferReverseHolo ? 'Reverse Holo aktiv' : 'Normal aktiv';
-  dom.lightboxPriceGrid.innerHTML = '';
-
-  if (!summary) {
-    const loading = document.createElement('p');
-    loading.className = 'lightbox-price-loading';
-    loading.textContent = 'Preise werden geladen...';
-    dom.lightboxPriceGrid.appendChild(loading);
-    return;
-  }
-
-  const prices = summary?.entry?.prices;
-  if (!prices || typeof prices !== 'object') {
-    const empty = document.createElement('p');
-    empty.className = 'lightbox-price-empty';
-    empty.textContent = 'Keine Preisdetails verfuegbar.';
-    dom.lightboxPriceGrid.appendChild(empty);
-    return;
-  }
-
-  const createPriceGroup = (title, rows) => {
-    const group = document.createElement('section');
-    group.className = 'lightbox-price-group';
-
-    const heading = document.createElement('h4');
-    heading.textContent = title;
-    group.appendChild(heading);
-
-    let visibleRows = 0;
-    rows.forEach(([label, value]) => {
-      const formatted = formatEuroPrice(value);
-      if (!formatted) return;
-
-      const row = document.createElement('div');
-      row.className = 'lightbox-price-row';
-
-      const labelNode = document.createElement('span');
-      labelNode.textContent = label;
-      const valueNode = document.createElement('strong');
-      valueNode.textContent = formatted;
-
-      row.append(labelNode, valueNode);
-      group.appendChild(row);
-      visibleRows += 1;
-    });
-
-    return visibleRows ? group : null;
-  };
-
-  const groups = [
-    createPriceGroup('Normal', [
-      ['Trend', getCardmarketPriceValue(prices, 'trend')],
-      ['Durchschnitt', getCardmarketPriceValue(prices, 'average', 'avg')],
-      ['Avg 1 Tag', getCardmarketPriceValue(prices, 'average1', 'avg1')],
-      ['Avg 7 Tage', getCardmarketPriceValue(prices, 'average7', 'avg7')],
-      ['Avg 30 Tage', getCardmarketPriceValue(prices, 'average30', 'avg30')],
-      ['Low', getCardmarketPriceValue(prices, 'low')]
-    ]),
-    createPriceGroup('Reverse Holo', [
-      ['Trend', getCardmarketPriceValue(prices, 'trendHolo')],
-      ['Durchschnitt', getCardmarketPriceValue(prices, 'averageHolo', 'avgHolo')],
-      ['Avg 1 Tag', getCardmarketPriceValue(prices, 'average1Holo', 'avg1Holo')],
-      ['Avg 7 Tage', getCardmarketPriceValue(prices, 'average7Holo', 'avg7Holo')],
-      ['Avg 30 Tage', getCardmarketPriceValue(prices, 'average30Holo', 'avg30Holo')],
-      ['Low', getCardmarketPriceValue(prices, 'lowHolo')],
-      ['Sell', getCardmarketPriceValue(prices, 'reverseHoloSell')]
-    ])
-  ].filter(Boolean);
-
-  if (!groups.length) {
-    const empty = document.createElement('p');
-    empty.className = 'lightbox-price-empty';
-    empty.textContent = 'Keine Preisdetails verfuegbar.';
-    dom.lightboxPriceGrid.appendChild(empty);
-    return;
-  }
-
-  groups.forEach((group) => dom.lightboxPriceGrid.appendChild(group));
-}
-
-function applyCardmarketPriceSummary(linkEl, summary, { compact = false, preferReverseHolo = false } = {}) {
-  if (!(linkEl instanceof HTMLElement) || !summary) return;
-  const presentation = buildCardmarketLinkPresentation(summary, { preferReverseHolo });
-  if (!presentation) return;
-
-  if (summary.url) {
-    // Beim Rendern den `?isReverseHolo=Y`-Suffix anhängen, wenn die Karte als
-    // RH gesammelt ist. So landet der User direkt auf der richtigen
-    // Cardmarket-Produktseite. Search-URLs bleiben unverändert (apply…
-    // erkennt sie und passt nichts an).
-    const finalUrl = applyReverseHoloQueryParam(summary.url, preferReverseHolo);
-    linkEl.href = finalUrl;
-    linkEl.dataset.cardmarketUrl = finalUrl;
-    linkEl.classList.toggle('card-cm-link-fallback', isGeneratedCardmarketSearchUrl(finalUrl));
-  }
-  if (presentation.title) linkEl.title = presentation.title;
-  if (presentation.label) {
-    linkEl.textContent = compact ? `CM - ${presentation.label}` : `Cardmarket - ${presentation.label}`;
-  }
+function renderLightboxCardmarketPrices(summary, opts = {}) {
+  return renderLightboxCardmarketPricesUi(
+    { priceMode: dom.lightboxPriceMode, priceGrid: dom.lightboxPriceGrid },
+    summary,
+    opts
+  );
 }
 
 
@@ -9935,6 +9794,7 @@ function createBootstrapRuntimeController() {
     loadDashboardPreferences,
     loadRecentSets,
     initSmartEngine,
+    runCardmarketVersioningCheck,
     initAutoHideTopbar,
     initGridZoom,
     initCustomSelects,
@@ -10046,6 +9906,20 @@ async function onLoginSuccess() {
   if (!CONFIG.SPREADSHEET_ID) { openSpreadsheetDialog(true); setLoading(false); return; }
   updateSpreadsheetInfoBar();
   await loadSets();
+
+  // Wenn der letzte Bulk-Import wegen abgelaufenem Login pausiert wurde,
+  // automatisch fortsetzen – der User muss nicht erneut auf
+  // "Alle fehlenden importieren" klicken.
+  const wasBlocked = state.importAuthBlocked;
+  if (wasBlocked) {
+    state.importAuthBlocked = false;
+    await tryAutoResumeImport({
+      importAuthBlocked: true,
+      runImport: importAllMissingSets,
+      showToast,
+      setGlobalStatus,
+    });
+  }
 }
 
 function resetToLoggedOut() {

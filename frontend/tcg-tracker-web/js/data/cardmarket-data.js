@@ -1,5 +1,7 @@
 import { CONFIG } from '../core/config.js';
+import { isLocalDevEnvironment } from '../core/dev-environment.js';
 import {
+  buildCardmarketImageUrl as sharedBuildCardmarketImageUrl,
   buildCardmarketProductUrl as sharedBuildCardmarketProductUrl,
   buildSetCardAssignmentMap as sharedBuildSetCardAssignmentMap,
   extractCardmarketProductId as sharedExtractCardmarketProductId,
@@ -11,7 +13,7 @@ import {
   promoteCardmarketUrlsForCards as sharedPromoteCardmarketUrlsForCards,
   resolveCardmarketEntryForCardFromSetPayload as sharedResolveCardmarketEntryForCardFromSetPayload,
   resolveCardmarketEntryFromSetPayload as sharedResolveCardmarketEntryFromSetPayload,
-} from './cardmarket-ui-helpers.js?v=20260608-stats-live-progress-rh-fix';
+} from './cardmarket-ui-helpers.js?v=20260613-tcgdex-merge-fix-v2';
 
 const REMOTE_CARDMARKET_BASE = `${String(CONFIG?.APIS?.VERA_BASE || '').replace(/\/$/, '')}/cardmarket`;
 
@@ -46,6 +48,30 @@ function getCardmarketUrlFromCard(card = {}) {
 
 export function buildCardmarketProductUrl(productId, { language = 'de' } = {}) {
   return sharedBuildCardmarketProductUrl(productId, { language });
+}
+
+export function buildCardmarketImageUrl(payload = {}) {
+  return sharedBuildCardmarketImageUrl({
+    ...payload,
+    proxyUrl: payload?.proxyUrl ?? getCardmarketImageProxyUrl()
+  });
+}
+
+// Reads the Cardmarket image proxy URL from the user settings (localStorage).
+// Returns empty string when:
+//   - the user hasn't configured a proxy, or
+//   - the runtime is NOT a local-dev environment (production always ignores
+//     the setting so the direct S3 URL is used).
+export function getCardmarketImageProxyUrl() {
+  if (!isLocalDevEnvironment()) return '';
+  try {
+    const raw = localStorage.getItem('poke:release:user-settings');
+    if (!raw) return '';
+    const parsed = JSON.parse(raw);
+    return String(parsed?.cardmarketImageProxyUrl || '').trim().replace(/\/$/, '');
+  } catch {
+    return '';
+  }
 }
 
 export function resolveCardmarketEntryFromSetPayload(setPayload = {}, productId = '') {
@@ -267,12 +293,15 @@ export async function resolveCardmarketEntryForCard(card = {}, { cards = [], res
   return directUrl ? resolveCardmarketEntryByUrl(directUrl, { signal, forceRefresh }) : null;
 }
 
-export async function promoteCardmarketUrlsForCards(cards = [], { productIndex = null, setPayload = null, resolveSetById = null, currentSetId = '', signal, forceRefresh = false } = {}) {
+export async function promoteCardmarketUrlsForCards(cards = [], { productIndex = null, setPayload = null, resolveSetById = null, currentSetId = '', setRecord = null, signal, forceRefresh = false } = {}) {
+  const proxyUrl = getCardmarketImageProxyUrl();
   return sharedPromoteCardmarketUrlsForCards(cards, {
     productIndex,
     setPayload,
     resolveSetById,
     currentSetId,
+    setRecord,
+    proxyUrl,
     signal,
     forceRefresh,
     loadProductIndex: productIndex ? null : ({ signal, forceRefresh } = {}) => loadCardmarketProductIndex({ signal, forceRefresh }),
@@ -280,4 +309,22 @@ export async function promoteCardmarketUrlsForCards(cards = [], { productIndex =
     loadTrackerSetIndex: ({ signal, forceRefresh } = {}) => loadCardmarketTrackerSetIndex({ signal, forceRefresh }),
     loadSetPayload: (expansionId, { signal, forceRefresh } = {}) => loadCardmarketSetPayload(expansionId, { signal, forceRefresh }),
   });
+}
+
+/**
+ * Leert alle In-Memory-Caches dieses Moduls.
+ *
+ * Wird nach einem Versionswechsel der täglich neu erzeugten
+ * Cardmarket-Artefakte aufgerufen, damit Preise, Expansion-IDs und
+ * Set-Payloads neu vom Server geladen werden. Die TTL-Caches in
+ * `core/cache.js` sind davon nicht betroffen – sie laufen ohnehin
+ * nach `CACHE_TTL_MS` ab.
+ */
+export function resetCardmarketDataCaches() {
+  productIndexCachePromise = null;
+  nameIndexCachePromise = null;
+  trackerSetIndexCachePromise = null;
+  setPayloadCachePromise.clear();
+  inferredExpansionCache.clear();
+  setAssignmentMapCache.clear();
 }

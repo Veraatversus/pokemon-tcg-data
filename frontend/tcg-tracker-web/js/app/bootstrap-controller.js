@@ -8,6 +8,7 @@ export function createBootstrapController({
   loadDashboardPreferences,
   loadRecentSets,
   initSmartEngine,
+  runCardmarketVersioningCheck,
   initAutoHideTopbar,
   initGridZoom,
   initCustomSelects,
@@ -118,6 +119,16 @@ export function createBootstrapController({
     } catch (error) {
       console.warn('Smart Engine init:', error);
     }
+
+    // Cardmarket-Build-Stamp-Check: lädt meta.json, vergleicht mit
+    // dem letzten bekannten generatedAt und invalidiert bei einem
+    // Versionswechsel die In-Memory-Preiscaches. Fire-and-forget, damit
+    // der Bootstrap nicht blockiert, falls der Server nicht erreichbar
+    // ist (z. B. beim Offline-Start).
+    runCardmarketVersioningCheck()?.catch?.((err) => {
+      console.warn('Cardmarket versioning check failed:', err);
+    });
+
     initAutoHideTopbar();
     initGridZoom();
     initCustomSelects();

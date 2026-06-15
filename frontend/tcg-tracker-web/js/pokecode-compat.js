@@ -1,6 +1,6 @@
 import { normalizeCardNumber, naturalSort } from './core/utils.js';
 import { isGeneratedCardmarketSearchUrl } from './data/cardmarket-url-utils.js';
-import { buildCardRecordFromSources, buildSetRecordFromSources } from './data/schema-contract.js?v=20260608-stats-live-progress-rh-fix';
+import { buildCardRecordFromSources, buildSetRecordFromSources } from './data/schema-contract.js?v=20260613-tcgdex-merge-fix-v2';
 
 export function normalizeString(str) {
   if (str === null || typeof str === 'undefined') {
@@ -208,24 +208,93 @@ function findTcgdexSetById(tcgdexSets, setId) {
   return tcgdexSets.find((set) => String(set?.id || '').trim().toLowerCase() === target) || null;
 }
 
-function mergeTcgdexSetWithFallback(preferredSet, fallbackSet = null) {
+/**
+ * Waehlt die Karten-Liste, die fuer den TCGDex-Import benutzt wird.
+ *
+ * TCGDex liefert je nach Locale und Set-Status teils:
+ * - Vollstaendige Karten-Liste (EN, populierte Sets)
+ * - Leeres `cards: []`-Array (DE, Metadaten-only)
+ * - Gar kein cards-Feld
+ *
+ * Da mergeTcgdexSetWithFallback nur ein leeres preferred.cards NICHT
+ * durch fallback.cards ersetzen kann, wenn das fallback selbst keine
+ * Karten fuehrt, brauchen wir hier eine explizite Fallback-Logik:
+ * bevorzugt preferred.cards (sofern nicht leer), sonst english.cards.
+ */
+export function pickTcgdexCardList(preferredSet, englishSet) {
+  const preferredCards = Array.isArray(preferredSet?.cards) ? preferredSet.cards : null;
+  if (preferredCards && preferredCards.length > 0) return preferredCards;
+  const englishCards = Array.isArray(englishSet?.cards) ? englishSet.cards : [];
+  return englishCards;
+}
+
+/**
+ * Identifier-Felder, anhand derer Karten/Booster-Items dedupliziert werden,
+ * wenn preferred und fallback beide Arrays mit Items liefern. TCGDex
+ * verwendet je nach Locale teils nur die Set-Metadaten, teils vollstaendige
+ * Karten-Listen, und Merge via Spread wuerde sonst eine vollstaendige
+ * fallback-Liste durch eine leere preferred-Liste ersetzen.
+ */
+const TCGDEX_MERGE_DEDUPE_KEYS = new Set(['cards', 'boosters']);
+
+function pickTcgdexItemDedupeKey(item) {
+  if (!item || typeof item !== 'object') return null;
+  return String(item.id || item.localId || item.number || '').trim().toLowerCase() || null;
+}
+
+function mergeTcgdexArray(preferredList, fallbackList) {
+  const result = [];
+  const seen = new Set();
+  const pushAll = (list) => {
+    if (!Array.isArray(list)) return;
+    for (const item of list) {
+      if (!item || typeof item !== 'object') continue;
+      const key = pickTcgdexItemDedupeKey(item);
+      if (key) {
+        if (seen.has(key)) continue;
+        seen.add(key);
+      }
+      result.push(item);
+    }
+  };
+  // preferred zuerst, damit dessen Eintraege im Konfliktfall gewinnen
+  pushAll(preferredList);
+  pushAll(fallbackList);
+  return result;
+}
+
+function mergeTcgdexObjectDeep(preferred, fallback) {
+  if (!preferred || typeof preferred !== 'object') return fallback;
+  if (!fallback || typeof fallback !== 'object') return preferred;
+  const out = { ...fallback, ...preferred };
+  for (const key of Object.keys(out)) {
+    const p = preferred[key];
+    const f = fallback[key];
+    if (Array.isArray(p) || Array.isArray(f)) {
+      if (TCGDEX_MERGE_DEDUPE_KEYS.has(key)) {
+        out[key] = mergeTcgdexArray(p, f);
+      } else {
+        // unbekannte Array-Felder: preferred wins, fallback nur wenn preferred leer
+        out[key] = Array.isArray(p) && p.length ? p : (Array.isArray(f) ? f : []);
+      }
+    } else if (p && typeof p === 'object' && f && typeof f === 'object') {
+      out[key] = mergeTcgdexObjectDeep(p, f);
+    }
+  }
+  return out;
+}
+
+export function mergeTcgdexSetWithFallback(preferredSet, fallbackSet = null) {
   if (!preferredSet && !fallbackSet) return null;
 
   const preferred = preferredSet && typeof preferredSet === 'object' ? preferredSet : {};
   const fallback = fallbackSet && typeof fallbackSet === 'object' ? fallbackSet : {};
-  const merged = {
-    ...fallback,
-    ...preferred,
-    serie: {
-      ...(fallback?.serie && typeof fallback.serie === 'object' ? fallback.serie : {}),
-      ...(preferred?.serie && typeof preferred.serie === 'object' ? preferred.serie : {})
-    },
-    abbreviation: {
-      ...(fallback?.abbreviation && typeof fallback.abbreviation === 'object' ? fallback.abbreviation : {}),
-      ...(preferred?.abbreviation && typeof preferred.abbreviation === 'object' ? preferred.abbreviation : {})
-    }
-  };
 
+  const merged = mergeTcgdexObjectDeep(preferred, fallback);
+
+  // Primitive Strings (logo, symbol) sollen vom fallback uebernommen
+  // werden, wenn preferred leer ist (sonst wuerden kaputte Symbole
+  // im UI landen).
   if (!String(merged.logo || '').trim()) {
     merged.logo = String(fallback?.logo || fallback?.images?.logo || '').trim();
   }
@@ -474,7 +543,12 @@ export async function loadCardsForSetCompat({
       tcgdexSet: tcgdexDetailedSet,
       fallbackSetId: tcgdexActualSetId
     });
-    const cards = tcgdexDetailedSet?.cards || [];
+    // TCGDex-DE liefert fuer viele Sets nur die Metadaten + leeres
+    // `cards: []`-Array. Wenn preferredDetail keine Karten enthaelt,
+    // fallen wir auf das englische Detail zurueck (das die vollstaendige
+    // Karten-Liste hat). mergeTcgdexSetWithFallback kann das nicht
+    // abfangen, weil der Summary-Fallback selbst keine Karten fuehrt.
+    const cards = pickTcgdexCardList(tcgdexDetailedSet, tcgdexEnglishDetailedSet);
     const englishCardsMap = buildTcgdexCardsMap(tcgdexEnglishDetailedSet?.cards || []);
     allCards = cards.map((card) => {
       const normalizedCardNumber = normalizeCardNumber(card?.localId || card?.id);

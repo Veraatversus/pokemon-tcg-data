@@ -5,9 +5,9 @@ import {
   combineSetsForOverviewCompat,
   fetchAllPrimaryCardsForSet,
   resolvePreferredTcgdexSetBases
-} from '../pokecode-compat.js?v=20260608-stats-live-progress-rh-fix';
-import { buildSetRecordFromSources, resolveDisplayCard, resolveDisplaySet } from './schema-contract.js?v=20260608-stats-live-progress-rh-fix';
-import { promoteCardmarketUrlsForCards } from './cardmarket-data.js?v=20260608-stats-live-progress-rh-fix';
+} from '../pokecode-compat.js?v=20260613-tcgdex-merge-fix-v2';
+import { buildSetRecordFromSources, resolveDisplayCard, resolveDisplaySet } from './schema-contract.js?v=20260613-tcgdex-merge-fix-v2';
+import { promoteCardmarketUrlsForCards } from './cardmarket-data.js?v=20260613-tcgdex-merge-fix-v2';
 
 // ── Interne Hilfsfunktionen ──────────────────────────────────────
 
@@ -323,7 +323,18 @@ export async function fetchMergedCardsWithSetMeta(setId, { signal } = {}) {
     cardRecords = await promoteCardmarketUrlsForCards(allCards || [], {
       signal,
       resolveSetById,
-      currentSetId: setId
+      currentSetId: setId,
+      setRecord: primarySet
+        ? {
+            setId: primarySet?.id || setId,
+            ptcgoCode: primarySet?.ptcgoCode || primarySet?.code || primarySet?.abbreviation?.official || ''
+          }
+        : (matchingTcgdexSet
+          ? {
+              setId: matchingTcgdexSet?.id || setId,
+              ptcgoCode: matchingTcgdexSet?.abbreviation?.official || matchingTcgdexSet?.ptcgoCode || matchingTcgdexSet?.code || ''
+            }
+          : null)
     });
   } catch (error) {
     console.warn('[cardmarket] direct-link promotion skipped', error);
