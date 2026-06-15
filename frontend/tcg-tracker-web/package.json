@@ -9,6 +9,7 @@
     "predev": "node scripts/ensure-cardmarket-junction.mjs",
     "start:dev": "npx http-server . -p 8080 -c-1 --cors",
     "start:dev:full": "npx http-server ../.. -p 8080 -c-1 --cors",
+    "start:dev:proxy": "node scripts/dev-proxy-runner.mjs",
     "test:smoke": "node tests/regression-smoke.mjs",
     "test:smoke:full-ui": "node tests/full-ui-smoke.mjs",
     "test:smoke:auth": "node tests/auth-smoke.mjs",

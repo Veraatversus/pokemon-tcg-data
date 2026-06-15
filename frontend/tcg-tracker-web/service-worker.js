@@ -4,9 +4,9 @@
 
 const SW_SCOPE_PATH = new URL(self.registration.scope).pathname.toLowerCase();
 const SW_SCOPE = /(^|\/)dev(\/|$)/.test(SW_SCOPE_PATH) ? 'dev' : 'release';
-const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v52`;
-const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v52`;
-const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v52`;
+const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v55`;
+const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v55`;
+const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v55`;
 
 const SW_DEBUG = false;
 
@@ -60,6 +60,13 @@ self.addEventListener('activate', (event) => {
 // Fetch event: serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
   const { request } = event;
+  if (request.url.includes('cardmarket')) {
+    console.log('[SW] cardmarket fetch:', request.destination, request.url.slice(0, 80));
+    event.waitUntil((async () => {
+      const clients = await self.clients.matchAll();
+      clients.forEach(c => c.postMessage({ type: 'CM_FETCH', url: request.url, destination: request.destination }));
+    })());
+  }
   const url = new URL(request.url);
 
   // Skip non-HTTP requests
