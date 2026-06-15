@@ -1,5 +1,7 @@
 import { CONFIG } from '../core/config.js';
+import { isLocalDevEnvironment } from '../core/dev-environment.js';
 import {
+  buildCardmarketImageUrl as sharedBuildCardmarketImageUrl,
   buildCardmarketProductUrl as sharedBuildCardmarketProductUrl,
   buildSetCardAssignmentMap as sharedBuildSetCardAssignmentMap,
   extractCardmarketProductId as sharedExtractCardmarketProductId,
@@ -46,6 +48,30 @@ function getCardmarketUrlFromCard(card = {}) {
 
 export function buildCardmarketProductUrl(productId, { language = 'de' } = {}) {
   return sharedBuildCardmarketProductUrl(productId, { language });
+}
+
+export function buildCardmarketImageUrl(payload = {}) {
+  return sharedBuildCardmarketImageUrl({
+    ...payload,
+    proxyUrl: payload?.proxyUrl ?? getCardmarketImageProxyUrl()
+  });
+}
+
+// Reads the Cardmarket image proxy URL from the user settings (localStorage).
+// Returns empty string when:
+//   - the user hasn't configured a proxy, or
+//   - the runtime is NOT a local-dev environment (production always ignores
+//     the setting so the direct S3 URL is used).
+export function getCardmarketImageProxyUrl() {
+  if (!isLocalDevEnvironment()) return '';
+  try {
+    const raw = localStorage.getItem('poke:release:user-settings');
+    if (!raw) return '';
+    const parsed = JSON.parse(raw);
+    return String(parsed?.cardmarketImageProxyUrl || '').trim().replace(/\/$/, '');
+  } catch {
+    return '';
+  }
 }
 
 export function resolveCardmarketEntryFromSetPayload(setPayload = {}, productId = '') {
@@ -267,12 +293,15 @@ export async function resolveCardmarketEntryForCard(card = {}, { cards = [], res
   return directUrl ? resolveCardmarketEntryByUrl(directUrl, { signal, forceRefresh }) : null;
 }
 
-export async function promoteCardmarketUrlsForCards(cards = [], { productIndex = null, setPayload = null, resolveSetById = null, currentSetId = '', signal, forceRefresh = false } = {}) {
+export async function promoteCardmarketUrlsForCards(cards = [], { productIndex = null, setPayload = null, resolveSetById = null, currentSetId = '', setRecord = null, signal, forceRefresh = false } = {}) {
+  const proxyUrl = getCardmarketImageProxyUrl();
   return sharedPromoteCardmarketUrlsForCards(cards, {
     productIndex,
     setPayload,
     resolveSetById,
     currentSetId,
+    setRecord,
+    proxyUrl,
     signal,
     forceRefresh,
     loadProductIndex: productIndex ? null : ({ signal, forceRefresh } = {}) => loadCardmarketProductIndex({ signal, forceRefresh }),

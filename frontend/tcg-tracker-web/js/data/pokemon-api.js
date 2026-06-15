@@ -323,7 +323,18 @@ export async function fetchMergedCardsWithSetMeta(setId, { signal } = {}) {
     cardRecords = await promoteCardmarketUrlsForCards(allCards || [], {
       signal,
       resolveSetById,
-      currentSetId: setId
+      currentSetId: setId,
+      setRecord: primarySet
+        ? {
+            setId: primarySet?.id || setId,
+            ptcgoCode: primarySet?.ptcgoCode || primarySet?.code || primarySet?.abbreviation?.official || ''
+          }
+        : (matchingTcgdexSet
+          ? {
+              setId: matchingTcgdexSet?.id || setId,
+              ptcgoCode: matchingTcgdexSet?.abbreviation?.official || matchingTcgdexSet?.ptcgoCode || matchingTcgdexSet?.code || ''
+            }
+          : null)
     });
   } catch (error) {
     console.warn('[cardmarket] direct-link promotion skipped', error);

@@ -1,39 +1,71 @@
 import { normalizeCardNumber } from '../core/utils.js';
 import { scopedStorageKey } from '../core/config.js';
 import { isGeneratedCardmarketSearchUrl } from './cardmarket-url-utils.js';
+import { isLocalDevEnvironment } from '../core/dev-environment.js';
 
 const SETTINGS_STORAGE_KEY = scopedStorageKey('user-settings');
-const RESOLVER_SOURCES = ['tcgdex', 'vera', 'legacy'];
+// Base resolver sources are always available. `cardmarket` is an opt-in
+// debug source that only appears in local-dev environments — see
+// `getResolverSources()`. Production builds never expose it in the
+// matrix, the candidate lists, or the settings UI.
+const BASE_RESOLVER_SOURCES = ['tcgdex', 'vera', 'legacy'];
+const DEV_ONLY_RESOLVER_SOURCE = 'cardmarket';
 
-const DEFAULT_RESOLVER_MATRIX = {
-  set: {
-    setName: ['tcgdex', 'vera', 'legacy'],
-    series: ['tcgdex', 'vera', 'legacy'],
-    releaseDate: ['tcgdex', 'vera', 'legacy'],
-    totalCards: ['tcgdex', 'vera', 'legacy'],
-    ptcgoCode: ['tcgdex', 'vera', 'legacy'],
-    logoUrl: ['tcgdex', 'vera', 'legacy'],
-    symbolUrl: ['tcgdex', 'vera', 'legacy'],
-    legalities: ['tcgdex', 'vera', 'legacy']
-  },
-  card: {
-    number: ['tcgdex', 'vera', 'legacy'],
-    name: ['tcgdex', 'vera', 'legacy'],
-    image: ['tcgdex', 'vera', 'legacy'],
-    imageLarge: ['tcgdex', 'vera', 'legacy'],
-    cardmarketUrl: ['tcgdex', 'vera', 'legacy'],
-    rarity: ['tcgdex', 'vera', 'legacy'],
-    hp: ['tcgdex', 'vera', 'legacy'],
-    types: ['tcgdex', 'vera', 'legacy'],
-    supertype: ['tcgdex', 'vera', 'legacy'],
-    subtypes: ['tcgdex', 'vera', 'legacy'],
-    evolvesFrom: ['tcgdex', 'vera', 'legacy'],
-    artist: ['tcgdex', 'vera', 'legacy'],
-    regulationMark: ['tcgdex', 'vera', 'legacy'],
-    rules: ['tcgdex', 'vera', 'legacy'],
-    flavorText: ['tcgdex', 'vera', 'legacy']
+function getResolverSources() {
+  return isLocalDevEnvironment()
+    ? [...BASE_RESOLVER_SOURCES, DEV_ONLY_RESOLVER_SOURCE]
+    : [...BASE_RESOLVER_SOURCES];
+}
+
+// Defaults are computed at first access (in `getDefaultResolverMatrix()`) so the
+// dev-only `cardmarket` source is only inserted when running on a loopback /
+// private-network host. Tests can call this directly.
+function getDefaultResolverMatrix() {
+  const sources = getResolverSources();
+  const imageOrder = isLocalDevEnvironment()
+    ? [...BASE_RESOLVER_SOURCES.slice(0, 2), 'cardmarket', 'legacy']
+    : [...BASE_RESOLVER_SOURCES];
+  const field = (order) => (Array.isArray(order) && order.length ? order : [...sources]);
+  return {
+    set: {
+      setName: field(['tcgdex', 'vera', 'legacy']),
+      series: field(['tcgdex', 'vera', 'legacy']),
+      releaseDate: field(['tcgdex', 'vera', 'legacy']),
+      totalCards: field(['tcgdex', 'vera', 'legacy']),
+      ptcgoCode: field(['tcgdex', 'vera', 'legacy']),
+      logoUrl: field(['tcgdex', 'vera', 'legacy']),
+      symbolUrl: field(['tcgdex', 'vera', 'legacy']),
+      legalities: field(['tcgdex', 'vera', 'legacy'])
+    },
+    card: {
+      number: field(['tcgdex', 'vera', 'legacy']),
+      name: field(['tcgdex', 'vera', 'legacy']),
+      image: field(imageOrder),
+      imageLarge: field(imageOrder),
+      cardmarketUrl: field(['tcgdex', 'vera', 'legacy']),
+      rarity: field(['tcgdex', 'vera', 'legacy']),
+      hp: field(['tcgdex', 'vera', 'legacy']),
+      types: field(['tcgdex', 'vera', 'legacy']),
+      supertype: field(['tcgdex', 'vera', 'legacy']),
+      subtypes: field(['tcgdex', 'vera', 'legacy']),
+      evolvesFrom: field(['tcgdex', 'vera', 'legacy']),
+      artist: field(['tcgdex', 'vera', 'legacy']),
+      regulationMark: field(['tcgdex', 'vera', 'legacy']),
+      rules: field(['tcgdex', 'vera', 'legacy']),
+      flavorText: field(['tcgdex', 'vera', 'legacy'])
+    }
+  };
+}
+
+// Backwards-compatible const reference. Built lazily on first read so dev
+// detection runs at access time, not at module evaluation time.
+let _defaultResolverMatrix = null;
+const DEFAULT_RESOLVER_MATRIX = new Proxy({}, {
+  get(_t, prop) {
+    if (!_defaultResolverMatrix) _defaultResolverMatrix = getDefaultResolverMatrix();
+    return _defaultResolverMatrix[prop];
   }
-};
+});
 
 let resolverMatrixCache = null;
 
@@ -51,22 +83,23 @@ function isValuePresent(value, { numeric = false } = {}) {
 
 function normalizePriority(priority, fallback) {
   if (!Array.isArray(priority) || priority.length === 0) return fallback;
+  const allowedSources = getResolverSources();
   const normalized = [];
   priority.forEach((entry) => {
     const source = String(entry || '').trim().toLowerCase();
-    if (RESOLVER_SOURCES.includes(source) && !normalized.includes(source)) {
+    if (allowedSources.includes(source) && !normalized.includes(source)) {
       normalized.push(source);
     }
   });
   if (normalized.length === 0) return fallback;
-  RESOLVER_SOURCES.forEach((source) => {
+  allowedSources.forEach((source) => {
     if (!normalized.includes(source)) normalized.push(source);
   });
   return normalized;
 }
 
 function normalizeResolverMatrix(input) {
-  const defaults = DEFAULT_RESOLVER_MATRIX;
+  const defaults = getDefaultResolverMatrix();
   const normalized = deepClone(defaults);
   if (!input || typeof input !== 'object') return normalized;
 
@@ -653,13 +686,20 @@ export function resolveDisplayCard(cardRecord = {}) {
     vera: cardRecord.vera_name
   }, { fallback: cardRecord.vera_name || cardRecord.tcgdex_name || '' });
 
+  // The `cardmarket` source is dev-only. In production, drop the slot from
+  // the candidate list so the resolver-matrix never resolves to it.
+  const cardmarketSourceSlot = isLocalDevEnvironment()
+    ? { cardmarket: sanitizeMediaValue(cardRecord.cardmarketImageUrl) }
+    : null;
   const imageCandidates = collectValuesByPriority(matrix.image, {
     tcgdex: sanitizeMediaValue(cardRecord.tcgdex_image_small || cardRecord.tcgdex_image),
     vera: sanitizeMediaValue(cardRecord.vera_images_small),
+    ...(cardmarketSourceSlot || {}),
     legacy: sanitizeMediaValue(cardRecord.image || cardRecord.imageUrl)
   }, {
     fallback: sanitizeMediaValue(cardRecord.vera_images_small)
       || sanitizeMediaValue(cardRecord.tcgdex_image_small || cardRecord.tcgdex_image)
+      || (cardmarketSourceSlot ? sanitizeMediaValue(cardRecord.cardmarketImageUrl) : '')
       || sanitizeMediaValue(cardRecord.image)
       || sanitizeMediaValue(cardRecord.imageUrl)
       || ''
@@ -669,10 +709,12 @@ export function resolveDisplayCard(cardRecord = {}) {
   const imageLargeCandidates = collectValuesByPriority(matrix.imageLarge, {
     tcgdex: sanitizeMediaValue(cardRecord.tcgdex_image_large),
     vera: sanitizeMediaValue(cardRecord.vera_images_large),
+    ...(cardmarketSourceSlot || {}),
     legacy: sanitizeMediaValue(cardRecord.imageLarge || cardRecord.imageLargeUrl || cardRecord.image || cardRecord.imageUrl)
   }, {
     fallback: sanitizeMediaValue(cardRecord.vera_images_large)
       || sanitizeMediaValue(cardRecord.tcgdex_image_large)
+      || (cardmarketSourceSlot ? sanitizeMediaValue(cardRecord.cardmarketImageUrl) : '')
       || sanitizeMediaValue(cardRecord.imageLarge)
       || sanitizeMediaValue(cardRecord.imageLargeUrl)
       || sanitizeMediaValue(cardRecord.vera_images_small)

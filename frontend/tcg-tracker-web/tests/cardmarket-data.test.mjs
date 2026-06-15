@@ -15,6 +15,7 @@ import {
 import {
   resolveCardmarketEntryForCardFromSetPayload as resolveCardmarketEntryForCardFromSetPayloadFrontend,
 } from '../js/data/cardmarket-data.js';
+import { isLocalDevEnvironment } from '../js/core/dev-environment.js';
 
 test('getCardmarketBaseUrl prefers the local app origin during localhost development', () => {
   assert.equal(getCardmarketBaseUrl({ origin: 'http://localhost:8080' }), 'http://localhost:8080/cardmarket');
@@ -318,6 +319,150 @@ test('promoteCardmarketUrlsForCards keeps duplicate same-name cards aligned to t
 
   assert.equal(promoted[0].cardmarketUrl, 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=1015');
   assert.equal(promoted[1].cardmarketUrl, 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=1088');
+});
+
+test('promoteCardmarketUrlsForCards publishes cardmarketImageUrl/categoryId/setCode when setRecord.ptcgoCode is provided', async () => {
+  const cards = [
+    {
+      setId: 'me4',
+      number: '002',
+      vera_name: 'Kakuna',
+      tcgdex_name: 'Kakuna',
+      cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=CRI+002',
+      vera_cardmarket_url: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=CRI+002'
+    }
+  ];
+
+  const promoted = await promoteCardmarketUrlsForCards(cards, {
+    productIndex: { '886394': { expansionId: 6517, path: 'sets/6517.json' } },
+    setPayload: {
+      expansionId: 6517,
+      cards: [
+        { cardmarketProductId: 886394, categoryId: 51, name: 'Kakuna [Exoskeleton | Hang Down]', prices: { trend: 0.03 } }
+      ]
+    },
+    setRecord: { setId: 'me4', ptcgoCode: 'cri' }
+  });
+
+  assert.equal(promoted[0].cardmarketProductId, 886394);
+  assert.equal(promoted[0].cardmarketCategoryId, 51);
+  assert.equal(promoted[0].cardmarketSetCode, 'cri');
+  assert.equal(
+    promoted[0].cardmarketImageUrl,
+    'https://product-images.s3.cardmarket.com/51/CRI/886394/886394.jpg'
+  );
+});
+
+test('promoteCardmarketUrlsForCards backfills cardmarketImageUrl on already-aligned cards when no URL promotion is needed', async () => {
+  const cards = [
+    {
+      setId: 'me4',
+      number: '002',
+      vera_name: 'Kakuna',
+      tcgdex_name: 'Kakuna',
+      cardmarketProductId: 886394,
+      cardmarketCategoryId: 51,
+      cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=886394',
+      vera_cardmarket_url: 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=886394'
+    }
+  ];
+
+  const promoted = await promoteCardmarketUrlsForCards(cards, {
+    productIndex: {},
+    setPayload: {
+      expansionId: 6517,
+      cards: [
+        { cardmarketProductId: 886394, categoryId: 51, name: 'Kakuna [Exoskeleton | Hang Down]', prices: { trend: 0.03 } }
+      ]
+    },
+    setRecord: { setId: 'me4', ptcgoCode: 'cri' }
+  });
+
+  assert.equal(
+    promoted[0].cardmarketImageUrl,
+    'https://product-images.s3.cardmarket.com/51/CRI/886394/886394.jpg'
+  );
+  assert.equal(promoted[0].cardmarketSetCode, 'cri');
+});
+
+test('promoteCardmarketUrlsForCards returns unchanged cards when ptcgoCode is unknown to the tracker', async () => {
+  const cards = [
+    {
+      setId: 'me4',
+      number: '002',
+      vera_name: 'Kakuna',
+      tcgdex_name: 'Kakuna',
+      cardmarketUrl: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=CRI+002',
+      vera_cardmarket_url: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=CRI+002'
+    }
+  ];
+
+  const promoted = await promoteCardmarketUrlsForCards(cards, {
+    productIndex: { '886394': { expansionId: 6517, path: 'sets/6517.json' } },
+    setPayload: {
+      expansionId: 6517,
+      cards: [
+        { cardmarketProductId: 886394, categoryId: 51, name: 'Kakuna [Exoskeleton | Hang Down]', prices: { trend: 0.03 } }
+      ]
+    },
+    setRecord: { setId: 'me4', ptcgoCode: 'unknown' },
+    trackerSetIndex: {
+      bySetId: { me4: '6517' },
+      byPtcgoCode: { cri: '6517' }
+    }
+  });
+
+  // URL promotion still happens (search fallback → direct product URL) but the
+  // cardmarket image metadata is intentionally empty so the resolver doesn't
+  // emit a broken URL.
+  assert.equal(promoted[0].cardmarketUrl, 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=886394');
+  assert.equal(promoted[0].cardmarketImageUrl, '');
+  assert.equal(promoted[0].cardmarketSetCode, '');
+});
+
+test('isLocalDevEnvironment returns false for github.io and other public hosts (gating the cardmarket image source)', () => {
+  // Direct unit test for the gate that `resolveDisplayCard` and
+  // `getCardmarketImageProxyUrl` rely on.
+  const realLocation = globalThis.location;
+  const publicHosts = [
+    'veraatversus.github.io',
+    'pokemon-tcg-data.github.io',
+    'example.com',
+    '8.8.8.8'
+  ];
+  for (const host of publicHosts) {
+    Object.defineProperty(globalThis, 'location', {
+      value: { hostname: host },
+      configurable: true,
+      writable: true
+    });
+    assert.equal(isLocalDevEnvironment(), false, `expected prod for ${host}`);
+  }
+  // Restore
+  Object.defineProperty(globalThis, 'location', {
+    value: realLocation,
+    configurable: true,
+    writable: true
+  });
+});
+
+test('isLocalDevEnvironment returns true for loopback and private-network hosts', () => {
+  const realLocation = globalThis.location;
+  const devHosts = ['localhost', '127.0.0.1', '10.0.0.5', '192.168.1.10', '172.16.0.1'];
+  for (const host of devHosts) {
+    Object.defineProperty(globalThis, 'location', {
+      value: { hostname: host },
+      configurable: true,
+      writable: true
+    });
+    assert.equal(isLocalDevEnvironment(), true, `expected dev for ${host}`);
+  }
+  // Restore
+  Object.defineProperty(globalThis, 'location', {
+    value: realLocation,
+    configurable: true,
+    writable: true
+  });
 });
 
 test('frontend wrapper forwards sourceCards for duplicate-name disambiguation', () => {
