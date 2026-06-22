@@ -119,14 +119,19 @@ function getResolverMatrix() {
   try {
     const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
     if (!raw) {
-      resolverMatrixCache = deepClone(DEFAULT_RESOLVER_MATRIX);
+      // Bypass the DEFAULT_RESOLVER_MATRIX Proxy: JSON.stringify on an
+      // empty Proxy({}, ...) returns '{}' (the get-trap is never invoked),
+      // so deepClone would lose the .set/.card sub-trees and any caller
+      // doing `getResolverMatrix().set` would crash. Calling the factory
+      // directly yields a real object that deepClone can clone safely.
+      resolverMatrixCache = deepClone(getDefaultResolverMatrix());
       return resolverMatrixCache;
     }
     const parsed = JSON.parse(raw);
     resolverMatrixCache = normalizeResolverMatrix(parsed?.resolverMatrix || null);
     return resolverMatrixCache;
   } catch {
-    resolverMatrixCache = deepClone(DEFAULT_RESOLVER_MATRIX);
+    resolverMatrixCache = deepClone(getDefaultResolverMatrix());
     return resolverMatrixCache;
   }
 }
