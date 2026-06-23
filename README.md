@@ -40,35 +40,3 @@ Please contribute when you see missing and/or incorrect data. I'll try to review
 3. Commit your changes (git commit -am 'Add some feature')
 4. Push to the branch (git push origin my-new-feature)
 5. Create a new Pull Request
-
-# Cardmarket Custom Set Scripts
-
-The Cardmarket build supports optional set-specific post-processing scripts.
-
-- Script directory: `scripts/cardmarket/custom-sets/`
-- File naming: `<setId>.mjs` (example: `1538.mjs`)
-- Export contract: `transformSet(payload, context)`
-- Runtime: Node.js ESM (`.mjs` JavaScript)
-- Context shape: `{ setId, artifacts, logger }`
-- Optional network timeout override for feed fetches: `CARDMARKET_FETCH_TIMEOUT_MS`
-
-Behavior:
-
-- If a custom script runs successfully, the transformed payload replaces the original set artifact before files are written.
-- If a custom script fails or returns an invalid payload, the build logs a warning and keeps the original set artifact unchanged.
-
-Example skeleton:
-
-```js
-export function transformSet(payload, { logger }) {
-	if (!payload || !Array.isArray(payload.cards)) {
-		return payload;
-	}
-
-	// mutate by returning a new payload object
-	return {
-		...payload,
-		cards: payload.cards,
-	};
-}
-```
