@@ -17,14 +17,14 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Fruity Aroma",
-                "text": "Look at the top 6 cards of your deck, and you may reveal any number of Pokémon you find there and put them into your hand. Shuffle the other cards back into your deck.",
+                "name": "Aroma Frutal",
+                "text": "Mira las 6 primeras cartas de tu baraja, y puedes enseñar cualquier cantidad de Pokémon que encuentres entre ellas y ponerlos en tu mano. Pon el resto de las cartas de nuevo en tu baraja y barájalas todas.",
                 "cost": "C",
                 "damage": "",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Solar Beam",
+                "name": "Rayo Solar",
                 "text": "",
                 "cost": "GC",
                 "damage": "60",
@@ -49,8 +49,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/1.webp",
-            "large": "https://images.pokedata.ovh/en/me5/1_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/1.webp",
+            "large": "https://images.pokedata.ovh/es/me5/1_hires.webp"
         },
         "resistances": []
     },
@@ -75,8 +75,8 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "String Shot",
-                "text": "Flip a coin. If heads, your opponent's Active Pokémon is now Paralyzed.",
+                "name": "Disparo Demora",
+                "text": "Lanza 1 moneda. Si sale cara, el Pokémon Activo de tu rival pasa a estar Paralizado.",
                 "cost": "C",
                 "damage": "10",
                 "convertedEnergyCost": 1
@@ -101,8 +101,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/2.webp",
-            "large": "https://images.pokedata.ovh/en/me5/2_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/2.webp",
+            "large": "https://images.pokedata.ovh/es/me5/2_hires.webp"
         },
         "resistances": []
     },
@@ -129,8 +129,8 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Reckless Charge",
-                "text": "This Pokémon also does 10 damage to itself.",
+                "name": "Carga Descuidada",
+                "text": "Este Pokémon también se hace 10 puntos de daño a sí mismo.",
                 "cost": "G",
                 "damage": "30",
                 "convertedEnergyCost": 1
@@ -154,8 +154,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/3.webp",
-            "large": "https://images.pokedata.ovh/en/me5/3_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/3.webp",
+            "large": "https://images.pokedata.ovh/es/me5/3_hires.webp"
         },
         "resistances": []
     },
@@ -178,15 +178,15 @@
         "rarity": "DoubleRare",
         "attacks": [
             {
-                "name": "Lively Cutter",
-                "text": "If this Pokémon was healed during this turn, this attack does 200 more damage.",
+                "name": "Cuchilla Animada",
+                "text": "Si este Pokémon ha sido curado durante este turno, este ataque hace 200 puntos de daño más.",
                 "cost": "G",
                 "damage": "60+",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Leaf Guard",
-                "text": "During your opponent's next turn, this Pokémon takes 50 less damage from attacks <i>(after applying Weakness and Resistance)</i>.",
+                "name": "Defensa Hoja",
+                "text": "Durante el próximo turno de tu rival, los ataques hacen 50 puntos de daño menos a este Pokémon <i>(después de aplicar Debilidad y Resistencia)</i>.",
                 "cost": "GC",
                 "damage": "140",
                 "convertedEnergyCost": 2
@@ -210,8 +210,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/4.webp",
-            "large": "https://images.pokedata.ovh/en/me5/4_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/4.webp",
+            "large": "https://images.pokedata.ovh/es/me5/4_hires.webp"
         },
         "resistances": []
     },
@@ -237,8 +237,8 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Furtive Drop",
-                "text": "Place 1 damage counter on your opponent's Active Pokémon.",
+                "name": "Caída Furtiva",
+                "text": "Pon 1 contador de daño en el Pokémon Activo de tu rival.",
                 "cost": "C",
                 "damage": "",
                 "convertedEnergyCost": 1
@@ -246,8 +246,8 @@
         ],
         "abilities": [
             {
-                "name": "[Ability] Hide 'n' Sneak",
-                "text": "Prevent all effects of your opponent's Pokémon's attacks and Abilities done to this Pokémon. <i>(Damage is not an effect.)</i>"
+                "name": "[Ability] Escondite a Hurtadillas",
+                "text": "Se evitan todos los efectos de los ataques y las habilidades de los Pokémon de tu rival infligidos a este Pokémon. <i>(El daño no es un efecto).</i>"
             }
         ],
         "weaknesses": [
@@ -266,8 +266,8 @@
         "retreatCost": [],
         "convertedRetreatCost": 0,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/5.webp",
-            "large": "https://images.pokedata.ovh/en/me5/5_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/5.webp",
+            "large": "https://images.pokedata.ovh/es/me5/5_hires.webp"
         },
         "resistances": []
     },
@@ -289,8 +289,8 @@
         "rarity": "Uncommon",
         "attacks": [
             {
-                "name": "Matcha Spin",
-                "text": "If you have 6 or more Pokémon that have the Hide 'n' Sneak Ability in your discard pile, place 4 damage counters on each of your opponent's Pokémon.",
+                "name": "Giro Matcha",
+                "text": "Si tienes en tu pila de descartes 6 Pokémon o más que tengan la habilidad Escondite a Hurtadillas, pon 4 contadores de daño en cada uno de los Pokémon de tu rival.",
                 "cost": "C",
                 "damage": "",
                 "convertedEnergyCost": 1
@@ -298,8 +298,8 @@
         ],
         "abilities": [
             {
-                "name": "[Ability] Hide 'n' Sneak",
-                "text": "Prevent all effects of your opponent's Pokémon's attacks and Abilities done to this Pokémon. <i>(Damage is not an effect.)</i>"
+                "name": "[Ability] Escondite a Hurtadillas",
+                "text": "Se evitan todos los efectos de los ataques y las habilidades de los Pokémon de tu rival infligidos a este Pokémon. <i>(El daño no es un efecto).</i>"
             }
         ],
         "weaknesses": [
@@ -320,8 +320,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/6.webp",
-            "large": "https://images.pokedata.ovh/en/me5/6_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/6.webp",
+            "large": "https://images.pokedata.ovh/es/me5/6_hires.webp"
         },
         "resistances": []
     },
@@ -343,15 +343,15 @@
         "rarity": "Uncommon",
         "attacks": [
             {
-                "name": "Singe",
-                "text": "Your opponent's Active Pokémon is now Burned.",
+                "name": "Quemadura",
+                "text": "El Pokémon Activo de tu rival pasa a estar Quemado.",
                 "cost": "R",
                 "damage": "",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Lava Wall",
-                "text": "During your opponent's next turn, prevent all damage done to this Pokémon by attacks from Burned Pokémon.",
+                "name": "Pared de Lava",
+                "text": "Durante el próximo turno de tu rival, se evita todo el daño infligido a este Pokémon por ataques de Pokémon Quemados.",
                 "cost": "RRC",
                 "damage": "120",
                 "convertedEnergyCost": 3
@@ -378,8 +378,8 @@
         ],
         "convertedRetreatCost": 4,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/7.webp",
-            "large": "https://images.pokedata.ovh/en/me5/7_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/7.webp",
+            "large": "https://images.pokedata.ovh/es/me5/7_hires.webp"
         },
         "resistances": []
     },
@@ -399,19 +399,19 @@
         "Craftable Date": "2026-07-16 19:00:00",
         "Craftable": 1,
         "baseEvolution": "Fennekin",
-        "name": "Mega Delphox ex",
+        "name": "Mega-Delphox ex",
         "rarity": "DoubleRare",
         "attacks": [
             {
-                "name": "Trick Portal",
-                "text": "Look at the top 9 cards of your deck, and you may put any number of Pokémon you find there onto your Bench. Shuffle the other cards back into your deck.",
+                "name": "Portal Trucado",
+                "text": "Mira las 9 primeras cartas de tu baraja, y puedes poner cualquier cantidad de Pokémon que encuentres entre ellas en tu Banca. Pon el resto de las cartas de nuevo en tu baraja y barájalas todas.",
                 "cost": "R",
                 "damage": "",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Eerie Glow",
-                "text": "Your opponent's Active Pokémon is now Burned and Confused.",
+                "name": "Resplandor Sobrecogedor",
+                "text": "El Pokémon Activo de tu rival pasa a estar Confundido y Quemado.",
                 "cost": "RCC",
                 "damage": "200",
                 "convertedEnergyCost": 3
@@ -436,8 +436,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/8.webp",
-            "large": "https://images.pokedata.ovh/en/me5/8_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/8.webp",
+            "large": "https://images.pokedata.ovh/es/me5/8_hires.webp"
         },
         "resistances": []
     },
@@ -462,15 +462,15 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Controlled Burn",
-                "text": "Discard the top card of your opponent's deck.",
+                "name": "Fuego Controlado",
+                "text": "Descarta la primera carta de la baraja de tu rival.",
                 "cost": "R",
                 "damage": "",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Bug Out",
-                "text": "Reveal the bottom 7 cards of your deck, and this attack does 50 damage for each Pokémon you find there that has the Bug Out attack. Then, shuffle any revealed Pokémon back into your deck. Discard the other cards.",
+                "name": "Bichos al Acecho",
+                "text": "Enseña las 7 últimas cartas de tu baraja, y este ataque hace 50 puntos de daño por cada Pokémon que encuentres entre ellas que tenga el ataque Bichos al Acecho. Después, pon cualquier Pokémon que hayas enseñado de nuevo en tu baraja y baraja todas las cartas. Descarta el resto de las cartas.",
                 "cost": "CCC",
                 "damage": "50x",
                 "convertedEnergyCost": 3
@@ -495,8 +495,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/9.webp",
-            "large": "https://images.pokedata.ovh/en/me5/9_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/9.webp",
+            "large": "https://images.pokedata.ovh/es/me5/9_hires.webp"
         },
         "resistances": []
     },
@@ -518,15 +518,15 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Controlled Burn",
-                "text": "Discard the top 2 cards of your opponent's deck.",
+                "name": "Fuego Controlado",
+                "text": "Descarta las 2 primeras cartas de la baraja de tu rival.",
                 "cost": "R",
                 "damage": "",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Heat Tackle",
-                "text": "This Pokémon also does 30 damage to itself.",
+                "name": "Placaje Ardiente",
+                "text": "Este Pokémon también se hace 30 puntos de daño a sí mismo.",
                 "cost": "RCCC",
                 "damage": "160",
                 "convertedEnergyCost": 4
@@ -552,8 +552,8 @@
         ],
         "convertedRetreatCost": 3,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/10.webp",
-            "large": "https://images.pokedata.ovh/en/me5/10_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/10.webp",
+            "large": "https://images.pokedata.ovh/es/me5/10_hires.webp"
         },
         "resistances": []
     },
@@ -581,8 +581,8 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Best Punch",
-                "text": "Flip a coin. If tails, this attack does nothing.",
+                "name": "Mejor Puñetazo",
+                "text": "Lanza 1 moneda. Si sale cruz, este ataque no hace nada.",
                 "cost": "R",
                 "damage": "40",
                 "convertedEnergyCost": 1
@@ -607,8 +607,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/11.webp",
-            "large": "https://images.pokedata.ovh/en/me5/11_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/11.webp",
+            "large": "https://images.pokedata.ovh/es/me5/11_hires.webp"
         },
         "resistances": []
     },
@@ -630,8 +630,8 @@
         "rarity": "Rare",
         "attacks": [
             {
-                "name": "Flame Legion",
-                "text": "This attack does 40 more damage for each of your Benched Pokémon that has any fire Energy attached.",
+                "name": "Legión de Llamas",
+                "text": "Este ataque hace 40 puntos de daño más por cada uno de tus Pokémon en Banca que tengan alguna Energía fire unida.",
                 "cost": "R",
                 "damage": "40+",
                 "convertedEnergyCost": 1
@@ -656,8 +656,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/12.webp",
-            "large": "https://images.pokedata.ovh/en/me5/12_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/12.webp",
+            "large": "https://images.pokedata.ovh/es/me5/12_hires.webp"
         },
         "resistances": []
     },
@@ -682,7 +682,7 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Pierce",
+                "name": "Perforar",
                 "text": "",
                 "cost": "CC",
                 "damage": "30",
@@ -707,8 +707,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/13.webp",
-            "large": "https://images.pokedata.ovh/en/me5/13_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/13.webp",
+            "large": "https://images.pokedata.ovh/es/me5/13_hires.webp"
         },
         "resistances": []
     },
@@ -730,8 +730,8 @@
         "rarity": "Uncommon",
         "attacks": [
             {
-                "name": "Hydro Jet",
-                "text": "This attack does 30 damage to 1 of your opponent's Pokémon for each water Energy attached to this Pokémon. <i>(Don't apply Weakness and Resistance for Benched Pokémon.)</i>",
+                "name": "Hidropropulsión",
+                "text": "Este ataque hace 30 puntos de daño a uno de los Pokémon de tu rival por cada Energía water unida a este Pokémon. <i>(No apliques Debilidad y Resistencia a los Pokémon en Banca).</i>",
                 "cost": "CCC",
                 "damage": "",
                 "convertedEnergyCost": 3
@@ -755,8 +755,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/14.webp",
-            "large": "https://images.pokedata.ovh/en/me5/14_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/14.webp",
+            "large": "https://images.pokedata.ovh/es/me5/14_hires.webp"
         },
         "resistances": []
     },
@@ -782,14 +782,14 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Water Gun",
+                "name": "Pistola Agua",
                 "text": "",
                 "cost": "WW",
                 "damage": "40",
                 "convertedEnergyCost": 2
             },
             {
-                "name": "Wave Splash",
+                "name": "Chapoteo Ondulante",
                 "text": "",
                 "cost": "WWW",
                 "damage": "80",
@@ -817,8 +817,8 @@
         ],
         "convertedRetreatCost": 4,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/15.webp",
-            "large": "https://images.pokedata.ovh/en/me5/15_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/15.webp",
+            "large": "https://images.pokedata.ovh/es/me5/15_hires.webp"
         },
         "resistances": []
     },
@@ -848,8 +848,8 @@
                 "convertedEnergyCost": 3
             },
             {
-                "name": "Falling Down",
-                "text": "This Pokémon is now Asleep.",
+                "name": "Desplome",
+                "text": "Este Pokémon pasa a estar Dormido.",
                 "cost": "WWWWW",
                 "damage": "270",
                 "convertedEnergyCost": 5
@@ -876,8 +876,8 @@
         ],
         "convertedRetreatCost": 4,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/16.webp",
-            "large": "https://images.pokedata.ovh/en/me5/16_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/16.webp",
+            "large": "https://images.pokedata.ovh/es/me5/16_hires.webp"
         },
         "resistances": []
     },
@@ -899,8 +899,8 @@
         "rarity": "Uncommon",
         "attacks": [
             {
-                "name": "Fossil Beatdown",
-                "text": "This attack does 30 more damage for each of your Benched Pokémon that has \"Antique\" in its name.",
+                "name": "Derribo Fósil",
+                "text": "Este ataque hace 30 puntos de daño más por cada uno de tus Pokémon en Banca que tengan \"Antiguo\" en su nombre.",
                 "cost": "C",
                 "damage": "10+",
                 "convertedEnergyCost": 1
@@ -924,8 +924,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/17.webp",
-            "large": "https://images.pokedata.ovh/en/me5/17_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/17.webp",
+            "large": "https://images.pokedata.ovh/es/me5/17_hires.webp"
         },
         "resistances": []
     },
@@ -950,7 +950,7 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Pound",
+                "name": "Destructor",
                 "text": "",
                 "cost": "W",
                 "damage": "20",
@@ -975,8 +975,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/18.webp",
-            "large": "https://images.pokedata.ovh/en/me5/18_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/18.webp",
+            "large": "https://images.pokedata.ovh/es/me5/18_hires.webp"
         },
         "resistances": []
     },
@@ -1002,7 +1002,7 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Hyper Voice",
+                "name": "Vozarrón",
                 "text": "",
                 "cost": "W",
                 "damage": "40",
@@ -1028,8 +1028,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/19.webp",
-            "large": "https://images.pokedata.ovh/en/me5/19_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/19.webp",
+            "large": "https://images.pokedata.ovh/es/me5/19_hires.webp"
         },
         "resistances": []
     },
@@ -1051,8 +1051,8 @@
         "rarity": "Rare",
         "attacks": [
             {
-                "name": "Aqua Return",
-                "text": "Shuffle this Pokémon and all attached cards into your deck.",
+                "name": "Retorno Acuático",
+                "text": "Pon este Pokémon y todas las cartas unidas a él en tu baraja, y baraja todas las cartas.",
                 "cost": "WC",
                 "damage": "120",
                 "convertedEnergyCost": 2
@@ -1060,8 +1060,8 @@
         ],
         "abilities": [
             {
-                "name": "[Ability] Enriching Melody",
-                "text": "Once during your turn, when you play this Pokémon from your hand to evolve 1 of your Pokémon, you may use this Ability. Heal all damage from 1 of your Pokémon."
+                "name": "[Ability] Melodía Restauradora",
+                "text": "Una vez durante tu turno, cuando juegas este Pokémon de tu mano para hacer evolucionar a uno de tus Pokémon, puedes usar esta habilidad. Cura todos los puntos de daño a uno de tus Pokémon."
             }
         ],
         "weaknesses": [
@@ -1083,8 +1083,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/20.webp",
-            "large": "https://images.pokedata.ovh/en/me5/20_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/20.webp",
+            "large": "https://images.pokedata.ovh/es/me5/20_hires.webp"
         },
         "resistances": []
     },
@@ -1110,8 +1110,8 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Draining Fin",
-                "text": "Heal 20 damage from this Pokémon.",
+                "name": "Aleta Drenaje",
+                "text": "Cura 20 puntos de daño a este Pokémon.",
                 "cost": "WW",
                 "damage": "20",
                 "convertedEnergyCost": 2
@@ -1136,8 +1136,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/21.webp",
-            "large": "https://images.pokedata.ovh/en/me5/21_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/21.webp",
+            "large": "https://images.pokedata.ovh/es/me5/21_hires.webp"
         },
         "resistances": []
     },
@@ -1159,8 +1159,8 @@
         "rarity": "Uncommon",
         "attacks": [
             {
-                "name": "Knuckle Justice",
-                "text": "If your opponent has exactly 1 Prize card remaining, this attack does 200 more damage.",
+                "name": "Nudillo Justiciero",
+                "text": "Si a tu rival le queda exactamente una carta de Premio, este ataque hace 200 puntos de daño más.",
                 "cost": "WW",
                 "damage": "80+",
                 "convertedEnergyCost": 2
@@ -1185,8 +1185,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/22.webp",
-            "large": "https://images.pokedata.ovh/en/me5/22_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/22.webp",
+            "large": "https://images.pokedata.ovh/es/me5/22_hires.webp"
         },
         "resistances": []
     },
@@ -1212,14 +1212,14 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Collect",
-                "text": "Draw a card.",
+                "name": "Coleccionar",
+                "text": "Roba 1 carta.",
                 "cost": "L",
                 "damage": "",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Tackle",
+                "name": "Placaje",
                 "text": "",
                 "cost": "LL",
                 "damage": "30",
@@ -1244,8 +1244,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/23.webp",
-            "large": "https://images.pokedata.ovh/en/me5/23_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/23.webp",
+            "large": "https://images.pokedata.ovh/es/me5/23_hires.webp"
         },
         "resistances": []
     },
@@ -1267,15 +1267,15 @@
         "rarity": "Uncommon",
         "attacks": [
             {
-                "name": "Flashing Barrier",
-                "text": "During your opponent's next turn, prevent all damage done to this Pokémon by attacks from Evolution Pokémon.",
+                "name": "Barrera Destellante",
+                "text": "Durante el próximo turno de tu rival, se evita todo el daño infligido a este Pokémon por ataques de Pokémon Evolución.",
                 "cost": "LL",
                 "damage": "50",
                 "convertedEnergyCost": 2
             },
             {
-                "name": "Sonic Edge",
-                "text": "This attack's damage isn't affected by any effects on your opponent's Active Pokémon.",
+                "name": "Tajo Sónico",
+                "text": "El daño de este ataque no se ve afectado por ningún efecto en el Pokémon Activo de tu rival.",
                 "cost": "LLL",
                 "damage": "110",
                 "convertedEnergyCost": 3
@@ -1299,8 +1299,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/24.webp",
-            "large": "https://images.pokedata.ovh/en/me5/24_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/24.webp",
+            "large": "https://images.pokedata.ovh/es/me5/24_hires.webp"
         },
         "resistances": []
     },
@@ -1326,14 +1326,14 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Vise Grip",
+                "name": "Agarre",
                 "text": "",
                 "cost": "L",
                 "damage": "30",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Ram",
+                "name": "Apisonar",
                 "text": "",
                 "cost": "LL",
                 "damage": "50",
@@ -1359,8 +1359,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/25.webp",
-            "large": "https://images.pokedata.ovh/en/me5/25_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/25.webp",
+            "large": "https://images.pokedata.ovh/es/me5/25_hires.webp"
         },
         "resistances": []
     },
@@ -1382,15 +1382,15 @@
         "rarity": "Uncommon",
         "attacks": [
             {
-                "name": "Quick Dive",
-                "text": "This attack does 50 damage to 1 of your opponent's Pokémon. <i>(Don't apply Weakness and Resistance for Benched Pokémon.)</i>",
+                "name": "Picado Raudo",
+                "text": "Este ataque hace 50 puntos de daño a uno de los Pokémon de tu rival. <i>(No apliques Debilidad y Resistencia a los Pokémon en Banca).</i>",
                 "cost": "L",
                 "damage": "",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Giga Railgun",
-                "text": "If this Pokémon has no Voltaic lightning Energy attached, this attack does nothing.",
+                "name": "Gigacañón de Riel",
+                "text": "Si este Pokémon no tiene ninguna Energía lightning Voltaica unida, este ataque no hace nada.",
                 "cost": "LL",
                 "damage": "260",
                 "convertedEnergyCost": 2
@@ -1415,8 +1415,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/26.webp",
-            "large": "https://images.pokedata.ovh/en/me5/26_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/26.webp",
+            "large": "https://images.pokedata.ovh/es/me5/26_hires.webp"
         },
         "resistances": []
     },
@@ -1436,19 +1436,19 @@
         "Craftable Date": "2026-07-16 19:00:00",
         "Craftable": 1,
         "baseEvolution": "Mega Zeraora ex",
-        "name": "Mega Zeraora ex",
+        "name": "Mega-Zeraora ex",
         "rarity": "DoubleRare",
         "attacks": [
             {
-                "name": "Thunderous Fist",
-                "text": "This attack does 60 damage for each lightning Energy attached to this Pokémon.",
+                "name": "Puño Atronador",
+                "text": "Este ataque hace 60 puntos de daño por cada Energía lightning unida a este Pokémon.",
                 "cost": "L",
                 "damage": "60x",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Zepto Turn",
-                "text": "Switch this Pokémon with 1 of your Benched Pokémon.",
+                "name": "Zeptogiro",
+                "text": "Cambia este Pokémon por uno de tus Pokémon en Banca.",
                 "cost": "LLL",
                 "damage": "150",
                 "convertedEnergyCost": 3
@@ -1472,8 +1472,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/27.webp",
-            "large": "https://images.pokedata.ovh/en/me5/27_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/27.webp",
+            "large": "https://images.pokedata.ovh/es/me5/27_hires.webp"
         },
         "resistances": []
     },
@@ -1495,8 +1495,8 @@
         "rarity": "Rare",
         "attacks": [
             {
-                "name": "Thunder",
-                "text": "This Pokémon also does 30 damage to itself.",
+                "name": "Trueno",
+                "text": "Este Pokémon también se hace 30 puntos de daño a sí mismo.",
                 "cost": "LL",
                 "damage": "90",
                 "convertedEnergyCost": 2
@@ -1504,8 +1504,8 @@
         ],
         "abilities": [
             {
-                "name": "[Ability] Photon Cord",
-                "text": "If this Pokémon is in the Active Spot and is Knocked Out by damage from an attack from your opponent's Pokémon, move up to 2 Basic lightning Energy cards from this Pokémon to 1 of your Benched Pokémon."
+                "name": "[Ability] Cable Fotónico",
+                "text": "Si este Pokémon está en el Puesto Activo y queda Fuera de Combate por el daño de un ataque de los Pokémon de tu rival, mueve hasta 2 cartas de Energía lightning Básica de este Pokémon a uno de tus Pokémon en Banca."
             }
         ],
         "weaknesses": [
@@ -1526,8 +1526,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/28.webp",
-            "large": "https://images.pokedata.ovh/en/me5/28_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/28.webp",
+            "large": "https://images.pokedata.ovh/es/me5/28_hires.webp"
         },
         "resistances": []
     },
@@ -1555,14 +1555,14 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "All-You-Can-Yeet",
-                "text": "You may discard any number of cards from your hand.",
+                "name": "Bufé de Descartes",
+                "text": "Puedes descartar cualquier cantidad de cartas de tu mano.",
                 "cost": "P",
                 "damage": "",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Headbutt",
+                "name": "Golpe Cabeza",
                 "text": "",
                 "cost": "CC",
                 "damage": "20",
@@ -1588,8 +1588,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/29.webp",
-            "large": "https://images.pokedata.ovh/en/me5/29_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/29.webp",
+            "large": "https://images.pokedata.ovh/es/me5/29_hires.webp"
         },
         "resistances": [
             {
@@ -1616,14 +1616,14 @@
         "rarity": "Uncommon",
         "attacks": [
             {
-                "name": "All Out",
-                "text": "If you have no cards in your hand, this attack does 160 more damage.",
+                "name": "A por Todas",
+                "text": "Si no tienes ninguna carta en tu mano, este ataque hace 160 puntos de daño más.",
                 "cost": "P",
                 "damage": "50+",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Zen Headbutt",
+                "name": "Cabezazo Zen",
                 "text": "",
                 "cost": "CCC",
                 "damage": "110",
@@ -1650,8 +1650,8 @@
         ],
         "convertedRetreatCost": 3,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/30.webp",
-            "large": "https://images.pokedata.ovh/en/me5/30_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/30.webp",
+            "large": "https://images.pokedata.ovh/es/me5/30_hires.webp"
         },
         "resistances": [
             {
@@ -1676,12 +1676,12 @@
         "Craftable Date": "2026-07-16 19:00:00",
         "Craftable": 1,
         "baseEvolution": "Slowpoke",
-        "name": "Mega Slowbro ex",
+        "name": "Mega-Slowbro ex",
         "rarity": "DoubleRare",
         "attacks": [
             {
-                "name": "Shellnado Spin",
-                "text": "During your opponent's next turn, if this Pokémon is damaged by an attack <i>(even if this Pokémon is Knocked Out)</i>, place 12 damage counters on the Attacking Pokémon.",
+                "name": "Giro Caparazón",
+                "text": "Durante el próximo turno de tu rival, si este Pokémon resulta dañado por un ataque <i>(</i><i>incluso si queda Fuera de Combate)</i>, pon 12 contadores de daño en el Pokémon Atacante.",
                 "cost": "PPP",
                 "damage": "180",
                 "convertedEnergyCost": 3
@@ -1707,8 +1707,8 @@
         ],
         "convertedRetreatCost": 3,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/31.webp",
-            "large": "https://images.pokedata.ovh/en/me5/31_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/31.webp",
+            "large": "https://images.pokedata.ovh/es/me5/31_hires.webp"
         },
         "resistances": [
             {
@@ -1735,15 +1735,15 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Intense Kiss",
-                "text": "At the end of your opponent's next turn, discard the Defending Pokémon and all attached cards.",
+                "name": "Beso Intenso",
+                "text": "Al final del próximo turno de tu rival, descarta el Pokémon Defensor y todas las cartas unidas a él.",
                 "cost": "P",
                 "damage": "",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Psy Bolt",
-                "text": "Flip a coin. If heads, your opponent's Active Pokémon is now Paralyzed.",
+                "name": "Rayo Psi",
+                "text": "Lanza 1 moneda. Si sale cara, el Pokémon Activo de tu rival pasa a estar Paralizado.",
                 "cost": "PC",
                 "damage": "50",
                 "convertedEnergyCost": 2
@@ -1767,8 +1767,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/32.webp",
-            "large": "https://images.pokedata.ovh/en/me5/32_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/32.webp",
+            "large": "https://images.pokedata.ovh/es/me5/32_hires.webp"
         },
         "resistances": [
             {
@@ -1800,7 +1800,7 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Hang Down",
+                "name": "Prender",
                 "text": "",
                 "cost": "P",
                 "damage": "10",
@@ -1809,8 +1809,8 @@
         ],
         "abilities": [
             {
-                "name": "[Ability] Hide 'n' Sneak",
-                "text": "Prevent all effects of your opponent's Pokémon's attacks and Abilities done to this Pokémon. <i>(Damage is not an effect.)</i>"
+                "name": "[Ability] Escondite a Hurtadillas",
+                "text": "Se evitan todos los efectos de los ataques y las habilidades de los Pokémon de tu rival infligidos a este Pokémon. <i>(El daño no es un efecto).</i>"
             }
         ],
         "weaknesses": [
@@ -1831,8 +1831,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/33.webp",
-            "large": "https://images.pokedata.ovh/en/me5/33_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/33.webp",
+            "large": "https://images.pokedata.ovh/es/me5/33_hires.webp"
         },
         "resistances": [
             {
@@ -1859,8 +1859,8 @@
         "rarity": "Uncommon",
         "attacks": [
             {
-                "name": "Puppet Pull",
-                "text": "You may search your deck for a card and put it into your hand. Then, shuffle your deck.",
+                "name": "Tirón del Títere",
+                "text": "Puedes buscar en tu baraja 1 carta y ponerla en tu mano. Después, baraja las cartas de tu baraja.",
                 "cost": "P",
                 "damage": "80",
                 "convertedEnergyCost": 1
@@ -1868,8 +1868,8 @@
         ],
         "abilities": [
             {
-                "name": "[Ability] Hide 'n' Sneak",
-                "text": "Prevent all effects of your opponent's Pokémon's attacks and Abilities done to this Pokémon. <i>(Damage is not an effect.)</i>"
+                "name": "[Ability] Escondite a Hurtadillas",
+                "text": "Se evitan todos los efectos de los ataques y las habilidades de los Pokémon de tu rival infligidos a este Pokémon. <i>(El daño no es un efecto).</i>"
             }
         ],
         "weaknesses": [
@@ -1890,8 +1890,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/34.webp",
-            "large": "https://images.pokedata.ovh/en/me5/34_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/34.webp",
+            "large": "https://images.pokedata.ovh/es/me5/34_hires.webp"
         },
         "resistances": [
             {
@@ -1918,8 +1918,8 @@
         "rarity": "Rare",
         "attacks": [
             {
-                "name": "Spiritual End",
-                "text": "If you have 13 or more Pokémon that have the Hide 'n' Sneak Ability in your discard pile, choose 2 of your opponent's Pokémon and quadruple the number of damage counters on each of them.",
+                "name": "Fin Espiritual",
+                "text": "Si tienes en tu pila de descartes 13 Pokémon o más que tengan la habilidad Escondite a Hurtadillas, elige 2 de los Pokémon de tu rival y cuadruplica la cantidad de contadores de daño en cada uno de ellos.",
                 "cost": "P",
                 "damage": "",
                 "convertedEnergyCost": 1
@@ -1943,8 +1943,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/35.webp",
-            "large": "https://images.pokedata.ovh/en/me5/35_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/35.webp",
+            "large": "https://images.pokedata.ovh/es/me5/35_hires.webp"
         },
         "resistances": [
             {
@@ -1974,7 +1974,7 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Will-O-Wisp",
+                "name": "Fuego Fatuo",
                 "text": "",
                 "cost": "P",
                 "damage": "20",
@@ -1999,8 +1999,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/36.webp",
-            "large": "https://images.pokedata.ovh/en/me5/36_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/36.webp",
+            "large": "https://images.pokedata.ovh/es/me5/36_hires.webp"
         },
         "resistances": [
             {
@@ -2031,8 +2031,8 @@
         "rarity": "Uncommon",
         "attacks": [
             {
-                "name": "Spreading Light",
-                "text": "Search your deck for up to 3 Lampent and put them onto your Bench. Then, shuffle your deck.",
+                "name": "Dispersión Lumínica",
+                "text": "Busca en tu baraja hasta 3 Lampent y ponlos en tu Banca. Después, baraja las cartas de tu baraja.",
                 "cost": "P",
                 "damage": "",
                 "convertedEnergyCost": 1
@@ -2056,8 +2056,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/37.webp",
-            "large": "https://images.pokedata.ovh/en/me5/37_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/37.webp",
+            "large": "https://images.pokedata.ovh/es/me5/37_hires.webp"
         },
         "resistances": [
             {
@@ -2082,12 +2082,12 @@
         "Craftable Date": "2026-07-16 19:00:00",
         "Craftable": 1,
         "baseEvolution": "Litwick",
-        "name": "Mega Chandelure ex",
+        "name": "Mega-Chandelure ex",
         "rarity": "DoubleRare",
         "attacks": [
             {
-                "name": "Phantom Maze",
-                "text": "This attack does 50 more damage for each colorless in your opponent's Active Pokémon's Retreat Cost.",
+                "name": "Laberinto Fantasmal",
+                "text": "Este ataque hace 50 puntos de daño más por cada colorless en el Coste de Retirada del Pokémon Activo de tu rival.",
                 "cost": "PP",
                 "damage": "130+",
                 "convertedEnergyCost": 2
@@ -2095,8 +2095,8 @@
         ],
         "abilities": [
             {
-                "name": "[Ability] Binding Flame",
-                "text": "Your opponent's Active Pokémon's Retreat Cost is colorless more."
+                "name": "[Ability] Atadura Ígnea",
+                "text": "El Coste de Retirada del Pokémon Activo de tu rival es de colorless más."
             }
         ],
         "weaknesses": [
@@ -2118,8 +2118,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/38.webp",
-            "large": "https://images.pokedata.ovh/en/me5/38_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/38.webp",
+            "large": "https://images.pokedata.ovh/es/me5/38_hires.webp"
         },
         "resistances": [
             {
@@ -2146,8 +2146,8 @@
         "rarity": "Uncommon",
         "attacks": [
             {
-                "name": "Vengeful Anchor",
-                "text": "If you have 4 or more Pokémon that have the Hide 'n' Sneak Ability in your discard pile, this attack does 140 more damage.",
+                "name": "Ancla Vengativa",
+                "text": "Si tienes en tu pila de descartes 4 Pokémon o más que tengan la habilidad Escondite a Hurtadillas, este ataque hace 140 puntos de daño más.",
                 "cost": "P",
                 "damage": "30+",
                 "convertedEnergyCost": 1
@@ -2173,8 +2173,8 @@
         ],
         "convertedRetreatCost": 3,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/39.webp",
-            "large": "https://images.pokedata.ovh/en/me5/39_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/39.webp",
+            "large": "https://images.pokedata.ovh/es/me5/39_hires.webp"
         },
         "resistances": [
             {
@@ -2201,8 +2201,8 @@
         "rarity": "Uncommon",
         "attacks": [
             {
-                "name": "Shadowy Knot",
-                "text": "This attack does 30 damage for each colorless in your opponent's Active Pokémon's Retreat Cost.",
+                "name": "Lazo Sombrío",
+                "text": "Este ataque hace 30 puntos de daño por cada colorless en el Coste de Retirada del Pokémon Activo de tu rival.",
                 "cost": "P",
                 "damage": "30x",
                 "convertedEnergyCost": 1
@@ -2226,8 +2226,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/40.webp",
-            "large": "https://images.pokedata.ovh/en/me5/40_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/40.webp",
+            "large": "https://images.pokedata.ovh/es/me5/40_hires.webp"
         },
         "resistances": [
             {
@@ -2254,8 +2254,8 @@
         "rarity": "Uncommon",
         "attacks": [
             {
-                "name": "Ghostly Blow",
-                "text": "Place 5 damage counters on 1 of your opponent's Benched Pokémon.",
+                "name": "Estallido Fantasmal",
+                "text": "Pon 5 contadores de daño en uno de los Pokémon en Banca de tu rival.",
                 "cost": "PP",
                 "damage": "100",
                 "convertedEnergyCost": 2
@@ -2263,8 +2263,8 @@
         ],
         "abilities": [
             {
-                "name": "[Ability] Durable Body",
-                "text": "If this Pokémon would be Knocked Out by damage from an attack, flip a coin. If heads, this Pokémon is not Knocked Out, and its remaining HP becomes 10."
+                "name": "[Ability] Cuerpo Resistente",
+                "text": "Si este Pokémon fuese a quedar Fuera de Combate por el daño de un ataque, lanza 1 moneda. Si sale cara, este Pokémon no queda Fuera de Combate y sus PS restantes pasan a ser 10."
             }
         ],
         "weaknesses": [
@@ -2286,8 +2286,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/41.webp",
-            "large": "https://images.pokedata.ovh/en/me5/41_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/41.webp",
+            "large": "https://images.pokedata.ovh/es/me5/41_hires.webp"
         },
         "resistances": [
             {
@@ -2317,7 +2317,7 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Low Kick",
+                "name": "Patada Baja",
                 "text": "",
                 "cost": "C",
                 "damage": "20",
@@ -2342,8 +2342,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/42.webp",
-            "large": "https://images.pokedata.ovh/en/me5/42_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/42.webp",
+            "large": "https://images.pokedata.ovh/es/me5/42_hires.webp"
         },
         "resistances": []
     },
@@ -2369,7 +2369,7 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Corkscrew Punch",
+                "name": "Puño Tirabuzón",
                 "text": "",
                 "cost": "CC",
                 "damage": "50",
@@ -2395,8 +2395,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/43.webp",
-            "large": "https://images.pokedata.ovh/en/me5/43_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/43.webp",
+            "large": "https://images.pokedata.ovh/es/me5/43_hires.webp"
         },
         "resistances": []
     },
@@ -2422,8 +2422,8 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Push Down",
-                "text": "Switch out your opponent's Active Pokémon to the Bench. <i>(Your opponent chooses the new Active Pokémon.)</i>",
+                "name": "Oprimir",
+                "text": "Mueve el Pokémon Activo de tu rival a la Banca. <i>(Tu rival elige el nuevo Pokémon Activo).</i>",
                 "cost": "FF",
                 "damage": "70",
                 "convertedEnergyCost": 2
@@ -2448,8 +2448,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/44.webp",
-            "large": "https://images.pokedata.ovh/en/me5/44_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/44.webp",
+            "large": "https://images.pokedata.ovh/es/me5/44_hires.webp"
         },
         "resistances": []
     },
@@ -2472,8 +2472,8 @@
         "rarity": "DoubleRare",
         "attacks": [
             {
-                "name": "Rowdy Hammer",
-                "text": "During your next turn, attacks used by this Pokémon do 150 more damage to your opponent's Active Pokémon <i>(before applying Weakness and Resistance)</i>.",
+                "name": "Martillo Alborotador",
+                "text": "Durante tu próximo turno, los ataques usados por este Pokémon hacen 150 puntos de daño más al Pokémon Activo de tu rival <i>(antes de aplicar Debilidad y Resistencia)</i>.",
                 "cost": "FF",
                 "damage": "150",
                 "convertedEnergyCost": 2
@@ -2481,8 +2481,8 @@
         ],
         "abilities": [
             {
-                "name": "[Ability] Destructive Headbutting",
-                "text": "Once during your turn, if this Pokémon is in the Active Spot, you may use this Ability. Flip a coin. If heads, discard an Energy from your opponent's Active Pokémon."
+                "name": "[Ability] Cabezazo Aniquilador",
+                "text": "Una vez durante tu turno, si este Pokémon está en el Puesto Activo, puedes usar esta habilidad. Lanza 1 moneda. Si sale cara, descarta 1 Energía del Pokémon Activo de tu rival."
             }
         ],
         "weaknesses": [
@@ -2504,8 +2504,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/45.webp",
-            "large": "https://images.pokedata.ovh/en/me5/45_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/45.webp",
+            "large": "https://images.pokedata.ovh/es/me5/45_hires.webp"
         },
         "resistances": []
     },
@@ -2532,14 +2532,14 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Call for Family",
-                "text": "Search your deck for up to 2 Basic Pokémon and put them onto your Bench. Then, shuffle your deck.",
+                "name": "Llamar a la Familia",
+                "text": "Busca en tu baraja hasta 2 Pokémon Básicos y ponlos en tu Banca. Después, baraja las cartas de tu baraja.",
                 "cost": "C",
                 "damage": "",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Dig Claws",
+                "name": "Hundir Garras",
                 "text": "",
                 "cost": "CCC",
                 "damage": "50",
@@ -2565,8 +2565,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/46.webp",
-            "large": "https://images.pokedata.ovh/en/me5/46_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/46.webp",
+            "large": "https://images.pokedata.ovh/es/me5/46_hires.webp"
         },
         "resistances": []
     },
@@ -2588,15 +2588,15 @@
         "rarity": "Rare",
         "attacks": [
             {
-                "name": "Battle Claw",
-                "text": "If your opponent's Active Pokémon is an Evolution Pokémon, this attack does 30 more damage.",
+                "name": "Garra Combativa",
+                "text": "Si el Pokémon Activo de tu rival es un Pokémon Evolución, este ataque hace 30 puntos de daño más.",
                 "cost": "F",
                 "damage": "30+",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Gaia Impact",
-                "text": "Discard all Energy from this Pokémon.",
+                "name": "Impacto Gaia",
+                "text": "Descarta todas las Energías de este Pokémon.",
                 "cost": "FFC",
                 "damage": "190",
                 "convertedEnergyCost": 3
@@ -2621,8 +2621,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/47.webp",
-            "large": "https://images.pokedata.ovh/en/me5/47_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/47.webp",
+            "large": "https://images.pokedata.ovh/es/me5/47_hires.webp"
         },
         "resistances": []
     },
@@ -2642,19 +2642,19 @@
         "Craftable Date": "2026-07-16 19:00:00",
         "Craftable": 1,
         "baseEvolution": "Mega Darkrai ex",
-        "name": "Mega Darkrai ex",
+        "name": "Mega-Darkrai ex",
         "rarity": "DoubleRare",
         "attacks": [
             {
-                "name": "Dusk Raid",
-                "text": "If your Benched Pokémon have any damage counters on them, this attack does 110 more damage.",
+                "name": "Incursión Crepuscular",
+                "text": "Si tus Pokémon en Banca tienen algún contador de daño sobre ellos, este ataque hace 110 puntos de daño más.",
                 "cost": "DD",
                 "damage": "110+",
                 "convertedEnergyCost": 2
             },
             {
-                "name": "Abyss Eye",
-                "text": "If your opponent's Active Pokémon is affected by a Special Condition, it is Knocked Out.",
+                "name": "Ojo Abismal",
+                "text": "Si el Pokémon Activo de tu rival se ve afectado por una Condición Especial, queda Fuera de Combate.",
                 "cost": "DDD",
                 "damage": "",
                 "convertedEnergyCost": 3
@@ -2679,8 +2679,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/48.webp",
-            "large": "https://images.pokedata.ovh/en/me5/48_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/48.webp",
+            "large": "https://images.pokedata.ovh/es/me5/48_hires.webp"
         },
         "resistances": []
     },
@@ -2706,14 +2706,14 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Flap",
+                "name": "Aleteo",
                 "text": "",
                 "cost": "D",
                 "damage": "10",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Gust",
+                "name": "Tornado",
                 "text": "",
                 "cost": "DC",
                 "damage": "20",
@@ -2738,8 +2738,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/49.webp",
-            "large": "https://images.pokedata.ovh/en/me5/49_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/49.webp",
+            "large": "https://images.pokedata.ovh/es/me5/49_hires.webp"
         },
         "resistances": [
             {
@@ -2769,14 +2769,14 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Bone Sniper",
-                "text": "This attack does 70 damage to 1 of your opponent's Pokémon that has any Special Energy attached. <i>(Don't apply Weakness and Resistance for Benched Pokémon.)</i>",
+                "name": "Francotirador Óseo",
+                "text": "Este ataque hace 70 puntos de daño a uno de los Pokémon de tu rival que tengan alguna Energía Especial unida. <i>(No apliques Debilidad y Resistencia a los Pokémon en Banca).</i>",
                 "cost": "D",
                 "damage": "",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Blasting Wind",
+                "name": "Vientos Explosivos",
                 "text": "",
                 "cost": "DDC",
                 "damage": "120",
@@ -2802,8 +2802,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/50.webp",
-            "large": "https://images.pokedata.ovh/en/me5/50_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/50.webp",
+            "large": "https://images.pokedata.ovh/es/me5/50_hires.webp"
         },
         "resistances": [
             {
@@ -2833,14 +2833,14 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Procurement",
-                "text": "Search your deck for an Item card, reveal it, and put it into your hand. Then, shuffle your deck.",
+                "name": "Adquisición",
+                "text": "Busca en tu baraja 1 carta de Objeto, enséñala y ponla en tu mano. Después, baraja las cartas de tu baraja.",
                 "cost": "D",
                 "damage": "",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Spinning Attack",
+                "name": "Ataque Giratorio",
                 "text": "",
                 "cost": "DD",
                 "damage": "30",
@@ -2865,8 +2865,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/51.webp",
-            "large": "https://images.pokedata.ovh/en/me5/51_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/51.webp",
+            "large": "https://images.pokedata.ovh/es/me5/51_hires.webp"
         },
         "resistances": []
     },
@@ -2888,15 +2888,15 @@
         "rarity": "Uncommon",
         "attacks": [
             {
-                "name": "Perplex",
-                "text": "Your opponent's Active Pokémon is now Confused.",
+                "name": "Desconcierto",
+                "text": "El Pokémon Activo de tu rival pasa a estar Confundido.",
                 "cost": "D",
                 "damage": "",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Brain Crush",
-                "text": "If your opponent's Active Pokémon isn't Confused, this attack does nothing.",
+                "name": "Aplastamiento Cerebral",
+                "text": "Si el Pokémon Activo de tu rival no está Confundido, este ataque no hace nada.",
                 "cost": "D",
                 "damage": "130",
                 "convertedEnergyCost": 1
@@ -2921,8 +2921,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/52.webp",
-            "large": "https://images.pokedata.ovh/en/me5/52_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/52.webp",
+            "large": "https://images.pokedata.ovh/es/me5/52_hires.webp"
         },
         "resistances": []
     },
@@ -2947,14 +2947,14 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Gnaw",
+                "name": "Roer",
                 "text": "",
                 "cost": "D",
                 "damage": "10",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Rear Kick",
+                "name": "Patada Trasera",
                 "text": "",
                 "cost": "DC",
                 "damage": "30",
@@ -2979,8 +2979,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/53.webp",
-            "large": "https://images.pokedata.ovh/en/me5/53_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/53.webp",
+            "large": "https://images.pokedata.ovh/es/me5/53_hires.webp"
         },
         "resistances": []
     },
@@ -3002,14 +3002,14 @@
         "rarity": "Uncommon",
         "attacks": [
             {
-                "name": "Skill Thief",
-                "text": "If you have no cards in your hand, choose an attack from 1 of your opponent's Pokémon in play and use it as this attack.",
+                "name": "Ladrón de Talentos",
+                "text": "Si no tienes ninguna carta en tu mano, elige un ataque de uno de los Pokémon en juego de tu rival y úsalo para este ataque.",
                 "cost": "CC",
                 "damage": "",
                 "convertedEnergyCost": 2
             },
             {
-                "name": "Sharp Fang",
+                "name": "Colmillo Afilado",
                 "text": "",
                 "cost": "DCC",
                 "damage": "80",
@@ -3034,8 +3034,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/54.webp",
-            "large": "https://images.pokedata.ovh/en/me5/54_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/54.webp",
+            "large": "https://images.pokedata.ovh/es/me5/54_hires.webp"
         },
         "resistances": []
     },
@@ -3058,15 +3058,15 @@
         "rarity": "DoubleRare",
         "attacks": [
             {
-                "name": "Wheely Draw",
-                "text": "Shuffle your hand into your deck. Then, draw 6 cards.",
+                "name": "Robo Redondo",
+                "text": "Pon las cartas de tu mano en tu baraja y barájalas todas. Después, roba 6 cartas.",
                 "cost": "D",
                 "damage": "",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Hangry Blaster",
-                "text": "This attack does 40 more damage for each damage counter on this Pokémon.",
+                "name": "Explosión Voraz",
+                "text": "Este ataque hace 40 puntos de daño más por cada contador de daño en este Pokémon.",
                 "cost": "DD",
                 "damage": "40+",
                 "convertedEnergyCost": 2
@@ -3090,8 +3090,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/55.webp",
-            "large": "https://images.pokedata.ovh/en/me5/55_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/55.webp",
+            "large": "https://images.pokedata.ovh/es/me5/55_hires.webp"
         },
         "resistances": []
     },
@@ -3113,15 +3113,15 @@
         "rarity": "Rare",
         "attacks": [
             {
-                "name": "Overhead Throw",
-                "text": "This attack also does 30 damage to 1 of your Benched Pokémon. <i>(Don't apply Weakness and Resistance for Benched Pokémon.)</i>",
+                "name": "Lanzamiento Elevado",
+                "text": "Este ataque también hace 30 puntos de daño a uno de tus Pokémon en Banca. <i>(No apliques Debilidad y Resistencia a los Pokémon en Banca).</i>",
                 "cost": "D",
                 "damage": "30",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Shadowy Whip",
-                "text": "If your Benched Pokémon have any Shadowy darkness Energy attached, this attack does 70 more damage.",
+                "name": "Látigo Sombrío",
+                "text": "Si tus Pokémon en Banca tienen alguna Energía darkness Sombría unida, este ataque hace 70 puntos de daño más.",
                 "cost": "DDD",
                 "damage": "100+",
                 "convertedEnergyCost": 3
@@ -3146,8 +3146,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/56.webp",
-            "large": "https://images.pokedata.ovh/en/me5/56_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/56.webp",
+            "large": "https://images.pokedata.ovh/es/me5/56_hires.webp"
         },
         "resistances": []
     },
@@ -3173,7 +3173,7 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Bite",
+                "name": "Mordisco",
                 "text": "",
                 "cost": "DD",
                 "damage": "40",
@@ -3199,8 +3199,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/57.webp",
-            "large": "https://images.pokedata.ovh/en/me5/57_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/57.webp",
+            "large": "https://images.pokedata.ovh/es/me5/57_hires.webp"
         },
         "resistances": []
     },
@@ -3222,15 +3222,15 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Bite",
+                "name": "Mordisco",
                 "text": "",
                 "cost": "DD",
                 "damage": "60",
                 "convertedEnergyCost": 2
             },
             {
-                "name": "Plunging Headbutt",
-                "text": "During your opponent's next turn, this Pokémon takes 100 more damage from attacks <i>(after applying Weakness and Resistance)</i>.",
+                "name": "Cabezazo Impetuoso",
+                "text": "Durante el próximo turno de tu rival, los ataques hacen 100 puntos de daño más a este Pokémon <i>(después de aplicar Debilidad y Resistencia)</i>.",
                 "cost": "DDD",
                 "damage": "210",
                 "convertedEnergyCost": 3
@@ -3256,8 +3256,8 @@
         ],
         "convertedRetreatCost": 3,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/58.webp",
-            "large": "https://images.pokedata.ovh/en/me5/58_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/58.webp",
+            "large": "https://images.pokedata.ovh/es/me5/58_hires.webp"
         },
         "resistances": []
     },
@@ -3279,8 +3279,8 @@
         "rarity": "Rare",
         "attacks": [
             {
-                "name": "Whirling Envy",
-                "text": "If this Pokémon has 2 or more damage counters on it, this attack does 90 more damage. This attack's damage isn't affected by Weakness.",
+                "name": "Torbellino de Envidia",
+                "text": "Si este Pokémon tiene 2 contadores de daño o más sobre él, este ataque hace 90 puntos de daño más. El daño de este ataque no se ve afectado por Debilidad.",
                 "cost": "D",
                 "damage": "20+",
                 "convertedEnergyCost": 1
@@ -3304,8 +3304,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/59.webp",
-            "large": "https://images.pokedata.ovh/en/me5/59_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/59.webp",
+            "large": "https://images.pokedata.ovh/es/me5/59_hires.webp"
         },
         "resistances": []
     },
@@ -3327,8 +3327,8 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Steel Cutter",
-                "text": "Discard up to 2 Basic metal Energy cards from your hand, and this attack does 40 damage for each card you discarded in this way.",
+                "name": "Corte de Acero",
+                "text": "Descarta hasta 2 cartas de Energía metal Básica de tu mano, y este ataque hace 40 puntos de daño por cada carta que hayas descartado de esta manera.",
                 "cost": "M",
                 "damage": "40x",
                 "convertedEnergyCost": 1
@@ -3352,8 +3352,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/60.webp",
-            "large": "https://images.pokedata.ovh/en/me5/60_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/60.webp",
+            "large": "https://images.pokedata.ovh/es/me5/60_hires.webp"
         },
         "resistances": [
             {
@@ -3383,8 +3383,8 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Smithereen Smash",
-                "text": "Discard an Energy from your opponent's Active Pokémon.",
+                "name": "Machaque",
+                "text": "Descarta 1 Energía del Pokémon Activo de tu rival.",
                 "cost": "MC",
                 "damage": "50",
                 "convertedEnergyCost": 2
@@ -3410,8 +3410,8 @@
         ],
         "convertedRetreatCost": 3,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/61.webp",
-            "large": "https://images.pokedata.ovh/en/me5/61_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/61.webp",
+            "large": "https://images.pokedata.ovh/es/me5/61_hires.webp"
         },
         "resistances": [
             {
@@ -3438,7 +3438,7 @@
         "rarity": "Rare",
         "attacks": [
             {
-                "name": "Hammer In",
+                "name": "Martillear",
                 "text": "",
                 "cost": "MMC",
                 "damage": "160",
@@ -3447,8 +3447,8 @@
         ],
         "abilities": [
             {
-                "name": "[Ability] Ancient Bulwark",
-                "text": "As long as this Pokémon is on your Bench, prevent all damage done to each of your Pokémon by attacks from your opponent's Pokémon that have 2 or less Energy attached."
+                "name": "[Ability] Bastión Ancestral",
+                "text": "Mientras este Pokémon esté en tu Banca, se evita todo el daño infligido a cada uno de tus Pokémon por ataques de los Pokémon de tu rival que tengan 2 Energías o menos unidas."
             }
         ],
         "weaknesses": [
@@ -3472,8 +3472,8 @@
         ],
         "convertedRetreatCost": 4,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/62.webp",
-            "large": "https://images.pokedata.ovh/en/me5/62_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/62.webp",
+            "large": "https://images.pokedata.ovh/es/me5/62_hires.webp"
         },
         "resistances": [
             {
@@ -3503,8 +3503,8 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Mirror Attack",
-                "text": "If your opponent's Active Pokémon is a metal Pokémon, this attack does 30 more damage.",
+                "name": "Ataque Espejo",
+                "text": "Si el Pokémon Activo de tu rival es un Pokémon metal, este ataque hace 30 puntos de daño más.",
                 "cost": "M",
                 "damage": "10+",
                 "convertedEnergyCost": 1
@@ -3530,8 +3530,8 @@
         ],
         "convertedRetreatCost": 3,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/63.webp",
-            "large": "https://images.pokedata.ovh/en/me5/63_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/63.webp",
+            "large": "https://images.pokedata.ovh/es/me5/63_hires.webp"
         },
         "resistances": [
             {
@@ -3561,15 +3561,15 @@
         "rarity": "Uncommon",
         "attacks": [
             {
-                "name": "Gentle Slap",
+                "name": "Bofetada Gentil",
                 "text": "",
                 "cost": "M",
                 "damage": "40",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Metal Block",
-                "text": "During your opponent's next turn, this Pokémon takes 100 less damage from attacks from Evolution Pokémon <i>(after applying Weakness and Resistance)</i>.",
+                "name": "Bloqueo Metálico",
+                "text": "Durante el próximo turno de tu rival, los ataques de los Pokémon Evolución hacen 100 puntos de daño menos a este Pokémon <i>(después de aplicar Debilidad y Resistencia)</i>.",
                 "cost": "MMC",
                 "damage": "120",
                 "convertedEnergyCost": 3
@@ -3595,8 +3595,8 @@
         ],
         "convertedRetreatCost": 3,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/64.webp",
-            "large": "https://images.pokedata.ovh/en/me5/64_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/64.webp",
+            "large": "https://images.pokedata.ovh/es/me5/64_hires.webp"
         },
         "resistances": [
             {
@@ -3621,19 +3621,19 @@
         "Craftable Date": "2026-07-16 19:00:00",
         "Craftable": 1,
         "baseEvolution": "Drilbur",
-        "name": "Mega Excadrill ex",
+        "name": "Mega-Excadrill ex",
         "rarity": "DoubleRare",
         "attacks": [
             {
-                "name": "Undermine",
-                "text": "Discard the top 2 cards of your opponent's deck.",
+                "name": "Horadar",
+                "text": "Descarta las 2 primeras cartas de la baraja de tu rival.",
                 "cost": "MM",
                 "damage": "90",
                 "convertedEnergyCost": 2
             },
             {
-                "name": "Maximum Drilling",
-                "text": "If this Pokémon has at least 2 extra Energy attached <i>(in addition to this attack's cost)</i>, this attack does 130 more damage.",
+                "name": "Perforación Total",
+                "text": "Si este Pokémon tiene por lo menos 2 Energías adicionales unidas <i>(además de las del coste de este ataque)</i>, este ataque hace 130 puntos de daño más.",
                 "cost": "MMM",
                 "damage": "200+",
                 "convertedEnergyCost": 3
@@ -3660,8 +3660,8 @@
         ],
         "convertedRetreatCost": 4,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/65.webp",
-            "large": "https://images.pokedata.ovh/en/me5/65_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/65.webp",
+            "large": "https://images.pokedata.ovh/es/me5/65_hires.webp"
         },
         "resistances": [
             {
@@ -3691,8 +3691,8 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Double Stab",
-                "text": "Flip 2 coins. This attack does 10 damage for each heads.",
+                "name": "Doble Puñalada",
+                "text": "Lanza 2 monedas. Este ataque hace 10 puntos de daño por cada cara.",
                 "cost": "C",
                 "damage": "10x",
                 "convertedEnergyCost": 1
@@ -3716,8 +3716,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/66.webp",
-            "large": "https://images.pokedata.ovh/en/me5/66_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/66.webp",
+            "large": "https://images.pokedata.ovh/es/me5/66_hires.webp"
         },
         "resistances": [
             {
@@ -3747,8 +3747,8 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Fly",
-                "text": "Flip a coin. If tails, this attack does nothing. If heads, during your opponent's next turn, prevent all damage from and effects of attacks done to this Pokémon.",
+                "name": "Vuelo",
+                "text": "Lanza 1 moneda. Si sale cruz, este ataque no hace nada. Si sale cara, durante el próximo turno de tu rival, se evitan todo el daño y todos los efectos de los ataques infligidos a este Pokémon.",
                 "cost": "C",
                 "damage": "30",
                 "convertedEnergyCost": 1
@@ -3772,8 +3772,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/67.webp",
-            "large": "https://images.pokedata.ovh/en/me5/67_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/67.webp",
+            "large": "https://images.pokedata.ovh/es/me5/67_hires.webp"
         },
         "resistances": [
             {
@@ -3800,8 +3800,8 @@
         "rarity": "Uncommon",
         "attacks": [
             {
-                "name": "Feather Rondo",
-                "text": "This attack does 20 more damage for each Benched Pokémon <i>(both yours and your opponent's)</i>.",
+                "name": "Rondó Pluma",
+                "text": "Este ataque hace 20 puntos de daño más por cada Pokémon en Banca <i>(tanto tuyos como de tu rival)</i>.",
                 "cost": "C",
                 "damage": "60+",
                 "convertedEnergyCost": 1
@@ -3809,8 +3809,8 @@
         ],
         "abilities": [
             {
-                "name": "[Ability] Aerial Draw",
-                "text": "Once during your turn, you may use this Ability. Draw a card."
+                "name": "[Ability] Robo Aéreo",
+                "text": "Una vez durante tu turno, puedes usar esta habilidad. Roba 1 carta."
             }
         ],
         "weaknesses": [
@@ -3832,8 +3832,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/68.webp",
-            "large": "https://images.pokedata.ovh/en/me5/68_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/68.webp",
+            "large": "https://images.pokedata.ovh/es/me5/68_hires.webp"
         },
         "resistances": [
             {
@@ -3860,11 +3860,11 @@
             "Silvally",
             "Silvally-GX"
         ],
-        "name": "Type: Null",
+        "name": "Código Cero",
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Power Edge",
+                "name": "Filo Poderoso",
                 "text": "",
                 "cost": "CC",
                 "damage": "40",
@@ -3890,8 +3890,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/69.webp",
-            "large": "https://images.pokedata.ovh/en/me5/69_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/69.webp",
+            "large": "https://images.pokedata.ovh/es/me5/69_hires.webp"
         },
         "resistances": []
     },
@@ -3913,8 +3913,8 @@
         "rarity": "Rare",
         "attacks": [
             {
-                "name": "Air Slash",
-                "text": "Discard an Energy from this Pokémon.",
+                "name": "Tajo Aéreo",
+                "text": "Descarta 1 Energía de este Pokémon.",
                 "cost": "CCC",
                 "damage": "130",
                 "convertedEnergyCost": 3
@@ -3922,8 +3922,8 @@
         ],
         "abilities": [
             {
-                "name": "[Ability] Call a Buddy",
-                "text": "Once during your turn, if you have no cards in your hand, you may use this Ability. Search your deck for a Supporter card, reveal it, and put it into your hand. Then, shuffle your deck."
+                "name": "[Ability] Llamar a un Amigo",
+                "text": "Una vez durante tu turno, si no tienes ninguna carta en tu mano, puedes usar esta habilidad. Busca en tu baraja 1 carta de Partidario, enséñala y ponla en tu mano. Después, baraja las cartas de tu baraja."
             }
         ],
         "weaknesses": [
@@ -3945,8 +3945,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/70.webp",
-            "large": "https://images.pokedata.ovh/en/me5/70_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/70.webp",
+            "large": "https://images.pokedata.ovh/es/me5/70_hires.webp"
         },
         "resistances": []
     },
@@ -3968,14 +3968,14 @@
         "rarity": "Common",
         "attacks": [
             {
-                "name": "Challenging Delivery",
-                "text": "Flip 2 coins. If both of them are heads, search your deck for a Pokémon and put it onto your Bench. Then, shuffle your deck.",
+                "name": "Reparto Desafiante",
+                "text": "Lanza 2 monedas. Si salen 2 caras, busca en tu baraja 1 Pokémon y ponlo en tu Banca. Después, baraja las cartas de tu baraja.",
                 "cost": "CC",
                 "damage": "",
                 "convertedEnergyCost": 2
             },
             {
-                "name": "Speed Wing",
+                "name": "Ala Veloz",
                 "text": "",
                 "cost": "CCC",
                 "damage": "100",
@@ -4000,8 +4000,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/71.webp",
-            "large": "https://images.pokedata.ovh/en/me5/71_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/71.webp",
+            "large": "https://images.pokedata.ovh/es/me5/71_hires.webp"
         },
         "resistances": [
             {
@@ -4025,13 +4025,13 @@
         "evolvesInto": [
             "Shieldon"
         ],
-        "name": "Antique Armor Fossil",
+        "name": "Fósil Coraza Antiguo",
         "rarity": "Common",
         "attacks": [],
         "abilities": [
             {
-                "name": "[Ability] Protective Armor",
-                "text": "As long as this Pokémon is in the Active Spot, all of your Pokémon take 10 less damage from attacks from your opponent's Pokémon <i>(after applying Weakness and Resistance)</i>."
+                "name": "[Ability] Coraza Protectora",
+                "text": "Mientras este Pokémon esté en el Puesto Activo, los ataques de los Pokémon de tu rival hacen 10 puntos de daño menos a todos tus Pokémon <i>(después de aplicar Debilidad y Resistencia)</i>."
             }
         ],
         "weaknesses": [
@@ -4050,8 +4050,8 @@
         "retreatCost": [],
         "convertedRetreatCost": 0,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/72.webp",
-            "large": "https://images.pokedata.ovh/en/me5/72_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/72.webp",
+            "large": "https://images.pokedata.ovh/es/me5/72_hires.webp"
         },
         "resistances": []
     },
@@ -4070,13 +4070,13 @@
         "evolvesInto": [
             "Cranidos"
         ],
-        "name": "Antique Skull Fossil",
+        "name": "Fósil Cráneo Antiguo",
         "rarity": "Common",
         "attacks": [],
         "abilities": [
             {
-                "name": "[Ability] Spiny Skull",
-                "text": "If this Pokémon is in the Active Spot and is damaged by an attack from your opponent's Pokémon <i>(even if this Pokémon is Knocked Out)</i>, place 3 damage counters on the Attacking Pokémon."
+                "name": "[Ability] Cráneo Espinoso",
+                "text": "Si este Pokémon está en el Puesto Activo y resulta dañado por un ataque de los Pokémon de tu rival <i>(incluso si queda Fuera de Combate)</i>, pon 3 contadores de daño en el Pokémon Atacante."
             }
         ],
         "weaknesses": [
@@ -4095,8 +4095,8 @@
         "retreatCost": [],
         "convertedRetreatCost": 0,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/73.webp",
-            "large": "https://images.pokedata.ovh/en/me5/73_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/73.webp",
+            "large": "https://images.pokedata.ovh/es/me5/73_hires.webp"
         },
         "resistances": []
     },
@@ -4111,10 +4111,10 @@
         "Release Date": "2026-07-16T17:00:00.0000000Z",
         "Craftable Date": "2026-07-16 19:00:00",
         "Craftable": 1,
-        "name": "Backtrack Badge",
+        "name": "Insignia Reintento",
         "rarity": "Uncommon",
         "rules": [
-            "Once during your turn, after you flip any coins for an attack of the colorless Pokémon this card is attached to, you may ignore all results of those coin flips and begin flipping those coins again."
+            "Una vez durante tu turno, después de lanzar las monedas para un ataque del Pokémon colorless al que esté unida esta carta, puedes ignorar todos los resultados de esos lanzamientos y lanzar esas monedas de nuevo."
         ],
         "number": "74",
         "regulationMark": "J",
@@ -4124,8 +4124,8 @@
             "expanded": "Legal"
         },
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/74.webp",
-            "large": "https://images.pokedata.ovh/en/me5/74_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/74.webp",
+            "large": "https://images.pokedata.ovh/es/me5/74_hires.webp"
         }
     },
     {
@@ -4140,10 +4140,10 @@
         "Craftable Date": "2026-07-16 19:00:00",
         "Craftable": 1,
         "baseEvolution": "Sino Sombrio",
-        "name": "Dark Bell",
+        "name": "Campanilla Oscuridad",
         "rarity": "Uncommon",
         "rules": [
-            "Both Active non-darkness Pokémon are now Confused."
+            "Cualquier Pokémon Activo que no sea de tipo darkness pasa a estar Confundido."
         ],
         "number": "75",
         "regulationMark": "J",
@@ -4153,8 +4153,8 @@
             "expanded": "Legal"
         },
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/75.webp",
-            "large": "https://images.pokedata.ovh/en/me5/75_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/75.webp",
+            "large": "https://images.pokedata.ovh/es/me5/75_hires.webp"
         }
     },
     {
@@ -4168,10 +4168,10 @@
         "Release Date": "2026-07-16T17:00:00.0000000Z",
         "Craftable Date": "2026-07-16 19:00:00",
         "Craftable": 1,
-        "name": "Fossil Quarry",
+        "name": "Cantera de Fósiles",
         "rarity": "Uncommon",
         "rules": [
-            "Once during each player's turn, that player may search their deck for up to 2 Item cards that have \"Antique\" in their name and put them onto their Bench. Then, that player shuffles their deck."
+            "Una vez durante el turno de cada jugador, ese jugador puede buscar en su baraja hasta 2 cartas de Objeto que tengan \"Antiguo\" en su nombre y ponerlas en su Banca. Después, ese jugador baraja las cartas de su baraja."
         ],
         "number": "76",
         "regulationMark": "J",
@@ -4181,8 +4181,8 @@
             "expanded": "Legal"
         },
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/76.webp",
-            "large": "https://images.pokedata.ovh/en/me5/76_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/76.webp",
+            "large": "https://images.pokedata.ovh/es/me5/76_hires.webp"
         }
     },
     {
@@ -4196,10 +4196,10 @@
         "Release Date": "2026-07-16T17:00:00.0000000Z",
         "Craftable Date": "2026-07-16 19:00:00",
         "Craftable": 1,
-        "name": "Gladion's Final Battle",
+        "name": "Combate Final de Gladio",
         "rarity": "Uncommon",
         "rules": [
-            "You can use this card only when it is the last card in your hand.During this turn, attacks used by your Pokémon that don't have a Rule Box do 80 more damage to your opponent's Active Pokémon <i>(before applying Weakness and Resistance)</i>. <i>(Pokémon {ex}, Pokémon v_atk, etc. have Rule Boxes.)</i>"
+            "Puedes usar esta carta solo cuando sea la última carta en tu mano.Durante este turno, los ataques usados por tus Pokémon que no tengan un recuadro de regla hacen 80 puntos de daño más al Pokémon Activo de tu rival <i>(antes de aplicar Debilidad y Resistencia)</i>. <i>(Los Pokémon {ex}, Pokémon v_atk, etc., tienen recuadros de regla).</i>"
         ],
         "number": "77",
         "regulationMark": "J",
@@ -4209,8 +4209,8 @@
             "expanded": "Legal"
         },
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/77.webp",
-            "large": "https://images.pokedata.ovh/en/me5/77_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/77.webp",
+            "large": "https://images.pokedata.ovh/es/me5/77_hires.webp"
         }
     },
     {
@@ -4224,10 +4224,10 @@
         "Release Date": "2026-07-16T17:00:00.0000000Z",
         "Craftable Date": "2026-07-16 19:00:00",
         "Craftable": 1,
-        "name": "Gwynn",
+        "name": "Inma",
         "rarity": "Uncommon",
         "rules": [
-            "Discard up to 2 Pokémon that don't have a Rule Box from your hand, and draw 3 cards for each card you discarded in this way. <i>(Pokémon {ex}, Pokémon v_atk, etc. have Rule Boxes.)</i>"
+            "Descarta hasta 2 Pokémon que no tengan un recuadro de regla de tu mano y roba 3 cartas por cada carta que hayas descartado de esta manera. <i>(Los Pokémon {ex}, Pokémon v_atk, etc., tienen recuadros de regla).</i>"
         ],
         "number": "78",
         "regulationMark": "J",
@@ -4237,8 +4237,8 @@
             "expanded": "Legal"
         },
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/78.webp",
-            "large": "https://images.pokedata.ovh/en/me5/78_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/78.webp",
+            "large": "https://images.pokedata.ovh/es/me5/78_hires.webp"
         }
     },
     {
@@ -4252,10 +4252,10 @@
         "Release Date": "2026-07-16T17:00:00.0000000Z",
         "Craftable Date": "2026-07-16 19:00:00",
         "Craftable": 1,
-        "name": "Jett",
+        "name": "Viona",
         "rarity": "Uncommon",
         "rules": [
-            "Draw a card for each of your opponent's Mega Evolution Pokémon {ex} in play."
+            "Roba 1 carta por cada uno de los Pokémon {ex} Megaevolución en juego de tu rival."
         ],
         "number": "79",
         "regulationMark": "J",
@@ -4265,8 +4265,8 @@
             "expanded": "Legal"
         },
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/79.webp",
-            "large": "https://images.pokedata.ovh/en/me5/79_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/79.webp",
+            "large": "https://images.pokedata.ovh/es/me5/79_hires.webp"
         }
     },
     {
@@ -4281,10 +4281,10 @@
         "Release Date": "2026-07-16T17:00:00.0000000Z",
         "Craftable Date": "2026-07-16 19:00:00",
         "Craftable": 1,
-        "name": "Misty's Vitality",
+        "name": "Vitalidad de Misty",
         "rarity": "Uncommon",
         "rules": [
-            "Search your deck for up to 4 Basic water Energy cards and attach them to 1 of your Pokémon. Then, shuffle your deck. Your turn ends."
+            "Busca en tu baraja hasta 4 cartas de Energía water Básica y únelas a uno de tus Pokémon. Después, baraja las cartas de tu baraja. Tu turno termina."
         ],
         "number": "80",
         "regulationMark": "J",
@@ -4294,8 +4294,8 @@
             "expanded": "Legal"
         },
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/80.webp",
-            "large": "https://images.pokedata.ovh/en/me5/80_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/80.webp",
+            "large": "https://images.pokedata.ovh/es/me5/80_hires.webp"
         }
     },
     {
@@ -4309,10 +4309,10 @@
         "Release Date": "2026-07-16T17:00:00.0000000Z",
         "Craftable Date": "2026-07-16 19:00:00",
         "Craftable": 1,
-        "name": "Rust Syndicate Grunt",
+        "name": "Recluta del Clan Corrosión",
         "rarity": "Uncommon",
         "rules": [
-            "You can use this card only if any of your Pokémon were Knocked Out during your opponent's last turn.Discard an Energy from 1 of your opponent's Pokémon."
+            "Puedes usar esta carta solo si alguno de tus Pokémon quedó Fuera de Combate durante el último turno de tu rival.Descarta 1 Energía de uno de los Pokémon de tu rival."
         ],
         "number": "81",
         "regulationMark": "J",
@@ -4322,8 +4322,8 @@
             "expanded": "Legal"
         },
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/81.webp",
-            "large": "https://images.pokedata.ovh/en/me5/81_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/81.webp",
+            "large": "https://images.pokedata.ovh/es/me5/81_hires.webp"
         }
     },
     {
@@ -4337,10 +4337,10 @@
         "Release Date": "2026-07-16T17:00:00.0000000Z",
         "Craftable Date": "2026-07-16 19:00:00",
         "Craftable": 1,
-        "name": "Tremendous Bomb",
+        "name": "Bomba Formidable",
         "rarity": "Uncommon",
         "rules": [
-            "If the Pokémon this card is attached to isn't a Mega Evolution Pokémon {ex}, is in the Active Spot, and takes 240 or more damage from an attack from your opponent's Mega Evolution Pokémon {ex} <i>(even if this Pokémon is Knocked Out)</i>, place 12 damage counters on the Attacking Pokémon. If you placed any damage counters in this way, discard this card."
+            "Si el Pokémon al que está unida esta carta no es un Pokémon {ex} Megaevolución, si está en el Puesto Activo y si un ataque de los Pokémon {ex} Megaevolución de tu rival le hace 240 puntos de daño o más <i>(incluso si queda Fuera de Combate)</i>, pon 12 contadores de daño en el Pokémon Atacante. Si has puesto algún contador de daño de esta manera, descarta esta carta."
         ],
         "number": "82",
         "regulationMark": "J",
@@ -4350,8 +4350,8 @@
             "expanded": "Legal"
         },
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/82.webp",
-            "large": "https://images.pokedata.ovh/en/me5/82_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/82.webp",
+            "large": "https://images.pokedata.ovh/es/me5/82_hires.webp"
         }
     },
     {
@@ -4365,10 +4365,10 @@
         "Release Date": "2026-07-16T17:00:00.0000000Z",
         "Craftable Date": "2026-07-16 19:00:00",
         "Craftable": 1,
-        "name": "Shadowy {D} Energy",
+        "name": "Energía {D} Sombría",
         "rarity": "Rare",
         "rules": [
-            "As long as this card is attached to a Pokémon, it provides darkness Energy. As long as the darkness Pokémon this card is attached to is on your Bench, prevent all damage done to it by attacks from your opponent's Pokémon."
+            "Mientras esta carta esté unida a un Pokémon, proporciona 1 Energía darkness. Mientras el Pokémon darkness al que esté unida esta carta esté en tu Banca, se evita todo el daño infligido a este Pokémon por ataques de los Pokémon de tu rival."
         ],
         "number": "83",
         "regulationMark": "J",
@@ -4378,8 +4378,8 @@
             "expanded": "Legal"
         },
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/83.webp",
-            "large": "https://images.pokedata.ovh/en/me5/83_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/83.webp",
+            "large": "https://images.pokedata.ovh/es/me5/83_hires.webp"
         }
     },
     {
@@ -4393,10 +4393,10 @@
         "Release Date": "2026-07-16T17:00:00.0000000Z",
         "Craftable Date": "2026-07-16 19:00:00",
         "Craftable": 1,
-        "name": "Voltaic {L} Energy",
+        "name": "Energía {L} Voltaica",
         "rarity": "Rare",
         "rules": [
-            "As long as this card is attached to a Pokémon, it provides lightning Energy. Attacks used by the lightning Pokémon this card is attached to do 20 more damage to your opponent's Active Pokémon <i>(before applying Weakness and Resistance)</i>."
+            "Mientras esta carta esté unida a un Pokémon, proporciona 1 Energía lightning. Los ataques usados por el Pokémon lightning al que esté unida esta carta hacen 20 puntos de daño más al Pokémon Activo de tu rival <i>(antes de aplicar Debilidad y Resistencia)</i>."
         ],
         "number": "84",
         "regulationMark": "J",
@@ -4406,8 +4406,8 @@
             "expanded": "Legal"
         },
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/84.webp",
-            "large": "https://images.pokedata.ovh/en/me5/84_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/84.webp",
+            "large": "https://images.pokedata.ovh/es/me5/84_hires.webp"
         }
     },
     {
@@ -4433,8 +4433,8 @@
         "rarity": "IllustrationRare",
         "attacks": [
             {
-                "name": "Reckless Charge",
-                "text": "This Pokémon also does 10 damage to itself.",
+                "name": "Carga Descuidada",
+                "text": "Este Pokémon también se hace 10 puntos de daño a sí mismo.",
                 "cost": "G",
                 "damage": "30",
                 "convertedEnergyCost": 1
@@ -4458,8 +4458,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/85.webp",
-            "large": "https://images.pokedata.ovh/en/me5/85_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/85.webp",
+            "large": "https://images.pokedata.ovh/es/me5/85_hires.webp"
         },
         "resistances": []
     },
@@ -4481,8 +4481,8 @@
         "rarity": "IllustrationRare",
         "attacks": [
             {
-                "name": "Flame Legion",
-                "text": "This attack does 40 more damage for each of your Benched Pokémon that has any fire Energy attached.",
+                "name": "Legión de Llamas",
+                "text": "Este ataque hace 40 puntos de daño más por cada uno de tus Pokémon en Banca que tengan alguna Energía fire unida.",
                 "cost": "R",
                 "damage": "40+",
                 "convertedEnergyCost": 1
@@ -4507,8 +4507,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/86.webp",
-            "large": "https://images.pokedata.ovh/en/me5/86_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/86.webp",
+            "large": "https://images.pokedata.ovh/es/me5/86_hires.webp"
         },
         "resistances": []
     },
@@ -4533,7 +4533,7 @@
         "rarity": "IllustrationRare",
         "attacks": [
             {
-                "name": "Pierce",
+                "name": "Perforar",
                 "text": "",
                 "cost": "CC",
                 "damage": "30",
@@ -4558,8 +4558,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/87.webp",
-            "large": "https://images.pokedata.ovh/en/me5/87_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/87.webp",
+            "large": "https://images.pokedata.ovh/es/me5/87_hires.webp"
         },
         "resistances": []
     },
@@ -4581,8 +4581,8 @@
         "rarity": "IllustrationRare",
         "attacks": [
             {
-                "name": "Aqua Return",
-                "text": "Shuffle this Pokémon and all attached cards into your deck.",
+                "name": "Retorno Acuático",
+                "text": "Pon este Pokémon y todas las cartas unidas a él en tu baraja, y baraja todas las cartas.",
                 "cost": "WC",
                 "damage": "120",
                 "convertedEnergyCost": 2
@@ -4590,8 +4590,8 @@
         ],
         "abilities": [
             {
-                "name": "[Ability] Enriching Melody",
-                "text": "Once during your turn, when you play this Pokémon from your hand to evolve 1 of your Pokémon, you may use this Ability. Heal all damage from 1 of your Pokémon."
+                "name": "[Ability] Melodía Restauradora",
+                "text": "Una vez durante tu turno, cuando juegas este Pokémon de tu mano para hacer evolucionar a uno de tus Pokémon, puedes usar esta habilidad. Cura todos los puntos de daño a uno de tus Pokémon."
             }
         ],
         "weaknesses": [
@@ -4613,8 +4613,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/88.webp",
-            "large": "https://images.pokedata.ovh/en/me5/88_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/88.webp",
+            "large": "https://images.pokedata.ovh/es/me5/88_hires.webp"
         },
         "resistances": []
     },
@@ -4636,15 +4636,15 @@
         "rarity": "IllustrationRare",
         "attacks": [
             {
-                "name": "Flashing Barrier",
-                "text": "During your opponent's next turn, prevent all damage done to this Pokémon by attacks from Evolution Pokémon.",
+                "name": "Barrera Destellante",
+                "text": "Durante el próximo turno de tu rival, se evita todo el daño infligido a este Pokémon por ataques de Pokémon Evolución.",
                 "cost": "LL",
                 "damage": "50",
                 "convertedEnergyCost": 2
             },
             {
-                "name": "Sonic Edge",
-                "text": "This attack's damage isn't affected by any effects on your opponent's Active Pokémon.",
+                "name": "Tajo Sónico",
+                "text": "El daño de este ataque no se ve afectado por ningún efecto en el Pokémon Activo de tu rival.",
                 "cost": "LLL",
                 "damage": "110",
                 "convertedEnergyCost": 3
@@ -4668,8 +4668,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/89.webp",
-            "large": "https://images.pokedata.ovh/en/me5/89_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/89.webp",
+            "large": "https://images.pokedata.ovh/es/me5/89_hires.webp"
         },
         "resistances": []
     },
@@ -4691,14 +4691,14 @@
         "rarity": "IllustrationRare",
         "attacks": [
             {
-                "name": "All Out",
-                "text": "If you have no cards in your hand, this attack does 160 more damage.",
+                "name": "A por Todas",
+                "text": "Si no tienes ninguna carta en tu mano, este ataque hace 160 puntos de daño más.",
                 "cost": "P",
                 "damage": "50+",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Zen Headbutt",
+                "name": "Cabezazo Zen",
                 "text": "",
                 "cost": "CCC",
                 "damage": "110",
@@ -4725,8 +4725,8 @@
         ],
         "convertedRetreatCost": 3,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/90.webp",
-            "large": "https://images.pokedata.ovh/en/me5/90_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/90.webp",
+            "large": "https://images.pokedata.ovh/es/me5/90_hires.webp"
         },
         "resistances": [
             {
@@ -4753,8 +4753,8 @@
         "rarity": "IllustrationRare",
         "attacks": [
             {
-                "name": "Vengeful Anchor",
-                "text": "If you have 4 or more Pokémon that have the Hide 'n' Sneak Ability in your discard pile, this attack does 140 more damage.",
+                "name": "Ancla Vengativa",
+                "text": "Si tienes en tu pila de descartes 4 Pokémon o más que tengan la habilidad Escondite a Hurtadillas, este ataque hace 140 puntos de daño más.",
                 "cost": "P",
                 "damage": "30+",
                 "convertedEnergyCost": 1
@@ -4780,8 +4780,8 @@
         ],
         "convertedRetreatCost": 3,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/91.webp",
-            "large": "https://images.pokedata.ovh/en/me5/91_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/91.webp",
+            "large": "https://images.pokedata.ovh/es/me5/91_hires.webp"
         },
         "resistances": [
             {
@@ -4808,14 +4808,14 @@
         "rarity": "IllustrationRare",
         "attacks": [
             {
-                "name": "Skill Thief",
-                "text": "If you have no cards in your hand, choose an attack from 1 of your opponent's Pokémon in play and use it as this attack.",
+                "name": "Ladrón de Talentos",
+                "text": "Si no tienes ninguna carta en tu mano, elige un ataque de uno de los Pokémon en juego de tu rival y úsalo para este ataque.",
                 "cost": "CC",
                 "damage": "",
                 "convertedEnergyCost": 2
             },
             {
-                "name": "Sharp Fang",
+                "name": "Colmillo Afilado",
                 "text": "",
                 "cost": "DCC",
                 "damage": "80",
@@ -4840,8 +4840,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/92.webp",
-            "large": "https://images.pokedata.ovh/en/me5/92_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/92.webp",
+            "large": "https://images.pokedata.ovh/es/me5/92_hires.webp"
         },
         "resistances": []
     },
@@ -4863,7 +4863,7 @@
         "rarity": "IllustrationRare",
         "attacks": [
             {
-                "name": "Hammer In",
+                "name": "Martillear",
                 "text": "",
                 "cost": "MMC",
                 "damage": "160",
@@ -4872,8 +4872,8 @@
         ],
         "abilities": [
             {
-                "name": "[Ability] Ancient Bulwark",
-                "text": "As long as this Pokémon is on your Bench, prevent all damage done to each of your Pokémon by attacks from your opponent's Pokémon that have 2 or less Energy attached."
+                "name": "[Ability] Bastión Ancestral",
+                "text": "Mientras este Pokémon esté en tu Banca, se evita todo el daño infligido a cada uno de tus Pokémon por ataques de los Pokémon de tu rival que tengan 2 Energías o menos unidas."
             }
         ],
         "weaknesses": [
@@ -4897,8 +4897,8 @@
         ],
         "convertedRetreatCost": 4,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/93.webp",
-            "large": "https://images.pokedata.ovh/en/me5/93_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/93.webp",
+            "large": "https://images.pokedata.ovh/es/me5/93_hires.webp"
         },
         "resistances": [
             {
@@ -4925,8 +4925,8 @@
         "rarity": "IllustrationRare",
         "attacks": [
             {
-                "name": "Feather Rondo",
-                "text": "This attack does 20 more damage for each Benched Pokémon <i>(both yours and your opponent's)</i>.",
+                "name": "Rondó Pluma",
+                "text": "Este ataque hace 20 puntos de daño más por cada Pokémon en Banca <i>(tanto tuyos como de tu rival)</i>.",
                 "cost": "C",
                 "damage": "60+",
                 "convertedEnergyCost": 1
@@ -4934,8 +4934,8 @@
         ],
         "abilities": [
             {
-                "name": "[Ability] Aerial Draw",
-                "text": "Once during your turn, you may use this Ability. Draw a card."
+                "name": "[Ability] Robo Aéreo",
+                "text": "Una vez durante tu turno, puedes usar esta habilidad. Roba 1 carta."
             }
         ],
         "weaknesses": [
@@ -4957,8 +4957,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/94.webp",
-            "large": "https://images.pokedata.ovh/en/me5/94_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/94.webp",
+            "large": "https://images.pokedata.ovh/es/me5/94_hires.webp"
         },
         "resistances": [
             {
@@ -4985,8 +4985,8 @@
         "rarity": "IllustrationRare",
         "attacks": [
             {
-                "name": "Air Slash",
-                "text": "Discard an Energy from this Pokémon.",
+                "name": "Tajo Aéreo",
+                "text": "Descarta 1 Energía de este Pokémon.",
                 "cost": "CCC",
                 "damage": "130",
                 "convertedEnergyCost": 3
@@ -4994,8 +4994,8 @@
         ],
         "abilities": [
             {
-                "name": "[Ability] Call a Buddy",
-                "text": "Once during your turn, if you have no cards in your hand, you may use this Ability. Search your deck for a Supporter card, reveal it, and put it into your hand. Then, shuffle your deck."
+                "name": "[Ability] Llamar a un Amigo",
+                "text": "Una vez durante tu turno, si no tienes ninguna carta en tu mano, puedes usar esta habilidad. Busca en tu baraja 1 carta de Partidario, enséñala y ponla en tu mano. Después, baraja las cartas de tu baraja."
             }
         ],
         "weaknesses": [
@@ -5017,8 +5017,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/95.webp",
-            "large": "https://images.pokedata.ovh/en/me5/95_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/95.webp",
+            "large": "https://images.pokedata.ovh/es/me5/95_hires.webp"
         },
         "resistances": []
     },
@@ -5041,15 +5041,15 @@
         "rarity": "UltraRare",
         "attacks": [
             {
-                "name": "Lively Cutter",
-                "text": "If this Pokémon was healed during this turn, this attack does 200 more damage.",
+                "name": "Cuchilla Animada",
+                "text": "Si este Pokémon ha sido curado durante este turno, este ataque hace 200 puntos de daño más.",
                 "cost": "G",
                 "damage": "60+",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Leaf Guard",
-                "text": "During your opponent's next turn, this Pokémon takes 50 less damage from attacks <i>(after applying Weakness and Resistance)</i>.",
+                "name": "Defensa Hoja",
+                "text": "Durante el próximo turno de tu rival, los ataques hacen 50 puntos de daño menos a este Pokémon <i>(después de aplicar Debilidad y Resistencia)</i>.",
                 "cost": "GC",
                 "damage": "140",
                 "convertedEnergyCost": 2
@@ -5073,8 +5073,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/96.webp",
-            "large": "https://images.pokedata.ovh/en/me5/96_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/96.webp",
+            "large": "https://images.pokedata.ovh/es/me5/96_hires.webp"
         },
         "resistances": []
     },
@@ -5104,8 +5104,8 @@
                 "convertedEnergyCost": 3
             },
             {
-                "name": "Falling Down",
-                "text": "This Pokémon is now Asleep.",
+                "name": "Desplome",
+                "text": "Este Pokémon pasa a estar Dormido.",
                 "cost": "WWWWW",
                 "damage": "270",
                 "convertedEnergyCost": 5
@@ -5132,8 +5132,8 @@
         ],
         "convertedRetreatCost": 4,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/97.webp",
-            "large": "https://images.pokedata.ovh/en/me5/97_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/97.webp",
+            "large": "https://images.pokedata.ovh/es/me5/97_hires.webp"
         },
         "resistances": []
     },
@@ -5153,19 +5153,19 @@
         "Craftable Date": "2027-01-16 18:00:00",
         "Craftable": 0,
         "baseEvolution": "Mega Zeraora ex",
-        "name": "Mega Zeraora ex",
+        "name": "Mega-Zeraora ex",
         "rarity": "UltraRare",
         "attacks": [
             {
-                "name": "Thunderous Fist",
-                "text": "This attack does 60 damage for each lightning Energy attached to this Pokémon.",
+                "name": "Puño Atronador",
+                "text": "Este ataque hace 60 puntos de daño por cada Energía lightning unida a este Pokémon.",
                 "cost": "L",
                 "damage": "60x",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Zepto Turn",
-                "text": "Switch this Pokémon with 1 of your Benched Pokémon.",
+                "name": "Zeptogiro",
+                "text": "Cambia este Pokémon por uno de tus Pokémon en Banca.",
                 "cost": "LLL",
                 "damage": "150",
                 "convertedEnergyCost": 3
@@ -5189,8 +5189,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/98.webp",
-            "large": "https://images.pokedata.ovh/en/me5/98_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/98.webp",
+            "large": "https://images.pokedata.ovh/es/me5/98_hires.webp"
         },
         "resistances": []
     },
@@ -5210,12 +5210,12 @@
         "Craftable Date": "2027-01-16 18:00:00",
         "Craftable": 0,
         "baseEvolution": "Litwick",
-        "name": "Mega Chandelure ex",
+        "name": "Mega-Chandelure ex",
         "rarity": "UltraRare",
         "attacks": [
             {
-                "name": "Phantom Maze",
-                "text": "This attack does 50 more damage for each colorless in your opponent's Active Pokémon's Retreat Cost.",
+                "name": "Laberinto Fantasmal",
+                "text": "Este ataque hace 50 puntos de daño más por cada colorless en el Coste de Retirada del Pokémon Activo de tu rival.",
                 "cost": "PP",
                 "damage": "130+",
                 "convertedEnergyCost": 2
@@ -5223,8 +5223,8 @@
         ],
         "abilities": [
             {
-                "name": "[Ability] Binding Flame",
-                "text": "Your opponent's Active Pokémon's Retreat Cost is colorless more."
+                "name": "[Ability] Atadura Ígnea",
+                "text": "El Coste de Retirada del Pokémon Activo de tu rival es de colorless más."
             }
         ],
         "weaknesses": [
@@ -5246,8 +5246,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/99.webp",
-            "large": "https://images.pokedata.ovh/en/me5/99_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/99.webp",
+            "large": "https://images.pokedata.ovh/es/me5/99_hires.webp"
         },
         "resistances": [
             {
@@ -5275,8 +5275,8 @@
         "rarity": "UltraRare",
         "attacks": [
             {
-                "name": "Rowdy Hammer",
-                "text": "During your next turn, attacks used by this Pokémon do 150 more damage to your opponent's Active Pokémon <i>(before applying Weakness and Resistance)</i>.",
+                "name": "Martillo Alborotador",
+                "text": "Durante tu próximo turno, los ataques usados por este Pokémon hacen 150 puntos de daño más al Pokémon Activo de tu rival <i>(antes de aplicar Debilidad y Resistencia)</i>.",
                 "cost": "FF",
                 "damage": "150",
                 "convertedEnergyCost": 2
@@ -5284,8 +5284,8 @@
         ],
         "abilities": [
             {
-                "name": "[Ability] Destructive Headbutting",
-                "text": "Once during your turn, if this Pokémon is in the Active Spot, you may use this Ability. Flip a coin. If heads, discard an Energy from your opponent's Active Pokémon."
+                "name": "[Ability] Cabezazo Aniquilador",
+                "text": "Una vez durante tu turno, si este Pokémon está en el Puesto Activo, puedes usar esta habilidad. Lanza 1 moneda. Si sale cara, descarta 1 Energía del Pokémon Activo de tu rival."
             }
         ],
         "weaknesses": [
@@ -5307,8 +5307,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/100.webp",
-            "large": "https://images.pokedata.ovh/en/me5/100_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/100.webp",
+            "large": "https://images.pokedata.ovh/es/me5/100_hires.webp"
         },
         "resistances": []
     },
@@ -5328,19 +5328,19 @@
         "Craftable Date": "2027-01-16 18:00:00",
         "Craftable": 0,
         "baseEvolution": "Mega Darkrai ex",
-        "name": "Mega Darkrai ex",
+        "name": "Mega-Darkrai ex",
         "rarity": "UltraRare",
         "attacks": [
             {
-                "name": "Dusk Raid",
-                "text": "If your Benched Pokémon have any damage counters on them, this attack does 110 more damage.",
+                "name": "Incursión Crepuscular",
+                "text": "Si tus Pokémon en Banca tienen algún contador de daño sobre ellos, este ataque hace 110 puntos de daño más.",
                 "cost": "DD",
                 "damage": "110+",
                 "convertedEnergyCost": 2
             },
             {
-                "name": "Abyss Eye",
-                "text": "If your opponent's Active Pokémon is affected by a Special Condition, it is Knocked Out.",
+                "name": "Ojo Abismal",
+                "text": "Si el Pokémon Activo de tu rival se ve afectado por una Condición Especial, queda Fuera de Combate.",
                 "cost": "DDD",
                 "damage": "",
                 "convertedEnergyCost": 3
@@ -5365,8 +5365,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/101.webp",
-            "large": "https://images.pokedata.ovh/en/me5/101_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/101.webp",
+            "large": "https://images.pokedata.ovh/es/me5/101_hires.webp"
         },
         "resistances": []
     },
@@ -5389,15 +5389,15 @@
         "rarity": "UltraRare",
         "attacks": [
             {
-                "name": "Wheely Draw",
-                "text": "Shuffle your hand into your deck. Then, draw 6 cards.",
+                "name": "Robo Redondo",
+                "text": "Pon las cartas de tu mano en tu baraja y barájalas todas. Después, roba 6 cartas.",
                 "cost": "D",
                 "damage": "",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Hangry Blaster",
-                "text": "This attack does 40 more damage for each damage counter on this Pokémon.",
+                "name": "Explosión Voraz",
+                "text": "Este ataque hace 40 puntos de daño más por cada contador de daño en este Pokémon.",
                 "cost": "DD",
                 "damage": "40+",
                 "convertedEnergyCost": 2
@@ -5421,8 +5421,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/102.webp",
-            "large": "https://images.pokedata.ovh/en/me5/102_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/102.webp",
+            "large": "https://images.pokedata.ovh/es/me5/102_hires.webp"
         },
         "resistances": []
     },
@@ -5442,19 +5442,19 @@
         "Craftable Date": "2027-01-16 18:00:00",
         "Craftable": 0,
         "baseEvolution": "Drilbur",
-        "name": "Mega Excadrill ex",
+        "name": "Mega-Excadrill ex",
         "rarity": "UltraRare",
         "attacks": [
             {
-                "name": "Undermine",
-                "text": "Discard the top 2 cards of your opponent's deck.",
+                "name": "Horadar",
+                "text": "Descarta las 2 primeras cartas de la baraja de tu rival.",
                 "cost": "MM",
                 "damage": "90",
                 "convertedEnergyCost": 2
             },
             {
-                "name": "Maximum Drilling",
-                "text": "If this Pokémon has at least 2 extra Energy attached <i>(in addition to this attack's cost)</i>, this attack does 130 more damage.",
+                "name": "Perforación Total",
+                "text": "Si este Pokémon tiene por lo menos 2 Energías adicionales unidas <i>(además de las del coste de este ataque)</i>, este ataque hace 130 puntos de daño más.",
                 "cost": "MMM",
                 "damage": "200+",
                 "convertedEnergyCost": 3
@@ -5481,8 +5481,8 @@
         ],
         "convertedRetreatCost": 4,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/103.webp",
-            "large": "https://images.pokedata.ovh/en/me5/103_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/103.webp",
+            "large": "https://images.pokedata.ovh/es/me5/103_hires.webp"
         },
         "resistances": [
             {
@@ -5502,10 +5502,10 @@
         "Release Date": "2026-07-16T17:00:00.0000000Z",
         "Craftable Date": "2027-01-16 18:00:00",
         "Craftable": 0,
-        "name": "Brave Bangle",
+        "name": "Pulsera Osada",
         "rarity": "UltraRare",
         "rules": [
-            "If the Pokémon this card is attached to doesn't have a Rule Box, the attacks it uses do 30 more damage to your opponent's Active Pokémon {ex} <i>(before applying Weakness and Resistance)</i>. <i>(Pokémon {ex}, Pokémon v_atk, etc. have Rule Boxes.)</i>"
+            "Si el Pokémon al que está unida esta carta no tiene un recuadro de regla, los ataques que use harán 30 puntos de daño más al Pokémon {ex} Activo de tu rival <i>(antes de aplicar Debilidad y Resistencia)</i>. <i>(Los Pokémon {ex}, Pokémon v_atk, etc., tienen recuadros de regla).</i>"
         ],
         "number": "104",
         "regulationMark": "I",
@@ -5515,8 +5515,8 @@
             "expanded": "Legal"
         },
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/104.webp",
-            "large": "https://images.pokedata.ovh/en/me5/104_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/104.webp",
+            "large": "https://images.pokedata.ovh/es/me5/104_hires.webp"
         }
     },
     {
@@ -5531,10 +5531,10 @@
         "Craftable Date": "2027-01-16 18:00:00",
         "Craftable": 0,
         "baseEvolution": "Martelo Esmagador",
-        "name": "Crushing Hammer",
+        "name": "Martillo Demoledor",
         "rarity": "UltraRare",
         "rules": [
-            "Flip a coin. If heads, discard an Energy from 1 of your opponent's Pokémon."
+            "Lanza 1 moneda. Si sale cara, descarta 1 Energía de uno de los Pokémon de tu rival."
         ],
         "number": "105",
         "regulationMark": "J",
@@ -5544,8 +5544,8 @@
             "expanded": "Legal"
         },
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/105.webp",
-            "large": "https://images.pokedata.ovh/en/me5/105_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/105.webp",
+            "large": "https://images.pokedata.ovh/es/me5/105_hires.webp"
         }
     },
     {
@@ -5560,10 +5560,10 @@
         "Craftable Date": "2027-01-16 18:00:00",
         "Craftable": 0,
         "baseEvolution": "Sino Sombrio",
-        "name": "Dark Bell",
+        "name": "Campanilla Oscuridad",
         "rarity": "UltraRare",
         "rules": [
-            "Both Active non-darkness Pokémon are now Confused."
+            "Cualquier Pokémon Activo que no sea de tipo darkness pasa a estar Confundido."
         ],
         "number": "106",
         "regulationMark": "J",
@@ -5573,8 +5573,8 @@
             "expanded": "Legal"
         },
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/106.webp",
-            "large": "https://images.pokedata.ovh/en/me5/106_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/106.webp",
+            "large": "https://images.pokedata.ovh/es/me5/106_hires.webp"
         }
     },
     {
@@ -5589,10 +5589,10 @@
         "Craftable Date": "2027-01-16 18:00:00",
         "Craftable": 0,
         "baseEvolution": "Substituição de Energia",
-        "name": "Energy Switch",
+        "name": "Interruptor de Energía",
         "rarity": "UltraRare",
         "rules": [
-            "Move a Basic Energy from 1 of your Pokémon to another of your Pokémon."
+            "Mueve 1 Energía Básica de uno de tus Pokémon a otro de tus Pokémon."
         ],
         "number": "107",
         "regulationMark": "I",
@@ -5602,8 +5602,8 @@
             "expanded": "Legal"
         },
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/107.webp",
-            "large": "https://images.pokedata.ovh/en/me5/107_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/107.webp",
+            "large": "https://images.pokedata.ovh/es/me5/107_hires.webp"
         }
     },
     {
@@ -5617,10 +5617,10 @@
         "Release Date": "2026-07-16T17:00:00.0000000Z",
         "Craftable Date": "2027-01-16 18:00:00",
         "Craftable": 0,
-        "name": "Gladion's Final Battle",
+        "name": "Combate Final de Gladio",
         "rarity": "UltraRare",
         "rules": [
-            "You can use this card only when it is the last card in your hand.During this turn, attacks used by your Pokémon that don't have a Rule Box do 80 more damage to your opponent's Active Pokémon <i>(before applying Weakness and Resistance)</i>. <i>(Pokémon {ex}, Pokémon v_atk, etc. have Rule Boxes.)</i>"
+            "Puedes usar esta carta solo cuando sea la última carta en tu mano.Durante este turno, los ataques usados por tus Pokémon que no tengan un recuadro de regla hacen 80 puntos de daño más al Pokémon Activo de tu rival <i>(antes de aplicar Debilidad y Resistencia)</i>. <i>(Los Pokémon {ex}, Pokémon v_atk, etc., tienen recuadros de regla).</i>"
         ],
         "number": "108",
         "regulationMark": "J",
@@ -5630,8 +5630,8 @@
             "expanded": "Legal"
         },
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/108.webp",
-            "large": "https://images.pokedata.ovh/en/me5/108_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/108.webp",
+            "large": "https://images.pokedata.ovh/es/me5/108_hires.webp"
         }
     },
     {
@@ -5645,10 +5645,10 @@
         "Release Date": "2026-07-16T17:00:00.0000000Z",
         "Craftable Date": "2027-01-16 18:00:00",
         "Craftable": 0,
-        "name": "Gwynn",
+        "name": "Inma",
         "rarity": "UltraRare",
         "rules": [
-            "Discard up to 2 Pokémon that don't have a Rule Box from your hand, and draw 3 cards for each card you discarded in this way. <i>(Pokémon {ex}, Pokémon v_atk, etc. have Rule Boxes.)</i>"
+            "Descarta hasta 2 Pokémon que no tengan un recuadro de regla de tu mano y roba 3 cartas por cada carta que hayas descartado de esta manera. <i>(Los Pokémon {ex}, Pokémon v_atk, etc., tienen recuadros de regla).</i>"
         ],
         "number": "109",
         "regulationMark": "J",
@@ -5658,8 +5658,8 @@
             "expanded": "Legal"
         },
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/109.webp",
-            "large": "https://images.pokedata.ovh/en/me5/109_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/109.webp",
+            "large": "https://images.pokedata.ovh/es/me5/109_hires.webp"
         }
     },
     {
@@ -5674,10 +5674,10 @@
         "Craftable Date": "2027-01-16 18:00:00",
         "Craftable": 0,
         "baseEvolution": "Defensor Férreo",
-        "name": "Iron Defender",
+        "name": "Defensor Férreo",
         "rarity": "UltraRare",
         "rules": [
-            "During your opponent's next turn, all of your metal Pokémon take 30 less damage from attacks from your opponent's Pokémon <i>(after applying Weakness and Resistance)</i>. <i>(This includes new Pokémon that come into play.)</i>"
+            "Durante el próximo turno de tu rival, los ataques de los Pokémon de tu rival hacen 30 puntos de daño menos a todos tus Pokémon metal <i>(después de aplicar Debilidad y Resistencia)</i>. <i>(Esto incluye los nuevos Pokémon que entren en juego).</i>"
         ],
         "number": "110",
         "regulationMark": "I",
@@ -5687,8 +5687,8 @@
             "expanded": "Legal"
         },
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/110.webp",
-            "large": "https://images.pokedata.ovh/en/me5/110_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/110.webp",
+            "large": "https://images.pokedata.ovh/es/me5/110_hires.webp"
         }
     },
     {
@@ -5703,10 +5703,10 @@
         "Release Date": "2026-07-16T17:00:00.0000000Z",
         "Craftable Date": "2027-01-16 18:00:00",
         "Craftable": 0,
-        "name": "Misty's Vitality",
+        "name": "Vitalidad de Misty",
         "rarity": "UltraRare",
         "rules": [
-            "Search your deck for up to 4 Basic water Energy cards and attach them to 1 of your Pokémon. Then, shuffle your deck. Your turn ends."
+            "Busca en tu baraja hasta 4 cartas de Energía water Básica y únelas a uno de tus Pokémon. Después, baraja las cartas de tu baraja. Tu turno termina."
         ],
         "number": "111",
         "regulationMark": "J",
@@ -5716,8 +5716,8 @@
             "expanded": "Legal"
         },
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/111.webp",
-            "large": "https://images.pokedata.ovh/en/me5/111_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/111.webp",
+            "large": "https://images.pokedata.ovh/es/me5/111_hires.webp"
         }
     },
     {
@@ -5731,10 +5731,10 @@
         "Release Date": "2026-07-16T17:00:00.0000000Z",
         "Craftable Date": "2027-01-16 18:00:00",
         "Craftable": 0,
-        "name": "Rust Syndicate Grunt",
+        "name": "Recluta del Clan Corrosión",
         "rarity": "UltraRare",
         "rules": [
-            "You can use this card only if any of your Pokémon were Knocked Out during your opponent's last turn.Discard an Energy from 1 of your opponent's Pokémon."
+            "Puedes usar esta carta solo si alguno de tus Pokémon quedó Fuera de Combate durante el último turno de tu rival.Descarta 1 Energía de uno de los Pokémon de tu rival."
         ],
         "number": "112",
         "regulationMark": "J",
@@ -5744,8 +5744,8 @@
             "expanded": "Legal"
         },
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/112.webp",
-            "large": "https://images.pokedata.ovh/en/me5/112_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/112.webp",
+            "large": "https://images.pokedata.ovh/es/me5/112_hires.webp"
         }
     },
     {
@@ -5759,10 +5759,10 @@
         "Release Date": "2026-07-16T17:00:00.0000000Z",
         "Craftable Date": "2027-01-16 18:00:00",
         "Craftable": 0,
-        "name": "Tremendous Bomb",
+        "name": "Bomba Formidable",
         "rarity": "UltraRare",
         "rules": [
-            "If the Pokémon this card is attached to isn't a Mega Evolution Pokémon {ex}, is in the Active Spot, and takes 240 or more damage from an attack from your opponent's Mega Evolution Pokémon {ex} <i>(even if this Pokémon is Knocked Out)</i>, place 12 damage counters on the Attacking Pokémon. If you placed any damage counters in this way, discard this card."
+            "Si el Pokémon al que está unida esta carta no es un Pokémon {ex} Megaevolución, si está en el Puesto Activo y si un ataque de los Pokémon {ex} Megaevolución de tu rival le hace 240 puntos de daño o más <i>(incluso si queda Fuera de Combate)</i>, pon 12 contadores de daño en el Pokémon Atacante. Si has puesto algún contador de daño de esta manera, descarta esta carta."
         ],
         "number": "113",
         "regulationMark": "J",
@@ -5772,8 +5772,8 @@
             "expanded": "Legal"
         },
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/113.webp",
-            "large": "https://images.pokedata.ovh/en/me5/113_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/113.webp",
+            "large": "https://images.pokedata.ovh/es/me5/113_hires.webp"
         }
     },
     {
@@ -5792,19 +5792,19 @@
         "Craftable Date": "2027-01-16 18:00:00",
         "Craftable": 0,
         "baseEvolution": "Mega Zeraora ex",
-        "name": "Mega Zeraora ex",
+        "name": "Mega-Zeraora ex",
         "rarity": "SpecialIllustrationRare",
         "attacks": [
             {
-                "name": "Thunderous Fist",
-                "text": "This attack does 60 damage for each lightning Energy attached to this Pokémon.",
+                "name": "Puño Atronador",
+                "text": "Este ataque hace 60 puntos de daño por cada Energía lightning unida a este Pokémon.",
                 "cost": "L",
                 "damage": "60x",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Zepto Turn",
-                "text": "Switch this Pokémon with 1 of your Benched Pokémon.",
+                "name": "Zeptogiro",
+                "text": "Cambia este Pokémon por uno de tus Pokémon en Banca.",
                 "cost": "LLL",
                 "damage": "150",
                 "convertedEnergyCost": 3
@@ -5828,8 +5828,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/114.webp",
-            "large": "https://images.pokedata.ovh/en/me5/114_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/114.webp",
+            "large": "https://images.pokedata.ovh/es/me5/114_hires.webp"
         },
         "resistances": []
     },
@@ -5849,12 +5849,12 @@
         "Craftable Date": "2027-01-16 18:00:00",
         "Craftable": 0,
         "baseEvolution": "Litwick",
-        "name": "Mega Chandelure ex",
+        "name": "Mega-Chandelure ex",
         "rarity": "SpecialIllustrationRare",
         "attacks": [
             {
-                "name": "Phantom Maze",
-                "text": "This attack does 50 more damage for each colorless in your opponent's Active Pokémon's Retreat Cost.",
+                "name": "Laberinto Fantasmal",
+                "text": "Este ataque hace 50 puntos de daño más por cada colorless en el Coste de Retirada del Pokémon Activo de tu rival.",
                 "cost": "PP",
                 "damage": "130+",
                 "convertedEnergyCost": 2
@@ -5862,8 +5862,8 @@
         ],
         "abilities": [
             {
-                "name": "[Ability] Binding Flame",
-                "text": "Your opponent's Active Pokémon's Retreat Cost is colorless more."
+                "name": "[Ability] Atadura Ígnea",
+                "text": "El Coste de Retirada del Pokémon Activo de tu rival es de colorless más."
             }
         ],
         "weaknesses": [
@@ -5885,8 +5885,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/115.webp",
-            "large": "https://images.pokedata.ovh/en/me5/115_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/115.webp",
+            "large": "https://images.pokedata.ovh/es/me5/115_hires.webp"
         },
         "resistances": [
             {
@@ -5911,19 +5911,19 @@
         "Craftable Date": "2027-01-16 18:00:00",
         "Craftable": 0,
         "baseEvolution": "Mega Darkrai ex",
-        "name": "Mega Darkrai ex",
+        "name": "Mega-Darkrai ex",
         "rarity": "SpecialIllustrationRare",
         "attacks": [
             {
-                "name": "Dusk Raid",
-                "text": "If your Benched Pokémon have any damage counters on them, this attack does 110 more damage.",
+                "name": "Incursión Crepuscular",
+                "text": "Si tus Pokémon en Banca tienen algún contador de daño sobre ellos, este ataque hace 110 puntos de daño más.",
                 "cost": "DD",
                 "damage": "110+",
                 "convertedEnergyCost": 2
             },
             {
-                "name": "Abyss Eye",
-                "text": "If your opponent's Active Pokémon is affected by a Special Condition, it is Knocked Out.",
+                "name": "Ojo Abismal",
+                "text": "Si el Pokémon Activo de tu rival se ve afectado por una Condición Especial, queda Fuera de Combate.",
                 "cost": "DDD",
                 "damage": "",
                 "convertedEnergyCost": 3
@@ -5948,8 +5948,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/116.webp",
-            "large": "https://images.pokedata.ovh/en/me5/116_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/116.webp",
+            "large": "https://images.pokedata.ovh/es/me5/116_hires.webp"
         },
         "resistances": []
     },
@@ -5972,15 +5972,15 @@
         "rarity": "SpecialIllustrationRare",
         "attacks": [
             {
-                "name": "Wheely Draw",
-                "text": "Shuffle your hand into your deck. Then, draw 6 cards.",
+                "name": "Robo Redondo",
+                "text": "Pon las cartas de tu mano en tu baraja y barájalas todas. Después, roba 6 cartas.",
                 "cost": "D",
                 "damage": "",
                 "convertedEnergyCost": 1
             },
             {
-                "name": "Hangry Blaster",
-                "text": "This attack does 40 more damage for each damage counter on this Pokémon.",
+                "name": "Explosión Voraz",
+                "text": "Este ataque hace 40 puntos de daño más por cada contador de daño en este Pokémon.",
                 "cost": "DD",
                 "damage": "40+",
                 "convertedEnergyCost": 2
@@ -6004,8 +6004,8 @@
         ],
         "convertedRetreatCost": 1,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/117.webp",
-            "large": "https://images.pokedata.ovh/en/me5/117_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/117.webp",
+            "large": "https://images.pokedata.ovh/es/me5/117_hires.webp"
         },
         "resistances": []
     },
@@ -6020,10 +6020,10 @@
         "Release Date": "2026-07-16T17:00:00.0000000Z",
         "Craftable Date": "2027-01-16 18:00:00",
         "Craftable": 0,
-        "name": "Gladion's Final Battle",
+        "name": "Combate Final de Gladio",
         "rarity": "SpecialIllustrationRare",
         "rules": [
-            "You can use this card only when it is the last card in your hand.During this turn, attacks used by your Pokémon that don't have a Rule Box do 80 more damage to your opponent's Active Pokémon <i>(before applying Weakness and Resistance)</i>. <i>(Pokémon {ex}, Pokémon v_atk, etc. have Rule Boxes.)</i>"
+            "Puedes usar esta carta solo cuando sea la última carta en tu mano.Durante este turno, los ataques usados por tus Pokémon que no tengan un recuadro de regla hacen 80 puntos de daño más al Pokémon Activo de tu rival <i>(antes de aplicar Debilidad y Resistencia)</i>. <i>(Los Pokémon {ex}, Pokémon v_atk, etc., tienen recuadros de regla).</i>"
         ],
         "number": "118",
         "regulationMark": "J",
@@ -6033,8 +6033,8 @@
             "expanded": "Legal"
         },
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/118.webp",
-            "large": "https://images.pokedata.ovh/en/me5/118_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/118.webp",
+            "large": "https://images.pokedata.ovh/es/me5/118_hires.webp"
         }
     },
     {
@@ -6048,10 +6048,10 @@
         "Release Date": "2026-07-16T17:00:00.0000000Z",
         "Craftable Date": "2027-01-16 18:00:00",
         "Craftable": 0,
-        "name": "Gwynn",
+        "name": "Inma",
         "rarity": "SpecialIllustrationRare",
         "rules": [
-            "Discard up to 2 Pokémon that don't have a Rule Box from your hand, and draw 3 cards for each card you discarded in this way. <i>(Pokémon {ex}, Pokémon v_atk, etc. have Rule Boxes.)</i>"
+            "Descarta hasta 2 Pokémon que no tengan un recuadro de regla de tu mano y roba 3 cartas por cada carta que hayas descartado de esta manera. <i>(Los Pokémon {ex}, Pokémon v_atk, etc., tienen recuadros de regla).</i>"
         ],
         "number": "119",
         "regulationMark": "J",
@@ -6061,8 +6061,8 @@
             "expanded": "Legal"
         },
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/119.webp",
-            "large": "https://images.pokedata.ovh/en/me5/119_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/119.webp",
+            "large": "https://images.pokedata.ovh/es/me5/119_hires.webp"
         }
     },
     {
@@ -6081,19 +6081,19 @@
         "Craftable Date": "2027-01-16 18:00:00",
         "Craftable": 0,
         "baseEvolution": "Mega Darkrai ex",
-        "name": "Mega Darkrai ex",
+        "name": "Mega-Darkrai ex",
         "rarity": "MegaHyperRare",
         "attacks": [
             {
-                "name": "Dusk Raid",
-                "text": "If your Benched Pokémon have any damage counters on them, this attack does 110 more damage.",
+                "name": "Incursión Crepuscular",
+                "text": "Si tus Pokémon en Banca tienen algún contador de daño sobre ellos, este ataque hace 110 puntos de daño más.",
                 "cost": "DD",
                 "damage": "110+",
                 "convertedEnergyCost": 2
             },
             {
-                "name": "Abyss Eye",
-                "text": "If your opponent's Active Pokémon is affected by a Special Condition, it is Knocked Out.",
+                "name": "Ojo Abismal",
+                "text": "Si el Pokémon Activo de tu rival se ve afectado por una Condición Especial, queda Fuera de Combate.",
                 "cost": "DDD",
                 "damage": "",
                 "convertedEnergyCost": 3
@@ -6118,8 +6118,8 @@
         ],
         "convertedRetreatCost": 2,
         "images": {
-            "small": "https://images.pokedata.ovh/en/me5/120.webp",
-            "large": "https://images.pokedata.ovh/en/me5/120_hires.webp"
+            "small": "https://images.pokedata.ovh/es/me5/120.webp",
+            "large": "https://images.pokedata.ovh/es/me5/120_hires.webp"
         },
         "resistances": []
     }
