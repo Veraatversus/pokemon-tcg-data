@@ -32,6 +32,7 @@
 - Build ohne `sources/pokemontcg` → identische Menge `(setId, cardId)` wie mit, alle Pflichtfelder gefüllt (Test in Task 5).
 - `db_collection`-Zeile mit Leerzeilen, Großschreibung (`TRUE`/`true`), führenden Nullen oder `TCGDEX-`-Präfix → wird über Aliase aufgelöst, nicht verworfen (Test in Task 5).
 - Pocket-Sets kommen hinzu → bestehende Set-Paare bleiben gleich (Pair-Drift-Gate grün) (Prüfung in Task 1).
+- Derselbe Kartenschlüssel bedeutet unter `TCGDEX-<id>` und unter der pt-ID unterschiedliche Karten (me55c/30th-c) → Auflösung nach Namensraum des Set-Schlüssels, nie über einen gemeinsamen Alias (Test in Task 2).
 
 ---
 
@@ -64,21 +65,24 @@
   - `buildRegistry({ ptSets, ptCardsBySet, tcgdexSets, setPairs, cardResults, subsetMerge, canonicalKeyOverrides, previous }): Registry`
   - `Registry = { sets: Record<canonicalSetId, RegistrySet>, cards: Record<canonicalSetId, Record<canonicalCardId, RegistryCard>> }`
   - `RegistrySet = { pokemontcg: string|null, tcgdex: string|null, mergedSubsets: string[], aliases: string[] }` (aliases sortiert, enthalten die eigene ID nicht)
-  - `RegistryCard = { pokemontcg: string|null /* pt card id */, tcgdex: { set: string, localId: string }[], aliases: string[], ambiguousLegacyKey?: string }`
+  - `RegistryCard = { pokemontcg: string|null /* pt card id */, tcgdex: { set: string, localId: string }[], keys: { pokemontcg: string[], tcgdex: string[] }, ambiguousLegacyKey?: string }`
+    - `keys.pokemontcg`: Schlüssel, unter denen die Karte bei einem **pokemontcg-Set-Schlüssel** (kanonische pt-ID oder pt-Unterset-ID) stehen kann: `normalizeCardNumber(ptNumber)`; bei Karten ohne pt-Gegenstück der kanonische Schlüssel (TCGdex-Union, so hat das Frontend sie geschrieben).
+    - `keys.tcgdex`: Schlüssel bei einem **`TCGDEX-<id>`-Set-Schlüssel**: `normalizeCardNumber(localId)` jeder TCGdex-Referenz.
+    - Kollidierende Nummern stehen nur in `ambiguousLegacyKey`, nicht in `keys`.
   - `assertFrozen(previous: Registry, next: Registry): void` – wirft `RegistryFrozenError` mit Liste geänderter/entfernter Einträge; neue Einträge sind erlaubt.
   - `readRegistry(dir): Registry|null`, `writeRegistry(dir, registry): void` → `api/registry/sets.json`, `api/registry/cards/<canonicalSetId>.json` (Dateiname: Set-ID unverändert, `TCGDEX-` inklusive)
-  - `resolveCollectionKey(registry, setId, cardId): { setId, cardId } | null` (case-insensitive Set-Aliase; Kartenschlüssel über `normalizeCardNumber`)
+  - `resolveCollectionKey(registry, setId, cardId): { setId, cardId } | null` – Set über ID/Aliase (case-insensitive). **Namensraum aus dem Set-Schlüssel:** beginnt er mit `TCGDEX-`, wird `normalizeCardNumber(cardId)` gegen `keys.tcgdex` der Karten des Sets gesucht, sonst gegen den kanonischen Schlüssel und `keys.pokemontcg`. Bei Unterset-Aliasen nur Karten aus diesem Unterset.
 - `subset-merge.json`: `{ "merges": [ { "main": "swsh12pt5", "subset": "swsh12pt5gg", "reason": "…" }, … ] }` (die sechs Paare aus den Global Constraints)
 - `canonical-keys.json`: `{ "zsv10pt5-80": { "key": "80", "reason": "Referenz-DB: zsv10pt5/80 abgehakt; pokemontcg-Nummer 60 ist ein Datenfehler" } }`
 
 Regeln (Spec §5.1–5.3):
 1. Set: kanonisch pt-ID, sonst `TCGDEX-<tcgdexId>`; Aliase = pt-ID, `TCGDEX-<tcgdexId>`, Unterset-IDs (pt) und deren `TCGDEX-<id>`. `mep`: pokemontcg-Karten aus `cards/en/mep.json` ohne Eintrag in `sets/en.json` zählen als pt-Set `mep`, gepaart mit TCGdex `mep`.
 2. Karte: Overrides zuerst. Sonst `normalizeCardNumber(ptNumber)`; bei `tcgdex_only` `normalizeCardNumber(localId)`. Kollidieren mehrere Karten eines Sets auf denselben Schlüssel N: jede bekommt `ambiguousLegacyKey: N` und Schlüssel `normalizeCardNumber(ptId-Suffix)`, falls ≠ N und eindeutig (z. B. `15_A1`, `106p`), sonst `N_<normalizeCardNumber(tcgdexLocalId)>`.
-3. Karten-Aliase = `normalizeCardNumber(ptNumber)`, `normalizeCardNumber(localId)` jeder TCGdex-Referenz, abzüglich des kanonischen Schlüssels; kollidierende Nummern stehen **nicht** als Alias, sondern nur als `ambiguousLegacyKey`.
+3. Karten-Schlüssel je Namensraum wie im Interface `RegistryCard.keys` beschrieben. Begründung (Referenz-DB 2): Unter `TCGDEX-30th-c` meinen `11`, `25`, `26` die TCGdex-Karten `011`/`025`/`026`, unter `me55c` meint `11` eine andere Karte (Original-Druck-Nummer). Ein namensraumloser Alias wäre mehrdeutig.
 4. Untersets: Karten des Untersets werden Karten des Hauptsets (Schlüssel wie oben, z. B. `GG1`); ein bereits existierender gleicher Schlüssel im Hauptset aus TCGdex-Union bleibt **eine** Karte mit beiden Referenzen.
 5. `previous` gegeben → bestehende Einträge werden 1:1 übernommen (auch wenn die Rohdaten heute anders ableiten würden), nur fehlende ergänzt.
 
-- [ ] **Step 1: Failing tests** (synthetische Daten): kanonische Set-IDs (pt vs. `TCGDEX-`), Aliase; Unterset-Merge `swsh12pt5gg/GG01` → `swsh12pt5`/`GG1` mit Alias-Set `swsh12pt5gg`; Kollision `15` ×4 → `15_A1…15_A4` + `ambiguousLegacyKey: '15'`; `me55c-106`/`106p`/`106m` → `106_<localId>`, `106p`, `106m`; Override `zsv10pt5-80 → 80`, `zsv10pt5-60` bleibt `60` ohne ambiguousLegacyKey; `previous` mit abweichendem Schlüssel → bleibt; `assertFrozen` wirft bei geändertem und entferntem Eintrag, nicht bei neuem; `resolveCollectionKey(reg, 'TCGDEX-me05', '001')` → `{ setId: 'me5', cardId: '1' }`; `resolveCollectionKey(reg, 'swsh12pt5gg', 'GG1')` → `{ setId: 'swsh12pt5', cardId: 'GG1' }`; Determinismus von `writeRegistry` (zweimal gleich).
+- [ ] **Step 1: Failing tests** (synthetische Daten): kanonische Set-IDs (pt vs. `TCGDEX-`), Aliase; Unterset-Merge `swsh12pt5gg/GG01` → `swsh12pt5`/`GG1` mit Alias-Set `swsh12pt5gg`; Kollision `15` ×4 → `15_A1…15_A4` + `ambiguousLegacyKey: '15'`; `me55c-106`/`106p`/`106m` → `106_<localId>`, `106p`, `106m`; Override `zsv10pt5-80 → 80`, `zsv10pt5-60` bleibt `60` ohne ambiguousLegacyKey; `previous` mit abweichendem Schlüssel → bleibt; `assertFrozen` wirft bei geändertem und entferntem Eintrag, nicht bei neuem; `resolveCollectionKey(reg, 'TCGDEX-me05', '001')` → `{ setId: 'me5', cardId: '1' }`; `resolveCollectionKey(reg, 'swsh12pt5gg', 'GG1')` → `{ setId: 'swsh12pt5', cardId: 'GG1' }`; Namensraum-Fall nach me55c-Muster (pt-Nummer `4` = Karte X mit TCGdex `014`, TCGdex `004` = Karte Y): `resolve('me55c','4')` → X, `resolve('TCGDEX-30th-c','4')` → Y; TCGdex-Union-Karte im gepaarten Set (`svp`/`166`) über pt-Set-Schlüssel auflösbar; Determinismus von `writeRegistry` (zweimal gleich).
 - [ ] **Step 2: Run, verify fail**
 - [ ] **Step 3: Implement**
 - [ ] **Step 4: Run, verify pass**
@@ -131,7 +135,7 @@ Regeln (Spec §5.1–5.3):
 - Produces: `parseCsv(text): string[][]` (RFC-4180, `\r\n`/`\n`, Quotes)
 
 - [ ] **Step 1: Tests schreiben**
-  - `compat-collection`: liest `.local/fixtures/*db_collection.csv` (fehlt → `t.skip`). Für jede nicht-leere Zeile: `resolveCollectionKey` liefert genau eine Karte; erlaubt sind nur Zeilen, deren Schlüssel ein `ambiguousLegacyKey` ist (werden separat gezählt). Erwartung Referenz-DB: 0 verwaiste Zeilen; alle 4.074 `g`-Haken lösen auf; zwei Zeilen, die auf dieselbe kanonische Karte fallen (Unterset + Hauptset), werden gezählt und dürfen nur bei identischen oder ODER-kompatiblen Haken vorkommen.
+  - `compat-collection`: liest **jede** Datei `.local/fixtures/*db_collection.csv` als eigenen Testfall (keine Datei → `t.skip`). Für jede nicht-leere Zeile: `resolveCollectionKey` liefert genau eine Karte; erlaubt sind nur Zeilen, deren Schlüssel ein `ambiguousLegacyKey` ist (werden separat gezählt). Erwartung je DB: 0 verwaiste Zeilen; jede Zeile mit `g` oder `rh` löst auf (Referenz-DB 1: 4.074 `g`; Referenz-DB 2 „Ja hier die Tabelle im Format“: 5.108 `g` / 3.581 `rh`, inkl. `TCGDEX-30th` 142, `TCGDEX-me05` 94, `TCGDEX-30th-c` 3, `svp` 166–218, `TCGDEX-mep` 26); Zeilen, die auf dieselbe kanonische Karte fallen (Unterset + Hauptset, `TCGDEX-<id>` + pt-ID), werden gezählt und im Testlog ausgegeben.
   - Generischer Teil (immer aktiv): für jeden Registry-Eintrag lösen kanonischer Schlüssel und jeder Alias auf genau diesen Eintrag auf; kein Alias zeigt auf zwei Karten.
   - `tcgdex-only`: `runBuild({ tcgdexOnly: true, outDir: <tmp> })`. Erwartung: Menge `(setId, cardId)` == Menge des normalen Builds **minus** genau den Registry-Karten mit `pokemontcg != null` und leerer `tcgdex`-Liste (pokemontcg-only, z. B. SM-`a`-Alternativen; im Normalbetrieb liefert sie der eingefrorene Snapshot weiter). Jede gebaute Karte hat `name`, `number`, `supertype`, `legalities`, `images`. Set-IDs und Kartenschlüssel sind identisch zum normalen Build.
 - [ ] **Step 2: Laufen lassen; Abweichungen in Task-2/4-Code beheben, nicht in den Tests aufweichen**

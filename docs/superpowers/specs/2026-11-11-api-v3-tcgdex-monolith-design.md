@@ -189,7 +189,10 @@ Jedes Registry-Element führt `aliases[]` mit allen IDs, unter denen es je auftr
 - Beim **Schreiben** bleibt der Schlüssel erhalten, der in der Zeile schon steht. Es gibt kein automatisches Umschlüsseln und damit auch keine doppelten Zeilen.
 - **Generische Alias-Regel** (gilt für alle Nutzer, nicht nur für die Referenz-DB):
   - Set: pokemontcg-ID (falls vorhanden) und `TCGDEX-<tcgdexId>` (falls vorhanden).
-  - Karte: `normalizeCardNumber(pokemontcg-Nummer)` und `normalizeCardNumber(TCGdex-localId)`.
+  - Karte, **je nach Namensraum des Set-Schlüssels**:
+    - Unter einer pokemontcg-Set-ID gilt `normalizeCardNumber(pokemontcg-Nummer)`. Für TCGdex-Union-Karten ohne pt-Gegenstück gilt deren TCGdex-Schlüssel.
+    - Unter `TCGDEX-<id>` gilt `normalizeCardNumber(TCGdex-localId)`.
+    - Ein gemeinsamer, namensraumloser Alias wäre mehrdeutig. Unter `TCGDEX-30th-c` meint `11` eine andere Karte als unter `me55c` (Referenz-DB 2).
 - **Galerie-Untersets** (Entscheidung, §10 Punkt 9): Karten aus `swsh9tg`…`swsh12tg`, `swsh12pt5gg` und `swsh45sv` gehören kanonisch zum **Hauptset** (`swsh9`…`swsh12`, `swsh12pt5`, `swsh45`), mit Kartenschlüsseln wie `TG1`, `GG1`, `SV1`. Die Unterset-IDs werden zu Set-Aliasen des Hauptsets.
   - Existieren Zeilen unter beiden Schlüsseln, gilt eine Karte als besessen, wenn sie an mindestens einer Stelle abgehakt ist (`g`/`rh` per ODER).
   - Die Konfiguration liegt in `api/mappings/subset-merge.json`.
@@ -245,6 +248,17 @@ Grundlage: `db_collection` mit 23.424 Zeilen in 213 Sets, davon 4.074 mit `g` un
 | `ecard2` `50a`/`50b` …, `sve` 17–24, `swshp` `SWSH301` | 0 Haken | TCGdex-only-Karten in gepaarten Sets (Schlüssel = TCGdex-localId) |
 | `zsv10pt5`/`80` (pokemontcg nennt die Karte fälschlich `60`) | abgehakt | Kanonischer Schlüssel `80`. Belegt, dass das Frontend die TCGdex-Nummer verwendet hat |
 | `cel25c`: 22 Zeilen (`15` einmal statt viermal) | 0 Haken | Migration nach §5.3 bei dieser DB verlustfrei |
+
+**Referenz-DB 2** („Ja hier die Tabelle im Format“): `db_collection` mit 7.077 Zeilen in 44 Sets, davon 5.108 mit `g` und 3.581 mit `rh` abgehakt. Sie hat dichtere Haken und ist deshalb die strengere Testbasis.
+
+| Befund | Haken | Konsequenz |
+|---|---|---|
+| `TCGDEX-30th` (gepaart mit `me55`) | 142 | Set-Alias, Karten über TCGdex-Namensraum |
+| `TCGDEX-30th-c`, Karten `11`, `25`, `26` (gepaart mit `me55c`) | 3 | Auflösung über die TCGdex-Nummern `011`/`025`/`026`, **nicht** über die pt-Nummern |
+| `TCGDEX-me05` (gepaart mit `me5`) | 94 | Set-Alias |
+| `TCGDEX-mep` | 26 | Alias zu `mep` |
+| `svp` 166–218 (TCGdex-Union-Promos) | 17 | Schlüssel = TCGdex-localId im gepaarten Set |
+| `swsh12pt5`/`GG…`, `zsv10pt5`/`80` | 62 bzw. 1 | wie Referenz-DB 1 |
 
 ## 6. v3-Datenmodell
 
