@@ -17,3 +17,6 @@ test('parseCsv: Leerzeilen bleiben als [""] erhalten, leere Felder ebenso', () =
 test('parseCsv: leerer Text', () => {
   assert.deepEqual(parseCsv(''), []);
 });
+test('parseCsv: fuehrendes UTF-8-BOM wird entfernt', () => {
+  assert.deepEqual(parseCsv(String.fromCharCode(0xfeff) + 'setId,cardId\nsv1,1\n'), [['setId', 'cardId'], ['sv1', '1']]);
+});

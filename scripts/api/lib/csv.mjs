@@ -1,5 +1,6 @@
-// RFC-4180-Parser: Quotes, escaped Quotes (""), \r\n und \n. Leerzeilen ergeben [''].
+// RFC-4180-Parser: Quotes, escaped Quotes (""), \r\n und \n. Fuehrendes BOM wird entfernt, Leerzeilen ergeben [''].
 export function parseCsv(text) {
+  if (text.charCodeAt(0) === 0xfeff) text = text.slice(1); // UTF-8-BOM
   const rows = [];
   let row = [];
   let field = '';
