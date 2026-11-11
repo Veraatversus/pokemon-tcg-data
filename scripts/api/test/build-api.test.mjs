@@ -107,6 +107,8 @@ test('runBuild: Mini-Repo, zwei Laeufe identisch, Registry geschrieben, alte Dat
     assert.equal(meta.sources.tcgdex.commit, '2222222222222222222222222222222222222222');
     assert.equal(meta.sources.pokemontcg.fetchedAt, undefined);
     assert.deepEqual(meta.counts, { cards: 7, sets: 2, matched: 2, primary_only: 1, tcgdex_only: 4 });
+    assert.deepEqual(meta.warnings, { missingImages: { bySet: {}, total: 0 } });
+    assert.deepEqual(r1.missingImages, { total: 0, bySet: {} });
     const idx = readJson(path.join(v3, 'search-index.json'));
     assert.equal(idx.length, 7);
     assert.deepEqual(idx[0], { cardId: '1', name: 'Pocket 001', nameDe: 'Tasche 001', number: '001', setId: 'TCGDEX-A1' });
@@ -132,12 +134,10 @@ test('runBuild tcgdexOnly: kanonische IDs aus der Registry, Registry nicht gesch
     const reg = snapshot(path.join(root, 'api', 'registry'));
     fs.rmSync(path.join(root, 'sources', 'pokemontcg'), { recursive: true });
     const out = path.join(root, 'out-td');
-    // sv1-2 hat kein TCGdex-Bild und ohne pokemontcg keine Legacy-URL -> Pflichtfeld-Gate
-    assert.throws(() => runBuild({ repoRoot: root, tcgdexOnly: true, outDir: 'out-td' }), (e) => e instanceof BuildValidationError
-      && e.violations.includes('Karte sv1-2: images.small fehlt') && e.violations.length === 1);
-    assert.equal(fs.existsSync(out), false);
+    // sv1-2: kein EN-Bild, ohne pokemontcg keine Legacy-URL -> DE-Bild; A1/010: gar kein Bild -> Warnung
     const assets = readJson(path.join(root, 'sources', 'tcgdex', 'assets-index.json'));
-    assets.en.sv.sv01['002'] = 'h';
+    assets.de.sv.sv01['002'] = 'h';
+    delete assets.en.tcgp.A1['010'];
     write(root, 'sources/tcgdex/assets-index.json', assets);
     const r = runBuild({ repoRoot: root, tcgdexOnly: true, outDir: 'out-td' });
     assert.deepEqual(snapshot(path.join(root, 'api', 'registry')), reg);
@@ -149,7 +149,13 @@ test('runBuild tcgdexOnly: kanonische IDs aus der Registry, Registry nicht gesch
     const sv1 = readJson(path.join(out, 'cards', 'sv1.json'));
     assert.equal(sv1[0].name, 'Alpha');
     assert.equal(sv1[0].matchStatus, 'tcgdex_only');
-    assert.equal(sv1[1].images.small, 'https://assets.tcgdex.net/en/sv/sv01/002/low.webp');
+    assert.equal(sv1[1].images.small, 'https://assets.tcgdex.net/de/sv/sv01/002/low.webp');
+    assert.equal(sv1[1].i18n.de.images.small, 'https://assets.tcgdex.net/de/sv/sv01/002/low.webp');
+    const a1 = readJson(path.join(out, 'cards', 'TCGDEX-A1.json'));
+    assert.equal(a1.length, 3);
+    assert.equal('images' in a1[2], false); // ohne Bild: Feld fehlt, Karte bleibt
+    assert.deepEqual(r.missingImages, { total: 1, bySet: { 'TCGDEX-A1': 1 } });
+    assert.deepEqual(readJson(path.join(out, 'meta.json')).warnings, { missingImages: { bySet: { 'TCGDEX-A1': 1 }, total: 1 } });
     assert.deepEqual(readJson(path.join(out, 'sets.json')).find((s) => s.id === 'sv1').name, 'Scarlet & Violet');
     assert.equal(readJson(path.join(out, 'meta.json')).sources.pokemontcg, null);
   } finally {
@@ -171,7 +177,20 @@ test('runBuild: eingefrorene Registry-Abweichung bricht ab', () => {
   }
 });
 
-test('requiredFieldViolations: Pflichtfelder fuer Karten und Sets', () => {
+test('runBuild: Karte ohne Namen bricht mit BuildValidationError ab, nichts geschrieben', () => {
+  const root = makeRepo();
+  try {
+    write(root, 'sources/tcgdex/data/Pokémon TCG Pocket/Genetic Apex/002.ts', cardTs('Genetic Apex', 'name: {}, category: "Pokemon", stage: "Basic"'));
+    assert.throws(() => runBuild({ repoRoot: root }), (e) => e instanceof BuildValidationError
+      && e.violations.length === 1 && e.violations[0] === 'Karte TCGDEX-A1-2: name fehlt');
+    assert.equal(fs.existsSync(path.join(root, 'api', 'v3', 'cards')), false);
+    assert.equal(fs.existsSync(path.join(root, 'api', 'registry')), false);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('requiredFieldViolations: Pflichtfelder fuer Karten und Sets (Bilder nicht Pflicht)', () => {
   const ok = { id: 's-1', setId: 's', cardId: '1', name: 'A', number: '1', images: { small: 'x' } };
   assert.deepEqual(requiredFieldViolations({ sets: [{ id: 's', name: 'S' }], cardsBySet: new Map([['s', [ok]]]) }), []);
   const v = requiredFieldViolations({
@@ -181,7 +200,7 @@ test('requiredFieldViolations: Pflichtfelder fuer Karten und Sets', () => {
   assert.deepEqual(v, [
     'Set t: name fehlt',
     'Karte s-1: name fehlt',
-    'Karte s-2: images.small fehlt',
-    'Karte s-3: images.small fehlt',
   ]);
+  const w = requiredFieldViolations({ sets: [], cardsBySet: new Map([['s', [{ ...ok, number: ' ' }, { ...ok, id: undefined }]]]) });
+  assert.deepEqual(w, ['Karte s-1: number fehlt', 'Karte ?: id fehlt']);
 });

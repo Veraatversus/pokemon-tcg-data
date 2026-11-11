@@ -224,3 +224,20 @@ test('mergeSet: Set nur mit nicht-englischem Namen -> erster vorhandener Name', 
   assert.equal(s.name, "Collection McDonald's 2013");
   assert.equal(s.images, undefined);
 });
+
+test('mergeCard: Bildreihenfolge TCGdex EN -> TCGdex DE -> pt-Legacy; ohne Bild kein images-Feld', () => {
+  const base = {
+    canonicalSetId: 'sv3pt5', canonicalCardId: '6',
+    registryCard: { pokemontcg: 'sv3pt5-6', tcgdex: [{ set: 'sv03.5', localId: '006' }], keys: { pokemontcg: ['6'], tcgdex: ['6'] } },
+    ptCard: charizardPt, tcgdexCards: [charizardTd], tcgdexSet: sv035, tables, legals, sourceCommits,
+  };
+  const deOnly = { de: { sv: { 'sv03.5': { '006': 'h' } } } };
+  const c = mergeCard({ ...base, assetsIndex: deOnly });
+  assert.deepEqual(c.images, { small: 'https://assets.tcgdex.net/de/sv/sv03.5/006/low.webp', large: 'https://assets.tcgdex.net/de/sv/sv03.5/006/high.webp' });
+  assert.equal(mergeCard({ ...base, assetsIndex: {} }).images.small, 'https://images.pokemontcg.io/sv3pt5/6.png');
+  const tdOnly = mergeCard({ ...base, ptCard: null, registryCard: { ...base.registryCard, pokemontcg: null }, assetsIndex: deOnly });
+  assert.equal(tdOnly.images.small, 'https://assets.tcgdex.net/de/sv/sv03.5/006/low.webp');
+  const none = mergeCard({ ...base, ptCard: null, registryCard: { ...base.registryCard, pokemontcg: null }, assetsIndex: {} });
+  assert.equal('images' in none, false);
+  assert.equal(none.i18n.de.images, undefined); // DE-Bilder nur echte DE-Assets
+});

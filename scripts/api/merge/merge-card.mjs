@@ -127,18 +127,18 @@ export function mergeCard({
     : (tcgdexSet ? { tcgdexSetId: tcgdexSet.id, serieId: tcgdexSet.serieId, localId: pt.number, regulationMark: pt.regulationMark } : null);
   const legalities = legalInput && legals ? deriveLegalities(legalInput, legals) : { unlimited: 'Legal' };
 
-  let images;
-  for (const c of tcgdexCards) {
-    images = cardImages(assetsIndex, 'en', c);
-    if (images) break;
-  }
+  // Bilder: TCGdex EN -> TCGdex DE -> pt-Legacy-URL; ohne jede Quelle fehlt das Feld `images`.
+  // i18n.de.images nur aus echten DE-Assets.
+  const firstImages = (lang) => {
+    for (const c of tcgdexCards) {
+      const found = cardImages(assetsIndex, lang, c);
+      if (found) return found;
+    }
+    return null;
+  };
+  const deImages = firstImages('de');
+  let images = firstImages('en') ?? deImages;
   if (!images && pt.images?.small) images = compact({ small: pt.images.small, large: pt.images.large });
-
-  let deImages;
-  for (const c of tcgdexCards) {
-    deImages = cardImages(assetsIndex, 'de', c);
-    if (deImages) break;
-  }
   const de = td ? compact({
     name: textOf(td.name, 'de'),
     evolvesFrom: textOf(td.evolveFrom, 'de'),

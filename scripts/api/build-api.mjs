@@ -48,7 +48,6 @@ export function requiredFieldViolations({ sets, cardsBySet }) {
   for (const cards of cardsBySet.values()) {
     for (const c of cards) {
       for (const f of ['id', 'setId', 'cardId', 'name', 'number']) if (!filled(c[f])) out.push(`Karte ${c.id ?? '?'}: ${f} fehlt`);
-      if (!filled(c.images?.small)) out.push(`Karte ${c.id ?? '?'}: images.small fehlt`);
     }
   }
   return out;
@@ -153,6 +152,14 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
   const violations = requiredFieldViolations({ sets, cardsBySet });
   if (violations.length) throw new BuildValidationError(violations);
 
+  // Warnung (kein Abbruch): Karten ohne jede Bildquelle (Feld `images` fehlt).
+  const missingImages = { total: 0, bySet: {} };
+  for (const [setId, cards] of cardsBySet) {
+    const n = cards.filter((c) => !filled(c.images?.small)).length;
+    if (n) missingImages.bySet[setId] = n;
+    missingImages.total += n;
+  }
+
   const cardTotal = [...cardsBySet.values()].reduce((n, c) => n + c.length, 0);
   const searchIndex = [];
   for (const [setId, cards] of [...cardsBySet].sort((a, b) => cmp(a[0], b[0]))) {
@@ -164,6 +171,7 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
     apiVersion: 3,
     languages: ['en', 'de'],
     counts: { sets: sets.length, cards: cardTotal, ...matchStatus },
+    warnings: { missingImages },
     sources: {
       pokemontcg: tcgdexOnly ? null : { commit: sources.pokemontcg?.commit ?? null },
       tcgdex: { commit: sources.tcgdex?.commit ?? null, fetchedAt: sources.tcgdex?.fetchedAt ?? null },
@@ -187,7 +195,7 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
   if (doWriteRegistry && !tcgdexOnly) writeRegistry(registryAbs, registry);
 
   return {
-    sets: sets.length, cards: cardTotal, matchStatus, registryChanges: changes, skippedNoSource,
+    sets: sets.length, cards: cardTotal, matchStatus, registryChanges: changes, skippedNoSource, missingImages,
     tables: Object.fromEntries(Object.entries(tables).map(([k, v]) => [k, Object.keys(v).length])),
     warnings: db.warnings.length,
   };
@@ -230,6 +238,11 @@ function main() {
     const ms = r.matchStatus;
     console.log(`Sets ${r.sets}, Karten ${r.cards} (matched ${ms.matched}, primary_only ${ms.primary_only}, tcgdex_only ${ms.tcgdex_only})`);
     if (r.skippedNoSource.length) console.log(`Ohne Quelle uebersprungen: ${r.skippedNoSource.length} (${r.skippedNoSource.slice(0, 10).join(', ')}${r.skippedNoSource.length > 10 ? ', ...' : ''})`);
+    const mi = r.missingImages;
+    if (mi.total) {
+      console.log(`WARNUNG: ${mi.total} Karten ohne Bild (images fehlt):`);
+      for (const [setId, n] of Object.entries(mi.bySet).sort((a, b) => b[1] - a[1] || cmp(a[0], b[0]))) console.log(`  ${setId}: ${n}`);
+    }
     console.log(`Gelernte Tabellen: ${Object.entries(r.tables).map(([k, n]) => `${k} ${n}`).join(', ')}`);
     const counts = new Map();
     for (const c of r.registryChanges) {
