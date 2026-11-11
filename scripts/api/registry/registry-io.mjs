@@ -13,7 +13,7 @@ function sortKeys(value) {
   return value;
 }
 
-const toJson = (value) => `${JSON.stringify(sortKeys(value), null, 2)}\n`;
+export const toJson = (value) => `${JSON.stringify(sortKeys(value), null, 2)}\n`;
 
 export function readRegistry(dir) {
   const setsFile = path.join(dir, 'sets.json');
