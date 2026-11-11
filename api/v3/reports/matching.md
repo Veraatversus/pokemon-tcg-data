@@ -6,14 +6,14 @@ Erzeugt: 2026-11-11T16:46:47.351Z
 
 - pokemontcg-Sets: 177
 - TCGdex-Sets: 209
-- Gepaarte Sets: 175
+- Gepaarte Sets: 177
 - pokemontcg-Karten: 20776
-- Zugeordnete Karten: 20513
-- cardMatchRatio: 0.9873
-- Verdaechtige Zuordnungen: 15
-- Nur in pokemontcg (primaryOnly): 106
-- Nur in TCGdex (in gepaarten Sets): 123
-- Ungepaarte TCGdex-Sets: 34 (885 Karten)
+- Zugeordnete Karten: 20719
+- cardMatchRatio: 0.9973
+- Verdaechtige Zuordnungen: 9
+- Nur in pokemontcg (primaryOnly): 57
+- Nur in TCGdex (in gepaarten Sets): 74
+- Ungepaarte TCGdex-Sets: 32 (728 Karten)
 - Doppelt zugeordnet: 0
 
 ## Quellen
@@ -74,7 +74,7 @@ Erzeugt: 2026-11-11T16:46:47.351Z
 | bw9 | Plasma Freeze | bw9 | Plasma Freeze | exactId | 1.00 | 122/122 | 0 | 0 |
 | bwp | BW Black Star Promos | bwp | BW Black Star Promos | exactId | 1.00 | 101/101 | 0 | 0 |
 | cel25 | Celebrations | cel25 | Celebrations | exactId | 1.00 | 25/25 | 0 | 0 |
-| cel25c | Celebrations: Classic Collection | cel25cc | Celebrations Classic Collection | nameAndDate | 0.00 | 0/25 | 0 | 25 |
+| cel25c | Celebrations: Classic Collection | cel25cc | Celebrations Classic Collection | mapping | 0.00 | 25/25 | 0 | 0 |
 | col1 | Call of Legends | col1 | Call of Legends | exactId | 1.00 | 106/106 | 0 | 0 |
 | dc1 | Double Crisis | dc1 | Double Crisis | exactId | 1.00 | 34/34 | 0 | 0 |
 | det1 | Detective Pikachu | det1 | Detective Pikachu | exactId | 1.00 | 18/18 | 0 | 0 |
@@ -91,6 +91,7 @@ Erzeugt: 2026-11-11T16:46:47.351Z
 | ecard2 | Aquapolis | ecard2 | Aquapolis | exactId | 0.98 | 182/182 | 0 | 0 |
 | ecard3 | Skyridge | ecard3 | Skyridge | exactId | 1.00 | 182/182 | 0 | 0 |
 | ex1 | Ruby & Sapphire | ex1 | Ruby & Sapphire | exactId | 1.00 | 109/109 | 0 | 0 |
+| ex10 | Unseen Forces | ex10 | Unseen Forces | mapping | 0.81 | 145/145 | 0 | 0 |
 | ex11 | Delta Species | ex11 | Delta Species | exactId | 1.00 | 114/114 | 0 | 0 |
 | ex12 | Legend Maker | ex12 | Legend Maker | exactId | 1.00 | 93/93 | 0 | 0 |
 | ex13 | Holon Phantoms | ex13 | Holon Phantoms | exactId | 1.00 | 111/111 | 0 | 0 |
@@ -119,6 +120,7 @@ Erzeugt: 2026-11-11T16:46:47.351Z
 | mcd14 | McDonald's Collection 2014 | 2014xy | McDonald's Collection 2014 | nameAndDate | 1.00 | 12/12 | 0 | 0 |
 | mcd15 | McDonald's Collection 2015 | 2015xy | McDonald's Collection 2015 | nameAndDate | 1.00 | 12/12 | 0 | 0 |
 | mcd16 | McDonald's Collection 2016 | 2016xy | McDonald's Collection 2016 | nameAndDate | 1.00 | 12/12 | 0 | 0 |
+| mcd17 | McDonald's Collection 2017 | 2017sm | McDonald's Collection 2017 | mapping | 1.00 | 12/12 | 0 | 0 |
 | mcd18 | McDonald's Collection 2018 | 2018sm | McDonald's Collection 2018 | nameAndDate | 1.00 | 12/12 | 0 | 0 |
 | mcd19 | McDonald's Collection 2019 | 2019sm | McDonald's Collection 2019 | nameAndDate | 1.00 | 12/12 | 0 | 0 |
 | mcd21 | McDonald's Collection 2021 | 2021swsh | McDonald's Collection 2021 | nameAndDate | 1.00 | 25/25 | 0 | 0 |
@@ -130,7 +132,7 @@ Erzeugt: 2026-11-11T16:46:47.351Z
 | me4 | Chaos Rising | me04 | Chaos Rising | normalizedId | 1.00 | 122/122 | 3 | 0 |
 | me5 | Pitch Black | me05 | Pitch Black | normalizedId | 1.00 | 120/120 | 2 | 0 |
 | me55 | 30th Celebration | 30th | 30th Celebration | codeAndDate | 1.00 | 161/161 | 0 | 0 |
-| me55c | 30th Celebration: Classic Collection | 30th-c | 30th Classic Collection | codeAndDate | 0.23 | 6/30 | 6 | 24 |
+| me55c | 30th Celebration: Classic Collection | 30th-c | 30th Classic Collection | mapping | 0.23 | 30/30 | 0 | 0 |
 | me6 | Delta Reign | me06 | Delta Reign | normalizedId | 1.00 | 141/141 | 0 | 0 |
 | neo1 | Neo Genesis | neo1 | Neo Genesis | exactId | 1.00 | 111/111 | 0 | 0 |
 | neo2 | Neo Discovery | neo2 | Neo Discovery | exactId | 1.00 | 75/75 | 0 | 0 |
@@ -231,18 +233,13 @@ Erzeugt: 2026-11-11T16:46:47.351Z
 
 ## Paare mit geringer Nummern-Ueberdeckung (Sichtpruefung)
 
-- cel25c (Celebrations: Classic Collection) <-> cel25cc (Celebrations Classic Collection): nameAndDate, Overlap 0.00
-- me55c (30th Celebration: Classic Collection) <-> 30th-c (30th Classic Collection): codeAndDate, Overlap 0.23
+Keine.
 
 ## Details pro Paar
 
 ### base4 <-> base4
 
 - Verdaechtig: 102
-
-### cel25c <-> cel25cc
-
-- primaryOnly: 2, 4, 8, 9, 15, 15, 15, 15, 17, 20, 24, 54, 60, 66, 73, 76, 86, 88, 93, 97, …(+5)
 
 ### me3 <-> me03
 
@@ -255,11 +252,6 @@ Erzeugt: 2026-11-11T16:46:47.351Z
 ### me5 <-> me05
 
 - Verdaechtig: 83, 84
-
-### me55c <-> 30th-c
-
-- Verdaechtig: 4, 5, 11, 18, 19, 25
-- primaryOnly: 11, 33, 41, 43, 47, 50, 57, 58, 69, 85, 89, 94, 99, 100, 101, 106, 106, 106, 108, 114, …(+4)
 
 ### sm1 <-> sm1
 
@@ -327,20 +319,16 @@ Erzeugt: 2026-11-11T16:46:47.351Z
 
 ## Nicht zugeordnet
 
-### pokemontcg-Sets (2)
+### pokemontcg-Sets (0)
 
-- ex10
-- mcd17
 
-### TCGdex-Sets (34)
+### TCGdex-Sets (32)
 
 - 2013bw
-- 2017sm
 - 2018sm-fr
 - 2019sm-fr
 - 2023sv
 - 2024sv
-- ex10
 - ex5.5
 - exu
 - jumbo
@@ -369,12 +357,14 @@ Erzeugt: 2026-11-11T16:46:47.351Z
 - wp
 - xya
 
-### Abgelehnte Kandidaten (11)
+### Abgelehnte Kandidaten (13)
 
 - cel25c <-> cel25 (codeAndDate): 1:1-Konflikt: TCGdex-Set bereits cel25 zugeordnet (exactId)
+- cel25c <-> cel25cc (nameAndDate): 1:1-Konflikt: TCGdex-Set bereits cel25c zugeordnet (mapping)
 - ex10 <-> ex10 (exactId): nicht plausibel: overlap 0.81 < 0.9 und Kartenzahl-Abweichung 19 % > 10 %
 - me55 <-> 30th-c (codeAndDate): nicht plausibel: overlap 0.19 < 0.9 und Kartenzahl-Abweichung 81 % > 10 %
 - me55c <-> 30th (codeAndDate): 1:1-Konflikt: TCGdex-Set bereits me55 zugeordnet (codeAndDate)
+- me55c <-> 30th-c (codeAndDate): 1:1-Konflikt: TCGdex-Set bereits me55c zugeordnet (mapping)
 - sma <-> sm115 (codeAndDate): nicht plausibel: overlap 0.00 < 0.9 und Kartenzahl-Abweichung 27 % > 10 %
 - swsh10tg <-> swsh10 (codeAndDate): nicht plausibel: overlap 0.00 < 0.9 und Kartenzahl-Abweichung 86 % > 10 %
 - swsh11tg <-> swsh11 (codeAndDate): nicht plausibel: overlap 0.00 < 0.9 und Kartenzahl-Abweichung 86 % > 10 %
