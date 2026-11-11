@@ -34,6 +34,7 @@ export function loadTcgdexDatabase(rootDir, { excludeSerieIds = ['tcgp'] } = {})
   const pendingCardDirs = [];
   const failedSetKeys = new Set(); // Set-Datei nicht parsebar (Fehler bereits erfasst)
   const setKey = (p) => path.resolve(p).replace(/\.ts$/, '');
+  const relPath = (f) => path.relative(rootDir, f).split(path.sep).join('/');
   const record = (file, e) => errors.push({ file, message: e instanceof Error ? e.message : String(e) });
 
   for (const serieName of tsBaseNames(dataDir)) {
@@ -105,7 +106,7 @@ export function loadTcgdexDatabase(rootDir, { excludeSerieIds = ['tcgp'] } = {})
         }
         // Doppelte (Set, localId): Kopie im eigenen Set-Ordner gewinnt.
         const own = (e) => path.resolve(path.dirname(e.file)) === target.ownDir;
-        const keepNew = own(entry) !== own(prev) ? own(entry) : entry.file < prev.file;
+        const keepNew = own(entry) !== own(prev) ? own(entry) : relPath(entry.file) < relPath(prev.file);
         const [kept, dropped] = keepNew ? [entry, prev] : [prev, entry];
         if (keepNew) {
           target.cards[target.cards.indexOf(prev.card)] = entry.card;

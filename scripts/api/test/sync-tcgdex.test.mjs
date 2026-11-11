@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { mirrorTcgdex, reduceAssetsIndex, shouldUpdate, runSync } from '../sources/sync-tcgdex.mjs';
+import { mirrorTcgdex, reduceAssetsIndex, shouldUpdate, runSync, classifyEntry } from '../sources/sync-tcgdex.mjs';
 import { updateSourcesManifest } from '../sources/manifest.mjs';
 
 const fixture = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fixtures', 'tcgdex');
@@ -100,6 +100,7 @@ test('runSync: unveraenderter Commit -> kein Mirror, SOURCES.json byte-identisch
   let fetched = false;
   const r = await runSync({
     repoRoot: root,
+    lsRemoteHead: () => 'abc',
     cloneTcgdex: () => ({ commit: 'abc', ref: 'master' }),
     fetchAssets: async () => { fetched = true; return {}; },
   });
@@ -116,6 +117,7 @@ test('runSync: geaenderter Commit -> Mirror und Manifest aktualisiert', async ()
   updateSourcesManifest(manifestFile, 'tcgdex', { commit: 'abc', fetchedAt: 'alt' });
   const r = await runSync({
     repoRoot: root,
+    lsRemoteHead: () => 'def',
     cloneTcgdex: (dir) => { fs.cpSync(makeClone(), dir, { recursive: true }); return { commit: 'def', ref: 'master' }; },
     fetchAssets: async () => ({ en: { a: 1 }, fr: {} }),
     now: () => new Date('2026-01-02T03:04:05Z'),
@@ -126,4 +128,61 @@ test('runSync: geaenderter Commit -> Mirror und Manifest aktualisiert', async ()
   assert.equal(m.tcgdex.fetchedAt, '2026-01-02T03:04:05.000Z');
   assert.ok(fs.existsSync(path.join(root, 'sources', 'tcgdex', 'data')));
   assert.deepEqual(JSON.parse(fs.readFileSync(path.join(root, 'sources', 'tcgdex', 'assets-index.json'), 'utf8')), { en: { a: 1 } });
+});
+
+test('classifyEntry: nur Datei und Ordner sind zulaessig', () => {
+  const st = (o) => ({ isSymbolicLink: () => false, isDirectory: () => false, isFile: () => false, ...o });
+  assert.equal(classifyEntry(st({ isFile: () => true })), 'file');
+  assert.equal(classifyEntry(st({ isDirectory: () => true })), 'dir');
+  assert.equal(classifyEntry(st({ isSymbolicLink: () => true, isFile: () => true })), 'symlink');
+  assert.equal(classifyEntry(st({})), 'other');
+});
+
+test('Symlink im Upstream bricht den Mirror ab, Ziel bleibt unveraendert', (t) => {
+  const clone = makeClone();
+  const target = path.join(tmp(), 'tcgdex');
+  fs.mkdirSync(target);
+  fs.writeFileSync(path.join(target, 'marker'), 'alt');
+  try {
+    fs.symlinkSync(os.tmpdir(), path.join(clone, 'data', 'Mega Evolution', 'link'), 'junction');
+  } catch (e) {
+    if (e.code === 'EPERM') return t.skip('symlinks not permitted');
+    throw e;
+  }
+  assert.throws(() => mirrorTcgdex({ cloneDir: clone, targetDir: target, excludeSerieIds: ['tcgp'] }), /Unzulaessiger Eintrag/);
+  assert.equal(fs.readFileSync(path.join(target, 'marker'), 'utf8'), 'alt');
+  assert.ok(!fs.existsSync(`${target}.tmp`));
+});
+
+test('runSync: unveraenderter Remote-HEAD -> kein Klon', async () => {
+  const root = tmp();
+  fs.mkdirSync(path.join(root, 'sources'));
+  const manifestFile = path.join(root, 'sources', 'SOURCES.json');
+  updateSourcesManifest(manifestFile, 'tcgdex', { commit: 'abc', fetchedAt: 'alt' });
+  const before = fs.readFileSync(manifestFile);
+  let cloned = false;
+  const r = await runSync({
+    repoRoot: root,
+    lsRemoteHead: () => 'abc',
+    cloneTcgdex: () => { cloned = true; return { commit: 'abc', ref: 'master' }; },
+  });
+  assert.equal(r.updated, false);
+  assert.equal(r.commit, 'abc');
+  assert.equal(cloned, false);
+  assert.ok(fs.readFileSync(manifestFile).equals(before));
+});
+
+test('runSync: geaenderter Remote-HEAD -> Klon; Nachpruefung bleibt als Sicherheitsnetz', async () => {
+  const root = tmp();
+  fs.mkdirSync(path.join(root, 'sources'));
+  updateSourcesManifest(path.join(root, 'sources', 'SOURCES.json'), 'tcgdex', { commit: 'abc', fetchedAt: 'alt' });
+  let cloned = false;
+  const r = await runSync({
+    repoRoot: root,
+    lsRemoteHead: () => 'def',
+    // Klon liefert (Race) wieder den bekannten Commit -> kein Mirror
+    cloneTcgdex: () => { cloned = true; return { commit: 'abc', ref: 'master' }; },
+  });
+  assert.equal(cloned, true);
+  assert.equal(r.updated, false);
 });

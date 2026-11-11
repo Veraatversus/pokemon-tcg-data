@@ -53,7 +53,7 @@ test('loadTcgdexDatabase: kaputte Karte wird als Fehler gesammelt', () => {
 });
 
 test('loadPokemontcg: liest sets/en.json und cards/en/<id>.json', () => {
-  const root = path.resolve(HERE, '..', '..', '..');
+  const root = path.resolve(HERE, '..', '..', '..', 'sources', 'pokemontcg');
   const { sets, cardsBySet } = loadPokemontcg(root);
   assert.ok(sets.length > 100);
   const base1 = cardsBySet.get('base1');

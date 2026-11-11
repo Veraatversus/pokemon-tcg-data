@@ -5,19 +5,21 @@ import { loadPokemontcg } from './sources/load-pokemontcg.mjs';
 import { loadTcgdexDatabase } from './tcgdex/load-database.mjs';
 import { matchSets } from './match/match-sets.mjs';
 import { matchCards } from './match/match-cards.mjs';
+import { belowMinCardMatch, comparePairDrift } from './report/gates.mjs';
 import { buildMatchingReport, renderMatchingMarkdown } from './report/matching-report.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const readJson = (p) => JSON.parse(fs.readFileSync(p, 'utf8'));
 
 function parseArgs(argv) {
-  const opts = { minCardMatch: null };
+  const opts = { minCardMatch: null, failOnPairDrift: false };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--min-card-match') {
       const v = Number(argv[++i]);
       if (!Number.isFinite(v)) throw new Error('--min-card-match erwartet eine Zahl');
       opts.minCardMatch = v;
-    } else throw new Error(`Unbekanntes Argument: ${argv[i]}`);
+    } else if (argv[i] === '--fail-on-pair-drift') opts.failOnPairDrift = true;
+    else throw new Error(`Unbekanntes Argument: ${argv[i]}`);
   }
   return opts;
 }
@@ -47,9 +49,20 @@ function main() {
     generatedAt: sources.tcgdex?.fetchedAt ?? new Date().toISOString(),
   });
   const outDir = path.join(root, 'api', 'v3', 'reports');
+  const jsonFile = path.join(outDir, 'matching.json');
+  if (opts.failOnPairDrift) {
+    const prev = fs.existsSync(jsonFile) ? readJson(jsonFile) : { sets: [] };
+    const drift = comparePairDrift(prev, report);
+    if (drift.drift) {
+      console.error(`FEHLER: Paar-Drift gegenueber dem letzten Report (${drift.messages.length} Abweichungen); Reports werden nicht ueberschrieben:`);
+      for (const m of drift.messages) console.error(`  ${m}`);
+      process.exitCode = 1;
+      return;
+    }
+  }
   fs.mkdirSync(outDir, { recursive: true });
-  fs.writeFileSync(path.join(outDir, 'matching.json'), `${JSON.stringify(report, null, 2)}\n`);
-  fs.writeFileSync(path.join(outDir, 'matching.md'), `${renderMatchingMarkdown(report)}`);
+  fs.writeFileSync(jsonFile, `${JSON.stringify(report, null, 2)}\n`);
+  fs.writeFileSync(path.join(outDir, 'matching.md'), renderMatchingMarkdown(report));
 
   const s = report.summary;
   console.log(`Paare ${s.pairedSets}/${s.ptSets}, Karten ${s.matchedCards}/${s.ptCards} (${s.cardMatchRatio}), verdaechtig ${s.suspicious}, primaryOnly ${s.primaryOnly}`);
@@ -64,8 +77,13 @@ function main() {
     console.error(`FEHLER: ${report.doubleAssigned.length} TCGdex-Karten doppelt zugeordnet`);
     failed = true;
   }
-  if (opts.minCardMatch !== null && s.cardMatchRatio < opts.minCardMatch) {
+  if (opts.minCardMatch !== null && belowMinCardMatch(s, opts.minCardMatch)) {
     console.error(`FEHLER: cardMatchRatio ${s.cardMatchRatio} < ${opts.minCardMatch}`);
+    failed = true;
+  }
+  if (report.unresolvedAliases.length) {
+    console.error(`FEHLER: ${report.unresolvedAliases.length} unaufgeloeste Karten-Aliase`);
+    for (const a of report.unresolvedAliases) console.error(`  ${a.pokemontcgId} #${a.ptNumber} -> ${a.target.setId}/${a.target.localId}: ${a.reason}`);
     failed = true;
   }
   process.exitCode = failed ? 1 : 0;

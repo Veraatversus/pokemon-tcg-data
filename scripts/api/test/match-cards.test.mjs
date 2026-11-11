@@ -119,3 +119,30 @@ test('jede TCGdex-Karte hoechstens einmal', () => {
   assert.equal(r.matched.length, 1);
   assert.equal(r.primaryOnly.length, 1);
 });
+
+test('unaufgeloeste Aliase werden gemeldet', () => {
+  const r = run(
+    [pt('1', 'A'), pt('2', 'B'), pt('3', 'C')],
+    set('s', [td('1', 'A'), td('2', 'B'), td('9', 'Z')]),
+    { aliases: {
+      2: { localId: '77' }, // Karte fehlt
+      3: { set: 'nix', localId: '1' }, // Set fehlt
+    } },
+  );
+  assert.deepEqual(r.unresolvedAliases, [
+    { ptNumber: '2', target: { setId: 's', localId: '77' }, reason: 'Ziel-Karte nicht gefunden' },
+    { ptNumber: '3', target: { setId: 'nix', localId: '1' }, reason: 'Ziel-Set nicht gefunden' },
+  ]);
+});
+
+test('Alias auf bereits vergebene Karte ist unaufgeloest', () => {
+  const r = run(
+    [pt('1', 'A'), pt('2', 'B')],
+    set('s', [td('1', 'A'), td('2', 'B')]),
+    { aliases: { 1: { localId: '1' }, 2: { localId: '1' } } },
+  );
+  assert.deepEqual(r.unresolvedAliases, [
+    { ptNumber: '2', target: { setId: 's', localId: '1' }, reason: 'Ziel-Karte bereits vergeben' },
+  ]);
+  assert.deepEqual(run([pt('1')], set('s', [td('1')])).unresolvedAliases, []);
+});

@@ -20,6 +20,7 @@ export function matchCards({ ptCards, tcgdexSet, tcgdexSetsById, cardMap }) {
   const free = (s) => !used.has(slotKey(s));
   const pending = () => ptCards.map((_, i) => i).filter((i) => !results[i]);
 
+  const unresolvedAliases = [];
   // 1. Aliase (auch set-uebergreifend)
   for (const [i, card] of ptCards.entries()) {
     const alias = cardMap?.aliases?.[card.number];
@@ -29,7 +30,12 @@ export function matchCards({ ptCards, tcgdexSet, tcgdexSetsById, cardMap }) {
     const cards = target?.cards ?? [];
     const found = cards.find((c) => c.localId === alias.localId)
       ?? cards.find((c) => cardMatchKey(c.localId) === cardMatchKey(alias.localId));
-    if (found && free(slot(setId, found))) take(i, [slot(setId, found)], 'mapping');
+    const unresolved = (reason) => unresolvedAliases.push({
+      ptNumber: card.number, target: { setId: setId ?? null, localId: alias.localId }, reason,
+    });
+    if (!found) unresolved(target ? 'Ziel-Karte nicht gefunden' : 'Ziel-Set nicht gefunden');
+    else if (!free(slot(setId, found))) unresolved('Ziel-Karte bereits vergeben');
+    else take(i, [slot(setId, found)], 'mapping');
   }
 
   // 2. Name und Reihenfolge (nur auf Anforderung)
@@ -90,5 +96,5 @@ export function matchCards({ ptCards, tcgdexSet, tcgdexSetsById, cardMap }) {
     .filter(free)
     .sort((a, b) => sortLocalIds(a.card.localId, b.card.localId))
     .map((s) => s.ref);
-  return { matched, primaryOnly, tcgdexOnly };
+  return { matched, primaryOnly, tcgdexOnly, unresolvedAliases };
 }

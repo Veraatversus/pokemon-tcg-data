@@ -129,7 +129,7 @@ test('Warnungen: Windows- und POSIX-Pfade werden zum gleichen relativen Pfad', (
   assert.deepEqual(r.warnings, [expected, expected]);
   const md = renderMatchingMarkdown(r);
   assert.ok(md.includes(`- ${expected}`));
-  assert.ok(!/[A-Za-z]:\|\/home\//.test(JSON.stringify(r) + md));
+  assert.ok(!/[A-Za-z]:[\/]|\/home\//.test(JSON.stringify(r) + md));
 });
 
 test('Ausgabe byte-identisch bei identischen Eingaben inkl. generatedAt', () => {
@@ -144,4 +144,15 @@ test('doppelte Zuordnung innerhalb eines Paars', () => {
   cr.get('a1').matched.push({ ptId: 'a1-7', ptNumber: '7', tcgdex: [{ setId: 'A1', localId: '1' }], method: 'mapping', suspicious: false });
   const r = build({ cardResults: cr });
   assert.deepEqual(r.doubleAssigned, [{ setId: 'A1', localId: '1', ptIds: ['a1-1', 'a1-7'] }]);
+});
+
+test('unaufgeloeste Aliase im Report und Markdown', () => {
+  const cr = cardResults();
+  cr.get('b1').unresolvedAliases = [{ ptNumber: '2', target: { setId: 'B1', localId: '77' }, reason: 'Ziel-Karte nicht gefunden' }];
+  const r = build({ cardResults: cr });
+  assert.deepEqual(r.unresolvedAliases, [{ pokemontcgId: 'b1', ptNumber: '2', target: { setId: 'B1', localId: '77' }, reason: 'Ziel-Karte nicht gefunden' }]);
+  const md = renderMatchingMarkdown(r);
+  assert.match(md, /Unaufgeloeste Aliase \(Fehler\)/);
+  assert.match(md, /- b1 #2 -> B1\/77: Ziel-Karte nicht gefunden/);
+  assert.deepEqual(build().unresolvedAliases, []);
 });

@@ -49,7 +49,11 @@ jobs:
         run: node scripts/api/sources/sync-tcgdex.mjs
 
       - name: Build matching report
-        run: node scripts/api/build-matching.mjs --min-card-match 0.995
+        run: node scripts/api/build-matching.mjs --min-card-match 0.995 --fail-on-pair-drift
+
+      - name: Regression tests against synced sources
+        working-directory: scripts/api
+        run: node --test test/matching-regression.test.mjs
 
       - name: Commit and push changes
         run: |
@@ -78,7 +82,8 @@ jobs:
 
               **Moegliche Ursachen:**
               - Tests, Parser oder Plausibilitaetspruefung des Spiegels sind fehlgeschlagen
-              - Das Matching hat die Qualitaetsschwelle (0,995) verfehlt oder Doppelzuordnungen gefunden
+              - Das Matching hat die Qualitaetsschwelle (0,995) verfehlt, Doppelzuordnungen oder unaufgeloeste Aliase gefunden oder die Set-Paarliste hat sich gegenueber dem letzten Report geaendert
+              - Die Regressionstests gegen die frisch gespiegelten Quellen sind fehlgeschlagen
               - Netzwerk- oder Push-Fehler
 
               **Erforderliche Aktion:**

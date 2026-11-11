@@ -37,6 +37,10 @@ export function buildMatchingReport({
     .map((a) => ({ setId: a.setId, localId: a.localId, ptIds: [...a.ptIds].sort(cmp) }))
     .sort((a, b) => cmp(a.setId, b.setId) || sortLocalIds(a.localId, b.localId));
 
+  const unresolvedAliases = [...cardResults.entries()]
+    .flatMap(([pokemontcgId, r]) => (r.unresolvedAliases ?? []).map((a) => ({ pokemontcgId, ...a })))
+    .sort((a, b) => cmp(a.pokemontcgId, b.pokemontcgId) || sortLocalIds(a.ptNumber, b.ptNumber));
+
   const sortNums = (arr) => [...arr].sort(sortLocalIds);
   const sets = [...setResult.pairs]
     .sort((a, b) => cmp(a.pokemontcgId, b.pokemontcgId) || cmp(a.tcgdexId, b.tcgdexId))
@@ -92,6 +96,7 @@ export function buildMatchingReport({
     unmatchedPokemontcg: setResult.unmatchedPokemontcg,
     unmatchedTcgdex: setResult.unmatchedTcgdex,
     doubleAssigned,
+    unresolvedAliases,
     warnings: warnings.map(formatWarning),
   };
 }
@@ -117,13 +122,19 @@ export function renderMatchingMarkdown(report) {
   out.push(`- Nur in pokemontcg (primaryOnly): ${s.primaryOnly}`);
   out.push(`- Nur in TCGdex (in gepaarten Sets): ${s.tcgdexOnlyInPairedSets}`);
   out.push(`- Ungepaarte TCGdex-Sets: ${s.unpairedTcgdexSets.sets} (${s.unpairedTcgdexSets.cards} Karten)`);
-  out.push(`- Doppelt zugeordnet: ${report.doubleAssigned.length}`, '');
+  out.push(`- Doppelt zugeordnet: ${report.doubleAssigned.length}`);
+  out.push(`- Unaufgeloeste Aliase: ${report.unresolvedAliases.length}`, '');
 
   out.push('## Quellen', '', '```json', JSON.stringify(report.sources, null, 2), '```', '');
 
   if (report.doubleAssigned.length) {
     out.push('## Doppelt zugeordnet (Fehler)', '');
     for (const d of report.doubleAssigned) out.push(`- ${d.setId}/${d.localId}: ${d.ptIds.join(', ')}`);
+    out.push('');
+  }
+  if (report.unresolvedAliases.length) {
+    out.push('## Unaufgeloeste Aliase (Fehler)', '');
+    for (const a of report.unresolvedAliases) out.push(`- ${a.pokemontcgId} #${a.ptNumber} -> ${a.target.setId}/${a.target.localId}: ${a.reason}`);
     out.push('');
   }
   if (report.warnings.length) {

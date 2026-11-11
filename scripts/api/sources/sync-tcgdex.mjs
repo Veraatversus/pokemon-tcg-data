@@ -32,6 +32,26 @@ function serieIdOf(file) {
   return id;
 }
 
+// Nur regulaere Dateien und Ordner duerfen aus dem (nicht vertrauenswuerdigen) Upstream kommen.
+export function classifyEntry(stat) {
+  if (stat.isSymbolicLink()) return 'symlink';
+  if (stat.isDirectory()) return 'dir';
+  if (stat.isFile()) return 'file';
+  return 'other';
+}
+
+function copyTree(src, dst) {
+  const kind = classifyEntry(fs.lstatSync(src));
+  if (kind === 'dir') {
+    fs.mkdirSync(dst, { recursive: true });
+    for (const name of fs.readdirSync(src)) copyTree(path.join(src, name), path.join(dst, name));
+  } else if (kind === 'file') {
+    fs.copyFileSync(src, dst);
+  } else {
+    throw new Error(`Unzulaessiger Eintrag im Upstream (${kind}): ${src}`);
+  }
+}
+
 function copyData(srcData, dstData, excludeSerieIds) {
   fs.mkdirSync(dstData, { recursive: true });
   const entries = fs.readdirSync(srcData, { withFileTypes: true });
@@ -44,7 +64,7 @@ function copyData(srcData, dstData, excludeSerieIds) {
   }
   for (const e of entries) {
     if (skip.has(e.name)) continue;
-    fs.cpSync(path.join(srcData, e.name), path.join(dstData, e.name), { recursive: true });
+    copyTree(path.join(srcData, e.name), path.join(dstData, e.name));
   }
 }
 
@@ -60,7 +80,7 @@ export function mirrorTcgdex({ cloneDir, targetDir, excludeSerieIds, assetsIndex
       const src = path.join(cloneDir, f);
       if (!fs.existsSync(src)) continue;
       fs.mkdirSync(path.dirname(path.join(tmpDir, f)), { recursive: true });
-      fs.copyFileSync(src, path.join(tmpDir, f));
+      copyTree(src, path.join(tmpDir, f));
     }
     if (assetsIndex) fs.writeFileSync(path.join(tmpDir, 'assets-index.json'), `${JSON.stringify(assetsIndex)}\n`);
 
@@ -86,6 +106,14 @@ export function mirrorTcgdex({ cloneDir, targetDir, excludeSerieIds, assetsIndex
 }
 
 // Klont TCGdex (sparse) nach cloneDir und liefert Commit und Branch.
+// Liefert den HEAD-Commit des Remote ohne zu klonen.
+function lsRemoteHead() {
+  const out = execFileSync('git', ['ls-remote', REPO, 'HEAD'], { encoding: 'utf8' }).trim();
+  const sha = out.split(/\s+/)[0];
+  if (!/^[0-9a-f]{40}$/.test(sha)) throw new Error(`git ls-remote: unerwartete Ausgabe: ${out}`);
+  return sha;
+}
+
 function cloneTcgdex(cloneDir) {
   const git = (...args) => execFileSync('git', args, { cwd: cloneDir, encoding: 'utf8' }).trim();
   execFileSync('git', ['clone', '--depth', '1', '--filter=blob:none', '--sparse', REPO, cloneDir], { stdio: 'inherit' });
@@ -100,13 +128,18 @@ async function fetchAssets() {
 }
 
 // Abhaengigkeiten injizierbar (Tests); main() verdrahtet die echten.
-export async function runSync({ repoRoot, cloneTcgdex: clonePort = cloneTcgdex, fetchAssets: assetsPort = fetchAssets, now = () => new Date() }) {
+export async function runSync({ repoRoot, cloneTcgdex: clonePort = cloneTcgdex, lsRemoteHead: headPort = lsRemoteHead, fetchAssets: assetsPort = fetchAssets, now = () => new Date() }) {
   const sourcesDir = path.join(repoRoot, 'sources');
   const manifestFile = path.join(sourcesDir, 'SOURCES.json');
+  const manifest = fs.existsSync(manifestFile) ? JSON.parse(fs.readFileSync(manifestFile, 'utf8')) : {};
+  const remoteHead = headPort();
+  if (!shouldUpdate(manifest, remoteHead)) {
+    console.log(`TCGdex unveraendert (${remoteHead})`);
+    return { updated: false, commit: remoteHead };
+  }
   const clone = fs.mkdtempSync(path.join(os.tmpdir(), 'tcgdex-clone-'));
   try {
     const { commit, ref } = clonePort(clone);
-    const manifest = fs.existsSync(manifestFile) ? JSON.parse(fs.readFileSync(manifestFile, 'utf8')) : {};
     if (!shouldUpdate(manifest, commit)) {
       console.log(`TCGdex unveraendert (${commit})`);
       return { updated: false, commit };
