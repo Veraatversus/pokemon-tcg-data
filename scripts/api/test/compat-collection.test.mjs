@@ -51,13 +51,19 @@ test('Registry: jeder Set-Alias und jedes mergedSubset erreicht mindestens eine 
           for (const r of c.tcgdex ?? []) if (r.set === td) candidates.push([cid, r.localId]);
         }
       } else {
-        for (const cid of Object.keys(cards)) candidates.push([cid, cid]);
+        for (const [cid, c] of Object.entries(cards)) {
+          candidates.push([cid, cid]);
+          for (const k of c.keys?.pokemontcg ?? []) {
+            if (k !== cid && !findAmbiguousKey(registry, a, k)) candidates.push([cid, k]);
+          }
+        }
       }
       for (const [cid, key] of candidates) {
         const res = resolveCollectionKey(registry, a, key);
         if (!res) continue;
         if (res.setId !== setId) bad.push(`Alias ${a}/${key} -> fremdes Set ${res.setId}`);
-        else if (res.cardId === cid) reachable++;
+        else if (res.cardId !== cid) bad.push(`Alias ${a}/${key}: erwartet ${setId}/${cid}, erhalten ${res.setId}/${res.cardId}`);
+        else reachable++;
       }
       if (!reachable) bad.push(`Alias ${a} (Set ${setId}): keine Karte erreichbar (${candidates.length} Kandidaten)`);
     }
