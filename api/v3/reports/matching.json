@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-11T17:30:21.202Z",
+  "generatedAt": "2026-11-11T16:46:47.351Z",
   "sources": {
     "pokemontcg": {
       "commit": "bc4a5871a2468e9f3fb8aaf0916c72255ed90d99",
@@ -2867,14 +2867,14 @@
   ],
   "doubleAssigned": [],
   "warnings": [
-    "{\"file\":\"E:\\\\Proggn\\\\Projects\\\\GitRepos\\\\pokemon-tcg-data-api-v3\\\\sources\\\\tcgdex\\\\data\\\\Platinum\\\\Supreme Victors\\\\AR1.ts\",\"message\":\"doppelte Karte AR1 im Set; behalten wird E:\\\\Proggn\\\\Projects\\\\GitRepos\\\\pokemon-tcg-data-api-v3\\\\sources\\\\tcgdex\\\\data\\\\Platinum\\\\Arceus\\\\AR1.ts\"}",
-    "{\"file\":\"E:\\\\Proggn\\\\Projects\\\\GitRepos\\\\pokemon-tcg-data-api-v3\\\\sources\\\\tcgdex\\\\data\\\\Platinum\\\\Supreme Victors\\\\AR2.ts\",\"message\":\"doppelte Karte AR2 im Set; behalten wird E:\\\\Proggn\\\\Projects\\\\GitRepos\\\\pokemon-tcg-data-api-v3\\\\sources\\\\tcgdex\\\\data\\\\Platinum\\\\Arceus\\\\AR2.ts\"}",
-    "{\"file\":\"E:\\\\Proggn\\\\Projects\\\\GitRepos\\\\pokemon-tcg-data-api-v3\\\\sources\\\\tcgdex\\\\data\\\\Platinum\\\\Supreme Victors\\\\AR3.ts\",\"message\":\"doppelte Karte AR3 im Set; behalten wird E:\\\\Proggn\\\\Projects\\\\GitRepos\\\\pokemon-tcg-data-api-v3\\\\sources\\\\tcgdex\\\\data\\\\Platinum\\\\Arceus\\\\AR3.ts\"}",
-    "{\"file\":\"E:\\\\Proggn\\\\Projects\\\\GitRepos\\\\pokemon-tcg-data-api-v3\\\\sources\\\\tcgdex\\\\data\\\\Platinum\\\\Supreme Victors\\\\AR4.ts\",\"message\":\"doppelte Karte AR4 im Set; behalten wird E:\\\\Proggn\\\\Projects\\\\GitRepos\\\\pokemon-tcg-data-api-v3\\\\sources\\\\tcgdex\\\\data\\\\Platinum\\\\Arceus\\\\AR4.ts\"}",
-    "{\"file\":\"E:\\\\Proggn\\\\Projects\\\\GitRepos\\\\pokemon-tcg-data-api-v3\\\\sources\\\\tcgdex\\\\data\\\\Platinum\\\\Supreme Victors\\\\AR5.ts\",\"message\":\"doppelte Karte AR5 im Set; behalten wird E:\\\\Proggn\\\\Projects\\\\GitRepos\\\\pokemon-tcg-data-api-v3\\\\sources\\\\tcgdex\\\\data\\\\Platinum\\\\Arceus\\\\AR5.ts\"}",
-    "{\"file\":\"E:\\\\Proggn\\\\Projects\\\\GitRepos\\\\pokemon-tcg-data-api-v3\\\\sources\\\\tcgdex\\\\data\\\\Platinum\\\\Supreme Victors\\\\AR6.ts\",\"message\":\"doppelte Karte AR6 im Set; behalten wird E:\\\\Proggn\\\\Projects\\\\GitRepos\\\\pokemon-tcg-data-api-v3\\\\sources\\\\tcgdex\\\\data\\\\Platinum\\\\Arceus\\\\AR6.ts\"}",
-    "{\"file\":\"E:\\\\Proggn\\\\Projects\\\\GitRepos\\\\pokemon-tcg-data-api-v3\\\\sources\\\\tcgdex\\\\data\\\\Platinum\\\\Supreme Victors\\\\AR7.ts\",\"message\":\"doppelte Karte AR7 im Set; behalten wird E:\\\\Proggn\\\\Projects\\\\GitRepos\\\\pokemon-tcg-data-api-v3\\\\sources\\\\tcgdex\\\\data\\\\Platinum\\\\Arceus\\\\AR7.ts\"}",
-    "{\"file\":\"E:\\\\Proggn\\\\Projects\\\\GitRepos\\\\pokemon-tcg-data-api-v3\\\\sources\\\\tcgdex\\\\data\\\\Platinum\\\\Supreme Victors\\\\AR8.ts\",\"message\":\"doppelte Karte AR8 im Set; behalten wird E:\\\\Proggn\\\\Projects\\\\GitRepos\\\\pokemon-tcg-data-api-v3\\\\sources\\\\tcgdex\\\\data\\\\Platinum\\\\Arceus\\\\AR8.ts\"}",
-    "{\"file\":\"E:\\\\Proggn\\\\Projects\\\\GitRepos\\\\pokemon-tcg-data-api-v3\\\\sources\\\\tcgdex\\\\data\\\\Platinum\\\\Supreme Victors\\\\AR9.ts\",\"message\":\"doppelte Karte AR9 im Set; behalten wird E:\\\\Proggn\\\\Projects\\\\GitRepos\\\\pokemon-tcg-data-api-v3\\\\sources\\\\tcgdex\\\\data\\\\Platinum\\\\Arceus\\\\AR9.ts\"}"
+    "sources/tcgdex/data/Platinum/Supreme Victors/AR1.ts: doppelte Karte AR1 im Set; behalten wird sources/tcgdex/data/Platinum/Arceus/AR1.ts",
+    "sources/tcgdex/data/Platinum/Supreme Victors/AR2.ts: doppelte Karte AR2 im Set; behalten wird sources/tcgdex/data/Platinum/Arceus/AR2.ts",
+    "sources/tcgdex/data/Platinum/Supreme Victors/AR3.ts: doppelte Karte AR3 im Set; behalten wird sources/tcgdex/data/Platinum/Arceus/AR3.ts",
+    "sources/tcgdex/data/Platinum/Supreme Victors/AR4.ts: doppelte Karte AR4 im Set; behalten wird sources/tcgdex/data/Platinum/Arceus/AR4.ts",
+    "sources/tcgdex/data/Platinum/Supreme Victors/AR5.ts: doppelte Karte AR5 im Set; behalten wird sources/tcgdex/data/Platinum/Arceus/AR5.ts",
+    "sources/tcgdex/data/Platinum/Supreme Victors/AR6.ts: doppelte Karte AR6 im Set; behalten wird sources/tcgdex/data/Platinum/Arceus/AR6.ts",
+    "sources/tcgdex/data/Platinum/Supreme Victors/AR7.ts: doppelte Karte AR7 im Set; behalten wird sources/tcgdex/data/Platinum/Arceus/AR7.ts",
+    "sources/tcgdex/data/Platinum/Supreme Victors/AR8.ts: doppelte Karte AR8 im Set; behalten wird sources/tcgdex/data/Platinum/Arceus/AR8.ts",
+    "sources/tcgdex/data/Platinum/Supreme Victors/AR9.ts: doppelte Karte AR9 im Set; behalten wird sources/tcgdex/data/Platinum/Arceus/AR9.ts"
   ]
 }
