@@ -1,0 +1,34 @@
+{
+  "merges": [
+    {
+      "main": "swsh9",
+      "subset": "swsh9tg",
+      "reason": "Trainer Gallery von Brilliant Stars: Karten gehoeren kanonisch zum Hauptset (Schluessel TG1...), Unterset-ID wird Set-Alias (Spec §5.2, §10 Punkt 9)."
+    },
+    {
+      "main": "swsh10",
+      "subset": "swsh10tg",
+      "reason": "Trainer Gallery von Astral Radiance: Karten gehoeren kanonisch zum Hauptset (Schluessel TG1...), Unterset-ID wird Set-Alias (Spec §5.2, §10 Punkt 9)."
+    },
+    {
+      "main": "swsh11",
+      "subset": "swsh11tg",
+      "reason": "Trainer Gallery von Lost Origin: Karten gehoeren kanonisch zum Hauptset (Schluessel TG1...), Unterset-ID wird Set-Alias (Spec §5.2, §10 Punkt 9)."
+    },
+    {
+      "main": "swsh12",
+      "subset": "swsh12tg",
+      "reason": "Trainer Gallery von Silver Tempest: Karten gehoeren kanonisch zum Hauptset (Schluessel TG1...), Unterset-ID wird Set-Alias (Spec §5.2, §10 Punkt 9)."
+    },
+    {
+      "main": "swsh12pt5",
+      "subset": "swsh12pt5gg",
+      "reason": "Galarian Gallery von Crown Zenith: Karten gehoeren kanonisch zum Hauptset (Schluessel GG1...); Referenz-DB fuehrt swsh12pt5/GG1... abgehakt (Spec §5.6)."
+    },
+    {
+      "main": "swsh45",
+      "subset": "swsh45sv",
+      "reason": "Shiny Vault von Shining Fates: Karten gehoeren kanonisch zum Hauptset (Schluessel SV1...), Unterset-ID wird Set-Alias (Spec §5.2, §10 Punkt 9)."
+    }
+  ]
+}
