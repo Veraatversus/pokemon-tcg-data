@@ -19,3 +19,27 @@ test('benannter Export (legals.ts-Form)', () => {
 for (const bad of ['{ ...other }', '{ a: foo() }', '{ a: `x${y}` }', '{ a: b + 1 }']) {
   test(`lehnt ab: ${bad}`, () => assert.throws(() => parseTcgdexModule(`const c = ${bad}\nexport default c`, 'bad.ts'), (e) => e instanceof TcgdexParseError && e.message.includes('bad.ts')));
 }
+
+// Sicherheitsrelevante Ablehnungen: Fehlertyp, Dateipfad und Grund/Knotentyp pruefen.
+const rejections = [
+  ['__proto__ als Identifier', 'const c = { __proto__: 1 }\nexport default c', '__proto__'],
+  ['__proto__ als String-Literal', 'const c = { "__proto__": 1 }\nexport default c', '__proto__'],
+  ['__proto__ als Shorthand', 'const __proto__ = 1\nconst c = { __proto__ }\nexport default c', '__proto__'],
+  ['Getter', 'const c = { get a() { return 1 } }\nexport default c', 'Property'],
+  ['Setter', 'const c = { set a(v) {} }\nexport default c', 'Property'],
+  ['Methode', 'const c = { a() {} }\nexport default c', 'Property'],
+  ['berechneter Schluessel', 'const a = "k"\nconst c = { [a]: 1 }\nexport default c', 'Property'],
+  ['Tagged Template', 'const c = { a: tag`x` }\nexport default c', 'TaggedTemplateExpression'],
+  ['Regex-Literal', 'const c = { a: /x/ }\nexport default c', 'Literaltyp'],
+  ['BigInt-Literal', 'const c = { a: 1n }\nexport default c', 'Literaltyp'],
+  ['globaler Bezeichner process', 'const c = { a: process }\nexport default c', 'unbekannter Bezeichner process'],
+  ['Bezeichner undefined', 'const c = { a: undefined }\nexport default c', 'unbekannter Bezeichner undefined'],
+  ['zyklische Referenz', 'const a = b\nconst b = a\nexport default a', 'zyklische Referenz'],
+  ['Syntaxfehler', 'const c = {\nexport default c', 'Syntaxfehler'],
+  ['Unary !x', 'const x = 1\nconst c = { a: !x }\nexport default c', 'UnaryExpression'],
+  ['Unary -x auf Bezeichner', 'const x = 1\nconst c = { a: -x }\nexport default c', 'UnaryExpression'],
+];
+for (const [name, src, reason] of rejections) {
+  test(`lehnt ab: ${name}`, () => assert.throws(() => parseTcgdexModule(src, 'sec.ts'), (e) =>
+    e instanceof TcgdexParseError && e.filePath === 'sec.ts' && e.message.includes('sec.ts') && e.message.includes(reason)));
+}
