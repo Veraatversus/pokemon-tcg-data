@@ -3,8 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadPokemontcg } from './sources/load-pokemontcg.mjs';
 import { loadTcgdexDatabase } from './tcgdex/load-database.mjs';
-import { matchSets } from './match/match-sets.mjs';
-import { matchCards } from './match/match-cards.mjs';
+import { runMatching } from './match/run-matching.mjs';
 import { belowMinCardMatch, comparePairDrift } from './report/gates.mjs';
 import { buildMatchingReport, renderMatchingMarkdown } from './report/matching-report.mjs';
 
@@ -32,17 +31,7 @@ function main() {
   const cardMap = readJson(path.join(root, 'api', 'mappings', 'card-map.json'));
   const sources = readJson(path.join(root, 'sources', 'SOURCES.json'));
 
-  const setResult = matchSets({ ptSets, tcgdexSets: db.sets, ptCardsBySet, setMap });
-  const tcgdexSetsById = new Map(db.sets.map((s) => [s.id, s]));
-  const cardResults = new Map();
-  for (const pair of setResult.pairs) {
-    cardResults.set(pair.pokemontcgId, matchCards({
-      ptCards: ptCardsBySet.get(pair.pokemontcgId) ?? [],
-      tcgdexSet: tcgdexSetsById.get(pair.tcgdexId),
-      tcgdexSetsById,
-      cardMap: cardMap[pair.pokemontcgId],
-    }));
-  }
+  const { setResult, cardResults } = runMatching({ ptSets, ptCardsBySet, tcgdexSets: db.sets, setMap, cardMap });
 
   const report = buildMatchingReport({
     setResult, cardResults, sources, ptSets, tcgdexSets: db.sets, ptCardsBySet, warnings: db.warnings,

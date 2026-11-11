@@ -1,0 +1,19 @@
+{
+  "1": {
+    "keys": {
+      "pokemontcg": [
+        "1"
+      ],
+      "tcgdex": [
+        "1"
+      ]
+    },
+    "pokemontcg": null,
+    "tcgdex": [
+      {
+        "localId": "001",
+        "set": "miscp"
+      }
+    ]
+  }
+}

@@ -1,0 +1,1760 @@
+[
+  {
+    "abilities": [
+      {
+        "name": "Protective Wall",
+        "text": "Prevent all damage done to your Benched Pokémon by your opponent's attacks.",
+        "type": "Poké-Body"
+      }
+    ],
+    "artist": "Kazuyuki Kano",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Metal",
+          "Metal",
+          "Colorless"
+        ],
+        "damage": "60",
+        "name": "Anger Revenge",
+        "text": "If Bastiodon was damaged by an attack during your opponent's last turn, this attack does 40 damage to 1 of your opponent's Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      }
+    ],
+    "cardId": "1",
+    "convertedRetreatCost": 3,
+    "evolvesFrom": "Shieldon",
+    "flavorText": "Any frontal attack is repulsed. It is a docile Pokémon that feeds on grass and berries.",
+    "hp": "130",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Schutzwall",
+            "text": "Verhindere allen Schaden, der Pokémon auf deiner Bank durch gegnerische Angriffe zugefügt wird."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Zornesrache",
+            "text": "Wenn Bollterus im letzten Zug deines Gegners durch einen Angriff Schaden zugefügt wurde, fügt dieser Angriff 1 Pokémon auf der Bank deines Gegners 40 Schadenspunkte zu. (Wende Schwäche und Resistenz bei Pokémon auf der Bank nicht an.)"
+          }
+        ],
+        "evolvesFrom": "Schilterus",
+        "flavorText": "Jeder Frontalangriff wird abgeschmettert. Dieses friedliche PKMN ernährt sich von Gras und Beeren.",
+        "name": "Bollterus"
+      }
+    },
+    "id": "pop6-1",
+    "ids": {
+      "cardmarket": [
+        277886
+      ],
+      "pokemontcg": "pop6-1",
+      "tcgdex": "pop6-1",
+      "tcgplayer": [
+        83735
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pop/pop6/1/high.webp",
+      "small": "https://assets.tcgdex.net/en/pop/pop6/1/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "51",
+    "matchStatus": "matched",
+    "name": "Bastiodon",
+    "nationalPokedexNumbers": [
+      411
+    ],
+    "number": "1",
+    "rarity": "Rare",
+    "resistances": [
+      {
+        "type": "Psychic",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "pop6",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 2"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Metal"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 277886,
+        "tcgplayerId": 83735,
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "+40"
+      }
+    ]
+  },
+  {
+    "artist": "Kouki Saitou",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Feint",
+        "text": "This attack's damage isn't affected by Resistance."
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Fighting",
+          "Fighting"
+        ],
+        "damage": "40",
+        "name": "Aura Sphere",
+        "text": "Does 20 damage to 1 of your opponent's Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      }
+    ],
+    "cardId": "2",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Riolu",
+    "flavorText": "It has the ability to sense the auras of all things. It understands human speech.",
+    "hp": "90",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Offenlegung",
+            "text": "Der Schaden dieses Angriffs wird durch die Resistenz des Verteidigenden Pokémon nicht verändert."
+          },
+          {
+            "name": "Aurasphäre",
+            "text": "Dieser Angriff fügt 1 Pokémon auf der Bank deines Gegners 20 Schadenspunkte zu. (Wende Schwäche und Resistenz bei Pokémon auf der Bank nicht an.)"
+          }
+        ],
+        "evolvesFrom": "Riolu",
+        "flavorText": "Es besitzt die Fähigkeit, die Aura aller Dinge zu spüren. Es versteht die menschliche Sprache.",
+        "name": "Lucario"
+      }
+    },
+    "id": "pop6-2",
+    "ids": {
+      "cardmarket": [
+        277887
+      ],
+      "pokemontcg": "pop6-2",
+      "tcgdex": "pop6-2",
+      "tcgplayer": [
+        86874
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pop/pop6/2/high.webp",
+      "small": "https://assets.tcgdex.net/en/pop/pop6/2/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "30",
+    "matchStatus": "matched",
+    "name": "Lucario",
+    "nationalPokedexNumbers": [
+      448
+    ],
+    "number": "2",
+    "rarity": "Rare",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "pop6",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 277887,
+        "tcgplayerId": 86874,
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Atsuko Nishida",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Call for Family",
+        "text": "Search your deck for a Basic Pokémon and put it onto your Bench. Shuffle your deck afterward."
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Water",
+          "Water"
+        ],
+        "damage": "30",
+        "name": "Aqua Ring",
+        "text": "Switch Manaphy with 1 of your Benched Pokémon."
+      }
+    ],
+    "cardId": "3",
+    "convertedRetreatCost": 1,
+    "flavorText": "Born on a cold seafloor, it will swim great distances to return to its birthplace.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Familienruf",
+            "text": "Durchsuche dein Deck nach 1 Basis-Pokémon-Karte und lege sie auf deine Bank. Mische dein Deck danach."
+          },
+          {
+            "name": "Wasserring",
+            "text": "Tausche Manaphy gegen 1 Pokémon auf deiner Bank aus."
+          }
+        ],
+        "flavorText": "Geboren auf dem Meeresboden, legt es große Entfernungen zurück, um dorthin zurückzukehren.",
+        "name": "Manaphy"
+      }
+    },
+    "id": "pop6-3",
+    "ids": {
+      "cardmarket": [
+        277888
+      ],
+      "pokemontcg": "pop6-3",
+      "tcgdex": "pop6-3",
+      "tcgplayer": [
+        87144
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pop/pop6/3/high.webp",
+      "small": "https://assets.tcgdex.net/en/pop/pop6/3/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "20",
+    "matchStatus": "matched",
+    "name": "Manaphy",
+    "nationalPokedexNumbers": [
+      490
+    ],
+    "number": "3",
+    "rarity": "Rare",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "pop6",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 277888,
+        "tcgplayerId": 87144,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 277888,
+        "tcgplayerId": 87144,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Atsuko Nishida",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Minor Errand-Running",
+        "text": "Search your deck for a basic Energy card, show it to your opponent, and put it into your hand. Shuffle your deck afterward."
+      },
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Lightning"
+        ],
+        "damage": "20",
+        "name": "Thunder Jolt",
+        "text": "Flip a coin. If tails, Pachirisu does 10 damage to itself."
+      }
+    ],
+    "cardId": "4",
+    "convertedRetreatCost": 1,
+    "flavorText": "It makes fur balls that crackle with static electricity. It stores them with berries in tree holes.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Kleine Besorgung",
+            "text": "Durchsuche dein Deck nach einer Basis-Energiekarte, zeige sie deinem Gegner und nimm sie auf die Hand. Mische dein Deck danach."
+          },
+          {
+            "name": "Donnerrüttler",
+            "text": "Wirf 1 Münze. Bei „Zahl“ fügt sich Pachirisu selbst 10 Schadenspunkte zu."
+          }
+        ],
+        "flavorText": "Es bildet ein Fellknäuel, der vor statischer Energie knistert. Es speichert die Energie in Bäumen.",
+        "name": "Pachirisu"
+      }
+    },
+    "id": "pop6-4",
+    "ids": {
+      "cardmarket": [
+        277889
+      ],
+      "pokemontcg": "pop6-4",
+      "tcgdex": "pop6-4",
+      "tcgplayer": [
+        87898
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pop/pop6/4/high.webp",
+      "small": "https://assets.tcgdex.net/en/pop/pop6/4/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "23",
+    "matchStatus": "matched",
+    "name": "Pachirisu",
+    "nationalPokedexNumbers": [
+      417
+    ],
+    "number": "4",
+    "rarity": "Rare",
+    "resistances": [
+      {
+        "type": "Metal",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "pop6",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 277889,
+        "tcgplayerId": 87898,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 277889,
+        "tcgplayerId": 87898,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Kazuyuki Kano",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Fighting",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Assurance",
+        "text": "As long as the Defending Pokémon's remaining HP is 60 or less, this attack's base damage is 60 instead of 30."
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Fighting",
+          "Fighting",
+          "Fighting"
+        ],
+        "damage": "100",
+        "name": "Hasty Headbutt",
+        "text": "Rampardos does 20 damage to itself. This attack's damage isn't affected by Weakness, Resistance, Poké-Powers, Poké-Bodies, or any other effects on the Defending Pokémon."
+      }
+    ],
+    "cardId": "5",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Cranidos",
+    "flavorText": "Its powerful head butt has enough power to shatter even the most durable things upon impact.",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Gewissheit",
+            "text": "Solange die verbliebenen KP des Verteidigenden Pokémon 60 oder weniger betragen, beträgt der Grundschaden dieses Angriffs 60 Schadenspunkte anstelle von 30 Schadenspunkten."
+          },
+          {
+            "name": "Hastige Kopfnuss",
+            "text": "Rameidon fügt sich selbst 20 Schadenspunkte zu. Schwäche, Resistenz, Poké-Power, Poké-Body und alle anderen Effekte auf dem Verteidigenden Pokémon haben keine Auswirkungen auf die Schadenspunkte dieses Angriffs."
+          }
+        ],
+        "evolvesFrom": "Koknodon",
+        "flavorText": "Sein kräftiger Kopfstoß hat genug Kraft, um selbst die stabilsten Dinge zu zerschmettern.",
+        "name": "Rameidon"
+      }
+    },
+    "id": "pop6-5",
+    "ids": {
+      "cardmarket": [
+        277890
+      ],
+      "pokemontcg": "pop6-5",
+      "tcgdex": "pop6-5",
+      "tcgplayer": [
+        88570
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pop/pop6/5/high.webp",
+      "small": "https://assets.tcgdex.net/en/pop/pop6/5/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "48",
+    "matchStatus": "matched",
+    "name": "Rampardos",
+    "nationalPokedexNumbers": [
+      409
+    ],
+    "number": "5",
+    "rarity": "Rare",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "pop6",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 2"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 277890,
+        "tcgplayerId": 88570,
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Grass",
+        "value": "+30"
+      }
+    ]
+  },
+  {
+    "artist": "Mitsuhiro Arita",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Psychic"
+        ],
+        "damage": "",
+        "name": "Blowing Wind",
+        "text": "Flip a coin. If heads, put 1 of your Benched Pokémon and all cards attached to it on top of your deck. Shuffle your deck afterward."
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Psychic",
+          "Colorless"
+        ],
+        "damage": "10",
+        "name": "Ominous Wind",
+        "text": "Flip a coin. If heads, the Defending Pokémon is now Confused and can't retreat during your opponent's next turn."
+      }
+    ],
+    "cardId": "6",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Drifblim"
+    ],
+    "flavorText": "A Pokémon formed by the spirits of people and Pokémon. It loves damp, humid seasons.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Windböe",
+            "text": "Wirf 1 Münze. Bei „Kopf“ lege 1 der Pokémon auf deiner Bank und alle an es angelegten Karten auf dein Deck. Mische dein Deck danach."
+          },
+          {
+            "name": "Unheilböen",
+            "text": "Wirf 1 Münze. Bei „Kopf“ ist das Verteidigende Pokémon jetzt verwirrt und kann sich im nächsten Zug deines Gegners nicht zurückziehen."
+          }
+        ],
+        "flavorText": "Ein PKMN, entstanden aus den Gefühlen von Menschen und PKMN. Es mag feuchte Jahreszeiten.",
+        "name": "Driftlon"
+      }
+    },
+    "id": "pop6-6",
+    "ids": {
+      "cardmarket": [
+        277891
+      ],
+      "pokemontcg": "pop6-6",
+      "tcgdex": "pop6-6",
+      "tcgplayer": [
+        84954
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pop/pop6/6/high.webp",
+      "small": "https://assets.tcgdex.net/en/pop/pop6/6/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "17",
+    "matchStatus": "matched",
+    "name": "Drifloon",
+    "nationalPokedexNumbers": [
+      425
+    ],
+    "number": "6",
+    "rarity": "Uncommon",
+    "resistances": [
+      {
+        "type": "Colorless",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "pop6",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 277891,
+        "tcgplayerId": 84954,
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Darkness",
+        "value": "+10"
+      }
+    ]
+  },
+  {
+    "artist": "Kouki Saitou",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Surprise Attack",
+        "text": "Flip a coin. If tails, this attack does nothing."
+      }
+    ],
+    "cardId": "7",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Gabite"
+    ],
+    "hp": "50",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Sinelbeere",
+            "text": "Entferne am Ende deines Zuges 1 Schadensmarke von Kaumalat."
+          }
+        ],
+        "name": "Kaumalat"
+      }
+    },
+    "id": "pop6-7",
+    "ids": {
+      "cardmarket": [
+        277892
+      ],
+      "pokemontcg": "pop6-7",
+      "tcgdex": "pop6-7",
+      "tcgplayer": [
+        85699
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pop/pop6/7/high.webp",
+      "small": "https://assets.tcgdex.net/en/pop/pop6/7/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "8",
+    "matchStatus": "matched",
+    "name": "Gible",
+    "nationalPokedexNumbers": [
+      443
+    ],
+    "number": "7",
+    "rarity": "Uncommon",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "rules": [
+      "Oran Berry: Remove 1 damage counter from Gible at the end of your turn."
+    ],
+    "setId": "pop6",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 277892,
+        "tcgplayerId": 85699,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 277892,
+        "tcgplayerId": 85699,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Colorless",
+        "value": "+10"
+      }
+    ]
+  },
+  {
+    "artist": "Kouki Saitou",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Fighting"
+        ],
+        "damage": "30",
+        "name": "Wild Kick",
+        "text": "Flip a coin. If tails, this attack does nothing."
+      }
+    ],
+    "cardId": "8",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Lucario"
+    ],
+    "flavorText": "The aura that emanates from its body intensifies to alert others if it is afraid or sad.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Stürmischer Kick",
+            "text": "Wirf 1 Münze. Bei „Zahl“ hat dieser Angriff keine Auswirkungen."
+          }
+        ],
+        "flavorText": "Die Aura, die dieses PKMN umgibt, verstärkt sich, wenn es zeigen will, dass es ängstlich oder traurig ist.",
+        "name": "Riolu"
+      }
+    },
+    "id": "pop6-8",
+    "ids": {
+      "cardmarket": [
+        277893
+      ],
+      "pokemontcg": "pop6-8",
+      "tcgdex": "pop6-8",
+      "tcgplayer": [
+        88752
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pop/pop6/8/high.webp",
+      "small": "https://assets.tcgdex.net/en/pop/pop6/8/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "7",
+    "matchStatus": "matched",
+    "name": "Riolu",
+    "nationalPokedexNumbers": [
+      447
+    ],
+    "number": "8",
+    "rarity": "Uncommon",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "pop6",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 277893,
+        "tcgplayerId": 88752,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 277893,
+        "tcgplayerId": 88752,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "+10"
+      }
+    ]
+  },
+  {
+    "artist": "Kagemaru Himeno",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Lightning",
+          "Colorless"
+        ],
+        "damage": "10",
+        "name": "Spark",
+        "text": "Does 10 damage to 2 of your opponent's Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      }
+    ],
+    "cardId": "9",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Raichu"
+    ],
+    "hp": "50",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Sinelbeere",
+            "text": "Entferne am Ende deines Zuges 1 Schadensmarke von Pikachu."
+          }
+        ],
+        "name": "Pikachu"
+      }
+    },
+    "id": "pop6-9",
+    "ids": {
+      "cardmarket": [
+        277894
+      ],
+      "pokemontcg": "pop6-9",
+      "tcgdex": "pop6-9",
+      "tcgplayer": [
+        88087,
+        276377
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pop/pop6/9/high.webp",
+      "small": "https://assets.tcgdex.net/en/pop/pop6/9/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "13",
+    "matchStatus": "matched",
+    "name": "Pikachu",
+    "nationalPokedexNumbers": [
+      25
+    ],
+    "number": "9",
+    "rarity": "Uncommon",
+    "resistances": [
+      {
+        "type": "Metal",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "rules": [
+      "Oran Berry: Remove 1 damage counter from Pikachu at the end of your turn."
+    ],
+    "setId": "pop6",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 277894,
+        "tcgplayerId": 88087,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 277894,
+        "tcgplayerId": 88087,
+        "type": "holo"
+      },
+      {
+        "cardmarketId": 277894,
+        "stamp": [
+          "pokemon-day"
+        ],
+        "tcgplayerId": 276377,
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+10"
+      }
+    ]
+  },
+  {
+    "artist": "Masakazu Fukuda",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Whirlwind",
+        "text": "Your opponent switches the Defending Pokémon with 1 of his or her Benched Pokémon."
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Clutch",
+        "text": "The Defending Pokémon can't retreat during your opponent's next turn."
+      }
+    ],
+    "cardId": "10",
+    "convertedRetreatCost": 0,
+    "evolvesFrom": "Starly",
+    "evolvesTo": [
+      "Staraptor"
+    ],
+    "flavorText": "It flies around forests and fields in search of bug Pokémon. It stays within a huge flock.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Wirbelwind",
+            "text": "Dein Gegner tauscht das Verteidigende Pokémon gegen 1 Pokémon auf seiner Bank aus."
+          },
+          {
+            "name": "Greifer",
+            "text": "Das Verteidigende Pokémon kann sich im nächsten Zug deines Gegners nicht zurückziehen."
+          }
+        ],
+        "evolvesFrom": "Staralili",
+        "flavorText": "Auf der Suche nach Käfer-PKMN fliegt es über Wiesen und Wälder. Es bleibt in einem großen Schwarm.",
+        "name": "Staravia"
+      }
+    },
+    "id": "pop6-10",
+    "ids": {
+      "cardmarket": [
+        277895
+      ],
+      "pokemontcg": "pop6-10",
+      "tcgdex": "pop6-10",
+      "tcgplayer": [
+        89514
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pop/pop6/10/high.webp",
+      "small": "https://assets.tcgdex.net/en/pop/pop6/10/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "21",
+    "matchStatus": "matched",
+    "name": "Staravia",
+    "nationalPokedexNumbers": [
+      397
+    ],
+    "number": "10",
+    "rarity": "Uncommon",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-20"
+      }
+    ],
+    "setId": "pop6",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 277895,
+        "tcgplayerId": 89514,
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Mitsuhiro Arita",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Amnesia",
+        "text": "Choose 1 of the Defending Pokémon's attacks. That Pokémon can't use that attack during your opponent's next turn."
+      },
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Scavenge",
+        "text": "Search your discard pile for a Trainer card, show it to your opponent, an put it into your hand."
+      }
+    ],
+    "cardId": "11",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Bibarel"
+    ],
+    "flavorText": "With nerves of steel, nothing can perturb it. It is more agile and active than it appears.",
+    "hp": "50",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Amnesie",
+            "text": "Wähle 1 Angriff des Verteidigenden Pokémon. Dieses Pokémon kann den gewählten Angriff im nächsten Zug deines Gegners nicht einsetzen."
+          },
+          {
+            "name": "Aasfresser",
+            "text": "Durchsuche deinen Ablagestapel nach einer Trainerkarte, zeige sie deinem Gegner und nimm sie auf die Hand."
+          }
+        ],
+        "flavorText": "Es hat Nerven wie Drahtseile, nichts kann es erschüttern. Es ist agiler und aktiver, als es scheint.",
+        "name": "Bidiza"
+      }
+    },
+    "id": "pop6-11",
+    "ids": {
+      "cardmarket": [
+        277896
+      ],
+      "pokemontcg": "pop6-11",
+      "tcgdex": "pop6-11",
+      "tcgplayer": [
+        83826
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pop/pop6/11/high.webp",
+      "small": "https://assets.tcgdex.net/en/pop/pop6/11/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "10",
+    "matchStatus": "matched",
+    "name": "Bidoof",
+    "nationalPokedexNumbers": [
+      399
+    ],
+    "number": "11",
+    "rarity": "Common",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "pop6",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 277896,
+        "tcgplayerId": 83826,
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+10"
+      }
+    ]
+  },
+  {
+    "artist": "Kagemaru Himeno",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "10",
+        "name": "Splash",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "10",
+        "name": "Jump Kick",
+        "text": "Does 10 damage to 1 of your opponent's Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      }
+    ],
+    "cardId": "12",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Lopunny"
+    ],
+    "flavorText": "It slams foes by sharply uncoiling is rolled ears. It stings enough to make a grown-up cry in pain.",
+    "hp": "50",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Platscher"
+          },
+          {
+            "name": "Sprungkick",
+            "text": "Dieser Angriff fügt 1 Pokémon auf der Bank deines Gegners 10 Schadenspunkte zu. (Wende Schwäche und Resistenz bei Pokémon auf der Bank nicht an.)"
+          }
+        ],
+        "flavorText": "Es entrollt seine Ohren sehr schnell, um seine Gegner schmerzhaft zu schlagen.",
+        "name": "Haspiror"
+      }
+    },
+    "id": "pop6-12",
+    "ids": {
+      "cardmarket": [
+        277897
+      ],
+      "pokemontcg": "pop6-12",
+      "tcgdex": "pop6-12",
+      "tcgplayer": [
+        84038
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pop/pop6/12/high.webp",
+      "small": "https://assets.tcgdex.net/en/pop/pop6/12/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "11",
+    "matchStatus": "matched",
+    "name": "Buneary",
+    "nationalPokedexNumbers": [
+      427
+    ],
+    "number": "12",
+    "rarity": "Common",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "pop6",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 277897,
+        "tcgplayerId": 84038,
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+10"
+      }
+    ]
+  },
+  {
+    "artist": "Atsuko Nishida",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Grass"
+        ],
+        "damage": "",
+        "name": "Sleep Powder",
+        "text": "The Defending Pokémon is now Asleep."
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Grass",
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Leech Seed",
+        "text": "If this attack does any damage to the Defending Pokémon (after applying Weakness and Resistance), remove 1 damage counter from Cherubi."
+      }
+    ],
+    "cardId": "13",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Cherrim"
+    ],
+    "flavorText": "The small ball holds the nutrients needed for evolution. Apparently, it is very sweet and tasty.",
+    "hp": "50",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Schlafpuder",
+            "text": "Das Verteidigende Pokémon schläft jetzt."
+          },
+          {
+            "name": "Egelsamen",
+            "text": "Falls dieser Angriff dem Verteidigenden Pokémon Schaden zufügt (nachdem Schwäche und Resistenz verrechnet wurden), entferne 1 Schadensmarke von Kikugi."
+          }
+        ],
+        "flavorText": "Das kleine Bällchen enthält alles, was es für die Entwicklung braucht. Es ist süß und lecker.",
+        "name": "Kikugi"
+      }
+    },
+    "id": "pop6-13",
+    "ids": {
+      "cardmarket": [
+        277898
+      ],
+      "pokemontcg": "pop6-13",
+      "tcgdex": "pop6-13",
+      "tcgplayer": [
+        84260
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/pop6/13_hires.png",
+      "small": "https://images.pokemontcg.io/pop6/13.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "7",
+    "matchStatus": "matched",
+    "name": "Cherubi",
+    "nationalPokedexNumbers": [
+      420
+    ],
+    "number": "13",
+    "rarity": "Common",
+    "resistances": [
+      {
+        "type": "Water",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "pop6",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 277898,
+        "tcgplayerId": 84260,
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "+10"
+      }
+    ]
+  },
+  {
+    "artist": "Kagemaru Himeno",
+    "attacks": [
+      {
+        "convertedEnergyCost": 0,
+        "cost": [],
+        "damage": "10",
+        "name": "Scratch",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Fire",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Ember",
+        "text": "Flip a coin. If heads discard a Fire Energy attached to Chimchar."
+      }
+    ],
+    "cardId": "14",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Monferno"
+    ],
+    "flavorText": "It agilely scales cliffs to live atop craggy mountains. Its fire is put out when it sleeps.",
+    "hp": "50",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Kratzer"
+          },
+          {
+            "name": "Glut",
+            "text": "Wirf 1 Münze. Bei „Zahl“ lege eine {R}-Energie, die an Panflam angelegt ist, auf deinen Ablagestapel."
+          }
+        ],
+        "flavorText": "Es klettert behände steile Felsen hinauf, um auf Bergen zu leben. Sein Feuer ist aus, wenn es schläft.",
+        "name": "Panflam"
+      }
+    },
+    "id": "pop6-14",
+    "ids": {
+      "cardmarket": [
+        277899
+      ],
+      "pokemontcg": "pop6-14",
+      "tcgdex": "pop6-14",
+      "tcgplayer": [
+        84283
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pop/pop6/14/high.webp",
+      "small": "https://assets.tcgdex.net/en/pop/pop6/14/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "8",
+    "matchStatus": "matched",
+    "name": "Chimchar",
+    "nationalPokedexNumbers": [
+      390
+    ],
+    "number": "14",
+    "rarity": "Common",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "pop6",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fire"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 277899,
+        "tcgplayerId": 84283,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 277899,
+        "tcgplayerId": 84283,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Water",
+        "value": "+10"
+      }
+    ]
+  },
+  {
+    "artist": "Atsuko Nishida",
+    "attacks": [
+      {
+        "convertedEnergyCost": 0,
+        "cost": [],
+        "damage": "10",
+        "name": "Peck",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Water",
+          "Colorless"
+        ],
+        "damage": "20+",
+        "name": "Water Spash",
+        "text": "Flip a coin. If heads, this attack does 20 damage plus 10 more damage."
+      }
+    ],
+    "cardId": "15",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Prinplup"
+    ],
+    "flavorText": "Because it is very proud, it hates accepting food from people. Its thick down guards it from cold.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Schnabel"
+          },
+          {
+            "name": "Wasserplatscher",
+            "text": "Wirf 1 Münze. Bei „Kopf“ fügt dieser Angriff 20 Schadenspunkte plus 10 weitere Schadenspunkte zu."
+          }
+        ],
+        "flavorText": "Es ist sehr stolz und nimmt daher kein Futter von anderen an. Seine dicken Daunen schützen vor Kälte.",
+        "name": "Plinfa"
+      }
+    },
+    "id": "pop6-15",
+    "ids": {
+      "cardmarket": [
+        277900
+      ],
+      "pokemontcg": "pop6-15",
+      "tcgdex": "pop6-15",
+      "tcgplayer": [
+        88143
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pop/pop6/15/high.webp",
+      "small": "https://assets.tcgdex.net/en/pop/pop6/15/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "9",
+    "matchStatus": "matched",
+    "name": "Piplup",
+    "nationalPokedexNumbers": [
+      393
+    ],
+    "number": "15",
+    "rarity": "Common",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "pop6",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 277900,
+        "tcgplayerId": 88143,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 277900,
+        "tcgplayerId": 88143,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+10"
+      }
+    ]
+  },
+  {
+    "artist": "Masakazu Fukuda",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "10",
+        "name": "Gust",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "10+",
+        "name": "Quick Attack",
+        "text": "Flip a coin. If heads, this attack does 10 damage plus 20 more damage."
+      }
+    ],
+    "cardId": "16",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Staravia"
+    ],
+    "flavorText": "They flock in great numbers. Though small, they flap their wings with great power.",
+    "hp": "50",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Windstoß"
+          },
+          {
+            "name": "Ruckzuckhieb",
+            "text": "Wirf 1 Münze. Bei „Kopf“ fügt dieser Angriff 10 Schadenspunkte plus 20 weitere Schadenspunkte zu."
+          }
+        ],
+        "flavorText": "Ihr Schwarm ist stets groß. Obwohl es kleine PKMN sind, schwingen sie ihre Flügel mit enormer Kraft.",
+        "name": "Staralili"
+      }
+    },
+    "id": "pop6-16",
+    "ids": {
+      "cardmarket": [
+        277901
+      ],
+      "pokemontcg": "pop6-16",
+      "tcgdex": "pop6-16",
+      "tcgplayer": [
+        89521
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pop/pop6/16/high.webp",
+      "small": "https://assets.tcgdex.net/en/pop/pop6/16/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "8",
+    "matchStatus": "matched",
+    "name": "Starly",
+    "nationalPokedexNumbers": [
+      396
+    ],
+    "number": "16",
+    "rarity": "Common",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "pop6",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 277901,
+        "tcgplayerId": 89521,
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+10"
+      }
+    ]
+  },
+  {
+    "artist": "Masakazu Fukuda",
+    "attacks": [
+      {
+        "convertedEnergyCost": 0,
+        "cost": [],
+        "damage": "10",
+        "name": "Tackle",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Grass"
+        ],
+        "damage": "20",
+        "name": "Razor Leaf",
+        "text": ""
+      }
+    ],
+    "cardId": "17",
+    "convertedRetreatCost": 2,
+    "evolvesTo": [
+      "Grotle"
+    ],
+    "flavorText": "Made from soil, the shell on its back hardens when it drinks water. It lives along lakes.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Tackle"
+          },
+          {
+            "name": "Rasierblatt"
+          }
+        ],
+        "flavorText": "Es besteht aus Erdreich. Trinkt es Wasser, verhärtet sich der Panzer auf seinem Rücken. Es lebt an Seen.",
+        "name": "Chelast"
+      }
+    },
+    "id": "pop6-17",
+    "ids": {
+      "cardmarket": [
+        277902
+      ],
+      "pokemontcg": "pop6-17",
+      "tcgdex": "pop6-17",
+      "tcgplayer": [
+        90072
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/pop6/17_hires.png",
+      "small": "https://images.pokemontcg.io/pop6/17.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "10",
+    "matchStatus": "matched",
+    "name": "Turtwig",
+    "nationalPokedexNumbers": [
+      387
+    ],
+    "number": "17",
+    "rarity": "Common",
+    "resistances": [
+      {
+        "type": "Water",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "pop6",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 277902,
+        "tcgplayerId": 90072,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 277902,
+        "tcgplayerId": 90072,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "+10"
+      }
+    ]
+  }
+]

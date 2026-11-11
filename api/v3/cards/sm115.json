@@ -1,0 +1,5801 @@
+[
+  {
+    "artist": "tetsuya koizumi",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Grass"
+        ],
+        "damage": "10",
+        "name": "Tackle",
+        "text": ""
+      }
+    ],
+    "cardId": "1",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Metapod"
+    ],
+    "flavorText": "Perhaps because it would like to grow up quickly, it has a voracious appetite, eating a hundred leaves a day.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Tackle"
+          }
+        ],
+        "flavorText": "Das nimmersatte Raupy verschlingt 100 Blätter am Tag. Vermutlich strebt es so ein schnelleres Wachstum an.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/1/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/1/low.webp"
+        },
+        "name": "Raupy"
+      }
+    },
+    "id": "sm115-1",
+    "ids": {
+      "cardmarket": [
+        394607
+      ],
+      "pokemontcg": "sm115-1",
+      "tcgdex": "sm115-1",
+      "tcgplayer": [
+        197643
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/1/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/1/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Caterpie",
+    "nationalPokedexNumbers": [
+      10
+    ],
+    "number": "1",
+    "rarity": "Common",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Shibuzoh.",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Grass",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Tackle",
+        "text": ""
+      }
+    ],
+    "cardId": "2",
+    "convertedRetreatCost": 2,
+    "evolvesFrom": "Caterpie",
+    "evolvesTo": [
+      "Butterfree"
+    ],
+    "flavorText": "Its shell is filled with a thick liquid. All of the cells throughout its body are being rebuilt in preparation for evolution.",
+    "hp": "90",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Tackle"
+          }
+        ],
+        "evolvesFrom": "Raupy",
+        "flavorText": "Sein Panzer birgt ein dickflüssiges Inneres. In Vorbereitung auf seine Entwicklung wird seine Zellstruktur vollständig umgestaltet.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/2/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/2/low.webp"
+        },
+        "name": "Safcon"
+      }
+    },
+    "id": "sm115-2",
+    "ids": {
+      "cardmarket": [
+        396592
+      ],
+      "pokemontcg": "sm115-2",
+      "tcgdex": "sm115-2",
+      "tcgplayer": [
+        197644
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/2/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/2/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Metapod",
+    "nationalPokedexNumbers": [
+      11
+    ],
+    "number": "2",
+    "rarity": "Uncommon",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Masakazu Fukuda",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Grass",
+          "Colorless"
+        ],
+        "damage": "80",
+        "name": "Gust",
+        "text": ""
+      }
+    ],
+    "cardId": "3",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Metapod",
+    "flavorText": "Its wings are covered in toxic scales. If it finds bird Pokémon going after Caterpie, Butterfree sprinkles its scales on them to drive them off.",
+    "hp": "130",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Windstoß"
+          }
+        ],
+        "evolvesFrom": "Safcon",
+        "flavorText": "Sieht es ein Raupy, das von Vogel-Pokémon angegriffen wird, schlägt es diese mit seinem hochgiftigen Flügelstaub in die Flucht.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/3/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/3/low.webp"
+        },
+        "name": "Smettbo"
+      }
+    },
+    "id": "sm115-3",
+    "ids": {
+      "cardmarket": [
+        394797
+      ],
+      "pokemontcg": "sm115-3",
+      "tcgdex": "sm115-3",
+      "tcgplayer": [
+        197645
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/3/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/3/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Butterfree",
+    "nationalPokedexNumbers": [
+      12
+    ],
+    "number": "3",
+    "rarity": "Rare",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 2"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "OOYAMA",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "10",
+        "name": "Scratch",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Grass",
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Slash",
+        "text": ""
+      }
+    ],
+    "cardId": "4",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Parasect"
+    ],
+    "flavorText": "Whether it's due to a lack of moisture or a lack of nutrients, in Alola the mushrooms on Paras don't grow up quite right.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Kratzer"
+          },
+          {
+            "name": "Schlitzer"
+          }
+        ],
+        "flavorText": "In Alola sind Paras’ Pilze etwas unterentwickelt. Vielleicht mangelt es ihm hier an Feuchtigkeit oder Nährstoffen.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/4/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/4/low.webp"
+        },
+        "name": "Paras"
+      }
+    },
+    "id": "sm115-4",
+    "ids": {
+      "cardmarket": [
+        394687
+      ],
+      "pokemontcg": "sm115-4",
+      "tcgdex": "sm115-4",
+      "tcgplayer": [
+        197646
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/4/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/4/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Paras",
+    "nationalPokedexNumbers": [
+      46
+    ],
+    "number": "4",
+    "rarity": "Common",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Hasuno",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Grass"
+        ],
+        "damage": "10",
+        "name": "Slash",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Grass",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Sharp Scythe",
+        "text": ""
+      }
+    ],
+    "cardId": "5",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Scizor"
+    ],
+    "flavorText": "Its two sharp scythes are more than just weapons. It uses them with dexterity to dress its prey before eating.",
+    "hp": "100",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Schlitzer"
+          },
+          {
+            "name": "Scharfe Sense"
+          }
+        ],
+        "flavorText": "Seine scharfen Sicheln sind nicht nur Waffen. Vor einer Mahlzeit filetiert es damit auch geschickt seine Beute.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/5/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/5/low.webp"
+        },
+        "name": "Sichlor"
+      }
+    },
+    "id": "sm115-5",
+    "ids": {
+      "cardmarket": [
+        394672
+      ],
+      "pokemontcg": "sm115-5",
+      "tcgdex": "sm115-5",
+      "tcgplayer": [
+        197647
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/5/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/5/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Scyther",
+    "nationalPokedexNumbers": [
+      123
+    ],
+    "number": "5",
+    "rarity": "Uncommon",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "5ban Graphics",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Grass",
+          "Grass",
+          "Colorless"
+        ],
+        "damage": "110",
+        "name": "Superpowered Horns",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Grass",
+          "Grass",
+          "Colorless"
+        ],
+        "damage": "160",
+        "name": "Guillotine-GX",
+        "text": "(You can't use more than 1 GX attack in a game.)"
+      }
+    ],
+    "cardId": "6",
+    "convertedRetreatCost": 2,
+    "hp": "180",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Superstarke Hörner"
+          },
+          {
+            "name": "Guillotine-GX",
+            "text": "(Du kannst pro Spiel nur 1 GX-Attacke einsetzen.)"
+          }
+        ],
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/6/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/6/low.webp"
+        },
+        "name": "Pinsir-GX"
+      }
+    },
+    "id": "sm115-6",
+    "ids": {
+      "cardmarket": [
+        394787
+      ],
+      "pokemontcg": "sm115-6",
+      "tcgdex": "sm115-6",
+      "tcgplayer": [
+        197648
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/6/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/6/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Pinsir-GX",
+    "nationalPokedexNumbers": [
+      127
+    ],
+    "number": "6",
+    "rarity": "Rare Holo GX",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "rules": [
+      "Pokémon-GX rule: When your Pokémon-GX is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic",
+      "GX"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Megumi Mizutani",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Fire"
+        ],
+        "damage": "10",
+        "name": "Gnaw",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Fire",
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Flare",
+        "text": ""
+      }
+    ],
+    "cardId": "7",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Charmeleon"
+    ],
+    "flavorText": "The flame on its tail indicates Charmander's life force. If it is healthy, the flame burns brightly.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Nagen"
+          },
+          {
+            "name": "Flackern"
+          }
+        ],
+        "flavorText": "Die Flamme auf seiner Schweifspitze zeigt die Lebensenergie an. Ist es gesund, leuchtet sie hell.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/7/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/7/low.webp"
+        },
+        "name": "Glumanda"
+      }
+    },
+    "id": "sm115-7",
+    "ids": {
+      "cardmarket": [
+        394692
+      ],
+      "pokemontcg": "sm115-7",
+      "tcgdex": "sm115-7",
+      "tcgplayer": [
+        197649
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/7/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/7/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Charmander",
+    "nationalPokedexNumbers": [
+      4
+    ],
+    "number": "7",
+    "rarity": "Common",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fire"
+    ],
+    "weaknesses": [
+      {
+        "type": "Water",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Shin Nagasawa",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Fire",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Slash",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Fire",
+          "Fire",
+          "Colorless"
+        ],
+        "damage": "80",
+        "name": "Flamethrower",
+        "text": ""
+      }
+    ],
+    "cardId": "8",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Charmander",
+    "evolvesTo": [
+      "Charizard"
+    ],
+    "flavorText": "It lashes about with its tail to knock down its foe. It then tears up the fallen opponent with sharp claws.",
+    "hp": "100",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Schlitzer"
+          },
+          {
+            "name": "Flammenwurf"
+          }
+        ],
+        "evolvesFrom": "Glumanda",
+        "flavorText": "Es schlägt im Kampf mit seinem Schwanz nach seinen Gegnern. Anschließend zerfetzt es die Gegner mit seinen scharfen Klauen.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/8/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/8/low.webp"
+        },
+        "name": "Glutexo"
+      }
+    },
+    "id": "sm115-8",
+    "ids": {
+      "cardmarket": [
+        394802
+      ],
+      "pokemontcg": "sm115-8",
+      "tcgdex": "sm115-8",
+      "tcgplayer": [
+        197650
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/8/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/8/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Charmeleon",
+    "nationalPokedexNumbers": [
+      5
+    ],
+    "number": "8",
+    "rarity": "Uncommon",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fire"
+    ],
+    "weaknesses": [
+      {
+        "type": "Water",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "aky CG Works",
+    "attacks": [
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Fire",
+          "Fire",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "140",
+        "name": "Flamethrower",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Fire",
+          "Fire",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "300",
+        "name": "Flare Blitz-GX",
+        "text": "(You can't use more than 1 GX attack in a game.)"
+      }
+    ],
+    "cardId": "9",
+    "convertedRetreatCost": 3,
+    "evolvesFrom": "Charmeleon",
+    "hp": "250",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Flammenwurf"
+          },
+          {
+            "name": "Flammenblitz-GX",
+            "text": "(Du kannst pro Spiel nur 1 GX-Attacke einsetzen.)"
+          }
+        ],
+        "evolvesFrom": "Glutexo",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/9/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/9/low.webp"
+        },
+        "name": "Glurak-GX"
+      }
+    },
+    "id": "sm115-9",
+    "ids": {
+      "cardmarket": [
+        381243
+      ],
+      "pokemontcg": "sm115-9",
+      "tcgdex": "sm115-9",
+      "tcgplayer": [
+        197651
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/9/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/9/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Charizard-GX",
+    "nationalPokedexNumbers": [
+      6
+    ],
+    "number": "9",
+    "rarity": "Rare Holo GX",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "rules": [
+      "Pokémon-GX rule: When your Pokémon-GX is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 2",
+      "GX"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fire"
+    ],
+    "weaknesses": [
+      {
+        "type": "Water",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Satoshi Shirai",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Fire",
+          "Fire"
+        ],
+        "damage": "50",
+        "name": "Fire Punch",
+        "text": ""
+      }
+    ],
+    "cardId": "10",
+    "convertedRetreatCost": 2,
+    "evolvesTo": [
+      "Magmortar"
+    ],
+    "flavorText": "Its entire body is burning. When it breathes, the temperature rises. When it sneezes, flames shoot out!",
+    "hp": "90",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Feuerschlag"
+          }
+        ],
+        "flavorText": "Mit seinem brennenden Körper und glühenden Atem heizt es seine Umgebung auf. Beim Niesen stößt es Flammen aus.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/10/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/10/low.webp"
+        },
+        "name": "Magmar"
+      }
+    },
+    "id": "sm115-10",
+    "ids": {
+      "cardmarket": [
+        394822
+      ],
+      "pokemontcg": "sm115-10",
+      "tcgdex": "sm115-10",
+      "tcgplayer": [
+        197652
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/10/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/10/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Magmar",
+    "nationalPokedexNumbers": [
+      126
+    ],
+    "number": "10",
+    "rarity": "Uncommon",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fire"
+    ],
+    "weaknesses": [
+      {
+        "type": "Water",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "nagimiso",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Water"
+        ],
+        "damage": "20",
+        "name": "Headache",
+        "text": ""
+      }
+    ],
+    "cardId": "11",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Golduck"
+    ],
+    "flavorText": "Using psychokinesis gives it a headache, so it normally passes the time spacing out and doing as little as possible.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Kopfweh"
+          }
+        ],
+        "flavorText": "Wenn es seine Psycho-Kräfte einsetzt, bekommt es Kopfschmerzen. Deshalb steht es lieber untätig und geistesabwesend herum.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/11/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/11/low.webp"
+        },
+        "name": "Enton"
+      }
+    },
+    "id": "sm115-11",
+    "ids": {
+      "cardmarket": [
+        394772
+      ],
+      "pokemontcg": "sm115-11",
+      "tcgdex": "sm115-11",
+      "tcgplayer": [
+        197653
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/11/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/11/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Psyduck",
+    "nationalPokedexNumbers": [
+      54
+    ],
+    "number": "11",
+    "rarity": "Common",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "weaknesses": [
+      {
+        "type": "Grass",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Misa Tsutsui",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Yawn",
+        "text": "Your opponent's Active Pokémon is now Asleep."
+      }
+    ],
+    "cardId": "12",
+    "convertedRetreatCost": 2,
+    "evolvesTo": [
+      "Slowbro",
+      "Slowking"
+    ],
+    "flavorText": "Alolan home cooking involves drying Slowpoke tails and then simmering them into a salty stew.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Gähner",
+            "text": "Das Aktive Pokémon deines Gegners schläft jetzt."
+          }
+        ],
+        "flavorText": "In Alola bereiten viele Familien Flegmon-Ruten zu, indem sie diese zuerst trocknen und dann in Salzwasser kochen.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/12/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/12/low.webp"
+        },
+        "name": "Flegmon"
+      }
+    },
+    "id": "sm115-12",
+    "ids": {
+      "cardmarket": [
+        394662
+      ],
+      "pokemontcg": "sm115-12",
+      "tcgdex": "sm115-12",
+      "tcgplayer": [
+        197654
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/12/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/12/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Slowpoke",
+    "nationalPokedexNumbers": [
+      79
+    ],
+    "number": "12",
+    "rarity": "Common",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "weaknesses": [
+      {
+        "type": "Grass",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Ken Sugimori",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "10",
+        "name": "Numbing Water",
+        "text": "Flip a coin. If heads, your opponent's Active Pokémon is now Paralyzed."
+      }
+    ],
+    "cardId": "13",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Starmie"
+    ],
+    "flavorText": "In many places, there are folktales of stardust falling into the ocean and becoming Staryu.",
+    "hp": "50",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Betäubendes Wasser",
+            "text": "Wirf 1 Münze. Bei Kopf ist das Aktive Pokémon deines Gegners jetzt paralysiert."
+          }
+        ],
+        "flavorText": "Einer weitverbreiteten Volkssage zufolge ist Sterndu aus Sternennebel entstanden, der ins Meer gefallen war.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/13/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/13/low.webp"
+        },
+        "name": "Sterndu"
+      }
+    },
+    "id": "sm115-13",
+    "ids": {
+      "cardmarket": [
+        394777
+      ],
+      "pokemontcg": "sm115-13",
+      "tcgdex": "sm115-13",
+      "tcgplayer": [
+        197657
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/13/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/13/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Staryu",
+    "nationalPokedexNumbers": [
+      120
+    ],
+    "number": "13",
+    "rarity": "Common",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "weaknesses": [
+      {
+        "type": "Grass",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "PLANETA Otani",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Water"
+        ],
+        "damage": "40",
+        "name": "Star Stream",
+        "text": "Attach 2 Water Energy cards from your discard pile to 1 of your Pokémon."
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "100",
+        "name": "Spinning Attack",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "40+",
+        "name": "Hydro Pump-GX",
+        "text": "This attack does 40 more damage times the amount of Water Energy attached to this Pokémon. (You can't use more than 1 GX attack in a game.)"
+      }
+    ],
+    "cardId": "14",
+    "convertedRetreatCost": 0,
+    "evolvesFrom": "Staryu",
+    "hp": "190",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Sternenfluss",
+            "text": "Lege 2 {W}-Energiekarten aus deinem Ablagestapel an 1 deiner Pokémon an."
+          },
+          {
+            "name": "Rundumangriff"
+          },
+          {
+            "name": "Hydropumpe-GX",
+            "text": "Diese Attacke fügt 40 Schadenspunkte mehr mal der Anzahl der an dieses Pokémon angelegten {W}-Energien zu. (Du kannst pro Spiel nur 1 GX-Attacke einsetzen.)"
+          }
+        ],
+        "evolvesFrom": "Sterndu",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/14/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/14/low.webp"
+        },
+        "name": "Starmie-GX"
+      }
+    },
+    "id": "sm115-14",
+    "ids": {
+      "cardmarket": [
+        396597
+      ],
+      "pokemontcg": "sm115-14",
+      "tcgdex": "sm115-14",
+      "tcgplayer": [
+        197658
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/14/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/14/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Starmie-GX",
+    "nationalPokedexNumbers": [
+      121
+    ],
+    "number": "14",
+    "rarity": "Rare Holo GX",
+    "rules": [
+      "Pokémon-GX rule: When your Pokémon-GX is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1",
+      "GX"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "weaknesses": [
+      {
+        "type": "Grass",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Shigenori Negishi",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "10",
+        "name": "Splash",
+        "text": ""
+      }
+    ],
+    "cardId": "15",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Gyarados"
+    ],
+    "flavorText": "In the distant past, they were fairly strong, but they have become gradually weaker over time.",
+    "hp": "30",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Platscher"
+          }
+        ],
+        "flavorText": "Vor langer, langer Zeit war es anscheinend ziemlich stark, doch es wurde zusehends schwächer und schwächer.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/15/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/15/low.webp"
+        },
+        "name": "Karpador"
+      }
+    },
+    "id": "sm115-15",
+    "ids": {
+      "cardmarket": [
+        394732
+      ],
+      "pokemontcg": "sm115-15",
+      "tcgdex": "sm115-15",
+      "tcgplayer": [
+        197659
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/15/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/15/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Magikarp",
+    "nationalPokedexNumbers": [
+      129
+    ],
+    "number": "15",
+    "rarity": "Common",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "5ban Graphics",
+    "attacks": [
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Water",
+          "Water",
+          "Water",
+          "Colorless"
+        ],
+        "damage": "130",
+        "name": "Dragon Rage",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Water",
+          "Water",
+          "Water",
+          "Colorless"
+        ],
+        "damage": "240",
+        "name": "Hyper Beam-GX",
+        "text": "(You can't use more than 1 GX attack in a game.)"
+      }
+    ],
+    "cardId": "16",
+    "convertedRetreatCost": 3,
+    "evolvesFrom": "Magikarp",
+    "hp": "230",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Drachenwut"
+          },
+          {
+            "name": "Hyperstrahl-GX",
+            "text": "(Du kannst pro Spiel nur 1 GX-Attacke einsetzen.)"
+          }
+        ],
+        "evolvesFrom": "Karpador",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/16/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/16/low.webp"
+        },
+        "name": "Garados-GX"
+      }
+    },
+    "id": "sm115-16",
+    "ids": {
+      "cardmarket": [
+        396602
+      ],
+      "pokemontcg": "sm115-16",
+      "tcgdex": "sm115-16",
+      "tcgplayer": [
+        197660
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/16/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/16/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Gyarados-GX",
+    "nationalPokedexNumbers": [
+      130
+    ],
+    "number": "16",
+    "rarity": "Rare Holo GX",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "rules": [
+      "Pokémon-GX rule: When your Pokémon-GX is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1",
+      "GX"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "kodama",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Water",
+          "Water",
+          "Colorless"
+        ],
+        "damage": "80",
+        "name": "Aqua Wave",
+        "text": ""
+      }
+    ],
+    "cardId": "17",
+    "convertedRetreatCost": 2,
+    "flavorText": "It likes swimming around with people on its back. In the Alola region, it's an important means of transportation over water.",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Aquawoge"
+          }
+        ],
+        "flavorText": "Da es liebend gerne beim Schwimmen Menschen auf seinem Rücken trägt, gilt es in Alola als bedeutendes Transportmittel.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/17/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/17/low.webp"
+        },
+        "name": "Lapras"
+      }
+    },
+    "id": "sm115-17",
+    "ids": {
+      "cardmarket": [
+        394702
+      ],
+      "pokemontcg": "sm115-17",
+      "tcgdex": "sm115-17",
+      "tcgplayer": [
+        197661
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/17/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/17/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Lapras",
+    "nationalPokedexNumbers": [
+      131
+    ],
+    "number": "17",
+    "rarity": "Rare",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "weaknesses": [
+      {
+        "type": "Grass",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Masakazu Fukuda",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Water",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Water Gun",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Water",
+          "Water",
+          "Colorless"
+        ],
+        "damage": "80",
+        "name": "Bubble Drain",
+        "text": "Heal 30 damage from this Pokémon."
+      }
+    ],
+    "cardId": "18",
+    "convertedRetreatCost": 3,
+    "evolvesFrom": "Eevee",
+    "flavorText": "Clean, clear waters are its usual habitat. When it's about to be attacked by an invading enemy, it dives into the water to hide.",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Aquaknarre"
+          },
+          {
+            "name": "Blasengully",
+            "text": "Heile 30 Schadenspunkte bei diesem Pokémon."
+          }
+        ],
+        "evolvesFrom": "Evoli",
+        "flavorText": "Es lebt meist an klaren Gewässern. Wittert es einen feindlichen Angriff, verschwindet es ins Wasser und macht sich unsichtbar.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/18/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/18/low.webp"
+        },
+        "name": "Aquana"
+      }
+    },
+    "id": "sm115-18",
+    "ids": {
+      "cardmarket": [
+        396607
+      ],
+      "pokemontcg": "sm115-18",
+      "tcgdex": "sm115-18",
+      "tcgplayer": [
+        197662
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/18/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/18/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Vaporeon",
+    "nationalPokedexNumbers": [
+      134
+    ],
+    "number": "18",
+    "rarity": "Rare Holo",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "weaknesses": [
+      {
+        "type": "Grass",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Kagemaru Himeno",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Lightning"
+        ],
+        "damage": "10",
+        "name": "Quick Attack",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Lightning",
+          "Lightning",
+          "Colorless"
+        ],
+        "damage": "60",
+        "name": "Electro Ball",
+        "text": ""
+      }
+    ],
+    "cardId": "19",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Raichu"
+    ],
+    "flavorText": "Its nature is to store up electricity. Forests where nests of Pikachu live are dangerous, since the trees are so often struck by lightning.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Ruckzuckhieb"
+          },
+          {
+            "name": "Elektroball"
+          }
+        ],
+        "flavorText": "Es liegt in seiner Natur, konstant Elektrizität zu speichern. Die Wälder, in denen Pikachu leben, bergen stets die Gefahr eines Blitzgewitters.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/19/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/19/low.webp"
+        },
+        "name": "Pikachu"
+      }
+    },
+    "id": "sm115-19",
+    "ids": {
+      "cardmarket": [
+        394592
+      ],
+      "pokemontcg": "sm115-19",
+      "tcgdex": "sm115-19",
+      "tcgplayer": [
+        197663
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/19/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/19/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Pikachu",
+    "nationalPokedexNumbers": [
+      25
+    ],
+    "number": "19",
+    "rarity": "Common",
+    "resistances": [
+      {
+        "type": "Metal",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "5ban Graphics",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Lightning",
+          "Lightning",
+          "Colorless"
+        ],
+        "damage": "120",
+        "name": "Thunderbolt",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Lightning",
+          "Lightning",
+          "Colorless"
+        ],
+        "damage": "200",
+        "name": "Spark Ball-GX",
+        "text": "(You can't use more than 1 GX attack in a game.)"
+      }
+    ],
+    "cardId": "20",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Pikachu",
+    "hp": "210",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Donnerblitz"
+          },
+          {
+            "name": "Zündball-GX",
+            "text": "(Du kannst pro Spiel nur 1 GX-Attacke einsetzen.)"
+          }
+        ],
+        "evolvesFrom": "Pikachu",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/20/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/20/low.webp"
+        },
+        "name": "Raichu-GX"
+      }
+    },
+    "id": "sm115-20",
+    "ids": {
+      "cardmarket": [
+        396612
+      ],
+      "pokemontcg": "sm115-20",
+      "tcgdex": "sm115-20",
+      "tcgplayer": [
+        197664
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/20/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/20/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Raichu-GX",
+    "nationalPokedexNumbers": [
+      26
+    ],
+    "number": "20",
+    "rarity": "Rare Holo GX",
+    "resistances": [
+      {
+        "type": "Metal",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "rules": [
+      "Pokémon-GX rule: When your Pokémon-GX is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1",
+      "GX"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "SATOSHI NAKAI",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Lightning"
+        ],
+        "damage": "20",
+        "name": "Lightning Ball",
+        "text": ""
+      }
+    ],
+    "cardId": "21",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Electrode"
+    ],
+    "flavorText": "It was discovered when Poké Balls were introduced. It is said that there is some connection.",
+    "hp": "50",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Kugelblitz"
+          }
+        ],
+        "flavorText": "Es wurde entdeckt, als man Pokébälle einführte. Es scheint, als gäbe es da einen Zusammenhang.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/21/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/21/low.webp"
+        },
+        "name": "Voltobal"
+      }
+    },
+    "id": "sm115-21",
+    "ids": {
+      "cardmarket": [
+        394642
+      ],
+      "pokemontcg": "sm115-21",
+      "tcgdex": "sm115-21",
+      "tcgplayer": [
+        197665
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/21/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/21/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Voltorb",
+    "nationalPokedexNumbers": [
+      100
+    ],
+    "number": "21",
+    "rarity": "Common",
+    "resistances": [
+      {
+        "type": "Metal",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Anesaki Dynamic",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Lightning"
+        ],
+        "damage": "30",
+        "name": "Lightning Ball",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Lightning",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "60+",
+        "name": "Electroblast",
+        "text": "Flip 2 coins. This attack does 30 more damage for each heads."
+      }
+    ],
+    "cardId": "22",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Voltorb",
+    "flavorText": "It explodes in response to even minor stimuli. It is feared, with the nickname of \"The Bomb Ball.\"",
+    "hp": "100",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Kugelblitz"
+          },
+          {
+            "name": "Elektrokracher",
+            "text": "Wirf 2 Münzen. Diese Attacke fügt 30 Schadenspunkte mehr pro Kopf zu."
+          }
+        ],
+        "evolvesFrom": "Voltobal",
+        "flavorText": "Es explodiert schon bei kleinsten Reizen. Sein Spitzname „Die Bombenkugel“ spiegelt die Furcht der Menschen wider.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/22/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/22/low.webp"
+        },
+        "name": "Lektrobal"
+      }
+    },
+    "id": "sm115-22",
+    "ids": {
+      "cardmarket": [
+        394782
+      ],
+      "pokemontcg": "sm115-22",
+      "tcgdex": "sm115-22",
+      "tcgplayer": [
+        197666
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/22/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/22/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Electrode",
+    "nationalPokedexNumbers": [
+      101
+    ],
+    "number": "22",
+    "rarity": "Rare",
+    "resistances": [
+      {
+        "type": "Metal",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Electromagnetic Wall",
+        "text": "As long as this Pokémon is your Active Pokémon, whenever your opponent attaches an Energy card from their hand to 1 of their Pokémon, put 2 damage counters on that Pokémon.",
+        "type": "Ability"
+      }
+    ],
+    "artist": "Kouki Saitou",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Lightning",
+          "Colorless"
+        ],
+        "damage": "90",
+        "name": "Thunderbolt",
+        "text": "Discard all Energy from this Pokémon."
+      }
+    ],
+    "cardId": "23",
+    "convertedRetreatCost": 0,
+    "evolvesFrom": "Eevee",
+    "flavorText": "Its lungs contain an organ that creates electricity. The crackling sound of electricity can be heard when it exhales.",
+    "hp": "90",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Elektromagnetischer Wall",
+            "text": "Solang dieses Pokémon dein Aktives Pokémon ist, lege jedes Mal, wenn dein Gegner 1 Energiekarte aus seiner Hand an 1 seiner Pokémon anlegt, 2 Schadensmarken auf jenes Pokémon."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Donnerblitz",
+            "text": "Lege alle Energien von diesem Pokémon auf deinen Ablagestapel."
+          }
+        ],
+        "evolvesFrom": "Evoli",
+        "flavorText": "Blitza verfügt über ein Organ in der Lunge, das Elektrizität erzeugt. Wenn dieses Pokémon ausatmet, hört man ein elektrisches Knistern.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/23/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/23/low.webp"
+        },
+        "name": "Blitza"
+      }
+    },
+    "id": "sm115-23",
+    "ids": {
+      "cardmarket": [
+        396622
+      ],
+      "pokemontcg": "sm115-23",
+      "tcgdex": "sm115-23",
+      "tcgplayer": [
+        197667
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/23/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/23/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Jolteon",
+    "nationalPokedexNumbers": [
+      135
+    ],
+    "number": "23",
+    "rarity": "Rare",
+    "resistances": [
+      {
+        "type": "Metal",
+        "value": "-20"
+      }
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Shin Nagasawa",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Hurricane Call",
+        "text": "Flip 4 coins. For each heads, search your deck for a Lightning Energy card and attach it to 1 of your Pokémon-GX or Pokémon-EX. Then, shuffle your deck."
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Lightning",
+          "Lightning",
+          "Colorless"
+        ],
+        "damage": "100",
+        "name": "Sky-High Claws",
+        "text": ""
+      }
+    ],
+    "cardId": "24",
+    "convertedRetreatCost": 2,
+    "flavorText": "A legendary bird Pokémon that is said to appear from clouds while dropping enormous lightning bolts.",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Sturmruf",
+            "text": "Wirf 4 Münzen. Durchsuche pro Kopf dein Deck nach 1 {L}-Energiekarte und lege sie an 1 deiner Pokémon-GX oder Pokémon-EX an. Mische anschließend dein Deck."
+          },
+          {
+            "name": "Himmelhohe Klauen"
+          }
+        ],
+        "flavorText": "Ein Legendäres Vogel-Pokémon, das im Sturzflug aus den Wolken bricht und Blitze schleudert.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/24/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/24/low.webp"
+        },
+        "name": "Zapdos"
+      }
+    },
+    "id": "sm115-24",
+    "ids": {
+      "cardmarket": [
+        394747
+      ],
+      "pokemontcg": "sm115-24",
+      "tcgdex": "sm115-24",
+      "tcgplayer": [
+        197668
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/24/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/24/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Zapdos",
+    "nationalPokedexNumbers": [
+      145
+    ],
+    "number": "24",
+    "rarity": "Rare Holo",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "MAHOU",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Psychic"
+        ],
+        "damage": "10",
+        "name": "Wrap",
+        "text": "Flip a coin. If heads, discard an Energy from your opponent's Active Pokémon."
+      }
+    ],
+    "cardId": "25",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Arbok"
+    ],
+    "flavorText": "By dislocating its jaw, it can swallow prey larger than itself. After a meal, it curls up and rests.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Wickel",
+            "text": "Wirf 1 Münze. Lege bei Kopf 1 Energie vom Aktiven Pokémon deines Gegners auf seinen Ablagestapel."
+          }
+        ],
+        "flavorText": "Es hängt seinen Kiefer aus und verschlingt so selbst größere Beute am Stück. Danach rollt es sich zusammen und ruht sich aus.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/25/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/25/low.webp"
+        },
+        "name": "Rettan"
+      }
+    },
+    "id": "sm115-25",
+    "ids": {
+      "cardmarket": [
+        394722
+      ],
+      "pokemontcg": "sm115-25",
+      "tcgdex": "sm115-25",
+      "tcgplayer": [
+        197669
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/25/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/25/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Ekans",
+    "nationalPokedexNumbers": [
+      23
+    ],
+    "number": "25",
+    "rarity": "Common",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Masakazu Fukuda",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Tail Whap",
+        "text": ""
+      }
+    ],
+    "cardId": "26",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Arbok"
+    ],
+    "flavorText": "By dislocating its jaw, it can swallow prey larger than itself. After a meal, it curls up and rests.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Schweifvertrimmer"
+          }
+        ],
+        "flavorText": "Es hängt seinen Kiefer aus und verschlingt so selbst größere Beute am Stück. Danach rollt es sich zusammen und ruht sich aus.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/26/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/26/low.webp"
+        },
+        "name": "Rettan"
+      }
+    },
+    "id": "sm115-26",
+    "ids": {
+      "cardmarket": [
+        394767
+      ],
+      "pokemontcg": "sm115-26",
+      "tcgdex": "sm115-26",
+      "tcgplayer": [
+        197670
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/26/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/26/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Ekans",
+    "nationalPokedexNumbers": [
+      23
+    ],
+    "number": "26",
+    "rarity": "Common",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Last Pattern",
+        "text": "If this Pokémon is Knocked Out by damage from an opponent's attack, discard 2 random cards from your opponent's hand.",
+        "type": "Ability"
+      }
+    ],
+    "artist": "kirisAki",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Psychic",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "50+",
+        "name": "Rocket Tail",
+        "text": "If Jessie & James is in your discard pile, this attack does 80 more damage."
+      }
+    ],
+    "cardId": "27",
+    "convertedRetreatCost": 2,
+    "evolvesFrom": "Ekans",
+    "flavorText": "The latest research has determined that there are over 20 possible arrangements of the patterns on its stomach.",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Letztes Muster",
+            "text": "Wenn dieses Pokémon durch Schaden einer Attacke deines Gegners kampfunfähig wird, lege 2 zufällige Karten aus der Hand deines Gegners auf seinen Ablagestapel."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Rocket-Schweif",
+            "text": "Wenn sich Jessie & James in deinem Ablagestapel befindet, fügt diese Attacke 80 Schadenspunkte mehr zu."
+          }
+        ],
+        "evolvesFrom": "Rettan",
+        "flavorText": "Jüngsten Forschungsergebnissen zufolge gibt es mehr als 20 verschiedene Musterungen, die Arboks Bauch aufweisen kann.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/27/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/27/low.webp"
+        },
+        "name": "Arbok"
+      }
+    },
+    "id": "sm115-27",
+    "ids": {
+      "cardmarket": [
+        381231
+      ],
+      "pokemontcg": "sm115-27",
+      "tcgdex": "sm115-27",
+      "tcgplayer": [
+        197671
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/27/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/27/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Arbok",
+    "nationalPokedexNumbers": [
+      24
+    ],
+    "number": "27",
+    "rarity": "Rare",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Saya Tsuruta",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Tackle",
+        "text": ""
+      }
+    ],
+    "cardId": "28",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Weezing"
+    ],
+    "flavorText": "Its thin, balloon-like body is inflated by horribly toxic gases. It reeks when it is nearby.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Tackle"
+          }
+        ],
+        "flavorText": "Sein dünner, ballonartiger Körper ist mit schrecklichem Giftgas gefüllt. Es verbreitet einen heftigen Gestank, wenn es in der Nähe ist.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/28/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/28/low.webp"
+        },
+        "name": "Smogon"
+      }
+    },
+    "id": "sm115-28",
+    "ids": {
+      "cardmarket": [
+        394762
+      ],
+      "pokemontcg": "sm115-28",
+      "tcgdex": "sm115-28",
+      "tcgplayer": [
+        197672
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/28/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/28/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Koffing",
+    "nationalPokedexNumbers": [
+      109
+    ],
+    "number": "28",
+    "rarity": "Common",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Surrender Now",
+        "text": "Once during your turn, if this Pokémon is discarded with the effect of Jessie & James, you may have your opponent discard a card from their hand. (They discard that card after the effect of Jessie & James.)",
+        "type": "Ability"
+      }
+    ],
+    "artist": "Hideki Ishikawa",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "40",
+        "name": "Tackle",
+        "text": ""
+      }
+    ],
+    "cardId": "29",
+    "convertedRetreatCost": 3,
+    "evolvesFrom": "Koffing",
+    "flavorText": "If one of the twin Koffing inflates, the other one deflates. It constantly mixes its poisonous gases.",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Gib lieber auf",
+            "text": "Einmal während deines Zuges, wenn dieses Pokémon durch den Effekt von Jessie & James auf deinen Ablagestapel gelegt wird, kannst du deinen Gegner dazu veranlassen, 1 Karte aus seiner Hand auf seinen Ablagestapel zu legen. (Er legt jene Karte nach dem Effekt von Jessie & James auf seinen Ablagestapel.)"
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Tackle"
+          }
+        ],
+        "evolvesFrom": "Smogon",
+        "flavorText": "Pumpt sich eines der zwei Smogon auf, lässt das andere Luft ab. So findet ein Giftgasaustausch statt.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/29/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/29/low.webp"
+        },
+        "name": "Smogmog"
+      }
+    },
+    "id": "sm115-29",
+    "ids": {
+      "cardmarket": [
+        381228
+      ],
+      "pokemontcg": "sm115-29",
+      "tcgdex": "sm115-29",
+      "tcgplayer": [
+        197673
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/29/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/29/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Weezing",
+    "nationalPokedexNumbers": [
+      110
+    ],
+    "number": "29",
+    "rarity": "Rare",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Kouki Saitou",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Psychic"
+        ],
+        "damage": "10",
+        "name": "Slap",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Psychic",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Lovely Kiss",
+        "text": ""
+      }
+    ],
+    "cardId": "30",
+    "convertedRetreatCost": 1,
+    "flavorText": "It sways its hips to a rhythm all its own. The precise movements of Jynx living in Alola are truly wonderful.",
+    "hp": "100",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Hieb"
+          },
+          {
+            "name": "Todeskuss"
+          }
+        ],
+        "flavorText": "Es bewegt seine Hüften in einem eigentümlichen Rhythmus. Rossana in Alola beherrschen einen besonders anmutigen Hüftschwung.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/30/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/30/low.webp"
+        },
+        "name": "Rossana"
+      }
+    },
+    "id": "sm115-30",
+    "ids": {
+      "cardmarket": [
+        394677
+      ],
+      "pokemontcg": "sm115-30",
+      "tcgdex": "sm115-30",
+      "tcgplayer": [
+        197674
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/30/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/30/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Jynx",
+    "nationalPokedexNumbers": [
+      124
+    ],
+    "number": "30",
+    "rarity": "Uncommon",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "aky CG Works",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Psychic",
+          "Psychic",
+          "Colorless"
+        ],
+        "damage": "110",
+        "name": "Super Psy Bolt",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Psychic",
+          "Psychic",
+          "Colorless"
+        ],
+        "damage": "120",
+        "name": "Psycrush-GX",
+        "text": "Discard all Energy from your opponent's Active Pokémon. (You can't use more than 1 GX attack in a game.)"
+      }
+    ],
+    "cardId": "31",
+    "convertedRetreatCost": 2,
+    "hp": "180",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Super-Psischlag"
+          },
+          {
+            "name": "Psibrecher-GX",
+            "text": "Lege alle Energien vom Aktiven Pokémon deines Gegners auf seinen Ablagestapel. (Du kannst pro Spiel nur 1 GX-Attacke einsetzen.)"
+          }
+        ],
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/31/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/31/low.webp"
+        },
+        "name": "Mewtu-GX"
+      }
+    },
+    "id": "sm115-31",
+    "ids": {
+      "cardmarket": [
+        381234
+      ],
+      "pokemontcg": "sm115-31",
+      "tcgdex": "sm115-31",
+      "tcgplayer": [
+        197675
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/31/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/31/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Mewtwo-GX",
+    "nationalPokedexNumbers": [
+      150
+    ],
+    "number": "31",
+    "rarity": "Rare Holo GX",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "rules": [
+      "Pokémon-GX rule: When your Pokémon-GX is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic",
+      "GX"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Atsuko Nishida",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Psychic",
+          "Psychic"
+        ],
+        "damage": "50",
+        "name": "Psyshot",
+        "text": ""
+      }
+    ],
+    "cardId": "32",
+    "convertedRetreatCost": 1,
+    "flavorText": "Because it can use all kinds of moves, many scientists believe Mew to be the ancestor of Pokémon.",
+    "hp": "80",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Psychoschuss"
+          }
+        ],
+        "flavorText": "Es beherrscht alle möglichen Attacken, daher sieht man in ihm den Vorfahren aller Pokémon.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/32/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/32/low.webp"
+        },
+        "name": "Mew"
+      }
+    },
+    "id": "sm115-32",
+    "ids": {
+      "cardmarket": [
+        394812
+      ],
+      "pokemontcg": "sm115-32",
+      "tcgdex": "sm115-32",
+      "tcgplayer": [
+        197676
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/32/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/32/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Mew",
+    "nationalPokedexNumbers": [
+      151
+    ],
+    "number": "32",
+    "rarity": "Rare",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Ken Sugimori",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "10",
+        "name": "Tackle",
+        "text": ""
+      }
+    ],
+    "cardId": "33",
+    "convertedRetreatCost": 2,
+    "evolvesTo": [
+      "Graveler"
+    ],
+    "flavorText": "Geodude that have lived a long life have had all their edges smoothed out until they're totally round. They also have a calm, quiet disposition.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Tackle"
+          }
+        ],
+        "flavorText": "Mit dem Alter verliert es zunehmend seine Kantigkeit, bis es vollkommen rund und auch charakterlich immer ausgeglichener wird.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/33/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/33/low.webp"
+        },
+        "name": "Kleinstein"
+      }
+    },
+    "id": "sm115-33",
+    "ids": {
+      "cardmarket": [
+        394647
+      ],
+      "pokemontcg": "sm115-33",
+      "tcgdex": "sm115-33",
+      "tcgplayer": [
+        197677
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/33/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/33/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Geodude",
+    "nationalPokedexNumbers": [
+      74
+    ],
+    "number": "33",
+    "rarity": "Common",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "weaknesses": [
+      {
+        "type": "Grass",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Ken Sugimori",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Tackle",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Fighting",
+          "Fighting",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Mudslide",
+        "text": "Discard 2 Fighting Energy from this Pokémon. This attack does 80 damage to 1 of your opponent's Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      }
+    ],
+    "cardId": "34",
+    "convertedRetreatCost": 3,
+    "evolvesFrom": "Geodude",
+    "evolvesTo": [
+      "Golem"
+    ],
+    "flavorText": "It climbs up cliffs as it heads toward the peak of a mountain. As soon as it reaches the summit, it rolls back down the way it came.",
+    "hp": "100",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Tackle"
+          },
+          {
+            "name": "Schlammlawine",
+            "text": "Lege 2 {F}-Energien von diesem Pokémon auf deinen Ablagestapel. Diese Attacke fügt 1 Pokémon deines Gegners 80 Schadenspunkte zu. (Wende Schwäche und Resistenz bei Pokémon auf der Bank nicht an.)"
+          }
+        ],
+        "evolvesFrom": "Kleinstein",
+        "flavorText": "Es klettert Berghänge bis zum Gipfel empor. Einmal oben angekommen, rollt es über den Bergpfad sogleich wieder hinunter.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/34/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/34/low.webp"
+        },
+        "name": "Georok"
+      }
+    },
+    "id": "sm115-34",
+    "ids": {
+      "cardmarket": [
+        394682
+      ],
+      "pokemontcg": "sm115-34",
+      "tcgdex": "sm115-34",
+      "tcgplayer": [
+        197678
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/34/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/34/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Graveler",
+    "nationalPokedexNumbers": [
+      75
+    ],
+    "number": "34",
+    "rarity": "Uncommon",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "weaknesses": [
+      {
+        "type": "Grass",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Ken Sugimori",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Fighting",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "60",
+        "name": "Rock Slide",
+        "text": "This attack does 20 damage to 3 of your opponent's Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      },
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Fighting",
+          "Fighting",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "140",
+        "name": "Land Crush",
+        "text": ""
+      }
+    ],
+    "cardId": "35",
+    "convertedRetreatCost": 4,
+    "evolvesFrom": "Graveler",
+    "flavorText": "When Golem grow old, they stop shedding their shells. Those that have lived a long, long time have shells green with moss.",
+    "hp": "170",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Steinhagel",
+            "text": "Diese Attacke fügt 3 Pokémon auf der Bank deines Gegners 20 Schadenspunkte zu. (Wende Schwäche und Resistenz bei Pokémon auf der Bank nicht an.)"
+          },
+          {
+            "name": "Schollenbrecher"
+          }
+        ],
+        "evolvesFrom": "Georok",
+        "flavorText": "Im Alter hört es auf, sich zu häuten. Der Panzer betagter Geowaz ist mit dichtem, grünem Moos bewachsen.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/35/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/35/low.webp"
+        },
+        "name": "Geowaz"
+      }
+    },
+    "id": "sm115-35",
+    "ids": {
+      "cardmarket": [
+        394697
+      ],
+      "pokemontcg": "sm115-35",
+      "tcgdex": "sm115-35",
+      "tcgplayer": [
+        197679
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/35/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/35/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Golem",
+    "nationalPokedexNumbers": [
+      76
+    ],
+    "number": "35",
+    "rarity": "Rare",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 2"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "weaknesses": [
+      {
+        "type": "Grass",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "PLANETA Igarashi",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Fighting"
+        ],
+        "damage": "30",
+        "name": "Bind",
+        "text": "Flip a coin. If heads, your opponent's Active Pokémon is now Paralyzed."
+      },
+      {
+        "convertedEnergyCost": 5,
+        "cost": [
+          "Fighting",
+          "Colorless",
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "150",
+        "name": "Heavy Impact",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 5,
+        "cost": [
+          "Fighting",
+          "Colorless",
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "200",
+        "name": "Rocky Avalanche-GX",
+        "text": "During your opponent's next turn, this Pokémon takes 100 less damage from attacks (after applying Weakness and Resistance). (You can't use more than 1 GX attack in a game.)"
+      }
+    ],
+    "cardId": "36",
+    "convertedRetreatCost": 4,
+    "evolvesTo": [
+      "Steelix"
+    ],
+    "hp": "200",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Klammergriff",
+            "text": "Wirf 1 Münze. Bei Kopf ist das Aktive Pokémon deines Gegners jetzt paralysiert."
+          },
+          {
+            "name": "Schwerer Einschlag"
+          },
+          {
+            "name": "Felslawine-GX",
+            "text": "Während des nächsten Zuges deines Gegners werden diesem Pokémon durch Attacken 100 Schadenspunkte weniger zugefügt (nachdem Schwäche und Resistenz verrechnet wurden). (Du kannst pro Spiel nur 1 GX-Attacke einsetzen.)"
+          }
+        ],
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/36/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/36/low.webp"
+        },
+        "name": "Onix-GX"
+      }
+    },
+    "id": "sm115-36",
+    "ids": {
+      "cardmarket": [
+        396627
+      ],
+      "pokemontcg": "sm115-36",
+      "tcgdex": "sm115-36",
+      "tcgplayer": [
+        197680
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/36/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/36/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Onix-GX",
+    "nationalPokedexNumbers": [
+      95
+    ],
+    "number": "36",
+    "rarity": "Rare Holo GX",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "rules": [
+      "Pokémon-GX rule: When your Pokémon-GX is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic",
+      "GX"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "weaknesses": [
+      {
+        "type": "Grass",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Hasuno",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Sharpshooting",
+        "text": "This attack does 20 damage to 1 of your opponent's Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      }
+    ],
+    "cardId": "37",
+    "convertedRetreatCost": 2,
+    "evolvesTo": [
+      "Marowak"
+    ],
+    "flavorText": "The skull it wears on its head is that of its dead mother. According to some, it will evolve when it comes to terms with the pain of her death.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Scharfschuss",
+            "text": "Diese Attacke fügt 1 Pokémon deines Gegners 20 Schadenspunkte zu. (Wende Schwäche und Resistenz bei Pokémon auf der Bank nicht an.)"
+          }
+        ],
+        "flavorText": "Der Schädel auf seinem Kopf gehörte seiner verstorbenen Mutter. Überwindet es diesen Verlust, setzt angeblich die Entwicklung ein.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/37/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/37/low.webp"
+        },
+        "name": "Tragosso"
+      }
+    },
+    "id": "sm115-37",
+    "ids": {
+      "cardmarket": [
+        394657
+      ],
+      "pokemontcg": "sm115-37",
+      "tcgdex": "sm115-37",
+      "tcgplayer": [
+        197681
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/37/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/37/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Cubone",
+    "nationalPokedexNumbers": [
+      104
+    ],
+    "number": "37",
+    "rarity": "Common",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "weaknesses": [
+      {
+        "type": "Grass",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Saya Tsuruta",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Lead",
+        "text": "Flip a coin. If heads, search your deck for a Supporter card, reveal it, and put it into your hand. Then, shuffle your deck."
+      },
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Fairy"
+        ],
+        "damage": "10",
+        "name": "Pound",
+        "text": ""
+      }
+    ],
+    "cardId": "38",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Clefable"
+    ],
+    "flavorText": "They're popular, but they're rare. Trainers who show them off recklessly may be targeted by thieves.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Führen",
+            "text": "Wirf 1 Münze. Durchsuche bei Kopf dein Deck nach 1 Unterstützerkarte, zeige sie deinem Gegner und nimm sie auf deine Hand. Mische anschließend dein Deck."
+          },
+          {
+            "name": "Pfund"
+          }
+        ],
+        "flavorText": "Dieses beliebte Pokémon hat Seltenheitswert. Wer leichtsinnig damit prahlt, eins zu haben, könnte in das Visier von Dieben geraten.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/38/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/38/low.webp"
+        },
+        "name": "Piepi"
+      }
+    },
+    "id": "sm115-38",
+    "ids": {
+      "cardmarket": [
+        394597
+      ],
+      "pokemontcg": "sm115-38",
+      "tcgdex": "sm115-38",
+      "tcgplayer": [
+        197682
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/38/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/38/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Clefairy",
+    "nationalPokedexNumbers": [
+      35
+    ],
+    "number": "38",
+    "rarity": "Common",
+    "resistances": [
+      {
+        "type": "Darkness",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fairy"
+    ],
+    "weaknesses": [
+      {
+        "type": "Metal",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "kirisAki",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Fairy"
+        ],
+        "damage": "10",
+        "name": "Pound",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Fairy",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Moon Dance",
+        "text": ""
+      }
+    ],
+    "cardId": "39",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Clefable"
+    ],
+    "flavorText": "They're popular, but they're rare. Trainers who show them off recklessly may be targeted by thieves.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Pfund"
+          },
+          {
+            "name": "Mondtanz"
+          }
+        ],
+        "flavorText": "Dieses beliebte Pokémon hat Seltenheitswert. Wer leichtsinnig damit prahlt, eins zu haben, könnte in das Visier von Dieben geraten.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/39/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/39/low.webp"
+        },
+        "name": "Piepi"
+      }
+    },
+    "id": "sm115-39",
+    "ids": {
+      "cardmarket": [
+        394597
+      ],
+      "pokemontcg": "sm115-39",
+      "tcgdex": "sm115-39",
+      "tcgplayer": [
+        197683
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/39/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/39/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Clefairy",
+    "nationalPokedexNumbers": [
+      35
+    ],
+    "number": "39",
+    "rarity": "Common",
+    "resistances": [
+      {
+        "type": "Darkness",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fairy"
+    ],
+    "weaknesses": [
+      {
+        "type": "Metal",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "sui",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Fairy",
+          "Colorless"
+        ],
+        "damage": "40",
+        "name": "Pound",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Fairy",
+          "Fairy",
+          "Colorless"
+        ],
+        "damage": "90",
+        "name": "Moon Impact",
+        "text": ""
+      }
+    ],
+    "cardId": "40",
+    "convertedRetreatCost": 2,
+    "evolvesFrom": "Clefairy",
+    "flavorText": "It can't help but hear a pin drop from over half a mile away, so it lives deep in the mountains where there aren't many people or Pokémon.",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Pfund"
+          },
+          {
+            "name": "Mondeinschlag"
+          }
+        ],
+        "evolvesFrom": "Piepi",
+        "flavorText": "Es hört eine fallende Nadel aus 1 km Entfernung und lebt daher tief in den Bergen, weit weg vom Lärm der Menschen und anderer Pokémon.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/40/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/40/low.webp"
+        },
+        "name": "Pixi"
+      }
+    },
+    "id": "sm115-40",
+    "ids": {
+      "cardmarket": [
+        394667
+      ],
+      "pokemontcg": "sm115-40",
+      "tcgdex": "sm115-40",
+      "tcgplayer": [
+        197684
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/40/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/40/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Clefable",
+    "nationalPokedexNumbers": [
+      36
+    ],
+    "number": "40",
+    "rarity": "Rare",
+    "resistances": [
+      {
+        "type": "Darkness",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fairy"
+    ],
+    "weaknesses": [
+      {
+        "type": "Metal",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Mizue",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Fairy"
+        ],
+        "damage": "10",
+        "name": "Singing Voice",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Fairy",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Rollout",
+        "text": ""
+      }
+    ],
+    "cardId": "41",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Wigglytuff"
+    ],
+    "flavorText": "Recordings of Jigglypuff's strange lullabies can be purchased from department stores. These CDs can be found near the bedding area.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Gesangsstimme"
+          },
+          {
+            "name": "Walzer"
+          }
+        ],
+        "flavorText": "In der Bettenabteilung von Kaufhäusern erhält man auch CDs mit Pummeluffs wundersam einlullendem Gesang.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/41/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/41/low.webp"
+        },
+        "name": "Pummeluff"
+      }
+    },
+    "id": "sm115-41",
+    "ids": {
+      "cardmarket": [
+        394602
+      ],
+      "pokemontcg": "sm115-41",
+      "tcgdex": "sm115-41",
+      "tcgplayer": [
+        197685
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/41/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/41/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Jigglypuff",
+    "nationalPokedexNumbers": [
+      39
+    ],
+    "number": "41",
+    "rarity": "Common",
+    "resistances": [
+      {
+        "type": "Darkness",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fairy"
+    ],
+    "weaknesses": [
+      {
+        "type": "Metal",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "5ban Graphics",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Fairy",
+          "Fairy",
+          "Colorless"
+        ],
+        "damage": "100+",
+        "name": "Rolling Rush",
+        "text": "Flip a coin until you get tails. This attack does 30 more damage for each heads."
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Fairy",
+          "Fairy",
+          "Colorless"
+        ],
+        "damage": "130",
+        "name": "Lovely Star-GX",
+        "text": "Heal all damage from this Pokémon. (You can't use more than 1 GX attack in a game.)"
+      }
+    ],
+    "cardId": "42",
+    "convertedRetreatCost": 2,
+    "evolvesFrom": "Jigglypuff",
+    "hp": "210",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Rollender Ansturm",
+            "text": "Wirf so lang 1 Münze, bis zum ersten Mal das Ergebnis Zahl kommt. Diese Attacke fügt 30 Schadenspunkte mehr pro Kopf zu."
+          },
+          {
+            "name": "Lieblicher Star GX",
+            "text": "Heile allen Schaden bei diesem Pokémon. (Du kannst pro Spiel nur 1 GX-Attacke einsetzen.)"
+          }
+        ],
+        "evolvesFrom": "Pummeluff",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/42/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/42/low.webp"
+        },
+        "name": "Knuddeluff-GX"
+      }
+    },
+    "id": "sm115-42",
+    "ids": {
+      "cardmarket": [
+        396632
+      ],
+      "pokemontcg": "sm115-42",
+      "tcgdex": "sm115-42",
+      "tcgplayer": [
+        197686
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/42/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/42/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Wigglytuff-GX",
+    "nationalPokedexNumbers": [
+      40
+    ],
+    "number": "42",
+    "rarity": "Rare Holo GX",
+    "resistances": [
+      {
+        "type": "Darkness",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "rules": [
+      "Pokémon-GX rule: When your Pokémon-GX is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1",
+      "GX"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fairy"
+    ],
+    "weaknesses": [
+      {
+        "type": "Metal",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Hideki Ishikawa",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Fairy"
+        ],
+        "damage": "",
+        "name": "Happy Mime",
+        "text": "Each player draws a card."
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Fairy",
+          "Fairy"
+        ],
+        "damage": "40×",
+        "name": "Double Slap",
+        "text": "Flip 2 coins. This attack does 40 damage for each heads."
+      }
+    ],
+    "cardId": "43",
+    "convertedRetreatCost": 1,
+    "flavorText": "Its pantomime skills are wonderful. You may become enraptured while watching it, but next thing you know, Mr. Mime has made a real wall.",
+    "hp": "90",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Fröhlicher Pantomime",
+            "text": "Jeder Spieler zieht 1 Karte."
+          },
+          {
+            "name": "Duplexhieb",
+            "text": "Wirf 2 Münzen. Diese Attacke fügt 40 Schadenspunkte pro Kopf zu."
+          }
+        ],
+        "flavorText": "Sein Können als Pantomime ist verblüffend. Vor lauter Bewunderung merkt man gar nicht, wie plötzlich eine echte Wand vor einem erscheint.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/43/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/43/low.webp"
+        },
+        "name": "Pantimos"
+      }
+    },
+    "id": "sm115-43",
+    "ids": {
+      "cardmarket": [
+        396637
+      ],
+      "pokemontcg": "sm115-43",
+      "tcgdex": "sm115-43",
+      "tcgplayer": [
+        197687
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/43/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/43/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Mr. Mime",
+    "nationalPokedexNumbers": [
+      122
+    ],
+    "number": "43",
+    "rarity": "Rare",
+    "resistances": [
+      {
+        "type": "Darkness",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fairy"
+    ],
+    "weaknesses": [
+      {
+        "type": "Metal",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Mitsuhiro Arita",
+    "attacks": [
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Fire",
+          "Water",
+          "Lightning",
+          "Colorless"
+        ],
+        "damage": "210",
+        "name": "Trinity Burn",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Sky Legends-GX",
+        "text": "Shuffle this Pokémon and all cards attached to it into your deck. If this Pokémon has at least 1 extra Fire, Water, and Lightning Energy attached to it (in addition to this attack's cost), this attack does 110 damage to 3 of your opponent's Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.) (You can't use more than 1 GX attack in a game.)"
+      }
+    ],
+    "cardId": "44",
+    "convertedRetreatCost": 3,
+    "hp": "300",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Dreiheitsbrand"
+          },
+          {
+            "name": "Legenden der Lüfte GX",
+            "text": "Mische dieses Pokémon und alle an es angelegten Karten in dein Deck. Wenn an dieses Pokémon mindestens 1 extra {R}-, {W}- und {L}-Energie angelegt ist (zusätzlich zu den Kosten dieser Attacke), fügt diese Attacke 3 Pokémon deines Gegners 110 Schadenspunkte zu. (Wende Schwäche und Resistenz bei Pokémon auf der Bank nicht an.) (Du kannst pro Spiel nur 1 GX-Attacke einsetzen.)"
+          }
+        ],
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/44/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/44/low.webp"
+        },
+        "name": "Lavados & Zapdos & Arktos-GX"
+      }
+    },
+    "id": "sm115-44",
+    "ids": {
+      "cardmarket": [
+        381222
+      ],
+      "pokemontcg": "sm115-44",
+      "tcgdex": "sm115-44",
+      "tcgplayer": [
+        197688
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/44/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/44/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Moltres & Zapdos & Articuno-GX",
+    "nationalPokedexNumbers": [
+      144,
+      145,
+      146
+    ],
+    "number": "44",
+    "rarity": "Rare Holo GX",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "rules": [
+      "TAG TEAM rule: When your TAG TEAM is Knocked Out, your opponent takes 3 Prize cards."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic",
+      "TAG TEAM",
+      "GX"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Eri Yamaki",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Leek Slap",
+        "text": ""
+      }
+    ],
+    "cardId": "45",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Sirfetch'd"
+    ],
+    "flavorText": "The plant stalk it holds is its weapon. The stalk is used like a sword to cut all sorts of things.",
+    "hp": "80",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Lauchschlag"
+          }
+        ],
+        "flavorText": "Dieses Pokémon nutzt eine Lauchstange als Waffe. Es setzt sie wie ein Schwert ein.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/45/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/45/low.webp"
+        },
+        "name": "Porenta"
+      }
+    },
+    "id": "sm115-45",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "sm115-45",
+      "tcgdex": "sm115-45",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/45/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/45/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Farfetch'd",
+    "nationalPokedexNumbers": [
+      83
+    ],
+    "number": "45",
+    "rarity": "Uncommon",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "sowsow",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "80",
+        "name": "Double-Edge",
+        "text": "This Pokémon does 20 damage to itself."
+      }
+    ],
+    "cardId": "46",
+    "convertedRetreatCost": 2,
+    "evolvesTo": [
+      "Blissey"
+    ],
+    "flavorText": "It seems that other Pokémon's efforts to take its delicious, nutritious egg away from it caused Chansey to get faster at fleeing.",
+    "hp": "130",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Risikotackle",
+            "text": "Dieses Pokémon fügt sich selbst 20 Schadenspunkte zu."
+          }
+        ],
+        "flavorText": "Es hat gelernt, rasch davonzulaufen, da es viele Pokémon auf die nahrhaften und köstlichen Eier abgesehen haben, die es legt.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/46/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/46/low.webp"
+        },
+        "name": "Chaneira"
+      }
+    },
+    "id": "sm115-46",
+    "ids": {
+      "cardmarket": [
+        394712
+      ],
+      "pokemontcg": "sm115-46",
+      "tcgdex": "sm115-46",
+      "tcgplayer": [
+        197691
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/46/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/46/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Chansey",
+    "nationalPokedexNumbers": [
+      113
+    ],
+    "number": "46",
+    "rarity": "Uncommon",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "You Iribi",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "40×",
+        "name": "Parental Fury",
+        "text": "Flip a coin until you get tails. This attack does 40 damage for each heads."
+      }
+    ],
+    "cardId": "47",
+    "convertedRetreatCost": 2,
+    "flavorText": "Kangaskhan protects its child by keeping it in its pouch. It has zero forgiveness for those who harm its child and will beat them down.",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Mütterliche Rage",
+            "text": "Wirf so lang 1 Münze, bis zum ersten Mal das Ergebnis Zahl kommt. Diese Attacke fügt 40 Schadenspunkte pro Kopf zu."
+          }
+        ],
+        "flavorText": "Sein Junges beschützt es in seinem Beutel. Wer dieses verwundet, den erwarten Kangamas Groll und eine rücksichtslose Tracht Prügel.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/47/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/47/low.webp"
+        },
+        "name": "Kangama"
+      }
+    },
+    "id": "sm115-47",
+    "ids": {
+      "cardmarket": [
+        396642
+      ],
+      "pokemontcg": "sm115-47",
+      "tcgdex": "sm115-47",
+      "tcgplayer": [
+        197692
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/47/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/47/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Kangaskhan",
+    "nationalPokedexNumbers": [
+      115
+    ],
+    "number": "47",
+    "rarity": "Rare",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Kagemaru Himeno",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Curiosity",
+        "text": "Your opponent reveals their hand."
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Spin Tackle",
+        "text": "Flip a coin. If tails, this Pokémon does 10 damage to itself."
+      }
+    ],
+    "cardId": "48",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Vaporeon",
+      "Jolteon",
+      "Flareon",
+      "Sylveon",
+      "Espeon",
+      "Umbreon",
+      "Leafeon",
+      "Glaceon"
+    ],
+    "flavorText": "The question of why only Eevee has such unstable genes has still not been solved.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Neugier",
+            "text": "Dein Gegner zeigt dir seine Handkarten."
+          },
+          {
+            "name": "Dreh-Tackle",
+            "text": "Wirf 1 Münze. Bei Zahl fügt sich dieses Pokémon selbst 10 Schadenspunkte zu."
+          }
+        ],
+        "flavorText": "Evoli ist das einzige Pokémon mit einem höchst instabilen Erbmaterial. Die Ursache dafür ist nach wie vor unklar.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/48/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/48/low.webp"
+        },
+        "name": "Evoli"
+      }
+    },
+    "id": "sm115-48",
+    "ids": {
+      "cardmarket": [
+        394587
+      ],
+      "pokemontcg": "sm115-48",
+      "tcgdex": "sm115-48",
+      "tcgplayer": [
+        197693
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/48/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/48/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Eevee",
+    "nationalPokedexNumbers": [
+      133
+    ],
+    "number": "48",
+    "rarity": "Rare Holo",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Hitoshi Ariga",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Gnaw",
+        "text": ""
+      }
+    ],
+    "cardId": "49",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Vaporeon",
+      "Jolteon",
+      "Flareon",
+      "Sylveon",
+      "Espeon",
+      "Umbreon",
+      "Leafeon",
+      "Glaceon"
+    ],
+    "flavorText": "Current studies show it can evolve into an incredible eight different species of Pokémon.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Nagen"
+          }
+        ],
+        "flavorText": "Nach derzeitigem Forschungsstand kann es sich zu acht verschiedenen Pokémon entwickeln.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/49/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/49/low.webp"
+        },
+        "name": "Evoli"
+      }
+    },
+    "id": "sm115-49",
+    "ids": {
+      "cardmarket": [
+        396647
+      ],
+      "pokemontcg": "sm115-49",
+      "tcgdex": "sm115-49",
+      "tcgplayer": [
+        197694
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/49/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/49/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Eevee",
+    "nationalPokedexNumbers": [
+      133
+    ],
+    "number": "49",
+    "rarity": "Common",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Akira Komayama",
+    "attacks": [
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "100",
+        "name": "Incredible Snore",
+        "text": ""
+      }
+    ],
+    "cardId": "50",
+    "convertedRetreatCost": 3,
+    "flavorText": "It doesn't do anything other than eat and sleep. When prompted to make a serious effort, though, it apparently displays awesome power.",
+    "hp": "150",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Lautes Schnarchen"
+          }
+        ],
+        "flavorText": "Wenn es nicht gerade frisst, dann schläft es. Macht es aber einmal Ernst, ist Schluss mit lustig.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/50/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/50/low.webp"
+        },
+        "name": "Relaxo"
+      }
+    },
+    "id": "sm115-50",
+    "ids": {
+      "cardmarket": [
+        396652
+      ],
+      "pokemontcg": "sm115-50",
+      "tcgdex": "sm115-50",
+      "tcgplayer": [
+        197696
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/50/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/50/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Snorlax",
+    "nationalPokedexNumbers": [
+      143
+    ],
+    "number": "50",
+    "rarity": "Rare",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Naoki Saito",
+    "cardId": "51",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/51/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/51/low.webp"
+        },
+        "name": "Bills Analyse",
+        "rules": [
+          "Schau dir die obersten 7 Karten deines Decks an. Du kannst bis zu 2 Trainerkarten, die du dort findest, deinem Gegner zeigen und auf deine Hand nehmen. Mische die anderen Karten zurück in dein Deck. Du kannst während deines Zuges (bevor du angreifst) nur 1 Unterstützerkarte spielen."
+        ]
+      }
+    },
+    "id": "sm115-51",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "sm115-51",
+      "tcgdex": "sm115-51",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/51/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/51/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Bill's Analysis",
+    "number": "51",
+    "rarity": "Rare",
+    "rules": [
+      "Look at the top 7 cards of your deck. You may reveal up to 2 Trainer cards you find there and put them into your hand. Shuffle the other cards back into your deck.",
+      "You may play only 1 Supporter card during your turn (before your attack)."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Supporter"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "Ken Sugimori",
+    "cardId": "52",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/52/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/52/low.webp"
+        },
+        "name": "Pyros letzter Widerstand",
+        "rules": [
+          "Du kannst diese Karte nur spielen, wenn sie die letzte Karte auf deiner Hand ist. Ziehe 2 Karten für jedes {R}-Pokémon, das du im Spiel hast. Du kannst während deines Zuges (bevor du angreifst) nur 1 Unterstützerkarte spielen."
+        ]
+      }
+    },
+    "id": "sm115-52",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "sm115-52",
+      "tcgdex": "sm115-52",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/52/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/52/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Blaine's Last Stand",
+    "number": "52",
+    "rarity": "Rare",
+    "rules": [
+      "You can play this card only when it is the last card in your hand.",
+      "Draw 2 cards for each Fire Pokémon you have in play.",
+      "You may play only 1 Supporter card during your turn (before your attack)."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Supporter"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "Megumi Mizutani",
+    "cardId": "53",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/53/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/53/low.webp"
+        },
+        "name": "Rockos Durchhaltevermögen",
+        "rules": [
+          "Mische eine beliebige Kombination aus 6 Pokémon und Basis-Energiekarten aus deinem Ablagestapel in dein Deck. Du kannst während deines Zuges (bevor du angreifst) nur 1 Unterstützerkarte spielen."
+        ]
+      }
+    },
+    "id": "sm115-53",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "sm115-53",
+      "tcgdex": "sm115-53",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/53/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/53/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Brock's Grit",
+    "number": "53",
+    "rarity": "Uncommon",
+    "rules": [
+      "Shuffle 6 in any combination of Pokémon and basic Energy cards from your discard pile into your deck.",
+      "You may play only 1 Supporter card during your turn (before your attack)."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Supporter"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "5ban Graphics",
+    "cardId": "54",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/54/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/54/low.webp"
+        },
+        "name": "Rockos Marmoria-Arena",
+        "rules": [
+          "Onix-GX (deinen und denen deines Gegners) werden durch Attacken des Gegners 40 Schadenspunkte weniger zugefügt (nachdem Schwäche und Resistenz verrechnet wurden). Diese Karte bleibt im Spiel, wenn du sie spielst. Lege diese Karte ab, sobald eine weitere Stadionkarte ins Spiel kommt. Wenn eine andere Karte mit dem gleichen Namen im Spiel ist, kannst du diese Karte nicht spielen."
+        ]
+      }
+    },
+    "id": "sm115-54",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "sm115-54",
+      "tcgdex": "sm115-54",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/54/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/54/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Brock's Pewter City Gym",
+    "number": "54",
+    "rarity": "Uncommon",
+    "rules": [
+      "Onix-GX (both yours and your opponent's) take 40 less damage from the opponent's attacks (after applying Weakness and Resistance).",
+      "This card stays in play when you play it. Discard this card if another Stadium card comes into play. If another card with the same name is in play, you can't play this card."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stadium"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "TOKIYA",
+    "cardId": "55",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/55/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/55/low.webp"
+        },
+        "name": "Rockos Training",
+        "rules": [
+          "Lege 1 Energiekarte aus deiner Hand an 1 deiner Kleinstein, Georok, Geowaz, Onix-GX, Tragosso, Rihorn, Rizeros oder Mogelbaum an. Du kannst während deines Zuges (bevor du angreifst) nur 1 Unterstützerkarte spielen."
+        ]
+      }
+    },
+    "id": "sm115-55",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "sm115-55",
+      "tcgdex": "sm115-55",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/55/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/55/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Brock's Training",
+    "number": "55",
+    "rarity": "Rare Holo",
+    "rules": [
+      "Attach an Energy card from your hand to 1 of your Geodude, Graveler, Golem, Onix-GX, Cubone, Rhyhorn, Rhydon, or Sudowoodo.",
+      "You may play only 1 Supporter card during your turn (before your attack)."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Supporter"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "Sanosuke Sakuma",
+    "cardId": "56",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/56/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/56/low.webp"
+        },
+        "name": "Erikas Gastfreundschaft",
+        "rules": [
+          "Du kannst diese Karte nur spielen, wenn du 4 oder weniger andere Karten auf deiner Hand hast. Ziehe 1 Karte für jedes Pokémon deines Gegners im Spiel. Du kannst während deines Zuges (bevor du angreifst) nur 1 Unterstützerkarte spielen."
+        ]
+      }
+    },
+    "id": "sm115-56",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "sm115-56",
+      "tcgdex": "sm115-56",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/56/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/56/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Erika's Hospitality",
+    "number": "56",
+    "rarity": "Rare",
+    "rules": [
+      "You can play this card only if you have 4 or fewer other cards in your hand.",
+      "Draw a card for each of your opponent's Pokémon in play.",
+      "You may play only 1 Supporter card during your turn (before your attack)."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Supporter"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "Megumi Mizutani",
+    "cardId": "57",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/57/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/57/low.webp"
+        },
+        "name": "Giovannis Exil",
+        "rules": [
+          "Lege bis zu 2 Pokémon auf deiner Bank, auf denen keine Schadensmarken liegen, und alle an sie angelegten Karten auf deinen Ablagestapel. Du kannst während deines Zuges (bevor du angreifst) nur 1 Unterstützerkarte spielen."
+        ]
+      }
+    },
+    "id": "sm115-57",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "sm115-57",
+      "tcgdex": "sm115-57",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/57/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/57/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Giovanni's Exile",
+    "number": "57",
+    "rarity": "Uncommon",
+    "rules": [
+      "Discard up to 2 of your Benched Pokémon that have no damage counters on them and all cards attached to them.",
+      "You may play only 1 Supporter card during your turn (before your attack)."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Supporter"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "Megumi Mizutani",
+    "cardId": "58",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/58/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/58/low.webp"
+        },
+        "name": "Jessie & James",
+        "rules": [
+          "Jeder Spieler legt 2 Karten aus seiner Hand auf seinen Ablagestapel. Dein Gegner legt als Erster ab. Du kannst während deines Zuges (bevor du angreifst) nur 1 Unterstützerkarte spielen."
+        ]
+      }
+    },
+    "id": "sm115-58",
+    "ids": {
+      "cardmarket": [
+        381225
+      ],
+      "pokemontcg": "sm115-58",
+      "tcgdex": "sm115-58",
+      "tcgplayer": [
+        197711
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/58/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/58/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Jessie & James",
+    "number": "58",
+    "rarity": "Rare Holo",
+    "rules": [
+      "Each player discards 2 cards from their hand. Your opponent discards first.",
+      "You may play only 1 Supporter card during your turn (before your attack)."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Supporter"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "Megumi Mizutani",
+    "cardId": "59",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/59/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/59/low.webp"
+        },
+        "name": "Kogas Falle",
+        "rules": [
+          "Das Aktive Pokémon deines Gegners ist jetzt verwirrt und vergiftet. Du kannst während deines Zuges (bevor du angreifst) nur 1 Unterstützerkarte spielen."
+        ]
+      }
+    },
+    "id": "sm115-59",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "sm115-59",
+      "tcgdex": "sm115-59",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/59/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/59/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Koga's Trap",
+    "number": "59",
+    "rarity": "Uncommon",
+    "rules": [
+      "Your opponent's Active Pokémon is now Confused and Poisoned.",
+      "You may play only 1 Supporter card during your turn (before your attack)."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Supporter"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "Megumi Mizutani",
+    "cardId": "60",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/60/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/60/low.webp"
+        },
+        "name": "Major Bobs Strategie",
+        "rules": [
+          "Du kannst diese Karte nur spielen, wenn du mehr verbleibende Preiskarten hast als dein Gegner. Du kannst während dieses Zuges 3 Unterstützerkarten (einschließlich dieser Karte) spielen. Du kannst während deines Zuges (bevor du angreifst) nur 1 Unterstützerkarte spielen."
+        ]
+      }
+    },
+    "id": "sm115-60",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "sm115-60",
+      "tcgdex": "sm115-60",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/60/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/60/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Lt. Surge's Strategy",
+    "number": "60",
+    "rarity": "Uncommon",
+    "rules": [
+      "You can play this card only if you have more Prize cards remaining than your opponent.",
+      "During this turn, you can play 3 Supporter cards (including this card).",
+      "You may play only 1 Supporter card during your turn (before your attack)."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Supporter"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "5ban Graphics",
+    "cardId": "61",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/61/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/61/low.webp"
+        },
+        "name": "Mistys Azuria-Arena",
+        "rules": [
+          "Die Attacken von Starmie-GX (deinen und denen deines Gegners) fügen dem Aktiven Pokémon des Gegners 40 Schadenspunkte mehr zu (bevor Schwäche und Resistenz verrechnet werden). Diese Karte bleibt im Spiel, wenn du sie spielst. Lege diese Karte ab, sobald eine weitere Stadionkarte ins Spiel kommt. Wenn eine andere Karte mit dem gleichen Namen im Spiel ist, kannst du diese Karte nicht spielen."
+        ]
+      }
+    },
+    "id": "sm115-61",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "sm115-61",
+      "tcgdex": "sm115-61",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/61/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/61/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Misty's Cerulean City Gym",
+    "number": "61",
+    "rarity": "Uncommon",
+    "rules": [
+      "The attacks of Starmie-GX (both yours and your opponent's) do 40 more damage to the opponent's Active Pokémon (before applying Weakness and Resistance).",
+      "This card stays in play when you play it. Discard this card if another Stadium card comes into play. If another card with the same name is in play, you can't play this card."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stadium"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "Megumi Mizutani",
+    "cardId": "62",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/62/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/62/low.webp"
+        },
+        "name": "Mistys Entschlossenheit",
+        "rules": [
+          "Lege 1 Karte von deiner Hand auf deinen Ablagestapel. Wenn du das machst, schau dir die obersten 8 Karten deines Decks an und nimm 1 davon auf deine Hand. Mische die anderen Karten anschließend in dein Deck. Du kannst während deines Zuges (vor deinem Angriff) nur 1 Unterstützerkarte spielen."
+        ]
+      }
+    },
+    "id": "sm115-62",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "sm115-62",
+      "tcgdex": "sm115-62",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/62/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/62/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Misty's Determination",
+    "number": "62",
+    "rarity": "Uncommon",
+    "rules": [
+      "Discard a card from your hand. If you do, look at the top 8 cards of your deck and put 1 of them into your hand. Shuffle the other cards back into your deck.",
+      "You may play only 1 Supporter card during your turn (before your attack)."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Supporter"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "TOKIYA",
+    "cardId": "63",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/63/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/63/low.webp"
+        },
+        "name": "Mistys Wasserkontrolle",
+        "rules": [
+          "Verschiebe beliebig viele {W}-Energien von deinen Pokémon beliebig auf deine Enton, Seeper, Sterndu, Starmie-GX, Karpador, Garados oder Lapras. Du kannst während deines Zuges (bevor du angreifst) nur 1 Unterstützerkarte spielen."
+        ]
+      }
+    },
+    "id": "sm115-63",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "sm115-63",
+      "tcgdex": "sm115-63",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/63/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/63/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Misty's Water Command",
+    "number": "63",
+    "rarity": "Rare Holo",
+    "rules": [
+      "Move any number of Water Energy from your Pokémon to your Psyduck, Horsea, Staryu, Starmie-GX, Magikarp, Gyarados, or Lapras in any way you like.",
+      "You may play only 1 Supporter card during your turn (before your attack)."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Supporter"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "TOKIYA",
+    "cardId": "64",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/64/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/64/low.webp"
+        },
+        "name": "Pokémon-Center-Dame",
+        "rules": [
+          "Heile 60 Schadenspunkte bei 1 deiner Pokémon. Alle Speziellen Zustände auf diesem Pokémon verlieren ihre Wirkung. Du kannst während deines Zuges (vor deinem Angriff) nur 1 Unterstützerkarte spielen."
+        ]
+      }
+    },
+    "id": "sm115-64",
+    "ids": {
+      "cardmarket": [
+        394612
+      ],
+      "pokemontcg": "sm115-64",
+      "tcgdex": "sm115-64",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/64/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/64/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Pokémon Center Lady",
+    "number": "64",
+    "rarity": "Uncommon",
+    "rules": [
+      "Heal 60 damage and remove all Special Conditions from 1 of your Pokémon.",
+      "You may play only 1 Supporter card during your turn (before your attack)."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Supporter"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "Hitoshi Ariga",
+    "cardId": "65",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/65/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/65/low.webp"
+        },
+        "name": "Sabrinas Vorschlag",
+        "rules": [
+          "Dein Gegner zeigt dir seine Handkarten. Du kannst 1 Unterstützerkarte, die du dort findest, wählen und den Effekt jener Karte als Effekt dieser Karte einsetzen. Du kannst während deines Zuges (bevor du angreifst) nur 1 Unterstützerkarte spielen."
+        ]
+      }
+    },
+    "id": "sm115-65",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "sm115-65",
+      "tcgdex": "sm115-65",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/65/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/65/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Sabrina's Suggestion",
+    "number": "65",
+    "rarity": "Uncommon",
+    "rules": [
+      "Your opponent reveals their hand. You may choose a Supporter card you find there and use the effect of that card as the effect of this card.",
+      "You may play only 1 Supporter card during your turn (before your attack)."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Supporter"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "5ban Graphics",
+    "attacks": [
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Fire",
+          "Water",
+          "Lightning",
+          "Colorless"
+        ],
+        "damage": "210",
+        "name": "Trinity Burn",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Sky Legends-GX",
+        "text": "Shuffle this Pokémon and all cards attached to it into your deck. If this Pokémon has at least 1 extra Fire, Water, and Lightning Energy attached to it (in addition to this attack's cost), this attack does 110 damage to 3 of your opponent's Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.) (You can't use more than 1 GX attack in a game.)"
+      }
+    ],
+    "cardId": "66",
+    "convertedRetreatCost": 3,
+    "hp": "300",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Dreiheitsbrand"
+          },
+          {
+            "name": "Legenden der Lüfte GX",
+            "text": "Mische dieses Pokémon und alle an es angelegten Karten in dein Deck. Wenn an dieses Pokémon mindestens 1 extra {R}-, {W}- und {L}-Energie angelegt ist (zusätzlich zu den Kosten dieser Attacke), fügt diese Attacke 3 Pokémon deines Gegners 110 Schadenspunkte zu. (Wende Schwäche und Resistenz bei Pokémon auf der Bank nicht an.) (Du kannst pro Spiel nur 1 GX-Attacke einsetzen.)"
+          }
+        ],
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/66/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/66/low.webp"
+        },
+        "name": "Lavados & Zapdos & Arktos-GX"
+      }
+    },
+    "id": "sm115-66",
+    "ids": {
+      "cardmarket": [
+        396672
+      ],
+      "pokemontcg": "sm115-66",
+      "tcgdex": "sm115-66",
+      "tcgplayer": [
+        197726
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/66/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/66/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Moltres & Zapdos & Articuno-GX",
+    "nationalPokedexNumbers": [
+      144,
+      145,
+      146
+    ],
+    "number": "66",
+    "rarity": "Rare Ultra",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "rules": [
+      "TAG TEAM rule: When your TAG TEAM is Knocked Out, your opponent takes 3 Prize cards."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic",
+      "TAG TEAM",
+      "GX"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "TOKIYA",
+    "cardId": "67",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/67/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/67/low.webp"
+        },
+        "name": "Giovannis Exil",
+        "rules": [
+          "Lege bis zu 2 Pokémon auf deiner Bank, auf denen keine Schadensmarken liegen, und alle an sie angelegten Karten auf deinen Ablagestapel. Du kannst während deines Zuges (bevor du angreifst) nur 1 Unterstützerkarte spielen."
+        ]
+      }
+    },
+    "id": "sm115-67",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "sm115-67",
+      "tcgdex": "sm115-67",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/67/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/67/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Giovanni's Exile",
+    "number": "67",
+    "rarity": "Rare Ultra",
+    "rules": [
+      "Discard up to 2 of your Benched Pokémon that have no damage counters on them and all cards attached to them.",
+      "You may play only 1 Supporter card during your turn (before your attack)."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Supporter"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "Megumi Mizutani",
+    "cardId": "68",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/68/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/68/low.webp"
+        },
+        "name": "Jessie & James",
+        "rules": [
+          "Jeder Spieler legt 2 Karten aus seiner Hand auf seinen Ablagestapel. Dein Gegner legt als Erster ab. Du kannst während deines Zuges (bevor du angreifst) nur 1 Unterstützerkarte spielen."
+        ]
+      }
+    },
+    "id": "sm115-68",
+    "ids": {
+      "cardmarket": [
+        396682
+      ],
+      "pokemontcg": "sm115-68",
+      "tcgdex": "sm115-68",
+      "tcgplayer": [
+        197732
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/68/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/68/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Jessie & James",
+    "number": "68",
+    "rarity": "Rare Ultra",
+    "rules": [
+      "Each player discards 2 cards from their hand. Your opponent discards first.",
+      "You may play only 1 Supporter card during your turn (before your attack)."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Supporter"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "5ban Graphics",
+    "attacks": [
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Fire",
+          "Water",
+          "Lightning",
+          "Colorless"
+        ],
+        "damage": "210",
+        "name": "Trinity Burn",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Sky Legends-GX",
+        "text": "Shuffle this Pokémon and all cards attached to it into your deck. If this Pokémon has at least 1 extra Fire, Water, and Lightning Energy attached to it (in addition to this attack's cost), this attack does 110 damage to 3 of your opponent's Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.) (You can't use more than 1 GX attack in a game.)"
+      }
+    ],
+    "cardId": "69",
+    "convertedRetreatCost": 3,
+    "hp": "300",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Dreiheitsbrand"
+          },
+          {
+            "name": "Legenden der Lüfte GX",
+            "text": "Mische dieses Pokémon und alle an es angelegten Karten in dein Deck. Wenn an dieses Pokémon mindestens 1 extra {R}-, {W}- und {L}-Energie angelegt ist (zusätzlich zu den Kosten dieser Attacke), fügt diese Attacke 3 Pokémon deines Gegners 110 Schadenspunkte zu. (Wende Schwäche und Resistenz bei Pokémon auf der Bank nicht an.) (Du kannst pro Spiel nur 1 GX-Attacke einsetzen.)"
+          }
+        ],
+        "images": {
+          "large": "https://assets.tcgdex.net/de/sm/sm115/69/high.webp",
+          "small": "https://assets.tcgdex.net/de/sm/sm115/69/low.webp"
+        },
+        "name": "Lavados & Zapdos & Arktos-GX"
+      }
+    },
+    "id": "sm115-69",
+    "ids": {
+      "cardmarket": [
+        396687
+      ],
+      "pokemontcg": "sm115-69",
+      "tcgdex": "sm115-69",
+      "tcgplayer": [
+        197728
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/sm/sm115/69/high.webp",
+      "small": "https://assets.tcgdex.net/en/sm/sm115/69/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Moltres & Zapdos & Articuno-GX",
+    "nationalPokedexNumbers": [
+      144,
+      145,
+      146
+    ],
+    "number": "69",
+    "rarity": "Rare Rainbow",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "rules": [
+      "TAG TEAM rule: When your TAG TEAM is Knocked Out, your opponent takes 3 Prize cards."
+    ],
+    "setId": "sm115",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic",
+      "TAG TEAM",
+      "GX"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "×2"
+      }
+    ]
+  }
+]

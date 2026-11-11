@@ -130,6 +130,23 @@ test('runSync: geaenderter Commit -> Mirror und Manifest aktualisiert', async ()
   assert.deepEqual(JSON.parse(fs.readFileSync(path.join(root, 'sources', 'tcgdex', 'assets-index.json'), 'utf8')), { en: { a: 1 } });
 });
 
+test('runSync: force spiegelt trotz unveraendertem Commit', async () => {
+  const root = tmp();
+  fs.mkdirSync(path.join(root, 'sources'));
+  const manifestFile = path.join(root, 'sources', 'SOURCES.json');
+  updateSourcesManifest(manifestFile, 'tcgdex', { commit: 'abc', fetchedAt: 'alt' });
+  const port = {
+    repoRoot: root,
+    lsRemoteHead: () => 'abc',
+    cloneTcgdex: (dir) => { fs.cpSync(makeClone(), dir, { recursive: true }); return { commit: 'abc', ref: 'master' }; },
+    fetchAssets: async () => ({ en: {} }),
+  };
+  assert.equal((await runSync(port)).updated, false);
+  const r = await runSync({ ...port, force: true });
+  assert.equal(r.updated, true);
+  assert.ok(fs.readdirSync(path.join(root, 'sources', 'tcgdex', 'data')).some((n) => n.startsWith('Pokémon TCG Pocket')));
+});
+
 test('classifyEntry: nur Datei und Ordner sind zulaessig', () => {
   const st = (o) => ({ isSymbolicLink: () => false, isDirectory: () => false, isFile: () => false, ...o });
   assert.equal(classifyEntry(st({ isFile: () => true })), 'file');

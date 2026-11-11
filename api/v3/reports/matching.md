@@ -1,19 +1,19 @@
 # Matching-Report
 
-Erzeugt: 2026-11-11T16:46:47.351Z
+Erzeugt: 2026-11-11T19:46:37.492Z
 
 ## Zusammenfassung
 
-- pokemontcg-Sets: 177
-- TCGdex-Sets: 209
-- Gepaarte Sets: 177
-- pokemontcg-Karten: 20776
-- Zugeordnete Karten: 20719
+- pokemontcg-Sets: 178
+- TCGdex-Sets: 224
+- Gepaarte Sets: 178
+- pokemontcg-Karten: 20825
+- Zugeordnete Karten: 20768
 - cardMatchRatio: 0.9973
 - Verdaechtige Zuordnungen: 9
 - Nur in pokemontcg (primaryOnly): 57
-- Nur in TCGdex (in gepaarten Sets): 74
-- Ungepaarte TCGdex-Sets: 32 (728 Karten)
+- Nur in TCGdex (in gepaarten Sets): 137
+- Ungepaarte TCGdex-Sets: 46 (3096 Karten)
 - Doppelt zugeordnet: 0
 - Unaufgeloeste Aliase: 0
 
@@ -30,7 +30,7 @@ Erzeugt: 2026-11-11T16:46:47.351Z
   },
   "tcgdex": {
     "commit": "5fbf524a3650cbf33926382388133c5a14965840",
-    "fetchedAt": "2026-11-11T16:46:47.351Z",
+    "fetchedAt": "2026-11-11T19:46:37.492Z",
     "ref": "master",
     "repo": "tcgdex/cards-database",
     "status": "active"
@@ -135,6 +135,7 @@ Erzeugt: 2026-11-11T16:46:47.351Z
 | me55 | 30th Celebration | 30th | 30th Celebration | codeAndDate | 1.00 | 161/161 | 0 | 0 |
 | me55c | 30th Celebration: Classic Collection | 30th-c | 30th Classic Collection | mapping | 0.23 | 30/30 | 0 | 0 |
 | me6 | Delta Reign | me06 | Delta Reign | normalizedId | 1.00 | 141/141 | 0 | 0 |
+| mep | mep | mep | MEP Black Star Promos | exactId | 1.00 | 49/49 | 0 | 0 |
 | neo1 | Neo Genesis | neo1 | Neo Genesis | exactId | 1.00 | 111/111 | 0 | 0 |
 | neo2 | Neo Discovery | neo2 | Neo Discovery | exactId | 1.00 | 75/75 | 0 | 0 |
 | neo3 | Neo Revelation | neo3 | Neo Revelation | exactId | 1.00 | 66/66 | 0 | 0 |
@@ -323,18 +324,32 @@ Keine.
 ### pokemontcg-Sets (0)
 
 
-### TCGdex-Sets (32)
+### TCGdex-Sets (46)
 
 - 2013bw
 - 2018sm-fr
 - 2019sm-fr
 - 2023sv
 - 2024sv
+- A1
+- A1a
+- A2
+- A2a
+- A2b
+- A3
+- A3a
+- A3b
+- A4
+- A4a
+- B1
+- B1a
+- B2
+- B2a
+- P-A
 - ex5.5
 - exu
 - jumbo
 - mee
-- mep
 - mfb
 - miscp
 - rc

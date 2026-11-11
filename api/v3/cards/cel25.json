@@ -1,0 +1,2570 @@
+[
+  {
+    "artist": "Kouki Saitou",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Fire",
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Sacred Fire",
+        "text": "This attack does 50 damage to 1 of your opponent's Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Fire",
+          "Fire",
+          "Colorless"
+        ],
+        "damage": "120",
+        "name": "Fire Blast",
+        "text": "Discard an Energy from this Pokémon."
+      }
+    ],
+    "cardId": "1",
+    "convertedRetreatCost": 2,
+    "flavorText": "It will reveal itself before a pure-hearted Trainer by shining its bright, rainbow-colored wings.",
+    "hp": "130",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Läuterfeuer",
+            "text": "Diese Attacke fügt 1 Pokémon deines Gegners 50 Schadenspunkte zu. (Wende Schwäche und Resistenz bei Pokémon auf der Bank nicht an.)"
+          },
+          {
+            "name": "Feuersturm",
+            "text": "Lege 1 Energie von diesem Pokémon auf deinen Ablagestapel."
+          }
+        ],
+        "flavorText": "Es wird sich dem Trainer offenbaren, der reinen Herzens ist, und ihm seine bunten Schwingen zeigen.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/swsh/cel25/1/high.webp",
+          "small": "https://assets.tcgdex.net/de/swsh/cel25/1/low.webp"
+        },
+        "name": "Ho-Oh"
+      }
+    },
+    "id": "cel25-1",
+    "ids": {
+      "cardmarket": [
+        576746
+      ],
+      "pokemontcg": "cel25-1",
+      "tcgdex": "cel25-1",
+      "tcgplayer": [
+        250300
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/cel25/1/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/cel25/1/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Ho-Oh",
+    "nationalPokedexNumbers": [
+      250
+    ],
+    "number": "1",
+    "rarity": "Rare",
+    "regulationMark": "E",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-30"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "cel25",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fire"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 576746,
+        "tcgplayerId": 250300,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Aya Kusube",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Scorching Wind",
+        "text": "This attack does 20 damage to each of your opponent's Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Fire",
+          "Fire",
+          "Colorless"
+        ],
+        "damage": "80+",
+        "name": "Black Flame",
+        "text": "If Zekrom is on your Bench, this attack does 80 more damage."
+      }
+    ],
+    "cardId": "2",
+    "convertedRetreatCost": 3,
+    "flavorText": "When Reshiram's tail flares, the heat energy moves the atmosphere and changes the world's weather.",
+    "hp": "130",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Versengender Wind",
+            "text": "Diese Attacke fügt jedem Pokémon auf der Bank deines Gegners 20 Schadenspunkte zu. (Wende Schwäche und Resistenz bei Pokémon auf der Bank nicht an.)"
+          },
+          {
+            "name": "Schwarze Flamme",
+            "text": "Wenn sich Zekrom auf deiner Bank befindet, fügt diese Attacke 80 Schadenspunkte mehr zu."
+          }
+        ],
+        "flavorText": "Lodert das Feuer in seinem Schweif auf, gerät die Erdatmosphäre durch die Hitze in Wallung und das Weltklima ändert sich.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/swsh/cel25/2/high.webp",
+          "small": "https://assets.tcgdex.net/de/swsh/cel25/2/low.webp"
+        },
+        "name": "Reshiram"
+      }
+    },
+    "id": "cel25-2",
+    "ids": {
+      "cardmarket": [
+        576747
+      ],
+      "pokemontcg": "cel25-2",
+      "tcgdex": "cel25-2",
+      "tcgplayer": [
+        250301
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/cel25/2/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/cel25/2/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Reshiram",
+    "nationalPokedexNumbers": [
+      643
+    ],
+    "number": "2",
+    "rarity": "Rare",
+    "regulationMark": "E",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "cel25",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fire"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 576747,
+        "tcgplayerId": 250301,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Water",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Ryuta Fuse",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Water",
+          "Water",
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Aqua Storm",
+        "text": "Discard the top 5 cards of your deck, and then choose 2 of your opponent's Benched Pokémon. This attack does 50 damage for each Energy card you discarded in this way to each of those Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      },
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Water",
+          "Water",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "120",
+        "name": "Surf",
+        "text": ""
+      }
+    ],
+    "cardId": "3",
+    "convertedRetreatCost": 3,
+    "flavorText": "It is said to have widened the seas by causing downpours. It had been asleep in a marine trench.",
+    "hp": "130",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Aquasturm",
+            "text": "Lege die obersten 5 Karten deines Decks auf deinen Ablagestapel und wähle anschließend 2 Pokémon auf der Bank deines Gegners. Diese Attacke fügt jedem jener Pokémon für jede auf diese Weise abgelegte Energiekarte 50 Schadenspunkte zu. (Wende Schwäche und Resistenz bei Pokémon auf der Bank nicht an.)"
+          },
+          {
+            "name": "Surfer"
+          }
+        ],
+        "flavorText": "Man sagt, es habe die Meere vergrößert, indem es es regnen ließ. Es schlief in einem Meeresgraben.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/swsh/cel25/3/high.webp",
+          "small": "https://assets.tcgdex.net/de/swsh/cel25/3/low.webp"
+        },
+        "name": "Kyogre"
+      }
+    },
+    "id": "cel25-3",
+    "ids": {
+      "cardmarket": [
+        576748
+      ],
+      "pokemontcg": "cel25-3",
+      "tcgdex": "cel25-3",
+      "tcgplayer": [
+        250298
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/cel25/3/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/cel25/3/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Kyogre",
+    "nationalPokedexNumbers": [
+      382
+    ],
+    "number": "3",
+    "rarity": "Rare",
+    "regulationMark": "E",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "cel25",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 576748,
+        "tcgplayerId": 250298,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Absolute Space",
+        "text": "As long as this Pokémon is in the Active Spot, your opponent can't play any Stadium cards from their hand.",
+        "type": "Ability"
+      }
+    ],
+    "artist": "5ban Graphics",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Water",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "80+",
+        "name": "Overdrive Smash",
+        "text": "During your next turn, this Pokémon's Overdrive Smash attack does 80 more damage (before applying Weakness and Resistance)."
+      }
+    ],
+    "cardId": "4",
+    "convertedRetreatCost": 2,
+    "flavorText": "It has the ability to distort space. It is described as a deity in Sinnoh-region mythology.",
+    "hp": "130",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Absoluter Raum",
+            "text": "Solange dieses Pokémon in der Aktiven Position ist, kann dein Gegner keine Stadionkarten aus seiner Hand spielen."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Turbosmash",
+            "text": "Während deines nächsten Zuges fügt die Attacke Turbosmash dieses Pokémon 80 Schadenspunkte mehr zu (bevor Schwäche und Resistenz verrechnet werden)."
+          }
+        ],
+        "flavorText": "Es hat die Macht, den Raum zu krümmen. In den Mythen von Sinnoh erscheint es als Gottheit.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/swsh/cel25/4/high.webp",
+          "small": "https://assets.tcgdex.net/de/swsh/cel25/4/low.webp"
+        },
+        "name": "Palkia"
+      }
+    },
+    "id": "cel25-4",
+    "ids": {
+      "cardmarket": [
+        576749
+      ],
+      "pokemontcg": "cel25-4",
+      "tcgdex": "cel25-4",
+      "tcgplayer": [
+        250302
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/cel25/4/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/cel25/4/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Palkia",
+    "nationalPokedexNumbers": [
+      484
+    ],
+    "number": "4",
+    "rarity": "Rare",
+    "regulationMark": "E",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "cel25",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 576749,
+        "tcgplayerId": 250302,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Mitsuhiro Arita",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "10",
+        "name": "Gnaw",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Lightning",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Thunder Jolt",
+        "text": "Flip a coin. If tails, this Pokémon also does 10 damage to itself."
+      }
+    ],
+    "cardId": "5",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Raichu"
+    ],
+    "flavorText": "It has small electric sacs on both its cheeks. If threatened, it looses electric charges from the sacs.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Nagen"
+          },
+          {
+            "name": "Donnerrüttler",
+            "text": "Wirf 1 Münze. Bei Zahl fügt sich dieses Pokémon auch selbst 10 Schadenspunkte zu."
+          }
+        ],
+        "flavorText": "Es hat kleine Backentaschen, die mit Elektrizität gefüllt sind. Bei Gefahr entlädt es sie.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/swsh/cel25/5/high.webp",
+          "small": "https://assets.tcgdex.net/de/swsh/cel25/5/low.webp"
+        },
+        "name": "Pikachu"
+      }
+    },
+    "id": "cel25-5",
+    "ids": {
+      "cardmarket": [
+        576750
+      ],
+      "pokemontcg": "cel25-5",
+      "tcgdex": "cel25-5",
+      "tcgplayer": [
+        250303
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/cel25/5/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/cel25/5/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Pikachu",
+    "nationalPokedexNumbers": [
+      25
+    ],
+    "number": "5",
+    "rarity": "Rare Holo",
+    "regulationMark": "E",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "cel25",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 576750,
+        "tcgplayerId": 250303,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "aky CG Works",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Lightning"
+        ],
+        "damage": "20",
+        "name": "Thunder Shock",
+        "text": "Flip a coin. If heads, your opponent's Active Pokémon is now Paralyzed."
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "120",
+        "name": "Fly",
+        "text": "Flip a coin. If tails, this attack does nothing. If heads, during your opponent's next turn, prevent all damage from and effects of attacks done to this Pokémon."
+      }
+    ],
+    "cardId": "6",
+    "convertedRetreatCost": 0,
+    "evolvesTo": [
+      "Raichu"
+    ],
+    "hp": "190",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Donnerschock",
+            "text": "Wirf 1 Münze. Bei Kopf ist das Aktive Pokémon deines Gegners jetzt paralysiert."
+          },
+          {
+            "name": "Fliegen",
+            "text": "Wirf 1 Münze. Bei Zahl hat diese Attacke keine Auswirkungen. Verhindere bei Kopf während des nächsten Zuges deines Gegners allen Schaden durch und alle Effekte von Attacken, die diesem Pokémon zugefügt werden."
+          }
+        ],
+        "images": {
+          "large": "https://assets.tcgdex.net/de/swsh/cel25/6/high.webp",
+          "small": "https://assets.tcgdex.net/de/swsh/cel25/6/low.webp"
+        },
+        "name": "Fliegendes Pikachu V"
+      }
+    },
+    "id": "cel25-6",
+    "ids": {
+      "cardmarket": [
+        576751
+      ],
+      "pokemontcg": "cel25-6",
+      "tcgdex": "cel25-6",
+      "tcgplayer": [
+        250304
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/cel25/6/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/cel25/6/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Flying Pikachu V",
+    "nationalPokedexNumbers": [
+      25
+    ],
+    "number": "6",
+    "rarity": "Rare Holo V",
+    "regulationMark": "E",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-30"
+      }
+    ],
+    "rules": [
+      "V rule: When your Pokémon V is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "setId": "cel25",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic",
+      "V"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 576751,
+        "tcgplayerId": 250304,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "aky CG Works",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Lightning",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "160",
+        "name": "Max Balloon",
+        "text": "During your opponent's next turn, prevent all damage done to this Pokémon by attacks from Basic Pokémon."
+      }
+    ],
+    "cardId": "7",
+    "convertedRetreatCost": 0,
+    "evolvesFrom": "Flying Pikachu V",
+    "evolvesTo": [
+      "Raichu"
+    ],
+    "hp": "310",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Dyna-Ballon",
+            "text": "Verhindere während des nächsten Zuges deines Gegners allen Schaden, der diesem Pokémon durch Attacken von Basis-Pokémon zugefügt wird."
+          }
+        ],
+        "evolvesFrom": "Fliegendes Pikachu-V",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/swsh/cel25/7/high.webp",
+          "small": "https://assets.tcgdex.net/de/swsh/cel25/7/low.webp"
+        },
+        "name": "Fliegendes Pikachu VMAX"
+      }
+    },
+    "id": "cel25-7",
+    "ids": {
+      "cardmarket": [
+        576752
+      ],
+      "pokemontcg": "cel25-7",
+      "tcgdex": "cel25-7",
+      "tcgplayer": [
+        250305
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/cel25/7/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/cel25/7/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Flying Pikachu VMAX",
+    "nationalPokedexNumbers": [
+      25
+    ],
+    "number": "7",
+    "rarity": "Rare Holo VMAX",
+    "regulationMark": "E",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-30"
+      }
+    ],
+    "rules": [
+      "VMAX rule: When your Pokémon VMAX is Knocked Out, your opponent takes 3 Prize cards."
+    ],
+    "setId": "cel25",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "VMAX"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 576752,
+        "tcgplayerId": 250305,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "aky CG Works",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Water",
+          "Water",
+          "Water"
+        ],
+        "damage": "150",
+        "name": "Surf",
+        "text": ""
+      }
+    ],
+    "cardId": "8",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Raichu"
+    ],
+    "hp": "200",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Surfer"
+          }
+        ],
+        "images": {
+          "large": "https://assets.tcgdex.net/de/swsh/cel25/8/high.webp",
+          "small": "https://assets.tcgdex.net/de/swsh/cel25/8/low.webp"
+        },
+        "name": "Surfendes Pikachu V"
+      }
+    },
+    "id": "cel25-8",
+    "ids": {
+      "cardmarket": [
+        576753
+      ],
+      "pokemontcg": "cel25-8",
+      "tcgdex": "cel25-8",
+      "tcgplayer": [
+        250306
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/cel25/8/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/cel25/8/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Surfing Pikachu V",
+    "nationalPokedexNumbers": [
+      25
+    ],
+    "number": "8",
+    "rarity": "Rare Holo V",
+    "regulationMark": "E",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "rules": [
+      "V rule: When your Pokémon V is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "setId": "cel25",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic",
+      "V"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 576753,
+        "tcgplayerId": 250306,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "aky CG Works",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Water",
+          "Water",
+          "Water"
+        ],
+        "damage": "160",
+        "name": "Max Surfer",
+        "text": "This attack also does 30 damage to each of your opponent's Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      }
+    ],
+    "cardId": "9",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Surfing Pikachu V",
+    "evolvesTo": [
+      "Raichu"
+    ],
+    "hp": "310",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Dyna-Surfen",
+            "text": "Diese Attacke fügt auch jedem Pokémon auf der Bank deines Gegners 30 Schadenspunkte zu. (Wende Schwäche und Resistenz bei Pokémon auf der Bank nicht an.)"
+          }
+        ],
+        "evolvesFrom": "Surfendes Pikachu-V",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/swsh/cel25/9/high.webp",
+          "small": "https://assets.tcgdex.net/de/swsh/cel25/9/low.webp"
+        },
+        "name": "Surfendes Pikachu VMAX"
+      }
+    },
+    "id": "cel25-9",
+    "ids": {
+      "cardmarket": [
+        576754
+      ],
+      "pokemontcg": "cel25-9",
+      "tcgdex": "cel25-9",
+      "tcgplayer": [
+        250307
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/cel25/9/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/cel25/9/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Surfing Pikachu VMAX",
+    "nationalPokedexNumbers": [
+      25
+    ],
+    "number": "9",
+    "rarity": "Rare Holo VMAX",
+    "regulationMark": "E",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "rules": [
+      "VMAX rule: When your Pokémon VMAX is Knocked Out, your opponent takes 3 Prize cards."
+    ],
+    "setId": "cel25",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "VMAX"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 576754,
+        "tcgplayerId": 250307,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Aya Kusube",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Field Crush",
+        "text": "If your opponent has a Stadium in play, discard it."
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Lightning",
+          "Lightning",
+          "Colorless"
+        ],
+        "damage": "80+",
+        "name": "White Thunder",
+        "text": "If Reshiram is on your Bench, this attack does 80 more damage."
+      }
+    ],
+    "cardId": "10",
+    "convertedRetreatCost": 3,
+    "flavorText": "Concealing itself in lightning clouds, it flies throughout the Unova region. It creates electricity in its tail.",
+    "hp": "130",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Feldschlag",
+            "text": "Wenn dein Gegner eine Stadionkarte im Spiel hat, lege sie auf seinen Ablagestapel."
+          },
+          {
+            "name": "Weißer Donner",
+            "text": "Wenn sich Reshiram auf deiner Bank befindet, fügt diese Attacke 80 Schadenspunkte mehr zu."
+          }
+        ],
+        "flavorText": "Sein Schweif erzeugt Strom. Es verbirgt sich hinter dichten Gewitterwolken und fliegt durch den Luftraum über Einall.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/swsh/cel25/10/high.webp",
+          "small": "https://assets.tcgdex.net/de/swsh/cel25/10/low.webp"
+        },
+        "name": "Zekrom"
+      }
+    },
+    "id": "cel25-10",
+    "ids": {
+      "cardmarket": [
+        576755
+      ],
+      "pokemontcg": "cel25-10",
+      "tcgdex": "cel25-10",
+      "tcgplayer": [
+        250308
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/cel25/10/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/cel25/10/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Zekrom",
+    "nationalPokedexNumbers": [
+      644
+    ],
+    "number": "10",
+    "rarity": "Rare",
+    "regulationMark": "E",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "cel25",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 576755,
+        "tcgplayerId": 250308,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Mysterious Tail",
+        "text": "Once during your turn, if this Pokémon is in the Active Spot, you may look at the top 6 cards of your deck, reveal an Item card you find there, and put it into your hand. Shuffle the other cards back into your deck.",
+        "type": "Ability"
+      }
+    ],
+    "artist": "Yuu Nishida",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Psychic",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Psyshot",
+        "text": ""
+      }
+    ],
+    "cardId": "11",
+    "convertedRetreatCost": 1,
+    "flavorText": "Its DNA is said to contain the genetic codes of all Pokémon, so it can use all kinds of techniques.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Geheimnisvoller Schweif",
+            "text": "Einmal während deines Zuges, wenn dieses Pokémon in der Aktiven Position ist, kannst du dir die obersten 6 Karten deines Decks anschauen, 1 Itemkarte, die du dort findest, deinem Gegner zeigen und auf deine Hand nehmen. Mische die anderen Karten zurück in dein Deck."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Psychoschuss"
+          }
+        ],
+        "flavorText": "Seine DNS soll den genetischen Code aller Pokémon beinhalten. Dadurch kann es alle Attacken erlernen.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/swsh/cel25/11/high.webp",
+          "small": "https://assets.tcgdex.net/de/swsh/cel25/11/low.webp"
+        },
+        "name": "Mew"
+      }
+    },
+    "id": "cel25-11",
+    "ids": {
+      "cardmarket": [
+        576756
+      ],
+      "pokemontcg": "cel25-11",
+      "tcgdex": "cel25-11",
+      "tcgplayer": [
+        250309
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/cel25/11/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/cel25/11/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Mew",
+    "nationalPokedexNumbers": [
+      151
+    ],
+    "number": "11",
+    "rarity": "Rare Holo",
+    "regulationMark": "E",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-30"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "cel25",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 576756,
+        "tcgplayerId": 250309,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Darkness",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "AKIRA EGAWA",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Breath of Life",
+        "text": "Search your deck for up to 3 basic Energy cards of different types and attach them to your Pokémon in any way you like. Then, shuffle your deck."
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Psychic",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "100",
+        "name": "Aurora Horns",
+        "text": ""
+      }
+    ],
+    "cardId": "12",
+    "convertedRetreatCost": 2,
+    "flavorText": "When the horns on its head shine in seven colors, it is said to be sharing everlasting life.",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Lebenshauch",
+            "text": "Durchsuche dein Deck nach bis zu 3 Basis-Energiekarten verschiedenen Typs und lege sie beliebig an deine Pokémon an. Mische anschließend dein Deck."
+          },
+          {
+            "name": "Aurorahörner"
+          }
+        ],
+        "flavorText": "Es heißt, dieses Pokémon spende ewiges Leben, sobald das Geweih auf seinem Haupt in sieben verschiedenen Farben leuchtet.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/swsh/cel25/12/high.webp",
+          "small": "https://assets.tcgdex.net/de/swsh/cel25/12/low.webp"
+        },
+        "name": "Xerneas"
+      }
+    },
+    "id": "cel25-12",
+    "ids": {
+      "cardmarket": [
+        576757
+      ],
+      "pokemontcg": "cel25-12",
+      "tcgdex": "cel25-12",
+      "tcgplayer": [
+        250310
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/cel25/12/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/cel25/12/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Xerneas",
+    "nationalPokedexNumbers": [
+      716
+    ],
+    "number": "12",
+    "rarity": "Rare",
+    "regulationMark": "E",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "cel25",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 576757,
+        "tcgplayerId": 250310,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Metal",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "kirisAki",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Star Protection",
+        "text": "Flip a coin. If heads, during your opponent's next turn, prevent all damage done to this Pokémon by attacks."
+      }
+    ],
+    "cardId": "13",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Cosmoem"
+    ],
+    "flavorText": "Whether or not it's a Pokémon from this world is a mystery. When it's in a jam, it warps away to a safe place to hide.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Sternenschutz",
+            "text": "Wirf 1 Münze. Verhindere bei Kopf während des nächsten Zuges deines Gegners allen Schaden, der diesem Pokémon durch Attacken zugefügt wird."
+          }
+        ],
+        "flavorText": "Es ist unklar, ob es aus dieser Welt stammt oder nicht. Wenn es in Gefahr ist, teleportiert es sich an einen sicheren Ort und versteckt sich.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/swsh/cel25/13/high.webp",
+          "small": "https://assets.tcgdex.net/de/swsh/cel25/13/low.webp"
+        },
+        "name": "Cosmog"
+      }
+    },
+    "id": "cel25-13",
+    "ids": {
+      "cardmarket": [
+        576758
+      ],
+      "pokemontcg": "cel25-13",
+      "tcgdex": "cel25-13",
+      "tcgplayer": [
+        250311
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/cel25/13/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/cel25/13/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Cosmog",
+    "nationalPokedexNumbers": [
+      789
+    ],
+    "number": "13",
+    "rarity": "Rare",
+    "regulationMark": "E",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-30"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "cel25",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 576758,
+        "tcgplayerId": 250311,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Darkness",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "kirisAki",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Star Protection",
+        "text": "Flip a coin. If heads, during your opponent's next turn, prevent all damage done to this Pokémon by attacks."
+      }
+    ],
+    "cardId": "14",
+    "convertedRetreatCost": 3,
+    "evolvesFrom": "Cosmog",
+    "evolvesTo": [
+      "Solgaleo",
+      "Lunala"
+    ],
+    "flavorText": "As it absorbs light, Cosmoem continues to grow. Its golden shell is surprisingly solid.",
+    "hp": "90",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Sternenschutz",
+            "text": "Wirf 1 Münze. Verhindere bei Kopf während des nächsten Zuges deines Gegners allen Schaden, der diesem Pokémon durch Attacken zugefügt wird."
+          }
+        ],
+        "evolvesFrom": "Cosmog",
+        "flavorText": "Es nimmt Licht in sich auf und wächst so immer weiter. Seine goldene Schale ist überraschend hart.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/swsh/cel25/14/high.webp",
+          "small": "https://assets.tcgdex.net/de/swsh/cel25/14/low.webp"
+        },
+        "name": "Cosmovum"
+      }
+    },
+    "id": "cel25-14",
+    "ids": {
+      "cardmarket": [
+        576759
+      ],
+      "pokemontcg": "cel25-14",
+      "tcgdex": "cel25-14",
+      "tcgplayer": [
+        250297
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/cel25/14/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/cel25/14/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Cosmoem",
+    "nationalPokedexNumbers": [
+      790
+    ],
+    "number": "14",
+    "rarity": "Rare",
+    "regulationMark": "E",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-30"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "cel25",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 576759,
+        "tcgplayerId": 250297,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Darkness",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "kirisAki",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Lunar Pain",
+        "text": "Double the number of damage counters on each of your opponent's Pokémon."
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Psychic",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "130",
+        "name": "Psychic Shot",
+        "text": "This attack also does 30 damage to 1 of your opponent's Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      }
+    ],
+    "cardId": "15",
+    "convertedRetreatCost": 2,
+    "evolvesFrom": "Cosmoem",
+    "flavorText": "It sometimes summons unknown powers and life-forms here to this world from holes that lead to other worlds.",
+    "hp": "160",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Mondschmerz",
+            "text": "Verdopple die Anzahl der Schadensmarken auf jedem Pokémon deines Gegners."
+          },
+          {
+            "name": "Psychogeschoss",
+            "text": "Diese Attacke fügt auch 1 Pokémon auf der Bank deines Gegners 30 Schadenspunkte zu. (Wende Schwäche und Resistenz bei Pokémon auf der Bank nicht an.)"
+          }
+        ],
+        "evolvesFrom": "Cosmovum",
+        "flavorText": "Öffnet es eine Ultrapforte, ebnet es mitunter für fremde Kräfte und Lebewesen den Weg in unsere Welt.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/swsh/cel25/15/high.webp",
+          "small": "https://assets.tcgdex.net/de/swsh/cel25/15/low.webp"
+        },
+        "name": "Lunala"
+      }
+    },
+    "id": "cel25-15",
+    "ids": {
+      "cardmarket": [
+        576760
+      ],
+      "pokemontcg": "cel25-15",
+      "tcgdex": "cel25-15",
+      "tcgplayer": [
+        250312
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/cel25/15/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/cel25/15/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Lunala",
+    "nationalPokedexNumbers": [
+      792
+    ],
+    "number": "15",
+    "rarity": "Rare Holo",
+    "regulationMark": "E",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-30"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "cel25",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 2"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 576760,
+        "tcgplayerId": 250312,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Darkness",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Roar of the Sword",
+        "text": "Once during your turn, you may search your deck for a Psychic Energy card and attach it to 1 of your Pokémon. Then, shuffle your deck. If you use this Ability, your turn ends.",
+        "type": "Ability"
+      }
+    ],
+    "artist": "Mitsuhiro Arita",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "60+",
+        "name": "Storm Slash",
+        "text": "This attack does 30 more damage for each Psychic Energy attached to this Pokémon."
+      }
+    ],
+    "cardId": "16",
+    "convertedRetreatCost": 2,
+    "hp": "220",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Gebrüll des Schwertes",
+            "text": "Einmal während deines Zuges kannst du dein Deck nach 1 {P}-Energiekarte durchsuchen und sie an 1 deiner Pokémon anlegen. Mische anschließend dein Deck. Wenn du diese Fähigkeit einsetzt, endet dein Zug."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Sturmschlitzer",
+            "text": "Diese Attacke fügt für jede an dieses Pokémon angelegte Psychic-Energie 30 Schadenspunkte mehr zu."
+          }
+        ],
+        "images": {
+          "large": "https://assets.tcgdex.net/de/swsh/cel25/16/high.webp",
+          "small": "https://assets.tcgdex.net/de/swsh/cel25/16/low.webp"
+        },
+        "name": "Zacian V"
+      }
+    },
+    "id": "cel25-16",
+    "ids": {
+      "cardmarket": [
+        576761
+      ],
+      "pokemontcg": "cel25-16",
+      "tcgdex": "cel25-16",
+      "tcgplayer": [
+        250313
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/cel25/16/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/cel25/16/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Zacian V",
+    "nationalPokedexNumbers": [
+      888
+    ],
+    "number": "16",
+    "rarity": "Rare Holo V",
+    "regulationMark": "E",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "rules": [
+      "V rule: When your Pokémon V is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "setId": "cel25",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic",
+      "V"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 576761,
+        "tcgplayerId": 250313,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Metal",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Ryuta Fuse",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Fighting",
+          "Fighting",
+          "Colorless"
+        ],
+        "damage": "80×",
+        "name": "Magma Volcano",
+        "text": "Discard the top 5 cards of your deck. This attack does 80 damage for each Energy card you discarded in this way."
+      },
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Fighting",
+          "Fighting",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "120",
+        "name": "Massive Rend",
+        "text": ""
+      }
+    ],
+    "cardId": "17",
+    "convertedRetreatCost": 3,
+    "flavorText": "This legendary Pokémon is said to represent the land. It went to sleep after dueling Kyogre.",
+    "hp": "130",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Magmavulkan",
+            "text": "Lege die obersten 5 Karten deines Decks auf deinen Ablagestapel. Diese Attacke fügt für jede auf diese Weise abgelegte Energiekarte 80 Schadenspunkte zu."
+          },
+          {
+            "name": "Riesiger Riss"
+          }
+        ],
+        "flavorText": "Dieses Legendäre Pokémon soll das Land verkörpern. Es ist in einen Schlaf gefallen, nachdem es mit Kyogre gekämpft hat.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/swsh/cel25/17/high.webp",
+          "small": "https://assets.tcgdex.net/de/swsh/cel25/17/low.webp"
+        },
+        "name": "Groudon"
+      }
+    },
+    "id": "cel25-17",
+    "ids": {
+      "cardmarket": [
+        576762
+      ],
+      "pokemontcg": "cel25-17",
+      "tcgdex": "cel25-17",
+      "tcgplayer": [
+        250314
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/cel25/17/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/cel25/17/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Groudon",
+    "nationalPokedexNumbers": [
+      383
+    ],
+    "number": "17",
+    "rarity": "Rare",
+    "regulationMark": "E",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "cel25",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 576762,
+        "tcgplayerId": 250314,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Grass",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Growl of the Shield",
+        "text": "All of your Fighting Pokémon take 20 less damage from attacks from your opponent's Pokémon VMAX (after applying Weakness and Resistance). You can't apply more than 1 Growl of the Shield Ability at a time.",
+        "type": "Ability"
+      }
+    ],
+    "artist": "Mitsuhiro Arita",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Fighting",
+          "Fighting",
+          "Colorless"
+        ],
+        "damage": "150",
+        "name": "Heavy Impact",
+        "text": ""
+      }
+    ],
+    "cardId": "18",
+    "convertedRetreatCost": 2,
+    "hp": "220",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Knurren des Schildes",
+            "text": "Allen deinen {F}-Pokémon werden durch Attacken von Pokémon-VMAX deines Gegners 20 Schadenspunkte weniger zugefügt (nachdem Schwäche und Resistenz verrechnet wurden). Du kannst immer nur jeweils 1 Fähigkeit Knurren des Schildes einsetzen."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Schwerer Einschlag"
+          }
+        ],
+        "images": {
+          "large": "https://assets.tcgdex.net/de/swsh/cel25/18/high.webp",
+          "small": "https://assets.tcgdex.net/de/swsh/cel25/18/low.webp"
+        },
+        "name": "Zamazenta V"
+      }
+    },
+    "id": "cel25-18",
+    "ids": {
+      "cardmarket": [
+        576763
+      ],
+      "pokemontcg": "cel25-18",
+      "tcgdex": "cel25-18",
+      "tcgplayer": [
+        250299
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/cel25/18/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/cel25/18/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Zamazenta V",
+    "nationalPokedexNumbers": [
+      889
+    ],
+    "number": "18",
+    "rarity": "Rare Holo V",
+    "regulationMark": "E",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "rules": [
+      "V rule: When your Pokémon V is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "setId": "cel25",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic",
+      "V"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 576763,
+        "tcgplayerId": 250299,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "AKIRA EGAWA",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Cry of Destruction",
+        "text": "Discard up to 3 Special Energy from your opponent's Pokémon."
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Darkness",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "100",
+        "name": "Dark Feather",
+        "text": ""
+      }
+    ],
+    "cardId": "19",
+    "convertedRetreatCost": 2,
+    "flavorText": "When its life comes to an end, it absorbs the life energy of every living thing and turns into a cocoon once more.",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Ruf der Zerstörung",
+            "text": "Lege bis zu 3 Spezial-Energien von Pokémon deines Gegners auf seinen Ablagestapel"
+          },
+          {
+            "name": "Dunkelfeder"
+          }
+        ],
+        "flavorText": "Neigt sich seine Lebensspanne dem Ende zu, entzieht es anderen Lebewesen deren Energie und verwandelt sich zurück in einen Kokon.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/swsh/cel25/19/high.webp",
+          "small": "https://assets.tcgdex.net/de/swsh/cel25/19/low.webp"
+        },
+        "name": "Yveltal"
+      }
+    },
+    "id": "cel25-19",
+    "ids": {
+      "cardmarket": [
+        576764
+      ],
+      "pokemontcg": "cel25-19",
+      "tcgdex": "cel25-19",
+      "tcgplayer": [
+        250315
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/cel25/19/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/cel25/19/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Yveltal",
+    "nationalPokedexNumbers": [
+      717
+    ],
+    "number": "19",
+    "rarity": "Rare",
+    "regulationMark": "E",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-30"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "cel25",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Darkness"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 576764,
+        "tcgplayerId": 250315,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "5ban Graphics",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Metal"
+        ],
+        "damage": "",
+        "name": "Temporal Backflow",
+        "text": "Put a card from your discard pile into your hand."
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "60+",
+        "name": "Metal Blast",
+        "text": "This attack does 20 more damage for each Metal Energy attached to this Pokémon."
+      }
+    ],
+    "cardId": "20",
+    "convertedRetreatCost": 2,
+    "flavorText": "It has the power to control time. It appears in Sinnoh-region myths as an ancient deity.",
+    "hp": "130",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Zeitlicher Rückfluss",
+            "text": "Nimm 1 Karte aus deinem Ablagestapel auf deine Hand."
+          },
+          {
+            "name": "Metallexplosion",
+            "text": "Diese Attacke fügt für jede an dieses Pokémon angelegte {M}-Energie 20 Schadenspunkte mehr zu."
+          }
+        ],
+        "flavorText": "Es besitzt die Macht, die Zeit zu kontrollieren. In den Mythen von Sinnoh erscheint es als Gottheit.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/swsh/cel25/20/high.webp",
+          "small": "https://assets.tcgdex.net/de/swsh/cel25/20/low.webp"
+        },
+        "name": "Dialga"
+      }
+    },
+    "id": "cel25-20",
+    "ids": {
+      "cardmarket": [
+        576765
+      ],
+      "pokemontcg": "cel25-20",
+      "tcgdex": "cel25-20",
+      "tcgplayer": [
+        250296
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/cel25/20/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/cel25/20/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Dialga",
+    "nationalPokedexNumbers": [
+      483
+    ],
+    "number": "20",
+    "rarity": "Rare",
+    "regulationMark": "E",
+    "resistances": [
+      {
+        "type": "Grass",
+        "value": "-30"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "cel25",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Metal"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 576765,
+        "tcgplayerId": 250296,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Rush In",
+        "text": "Once during your turn, if this Pokémon is on your Bench, you may switch it with your Active Pokémon.",
+        "type": "Ability"
+      }
+    ],
+    "artist": "kirisAki",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "100",
+        "name": "Solar Geyser",
+        "text": "Attach up to 2 basic Energy cards from your discard pile to 1 of your Benched Pokémon."
+      }
+    ],
+    "cardId": "21",
+    "convertedRetreatCost": 2,
+    "evolvesFrom": "Cosmoem",
+    "flavorText": "In writings from the distant past, it's called by the name \"the beast that devours the sun.\"",
+    "hp": "170",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Hineinstürmen",
+            "text": "Einmal während deines Zuges, wenn sich dieses Pokémon in auf deiner Bank befindet, kannst du es gegen dein Aktives Pokémon tauschen."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Solargeysir",
+            "text": "Lege bis zu 2 Basis-Energiekarten aus deinem Ablagestapel an 1 Pokémon auf deiner Bank an."
+          }
+        ],
+        "evolvesFrom": "Cosmovum",
+        "flavorText": "In Schriftstücken aus längst vergangenen Zeiten wird es als „Sonnenverschlinger“ bezeichnet.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/swsh/cel25/21/high.webp",
+          "small": "https://assets.tcgdex.net/de/swsh/cel25/21/low.webp"
+        },
+        "name": "Solgaleo"
+      }
+    },
+    "id": "cel25-21",
+    "ids": {
+      "cardmarket": [
+        576766
+      ],
+      "pokemontcg": "cel25-21",
+      "tcgdex": "cel25-21",
+      "tcgplayer": [
+        250316
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/cel25/21/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/cel25/21/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Solgaleo",
+    "nationalPokedexNumbers": [
+      791
+    ],
+    "number": "21",
+    "rarity": "Rare Holo",
+    "regulationMark": "E",
+    "resistances": [
+      {
+        "type": "Grass",
+        "value": "-30"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "cel25",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 2"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Metal"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 576766,
+        "tcgplayerId": 250316,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Kouki Saitou",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "20×",
+        "name": "Aero Ball",
+        "text": "This attack does 20 damage for each Energy attached to both Active Pokémon."
+      },
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "160",
+        "name": "Deep Crush",
+        "text": "During your next turn, this Pokémon can't attack."
+      }
+    ],
+    "cardId": "22",
+    "convertedRetreatCost": 2,
+    "flavorText": "It is said to be the guardian of the seas. It is rumored to have been seen on the night of a storm.",
+    "hp": "130",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Luftball",
+            "text": "Diese Attacke fügt für jede an beide Aktive Pokémon angelegte Energie 20 Schadenspunkte zu."
+          },
+          {
+            "name": "Tiefenbrecher",
+            "text": "Während deines nächsten Zuges kann dieses Pokémon nicht angreifen."
+          }
+        ],
+        "flavorText": "Man berichtet, es sei der Wächter der Meere und man habe es im Herzen eines tosenden Sturmes gesehen.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/swsh/cel25/22/high.webp",
+          "small": "https://assets.tcgdex.net/de/swsh/cel25/22/low.webp"
+        },
+        "name": "Lugia"
+      }
+    },
+    "id": "cel25-22",
+    "ids": {
+      "cardmarket": [
+        576767
+      ],
+      "pokemontcg": "cel25-22",
+      "tcgdex": "cel25-22",
+      "tcgplayer": [
+        250317
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/cel25/22/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/cel25/22/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Lugia",
+    "nationalPokedexNumbers": [
+      249
+    ],
+    "number": "22",
+    "rarity": "Rare",
+    "regulationMark": "E",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-30"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "cel25",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 576767,
+        "tcgplayerId": 250317,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "KIYOTAKA OSHIYAMA",
+    "cardId": "23",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/swsh/cel25/23/high.webp",
+          "small": "https://assets.tcgdex.net/de/swsh/cel25/23/low.webp"
+        },
+        "name": "Forschung des Professors (Prof. Eich)",
+        "rules": [
+          "Lege deine Handkarten auf deinen Ablagestapel und ziehe 7 Karten. Du kannst während deines Zuges nur 1 Unterstützerkarte spielen."
+        ]
+      }
+    },
+    "id": "cel25-23",
+    "ids": {
+      "cardmarket": [
+        576768
+      ],
+      "pokemontcg": "cel25-23",
+      "tcgdex": "cel25-23",
+      "tcgplayer": [
+        250318
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/cel25/23/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/cel25/23/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Professor's Research (Professor Oak)",
+    "number": "23",
+    "rarity": "Rare Holo",
+    "regulationMark": "D",
+    "rules": [
+      "Discard your hand and draw 7 cards.",
+      "You may play only 1 Supporter card during your turn."
+    ],
+    "setId": "cel25",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Supporter"
+    ],
+    "supertype": "Trainer",
+    "variants": [
+      {
+        "cardmarketId": 576768,
+        "tcgplayerId": 250318,
+        "type": "holo"
+      }
+    ]
+  },
+  {
+    "artist": "Ken Sugimori",
+    "cardId": "24",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/swsh/cel25/24/high.webp",
+          "small": "https://assets.tcgdex.net/de/swsh/cel25/24/low.webp"
+        },
+        "name": "Forschung des Professors (Prof. Eich)",
+        "rules": [
+          "Lege deine Handkarten auf deinen Ablagestapel und ziehe 7 Karten."
+        ]
+      }
+    },
+    "id": "cel25-24",
+    "ids": {
+      "cardmarket": [
+        576769
+      ],
+      "pokemontcg": "cel25-24",
+      "tcgdex": "cel25-24",
+      "tcgplayer": [
+        250293
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/cel25/24/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/cel25/24/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Professor's Research (Professor Oak)",
+    "number": "24",
+    "rarity": "Rare Ultra",
+    "regulationMark": "D",
+    "rules": [
+      "Discard your hand and draw 7 cards.",
+      "You may play only 1 Supporter card during your turn."
+    ],
+    "setId": "cel25",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Supporter"
+    ],
+    "supertype": "Trainer",
+    "variants": [
+      {
+        "cardmarketId": 576769,
+        "tcgplayerId": 250293,
+        "type": "holo"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Mysterious Tail",
+        "text": "Once during your turn, if this Pokémon is in the Active Spot, you may look at the top 6 cards of your deck, reveal an Item card you find there, and put it into your hand. Shuffle the other cards back into your deck.",
+        "type": "Ability"
+      }
+    ],
+    "artist": "Saki Hayashiro",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Psychic",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Psyshot",
+        "text": ""
+      }
+    ],
+    "cardId": "25",
+    "convertedRetreatCost": 1,
+    "flavorText": "Its DNA is said to contain the genetic codes of all Pokémon, so it can use all kinds of techniques.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Geheimnisvoller Schweif",
+            "text": "Einmal während deines Zuges, wenn dieses Pokémon in der Aktiven Position ist, kannst du dir die obersten 6 Karten deines Decks anschauen, 1 Itemkarte, die du dort findest, deinem Gegner zeigen und auf deine Hand nehmen. Mische die anderen Karten zurück in dein Deck."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Psychoschuss"
+          }
+        ],
+        "flavorText": "Seine DNS soll den genetischen Code aller Pokémon beinhalten. Dadurch kann es alle Attacken erlernen.",
+        "name": "Mew"
+      }
+    },
+    "id": "cel25-25",
+    "ids": {
+      "cardmarket": [
+        576770
+      ],
+      "pokemontcg": "cel25-25",
+      "tcgdex": "cel25-25",
+      "tcgplayer": [
+        250295
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/cel25/25_hires.png",
+      "small": "https://images.pokemontcg.io/cel25/25.png"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Mew",
+    "nationalPokedexNumbers": [
+      151
+    ],
+    "number": "25",
+    "rarity": "Rare Holo",
+    "regulationMark": "E",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-30"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "cel25",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 576770,
+        "tcgplayerId": 250295,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Darkness",
+        "value": "×2"
+      }
+    ]
+  }
+]

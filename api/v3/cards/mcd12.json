@@ -1,0 +1,1023 @@
+[
+  {
+    "artist": "Kagemaru Himeno",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Wrap",
+        "text": "Flip a coin. If heads, the Defending Pokémon is now Paralyzed."
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Grass",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Tackle",
+        "text": ""
+      }
+    ],
+    "cardId": "1",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Snivy",
+    "evolvesTo": [
+      "Serperior"
+    ],
+    "flavorText": "They avoid attacks by sinking into the shadows of thick foliage. They retaliate with masterful whipping techniques.",
+    "hp": "80",
+    "id": "mcd12-1",
+    "ids": {
+      "cardmarket": [
+        281778
+      ],
+      "pokemontcg": "mcd12-1",
+      "tcgdex": "2012bw-1",
+      "tcgplayer": [
+        89081
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/mcd12/1_hires.png",
+      "small": "https://images.pokemontcg.io/mcd12/1.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Servine",
+    "nationalPokedexNumbers": [
+      496
+    ],
+    "number": "1",
+    "resistances": [
+      {
+        "type": "Water",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "mcd12",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 281778,
+        "stamp": [
+          "mcdonalds"
+        ],
+        "tcgplayerId": 89081,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Kouki Saitou",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Collect",
+        "text": "Draw a card."
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Scratch",
+        "text": ""
+      }
+    ],
+    "cardId": "2",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Simisage"
+    ],
+    "flavorText": "This Pokémon dwells deep in the forest. Eating a leaf from its head whisks weariness away as if by magic.",
+    "hp": "70",
+    "id": "mcd12-2",
+    "ids": {
+      "cardmarket": [
+        281779
+      ],
+      "pokemontcg": "mcd12-2",
+      "tcgdex": "2012bw-2",
+      "tcgplayer": [
+        87937
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/mcd12/2_hires.png",
+      "small": "https://images.pokemontcg.io/mcd12/2.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Pansage",
+    "nationalPokedexNumbers": [
+      511
+    ],
+    "number": "2",
+    "resistances": [
+      {
+        "type": "Water",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "mcd12",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 281779,
+        "stamp": [
+          "mcdonalds"
+        ],
+        "tcgplayerId": 87937,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "MAHOU",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Withdraw",
+        "text": "Flip a coin. If heads, prevent all damage done to this Pokémon by attacks during your opponent's next turn."
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Grass",
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Slash",
+        "text": ""
+      }
+    ],
+    "cardId": "3",
+    "convertedRetreatCost": 2,
+    "evolvesTo": [
+      "Crustle"
+    ],
+    "flavorText": "The Pokémon can easily melt holes in hard rocks with a liquid secreted from its mouth.",
+    "hp": "60",
+    "id": "mcd12-3",
+    "ids": {
+      "cardmarket": [
+        281780
+      ],
+      "pokemontcg": "mcd12-3",
+      "tcgdex": "2012bw-3",
+      "tcgplayer": [
+        85065
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/mcd12/3_hires.png",
+      "small": "https://images.pokemontcg.io/mcd12/3.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Dwebble",
+    "nationalPokedexNumbers": [
+      557
+    ],
+    "number": "3",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "mcd12",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 281780,
+        "stamp": [
+          "mcdonalds"
+        ],
+        "tcgplayerId": 85065,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Kouki Saitou",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Flame Charge",
+        "text": "Search your deck for a Fire Energy card and attach it to this Pokémon. Shuffle your deck afterward."
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Fire",
+          "Fire",
+          "Colorless"
+        ],
+        "damage": "50",
+        "name": "Heat Crash",
+        "text": ""
+      }
+    ],
+    "cardId": "4",
+    "convertedRetreatCost": 3,
+    "evolvesFrom": "Tepig",
+    "evolvesTo": [
+      "Emboar"
+    ],
+    "flavorText": "When its internal fire flares up, its movements grow sharper and faster. When in trouble, it emits smoke.",
+    "hp": "100",
+    "id": "mcd12-4",
+    "ids": {
+      "cardmarket": [
+        281781
+      ],
+      "pokemontcg": "mcd12-4",
+      "tcgdex": "2012bw-4",
+      "tcgplayer": [
+        88064
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/mcd12/4_hires.png",
+      "small": "https://images.pokemontcg.io/mcd12/4.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Pignite",
+    "nationalPokedexNumbers": [
+      499
+    ],
+    "number": "4",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "mcd12",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fire"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 281781,
+        "stamp": [
+          "mcdonalds"
+        ],
+        "tcgplayerId": 88064,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Water",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Masakazu Fukuda",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Water Gun",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Water",
+          "Water",
+          "Colorless"
+        ],
+        "damage": "40+",
+        "name": "Razor Shell",
+        "text": "Flip a coin. If heads, this attack does 20 more damage."
+      }
+    ],
+    "cardId": "5",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Oshawott",
+    "evolvesTo": [
+      "Samurott"
+    ],
+    "flavorText": "Scalchop techniques differ from one Dewott to another. It never neglects maintaining its scalchops.",
+    "hp": "90",
+    "id": "mcd12-5",
+    "ids": {
+      "cardmarket": [
+        281782
+      ],
+      "pokemontcg": "mcd12-5",
+      "tcgdex": "2012bw-5",
+      "tcgplayer": [
+        84797
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/mcd12/5_hires.png",
+      "small": "https://images.pokemontcg.io/mcd12/5.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Dewott",
+    "nationalPokedexNumbers": [
+      502
+    ],
+    "number": "5",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "mcd12",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 281782,
+        "stamp": [
+          "mcdonalds"
+        ],
+        "tcgplayerId": 84797,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Kouki Saitou",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Lightning"
+        ],
+        "damage": "10",
+        "name": "Thundershock",
+        "text": "Flip a coin. If heads, the Defending Pokémon is now Paralyzed."
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "10+",
+        "name": "Acrobatics",
+        "text": "Flip 2 coins. This attack does 20 more damage for each heads."
+      }
+    ],
+    "cardId": "6",
+    "convertedRetreatCost": 0,
+    "flavorText": "The energy made in its cheeks' electric pouches is stored inside its membranes and released while it is gliding.",
+    "hp": "70",
+    "id": "mcd12-6",
+    "ids": {
+      "cardmarket": [
+        281783
+      ],
+      "pokemontcg": "mcd12-6",
+      "tcgdex": "2012bw-6",
+      "tcgplayer": [
+        85193
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/mcd12/6_hires.png",
+      "small": "https://images.pokemontcg.io/mcd12/6.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Emolga",
+    "nationalPokedexNumbers": [
+      587
+    ],
+    "number": "6",
+    "setId": "mcd12",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 281783,
+        "stamp": [
+          "mcdonalds"
+        ],
+        "tcgplayerId": 85193,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Masakazu Fukuda",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Psychic",
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Psy Bolt",
+        "text": "Flip a coin. If heads, the Defending Pokémon is now Paralyzed."
+      }
+    ],
+    "cardId": "7",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Swoobat"
+    ],
+    "flavorText": "Its habitat is dark forests and caves. It emits ultrasonic waves from its nose to learn about its surroundings.",
+    "hp": "60",
+    "id": "mcd12-7",
+    "ids": {
+      "cardmarket": [
+        281784
+      ],
+      "pokemontcg": "mcd12-7",
+      "tcgdex": "2012bw-7",
+      "tcgplayer": [
+        90629
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/mcd12/7_hires.png",
+      "small": "https://images.pokemontcg.io/mcd12/7.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Woobat",
+    "nationalPokedexNumbers": [
+      527
+    ],
+    "number": "7",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "mcd12",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 281784,
+        "stamp": [
+          "mcdonalds"
+        ],
+        "tcgplayerId": 90629,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "match",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Fighting"
+        ],
+        "damage": "10",
+        "name": "Hone ClawsScratch",
+        "text": "During your next turn, each of this Pokémon's attacks does 30 more damage (before applying Weakness and Resistance)."
+      }
+    ],
+    "cardId": "8",
+    "convertedRetreatCost": 2,
+    "evolvesTo": [
+      "Excadrill"
+    ],
+    "flavorText": "It can dig through the ground at a speed of 30 mph. It could give a car running aboveground a good race.",
+    "hp": "70",
+    "id": "mcd12-8",
+    "ids": {
+      "cardmarket": [
+        281785
+      ],
+      "pokemontcg": "mcd12-8",
+      "tcgdex": "2012bw-8",
+      "tcgplayer": [
+        84967
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/mcd12/8_hires.png",
+      "small": "https://images.pokemontcg.io/mcd12/8.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Drilbur",
+    "nationalPokedexNumbers": [
+      529
+    ],
+    "number": "8",
+    "resistances": [
+      {
+        "type": "Lightning",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "mcd12",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 281785,
+        "stamp": [
+          "mcdonalds"
+        ],
+        "tcgplayerId": 84967,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Water",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Atsuko Nishida",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Darkness",
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Knock Off",
+        "text": "Flip a coin. If heads, discard a random card from your opponent's hand."
+      }
+    ],
+    "cardId": "9",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Liepard"
+    ],
+    "flavorText": "They steal from people for fun, but their victims can't help but forgive them. Their deceptively cute act is perfect.",
+    "hp": "60",
+    "id": "mcd12-9",
+    "ids": {
+      "cardmarket": [
+        281786
+      ],
+      "pokemontcg": "mcd12-9",
+      "tcgdex": "2012bw-9",
+      "tcgplayer": [
+        88463
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/mcd12/9_hires.png",
+      "small": "https://images.pokemontcg.io/mcd12/9.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Purrloin",
+    "nationalPokedexNumbers": [
+      509
+    ],
+    "number": "9",
+    "resistances": [
+      {
+        "type": "Psychic",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "mcd12",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Darkness"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 281786,
+        "stamp": [
+          "mcdonalds"
+        ],
+        "tcgplayerId": 88463,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Masakazu Fukuda",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "10",
+        "name": "Headbutt",
+        "text": ""
+      }
+    ],
+    "cardId": "10",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Scrafty"
+    ],
+    "flavorText": "Its skin has a rubbery elasticity, so it can reduce damage by defensively pulling its skin up to its neck.",
+    "hp": "60",
+    "id": "mcd12-10",
+    "ids": {
+      "cardmarket": [
+        281787
+      ],
+      "pokemontcg": "mcd12-10",
+      "tcgdex": "2012bw-10",
+      "tcgplayer": [
+        88986
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/mcd12/10_hires.png",
+      "small": "https://images.pokemontcg.io/mcd12/10.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Scraggy",
+    "nationalPokedexNumbers": [
+      559
+    ],
+    "number": "10",
+    "resistances": [
+      {
+        "type": "Psychic",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "mcd12",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Darkness"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 281787,
+        "stamp": [
+          "mcdonalds"
+        ],
+        "tcgplayerId": 88986,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Kouki Saitou",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Metal Sound",
+        "text": "The Defending Pokémon is now Confused."
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Metal",
+          "Metal",
+          "Colorless"
+        ],
+        "damage": "60",
+        "name": "Guard Press",
+        "text": "During your opponent's next turn, any damage done to this Pokémon by attacks is reduced by 20 (after applying Weakness and Resistance)."
+      }
+    ],
+    "cardId": "11",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Klink",
+    "evolvesTo": [
+      "Klinklang"
+    ],
+    "flavorText": "Spinning minigears are rotated at high speed and repeatedly fired away. It is dangerous if the gears don't return.",
+    "hp": "80",
+    "id": "mcd12-11",
+    "ids": {
+      "cardmarket": [
+        281788
+      ],
+      "pokemontcg": "mcd12-11",
+      "tcgdex": "2012bw-11",
+      "tcgplayer": [
+        86478
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/mcd12/11_hires.png",
+      "small": "https://images.pokemontcg.io/mcd12/11.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Klang",
+    "nationalPokedexNumbers": [
+      600
+    ],
+    "number": "11",
+    "resistances": [
+      {
+        "type": "Psychic",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "mcd12",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Metal"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 281788,
+        "stamp": [
+          "mcdonalds"
+        ],
+        "tcgplayerId": 86478,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Atsuko Nishida",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "10×",
+        "name": "Dual Chop",
+        "text": "Flip 2 coins. This attack does 10 damage times the number of heads."
+      }
+    ],
+    "cardId": "12",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Fraxure"
+    ],
+    "flavorText": "They use their tusks to crush the berries they eat. Repeated regrowth makes their tusks strong and sharp.",
+    "hp": "60",
+    "id": "mcd12-12",
+    "ids": {
+      "cardmarket": [
+        281789
+      ],
+      "pokemontcg": "mcd12-12",
+      "tcgdex": "2012bw-12",
+      "tcgplayer": [
+        83673
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/mcd12/12_hires.png",
+      "small": "https://images.pokemontcg.io/mcd12/12.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Axew",
+    "nationalPokedexNumbers": [
+      610
+    ],
+    "number": "12",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "mcd12",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 281789,
+        "stamp": [
+          "mcdonalds"
+        ],
+        "tcgplayerId": 83673,
+        "type": "holo"
+      }
+    ]
+  }
+]
