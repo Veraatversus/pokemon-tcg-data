@@ -1,0 +1,16 @@
+{
+  "pokemontcg": {
+    "commit": "bc4a5871a2468e9f3fb8aaf0916c72255ed90d99",
+    "fetchedAt": "2026-11-11T17:20:21.527Z",
+    "ref": "master",
+    "repo": "PokemonTCG/pokemon-tcg-data + JulienGitHub/pokemon-tcg-data (gemergt)",
+    "status": "frozen"
+  },
+  "tcgdex": {
+    "commit": "5fbf524a3650cbf33926382388133c5a14965840",
+    "fetchedAt": "2026-11-11T16:46:47.351Z",
+    "ref": "master",
+    "repo": "tcgdex/cards-database",
+    "status": "active"
+  }
+}
