@@ -15,6 +15,7 @@ Erzeugt: 2026-11-11T16:46:47.351Z
 - Nur in TCGdex (in gepaarten Sets): 74
 - Ungepaarte TCGdex-Sets: 32 (728 Karten)
 - Doppelt zugeordnet: 0
+- Unaufgeloeste Aliase: 0
 
 ## Quellen
 

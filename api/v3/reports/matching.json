@@ -2792,6 +2792,7 @@
     "xya"
   ],
   "doubleAssigned": [],
+  "unresolvedAliases": [],
   "warnings": [
     "sources/tcgdex/data/Platinum/Supreme Victors/AR1.ts: doppelte Karte AR1 im Set; behalten wird sources/tcgdex/data/Platinum/Arceus/AR1.ts",
     "sources/tcgdex/data/Platinum/Supreme Victors/AR2.ts: doppelte Karte AR2 im Set; behalten wird sources/tcgdex/data/Platinum/Arceus/AR2.ts",
