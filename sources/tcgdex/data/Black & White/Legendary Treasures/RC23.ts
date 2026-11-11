@@ -1,0 +1,89 @@
+import { Card } from '../../../interfaces'
+import Set from '../Legendary Treasures'
+
+const card: Card = {
+	name: {
+		de: "Emolga",
+		en: "Emolga",
+	},
+
+	illustrator: "Atsuko Nishida",
+	rarity: "Ultra Rare",
+	category: "Pokemon",
+	set: Set,
+
+	dexId: [
+		587,
+	],
+
+	hp: 70,
+
+	types: [
+		"Lightning",
+	],
+
+	stage: "Basic",
+
+	attacks: [
+		{
+			cost: [
+				"Colorless",
+			],
+			name: {
+				en: "Call for Family",
+			},
+			effect: {
+				en: "Search your deck for 2 Basic Pokémon and put them onto your Bench. Shuffle your deck afterward.",
+			},
+
+		},
+		{
+			cost: [
+				"Lightning",
+			],
+			name: {
+				en: "Static Shock",
+			},
+
+			damage: 20,
+
+		},
+	],
+
+	weaknesses: [
+		{
+			type: "Lightning",
+			value: "×2"
+		},
+	],
+
+	resistances: [
+		{
+			type: "Fighting",
+			value: "-20"
+		},
+	],
+
+	description: {
+		en: "It glides on its outstretched membrane while shocking foes with the electricity stored in the pouches on its cheeks.",
+	},
+
+	variants: [
+		{
+			type: 'normal',
+			thirdParty: {
+				cardmarket: 281147,
+				tcgplayer: 85192
+			}
+		},
+		{
+			type: 'reverse',
+			thirdParty: {
+				cardmarket: 281147,
+				tcgplayer: 85192
+			}
+		},
+	],
+}
+
+export default card

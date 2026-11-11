@@ -1,0 +1,34 @@
+import { Card } from '../../../interfaces'
+import Set from '../Emerald'
+
+const card: Card = {
+	name: {
+		en: "Water Energy",
+		fr: "Énergie Eau",
+		de: "Wasserenergie"
+	},
+
+	illustrator: undefined,
+	rarity: "Rare",
+	category: "Energy",
+	set: Set,
+	stage: "Basic",
+	energyType: "Normal",
+
+	thirdParty: {
+		tcgplayer: 90507,
+		cardmarket: 276614
+	},
+
+	variants: [
+		{
+			type: "holo",
+			thirdParty: {
+				tcgplayer: 90507,
+				cardmarket: 276614
+			},
+		},
+	],
+}
+
+export default card
