@@ -25,7 +25,7 @@ const tsBaseNames = (dir) => listDir(dir)
 
 const numberOrNull = (v) => (typeof v === 'number' ? v : null);
 
-export function loadTcgdexDatabase(rootDir, { excludeSerieIds = ['tcgp'] } = {}) {
+export function loadTcgdexDatabase(rootDir, { excludeSerieIds = [] } = {}) {
   const dataDir = path.join(rootDir, 'data');
   const sets = [];
   const errors = [];

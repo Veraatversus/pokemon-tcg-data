@@ -1,0 +1,903 @@
+{
+  "1": {
+    "keys": {
+      "pokemontcg": [
+        "1"
+      ],
+      "tcgdex": [
+        "1"
+      ]
+    },
+    "pokemontcg": "basep-1",
+    "tcgdex": [
+      {
+        "localId": "1",
+        "set": "basep"
+      }
+    ]
+  },
+  "2": {
+    "keys": {
+      "pokemontcg": [
+        "2"
+      ],
+      "tcgdex": [
+        "2"
+      ]
+    },
+    "pokemontcg": "basep-2",
+    "tcgdex": [
+      {
+        "localId": "2",
+        "set": "basep"
+      }
+    ]
+  },
+  "3": {
+    "keys": {
+      "pokemontcg": [
+        "3"
+      ],
+      "tcgdex": [
+        "3"
+      ]
+    },
+    "pokemontcg": "basep-3",
+    "tcgdex": [
+      {
+        "localId": "3",
+        "set": "basep"
+      }
+    ]
+  },
+  "4": {
+    "keys": {
+      "pokemontcg": [
+        "4"
+      ],
+      "tcgdex": [
+        "4"
+      ]
+    },
+    "pokemontcg": "basep-4",
+    "tcgdex": [
+      {
+        "localId": "4",
+        "set": "basep"
+      }
+    ]
+  },
+  "5": {
+    "keys": {
+      "pokemontcg": [
+        "5"
+      ],
+      "tcgdex": [
+        "5"
+      ]
+    },
+    "pokemontcg": "basep-5",
+    "tcgdex": [
+      {
+        "localId": "5",
+        "set": "basep"
+      }
+    ]
+  },
+  "6": {
+    "keys": {
+      "pokemontcg": [
+        "6"
+      ],
+      "tcgdex": [
+        "6"
+      ]
+    },
+    "pokemontcg": "basep-6",
+    "tcgdex": [
+      {
+        "localId": "6",
+        "set": "basep"
+      }
+    ]
+  },
+  "7": {
+    "keys": {
+      "pokemontcg": [
+        "7"
+      ],
+      "tcgdex": [
+        "7"
+      ]
+    },
+    "pokemontcg": "basep-7",
+    "tcgdex": [
+      {
+        "localId": "7",
+        "set": "basep"
+      }
+    ]
+  },
+  "8": {
+    "keys": {
+      "pokemontcg": [
+        "8"
+      ],
+      "tcgdex": [
+        "8"
+      ]
+    },
+    "pokemontcg": "basep-8",
+    "tcgdex": [
+      {
+        "localId": "8",
+        "set": "basep"
+      }
+    ]
+  },
+  "9": {
+    "keys": {
+      "pokemontcg": [
+        "9"
+      ],
+      "tcgdex": [
+        "9"
+      ]
+    },
+    "pokemontcg": "basep-9",
+    "tcgdex": [
+      {
+        "localId": "9",
+        "set": "basep"
+      }
+    ]
+  },
+  "10": {
+    "keys": {
+      "pokemontcg": [
+        "10"
+      ],
+      "tcgdex": [
+        "10"
+      ]
+    },
+    "pokemontcg": "basep-10",
+    "tcgdex": [
+      {
+        "localId": "10",
+        "set": "basep"
+      }
+    ]
+  },
+  "11": {
+    "keys": {
+      "pokemontcg": [
+        "11"
+      ],
+      "tcgdex": [
+        "11"
+      ]
+    },
+    "pokemontcg": "basep-11",
+    "tcgdex": [
+      {
+        "localId": "11",
+        "set": "basep"
+      }
+    ]
+  },
+  "12": {
+    "keys": {
+      "pokemontcg": [
+        "12"
+      ],
+      "tcgdex": [
+        "12"
+      ]
+    },
+    "pokemontcg": "basep-12",
+    "tcgdex": [
+      {
+        "localId": "12",
+        "set": "basep"
+      }
+    ]
+  },
+  "13": {
+    "keys": {
+      "pokemontcg": [
+        "13"
+      ],
+      "tcgdex": [
+        "13"
+      ]
+    },
+    "pokemontcg": "basep-13",
+    "tcgdex": [
+      {
+        "localId": "13",
+        "set": "basep"
+      }
+    ]
+  },
+  "14": {
+    "keys": {
+      "pokemontcg": [
+        "14"
+      ],
+      "tcgdex": [
+        "14"
+      ]
+    },
+    "pokemontcg": "basep-14",
+    "tcgdex": [
+      {
+        "localId": "14",
+        "set": "basep"
+      }
+    ]
+  },
+  "15": {
+    "keys": {
+      "pokemontcg": [
+        "15"
+      ],
+      "tcgdex": [
+        "15"
+      ]
+    },
+    "pokemontcg": "basep-15",
+    "tcgdex": [
+      {
+        "localId": "15",
+        "set": "basep"
+      }
+    ]
+  },
+  "16": {
+    "keys": {
+      "pokemontcg": [
+        "16"
+      ],
+      "tcgdex": [
+        "16"
+      ]
+    },
+    "pokemontcg": "basep-16",
+    "tcgdex": [
+      {
+        "localId": "16",
+        "set": "basep"
+      }
+    ]
+  },
+  "17": {
+    "keys": {
+      "pokemontcg": [
+        "17"
+      ],
+      "tcgdex": [
+        "17"
+      ]
+    },
+    "pokemontcg": "basep-17",
+    "tcgdex": [
+      {
+        "localId": "17",
+        "set": "basep"
+      }
+    ]
+  },
+  "18": {
+    "keys": {
+      "pokemontcg": [
+        "18"
+      ],
+      "tcgdex": [
+        "18"
+      ]
+    },
+    "pokemontcg": "basep-18",
+    "tcgdex": [
+      {
+        "localId": "18",
+        "set": "basep"
+      }
+    ]
+  },
+  "19": {
+    "keys": {
+      "pokemontcg": [
+        "19"
+      ],
+      "tcgdex": [
+        "19"
+      ]
+    },
+    "pokemontcg": "basep-19",
+    "tcgdex": [
+      {
+        "localId": "19",
+        "set": "basep"
+      }
+    ]
+  },
+  "20": {
+    "keys": {
+      "pokemontcg": [
+        "20"
+      ],
+      "tcgdex": [
+        "20"
+      ]
+    },
+    "pokemontcg": "basep-20",
+    "tcgdex": [
+      {
+        "localId": "20",
+        "set": "basep"
+      }
+    ]
+  },
+  "21": {
+    "keys": {
+      "pokemontcg": [
+        "21"
+      ],
+      "tcgdex": [
+        "21"
+      ]
+    },
+    "pokemontcg": "basep-21",
+    "tcgdex": [
+      {
+        "localId": "21",
+        "set": "basep"
+      }
+    ]
+  },
+  "22": {
+    "keys": {
+      "pokemontcg": [
+        "22"
+      ],
+      "tcgdex": [
+        "22"
+      ]
+    },
+    "pokemontcg": "basep-22",
+    "tcgdex": [
+      {
+        "localId": "22",
+        "set": "basep"
+      }
+    ]
+  },
+  "23": {
+    "keys": {
+      "pokemontcg": [
+        "23"
+      ],
+      "tcgdex": [
+        "23"
+      ]
+    },
+    "pokemontcg": "basep-23",
+    "tcgdex": [
+      {
+        "localId": "23",
+        "set": "basep"
+      }
+    ]
+  },
+  "24": {
+    "keys": {
+      "pokemontcg": [
+        "24"
+      ],
+      "tcgdex": [
+        "24"
+      ]
+    },
+    "pokemontcg": "basep-24",
+    "tcgdex": [
+      {
+        "localId": "24",
+        "set": "basep"
+      }
+    ]
+  },
+  "25": {
+    "keys": {
+      "pokemontcg": [
+        "25"
+      ],
+      "tcgdex": [
+        "25"
+      ]
+    },
+    "pokemontcg": "basep-25",
+    "tcgdex": [
+      {
+        "localId": "25",
+        "set": "basep"
+      }
+    ]
+  },
+  "26": {
+    "keys": {
+      "pokemontcg": [
+        "26"
+      ],
+      "tcgdex": [
+        "26"
+      ]
+    },
+    "pokemontcg": "basep-26",
+    "tcgdex": [
+      {
+        "localId": "26",
+        "set": "basep"
+      }
+    ]
+  },
+  "27": {
+    "keys": {
+      "pokemontcg": [
+        "27"
+      ],
+      "tcgdex": [
+        "27"
+      ]
+    },
+    "pokemontcg": "basep-27",
+    "tcgdex": [
+      {
+        "localId": "27",
+        "set": "basep"
+      }
+    ]
+  },
+  "28": {
+    "keys": {
+      "pokemontcg": [
+        "28"
+      ],
+      "tcgdex": [
+        "28"
+      ]
+    },
+    "pokemontcg": "basep-28",
+    "tcgdex": [
+      {
+        "localId": "28",
+        "set": "basep"
+      }
+    ]
+  },
+  "29": {
+    "keys": {
+      "pokemontcg": [
+        "29"
+      ],
+      "tcgdex": [
+        "29"
+      ]
+    },
+    "pokemontcg": "basep-29",
+    "tcgdex": [
+      {
+        "localId": "29",
+        "set": "basep"
+      }
+    ]
+  },
+  "30": {
+    "keys": {
+      "pokemontcg": [
+        "30"
+      ],
+      "tcgdex": [
+        "30"
+      ]
+    },
+    "pokemontcg": "basep-30",
+    "tcgdex": [
+      {
+        "localId": "30",
+        "set": "basep"
+      }
+    ]
+  },
+  "31": {
+    "keys": {
+      "pokemontcg": [
+        "31"
+      ],
+      "tcgdex": [
+        "31"
+      ]
+    },
+    "pokemontcg": "basep-31",
+    "tcgdex": [
+      {
+        "localId": "31",
+        "set": "basep"
+      }
+    ]
+  },
+  "32": {
+    "keys": {
+      "pokemontcg": [
+        "32"
+      ],
+      "tcgdex": [
+        "32"
+      ]
+    },
+    "pokemontcg": "basep-32",
+    "tcgdex": [
+      {
+        "localId": "32",
+        "set": "basep"
+      }
+    ]
+  },
+  "33": {
+    "keys": {
+      "pokemontcg": [
+        "33"
+      ],
+      "tcgdex": [
+        "33"
+      ]
+    },
+    "pokemontcg": "basep-33",
+    "tcgdex": [
+      {
+        "localId": "33",
+        "set": "basep"
+      }
+    ]
+  },
+  "34": {
+    "keys": {
+      "pokemontcg": [
+        "34"
+      ],
+      "tcgdex": [
+        "34"
+      ]
+    },
+    "pokemontcg": "basep-34",
+    "tcgdex": [
+      {
+        "localId": "34",
+        "set": "basep"
+      }
+    ]
+  },
+  "35": {
+    "keys": {
+      "pokemontcg": [
+        "35"
+      ],
+      "tcgdex": [
+        "35"
+      ]
+    },
+    "pokemontcg": "basep-35",
+    "tcgdex": [
+      {
+        "localId": "35",
+        "set": "basep"
+      }
+    ]
+  },
+  "36": {
+    "keys": {
+      "pokemontcg": [
+        "36"
+      ],
+      "tcgdex": [
+        "36"
+      ]
+    },
+    "pokemontcg": "basep-36",
+    "tcgdex": [
+      {
+        "localId": "36",
+        "set": "basep"
+      }
+    ]
+  },
+  "37": {
+    "keys": {
+      "pokemontcg": [
+        "37"
+      ],
+      "tcgdex": [
+        "37"
+      ]
+    },
+    "pokemontcg": "basep-37",
+    "tcgdex": [
+      {
+        "localId": "37",
+        "set": "basep"
+      }
+    ]
+  },
+  "38": {
+    "keys": {
+      "pokemontcg": [
+        "38"
+      ],
+      "tcgdex": [
+        "38"
+      ]
+    },
+    "pokemontcg": "basep-38",
+    "tcgdex": [
+      {
+        "localId": "38",
+        "set": "basep"
+      }
+    ]
+  },
+  "39": {
+    "keys": {
+      "pokemontcg": [
+        "39"
+      ],
+      "tcgdex": [
+        "39"
+      ]
+    },
+    "pokemontcg": "basep-39",
+    "tcgdex": [
+      {
+        "localId": "39",
+        "set": "basep"
+      }
+    ]
+  },
+  "40": {
+    "keys": {
+      "pokemontcg": [
+        "40"
+      ],
+      "tcgdex": [
+        "40"
+      ]
+    },
+    "pokemontcg": "basep-40",
+    "tcgdex": [
+      {
+        "localId": "40",
+        "set": "basep"
+      }
+    ]
+  },
+  "41": {
+    "keys": {
+      "pokemontcg": [
+        "41"
+      ],
+      "tcgdex": [
+        "41"
+      ]
+    },
+    "pokemontcg": "basep-41",
+    "tcgdex": [
+      {
+        "localId": "41",
+        "set": "basep"
+      }
+    ]
+  },
+  "42": {
+    "keys": {
+      "pokemontcg": [
+        "42"
+      ],
+      "tcgdex": [
+        "42"
+      ]
+    },
+    "pokemontcg": "basep-42",
+    "tcgdex": [
+      {
+        "localId": "42",
+        "set": "basep"
+      }
+    ]
+  },
+  "43": {
+    "keys": {
+      "pokemontcg": [
+        "43"
+      ],
+      "tcgdex": [
+        "43"
+      ]
+    },
+    "pokemontcg": "basep-43",
+    "tcgdex": [
+      {
+        "localId": "43",
+        "set": "basep"
+      }
+    ]
+  },
+  "44": {
+    "keys": {
+      "pokemontcg": [
+        "44"
+      ],
+      "tcgdex": [
+        "44"
+      ]
+    },
+    "pokemontcg": "basep-44",
+    "tcgdex": [
+      {
+        "localId": "44",
+        "set": "basep"
+      }
+    ]
+  },
+  "45": {
+    "keys": {
+      "pokemontcg": [
+        "45"
+      ],
+      "tcgdex": [
+        "45"
+      ]
+    },
+    "pokemontcg": "basep-45",
+    "tcgdex": [
+      {
+        "localId": "45",
+        "set": "basep"
+      }
+    ]
+  },
+  "46": {
+    "keys": {
+      "pokemontcg": [
+        "46"
+      ],
+      "tcgdex": [
+        "46"
+      ]
+    },
+    "pokemontcg": "basep-46",
+    "tcgdex": [
+      {
+        "localId": "46",
+        "set": "basep"
+      }
+    ]
+  },
+  "47": {
+    "keys": {
+      "pokemontcg": [
+        "47"
+      ],
+      "tcgdex": [
+        "47"
+      ]
+    },
+    "pokemontcg": "basep-47",
+    "tcgdex": [
+      {
+        "localId": "47",
+        "set": "basep"
+      }
+    ]
+  },
+  "48": {
+    "keys": {
+      "pokemontcg": [
+        "48"
+      ],
+      "tcgdex": [
+        "48"
+      ]
+    },
+    "pokemontcg": "basep-48",
+    "tcgdex": [
+      {
+        "localId": "48",
+        "set": "basep"
+      }
+    ]
+  },
+  "49": {
+    "keys": {
+      "pokemontcg": [
+        "49"
+      ],
+      "tcgdex": [
+        "49"
+      ]
+    },
+    "pokemontcg": "basep-49",
+    "tcgdex": [
+      {
+        "localId": "49",
+        "set": "basep"
+      }
+    ]
+  },
+  "50": {
+    "keys": {
+      "pokemontcg": [
+        "50"
+      ],
+      "tcgdex": [
+        "50"
+      ]
+    },
+    "pokemontcg": "basep-50",
+    "tcgdex": [
+      {
+        "localId": "50",
+        "set": "basep"
+      }
+    ]
+  },
+  "51": {
+    "keys": {
+      "pokemontcg": [
+        "51"
+      ],
+      "tcgdex": [
+        "51"
+      ]
+    },
+    "pokemontcg": "basep-51",
+    "tcgdex": [
+      {
+        "localId": "51",
+        "set": "basep"
+      }
+    ]
+  },
+  "52": {
+    "keys": {
+      "pokemontcg": [
+        "52"
+      ],
+      "tcgdex": [
+        "52"
+      ]
+    },
+    "pokemontcg": "basep-52",
+    "tcgdex": [
+      {
+        "localId": "52",
+        "set": "basep"
+      }
+    ]
+  },
+  "53": {
+    "keys": {
+      "pokemontcg": [
+        "53"
+      ],
+      "tcgdex": [
+        "53"
+      ]
+    },
+    "pokemontcg": "basep-53",
+    "tcgdex": [
+      {
+        "localId": "53",
+        "set": "basep"
+      }
+    ]
+  }
+}

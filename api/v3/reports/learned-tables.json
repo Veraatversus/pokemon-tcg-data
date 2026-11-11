@@ -1,0 +1,349 @@
+{
+  "rarity": {
+    "ACE SPEC Rare": "ACE SPEC Rare",
+    "Amazing Rare": "Amazing Rare",
+    "Classic Collection": "Classic Collection",
+    "Common": "Common",
+    "Full Art Trainer": "Rare Ultra",
+    "Holo Rare": "Rare Holo",
+    "Holo Rare V": "Rare Holo V",
+    "Holo Rare VMAX": "Rare Holo VMAX",
+    "Holo Rare VSTAR": "Rare Holo VSTAR",
+    "Hyper rare": "Hyper Rare",
+    "Illustration rare": "Illustration Rare",
+    "LEGEND": "LEGEND",
+    "Mega Attack Rare": "MegaAttackRare",
+    "Pikachu Rare": "Pikachu Rare",
+    "Promo": "Promo",
+    "RGB Rare": "Common",
+    "Radiant Rare": "Radiant Rare",
+    "Rare Holo": "Rare Holo",
+    "Rare Holo LV.X": "Rare Holo LV.X",
+    "Rare PRIME": "Rare Prime",
+    "Shiny Ultra Rare": "Shiny Ultra Rare",
+    "Shiny rare V": "Rare Holo V",
+    "Shiny rare VMAX": "Rare Holo VMAX",
+    "Special illustration rare": "Special Illustration Rare",
+    "Uncommon": "Uncommon"
+  },
+  "rules": {
+    "EX|Basic|Secret Rare": [
+      "Pokémon-EX rule: When a Pokémon-EX has been Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "EX|Basic|Ultra Rare": [
+      "Pokémon-EX rule: When a Pokémon-EX has been Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "EX|MEGA|Secret Rare": [
+      "Mega Evolution rule: When 1 of your Pokémon becomes a Mega Evolution Pokémon, your turn ends.",
+      "Pokémon-EX rule: When a Pokémon-EX has been Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "EX|MEGA|Ultra Rare": [
+      "Mega Evolution rule: When 1 of your Pokémon becomes a Mega Evolution Pokémon, your turn ends.",
+      "Pokémon-EX rule: When a Pokémon-EX has been Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "EX||Promo": [
+      "Pokémon-EX rule: When a Pokémon-EX has been Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "EX||Rare": [
+      "Pokémon-EX rule: When a Pokémon-EX has been Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "EX||Ultra Rare": [
+      "Pokémon-EX rule: When a Pokémon-EX has been Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "GX|Basic|Promo": [
+      "Pokémon-GX rule: When your Pokémon-GX is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "GX|Stage1|Secret Rare": [
+      "Pokémon-GX rule: When your Pokémon-GX is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "GX|Stage2|Promo": [
+      "Pokémon-GX rule: When your Pokémon-GX is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "GX||Promo": [
+      "Pokémon-GX rule: When your Pokémon-GX is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "GX||Rare": [
+      "Pokémon-GX rule: When your Pokémon-GX is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "GX||Secret Rare": [
+      "Pokémon-GX rule: When your Pokémon-GX is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "GX||Shiny rare": [
+      "Pokémon-GX rule: When your Pokémon-GX is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "GX||Ultra Rare": [
+      "Pokémon-GX rule: When your Pokémon-GX is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "Prime|Basic|Rare PRIME": [],
+    "Prime|Stage1|Rare PRIME": [],
+    "Prime|Stage2|Rare PRIME": [],
+    "SP|Basic|Common": [],
+    "SP|Basic|Holo Rare": [],
+    "SP|Basic|Rare": [],
+    "SP|Basic|Uncommon": [],
+    "TAG TEAM-GX|Basic|Promo": [
+      "TAG TEAM rule: When your TAG TEAM is Knocked Out, your opponent takes 3 Prize cards."
+    ],
+    "TAG TEAM-GX|Basic|Secret Rare": [
+      "TAG TEAM rule: When your TAG TEAM is Knocked Out, your opponent takes 3 Prize cards."
+    ],
+    "TAG TEAM-GX||Promo": [
+      "TAG TEAM rule: When your TAG TEAM is Knocked Out, your opponent takes 3 Prize cards."
+    ],
+    "TAG TEAM-GX||Secret Rare": [
+      "TAG TEAM rule: When your TAG TEAM is Knocked Out, your opponent takes 3 Prize cards."
+    ],
+    "TAG TEAM-GX||Ultra Rare": [
+      "TAG TEAM rule: When your TAG TEAM is Knocked Out, your opponent takes 3 Prize cards."
+    ],
+    "V|Basic|Holo Rare V": [
+      "V rule: When your Pokémon V is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "V|Basic|Promo": [
+      "V rule: When your Pokémon V is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "V|Basic|Secret Rare": [
+      "V rule: When your Pokémon V is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "V|Basic|Shiny rare V": [
+      "V rule: When your Pokémon V is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "V|Basic|Ultra Rare": [
+      "V rule: When your Pokémon V is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "V|VSTAR|Holo Rare VSTAR": [
+      "VSTAR rule: When your Pokémon VSTAR is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "V|VSTAR|Promo": [
+      "VSTAR rule: When your Pokémon VSTAR is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "V|VSTAR|Secret Rare": [
+      "VSTAR rule: When your Pokémon VSTAR is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "V|VSTAR|Ultra Rare": [
+      "VSTAR rule: When your Pokémon VSTAR is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "V||Promo": [
+      "How to play a Pokémon V-UNION: Once per game during your turn, combine 4 different Morpeko V-UNION from your discard pile and put them onto your Bench.",
+      "V-UNION rule: When your Pokémon V-UNION is Knocked Out, your opponent takes 3 Prize cards."
+    ],
+    "ex|Basic|Hyper rare": [
+      "Pokémon ex rule: When your Pokémon ex is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "ex|Basic|Promo": [
+      "Pokémon ex rule: When your Pokémon ex is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "ex|Basic|Rare": [
+      "When Pokémon-ex has been Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "ex|Stage1|Promo": [
+      "Pokémon ex rule: When your Pokémon ex is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "ex|Stage1|Rare": [
+      "When Pokémon-ex has been Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "ex|Stage2|Mega Attack Rare": [],
+    "ex|Stage2|Rare": [
+      "When Pokémon-ex has been Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "ex|Stage2|Shiny Ultra Rare": [
+      "Pokémon ex rule: When your Pokémon ex is Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "ex||Rare": [
+      "When Pokémon-ex has been Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "|Baby|Rare": [
+      "If your Active Pokémon is a Baby Pokémon and your opponent announces an attack, your opponent flips a coin (before doing anything else). If tails, your opponent's turn ends."
+    ],
+    "|Basic|Amazing Rare": [],
+    "|Basic|Common": [],
+    "|Basic|Holo Rare": [],
+    "|Basic|Illustration rare": [],
+    "|Basic|None": [],
+    "|Basic|Pikachu Rare": [],
+    "|Basic|Promo": [],
+    "|Basic|RGB Rare": [],
+    "|Basic|Radiant Rare": [
+      "Radiant Pokémon Rule: You can't have more than 1 Radiant Pokémon in your deck."
+    ],
+    "|Basic|Rare": [],
+    "|Basic|Rare Holo": [],
+    "|Basic|Rare Holo LV.X": [],
+    "|Basic|Shiny rare": [],
+    "|Basic|Ultra Rare": [],
+    "|Basic|Uncommon": [],
+    "|MEGA|Promo": [
+      "Mega Evolution rule: When 1 of your Pokémon becomes a Mega Evolution Pokémon, your turn ends.",
+      "Pokémon-EX rule: When a Pokémon-EX has been Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "|MEGA|Ultra Rare": [
+      "Mega Evolution rule: When 1 of your Pokémon becomes a Mega Evolution Pokémon, your turn ends.",
+      "Pokémon-EX rule: When a Pokémon-EX has been Knocked Out, your opponent takes 2 Prize cards."
+    ],
+    "|Stage1|Common": [],
+    "|Stage1|Holo Rare": [],
+    "|Stage1|Illustration rare": [],
+    "|Stage1|None": [],
+    "|Stage1|Promo": [],
+    "|Stage1|Rare": [],
+    "|Stage1|Rare Holo": [],
+    "|Stage1|Secret Rare": [],
+    "|Stage1|Shiny rare": [],
+    "|Stage1|Uncommon": [],
+    "|Stage2|Classic Collection": [],
+    "|Stage2|Common": [],
+    "|Stage2|Holo Rare": [],
+    "|Stage2|Illustration rare": [],
+    "|Stage2|None": [],
+    "|Stage2|Promo": [],
+    "|Stage2|Rare": [],
+    "|Stage2|Rare Holo": [],
+    "|Stage2|Secret Rare": [],
+    "|Stage2|Shiny rare": [],
+    "|Stage2|Uncommon": [],
+    "|VMAX|Holo Rare VMAX": [
+      "VMAX rule: When your Pokémon VMAX is Knocked Out, your opponent takes 3 Prize cards."
+    ],
+    "|VMAX|Promo": [
+      "VMAX rule: When your Pokémon VMAX is Knocked Out, your opponent takes 3 Prize cards."
+    ],
+    "|VMAX|Secret Rare": [
+      "VMAX rule: When your Pokémon VMAX is Knocked Out, your opponent takes 3 Prize cards."
+    ],
+    "|VMAX|Shiny rare VMAX": [
+      "VMAX rule: When your Pokémon VMAX is Knocked Out, your opponent takes 3 Prize cards."
+    ],
+    "|VMAX|Ultra Rare": [
+      "VMAX rule: When your Pokémon VMAX is Knocked Out, your opponent takes 3 Prize cards."
+    ]
+  },
+  "subtypes": {
+    "BREAK|||": [
+      "BREAK"
+    ],
+    "Baby|||": [
+      "Baby"
+    ],
+    "Basic|EX||": [
+      "Basic",
+      "EX"
+    ],
+    "Basic|Legend||": [
+      "LEGEND"
+    ],
+    "Basic|Prime||": [
+      "Basic",
+      "Prime"
+    ],
+    "Basic|SP||": [
+      "Basic",
+      "SP"
+    ],
+    "Basic|TAG TEAM-GX||": [
+      "Basic",
+      "TAG TEAM",
+      "GX"
+    ],
+    "Basic|V||": [
+      "Basic",
+      "V"
+    ],
+    "Basic||Supporter|": [
+      "Basic"
+    ],
+    "Basic|||": [
+      "Basic"
+    ],
+    "Basic|||Normal": [
+      "Basic"
+    ],
+    "LEVEL-UP|SP||": [
+      "Level-Up",
+      "SP"
+    ],
+    "LEVEL-UP|||": [
+      "Level-Up"
+    ],
+    "MEGA|EX||": [
+      "MEGA",
+      "EX"
+    ],
+    "MEGA|||": [
+      "MEGA",
+      "EX"
+    ],
+    "RESTORED|||": [
+      "Restored"
+    ],
+    "Stage1|GX||": [
+      "Stage 1",
+      "GX"
+    ],
+    "Stage1|Prime||": [
+      "Stage 1",
+      "Prime"
+    ],
+    "Stage1|||": [
+      "Stage 1"
+    ],
+    "Stage2|EX||": [
+      "Stage 2",
+      "ex"
+    ],
+    "Stage2|GX||": [
+      "Stage 2",
+      "GX"
+    ],
+    "Stage2|Prime||": [
+      "Stage 2",
+      "Prime"
+    ],
+    "Stage2|||": [
+      "Stage 2"
+    ],
+    "V-UNION|V||": [
+      "V-UNION"
+    ],
+    "VSTAR|V||": [
+      "VSTAR"
+    ],
+    "|EX||": [
+      "Basic",
+      "EX"
+    ],
+    "|TAG TEAM-GX||": [
+      "Basic",
+      "TAG TEAM",
+      "GX"
+    ],
+    "|V||": [
+      "V-UNION"
+    ],
+    "||Item|": [
+      "Item"
+    ],
+    "||Rocket's Secret Machine|": [
+      "Rocket's Secret Machine"
+    ],
+    "||Stadium|": [
+      "Stadium"
+    ],
+    "||Supporter|": [
+      "Supporter"
+    ],
+    "||Technical Machine|": [
+      "Technical Machine"
+    ],
+    "|||Normal": [
+      "Basic"
+    ],
+    "|||Special": [
+      "Special"
+    ]
+  },
+  "supertype": {
+    "Energy": "Energy",
+    "Pokemon": "Pokémon",
+    "Trainer": "Trainer"
+  }
+}

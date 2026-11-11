@@ -1,0 +1,67 @@
+[
+  {
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Psychic",
+          "Psychic"
+        ],
+        "damage": "40",
+        "name": "Psyche",
+        "text": ""
+      }
+    ],
+    "cardId": "1",
+    "convertedRetreatCost": 2,
+    "flavorText": "New Species. Little God or Evil?",
+    "hp": "30",
+    "id": "TCGDEX-miscp-1",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "miscp-001",
+      "tcgplayer": [
+        108589
+      ]
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Ancient Mew",
+    "nationalPokedexNumbers": [
+      151
+    ],
+    "number": "001",
+    "rarity": "Promo",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-miscp",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "variants": [
+      {
+        "foil": "cosmos",
+        "tcgplayerId": 108589,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "x2"
+      }
+    ]
+  }
+]

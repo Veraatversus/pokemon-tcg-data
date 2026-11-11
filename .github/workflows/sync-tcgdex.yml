@@ -55,10 +55,13 @@ jobs:
         working-directory: scripts/api
         run: node --test test/matching-regression.test.mjs
 
+      - name: Build API v3 and registry
+        run: node scripts/api/build-api.mjs
+
       - name: Commit and push changes
         run: |
-          git add sources/tcgdex sources/SOURCES.json api/v3/reports
-          if [ -z "$(git status --porcelain -- sources/tcgdex sources/SOURCES.json api/v3/reports)" ]; then
+          git add sources/tcgdex sources/SOURCES.json api/v3 api/registry
+          if [ -z "$(git status --porcelain -- sources/tcgdex sources/SOURCES.json api/v3 api/registry)" ]; then
             echo "Keine Aenderungen - nichts zu committen"
             exit 0
           fi
@@ -72,9 +75,22 @@ jobs:
         with:
           script: |
             const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const { owner, repo } = context.repo;
+            const open = await github.rest.issues.listForRepo({ owner, repo, state: 'open', labels: 'upstream-sync', per_page: 1 });
+            if (open.data.length) {
+              const existing = open.data[0];
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: existing.number,
+                body: `Der TCGdex-Sync ist erneut fehlgeschlagen: ${runUrl}`
+              });
+              console.log('Commented on existing issue:', existing.number);
+              return;
+            }
             const issue = await github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
+              owner,
+              repo,
               title: 'TCGdex-Sync fehlgeschlagen - manuelle Pruefung erforderlich',
               body: `Der automatische TCGdex-Sync auf \`master\` ist fehlgeschlagen. Es wurde nichts committet.
 
@@ -84,10 +100,14 @@ jobs:
               - Tests, Parser oder Plausibilitaetspruefung des Spiegels sind fehlgeschlagen
               - Das Matching hat die Qualitaetsschwelle (0,995) verfehlt, Doppelzuordnungen oder unaufgeloeste Aliase gefunden oder die Set-Paarliste hat sich gegenueber dem letzten Report geaendert
               - Die Regressionstests gegen die frisch gespiegelten Quellen sind fehlgeschlagen
+              - Der v3-Build (Registry eingefroren/Invariante verletzt, Parserfehler, Pflichtfeld fehlt) ist fehlgeschlagen
               - Netzwerk- oder Push-Fehler
 
               **Erforderliche Aktion:**
               Bitte das Log des Laufs pruefen, die Ursache beheben und den Workflow erneut starten.
+              Bei Registry-Drift: Anleitung in [scripts/api/README.md](${context.serverUrl}/${owner}/${repo}/blob/master/scripts/api/README.md#registry-drift-beheben).
+
+              Weitere Fehlschlaege werden als Kommentar an diesem Issue ergaenzt.
               `,
               labels: ['upstream-sync', 'manual-action-required']
             });

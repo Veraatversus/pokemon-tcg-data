@@ -1,0 +1,7258 @@
+[
+  {
+    "artist": "5ban Graphics",
+    "cardId": "1",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/001/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/001/low.webp"
+        },
+        "name": "Trank",
+        "rules": [
+          "Heile 20 Schadenspunkte bei 1 deiner Pokémon."
+        ]
+      }
+    },
+    "id": "TCGDEX-P-A-1",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-001",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/001/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/001/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Potion",
+    "number": "001",
+    "rules": [
+      "Heal 20 damage from 1 of your Pokémon."
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Item"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "Toyste Beach",
+    "cardId": "2",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/002/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/002/low.webp"
+        },
+        "name": "X-Initiative",
+        "rules": [
+          "Während dieses Zuges verringern sich die Rückzugskosten deines Aktiven Pokémon um 1."
+        ]
+      }
+    },
+    "id": "TCGDEX-P-A-2",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-002",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/002/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/002/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "X Speed",
+    "number": "002",
+    "rules": [
+      "During this turn, the Retreat Cost of your Active Pokémon is 1 less."
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Item"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "Toyste Beach",
+    "cardId": "3",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/003/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/003/low.webp"
+        },
+        "name": "Handperiskop",
+        "rules": [
+          "Dein Gegner zeigt dir seine Handkarten."
+        ]
+      }
+    },
+    "id": "TCGDEX-P-A-3",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-003",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/003/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/003/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Hand Scope",
+    "number": "003",
+    "rules": [
+      "Your opponent reveals their hand."
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Item"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "Ryo Ueda",
+    "cardId": "4",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/004/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/004/low.webp"
+        },
+        "name": "Pokédex",
+        "rules": [
+          "Schau dir die oberste Karte deines Decks an."
+        ]
+      }
+    },
+    "id": "TCGDEX-P-A-4",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-004",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/004/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/004/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Pokédex",
+    "number": "004",
+    "rules": [
+      "Look at the top 3 cards of your deck."
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Item"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "Ryo Ueda",
+    "cardId": "5",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/005/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/005/low.webp"
+        },
+        "name": "Pokéball",
+        "rules": [
+          "Nimm 1 zufälliges Basis-Pokémon aus deinem Deck auf deine Hand."
+        ]
+      }
+    },
+    "id": "TCGDEX-P-A-5",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-005",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/005/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/005/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Poké Ball",
+    "number": "005",
+    "rules": [
+      "Put a random Basic Pokémon from your deck into your hand."
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Item"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "5ban Graphics",
+    "cardId": "6",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/006/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/006/low.webp"
+        },
+        "name": "Rote Karte",
+        "rules": [
+          "Dein Gegner mischt seine Handkarten in sein Deck und zieht 3 Karten."
+        ]
+      }
+    },
+    "id": "TCGDEX-P-A-6",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-006",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/006/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/006/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Red Card",
+    "number": "006",
+    "rules": [
+      "Your opponent shuffles their hand into their deck and draws 3 cards."
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Item"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "Naoki Saito",
+    "cardId": "7",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/007/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/007/low.webp"
+        },
+        "name": "Forschung des Professors",
+        "rules": [
+          "Ziehe 2 Karten."
+        ]
+      }
+    },
+    "id": "TCGDEX-P-A-7",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-007",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/007/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/007/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Professor's Research",
+    "number": "007",
+    "rules": [
+      "Draw 2 cards."
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Supporter"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "Yuu Nishida",
+    "cardId": "8",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/008/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/008/low.webp"
+        },
+        "name": "Pokédex",
+        "rules": [
+          "Schau dir die oberste Karte deines Decks an."
+        ]
+      }
+    },
+    "id": "TCGDEX-P-A-8",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-008",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/008/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/008/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Pokédex",
+    "number": "008",
+    "rules": [
+      "Look at the top 3 cards of your deck."
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Item"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "Atsushi Furusawa",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Lightning"
+        ],
+        "damage": "20",
+        "name": "Gnaw",
+        "text": ""
+      }
+    ],
+    "cardId": "9",
+    "convertedRetreatCost": 1,
+    "flavorText": "When it is angered, it immediately discharges the\nenergy stored in the pouches in its cheeks.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Nagen"
+          }
+        ],
+        "flavorText": "Ist es wütend, entlädt sich augenblicklich die Elektrizität, die es in seinen Backentaschen gespeichert hat.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/009/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/009/low.webp"
+        },
+        "name": "Pikachu"
+      }
+    },
+    "id": "TCGDEX-P-A-9",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-009",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/009/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/009/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Pikachu",
+    "nationalPokedexNumbers": [
+      25
+    ],
+    "number": "009",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Krgc",
+    "attacks": [
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Psychic",
+          "Psychic",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "120",
+        "name": "Power Blast",
+        "text": "Discard 2 {P} Energy from this Pokémon."
+      }
+    ],
+    "cardId": "10",
+    "convertedRetreatCost": 2,
+    "flavorText": "It was created by a scientist after years of horrific\ngene-splicing and DNA-engineering experiments.",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Powerschuss",
+            "text": "Lege 2 {P}-Energien von diesem Pokémon ab."
+          }
+        ],
+        "flavorText": "Dieses Pokémon ist das Resultat eines jahrelangen und skrupellosen Experimentes.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/010/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/010/low.webp"
+        },
+        "name": "Mewtu"
+      }
+    },
+    "id": "TCGDEX-P-A-10",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-010",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/010/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/010/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Mewtwo",
+    "nationalPokedexNumbers": [
+      150
+    ],
+    "number": "010",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Darkness",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "sowsow",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "60",
+        "name": "Gentle Slap",
+        "text": ""
+      }
+    ],
+    "cardId": "11",
+    "convertedRetreatCost": 3,
+    "flavorText": "This kindly Pokémon lays highly nutritious eggs\nand shares them with injured Pokémon or people.",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Sanfter Hieb"
+          }
+        ],
+        "flavorText": "Ein freundliches Pokémon, das nahrhafte Eier legt, um diese mit verletzten Pokémon und Menschen zu teilen.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/011/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/011/low.webp"
+        },
+        "name": "Chaneira"
+      }
+    },
+    "id": "TCGDEX-P-A-11",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-011",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/011/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/011/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Chansey",
+    "nationalPokedexNumbers": [
+      113
+    ],
+    "number": "011",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Shigenori Negishi",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "10",
+        "name": "Pay Day",
+        "text": "Draw a card."
+      }
+    ],
+    "cardId": "12",
+    "convertedRetreatCost": 1,
+    "flavorText": "All it does is sleep during the daytime. At night,\nit patrols its territory with its eyes aglow.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Zahltag",
+            "text": "Ziehe 1 Karte."
+          }
+        ],
+        "flavorText": "Es schläft den ganzen Tag. Nachts patrouilliert es sein Revier mit glühenden Augen.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/012/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/012/low.webp"
+        },
+        "name": "Mauzi"
+      }
+    },
+    "id": "TCGDEX-P-A-12",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-012",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/012/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/012/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Meowth",
+    "nationalPokedexNumbers": [
+      52
+    ],
+    "number": "012",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Powder Heal",
+        "text": "Once during your turn, you may heal 20 damage from each of your Pokémon.",
+        "type": "Ability"
+      }
+    ],
+    "artist": "miki kudo",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Grass",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "60",
+        "name": "Gust",
+        "text": ""
+      }
+    ],
+    "cardId": "13",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Metapod",
+    "flavorText": "In battle, it flaps its wings at great speed to\nrelease highly toxic dust into the air.",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Puderheilung",
+            "text": "Einmal während deines Zuges kannst du 20 Schadenspunkte bei jedem deiner Pokémon heilen."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Windstoß"
+          }
+        ],
+        "evolvesFrom": "Safcon",
+        "flavorText": "Wenn es sehr schnell mit den Flügeln schlägt, setzt es hochgiftigen Flügelstaub frei.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/013/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/013/low.webp"
+        },
+        "name": "Smettbo"
+      }
+    },
+    "id": "TCGDEX-P-A-13",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-013",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/013/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/013/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Butterfree",
+    "nationalPokedexNumbers": [
+      12
+    ],
+    "number": "013",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 2"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "PLANETA CG Works",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Water",
+          "Water",
+          "Colorless"
+        ],
+        "damage": "80",
+        "name": "Bubble Drain",
+        "text": "Heal 20 damage from this Pokémon."
+      }
+    ],
+    "cardId": "14",
+    "convertedRetreatCost": 3,
+    "hp": "140",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Blasengully",
+            "text": "Heile 20 Schadenspunkte bei diesem Pokémon."
+          }
+        ],
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/014/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/014/low.webp"
+        },
+        "name": "Lapras-ex"
+      }
+    },
+    "id": "TCGDEX-P-A-14",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-014",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/014/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/014/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Lapras ex",
+    "nationalPokedexNumbers": [
+      131
+    ],
+    "number": "014",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic",
+      "EX"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Kouki Saitou",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Lightning"
+        ],
+        "damage": "20",
+        "name": "Gnaw",
+        "text": ""
+      }
+    ],
+    "cardId": "15",
+    "convertedRetreatCost": 1,
+    "flavorText": "When it is angered, it immediately discharges the\nenergy stored in the pouches in its cheeks.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Nagen"
+          }
+        ],
+        "flavorText": "Ist es wütend, entlädt sich augenblicklich die Elektrizität, die es in seinen Backentaschen gespeichert hat.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/015/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/015/low.webp"
+        },
+        "name": "Pikachu"
+      }
+    },
+    "id": "TCGDEX-P-A-15",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-015",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/015/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/015/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Pikachu",
+    "nationalPokedexNumbers": [
+      25
+    ],
+    "number": "015",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Shibuzoh.",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Psychic"
+        ],
+        "damage": "20",
+        "name": "Slap",
+        "text": ""
+      }
+    ],
+    "cardId": "16",
+    "convertedRetreatCost": 1,
+    "flavorText": "It is said that happiness will come to those who\nsee a gathering of Clefairy dancing under a\nfull moon.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Hieb"
+          }
+        ],
+        "flavorText": "Eine Ansammlung von Piepi bei Vollmond tanzen zu sehen, soll ein glückliches Leben verheißen.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/016/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/016/low.webp"
+        },
+        "name": "Piepi"
+      }
+    },
+    "id": "TCGDEX-P-A-16",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-016",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/016/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/016/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Clefairy",
+    "nationalPokedexNumbers": [
+      35
+    ],
+    "number": "016",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Metal",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Souichirou Gunjima",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Fighting"
+        ],
+        "damage": "30",
+        "name": "Reckless Charge",
+        "text": "This Pokémon also does 10 damage to itself."
+      }
+    ],
+    "cardId": "17",
+    "convertedRetreatCost": 1,
+    "flavorText": "It lives in groups in the treetops. If it loses sight of\nits group, it becomes infuriated by its loneliness.",
+    "hp": "50",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Waghalsiger Sturmangriff",
+            "text": "Dieses Pokémon fügt auch sich selbst 10 Schadenspunkte zu."
+          }
+        ],
+        "flavorText": "Es lebt mit Artgenossen in Baumkronen. Verliert es sie aus den Augen, wird es vor Einsamkeit sofort zornig.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/017/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/017/low.webp"
+        },
+        "name": "Menki"
+      }
+    },
+    "id": "TCGDEX-P-A-17",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-017",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/017/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/017/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Mankey",
+    "nationalPokedexNumbers": [
+      56
+    ],
+    "number": "017",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Kuroimori",
+    "attacks": [
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Grass",
+          "Grass",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "80",
+        "name": "Mega Drain",
+        "text": "Heal 30 damage from this Pokémon."
+      }
+    ],
+    "cardId": "18",
+    "convertedRetreatCost": 3,
+    "evolvesFrom": "Ivysaur",
+    "flavorText": "Its plant blooms when it is absorbing solar\nenergy. It stays on the move to seek sunlight.",
+    "hp": "160",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Megasauger",
+            "text": "Heile 30 Schadenspunkte bei diesem Pokémon."
+          }
+        ],
+        "evolvesFrom": "Bisaknosp",
+        "flavorText": "Es nutzt Solarenergie als Nahrung und bringt so seine große Blume zum Blühen. Es geht dorthin, wo die Sonne scheint.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/018/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/018/low.webp"
+        },
+        "name": "Bisaflor"
+      }
+    },
+    "id": "TCGDEX-P-A-18",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-018",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/018/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/018/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Venusaur",
+    "nationalPokedexNumbers": [
+      3
+    ],
+    "number": "018",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 2"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Water Shuriken",
+        "text": "Once during your turn, you may do 20 damage to 1 of your opponent's Pokémon.",
+        "type": "Ability"
+      }
+    ],
+    "artist": "Sanosuke Sakuma",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Water",
+          "Colorless"
+        ],
+        "damage": "60",
+        "name": "Mist Slash",
+        "text": ""
+      }
+    ],
+    "cardId": "19",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Frogadier",
+    "flavorText": "It creates throwing stars out of compressed water.\nWhen it spins them and throws them at high speed,\nthese stars can split metal in two.",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Wasser-Shuriken",
+            "text": "Einmal während deines Zuges kannst du 1 Pokémon deines Gegners 20 Schadenspunkte zufügen."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Schleierschlitzer"
+          }
+        ],
+        "evolvesFrom": "Amphizel",
+        "flavorText": "Es stellt Wurfsterne aus komprimiertem Wasser her, die durch ihre hohe Drehgeschwindigkeit beim Werfen sogar Metall durchtrennen.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/019/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/019/low.webp"
+        },
+        "name": "Quajutsu"
+      }
+    },
+    "id": "TCGDEX-P-A-19",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-019",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/019/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/019/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Greninja",
+    "nationalPokedexNumbers": [
+      658
+    ],
+    "number": "019",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 2"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Mékayu",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Psychic"
+        ],
+        "damage": "50",
+        "name": "Surprise Attack",
+        "text": "Flip a coin. If tails, this attack does nothing."
+      }
+    ],
+    "cardId": "20",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Gastly",
+    "flavorText": "It likes to lurk in the dark and tap shoulders\nwith a gaseous hand. Its touch causes endless\nshuddering.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Überraschungsangriff",
+            "text": "Wirf 1 Münze. Bei Zahl hat diese Attacke keine Auswirkungen."
+          }
+        ],
+        "evolvesFrom": "Nebulak",
+        "flavorText": "Es lauert gern im Dunkeln und tippt Leuten mit seiner gasförmigen Hand auf die Schulter. Seine Berührung erzeugt endloses Schaudern.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/020/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/020/low.webp"
+        },
+        "name": "Alpollo"
+      }
+    },
+    "id": "TCGDEX-P-A-20",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-020",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/020/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/020/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Haunter",
+    "nationalPokedexNumbers": [
+      93
+    ],
+    "number": "020",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Darkness",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Tomokazu Komiya",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Fighting",
+          "Fighting",
+          "Fighting"
+        ],
+        "damage": "70",
+        "name": "Land Crush",
+        "text": ""
+      }
+    ],
+    "cardId": "21",
+    "convertedRetreatCost": 4,
+    "flavorText": "As it digs through the ground, it absorbs many\nhard objects. This is what makes its body so solid.",
+    "hp": "110",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Schollenbrecher"
+          }
+        ],
+        "flavorText": "Wenn es sich durch die Erde gräbt, nimmt es viele harte Gegenstände auf, die seinen Körper erhärten.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/021/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/021/low.webp"
+        },
+        "name": "Onix"
+      }
+    },
+    "id": "TCGDEX-P-A-21",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-021",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/021/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/021/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Onix",
+    "nationalPokedexNumbers": [
+      95
+    ],
+    "number": "021",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "weaknesses": [
+      {
+        "type": "Grass",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Kurata So",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Sing",
+        "text": "Your opponent's Active Pokémon is now Asleep."
+      }
+    ],
+    "cardId": "22",
+    "convertedRetreatCost": 1,
+    "flavorText": "When its huge eyes waver, it sings a mysteriously\nsoothing melody that lulls its enemies to sleep.",
+    "hp": "50",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Gesang",
+            "text": "Das Aktive Pokémon deines Gegners schläft jetzt."
+          }
+        ],
+        "flavorText": "Wenn seine Kulleraugen zu flackern beginnen, singt es ein mysteriöses, wohlklingendes Lied, das Zuhörer in Schlaf versetzt.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/022/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/022/low.webp"
+        },
+        "name": "Pummeluff"
+      }
+    },
+    "id": "TCGDEX-P-A-22",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-022",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/022/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/022/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Jigglypuff",
+    "nationalPokedexNumbers": [
+      39
+    ],
+    "number": "022",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Kouki Saitou",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Grass",
+          "Colorless"
+        ],
+        "damage": "40",
+        "name": "Vine Whip",
+        "text": ""
+      }
+    ],
+    "cardId": "23",
+    "convertedRetreatCost": 1,
+    "flavorText": "There is a plant seed on its back right from the\nday this Pokémon is born. The seed slowly\ngrows larger.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Rankenhieb"
+          }
+        ],
+        "flavorText": "Dieses Pokémon trägt von Geburt an einen Samen auf dem Rücken, der im Laufe der Zeit keimt und wächst.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/023/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/023/low.webp"
+        },
+        "name": "Bisasam"
+      }
+    },
+    "id": "TCGDEX-P-A-23",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-023",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/023/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/023/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Bulbasaur",
+    "nationalPokedexNumbers": [
+      1
+    ],
+    "number": "023",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Miki Tanaka",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Lightning"
+        ],
+        "damage": "20",
+        "name": "Lightning Ball",
+        "text": ""
+      }
+    ],
+    "cardId": "24",
+    "convertedRetreatCost": 1,
+    "flavorText": "The electromagnetic waves emitted by the units\nat the sides of its head expel antigravity, which\nallows it to float.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Kugelblitz"
+          }
+        ],
+        "flavorText": "Die seitlichen Module halten es in der Luft, indem sie mit elektromagnetischen Wellen die Schwerkraft überlisten.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/024/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/024/low.webp"
+        },
+        "name": "Magnetilo"
+      }
+    },
+    "id": "TCGDEX-P-A-24",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-024",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/024/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/024/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Magnemite",
+    "nationalPokedexNumbers": [
+      81
+    ],
+    "number": "024",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "PLANETA Igarashi",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Fire"
+        ],
+        "damage": "",
+        "name": "Inferno Dance",
+        "text": "Flip 3 coins. Take an amount of {R} Energy from your Energy Zone equal to the number of heads and attach it to your Benched {R} Pokémon in any way you like."
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Fire",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "70",
+        "name": "Heat Blast",
+        "text": ""
+      }
+    ],
+    "cardId": "25",
+    "convertedRetreatCost": 2,
+    "hp": "140",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Infernotanz",
+            "text": "Wirf 3 Münzen. Lege pro Kopf 1 {R}-Energie aus deinem Energiebereich beliebig an die {R}-Pokémon auf deiner Bank an."
+          },
+          {
+            "name": "Hitzestoß"
+          }
+        ],
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/025/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/025/low.webp"
+        },
+        "name": "Lavados-ex"
+      }
+    },
+    "id": "TCGDEX-P-A-25",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-025",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/025/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/025/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Moltres ex",
+    "nationalPokedexNumbers": [
+      146
+    ],
+    "number": "025",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic",
+      "EX"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fire"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Kouki Saitou",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Lightning"
+        ],
+        "damage": "20",
+        "name": "Gnaw",
+        "text": ""
+      }
+    ],
+    "cardId": "26",
+    "convertedRetreatCost": 1,
+    "flavorText": "When it is angered, it immediately discharges the\nenergy stored in the pouches in its cheeks.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Nagen"
+          }
+        ],
+        "flavorText": "Ist es wütend, entlädt sich augenblicklich die Elektrizität, die es in seinen Backentaschen gespeichert hat.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/026/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/026/low.webp"
+        },
+        "name": "Pikachu"
+      }
+    },
+    "id": "TCGDEX-P-A-26",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-026",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/026/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/026/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Pikachu",
+    "nationalPokedexNumbers": [
+      25
+    ],
+    "number": "026",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Yoriyuki Ikegami",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Grass"
+        ],
+        "damage": "20",
+        "name": "Tackle",
+        "text": ""
+      }
+    ],
+    "cardId": "27",
+    "convertedRetreatCost": 1,
+    "flavorText": "Being exposed to sunlight makes its movements\nswifter. It uses vines more adeptly than its hands.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Tackle"
+          }
+        ],
+        "flavorText": "Im Sonnenlicht erhöht sich das Tempo seiner Bewegungen. Es ist mit seinen Schlingen geschickter als mit den Händen.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/027/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/027/low.webp"
+        },
+        "name": "Serpifeu"
+      }
+    },
+    "id": "TCGDEX-P-A-27",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-027",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/027/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/027/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Snivy",
+    "nationalPokedexNumbers": [
+      495
+    ],
+    "number": "027",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Shin Nagasawa",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Fire",
+          "Fire",
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Volcanic Ash",
+        "text": "Discard 2 {R} Energy from this Pokémon. This attack does 80 damage to 1 of your opponent's Pokémon."
+      }
+    ],
+    "cardId": "28",
+    "convertedRetreatCost": 2,
+    "evolvesFrom": "Larvesta",
+    "flavorText": "Its burning body causes it to be unpopular in hot\nparts of the world, but in cold ones, Volcarona is\nrevered as an embodiment of the sun.",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Vulkanasche",
+            "text": "Lege 2 {R}-Energien von diesem Pokémon ab. Diese Attacke fügt 1 Pokémon deines Gegners 80 Schadenspunkte zu."
+          }
+        ],
+        "evolvesFrom": "Ignivor",
+        "flavorText": "In heißen Gebieten ist sein brennender Körper unbeliebt, aber in kalten Gegenden wird es als Verkörperung der Sonne verehrt.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/028/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/028/low.webp"
+        },
+        "name": "Ramoth"
+      }
+    },
+    "id": "TCGDEX-P-A-28",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-028",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/028/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/028/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Volcarona",
+    "nationalPokedexNumbers": [
+      637
+    ],
+    "number": "028",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fire"
+    ],
+    "weaknesses": [
+      {
+        "type": "Water",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "danciao",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Water",
+          "Water",
+          "Colorless"
+        ],
+        "damage": "80+",
+        "name": "Hydro Pump",
+        "text": "If this Pokémon has at least 2 extra {W} Energy attached, this attack does 60 more damage."
+      }
+    ],
+    "cardId": "29",
+    "convertedRetreatCost": 3,
+    "evolvesFrom": "Wartortle",
+    "flavorText": "It crushes its foe under its heavy body to cause\nfainting. In a pinch, it will withdraw inside its shell.",
+    "hp": "150",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Hydropumpe",
+            "text": "Wenn an dieses Pokémon mindestens 2 extra {W}-Energien angelegt sind, fügt diese Attacke 60 Schadenspunkte mehr zu."
+          }
+        ],
+        "evolvesFrom": "Schillok",
+        "flavorText": "Es begräbt seine Gegner mit seinem enormen Körpergewicht. Wenn es in einer aussichtslosen Lage steckt, zieht es sich in seinen Panzer zurück.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/029/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/029/low.webp"
+        },
+        "name": "Turtok"
+      }
+    },
+    "id": "TCGDEX-P-A-29",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-029",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/029/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/029/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Blastoise",
+    "nationalPokedexNumbers": [
+      9
+    ],
+    "number": "029",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 2"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "En Morikura",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Growl",
+        "text": "During your opponent's next turn, attacks used by the Defending Pokémon do −20 damage."
+      }
+    ],
+    "cardId": "30",
+    "convertedRetreatCost": 1,
+    "flavorText": "Its ability to evolve into many forms allows it to\nadapt smoothly and perfectly to any environment.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Heuler",
+            "text": "Während des nächsten Zuges deines Gegners fügen die Attacken des Verteidigenden Pokémon - 20 Schadenspunkte zu."
+          }
+        ],
+        "flavorText": "Um sich jeder Umgebung perfekt anpassen zu können, ist es in der Lage, sich zu verschiedenen Pokémon zu entwickeln.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/030/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/030/low.webp"
+        },
+        "name": "Evoli"
+      }
+    },
+    "id": "TCGDEX-P-A-30",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-030",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/030/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/030/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Eevee",
+    "nationalPokedexNumbers": [
+      133
+    ],
+    "number": "030",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "MAHOU",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "30×",
+        "name": "Do the Wave",
+        "text": "This attack does 30 damage for each of your Benched Pokémon."
+      }
+    ],
+    "cardId": "31",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Minccino",
+    "flavorText": "Its body secretes oil that this Pokémon spreads\nover its nest as a coating to protect it from dust.\nCinccino won't tolerate even a speck of the stuff.",
+    "hp": "90",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Wellenreiten",
+            "text": "Diese Attacke fügt für jedes Pokémon auf deiner Bank 30 Schadenspunkte zu."
+          }
+        ],
+        "evolvesFrom": "Picochilla",
+        "flavorText": "Es ist sehr reinlich und duldet nicht mal das kleinste Staubkorn. Es beschichtet sein Nest mit dem Öl, das sein Körper absondert.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/031/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/031/low.webp"
+        },
+        "name": "Chillabell"
+      }
+    },
+    "id": "TCGDEX-P-A-31",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-031",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/031/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/031/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Cinccino",
+    "nationalPokedexNumbers": [
+      573
+    ],
+    "number": "031",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Naoyo Kimura",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Fire"
+        ],
+        "damage": "30",
+        "name": "Ember",
+        "text": "Discard a {R} Energy from this Pokémon."
+      }
+    ],
+    "cardId": "32",
+    "convertedRetreatCost": 1,
+    "flavorText": "It has a preference for hot things. When it rains,\nsteam is said to spout from the tip of its tail.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Glut",
+            "text": "Lege 1 {R}-Energie von diesem Pokémon ab."
+          }
+        ],
+        "flavorText": "Dieses Pokémon bevorzugt heiße Dinge. Bei Regen soll seine Schwanzspitze dampfen.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/032/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/032/low.webp"
+        },
+        "name": "Glumanda"
+      }
+    },
+    "id": "TCGDEX-P-A-32",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-032",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/032/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/032/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Charmander",
+    "nationalPokedexNumbers": [
+      4
+    ],
+    "number": "032",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fire"
+    ],
+    "weaknesses": [
+      {
+        "type": "Water",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Kanako Eo",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Water"
+        ],
+        "damage": "20",
+        "name": "Water Gun",
+        "text": ""
+      }
+    ],
+    "cardId": "33",
+    "convertedRetreatCost": 1,
+    "flavorText": "When it retracts its long neck into its shell, it\nsquirts out water with vigorous force.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Aquaknarre"
+          }
+        ],
+        "flavorText": "Zieht es seinen langen Hals in seinen Panzer zurück, verspritzt es Wasser mit unbändiger Kraft.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/033/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/033/low.webp"
+        },
+        "name": "Schiggy"
+      }
+    },
+    "id": "TCGDEX-P-A-33",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-033",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/033/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/033/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Squirtle",
+    "nationalPokedexNumbers": [
+      7
+    ],
+    "number": "033",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Kariya",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Nap",
+        "text": "Heal 20 damage from this Pokémon."
+      }
+    ],
+    "cardId": "34",
+    "convertedRetreatCost": 1,
+    "flavorText": "It doesn't like to be taken care of. It's difficult to\nbond with since it won't listen to its Trainer.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Nickerchen",
+            "text": "Heile 20 Schadenspunkte bei diesem Pokémon."
+          }
+        ],
+        "flavorText": "Einmischung kann es gar nicht leiden. Es ist bockig und fasst nur schwer Zutrauen zu seinem Trainer.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/034/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/034/low.webp"
+        },
+        "name": "Plinfa"
+      }
+    },
+    "id": "TCGDEX-P-A-34",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-034",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/034/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/034/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Piplup",
+    "nationalPokedexNumbers": [
+      393
+    ],
+    "number": "034",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Atsuko Nishida",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Grass",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Bite",
+        "text": ""
+      }
+    ],
+    "cardId": "35",
+    "convertedRetreatCost": 2,
+    "flavorText": "It uses its whole body to photosynthesize when\nexposed to sunlight. Its shell is made from\nhardened soil.",
+    "hp": "80",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Biss"
+          }
+        ],
+        "flavorText": "Es badet im Sonnenlicht und betreibt dabei mit dem ganzen Körper Fotosynthese. Sein Panzer besteht aus hartem Lehm.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/035/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/035/low.webp"
+        },
+        "name": "Chelast"
+      }
+    },
+    "id": "TCGDEX-P-A-35",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-035",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/035/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/035/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Turtwig",
+    "nationalPokedexNumbers": [
+      387
+    ],
+    "number": "035",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Sumiyoshi Kizuki",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Lightning",
+          "Lightning"
+        ],
+        "damage": "40+",
+        "name": "Exciting Voltage",
+        "text": "If this Pokémon has at least 2 extra {L} Energy attached, this attack does 80 more damage."
+      }
+    ],
+    "cardId": "36",
+    "convertedRetreatCost": 3,
+    "evolvesFrom": "Electabuzz",
+    "flavorText": "The amount of electrical energy this Pokémon\nproduces is proportional to the rate of its pulse.\nThe voltage jumps while Electivire is battling.",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Knisternde Spannung",
+            "text": "Wenn an dieses Pokémon mindestens 2 extra {L}-Energien angelegt sind, fügt diese Attacke 80 Schadenspunkte mehr zu."
+          }
+        ],
+        "evolvesFrom": "Elektek",
+        "flavorText": "Wie viel Strom es erzeugt, ist abhängig von seinem Puls. Im Kampf steigt Elevolteks elektrische Spannung schlagartig an.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/036/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/036/low.webp"
+        },
+        "name": "Elevoltek"
+      }
+    },
+    "id": "TCGDEX-P-A-36",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-036",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/036/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/036/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Electivire",
+    "nationalPokedexNumbers": [
+      466
+    ],
+    "number": "036",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Lunar Plumage",
+        "text": "Whenever you attach a {P} Energy from your Energy Zone to this Pokémon, heal 20 damage from this Pokémon.",
+        "type": "Ability"
+      }
+    ],
+    "artist": "PLANETA Mochizuki",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Psychic",
+          "Psychic",
+          "Colorless"
+        ],
+        "damage": "80",
+        "name": "Psychic Flash",
+        "text": ""
+      }
+    ],
+    "cardId": "37",
+    "convertedRetreatCost": 2,
+    "hp": "140",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Lunargefieder",
+            "text": "Heile jedes Mal, wenn du 1 {P}-Energie aus dem Energiebereich an dieses Pokémon anlegst, 20 Schadenspunkte bei diesem Pokémon."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Psycho-Blitz"
+          }
+        ],
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/037/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/037/low.webp"
+        },
+        "name": "Cresselia-ex"
+      }
+    },
+    "id": "TCGDEX-P-A-37",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-037",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/037/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/037/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Cresselia ex",
+    "nationalPokedexNumbers": [
+      488
+    ],
+    "number": "037",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic",
+      "EX"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Darkness",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Miki Tanaka",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Psychic"
+        ],
+        "damage": "",
+        "name": "Confuse Ray",
+        "text": "Your opponent's Active Pokémon is now Confused."
+      }
+    ],
+    "cardId": "38",
+    "convertedRetreatCost": 1,
+    "flavorText": "This Pokémon startles people in the middle of\nthe night. It gathers fear as its energy.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Konfusstrahl",
+            "text": "Das Aktive Pokémon deines Gegners ist jetzt verwirrt."
+          }
+        ],
+        "flavorText": "Ein Pokémon, das Menschen mitten in der Nacht erschreckt. Es sammelt die Angst als seine Energie.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/038/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/038/low.webp"
+        },
+        "name": "Traunfugil"
+      }
+    },
+    "id": "TCGDEX-P-A-38",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-038",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/038/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/038/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Misdreavus",
+    "nationalPokedexNumbers": [
+      200
+    ],
+    "number": "038",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Darkness",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Anesaki Dynamic",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Metal"
+        ],
+        "damage": "20+",
+        "name": "Metal Arms",
+        "text": "If this Pokémon has a Pokémon Tool attached, this attack does 30 more damage."
+      }
+    ],
+    "cardId": "39",
+    "convertedRetreatCost": 1,
+    "flavorText": "People fashion swords from Skarmory's shed\nfeathers, so this Pokémon is a popular element\nin heraldic designs.",
+    "hp": "80",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Metallarme",
+            "text": "Wenn an dieses Pokémon 1 Pokémon-Ausrüstung angelegt ist, fügt diese Attacke 30 Schadenspunkte mehr zu."
+          }
+        ],
+        "flavorText": "Es wird gern als Vorlage für Wappenmotive genutzt, da aus den Federn, die ihm ausfallen, Schwerter hergestellt werden.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/039/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/039/low.webp"
+        },
+        "name": "Panzaeron"
+      }
+    },
+    "id": "TCGDEX-P-A-39",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-039",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/039/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/039/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Skarmory",
+    "nationalPokedexNumbers": [
+      227
+    ],
+    "number": "039",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Metal"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "sui",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Fire"
+        ],
+        "damage": "20",
+        "name": "Scratch",
+        "text": ""
+      }
+    ],
+    "cardId": "40",
+    "convertedRetreatCost": 1,
+    "flavorText": "Its fiery rear end is fueled by gas made in its belly.\nEven rain can't extinguish the fire.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Kratzer"
+          }
+        ],
+        "flavorText": "Das Feuer an seinem Hinterteil wird durch Gase im Bauch genährt. Selbst Regen löscht es nicht.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/040/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/040/low.webp"
+        },
+        "name": "Panflam"
+      }
+    },
+    "id": "TCGDEX-P-A-40",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-040",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/040/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/040/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Chimchar",
+    "nationalPokedexNumbers": [
+      390
+    ],
+    "number": "040",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fire"
+    ],
+    "weaknesses": [
+      {
+        "type": "Water",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Naoyo Kimura",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Psychic"
+        ],
+        "damage": "20",
+        "name": "Pound",
+        "text": ""
+      }
+    ],
+    "cardId": "41",
+    "convertedRetreatCost": 1,
+    "flavorText": "The shell seems to be filled with joy. It is said\nthat it will share good luck when treated kindly.",
+    "hp": "50",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Klaps"
+          }
+        ],
+        "flavorText": "Seine Schale ist voll von Freude. Es heißt, wenn man es freundlich und gut behandelt, teile es sein Glück.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/041/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/041/low.webp"
+        },
+        "name": "Togepi"
+      }
+    },
+    "id": "TCGDEX-P-A-41",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-041",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/041/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/041/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Togepi",
+    "nationalPokedexNumbers": [
+      175
+    ],
+    "number": "041",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Metal",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Nightmare Aura",
+        "text": "Whenever you attach a {D} Energy from your Energy Zone to this Pokémon, do 20 damage to your opponent's Active Pokémon.",
+        "type": "Ability"
+      }
+    ],
+    "artist": "PLANETA Mochizuki",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Darkness",
+          "Darkness",
+          "Colorless"
+        ],
+        "damage": "80",
+        "name": "Dark Prism",
+        "text": ""
+      }
+    ],
+    "cardId": "42",
+    "convertedRetreatCost": 2,
+    "hp": "140",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Alptraum-Aura",
+            "text": "Füge jedes Mal, wenn du 1 {D}-Energie aus dem Energiebereich an dieses Pokémon anlegst, dem Aktiven Pokémon deines Gegners 20 Schadenspunkte zu."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Dunkles Prisma"
+          }
+        ],
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/042/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/042/low.webp"
+        },
+        "name": "Darkrai-ex"
+      }
+    },
+    "id": "TCGDEX-P-A-42",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-042",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/042/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/042/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Darkrai ex",
+    "nationalPokedexNumbers": [
+      491
+    ],
+    "number": "042",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic",
+      "EX"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Darkness"
+    ],
+    "weaknesses": [
+      {
+        "type": "Grass",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "MAHOU",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Grass",
+          "Grass"
+        ],
+        "damage": "60",
+        "name": "Leech Seed",
+        "text": "Heal 20 damage from this Pokémon."
+      }
+    ],
+    "cardId": "43",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Cherubi",
+    "flavorText": "After absorbing plenty of sunlight, Cherrim takes\nthis form. It's full of energy while it's like this,\nand its liveliness will go on until sundown.",
+    "hp": "80",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Egelsamen",
+            "text": "Heile 20 Schadenspunkte bei diesem Pokémon."
+          }
+        ],
+        "evolvesFrom": "Kikugi",
+        "flavorText": "Diese Form nimmt Kinoso an, wenn es viel Sonne getankt und dadurch seine Energie aufgefüllt hat. Es bleibt bis zum Sonnenuntergang aktiv.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/043/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/043/low.webp"
+        },
+        "name": "Kinoso"
+      }
+    },
+    "id": "TCGDEX-P-A-43",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-043",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/043/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/043/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Cherrim",
+    "nationalPokedexNumbers": [
+      421
+    ],
+    "number": "043",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Resilience Link",
+        "text": "If you have Arceus or Arceus ex in play, this Pokémon takes −30 damage from attacks.",
+        "type": "Ability"
+      }
+    ],
+    "artist": "Kazumasa Yasukuni",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Lightning",
+          "Lightning"
+        ],
+        "damage": "40",
+        "name": "Spark",
+        "text": "This attack also does 20 damage to 1 of your opponent's Benched Pokémon."
+      }
+    ],
+    "cardId": "44",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Pikachu",
+    "flavorText": "Its tail discharges electricity into the ground,\nprotecting it from getting shocked.",
+    "hp": "90",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Widerstandskopplung",
+            "text": "Wenn du Arceus oder Arceus-ex im Spiel hast, werden diesem Pokémon durch Attacken - 30 Schadenspunkte zugefügt."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Funkensprung",
+            "text": "Diese Attacke fügt auch 1 Pokémon auf der Bank deines Gegners 20 Schadenspunkte zu."
+          }
+        ],
+        "evolvesFrom": "Pikachu",
+        "flavorText": "Mithilfe seines Schweifs entlädt es Elektrizität in den Boden, um sich auf diese Weise vor elektrischen Schlägen zu schützen.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/044/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/044/low.webp"
+        },
+        "name": "Raichu"
+      }
+    },
+    "id": "TCGDEX-P-A-44",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-044",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/044/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/044/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Raichu",
+    "nationalPokedexNumbers": [
+      26
+    ],
+    "number": "044",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Tomokazu Komiya",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Iron Defense",
+        "text": "Flip a coin. If heads, during your opponent's next turn, prevent all damage done to this Pokémon by attacks."
+      }
+    ],
+    "cardId": "45",
+    "convertedRetreatCost": 1,
+    "flavorText": "It moves less than an inch a year, but when\nit's in a jam, it will spin and drill down into the\nground in a split second.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Eisenabwehr",
+            "text": "Wirf 1 Münze. Verhindere bei Kopf während des nächsten Zuges deines Gegners allen Schaden, der diesem Pokémon durch Attacken zugefügt wird."
+          }
+        ],
+        "flavorText": "Es bewegt sich nur 1 cm pro Jahr, aber in Notlagen bohrt es sich mit seinem Körper blitzschnell in den Boden.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/045/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/045/low.webp"
+        },
+        "name": "Nasgnet"
+      }
+    },
+    "id": "TCGDEX-P-A-45",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-045",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/045/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/045/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Nosepass",
+    "nationalPokedexNumbers": [
+      299
+    ],
+    "number": "045",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "weaknesses": [
+      {
+        "type": "Grass",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Uninori",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Fighting"
+        ],
+        "damage": "20",
+        "name": "Tackle",
+        "text": ""
+      }
+    ],
+    "cardId": "46",
+    "convertedRetreatCost": 1,
+    "flavorText": "It skulks in caves, and when prey or an enemy\npasses by, it leaps out and chomps them.\nThe force of its attack sometimes chips its teeth.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Tackle"
+          }
+        ],
+        "flavorText": "Es verbirgt sich in kleinen Höhlen, aus denen es herausspringt und vorbeilaufende Gegner oder Beute beißt. Manchmal bricht dabei ein Zahn ab.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/046/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/046/low.webp"
+        },
+        "name": "Kaumalat"
+      }
+    },
+    "id": "TCGDEX-P-A-46",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-046",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/046/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/046/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Gible",
+    "nationalPokedexNumbers": [
+      443
+    ],
+    "number": "046",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "weaknesses": [
+      {
+        "type": "Grass",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Defensive Whirlwind",
+        "text": "This Pokémon takes −30 damage from attacks from {F} Pokémon.",
+        "type": "Ability"
+      }
+    ],
+    "artist": "Hasuno",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "90",
+        "name": "Wing Attack",
+        "text": ""
+      }
+    ],
+    "cardId": "47",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Staravia",
+    "flavorText": "When Staravia evolve into Staraptor, they leave\nthe flock to live alone. They have sturdy wings.",
+    "hp": "140",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Schützender Wirbelwind",
+            "text": "Diesem Pokémon werden durch Attacken von {F}-Pokémon - 30 Schadenspunkte zugefügt."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Flügelschlag"
+          }
+        ],
+        "evolvesFrom": "Staravia",
+        "flavorText": "Entwickelt sich Staravia zu Staraptor, verlässt es den Schwarm und lebt allein. Die Spannweite seiner Flügel ist gigantisch.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/047/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/047/low.webp"
+        },
+        "name": "Staraptor"
+      }
+    },
+    "id": "TCGDEX-P-A-47",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-047",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/047/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/047/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Staraptor",
+    "nationalPokedexNumbers": [
+      398
+    ],
+    "number": "047",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 2"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "sui",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Water"
+        ],
+        "damage": "",
+        "name": "Oceanic Gift",
+        "text": "Choose 2 of your Benched Pokémon. For each of those Pokémon, take a {W} Energy from your Energy Zone and attach it to that Pokémon."
+      }
+    ],
+    "cardId": "48",
+    "convertedRetreatCost": 1,
+    "flavorText": "It is born with a wondrous power that lets it bond\nwith any kind of Pokémon.",
+    "hp": "50",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Geschenk des Meeres",
+            "text": "Wähle 2 Pokémon auf deiner Bank. Lege für jedes jener Pokémon 1 {W}-Energie aus deinem Energiebereich an jene Pokémon an."
+          }
+        ],
+        "flavorText": "Es wird mit einer wundersamen Kraft geboren, die eine Bindung zu jedem anderen Pokémon möglich macht.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/048/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/048/low.webp"
+        },
+        "name": "Manaphy"
+      }
+    },
+    "id": "TCGDEX-P-A-48",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-048",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/048/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/048/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Manaphy",
+    "nationalPokedexNumbers": [
+      490
+    ],
+    "number": "048",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "okayamatakatoshi",
+    "attacks": [
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "100",
+        "name": "Collapse",
+        "text": "This Pokémon is now Asleep."
+      }
+    ],
+    "cardId": "49",
+    "convertedRetreatCost": 4,
+    "flavorText": "It is not satisfied unless it eats over 880 pounds\nof food every day. When it is done eating, it\ngoes promptly to sleep.",
+    "hp": "140",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Kollaps",
+            "text": "Dieses Pokémon schläft jetzt."
+          }
+        ],
+        "flavorText": "Es muss über 400 kg Nahrung am Tag fressen, um satt zu werden. Ist es mit dem Essen fertig, schläft es sofort ein.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/049/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/049/low.webp"
+        },
+        "name": "Relaxo"
+      }
+    },
+    "id": "TCGDEX-P-A-49",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-049",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/049/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/049/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Snorlax",
+    "nationalPokedexNumbers": [
+      143
+    ],
+    "number": "049",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "PLANETA Mochizuki",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Psychic",
+          "Colorless"
+        ],
+        "damage": "50",
+        "name": "Psychic Sphere",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Psychic",
+          "Psychic",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "150",
+        "name": "Psydrive",
+        "text": "Discard 2 {P} Energy from this Pokémon."
+      }
+    ],
+    "cardId": "50",
+    "convertedRetreatCost": 2,
+    "hp": "150",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Psychosphäre"
+          },
+          {
+            "name": "Psycho-Antrieb",
+            "text": "Lege 2 {P}-Energien von diesem Pokémon ab."
+          }
+        ],
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/050/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/050/low.webp"
+        },
+        "name": "Mewtu-ex"
+      }
+    },
+    "id": "TCGDEX-P-A-50",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-050",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/050/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/050/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Mewtwo ex",
+    "nationalPokedexNumbers": [
+      150
+    ],
+    "number": "050",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic",
+      "EX"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Darkness",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Shigenori Negishi",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Overacceleration",
+        "text": "During your next turn, this Pokémon's Overacceleration attack does +20 damage."
+      }
+    ],
+    "cardId": "51",
+    "convertedRetreatCost": 1,
+    "flavorText": "Apparently Cyclizar has been allowing people to\nride on its back since ancient times. Depictions of\nthis have been found in 10,000-year-old murals.",
+    "hp": "80",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Überbeschleunigung",
+            "text": "Während deines nächsten Zuges fügt die Attacke Überbeschleunigung von diesem Pokémon + 20 Schadenspunkte zu."
+          }
+        ],
+        "flavorText": "Seit uralten Zeiten soll es Menschen auf seinem Rücken reiten lassen. Darstellungen davon finden sich auf 10 000 Jahre alten Wandmalereien.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/051/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/051/low.webp"
+        },
+        "name": "Mopex"
+      }
+    },
+    "id": "TCGDEX-P-A-51",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-051",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/051/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/051/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Cyclizar",
+    "nationalPokedexNumbers": [
+      967
+    ],
+    "number": "051",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "MINAMINAMI Take",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Grass"
+        ],
+        "damage": "",
+        "name": "Cry for Help",
+        "text": "Put 1 random {G} Pokémon from your deck into your hand."
+      }
+    ],
+    "cardId": "52",
+    "convertedRetreatCost": 1,
+    "flavorText": "Its fluffy fur is similar in composition to plants.\nThis Pokémon frequently washes its face to keep\nit from drying out.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Hilfeschrei",
+            "text": "Nimm 1 zufälliges {G}-Pokémon aus deinem Deck auf deine Hand."
+          }
+        ],
+        "flavorText": "Die Zusammensetzung seines weichen Fells ähnelt der von Pflanzen. Es reinigt penibel sein Gesicht, um zu verhindern, dass dieses austrocknet.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/052/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/052/low.webp"
+        },
+        "name": "Felori"
+      }
+    },
+    "id": "TCGDEX-P-A-52",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-052",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/052/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/052/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Sprigatito",
+    "nationalPokedexNumbers": [
+      906
+    ],
+    "number": "052",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Shin Nagasawa",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Water"
+        ],
+        "damage": "10+",
+        "name": "Attack the Wound",
+        "text": "If your opponent's Active Pokémon has damage on it, this attack does 60 more damage."
+      }
+    ],
+    "cardId": "53",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Buizel",
+    "flavorText": "With its flotation sac inflated, it can carry people\non its back. It deflates the sac before it dives.",
+    "hp": "100",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Wundschmerz",
+            "text": "Wenn dem Aktiven Pokémon deines Gegners bereits Schaden zugefügt wurde, fügt diese Attacke 60 Schadenspunkte mehr zu."
+          }
+        ],
+        "evolvesFrom": "Bamelin",
+        "flavorText": "Mit gefüllter Schwimmblase kann es Menschen auf seinem Rücken tragen. Lässt es Luft aus ihr heraus, taucht es unter.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/053/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/053/low.webp"
+        },
+        "name": "Bojelin"
+      }
+    },
+    "id": "TCGDEX-P-A-53",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-053",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/053/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/053/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Floatzel",
+    "nationalPokedexNumbers": [
+      419
+    ],
+    "number": "053",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Counterattack",
+        "text": "If this Pokémon is in the Active Spot and is damaged by an attack from your opponent's Pokémon, do 20 damage to the Attacking Pokémon.",
+        "type": "Ability"
+      }
+    ],
+    "artist": "REND",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Lightning",
+          "Lightning"
+        ],
+        "damage": "70",
+        "name": "Electric Punch",
+        "text": ""
+      }
+    ],
+    "cardId": "54",
+    "convertedRetreatCost": 0,
+    "evolvesFrom": "Pawmo",
+    "flavorText": "This Pokémon normally is slow to react, but once\nit enters battle, it will strike down its enemies\nwith lightning-fast movements.",
+    "hp": "140",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Gegenangriff",
+            "text": "Wenn dieses Pokémon in der Aktiven Position ist und durch eine Attacke von Pokémon deines Gegners Schaden erhält, füge dem Angreifenden Pokémon 20 Schadenspunkte zu."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Elektroschlag"
+          }
+        ],
+        "evolvesFrom": "Pamamo",
+        "flavorText": "Dieses Pokémon ist für gewöhnlich sehr gelassen, doch sobald ein Kampf beginnt, streckt es den Gegner mit blitzschnellen Bewegungen zu Boden.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/054/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/054/low.webp"
+        },
+        "name": "Pamomamo"
+      }
+    },
+    "id": "TCGDEX-P-A-54",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-054",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/054/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/054/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Pawmot",
+    "nationalPokedexNumbers": [
+      923
+    ],
+    "number": "054",
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 2"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Masakazu Fukuda",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Fighting",
+          "Fighting"
+        ],
+        "damage": "70+",
+        "name": "Power Press",
+        "text": "If this Pokémon has at least 2 extra {F} Energy attached, this attack does 50 more damage."
+      }
+    ],
+    "cardId": "55",
+    "convertedRetreatCost": 2,
+    "evolvesFrom": "Machoke",
+    "flavorText": "It quickly swings its four arms to rock its\nopponents with ceaseless punches and chops\nfrom all angles.",
+    "hp": "150",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Powerdruck",
+            "text": "Wenn an dieses Pokémon mindestens 2 extra {F}-Energien angelegt sind, fügt diese Attacke 50 Schadenspunkte mehr zu."
+          }
+        ],
+        "evolvesFrom": "Maschock",
+        "flavorText": "Es verwendet seine vier Arme, um seine Gegner unermüdlich mit schnellen Schlägen aus allen Winkeln einzudecken.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/055/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/055/low.webp"
+        },
+        "name": "Machomei"
+      }
+    },
+    "id": "TCGDEX-P-A-55",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-055",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/055/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/055/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Machamp",
+    "nationalPokedexNumbers": [
+      68
+    ],
+    "number": "055",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 2"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Krgc",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Darkness"
+        ],
+        "damage": "",
+        "name": "Poison Sting",
+        "text": "Your opponent's Active Pokémon is now Poisoned."
+      }
+    ],
+    "cardId": "56",
+    "convertedRetreatCost": 1,
+    "flavorText": "By dislocating its jaw, it can swallow prey larger\nthan itself. After a meal, it curls up and rests.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Giftstachel",
+            "text": "Das Aktive Pokémon deines Gegners ist jetzt vergiftet."
+          }
+        ],
+        "flavorText": "Es hängt seinen Kiefer aus und verschlingt so selbst größere Beute am Stück. Danach rollt es sich zusammen und ruht sich aus.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/056/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/056/low.webp"
+        },
+        "name": "Rettan"
+      }
+    },
+    "id": "TCGDEX-P-A-56",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-056",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/056/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/056/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Ekans",
+    "nationalPokedexNumbers": [
+      23
+    ],
+    "number": "056",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Darkness"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Kouki Saitou",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Headbutt",
+        "text": ""
+      }
+    ],
+    "cardId": "57",
+    "convertedRetreatCost": 2,
+    "flavorText": "With nerves of steel, nothing can perturb it. It is\nmore agile and active than it appears.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Kopfnuss"
+          }
+        ],
+        "flavorText": "Es hat Nerven wie Drahtseile, nichts kann es erschüttern. Es ist agiler und aktiver, als es scheint.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/057/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/057/low.webp"
+        },
+        "name": "Bidiza"
+      }
+    },
+    "id": "TCGDEX-P-A-57",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-057",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/057/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/057/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Bidoof",
+    "nationalPokedexNumbers": [
+      399
+    ],
+    "number": "057",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "OOYAMA",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Lightning"
+        ],
+        "damage": "10",
+        "name": "Plasma",
+        "text": "Take a {L} Energy from your Energy Zone and attach it to 1 of your Benched {L} Pokémon."
+      }
+    ],
+    "cardId": "58",
+    "convertedRetreatCost": 1,
+    "flavorText": "It's one of the kinds of Pokémon with electric\ncheek pouches. It shoots charges from its tail.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Plasma",
+            "text": "Lege 1 {L}-Energie aus deinem Energiebereich an 1 {L}-Pokémon auf deiner Bank an."
+          }
+        ],
+        "flavorText": "Pachirisu ist eines der Pokémon, die mit ihren Backentaschen Elektrizität erzeugen. Den so gesammelten Strom gibt es über den Schweif ab.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/058/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/058/low.webp"
+        },
+        "name": "Pachirisu"
+      }
+    },
+    "id": "TCGDEX-P-A-58",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-058",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/058/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/058/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Pachirisu",
+    "nationalPokedexNumbers": [
+      417
+    ],
+    "number": "058",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Akira Komayama",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Fighting",
+          "Fighting"
+        ],
+        "damage": "40",
+        "name": "Punch",
+        "text": ""
+      }
+    ],
+    "cardId": "59",
+    "convertedRetreatCost": 1,
+    "flavorText": "They communicate with one another using their\nauras. They are able to run all through the night.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Boxhieb"
+          }
+        ],
+        "flavorText": "Dieses Pokémon nutzt seine Aura, um mit seinen Artgenossen zu kommunizieren. Es kann eine ganze Nacht lang laufen.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/059/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/059/low.webp"
+        },
+        "name": "Riolu"
+      }
+    },
+    "id": "TCGDEX-P-A-59",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-059",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/059/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/059/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Riolu",
+    "nationalPokedexNumbers": [
+      447
+    ],
+    "number": "059",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "0313",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Growth Spurt",
+        "text": "Take a {G} Energy from your Energy Zone and attach it to this Pokémon."
+      }
+    ],
+    "cardId": "60",
+    "convertedRetreatCost": 1,
+    "flavorText": "Though it may look like it's just a bunch of eggs,\nit's a proper Pokémon. Exeggcute communicates\nwith others of its kind via telepathy, apparently.",
+    "hp": "50",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Wachstumsschub",
+            "text": "Lege 1 {G}-Energie aus deinem Energiebereich an dieses Pokémon an."
+          }
+        ],
+        "flavorText": "Owei mag zwar Eiern ähneln, ist aber ein echtes Pokémon, das aus sechs Individuen besteht, die wohl telepathisch miteinander kommunizieren.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/060/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/060/low.webp"
+        },
+        "name": "Owei"
+      }
+    },
+    "id": "TCGDEX-P-A-60",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-060",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/060/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/060/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Exeggcute",
+    "nationalPokedexNumbers": [
+      102
+    ],
+    "number": "060",
+    "rarity": "One Diamond",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Sanosuke Sakuma",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "10",
+        "name": "Flop",
+        "text": ""
+      }
+    ],
+    "cardId": "61",
+    "convertedRetreatCost": 1,
+    "flavorText": "It secretes flexible bubbles from its chest and back.\nThe bubbles reduce the damage it would otherwise\ntake when attacked.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Plumps"
+          }
+        ],
+        "flavorText": "Es stößt aus Brust und Rücken elastische Blasen aus, mit denen es gegnerische Angriffe abfängt und so den erlittenen Schaden verringert.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/061/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/061/low.webp"
+        },
+        "name": "Froxy"
+      }
+    },
+    "id": "TCGDEX-P-A-61",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-061",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/061/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/061/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Froakie",
+    "nationalPokedexNumbers": [
+      656
+    ],
+    "number": "061",
+    "rarity": "One Diamond",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Eri Yamaki",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "40",
+        "name": "Leek Slap",
+        "text": ""
+      }
+    ],
+    "cardId": "62",
+    "convertedRetreatCost": 1,
+    "flavorText": "The stalk this Pokémon carries in its wings serves\nas a sword to cut down opponents. In a dire\nsituation, the stalk can also serve as food.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Lauchschlag"
+          }
+        ],
+        "flavorText": "Unter seinem Flügel trägt es eine Lauchstange, die es wie ein Schwert gegen Feinde einsetzt und welche ihm im Bedarfsfall auch als Nahrung dient.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/062/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/062/low.webp"
+        },
+        "name": "Porenta"
+      }
+    },
+    "id": "TCGDEX-P-A-62",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-062",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/062/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/062/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Farfetch'd",
+    "nationalPokedexNumbers": [
+      83
+    ],
+    "number": "062",
+    "rarity": "One Diamond",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Yoshinobu Saito",
+    "attacks": [
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "70",
+        "name": "Spiral Rush",
+        "text": "Flip a coin until you get tails. This attack does 30 more damage for each heads."
+      }
+    ],
+    "cardId": "63",
+    "convertedRetreatCost": 1,
+    "flavorText": "It lives in the ozone layer far above the clouds and\ncannot be seen from the ground.",
+    "hp": "100",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Spiralsturmangriff",
+            "text": "Wirf so lange 1 Münze, bis sie Zahl zeigt. Diese Attacke fügt 30 Schadenspunkte mehr pro Kopf zu."
+          }
+        ],
+        "flavorText": "Es lebt in der Ozonschicht hoch über den Wolken und kann vom Boden aus nicht gesehen werden.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/063/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/063/low.webp"
+        },
+        "name": "Rayquaza"
+      }
+    },
+    "id": "TCGDEX-P-A-63",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-063",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/063/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/063/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Rayquaza",
+    "nationalPokedexNumbers": [
+      384
+    ],
+    "number": "063",
+    "rarity": "Three Diamond",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "PLANETA CG Works",
+    "attacks": [
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Draco Meteor",
+        "text": "1 of your opponent's Pokémon is chosen at random 4 times. For each time a Pokémon was chosen, do 40 damage to it."
+      }
+    ],
+    "cardId": "64",
+    "convertedRetreatCost": 2,
+    "hp": "140",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Draco Meteor",
+            "text": "4 Mal wird zufällig 1 Pokémon des Gegners ausgewählt. Füge jedes Mal, wenn ein Pokémon ausgewählt wird, diesem Pokémon 40 Schadenspunkte zu."
+          }
+        ],
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/064/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/064/low.webp"
+        },
+        "name": "Rayquaza-ex"
+      }
+    },
+    "id": "TCGDEX-P-A-64",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-064",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/064/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/064/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Rayquaza ex",
+    "nationalPokedexNumbers": [
+      384
+    ],
+    "number": "064",
+    "rarity": "Four Diamond",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic",
+      "EX"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "PLANETA CG Works",
+    "attacks": [
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Draco Meteor",
+        "text": "1 of your opponent's Pokémon is chosen at random 4 times. For each time a Pokémon was chosen, do 40 damage to it."
+      }
+    ],
+    "cardId": "65",
+    "convertedRetreatCost": 2,
+    "hp": "140",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Draco Meteor",
+            "text": "4 Mal wird zufällig 1 Pokémon des Gegners ausgewählt. Füge jedes Mal, wenn ein Pokémon ausgewählt wird, diesem Pokémon 40 Schadenspunkte zu."
+          }
+        ],
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/065/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/065/low.webp"
+        },
+        "name": "Rayquaza-ex"
+      }
+    },
+    "id": "TCGDEX-P-A-65",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-065",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/065/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/065/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Rayquaza ex",
+    "nationalPokedexNumbers": [
+      384
+    ],
+    "number": "065",
+    "rarity": "Two Star",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic",
+      "EX"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Amelicart",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Psychic",
+          "Colorless"
+        ],
+        "damage": "60",
+        "name": "Shadow Hit",
+        "text": "This attack also does 20 damage to 1 of your Pokémon."
+      }
+    ],
+    "cardId": "66",
+    "convertedRetreatCost": 1,
+    "flavorText": "This Pokémon lives in dark places untouched by\nsunlight. When it appears before humans, it hides\nitself under a cloth that resembles a Pikachu.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Schattenschlag",
+            "text": "Diese Attacke fügt auch 1 deiner Pokémon 20 Schadenspunkte zu."
+          }
+        ],
+        "flavorText": "Es lebt an dunklen Orten ohne Sonnenlicht.\nMenschen zeigt es sich nur, wenn es mit einem\nLumpen bedeckt ist, der aussieht wie ein Pikachu.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/066/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/066/low.webp"
+        },
+        "name": "Mimigma"
+      }
+    },
+    "id": "TCGDEX-P-A-66",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-066",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/066/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/066/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Mimikyu",
+    "nationalPokedexNumbers": [
+      778
+    ],
+    "number": "066",
+    "rarity": "One Star",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Darkness",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Mizue",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Teleport",
+        "text": "Switch this Pokémon with 1 of your Benched Pokémon."
+      }
+    ],
+    "cardId": "67",
+    "convertedRetreatCost": 1,
+    "flavorText": "Even though its helpless, gaseous body can be blown\naway by the slightest breeze, it doesn't seem to care.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Teleport",
+            "text": "Tausche dieses Pokémon gegen 1 Pokémon auf deiner Bank aus."
+          }
+        ],
+        "flavorText": "Da sein Körper aus Gas besteht, kann es schon von einem leichten Luftzug weggeweht werden. Aber das scheint ihm nichts auszumachen.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/067/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/067/low.webp"
+        },
+        "name": "Cosmog"
+      }
+    },
+    "id": "TCGDEX-P-A-67",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-067",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/067/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/067/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Cosmog",
+    "nationalPokedexNumbers": [
+      789
+    ],
+    "number": "067",
+    "rarity": "Three Diamond",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Darkness",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Ryuta Fuse",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Fighting",
+          "Fighting",
+          "Colorless"
+        ],
+        "damage": "80",
+        "name": "Crunch",
+        "text": "Flip a coin. If heads, discard a random Energy from your opponent's Active Pokémon."
+      }
+    ],
+    "cardId": "68",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Rockruff",
+    "flavorText": "Lycanroc attacks its prey with its\nsharp claws and fangs. It loyally obeys\nthe instructions of a Trainer it trusts.",
+    "hp": "100",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Knirscher",
+            "text": "Wirf 1 Münze. Lege bei Kopf 1 zufällige Energie vom Aktiven Pokémon deines Gegners ab."
+          }
+        ],
+        "evolvesFrom": "Wuffels",
+        "flavorText": "Es greift seine Beute mit scharfen Fangzähnen und Krallen an. Vertraut es einem Trainer, befolgt es treu dessen Anweisungen.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/068/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/068/low.webp"
+        },
+        "name": "Wolwerock"
+      }
+    },
+    "id": "TCGDEX-P-A-68",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-068",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/068/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/068/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Lycanroc",
+    "nationalPokedexNumbers": [
+      745
+    ],
+    "number": "068",
+    "rarity": "Three Diamond",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "weaknesses": [
+      {
+        "type": "Grass",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Satoshi Shirai",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Grass",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "150",
+        "name": "Tropical Hammer",
+        "text": "Flip a coin. If tails, this attack does nothing."
+      }
+    ],
+    "cardId": "69",
+    "convertedRetreatCost": 4,
+    "evolvesFrom": "Exeggcute",
+    "flavorText": "Blazing sunlight has brought out the true\nform and powers of this Pokémon.",
+    "hp": "150",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Tropischer Hammer",
+            "text": "Wirf 1 Münze. Bei Zahl hat diese Attacke keine Auswirkungen."
+          }
+        ],
+        "evolvesFrom": "Owei",
+        "flavorText": "Durch starke Sonneneinstrahlung wurden seine eigentlichen Kräfte und seine wahre Gestalt freigesetzt.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/069/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/069/low.webp"
+        },
+        "name": "Alola-Kokowei"
+      }
+    },
+    "id": "TCGDEX-P-A-69",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-069",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/069/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/069/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Alolan Exeggutor",
+    "nationalPokedexNumbers": [
+      103
+    ],
+    "number": "069",
+    "rarity": "Three Diamond",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "tono",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Water",
+          "Water",
+          "Water"
+        ],
+        "damage": "60",
+        "name": "Blizzard",
+        "text": "This attack also does 20 damage to each of your opponent's Benched Pokémon."
+      }
+    ],
+    "cardId": "70",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Alolan Vulpix",
+    "flavorText": "A deity resides in the snowy mountains where this Pokémon lives. In ancient times, it was worshiped as that deity's incarnation.",
+    "hp": "110",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Blizzard",
+            "text": "Diese Attacke fügt auch jedem Pokémon auf der Bank deines Gegners 20 Schadenspunkte zu."
+          }
+        ],
+        "evolvesFrom": "Alola-Vulpix",
+        "flavorText": "Einst lebte es auf einem schneebedeckten Berg, der auch die Heimat einer Gottheit war, weshalb es als deren Verkörperung verehrt wurde.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/070/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/070/low.webp"
+        },
+        "name": "Alola-Vulnona"
+      }
+    },
+    "id": "TCGDEX-P-A-70",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-070",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/070/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/070/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Alolan Ninetales",
+    "nationalPokedexNumbers": [
+      38
+    ],
+    "number": "070",
+    "rarity": "One Star",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "weaknesses": [
+      {
+        "type": "Metal",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Miki Tanaka",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Punch",
+        "text": ""
+      }
+    ],
+    "cardId": "71",
+    "convertedRetreatCost": 2,
+    "flavorText": "This Pokémon punches trees and eats\nthe berries that drop down, training itself\nand getting food at the same time.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Boxhieb"
+          }
+        ],
+        "flavorText": "Dieses Pokémon boxt Bäume und frisst dann die Beeren, die von ihnen herabfallen. So gelangt es an Nahrung und kann gleichzeitig trainieren.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/071/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/071/low.webp"
+        },
+        "name": "Krabbox"
+      }
+    },
+    "id": "TCGDEX-P-A-71",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-071",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/071/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/071/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Crabrawler",
+    "nationalPokedexNumbers": [
+      739
+    ],
+    "number": "071",
+    "rarity": "One Diamond",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Naoki Saito",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Darkness"
+        ],
+        "damage": "",
+        "name": "Poison Gas",
+        "text": "Your opponent's Active Pokémon is now Poisoned."
+      }
+    ],
+    "cardId": "72",
+    "convertedRetreatCost": 2,
+    "flavorText": "There are a hundred or so of them living in\nAlola's waste-disposal site. They're all hard\nworkers who eat a lot of trash.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Giftwolke",
+            "text": "Das Aktive Pokémon deines Gegners ist jetzt vergiftet."
+          }
+        ],
+        "flavorText": "Die Müllanlagen Alolas beherbergen rund hundert Exemplare dieses Pokémon. Sie sind fleißig dabei, riesige Mengen an Müll zu vertilgen.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/072/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/072/low.webp"
+        },
+        "name": "Alola-Sleima"
+      }
+    },
+    "id": "TCGDEX-P-A-72",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-072",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/072/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/072/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Alolan Grimer",
+    "nationalPokedexNumbers": [
+      88
+    ],
+    "number": "072",
+    "rarity": "One Diamond",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Darkness"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Sekio",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "80",
+        "name": "Beak Blast",
+        "text": "Flip a coin. If heads, your opponent's Active Pokémon is now Burned."
+      }
+    ],
+    "cardId": "73",
+    "convertedRetreatCost": 2,
+    "evolvesFrom": "Trumbeak",
+    "flavorText": "They smack beaks with others of their kind to communicate.\nThe strength and number of hits tell each other how they feel.",
+    "hp": "140",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Schnabelkanone",
+            "text": "Wirf 1 Münze. Bei Kopf ist das Aktive Pokémon deines Gegners jetzt verbrannt."
+          }
+        ],
+        "evolvesFrom": "Trompeck",
+        "flavorText": "Sie kommunizieren miteinander, indem sie ihre Schnäbel gegeneinanderschlagen. Stärke und Anzahl der Schläge übermitteln ihre Gefühle.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tcgp/P-A/073/high.webp",
+          "small": "https://assets.tcgdex.net/de/tcgp/P-A/073/low.webp"
+        },
+        "name": "Tukanon"
+      }
+    },
+    "id": "TCGDEX-P-A-73",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-073",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/tcgp/P-A/073/high.webp",
+      "small": "https://assets.tcgdex.net/en/tcgp/P-A/073/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Toucannon",
+    "nationalPokedexNumbers": [
+      733
+    ],
+    "number": "073",
+    "rarity": "One Diamond",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 2"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Thunderclap Flash",
+        "text": "At the end of your first turn, take a {L} Energy from your Energy Zone and attach it to this Pokémon.",
+        "type": "Ability"
+      }
+    ],
+    "artist": "GIDORA",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Lightning",
+          "Lightning"
+        ],
+        "damage": "50",
+        "name": "Lightning Claw",
+        "text": ""
+      }
+    ],
+    "cardId": "74",
+    "convertedRetreatCost": 1,
+    "flavorText": "It electrifies its claws and tears its opponents\napart with them. Even if they dodge its attack,\nthey'll be electrocuted by the flying sparks.",
+    "hp": "90",
+    "id": "TCGDEX-P-A-74",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-074",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Zeraora",
+    "nationalPokedexNumbers": [
+      807
+    ],
+    "number": "074",
+    "rarity": "One Star",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Hasuno",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Grass"
+        ],
+        "damage": "40",
+        "name": "Thrash Metal",
+        "text": ""
+      }
+    ],
+    "cardId": "75",
+    "convertedRetreatCost": 1,
+    "flavorText": "This Ultra Beast's body, which is as thin\nas paper, is like a sharpened sword.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Thrash Metal"
+          }
+        ],
+        "flavorText": "Der Körper dieser Ultrabestie ist dünn wie Papier und so scharfkantig wie eine geschliffene Klinge.",
+        "name": "Katagami"
+      }
+    },
+    "id": "TCGDEX-P-A-75",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-075",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Kartana",
+    "nationalPokedexNumbers": [
+      798
+    ],
+    "number": "075",
+    "rarity": "One Diamond",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Hasuno",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Fire",
+          "Fire",
+          "Colorless"
+        ],
+        "damage": "130",
+        "name": "Beat Punk",
+        "text": "This Pokémon also does 70 damage to itself."
+      }
+    ],
+    "cardId": "76",
+    "convertedRetreatCost": 2,
+    "flavorText": "It slithers toward people. Then, without warning, it triggers the\nexplosion of its own head. It's apparently one kind of Ultra Beast.",
+    "hp": "100",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Beat Punk",
+            "text": "Dieses Pokémon fügt auch sich selbst 70 Schadenspunkte zu."
+          }
+        ],
+        "flavorText": "Dieses Wesen ist vermutlich eine Ultrabestie. Es nähert sich Menschen tänzelnd, nur um dann plötzlich seinen Kopf explodieren zu lassen.",
+        "name": "Kopplosio"
+      }
+    },
+    "id": "TCGDEX-P-A-76",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-076",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Blacephalon",
+    "nationalPokedexNumbers": [
+      806
+    ],
+    "number": "076",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fire"
+    ],
+    "weaknesses": [
+      {
+        "type": "Water",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Shin Nagasawa",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Lightning",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "60",
+        "name": "Electronica",
+        "text": "Your opponent's Active Pokémon is now Confused."
+      }
+    ],
+    "cardId": "77",
+    "convertedRetreatCost": 2,
+    "flavorText": "Although it's alien to this world and a danger here, it's apparently\na common organism in the world where it normally lives.",
+    "hp": "100",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Electronica",
+            "text": "Das Aktive Pokémon deines Gegners ist jetzt verwirrt."
+          }
+        ],
+        "flavorText": "In dieser Welt wirkt sein Aussehen gefährlich und fremdartig, doch in seiner ursprünglichen Welt ist es ein ganz gewöhnliches Lebewesen.",
+        "name": "Voltriant"
+      }
+    },
+    "id": "TCGDEX-P-A-77",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-077",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Xurkitree",
+    "nationalPokedexNumbers": [
+      796
+    ],
+    "number": "077",
+    "rarity": "One Diamond",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "nagimiso",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Psychic",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "100",
+        "name": "Psychobilly",
+        "text": "This Pokémon also does 30 damage to itself."
+      }
+    ],
+    "cardId": "78",
+    "convertedRetreatCost": 2,
+    "flavorText": "Lunala no longer has a will of its own. Now under the\ncontrol of Necrozma, it continuously expels all of its energy.",
+    "hp": "110",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Psychobilly",
+            "text": "Dieses Pokémon fügt auch sich selbst 30 Schadenspunkte zu."
+          }
+        ],
+        "flavorText": "In dieser Form unterliegt Lunala gänzlich Necrozmas Kontrolle, es hat keinen eigenen Willen mehr. Seine Energie fließt ungehindert aus.",
+        "name": "Morgenschwingen-Necrozma"
+      }
+    },
+    "id": "TCGDEX-P-A-78",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-078",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Dawn Wings Necrozma",
+    "nationalPokedexNumbers": [
+      800
+    ],
+    "number": "078",
+    "rarity": "Three Diamond",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Darkness",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "nagimiso",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Metal",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "100",
+        "name": "Black Metal",
+        "text": "Discard a {M} Energy from this Pokémon."
+      }
+    ],
+    "cardId": "79",
+    "convertedRetreatCost": 2,
+    "flavorText": "This is its form while it is devouring the light of\nSolgaleo. It pounces on foes and then slashes\nthem with the claws on its four limbs and back.",
+    "hp": "110",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Black Metal",
+            "text": "Lege 1 {M}-Energie von diesem Pokémon ab."
+          }
+        ],
+        "flavorText": "Necrozma nimmt diese Form an, wenn es das Licht von Solgaleo verschlingt. Es schlitzt Gegner mit seinen vielen scharfen Krallen auf.",
+        "name": "Abendmähne-Necrozma"
+      }
+    },
+    "id": "TCGDEX-P-A-79",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-079",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Dusk Mane Necrozma",
+    "nationalPokedexNumbers": [
+      800
+    ],
+    "number": "079",
+    "rarity": "Three Diamond",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Metal"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Shin Nagasawa",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Metal",
+          "Colorless"
+        ],
+        "damage": "40",
+        "name": "Brass Rock",
+        "text": "During your opponent's next turn, this Pokémon takes −20 damage from attacks."
+      }
+    ],
+    "cardId": "80",
+    "convertedRetreatCost": 3,
+    "flavorText": "It appeared from an Ultra Wormhole. Each one\nappears to be made up of many life-forms\nstacked one on top of each other.",
+    "hp": "110",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Brass Rock",
+            "text": "Während des nächsten Zuges deines Gegners werden diesem Pokémon durch Attacken - 20 Schadenspunkte zugefügt."
+          }
+        ],
+        "flavorText": "Diese Kreatur kam durch eine Ultrapforte. Sie besteht anscheinend aus mehreren aufeinandergestapelten Wesen.",
+        "name": "Muramura"
+      }
+    },
+    "id": "TCGDEX-P-A-80",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-080",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Stakataka",
+    "nationalPokedexNumbers": [
+      805
+    ],
+    "number": "080",
+    "rarity": "One Diamond",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Metal"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "PLANETA Tsuji",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "60",
+        "name": "Photon Claw",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Psychic",
+          "Psychic",
+          "Metal",
+          "Metal"
+        ],
+        "damage": "120",
+        "name": "Shoegaze",
+        "text": "Discard the top 5 cards of each player's deck."
+      }
+    ],
+    "cardId": "81",
+    "convertedRetreatCost": 2,
+    "hp": "150",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Photonenklaue"
+          },
+          {
+            "name": "Shoegaze",
+            "text": "Lege die obersten 5 Karten des Decks jedes Spielers ab."
+          }
+        ],
+        "name": "Ultra-Necrozma-ex"
+      }
+    },
+    "id": "TCGDEX-P-A-81",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-081",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Ultra Necrozma ex",
+    "nationalPokedexNumbers": [
+      800
+    ],
+    "number": "081",
+    "rarity": "Four Diamond",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic",
+      "EX"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Dragon"
+    ],
+    "weaknesses": [
+      {
+        "type": "Colorless",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Megumi Mizutani",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Darkness"
+        ],
+        "damage": "20",
+        "name": "2-Step",
+        "text": "Flip 2 coins. This attack does 20 damage for each heads."
+      }
+    ],
+    "cardId": "82",
+    "convertedRetreatCost": 1,
+    "flavorText": "This Ultra Beast is well enough liked to be\nchosen as a first partner in its own world.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "2-Step",
+            "text": "Wirf 2 Münzen. Diese Attacke fügt 20 Schadenspunkte pro Kopf zu."
+          }
+        ],
+        "flavorText": "Diese Ultrabestie wird in der Welt, aus der sie kommt, so gemocht, dass sie oft als Partner für Reisen gewählt wird.",
+        "name": "Venicro"
+      }
+    },
+    "id": "TCGDEX-P-A-82",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-082",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Poipole",
+    "nationalPokedexNumbers": [
+      803
+    ],
+    "number": "082",
+    "rarity": "Three Diamond",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Darkness"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Kanako Eo",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "40",
+        "name": "Ram",
+        "text": ""
+      }
+    ],
+    "cardId": "83",
+    "convertedRetreatCost": 2,
+    "flavorText": "Its fluffy fur is a delight to pet, but carelessly reaching out\nto touch this Pokémon could result in painful retaliation.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Ramme"
+          }
+        ],
+        "flavorText": "Sein Pelz ist wunderbar flauschig. Wagt man es jedoch, diesen zu berühren, setzt es sich ohne Rücksicht auf Verluste zur Wehr.",
+        "name": "Velursi"
+      }
+    },
+    "id": "TCGDEX-P-A-83",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-083",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Stufful",
+    "nationalPokedexNumbers": [
+      759
+    ],
+    "number": "083",
+    "rarity": "Three Diamond",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "PLANETA Tsuji",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Lightning"
+        ],
+        "damage": "20",
+        "name": "Plasma Hurricane",
+        "text": "Take a {L} Energy from your Energy Zone and attach it to this Pokémon."
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Lightning",
+          "Lightning",
+          "Colorless"
+        ],
+        "damage": "90",
+        "name": "Mach Bolt",
+        "text": ""
+      }
+    ],
+    "cardId": "84",
+    "convertedRetreatCost": 1,
+    "hp": "130",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Plasmaorkan",
+            "text": "Lege 1 {L}-Energie aus deinem Energiebereich an dieses Pokémon an."
+          },
+          {
+            "name": "Flotter Sprung"
+          }
+        ],
+        "name": "Kapu-Riki-ex"
+      }
+    },
+    "id": "TCGDEX-P-A-84",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-084",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Tapu Koko ex",
+    "nationalPokedexNumbers": [
+      785
+    ],
+    "number": "084",
+    "rarity": "Four Diamond",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic",
+      "EX"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "OOYAMA",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Water"
+        ],
+        "damage": "10",
+        "name": "Sweets Relay",
+        "text": "If 1 of your Pokémon used Sweets Relay during your last turn, this attack does 20 more damage."
+      }
+    ],
+    "cardId": "85",
+    "convertedRetreatCost": 1,
+    "flavorText": "Unable to survive in hot areas, it makes itself\ncomfortable by breathing out air cold enough to\ncause snow. It burrows into the snow to sleep.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Süße Staffel",
+            "text": "Wenn 1 deiner Pokémon während deines letzten Zuges Süße Staffel eingesetzt hat, fügt diese Attacke 20 Schadenspunkte mehr zu."
+          }
+        ],
+        "flavorText": "Gelatini kann nicht an warmen Orten leben. Es erzeugt Schnee, indem es kalte Luft ausatmet, und vergräbt sich dann darin, um zu schlafen.",
+        "name": "Gelatini"
+      }
+    },
+    "id": "TCGDEX-P-A-85",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-085",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Vanillite",
+    "nationalPokedexNumbers": [
+      582
+    ],
+    "number": "085",
+    "rarity": "One Diamond",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "weaknesses": [
+      {
+        "type": "Metal",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Mizue",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Lightning"
+        ],
+        "damage": "40",
+        "name": "Beginning Bolt",
+        "text": "If this Pokémon evolved during this turn, this attack does 20 more damage."
+      }
+    ],
+    "cardId": "86",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Eevee",
+    "flavorText": "It concentrates the weak electric charges emitted\nby its cells and launches wicked lightning bolts.",
+    "hp": "90",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Startspannung",
+            "text": "Wenn sich dieses Pokémon während dieses Zuges entwickelt hat, fügt diese Attacke 20 Schadenspunkte mehr zu."
+          }
+        ],
+        "evolvesFrom": "Evoli",
+        "flavorText": "Es sammelt die schwache elektrische Energie, die von seinen Zellen ausgeht, und feuert starke Blitze ab.",
+        "name": "Blitza"
+      }
+    },
+    "id": "TCGDEX-P-A-86",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-086",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Jolteon",
+    "nationalPokedexNumbers": [
+      135
+    ],
+    "number": "086",
+    "rarity": "Three Diamond",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Tika Matsuno",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "40",
+        "name": "Sweets Overload",
+        "text": "This attack does 40 damage for each time your Pokémon used Sweets Relay during this game."
+      }
+    ],
+    "cardId": "87",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Milcery",
+    "flavorText": "When it trusts a Trainer, it will treat them\nto berries it's decorated with cream.",
+    "hp": "80",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Süßer Überfluss",
+            "text": "Diese Attacke fügt für jedes Mal, wenn deine Pokémon in diesem Spiel Süße Staffel eingesetzt haben, 40 Schadenspunkte zu."
+          }
+        ],
+        "evolvesFrom": "Hokumil",
+        "flavorText": "Es macht einem Trainer, dem es vertraut, mit Beeren samt Sahnedekoration eine Freude.",
+        "name": "Pokusan"
+      }
+    },
+    "id": "TCGDEX-P-A-87",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-087",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Alcremie",
+    "nationalPokedexNumbers": [
+      869
+    ],
+    "number": "087",
+    "rarity": "One Star",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Metal",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Shinya Komatsu",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Shed Skin",
+        "text": "Heal 30 damage from this Pokémon."
+      }
+    ],
+    "cardId": "88",
+    "convertedRetreatCost": 2,
+    "evolvesFrom": "Dratini",
+    "flavorText": "They say that if it emits an aura from its whole\nbody, the weather will begin to change instantly.",
+    "hp": "100",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Expidermis",
+            "text": "Heile 30 Schadenspunkte bei diesem Pokémon."
+          }
+        ],
+        "evolvesFrom": "Dratini",
+        "flavorText": "Man sagt, wenn sein ganzer Körper eine Aura ausstrahle, ändere sich augenblicklich das Wetter in seiner Umgebung.",
+        "name": "Dragonir"
+      }
+    },
+    "id": "TCGDEX-P-A-88",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-088",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Dragonair",
+    "nationalPokedexNumbers": [
+      148
+    ],
+    "number": "088",
+    "rarity": "One Diamond",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Dragon"
+    ],
+    "weaknesses": [
+      {
+        "type": "Colorless",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "MAHOU",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "40",
+        "name": "Drain Slap",
+        "text": "Heal 10 damage from this Pokémon."
+      }
+    ],
+    "cardId": "89",
+    "convertedRetreatCost": 2,
+    "flavorText": "This Pokémon has a kind heart. By touching with its feelers,\nAudino can gauge other creatures' feelings and physical conditions.",
+    "hp": "100",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Watschensauger",
+            "text": "Heile 10 Schadenspunkte bei diesem Pokémon."
+          }
+        ],
+        "flavorText": "Berührt dieses herzensgute Pokémon jemanden mit seinen Fühlern, kann es dessen körperliche Verfassung und Gemütszustand ertasten.",
+        "name": "Ohrdoch"
+      }
+    },
+    "id": "TCGDEX-P-A-89",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-089",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Audino",
+    "nationalPokedexNumbers": [
+      531
+    ],
+    "number": "089",
+    "rarity": "One Diamond",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "sowsow",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Metal",
+          "Metal"
+        ],
+        "damage": "30",
+        "name": "Bristling Spikes",
+        "text": "During your opponent's next turn, if this Pokémon is damaged by an attack, do 30 damage to the Attacking Pokémon."
+      }
+    ],
+    "cardId": "90",
+    "convertedRetreatCost": 1,
+    "flavorText": "With the long hairs on its back, this Pokémon\ntakes in electricity from other electric Pokémon.\nIt stores what it absorbs in an electric sac.",
+    "hp": "80",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Aufgestellte Stacheln",
+            "text": "Wenn diesem Pokémon während des nächsten Zuges deines Gegners durch eine Attacke Schaden zugefügt wird, füge dem Angreifenden Pokémon 30 Schadenspunkte zu."
+          }
+        ],
+        "flavorText": "Der Schweif an seinem Rücken absorbiert Blitze und Angriffe von Elektro-Pokémon. Es speichert den so gewonnenen Strom in Elektrotaschen.",
+        "name": "Togedemaru"
+      }
+    },
+    "id": "TCGDEX-P-A-90",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-090",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Togedemaru",
+    "nationalPokedexNumbers": [
+      777
+    ],
+    "number": "090",
+    "rarity": "Three Diamond",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Metal"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "HYOGONOSUKE",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "50",
+        "name": "Enhanced Fang",
+        "text": "If this Pokémon has a Pokémon Tool attached, this attack does 50 more damage."
+      }
+    ],
+    "cardId": "91",
+    "convertedRetreatCost": 2,
+    "evolvesFrom": "Skwovet",
+    "flavorText": "This Pokémon makes off with heaps of fallen berries by wrapping\nthem in its tail, which is roughly twice the length of its body.",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Spezial-Zahn",
+            "text": "Wenn an dieses Pokémon 1 Pokémon-Ausrüstung angelegt ist, fügt diese Attacke 50 Schadenspunkte mehr zu."
+          }
+        ],
+        "evolvesFrom": "Raffel",
+        "flavorText": "Sein Schweif ist etwa doppelt so lang wie sein Körper. Es umwickelt damit von Bäumen gefallene Beeren und trägt sie mit sich fort.",
+        "name": "Schlaraffel"
+      }
+    },
+    "id": "TCGDEX-P-A-91",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-091",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Greedent",
+    "nationalPokedexNumbers": [
+      820
+    ],
+    "number": "091",
+    "rarity": "Three Diamond",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "nisimono",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Tackle",
+        "text": ""
+      }
+    ],
+    "cardId": "92",
+    "convertedRetreatCost": 1,
+    "flavorText": "Its ability to evolve into many forms allows it to\nadapt smoothly and perfectly to any environment.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Tackle"
+          }
+        ],
+        "flavorText": "Um sich jeder Umgebung perfekt anpassen zu können, ist es in der Lage, sich zu verschiedenen Pokémon zu entwickeln.",
+        "name": "Evoli"
+      }
+    },
+    "id": "TCGDEX-P-A-92",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-092",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Eevee",
+    "nationalPokedexNumbers": [
+      133
+    ],
+    "number": "092",
+    "rarity": "Three Diamond",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Tika Matsuno",
+    "attacks": [
+      {
+        "convertedEnergyCost": 0,
+        "cost": [],
+        "damage": "",
+        "name": "Twinkly Call",
+        "text": "Put a random Pokémon from your deck into your hand."
+      }
+    ],
+    "cardId": "93",
+    "convertedRetreatCost": 0,
+    "flavorText": "According to local rumors, Cleffa are often seen\nin places where shooting stars have fallen.",
+    "hp": "30",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Funkelruf",
+            "text": "Nimm 1 zufälliges Pokémon aus deinem Deck auf deine Hand."
+          }
+        ],
+        "flavorText": "Man erzählt sich, dass überall dort besonders häufig Pii anzutreffen seien, wo einst eine Sternschnuppe eingeschlagen ist.",
+        "name": "Pii"
+      }
+    },
+    "id": "TCGDEX-P-A-93",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-093",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Cleffa",
+    "nationalPokedexNumbers": [
+      173
+    ],
+    "number": "093",
+    "rarity": "One Star",
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Colorless",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Taira Akitsu",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Water"
+        ],
+        "damage": "",
+        "name": "Water Arrow",
+        "text": "This attack does 10 damage to 1 of your opponent's Pokémon."
+      }
+    ],
+    "cardId": "94",
+    "convertedRetreatCost": 1,
+    "flavorText": "Horsea makes its home in oceans with gentle\ncurrents. If this Pokémon is under attack, it spits\nout pitch-black ink and escapes.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Wasserpfeil",
+            "text": "Diese Attacke fügt 1 Pokémon deines Gegners 10 Schadenspunkte zu."
+          }
+        ],
+        "flavorText": "Es lebt in Meeren mit ruhigem Gezeitenstrom. Wird es angegriffen, versprüht es tiefschwarze Tinte und ergreift daraufhin die Flucht.",
+        "name": "Seeper"
+      }
+    },
+    "id": "TCGDEX-P-A-94",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-094",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Horsea",
+    "nationalPokedexNumbers": [
+      116
+    ],
+    "number": "094",
+    "rarity": "One Diamond",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Aya Kusube",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Lightning"
+        ],
+        "damage": "",
+        "name": "Luring Glow",
+        "text": "Flip a coin. If heads, switch in 1 of your opponent's Benched Pokémon to the Active Spot."
+      }
+    ],
+    "cardId": "95",
+    "convertedRetreatCost": 1,
+    "flavorText": "Its antennae, which evolved from a fin, have both\npositive and negative charges flowing through them.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Lockendes Glühen",
+            "text": "Wirf 1 Münze. Wechsle bei Kopf 1 Pokémon von der Bank deines Gegners in die Aktive Position ein."
+          }
+        ],
+        "flavorText": "Seine Antennen haben sich aus Flossen entwickelt und sind sowohl positiv als auch negativ geladen.",
+        "name": "Lampi"
+      }
+    },
+    "id": "TCGDEX-P-A-95",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-095",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Chinchou",
+    "nationalPokedexNumbers": [
+      170
+    ],
+    "number": "095",
+    "rarity": "One Diamond",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Kagemaru Himeno",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Darkness",
+          "Darkness",
+          "Darkness"
+        ],
+        "damage": "70",
+        "name": "Diving Swipe",
+        "text": "Discard a random card from your opponent's hand."
+      }
+    ],
+    "cardId": "96",
+    "convertedRetreatCost": 2,
+    "evolvesFrom": "Houndour",
+    "flavorText": "If you are burned by the flames it shoots from its\nmouth, the pain will never go away.",
+    "hp": "110",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Sturzklau",
+            "text": "Lege 1 zufällige Karte aus der Hand deines Gegners auf seinen Ablagestapel."
+          }
+        ],
+        "evolvesFrom": "Hunduster",
+        "flavorText": "Wird man von den Flammen getroffen, die es aus seinem Maul schießt, so erleidet man eine Brandwunde, deren Schmerz nie nachlässt.",
+        "name": "Hundemon"
+      }
+    },
+    "id": "TCGDEX-P-A-96",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-096",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Houndoom",
+    "nationalPokedexNumbers": [
+      229
+    ],
+    "number": "096",
+    "rarity": "One Diamond",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Darkness"
+    ],
+    "weaknesses": [
+      {
+        "type": "Grass",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Kouki Saitou",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Cross-Cut",
+        "text": "If your opponent's Active Pokémon is an Evolution Pokémon, this attack does 40 more damage."
+      }
+    ],
+    "cardId": "97",
+    "convertedRetreatCost": 3,
+    "flavorText": "Although it's carrying its baby in a pouch on\nits belly, Kangaskhan is swift on its feet. It\nintimidates its opponents with quick jabs.",
+    "hp": "100",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Überkreuzzerschneider",
+            "text": "Wenn das Aktive Pokémon deines Gegners ein Entwicklungs-Pokémon ist, fügt diese Attacke 40 Schadenspunkte mehr zu."
+          }
+        ],
+        "flavorText": "Obwohl es sein Junges im Beutel trägt, bewegt sich dieses Pokémon äußerst leichtfüßig. Gegner schreckt Kangama mit blitzschnellen Schlägen ab.",
+        "name": "Kangama"
+      }
+    },
+    "id": "TCGDEX-P-A-97",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-097",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Kangaskhan",
+    "nationalPokedexNumbers": [
+      115
+    ],
+    "number": "097",
+    "rarity": "Three Diamond",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "PLANETA CG Works",
+    "attacks": [
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "100",
+        "name": "Happy Punch",
+        "text": "Flip a coin. If heads, heal 60 damage from this Pokémon."
+      }
+    ],
+    "cardId": "98",
+    "convertedRetreatCost": 3,
+    "evolvesFrom": "Chansey",
+    "hp": "180",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Freudenschlag",
+            "text": "Wirf 1 Münze. Heile bei Kopf 60 Schadenspunkte bei diesem Pokémon."
+          }
+        ],
+        "evolvesFrom": "Chaneira",
+        "name": "Heiteira-ex"
+      }
+    },
+    "id": "TCGDEX-P-A-98",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-098",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Blissey ex",
+    "nationalPokedexNumbers": [
+      242
+    ],
+    "number": "098",
+    "rarity": "Four Diamond",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1",
+      "EX"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Shibuzoh.",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "10",
+        "name": "Tackle",
+        "text": ""
+      }
+    ],
+    "cardId": "99",
+    "convertedRetreatCost": 1,
+    "flavorText": "The fur on its body naturally repels water. It can\nstay dry even when it plays in the water.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Tackle"
+          }
+        ],
+        "flavorText": "Sein Fell ist von Natur aus wasserabweisend. Es bleibt trocken, auch wenn es im Wasser spielt.",
+        "name": "Marill"
+      }
+    },
+    "id": "TCGDEX-P-A-99",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-099",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Marill",
+    "nationalPokedexNumbers": [
+      183
+    ],
+    "number": "099",
+    "rarity": "Three Diamond",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Satoshi Shirai",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Darkness"
+        ],
+        "damage": "50",
+        "name": "Slash",
+        "text": ""
+      }
+    ],
+    "cardId": "100",
+    "convertedRetreatCost": 0,
+    "evolvesFrom": "Sneasel",
+    "flavorText": "Evolution made it even more devious.\nIt communicates by clawing signs in boulders.",
+    "hp": "80",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Schlitzer"
+          }
+        ],
+        "evolvesFrom": "Sniebel",
+        "flavorText": "Snibunna wurde durch seine Entwicklung noch verschlagener. Es kommuniziert durch in Felsen gekratzte Zeichen.",
+        "name": "Snibunna"
+      }
+    },
+    "id": "TCGDEX-P-A-100",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "P-A-100",
+      "tcgplayer": []
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Weavile",
+    "nationalPokedexNumbers": [
+      461
+    ],
+    "number": "100",
+    "rarity": "Three Diamond",
+    "setId": "TCGDEX-P-A",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Darkness"
+    ],
+    "weaknesses": [
+      {
+        "type": "Grass",
+        "value": "+20"
+      }
+    ]
+  }
+]
