@@ -1,0 +1,25 @@
+import { Card } from "../../../interfaces"
+import Set from "../Mega Rising"
+
+const card: Card = {
+	set: Set,
+
+	name: {
+		en: "Copycat",
+		fr: "Copieuse"
+	},
+
+	illustrator: "Yuu Nishida",
+	rarity: "Two Star",
+	category: "Trainer",
+
+	effect: {
+		en: "Shuffle your hand into your deck. Draw a card for each card in your opponent's hand.",
+		fr: "Mélangez votre main avec votre deck. Piochez une carte pour chaque carte dans la main de votre adversaire."
+	},
+
+	trainerType: "Supporter",
+	boosters: ["mega-gyarados"]
+}
+
+export default card
