@@ -29,6 +29,10 @@ export function loadTcgdexDatabase(rootDir, { excludeSerieIds = ['tcgp'] } = {})
   const dataDir = path.join(rootDir, 'data');
   const sets = [];
   const errors = [];
+  const setsByKey = new Map(); // aufgeloester Set-Pfad (ohne .ts) -> cards[]
+  const pendingCardDirs = [];
+  const failedSetKeys = new Set(); // Set-Datei nicht parsebar (Fehler bereits erfasst)
+  const setKey = (p) => path.resolve(p).replace(/\.ts$/, '');
   const record = (file, e) => errors.push({ file, message: e instanceof Error ? e.message : String(e) });
 
   for (const serieName of tsBaseNames(dataDir)) {
@@ -52,23 +56,14 @@ export function loadTcgdexDatabase(rootDir, { excludeSerieIds = ['tcgp'] } = {})
         if (!set || typeof set.id !== 'string') throw new Error('Set ohne id');
       } catch (e) {
         record(setFile, e);
+        failedSetKeys.add(setKey(setFile));
         continue;
       }
 
       const cards = [];
       const cardDir = path.join(serieDir, setName);
-      for (const localId of tsBaseNames(cardDir)) {
-        const cardFile = path.join(cardDir, `${localId}.ts`);
-        try {
-          const card = readModule(cardFile);
-          if (!card || typeof card !== 'object') throw new Error('Karte ist kein Objekt');
-          const { set: _set, ...rest } = card;
-          cards.push({ localId, ...rest });
-        } catch (e) {
-          record(cardFile, e);
-        }
-      }
-      cards.sort((a, b) => sortLocalIds(a.localId, b.localId));
+      pendingCardDirs.push(cardDir);
+      setsByKey.set(setKey(setFile), cards);
 
       const rd = set.releaseDate;
       sets.push({
@@ -85,5 +80,27 @@ export function loadTcgdexDatabase(rootDir, { excludeSerieIds = ['tcgp'] } = {})
       });
     }
   }
+
+  // Karten dem Set zuordnen, auf das ihr `set`-Import zeigt (nicht dem Ordner).
+  for (const cardDir of pendingCardDirs) {
+    for (const localId of tsBaseNames(cardDir)) {
+      const cardFile = path.join(cardDir, `${localId}.ts`);
+      try {
+        const card = readModule(cardFile);
+        if (!card || typeof card !== 'object') throw new Error('Karte ist kein Objekt');
+        const { set: setRef, ...rest } = card;
+        const spec = setRef?.$import;
+        if (typeof spec !== 'string') throw new Error('Karte ohne set-Import');
+        const key = setKey(path.resolve(cardDir, spec));
+        if (failedSetKeys.has(key)) continue;
+        const target = setsByKey.get(key);
+        if (!target) throw new Error(`set-Import "${spec}" zeigt auf kein geladenes Set`);
+        target.push({ ...rest, localId });
+      } catch (e) {
+        record(cardFile, e);
+      }
+    }
+  }
+  for (const cards of setsByKey.values()) cards.sort((x, y) => sortLocalIds(x.localId, y.localId));
   return { sets, errors };
 }

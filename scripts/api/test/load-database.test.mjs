@@ -60,3 +60,51 @@ test('loadPokemontcg: liest sets/en.json und cards/en/<id>.json', () => {
   assert.ok(Array.isArray(base1) && base1.length > 0);
   assert.equal(base1[0].id.startsWith('base1-'), true);
 });
+
+function withTmpCopy(fn) {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'tcgdex-fixture-'));
+  try {
+    fs.cpSync(FIXTURE, tmp, { recursive: true });
+    return fn(tmp, path.join(tmp, 'data', 'Mega Evolution', 'Pitch Black'));
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+}
+const cardSrc = (spec, extra = '') => `import { Card } from "../../../interfaces"
+import Set from "${spec}"
+const card: Card = { set: Set, ${extra}name: { en: "X" } }
+export default card
+`;
+
+test('Karte wird dem importierten Set zugeordnet, nicht dem Ordner', () => withTmpCopy((tmp, dir) => {
+  fs.writeFileSync(path.join(dir, 'AR1.ts'), cardSrc("../../McDonald's Collection/McDonald\'s Collection 2011"));
+  const { sets, errors } = loadTcgdexDatabase(tmp);
+  assert.equal(errors.length, 0);
+  assert.deepEqual(sets.find((s) => s.id === 'me05').cards.map((c) => c.localId), ['001', '002']);
+  assert.deepEqual(sets.find((s) => s.id === '2011bw').cards.map((c) => c.localId), ['1', '2', '10', 'AR1']);
+}));
+
+test('Import mit .ts-Endung wird aufgeloest; localId-Feld ueberschreibt Dateinamen nicht', () => withTmpCopy((tmp, dir) => {
+  fs.writeFileSync(path.join(dir, '003.ts'), cardSrc('../Pitch Black.ts', 'localId: "zzz", '));
+  const { sets, errors } = loadTcgdexDatabase(tmp);
+  assert.equal(errors.length, 0);
+  assert.deepEqual(sets.find((s) => s.id === 'me05').cards.map((c) => c.localId), ['001', '002', '003']);
+}));
+
+test('Nicht aufloesbarer Import ergibt Fehler und Karte wird uebersprungen', () => withTmpCopy((tmp, dir) => {
+  fs.writeFileSync(path.join(dir, '004.ts'), cardSrc('../Gibt Es Nicht'));
+  const { sets, errors } = loadTcgdexDatabase(tmp);
+  assert.equal(errors.length, 1);
+  assert.match(errors[0].file, /004.ts$/);
+  assert.deepEqual(sets.find((s) => s.id === 'me05').cards.map((c) => c.localId), ['001', '002']);
+}));
+
+test('Set-Pfad endet auf "ts" ohne Punkt (Furious Fists) wird korrekt aufgeloest', () => withTmpCopy((tmp, dir) => {
+  const serie = path.join(tmp, 'data', 'Mega Evolution');
+  fs.writeFileSync(path.join(serie, 'Furious Fists.ts'), fs.readFileSync(path.join(serie, 'Pitch Black.ts'), 'utf8').replace('me05', 'xy3').replace('Pitch Black', 'Furious Fists'));
+  fs.mkdirSync(path.join(serie, 'Furious Fists'));
+  fs.writeFileSync(path.join(serie, 'Furious Fists', '1.ts'), cardSrc('../Furious Fists'));
+  const { sets, errors } = loadTcgdexDatabase(tmp);
+  assert.equal(errors.length, 0);
+  assert.deepEqual(sets.find((s) => s.id === 'xy3').cards.map((c) => c.localId), ['1']);
+}));
