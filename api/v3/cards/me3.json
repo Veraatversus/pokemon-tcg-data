@@ -4,7 +4,9 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "G",
+        "cost": [
+          "Grass"
+        ],
         "damage": "10",
         "name": "Gooey Thread",
         "text": "During your opponent's next turn, the Defending Pokémon can't retreat."
@@ -12,7 +14,7 @@
     ],
     "cardId": "1",
     "convertedRetreatCost": 1,
-    "hp": 60,
+    "hp": "60",
     "i18n": {
       "de": {
         "attacks": [
@@ -56,7 +58,6 @@
     "number": "1",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -66,7 +67,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -96,7 +97,9 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "G",
+        "cost": [
+          "Grass"
+        ],
         "damage": "50",
         "name": "Poison Ring",
         "text": "Your opponent's Active Pokémon is now Poisoned. During your opponent's next turn, that Pokémon can't retreat."
@@ -105,7 +108,7 @@
     "cardId": "2",
     "convertedRetreatCost": 1,
     "evolvesFrom": "Spinarak",
-    "hp": 110,
+    "hp": "110",
     "i18n": {
       "de": {
         "attacks": [
@@ -150,7 +153,6 @@
     "number": "2",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -190,14 +192,18 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "G",
+        "cost": [
+          "Grass"
+        ],
         "damage": "",
         "name": "Send Flowers",
-        "text": "Search your deck for an Energy card and attach it to 1 of your Benched grass Pokémon. Then, shuffle your deck."
+        "text": "Search your deck for an Energy card and attach it to 1 of your Benched {G} Pokémon. Then, shuffle your deck."
       },
       {
         "convertedEnergyCost": 1,
-        "cost": "G",
+        "cost": [
+          "Grass"
+        ],
         "damage": "30",
         "name": "Leaf Step",
         "text": ""
@@ -205,7 +211,7 @@
     ],
     "cardId": "3",
     "convertedRetreatCost": 0,
-    "hp": 70,
+    "hp": "70",
     "i18n": {
       "de": {
         "attacks": [
@@ -252,15 +258,13 @@
     "number": "3",
     "rarity": "Uncommon",
     "regulationMark": "J",
-    "resistances": [],
-    "retreatCost": [],
     "setId": "me3",
     "sources": {
       "pokemontcg": "bc4a5871",
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -290,7 +294,9 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "G",
+        "cost": [
+          "Grass"
+        ],
         "damage": "30",
         "name": "Reckless Charge",
         "text": "This Pokémon also does 10 damage to itself."
@@ -298,7 +304,7 @@
     ],
     "cardId": "4",
     "convertedRetreatCost": 1,
-    "hp": 70,
+    "hp": "70",
     "i18n": {
       "de": {
         "attacks": [
@@ -342,7 +348,6 @@
     "number": "4",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -352,7 +357,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -382,7 +387,9 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "G",
+        "cost": [
+          "Grass"
+        ],
         "damage": "40",
         "name": "Solar Cutter",
         "text": ""
@@ -391,7 +398,7 @@
     "cardId": "5",
     "convertedRetreatCost": 1,
     "evolvesFrom": "Snivy",
-    "hp": 100,
+    "hp": "100",
     "i18n": {
       "de": {
         "attacks": [
@@ -435,7 +442,6 @@
     "number": "5",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -475,14 +481,20 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "G",
-        "damage": "20x",
+        "cost": [
+          "Grass"
+        ],
+        "damage": "20×",
         "name": "Regal Command",
         "text": "This attack does 20 damage for each of your Pokémon in play."
       },
       {
         "convertedEnergyCost": 3,
-        "cost": "GGG",
+        "cost": [
+          "Grass",
+          "Grass",
+          "Grass"
+        ],
         "damage": "100+",
         "name": "Solar Coiling",
         "text": "If Rosa's Encouragement is in your discard pile, this attack does 150 more damage."
@@ -491,7 +503,7 @@
     "cardId": "6",
     "convertedRetreatCost": 2,
     "evolvesFrom": "Servine",
-    "hp": 160,
+    "hp": "160",
     "i18n": {
       "de": {
         "attacks": [
@@ -542,7 +554,6 @@
     "number": "6",
     "rarity": "Rare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -588,7 +599,9 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "G",
+        "cost": [
+          "Grass"
+        ],
         "damage": "20",
         "name": "Gnaw",
         "text": ""
@@ -596,7 +609,7 @@
     ],
     "cardId": "7",
     "convertedRetreatCost": 1,
-    "hp": 40,
+    "hp": "40",
     "i18n": {
       "de": {
         "attacks": [
@@ -639,7 +652,6 @@
     "number": "7",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -649,7 +661,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -679,7 +691,9 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "G",
+        "cost": [
+          "Grass"
+        ],
         "damage": "",
         "name": "Hide",
         "text": "Flip a coin. If heads, during your opponent's next turn, prevent all damage from and effects of attacks done to this Pokémon."
@@ -688,7 +702,7 @@
     "cardId": "8",
     "convertedRetreatCost": 3,
     "evolvesFrom": "Scatterbug",
-    "hp": 80,
+    "hp": "80",
     "i18n": {
       "de": {
         "attacks": [
@@ -733,7 +747,6 @@
     "number": "8",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -773,15 +786,18 @@
   {
     "abilities": [
       {
-        "name": "[Ability] Grand Wing",
-        "text": "Once during your turn, you may use this Ability. Your opponent shuffles their hand and puts it on the bottom of their deck. If they put any cards on the bottom of their deck in this way, they draw 4 cards."
+        "name": "Grand Wing",
+        "text": "Once during your turn, you may use this Ability. Your opponent shuffles their hand and puts it on the bottom of their deck. If they put any cards on the bottom of their deck in this way, they draw 4 cards.",
+        "type": "Ability"
       }
     ],
     "artist": "mingo",
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "G",
+        "cost": [
+          "Grass"
+        ],
         "damage": "60+",
         "name": "Blow Through",
         "text": "If a Stadium is in play, this attack does 60 more damage."
@@ -790,7 +806,7 @@
     "cardId": "9",
     "convertedRetreatCost": 1,
     "evolvesFrom": "Spewpa",
-    "hp": 120,
+    "hp": "120",
     "i18n": {
       "de": {
         "abilities": [
@@ -841,7 +857,6 @@
     "number": "9",
     "rarity": "Uncommon",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -881,14 +896,20 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "G",
+        "cost": [
+          "Grass"
+        ],
         "damage": "",
         "name": "Find a Friend",
         "text": "Search your deck for a Pokémon, reveal it, and put it into your hand. Then, shuffle your deck."
       },
       {
         "convertedEnergyCost": 3,
-        "cost": "CCC",
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
         "damage": "30",
         "name": "Tackle",
         "text": ""
@@ -896,7 +917,7 @@
     ],
     "cardId": "10",
     "convertedRetreatCost": 2,
-    "hp": 80,
+    "hp": "80",
     "i18n": {
       "de": {
         "attacks": [
@@ -943,7 +964,6 @@
     "number": "10",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -954,7 +974,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -984,23 +1004,29 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "G",
+        "cost": [
+          "Grass"
+        ],
         "damage": "20",
         "name": "Leafage",
         "text": ""
       },
       {
         "convertedEnergyCost": 3,
-        "cost": "CCC",
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
         "damage": "",
         "name": "Feather Shot",
-        "text": "Discard all Energy from this Pokémon, and this attack does 90 damage to 1 of your opponent's Pokémon. <i>(Don't apply Weakness and Resistance for Benched Pokémon.)</i>"
+        "text": "Discard all Energy from this Pokémon, and this attack does 90 damage to 1 of your opponent's Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
       }
     ],
     "cardId": "11",
     "convertedRetreatCost": 2,
     "evolvesFrom": "Rowlet",
-    "hp": 100,
+    "hp": "100",
     "i18n": {
       "de": {
         "attacks": [
@@ -1048,7 +1074,6 @@
     "number": "11",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -1087,15 +1112,21 @@
   {
     "abilities": [
       {
-        "name": "[Ability] Sniper's Eye",
-        "text": "If your opponent has exactly 4 cards in their hand, ignore all colorless Energy in the costs of attacks used by this Pokémon."
+        "name": "Sniper's Eye",
+        "text": "If your opponent has exactly 4 cards in their hand, ignore all {C} Energy in the costs of attacks used by this Pokémon.",
+        "type": "Ability"
       }
     ],
     "artist": "aky CG Works",
     "attacks": [
       {
         "convertedEnergyCost": 4,
-        "cost": "GCCC",
+        "cost": [
+          "Grass",
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
         "damage": "240",
         "name": "Crushing Arrow",
         "text": "Discard an Energy from your opponent's Active Pokémon."
@@ -1104,7 +1135,7 @@
     "cardId": "12",
     "convertedRetreatCost": 2,
     "evolvesFrom": "Dartrix",
-    "hp": 320,
+    "hp": "320",
     "i18n": {
       "de": {
         "abilities": [
@@ -1155,7 +1186,6 @@
     "number": "12",
     "rarity": "DoubleRare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -1198,7 +1228,10 @@
     "attacks": [
       {
         "convertedEnergyCost": 2,
-        "cost": "RR",
+        "cost": [
+          "Fire",
+          "Fire"
+        ],
         "damage": "60",
         "name": "Flare",
         "text": ""
@@ -1207,7 +1240,7 @@
     "cardId": "13",
     "convertedRetreatCost": 1,
     "evolvesFrom": "Fletchling",
-    "hp": 90,
+    "hp": "90",
     "i18n": {
       "de": {
         "attacks": [
@@ -1294,15 +1327,19 @@
   {
     "abilities": [
       {
-        "name": "[Ability] Sky Hunt",
-        "text": "Once during your turn, you may use this Ability. Flip a coin. If heads, discard a random card from your opponent's hand."
+        "name": "Sky Hunt",
+        "text": "Once during your turn, you may use this Ability. Flip a coin. If heads, discard a random card from your opponent's hand.",
+        "type": "Ability"
       }
     ],
     "artist": "Shinji Kanda",
     "attacks": [
       {
         "convertedEnergyCost": 2,
-        "cost": "RR",
+        "cost": [
+          "Fire",
+          "Fire"
+        ],
         "damage": "110",
         "name": "Fire Wing",
         "text": ""
@@ -1311,7 +1348,7 @@
     "cardId": "14",
     "convertedRetreatCost": 1,
     "evolvesFrom": "Fletchinder",
-    "hp": 150,
+    "hp": "150",
     "i18n": {
       "de": {
         "abilities": [
@@ -1406,7 +1443,9 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "R",
+        "cost": [
+          "Fire"
+        ],
         "damage": "20",
         "name": "Fire Claws",
         "text": ""
@@ -1414,7 +1453,7 @@
     ],
     "cardId": "15",
     "convertedRetreatCost": 1,
-    "hp": 70,
+    "hp": "70",
     "i18n": {
       "de": {
         "attacks": [
@@ -1457,7 +1496,6 @@
     "number": "15",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -1467,7 +1505,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -1497,14 +1535,19 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "R",
+        "cost": [
+          "Fire"
+        ],
         "damage": "",
         "name": "Nasty Plot",
         "text": "Search your deck for up to 2 cards and put them into your hand. Then, shuffle your deck."
       },
       {
         "convertedEnergyCost": 2,
-        "cost": "RR",
+        "cost": [
+          "Fire",
+          "Fire"
+        ],
         "damage": "100",
         "name": "Dire Nails",
         "text": "Your opponent's Active Pokémon is now Burned and Poisoned. Switch this Pokémon with 1 of your Benched Pokémon."
@@ -1513,7 +1556,7 @@
     "cardId": "16",
     "convertedRetreatCost": 1,
     "evolvesFrom": "Salandit",
-    "hp": 260,
+    "hp": "260",
     "i18n": {
       "de": {
         "attacks": [
@@ -1562,7 +1605,6 @@
     "number": "16",
     "rarity": "DoubleRare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -1596,15 +1638,20 @@
   {
     "abilities": [
       {
-        "name": "[Ability] Shell Spikes",
-        "text": "If this Pokémon is in the Active Spot and is damaged by an attack from your opponent's Pokémon <i>(even if this Pokémon is Knocked Out)</i>, discard an Energy from the Attacking Pokémon."
+        "name": "Shell Spikes",
+        "text": "If this Pokémon is in the Active Spot and is damaged by an attack from your opponent's Pokémon (even if this Pokémon is Knocked Out), discard an Energy from the Attacking Pokémon.",
+        "type": "Ability"
       }
     ],
     "artist": "Hasuno",
     "attacks": [
       {
         "convertedEnergyCost": 3,
-        "cost": "RRC",
+        "cost": [
+          "Fire",
+          "Fire",
+          "Colorless"
+        ],
         "damage": "80+",
         "name": "Heat Breath",
         "text": "Flip a coin. If heads, this attack does 80 more damage."
@@ -1612,7 +1659,7 @@
     ],
     "cardId": "17",
     "convertedRetreatCost": 2,
-    "hp": 120,
+    "hp": "120",
     "i18n": {
       "de": {
         "abilities": [
@@ -1662,7 +1709,6 @@
     "number": "17",
     "rarity": "Uncommon",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -1673,7 +1719,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -1703,14 +1749,19 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "W",
+        "cost": [
+          "Water"
+        ],
         "damage": "10",
         "name": "Rain Splash",
         "text": ""
       },
       {
         "convertedEnergyCost": 2,
-        "cost": "WW",
+        "cost": [
+          "Water",
+          "Water"
+        ],
         "damage": "30",
         "name": "Wave Splash",
         "text": ""
@@ -1718,7 +1769,7 @@
     ],
     "cardId": "18",
     "convertedRetreatCost": 2,
-    "hp": 80,
+    "hp": "80",
     "i18n": {
       "de": {
         "attacks": [
@@ -1764,7 +1815,6 @@
     "number": "18",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -1775,7 +1825,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -1803,15 +1853,19 @@
   {
     "abilities": [
       {
-        "name": "[Ability] Wash Out",
-        "text": "As often as you like during your turn, you may use this Ability. Move a water Energy from 1 of your Benched Pokémon to your Active Pokémon."
+        "name": "Wash Out",
+        "text": "As often as you like during your turn, you may use this Ability. Move a {W} Energy from 1 of your Benched Pokémon to your Active Pokémon.",
+        "type": "Ability"
       }
     ],
     "artist": "Yoshioka",
     "attacks": [
       {
         "convertedEnergyCost": 2,
-        "cost": "WW",
+        "cost": [
+          "Water",
+          "Water"
+        ],
         "damage": "60",
         "name": "Wave Splash",
         "text": ""
@@ -1820,7 +1874,7 @@
     "cardId": "19",
     "convertedRetreatCost": 2,
     "evolvesFrom": "Seel",
-    "hp": 130,
+    "hp": "130",
     "i18n": {
       "de": {
         "abilities": [
@@ -1870,7 +1924,6 @@
     "number": "19",
     "rarity": "Rare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -1917,7 +1970,9 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "W",
+        "cost": [
+          "Water"
+        ],
         "damage": "20",
         "name": "Water Gun",
         "text": ""
@@ -1925,7 +1980,7 @@
     ],
     "cardId": "20",
     "convertedRetreatCost": 1,
-    "hp": 70,
+    "hp": "70",
     "i18n": {
       "de": {
         "attacks": [
@@ -1968,7 +2023,6 @@
     "number": "20",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -1978,7 +2032,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -2008,14 +2062,20 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "W",
+        "cost": [
+          "Water"
+        ],
         "damage": "120",
         "name": "Jetting Blow",
-        "text": "This attack also does 50 damage to 1 of your opponent's Benched Pokémon. <i>(Don't apply Weakness and Resistance for Benched Pokémon.)</i>"
+        "text": "This attack also does 50 damage to 1 of your opponent's Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
       },
       {
         "convertedEnergyCost": 3,
-        "cost": "CCC",
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
         "damage": "210",
         "name": "Nebula Beam",
         "text": "This attack's damage isn't affected by Weakness or Resistance, or by any effects on your opponent's Active Pokémon."
@@ -2024,7 +2084,7 @@
     "cardId": "21",
     "convertedRetreatCost": 2,
     "evolvesFrom": "Staryu",
-    "hp": 330,
+    "hp": "330",
     "i18n": {
       "de": {
         "attacks": [
@@ -2073,7 +2133,6 @@
     "number": "21",
     "rarity": "DoubleRare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -2085,8 +2144,7 @@
     },
     "subtypes": [
       "Stage 1",
-      "ex",
-      "Mega Evolution ex"
+      "ex"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -2117,14 +2175,20 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "W",
-        "damage": "30x",
+        "cost": [
+          "Water"
+        ],
+        "damage": "30×",
         "name": "Hydro Turn",
-        "text": "This attack does 30 damage for each water Energy attached to this Pokémon. Switch this Pokémon with 1 of your Benched Pokémon."
+        "text": "This attack does 30 damage for each {W} Energy attached to this Pokémon. Switch this Pokémon with 1 of your Benched Pokémon."
       },
       {
         "convertedEnergyCost": 3,
-        "cost": "WWW",
+        "cost": [
+          "Water",
+          "Water",
+          "Water"
+        ],
         "damage": "140",
         "name": "Surf",
         "text": ""
@@ -2132,7 +2196,7 @@
     ],
     "cardId": "22",
     "convertedRetreatCost": 2,
-    "hp": 210,
+    "hp": "210",
     "i18n": {
       "de": {
         "attacks": [
@@ -2179,7 +2243,6 @@
     "number": "22",
     "rarity": "DoubleRare",
     "regulationMark": "I",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -2190,7 +2253,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage",
+      "Basic",
       "ex"
     ],
     "supertype": "Pokémon",
@@ -2216,7 +2279,10 @@
     "attacks": [
       {
         "convertedEnergyCost": 2,
-        "cost": "WC",
+        "cost": [
+          "Water",
+          "Colorless"
+        ],
         "damage": "50",
         "name": "Icy Wind",
         "text": "Your opponent's Active Pokémon is now Asleep."
@@ -2225,7 +2291,7 @@
     "cardId": "23",
     "convertedRetreatCost": 3,
     "evolvesFrom": "Antique Sail Fossil",
-    "hp": 100,
+    "hp": "100",
     "i18n": {
       "de": {
         "attacks": [
@@ -2270,7 +2336,6 @@
     "number": "23",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -2310,15 +2375,20 @@
   {
     "abilities": [
       {
-        "name": "[Ability] Tundra Wall",
-        "text": "All of your Pokémon that have any water Energy attached take 50 less damage from attacks from your opponent's Pokémon <i>(after applying Weakness and Resistance)</i>. The effect of Tundra Wall doesn't stack."
+        "name": "Tundra Wall",
+        "text": "All of your Pokémon that have any {W} Energy attached take 50 less damage from attacks from your opponent's Pokémon (after applying Weakness and Resistance). The effect of Tundra Wall doesn't stack.",
+        "type": "Ability"
       }
     ],
     "artist": "HACCAN",
     "attacks": [
       {
         "convertedEnergyCost": 3,
-        "cost": "WWC",
+        "cost": [
+          "Water",
+          "Water",
+          "Colorless"
+        ],
         "damage": "150",
         "name": "Freezing Chill",
         "text": "During your opponent's next turn, the Defending Pokémon can't use attacks."
@@ -2327,7 +2397,7 @@
     "cardId": "24",
     "convertedRetreatCost": 3,
     "evolvesFrom": "Amaura",
-    "hp": 170,
+    "hp": "170",
     "i18n": {
       "de": {
         "abilities": [
@@ -2382,7 +2452,6 @@
     "number": "24",
     "rarity": "Rare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -2438,22 +2507,29 @@
     "attacks": [
       {
         "convertedEnergyCost": 2,
-        "cost": "WC",
+        "cost": [
+          "Water",
+          "Colorless"
+        ],
         "damage": "50",
         "name": "Strength",
         "text": ""
       },
       {
         "convertedEnergyCost": 3,
-        "cost": "WWC",
-        "damage": "90x",
+        "cost": [
+          "Water",
+          "Water",
+          "Colorless"
+        ],
+        "damage": "90×",
         "name": "Powerful Steam",
-        "text": "Flip a coin for each water Energy attached to this Pokémon. This attack does 90 damage for each heads."
+        "text": "Flip a coin for each {W} Energy attached to this Pokémon. This attack does 90 damage for each heads."
       }
     ],
     "cardId": "25",
     "convertedRetreatCost": 3,
-    "hp": 130,
+    "hp": "130",
     "i18n": {
       "de": {
         "attacks": [
@@ -2500,7 +2576,6 @@
     "number": "25",
     "rarity": "Uncommon",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -2512,7 +2587,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -2542,15 +2617,17 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "L",
-        "damage": "10x",
+        "cost": [
+          "Lightning"
+        ],
+        "damage": "10×",
         "name": "Double Scratch",
         "text": "Flip 2 coins. This attack does 10 damage for each heads."
       }
     ],
     "cardId": "26",
     "convertedRetreatCost": 1,
-    "hp": 70,
+    "hp": "70",
     "i18n": {
       "de": {
         "attacks": [
@@ -2594,7 +2671,6 @@
     "number": "26",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -2604,7 +2680,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -2632,15 +2708,19 @@
   {
     "abilities": [
       {
-        "name": "[Ability] Fighting Roar",
-        "text": "If your opponent's Active Pokémon is a Pokémon {ex}, this Pokémon can evolve during your first turn or the turn you play it."
+        "name": "Fighting Roar",
+        "text": "If your opponent's Active Pokémon is a Pokémon ex, this Pokémon can evolve during your first turn or the turn you play it.",
+        "type": "Ability"
       }
     ],
     "artist": "Atsuko Nishida",
     "attacks": [
       {
         "convertedEnergyCost": 2,
-        "cost": "LC",
+        "cost": [
+          "Lightning",
+          "Colorless"
+        ],
         "damage": "40",
         "name": "Static Shock",
         "text": ""
@@ -2649,7 +2729,7 @@
     "cardId": "27",
     "convertedRetreatCost": 1,
     "evolvesFrom": "Shinx",
-    "hp": 90,
+    "hp": "90",
     "i18n": {
       "de": {
         "abilities": [
@@ -2699,7 +2779,6 @@
     "number": "27",
     "rarity": "Uncommon",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -2739,14 +2818,21 @@
     "attacks": [
       {
         "convertedEnergyCost": 2,
-        "cost": "LC",
-        "damage": "70x",
+        "cost": [
+          "Lightning",
+          "Colorless"
+        ],
+        "damage": "70×",
         "name": "Incessant Onslaught",
         "text": "This attack does 70 damage for each Prize card you have taken."
       },
       {
         "convertedEnergyCost": 3,
-        "cost": "LCC",
+        "cost": [
+          "Lightning",
+          "Colorless",
+          "Colorless"
+        ],
         "damage": "200",
         "name": "Strong Volt",
         "text": "Discard 2 Energy from this Pokémon."
@@ -2755,7 +2841,7 @@
     "cardId": "28",
     "convertedRetreatCost": 0,
     "evolvesFrom": "Luxio",
-    "hp": 150,
+    "hp": "150",
     "i18n": {
       "de": {
         "attacks": [
@@ -2808,8 +2894,6 @@
     "number": "28",
     "rarity": "Rare",
     "regulationMark": "J",
-    "resistances": [],
-    "retreatCost": [],
     "setId": "me3",
     "sources": {
       "pokemontcg": "bc4a5871",
@@ -2860,14 +2944,19 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "L",
+        "cost": [
+          "Lightning"
+        ],
         "damage": "",
         "name": "Tail Generator",
-        "text": "Choose Basic lightning Energy cards from your discard pile up to the amount of Energy attached to all of your opponent's Pokémon and attach them to your lightning Pokémon in any way you like."
+        "text": "Choose Basic {L} Energy cards from your discard pile up to the amount of Energy attached to all of your opponent's Pokémon and attach them to your {L} Pokémon in any way you like."
       },
       {
         "convertedEnergyCost": 2,
-        "cost": "LC",
+        "cost": [
+          "Lightning",
+          "Colorless"
+        ],
         "damage": "30",
         "name": "Thunder Shock",
         "text": "Flip a coin. If heads, your opponent's Active Pokémon is now Paralyzed."
@@ -2875,7 +2964,7 @@
     ],
     "cardId": "29",
     "convertedRetreatCost": 1,
-    "hp": 70,
+    "hp": "70",
     "i18n": {
       "de": {
         "attacks": [
@@ -2923,7 +3012,6 @@
     "number": "29",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -2933,7 +3021,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -2963,14 +3051,19 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "P",
+        "cost": [
+          "Psychic"
+        ],
         "damage": "",
         "name": "Follow Me",
         "text": "Switch in 1 of your opponent's Benched Pokémon to the Active Spot."
       },
       {
         "convertedEnergyCost": 2,
-        "cost": "PP",
+        "cost": [
+          "Psychic",
+          "Psychic"
+        ],
         "damage": "30",
         "name": "Flop",
         "text": ""
@@ -2978,7 +3071,7 @@
     ],
     "cardId": "30",
     "convertedRetreatCost": 1,
-    "hp": 70,
+    "hp": "70",
     "i18n": {
       "de": {
         "attacks": [
@@ -3025,7 +3118,6 @@
     "number": "30",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -3035,7 +3127,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -3063,15 +3155,19 @@
   {
     "abilities": [
       {
-        "name": "[Ability] Luminous Wing",
-        "text": "Prevent all effects of your opponent's Pokémon's Abilities done to this Pokémon."
+        "name": "Luminous Wing",
+        "text": "Prevent all effects of your opponent's Pokémon's Abilities done to this Pokémon.",
+        "type": "Ability"
       }
     ],
     "artist": "aky CG Works",
     "attacks": [
       {
         "convertedEnergyCost": 2,
-        "cost": "PP",
+        "cost": [
+          "Psychic",
+          "Psychic"
+        ],
         "damage": "120+",
         "name": "Shooting Moons",
         "text": "You may discard up to 4 Energy cards from your hand, and this attack does 40 more damage for each card you discarded in this way."
@@ -3080,7 +3176,7 @@
     "cardId": "31",
     "convertedRetreatCost": 1,
     "evolvesFrom": "Clefairy",
-    "hp": 320,
+    "hp": "320",
     "i18n": {
       "de": {
         "abilities": [
@@ -3131,7 +3227,6 @@
     "number": "31",
     "rarity": "DoubleRare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -3142,8 +3237,7 @@
     },
     "subtypes": [
       "Stage 1",
-      "ex",
-      "Mega Evolution ex"
+      "ex"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -3168,15 +3262,18 @@
     "attacks": [
       {
         "convertedEnergyCost": 2,
-        "cost": "PC",
-        "damage": "60x",
+        "cost": [
+          "Psychic",
+          "Colorless"
+        ],
+        "damage": "60×",
         "name": "Double Eater",
         "text": "Discard up to 2 Energy cards from your hand, and this attack does 60 damage for each card you discarded in this way."
       }
     ],
     "cardId": "32",
     "convertedRetreatCost": 2,
-    "hp": 110,
+    "hp": "110",
     "i18n": {
       "de": {
         "attacks": [
@@ -3220,7 +3317,6 @@
     "number": "32",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -3231,7 +3327,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -3261,14 +3357,18 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "C",
+        "cost": [
+          "Colorless"
+        ],
         "damage": "",
         "name": "Nap",
         "text": "Heal 20 damage from this Pokémon."
       },
       {
         "convertedEnergyCost": 1,
-        "cost": "P",
+        "cost": [
+          "Psychic"
+        ],
         "damage": "10",
         "name": "Stampede",
         "text": ""
@@ -3276,7 +3376,7 @@
     ],
     "cardId": "33",
     "convertedRetreatCost": 1,
-    "hp": 60,
+    "hp": "60",
     "i18n": {
       "de": {
         "attacks": [
@@ -3338,7 +3438,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -3358,7 +3458,7 @@
     ],
     "weaknesses": [
       {
-        "type": "Dark",
+        "type": "Darkness",
         "value": "×2"
       }
     ]
@@ -3368,14 +3468,18 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "P",
+        "cost": [
+          "Psychic"
+        ],
         "damage": "",
         "name": "Perplex",
         "text": "Your opponent's Active Pokémon is now Confused."
       },
       {
         "convertedEnergyCost": 1,
-        "cost": "P",
+        "cost": [
+          "Psychic"
+        ],
         "damage": "30+",
         "name": "Psychic",
         "text": "This attack does 30 more damage for each Energy attached to your opponent's Active Pokémon."
@@ -3384,7 +3488,7 @@
     "cardId": "34",
     "convertedRetreatCost": 1,
     "evolvesFrom": "Espurr",
-    "hp": 100,
+    "hp": "100",
     "i18n": {
       "de": {
         "attacks": [
@@ -3468,7 +3572,7 @@
     ],
     "weaknesses": [
       {
-        "type": "Dark",
+        "type": "Darkness",
         "value": "×2"
       }
     ]
@@ -3478,14 +3582,18 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "C",
+        "cost": [
+          "Colorless"
+        ],
         "damage": "",
         "name": "Sweet Scent",
         "text": "Heal 30 damage from 1 of your Pokémon."
       },
       {
         "convertedEnergyCost": 1,
-        "cost": "P",
+        "cost": [
+          "Psychic"
+        ],
         "damage": "10",
         "name": "Ram",
         "text": ""
@@ -3493,7 +3601,7 @@
     ],
     "cardId": "35",
     "convertedRetreatCost": 1,
-    "hp": 70,
+    "hp": "70",
     "i18n": {
       "de": {
         "attacks": [
@@ -3540,7 +3648,6 @@
     "number": "35",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -3550,7 +3657,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -3578,15 +3685,19 @@
   {
     "abilities": [
       {
-        "name": "[Ability] Scent Collection",
-        "text": "Once during your turn, you may use this Ability. Search your deck for up to 2 Basic psychic Energy cards, reveal them, and put them into your hand. Then, shuffle your deck."
+        "name": "Scent Collection",
+        "text": "Once during your turn, you may use this Ability. Search your deck for up to 2 Basic {P} Energy cards, reveal them, and put them into your hand. Then, shuffle your deck.",
+        "type": "Ability"
       }
     ],
     "artist": "Mori Yuu",
     "attacks": [
       {
         "convertedEnergyCost": 2,
-        "cost": "PC",
+        "cost": [
+          "Psychic",
+          "Colorless"
+        ],
         "damage": "50",
         "name": "Draining Kiss",
         "text": "Heal 30 damage from this Pokémon."
@@ -3595,7 +3706,7 @@
     "cardId": "36",
     "convertedRetreatCost": 1,
     "evolvesFrom": "Spritzee",
-    "hp": 120,
+    "hp": "120",
     "i18n": {
       "de": {
         "abilities": [
@@ -3646,7 +3757,6 @@
     "number": "36",
     "rarity": "Uncommon",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -3686,7 +3796,10 @@
     "attacks": [
       {
         "convertedEnergyCost": 2,
-        "cost": "FF",
+        "cost": [
+          "Fighting",
+          "Fighting"
+        ],
         "damage": "40",
         "name": "Rolling Rocks",
         "text": ""
@@ -3694,7 +3807,7 @@
     ],
     "cardId": "37",
     "convertedRetreatCost": 3,
-    "hp": 90,
+    "hp": "90",
     "i18n": {
       "de": {
         "attacks": [
@@ -3737,7 +3850,6 @@
     "number": "37",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -3749,7 +3861,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -3779,14 +3891,22 @@
     "attacks": [
       {
         "convertedEnergyCost": 2,
-        "cost": "FF",
+        "cost": [
+          "Fighting",
+          "Fighting"
+        ],
         "damage": "60",
         "name": "Rolling Rocks",
         "text": ""
       },
       {
         "convertedEnergyCost": 4,
-        "cost": "FFFC",
+        "cost": [
+          "Fighting",
+          "Fighting",
+          "Fighting",
+          "Colorless"
+        ],
         "damage": "260",
         "name": "Obliterating Nose",
         "text": "Discard 3 Energy from this Pokémon."
@@ -3795,7 +3915,7 @@
     "cardId": "38",
     "convertedRetreatCost": 3,
     "evolvesFrom": "Nosepass",
-    "hp": 140,
+    "hp": "140",
     "i18n": {
       "de": {
         "attacks": [
@@ -3843,7 +3963,6 @@
     "number": "38",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -3885,14 +4004,20 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "F",
+        "cost": [
+          "Fighting"
+        ],
         "damage": "10",
         "name": "Sand Attack",
         "text": "During your opponent's next turn, if the Defending Pokémon tries to use an attack, your opponent flips a coin. If tails, that attack doesn't happen."
       },
       {
         "convertedEnergyCost": 3,
-        "cost": "FCC",
+        "cost": [
+          "Fighting",
+          "Colorless",
+          "Colorless"
+        ],
         "damage": "60",
         "name": "Bite",
         "text": ""
@@ -3900,7 +4025,7 @@
     ],
     "cardId": "39",
     "convertedRetreatCost": 4,
-    "hp": 100,
+    "hp": "100",
     "i18n": {
       "de": {
         "attacks": [
@@ -3947,7 +4072,6 @@
     "number": "39",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -3960,7 +4084,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -3990,14 +4114,23 @@
     "attacks": [
       {
         "convertedEnergyCost": 3,
-        "cost": "FFC",
+        "cost": [
+          "Fighting",
+          "Fighting",
+          "Colorless"
+        ],
         "damage": "80",
         "name": "Twister Spewing",
         "text": "If you played Tarragon from your hand during this turn, discard the top 3 cards of your opponent's deck."
       },
       {
         "convertedEnergyCost": 4,
-        "cost": "FFCC",
+        "cost": [
+          "Fighting",
+          "Fighting",
+          "Colorless",
+          "Colorless"
+        ],
         "damage": "130",
         "name": "Heavy Impact",
         "text": ""
@@ -4006,7 +4139,7 @@
     "cardId": "40",
     "convertedRetreatCost": 4,
     "evolvesFrom": "Hippopotas",
-    "hp": 150,
+    "hp": "150",
     "i18n": {
       "de": {
         "attacks": [
@@ -4054,7 +4187,6 @@
     "number": "40",
     "rarity": "Uncommon",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -4097,14 +4229,21 @@
     "attacks": [
       {
         "convertedEnergyCost": 2,
-        "cost": "FF",
+        "cost": [
+          "Fighting",
+          "Fighting"
+        ],
         "damage": "50",
         "name": "Rock Tumble",
         "text": "This attack's damage isn't affected by Resistance."
       },
       {
         "convertedEnergyCost": 3,
-        "cost": "FFC",
+        "cost": [
+          "Fighting",
+          "Fighting",
+          "Colorless"
+        ],
         "damage": "120",
         "name": "Screw Knuckle",
         "text": "Put an Energy attached to this Pokémon into your hand."
@@ -4112,7 +4251,7 @@
     ],
     "cardId": "41",
     "convertedRetreatCost": 1,
-    "hp": 120,
+    "hp": "120",
     "i18n": {
       "de": {
         "attacks": [
@@ -4162,7 +4301,6 @@
     "number": "41",
     "rarity": "Rare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -4172,7 +4310,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -4207,14 +4345,19 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "F",
+        "cost": [
+          "Fighting"
+        ],
         "damage": "",
         "name": "Double Draw",
         "text": "Draw 2 cards."
       },
       {
         "convertedEnergyCost": 2,
-        "cost": "FF",
+        "cost": [
+          "Fighting",
+          "Fighting"
+        ],
         "damage": "30",
         "name": "Scratch",
         "text": ""
@@ -4222,7 +4365,7 @@
     ],
     "cardId": "42",
     "convertedRetreatCost": 2,
-    "hp": 80,
+    "hp": "80",
     "i18n": {
       "de": {
         "attacks": [
@@ -4269,7 +4412,6 @@
     "number": "42",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -4280,7 +4422,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -4308,15 +4450,20 @@
   {
     "abilities": [
       {
-        "name": "[Ability] Stone Arms",
-        "text": "Once during your turn, you may use this Ability. Attach a Basic fighting Energy card from your hand to 1 of your fighting Pokémon."
+        "name": "Stone Arms",
+        "text": "Once during your turn, you may use this Ability. Attach a Basic {F} Energy card from your hand to 1 of your {F} Pokémon.",
+        "type": "Ability"
       }
     ],
     "artist": "Kazumasa Yasukuni",
     "attacks": [
       {
         "convertedEnergyCost": 3,
-        "cost": "FFC",
+        "cost": [
+          "Fighting",
+          "Fighting",
+          "Colorless"
+        ],
         "damage": "80",
         "name": "Hammer In",
         "text": ""
@@ -4325,7 +4472,7 @@
     "cardId": "43",
     "convertedRetreatCost": 2,
     "evolvesFrom": "Binacle",
-    "hp": 130,
+    "hp": "130",
     "i18n": {
       "de": {
         "abilities": [
@@ -4375,7 +4522,6 @@
     "number": "43",
     "rarity": "Uncommon",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -4416,8 +4562,11 @@
     "attacks": [
       {
         "convertedEnergyCost": 2,
-        "cost": "FC",
-        "damage": "20x",
+        "cost": [
+          "Fighting",
+          "Colorless"
+        ],
+        "damage": "20×",
         "name": "Get Angry",
         "text": "This attack does 20 damage for each damage counter on this Pokémon."
       }
@@ -4425,7 +4574,7 @@
     "cardId": "44",
     "convertedRetreatCost": 3,
     "evolvesFrom": "Antique Jaw Fossil",
-    "hp": 100,
+    "hp": "100",
     "i18n": {
       "de": {
         "attacks": [
@@ -4470,7 +4619,6 @@
     "number": "44",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -4510,15 +4658,19 @@
   {
     "abilities": [
       {
-        "name": "[Ability] Tyrannically Gutsy",
-        "text": "If this Pokémon has any Special Energy attached, it gets +150 HP."
+        "name": "Tyrannically Gutsy",
+        "text": "If this Pokémon has any Special Energy attached, it gets +150 HP.",
+        "type": "Ability"
       }
     ],
     "artist": "Dsuke",
     "attacks": [
       {
         "convertedEnergyCost": 2,
-        "cost": "FC",
+        "cost": [
+          "Fighting",
+          "Colorless"
+        ],
         "damage": "160",
         "name": "Wreak Havoc",
         "text": "Flip a coin until you get tails. For each heads, discard the top card of your opponent's deck."
@@ -4527,7 +4679,7 @@
     "cardId": "45",
     "convertedRetreatCost": 3,
     "evolvesFrom": "Tyrunt",
-    "hp": 180,
+    "hp": "180",
     "i18n": {
       "de": {
         "abilities": [
@@ -4582,7 +4734,6 @@
     "number": "45",
     "rarity": "Rare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -4635,7 +4786,9 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "F",
+        "cost": [
+          "Fighting"
+        ],
         "damage": "30+",
         "name": "Vengeful Kick",
         "text": "If your Benched Pokémon have any damage counters on them, this attack does 60 more damage."
@@ -4643,7 +4796,7 @@
     ],
     "cardId": "46",
     "convertedRetreatCost": 0,
-    "hp": 70,
+    "hp": "70",
     "i18n": {
       "de": {
         "attacks": [
@@ -4687,15 +4840,13 @@
     "number": "46",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
-    "retreatCost": [],
     "setId": "me3",
     "sources": {
       "pokemontcg": "bc4a5871",
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -4725,22 +4876,32 @@
     "attacks": [
       {
         "convertedEnergyCost": 3,
-        "cost": "FFF",
+        "cost": [
+          "Fighting",
+          "Fighting",
+          "Fighting"
+        ],
         "damage": "200",
         "name": "Gaia Wave",
-        "text": "During your opponent's next turn, this Pokémon takes 30 less damage from attacks <i>(after applying Weakness and Resistance)</i>."
+        "text": "During your opponent's next turn, this Pokémon takes 30 less damage from attacks (after applying Weakness and Resistance)."
       },
       {
         "convertedEnergyCost": 5,
-        "cost": "FFFFF",
+        "cost": [
+          "Fighting",
+          "Fighting",
+          "Fighting",
+          "Fighting",
+          "Fighting"
+        ],
         "damage": "",
         "name": "Nullifying Zero",
-        "text": "For each of your opponent's Pokémon, flip a coin. If heads, this attack does 150 damage to that Pokémon. <i>(Don't apply Weakness and Resistance for Benched Pokémon.)</i>"
+        "text": "For each of your opponent's Pokémon, flip a coin. If heads, this attack does 150 damage to that Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
       }
     ],
     "cardId": "47",
     "convertedRetreatCost": 2,
-    "hp": 310,
+    "hp": "310",
     "i18n": {
       "de": {
         "attacks": [
@@ -4788,7 +4949,6 @@
     "number": "47",
     "rarity": "DoubleRare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -4799,9 +4959,8 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage",
-      "ex",
-      "Mega Evolution ex"
+      "Basic",
+      "ex"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -4832,7 +4991,9 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "D",
+        "cost": [
+          "Darkness"
+        ],
         "damage": "30",
         "name": "Surprise Attack",
         "text": "Flip a coin. If tails, this attack does nothing."
@@ -4840,7 +5001,7 @@
     ],
     "cardId": "48",
     "convertedRetreatCost": 1,
-    "hp": 70,
+    "hp": "70",
     "i18n": {
       "de": {
         "attacks": [
@@ -4884,7 +5045,6 @@
     "number": "48",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -4894,11 +5054,11 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
-      "Dark"
+      "Darkness"
     ],
     "variants": [
       {
@@ -4930,7 +5090,9 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "D",
+        "cost": [
+          "Darkness"
+        ],
         "damage": "",
         "name": "Haunt",
         "text": "Place 3 damage counters on your opponent's Active Pokémon."
@@ -4939,7 +5101,7 @@
     "cardId": "49",
     "convertedRetreatCost": 1,
     "evolvesFrom": "Gastly",
-    "hp": 100,
+    "hp": "100",
     "i18n": {
       "de": {
         "attacks": [
@@ -4984,7 +5146,6 @@
     "number": "49",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -4998,7 +5159,7 @@
     ],
     "supertype": "Pokémon",
     "types": [
-      "Dark"
+      "Darkness"
     ],
     "variants": [
       {
@@ -5028,15 +5189,18 @@
   {
     "abilities": [
       {
-        "name": "[Ability] Infinite Shadow",
-        "text": "If this Pokémon is Knocked Out by damage from an attack from your opponent's Pokémon, put it into your hand instead of the discard pile. <i>(Discard all attached cards.)</i>"
+        "name": "Infinite Shadow",
+        "text": "If this Pokémon is Knocked Out by damage from an attack from your opponent's Pokémon, put it into your hand instead of the discard pile. (Discard all attached cards.)",
+        "type": "Ability"
       }
     ],
     "artist": "Masako Tomii",
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "D",
+        "cost": [
+          "Darkness"
+        ],
         "damage": "10+",
         "name": "Mind Jack",
         "text": "This attack does 30 more damage for each of your opponent's Benched Pokémon."
@@ -5045,7 +5209,7 @@
     "cardId": "50",
     "convertedRetreatCost": 1,
     "evolvesFrom": "Haunter",
-    "hp": 130,
+    "hp": "130",
     "i18n": {
       "de": {
         "abilities": [
@@ -5104,7 +5268,6 @@
     "number": "50",
     "rarity": "Rare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -5118,7 +5281,7 @@
     ],
     "supertype": "Pokémon",
     "types": [
-      "Dark"
+      "Darkness"
     ],
     "variants": [
       {
@@ -5176,7 +5339,10 @@
     "attacks": [
       {
         "convertedEnergyCost": 2,
-        "cost": "DD",
+        "cost": [
+          "Darkness",
+          "Darkness"
+        ],
         "damage": "20",
         "name": "Poison Jab",
         "text": "Your opponent's Active Pokémon is now Poisoned."
@@ -5184,7 +5350,7 @@
     ],
     "cardId": "51",
     "convertedRetreatCost": 2,
-    "hp": 80,
+    "hp": "80",
     "i18n": {
       "de": {
         "attacks": [
@@ -5228,7 +5394,6 @@
     "number": "51",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -5239,11 +5404,11 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
-      "Dark"
+      "Darkness"
     ],
     "variants": [
       {
@@ -5269,14 +5434,21 @@
     "attacks": [
       {
         "convertedEnergyCost": 2,
-        "cost": "DD",
+        "cost": [
+          "Darkness",
+          "Darkness"
+        ],
         "damage": "60",
         "name": "Wrack Down",
         "text": ""
       },
       {
         "convertedEnergyCost": 3,
-        "cost": "DDD",
+        "cost": [
+          "Darkness",
+          "Darkness",
+          "Darkness"
+        ],
         "damage": "100",
         "name": "Hazardous Tail",
         "text": "This Pokémon also does 70 damage to itself. Your opponent's Active Pokémon is now Paralyzed and Poisoned."
@@ -5285,7 +5457,7 @@
     "cardId": "52",
     "convertedRetreatCost": 3,
     "evolvesFrom": "Skorupi",
-    "hp": 140,
+    "hp": "140",
     "i18n": {
       "de": {
         "attacks": [
@@ -5333,7 +5505,6 @@
     "number": "52",
     "rarity": "Uncommon",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -5349,7 +5520,7 @@
     ],
     "supertype": "Pokémon",
     "types": [
-      "Dark"
+      "Darkness"
     ],
     "variants": [
       {
@@ -5375,14 +5546,22 @@
     "attacks": [
       {
         "convertedEnergyCost": 3,
-        "cost": "DDC",
+        "cost": [
+          "Darkness",
+          "Darkness",
+          "Colorless"
+        ],
         "damage": "",
         "name": "Soul Destroyer",
         "text": "Knock Out each of your opponent's Pokémon that has 50 HP or less remaining."
       },
       {
         "convertedEnergyCost": 3,
-        "cost": "DDC",
+        "cost": [
+          "Darkness",
+          "Darkness",
+          "Colorless"
+        ],
         "damage": "210",
         "name": "Dark Strike",
         "text": "During your next turn, this Pokémon can't use Dark Strike."
@@ -5390,7 +5569,7 @@
     ],
     "cardId": "53",
     "convertedRetreatCost": 1,
-    "hp": 210,
+    "hp": "210",
     "i18n": {
       "de": {
         "attacks": [
@@ -5453,12 +5632,12 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage",
+      "Basic",
       "ex"
     ],
     "supertype": "Pokémon",
     "types": [
-      "Dark"
+      "Darkness"
     ],
     "variants": [
       {
@@ -5485,22 +5664,28 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "D",
+        "cost": [
+          "Darkness"
+        ],
         "damage": "20",
         "name": "Strafe",
         "text": "You may switch this Pokémon with 1 of your Benched Pokémon."
       },
       {
         "convertedEnergyCost": 3,
-        "cost": "DDC",
+        "cost": [
+          "Darkness",
+          "Darkness",
+          "Colorless"
+        ],
         "damage": "80+",
         "name": "Rising Blade",
-        "text": "If your opponent's Active Pokémon is a Pokémon {ex}, this attack does 80 more damage."
+        "text": "If your opponent's Active Pokémon is a Pokémon ex, this attack does 80 more damage."
       }
     ],
     "cardId": "54",
     "convertedRetreatCost": 1,
-    "hp": 120,
+    "hp": "120",
     "i18n": {
       "de": {
         "attacks": [
@@ -5548,7 +5733,6 @@
     "number": "54",
     "rarity": "Rare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -5558,11 +5742,11 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
-      "Dark"
+      "Darkness"
     ],
     "variants": [
       {
@@ -5588,15 +5772,19 @@
     "attacks": [
       {
         "convertedEnergyCost": 3,
-        "cost": "MMC",
+        "cost": [
+          "Metal",
+          "Metal",
+          "Colorless"
+        ],
         "damage": "",
         "name": "Sonic Ripper",
-        "text": "Shuffle all Energy attached to this Pokémon into your deck, and this attack does 220 damage to 1 of your opponent's Pokémon. <i>(Don't apply Weakness and Resistance for Benched Pokémon.)</i>"
+        "text": "Shuffle all Energy attached to this Pokémon into your deck, and this attack does 220 damage to 1 of your opponent's Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
       }
     ],
     "cardId": "55",
     "convertedRetreatCost": 0,
-    "hp": 260,
+    "hp": "260",
     "i18n": {
       "de": {
         "attacks": [
@@ -5646,16 +5834,14 @@
         "value": "-30"
       }
     ],
-    "retreatCost": [],
     "setId": "me3",
     "sources": {
       "pokemontcg": "bc4a5871",
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage",
-      "ex",
-      "Mega Evolution ex"
+      "Basic",
+      "ex"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -5686,7 +5872,9 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "C",
+        "cost": [
+          "Colorless"
+        ],
         "damage": "10",
         "name": "Cut",
         "text": ""
@@ -5694,7 +5882,7 @@
     ],
     "cardId": "56",
     "convertedRetreatCost": 2,
-    "hp": 70,
+    "hp": "70",
     "i18n": {
       "de": {
         "attacks": [
@@ -5753,7 +5941,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -5783,8 +5971,11 @@
     "attacks": [
       {
         "convertedEnergyCost": 2,
-        "cost": "CC",
-        "damage": "60x",
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "60×",
         "name": "Weaponized Swords",
         "text": "Reveal any number of Honedge, Doublade, and Aegislash from your hand, and this attack does 60 damage for each card you revealed in this way."
       }
@@ -5792,7 +5983,7 @@
     "cardId": "57",
     "convertedRetreatCost": 2,
     "evolvesFrom": "Honedge",
-    "hp": 100,
+    "hp": "100",
     "i18n": {
       "de": {
         "attacks": [
@@ -5883,14 +6074,23 @@
     "attacks": [
       {
         "convertedEnergyCost": 3,
-        "cost": "CCC",
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
         "damage": "80",
         "name": "Slash",
         "text": ""
       },
       {
         "convertedEnergyCost": 4,
-        "cost": "MCCC",
+        "cost": [
+          "Metal",
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
         "damage": "230",
         "name": "Metal Slash",
         "text": "During your next turn, this Pokémon can't use attacks."
@@ -5899,7 +6099,7 @@
     "cardId": "58",
     "convertedRetreatCost": 3,
     "evolvesFrom": "Doublade",
-    "hp": 150,
+    "hp": "150",
     "i18n": {
       "de": {
         "attacks": [
@@ -5994,7 +6194,9 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "M",
+        "cost": [
+          "Metal"
+        ],
         "damage": "30",
         "name": "Memory Lock",
         "text": "Choose 1 of your opponent's Active Pokémon's attacks. During your opponent's next turn, that Pokémon can't use that attack."
@@ -6002,7 +6204,7 @@
     ],
     "cardId": "59",
     "convertedRetreatCost": 1,
-    "hp": 70,
+    "hp": "70",
     "i18n": {
       "de": {
         "attacks": [
@@ -6061,7 +6263,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -6091,7 +6293,9 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "C",
+        "cost": [
+          "Colorless"
+        ],
         "damage": "30",
         "name": "Take Down",
         "text": "This Pokémon also does 10 damage to itself."
@@ -6099,7 +6303,7 @@
     ],
     "cardId": "60",
     "convertedRetreatCost": 1,
-    "hp": 40,
+    "hp": "40",
     "i18n": {
       "de": {
         "attacks": [
@@ -6143,7 +6347,6 @@
     "number": "60",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -6153,7 +6356,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -6183,15 +6386,19 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "C",
+        "cost": [
+          "Colorless"
+        ],
         "damage": "20",
         "name": "Scrape Off",
         "text": "Before doing damage, discard all Pokémon Tools from your opponent's Active Pokémon."
       },
       {
         "convertedEnergyCost": 1,
-        "cost": "C",
-        "damage": "40x",
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "40×",
         "name": "Retaliatory Incisors",
         "text": "This attack does 40 damage for each damage counter on all of your Benched Rattata."
       }
@@ -6199,7 +6406,7 @@
     "cardId": "61",
     "convertedRetreatCost": 1,
     "evolvesFrom": "Rattata",
-    "hp": 90,
+    "hp": "90",
     "i18n": {
       "de": {
         "attacks": [
@@ -6248,7 +6455,6 @@
     "number": "61",
     "rarity": "Uncommon",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -6286,15 +6492,20 @@
   {
     "abilities": [
       {
-        "name": "[Ability] Last-Ditch Catch",
-        "text": "Once during your turn, when you play this Pokémon from your hand onto your Bench, you may use this Ability. Search your deck for a Supporter card, reveal it, and put it into your hand. Then, shuffle your deck. You can't use more than 1 Ability that has \"Last-Ditch\" in its name each turn."
+        "name": "Last-Ditch Catch",
+        "text": "Once during your turn, when you play this Pokémon from your hand onto your Bench, you may use this Ability. Search your deck for a Supporter card, reveal it, and put it into your hand. Then, shuffle your deck. You can't use more than 1 Ability that has \"Last-Ditch\" in its name each turn.",
+        "type": "Ability"
       }
     ],
     "artist": "5ban Graphics",
     "attacks": [
       {
         "convertedEnergyCost": 3,
-        "cost": "CCC",
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
         "damage": "60",
         "name": "Tuck Tail",
         "text": "Put this Pokémon and all attached cards into your hand."
@@ -6302,7 +6513,7 @@
     ],
     "cardId": "62",
     "convertedRetreatCost": 1,
-    "hp": 170,
+    "hp": "170",
     "i18n": {
       "de": {
         "abilities": [
@@ -6352,7 +6563,6 @@
     "number": "62",
     "rarity": "DoubleRare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -6362,7 +6572,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage",
+      "Basic",
       "ex"
     ],
     "supertype": "Pokémon",
@@ -6394,14 +6604,21 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "C",
+        "cost": [
+          "Colorless"
+        ],
         "damage": "",
         "name": "Gormandizer",
         "text": "Flip a coin until you get tails. Search your deck for an amount of Basic Energy up to the number of heads and attach it to this Pokémon. Then, shuffle your deck."
       },
       {
         "convertedEnergyCost": 4,
-        "cost": "CCCC",
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
         "damage": "160",
         "name": "Collapse",
         "text": "This Pokémon is now Asleep."
@@ -6409,7 +6626,7 @@
     ],
     "cardId": "63",
     "convertedRetreatCost": 4,
-    "hp": 160,
+    "hp": "160",
     "i18n": {
       "de": {
         "attacks": [
@@ -6457,7 +6674,6 @@
     "number": "63",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -6470,7 +6686,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -6500,7 +6716,9 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "C",
+        "cost": [
+          "Colorless"
+        ],
         "damage": "10",
         "name": "Smash Kick",
         "text": ""
@@ -6508,7 +6726,7 @@
     ],
     "cardId": "64",
     "convertedRetreatCost": 1,
-    "hp": 70,
+    "hp": "70",
     "i18n": {
       "de": {
         "attacks": [
@@ -6551,7 +6769,6 @@
     "number": "64",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -6561,7 +6778,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -6591,14 +6808,20 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "C",
+        "cost": [
+          "Colorless"
+        ],
         "damage": "140",
         "name": "Earthquake",
-        "text": "This attack also does 30 damage to each of your Benched Pokémon. <i>(Don't apply Weakness and Resistance for Benched Pokémon.)</i>"
+        "text": "This attack also does 30 damage to each of your Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
       },
       {
         "convertedEnergyCost": 3,
-        "cost": "CCC",
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
         "damage": "100",
         "name": "Whap Down",
         "text": ""
@@ -6607,7 +6830,7 @@
     "cardId": "65",
     "convertedRetreatCost": 4,
     "evolvesFrom": "Bunnelby",
-    "hp": 150,
+    "hp": "150",
     "i18n": {
       "de": {
         "attacks": [
@@ -6655,7 +6878,6 @@
     "number": "65",
     "rarity": "Uncommon",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -6698,14 +6920,19 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "C",
+        "cost": [
+          "Colorless"
+        ],
         "damage": "",
         "name": "Chirp",
-        "text": "Search your deck for up to 2 Pokémon with fighting Resistance, reveal them, and put them into your hand. Then, shuffle your deck."
+        "text": "Search your deck for up to 2 Pokémon with {F} Resistance, reveal them, and put them into your hand. Then, shuffle your deck."
       },
       {
         "convertedEnergyCost": 2,
-        "cost": "CC",
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
         "damage": "20",
         "name": "Peck",
         "text": ""
@@ -6713,7 +6940,7 @@
     ],
     "cardId": "66",
     "convertedRetreatCost": 1,
-    "hp": 60,
+    "hp": "60",
     "i18n": {
       "de": {
         "attacks": [
@@ -6775,7 +7002,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -6805,14 +7032,18 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "C",
+        "cost": [
+          "Colorless"
+        ],
         "damage": "",
         "name": "Hand Trim",
         "text": "Discard random cards from your opponent's hand until they have 5 cards in their hand."
       },
       {
         "convertedEnergyCost": 1,
-        "cost": "C",
+        "cost": [
+          "Colorless"
+        ],
         "damage": "30",
         "name": "Headbutt",
         "text": ""
@@ -6820,7 +7051,7 @@
     ],
     "cardId": "67",
     "convertedRetreatCost": 1,
-    "hp": 90,
+    "hp": "90",
     "i18n": {
       "de": {
         "attacks": [
@@ -6867,7 +7098,6 @@
     "number": "67",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -6877,7 +7107,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -6905,15 +7135,14 @@
   {
     "abilities": [
       {
-        "name": "[Ability] Intimidating Jaw",
-        "text": "As long as this Pokémon is in the Active Spot, attacks used by your opponent's Active Pokémon do 30 less damage <i>(before applying Weakness and Resistance)</i>."
+        "name": "Intimidating Jaw",
+        "text": "As long as this Pokémon is in the Active Spot, attacks used by your opponent's Active Pokémon do 30 less damage (before applying Weakness and Resistance).",
+        "type": "Ability"
       }
     ],
     "artist": "AYUMI ODASHIMA",
-    "attacks": [],
     "cardId": "68",
-    "convertedRetreatCost": 0,
-    "hp": 60,
+    "hp": "60",
     "i18n": {
       "de": {
         "abilities": [
@@ -6957,8 +7186,6 @@
     "number": "68",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
-    "retreatCost": [],
     "rules": [
       "Play this card as if it were a 60-HP Basic {C} Pokémon. This card can't be affected by any Special Conditions and can't retreat.\n\nAt any time during your turn, you may discard this card from play."
     ],
@@ -6968,10 +7195,9 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Item-Pokemon"
+      "Item"
     ],
-    "supertype": "Pokémon",
-    "types": [],
+    "supertype": "Trainer",
     "variants": [
       {
         "cardmarketId": 877484,
@@ -6983,26 +7209,19 @@
         "tcgplayerId": 684353,
         "type": "reverse"
       }
-    ],
-    "weaknesses": [
-      {
-        "type": "",
-        "value": "×"
-      }
     ]
   },
   {
     "abilities": [
       {
-        "name": "[Ability] Protective Sail",
-        "text": "Whenever your opponent plays a Supporter card from their hand, prevent all effects of that card done to this Pokémon."
+        "name": "Protective Sail",
+        "text": "Whenever your opponent plays a Supporter card from their hand, prevent all effects of that card done to this Pokémon.",
+        "type": "Ability"
       }
     ],
     "artist": "AYUMI ODASHIMA",
-    "attacks": [],
     "cardId": "69",
-    "convertedRetreatCost": 0,
-    "hp": 60,
+    "hp": "60",
     "i18n": {
       "de": {
         "abilities": [
@@ -7046,8 +7265,6 @@
     "number": "69",
     "rarity": "Common",
     "regulationMark": "J",
-    "resistances": [],
-    "retreatCost": [],
     "rules": [
       "Play this card as if it were a 60-HP Basic {C} Pokémon. This card can't be affected by any Special Conditions and can't retreat.\n\nAt any time during your turn, you may discard this card from play."
     ],
@@ -7057,10 +7274,9 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Item-Pokemon"
+      "Item"
     ],
-    "supertype": "Pokémon",
-    "types": [],
+    "supertype": "Trainer",
     "variants": [
       {
         "cardmarketId": 877485,
@@ -7071,12 +7287,6 @@
         "cardmarketId": 877485,
         "tcgplayerId": 684354,
         "type": "reverse"
-      }
-    ],
-    "weaknesses": [
-      {
-        "type": "",
-        "value": "×"
       }
     ]
   },
@@ -7097,7 +7307,6 @@
       }
     ],
     "cardId": "70",
-    "hp": 0,
     "i18n": {
       "de": {
         "attacks": [
@@ -7142,8 +7351,7 @@
     "rarity": "Uncommon",
     "regulationMark": "J",
     "rules": [
-      "The Mega Zygarde {ex} this card is attached to can use the attack on this card. <i>(You still need the necessary Energy to use this attack.)</i>",
-      "Discard all Energy from this Pokémon."
+      "The Mega Zygarde ex this card is attached to can use the attack on this card. (You still need the necessary Energy to use this attack.)"
     ],
     "setId": "me3",
     "sources": {
@@ -7154,7 +7362,6 @@
       "Tool"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877486,
@@ -7177,7 +7384,6 @@
   {
     "artist": "Ayaka Yoshida",
     "cardId": "71",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -7227,7 +7433,6 @@
       "Item"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877487,
@@ -7244,7 +7449,6 @@
   {
     "artist": "Toyste Beach",
     "cardId": "72",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -7294,7 +7498,6 @@
       "Item"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877488,
@@ -7311,7 +7514,6 @@
   {
     "artist": "Toyste Beach",
     "cardId": "73",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -7361,7 +7563,6 @@
       "Item"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877489,
@@ -7378,7 +7579,6 @@
   {
     "artist": "Toyste Beach",
     "cardId": "74",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -7428,7 +7628,6 @@
       "Item"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877490,
@@ -7445,7 +7644,6 @@
   {
     "artist": "Susumu Maeya",
     "cardId": "75",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -7484,7 +7682,7 @@
     "rarity": "Uncommon",
     "regulationMark": "J",
     "rules": [
-      "Heal 150 damage from 1 of your psychic Pokémon."
+      "Heal 150 damage from 1 of your {P} Pokémon."
     ],
     "setId": "me3",
     "sources": {
@@ -7495,7 +7693,6 @@
       "Supporter"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877492,
@@ -7512,7 +7709,6 @@
   {
     "artist": "kantaro",
     "cardId": "76",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -7562,7 +7758,6 @@
       "Supporter"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877493,
@@ -7592,7 +7787,6 @@
   {
     "artist": "MARINA Chikazawa",
     "cardId": "77",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -7642,7 +7836,6 @@
       "Stadium"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877494,
@@ -7659,7 +7852,6 @@
   {
     "artist": "5ban Graphics",
     "cardId": "78",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -7709,7 +7901,6 @@
       "Item"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877495,
@@ -7726,7 +7917,6 @@
   {
     "artist": "DOM",
     "cardId": "79",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -7765,7 +7955,7 @@
     "rarity": "Uncommon",
     "regulationMark": "J",
     "rules": [
-      "Draw cards until you have 5 cards in your hand. Before drawing cards, you may discard any number of cards from your hand. <i>(If you can't draw any cards in this way, you can't use this card.)</i>"
+      "Draw cards until you have 5 cards in your hand. Before drawing cards, you may discard any number of cards from your hand. (If you can't draw any cards in this way, you can't use this card.)"
     ],
     "setId": "me3",
     "sources": {
@@ -7776,7 +7966,6 @@
       "Supporter"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877496,
@@ -7793,7 +7982,6 @@
   {
     "artist": "Studio Bora Inc.",
     "cardId": "80",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -7843,7 +8031,6 @@
       "Item"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877497,
@@ -7860,7 +8047,6 @@
   {
     "artist": "Studio Bora Inc.",
     "cardId": "81",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -7899,7 +8085,7 @@
     "rarity": "Uncommon",
     "regulationMark": "J",
     "rules": [
-      "Search your deck for a Pokémon that doesn't have a Rule Box, reveal it, and put it into your hand. Then, shuffle your deck. <i>(Pokémon {ex}, Pokémon v_atk, etc. have Rule Boxes.)</i>"
+      "Search your deck for a Pokémon that doesn't have a Rule Box, reveal it, and put it into your hand. Then, shuffle your deck. (Pokémon ex, Pokémon V, etc. have Rule Boxes.)"
     ],
     "setId": "me3",
     "sources": {
@@ -7910,7 +8096,6 @@
       "Item"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877498,
@@ -7927,7 +8112,6 @@
   {
     "artist": "Studio Bora Inc.",
     "cardId": "82",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -7977,7 +8161,6 @@
       "Item"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877499,
@@ -7994,7 +8177,6 @@
   {
     "artist": "Ayaka Yoshida",
     "cardId": "83",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -8044,7 +8226,6 @@
       "Item"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877500,
@@ -8061,7 +8242,6 @@
   {
     "artist": "Atsushi Furusawa",
     "cardId": "84",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -8100,7 +8280,7 @@
     "rarity": "Uncommon",
     "regulationMark": "J",
     "rules": [
-      "You can use this card only if you have more Prize cards remaining than your opponent.Attach up to 2 Basic Energy cards from your discard pile to 1 of your Stage 2 Pokémon."
+      "You can use this card only if you have more Prize cards remaining than your opponent.\n\nAttach up to 2 Basic Energy cards from your discard pile to 1 of your Stage 2 Pokémon."
     ],
     "setId": "me3",
     "sources": {
@@ -8111,7 +8291,6 @@
       "Supporter"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877501,
@@ -8134,7 +8313,6 @@
   {
     "artist": "Akira Komayama",
     "cardId": "85",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -8173,7 +8351,7 @@
     "rarity": "Uncommon",
     "regulationMark": "J",
     "rules": [
-      "Put up to 4 in any combination of fighting Pokémon and Basic fighting Energy cards from your discard pile into your hand."
+      "Put up to 4 in any combination of {F} Pokémon and Basic {F} Energy cards from your discard pile into your hand."
     ],
     "setId": "me3",
     "sources": {
@@ -8184,7 +8362,6 @@
       "Supporter"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877502,
@@ -8200,7 +8377,6 @@
   },
   {
     "cardId": "86",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -8245,7 +8421,7 @@
     "rarity": "Rare",
     "regulationMark": "J",
     "rules": [
-      "As long as this card is attached to a Pokémon, it provides grass Energy.The grass Pokémon this card is attached to gets +20 HP."
+      "As long as this card is attached to a Pokémon, it provides {G} Energy.\nThe {G} Pokémon this card is attached to gets +20 HP."
     ],
     "setId": "me3",
     "sources": {
@@ -8253,10 +8429,9 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Special Energy"
+      "Basic"
     ],
     "supertype": "Energy",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877503,
@@ -8294,7 +8469,6 @@
   },
   {
     "cardId": "87",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -8339,7 +8513,7 @@
     "rarity": "Rare",
     "regulationMark": "J",
     "rules": [
-      "As long as this card is attached to a Pokémon, it provides fighting Energy.Prevent all effects of attacks used by your opponent's Pokémon done to the fighting Pokémon this card is attached to. <i>(Existing effects are not removed. Damage is not an effect.)</i>"
+      "As long as this card is attached to a Pokémon, it provides {F} Energy.\nPrevent all effects of attacks used by your opponent's Pokémon done to the {F} Pokémon this card is attached to. (Existing effects are not removed. Damage is not an effect.)"
     ],
     "setId": "me3",
     "sources": {
@@ -8347,10 +8521,9 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Special Energy"
+      "Basic"
     ],
     "supertype": "Energy",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877504,
@@ -8388,7 +8561,6 @@
   },
   {
     "cardId": "88",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -8433,7 +8605,7 @@
     "rarity": "Rare",
     "regulationMark": "J",
     "rules": [
-      "As long as this card is attached to a Pokémon, it provides psychic Energy.When you attach this card from your hand to a psychic Pokémon, search your deck for up to 2 Basic psychic Pokémon and put them onto your Bench. Then, shuffle your deck."
+      "As long as this card is attached to a Pokémon, it provides {P} Energy.\nWhen you attach this card from your hand to a {P} Pokémon, search your deck for up to 2 Basic {P} Pokémon and put them onto your Bench. Then, shuffle your deck."
     ],
     "setId": "me3",
     "sources": {
@@ -8441,10 +8613,9 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Special Energy"
+      "Basic"
     ],
     "supertype": "Energy",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877505,
@@ -8485,7 +8656,9 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "G",
+        "cost": [
+          "Grass"
+        ],
         "damage": "",
         "name": "Hide",
         "text": "Flip a coin. If heads, during your opponent's next turn, prevent all damage from and effects of attacks done to this Pokémon."
@@ -8494,7 +8667,7 @@
     "cardId": "89",
     "convertedRetreatCost": 3,
     "evolvesFrom": "Scatterbug",
-    "hp": 80,
+    "hp": "80",
     "i18n": {
       "de": {
         "attacks": [
@@ -8539,7 +8712,6 @@
     "number": "89",
     "rarity": "IllustrationRare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -8576,14 +8748,20 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "G",
+        "cost": [
+          "Grass"
+        ],
         "damage": "",
         "name": "Find a Friend",
         "text": "Search your deck for a Pokémon, reveal it, and put it into your hand. Then, shuffle your deck."
       },
       {
         "convertedEnergyCost": 3,
-        "cost": "CCC",
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
         "damage": "30",
         "name": "Tackle",
         "text": ""
@@ -8591,7 +8769,7 @@
     ],
     "cardId": "90",
     "convertedRetreatCost": 2,
-    "hp": 80,
+    "hp": "80",
     "i18n": {
       "de": {
         "attacks": [
@@ -8638,7 +8816,6 @@
     "number": "90",
     "rarity": "IllustrationRare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -8649,7 +8826,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -8672,15 +8849,19 @@
   {
     "abilities": [
       {
-        "name": "[Ability] Sky Hunt",
-        "text": "Once during your turn, you may use this Ability. Flip a coin. If heads, discard a random card from your opponent's hand."
+        "name": "Sky Hunt",
+        "text": "Once during your turn, you may use this Ability. Flip a coin. If heads, discard a random card from your opponent's hand.",
+        "type": "Ability"
       }
     ],
     "artist": "OKACHEKE",
     "attacks": [
       {
         "convertedEnergyCost": 2,
-        "cost": "RR",
+        "cost": [
+          "Fire",
+          "Fire"
+        ],
         "damage": "110",
         "name": "Fire Wing",
         "text": ""
@@ -8689,7 +8870,7 @@
     "cardId": "91",
     "convertedRetreatCost": 1,
     "evolvesFrom": "Fletchinder",
-    "hp": 150,
+    "hp": "150",
     "i18n": {
       "de": {
         "abilities": [
@@ -8777,15 +8958,20 @@
   {
     "abilities": [
       {
-        "name": "[Ability] Tundra Wall",
-        "text": "All of your Pokémon that have any water Energy attached take 50 less damage from attacks from your opponent's Pokémon <i>(after applying Weakness and Resistance)</i>. The effect of Tundra Wall doesn't stack."
+        "name": "Tundra Wall",
+        "text": "All of your Pokémon that have any {W} Energy attached take 50 less damage from attacks from your opponent's Pokémon (after applying Weakness and Resistance). The effect of Tundra Wall doesn't stack.",
+        "type": "Ability"
       }
     ],
     "artist": "Masa",
     "attacks": [
       {
         "convertedEnergyCost": 3,
-        "cost": "WWC",
+        "cost": [
+          "Water",
+          "Water",
+          "Colorless"
+        ],
         "damage": "150",
         "name": "Freezing Chill",
         "text": "During your opponent's next turn, the Defending Pokémon can't use attacks."
@@ -8794,7 +8980,7 @@
     "cardId": "92",
     "convertedRetreatCost": 3,
     "evolvesFrom": "Amaura",
-    "hp": 170,
+    "hp": "170",
     "i18n": {
       "de": {
         "abilities": [
@@ -8845,7 +9031,6 @@
     "number": "92",
     "rarity": "IllustrationRare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -8882,14 +9067,19 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "L",
+        "cost": [
+          "Lightning"
+        ],
         "damage": "",
         "name": "Tail Generator",
-        "text": "Choose Basic lightning Energy cards from your discard pile up to the amount of Energy attached to all of your opponent's Pokémon and attach them to your lightning Pokémon in any way you like."
+        "text": "Choose Basic {L} Energy cards from your discard pile up to the amount of Energy attached to all of your opponent's Pokémon and attach them to your {L} Pokémon in any way you like."
       },
       {
         "convertedEnergyCost": 2,
-        "cost": "LC",
+        "cost": [
+          "Lightning",
+          "Colorless"
+        ],
         "damage": "30",
         "name": "Thunder Shock",
         "text": "Flip a coin. If heads, your opponent's Active Pokémon is now Paralyzed."
@@ -8897,7 +9087,7 @@
     ],
     "cardId": "93",
     "convertedRetreatCost": 1,
-    "hp": 70,
+    "hp": "70",
     "i18n": {
       "de": {
         "attacks": [
@@ -8945,7 +9135,6 @@
     "number": "93",
     "rarity": "IllustrationRare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -8955,7 +9144,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -8980,14 +9169,19 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "P",
+        "cost": [
+          "Psychic"
+        ],
         "damage": "",
         "name": "Follow Me",
         "text": "Switch in 1 of your opponent's Benched Pokémon to the Active Spot."
       },
       {
         "convertedEnergyCost": 2,
-        "cost": "PP",
+        "cost": [
+          "Psychic",
+          "Psychic"
+        ],
         "damage": "30",
         "name": "Flop",
         "text": ""
@@ -8995,7 +9189,7 @@
     ],
     "cardId": "94",
     "convertedRetreatCost": 1,
-    "hp": 70,
+    "hp": "70",
     "i18n": {
       "de": {
         "attacks": [
@@ -9042,7 +9236,6 @@
     "number": "94",
     "rarity": "IllustrationRare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -9052,7 +9245,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -9077,14 +9270,18 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "C",
+        "cost": [
+          "Colorless"
+        ],
         "damage": "",
         "name": "Nap",
         "text": "Heal 20 damage from this Pokémon."
       },
       {
         "convertedEnergyCost": 1,
-        "cost": "P",
+        "cost": [
+          "Psychic"
+        ],
         "damage": "10",
         "name": "Stampede",
         "text": ""
@@ -9092,7 +9289,7 @@
     ],
     "cardId": "95",
     "convertedRetreatCost": 1,
-    "hp": 60,
+    "hp": "60",
     "i18n": {
       "de": {
         "attacks": [
@@ -9154,7 +9351,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage"
+      "Basic"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -9169,7 +9366,7 @@
     ],
     "weaknesses": [
       {
-        "type": "Dark",
+        "type": "Darkness",
         "value": "×2"
       }
     ]
@@ -9179,14 +9376,22 @@
     "attacks": [
       {
         "convertedEnergyCost": 2,
-        "cost": "FF",
+        "cost": [
+          "Fighting",
+          "Fighting"
+        ],
         "damage": "60",
         "name": "Rolling Rocks",
         "text": ""
       },
       {
         "convertedEnergyCost": 4,
-        "cost": "FFFC",
+        "cost": [
+          "Fighting",
+          "Fighting",
+          "Fighting",
+          "Colorless"
+        ],
         "damage": "260",
         "name": "Obliterating Nose",
         "text": "Discard 3 Energy from this Pokémon."
@@ -9195,7 +9400,7 @@
     "cardId": "96",
     "convertedRetreatCost": 3,
     "evolvesFrom": "Nosepass",
-    "hp": 140,
+    "hp": "140",
     "i18n": {
       "de": {
         "attacks": [
@@ -9243,7 +9448,6 @@
     "number": "96",
     "rarity": "IllustrationRare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -9280,14 +9484,21 @@
     "attacks": [
       {
         "convertedEnergyCost": 2,
-        "cost": "DD",
+        "cost": [
+          "Darkness",
+          "Darkness"
+        ],
         "damage": "60",
         "name": "Wrack Down",
         "text": ""
       },
       {
         "convertedEnergyCost": 3,
-        "cost": "DDD",
+        "cost": [
+          "Darkness",
+          "Darkness",
+          "Darkness"
+        ],
         "damage": "100",
         "name": "Hazardous Tail",
         "text": "This Pokémon also does 70 damage to itself. Your opponent's Active Pokémon is now Paralyzed and Poisoned."
@@ -9296,7 +9507,7 @@
     "cardId": "97",
     "convertedRetreatCost": 3,
     "evolvesFrom": "Skorupi",
-    "hp": 140,
+    "hp": "140",
     "i18n": {
       "de": {
         "attacks": [
@@ -9344,7 +9555,6 @@
     "number": "97",
     "rarity": "IllustrationRare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -9360,7 +9570,7 @@
     ],
     "supertype": "Pokémon",
     "types": [
-      "Dark"
+      "Darkness"
     ],
     "variants": [
       {
@@ -9381,8 +9591,11 @@
     "attacks": [
       {
         "convertedEnergyCost": 2,
-        "cost": "CC",
-        "damage": "60x",
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "60×",
         "name": "Weaponized Swords",
         "text": "Reveal any number of Honedge, Doublade, and Aegislash from your hand, and this attack does 60 damage for each card you revealed in this way."
       }
@@ -9390,7 +9603,7 @@
     "cardId": "98",
     "convertedRetreatCost": 2,
     "evolvesFrom": "Honedge",
-    "hp": 100,
+    "hp": "100",
     "i18n": {
       "de": {
         "attacks": [
@@ -9476,15 +9689,19 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "C",
+        "cost": [
+          "Colorless"
+        ],
         "damage": "20",
         "name": "Scrape Off",
         "text": "Before doing damage, discard all Pokémon Tools from your opponent's Active Pokémon."
       },
       {
         "convertedEnergyCost": 1,
-        "cost": "C",
-        "damage": "40x",
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "40×",
         "name": "Retaliatory Incisors",
         "text": "This attack does 40 damage for each damage counter on all of your Benched Rattata."
       }
@@ -9492,7 +9709,7 @@
     "cardId": "99",
     "convertedRetreatCost": 1,
     "evolvesFrom": "Rattata",
-    "hp": 90,
+    "hp": "90",
     "i18n": {
       "de": {
         "attacks": [
@@ -9541,7 +9758,6 @@
     "number": "99",
     "rarity": "IllustrationRare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -9574,15 +9790,21 @@
   {
     "abilities": [
       {
-        "name": "[Ability] Sniper's Eye",
-        "text": "If your opponent has exactly 4 cards in their hand, ignore all colorless Energy in the costs of attacks used by this Pokémon."
+        "name": "Sniper's Eye",
+        "text": "If your opponent has exactly 4 cards in their hand, ignore all {C} Energy in the costs of attacks used by this Pokémon.",
+        "type": "Ability"
       }
     ],
     "artist": "5ban Graphics",
     "attacks": [
       {
         "convertedEnergyCost": 4,
-        "cost": "GCCC",
+        "cost": [
+          "Grass",
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
         "damage": "240",
         "name": "Crushing Arrow",
         "text": "Discard an Energy from your opponent's Active Pokémon."
@@ -9591,7 +9813,7 @@
     "cardId": "100",
     "convertedRetreatCost": 2,
     "evolvesFrom": "Dartrix",
-    "hp": 320,
+    "hp": "320",
     "i18n": {
       "de": {
         "abilities": [
@@ -9642,7 +9864,6 @@
     "number": "100",
     "rarity": "UltraRare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -9679,14 +9900,19 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "R",
+        "cost": [
+          "Fire"
+        ],
         "damage": "",
         "name": "Nasty Plot",
         "text": "Search your deck for up to 2 cards and put them into your hand. Then, shuffle your deck."
       },
       {
         "convertedEnergyCost": 2,
-        "cost": "RR",
+        "cost": [
+          "Fire",
+          "Fire"
+        ],
         "damage": "100",
         "name": "Dire Nails",
         "text": "Your opponent's Active Pokémon is now Burned and Poisoned. Switch this Pokémon with 1 of your Benched Pokémon."
@@ -9695,7 +9921,7 @@
     "cardId": "101",
     "convertedRetreatCost": 1,
     "evolvesFrom": "Salandit",
-    "hp": 260,
+    "hp": "260",
     "i18n": {
       "de": {
         "attacks": [
@@ -9744,7 +9970,6 @@
     "number": "101",
     "rarity": "UltraRare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -9780,14 +10005,20 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "W",
+        "cost": [
+          "Water"
+        ],
         "damage": "120",
         "name": "Jetting Blow",
-        "text": "This attack also does 50 damage to 1 of your opponent's Benched Pokémon. <i>(Don't apply Weakness and Resistance for Benched Pokémon.)</i>"
+        "text": "This attack also does 50 damage to 1 of your opponent's Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
       },
       {
         "convertedEnergyCost": 3,
-        "cost": "CCC",
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
         "damage": "210",
         "name": "Nebula Beam",
         "text": "This attack's damage isn't affected by Weakness or Resistance, or by any effects on your opponent's Active Pokémon."
@@ -9796,7 +10027,7 @@
     "cardId": "102",
     "convertedRetreatCost": 2,
     "evolvesFrom": "Staryu",
-    "hp": 330,
+    "hp": "330",
     "i18n": {
       "de": {
         "attacks": [
@@ -9845,7 +10076,6 @@
     "number": "102",
     "rarity": "UltraRare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -9857,8 +10087,7 @@
     },
     "subtypes": [
       "Stage 1",
-      "ex",
-      "Mega Evolution ex"
+      "ex"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -9881,15 +10110,19 @@
   {
     "abilities": [
       {
-        "name": "[Ability] Luminous Wing",
-        "text": "Prevent all effects of your opponent's Pokémon's Abilities done to this Pokémon."
+        "name": "Luminous Wing",
+        "text": "Prevent all effects of your opponent's Pokémon's Abilities done to this Pokémon.",
+        "type": "Ability"
       }
     ],
     "artist": "aky CG Works",
     "attacks": [
       {
         "convertedEnergyCost": 2,
-        "cost": "PP",
+        "cost": [
+          "Psychic",
+          "Psychic"
+        ],
         "damage": "120+",
         "name": "Shooting Moons",
         "text": "You may discard up to 4 Energy cards from your hand, and this attack does 40 more damage for each card you discarded in this way."
@@ -9898,7 +10131,7 @@
     "cardId": "103",
     "convertedRetreatCost": 1,
     "evolvesFrom": "Clefairy",
-    "hp": 320,
+    "hp": "320",
     "i18n": {
       "de": {
         "abilities": [
@@ -9949,7 +10182,6 @@
     "number": "103",
     "rarity": "UltraRare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -9960,8 +10192,7 @@
     },
     "subtypes": [
       "Stage 1",
-      "ex",
-      "Mega Evolution ex"
+      "ex"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -9986,22 +10217,32 @@
     "attacks": [
       {
         "convertedEnergyCost": 3,
-        "cost": "FFF",
+        "cost": [
+          "Fighting",
+          "Fighting",
+          "Fighting"
+        ],
         "damage": "200",
         "name": "Gaia Wave",
-        "text": "During your opponent's next turn, this Pokémon takes 30 less damage from attacks <i>(after applying Weakness and Resistance)</i>."
+        "text": "During your opponent's next turn, this Pokémon takes 30 less damage from attacks (after applying Weakness and Resistance)."
       },
       {
         "convertedEnergyCost": 5,
-        "cost": "FFFFF",
+        "cost": [
+          "Fighting",
+          "Fighting",
+          "Fighting",
+          "Fighting",
+          "Fighting"
+        ],
         "damage": "",
         "name": "Nullifying Zero",
-        "text": "For each of your opponent's Pokémon, flip a coin. If heads, this attack does 150 damage to that Pokémon. <i>(Don't apply Weakness and Resistance for Benched Pokémon.)</i>"
+        "text": "For each of your opponent's Pokémon, flip a coin. If heads, this attack does 150 damage to that Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
       }
     ],
     "cardId": "104",
     "convertedRetreatCost": 2,
-    "hp": 310,
+    "hp": "310",
     "i18n": {
       "de": {
         "attacks": [
@@ -10049,7 +10290,6 @@
     "number": "104",
     "rarity": "UltraRare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -10060,9 +10300,8 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage",
-      "ex",
-      "Mega Evolution ex"
+      "Basic",
+      "ex"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -10087,14 +10326,22 @@
     "attacks": [
       {
         "convertedEnergyCost": 3,
-        "cost": "DDC",
+        "cost": [
+          "Darkness",
+          "Darkness",
+          "Colorless"
+        ],
         "damage": "",
         "name": "Soul Destroyer",
         "text": "Knock Out each of your opponent's Pokémon that has 50 HP or less remaining."
       },
       {
         "convertedEnergyCost": 3,
-        "cost": "DDC",
+        "cost": [
+          "Darkness",
+          "Darkness",
+          "Colorless"
+        ],
         "damage": "210",
         "name": "Dark Strike",
         "text": "During your next turn, this Pokémon can't use Dark Strike."
@@ -10102,7 +10349,7 @@
     ],
     "cardId": "105",
     "convertedRetreatCost": 1,
-    "hp": 210,
+    "hp": "210",
     "i18n": {
       "de": {
         "attacks": [
@@ -10165,12 +10412,12 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage",
+      "Basic",
       "ex"
     ],
     "supertype": "Pokémon",
     "types": [
-      "Dark"
+      "Darkness"
     ],
     "variants": [
       {
@@ -10191,15 +10438,19 @@
     "attacks": [
       {
         "convertedEnergyCost": 3,
-        "cost": "MMC",
+        "cost": [
+          "Metal",
+          "Metal",
+          "Colorless"
+        ],
         "damage": "",
         "name": "Sonic Ripper",
-        "text": "Shuffle all Energy attached to this Pokémon into your deck, and this attack does 220 damage to 1 of your opponent's Pokémon. <i>(Don't apply Weakness and Resistance for Benched Pokémon.)</i>"
+        "text": "Shuffle all Energy attached to this Pokémon into your deck, and this attack does 220 damage to 1 of your opponent's Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
       }
     ],
     "cardId": "106",
     "convertedRetreatCost": 0,
-    "hp": 260,
+    "hp": "260",
     "i18n": {
       "de": {
         "attacks": [
@@ -10249,16 +10500,14 @@
         "value": "-30"
       }
     ],
-    "retreatCost": [],
     "setId": "me3",
     "sources": {
       "pokemontcg": "bc4a5871",
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage",
-      "ex",
-      "Mega Evolution ex"
+      "Basic",
+      "ex"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -10281,15 +10530,20 @@
   {
     "abilities": [
       {
-        "name": "[Ability] Last-Ditch Catch",
-        "text": "Once during your turn, when you play this Pokémon from your hand onto your Bench, you may use this Ability. Search your deck for a Supporter card, reveal it, and put it into your hand. Then, shuffle your deck. You can't use more than 1 Ability that has \"Last-Ditch\" in its name each turn."
+        "name": "Last-Ditch Catch",
+        "text": "Once during your turn, when you play this Pokémon from your hand onto your Bench, you may use this Ability. Search your deck for a Supporter card, reveal it, and put it into your hand. Then, shuffle your deck. You can't use more than 1 Ability that has \"Last-Ditch\" in its name each turn.",
+        "type": "Ability"
       }
     ],
     "artist": "5ban Graphics",
     "attacks": [
       {
         "convertedEnergyCost": 3,
-        "cost": "CCC",
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
         "damage": "60",
         "name": "Tuck Tail",
         "text": "Put this Pokémon and all attached cards into your hand."
@@ -10297,7 +10551,7 @@
     ],
     "cardId": "107",
     "convertedRetreatCost": 1,
-    "hp": 170,
+    "hp": "170",
     "i18n": {
       "de": {
         "abilities": [
@@ -10347,7 +10601,6 @@
     "number": "107",
     "rarity": "UltraRare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -10357,7 +10610,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage",
+      "Basic",
       "ex"
     ],
     "supertype": "Pokémon",
@@ -10381,7 +10634,6 @@
   {
     "artist": "Toyste Beach",
     "cardId": "108",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -10431,7 +10683,6 @@
       "Item"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877525,
@@ -10443,7 +10694,6 @@
   {
     "artist": "AYUMI ODASHIMA",
     "cardId": "109",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -10482,7 +10732,7 @@
     "rarity": "UltraRare",
     "regulationMark": "I",
     "rules": [
-      "Each player's grass Pokémon can evolve into grass Pokémon during the turn they play those Pokémon, except during their first turn."
+      "Each player's {G} Pokémon can evolve into {G} Pokémon during the turn they play those Pokémon, except during their first turn."
     ],
     "setId": "me3",
     "sources": {
@@ -10493,7 +10743,6 @@
       "Stadium"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877526,
@@ -10505,7 +10754,6 @@
   {
     "artist": "Susumu Maeya",
     "cardId": "110",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -10544,7 +10792,7 @@
     "rarity": "UltraRare",
     "regulationMark": "J",
     "rules": [
-      "Heal 150 damage from 1 of your psychic Pokémon."
+      "Heal 150 damage from 1 of your {P} Pokémon."
     ],
     "setId": "me3",
     "sources": {
@@ -10555,7 +10803,6 @@
       "Supporter"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877527,
@@ -10567,7 +10814,6 @@
   {
     "artist": "MARINA Chikazawa",
     "cardId": "111",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -10617,7 +10863,6 @@
       "Stadium"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877528,
@@ -10629,7 +10874,6 @@
   {
     "artist": "DOM",
     "cardId": "112",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -10668,7 +10912,7 @@
     "rarity": "UltraRare",
     "regulationMark": "J",
     "rules": [
-      "Draw cards until you have 5 cards in your hand. Before drawing cards, you may discard any number of cards from your hand. <i>(If you can't draw any cards in this way, you can't use this card.)</i>"
+      "Draw cards until you have 5 cards in your hand. Before drawing cards, you may discard any number of cards from your hand. (If you can't draw any cards in this way, you can't use this card.)"
     ],
     "setId": "me3",
     "sources": {
@@ -10679,7 +10923,6 @@
       "Supporter"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877529,
@@ -10691,7 +10934,6 @@
   {
     "artist": "Studio Bora Inc.",
     "cardId": "113",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -10730,7 +10972,7 @@
     "rarity": "UltraRare",
     "regulationMark": "J",
     "rules": [
-      "Search your deck for a Pokémon that doesn't have a Rule Box, reveal it, and put it into your hand. Then, shuffle your deck. <i>(Pokémon {ex}, Pokémon v_atk, etc. have Rule Boxes.)</i>"
+      "Search your deck for a Pokémon that doesn't have a Rule Box, reveal it, and put it into your hand. Then, shuffle your deck. (Pokémon ex, Pokémon V, etc. have Rule Boxes.)"
     ],
     "setId": "me3",
     "sources": {
@@ -10741,7 +10983,6 @@
       "Item"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877530,
@@ -10753,7 +10994,6 @@
   {
     "artist": "Atsushi Furusawa",
     "cardId": "114",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -10792,7 +11032,7 @@
     "rarity": "UltraRare",
     "regulationMark": "J",
     "rules": [
-      "You can use this card only if you have more Prize cards remaining than your opponent.Attach up to 2 Basic Energy cards from your discard pile to 1 of your Stage 2 Pokémon."
+      "You can use this card only if you have more Prize cards remaining than your opponent.\n\nAttach up to 2 Basic Energy cards from your discard pile to 1 of your Stage 2 Pokémon."
     ],
     "setId": "me3",
     "sources": {
@@ -10803,7 +11043,6 @@
       "Supporter"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877531,
@@ -10815,7 +11054,6 @@
   {
     "artist": "Toyste Beach",
     "cardId": "115",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -10865,7 +11103,6 @@
       "Item"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877532,
@@ -10877,7 +11114,6 @@
   {
     "artist": "Akira Komayama",
     "cardId": "116",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -10916,7 +11152,7 @@
     "rarity": "UltraRare",
     "regulationMark": "J",
     "rules": [
-      "Put up to 4 in any combination of fighting Pokémon and Basic fighting Energy cards from your discard pile into your hand."
+      "Put up to 4 in any combination of {F} Pokémon and Basic {F} Energy cards from your discard pile into your hand."
     ],
     "setId": "me3",
     "sources": {
@@ -10927,7 +11163,6 @@
       "Supporter"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877533,
@@ -10939,7 +11174,6 @@
   {
     "artist": "Studio Bora Inc.",
     "cardId": "117",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -10978,7 +11212,7 @@
     "rarity": "UltraRare",
     "regulationMark": "I",
     "rules": [
-      "Attach a Basic psychic Energy card from your discard pile to 1 of your Benched psychic Pokémon."
+      "Attach a Basic {P} Energy card from your discard pile to 1 of your Benched {P} Pokémon."
     ],
     "setId": "me3",
     "sources": {
@@ -10989,7 +11223,6 @@
       "Item"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877534,
@@ -11003,14 +11236,20 @@
     "attacks": [
       {
         "convertedEnergyCost": 1,
-        "cost": "W",
+        "cost": [
+          "Water"
+        ],
         "damage": "120",
         "name": "Jetting Blow",
-        "text": "This attack also does 50 damage to 1 of your opponent's Benched Pokémon. <i>(Don't apply Weakness and Resistance for Benched Pokémon.)</i>"
+        "text": "This attack also does 50 damage to 1 of your opponent's Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
       },
       {
         "convertedEnergyCost": 3,
-        "cost": "CCC",
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
         "damage": "210",
         "name": "Nebula Beam",
         "text": "This attack's damage isn't affected by Weakness or Resistance, or by any effects on your opponent's Active Pokémon."
@@ -11019,7 +11258,7 @@
     "cardId": "118",
     "convertedRetreatCost": 2,
     "evolvesFrom": "Staryu",
-    "hp": 330,
+    "hp": "330",
     "i18n": {
       "de": {
         "attacks": [
@@ -11068,7 +11307,6 @@
     "number": "118",
     "rarity": "SpecialIllustrationRare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -11080,8 +11318,7 @@
     },
     "subtypes": [
       "Stage 1",
-      "ex",
-      "Mega Evolution ex"
+      "ex"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -11104,15 +11341,19 @@
   {
     "abilities": [
       {
-        "name": "[Ability] Luminous Wing",
-        "text": "Prevent all effects of your opponent's Pokémon's Abilities done to this Pokémon."
+        "name": "Luminous Wing",
+        "text": "Prevent all effects of your opponent's Pokémon's Abilities done to this Pokémon.",
+        "type": "Ability"
       }
     ],
     "artist": "Cona Nitanda",
     "attacks": [
       {
         "convertedEnergyCost": 2,
-        "cost": "PP",
+        "cost": [
+          "Psychic",
+          "Psychic"
+        ],
         "damage": "120+",
         "name": "Shooting Moons",
         "text": "You may discard up to 4 Energy cards from your hand, and this attack does 40 more damage for each card you discarded in this way."
@@ -11121,7 +11362,7 @@
     "cardId": "119",
     "convertedRetreatCost": 1,
     "evolvesFrom": "Clefairy",
-    "hp": 320,
+    "hp": "320",
     "i18n": {
       "de": {
         "abilities": [
@@ -11172,7 +11413,6 @@
     "number": "119",
     "rarity": "SpecialIllustrationRare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -11183,8 +11423,7 @@
     },
     "subtypes": [
       "Stage 1",
-      "ex",
-      "Mega Evolution ex"
+      "ex"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -11209,22 +11448,32 @@
     "attacks": [
       {
         "convertedEnergyCost": 3,
-        "cost": "FFF",
+        "cost": [
+          "Fighting",
+          "Fighting",
+          "Fighting"
+        ],
         "damage": "200",
         "name": "Gaia Wave",
-        "text": "During your opponent's next turn, this Pokémon takes 30 less damage from attacks <i>(after applying Weakness and Resistance)</i>."
+        "text": "During your opponent's next turn, this Pokémon takes 30 less damage from attacks (after applying Weakness and Resistance)."
       },
       {
         "convertedEnergyCost": 5,
-        "cost": "FFFFF",
+        "cost": [
+          "Fighting",
+          "Fighting",
+          "Fighting",
+          "Fighting",
+          "Fighting"
+        ],
         "damage": "",
         "name": "Nullifying Zero",
-        "text": "For each of your opponent's Pokémon, flip a coin. If heads, this attack does 150 damage to that Pokémon. <i>(Don't apply Weakness and Resistance for Benched Pokémon.)</i>"
+        "text": "For each of your opponent's Pokémon, flip a coin. If heads, this attack does 150 damage to that Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
       }
     ],
     "cardId": "120",
     "convertedRetreatCost": 2,
-    "hp": 310,
+    "hp": "310",
     "i18n": {
       "de": {
         "attacks": [
@@ -11272,7 +11521,6 @@
     "number": "120",
     "rarity": "SpecialIllustrationRare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -11283,9 +11531,8 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage",
-      "ex",
-      "Mega Evolution ex"
+      "Basic",
+      "ex"
     ],
     "supertype": "Pokémon",
     "types": [
@@ -11308,15 +11555,20 @@
   {
     "abilities": [
       {
-        "name": "[Ability] Last-Ditch Catch",
-        "text": "Once during your turn, when you play this Pokémon from your hand onto your Bench, you may use this Ability. Search your deck for a Supporter card, reveal it, and put it into your hand. Then, shuffle your deck. You can't use more than 1 Ability that has \"Last-Ditch\" in its name each turn."
+        "name": "Last-Ditch Catch",
+        "text": "Once during your turn, when you play this Pokémon from your hand onto your Bench, you may use this Ability. Search your deck for a Supporter card, reveal it, and put it into your hand. Then, shuffle your deck. You can't use more than 1 Ability that has \"Last-Ditch\" in its name each turn.",
+        "type": "Ability"
       }
     ],
     "artist": "Natsumi Yoshida",
     "attacks": [
       {
         "convertedEnergyCost": 3,
-        "cost": "CCC",
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
         "damage": "60",
         "name": "Tuck Tail",
         "text": "Put this Pokémon and all attached cards into your hand."
@@ -11324,7 +11576,7 @@
     ],
     "cardId": "121",
     "convertedRetreatCost": 1,
-    "hp": 170,
+    "hp": "170",
     "i18n": {
       "de": {
         "abilities": [
@@ -11374,7 +11626,6 @@
     "number": "121",
     "rarity": "SpecialIllustrationRare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless"
     ],
@@ -11384,7 +11635,7 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage",
+      "Basic",
       "ex"
     ],
     "supertype": "Pokémon",
@@ -11408,7 +11659,6 @@
   {
     "artist": "Souichirou Gunjima",
     "cardId": "122",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -11447,7 +11697,7 @@
     "rarity": "SpecialIllustrationRare",
     "regulationMark": "J",
     "rules": [
-      "Heal 150 damage from 1 of your psychic Pokémon."
+      "Heal 150 damage from 1 of your {P} Pokémon."
     ],
     "setId": "me3",
     "sources": {
@@ -11458,7 +11708,6 @@
       "Supporter"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877539,
@@ -11470,7 +11719,6 @@
   {
     "artist": "Iori Suzuki",
     "cardId": "123",
-    "hp": 0,
     "i18n": {
       "de": {
         "images": {
@@ -11509,7 +11757,7 @@
     "rarity": "SpecialIllustrationRare",
     "regulationMark": "J",
     "rules": [
-      "You can use this card only if you have more Prize cards remaining than your opponent.Attach up to 2 Basic Energy cards from your discard pile to 1 of your Stage 2 Pokémon."
+      "You can use this card only if you have more Prize cards remaining than your opponent.\n\nAttach up to 2 Basic Energy cards from your discard pile to 1 of your Stage 2 Pokémon."
     ],
     "setId": "me3",
     "sources": {
@@ -11520,7 +11768,6 @@
       "Supporter"
     ],
     "supertype": "Trainer",
-    "types": [],
     "variants": [
       {
         "cardmarketId": 877540,
@@ -11534,22 +11781,32 @@
     "attacks": [
       {
         "convertedEnergyCost": 3,
-        "cost": "FFF",
+        "cost": [
+          "Fighting",
+          "Fighting",
+          "Fighting"
+        ],
         "damage": "200",
         "name": "Gaia Wave",
-        "text": "During your opponent's next turn, this Pokémon takes 30 less damage from attacks <i>(after applying Weakness and Resistance)</i>."
+        "text": "During your opponent's next turn, this Pokémon takes 30 less damage from attacks (after applying Weakness and Resistance)."
       },
       {
         "convertedEnergyCost": 5,
-        "cost": "FFFFF",
+        "cost": [
+          "Fighting",
+          "Fighting",
+          "Fighting",
+          "Fighting",
+          "Fighting"
+        ],
         "damage": "",
         "name": "Nullifying Zero",
-        "text": "For each of your opponent's Pokémon, flip a coin. If heads, this attack does 150 damage to that Pokémon. <i>(Don't apply Weakness and Resistance for Benched Pokémon.)</i>"
+        "text": "For each of your opponent's Pokémon, flip a coin. If heads, this attack does 150 damage to that Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
       }
     ],
     "cardId": "124",
     "convertedRetreatCost": 2,
-    "hp": 310,
+    "hp": "310",
     "i18n": {
       "de": {
         "attacks": [
@@ -11597,7 +11854,6 @@
     "number": "124",
     "rarity": "MegaHyperRare",
     "regulationMark": "J",
-    "resistances": [],
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -11608,9 +11864,8 @@
       "tcgdex": "5fbf524a"
     },
     "subtypes": [
-      "Basic Stage",
-      "ex",
-      "Mega Evolution ex"
+      "Basic",
+      "ex"
     ],
     "supertype": "Pokémon",
     "types": [

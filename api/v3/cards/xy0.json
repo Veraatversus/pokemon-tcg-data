@@ -60,7 +60,6 @@
       13
     ],
     "number": "1",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -158,7 +157,6 @@
       511
     ],
     "number": "2",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -254,7 +252,6 @@
       650
     ],
     "number": "3",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -355,7 +352,6 @@
       651
     ],
     "number": "4",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -456,7 +452,6 @@
       652
     ],
     "number": "5",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -543,7 +538,6 @@
       218
     ],
     "number": "6",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -642,7 +636,6 @@
       513
     ],
     "number": "7",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -738,7 +731,6 @@
       653
     ],
     "number": "8",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -839,7 +831,6 @@
       654
     ],
     "number": "9",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -938,7 +929,6 @@
       655
     ],
     "number": "10",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -1037,7 +1027,6 @@
       515
     ],
     "number": "11",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -1133,7 +1122,6 @@
       656
     ],
     "number": "12",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -1233,7 +1221,6 @@
       657
     ],
     "number": "13",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -1330,7 +1317,6 @@
       658
     ],
     "number": "14",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -1414,7 +1400,6 @@
       692
     ],
     "number": "15",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -1498,7 +1483,6 @@
       261
     ],
     "number": "16",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Psychic",
@@ -1588,7 +1572,6 @@
       262
     ],
     "number": "17",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Psychic",
@@ -1677,7 +1660,6 @@
       686
     ],
     "number": "18",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Psychic",
@@ -1779,7 +1761,6 @@
       624
     ],
     "number": "19",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Psychic",
@@ -1882,7 +1863,6 @@
       625
     ],
     "number": "20",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Psychic",
@@ -1973,7 +1953,6 @@
       679
     ],
     "number": "21",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Psychic",
@@ -2064,7 +2043,6 @@
       209
     ],
     "number": "22",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Darkness",
@@ -2169,7 +2147,6 @@
       210
     ],
     "number": "23",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Darkness",
@@ -2261,7 +2238,6 @@
       684
     ],
     "number": "24",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Darkness",
@@ -2350,7 +2326,6 @@
       83
     ],
     "number": "25",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Fighting",
@@ -2454,7 +2429,6 @@
       143
     ],
     "number": "26",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -2540,7 +2514,6 @@
       241
     ],
     "number": "27",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -2627,7 +2600,6 @@
       300
     ],
     "number": "28",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -2712,7 +2684,6 @@
       399
     ],
     "number": "29",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -2797,7 +2768,6 @@
       659
     ],
     "number": "30",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -2881,7 +2851,6 @@
       661
     ],
     "number": "31",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Fighting",
@@ -2983,7 +2952,6 @@
       676
     ],
     "number": "32",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -3079,7 +3047,6 @@
       676
     ],
     "number": "33",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -3139,7 +3106,6 @@
     "matchStatus": "matched",
     "name": "Crushing Hammer",
     "number": "34",
-    "rarity": "None",
     "rules": [
       "Flip a coin. If heads, discard an Energy attached to 1 of your opponent's Pokémon.",
       "You may play as many Item cards as you like during your turn (before your attack)."
@@ -3189,7 +3155,6 @@
     "matchStatus": "matched",
     "name": "Poké Ball",
     "number": "35",
-    "rarity": "None",
     "rules": [
       "Flip a coin. If heads, search your deck for a Pokémon, reveal it, and put it into your hand. Shuffle your deck afterward.",
       "You may play as many Item cards as you like during your turn (before your attack)."
@@ -3239,7 +3204,6 @@
     "matchStatus": "matched",
     "name": "Pokémon Catcher",
     "number": "36",
-    "rarity": "None",
     "rules": [
       "Flip a coin. If heads, switch 1 of your opponent's Benched Pokémon with his or her Active Pokémon.",
       "You may play as many Item cards as you like during your turn (before your attack)."
@@ -3291,7 +3255,6 @@
     "matchStatus": "matched",
     "name": "Potion",
     "number": "37",
-    "rarity": "None",
     "rules": [
       "Heal 30 damage from 1 of your Pokémon.",
       "You may play as many Item cards as you like during your turn (before your attack)."
@@ -3343,7 +3306,6 @@
     "matchStatus": "matched",
     "name": "Switch",
     "number": "38",
-    "rarity": "None",
     "rules": [
       "Switch your Active Pokémon with 1 of your Benched Pokémon.",
       "You may play as many Item cards as you like during your turn (before your attack)."
@@ -3395,7 +3357,6 @@
     "matchStatus": "matched",
     "name": "Tierno",
     "number": "39",
-    "rarity": "None",
     "rules": [
       "Draw 3 cards.",
       "You may play only 1 Supporter card during your turn (before your attack)."

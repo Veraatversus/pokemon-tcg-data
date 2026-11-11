@@ -31,7 +31,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Potion",
     "number": "001",
-    "rarity": "None",
     "rules": [
       "Heal 20 damage from 1 of your Pokémon."
     ],
@@ -76,7 +75,6 @@
     "matchStatus": "tcgdex_only",
     "name": "X Speed",
     "number": "002",
-    "rarity": "None",
     "rules": [
       "During this turn, the Retreat Cost of your Active Pokémon is 1 less."
     ],
@@ -121,7 +119,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Hand Scope",
     "number": "003",
-    "rarity": "None",
     "rules": [
       "Your opponent reveals their hand."
     ],
@@ -166,7 +163,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Pokédex",
     "number": "004",
-    "rarity": "None",
     "rules": [
       "Look at the top 3 cards of your deck."
     ],
@@ -211,7 +207,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Poké Ball",
     "number": "005",
-    "rarity": "None",
     "rules": [
       "Put a random Basic Pokémon from your deck into your hand."
     ],
@@ -256,7 +251,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Red Card",
     "number": "006",
-    "rarity": "None",
     "rules": [
       "Your opponent shuffles their hand into their deck and draws 3 cards."
     ],
@@ -301,7 +295,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Professor's Research",
     "number": "007",
-    "rarity": "None",
     "rules": [
       "Draw 2 cards."
     ],
@@ -346,7 +339,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Pokédex",
     "number": "008",
-    "rarity": "None",
     "rules": [
       "Look at the top 3 cards of your deck."
     ],
@@ -411,7 +403,6 @@
       25
     ],
     "number": "009",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -489,7 +480,6 @@
       150
     ],
     "number": "010",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -566,7 +556,6 @@
       113
     ],
     "number": "011",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -643,7 +632,6 @@
       52
     ],
     "number": "012",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -734,7 +722,6 @@
       12
     ],
     "number": "013",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -809,7 +796,6 @@
       131
     ],
     "number": "014",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -886,7 +872,6 @@
       25
     ],
     "number": "015",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -960,7 +945,6 @@
       35
     ],
     "number": "016",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -1035,7 +1019,6 @@
       56
     ],
     "number": "017",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -1115,7 +1098,6 @@
       3
     ],
     "number": "018",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -1207,7 +1189,6 @@
       658
     ],
     "number": "019",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -1284,7 +1265,6 @@
       93
     ],
     "number": "020",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -1360,7 +1340,6 @@
       95
     ],
     "number": "021",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -1438,7 +1417,6 @@
       39
     ],
     "number": "022",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -1513,7 +1491,6 @@
       1
     ],
     "number": "023",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -1587,7 +1564,6 @@
       81
     ],
     "number": "024",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -1674,7 +1650,6 @@
       146
     ],
     "number": "025",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -1750,7 +1725,6 @@
       25
     ],
     "number": "026",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -1824,7 +1798,6 @@
       495
     ],
     "number": "027",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -1903,7 +1876,6 @@
       637
     ],
     "number": "028",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -1983,7 +1955,6 @@
       9
     ],
     "number": "029",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -2060,7 +2031,6 @@
       133
     ],
     "number": "030",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -2139,7 +2109,6 @@
       573
     ],
     "number": "031",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -2214,7 +2183,6 @@
       4
     ],
     "number": "032",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -2288,7 +2256,6 @@
       7
     ],
     "number": "033",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -2363,7 +2330,6 @@
       393
     ],
     "number": "034",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -2438,7 +2404,6 @@
       387
     ],
     "number": "035",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -2517,7 +2482,6 @@
       466
     ],
     "number": "036",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -2606,7 +2570,6 @@
       488
     ],
     "number": "037",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -2683,7 +2646,6 @@
       200
     ],
     "number": "038",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -2758,7 +2720,6 @@
       227
     ],
     "number": "039",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -2832,7 +2793,6 @@
       390
     ],
     "number": "040",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -2906,7 +2866,6 @@
       175
     ],
     "number": "041",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -2993,7 +2952,6 @@
       491
     ],
     "number": "042",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -3073,7 +3031,6 @@
       421
     ],
     "number": "043",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -3164,7 +3121,6 @@
       26
     ],
     "number": "044",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -3240,7 +3196,6 @@
       299
     ],
     "number": "045",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -3314,7 +3269,6 @@
       443
     ],
     "number": "046",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -3405,7 +3359,6 @@
       398
     ],
     "number": "047",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -3480,7 +3433,6 @@
       490
     ],
     "number": "048",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -3558,7 +3510,6 @@
       143
     ],
     "number": "049",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -3650,7 +3601,6 @@
       150
     ],
     "number": "050",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -3727,7 +3677,6 @@
       967
     ],
     "number": "051",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -3802,7 +3751,6 @@
       906
     ],
     "number": "052",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -3879,7 +3827,6 @@
       419
     ],
     "number": "053",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -3969,7 +3916,6 @@
       923
     ],
     "number": "054",
-    "rarity": "None",
     "setId": "TCGDEX-P-A",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -4044,7 +3990,6 @@
       68
     ],
     "number": "055",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -4120,7 +4065,6 @@
       23
     ],
     "number": "056",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -4195,7 +4139,6 @@
       399
     ],
     "number": "057",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -4271,7 +4214,6 @@
       417
     ],
     "number": "058",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -4346,7 +4288,6 @@
       447
     ],
     "number": "059",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -5622,7 +5563,6 @@
       806
     ],
     "number": "076",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless"

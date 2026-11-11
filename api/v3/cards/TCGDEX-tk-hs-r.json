@@ -20,7 +20,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Moomoo Milk",
     "number": "1",
-    "rarity": "None",
     "setId": "TCGDEX-tk-hs-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -83,7 +82,6 @@
       25
     ],
     "number": "2",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Metal",
@@ -166,7 +164,6 @@
       180
     ],
     "number": "3",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Metal",
@@ -247,7 +244,6 @@
       52
     ],
     "number": "4",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -296,7 +292,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Lightning Energy",
     "number": "5",
-    "rarity": "None",
     "setId": "TCGDEX-tk-hs-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -330,7 +325,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Lightning Energy",
     "number": "6",
-    "rarity": "None",
     "setId": "TCGDEX-tk-hs-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -364,7 +358,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Lightning Energy",
     "number": "7",
-    "rarity": "None",
     "setId": "TCGDEX-tk-hs-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -398,7 +391,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Lightning Energy",
     "number": "8",
-    "rarity": "None",
     "setId": "TCGDEX-tk-hs-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -432,7 +424,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Lightning Energy",
     "number": "9",
-    "rarity": "None",
     "setId": "TCGDEX-tk-hs-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -466,7 +457,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Lightning Energy",
     "number": "10",
-    "rarity": "None",
     "setId": "TCGDEX-tk-hs-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -500,7 +490,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Lightning Energy",
     "number": "11",
-    "rarity": "None",
     "setId": "TCGDEX-tk-hs-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -560,7 +549,6 @@
       52
     ],
     "number": "12",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -635,7 +623,6 @@
       179
     ],
     "number": "13",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Metal",
@@ -690,7 +677,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Lightning Energy",
     "number": "14",
-    "rarity": "None",
     "setId": "TCGDEX-tk-hs-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -724,7 +710,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Lightning Energy",
     "number": "15",
-    "rarity": "None",
     "setId": "TCGDEX-tk-hs-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -784,7 +769,6 @@
       25
     ],
     "number": "16",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Metal",
@@ -867,7 +851,6 @@
       180
     ],
     "number": "17",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Metal",
@@ -922,7 +905,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Lightning Energy",
     "number": "18",
-    "rarity": "None",
     "setId": "TCGDEX-tk-hs-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -983,7 +965,6 @@
       26
     ],
     "number": "19",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Metal",
@@ -1061,7 +1042,6 @@
       179
     ],
     "number": "20",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Metal",
@@ -1117,7 +1097,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Copycat",
     "number": "21",
-    "rarity": "None",
     "setId": "TCGDEX-tk-hs-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -1155,7 +1134,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Pokémon Collector",
     "number": "22",
-    "rarity": "None",
     "setId": "TCGDEX-tk-hs-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -1192,7 +1170,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Lightning Energy",
     "number": "23",
-    "rarity": "None",
     "setId": "TCGDEX-tk-hs-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -1227,7 +1204,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Switch",
     "number": "24",
-    "rarity": "None",
     "setId": "TCGDEX-tk-hs-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -1265,7 +1241,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Poké Ball",
     "number": "25",
-    "rarity": "None",
     "setId": "TCGDEX-tk-hs-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -1303,7 +1278,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Moomoo Milk",
     "number": "26",
-    "rarity": "None",
     "setId": "TCGDEX-tk-hs-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -1341,7 +1315,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Pokémon Collector",
     "number": "27",
-    "rarity": "None",
     "setId": "TCGDEX-tk-hs-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -1378,7 +1351,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Lightning Energy",
     "number": "28",
-    "rarity": "None",
     "setId": "TCGDEX-tk-hs-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -1413,7 +1385,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Energy Switch",
     "number": "29",
-    "rarity": "None",
     "setId": "TCGDEX-tk-hs-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -1474,7 +1445,6 @@
       26
     ],
     "number": "30",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Metal",

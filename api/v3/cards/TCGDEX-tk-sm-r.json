@@ -24,7 +24,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Lightning Energy",
     "number": "1",
-    "rarity": "None",
     "setId": "TCGDEX-tk-sm-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -113,7 +112,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Lightning Energy",
     "number": "3",
-    "rarity": "None",
     "setId": "TCGDEX-tk-sm-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -237,7 +235,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Lightning Energy",
     "number": "5",
-    "rarity": "None",
     "setId": "TCGDEX-tk-sm-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -379,7 +376,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Lightning Energy",
     "number": "7",
-    "rarity": "None",
     "setId": "TCGDEX-tk-sm-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -418,7 +414,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Lightning Energy",
     "number": "8",
-    "rarity": "None",
     "setId": "TCGDEX-tk-sm-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -457,7 +452,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Lightning Energy",
     "number": "9",
-    "rarity": "None",
     "setId": "TCGDEX-tk-sm-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -496,7 +490,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Lightning Energy",
     "number": "10",
-    "rarity": "None",
     "setId": "TCGDEX-tk-sm-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -625,7 +618,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Lightning Energy",
     "number": "12",
-    "rarity": "None",
     "setId": "TCGDEX-tk-sm-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -794,7 +786,6 @@
       25
     ],
     "number": "14",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Metal",
@@ -1037,7 +1028,6 @@
       26
     ],
     "number": "17",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Metal",
@@ -1516,7 +1506,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Psychic Energy",
     "number": "24",
-    "rarity": "None",
     "setId": "TCGDEX-tk-sm-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -1717,7 +1706,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Psychic Energy",
     "number": "27",
-    "rarity": "None",
     "setId": "TCGDEX-tk-sm-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -1759,7 +1747,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Psychic Energy",
     "number": "28",
-    "rarity": "None",
     "setId": "TCGDEX-tk-sm-r",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -1841,7 +1828,6 @@
       25
     ],
     "number": "29",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Metal",
@@ -1943,7 +1929,6 @@
       26
     ],
     "number": "30",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Metal",

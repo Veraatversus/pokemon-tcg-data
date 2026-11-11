@@ -68,7 +68,6 @@
       509
     ],
     "number": "1",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Psychic",
@@ -177,7 +176,6 @@
       505
     ],
     "number": "2",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -239,7 +237,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Darkness Energy",
     "number": "3",
-    "rarity": "None",
     "setId": "TCGDEX-tk-bw-z",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -316,7 +313,6 @@
       572
     ],
     "number": "4",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -378,7 +374,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Darkness Energy",
     "number": "5",
-    "rarity": "None",
     "setId": "TCGDEX-tk-bw-z",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -431,7 +426,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Darkness Energy",
     "number": "6",
-    "rarity": "None",
     "setId": "TCGDEX-tk-bw-z",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -484,7 +478,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Darkness Energy",
     "number": "7",
-    "rarity": "None",
     "setId": "TCGDEX-tk-bw-z",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -537,7 +530,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Darkness Energy",
     "number": "8",
-    "rarity": "None",
     "setId": "TCGDEX-tk-bw-z",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -590,7 +582,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Darkness Energy",
     "number": "9",
-    "rarity": "None",
     "setId": "TCGDEX-tk-bw-z",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -643,7 +634,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Darkness Energy",
     "number": "10",
-    "rarity": "None",
     "setId": "TCGDEX-tk-bw-z",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -700,7 +690,6 @@
     "matchStatus": "tcgdex_only",
     "name": "PlusPower",
     "number": "11",
-    "rarity": "None",
     "rules": [
       "During this turn, your Pokémon’s attacks do 10 more damage to the Active Pokémon (before applying Weakness and Resistance)."
     ],
@@ -789,7 +778,6 @@
       504
     ],
     "number": "12",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -876,7 +864,6 @@
       570
     ],
     "number": "13",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Psychic",
@@ -968,7 +955,6 @@
       519
     ],
     "number": "14",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Fighting",
@@ -1075,7 +1061,6 @@
       520
     ],
     "number": "15",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Fighting",
@@ -1147,7 +1132,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Energy Retrieval",
     "number": "16",
-    "rarity": "None",
     "rules": [
       "Put 2 basic Energy cards from your discard pile into your hand."
     ],
@@ -1240,7 +1224,6 @@
       571
     ],
     "number": "17",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Psychic",
@@ -1313,7 +1296,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Pokémon Communication",
     "number": "18",
-    "rarity": "None",
     "rules": [
       "Reveal a Pokémon in your hand and put it on top of your deck. If you do, search your deck for a Pokémon, reveal it, and put it into your hand. Shuffle your deck afterward."
     ],
@@ -1390,7 +1372,6 @@
       572
     ],
     "number": "19",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -1452,7 +1433,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Darkness Energy",
     "number": "20",
-    "rarity": "None",
     "setId": "TCGDEX-tk-bw-z",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -1529,7 +1509,6 @@
       519
     ],
     "number": "21",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Fighting",
@@ -1597,7 +1576,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Darkness Energy",
     "number": "22",
-    "rarity": "None",
     "setId": "TCGDEX-tk-bw-z",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -1675,7 +1653,6 @@
       570
     ],
     "number": "23",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Psychic",
@@ -1743,7 +1720,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Darkness Energy",
     "number": "24",
-    "rarity": "None",
     "setId": "TCGDEX-tk-bw-z",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -1832,7 +1808,6 @@
       509
     ],
     "number": "25",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Psychic",
@@ -1900,7 +1875,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Darkness Energy",
     "number": "26",
-    "rarity": "None",
     "setId": "TCGDEX-tk-bw-z",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -1957,7 +1931,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Energy Search",
     "number": "27",
-    "rarity": "None",
     "rules": [
       "Search your deck for a basic Energy card, reveal it, and put it into your hand. Shuffle your deck afterward."
     ],
@@ -2010,7 +1983,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Darkness Energy",
     "number": "28",
-    "rarity": "None",
     "setId": "TCGDEX-tk-bw-z",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -2099,7 +2071,6 @@
       504
     ],
     "number": "29",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -2201,7 +2172,6 @@
       571
     ],
     "number": "30",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Psychic",

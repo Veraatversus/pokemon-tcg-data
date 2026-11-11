@@ -55,7 +55,6 @@
       10
     ],
     "number": "1",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -139,7 +138,6 @@
       103
     ],
     "number": "2",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless",
@@ -242,7 +240,6 @@
       126
     ],
     "number": "3",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -327,7 +324,6 @@
       27
     ],
     "number": "4",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -425,7 +421,6 @@
       131
     ],
     "number": "5",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -512,7 +507,6 @@
       25
     ],
     "number": "6",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Metal",
@@ -604,7 +598,6 @@
       92
     ],
     "number": "7",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Fighting",
@@ -696,7 +689,6 @@
       56
     ],
     "number": "8",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -796,7 +788,6 @@
       95
     ],
     "number": "9",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -881,7 +872,6 @@
       52
     ],
     "number": "10",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Psychic",
@@ -969,7 +959,6 @@
       51
     ],
     "number": "11",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Psychic",
@@ -1067,7 +1056,6 @@
       133
     ],
     "number": "12",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],

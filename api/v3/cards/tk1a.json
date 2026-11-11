@@ -65,7 +65,6 @@
       371
     ],
     "number": "1",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -159,7 +158,6 @@
       256
     ],
     "number": "2",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -257,7 +255,6 @@
       301
     ],
     "number": "3",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -352,7 +349,6 @@
       380
     ],
     "number": "4",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -449,7 +445,6 @@
       322
     ],
     "number": "5",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -546,7 +541,6 @@
       300
     ],
     "number": "6",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -631,7 +625,6 @@
       255
     ],
     "number": "7",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -694,7 +687,6 @@
     "matchStatus": "matched",
     "name": "Potion",
     "number": "8",
-    "rarity": "None",
     "rules": [
       "Remove 2 damage counters from 1 of your Pokémon (remove 1 damage counter if that Pokémon has only 1)."
     ],
@@ -748,7 +740,6 @@
     "matchStatus": "matched",
     "name": "Energy Search",
     "number": "9",
-    "rarity": "None",
     "rules": [
       "Search your deck for a basic Energy card, show it to your opponent, and put it into your hand. Shuffle your deck afterward"
     ],
@@ -798,7 +789,6 @@
     "matchStatus": "matched",
     "name": "Fire Energy",
     "number": "10",
-    "rarity": "None",
     "setId": "tk1a",
     "sources": {
       "pokemontcg": "bc4a5871",

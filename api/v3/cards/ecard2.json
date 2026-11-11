@@ -5255,16 +5255,6 @@
         "cardmarketId": 275122,
         "tcgplayerId": 85813,
         "type": "reverse"
-      },
-      {
-        "cardmarketId": 275122,
-        "tcgplayerId": 85813,
-        "type": "normal"
-      },
-      {
-        "cardmarketId": 275122,
-        "tcgplayerId": 85813,
-        "type": "reverse"
       }
     ],
     "weaknesses": [
@@ -7716,11 +7706,6 @@
       },
       {
         "cardmarketId": 275147,
-        "tcgplayerId": 84971,
-        "type": "normal"
-      },
-      {
-        "cardmarketId": 275147,
         "tcgplayerId": 84972,
         "type": "reverse"
       }
@@ -9824,16 +9809,6 @@
         "cardmarketId": 275169,
         "tcgplayerId": 87591,
         "type": "reverse"
-      },
-      {
-        "cardmarketId": 275169,
-        "tcgplayerId": 87591,
-        "type": "normal"
-      },
-      {
-        "cardmarketId": 275169,
-        "tcgplayerId": 87591,
-        "type": "reverse"
       }
     ],
     "weaknesses": [
@@ -10636,16 +10611,6 @@
       "Colorless"
     ],
     "variants": [
-      {
-        "cardmarketId": 275179,
-        "tcgplayerId": 88306,
-        "type": "normal"
-      },
-      {
-        "cardmarketId": 275179,
-        "tcgplayerId": 88306,
-        "type": "reverse"
-      },
       {
         "cardmarketId": 275179,
         "tcgplayerId": 88306,

@@ -36,7 +36,6 @@
       418
     ],
     "number": "1",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -114,7 +113,6 @@
       419
     ],
     "number": "2",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -190,7 +188,6 @@
       118
     ],
     "number": "3",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -266,7 +263,6 @@
       490
     ],
     "number": "4",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -342,7 +338,6 @@
       393
     ],
     "number": "5",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -419,7 +414,6 @@
       394
     ],
     "number": "6",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -497,7 +491,6 @@
       119
     ],
     "number": "7",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -572,7 +565,6 @@
       158
     ],
     "number": "8",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -622,7 +614,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Dusk Ball",
     "number": "9",
-    "rarity": "None",
     "rules": [
       "Look at the 7 cards from the bottom of your deck. Choose 1 Pokémon you find there, show it to your opponent, and put it into your hand. Put the remaining cards back on top of your deck. Shuffle your deck afterward."
     ],
@@ -663,7 +654,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Energy Search",
     "number": "10",
-    "rarity": "None",
     "rules": [
       "Search your deck for a basic Energy card, show it to your opponent, and put it into your hand. Shuffle your deck afterward."
     ],
@@ -704,7 +694,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Potion",
     "number": "11",
-    "rarity": "None",
     "rules": [
       "Remove 2 damage counters from 1 of your Pokémon (remove 1 damage counter if that Pokémon has only 1)."
     ],
@@ -745,7 +734,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Water Energy",
     "number": "12",
-    "rarity": "None",
     "setId": "TCGDEX-tk-dp-m",
     "sources": {
       "tcgdex": "5fbf524a"

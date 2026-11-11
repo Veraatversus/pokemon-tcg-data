@@ -68,7 +68,6 @@
       506
     ],
     "number": "1",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -129,7 +128,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Fighting Energy",
     "number": "2",
-    "rarity": "None",
     "setId": "TCGDEX-tk-bw-e",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -178,7 +176,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Fighting Energy",
     "number": "3",
-    "rarity": "None",
     "setId": "TCGDEX-tk-bw-e",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -231,7 +228,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Energy Switch",
     "number": "4",
-    "rarity": "None",
     "rules": [
       "Move a basic Energy from 1 of your Pokémon to another of your Pokémon."
     ],
@@ -283,7 +279,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Fighting Energy",
     "number": "5",
-    "rarity": "None",
     "setId": "TCGDEX-tk-bw-e",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -332,7 +327,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Fighting Energy",
     "number": "6",
-    "rarity": "None",
     "setId": "TCGDEX-tk-bw-e",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -381,7 +375,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Fighting Energy",
     "number": "7",
-    "rarity": "None",
     "setId": "TCGDEX-tk-bw-e",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -430,7 +423,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Fighting Energy",
     "number": "8",
-    "rarity": "None",
     "setId": "TCGDEX-tk-bw-e",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -479,7 +471,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Fighting Energy",
     "number": "9",
-    "rarity": "None",
     "setId": "TCGDEX-tk-bw-e",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -528,7 +519,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Fighting Energy",
     "number": "10",
-    "rarity": "None",
     "setId": "TCGDEX-tk-bw-e",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -602,7 +592,6 @@
       532
     ],
     "number": "11",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -689,7 +678,6 @@
       531
     ],
     "number": "12",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -788,7 +776,6 @@
       529
     ],
     "number": "13",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Lightning",
@@ -897,7 +884,6 @@
       533
     ],
     "number": "14",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -963,7 +949,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Potion",
     "number": "15",
-    "rarity": "None",
     "rules": [
       "Heal 30 damage from 1 of your Pokémon."
     ],
@@ -1019,7 +1004,6 @@
     "matchStatus": "tcgdex_only",
     "name": "PlusPower",
     "number": "16",
-    "rarity": "None",
     "rules": [
       "During this turn, your Pokémon’s attacks do 10 more damage to the Active Pokémon (before applying Weakness and Resistance)."
     ],
@@ -1112,7 +1096,6 @@
       530
     ],
     "number": "17",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Lightning",
@@ -1206,7 +1189,6 @@
       531
     ],
     "number": "18",
-    "rarity": "None",
     "retreatCost": [
       "Colorless",
       "Colorless"
@@ -1310,7 +1292,6 @@
       507
     ],
     "number": "19",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -1371,7 +1352,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Fighting Energy",
     "number": "20",
-    "rarity": "None",
     "setId": "TCGDEX-tk-bw-e",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -1424,7 +1404,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Energy Search",
     "number": "21",
-    "rarity": "None",
     "rules": [
       "Search your deck for a basic Energy card, reveal it, and put it into your hand. Shuffle your deck afterward."
     ],
@@ -1476,7 +1455,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Fighting Energy",
     "number": "22",
-    "rarity": "None",
     "setId": "TCGDEX-tk-bw-e",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -1529,7 +1507,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Potion",
     "number": "23",
-    "rarity": "None",
     "rules": [
       "Heal 30 damage from 1 of your Pokémon."
     ],
@@ -1585,7 +1562,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Pokémon Communication",
     "number": "24",
-    "rarity": "None",
     "rules": [
       "Reveal a Pokémon in your hand and put it on top of your deck. If you do, search your deck for a Pokémon, reveal it, and put it into your hand. Shuffle your deck afterward."
     ],
@@ -1674,7 +1650,6 @@
       529
     ],
     "number": "25",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Lightning",
@@ -1742,7 +1717,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Fighting Energy",
     "number": "26",
-    "rarity": "None",
     "setId": "TCGDEX-tk-bw-e",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -1828,7 +1802,6 @@
       506
     ],
     "number": "27",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -1889,7 +1862,6 @@
     "matchStatus": "tcgdex_only",
     "name": "Fighting Energy",
     "number": "28",
-    "rarity": "None",
     "setId": "TCGDEX-tk-bw-e",
     "sources": {
       "tcgdex": "5fbf524a"
@@ -1963,7 +1935,6 @@
       532
     ],
     "number": "29",
-    "rarity": "None",
     "retreatCost": [
       "Colorless"
     ],
@@ -2065,7 +2036,6 @@
       530
     ],
     "number": "30",
-    "rarity": "None",
     "resistances": [
       {
         "type": "Lightning",
