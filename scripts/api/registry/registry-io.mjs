@@ -22,7 +22,8 @@ export function readRegistry(dir) {
   const cards = {};
   for (const id of Object.keys(sets)) {
     const file = path.join(dir, 'cards', `${id}.json`);
-    cards[id] = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : {};
+    if (!fs.existsSync(file)) throw new Error(`Registry unvollstaendig: Kartendatei fuer Set ${id} fehlt (${file})`);
+    cards[id] = JSON.parse(fs.readFileSync(file, 'utf8'));
   }
   return { sets, cards };
 }

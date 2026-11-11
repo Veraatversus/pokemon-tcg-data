@@ -1,5 +1,9 @@
 // Registry: eingefrorene kanonische Set-/Kartenschluessel fuer db_collection (Spec §5.1-5.3).
 // Reine Funktionen (Eingaben -> Registry); Datei-I/O liegt in registry-io.mjs.
+//
+// Einfrier-Modell: bestehende Werte bleiben unveraendert (jeder alte Schluessel loest weiter auf
+// dieselbe Karte auf). Erlaubt sind nur additive Aenderungen: neue Sets/Karten, Aliase,
+// mergedSubsets, TCGdex-Referenzen und Schluessel als Obermenge, pokemontcg/tcgdex null -> Wert.
 import { normalizeCardNumber } from '../lib/card-key.mjs';
 
 const TD_PREFIX = 'TCGDEX-';
@@ -7,6 +11,7 @@ const norm = normalizeCardNumber;
 const cmp = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 const refKey = (setId, localId) => `${setId}\u0000${localId}`;
 const uniqSorted = (values) => [...new Set(values)].sort(cmp);
+const BLOCKED = Symbol('blocked');
 
 export class RegistryFrozenError extends Error {
   constructor(changes) {
@@ -16,32 +21,153 @@ export class RegistryFrozenError extends Error {
   }
 }
 
-// Stabiler Vergleich unabhaengig von der Schluesselreihenfolge.
-function stable(value) {
-  if (Array.isArray(value)) return `[${value.map(stable).join(',')}]`;
-  if (value && typeof value === 'object') {
-    return `{${Object.keys(value).sort(cmp).map((k) => `${JSON.stringify(k)}:${stable(value[k])}`).join(',')}}`;
+export class RegistryInvariantError extends Error {
+  constructor(violations) {
+    super(`Registry-Invariante verletzt (${violations.length}):\n  ${violations.join('\n  ')}`);
+    this.name = 'RegistryInvariantError';
+    this.violations = violations;
   }
-  return JSON.stringify(value);
 }
 
+// --- Invarianten -------------------------------------------------------------------------
+
+// Je Set: jeder pt-Namensraum-Schluessel (kanonische ID + keys.pokemontcg) und jeder keys.tcgdex-
+// Schluessel gehoert genau einer Karte; ambiguousLegacyKey ist nie ein pt-Schluessel.
+// Global: Set-IDs und Aliase case-insensitiv eindeutig (auch Dateinamen), pt-Karten-IDs und
+// TCGdex-Referenzen hoechstens einmal vergeben.
+export function registryViolations(registry) {
+  const v = [];
+  const names = new Map();
+  for (const [id, s] of Object.entries(registry.sets ?? {})) {
+    for (const name of new Set([id, ...(s.aliases ?? []), ...(s.mergedSubsets ?? [])].map((x) => x.toLowerCase()))) {
+      const other = names.get(name);
+      if (other !== undefined && other !== id) v.push(`Set-ID/Alias '${name}' (case-insensitiv) in ${other} und ${id}`);
+      else names.set(name, id);
+    }
+  }
+  const ptIds = new Map();
+  const refs = new Map();
+  for (const [setId, cards] of Object.entries(registry.cards ?? {})) {
+    const pt = new Map();
+    const td = new Map();
+    const claim = (map, ns, k, cid) => {
+      const o = map.get(k);
+      if (o !== undefined && o !== cid) v.push(`${setId}: ${ns}-Schluessel '${k}' bei ${o} und ${cid}`);
+      else map.set(k, cid);
+    };
+    for (const [cid, c] of Object.entries(cards)) {
+      claim(pt, 'pokemontcg', cid, cid);
+      for (const k of c.keys?.pokemontcg ?? []) claim(pt, 'pokemontcg', k, cid);
+      for (const k of c.keys?.tcgdex ?? []) claim(td, 'tcgdex', k, cid);
+      if (c.pokemontcg) {
+        if (ptIds.has(c.pokemontcg)) v.push(`pokemontcg-Karte ${c.pokemontcg} doppelt: ${ptIds.get(c.pokemontcg)} und ${setId}/${cid}`);
+        else ptIds.set(c.pokemontcg, `${setId}/${cid}`);
+      }
+      for (const r of c.tcgdex ?? []) {
+        const k = refKey(r.set, r.localId);
+        if (refs.has(k)) v.push(`TCGdex-Karte ${r.set}/${r.localId} doppelt: ${refs.get(k)} und ${setId}/${cid}`);
+        else refs.set(k, `${setId}/${cid}`);
+      }
+    }
+    for (const [cid, c] of Object.entries(cards)) {
+      if (c.ambiguousLegacyKey && pt.has(c.ambiguousLegacyKey)) {
+        v.push(`${setId}: ambiguousLegacyKey '${c.ambiguousLegacyKey}' von ${cid} ist Schluessel von ${pt.get(c.ambiguousLegacyKey)}`);
+      }
+    }
+  }
+  return v;
+}
+
+export function assertRegistryInvariants(registry) {
+  const v = registryViolations(registry);
+  if (v.length) throw new RegistryInvariantError(v);
+}
+
+// --- Einfrieren ----------------------------------------------------------------------------
+
+const missing = (prev = [], next = []) => {
+  const have = new Set(next);
+  return prev.filter((x) => !have.has(x));
+};
+const refStrings = (card) => (card?.tcgdex ?? []).map((r) => `${r.set}/${r.localId}`);
+const SET_FIELDS = new Set(['pokemontcg', 'tcgdex', 'mergedSubsets', 'aliases']);
+const CARD_FIELDS = new Set(['pokemontcg', 'tcgdex', 'keys', 'ambiguousLegacyKey']);
+
+// Jeder alte Wert muss unveraendert vorhanden sein; Skalare duerfen nur null -> Wert wechseln,
+// Listen nur wachsen. Danach muss `next` die Invarianten erfuellen (alte Schluessel eindeutig).
 export function assertFrozen(previous, next) {
-  const changes = [];
   if (!previous) return;
+  const changes = [];
+  const scalar = (label, field, a, b) => {
+    if (a !== null && a !== undefined && a !== b) changes.push(`${label}: ${field} ${JSON.stringify(a)} -> ${JSON.stringify(b ?? null)}`);
+  };
+  const list = (label, field, a, b) => {
+    const gone = missing(a, b);
+    if (gone.length) changes.push(`${label}: ${field} entfernt: ${gone.join(', ')}`);
+  };
   for (const [id, set] of Object.entries(previous.sets ?? {})) {
     const now = next.sets?.[id];
-    if (!now) changes.push(`Set ${id} entfernt`);
-    else if (stable(now) !== stable(set)) changes.push(`Set ${id} geaendert: ${stable(set)} -> ${stable(now)}`);
+    const label = `Set ${id}`;
+    if (!now) { changes.push(`${label} entfernt`); continue; }
+    scalar(label, 'pokemontcg', set.pokemontcg, now.pokemontcg);
+    scalar(label, 'tcgdex', set.tcgdex, now.tcgdex);
+    list(label, 'mergedSubsets', set.mergedSubsets, now.mergedSubsets);
+    list(label, 'aliases', set.aliases, now.aliases);
+    for (const f of Object.keys(set)) {
+      if (!SET_FIELDS.has(f) && JSON.stringify(set[f]) !== JSON.stringify(now[f])) changes.push(`${label}: ${f} geaendert`);
+    }
   }
   for (const [setId, cards] of Object.entries(previous.cards ?? {})) {
     for (const [cardId, card] of Object.entries(cards)) {
       const now = next.cards?.[setId]?.[cardId];
-      if (!now) changes.push(`Karte ${setId}/${cardId} entfernt`);
-      else if (stable(now) !== stable(card)) changes.push(`Karte ${setId}/${cardId} geaendert: ${stable(card)} -> ${stable(now)}`);
+      const label = `Karte ${setId}/${cardId}`;
+      if (!now) { changes.push(`${label} entfernt`); continue; }
+      scalar(label, 'pokemontcg', card.pokemontcg, now.pokemontcg);
+      if ((card.ambiguousLegacyKey ?? null) !== (now.ambiguousLegacyKey ?? null)) {
+        changes.push(`${label}: ambiguousLegacyKey ${card.ambiguousLegacyKey ?? null} -> ${now.ambiguousLegacyKey ?? null}`);
+      }
+      list(label, 'tcgdex', refStrings(card), refStrings(now));
+      list(label, 'keys.pokemontcg', card.keys?.pokemontcg, now.keys?.pokemontcg);
+      list(label, 'keys.tcgdex', card.keys?.tcgdex, now.keys?.tcgdex);
+      for (const f of Object.keys(card)) {
+        if (!CARD_FIELDS.has(f) && JSON.stringify(card[f]) !== JSON.stringify(now[f])) changes.push(`${label}: ${f} geaendert`);
+      }
     }
   }
   if (changes.length) throw new RegistryFrozenError(changes);
+  assertRegistryInvariants(next);
 }
+
+// Protokoll der additiven Aenderungen gegenueber previous (fuer Build-Ausgabe/Review).
+export function registryChanges(previous, next) {
+  const out = [];
+  for (const [id, set] of Object.entries(next.sets ?? {})) {
+    const old = previous?.sets?.[id];
+    if (!old) { out.push(`Set ${id} neu`); continue; }
+    for (const f of ['pokemontcg', 'tcgdex']) if (old[f] == null && set[f] != null) out.push(`Set ${id}: ${f} ${set[f]}`);
+    for (const f of ['mergedSubsets', 'aliases']) {
+      const added = missing(set[f], old[f]);
+      if (added.length) out.push(`Set ${id}: ${f} + ${added.join(', ')}`);
+    }
+  }
+  for (const [setId, cards] of Object.entries(next.cards ?? {})) {
+    for (const [cardId, card] of Object.entries(cards)) {
+      const old = previous?.cards?.[setId]?.[cardId];
+      const label = `Karte ${setId}/${cardId}`;
+      if (!old) { out.push(`${label} neu`); continue; }
+      if (old.pokemontcg == null && card.pokemontcg != null) out.push(`${label}: pokemontcg ${card.pokemontcg}`);
+      const refs = missing(refStrings(card), refStrings(old));
+      if (refs.length) out.push(`${label}: tcgdex + ${refs.join(', ')}`);
+      for (const ns of ['pokemontcg', 'tcgdex']) {
+        const added = missing(card.keys?.[ns], old.keys?.[ns]);
+        if (added.length) out.push(`${label}: keys.${ns} + ${added.join(', ')}`);
+      }
+    }
+  }
+  return out;
+}
+
+// --- Ableitung -----------------------------------------------------------------------------
 
 function overrideKey(overrides, ptId) {
   const o = ptId ? overrides?.[ptId] : undefined;
@@ -55,87 +181,99 @@ function ptSuffix(ptId, ptSetId) {
   return i >= 0 ? ptId.slice(i + 1) : ptId;
 }
 
-// Frische Ableitung der Karten eines Registry-Sets (ohne previous).
-function deriveCards(candidates, overrides, setLabel) {
+// Variantengruppe (ecard2 50 -> 50a/50b): das alte Frontend fuehrte die TCGdex-Varianten als
+// TCGdex-Union-Karten unter der pt-Set-ID (Referenz-DB: ecard2/50a, 50b, 74a, ...).
+const variantKeys = (c) => (c.method === 'variantGroup' ? c.refs.map((r) => norm(r.localId)) : []);
+
+// Fusion nur fuer Unterset-Merges und Overrides: eine TCGdex-Union-Karte mit gleichem Schluessel wie
+// genau eine solche pt-Karte (ohne Referenz in diesem TCGdex-Set) wird deren zweite Referenz.
+function fuse(candidates, mainPt, overrides) {
   for (const c of candidates) {
     c.base = c.ptId ? (overrideKey(overrides, c.ptId) ?? norm(c.ptNumber)) : norm(c.refs[0].localId);
   }
-  // TCGdex-Union-Karte mit gleichem Schluessel wie genau eine pt-Karte ohne Referenz in diesem
-  // TCGdex-Set (Unterset-Karte im Hauptset, Override-Karte) -> eine Karte mit beiden Referenzen.
-  const pts = candidates.filter((c) => c.ptId);
+  const fusable = candidates.filter((c) => c.ptId && (c.ptSetId !== mainPt || overrideKey(overrides, c.ptId) !== null));
   const merged = new Set();
   for (const t of candidates.filter((c) => !c.ptId)) {
-    const hits = pts.filter((p) => p.base === t.base);
+    const hits = fusable.filter((p) => p.base === t.base);
     if (hits.length !== 1) continue;
     const [p] = hits;
     if (p.refs.some((r) => r.setId === t.refs[0].setId)) continue;
     p.refs.push(t.refs[0]);
     merged.add(t);
   }
-  const list = candidates.filter((c) => !merged.has(c));
+  return candidates.filter((c) => !merged.has(c));
+}
 
+// Kanonische IDs fuer neue Karten. `taken`: belegte pt-Namensraum-Schluessel eingefrorener Karten.
+function assignIds(list, taken, setLabel) {
   const byBase = new Map();
   for (const c of list) {
     if (!byBase.has(c.base)) byBase.set(c.base, []);
     byBase.get(c.base).push(c);
   }
-  const bases = new Set(byBase.keys());
+  const used = new Set(taken);
+  for (const n of byBase.keys()) used.add(n);
+  const firstLocal = (c) => [...c.refs, ...(c.ownedRefs ?? [])][0]?.localId;
+  const pick = (c, n, unique) => {
+    const s = c.ptId ? norm(ptSuffix(c.ptId, c.ptSetId)) : null;
+    const local = firstLocal(c);
+    const options = [
+      unique(s) ? s : null,
+      local !== undefined ? `${n}_${norm(local)}` : null,
+      s && s !== n ? `${n}_${s}` : null,
+    ].filter(Boolean);
+    const id = options.find((o) => !used.has(o));
+    if (!id) throw new Error(`Registry ${setLabel}: kein freier Schluessel fuer ${c.ptId ?? firstLocal(c)} (Nummer ${n})`);
+    used.add(id);
+    return id;
+  };
   for (const [n, group] of byBase) {
-    if (group.length === 1) {
+    if (group.length === 1 && !taken.has(n)) {
       group[0].id = n;
       continue;
     }
     const suffixes = group.map((c) => (c.ptId ? norm(ptSuffix(c.ptId, c.ptSetId)) : null));
-    const taken = new Set();
-    group.forEach((c, i) => {
-      c.ambiguousLegacyKey = n;
-      const s = suffixes[i];
-      const unique = s && s !== n && suffixes.filter((x) => x === s).length === 1 && !bases.has(s);
-      let id = unique ? s : null;
-      if (!id && c.refs.length) id = `${n}_${norm(c.refs[0].localId)}`;
-      if (!id || taken.has(id) || bases.has(id)) {
-        throw new Error(`Registry ${setLabel}: kein eindeutiger Schluessel fuer kollidierende Nummer ${n} (${c.ptId ?? refKey(c.refs[0]?.setId, c.refs[0]?.localId)})`);
-      }
-      taken.add(id);
-      c.id = id;
-    });
+    const unique = (s) => s && s !== n && suffixes.filter((x) => x === s).length <= 1;
+    for (const c of group) {
+      // Mehrere neue Karten auf N: alter mehrdeutiger Schluessel. N schon eingefroren belegt: nur ausweichen.
+      if (group.length > 1 && !taken.has(n)) c.ambiguousLegacyKey = n;
+      c.id = pick(c, n, unique);
+    }
   }
-  for (const c of list) {
-    c.rawTd = uniqSorted(c.refs.map((r) => norm(r.localId)));
-    // Variantengruppe (ecard2 50 -> 50a/50b): das alte Frontend fuehrte die TCGdex-Varianten als
-    // TCGdex-Union-Karten unter der pt-Set-ID (Referenz-DB: ecard2/50a, 50b, 74a, ...).
-    c.rawPt = c.ptId ? [norm(c.ptNumber), ...(c.method === 'variantGroup' ? c.rawTd : [])] : [c.id];
-  }
-  return list;
 }
 
-// Namensraum-Schluessel: ein Schluessel, der die kanonische ID einer anderen Karte ist oder bei
-// mehreren Karten vorkommt, ist mehrdeutig und entfaellt (nur bei neuen, nicht eingefrorenen Karten).
-function finalizeKeys(entries) {
-  const pt = new Map();
-  const tdKeys = new Map();
-  const ids = new Set(entries.map((e) => e.id));
-  const count = (map, k) => map.set(k, (map.get(k) ?? 0) + 1);
+// Schluessel je Namensraum vergeben: eingefrorene bleiben, neue nur wenn frei und eindeutig.
+function assignKeys(entries) {
+  const ptOwner = new Map();
+  const tdOwner = new Map();
   for (const e of entries) {
-    for (const k of new Set(e.rawPt)) count(pt, k);
-    for (const k of new Set(e.rawTd)) count(tdKeys, k);
+    ptOwner.set(e.id, e);
+    for (const k of e.fixedPt) ptOwner.set(k, e);
+    for (const k of e.fixedTd) tdOwner.set(k, e);
   }
   for (const e of entries) {
-    if (e.frozen) continue;
-    const keepPt = (k) => k === e.id || (!ids.has(k) && pt.get(k) === 1);
+    const a = e.card.ambiguousLegacyKey;
+    if (a && !ptOwner.has(a)) ptOwner.set(a, BLOCKED);
+  }
+  const claims = (ns) => {
+    const m = new Map();
+    for (const e of entries) for (const k of new Set(e[ns])) m.set(k, (m.get(k) ?? 0) + 1);
+    return m;
+  };
+  const ptClaims = claims('addPt');
+  const tdClaims = claims('addTd');
+  for (const e of entries) {
+    const keep = (owner, counts) => (k) => {
+      const o = owner.get(k);
+      return o === e || (o === undefined && counts.get(k) === 1);
+    };
+    const pt = e.addPt.filter(keep(ptOwner, ptClaims));
+    const td = e.addTd.filter(keep(tdOwner, tdClaims));
     e.card.keys = {
-      pokemontcg: uniqSorted(e.rawPt.filter(keepPt)),
-      tcgdex: uniqSorted(e.rawTd.filter((k) => tdKeys.get(k) === 1)),
+      pokemontcg: uniqSorted([...e.fixedPt, ...pt]),
+      tcgdex: uniqSorted([...e.fixedTd, ...td]),
     };
   }
-}
-
-function frozenEntry(id, card) {
-  return {
-    id, frozen: true, card,
-    rawPt: [id, ...(card.keys?.pokemontcg ?? [])],
-    rawTd: card.keys?.tcgdex ?? [],
-  };
 }
 
 export function buildRegistry({
@@ -202,7 +340,9 @@ export function buildRegistry({
     const cards = set.cards ?? [];
     const free = cards.filter((c) => !referenced.has(refKey(set.id, c.localId)));
     let gid = prevByTd.get(set.id);
-    if (!gid) {
+    if (gid) {
+      group(gid, () => ({})).extraTd.add(set.id);
+    } else {
       const owners = new Set(cards.filter((c) => !free.includes(c)).map((c) => referenced.get(refKey(set.id, c.localId))));
       if (owners.size && free.length) {
         throw new Error(`Registry: TCGdex-Set ${set.id} ist nur teilweise von ${[...owners].join(', ')} referenziert`);
@@ -218,7 +358,7 @@ export function buildRegistry({
     for (const c of free) addCandidate(g, { ptId: null, refs: [{ setId: set.id, localId: c.localId }] });
   }
 
-  // 3. Karten je Set ableiten, mit previous zusammenfuehren
+  // 3. Sets und Karten: eingefrorene Eintraege uebernehmen, additiv ergaenzen, Neues ableiten
   const tdCards = new Map(tcgdexSets.map((s) => [s.id, new Set((s.cards ?? []).map((c) => c.localId))]));
   const drift = [];
   const out = { sets: {}, cards: {} };
@@ -226,8 +366,9 @@ export function buildRegistry({
     const g = groups.get(id);
     const prevSet = previous?.sets?.[id];
     const prevCards = previous?.cards?.[id] ?? {};
-    if (prevSet) out.sets[id] = structuredClone(prevSet);
-    else {
+
+    const fresh = { pokemontcg: g?.pokemontcg ?? null, tcgdex: g?.tcgdex ?? null, mergedSubsets: [], aliases: [] };
+    if (g) {
       const aliases = new Set();
       if (g.pokemontcg) aliases.add(g.pokemontcg);
       if (g.tcgdex) aliases.add(`${TD_PREFIX}${g.tcgdex}`);
@@ -236,12 +377,17 @@ export function buildRegistry({
         if (s.td) aliases.add(`${TD_PREFIX}${s.td}`);
       }
       for (const t of g.extraTd) aliases.add(`${TD_PREFIX}${t}`);
-      aliases.delete(id);
-      out.sets[id] = {
-        pokemontcg: g.pokemontcg, tcgdex: g.tcgdex,
-        mergedSubsets: uniqSorted(g.subsets.map((s) => s.pt)), aliases: [...aliases].sort(cmp),
-      };
+      fresh.mergedSubsets = g.subsets.map((s) => s.pt);
+      fresh.aliases = [...aliases];
     }
+    const set = prevSet ? structuredClone(prevSet) : {};
+    set.pokemontcg = set.pokemontcg ?? fresh.pokemontcg;
+    set.tcgdex = set.tcgdex ?? fresh.tcgdex;
+    // Abweichender Skalar (eingefroren != frisch): eingefrorener Wert bleibt, frischer wird Alias.
+    if (prevSet?.pokemontcg && fresh.pokemontcg && fresh.pokemontcg !== prevSet.pokemontcg) fresh.aliases.push(fresh.pokemontcg);
+    set.mergedSubsets = uniqSorted([...(set.mergedSubsets ?? []), ...fresh.mergedSubsets]);
+    set.aliases = uniqSorted([...(set.aliases ?? []), ...fresh.aliases]).filter((a) => a !== id);
+    out.sets[id] = set;
 
     // Abweichung: eingefrorene Referenz existiert in TCGdex nicht mehr
     for (const [cardId, card] of Object.entries(prevCards)) {
@@ -250,34 +396,88 @@ export function buildRegistry({
       }
     }
 
-    const entries = Object.entries(prevCards).map(([cid, card]) => frozenEntry(cid, structuredClone(card)));
-    if (g) {
-      const prevByPtId = new Map();
-      const prevByRef = new Map();
-      for (const e of entries) {
-        if (e.card.pokemontcg) prevByPtId.set(e.card.pokemontcg, e);
-        for (const r of e.card.tcgdex ?? []) prevByRef.set(refKey(r.set, r.localId), e);
-      }
-      // Nur Kandidaten ohne eingefrorenen Eintrag (ueber pt-ID oder TCGdex-Referenz) werden neu abgeleitet.
-      const fresh = g.candidates.filter((c) => !((c.ptId && prevByPtId.get(c.ptId))
-        || c.refs.some((r) => prevByRef.has(refKey(r.setId, r.localId)))));
-      const derived = deriveCards(fresh, canonicalKeyOverrides, id);
-      const usedIds = new Set(entries.map((e) => e.id));
-      for (const c of derived) {
-        let cid = c.id;
-        if (usedIds.has(cid) && c.refs.length) cid = `${c.base}_${norm(c.refs[0].localId)}`;
-        if (usedIds.has(cid)) throw new Error(`Registry ${id}: neuer Kartenschluessel ${c.id} kollidiert mit eingefrorenem Eintrag`);
-        usedIds.add(cid);
-        const card = { pokemontcg: c.ptId ?? null, tcgdex: c.refs.map((r) => ({ set: r.setId, localId: r.localId })), keys: null };
-        if (c.ambiguousLegacyKey) card.ambiguousLegacyKey = c.ambiguousLegacyKey;
-        entries.push({ id: cid, frozen: false, card, rawPt: c.rawPt, rawTd: c.rawTd });
-      }
+    const entries = Object.entries(prevCards).map(([cid, card]) => ({
+      id: cid, frozen: true, card: structuredClone(card),
+      fixedPt: new Set(card.keys?.pokemontcg ?? []), fixedTd: new Set(card.keys?.tcgdex ?? []), addPt: [], addTd: [],
+    }));
+    const byPtId = new Map();
+    const byRef = new Map();
+    for (const e of entries) {
+      if (e.card.pokemontcg) byPtId.set(e.card.pokemontcg, e);
+      for (const r of e.card.tcgdex ?? []) byRef.set(refKey(r.set, r.localId), e);
     }
-    finalizeKeys(entries);
+    const newCands = [];
+    for (const c of g ? fuse(g.candidates, g.pokemontcg, canonicalKeyOverrides) : []) {
+      const owned = c.refs.filter((r) => byRef.has(refKey(r.setId, r.localId)));
+      const newRefs = c.refs.filter((r) => !byRef.has(refKey(r.setId, r.localId)));
+      let target = c.ptId ? byPtId.get(c.ptId) : undefined;
+      if (!target && owned.length) {
+        const owners = [...new Set(owned.map((r) => byRef.get(refKey(r.setId, r.localId))))];
+        if (!c.ptId) target = owners[0];
+        else if (owners.length === 1 && owners[0].card.pokemontcg == null) {
+          // TCGdex-zuerst eingefrorene Karte bekommt ihr pokemontcg-Gegenstueck (null -> Wert).
+          [target] = owners;
+          target.card.pokemontcg = c.ptId;
+          byPtId.set(c.ptId, target);
+          target.addPt.push(norm(c.ptNumber));
+        }
+      }
+      if (target) {
+        for (const r of newRefs) {
+          target.card.tcgdex.push({ set: r.setId, localId: r.localId });
+          byRef.set(refKey(r.setId, r.localId), target);
+          target.addTd.push(norm(r.localId));
+        }
+        if (c.ptId && target.card.pokemontcg === c.ptId) target.addPt.push(...variantKeys(c));
+        continue;
+      }
+      newCands.push({ ...c, refs: newRefs, ownedRefs: owned });
+    }
+    const taken = new Set();
+    for (const e of entries) {
+      taken.add(e.id);
+      for (const k of e.fixedPt) taken.add(k);
+      if (e.card.ambiguousLegacyKey) taken.add(e.card.ambiguousLegacyKey);
+    }
+    assignIds(newCands, taken, id);
+    for (const c of newCands) {
+      const card = { pokemontcg: c.ptId ?? null, tcgdex: c.refs.map((r) => ({ set: r.setId, localId: r.localId })), keys: null };
+      if (c.ambiguousLegacyKey) card.ambiguousLegacyKey = c.ambiguousLegacyKey;
+      const addPt = c.ptId ? [norm(c.ptNumber), ...variantKeys(c)] : [c.id];
+      entries.push({
+        id: c.id, frozen: false, card, fixedPt: new Set(), fixedTd: new Set(),
+        addPt, addTd: c.refs.map((r) => norm(r.localId)),
+      });
+    }
+    assignKeys(entries);
     out.cards[id] = {};
     for (const e of [...entries].sort((a, b) => cmp(a.id, b.id))) out.cards[id][e.id] = e.card;
   }
   if (drift.length) throw new RegistryFrozenError(drift);
+
+  // Nichts still verlieren: jede Eingabe-Karte genau einmal referenziert.
+  const lost = [];
+  const ptCount = new Map();
+  const refCount = new Map();
+  for (const cards of Object.values(out.cards)) {
+    for (const c of Object.values(cards)) {
+      if (c.pokemontcg) ptCount.set(c.pokemontcg, (ptCount.get(c.pokemontcg) ?? 0) + 1);
+      for (const r of c.tcgdex) refCount.set(refKey(r.set, r.localId), (refCount.get(refKey(r.set, r.localId)) ?? 0) + 1);
+    }
+  }
+  for (const s of ptSets) {
+    for (const c of ptCardsBySet.get(s.id) ?? []) {
+      if (ptCount.get(c.id) !== 1) lost.push(`pokemontcg-Karte ${c.id} ${ptCount.get(c.id) ?? 0}x in der Registry`);
+    }
+  }
+  for (const s of tcgdexSets) {
+    for (const c of s.cards ?? []) {
+      const n = refCount.get(refKey(s.id, c.localId));
+      if (n !== 1) lost.push(`TCGdex-Karte ${s.id}/${c.localId} ${n ?? 0}x in der Registry`);
+    }
+  }
+  if (lost.length) throw new RegistryInvariantError(lost);
+  assertRegistryInvariants(out);
   return out;
 }
 
@@ -328,8 +528,10 @@ function lookup(registry, setId, cardId) {
   if (!key) return null;
   const cards = registry.cards?.[entry.setId] ?? {};
   if (entry.ns === 'tcgdex') {
-    const hits = Object.entries(cards).filter(([, c]) => (c.tcgdex ?? [])
-      .some((r) => r.set === entry.td && norm(r.localId) === key && (c.keys?.tcgdex ?? []).includes(key)));
+    const find = (eq) => Object.entries(cards).filter(([, c]) => (c.tcgdex ?? []).some((r) => r.set === entry.td
+      && eq(norm(r.localId), key) && (c.keys?.tcgdex ?? []).includes(norm(r.localId))));
+    let hits = find((a, b) => a === b);
+    if (!hits.length) hits = find((a, b) => a.toLowerCase() === b.toLowerCase());
     return { entry, key, pool: [], hits: hits.map(([id]) => id) };
   }
   const pool = entry.subset ? subsetCards(registry.sets[entry.setId], cards, entry.subset) : Object.entries(cards);

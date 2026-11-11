@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {
   buildRegistry, assertFrozen, resolveCollectionKey, findAmbiguousKey, RegistryFrozenError,
+  RegistryInvariantError, registryViolations, registryChanges,
 } from '../registry/build-registry.mjs';
 import { readRegistry, writeRegistry } from '../registry/registry-io.mjs';
 
@@ -290,6 +291,165 @@ test('writeRegistry deterministisch, readRegistry liest zurueck', () => {
       assert.ok(ta.endsWith('}\n'));
     }
     assert.deepEqual(readRegistry(a), r);
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+// --- Fix-Runde 1: Einfrieren auf Schluesselebene, additive Aenderungen ------------------
+function ecard2Fixture({ withC = false, with50a = false } = {}) {
+  const f = fixture();
+  const c50 = pt('ecard2', '50');
+  const c50a = pt('ecard2', '50a');
+  const localIds = ['50a', '50b', ...(withC ? ['50c'] : [])];
+  f.ptSets.push(ptSet('ecard2'));
+  f.ptCardsBySet.set('ecard2', with50a ? [c50, c50a] : [c50]);
+  f.tcgdexSets.push(td('ecard2', localIds));
+  f.setPairs.push({ pokemontcgId: 'ecard2', tcgdexId: 'ecard2', method: 'exactId', overlap: 1 });
+  f.cardResults.set('ecard2', result({ matched: with50a
+    ? [{ ...m(c50, [ref('ecard2', '50b')]), method: 'variantGroup' }, m(c50a, [ref('ecard2', '50a')])]
+    : [{ ...m(c50, localIds.map((l) => ref('ecard2', l))), method: 'variantGroup' }] }));
+  return f;
+}
+
+test('neue Karte stiehlt keinen eingefrorenen Schluessel (ecard2-50a nach eingefrorenem 50 mit 50a)', () => {
+  const previous = buildRegistry(ecard2Fixture());
+  assert.deepEqual(previous.cards.ecard2['50'].keys.pokemontcg, ['50', '50a', '50b']);
+  const next = buildRegistry({ ...ecard2Fixture({ with50a: true }), previous: structuredClone(previous) });
+  assert.doesNotThrow(() => assertFrozen(previous, next));
+  assert.deepEqual(resolveCollectionKey(next, 'ecard2', '50a'), { setId: 'ecard2', cardId: '50' });
+  const added = Object.entries(next.cards.ecard2).filter(([, c]) => c.pokemontcg === 'ecard2-50a');
+  assert.equal(added.length, 1);
+  const [[newId, newCard]] = added;
+  assert.notEqual(newId, '50a');
+  assert.ok(!newCard.keys.pokemontcg.includes('50a'));
+  assert.deepEqual(resolveCollectionKey(next, 'ecard2', newId), { setId: 'ecard2', cardId: newId });
+  assert.deepEqual(next.cards.ecard2['50'].tcgdex, previous.cards.ecard2['50'].tcgdex);
+});
+
+test('Variantengruppe waechst um 50c: Referenz und Schluessel kommen additiv zur eingefrorenen Karte', () => {
+  const previous = buildRegistry(ecard2Fixture());
+  const next = buildRegistry({ ...ecard2Fixture({ withC: true }), previous: structuredClone(previous) });
+  assert.doesNotThrow(() => assertFrozen(previous, next));
+  const c = next.cards.ecard2['50'];
+  assert.deepEqual(c.tcgdex.map((r) => r.localId), ['50a', '50b', '50c']);
+  assert.deepEqual(c.keys, { pokemontcg: ['50', '50a', '50b', '50c'], tcgdex: ['50a', '50b', '50c'] });
+  assert.deepEqual(resolveCollectionKey(next, 'ecard2', '50c'), { setId: 'ecard2', cardId: '50' });
+  assert.ok(registryChanges(previous, next).some((x) => x.includes('ecard2/50') && x.includes('50c')));
+});
+
+test('eingefrorenes TCGdex-zuerst-Set bekommt spaeter ein pt-Paar: Aliase und pokemontcg ergaenzt, alte Schluessel bleiben', () => {
+  const f0 = fixture();
+  f0.ptSets = f0.ptSets.filter((s) => s.id !== 'me5');
+  f0.ptCardsBySet.delete('me5');
+  f0.setPairs = f0.setPairs.filter((p) => p.pokemontcgId !== 'me5');
+  f0.cardResults.delete('me5');
+  const previous = buildRegistry(f0);
+  assert.deepEqual(previous.sets['TCGDEX-me05'], { pokemontcg: null, tcgdex: 'me05', mergedSubsets: [], aliases: [] });
+  const next = buildRegistry({ ...fixture(), previous: structuredClone(previous) });
+  assert.doesNotThrow(() => assertFrozen(previous, next));
+  assert.equal(next.sets.me5, undefined);
+  assert.deepEqual(next.sets['TCGDEX-me05'], { pokemontcg: 'me5', tcgdex: 'me05', mergedSubsets: [], aliases: ['me5'] });
+  assert.deepEqual(next.cards['TCGDEX-me05']['1'], {
+    pokemontcg: 'me5-1', tcgdex: [{ set: 'me05', localId: '001' }], keys: { pokemontcg: ['1'], tcgdex: ['1'] },
+  });
+  assert.deepEqual(resolveCollectionKey(next, 'me5', '1'), { setId: 'TCGDEX-me05', cardId: '1' });
+  assert.deepEqual(resolveCollectionKey(next, 'TCGDEX-me05', '001'), { setId: 'TCGDEX-me05', cardId: '1' });
+  const changes = registryChanges(previous, next);
+  assert.ok(changes.includes('Set TCGDEX-me05: pokemontcg me5'));
+  assert.ok(changes.includes('Karte TCGDEX-me05/1: pokemontcg me5-1'));
+});
+
+test('neuer Unterset-Merge fuer eingefrorenes Hauptset: mergedSubsets/Aliase additiv, Union-Karte GG1 bekommt pt-Gegenstueck', () => {
+  const f0 = fixture();
+  f0.ptSets = f0.ptSets.filter((s) => s.id !== 'swsh12pt5gg');
+  f0.ptCardsBySet.delete('swsh12pt5gg');
+  f0.setPairs = f0.setPairs.filter((p) => p.pokemontcgId !== 'swsh12pt5gg');
+  f0.cardResults.delete('swsh12pt5gg');
+  f0.tcgdexSets = f0.tcgdexSets.filter((s) => s.id !== 'swsh12.5gg');
+  f0.subsetMerge = { merges: [] };
+  const previous = buildRegistry(f0);
+  assert.deepEqual(previous.sets.swsh12pt5.mergedSubsets, []);
+  assert.equal(previous.cards.swsh12pt5.GG1.pokemontcg, null);
+  const next = buildRegistry({ ...fixture(), previous: structuredClone(previous) });
+  assert.doesNotThrow(() => assertFrozen(previous, next));
+  assert.deepEqual(next.sets.swsh12pt5, {
+    pokemontcg: 'swsh12pt5', tcgdex: 'swsh12.5', mergedSubsets: ['swsh12pt5gg'],
+    aliases: ['TCGDEX-swsh12.5', 'TCGDEX-swsh12.5gg', 'swsh12pt5gg'],
+  });
+  assert.equal(next.cards.swsh12pt5.GG1.pokemontcg, 'swsh12pt5gg-GG01');
+  assert.deepEqual(next.cards.swsh12pt5.GG1.tcgdex.map((r) => `${r.set}/${r.localId}`).sort(), ['swsh12.5/GG01', 'swsh12.5gg/GG01']);
+  assert.equal(next.cards.swsh12pt5.GG2.pokemontcg, 'swsh12pt5gg-GG02');
+  assert.deepEqual(resolveCollectionKey(next, 'swsh12pt5gg', 'GG1'), { setId: 'swsh12pt5', cardId: 'GG1' });
+  assert.deepEqual(resolveCollectionKey(next, 'swsh12pt5', 'GG1'), { setId: 'swsh12pt5', cardId: 'GG1' });
+});
+
+test('assertFrozen: entfernter Alias/Schluessel/Referenz und geaenderter Skalar werfen, null -> Wert nicht', () => {
+  const prev = build();
+  const cases = [
+    (r) => { r.sets.swsh12pt5.aliases = r.sets.swsh12pt5.aliases.filter((a) => a !== 'swsh12pt5gg'); },
+    (r) => { r.sets.swsh12pt5.mergedSubsets = []; },
+    (r) => { r.cards.svp['166'].keys.pokemontcg = []; },
+    (r) => { r.cards.zsv10pt5['80'].tcgdex = []; },
+    (r) => { r.cards.me5['1'].pokemontcg = 'me5-x'; },
+    (r) => { r.sets.me5.tcgdex = 'me5x'; },
+    (r) => { r.cards.cel25c['15_A1'].ambiguousLegacyKey = '16'; },
+  ];
+  for (const mutate of cases) {
+    const next = structuredClone(prev);
+    mutate(next);
+    assert.throws(() => assertFrozen(prev, next), (e) => e instanceof RegistryFrozenError && e.changes.length === 1, mutate.toString());
+  }
+  const before = structuredClone(prev);
+  before.cards.svp['166'].pokemontcg = null;
+  before.sets['TCGDEX-A4'].pokemontcg = null;
+  const after = structuredClone(prev);
+  after.cards.svp['166'].pokemontcg = 'svp-166';
+  after.sets['TCGDEX-A4'].pokemontcg = 'a4';
+  after.sets['TCGDEX-A4'].aliases = ['a4'];
+  assert.doesNotThrow(() => assertFrozen(before, after));
+});
+
+test('Invariante: Schluessel bei zwei Karten eines Sets und Case-Kollision von Set-IDs werden erkannt', () => {
+  const r = build();
+  assert.deepEqual(registryViolations(r), []);
+  const bad = structuredClone(r);
+  bad.cards.me5['1'].keys.pokemontcg.push('58');
+  bad.cards.me5['58'] = { pokemontcg: null, tcgdex: [], keys: { pokemontcg: [], tcgdex: [] } };
+  assert.ok(registryViolations(bad).some((v) => v.includes('58')));
+  assert.throws(() => assertFrozen(r, bad), RegistryInvariantError);
+  const f = fixture();
+  f.tcgdexSets.push(td('abc', ['1']), td('ABC', ['1']));
+  assert.throws(() => buildRegistry(f), (e) => e instanceof RegistryInvariantError && e.violations.some((v) => v.includes('tcgdex-abc')));
+});
+
+test('keine Zahlen-Fusion ausserhalb von Unterset/Override: vom Matcher getrennte Karten bleiben getrennt', () => {
+  const f = fixture();
+  const extra = pt('svp', '166', 'svp-166x');
+  f.ptCardsBySet.get('svp').push(extra);
+  f.cardResults.get('svp').primaryOnly.push(po(extra));
+  const r = buildRegistry(f);
+  const svp = r.cards.svp;
+  assert.equal(svp['166'], undefined);
+  assert.equal(svp['166x'].pokemontcg, 'svp-166x');
+  assert.equal(svp['166x'].ambiguousLegacyKey, '166');
+  assert.deepEqual(svp['166_166'].tcgdex, [{ set: 'svp', localId: '166' }]);
+  assert.equal(svp['166_166'].ambiguousLegacyKey, '166');
+});
+
+test('Kartenschluessel case-insensitiv in beiden Namensraeumen', () => {
+  const r = build();
+  assert.deepEqual(resolveCollectionKey(r, 'swsh12pt5', 'gg1'), { setId: 'swsh12pt5', cardId: 'GG1' });
+  assert.deepEqual(resolveCollectionKey(r, 'TCGDEX-swsh12.5gg', 'gg01'), { setId: 'swsh12pt5', cardId: 'GG1' });
+  assert.deepEqual(resolveCollectionKey(r, 'TCGDEX-cel25cc', 'cc003'), { setId: 'cel25c', cardId: '15_A3' });
+});
+
+test('readRegistry wirft, wenn eine Kartendatei eines Sets fehlt', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'registry-'));
+  try {
+    writeRegistry(tmp, build());
+    fs.rmSync(path.join(tmp, 'cards', 'me5.json'));
+    assert.throws(() => readRegistry(tmp), /me5/);
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
