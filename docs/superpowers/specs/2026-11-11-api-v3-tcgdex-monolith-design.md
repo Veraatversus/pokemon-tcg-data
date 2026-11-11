@@ -214,7 +214,7 @@ Heute teilen sich diese Karten eine Zeile in `db_collection`. Der Sammelstatus i
 **Migration:**
 1. Beim Laden erkennt das Frontend Zeilen mit einem alten mehrdeutigen Schlüssel (Registry-Feld `ambiguousLegacyKey`).
 2. Ist der Status `g`/`rh` dort `false`, wird die Zeile still auf die neuen Schlüssel umgeschrieben. Es geht nichts verloren.
-3. Ist der Status gesetzt, fragt ein einmaliger Dialog, für welche der Karten er gilt (Mehrfachauswahl, mit Bildern). Erst danach werden neue Zeilen geschrieben und die alte Zeile entfernt.
+3. Ist der Status gesetzt, fragt ein einmaliger Dialog, für welche der Karten er gilt (Mehrfachauswahl, mit Bildern). Erst danach werden neue Zeilen geschrieben und die alte Zeile auf `false` gesetzt. Gelöscht wird sie nicht (§7.1: in den Sheets wird nichts gelöscht).
 4. Bis zur Antwort bleibt die alte Zeile unverändert, und die Karten zeigen den alten Status gemeinsam an.
 5. Vor der Migration wird ein Snapshot angelegt (`features/collection/versioning.js`).
 
@@ -306,6 +306,14 @@ Ein Set bzw. eine Karte enthält **pokemontcg-kompatible Felder auf oberster Ebe
 - **Neu:** Sprachwahl (DE/EN) für Name, Texte und Bild mit Fallback-Kette; Cardmarket-Links aus `variants[].cardmarketId` (Reverse-Holo direkt adressierbar).
 - `schema-contract.js` bleibt die Brücke zu den Sheets. Die `vera_*`/`tcgdex_*`-Spalten werden aus v3 befüllt.
 - `pokecode.js` (Apps Script) bekommt einen eigenen, kleineren Umstieg auf `api/v3/`.
+
+### 7.1 Entscheidungen Phase 3 (2026-11-11)
+
+- **Alte Schlüssel:** Das Frontend liest Sammlungszeilen über **alle Aliase** eines Sets (z. B. `TCGDEX-me05`, `swsh12pt5gg`). Haken werden in genau die **bestehenden Zeilen** zurückgeschrieben, und zwar in alle Zeilen einer Karte, damit sie synchron bleiben. In den Sheets wird nichts umbenannt; neue Zeilen nutzen den kanonischen Schlüssel.
+- **Sammel-Schlüssel im Frontend:** neues Feld `collectionKey` (= v3 `cardId`, z. B. `6`, `15_A1`, `GG1`). Alle Sammlungs-Lookups laufen über `collectionKey`, nie mehr über `normalizeCardNumber(card.number)`. Das interne Feld `cardId` bleibt die Karten-ID (= v3 `id`, bei gematchten Karten identisch mit der pokemontcg-ID).
+- **`db_cards`/`db_sets`:** werden weiter befüllt, jetzt aus v3 (`vera_*` = EN aus den Oberfeldern, `tcgdex_*` = DE aus `i18n.de`). Der Schreibpfad wird hinter `CONFIG.WRITE_DB_CARDS` gekapselt, damit er später abgeschaltet werden kann. Kartendaten liest das Frontend aus `api/v3`, `db_cards` dient nur noch als Offline-Fallback.
+- **Schlüssel-Auflösung im Browser:** eigenes Frontend-Modul mit derselben Semantik wie `scripts/api/registry` (`resolveCollectionKey`/`findAmbiguousKey`). Ein Paritätstest vergleicht beide Implementierungen über die komplette Registry und die Referenz-DBs, so bleibt die Laufzeit entkoppelt und das Verhalten identisch.
+- **Datenquelle:** `api/v3/` und `api/registry/` werden relativ zur App-Adresse geladen (gleiche Origin auf GitHub Pages: Root = `release`, `/dev` = `dev`). Es gibt keine Laufzeit-Aufrufe an `api.pokemontcg.io` oder `api.tcgdex.net` mehr.
 
 ## 8. Phasen
 
