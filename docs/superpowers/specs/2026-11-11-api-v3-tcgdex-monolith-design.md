@@ -22,7 +22,7 @@ Die Pokémon TCG API (pokemontcg.io) wird am **1. März 2027** abgeschaltet. Heu
 4. alle Laufzeit-Aufrufe an pokemontcg.io und api.tcgdex.net im Frontend ersetzt,
 5. **bestehende Google-Sheets-Datenbanken ohne Verlust des Sammelstatus** weiter nutzbar lässt.
 
-Nicht-Ziele: `data-asia` (JP/Asien), TCG-Pocket-Sets, Preis-Historie.
+Nicht-Ziele: `data-asia` (JP/Asien), Preis-Historie. (TCG-Pocket war zunächst ausgeschlossen und ist seit Phase 2 wieder enthalten, siehe §10 Punkt 8.)
 
 ## 2. Analyse-Befunde (Stand 2026-11-11, TCGdex `5fbf524a`)
 
@@ -187,6 +187,12 @@ Jedes Registry-Element führt `aliases[]` mit allen IDs, unter denen es je auftr
 
 - Beim **Lesen** von `db_collection` löst das Frontend jede Zeile über diese Aliase auf.
 - Beim **Schreiben** bleibt der Schlüssel erhalten, der in der Zeile schon steht. Es gibt kein automatisches Umschlüsseln und damit auch keine doppelten Zeilen.
+- **Generische Alias-Regel** (gilt für alle Nutzer, nicht nur für die Referenz-DB):
+  - Set: pokemontcg-ID (falls vorhanden) und `TCGDEX-<tcgdexId>` (falls vorhanden).
+  - Karte: `normalizeCardNumber(pokemontcg-Nummer)` und `normalizeCardNumber(TCGdex-localId)`.
+- **Galerie-Untersets** (Entscheidung, §10 Punkt 9): Karten aus `swsh9tg`…`swsh12tg`, `swsh12pt5gg` und `swsh45sv` gehören kanonisch zum **Hauptset** (`swsh9`…`swsh12`, `swsh12pt5`, `swsh45`), mit Kartenschlüsseln wie `TG1`, `GG1`, `SV1`. Die Unterset-IDs werden zu Set-Aliasen des Hauptsets.
+  - Existieren Zeilen unter beiden Schlüsseln, gilt eine Karte als besessen, wenn sie an mindestens einer Stelle abgehakt ist (`g`/`rh` per ODER).
+  - Die Konfiguration liegt in `api/mappings/subset-merge.json`.
 
 ### 5.3 Nicht-eindeutige Nummern: eindeutige Schlüssel + Migration (entschieden)
 
@@ -224,6 +230,21 @@ Heute teilen sich diese Karten eine Zeile in `db_collection`. Der Sammelstatus i
 - Fixture: Export der echten Produktiv-DB (`db_collection`, `Sets Overview`, als CSV). Sie liegt lokal unter `.local/fixtures/` (gitignored, wird **nicht** committet). Committet wird nur eine daraus abgeleitete, reduzierte Schlüsselliste (`setId`, `cardId`) ohne weitere Inhalte, falls gewünscht.
 - Test: Jede Fixture-Zeile wird auf genau eine v3-Karte aufgelöst, 0 verwaiste Zeilen, 0 Doppelbelegungen außer den bekannten Fällen aus 5.3.
 - Ergänzend wird jede heute generierbare Schlüsselkombination (alle Sets × Karten aus dem jetzigen Frontend-Pfad) gegen die Registry geprüft.
+
+### 5.6 Befunde aus der Referenz-DB (2026-11-11)
+
+Grundlage: `db_collection` mit 23.424 Zeilen in 213 Sets, davon 4.074 mit `g` und 2.764 mit `rh` abgehakt.
+
+| Befund | Zeilen / Haken | Konsequenz |
+|---|---|---|
+| 170 pokemontcg-Sets, deren Schlüssel direkt passen | Großteil | keine |
+| 14 Pocket-Sets (`TCGDEX-A1a` … `TCGDEX-P-A`) | 1 Haken (`B2a`) | Pocket wieder aufnehmen (§10 Punkt 8) |
+| `TCGDEX-me05`, `-me06`, `-30th`, `-fut2020` (inzwischen gepaart) | 0 Haken | Set-Alias `TCGDEX-<id>` |
+| `mep` und `TCGDEX-mep` | 0 Haken | Kanonisch `mep`, Alias `TCGDEX-mep`. pokemontcg-Karten liegen nur in `cards/en/mep.json` (fehlt in `sets/en.json`) |
+| Galerie-Karten unter dem Hauptset (`swsh12pt5`/`GG1`…, `swsh9`/`TG1`…, `swsh45`/`SV1`…) | 62 Haken (GG), identisch zu `swsh12pt5gg` | Galerien gehören ins Hauptset (§5.2) |
+| `ecard2` `50a`/`50b` …, `sve` 17–24, `swshp` `SWSH301` | 0 Haken | TCGdex-only-Karten in gepaarten Sets (Schlüssel = TCGdex-localId) |
+| `zsv10pt5`/`80` (pokemontcg nennt die Karte fälschlich `60`) | abgehakt | Kanonischer Schlüssel `80`. Belegt, dass das Frontend die TCGdex-Nummer verwendet hat |
+| `cel25c`: 22 Zeilen (`15` einmal statt viermal) | 0 Haken | Migration nach §5.3 bei dieser DB verlustfrei |
 
 ## 6. v3-Datenmodell
 
@@ -298,6 +319,9 @@ Ein Set bzw. eine Karte enthält **pokemontcg-kompatible Felder auf oberster Ebe
 2. **Julien:** kein separater Snapshot; Juliens EN-Beiträge stecken im gemergten, eingefrorenen `sources/pokemontcg/` (Registry und Legacy-Fallback), kein laufender Sync (§2.2).
 3. **Sprachen in v3:** `en` + `de`. TCGdex-Snapshot und Assets-Index werden auf diese beiden Sprachen (plus `univ` für Symbole) reduziert.
 4. **Kompatibilitäts-Fixture:** CSV-Export der Produktiv-DB, lokal und gitignored (§5.5).
-5. **Sets ohne pokemontcg-Gegenstück:** Alle werden aufgenommen (Trainer Kits, McDonald's, Promos usw.), außer Pocket und `data-asia`.
+5. **Sets ohne pokemontcg-Gegenstück:** Alle werden aufgenommen (Trainer Kits, McDonald's, Promos usw.), außer `data-asia`.
 6. **pokemontcg sofort einfrieren:** TCGdex ist ab sofort die einzige aktive Quelle (§3.2). Spaltensemantik `vera_*` = EN, `tcgdex_*` = DE (§5.4).
 7. **Matching:** Ziel ist ein möglichst korrektes und vollständiges Matching. Alle Hilfsmittel aus §4.3/§4.4 werden umgesetzt, Restfälle landen in den Mappings und nicht im Report-Backlog.
+8. **Pocket wieder aufnehmen** (2026-11-11, nach Auswertung der Referenz-DB): Pocket-Sets kommen als `TCGDEX-<id>` in die API. Der Snapshot-Sync spiegelt dafür die Serie `tcgp` mit; `data-asia` bleibt ausgeschlossen.
+9. **Galerie-Untersets gehören ins Hauptset** (2026-11-11): siehe §5.2. Unterset-Zeilen werden als Aliase per ODER zusammengeführt.
+10. **Phase 1 abgenommen** (2026-11-11): Die Nutzerin hat die Paarliste in `api/v3/reports/matching.md` geprüft und bestätigt.
