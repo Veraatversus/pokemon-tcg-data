@@ -134,7 +134,7 @@ test('runBuild tcgdexOnly: kanonische IDs aus der Registry, Registry nicht gesch
     const reg = snapshot(path.join(root, 'api', 'registry'));
     fs.rmSync(path.join(root, 'sources', 'pokemontcg'), { recursive: true });
     const out = path.join(root, 'out-td');
-    // sv1-2: kein EN-Bild, ohne pokemontcg keine Legacy-URL -> DE-Bild; A1/010: gar kein Bild -> Warnung
+    // sv1-2: kein EN-Bild, ohne pokemontcg keine Legacy-URL -> nur i18n.de.images; A1/010: gar kein Bild -> Warnung
     const assets = readJson(path.join(root, 'sources', 'tcgdex', 'assets-index.json'));
     assets.de.sv.sv01['002'] = 'h';
     delete assets.en.tcgp.A1['010'];
@@ -149,7 +149,7 @@ test('runBuild tcgdexOnly: kanonische IDs aus der Registry, Registry nicht gesch
     const sv1 = readJson(path.join(out, 'cards', 'sv1.json'));
     assert.equal(sv1[0].name, 'Alpha');
     assert.equal(sv1[0].matchStatus, 'tcgdex_only');
-    assert.equal(sv1[1].images.small, 'https://assets.tcgdex.net/de/sv/sv01/002/low.webp');
+    assert.equal('images' in sv1[1], false); // nur DE-Bild: oben kein images, nicht als fehlend gezaehlt
     assert.equal(sv1[1].i18n.de.images.small, 'https://assets.tcgdex.net/de/sv/sv01/002/low.webp');
     const a1 = readJson(path.join(out, 'cards', 'TCGDEX-A1.json'));
     assert.equal(a1.length, 3);

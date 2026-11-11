@@ -163,10 +163,10 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
   const violations = requiredFieldViolations({ sets, cardsBySet });
   if (violations.length) throw new BuildValidationError(violations);
 
-  // Warnung (kein Abbruch): Karten ohne jede Bildquelle (Feld `images` fehlt).
+  // Warnung (kein Abbruch): Karten ohne Bild. Eine Karte nur mit DE-Bild (i18n.de.images) ist darstellbar und zaehlt nicht.
   const missingImages = { total: 0, bySet: {} };
   for (const [setId, cards] of cardsBySet) {
-    const n = cards.filter((c) => !filled(c.images?.small)).length;
+    const n = cards.filter((c) => !filled(c.images?.small) && !filled(c.i18n?.de?.images?.small)).length;
     if (n) missingImages.bySet[setId] = n;
     missingImages.total += n;
   }

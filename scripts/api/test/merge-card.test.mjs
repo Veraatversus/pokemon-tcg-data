@@ -225,7 +225,7 @@ test('mergeSet: Set nur mit nicht-englischem Namen -> erster vorhandener Name', 
   assert.equal(s.images, undefined);
 });
 
-test('mergeCard: Bildreihenfolge TCGdex EN -> TCGdex DE -> pt-Legacy; ohne Bild kein images-Feld', () => {
+test('mergeCard: Bilder oben strikt EN -> pt-Legacy; DE nur in i18n.de.images', () => {
   const base = {
     canonicalSetId: 'sv3pt5', canonicalCardId: '6',
     registryCard: { pokemontcg: 'sv3pt5-6', tcgdex: [{ set: 'sv03.5', localId: '006' }], keys: { pokemontcg: ['6'], tcgdex: ['6'] } },
@@ -233,10 +233,14 @@ test('mergeCard: Bildreihenfolge TCGdex EN -> TCGdex DE -> pt-Legacy; ohne Bild 
   };
   const deOnly = { de: { sv: { 'sv03.5': { '006': 'h' } } } };
   const c = mergeCard({ ...base, assetsIndex: deOnly });
-  assert.deepEqual(c.images, { small: 'https://assets.tcgdex.net/de/sv/sv03.5/006/low.webp', large: 'https://assets.tcgdex.net/de/sv/sv03.5/006/high.webp' });
+  assert.equal(c.images.small, 'https://images.pokemontcg.io/sv3pt5/6.png'); // kein DE-Fallback oben, Legacy vor DE
+  assert.equal(c.i18n.de.images.small, 'https://assets.tcgdex.net/de/sv/sv03.5/006/low.webp');
+  const enAndDe = mergeCard({ ...base, assetsIndex: { ...deOnly, en: { sv: { 'sv03.5': { '006': 'h' } } } } });
+  assert.equal(enAndDe.images.small, 'https://assets.tcgdex.net/en/sv/sv03.5/006/low.webp');
   assert.equal(mergeCard({ ...base, assetsIndex: {} }).images.small, 'https://images.pokemontcg.io/sv3pt5/6.png');
   const tdOnly = mergeCard({ ...base, ptCard: null, registryCard: { ...base.registryCard, pokemontcg: null }, assetsIndex: deOnly });
-  assert.equal(tdOnly.images.small, 'https://assets.tcgdex.net/de/sv/sv03.5/006/low.webp');
+  assert.equal('images' in tdOnly, false); // nur DE-Bild: oben kein images
+  assert.equal(tdOnly.i18n.de.images.small, 'https://assets.tcgdex.net/de/sv/sv03.5/006/low.webp');
   const none = mergeCard({ ...base, ptCard: null, registryCard: { ...base.registryCard, pokemontcg: null }, assetsIndex: {} });
   assert.equal('images' in none, false);
   assert.equal(none.i18n.de.images, undefined); // DE-Bilder nur echte DE-Assets

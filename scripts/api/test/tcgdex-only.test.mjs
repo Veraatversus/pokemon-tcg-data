@@ -57,7 +57,7 @@ test('TCGdex-only: gleiche Sets, Karten = Normalbuild minus pokemontcg-only-Regi
 });
 
 test('TCGdex-only: Pflichtfelder jeder Karte', (t) => {
-  // `images` fehlt laut Build-Design (Warnung missingImages) bei Karten ohne jede Bildquelle. Im tcgdex-only-Build
+  // `images` fehlt laut Build-Design (Warnung missingImages) bei Karten ohne jede Bildquelle (zaehlt nur ohne EN-Bild und ohne i18n.de.images). Im tcgdex-only-Build
   // fehlen zusaetzlich Bilder, die im Normalbuild nur von pokemontcg stammen (wird nur geloggt).
   const bad = [];
   let noImage = 0;
@@ -67,7 +67,7 @@ test('TCGdex-only: Pflichtfelder jeder Karte', (t) => {
       for (const f of ['name', 'number', 'supertype', 'legalities']) {
         if (c[f] == null || c[f] === '') bad.push(`${s}/${id}:${f}`);
       }
-      if (!c.images?.small) {
+      if (!c.images?.small && !c.i18n?.de?.images?.small) {
         noImage++;
         if (normal.get(s)?.get(id)?.images?.small) onlyPtImage++;
       }

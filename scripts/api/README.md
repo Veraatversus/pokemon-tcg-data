@@ -9,6 +9,8 @@ Node 24 (ESM). Tests: `cd scripts/api && npm test`.
 3. **Build** (`build-api.mjs`): erzeugt aus Quellen, Matching und der **eingefrorenen Registry** (`api/registry/`) die statische API unter `api/v3/` (`sets.json`, `cards/<set>.json`, `search-index.json`, `meta.json`) und ergaenzt die Registry nur additiv.
 4. **Reports** (`api/v3/reports/`): `matching.*` und `learned-tables.json` (aus Paaren gelernte Ableitungstabellen; Aenderungen erscheinen im Diff).
 
+Kartenbilder: oben in `images` strikt Englisch (TCGdex EN, sonst pokemontcg-Legacy-URL), Deutsch nur in `i18n.de.images`; `warnings.missingImages` zaehlt Karten ohne EN-Bild und ohne `i18n.de.images`.
+
 Die Registry vergibt kanonische Set-IDs und Kartenschluessel. Sie ist die Grundlage der Zeilenschluessel in `db_collection` und darf sich daher nur additiv aendern.
 
 ## Registry-Drift beheben
