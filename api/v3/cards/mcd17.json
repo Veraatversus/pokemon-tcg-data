@@ -1,0 +1,1138 @@
+[
+  {
+    "artist": "Megumi Mizutani",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "10",
+        "name": "Tackle",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Grass",
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Leafage",
+        "text": ""
+      }
+    ],
+    "cardId": "1",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Dartrix"
+    ],
+    "flavorText": "This wary Pokémon uses photosynthesis to store up energy during the day, while becoming active at night.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Tackle"
+          },
+          {
+            "name": "Blattwerk"
+          }
+        ],
+        "name": "Bauz"
+      }
+    },
+    "id": "mcd17-1",
+    "ids": {
+      "cardmarket": [
+        301843
+      ],
+      "pokemontcg": "mcd17-1",
+      "tcgdex": "2017sm-1",
+      "tcgplayer": [
+        152681
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/mcd17/1_hires.png",
+      "small": "https://images.pokemontcg.io/mcd17/1.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Rowlet",
+    "nationalPokedexNumbers": [
+      722
+    ],
+    "number": "1",
+    "rarity": "None",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "mcd17",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 301843,
+        "tcgplayerId": 152681,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Akira Komayama",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Vice Grip",
+        "text": ""
+      }
+    ],
+    "cardId": "2",
+    "convertedRetreatCost": 2,
+    "evolvesTo": [
+      "Charjabug"
+    ],
+    "flavorText": "They often gather near places frequented by electric Pokémon in order to avoid being attacked by bird Pokémon.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Klammer"
+          }
+        ],
+        "name": "Mabula"
+      }
+    },
+    "id": "mcd17-2",
+    "ids": {
+      "cardmarket": [
+        301844
+      ],
+      "pokemontcg": "mcd17-2",
+      "tcgdex": "2017sm-2",
+      "tcgplayer": [
+        152682
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/mcd17/2_hires.png",
+      "small": "https://images.pokemontcg.io/mcd17/2.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Grubbin",
+    "nationalPokedexNumbers": [
+      736
+    ],
+    "number": "2",
+    "rarity": "None",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "mcd17",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 301844,
+        "tcgplayerId": 152682,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Akira Komayama",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Fire"
+        ],
+        "damage": "10",
+        "name": "Bite",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Fire",
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Flare",
+        "text": ""
+      }
+    ],
+    "cardId": "3",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Torracat"
+    ],
+    "flavorText": "While grooming itself, it builds up fur inside its stomach. It sets the fur alight and spews fiery attacks, which change based on how it coughs.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Biss"
+          },
+          {
+            "name": "Flackern"
+          }
+        ],
+        "name": "Flamiau"
+      }
+    },
+    "id": "mcd17-3",
+    "ids": {
+      "cardmarket": [
+        301845
+      ],
+      "pokemontcg": "mcd17-3",
+      "tcgdex": "2017sm-3",
+      "tcgplayer": [
+        152683
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/mcd17/3_hires.png",
+      "small": "https://images.pokemontcg.io/mcd17/3.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Litten",
+    "nationalPokedexNumbers": [
+      725
+    ],
+    "number": "3",
+    "rarity": "None",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "mcd17",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fire"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 301845,
+        "tcgplayerId": 152683,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Water",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Kouki Saitou",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Water"
+        ],
+        "damage": "10",
+        "name": "Pound",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Water",
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Water Gun",
+        "text": ""
+      }
+    ],
+    "cardId": "4",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Brionne"
+    ],
+    "flavorText": "This Pokémon snorts body fluids from its nose, blowing balloons to smash into its foes. It's famous for being a hard worker.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Pfund"
+          },
+          {
+            "name": "Aquaknarre"
+          }
+        ],
+        "name": "Robball"
+      }
+    },
+    "id": "mcd17-4",
+    "ids": {
+      "cardmarket": [
+        301846
+      ],
+      "pokemontcg": "mcd17-4",
+      "tcgdex": "2017sm-4",
+      "tcgplayer": [
+        152684
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/mcd17/4_hires.png",
+      "small": "https://images.pokemontcg.io/mcd17/4.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Popplio",
+    "nationalPokedexNumbers": [
+      728
+    ],
+    "number": "4",
+    "rarity": "None",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "mcd17",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 301846,
+        "tcgplayerId": 152684,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Grass",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "kirisAki",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Lightning"
+        ],
+        "damage": "",
+        "name": "Thunder Wave",
+        "text": "Flip a coin. If heads, your opponent's Active Pokémon is now Paralyzed."
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Lightning",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "50",
+        "name": "Electro Ball",
+        "text": ""
+      }
+    ],
+    "cardId": "5",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Raichu"
+    ],
+    "flavorText": "A plan was recently announced to gather many Pikachu and make an electric power plant.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Donnerwelle",
+            "text": "Wirf 1 Münze. Bei Kopf ist das Aktive Pokémon deines Gegners jetzt paralysiert."
+          },
+          {
+            "name": "Elektroball"
+          }
+        ],
+        "name": "Pikachu"
+      }
+    },
+    "id": "mcd17-5",
+    "ids": {
+      "cardmarket": [
+        301847
+      ],
+      "pokemontcg": "mcd17-5",
+      "tcgdex": "2017sm-5",
+      "tcgplayer": [
+        152685
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/mcd17/5_hires.png",
+      "small": "https://images.pokemontcg.io/mcd17/5.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Pikachu",
+    "nationalPokedexNumbers": [
+      25
+    ],
+    "number": "5",
+    "rarity": "None",
+    "resistances": [
+      {
+        "type": "Metal",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "mcd17",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 301847,
+        "tcgplayerId": 152685,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Megumi Mizutani",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Dust Gathering",
+        "text": "Draw a card."
+      }
+    ],
+    "cardId": "6",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Cosmoem"
+    ],
+    "flavorText": "Its body is gaseous and frail. It slowly grows as it collects dust from the atmosphere.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Staubfänger",
+            "text": "Ziehe 1 Karte."
+          }
+        ],
+        "name": "Cosmog"
+      }
+    },
+    "id": "mcd17-6",
+    "ids": {
+      "cardmarket": [
+        301848
+      ],
+      "pokemontcg": "mcd17-6",
+      "tcgdex": "2017sm-6",
+      "tcgplayer": [
+        152686
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/mcd17/6_hires.png",
+      "small": "https://images.pokemontcg.io/mcd17/6.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Cosmog",
+    "nationalPokedexNumbers": [
+      789
+    ],
+    "number": "6",
+    "rarity": "None",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "mcd17",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 301848,
+        "tcgplayerId": 152686,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Shin Nagasawa",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Punch",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Fighting",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "40",
+        "name": "Crabhammer",
+        "text": ""
+      }
+    ],
+    "cardId": "7",
+    "convertedRetreatCost": 2,
+    "evolvesTo": [
+      "Crabominable"
+    ],
+    "flavorText": "It punches so much, its pincers often come off from overuse, but they grow back quickly. What little meat they contain is rich and delicious.",
+    "hp": "80",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Boxhieb"
+          },
+          {
+            "name": "Krabbhammer"
+          }
+        ],
+        "name": "Krabbox"
+      }
+    },
+    "id": "mcd17-7",
+    "ids": {
+      "cardmarket": [
+        301849
+      ],
+      "pokemontcg": "mcd17-7",
+      "tcgdex": "2017sm-7",
+      "tcgplayer": [
+        152687
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/mcd17/7_hires.png",
+      "small": "https://images.pokemontcg.io/mcd17/7.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Crabrawler",
+    "nationalPokedexNumbers": [
+      739
+    ],
+    "number": "7",
+    "rarity": "None",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "mcd17",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 301849,
+        "tcgplayerId": 152687,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Kagemaru Himeno",
+    "attacks": [
+      {
+        "convertedEnergyCost": 0,
+        "cost": [],
+        "damage": "10×",
+        "name": "Fury Swipes",
+        "text": "Flip 3 coins. This attack does 10 damage for each heads."
+      }
+    ],
+    "cardId": "8",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Persian"
+    ],
+    "flavorText": "This Pokémon was not originally found in Alola. Human actions caused a surge in their numbers, and they went feral. They're prideful and crafty.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Kratzfurie",
+            "text": "Wirf 3 Münzen. Diese Attacke fügt 10 Schadenspunkte pro Kopf zu."
+          }
+        ],
+        "name": "Alola-Mauzi"
+      }
+    },
+    "id": "mcd17-8",
+    "ids": {
+      "cardmarket": [
+        301850
+      ],
+      "pokemontcg": "mcd17-8",
+      "tcgdex": "2017sm-8",
+      "tcgplayer": [
+        152688
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/mcd17/8_hires.png",
+      "small": "https://images.pokemontcg.io/mcd17/8.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Alolan Meowth",
+    "nationalPokedexNumbers": [
+      52
+    ],
+    "number": "8",
+    "rarity": "None",
+    "resistances": [
+      {
+        "type": "Psychic",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "mcd17",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Darkness"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 301850,
+        "tcgplayerId": 152688,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Megumi Mizutani",
+    "attacks": [
+      {
+        "convertedEnergyCost": 0,
+        "cost": [],
+        "damage": "",
+        "name": "Spelunk",
+        "text": "Look at the top 3 cards of your deck and put them back in any order."
+      },
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Metal"
+        ],
+        "damage": "10",
+        "name": "Mud-Slap",
+        "text": ""
+      }
+    ],
+    "cardId": "9",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Dugtrio"
+    ],
+    "flavorText": "Its head sports an altered form of whiskers made of metal. When in communication with its comrades, its whiskers wobble to and fro.",
+    "hp": "50",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Höhlenkunde",
+            "text": "Schau dir die obersten 3 Karten deines Decks an und lege sie in beliebiger Reihenfolge zurück auf dein Deck."
+          },
+          {
+            "name": "Lehmschelle"
+          }
+        ],
+        "name": "Alola-Digda"
+      }
+    },
+    "id": "mcd17-9",
+    "ids": {
+      "cardmarket": [
+        301851
+      ],
+      "pokemontcg": "mcd17-9",
+      "tcgdex": "2017sm-9",
+      "tcgplayer": [
+        152689
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/mcd17/9_hires.png",
+      "small": "https://images.pokemontcg.io/mcd17/9.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Alolan Diglett",
+    "nationalPokedexNumbers": [
+      50
+    ],
+    "number": "9",
+    "rarity": "None",
+    "resistances": [
+      {
+        "type": "Psychic",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "mcd17",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Metal"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 301851,
+        "tcgplayerId": 152689,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Hitoshi Ariga",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Fairy"
+        ],
+        "damage": "10",
+        "name": "Fly Around",
+        "text": "If any damage is done to this Pokémon by attacks during your opponent's next turn, flip a coin. If heads, prevent that damage."
+      }
+    ],
+    "cardId": "10",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Ribombee"
+    ],
+    "flavorText": "It feeds on the nectar and pollen of flowers. Because it's able to sense auras, it can identify which flowers are about to bloom.",
+    "hp": "30",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Herumfliegen",
+            "text": "Wirf 1 Münze, wenn diesem Pokémon während des nächsten Zuges deines Gegners durch Attacken Schaden zugefügt wird. Verhindere diesen Schaden bei Kopf."
+          }
+        ],
+        "name": "Wommel"
+      }
+    },
+    "id": "mcd17-10",
+    "ids": {
+      "cardmarket": [
+        301852
+      ],
+      "pokemontcg": "mcd17-10",
+      "tcgdex": "2017sm-10",
+      "tcgplayer": [
+        152690
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/mcd17/10_hires.png",
+      "small": "https://images.pokemontcg.io/mcd17/10.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Cutiefly",
+    "nationalPokedexNumbers": [
+      742
+    ],
+    "number": "10",
+    "rarity": "None",
+    "resistances": [
+      {
+        "type": "Darkness",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "mcd17",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fairy"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 301852,
+        "tcgplayerId": 152690,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Metal",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Shin Nagasawa",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "10+",
+        "name": "Rock Smash",
+        "text": "Flip a coin. If heads, this attack does 10 more damage."
+      }
+    ],
+    "cardId": "11",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Trumbeak"
+    ],
+    "flavorText": "This Pokémon feeds on berries, whose leftover seeds become the ammunition for the attacks it fires off from its mouth.",
+    "hp": "50",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Zertrümmerer",
+            "text": "Wirf 1 Münze. Bei Kopf fügt diese Attacke 10 Schadenspunkte mehr zu."
+          }
+        ],
+        "name": "Peppeck"
+      }
+    },
+    "id": "mcd17-11",
+    "ids": {
+      "cardmarket": [
+        301853
+      ],
+      "pokemontcg": "mcd17-11",
+      "tcgdex": "2017sm-11",
+      "tcgplayer": [
+        152692
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/mcd17/11_hires.png",
+      "small": "https://images.pokemontcg.io/mcd17/11.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Pikipek",
+    "nationalPokedexNumbers": [
+      731
+    ],
+    "number": "11",
+    "rarity": "None",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "mcd17",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 301853,
+        "tcgplayerId": 152692,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "match",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "10",
+        "name": "Tackle",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Bite",
+        "text": ""
+      }
+    ],
+    "cardId": "12",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Gumshoos"
+    ],
+    "flavorText": "With its sharp fangs, it will bite anything. It did not originally live in Alola but was imported from another region.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Tackle"
+          },
+          {
+            "name": "Biss"
+          }
+        ],
+        "name": "Mangunior"
+      }
+    },
+    "id": "mcd17-12",
+    "ids": {
+      "cardmarket": [
+        301854
+      ],
+      "pokemontcg": "mcd17-12",
+      "tcgdex": "2017sm-12",
+      "tcgplayer": [
+        152693
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/mcd17/12_hires.png",
+      "small": "https://images.pokemontcg.io/mcd17/12.png"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Yungoos",
+    "nationalPokedexNumbers": [
+      734
+    ],
+    "number": "12",
+    "rarity": "None",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "mcd17",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 301854,
+        "tcgplayerId": 152693,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  }
+]

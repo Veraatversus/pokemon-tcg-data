@@ -1,0 +1,419 @@
+[
+  {
+    "artist": "The Pokémon Company Art Team",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "10",
+        "name": "Tail Whap",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Lightning",
+          "Lightning",
+          "Colorless"
+        ],
+        "damage": "120",
+        "name": "Lightning Shot",
+        "text": "Flip a coin. If tails, this attack does nothing."
+      }
+    ],
+    "cardId": "1",
+    "convertedRetreatCost": 1,
+    "flavorText": "Pikachu that can generate powerful electricity have cheek sacs that are extra soft and super stretchy.",
+    "hp": "60",
+    "id": "fut20-1",
+    "ids": {
+      "cardmarket": [
+        506930
+      ],
+      "pokemontcg": "fut20-1",
+      "tcgdex": "fut2020-1",
+      "tcgplayer": [
+        223761
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/fut2020/1/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/fut2020/1/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Pikachu on the Ball",
+    "nationalPokedexNumbers": [
+      25
+    ],
+    "number": "1",
+    "rarity": "None",
+    "regulationMark": "D",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "fut20",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 506930,
+        "tcgplayerId": 223761,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "The Pokémon Company Art Team",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Make the Assist",
+        "text": "Attach a basic Energy card from your hand to 1 of your Benched Pokémon."
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Tackle",
+        "text": ""
+      }
+    ],
+    "cardId": "2",
+    "convertedRetreatCost": 1,
+    "flavorText": "It has the ability to alter the composition of its body to suit its surrounding environment.",
+    "hp": "60",
+    "id": "fut20-2",
+    "ids": {
+      "cardmarket": [
+        506935
+      ],
+      "pokemontcg": "fut20-2",
+      "tcgdex": "fut2020-2",
+      "tcgplayer": [
+        223760
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/fut2020/2/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/fut2020/2/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Eevee on the Ball",
+    "nationalPokedexNumbers": [
+      133
+    ],
+    "number": "2",
+    "rarity": "None",
+    "regulationMark": "D",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "fut20",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 506935,
+        "tcgplayerId": 223760,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "The Pokémon Company Art Team",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Grass"
+        ],
+        "damage": "",
+        "name": "Tenacious Defense",
+        "text": "During your opponent's next turn, the Defending Pokémon can't retreat."
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Grass",
+          "Grass",
+          "Colorless"
+        ],
+        "damage": "50",
+        "name": "Razor Leaf",
+        "text": ""
+      }
+    ],
+    "cardId": "3",
+    "convertedRetreatCost": 1,
+    "flavorText": "When it uses its special stick to strike up a beat, the sound waves produced carry revitalizing energy to the plants and flowers in the area.",
+    "hp": "60",
+    "id": "fut20-3",
+    "ids": {
+      "cardmarket": [
+        506940
+      ],
+      "pokemontcg": "fut20-3",
+      "tcgdex": "fut2020-3",
+      "tcgplayer": [
+        227413
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/fut2020/3/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/fut2020/3/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Grookey on the Ball",
+    "nationalPokedexNumbers": [
+      810
+    ],
+    "number": "3",
+    "rarity": "None",
+    "regulationMark": "D",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "fut20",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 506940,
+        "tcgplayerId": 227413,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "The Pokémon Company Art Team",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Fire"
+        ],
+        "damage": "20×",
+        "name": "Fiery Dribbling",
+        "text": "Flip a coin until you get tails. This attack does 20 damage for each heads."
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Fire",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Reckless Charge",
+        "text": "This Pokémon also does 10 damage to itself."
+      }
+    ],
+    "cardId": "4",
+    "convertedRetreatCost": 1,
+    "flavorText": "A warm-up of running around gets fire energy coursing through this Pokémon's body. Once that happens, it's ready to fight at full power.",
+    "hp": "60",
+    "id": "fut20-4",
+    "ids": {
+      "cardmarket": [
+        569468
+      ],
+      "pokemontcg": "fut20-4",
+      "tcgdex": "fut2020-4",
+      "tcgplayer": [
+        248016
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/fut2020/4/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/fut2020/4/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Scorbunny on the Ball",
+    "nationalPokedexNumbers": [
+      813
+    ],
+    "number": "4",
+    "rarity": "None",
+    "regulationMark": "D",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "fut20",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fire"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 569468,
+        "tcgplayerId": 248016,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Water",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "The Pokémon Company Art Team",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Water"
+        ],
+        "damage": "",
+        "name": "Spectacular Save",
+        "text": "Flip a coin. If heads, during your opponent's next turn, prevent all effects of attacks, including damage, done to this Pokémon."
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Water",
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Rain Splash",
+        "text": ""
+      }
+    ],
+    "cardId": "5",
+    "convertedRetreatCost": 1,
+    "flavorText": "When scared, this Pokémon cries. Its tears pack the chemical punch of 100 onions, and attackers won't be able to resist weeping.",
+    "hp": "60",
+    "id": "fut20-5",
+    "ids": {
+      "cardmarket": [
+        574871
+      ],
+      "pokemontcg": "fut20-5",
+      "tcgdex": "fut2020-5",
+      "tcgplayer": [
+        248015
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/swsh/fut2020/5/high.webp",
+      "small": "https://assets.tcgdex.net/en/swsh/fut2020/5/low.webp"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Sobble on the Ball",
+    "nationalPokedexNumbers": [
+      816
+    ],
+    "number": "5",
+    "rarity": "None",
+    "regulationMark": "D",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "fut20",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 574871,
+        "tcgplayerId": 248015,
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "×2"
+      }
+    ]
+  }
+]

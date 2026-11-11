@@ -1,0 +1,5339 @@
+[
+  {
+    "artist": "Masakazu Fukuda",
+    "attacks": [
+      {
+        "convertedEnergyCost": 0,
+        "cost": [],
+        "damage": "10",
+        "name": "Tackle",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Grass"
+        ],
+        "damage": "20",
+        "name": "Razor Leaf",
+        "text": ""
+      }
+    ],
+    "cardId": "DP1",
+    "convertedRetreatCost": 2,
+    "evolvesTo": [
+      "Grotle"
+    ],
+    "flavorText": "Made from soil, the shell on its back hardens when it drinks water. It lives along lakes.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Tackle"
+          },
+          {
+            "name": "Rasierblatt"
+          }
+        ],
+        "name": "Chelast"
+      }
+    },
+    "id": "dpp-DP1",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP01",
+      "tcgdex": "dpp-DP01",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP01/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP01/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "10",
+    "matchStatus": "matched",
+    "name": "Turtwig",
+    "nationalPokedexNumbers": [
+      387
+    ],
+    "number": "DP01",
+    "rarity": "Promo",
+    "resistances": [
+      {
+        "type": "Water",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "+10"
+      }
+    ]
+  },
+  {
+    "artist": "Kagemaru Himeno",
+    "attacks": [
+      {
+        "convertedEnergyCost": 0,
+        "cost": [],
+        "damage": "10",
+        "name": "Scratch",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Fire",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Ember",
+        "text": "Flip a coin. If tails, discard a Fire Energy attached to Chimchar."
+      }
+    ],
+    "cardId": "DP2",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Monferno"
+    ],
+    "flavorText": "It agilely scales sheer cliffs to live atop craggy mountains. Its fire is put out when it sleeps.",
+    "hp": "50",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Kratzer"
+          },
+          {
+            "name": "Glut",
+            "text": "Wirf 1 Münze. Bei \"Zahl\" lege eine -Energie, die an Panflam angelegt ist, auf deinen Ablagestapel."
+          }
+        ],
+        "name": "Panflam"
+      }
+    },
+    "id": "dpp-DP2",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP02",
+      "tcgdex": "dpp-DP02",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP02/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP02/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "8",
+    "matchStatus": "matched",
+    "name": "Chimchar",
+    "nationalPokedexNumbers": [
+      390
+    ],
+    "number": "DP02",
+    "rarity": "Promo",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fire"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Water",
+        "value": "+10"
+      }
+    ]
+  },
+  {
+    "artist": "Atsuko Nishida",
+    "attacks": [
+      {
+        "convertedEnergyCost": 0,
+        "cost": [],
+        "damage": "10",
+        "name": "Peck",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Water",
+          "Colorless"
+        ],
+        "damage": "20+",
+        "name": "Water Splash",
+        "text": "Flip a coin. If heads, this attack does 20 damage plus 10 more damage."
+      }
+    ],
+    "cardId": "DP3",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Prinplup"
+    ],
+    "flavorText": "Because it is very proud, it hates accepting food from people. Its thick down guards it from cold.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Schnabel"
+          },
+          {
+            "name": "Wasserplatscher",
+            "text": "Wirf 1 Münze. Bei \"Kopf\" fügt dieser Angriff 20 Schadenspunkte plus 10 weitere Schadenspunkte zu."
+          }
+        ],
+        "name": "Plinfa"
+      }
+    },
+    "id": "dpp-DP3",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP03",
+      "tcgdex": "dpp-DP03",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP03/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP03/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "9",
+    "matchStatus": "matched",
+    "name": "Piplup",
+    "nationalPokedexNumbers": [
+      393
+    ],
+    "number": "DP03",
+    "rarity": "Promo",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "variants": [
+      {
+        "foil": "cosmos",
+        "type": "holo"
+      },
+      {
+        "stamp": [
+          "dylan-lefavour"
+        ],
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+10"
+      }
+    ]
+  },
+  {
+    "artist": "Atsuko Nishida",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Minor Errand-Running",
+        "text": "Search your deck for a basic Energy card, show it to your opponent, and put it into your hand. Shuffle your deck afterward."
+      },
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Lightning"
+        ],
+        "damage": "20",
+        "name": "Thunder Jolt",
+        "text": "Flip a coin. If tails, Pachirisu does 10 damage to itself."
+      }
+    ],
+    "cardId": "DP4",
+    "convertedRetreatCost": 1,
+    "flavorText": "It makes fur balls that crackle with static electricity. It stores them with berries in tree holes.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Kleine Besorgung",
+            "text": "Durchsuche dein Deck nach einer Basis-Energiekarte, zeige sie deinem Gegner und nimm sie auf die Hand. Mische dein Deck danach."
+          },
+          {
+            "name": "Donnerrüttler",
+            "text": "Wirf 1 Münze. Bei \"Zahl\" fügt sich Pachirisu selbst 10 Schadenspunkte zu."
+          }
+        ],
+        "name": "Pachirisu"
+      }
+    },
+    "id": "dpp-DP4",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP04",
+      "tcgdex": "dpp-DP04",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP04/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP04/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "23",
+    "matchStatus": "matched",
+    "name": "Pachirisu",
+    "nationalPokedexNumbers": [
+      417
+    ],
+    "number": "DP04",
+    "rarity": "Promo",
+    "resistances": [
+      {
+        "type": "Metal",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Sumiyoshi Kizuki",
+    "cardId": "DP5",
+    "i18n": {
+      "de": {
+        "name": "Tropenwinde",
+        "rules": [
+          "Wirf 1 Münze. Entferne bei 'Kopf' 2 Schadensmarken von allen Aktiven Pokémon (1, falls nur 1 vorhanden). Bei 'Zahl' schlafen alle Aktiven Pokémon jetzt."
+        ]
+      }
+    },
+    "id": "dpp-DP5",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP05",
+      "tcgdex": "dpp-DP05",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP05/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP05/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Tropical Wind",
+    "number": "DP05",
+    "rarity": "Promo",
+    "rules": [
+      "Flip a coin. If heads, remove 2 damage counters from each Active Pokémon (remove 1 damage counter if a Pokémon has only 1). If tails, each Active Pokémon is now Asleep."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Item"
+    ],
+    "supertype": "Trainer",
+    "variants": [
+      {
+        "stamp": [
+          "worlds-2007"
+        ],
+        "type": "normal"
+      },
+      {
+        "stamp": [
+          "worlds-2007",
+          "finalist"
+        ],
+        "type": "normal"
+      },
+      {
+        "stamp": [
+          "worlds-2007",
+          "quarter-finalist"
+        ],
+        "type": "normal"
+      },
+      {
+        "stamp": [
+          "worlds-2007",
+          "semi-finalist"
+        ],
+        "type": "normal"
+      },
+      {
+        "stamp": [
+          "worlds-2007",
+          "staff"
+        ],
+        "type": "normal"
+      },
+      {
+        "stamp": [
+          "worlds-2007",
+          "top-sixteen"
+        ],
+        "type": "normal"
+      },
+      {
+        "stamp": [
+          "worlds-2007",
+          "top-thirty-two"
+        ],
+        "type": "normal"
+      }
+    ]
+  },
+  {
+    "artist": "Kagemaru Himeno",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "10",
+        "name": "Splash",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "10",
+        "name": "Jump Kick",
+        "text": "Does 10 damage to 1 of your opponent's Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      }
+    ],
+    "cardId": "DP6",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Lopunny"
+    ],
+    "flavorText": "It slams foes by sharply uncoiling its rolled ears. It stings enough to make a grown-up cry in pain.",
+    "hp": "50",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Platscher"
+          },
+          {
+            "name": "Sprungkick",
+            "text": "Dieser Angriff fügt 1 Pokémon auf der Bank deines Gegners 10 Schadenspunkte zu. (Wende Schwäche und Resistenz bei Pokémon auf der Bank nicht an.)"
+          }
+        ],
+        "name": "Haspiror"
+      }
+    },
+    "id": "dpp-DP6",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP06",
+      "tcgdex": "dpp-DP06",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP06/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP06/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "11",
+    "matchStatus": "matched",
+    "name": "Buneary",
+    "nationalPokedexNumbers": [
+      427
+    ],
+    "number": "DP06",
+    "rarity": "Promo",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+10"
+      }
+    ]
+  },
+  {
+    "artist": "Mitsuhiro Arita",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Headbutt",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Fighting",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Steamroll",
+        "text": "Does 20 damage to 1 of your opponent's Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      }
+    ],
+    "cardId": "DP7",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Skull Fossil",
+    "evolvesTo": [
+      "Rampardos"
+    ],
+    "flavorText": "It lived in jungles around 100 million years ago. Its skull is as hard as iron.",
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Kopfnuss"
+          },
+          {
+            "name": "Überrollen",
+            "text": "Dieser Angriff fügt 1 Pokémon auf der Bank deines Gegners 20 Schadenspunkte zu. (Wende Schwäche und Resistenz bei Pokémon auf der Bank nicht an.)"
+          }
+        ],
+        "name": "Koknodon"
+      }
+    },
+    "id": "dpp-DP7",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP07",
+      "tcgdex": "dpp-DP07",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP07/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP07/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "24",
+    "matchStatus": "matched",
+    "name": "Cranidos",
+    "nationalPokedexNumbers": [
+      408
+    ],
+    "number": "DP07",
+    "rarity": "Promo",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Grass",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Kouki Saitou",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Metal",
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Hard Face",
+        "text": "During your opponent's next turn, any damage done to Shieldon by attacks is reduced by 20 (after applying Weakness and Resistance)."
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Metal",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "40+",
+        "name": "Shield Attack",
+        "text": "Flip a coin. If heads, this attack does 40 damage plus 20 more damage."
+      }
+    ],
+    "cardId": "DP8",
+    "convertedRetreatCost": 2,
+    "evolvesFrom": "Armor Fossil",
+    "evolvesTo": [
+      "Bastiodon"
+    ],
+    "flavorText": "A Pokémon that lived in jungles around 100 million years ago. Its facial hide is extremely hard.",
+    "hp": "80",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Harte Oberfläche",
+            "text": "Während des nächsten Zuges deines Gegners wird Schaden, der Schilterus durch Angriffe zugefügt wird, um 20 Schadenspunkte reduziert (nachdem Schwäche und Resistenz verrechnet wurden)."
+          },
+          {
+            "name": "Schildattacke",
+            "text": "Wirf 1 Münze. Bei \"Kopf\" fügt dieser Angriff 40 Schadenspunkte plus 20 weitere Schadenspunkte zu."
+          }
+        ],
+        "name": "Schilterus"
+      }
+    },
+    "id": "dpp-DP8",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP08",
+      "tcgdex": "dpp-DP08",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP08/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP08/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "26",
+    "matchStatus": "matched",
+    "name": "Shieldon",
+    "nationalPokedexNumbers": [
+      410
+    ],
+    "number": "DP08",
+    "rarity": "Promo",
+    "resistances": [
+      {
+        "type": "Psychic",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Metal"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Forest Murmurs",
+        "text": "Once during your turn (before your attack), if you have more Prize cards left than your opponent, you may choose 1 of your opponent's Benched Pokémon and switch it with 1 of the Defending Pokémon. This power can't be used if Torterra is affected by a Special Condition.",
+        "type": "Poké-Power"
+      }
+    ],
+    "artist": "Shizurow",
+    "attacks": [
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Grass",
+          "Grass",
+          "Grass",
+          "Colorless"
+        ],
+        "damage": "100",
+        "name": "Vigorous Dash",
+        "text": "Does 30 damage to 1 of your opponent's Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.) Torterra does 30 damage to itself."
+      }
+    ],
+    "cardId": "DP9",
+    "convertedRetreatCost": 4,
+    "evolvesFrom": "Torterra",
+    "hp": "160",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Waldgeflüster",
+            "text": "Einmal während deines Zuges (vor deinem Angriff), wenn du mehr Preise übrig hast als dein Gegner, kannst du 1 Pokémon auf der Bank deines Gegners wählen und es gegen 1 Verteidigendes Pokémon austauschen. Diese Poké-Power kann nicht benutzt werden, wenn Chelterrar von einem Speziellen Zustand betroffen ist."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Energischer Sprint",
+            "text": "Dieser Angriff fügt 1 Pokémon auf der Bank deines Gegners 30 Schadenspunkte zu. (Wende Schwäche und Resistenz auf der Bank nicht an.) Chelterrar fügt sich selbst 30 Schadenspunkte zu."
+          }
+        ],
+        "name": "Chelterrar"
+      }
+    },
+    "id": "dpp-DP9",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP09",
+      "tcgdex": "dpp-DP09",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP09/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP09/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "X",
+    "matchStatus": "matched",
+    "name": "Torterra LV.X",
+    "nationalPokedexNumbers": [
+      389
+    ],
+    "number": "DP09",
+    "rarity": "Promo",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "rules": [
+      "Put this card onto your Active Torterra. Torterra LV.X can use any attack, Poké-Power, or Poké-Body from its previous level."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Level-Up"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "+30"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Burning Head",
+        "text": "Once during your turn (before your attack), you may look at the top 3 cards of your deck, choose 1 of them, and put it into your hand. Discard the other 2 cards. This power can't be used if Infernape is affected by a Special Condition.",
+        "type": "Poké-Power"
+      }
+    ],
+    "artist": "Shizurow",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Fire",
+          "Fire"
+        ],
+        "damage": "150",
+        "name": "Flare Up",
+        "text": "Search your discard pile for 8 Fire Energy cards, show them to your opponent, and shuffle them into your deck. (This attack does nothing if you don't have 8 Fire Energy cards in your discard pile.)"
+      }
+    ],
+    "cardId": "DP10",
+    "evolvesFrom": "Infernape",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Feuerkopf",
+            "text": "Einmal während deines Zuges (vor deinem Angriff) kannst du dir die obersten 3 Karten deines Decks anschauen. Wähle 1 davon und nimm sie auf die Hand. Lege die anderen 2 Karten auf deinen Ablagestapel. Diese Poké-Power kann nicht benutzt werden, wenn Panferno von einem Speziellen Zustand betroffen ist."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Aufflammen",
+            "text": "Durchsuche deinen Ablagestapel nach 8 -Energiekarten, zeige sie deinem Gegner und mische sie in dein Deck. (Dieser Angriff hat keine Auswirklungen, wenn weniger als 8 -Energiekarten auf deinem Ablagestapel liegen.)"
+          }
+        ],
+        "name": "Panferno"
+      }
+    },
+    "id": "dpp-DP10",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP10",
+      "tcgdex": "dpp-DP10",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP10/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP10/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "X",
+    "matchStatus": "matched",
+    "name": "Infernape LV.X",
+    "nationalPokedexNumbers": [
+      392
+    ],
+    "number": "DP10",
+    "rarity": "Promo",
+    "rules": [
+      "Put this card onto your Active Infernape. Infernape LV.X can use any attack, Poké-Power, or Poké-Body from its previous level."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Level-Up"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fire"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Water",
+        "value": "+30"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Supreme Command",
+        "text": "Once during your turn (before your attack), you may choose up to 2 cards from your opponent's hand without looking and put them face down next to the Defending Pokémon. (These cards are not in play or in your opponent's hand.) At the end of your opponent's next turn, return those cards to your opponent's hand. This power can't be used if Empoleon is affected by a Special Condition.",
+        "type": "Poké-Power"
+      }
+    ],
+    "artist": "Shizurow",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Water",
+          "Water",
+          "Water"
+        ],
+        "damage": "",
+        "name": "Hydro Impact",
+        "text": "Choose 1 of your opponent's Pokémon. This attack does 80 damage to that Pokémon (Don't apply Weakness and Resistance for Benched Pokémon.) Empoleon can't attack during your next turn."
+      }
+    ],
+    "cardId": "DP11",
+    "convertedRetreatCost": 2,
+    "evolvesFrom": "Empoleon",
+    "hp": "140",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Oberkommando",
+            "text": "Einmal während deines Zuges (vor deinem Angriff) kannst du bis zu 2 Karten auf der Hand deines Gegners wählen (ohne sie vorher anzusehen). Lege die Karten verdeckt neben das Verteidigende Pokémon (sie sind weder im Spiel, noch auf der Hand des Gegners). Am Ende des nächsten Zuges deines Gegners nimmt dieser die Karten zurück auf seine Hand. Diese Poké-Power kann nicht benutzt werden, wenn Impoleon von einem Speziellen Zustand betroffen ist."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Hydroeinschlag",
+            "text": "Wähle 1 Pokémon deines Gegners. Dieser Angriff fügt dem gewählten Pokémon 80 Schadenspunkte zu. (Wende Schwäche und Resistenz bei Pokémon auf der Bank nicht an.) Impoleon kann in deinem nächsten Zug nicht angreifen."
+          }
+        ],
+        "name": "Impoleon"
+      }
+    },
+    "id": "dpp-DP11",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP11",
+      "tcgdex": "dpp-DP11",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP11/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP11/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "X",
+    "matchStatus": "matched",
+    "name": "Empoleon LV.X",
+    "nationalPokedexNumbers": [
+      395
+    ],
+    "number": "DP11",
+    "rarity": "Promo",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "rules": [
+      "Put this card onto your Active Empoleon. Empoleon LV.X can use any attack, Poké-Power, or Poké-Body from its previous level."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Level-Up"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+30"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Stance",
+        "text": "Once during your turn (before your attack), when you put Lucario LV.X from your hand onto your Active Lucario, you may use this power. Prevent all effects of an attack, including damage, done to Lucario during your opponent's next turn. (If Lucario is no longer your Active Pokémon, this effect ends.)",
+        "type": "Poké-Power"
+      }
+    ],
+    "artist": "Ryo Ueda",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Fighting",
+          "Fighting",
+          "Colorless"
+        ],
+        "damage": "80",
+        "name": "Close Combat",
+        "text": "During your opponent's next turn, any damage done to Lucario by attacks is increased by 30 (after applying Weakness and Resistance)."
+      }
+    ],
+    "cardId": "DP12",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Lucario",
+    "hp": "110",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Abwehrhaltung",
+            "text": "Einmal während deines Zuges (vor deinem Angriff) kannst du, wenn du Lucario Lv.X auf dein aktives Lucario legst, diese Poké-Power benutzen. Verhindere während des nächsten Zuges deines Gegners alle Effekte eines Angiffs, einschließlich Schaden, die Lucario zugefügt werden. (Wenn Lucario nicht mehr dein Aktives Pokémon ist, endet dieser Effekt.)"
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Nahkampf",
+            "text": "Während des nächsten Zuges deines Gegeners wird Schaden, der Lucario durch Angriffe zugefügt wird, um 30 Schadenspunkte erhöht (nachdem Schwäche und Resistenz verrechnet wurden.)"
+          }
+        ],
+        "name": "Lucario"
+      }
+    },
+    "id": "dpp-DP12",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP12",
+      "tcgdex": "dpp-DP12",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP12/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP12/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "X",
+    "matchStatus": "matched",
+    "name": "Lucario LV.X",
+    "nationalPokedexNumbers": [
+      448
+    ],
+    "number": "DP12",
+    "rarity": "Promo",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "rules": [
+      "Put this card onto your Active Lucario. Lucario LV.X can use any attack, Poké-Power, or Poké-Body from its previous level."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Level-Up"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Mitsuhiro Arita",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Water"
+        ],
+        "damage": "10+",
+        "name": "Splash About",
+        "text": "If Buizel has less Energy attached to it than the Defending Pokémon, this attack does 10 damage plus 10 more damage."
+      }
+    ],
+    "cardId": "DP13",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Floatzel"
+    ],
+    "flavorText": "It has a flotation sac that is like an inflatable collar. It floats on water with its head out.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Herumspritzen",
+            "text": "Wenn an das Verteidigende Pokémon mehr Energie angelegt ist als an Bamelin, fügt dieser Angriff 10 Schadenspunkte plus 10 weitere Schadenspunkte zu."
+          }
+        ],
+        "name": "Bamelin"
+      }
+    },
+    "id": "dpp-DP13",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP13",
+      "tcgdex": "dpp-DP13",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP13/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP13/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "10",
+    "matchStatus": "matched",
+    "name": "Buizel",
+    "nationalPokedexNumbers": [
+      418
+    ],
+    "number": "DP13",
+    "rarity": "Promo",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+10"
+      }
+    ]
+  },
+  {
+    "artist": "Masakazu Fukuda",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Me First",
+        "text": "Draw a card."
+      },
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "10",
+        "name": "Tone-Deaf",
+        "text": "Flip a coin. If heads, the Defending Pokémon is now Confused."
+      }
+    ],
+    "cardId": "DP14",
+    "convertedRetreatCost": 1,
+    "flavorText": "It can learn and speak human words. If they gather, they all learn the same saying.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Egotrip",
+            "text": "Ziehe 1 Karte."
+          },
+          {
+            "name": "Unmusikalisch",
+            "text": "Wirf 1 Münze. Bei 'Kopf' ist das Verteidigende Pokémon jetzt verwirrt."
+          }
+        ],
+        "name": "Plaudagei"
+      }
+    },
+    "id": "dpp-DP14",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP14",
+      "tcgdex": "dpp-DP14",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP14/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP14/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "27",
+    "matchStatus": "matched",
+    "name": "Chatot",
+    "nationalPokedexNumbers": [
+      441
+    ],
+    "number": "DP14",
+    "rarity": "Promo",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+10"
+      }
+    ]
+  },
+  {
+    "artist": "Kagemaru Himeno",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Lightning"
+        ],
+        "damage": "10",
+        "name": "Spark",
+        "text": "Does 10 damage to 1 of your opponent's Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      }
+    ],
+    "cardId": "DP15",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Luxio"
+    ],
+    "flavorText": "All of its fur dazzles if danger is sensed. It flees while the foe is momentarily blinded.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Funkensprung",
+            "text": "Dieser Angriff fügt 1 Pokémon auf der Bank deines Gegners 10 Schadenspunkte zu. (Wende Schwäche und Resistenz bei Pokémon auf der Bank nicht an.)"
+          }
+        ],
+        "name": "Sheinux"
+      }
+    },
+    "id": "dpp-DP15",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP15",
+      "tcgdex": "dpp-DP15",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP15/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP15/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "7",
+    "matchStatus": "matched",
+    "name": "Shinx",
+    "nationalPokedexNumbers": [
+      403
+    ],
+    "number": "DP15",
+    "rarity": "Promo",
+    "resistances": [
+      {
+        "type": "Metal",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+10"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Electro Recycle",
+        "text": "Once during your turn (before your attack), if Pichu is anywhere under Pikachu, you may search your discard pile for a Lightning Energy card, show it to your opponent, and put it into your hand. This power can't be used if Pikachu is affected by a Special Condition.",
+        "type": "Poké-Power"
+      }
+    ],
+    "artist": "Sumiyoshi Kizuki",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Lightning",
+          "Colorless"
+        ],
+        "damage": "20+",
+        "name": "BikaBika",
+        "text": "Flip a coin. If heads, this attack does 20 damage plus 10 more damage."
+      }
+    ],
+    "cardId": "DP16",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Raichu"
+    ],
+    "flavorText": "It lives in forests with others. It stores electricity in the pouches on its cheeks.",
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Elektro-Recycling",
+            "text": "Einmal während deines Zuges (vor deinem Angriff) kannst du, wenn Pichu sich an beliebiger Stelle unter Pikachu befindet, deinen Ablagestapel nach einer -Energiekarte durchsuchen. Zeige sie deinem Gegner und nimm sie auf die Hand. Diese Poké-Power kann nicht benutzt werden, wenn Pikachu von einem Speziellen Zustand betroffen ist."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "PikaPika",
+            "text": "Wirf 1 Münze. Bei \"Kopf\" fügt dieser Angriff 20 Schadenspunkte plus 10 weitere Schadenspunkte zu."
+          }
+        ],
+        "name": "Pikachu"
+      }
+    },
+    "id": "dpp-DP16",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP16",
+      "tcgdex": "dpp-DP16",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP16/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP16/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "15",
+    "matchStatus": "matched",
+    "name": "Pikachu",
+    "nationalPokedexNumbers": [
+      25
+    ],
+    "number": "DP16",
+    "rarity": "Promo",
+    "resistances": [
+      {
+        "type": "Metal",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "variants": [
+      {
+        "foil": "cosmos",
+        "type": "holo"
+      },
+      {
+        "stamp": [
+          "countdown-calendar"
+        ],
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+10"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Time Skip",
+        "text": "Once during your turn (before your attack), you may have your opponent flip 2 coins. If both of them are heads, your turn ends. If both of them are tails, after your opponent draws a card at the beginning of his or her next turn, his or her turn ends. This power can't be used if Dialga is affected by a Special Condition.",
+        "type": "Poké-Power"
+      }
+    ],
+    "artist": "Ryo Ueda",
+    "attacks": [
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Metal",
+          "Metal",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "80",
+        "name": "Metal Flash",
+        "text": "During your next turn, Dialga can't use Metal Flash."
+      }
+    ],
+    "cardId": "DP17",
+    "convertedRetreatCost": 2,
+    "evolvesFrom": "Dialga",
+    "hp": "110",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Zeitsprung",
+            "text": "Einmal während deines Zuges (vor deinem Angriff), kannst du deinen Gegner 2 Münzen werfen lassen. Wenn beide \"Kopf\" gezeigt haben, ist dein Zug jetzt beendet. Wenn beide \"Zahl\" gezeigt haben, endet der nächste Zug deines Gegners, nachdem er zu Beginn seines Zuges eine Karte gezogen hat. Diese Poké-Power kann nicht benutzt werden, wenn Dialga von einem Speziellen Zustand betroffen ist."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Metallblitz",
+            "text": "Dialga kann Metallblitz in deinem nächsten Zug nicht einsetzen."
+          }
+        ],
+        "name": "Dialga"
+      }
+    },
+    "id": "dpp-DP17",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP17",
+      "tcgdex": "dpp-DP17",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP17/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP17/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "X",
+    "matchStatus": "matched",
+    "name": "Dialga LV.X",
+    "nationalPokedexNumbers": [
+      483
+    ],
+    "number": "DP17",
+    "rarity": "Promo",
+    "resistances": [
+      {
+        "type": "Psychic",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "rules": [
+      "Put this card onto your Active Dialga. Dialga LV.X can use any attack, Poké-Power, or Poké-Body from its previous level."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Level-Up"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Metal"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Restructure",
+        "text": "Once during your turn (before your attack), you may have your opponent switch 1 of your Active Pokémon with 1 of your Benched Pokémon. Then, you switch 1 of the Defending Pokémon with 1 of your opponent's Benched Pokémon. This power can't be used if Palkia is affected by a Special Condition.",
+        "type": "Poké-Power"
+      }
+    ],
+    "artist": "Ryo Ueda",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Water",
+          "Water",
+          "Water"
+        ],
+        "damage": "60",
+        "name": "Hydro Reflect",
+        "text": "You may move all Energy cards attached to Palkia to your Benched Pokémon in any way you like. (Ignore this effect if you don't have any Benched Pokémon.)"
+      }
+    ],
+    "cardId": "DP18",
+    "convertedRetreatCost": 3,
+    "evolvesFrom": "Palkia",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Umstrukturieren",
+            "text": "Einmal während deines Zuges (vor deinem Angriff) kannst du deinen Gegner 1 deiner Aktiven Pokémon gegen 1 Pokémon auf deiner Bank austauschen lassen. Danach tausche 1 Verteidigendes Pokémon gegen 1 Pokémon auf der Bank deines Gegners aus. Diese Poké-Power kann nicht benutzt werden, wenn Palkia von einem Speziellen Zustand betroffen ist."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Hydroreflexion",
+            "text": "Du kannst alle Energiekarten, die an Palkia angelegt sind, entfernen und in beliebiger Verteilung an die Pokémon auf deiner Bank anlegen. (Dieser Effekt hat keine Auswirkungen, wenn du keine Pokémon auf der Bank hast.)"
+          }
+        ],
+        "name": "Palkia"
+      }
+    },
+    "id": "dpp-DP18",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP18",
+      "tcgdex": "dpp-DP18",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP18/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP18/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "X",
+    "matchStatus": "matched",
+    "name": "Palkia LV.X",
+    "nationalPokedexNumbers": [
+      484
+    ],
+    "number": "DP18",
+    "rarity": "Promo",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "rules": [
+      "Put this card onto your Active Palkia. Palkia LV.X can use any attack, Poké-Power, or Poké-Body from its previous level."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Level-Up"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      },
+      {
+        "stamp": [
+          "david-cohen"
+        ],
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Dark Shadow",
+        "text": "Each basic Darkness Energy card attached to your Darkness Pokémon now has the effect \"If the Pokémon Darkness Energy is attached to attacks, the attack does 10 more damage to the Active Pokémon (before applying Weakness and Resistance).\" You can't use more than 1 Dark Shadow Poké-Body each turn.",
+        "type": "Poké-Body"
+      }
+    ],
+    "artist": "Shizurow",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Darkness",
+          "Darkness",
+          "Colorless"
+        ],
+        "damage": "40",
+        "name": "Endless Darkness",
+        "text": "The Defending Pokémon is now Asleep. Flip 2 coins instead of 1 between turns. If either of them is tails, the Defending Pokémon is still Asleep. If both of them are tails, the Defending Pokémon is Knocked Out."
+      }
+    ],
+    "cardId": "DP19",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Darkrai",
+    "hp": "100",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Dark Shadow",
+            "text": "Each basic  Energy card attached to your  Pokémon now has the effect. If the Pokémon Darkness Energy is attached to attachs, the attack does 10 more damage to the Active Pokémon (before applying Weakness and Resistance). You can't use more than 1 Dark Shadow Poké-Body each turn."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Unendliche Finsternis",
+            "text": "Das Verteidigende Pokémon schläft jetzt. Wirf zwischen den Zügen 2 Münzen anstelle von 1 Münze. Wenn eine Münze \"Zahl\" gezeigt hat, schläft das Verteidigende Pokémon weiter. Wenn beide \"Zahl\" gezeigt haben, ist das Verteidigende Pokémon jetzt kampfunfähig."
+          }
+        ],
+        "name": "Darkrai"
+      }
+    },
+    "id": "dpp-DP19",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP19",
+      "tcgdex": "dpp-DP19",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP19/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP19/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "X",
+    "matchStatus": "matched",
+    "name": "Darkrai LV.X",
+    "nationalPokedexNumbers": [
+      491
+    ],
+    "number": "DP19",
+    "rarity": "Promo",
+    "resistances": [
+      {
+        "type": "Psychic",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "rules": [
+      "Put this card onto your Active Darkrai. Darkrai LV.X can use any attack, Poké-Power, or Poké-Body from its previous level."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Level-Up"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Darkness"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Daisuke Ito",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Fire",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Smoke Bomb",
+        "text": "If the Defending Pokémon tries to attack during your opponent's next turn, your opponent flips a coin. If tails, that attack does nothing."
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Fire",
+          "Fire",
+          "Colorless"
+        ],
+        "damage": "80",
+        "name": "Flame Drum",
+        "text": "If Magby isn't anywhere under Magmortar, discard 2 Energy cards from your hand. (If you can't discard 2 Energy cards from your hand, this attack does nothing.)"
+      }
+    ],
+    "cardId": "DP20",
+    "convertedRetreatCost": 3,
+    "evolvesFrom": "Magmar",
+    "flavorText": "It blasts fireballs of over 3,600 degrees F from the ends of its arms. It lives in volcanic craters.",
+    "hp": "100",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Rauchbombe",
+            "text": "Falls das Verteidigende Pokémon während des nächsten Zuges deines Gegners angreift, wirft dein Gegner 1 Münze. Bei \"Zahl\" hat dieser Angriff keine Auswirkungen."
+          },
+          {
+            "name": "Flammentrommel",
+            "text": "Wenn Magby sich an keiner Stelle unter Magbrant befindet, lege 2 Karten von deiner Hand auf deinen Ablagestapel. (Wenn du keine 2 Karten von deiner Hand auf den Ablagestapel legen kannst, hat dieser Angriff keine Auswirkungen.)"
+          }
+        ],
+        "name": "Magbrant"
+      }
+    },
+    "id": "dpp-DP20",
+    "ids": {
+      "cardmarket": [
+        275562
+      ],
+      "pokemontcg": "dpp-DP20",
+      "tcgdex": "dpp-DP20",
+      "tcgplayer": [
+        87057
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP20/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP20/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "48",
+    "matchStatus": "matched",
+    "name": "Magmortar",
+    "nationalPokedexNumbers": [
+      467
+    ],
+    "number": "DP20",
+    "rarity": "Promo",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fire"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Water",
+        "value": "+30"
+      }
+    ]
+  },
+  {
+    "artist": "Daisuke Ito",
+    "attacks": [
+      {
+        "convertedEnergyCost": 0,
+        "cost": [],
+        "damage": "",
+        "name": "Electromagnetic Induction",
+        "text": "Search your deck for up to 2 Lightning Energy cards and attach them to 1 of your Pokémon. Shuffle your deck afterward."
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Lightning",
+          "Colorless"
+        ],
+        "damage": "30×",
+        "name": "Explosive Thunder",
+        "text": "Discard all basic Lightning Energy cards attached to Raichu. This attack does 30 damage times the number of Lightning Energy cards you discarded."
+      }
+    ],
+    "cardId": "DP21",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Pikachu",
+    "flavorText": "It turns aggressive if it has too much electricity in its body. It discharges power through its tail.",
+    "hp": "90",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Elektromagnetische Induktion",
+            "text": "Durchsuche dein Deck nach bis zu 2 -Energiekarten und lege sie an 1 deiner Pokémon an. Mische dein Deck danach."
+          },
+          {
+            "name": "Explosiver Donner",
+            "text": "Lege alle an Raichu angelegten -Basis-Energiekarten auf deinen Ablagestapel. Dieser Angriff fügt 30 Schadenspunkte mal der Anzahl der auf diese Weise auf den Ablagestapel gelegten -Energiekarten zu."
+          }
+        ],
+        "name": "Raichu"
+      }
+    },
+    "id": "dpp-DP21",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP21",
+      "tcgdex": "dpp-DP21",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP21/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP21/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "40",
+    "matchStatus": "matched",
+    "name": "Raichu",
+    "nationalPokedexNumbers": [
+      26
+    ],
+    "number": "DP21",
+    "rarity": "Promo",
+    "resistances": [
+      {
+        "type": "Metal",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Baby Evolution",
+        "text": "Once during your turn (before your attack), you may put Mr. Mime from your hand onto Mime Jr. (this counts as evolving Mime Jr.) and remove all damage counters from Mime Jr.",
+        "type": "Poké-Power"
+      }
+    ],
+    "artist": "Mitsuhiro Arita",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Psychic"
+        ],
+        "damage": "",
+        "name": "Mime",
+        "text": "Shuffle your hand into your deck. Then, draw a number of cards equal to the number of cards in your opponent's hand."
+      }
+    ],
+    "cardId": "DP22",
+    "convertedRetreatCost": 1,
+    "flavorText": "It habitually mimics foes. Once mimicked, the foe cannot take its eyes off this Pokémon.",
+    "hp": "40",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Baby Evolution",
+            "text": "Einmal während deines Zuges (vor deinem Angriff) kannst du Pantimos von deiner Hand auf Pantimimi legen (das zählt als Entwickeln von Pantimimi). Entferne alle Schadensmarken von Pantimimi."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Mimen",
+            "text": "Mische deine Handkarten in dein Deck. Zähle danach die Anzahl der Karten auf der Hand deines Gegners. Ziehe ebenso viele Karten."
+          }
+        ],
+        "name": "Pantimimi"
+      }
+    },
+    "id": "dpp-DP22",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP22",
+      "tcgdex": "dpp-DP22",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP22/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP22/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "5",
+    "matchStatus": "matched",
+    "name": "Mime Jr.",
+    "nationalPokedexNumbers": [
+      439
+    ],
+    "number": "DP22",
+    "rarity": "Promo",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "+10"
+      }
+    ]
+  },
+  {
+    "artist": "Mitsuhiro Arita",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Charm",
+        "text": "During your opponent's next turn, any damage done by attacks from the Defending Pokémon is reduced by 20 (before applying Weakness and Resistance)."
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Pose",
+        "text": "Flip a coin. If tails, this attack does nothing."
+      }
+    ],
+    "cardId": "DP23",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Purugly"
+    ],
+    "flavorText": "It claws if displeased and purrs when affectionate. Its fickleness if very popular among some.",
+    "hp": "50",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Charme",
+            "text": "Während des nächsten Zuges deines Gegners wird aller Schaden, der durch Angriffe des Verteidigenden Pokémon zugefügt wird, um 20 Schadenspunkte reduziert (bevor Schwäche und Resistenz verrechnet werden)."
+          },
+          {
+            "name": "Posieren",
+            "text": "Wirf 1 Münze. Bei \"Zahl\" hat dieser Angriff keine Auswirkungen."
+          }
+        ],
+        "name": "Charmian"
+      }
+    },
+    "id": "dpp-DP23",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP23",
+      "tcgdex": "dpp-DP23",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP23/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP23/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "12",
+    "matchStatus": "matched",
+    "name": "Glameow",
+    "nationalPokedexNumbers": [
+      431
+    ],
+    "number": "DP23",
+    "rarity": "Promo",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+10"
+      }
+    ]
+  },
+  {
+    "artist": "Kouki Saitou",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Water"
+        ],
+        "damage": "10",
+        "name": "Spacial Rend",
+        "text": "Search your deck for a Stadium card, show it to your opponent, and put it into your hand. Shuffle your deck afterward. If there is any Stadium card in play, discard it."
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Metal",
+          "Metal",
+          "Metal"
+        ],
+        "damage": "80",
+        "name": "Roar of Time",
+        "text": "Search your discard pile for 3 Pokémon, show them to your opponent, and put them on top of your deck. Shuffle your deck afterward. (If you don't have 3 Pokémon in your discard pile, this attack does nothing.)"
+      }
+    ],
+    "cardId": "DP24",
+    "convertedRetreatCost": 1,
+    "hp": "80",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Raumschlag",
+            "text": "Durchsuche dein Deck nach 1 Stadion-Karte, zeige sie deinem Gegner und nimm sie auf die Hand. Mische dein Deck danach. Wenn sich bereits eine Stadion-Karte im Spiel befindet, lege diese auf den Ablagestapel."
+          },
+          {
+            "name": "Zeitenlärm",
+            "text": "Durchsuche deinen Ablagestapel nach 3 Pokémon, zeige sie deinem Gegner und lege sie auf dein Deck. Mische dein Deck danach. (Wenn du keine 3 Pokémon in deinem Ablagestapel hast, hat dieser Angriff keine Auswirkungen.)"
+          }
+        ],
+        "name": "Darkrai"
+      }
+    },
+    "id": "dpp-DP24",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP24",
+      "tcgdex": "dpp-DP24",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP24/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP24/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "50",
+    "matchStatus": "matched",
+    "name": "Darkrai",
+    "nationalPokedexNumbers": [
+      491
+    ],
+    "number": "DP24",
+    "rarity": "Promo",
+    "resistances": [
+      {
+        "type": "Psychic",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "rules": [
+      "Enigma Berry: If Darkrai is damaged by an attack from your opponent's Fighting Pokémon, remove 4 damage counters at the end of that turn."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Darkness"
+    ],
+    "variants": [
+      {
+        "foil": "cosmos",
+        "type": "holo"
+      },
+      {
+        "size": "jumbo",
+        "type": "holo"
+      },
+      {
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Sumiyoshi Kizuki",
+    "cardId": "DP25",
+    "i18n": {
+      "de": {
+        "name": "Tropenwinde",
+        "rules": [
+          "Wirf 1 Münze. Entferne bei 'Kopf' 2 Schadensmarken von allen Aktiven Pokémon (1, falls nur 1 vorhanden). Bei 'Zahl' schlafen alle Aktiven Pokémon jetzt."
+        ]
+      }
+    },
+    "id": "dpp-DP25",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP25",
+      "tcgdex": "dpp-DP25",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP25/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP25/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Tropical Wind",
+    "number": "DP25",
+    "rarity": "Promo",
+    "rules": [
+      "Flip a coin. If heads, remove 2 damage counters from each Active Pokémon (remove 1 damage counter if a Pokémon has only 1). If tails, each Active Pokémon is now Asleep."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Item"
+    ],
+    "supertype": "Trainer",
+    "variants": [
+      {
+        "stamp": [
+          "worlds-2008"
+        ],
+        "type": "normal"
+      },
+      {
+        "stamp": [
+          "worlds-2008",
+          "finalist"
+        ],
+        "type": "normal"
+      },
+      {
+        "stamp": [
+          "worlds-2008",
+          "quarter-finalist"
+        ],
+        "type": "normal"
+      },
+      {
+        "stamp": [
+          "worlds-2008",
+          "semi-finalist"
+        ],
+        "type": "normal"
+      },
+      {
+        "stamp": [
+          "worlds-2008",
+          "staff"
+        ],
+        "type": "normal"
+      },
+      {
+        "stamp": [
+          "worlds-2008",
+          "top-sixteen"
+        ],
+        "type": "normal"
+      },
+      {
+        "stamp": [
+          "worlds-2008",
+          "top-thirty-two"
+        ],
+        "type": "normal"
+      }
+    ]
+  },
+  {
+    "artist": "Kazuyuki Kano",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Metal"
+        ],
+        "damage": "10",
+        "name": "Time Bellow",
+        "text": "Draw a card."
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Metal",
+          "Metal",
+          "Colorless"
+        ],
+        "damage": "40",
+        "name": "Flash Cannon",
+        "text": "You may return all Energy cards attached to Dialga to your hand. If you do, remove the highest Stage Evolution card from the Defending Pokémon and shuffle that card into your opponent's deck."
+      }
+    ],
+    "cardId": "DP26",
+    "convertedRetreatCost": 2,
+    "flavorText": "It has the power to control time. It appears in Sinnoh-region myths as an ancient deity.",
+    "hp": "90",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Zeitschrei",
+            "text": "Ziehe 1 Karte."
+          },
+          {
+            "name": "Lichtkanone",
+            "text": "Du kannst alle an Dialga angelegten Energiekarten zurück auf deine Hand nehmen. Wenn du das machst, entferne die höchste Evolutionskarte vom Verteidigenden Pokémon. Dein Gegner mischt diese Karte in sein Deck."
+          }
+        ],
+        "name": "Dialga"
+      }
+    },
+    "id": "dpp-DP26",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP26",
+      "tcgdex": "dpp-DP26",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP26/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP26/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "68",
+    "matchStatus": "matched",
+    "name": "Dialga",
+    "nationalPokedexNumbers": [
+      483
+    ],
+    "number": "DP26",
+    "rarity": "Promo",
+    "resistances": [
+      {
+        "type": "Psychic",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Metal"
+    ],
+    "variants": [
+      {
+        "foil": "cosmos",
+        "type": "holo"
+      },
+      {
+        "foil": "cracked-ice",
+        "size": "jumbo",
+        "type": "holo"
+      },
+      {
+        "foil": "mirror",
+        "size": "jumbo",
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "artist": "Daisuke Ito",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Water"
+        ],
+        "damage": "10",
+        "name": "Spacial Rend",
+        "text": "Search your deck for a Stadium card, show it to your opponent, and put it into your hand. Shuffle your deck afterward. If there is any Stadium card in play, discard it."
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Water",
+          "Water",
+          "Colorless"
+        ],
+        "damage": "40",
+        "name": "Transback",
+        "text": "You may flip a coin. If heads, discard all Energy attached to Palkia and put the Defending Pokémon and all cards attached to it on top of your opponent's deck. Your opponent shuffles his or her deck afterward."
+      }
+    ],
+    "cardId": "DP27",
+    "convertedRetreatCost": 2,
+    "flavorText": "It has the ability to distort space. It is described as a deity in Sinnoh-region mythology.",
+    "hp": "90",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Raumschlag",
+            "text": "Durchsuche dein Deck nach 1 Stadion-Karte, zeige sie deinem Gegner und nimm sie auf die Hand. Mische dein Deck danach. Wenn sich bereits eine Stadion-Karte im Spiel befindet, lege diese auf den Ablagestapel."
+          },
+          {
+            "name": "Abtransport",
+            "text": "Du kannst 1 Münze werfen. Bei \"Kopf\" lege alle Energien, die an Palkia angelegt sind, auf deinen Ablagestapel. Danach lege das Verteidigende Pokémon und alle an es angelegten Karten auf das Deck deines Gegners. Dein Gegner mischt sein Deck danach."
+          }
+        ],
+        "name": "Palkia"
+      }
+    },
+    "id": "dpp-DP27",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP27",
+      "tcgdex": "dpp-DP27",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP27/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP27/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "67",
+    "matchStatus": "matched",
+    "name": "Palkia",
+    "nationalPokedexNumbers": [
+      484
+    ],
+    "number": "DP27",
+    "rarity": "Promo",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "variants": [
+      {
+        "foil": "cosmos",
+        "type": "holo"
+      },
+      {
+        "foil": "cracked-ice",
+        "size": "jumbo",
+        "type": "holo"
+      },
+      {
+        "foil": "mirror",
+        "size": "jumbo",
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Psybarrier",
+        "text": "Prevent all effects of attacks, including damage, done to Mewtwo by your opponent's Pokémon that isn't an Evolved Pokémon.",
+        "type": "Poké-Body"
+      }
+    ],
+    "artist": "Shizurow",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Psychic",
+          "Psychic",
+          "Colorless"
+        ],
+        "damage": "120",
+        "name": "Giga Burn",
+        "text": "Discard all Energy attached to Mewtwo."
+      }
+    ],
+    "cardId": "DP28",
+    "convertedRetreatCost": 2,
+    "evolvesFrom": "Mewtwo",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Psybarriere",
+            "text": "Verhindere alle Effekte von Angriffen, einschließlich Schaden, die Mewtu von Pokémon deines Gegners, die keine entwickelten Pokémon sind, zugefügt würden."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Gigaverbrennung",
+            "text": "Lege alle an Mewtu angelegten Energien auf deinen Ablagestapel."
+          }
+        ],
+        "name": "Mewtu"
+      }
+    },
+    "id": "dpp-DP28",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP28",
+      "tcgdex": "dpp-DP28",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP28/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP28/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "X",
+    "matchStatus": "matched",
+    "name": "Mewtwo LV.X",
+    "nationalPokedexNumbers": [
+      150
+    ],
+    "number": "DP28",
+    "rarity": "Promo",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "rules": [
+      "Put this card onto your Active Mewtwo. Mewtwo LV.X can use any attack, Poké-Power, or Poké-Body from its previous level."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Level-Up"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Ryo Ueda",
+    "attacks": [
+      {
+        "convertedEnergyCost": 0,
+        "cost": [],
+        "damage": "50×",
+        "name": "Hard Crush",
+        "text": "Discard the top 5 cards from your deck. This attack does 50 damage for each Energy card you discarded."
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Fighting",
+          "Fighting",
+          "Colorless"
+        ],
+        "damage": "60",
+        "name": "Upthrow",
+        "text": "Search your discard pile for all Fighting Energy cards, show them to your opponent, and shuffle them into your deck."
+      }
+    ],
+    "cardId": "DP29",
+    "convertedRetreatCost": 4,
+    "evolvesFrom": "Rhyperior",
+    "hp": "170",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Heftiger Zermalmer",
+            "text": "Lege die obersten 5 Karten deines Decks auf deinen Ablagestapel. Dieser Angriff fügt für jede Energiekarte, die auf diese Weise abgelegt wurde, 50 Schadenspunkte zu."
+          },
+          {
+            "name": "Verwerfung",
+            "text": "Durchsuche deinen Ablagestapel nach allen -Energiekarten, zeige sie deinem Gegner und mische sie in dein Deck."
+          }
+        ],
+        "name": "Rihornior"
+      }
+    },
+    "id": "dpp-DP29",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP29",
+      "tcgdex": "dpp-DP29",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP29/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP29/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "X",
+    "matchStatus": "matched",
+    "name": "Rhyperior LV.X",
+    "nationalPokedexNumbers": [
+      464
+    ],
+    "number": "DP29",
+    "rarity": "Promo",
+    "resistances": [
+      {
+        "type": "Lightning",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "rules": [
+      "Put this card onto your Active Rhyperior. Rhyperior LV.X can use any attack, Poké-Power, or Poké-Body from its previous level."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Level-Up"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Water",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Sacrifice",
+        "text": "Once during your turn (before your attack), you may choose 1 of your Pokémon in play and that Pokémon is Knocked Out. Then, search your discard pile for up to 2 basic Energy cards, attach them to Regigigas, and remove 8 damage counters from Regigigas. This power can't be used if Regigigas is affected by a Special Condition.",
+        "type": "Poké-Power"
+      }
+    ],
+    "artist": "Shizurow",
+    "attacks": [
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Water",
+          "Fighting",
+          "Metal",
+          "Colorless"
+        ],
+        "damage": "100",
+        "name": "Giga Blaster",
+        "text": "Discard the top card from your opponent's deck. Then, choose 1 card from your opponent's hand without looking and discard it. Regigigas can't use Giga Blaster during your next turn."
+      }
+    ],
+    "cardId": "DP30",
+    "convertedRetreatCost": 4,
+    "evolvesFrom": "Regigigas",
+    "hp": "150",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Opfer bringen",
+            "text": "Einmal während deines Zuges (vor deinem Angriff) kannst du 1 deiner Pokémon im Spiel wählen und kampfunfähig machen. Danach durchsuche deinen Ablagestapel nach bis zu 2 Basis-Energiekarten, lege sie an Regigigas an und entferne 8 Schadensmarken von Regigigas. Diese Poké-Power kann nicht benutzt werden, wenn Regigigas von einem Speziellen Zustand betroffen ist."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Gigablaster",
+            "text": "Lege die oberste Karte vom Deck deines Gegners auf seinen Ablagestapel. Danach wähle 1 Karte von der Hand deines Gegners (ohne sie vorher anzusehen) und lege sie auf seinen Ablagestapel. Regigigas kann Gigablaster in deinem nächsten Zug nicht einsetzen."
+          }
+        ],
+        "name": "Regigigas"
+      }
+    },
+    "id": "dpp-DP30",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP30",
+      "tcgdex": "dpp-DP30",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP30/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP30/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "X",
+    "matchStatus": "matched",
+    "name": "Regigigas LV.X",
+    "nationalPokedexNumbers": [
+      486
+    ],
+    "number": "DP30",
+    "rarity": "Promo",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "rules": [
+      "Put this card onto your Active Regigigas. Regigigas LV.X can use any attack, Poké-Power, or Poké-Body from its previous level."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Level-Up"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Heat Metal",
+        "text": "Your opponent can't remove the Special Condition Burned by evolving or devolving his or her Burned Pokémon. (This also includes putting a Pokémon Level-Up card onto the Burned Pokémon.) Whenever your opponent flips a coin for the Special Condition Burned between turns, treat it as tails.",
+        "type": "Poké-Body"
+      },
+      {
+        "name": "Heat Wave",
+        "text": "Once at the end of your turn, if Heatran is on your Bench, you may use this power. If you discarded basic Energy cards attached to your Fire or Metal Active Pokémon by using that Pokémon's attack this turn, attach up to 2 of those Energy cards to that Pokémon.",
+        "type": "Poké-Power"
+      }
+    ],
+    "artist": "Shizurow",
+    "cardId": "DP31",
+    "convertedRetreatCost": 4,
+    "evolvesFrom": "Heatran",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Hitzewelle",
+            "text": "Einmal am Ende deines Zuges kannst du, wenn Heatran auf deiner Bank ist, diese Poké-Power benutzen. Wenn du in diesem Zug als Ergebnis eines Angriffs von deinem Aktiven - oder -Pokémon Basis-Energiekarten von diesem entfernt und auf deinen Ablagestapel gelegt hast, lege bis zu 2 dieser Energiekarten an dieses Pokémon an."
+          }
+        ],
+        "name": "Heatran"
+      }
+    },
+    "id": "dpp-DP31",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP31",
+      "tcgdex": "dpp-DP31",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP31/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP31/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "X",
+    "matchStatus": "matched",
+    "name": "Heatran LV.X",
+    "nationalPokedexNumbers": [
+      485
+    ],
+    "number": "DP31",
+    "rarity": "Promo",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "rules": [
+      "Put this card onto your Active Heatran. Heatran LV.X can use any attack, Poké-Power, or Poké-Body from its previous level."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Level-Up"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fire"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Water",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Kent Kanetsuna",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Metal",
+          "Colorless"
+        ],
+        "damage": "40",
+        "name": "Mirror Shot",
+        "text": "If the Defending Pokémon tries to attack during your opponent's next turn, your opponent flips a coin. If tails, that attack does nothing."
+      },
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Lightning",
+          "Metal",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "100",
+        "name": "Magnet Slash",
+        "text": "Discard all Lightning Energy attached to Magnezone."
+      }
+    ],
+    "cardId": "DP32",
+    "convertedRetreatCost": 2,
+    "evolvesFrom": "Magneton",
+    "flavorText": "It evolved from exposure to a special magnetic field. Three units generate magnetism.",
+    "hp": "130",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Spiegelsalve",
+            "text": "Falls das Verteidigende Pokémon während des nächsten Zuges deines Gegners angreift, wirft dein Gegner 1 Münze. Bei \"Zahl\" hat dieser Angriff keine Auswirkungen."
+          },
+          {
+            "name": "Magnetschlitzer",
+            "text": "Lege alle -Energien, die an Magnezone angelegt sind, auf deinen Ablagestapel."
+          }
+        ],
+        "name": "Magnezone"
+      }
+    },
+    "id": "dpp-DP32",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP32",
+      "tcgdex": "dpp-DP32",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP32/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP32/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "51",
+    "matchStatus": "matched",
+    "name": "Magnezone",
+    "nationalPokedexNumbers": [
+      462
+    ],
+    "number": "DP32",
+    "rarity": "Promo",
+    "resistances": [
+      {
+        "type": "Psychic",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 2"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Metal"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "+30"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Dark Hide",
+        "text": "Once during your turn (before your attack), you may flip a coin. If heads, look at your opponent's hand, choose a Pokémon you find there, and put it on the bottom of his or her deck. This power can't be used if Dusknoir is affected by a Special Condition.",
+        "type": "Poké-Power"
+      }
+    ],
+    "artist": "Kent Kanetsuna",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Psychic",
+          "Psychic",
+          "Colorless"
+        ],
+        "damage": "70",
+        "name": "Reaper Pulse",
+        "text": "Move up to 2 damage counters from Dusknoir to 1 of your opponent's Benched Pokémon."
+      }
+    ],
+    "cardId": "DP33",
+    "convertedRetreatCost": 2,
+    "evolvesFrom": "Dusclops",
+    "flavorText": "The antenna on its head captures radio waves from the world of spirits that command it to take people there.",
+    "hp": "130",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Dunkles Versteck",
+            "text": "Einmal während deines Zuges (vor deinem Angriff) kannst du 1 Münze werfen. Bei \"Kopf\" schau dir die Handkarten deines Gegners an, wähle 1 Pokémon-Karte, die du dort gefunden hast, und lege sie unter das Deck deines Gegners. Diese Poké-Power kann nicht benutzt werden, wenn Zwirrfinst von einem Speziellen Zustand betroffen ist."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Düsterpuls",
+            "text": "Entferne bis zu 2 Schadensmarken von Zwirrfinst und lege sie auf 1 Pokémon auf der Bank deines Gegners."
+          }
+        ],
+        "name": "Zwirrfinst"
+      }
+    },
+    "id": "dpp-DP33",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP33",
+      "tcgdex": "dpp-DP33",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP33/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP33/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "49",
+    "matchStatus": "matched",
+    "name": "Dusknoir",
+    "nationalPokedexNumbers": [
+      477
+    ],
+    "number": "DP33",
+    "rarity": "Promo",
+    "resistances": [
+      {
+        "type": "Colorless",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 2"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Darkness",
+        "value": "+30"
+      }
+    ]
+  },
+  {
+    "artist": "Mitsuhiro Arita",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Wind Wave",
+        "text": "Search your discard pile for up to 5 in any combination of Pokémon and Supporter cards. Show them to your opponent and shuffle them into your deck."
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Psychic",
+          "Psychic",
+          "Psychic"
+        ],
+        "damage": "60",
+        "name": "Explosive Smoke",
+        "text": "Does 10 damage to each Benched Pokémon (both yours and your opponent's). (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      }
+    ],
+    "cardId": "DP34",
+    "evolvesFrom": "Drifloon",
+    "flavorText": "It's drowzy in daytime, but flies off in the evening in big groups. No one knows where they go.",
+    "hp": "80",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Windwelle",
+            "text": "Durchsuche deinen Ablagestapel nach bis zu 5 Karten in beliebiger Kombination aus Pokémon- und Unterstützerkarten. Zeige sie deinem Gegner und mische sie in dein Deck."
+          },
+          {
+            "name": "Explosiver Qualm",
+            "text": "Dieser Angriff fügt allen Pokémon auf der Bank (deinen und denen deines Gegners) 10 Schadenspunkte zu. (Wende Schwäche und Resistenz bei Pokémon auf der Bank nicht an.)"
+          }
+        ],
+        "name": "Drifzepeli"
+      }
+    },
+    "id": "dpp-DP34",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP34",
+      "tcgdex": "dpp-DP34",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP34/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP34/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "40",
+    "matchStatus": "matched",
+    "name": "Drifblim",
+    "nationalPokedexNumbers": [
+      426
+    ],
+    "number": "DP34",
+    "rarity": "Promo",
+    "resistances": [
+      {
+        "type": "Colorless",
+        "value": "-20"
+      }
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Darkness",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Install",
+        "text": "As often as you like during your turn (before your attack), move a Technical Machine card attached to 1 of your Pokémon to another of your Pokémon. This power can't be used if Porygon-Z is affected by a Special Condition.",
+        "type": "Poké-Power"
+      }
+    ],
+    "artist": "Kagemaru Himeno",
+    "attacks": [
+      {
+        "convertedEnergyCost": 0,
+        "cost": [],
+        "damage": "",
+        "name": "Learning",
+        "text": "Search your deck for a Pokémon LV.X that levels up from 1 of your Pokémon, and put it onto that Pokémon. (This counts as leveling up that Pokémon.) Shuffle your deck afterward."
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "40+",
+        "name": "Overload",
+        "text": "Does 40 damage plus 20 more damage for each Technical Machine card attached to Porygon-Z."
+      }
+    ],
+    "cardId": "DP35",
+    "convertedRetreatCost": 2,
+    "evolvesFrom": "Porygon2",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Installieren",
+            "text": "Beliebig oft während deines Zuges (vor deinem Angriff) kannst du 1 Technische Maschine, die an 1 deiner Pokémon angelegt ist, an ein anderes deiner Pokémon anlegen. Diese Poké-Power kann nicht benutzt werden, wenn Porygon-Z von einem Speziellen Zustand betroffen ist."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Lernen",
+            "text": "Durchsuche dein Deck nach einer Pokémon LV.X-Karte, die auf 1 deiner Pokémon gelegt werden kann, und lege sie auf dieses Pokémon. (Dies zählt als Level-Up dieses Pokémon.) Mische dein Deck danach."
+          },
+          {
+            "name": "Überlastung",
+            "text": "Dieser Angriff fügt 40 Schadenspunkte plus 20 weitere Schadenspunkte für jede an Porygon-Z angelegte Technische Machine zu."
+          }
+        ],
+        "name": "Porygon-Z"
+      }
+    },
+    "id": "dpp-DP35",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP35",
+      "tcgdex": "dpp-DP35",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP35/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP35/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "56",
+    "matchStatus": "matched",
+    "name": "Porygon-Z",
+    "nationalPokedexNumbers": [
+      474
+    ],
+    "number": "DP35",
+    "rarity": "Promo",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 2"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+30"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Bind Eye",
+        "text": "As long as Gliscor is your Active Pokémon, your opponent can't remove any Special Conditions by evolving or devolving his or her Pokémon. (This also includes putting a Pokémon Level-Up card onto that Pokémon.)",
+        "type": "Poké-Body"
+      }
+    ],
+    "artist": "Kagemaru Himeno",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Cutting Turn",
+        "text": "Flip a coin. If heads, put damage counters on the Defending Pokémon until it is 10HP away from being Knocked Out. If you do, shuffle Gliscor and all cards attached to it back into your deck."
+      },
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Fighting"
+        ],
+        "damage": "20",
+        "name": "Friction Heat",
+        "text": "The Defending Pokémon is now Burned."
+      }
+    ],
+    "cardId": "DP36",
+    "evolvesFrom": "Gligar",
+    "hp": "90",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Fesselnder Blick",
+            "text": "Solange Skorgro dein Aktives Pokémon ist, kann dein Gegner durch Entwickeln oder Rückentwickeln keine Speziellen Zustände von seinen Pokémon entfernen. (Dies gilt auch für das Spielen einer Pokémon Level-Up-Karte auf das jeweilige Pokémon.)"
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Schneidedreher",
+            "text": "Wirf 1 Münze. Bei \"Kopf\" lege so viele Schadensmarken auf das Verteidigende Pokémon, dass es nur noch 10 Schadenspunkte davon entfernt ist, kampfunfähig zu werden. Wenn du das machst, mische Skorgro und alle daran angelegten Karten in dein Deck."
+          },
+          {
+            "name": "Reibungshitze",
+            "text": "Das Verteidigende Pokémon ist jetzt verbrannt."
+          }
+        ],
+        "name": "Skorgro"
+      }
+    },
+    "id": "dpp-DP36",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP36",
+      "tcgdex": "dpp-DP36",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP36/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP36/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "47",
+    "matchStatus": "matched",
+    "name": "Gliscor",
+    "nationalPokedexNumbers": [
+      472
+    ],
+    "number": "DP36",
+    "rarity": "Promo",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-20"
+      }
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Water",
+        "value": "+20"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Time Skip",
+        "text": "Once during your turn (before your attack), you may have your opponent flip 2 coins. If both of them are heads, your turn ends. If both of them are tails, after your opponent draws a card at the beginning of his or her next turn, his or her turn ends. This power can't be used if Dialga is affected by a Special Condition.",
+        "type": "Poké-Power"
+      }
+    ],
+    "artist": "Ryo Ueda",
+    "attacks": [
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Metal",
+          "Metal",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "80",
+        "name": "Metal Flash",
+        "text": "During your next turn, Dialga can't use Metal Flash."
+      }
+    ],
+    "cardId": "DP37",
+    "convertedRetreatCost": 2,
+    "evolvesFrom": "Dialga",
+    "hp": "110",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Zeitsprung",
+            "text": "Einmal während deines Zuges (vor deinem Angriff), kannst du deinen Gegner 2 Münzen werfen lassen. Wenn beide \"Kopf\" gezeigt haben, ist dein Zug jetzt beendet. Wenn beide \"Zahl\" gezeigt haben, endet der nächste Zug deines Gegners, nachdem er zu Beginn seines Zuges eine Karte gezogen hat. Diese Poké-Power kann nicht benutzt werden, wenn Dialga von einem Speziellen Zustand betroffen ist."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Metallblitz",
+            "text": "Dialga kann Metallblitz in deinem nächsten Zug nicht einsetzen."
+          }
+        ],
+        "name": "Dialga"
+      }
+    },
+    "id": "dpp-DP37",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP37",
+      "tcgdex": "dpp-DP37",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP37/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP37/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "X",
+    "matchStatus": "matched",
+    "name": "Dialga LV.X",
+    "nationalPokedexNumbers": [
+      483
+    ],
+    "number": "DP37",
+    "rarity": "Promo",
+    "resistances": [
+      {
+        "type": "Psychic",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "rules": [
+      "Put this card onto your Active Dialga. Dialga LV.X can use any attack, Poké-Power, or Poké-Body from its previous level."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Level-Up"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Metal"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Invisible Tentacles",
+        "text": "Whenever your opponent's Pokémon tries to attack, your opponent discards 1 card from his or her hand. (If your opponent can't discard 1 card, your opponent's Pokémon can't attack.) You can't use more than 1 Invisible Tentacles Poké-Body each turn.",
+        "type": "Poké-Body"
+      }
+    ],
+    "artist": "Shizurow",
+    "attacks": [
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Psychic",
+          "Psychic",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Darkness Lost",
+        "text": "This attack does 30 damage to each of your opponent's Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.) If any of your opponent's Pokémon would be Knocked Out by damage from this attack, put that Pokémon and all cards attached to it in the Lost Zone instead of discarding it."
+      }
+    ],
+    "cardId": "DP38",
+    "convertedRetreatCost": 3,
+    "evolvesFrom": "Giratina",
+    "hp": "130",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Unsichtbare Tentakel",
+            "text": "Immer wenn ein gegnerisches Pokémon angreift, legt dein Gegner 1 Karte von seiner Hand auf seinen Ablagestapel. (Wenn dein Gegner keine Karte von seiner Hand auf seinen Ablagestapel legen kann, kann keines seiner Pokémon angreifen.) Du kannst nicht mehr als 1 Unsichtbare Tentakel Poké-Body pro Zug benutzen."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Finsteres Nirgendwo",
+            "text": "Dieser Angriff fügt allen Pokémon deines Gegners 30 Schadenspunkte zu. (Wende Schwäche und Resistenz bei Pokémon auf der Bank nicht an.) Wenn ein Pokémon deines Gegners durch diesen Angriff kampfunfähig würde, lege dieses Pokémon und alle Karten, die an es angelegt sind, nicht auf den Ablagestapel, sondern ins Nirgendwo."
+          }
+        ],
+        "name": "Giratina"
+      }
+    },
+    "id": "dpp-DP38",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP38",
+      "tcgdex": "dpp-DP38",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP38/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP38/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "X",
+    "matchStatus": "matched",
+    "name": "Giratina LV.X",
+    "nationalPokedexNumbers": [
+      487
+    ],
+    "number": "DP38",
+    "rarity": "Promo",
+    "resistances": [
+      {
+        "type": "Colorless",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "rules": [
+      "Put this card onto your Active Giratina. Giratina LV.X can use any attack, Poké-Power, or Poké-Body from its previous level."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Level-Up"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Darkness",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Revenge Seed",
+        "text": "If any of your Grass Pokémon were Knocked Out by damage from an opponent's attack during his or her last turn, each of Shaymin's attacks does 60 more damage to the Active Pokémon (before applying Weakness and Resistance).",
+        "type": "Poké-Body"
+      }
+    ],
+    "artist": "Shizurow",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Grass",
+          "Colorless"
+        ],
+        "damage": "50",
+        "name": "Energy Flare",
+        "text": "You may move any number of Energy cards attached to your Pokémon to your other Pokémon in any way you like."
+      }
+    ],
+    "cardId": "DP39",
+    "evolvesFrom": "Shaymin",
+    "hp": "110",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Vergeltungssamen",
+            "text": "Wenn im letzten Zug deines Gegners mindestens 1 deiner -Pokémon durch Schaden eines gegnerischen Angriffs kampfunfähig gemacht wurde, fügen Shaymins Angriffe den Aktiven Pokémon 60 weitere Schadenspunkte zu (bevor Schwäche und Resistenz verrechnet werden)."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Energiefackel",
+            "text": "Du kannst beliebig viele Energiekarten, die an deinen Pokémon angelegt sind, in beliebiger Verteilung an deine anderen Pokémon anlegen."
+          }
+        ],
+        "name": "Shaymin"
+      }
+    },
+    "id": "dpp-DP39",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP39",
+      "tcgdex": "dpp-DP39",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP39/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP39/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "X",
+    "matchStatus": "matched",
+    "name": "Shaymin LV.X",
+    "nationalPokedexNumbers": [
+      492
+    ],
+    "number": "DP39",
+    "rarity": "Promo",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-20"
+      }
+    ],
+    "rules": [
+      "Put this card onto your Active Shaymin. Shaymin LV.X can use any attack, Poké-Power, or Poké-Body from its previous level."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Level-Up"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Kagemaru Himeno",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Drag Off",
+        "text": "Before doing damage, you may choose 1 of your opponent's Benched Pokémon and switch it with the Defending Pokémon."
+      },
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "80",
+        "name": "Giga Hammer",
+        "text": "Regigigas can't use Giga Hammer during your next turn."
+      }
+    ],
+    "cardId": "DP40",
+    "convertedRetreatCost": 4,
+    "flavorText": "There is an enduring legend that states this Pokémon towed continents with ropes.",
+    "hp": "100",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Wegzerren",
+            "text": "Bevor der Schaden zugefügt wird, kannst du 1 Pokémon auf der Bank deines Gegners wählen und es gegen das Verteidigende Pokémon austauschen."
+          },
+          {
+            "name": "Gigahammer",
+            "text": "Regigigas kann Gigahammer in deinem nächsten Zug nicht einsetzen."
+          }
+        ],
+        "name": "Regigigas"
+      }
+    },
+    "id": "dpp-DP40",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP40",
+      "tcgdex": "dpp-DP40",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP40/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP40/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "46",
+    "matchStatus": "matched",
+    "name": "Regigigas",
+    "nationalPokedexNumbers": [
+      486
+    ],
+    "number": "DP40",
+    "rarity": "Promo",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "variants": [
+      {
+        "foil": "cosmos",
+        "type": "holo"
+      },
+      {
+        "size": "jumbo",
+        "type": "holo"
+      },
+      {
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Leap Away",
+        "text": "Once during your turn (before your attack), if Toxicroak G is your Active Pokémon, you may flip a coin. If heads, return Toxicroak G and all cards attached to it to your hand. This power can't be used if Toxicroak G is affected by a Special Condition.",
+        "type": "Poké-Power"
+      }
+    ],
+    "artist": "Ryota Saito",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Psychic",
+          "Colorless"
+        ],
+        "damage": "20+",
+        "name": "Poison Revenge",
+        "text": "If any of your Pokémon were Knocked Out by damage from an opponent's attack during his or her last turn, this attack does 20 damage plus 40 more damage and the Defending Pokémon is now Poisoned."
+      }
+    ],
+    "cardId": "DP41",
+    "convertedRetreatCost": 2,
+    "hp": "90",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Wegspringen",
+            "text": "Einmal während deines Zuges (vor deinem Angriff), wenn Toxiquak G dein Aktives Pokémon ist, kannst du 1 Münze werfen. Bei \"Kopf\" nimm Toxiquak G und alle Karten, die an es angelegt sind, zurück auf die Hand. Diese Poké-Power kann nicht benutzt werden, wenn Toxiquak G von einem Speziellen Zustand betroffen ist."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Vergeltungsgift",
+            "text": "Wenn im letzten Zug deines Gegners mindestens 1 deiner Pokémon durch Schaden eines gegnerischen Angriffs kampfunfähig gemacht wurde, fügt dieser Angriff 20 Schadenspunkte plus 40 weitere Schadenspunkte zu und das Verteidigende Pokémon ist jetzt vergiftet."
+          }
+        ],
+        "name": "Toxiquak G"
+      }
+    },
+    "id": "dpp-DP41",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP41",
+      "tcgdex": "dpp-DP41",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP41/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP41/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "45",
+    "matchStatus": "matched",
+    "name": "Toxicroak G",
+    "nationalPokedexNumbers": [
+      454
+    ],
+    "number": "DP41",
+    "rarity": "Promo",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic",
+      "SP"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "variants": [
+      {
+        "foil": "cosmos",
+        "type": "holo"
+      },
+      {
+        "stamp": [
+          "tsubasa-nakamura"
+        ],
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Makoto Imai",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Power Whip",
+        "text": "Choose 1 of your opponent's Pokémon. This attack does 10 damage for each Energy attached to Carnivine G to that Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      },
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Grass",
+          "Colorless"
+        ],
+        "damage": "20+",
+        "name": "Grass Knot",
+        "text": "Does 20 damage plus 10 more damage for each Colorless Energy in the Defending Pokémon's Retreat Cost (after applying effects to the Retreat Cost)."
+      }
+    ],
+    "cardId": "DP42",
+    "convertedRetreatCost": 1,
+    "hp": "80",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Blattgeißel",
+            "text": "Wähle 1 Pokémon deines Gegners. Dieser Angriff fügt dem gewählten Pokémon 10 Schadenspunkte für jede an Venuflibis G angelegte Energie zu. (Wende Schwäche und Resistenz bei Pokémon auf der Bank nicht an.)"
+          },
+          {
+            "name": "Strauchler",
+            "text": "Dieser Angriff fügt 20 Schadenspunkte plus 10 weitere Schadenspunkte für jede -Energie in den Rückzugskosten des Verteidigenden Pokémon zu (nachdem Effekte auf die Rückzugskosten verrechnet wurden)."
+          }
+        ],
+        "name": "Venuflibis G"
+      }
+    },
+    "id": "dpp-DP42",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP42",
+      "tcgdex": "dpp-DP42",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP42/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP42/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "43",
+    "matchStatus": "matched",
+    "name": "Carnivine G",
+    "nationalPokedexNumbers": [
+      455
+    ],
+    "number": "DP42",
+    "rarity": "Promo",
+    "resistances": [
+      {
+        "type": "Water",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic",
+      "SP"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Ryota Saito",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Metal",
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Nose Unit",
+        "text": "This attack does 20 damage to each of your opponent's Pokémon that has any Poké-Bodies. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      },
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Metal",
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "70",
+        "name": "Loud Snort",
+        "text": "Probopass G's Retreat Cost is 0 until the end of your next turn."
+      }
+    ],
+    "cardId": "DP43",
+    "convertedRetreatCost": 3,
+    "hp": "90",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Naseneinheit",
+            "text": "Dieser Angriff fügt jedem Pokémon deines Gegners, das mindestens 1 Poké-Body hat, 20 Schadenspunkte zu. (Wende Schwäche und Resistenz bei Pokémon auf der Bank nicht an.)"
+          },
+          {
+            "name": "Lautes Schnaufen",
+            "text": "Voluminas G hat Rückzugskosten 0 bis zum Ende deines nächsten Zuges."
+          }
+        ],
+        "name": "Voluminas G"
+      }
+    },
+    "id": "dpp-DP43",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP43",
+      "tcgdex": "dpp-DP43",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP43/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP43/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "53",
+    "matchStatus": "matched",
+    "name": "Probopass G",
+    "nationalPokedexNumbers": [
+      476
+    ],
+    "number": "DP43",
+    "rarity": "Promo",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic",
+      "SP"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Water",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Kagemaru Himeno",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Lightning"
+        ],
+        "damage": "30",
+        "name": "Charge Beam",
+        "text": "Search your discard pile for an Energy card and attach it to Magnezone."
+      },
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Lightning",
+          "Metal",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "60",
+        "name": "Metallic Bolt",
+        "text": "You may discard a Lightning Energy and a Metal Energy attached to Magnezone. If you do, this attack's base damage is 120 instead of 60."
+      }
+    ],
+    "cardId": "DP44",
+    "convertedRetreatCost": 2,
+    "evolvesFrom": "Magneton",
+    "flavorText": "It evolved from exposure to a special magnetic field. Three units generate magnetism.",
+    "hp": "130",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Ladestrahl",
+            "text": "Durchsuche deinen Ablagestapel nach 1 Energiekarte und lege sie an Magnezone an."
+          },
+          {
+            "name": "Metallschuss",
+            "text": "Du kannst 1 - und 1 -Energie, die an Magnezone angelegt sind, auf deinen Ablagestapel legen. Wenn du das machst, beträgt der Grundschaden dieses Angriffs 120 Schadenspunkte anstelle von 60 Schadenspunkten."
+          }
+        ],
+        "name": "Magnezone"
+      }
+    },
+    "id": "dpp-DP44",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP44",
+      "tcgdex": "dpp-DP44",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP44/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP44/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "53",
+    "matchStatus": "matched",
+    "name": "Magnezone",
+    "nationalPokedexNumbers": [
+      462
+    ],
+    "number": "DP44",
+    "rarity": "Promo",
+    "resistances": [
+      {
+        "type": "Metal",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 2"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "+30"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Call for Power",
+        "text": "As often as you like during your turn (before your attack), you may move an Energy attached to 1 of your Pokémon to Charizard G. This power can't be used if Charizard G is affected by a Special Condition.",
+        "type": "Poké-Power"
+      }
+    ],
+    "artist": "Wataru Kawahara",
+    "attacks": [
+      {
+        "convertedEnergyCost": 5,
+        "cost": [
+          "Fire",
+          "Fire",
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "150",
+        "name": "Malevolent Fire",
+        "text": "Flip a coin. If tails, discard all Energy attached to Charizard G."
+      }
+    ],
+    "cardId": "DP45",
+    "convertedRetreatCost": 3,
+    "evolvesFrom": "Charizard G",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Kraftruf",
+            "text": "Beliebig oft während deines Zuges (vor deinem Angriff) kannst du 1 Energie, die an 1 deiner Pokémon angelegt ist, entfernen und an Glurak G anlegen. Diese Poké-Power kann nicht benutzt werden, wenn Glurak G von einem Speziellen Zustand betroffen ist."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Bösartiges Feuer",
+            "text": "Wirf 1 Münze. Bei \"Zahl\" entferne alle Energien, die an Glurak G angelegt sind, und lege sie auf deinen Ablagestapel."
+          }
+        ],
+        "name": "Glurak G"
+      }
+    },
+    "id": "dpp-DP45",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP45",
+      "tcgdex": "dpp-DP45",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP45/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP45/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "X",
+    "matchStatus": "matched",
+    "name": "Charizard G LV.X",
+    "nationalPokedexNumbers": [
+      6
+    ],
+    "number": "DP45",
+    "rarity": "Promo",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "rules": [
+      "Put this card onto your Active Charizard G. Charizard G LV.X can use any attack, Poké-Power, or Poké-Body from its previous level."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Level-Up",
+      "SP"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fire"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Water",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Healing Breath",
+        "text": "Once during your turn (before your attack), when you put Garchomp C LV.X from your hand onto your Active Garchomp C, you may remove all damage counters from each of your Pokémon SP.",
+        "type": "Poké-Power"
+      }
+    ],
+    "artist": "Shizurow",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "",
+        "name": "Dragon Rush",
+        "text": "Discard 2 Energy attached to Garchomp C. Choose 1 of your opponent's Pokémon. This attack does 80 damage to that Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.) Garchomp C can't use Dragon Rush during your next turn."
+      }
+    ],
+    "cardId": "DP46",
+    "evolvesFrom": "Garchomp C",
+    "hp": "110",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Heilender Hauch",
+            "text": "Einmal während deines Zuges (vor deinem Angriff) kannst du, wenn du Knakrack C LV.X von deiner Hand auf dein Aktives Knakrack Pokémon C legst, alle Schadensmarken von jedem deiner Pokémon SP entfernen."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Drachenstoß",
+            "text": "Lege 2 an Knakrack C angelegte Energien auf deinen Ablagestapel. Wähle 1 Pokémon deines Gegners. Dieser Angriff fügt dem gewählten Pokémon 80 Schadenspunkte zu. (Wende Schwäche und Resistenz bei Pokémon auf der Bank nicht an.) Knakrack C kann Drachenstoß in deinem nächsten Zug nicht einsetzen."
+          }
+        ],
+        "name": "Knakrack C"
+      }
+    },
+    "id": "dpp-DP46",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP46",
+      "tcgdex": "dpp-DP46",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP46/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP46/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "X",
+    "matchStatus": "matched",
+    "name": "Garchomp C LV.X",
+    "nationalPokedexNumbers": [
+      445
+    ],
+    "number": "DP46",
+    "rarity": "Promo",
+    "rules": [
+      "Put this card onto your Active Garchomp C. Garchomp C LV.X can use any attack, Poké-Power, or Poké-Body from its previous level."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Level-Up",
+      "SP"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Colorless",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Dragon Spirit",
+        "text": "If Rayquaza C is your Active Pokémon and is damaged but not Knocked Out by an opponent's attack, you may search your discard pile for an Energy card and attach it to Rayquaza C.",
+        "type": "Poké-Body"
+      }
+    ],
+    "artist": "Shizurow",
+    "attacks": [
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Water",
+          "Psychic",
+          "Fighting",
+          "Colorless"
+        ],
+        "damage": "200",
+        "name": "Final Blowup",
+        "text": "Discard all Energy attached to Rayquaza C. Ignore this effect if you have no cards in your hand."
+      }
+    ],
+    "cardId": "DP47",
+    "convertedRetreatCost": 3,
+    "evolvesFrom": "Rayquaza C",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Drachenmut",
+            "text": "Wenn Rayquaza C dein Aktives Pokémon ist und durch einen gegnerischen Angriff Schaden erhält, aber nicht kampfunfähig wird, kannst du deinen Ablagestapel nach 1 Energiekarte durchsuchen und sie an Rayquaza C anlegen."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Letztes Donnerwetter",
+            "text": "Lege alle an Rayquaza C angelegten Energien auf deinen Ablagestapel. Dieser Effekt gilt nur, wenn du mindestens 1 Handkarte hast."
+          }
+        ],
+        "name": "Rayquaza C"
+      }
+    },
+    "id": "dpp-DP47",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP47",
+      "tcgdex": "dpp-DP47",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP47/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP47/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "X",
+    "matchStatus": "matched",
+    "name": "Rayquaza C LV.X",
+    "nationalPokedexNumbers": [
+      384
+    ],
+    "number": "DP47",
+    "rarity": "Promo",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "rules": [
+      "Put this card onto your Active Rayquaza C. Rayquaza C LV.X can use any attack, Poké-Power, or Poké-Body from its previous level."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Level-Up",
+      "SP"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Colorless",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Sumiyoshi Kizuki",
+    "cardId": "DP48",
+    "i18n": {
+      "de": {
+        "name": "Tropenwinde",
+        "rules": [
+          "Wirf 1 Münze. Entferne bei \"Kopf\" 2 Schadensmarken von allen Aktiven Pokémon (1, falls nur 1 vorhanden). Bei \"Zahl\" schlafen alle Aktiven Pokémon jetzt."
+        ]
+      }
+    },
+    "id": "dpp-DP48",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP48",
+      "tcgdex": "dpp-DP48",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP48/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP48/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Tropical Wind",
+    "number": "DP48",
+    "rarity": "Promo",
+    "rules": [
+      "Flip a coin. If heads, remove 2 damage counters from each Active Pokémon (remove 1 damage counter if a Pokémon has only 1). If tails, each Active Pokémon is now Asleep."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Item"
+    ],
+    "supertype": "Trainer",
+    "variants": [
+      {
+        "stamp": [
+          "worlds-2009"
+        ],
+        "type": "normal"
+      },
+      {
+        "stamp": [
+          "worlds-2009",
+          "finalist"
+        ],
+        "type": "normal"
+      },
+      {
+        "stamp": [
+          "worlds-2009",
+          "quarter-finalist"
+        ],
+        "type": "normal"
+      },
+      {
+        "stamp": [
+          "worlds-2009",
+          "semi-finalist"
+        ],
+        "type": "normal"
+      },
+      {
+        "stamp": [
+          "worlds-2009",
+          "staff"
+        ],
+        "type": "normal"
+      },
+      {
+        "stamp": [
+          "worlds-2009",
+          "top-sixteen"
+        ],
+        "type": "normal"
+      },
+      {
+        "stamp": [
+          "worlds-2009",
+          "top-thirty-two"
+        ],
+        "type": "normal"
+      }
+    ]
+  },
+  {
+    "artist": "Kagemaru Himeno",
+    "attacks": [
+      {
+        "convertedEnergyCost": 1,
+        "cost": [
+          "Metal"
+        ],
+        "damage": "",
+        "name": "Time Call",
+        "text": "Search your deck for a card that evolves from 1 of your Pokémon and put it onto that Pokémon. (This counts as evolving that Pokémon.) Shuffle your deck afterward."
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Metal",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "100",
+        "name": "Time Wager",
+        "text": "Flip 2 coins. If either of them is tails, this attack's base damage is 50 instead of 100."
+      }
+    ],
+    "cardId": "DP49",
+    "convertedRetreatCost": 2,
+    "flavorText": "It has the power to control time. It appears in Sinnoh-region myths as an ancient deity.",
+    "hp": "100",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Time Call",
+            "text": "Search your deck for a card that evolves from 1 of your Pokémon and put it onto that Pokémon. (This counts as evolving that Pokémon.) Shuffle your deck afterward."
+          },
+          {
+            "name": "Time Wager",
+            "text": "Flip 2 coins. If either of them is tails, this attack's base damage is 50 instead of 100."
+          }
+        ],
+        "name": "Dialga"
+      }
+    },
+    "id": "dpp-DP49",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP49",
+      "tcgdex": "dpp-DP49",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP49/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP49/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "69",
+    "matchStatus": "matched",
+    "name": "Dialga",
+    "nationalPokedexNumbers": [
+      483
+    ],
+    "number": "DP49",
+    "rarity": "Promo",
+    "resistances": [
+      {
+        "type": "Psychic",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Metal"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Kunihiko Yuyama",
+    "attacks": [
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "80",
+        "name": "Judgment",
+        "text": "Discard all Energy cards attached to Arceus and this attack does 10 damage to each of your opponent's Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)"
+      }
+    ],
+    "cardId": "DP50",
+    "convertedRetreatCost": 2,
+    "flavorText": "It is said to have emerged from an egg in a place where there was nothing, then shaped the world.",
+    "hp": "90",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Urteilskraft",
+            "text": "Entferne alle an Arceus angelegte Energiekarten und lege sie auf deinen Ablagestapel; dieser Angriff fügt jedem Pokémon auf der Bank deines Gegners 10 Schadenspunkte zu. (Wende Schwäche und Resistenz bei Pokémon auf der Bank nicht an.)"
+          }
+        ],
+        "name": "Arceus"
+      }
+    },
+    "id": "dpp-DP50",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP50",
+      "tcgdex": "dpp-DP50",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP50/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP50/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "100",
+    "matchStatus": "matched",
+    "name": "Arceus",
+    "nationalPokedexNumbers": [
+      493
+    ],
+    "number": "DP50",
+    "rarity": "Promo",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "rules": [
+      "You may have as many of this card in your deck as you like."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      },
+      {
+        "size": "jumbo",
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Lunar Aura",
+        "text": "If you have Darkrai in play, remove 1 damage counter from Cresselia between turns.",
+        "type": "Poké-Body"
+      }
+    ],
+    "artist": "Wataru Kawahara",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Psychic",
+          "Psychic",
+          "Colorless"
+        ],
+        "damage": "80-",
+        "name": "Lunar Flight",
+        "text": "Does 80 damage minus 10 damage for each damage counter on Cresselia."
+      }
+    ],
+    "cardId": "DP51",
+    "convertedRetreatCost": 2,
+    "flavorText": "On nights around the quarter moon, the aurora from its tail extends and undulates beautifully.",
+    "hp": "90",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Lunar Aura",
+            "text": "If you have Darkrai in play, remove 1 damage counter from Cresselia between turns."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Lunar Flight",
+            "text": "Does 80 damage minus 10 damage for each damage counter on Cresselia."
+          }
+        ],
+        "name": "Cresselia"
+      }
+    },
+    "id": "dpp-DP51",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP51",
+      "tcgdex": "dpp-DP51",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP51/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP51/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "62",
+    "matchStatus": "matched",
+    "name": "Cresselia",
+    "nationalPokedexNumbers": [
+      488
+    ],
+    "number": "DP51",
+    "rarity": "Promo",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Darkness Aura",
+        "text": "If you have Cresselia in play, each of Darkrai's attack does 20 more damage to the Defending Pokémon (before applying Weakness and Resistance).",
+        "type": "Poké-Body"
+      }
+    ],
+    "artist": "Wataru Kawahara",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Darkness",
+          "Darkness",
+          "Colorless"
+        ],
+        "damage": "60",
+        "name": "Hypnoblast",
+        "text": "Flip a coin. If heads, the Defending Pokémon is now Asleep."
+      }
+    ],
+    "cardId": "DP52",
+    "convertedRetreatCost": 2,
+    "flavorText": "To protect itself, it afflicts those around it with nightmares. However, it means no harm.",
+    "hp": "90",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Darkness Aura",
+            "text": "If you have Cresselia in play, each of Darkrai's attacks does 20 more damage to the Defending Pokémon (before applying Weakness and Resistance)."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Hypnoblast",
+            "text": "Flip a coin. If heads, the Defending Pokémon is now Asleep."
+          }
+        ],
+        "name": "Darkrai"
+      }
+    },
+    "id": "dpp-DP52",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP52",
+      "tcgdex": "dpp-DP52",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP52/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP52/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "61",
+    "matchStatus": "matched",
+    "name": "Darkrai",
+    "nationalPokedexNumbers": [
+      491
+    ],
+    "number": "DP52",
+    "rarity": "Promo",
+    "resistances": [
+      {
+        "type": "Psychic",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Darkness"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Multitype",
+        "text": "Arceus LV. X's type is the same type as its previous Level.",
+        "type": "Poké-Body"
+      },
+      {
+        "name": "Omniscient",
+        "text": "Arceus can use the attacks of all Arceus you have in play as its own. (You still need the necessary Energy to use each attack.)",
+        "type": "Poké-Body"
+      }
+    ],
+    "artist": "Shizurow",
+    "cardId": "DP53",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Arceus",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Variabilität",
+            "text": "Arceus LV.X hat denselben Typ wie sein vorheriges Level."
+          }
+        ],
+        "name": "Arceus"
+      }
+    },
+    "id": "dpp-DP53",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP53",
+      "tcgdex": "dpp-DP53",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP53/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP53/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "X",
+    "matchStatus": "matched",
+    "name": "Arceus LV.X",
+    "nationalPokedexNumbers": [
+      493
+    ],
+    "number": "DP53",
+    "rarity": "Promo",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "rules": [
+      "You may have as many of this card in your deck as you like.",
+      "Put this card onto your Active Arceus. Arceus LV.X can use any attack, Poké-Power, or Poké-Body from its previous level."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Level-Up"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ]
+  },
+  {
+    "artist": "Ryo Ueda",
+    "cardId": "DP54",
+    "i18n": {
+      "de": {
+        "name": "Tor des Ursprungs",
+        "rules": [
+          "Durchsuche dein Deck nach 1 Arceus-Karte, zeige sie deinem Gegner und nimm sie auf die Hand. Mische dein Deck danach."
+        ]
+      }
+    },
+    "id": "dpp-DP54",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP54",
+      "tcgdex": "dpp-DP54",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP54/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP54/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Beginning Door",
+    "number": "DP54",
+    "rarity": "Promo",
+    "rules": [
+      "Search your deck for Arceus, show it to your opponent, and put it into your hand. Shuffle your deck afterward."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Item"
+    ],
+    "supertype": "Trainer",
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ]
+  },
+  {
+    "artist": "Yusuke Ishikawa",
+    "cardId": "DP55",
+    "i18n": {
+      "de": {
+        "name": "Ultimativ-Zone",
+        "rules": [
+          "Beliebig oft während seines Zuges kann jeder Spieler 1 Energiekarte von 1 Pokémon auf seiner Bank entfernen und an sein Aktives Arceus anlegen."
+        ]
+      }
+    },
+    "id": "dpp-DP55",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP55",
+      "tcgdex": "dpp-DP55",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP55/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP55/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Ultimate Zone",
+    "number": "DP55",
+    "rarity": "Promo",
+    "rules": [
+      "This card stays in play when you play it. Discard this card if another Stadium card comes into play. If another card with the same name is in play, you can't play this card.",
+      "During each player's turn, the player may move an Energy card attached to 1 of his or her Benched Pokémon to his or her Active Arceus as often as he or she likes."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stadium"
+    ],
+    "supertype": "Trainer",
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ]
+  },
+  {
+    "abilities": [
+      {
+        "name": "Multitype",
+        "text": "Arceus LV.X's type is the same as its previous Level.",
+        "type": "Poké-Body"
+      }
+    ],
+    "artist": "Ryo Ueda",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Grass",
+          "Fire",
+          "Colorless"
+        ],
+        "damage": "100",
+        "name": "Meteor Blast",
+        "text": "Flip a coin. If tails, this attack's base damage is 50 instead of 100."
+      }
+    ],
+    "cardId": "DP56",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Arceus",
+    "hp": "120",
+    "i18n": {
+      "de": {
+        "abilities": [
+          {
+            "name": "Variabilität",
+            "text": "Arceus LV.X hat denselben Typ wie sein vorheriges Level."
+          }
+        ],
+        "attacks": [
+          {
+            "name": "Meteorexplosion",
+            "text": "Wirf 1 Münze. Bei \"Zahl\" beträgt der Grundschaden dieses Angriffs 50 Schadenspunkte anstelle von 100 Schadenspunkten."
+          }
+        ],
+        "name": "Arceus"
+      }
+    },
+    "id": "dpp-DP56",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "dpp-DP56",
+      "tcgdex": "dpp-DP56",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/dp/dpp/DP56/high.webp",
+      "small": "https://assets.tcgdex.net/en/dp/dpp/DP56/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "level": "X",
+    "matchStatus": "matched",
+    "name": "Arceus LV.X",
+    "nationalPokedexNumbers": [
+      493
+    ],
+    "number": "DP56",
+    "rarity": "Promo",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "rules": [
+      "You may have as many of this card in your deck as you like.",
+      "Put this card onto your Active Arceus. Arceus LV.X can use any attack, Poké-Power, or Poké-Body from its previous level."
+    ],
+    "setId": "dpp",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Level-Up"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "variants": [
+      {
+        "type": "holo"
+      }
+    ]
+  }
+]

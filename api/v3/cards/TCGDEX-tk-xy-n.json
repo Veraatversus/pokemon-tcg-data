@@ -1,0 +1,1532 @@
+[
+  {
+    "cardId": "1",
+    "convertedRetreatCost": 1,
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/1/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/1/low.webp"
+        },
+        "name": "Spoink"
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-1",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-1",
+      "tcgplayer": [
+        97996
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/1/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/1/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Spoink",
+    "nationalPokedexNumbers": [
+      325
+    ],
+    "number": "1",
+    "rarity": "Common",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "cardId": "2",
+    "convertedRetreatCost": 2,
+    "evolvesFrom": "Pumpkaboo",
+    "hp": "100",
+    "i18n": {
+      "de": {
+        "evolvesFrom": "Irrbis",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/2/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/2/low.webp"
+        },
+        "name": "Pumpdjinn"
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-2",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-2",
+      "tcgplayer": [
+        97997
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/2/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/2/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Gourgeist",
+    "nationalPokedexNumbers": [
+      711
+    ],
+    "number": "2",
+    "rarity": "Rare",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Darkness",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "cardId": "3",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Ekans",
+    "hp": "90",
+    "i18n": {
+      "de": {
+        "evolvesFrom": "Rettan",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/3/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/3/low.webp"
+        },
+        "name": "Arbok"
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-3",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-3",
+      "tcgplayer": [
+        97998
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/3/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/3/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Arbok",
+    "nationalPokedexNumbers": [
+      24
+    ],
+    "number": "3",
+    "rarity": "Rare",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "cardId": "4",
+    "convertedRetreatCost": 1,
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/4/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/4/low.webp"
+        },
+        "name": "Scoppel"
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-4",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-4",
+      "tcgplayer": [
+        97999
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/4/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/4/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Bunnelby",
+    "nationalPokedexNumbers": [
+      659
+    ],
+    "number": "4",
+    "rarity": "Common",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "cardId": "5",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/5/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/5/low.webp"
+        },
+        "name": "Psycho-Energie"
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-5",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-5",
+      "tcgplayer": [
+        98000
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/5/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/5/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Psychic Energy",
+    "number": "5",
+    "rarity": "Common",
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy"
+  },
+  {
+    "cardId": "6",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/6/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/6/low.webp"
+        },
+        "name": "Psycho-Energie"
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-6",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-6",
+      "tcgplayer": [
+        98001
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/6/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/6/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Psychic Energy",
+    "number": "6",
+    "rarity": "Common",
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy"
+  },
+  {
+    "cardId": "7",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/7/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/7/low.webp"
+        },
+        "name": "Psycho-Energie"
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-7",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-7",
+      "tcgplayer": [
+        98002
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/7/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/7/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Psychic Energy",
+    "number": "7",
+    "rarity": "Common",
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy"
+  },
+  {
+    "cardId": "8",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/8/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/8/low.webp"
+        },
+        "name": "Psycho-Energie"
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-8",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-8",
+      "tcgplayer": [
+        98003
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/8/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/8/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Psychic Energy",
+    "number": "8",
+    "rarity": "Common",
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy"
+  },
+  {
+    "cardId": "9",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/9/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/9/low.webp"
+        },
+        "name": "Psycho-Energie"
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-9",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-9",
+      "tcgplayer": [
+        98004
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/9/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/9/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Psychic Energy",
+    "number": "9",
+    "rarity": "Common",
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy"
+  },
+  {
+    "cardId": "10",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/10/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/10/low.webp"
+        },
+        "name": "Psycho-Energie"
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-10",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-10",
+      "tcgplayer": [
+        98005
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/10/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/10/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Psychic Energy",
+    "number": "10",
+    "rarity": "Common",
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy"
+  },
+  {
+    "cardId": "11",
+    "convertedRetreatCost": 2,
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/11/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/11/low.webp"
+        },
+        "name": "Irrbis"
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-11",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-11",
+      "tcgplayer": [
+        98006
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/11/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/11/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Pumpkaboo",
+    "nationalPokedexNumbers": [
+      710
+    ],
+    "number": "11",
+    "rarity": "Common",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Darkness",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "cardId": "12",
+    "convertedRetreatCost": 1,
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/12/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/12/low.webp"
+        },
+        "name": "eF-eM"
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-12",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-12",
+      "tcgplayer": [
+        98007
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/12/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/12/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Noibat",
+    "nationalPokedexNumbers": [
+      714
+    ],
+    "number": "12",
+    "rarity": "Common",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "5ban Graphics",
+    "attacks": [
+      {
+        "convertedEnergyCost": 0,
+        "cost": [],
+        "damage": "20+",
+        "name": "Second Bite",
+        "text": "This attack does 10 more damage for each damage counter on your opponent’s Active Pokémon."
+      },
+      {
+        "convertedEnergyCost": 0,
+        "cost": [],
+        "damage": "60+",
+        "name": "Sonic Bazooka",
+        "text": "Flip a coin. If heads, this attack does 30 more damage and your opponent’s Active Pokémon is now Confused."
+      }
+    ],
+    "cardId": "13",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Noibat",
+    "flavorText": "They fly around on moonless nights and attack careless prey. Nothing can beat them in a battle in the dark.",
+    "hp": "110",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Wunde Stelle",
+            "text": "Dieser Angriff fügt 10 weitere Schadenspunkte für jede Schadensmarke auf dem Aktiven Pokémon deines Gegners zu."
+          },
+          {
+            "name": "Bazookaschall",
+            "text": "Wirf 1 Münze. Bei „Kopf“ fügt dieser Angriff 30 weitere Schadenspunkte zu und das Aktive Pokémon deines Gegners ist jetzt verwirrt."
+          }
+        ],
+        "evolvesFrom": "eF-eM",
+        "flavorText": "Es fliegt in finsterer, mondloser Nacht umher und macht Jagd auf achtlose Beute. Ist bei Dunkelheit jedem Gegner überlegen.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/13/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/13/low.webp"
+        },
+        "name": "UHaFnir"
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-13",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-13",
+      "tcgplayer": [
+        98008
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/13/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/13/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Noivern",
+    "nationalPokedexNumbers": [
+      715
+    ],
+    "number": "13",
+    "rarity": "None",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Dragon"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fairy",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "cardId": "14",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/14/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/14/low.webp"
+        },
+        "name": "Pokémon-Fänger",
+        "rules": [
+          "Tausche das Aktive Pokémon deines Gegners gegen 1 Pokémon auf seiner Bank aus. Du kannst während deines Zuges (vor deinem Angriff) beliebig viele Itemkarten spielen."
+        ]
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-14",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-14",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/14/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/14/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Pokémon Catcher",
+    "number": "14",
+    "rarity": "Uncommon",
+    "rules": [
+      "Flip a coin. If heads, switch 1 of your opponent’s Benched Pokémon with his or her Active Pokémon."
+    ],
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Item"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "cardId": "15",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/15/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/15/low.webp"
+        },
+        "name": "Trank",
+        "rules": [
+          "Heile 30 Schadenspunkte bei 1 deiner Pokémon."
+        ]
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-15",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-15",
+      "tcgplayer": [
+        98010
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/15/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/15/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Potion",
+    "number": "15",
+    "rarity": "Common",
+    "rules": [
+      "Heal 30 damage from 1 of your Pokémon."
+    ],
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Item"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "cardId": "16",
+    "convertedRetreatCost": 2,
+    "hp": "70",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/16/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/16/low.webp"
+        },
+        "name": "Rettan"
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-16",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-16",
+      "tcgplayer": [
+        98011
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/16/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/16/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Ekans",
+    "nationalPokedexNumbers": [
+      23
+    ],
+    "number": "16",
+    "rarity": "Common",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "cardId": "17",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/17/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/17/low.webp"
+        },
+        "name": "Psycho-Energie"
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-17",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-17",
+      "tcgplayer": [
+        98012
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/17/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/17/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Psychic Energy",
+    "number": "17",
+    "rarity": "Common",
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy"
+  },
+  {
+    "cardId": "18",
+    "convertedRetreatCost": 2,
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/18/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/18/low.webp"
+        },
+        "name": "Irrbis"
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-18",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-18",
+      "tcgplayer": [
+        98013
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/18/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/18/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Pumpkaboo",
+    "nationalPokedexNumbers": [
+      710
+    ],
+    "number": "18",
+    "rarity": "Common",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "weaknesses": [
+      {
+        "type": "Darkness",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "cardId": "19",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/19/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/19/low.webp"
+        },
+        "name": "Finsternis-Energie"
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-19",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-19",
+      "tcgplayer": [
+        98014
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/19/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/19/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Darkness Energy",
+    "number": "19",
+    "rarity": "Common",
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy"
+  },
+  {
+    "cardId": "20",
+    "convertedRetreatCost": 1,
+    "hp": "90",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/20/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/20/low.webp"
+        },
+        "name": "Coiffwaff"
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-20",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-20",
+      "tcgplayer": [
+        98018
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/20/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/20/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Furfrou",
+    "nationalPokedexNumbers": [
+      676
+    ],
+    "number": "20",
+    "rarity": "Common",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "cardId": "21",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/21/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/21/low.webp"
+        },
+        "name": "Pokéball",
+        "rules": [
+          "Wirf 1 Münze. Durchsuche bei \"Kopf\" dein Deck nach 1 Pokémon, zeige es deinem Gegner und nimm es auf deine Hand. Mische anschließend dein Deck."
+        ]
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-21",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-21",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/21/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/21/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Poké Ball",
+    "number": "21",
+    "rarity": "Uncommon",
+    "rules": [
+      "Flip a coin. If heads, search your deck for a Pokémon, reveal it, and put it into your hand. Shuffle your deck afterward."
+    ],
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Item"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "cardId": "22",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/22/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/22/low.webp"
+        },
+        "name": "Finsternis-Energie"
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-22",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-22",
+      "tcgplayer": [
+        98015
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/22/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/22/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Darkness Energy",
+    "number": "22",
+    "rarity": "Common",
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy"
+  },
+  {
+    "cardId": "23",
+    "convertedRetreatCost": 1,
+    "hp": "60",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/23/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/23/low.webp"
+        },
+        "name": "eF-eM"
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-23",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-23",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/23/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/23/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Noibat",
+    "nationalPokedexNumbers": [
+      714
+    ],
+    "number": "23",
+    "rarity": "Common",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "cardId": "24",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/24/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/24/low.webp"
+        },
+        "name": "Brief vom Prof.",
+        "rules": [
+          "Durchsuche dein Deck nach 2 Basis-Energiekarten, zeige sie deinem Gegner und nimm sie auf deine Hand. Mische anschließend dein Deck. Du kannst während deines Zuges (vor deinem Angriff) beliebig viele Itemkarten spielen."
+        ]
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-24",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-24",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/24/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/24/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Professor’s Letter",
+    "number": "24",
+    "rarity": "Uncommon",
+    "rules": [
+      "Search your deck for up to 2 basic Energy cards, reveal them, and put them into your hand. Shuffle your deck afterward."
+    ],
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Item"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "cardId": "25",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/25/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/25/low.webp"
+        },
+        "name": "Psycho-Energie"
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-25",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-25",
+      "tcgplayer": [
+        98022
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/25/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/25/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Psychic Energy",
+    "number": "25",
+    "rarity": "Common",
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy"
+  },
+  {
+    "cardId": "26",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/26/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/26/low.webp"
+        },
+        "name": "Finsternis-Energie"
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-26",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-26",
+      "tcgplayer": [
+        98016
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/26/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/26/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Darkness Energy",
+    "number": "26",
+    "rarity": "Common",
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy"
+  },
+  {
+    "cardId": "27",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/27/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/27/low.webp"
+        },
+        "name": "Trank",
+        "rules": [
+          "Heile 30 Schadenspunkte bei 1 deiner Pokémon."
+        ]
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-27",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-27",
+      "tcgplayer": [
+        98023
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/27/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/27/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Potion",
+    "number": "27",
+    "rarity": "Common",
+    "rules": [
+      "Heal 30 damage from 1 of your Pokémon."
+    ],
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Item"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "cardId": "28",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/28/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/28/low.webp"
+        },
+        "name": "Finsternis-Energie"
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-28",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-28",
+      "tcgplayer": [
+        98017
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/28/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/28/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Darkness Energy",
+    "number": "28",
+    "rarity": "Common",
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy"
+  },
+  {
+    "cardId": "29",
+    "i18n": {
+      "de": {
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/29/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/29/low.webp"
+        },
+        "name": "Tausch",
+        "rules": [
+          "Tausche dein Aktives Pokémon gegen 1 Pokémon auf deiner Bank aus."
+        ]
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-29",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-29",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/29/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/29/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Switch",
+    "number": "29",
+    "rarity": "Common",
+    "rules": [
+      "Switch your Active Pokémon with 1 of your Benched Pokémon."
+    ],
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Item"
+    ],
+    "supertype": "Trainer"
+  },
+  {
+    "artist": "5ban Graphics",
+    "attacks": [
+      {
+        "convertedEnergyCost": 0,
+        "cost": [],
+        "damage": "20+",
+        "name": "Second Bite",
+        "text": "This attack does 10 more damage for each damage counter on your opponent’s Active Pokémon."
+      },
+      {
+        "convertedEnergyCost": 0,
+        "cost": [],
+        "damage": "60+",
+        "name": "Sonic Bazooka",
+        "text": "Flip a coin. If heads, this attack does 30 more damage and your opponent’s Active Pokémon is now Confused."
+      }
+    ],
+    "cardId": "30",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Noibat",
+    "flavorText": "They fly around on moonless nights and attack careless prey. Nothing can beat them in a battle in the dark.",
+    "hp": "110",
+    "i18n": {
+      "de": {
+        "attacks": [
+          {
+            "name": "Wunde Stelle",
+            "text": "Dieser Angriff fügt 10 weitere Schadenspunkte für jede Schadensmarke auf dem Aktiven Pokémon deines Gegners zu."
+          },
+          {
+            "name": "Bazookaschall",
+            "text": "Wirf 1 Münze. Bei „Kopf“ fügt dieser Angriff 30 weitere Schadenspunkte zu und das Aktive Pokémon deines Gegners ist jetzt verwirrt."
+          }
+        ],
+        "evolvesFrom": "eF-eM",
+        "flavorText": "Es fliegt in finsterer, mondloser Nacht umher und macht Jagd auf achtlose Beute. Ist bei Dunkelheit jedem Gegner überlegen.",
+        "images": {
+          "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/30/high.webp",
+          "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/30/low.webp"
+        },
+        "name": "UHaFnir"
+      }
+    },
+    "id": "TCGDEX-tk-xy-n-30",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": null,
+      "tcgdex": "tk-xy-n-30",
+      "tcgplayer": [
+        98025
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/de/tk/tk-xy-n/30/high.webp",
+      "small": "https://assets.tcgdex.net/de/tk/tk-xy-n/30/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Noivern",
+    "nationalPokedexNumbers": [
+      715
+    ],
+    "number": "30",
+    "rarity": "None",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "TCGDEX-tk-xy-n",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Dragon"
+    ],
+    "weaknesses": [
+      {
+        "type": "Fairy",
+        "value": "×2"
+      }
+    ]
+  }
+]

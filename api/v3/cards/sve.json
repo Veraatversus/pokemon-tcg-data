@@ -1,0 +1,1754 @@
+[
+  {
+    "cardId": "1",
+    "i18n": {
+      "de": {
+        "name": "Pflanze-Energie"
+      }
+    },
+    "id": "sve-1",
+    "ids": {
+      "cardmarket": [
+        689750,
+        735364,
+        780803
+      ],
+      "pokemontcg": "sve-1",
+      "tcgdex": "sve-001",
+      "tcgplayer": [
+        475425,
+        515640,
+        517177,
+        562155,
+        599455,
+        622935
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/sve/1_hires.png",
+      "small": "https://images.pokemontcg.io/sve/1.png"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Basic Grass Energy",
+    "number": "1",
+    "rarity": "Common",
+    "setId": "sve",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy",
+    "variants": [
+      {
+        "cardmarketId": 689750,
+        "tcgplayerId": 475425,
+        "type": "normal"
+      },
+      {
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 515640,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 735364,
+        "foil": "cosmos",
+        "tcgplayerId": 517177,
+        "type": "reverse"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 622935,
+        "type": "reverse"
+      },
+      {
+        "cardmarketId": 780803,
+        "foil": "pokeball",
+        "tcgplayerId": 562155,
+        "type": "reverse"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "professor-program"
+        ],
+        "tcgplayerId": 599455,
+        "type": "reverse"
+      }
+    ]
+  },
+  {
+    "cardId": "2",
+    "i18n": {
+      "de": {
+        "name": "Feuer-Energie"
+      }
+    },
+    "id": "sve-2",
+    "ids": {
+      "cardmarket": [
+        689751,
+        735366,
+        780804
+      ],
+      "pokemontcg": "sve-2",
+      "tcgdex": "sve-002",
+      "tcgplayer": [
+        475426,
+        515639,
+        517178,
+        562160,
+        599454,
+        651037
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/sve/2_hires.png",
+      "small": "https://images.pokemontcg.io/sve/2.png"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Basic Fire Energy",
+    "number": "2",
+    "rarity": "Common",
+    "setId": "sve",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy",
+    "variants": [
+      {
+        "cardmarketId": 689751,
+        "tcgplayerId": 475426,
+        "type": "normal"
+      },
+      {
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 515639,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 735366,
+        "foil": "cosmos",
+        "tcgplayerId": 517178,
+        "type": "reverse"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 651037,
+        "type": "reverse"
+      },
+      {
+        "cardmarketId": 780804,
+        "foil": "pokeball",
+        "tcgplayerId": 562160,
+        "type": "reverse"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "professor-program"
+        ],
+        "tcgplayerId": 599454,
+        "type": "reverse"
+      }
+    ]
+  },
+  {
+    "cardId": "3",
+    "i18n": {
+      "de": {
+        "name": "Wasser-Energie"
+      }
+    },
+    "id": "sve-3",
+    "ids": {
+      "cardmarket": [
+        689753,
+        735367,
+        780805
+      ],
+      "pokemontcg": "sve-3",
+      "tcgdex": "sve-003",
+      "tcgplayer": [
+        475427,
+        515644,
+        517179,
+        563014,
+        599458,
+        622937
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/sve/3_hires.png",
+      "small": "https://images.pokemontcg.io/sve/3.png"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Basic Water Energy",
+    "number": "3",
+    "rarity": "Common",
+    "setId": "sve",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy",
+    "variants": [
+      {
+        "cardmarketId": 689753,
+        "tcgplayerId": 475427,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 735367,
+        "foil": "cosmos",
+        "tcgplayerId": 517179,
+        "type": "reverse"
+      },
+      {
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 515644,
+        "type": "normal"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 622937,
+        "type": "reverse"
+      },
+      {
+        "cardmarketId": 780805,
+        "foil": "pokeball",
+        "tcgplayerId": 563014,
+        "type": "reverse"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "professor-program"
+        ],
+        "tcgplayerId": 599458,
+        "type": "reverse"
+      }
+    ]
+  },
+  {
+    "cardId": "4",
+    "i18n": {
+      "de": {
+        "name": "Elektro-Energie"
+      }
+    },
+    "id": "sve-4",
+    "ids": {
+      "cardmarket": [
+        689755,
+        735368,
+        780808
+      ],
+      "pokemontcg": "sve-4",
+      "tcgdex": "sve-004",
+      "tcgplayer": [
+        475428,
+        515641,
+        517180,
+        562152,
+        599456,
+        622938
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/sve/4_hires.png",
+      "small": "https://images.pokemontcg.io/sve/4.png"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Basic Lightning Energy",
+    "number": "4",
+    "rarity": "Common",
+    "setId": "sve",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy",
+    "variants": [
+      {
+        "cardmarketId": 689755,
+        "tcgplayerId": 475428,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 735368,
+        "foil": "cosmos",
+        "tcgplayerId": 517180,
+        "type": "reverse"
+      },
+      {
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 515641,
+        "type": "normal"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 622938,
+        "type": "reverse"
+      },
+      {
+        "cardmarketId": 780808,
+        "foil": "pokeball",
+        "tcgplayerId": 562152,
+        "type": "reverse"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "professor-program"
+        ],
+        "tcgplayerId": 599456,
+        "type": "reverse"
+      }
+    ]
+  },
+  {
+    "cardId": "5",
+    "i18n": {
+      "de": {
+        "name": "Psycho-Energie"
+      }
+    },
+    "id": "sve-5",
+    "ids": {
+      "cardmarket": [
+        689757,
+        735370,
+        780806
+      ],
+      "pokemontcg": "sve-5",
+      "tcgdex": "sve-005",
+      "tcgplayer": [
+        475429,
+        515643,
+        517181,
+        562157,
+        599457,
+        622939
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/sve/5_hires.png",
+      "small": "https://images.pokemontcg.io/sve/5.png"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Basic Psychic Energy",
+    "number": "5",
+    "rarity": "Common",
+    "setId": "sve",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy",
+    "variants": [
+      {
+        "cardmarketId": 689757,
+        "tcgplayerId": 475429,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 735370,
+        "foil": "cosmos",
+        "tcgplayerId": 517181,
+        "type": "reverse"
+      },
+      {
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 515643,
+        "type": "normal"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 622939,
+        "type": "reverse"
+      },
+      {
+        "cardmarketId": 780806,
+        "foil": "pokeball",
+        "tcgplayerId": 562157,
+        "type": "reverse"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "professor-program"
+        ],
+        "tcgplayerId": 599457,
+        "type": "reverse"
+      }
+    ]
+  },
+  {
+    "cardId": "6",
+    "i18n": {
+      "de": {
+        "name": "Kampf-Energie"
+      }
+    },
+    "id": "sve-6",
+    "ids": {
+      "cardmarket": [
+        689758,
+        735371,
+        780807
+      ],
+      "pokemontcg": "sve-6",
+      "tcgdex": "sve-006",
+      "tcgplayer": [
+        475430,
+        515638,
+        517182,
+        562158,
+        599453,
+        622940
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/sve/6_hires.png",
+      "small": "https://images.pokemontcg.io/sve/6.png"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Basic Fighting Energy",
+    "number": "6",
+    "rarity": "Common",
+    "setId": "sve",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy",
+    "variants": [
+      {
+        "cardmarketId": 689758,
+        "tcgplayerId": 475430,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 735371,
+        "foil": "cosmos",
+        "tcgplayerId": 517182,
+        "type": "reverse"
+      },
+      {
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 515638,
+        "type": "normal"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 622940,
+        "type": "reverse"
+      },
+      {
+        "cardmarketId": 780807,
+        "foil": "pokeball",
+        "tcgplayerId": 562158,
+        "type": "reverse"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "professor-program"
+        ],
+        "tcgplayerId": 599453,
+        "type": "reverse"
+      }
+    ]
+  },
+  {
+    "cardId": "7",
+    "i18n": {
+      "de": {
+        "name": "Finsternis-Energie"
+      }
+    },
+    "id": "sve-7",
+    "ids": {
+      "cardmarket": [
+        689760,
+        735372,
+        780809
+      ],
+      "pokemontcg": "sve-7",
+      "tcgdex": "sve-007",
+      "tcgplayer": [
+        475431,
+        515635,
+        517183,
+        562154,
+        599460,
+        622941
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/sve/7_hires.png",
+      "small": "https://images.pokemontcg.io/sve/7.png"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Basic Darkness Energy",
+    "number": "7",
+    "rarity": "Common",
+    "setId": "sve",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy",
+    "variants": [
+      {
+        "cardmarketId": 689760,
+        "tcgplayerId": 475431,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 735372,
+        "foil": "cosmos",
+        "tcgplayerId": 517183,
+        "type": "reverse"
+      },
+      {
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 515635,
+        "type": "normal"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 622941,
+        "type": "reverse"
+      },
+      {
+        "cardmarketId": 780809,
+        "foil": "pokeball",
+        "tcgplayerId": 562154,
+        "type": "reverse"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "professor-program"
+        ],
+        "tcgplayerId": 599460,
+        "type": "reverse"
+      }
+    ]
+  },
+  {
+    "cardId": "8",
+    "i18n": {
+      "de": {
+        "name": "Metall-Energie"
+      }
+    },
+    "id": "sve-8",
+    "ids": {
+      "cardmarket": [
+        689762,
+        735373,
+        780810
+      ],
+      "pokemontcg": "sve-8",
+      "tcgdex": "sve-008",
+      "tcgplayer": [
+        475432,
+        515642,
+        517184,
+        562159,
+        599459,
+        622942
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/sve/8_hires.png",
+      "small": "https://images.pokemontcg.io/sve/8.png"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Basic Metal Energy",
+    "number": "8",
+    "rarity": "Common",
+    "setId": "sve",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy",
+    "variants": [
+      {
+        "cardmarketId": 689762,
+        "tcgplayerId": 475432,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 735373,
+        "foil": "cosmos",
+        "tcgplayerId": 517184,
+        "type": "reverse"
+      },
+      {
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 515642,
+        "type": "normal"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 622942,
+        "type": "reverse"
+      },
+      {
+        "cardmarketId": 780810,
+        "foil": "pokeball",
+        "tcgplayerId": 562159,
+        "type": "reverse"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "professor-program"
+        ],
+        "tcgplayerId": 599459,
+        "type": "reverse"
+      }
+    ]
+  },
+  {
+    "cardId": "9",
+    "i18n": {
+      "de": {
+        "name": "Pflanze-Energie"
+      }
+    },
+    "id": "sve-9",
+    "ids": {
+      "cardmarket": [
+        786113,
+        809704
+      ],
+      "pokemontcg": "sve-9",
+      "tcgdex": "sve-009",
+      "tcgplayer": [
+        578864,
+        599740,
+        623649,
+        651098
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/sve/9_hires.png",
+      "small": "https://images.pokemontcg.io/sve/9.png"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Basic Grass Energy",
+    "number": "9",
+    "rarity": "Common",
+    "setId": "sve",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy",
+    "variants": [
+      {
+        "cardmarketId": 786113,
+        "tcgplayerId": 578864,
+        "type": "normal"
+      },
+      {
+        "type": "reverse"
+      },
+      {
+        "cardmarketId": 809704,
+        "foil": "cracked-ice",
+        "tcgplayerId": 599740,
+        "type": "reverse"
+      },
+      {
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 623649,
+        "type": "normal"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 651098,
+        "type": "reverse"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "professor-program"
+        ],
+        "type": "reverse"
+      }
+    ]
+  },
+  {
+    "cardId": "10",
+    "i18n": {
+      "de": {
+        "name": "Feuer-Energie"
+      }
+    },
+    "id": "sve-10",
+    "ids": {
+      "cardmarket": [
+        786114,
+        809705
+      ],
+      "pokemontcg": "sve-10",
+      "tcgdex": "sve-010",
+      "tcgplayer": [
+        578863,
+        599738,
+        623650,
+        651037
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/sve/10_hires.png",
+      "small": "https://images.pokemontcg.io/sve/10.png"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Basic Fire Energy",
+    "number": "10",
+    "rarity": "Common",
+    "setId": "sve",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy",
+    "variants": [
+      {
+        "cardmarketId": 786114,
+        "tcgplayerId": 578863,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 809705,
+        "foil": "cracked-ice",
+        "tcgplayerId": 599738,
+        "type": "reverse"
+      },
+      {
+        "type": "reverse"
+      },
+      {
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 623650,
+        "type": "normal"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 651037,
+        "type": "reverse"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "professor-program"
+        ],
+        "type": "reverse"
+      }
+    ]
+  },
+  {
+    "cardId": "11",
+    "i18n": {
+      "de": {
+        "name": "Wasser-Energie"
+      }
+    },
+    "id": "sve-11",
+    "ids": {
+      "cardmarket": [
+        786115,
+        809706
+      ],
+      "pokemontcg": "sve-11",
+      "tcgdex": "sve-011",
+      "tcgplayer": [
+        578862,
+        599745,
+        623651,
+        651115
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/sve/11_hires.png",
+      "small": "https://images.pokemontcg.io/sve/11.png"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Basic Water Energy",
+    "number": "11",
+    "rarity": "Common",
+    "setId": "sve",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy",
+    "variants": [
+      {
+        "cardmarketId": 786115,
+        "tcgplayerId": 578862,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 809706,
+        "foil": "cracked-ice",
+        "tcgplayerId": 599745,
+        "type": "reverse"
+      },
+      {
+        "type": "reverse"
+      },
+      {
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 623651,
+        "type": "normal"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 651115,
+        "type": "reverse"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "professor-program"
+        ],
+        "type": "reverse"
+      }
+    ]
+  },
+  {
+    "cardId": "12",
+    "i18n": {
+      "de": {
+        "name": "Elektro-Energie"
+      }
+    },
+    "id": "sve-12",
+    "ids": {
+      "cardmarket": [
+        786116,
+        809707
+      ],
+      "pokemontcg": "sve-12",
+      "tcgdex": "sve-012",
+      "tcgplayer": [
+        578866,
+        599741,
+        623652,
+        651100
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/sve/12_hires.png",
+      "small": "https://images.pokemontcg.io/sve/12.png"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Basic Lightning Energy",
+    "number": "12",
+    "rarity": "Common",
+    "setId": "sve",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy",
+    "variants": [
+      {
+        "cardmarketId": 786116,
+        "tcgplayerId": 578866,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 809707,
+        "foil": "cracked-ice",
+        "tcgplayerId": 599741,
+        "type": "reverse"
+      },
+      {
+        "type": "reverse"
+      },
+      {
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 623652,
+        "type": "normal"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 651100,
+        "type": "reverse"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "professor-program"
+        ],
+        "type": "reverse"
+      }
+    ]
+  },
+  {
+    "cardId": "13",
+    "i18n": {
+      "de": {
+        "name": "Psycho-Energie"
+      }
+    },
+    "id": "sve-13",
+    "ids": {
+      "cardmarket": [
+        786117,
+        809708
+      ],
+      "pokemontcg": "sve-13",
+      "tcgdex": "sve-013",
+      "tcgplayer": [
+        578865,
+        599743,
+        623653,
+        651109
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/sve/13_hires.png",
+      "small": "https://images.pokemontcg.io/sve/13.png"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Basic Psychic Energy",
+    "number": "13",
+    "rarity": "Common",
+    "setId": "sve",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy",
+    "variants": [
+      {
+        "cardmarketId": 786117,
+        "tcgplayerId": 578865,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 809708,
+        "foil": "cracked-ice",
+        "tcgplayerId": 599743,
+        "type": "reverse"
+      },
+      {
+        "type": "reverse"
+      },
+      {
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 623653,
+        "type": "normal"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 651109,
+        "type": "reverse"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "professor-program"
+        ],
+        "type": "reverse"
+      }
+    ]
+  },
+  {
+    "cardId": "14",
+    "i18n": {
+      "de": {
+        "name": "Kampf-Energie"
+      }
+    },
+    "id": "sve-14",
+    "ids": {
+      "cardmarket": [
+        786118,
+        809709
+      ],
+      "pokemontcg": "sve-14",
+      "tcgdex": "sve-014",
+      "tcgplayer": [
+        578867,
+        599746,
+        623654,
+        651096
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/sve/14_hires.png",
+      "small": "https://images.pokemontcg.io/sve/14.png"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Basic Fighting Energy",
+    "number": "14",
+    "rarity": "Common",
+    "setId": "sve",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy",
+    "variants": [
+      {
+        "cardmarketId": 786118,
+        "tcgplayerId": 578867,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 809709,
+        "foil": "cracked-ice",
+        "tcgplayerId": 599746,
+        "type": "reverse"
+      },
+      {
+        "type": "reverse"
+      },
+      {
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 623654,
+        "type": "normal"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 651096,
+        "type": "reverse"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "professor-program"
+        ],
+        "type": "reverse"
+      }
+    ]
+  },
+  {
+    "cardId": "15",
+    "i18n": {
+      "de": {
+        "name": "Finsternis-Energie"
+      }
+    },
+    "id": "sve-15",
+    "ids": {
+      "cardmarket": [
+        786119,
+        809710
+      ],
+      "pokemontcg": "sve-15",
+      "tcgdex": "sve-015",
+      "tcgplayer": [
+        578868,
+        599747,
+        623655,
+        651036
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/sve/15_hires.png",
+      "small": "https://images.pokemontcg.io/sve/15.png"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Basic Darkness Energy",
+    "number": "15",
+    "rarity": "Common",
+    "setId": "sve",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy",
+    "variants": [
+      {
+        "cardmarketId": 786119,
+        "tcgplayerId": 578868,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 809710,
+        "foil": "cracked-ice",
+        "tcgplayerId": 599747,
+        "type": "reverse"
+      },
+      {
+        "type": "reverse"
+      },
+      {
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 623655,
+        "type": "normal"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 651036,
+        "type": "reverse"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "professor-program"
+        ],
+        "type": "reverse"
+      }
+    ]
+  },
+  {
+    "cardId": "16",
+    "i18n": {
+      "de": {
+        "name": "Metall-Energie"
+      }
+    },
+    "id": "sve-16",
+    "ids": {
+      "cardmarket": [
+        786120,
+        809711
+      ],
+      "pokemontcg": "sve-16",
+      "tcgdex": "sve-016",
+      "tcgplayer": [
+        578869,
+        599742,
+        627701,
+        651102
+      ]
+    },
+    "images": {
+      "large": "https://images.pokemontcg.io/sve/16_hires.png",
+      "small": "https://images.pokemontcg.io/sve/16.png"
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Basic Metal Energy",
+    "number": "16",
+    "rarity": "Common",
+    "setId": "sve",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy",
+    "variants": [
+      {
+        "cardmarketId": 786120,
+        "tcgplayerId": 578869,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 809711,
+        "foil": "cracked-ice",
+        "tcgplayerId": 599742,
+        "type": "reverse"
+      },
+      {
+        "type": "reverse"
+      },
+      {
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 627701,
+        "type": "normal"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "player-rewards-program"
+        ],
+        "tcgplayerId": 651102,
+        "type": "reverse"
+      },
+      {
+        "foil": "cosmos",
+        "stamp": [
+          "professor-program"
+        ],
+        "type": "reverse"
+      }
+    ]
+  },
+  {
+    "cardId": "17",
+    "i18n": {
+      "de": {
+        "name": "Pflanze-Energie"
+      }
+    },
+    "id": "sve-17",
+    "ids": {
+      "cardmarket": [
+        836249,
+        836972
+      ],
+      "pokemontcg": null,
+      "tcgdex": "sve-017",
+      "tcgplayer": [
+        645286
+      ]
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Grass Energy",
+    "number": "017",
+    "rarity": "Common",
+    "setId": "sve",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy",
+    "variants": [
+      {
+        "cardmarketId": 836249,
+        "tcgplayerId": 645286,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 836972,
+        "foil": "tinsel",
+        "type": "reverse"
+      }
+    ]
+  },
+  {
+    "cardId": "18",
+    "i18n": {
+      "de": {
+        "name": "Feuer-Energie"
+      }
+    },
+    "id": "sve-18",
+    "ids": {
+      "cardmarket": [
+        836250,
+        836973
+      ],
+      "pokemontcg": null,
+      "tcgdex": "sve-018",
+      "tcgplayer": [
+        645287
+      ]
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Fire Energy",
+    "number": "018",
+    "rarity": "Common",
+    "setId": "sve",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy",
+    "variants": [
+      {
+        "cardmarketId": 836250,
+        "tcgplayerId": 645287,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 836973,
+        "foil": "tinsel",
+        "type": "reverse"
+      }
+    ]
+  },
+  {
+    "cardId": "19",
+    "i18n": {
+      "de": {
+        "name": "Wasser-Energie"
+      }
+    },
+    "id": "sve-19",
+    "ids": {
+      "cardmarket": [
+        836251,
+        836974
+      ],
+      "pokemontcg": null,
+      "tcgdex": "sve-019",
+      "tcgplayer": [
+        645288
+      ]
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Water Energy",
+    "number": "019",
+    "rarity": "Common",
+    "setId": "sve",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy",
+    "variants": [
+      {
+        "cardmarketId": 836251,
+        "tcgplayerId": 645288,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 836974,
+        "foil": "tinsel",
+        "type": "reverse"
+      }
+    ]
+  },
+  {
+    "cardId": "20",
+    "i18n": {
+      "de": {
+        "name": "Elektro-Energie"
+      }
+    },
+    "id": "sve-20",
+    "ids": {
+      "cardmarket": [
+        836252,
+        836975
+      ],
+      "pokemontcg": null,
+      "tcgdex": "sve-020",
+      "tcgplayer": [
+        645289
+      ]
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Lightning Energy",
+    "number": "020",
+    "rarity": "Common",
+    "setId": "sve",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy",
+    "variants": [
+      {
+        "cardmarketId": 836252,
+        "tcgplayerId": 645289,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 836975,
+        "foil": "tinsel",
+        "type": "reverse"
+      }
+    ]
+  },
+  {
+    "cardId": "21",
+    "i18n": {
+      "de": {
+        "name": "Psycho-Energie"
+      }
+    },
+    "id": "sve-21",
+    "ids": {
+      "cardmarket": [
+        836253,
+        836976
+      ],
+      "pokemontcg": null,
+      "tcgdex": "sve-021",
+      "tcgplayer": [
+        645301
+      ]
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Psychic Energy",
+    "number": "021",
+    "rarity": "Common",
+    "setId": "sve",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy",
+    "variants": [
+      {
+        "cardmarketId": 836253,
+        "tcgplayerId": 645301,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 836976,
+        "foil": "tinsel",
+        "type": "reverse"
+      }
+    ]
+  },
+  {
+    "cardId": "22",
+    "i18n": {
+      "de": {
+        "name": "Kampf-Energie"
+      }
+    },
+    "id": "sve-22",
+    "ids": {
+      "cardmarket": [
+        836254,
+        836977
+      ],
+      "pokemontcg": null,
+      "tcgdex": "sve-022",
+      "tcgplayer": [
+        645302
+      ]
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Fighting Energy",
+    "number": "022",
+    "rarity": "Common",
+    "setId": "sve",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy",
+    "variants": [
+      {
+        "cardmarketId": 836254,
+        "tcgplayerId": 645302,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 836977,
+        "foil": "tinsel",
+        "type": "reverse"
+      }
+    ]
+  },
+  {
+    "cardId": "23",
+    "i18n": {
+      "de": {
+        "name": "Finsternis-Energie"
+      }
+    },
+    "id": "sve-23",
+    "ids": {
+      "cardmarket": [
+        836255,
+        836978
+      ],
+      "pokemontcg": null,
+      "tcgdex": "sve-023",
+      "tcgplayer": [
+        645303
+      ]
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Darkness Energy",
+    "number": "023",
+    "rarity": "Common",
+    "setId": "sve",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy",
+    "variants": [
+      {
+        "cardmarketId": 836255,
+        "tcgplayerId": 645303,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 836978,
+        "foil": "tinsel",
+        "type": "reverse"
+      }
+    ]
+  },
+  {
+    "cardId": "24",
+    "i18n": {
+      "de": {
+        "name": "Metall-Energie"
+      }
+    },
+    "id": "sve-24",
+    "ids": {
+      "cardmarket": [
+        836256,
+        836979
+      ],
+      "pokemontcg": null,
+      "tcgdex": "sve-024",
+      "tcgplayer": [
+        645304
+      ]
+    },
+    "legalities": {
+      "expanded": "Legal",
+      "unlimited": "Legal"
+    },
+    "matchStatus": "tcgdex_only",
+    "name": "Metal Energy",
+    "number": "024",
+    "rarity": "Common",
+    "setId": "sve",
+    "sources": {
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Energy",
+    "variants": [
+      {
+        "cardmarketId": 836256,
+        "tcgplayerId": 645304,
+        "type": "normal"
+      },
+      {
+        "cardmarketId": 836979,
+        "foil": "tinsel",
+        "type": "reverse"
+      }
+    ]
+  }
+]

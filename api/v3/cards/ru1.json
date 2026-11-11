@@ -1,0 +1,1240 @@
+[
+  {
+    "artist": "Pokemon Rumble",
+    "attacks": [
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Grass",
+          "Grass",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "50",
+        "name": "Giga Drain",
+        "text": "Remove from Venusaur the number of damage counters equal to the damage you did to the Defending Pokémon."
+      }
+    ],
+    "cardId": "1",
+    "convertedRetreatCost": 4,
+    "evolvesFrom": "Ivysaur",
+    "hp": "140",
+    "id": "ru1-1",
+    "ids": {
+      "cardmarket": [
+        278842
+      ],
+      "pokemontcg": "ru1-1",
+      "tcgdex": "ru1-1",
+      "tcgplayer": [
+        90320
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pl/ru1/1/high.webp",
+      "small": "https://assets.tcgdex.net/en/pl/ru1/1/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Venusaur",
+    "nationalPokedexNumbers": [
+      3
+    ],
+    "number": "1",
+    "rarity": "None",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "ru1",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 2"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 278842,
+        "tcgplayerId": 90320,
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Pokemon Rumble",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Grass",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "60",
+        "name": "Solarbeam",
+        "text": ""
+      }
+    ],
+    "cardId": "2",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Cherubi",
+    "hp": "80",
+    "id": "ru1-2",
+    "ids": {
+      "cardmarket": [
+        278843
+      ],
+      "pokemontcg": "ru1-2",
+      "tcgdex": "ru1-2",
+      "tcgplayer": [
+        84256
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pl/ru1/2/high.webp",
+      "small": "https://assets.tcgdex.net/en/pl/ru1/2/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Cherrim",
+    "nationalPokedexNumbers": [
+      421
+    ],
+    "number": "2",
+    "rarity": "None",
+    "resistances": [
+      {
+        "type": "Water",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "ru1",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Grass"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 278843,
+        "tcgplayerId": 84256,
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Pokemon Rumble",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Fire",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "60",
+        "name": "Flame Tail",
+        "text": ""
+      }
+    ],
+    "cardId": "3",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Vulpix",
+    "hp": "90",
+    "id": "ru1-3",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "ru1-3",
+      "tcgdex": "ru1-3",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pl/ru1/3/high.webp",
+      "small": "https://assets.tcgdex.net/en/pl/ru1/3/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Ninetales",
+    "nationalPokedexNumbers": [
+      38
+    ],
+    "number": "3",
+    "rarity": "None",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "ru1",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fire"
+    ],
+    "variants": [
+      {
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Water",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Pokemon Rumble",
+    "attacks": [
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Fire",
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "60+",
+        "name": "Heat Boiler",
+        "text": "If the Defending Pokémon is a Water Pokémon, this attack does 60 damage plus 40 more damage."
+      }
+    ],
+    "cardId": "4",
+    "convertedRetreatCost": 4,
+    "hp": "110",
+    "id": "ru1-4",
+    "ids": {
+      "cardmarket": [],
+      "pokemontcg": "ru1-4",
+      "tcgdex": "ru1-4",
+      "tcgplayer": []
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pl/ru1/4/high.webp",
+      "small": "https://assets.tcgdex.net/en/pl/ru1/4/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Heatran",
+    "nationalPokedexNumbers": [
+      485
+    ],
+    "number": "4",
+    "rarity": "None",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "ru1",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fire"
+    ],
+    "variants": [
+      {
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Water",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Pokemon Rumble",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Water",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "50",
+        "name": "Spiral Drain",
+        "text": "Remove 1 damage counter from Starmie."
+      }
+    ],
+    "cardId": "5",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Staryu",
+    "hp": "80",
+    "id": "ru1-5",
+    "ids": {
+      "cardmarket": [
+        278846
+      ],
+      "pokemontcg": "ru1-5",
+      "tcgdex": "ru1-5",
+      "tcgplayer": [
+        87775
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pl/ru1/5/high.webp",
+      "small": "https://assets.tcgdex.net/en/pl/ru1/5/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Starmie",
+    "nationalPokedexNumbers": [
+      121
+    ],
+    "number": "5",
+    "rarity": "None",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "ru1",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 278846,
+        "tcgplayerId": 87775,
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Pokemon Rumble",
+    "attacks": [
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Water",
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "80",
+        "name": "Thrash Tackle",
+        "text": "Gyarados does 20 damage to itself."
+      }
+    ],
+    "cardId": "6",
+    "convertedRetreatCost": 3,
+    "evolvesFrom": "Magikarp",
+    "hp": "130",
+    "id": "ru1-6",
+    "ids": {
+      "cardmarket": [
+        278847
+      ],
+      "pokemontcg": "ru1-6",
+      "tcgdex": "ru1-6",
+      "tcgplayer": [
+        87775
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pl/ru1/6/high.webp",
+      "small": "https://assets.tcgdex.net/en/pl/ru1/6/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Gyarados",
+    "nationalPokedexNumbers": [
+      130
+    ],
+    "number": "6",
+    "rarity": "None",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "ru1",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Water"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 278847,
+        "tcgplayerId": 87775,
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Pokemon Rumble",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Lightning",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "60",
+        "name": "Volt Tackle",
+        "text": "Pikachu does 10 damage to itself."
+      }
+    ],
+    "cardId": "7",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Raichu"
+    ],
+    "hp": "60",
+    "id": "ru1-7",
+    "ids": {
+      "cardmarket": [
+        278848
+      ],
+      "pokemontcg": "ru1-7",
+      "tcgdex": "ru1-7",
+      "tcgplayer": [
+        88096
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pl/ru1/7/high.webp",
+      "small": "https://assets.tcgdex.net/en/pl/ru1/7/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Pikachu",
+    "nationalPokedexNumbers": [
+      25
+    ],
+    "number": "7",
+    "rarity": "None",
+    "resistances": [
+      {
+        "type": "Metal",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "ru1",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 278848,
+        "tcgplayerId": 88096,
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Pokemon Rumble",
+    "attacks": [
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Lightning",
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "70",
+        "name": "Drill Peck",
+        "text": ""
+      }
+    ],
+    "cardId": "8",
+    "convertedRetreatCost": 2,
+    "hp": "100",
+    "id": "ru1-8",
+    "ids": {
+      "cardmarket": [
+        278849
+      ],
+      "pokemontcg": "ru1-8",
+      "tcgdex": "ru1-8",
+      "tcgplayer": [
+        90720
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pl/ru1/8/high.webp",
+      "small": "https://assets.tcgdex.net/en/pl/ru1/8/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Zapdos",
+    "nationalPokedexNumbers": [
+      145
+    ],
+    "number": "8",
+    "rarity": "None",
+    "resistances": [
+      {
+        "type": "Fighting",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "ru1",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Lightning"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 278849,
+        "tcgplayerId": 90720,
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Lightning",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Pokemon Rumble",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Psychic",
+          "Psychic",
+          "Colorless"
+        ],
+        "damage": "70",
+        "name": "Super Psy Bolt",
+        "text": ""
+      }
+    ],
+    "cardId": "9",
+    "convertedRetreatCost": 2,
+    "hp": "100",
+    "id": "ru1-9",
+    "ids": {
+      "cardmarket": [
+        278850
+      ],
+      "pokemontcg": "ru1-9",
+      "tcgdex": "ru1-9",
+      "tcgplayer": [
+        87423
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pl/ru1/9/high.webp",
+      "small": "https://assets.tcgdex.net/en/pl/ru1/9/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Mewtwo",
+    "nationalPokedexNumbers": [
+      150
+    ],
+    "number": "9",
+    "rarity": "None",
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "ru1",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 278850,
+        "tcgplayerId": 87423,
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Pokemon Rumble",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "30",
+        "name": "Cut",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Psychic",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "60",
+        "name": "Will-o'-the-wisp",
+        "text": ""
+      }
+    ],
+    "cardId": "10",
+    "convertedRetreatCost": 0,
+    "hp": "60",
+    "id": "ru1-10",
+    "ids": {
+      "cardmarket": [
+        278850
+      ],
+      "pokemontcg": "ru1-10",
+      "tcgdex": "ru1-10",
+      "tcgplayer": [
+        87404
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pl/ru1/10/high.webp",
+      "small": "https://assets.tcgdex.net/en/pl/ru1/10/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Mew",
+    "nationalPokedexNumbers": [
+      151
+    ],
+    "number": "10",
+    "rarity": "None",
+    "setId": "ru1",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Psychic"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 278850,
+        "tcgplayerId": 87404,
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Pokemon Rumble",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Dig",
+        "text": ""
+      }
+    ],
+    "cardId": "11",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Dugtrio"
+    ],
+    "hp": "30",
+    "id": "ru1-11",
+    "ids": {
+      "cardmarket": [
+        278852
+      ],
+      "pokemontcg": "ru1-11",
+      "tcgdex": "ru1-11",
+      "tcgplayer": [
+        84825
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pl/ru1/11/high.webp",
+      "small": "https://assets.tcgdex.net/en/pl/ru1/11/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Diglett",
+    "nationalPokedexNumbers": [
+      50
+    ],
+    "number": "11",
+    "rarity": "None",
+    "resistances": [
+      {
+        "type": "Lightning",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "ru1",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 278852,
+        "tcgplayerId": 84825,
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Grass",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Pokemon Rumble",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Fighting",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "40",
+        "name": "Metal Claw",
+        "text": ""
+      },
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Fighting",
+          "Metal",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "80",
+        "name": "Pulse Blast",
+        "text": ""
+      }
+    ],
+    "cardId": "12",
+    "convertedRetreatCost": 1,
+    "evolvesFrom": "Riolu",
+    "hp": "90",
+    "id": "ru1-12",
+    "ids": {
+      "cardmarket": [
+        278853
+      ],
+      "pokemontcg": "ru1-12",
+      "tcgdex": "ru1-12",
+      "tcgplayer": [
+        86879
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pl/ru1/12/high.webp",
+      "small": "https://assets.tcgdex.net/en/pl/ru1/12/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Lucario",
+    "nationalPokedexNumbers": [
+      448
+    ],
+    "number": "12",
+    "rarity": "None",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "ru1",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Fighting"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 278853,
+        "tcgplayerId": 86879,
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Psychic",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Pokemon Rumble",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Darkness",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "20+",
+        "name": "Rage",
+        "text": "Does 20 damage plus 10 more damage for each damage counter on Skuntank."
+      }
+    ],
+    "cardId": "13",
+    "convertedRetreatCost": 2,
+    "evolvesFrom": "Stunky",
+    "hp": "90",
+    "id": "ru1-13",
+    "ids": {
+      "cardmarket": [
+        278854
+      ],
+      "pokemontcg": "ru1-13",
+      "tcgdex": "ru1-13",
+      "tcgplayer": [
+        89281
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pl/ru1/13/high.webp",
+      "small": "https://assets.tcgdex.net/en/pl/ru1/13/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Skuntank",
+    "nationalPokedexNumbers": [
+      435
+    ],
+    "number": "13",
+    "rarity": "None",
+    "resistances": [
+      {
+        "type": "Psychic",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "ru1",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Darkness"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 278854,
+        "tcgplayerId": 89281,
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Pokemon Rumble",
+    "attacks": [
+      {
+        "convertedEnergyCost": 3,
+        "cost": [
+          "Metal",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "40",
+        "name": "Strength",
+        "text": ""
+      }
+    ],
+    "cardId": "14",
+    "convertedRetreatCost": 4,
+    "evolvesFrom": "Shieldon",
+    "hp": "120",
+    "id": "ru1-14",
+    "ids": {
+      "cardmarket": [
+        278855
+      ],
+      "pokemontcg": "ru1-14",
+      "tcgdex": "ru1-14",
+      "tcgplayer": [
+        83737
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pl/ru1/14/high.webp",
+      "small": "https://assets.tcgdex.net/en/pl/ru1/14/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Bastiodon",
+    "nationalPokedexNumbers": [
+      411
+    ],
+    "number": "14",
+    "rarity": "None",
+    "resistances": [
+      {
+        "type": "Psychic",
+        "value": "-20"
+      }
+    ],
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "ru1",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 2"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Metal"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 278855,
+        "tcgplayerId": 83737,
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fire",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Pokemon Rumble",
+    "attacks": [
+      {
+        "convertedEnergyCost": 2,
+        "cost": [
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "20",
+        "name": "Bite",
+        "text": ""
+      }
+    ],
+    "cardId": "15",
+    "convertedRetreatCost": 1,
+    "evolvesTo": [
+      "Raticate"
+    ],
+    "hp": "30",
+    "id": "ru1-15",
+    "ids": {
+      "cardmarket": [
+        278856
+      ],
+      "pokemontcg": "ru1-15",
+      "tcgdex": "ru1-15",
+      "tcgplayer": [
+        88620
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pl/ru1/15/high.webp",
+      "small": "https://assets.tcgdex.net/en/pl/ru1/15/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Rattata",
+    "nationalPokedexNumbers": [
+      19
+    ],
+    "number": "15",
+    "rarity": "None",
+    "retreatCost": [
+      "Colorless"
+    ],
+    "setId": "ru1",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Basic"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 278856,
+        "tcgplayerId": 88620,
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  },
+  {
+    "artist": "Pokemon Rumble",
+    "attacks": [
+      {
+        "convertedEnergyCost": 4,
+        "cost": [
+          "Colorless",
+          "Colorless",
+          "Colorless",
+          "Colorless"
+        ],
+        "damage": "50",
+        "name": "Rollout",
+        "text": ""
+      }
+    ],
+    "cardId": "16",
+    "convertedRetreatCost": 3,
+    "evolvesFrom": "Bidoof",
+    "hp": "90",
+    "id": "ru1-16",
+    "ids": {
+      "cardmarket": [
+        278857
+      ],
+      "pokemontcg": "ru1-16",
+      "tcgdex": "ru1-16",
+      "tcgplayer": [
+        83820
+      ]
+    },
+    "images": {
+      "large": "https://assets.tcgdex.net/en/pl/ru1/16/high.webp",
+      "small": "https://assets.tcgdex.net/en/pl/ru1/16/low.webp"
+    },
+    "legalities": {
+      "unlimited": "Legal"
+    },
+    "matchStatus": "matched",
+    "name": "Bibarel",
+    "nationalPokedexNumbers": [
+      400
+    ],
+    "number": "16",
+    "rarity": "None",
+    "retreatCost": [
+      "Colorless",
+      "Colorless",
+      "Colorless"
+    ],
+    "setId": "ru1",
+    "sources": {
+      "pokemontcg": "bc4a5871",
+      "tcgdex": "5fbf524a"
+    },
+    "subtypes": [
+      "Stage 1"
+    ],
+    "supertype": "Pokémon",
+    "types": [
+      "Colorless"
+    ],
+    "variants": [
+      {
+        "cardmarketId": 278857,
+        "tcgplayerId": 83820,
+        "type": "normal"
+      }
+    ],
+    "weaknesses": [
+      {
+        "type": "Fighting",
+        "value": "×2"
+      }
+    ]
+  }
+]
