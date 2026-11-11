@@ -70,3 +70,16 @@ test('updateSourcesManifest ergänzt und sortiert Einträge stabil', () => {
   updateSourcesManifest(file, 'tcgdex', e('r3'));
   assert.equal(JSON.parse(fs.readFileSync(file, 'utf8')).tcgdex.repo, 'r3');
 });
+
+test('nicht parsebare Serie-Datei bricht den Mirror ab, Ziel bleibt unverändert', () => {
+  const target = path.join(tmp(), 'tcgdex');
+  fs.mkdirSync(target);
+  fs.writeFileSync(path.join(target, 'marker'), 'alt');
+  for (const body of ['this is not ( valid', 'export default { name: "x" }']) {
+    const clone = makeClone();
+    fs.writeFileSync(path.join(clone, 'data', 'Pokémon TCG Pocket.ts'), body);
+    assert.throws(() => mirrorTcgdex({ cloneDir: clone, targetDir: target, excludeSerieIds: ['tcgp'] }), /Serie-Datei/);
+    assert.equal(fs.readFileSync(path.join(target, 'marker'), 'utf8'), 'alt');
+    assert.ok(!fs.existsSync(`${target}.tmp`));
+  }
+});

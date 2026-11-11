@@ -16,11 +16,14 @@ export function reduceAssetsIndex(datas, langs = ['en', 'de', 'univ']) {
 }
 
 function serieIdOf(file) {
+  let id;
   try {
-    return parseTcgdexModule(fs.readFileSync(file, 'utf8'), file).exports.default?.id;
-  } catch {
-    return undefined;
+    id = parseTcgdexModule(fs.readFileSync(file, 'utf8'), file).exports.default?.id;
+  } catch (e) {
+    throw new Error(`Serie-Datei nicht parsebar (${file}): ${e.message}`);
   }
+  if (typeof id !== 'string') throw new Error(`Serie-Datei ohne id (${file})`);
+  return id;
 }
 
 function copyData(srcData, dstData, excludeSerieIds) {
