@@ -83,7 +83,7 @@ async function main() {
   const git = (...args) => execFileSync('git', args, { cwd: clone, encoding: 'utf8' }).trim();
   try {
     execFileSync('git', ['clone', '--depth', '1', '--filter=blob:none', '--sparse', REPO, clone], { stdio: 'inherit' });
-    git('sparse-checkout', 'set', 'data', 'meta', 'interfaces.d.ts', 'LICENSE');
+    git('sparse-checkout', 'set', '--no-cone', '/data/', '/meta/', '/interfaces.d.ts', '/LICENSE');
     const commit = git('rev-parse', 'HEAD');
     const ref = git('rev-parse', '--abbrev-ref', 'HEAD');
     const res = await fetch(ASSETS_URL);
