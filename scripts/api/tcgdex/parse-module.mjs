@@ -49,7 +49,10 @@ export function parseTcgdexModule(source, filePath) {
       case 'ObjectExpression': {
         const obj = {};
         for (const p of node.properties) {
-          if (p.type !== 'Property' || p.kind !== 'init' || p.method || p.computed) fail(`nicht erlaubter Knoten ${p.type}`);
+          if (p.type !== 'Property') fail(`nicht erlaubter Knoten ${p.type}`);
+          if (p.computed) fail('nicht erlaubter Knoten Property (berechneter Schluessel)');
+          if (p.kind !== 'init') fail(`nicht erlaubter Knoten Property (${p.kind}-Accessor)`);
+          if (p.method) fail('nicht erlaubter Knoten Property (Methode)');
           let key;
           if (p.key.type === 'Identifier') key = p.key.name;
           else if (p.key.type === 'Literal') key = String(p.key.value);
