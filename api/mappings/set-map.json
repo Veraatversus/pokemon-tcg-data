@@ -1,3 +1,24 @@
 {
-  "pairs": []
+  "pairs": [
+    {
+      "pokemontcg": "ex10",
+      "tcgdex": "ex10",
+      "reason": "Gleiche ID und gleicher Name 'Unseen Forces' (ptcgoCode UF = abbreviationOfficial UF). pokemontcg fuehrt 145 Karten (1-117 + Unown A-Z, !, ?), TCGdex fuehrt die 28 Unown separat im Set 'exu' (Unseen Forces Unown Collection); daher lehnt die Plausibilitaetspruefung exactId ab (Overlap 0.81). Karten 1-117 stimmen 1:1 nach Nummer und Name ueberein; Unown via card-map-Aliase nach exu."
+    },
+    {
+      "pokemontcg": "mcd17",
+      "tcgdex": "2017sm",
+      "reason": "Identischer Name 'McDonald's Collection 2017', 12/12 Karten nach Nummer und Name identisch (Rowlet ... Yungoos). Automatisches nameAndDate scheitert nur am Datum (pokemontcg 2017/11/07 vs. TCGdex 2017-08-03, > 31 Tage)."
+    },
+    {
+      "pokemontcg": "cel25c",
+      "tcgdex": "cel25cc",
+      "reason": "Celebrations: Classic Collection. pokemontcg nutzt die Originalnummern der Nachdrucke (2, 4, 15 x4, ...), TCGdex die Set-Nummern CC001-CC025 -> Overlap 0.00 (lowOverlap). Alle 25 Kartennamen kommen in beiden Sets genau einmal vor (Name-Abgleich per byNamePosition in card-map). Explizit gemappt, damit das Paar nicht an der Plausibilitaetspruefung haengt."
+    },
+    {
+      "pokemontcg": "me55c",
+      "tcgdex": "30th-c",
+      "reason": "30th Celebration: Classic Collection. Gleicher Code 30C und Datum 2026-09-16; pokemontcg nutzt die Originalnummern der Nachdrucke (106 x3, 11 x2), TCGdex 001-030 -> Overlap 0.23 (lowOverlap, Zufallstreffer). Alle 30 Kartennamen stimmen ueberein (byNamePosition + Aliase in card-map)."
+    }
+  ]
 }

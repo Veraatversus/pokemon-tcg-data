@@ -1,1 +1,173 @@
-{}
+{
+  "cel25c": {
+    "reason": "Originalnummern (teils doppelt, z. B. 15 x4) passen nicht zu TCGdex CC001-CC025; alle 25 Namen kommen in beiden Sets genau einmal vor -> Zuordnung per Name.",
+    "byNamePosition": true
+  },
+  "ex10": {
+    "reason": "Unown A-Z, !, ? liegen bei TCGdex im separaten Set exu.",
+    "aliases": {
+      "A": {
+        "set": "exu",
+        "localId": "A",
+        "reason": "Unown A: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId A."
+      },
+      "B": {
+        "set": "exu",
+        "localId": "B",
+        "reason": "Unown B: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId B."
+      },
+      "C": {
+        "set": "exu",
+        "localId": "C",
+        "reason": "Unown C: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId C."
+      },
+      "D": {
+        "set": "exu",
+        "localId": "D",
+        "reason": "Unown D: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId D."
+      },
+      "E": {
+        "set": "exu",
+        "localId": "E",
+        "reason": "Unown E: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId E."
+      },
+      "F": {
+        "set": "exu",
+        "localId": "F",
+        "reason": "Unown F: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId F."
+      },
+      "G": {
+        "set": "exu",
+        "localId": "G",
+        "reason": "Unown G: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId G."
+      },
+      "H": {
+        "set": "exu",
+        "localId": "H",
+        "reason": "Unown H: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId H."
+      },
+      "I": {
+        "set": "exu",
+        "localId": "I",
+        "reason": "Unown I: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId I."
+      },
+      "J": {
+        "set": "exu",
+        "localId": "J",
+        "reason": "Unown J: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId J."
+      },
+      "K": {
+        "set": "exu",
+        "localId": "K",
+        "reason": "Unown K: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId K."
+      },
+      "L": {
+        "set": "exu",
+        "localId": "L",
+        "reason": "Unown L: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId L."
+      },
+      "M": {
+        "set": "exu",
+        "localId": "M",
+        "reason": "Unown M: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId M."
+      },
+      "N": {
+        "set": "exu",
+        "localId": "N",
+        "reason": "Unown N: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId N."
+      },
+      "O": {
+        "set": "exu",
+        "localId": "O",
+        "reason": "Unown O: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId O."
+      },
+      "P": {
+        "set": "exu",
+        "localId": "P",
+        "reason": "Unown P: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId P."
+      },
+      "Q": {
+        "set": "exu",
+        "localId": "Q",
+        "reason": "Unown Q: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId Q."
+      },
+      "R": {
+        "set": "exu",
+        "localId": "R",
+        "reason": "Unown R: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId R."
+      },
+      "S": {
+        "set": "exu",
+        "localId": "S",
+        "reason": "Unown S: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId S."
+      },
+      "T": {
+        "set": "exu",
+        "localId": "T",
+        "reason": "Unown T: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId T."
+      },
+      "U": {
+        "set": "exu",
+        "localId": "U",
+        "reason": "Unown U: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId U."
+      },
+      "V": {
+        "set": "exu",
+        "localId": "V",
+        "reason": "Unown V: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId V."
+      },
+      "W": {
+        "set": "exu",
+        "localId": "W",
+        "reason": "Unown W: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId W."
+      },
+      "X": {
+        "set": "exu",
+        "localId": "X",
+        "reason": "Unown X: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId X."
+      },
+      "Y": {
+        "set": "exu",
+        "localId": "Y",
+        "reason": "Unown Y: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId Y."
+      },
+      "Z": {
+        "set": "exu",
+        "localId": "Z",
+        "reason": "Unown Z: TCGdex fuehrt die Unseen-Forces-Unown im Set exu (Unseen Forces Unown Collection), localId Z."
+      },
+      "!": {
+        "set": "exu",
+        "localId": "!",
+        "reason": "Unown !: TCGdex-Set exu, localId !."
+      },
+      "?": {
+        "set": "exu",
+        "localId": "%3F",
+        "reason": "Unown ?: TCGdex-Set exu; die Datei heisst %3F.ts (Fragezeichen percent-kodiert, im Dateinamen nicht erlaubt), der Loader liefert daher localId %3F."
+      }
+    }
+  },
+  "me55c": {
+    "reason": "Originalnummern (106 x3, 11 x2) passen nicht zu TCGdex 001-030 -> Zuordnung per Name. Aliase fuer die Faelle, in denen der Teilstring-Namensvergleich mehrdeutig ist.",
+    "byNamePosition": true,
+    "aliases": {
+      "33": {
+        "localId": "008",
+        "reason": "Pikachu & Zekrom-GX (HP 240, Full Blitz/Tag Bolt-GX) = TCGdex 008 Pikachu & Zekrom GX (gleiche Attacken, HP 240)."
+      },
+      "58": {
+        "localId": "014",
+        "reason": "Pikachu (HP 40, Gnaw/Thunder Jolt) = TCGdex 014 Pikachu. Ohne Alias wuerde der Namensabgleich 008 Pikachu & Zekrom GX treffen (Teilstring)."
+      },
+      "99": {
+        "localId": "019",
+        "reason": "Darkrai & Cresselia LEGEND, obere Haelfte (Originalnummer 99 vor 100). TCGdex ordnet die Classic Collection in Originalreihenfolge; 019 vor 020. Beide Haelften gleichnamig, daher explizit fixiert."
+      },
+      "100": {
+        "localId": "020",
+        "reason": "Darkrai & Cresselia LEGEND, untere Haelfte (Originalnummer 100). TCGdex 020 traegt die Attacken (Lost Crisis/Moon's Invite) wie die untere LEGEND-Haelfte."
+      }
+    }
+  }
+}
