@@ -1,4 +1,3 @@
 cards/en/v1/
 .idea/
-# Lokale Fixtures (private Sammlungsdaten, nie committen)
-.local/
+scripts/api/node_modules/

@@ -1,0 +1,94 @@
+name: Daily Sync TCGdex to Master
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: write
+  issues: write
+
+concurrency:
+  group: sync-tcgdex
+  cancel-in-progress: false
+
+jobs:
+  sync_tcgdex_to_master:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 1
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        working-directory: scripts/api
+        run: npm ci
+
+      - name: Run tests
+        working-directory: scripts/api
+        run: npm test
+
+      - name: Sync TCGdex
+        run: node scripts/api/sources/sync-tcgdex.mjs
+
+      - name: Build matching report
+        run: node scripts/api/build-matching.mjs --min-card-match 0.995 --fail-on-pair-drift
+
+      - name: Regression tests against synced sources
+        working-directory: scripts/api
+        run: node --test test/matching-regression.test.mjs
+
+      - name: Commit and push changes
+        run: |
+          git add sources/tcgdex sources/SOURCES.json api/v3/reports
+          if [ -z "$(git status --porcelain -- sources/tcgdex sources/SOURCES.json api/v3/reports)" ]; then
+            echo "Keine Aenderungen - nichts zu committen"
+            exit 0
+          fi
+          git commit -m "chore: sync TCGdex data"
+          git pull --rebase origin master
+          git push origin master
+
+      - name: Create issue on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'TCGdex-Sync fehlgeschlagen - manuelle Pruefung erforderlich',
+              body: `Der automatische TCGdex-Sync auf \`master\` ist fehlgeschlagen. Es wurde nichts committet.
+
+              **Lauf:** ${runUrl}
+
+              **Moegliche Ursachen:**
+              - Tests, Parser oder Plausibilitaetspruefung des Spiegels sind fehlgeschlagen
+              - Das Matching hat die Qualitaetsschwelle (0,995) verfehlt, Doppelzuordnungen oder unaufgeloeste Aliase gefunden oder die Set-Paarliste hat sich gegenueber dem letzten Report geaendert
+              - Die Regressionstests gegen die frisch gespiegelten Quellen sind fehlgeschlagen
+              - Netzwerk- oder Push-Fehler
+
+              **Erforderliche Aktion:**
+              Bitte das Log des Laufs pruefen, die Ursache beheben und den Workflow erneut starten.
+              `,
+              labels: ['upstream-sync', 'manual-action-required']
+            });
+            console.log('Created issue:', issue.data.number);
