@@ -15,7 +15,7 @@ export function reduceAssetsIndex(datas, langs = ['en', 'de', 'univ']) {
   return Object.fromEntries(langs.filter((l) => l in datas).map((l) => [l, datas[l]]));
 }
 
-// Nur bei geaendertem TCGdex-Commit wird gespiegelt. Folge: der Assets-Index (datas.json)
+// Nur bei geaendertem TCGdex-Commit (oder mit --force) wird gespiegelt. Folge: der Assets-Index (datas.json)
 // wird nur zusammen mit einem Commit-Wechsel aktualisiert, nicht allein bei eigener Aenderung.
 export function shouldUpdate(manifest, newCommit) {
   return manifest?.tcgdex?.commit !== newCommit;
@@ -128,24 +128,24 @@ async function fetchAssets() {
 }
 
 // Abhaengigkeiten injizierbar (Tests); main() verdrahtet die echten.
-export async function runSync({ repoRoot, cloneTcgdex: clonePort = cloneTcgdex, lsRemoteHead: headPort = lsRemoteHead, fetchAssets: assetsPort = fetchAssets, now = () => new Date() }) {
+export async function runSync({ repoRoot, cloneTcgdex: clonePort = cloneTcgdex, lsRemoteHead: headPort = lsRemoteHead, fetchAssets: assetsPort = fetchAssets, now = () => new Date(), force = false }) {
   const sourcesDir = path.join(repoRoot, 'sources');
   const manifestFile = path.join(sourcesDir, 'SOURCES.json');
   const manifest = fs.existsSync(manifestFile) ? JSON.parse(fs.readFileSync(manifestFile, 'utf8')) : {};
   const remoteHead = headPort();
-  if (!shouldUpdate(manifest, remoteHead)) {
+  if (!force && !shouldUpdate(manifest, remoteHead)) {
     console.log(`TCGdex unveraendert (${remoteHead})`);
     return { updated: false, commit: remoteHead };
   }
   const clone = fs.mkdtempSync(path.join(os.tmpdir(), 'tcgdex-clone-'));
   try {
     const { commit, ref } = clonePort(clone);
-    if (!shouldUpdate(manifest, commit)) {
+    if (!force && !shouldUpdate(manifest, commit)) {
       console.log(`TCGdex unveraendert (${commit})`);
       return { updated: false, commit };
     }
     const assetsIndex = reduceAssetsIndex(await assetsPort());
-    const result = mirrorTcgdex({ cloneDir: clone, targetDir: path.join(sourcesDir, 'tcgdex'), excludeSerieIds: ['tcgp'], assetsIndex });
+    const result = mirrorTcgdex({ cloneDir: clone, targetDir: path.join(sourcesDir, 'tcgdex'), excludeSerieIds: [], assetsIndex });
     updateSourcesManifest(manifestFile, 'tcgdex', {
       repo: 'tcgdex/cards-database', ref, commit, fetchedAt: now().toISOString(), status: 'active',
     });
@@ -158,7 +158,7 @@ export async function runSync({ repoRoot, cloneTcgdex: clonePort = cloneTcgdex, 
 
 async function main() {
   const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
-  await runSync({ repoRoot });
+  await runSync({ repoRoot, force: process.argv.includes('--force') });
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

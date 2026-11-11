@@ -10,10 +10,10 @@ import { loadPokemontcg } from '../sources/load-pokemontcg.mjs';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURE = path.join(HERE, 'fixtures', 'tcgdex');
 
-test('loadTcgdexDatabase: Sets, Ausschluss tcgp, cardmarketId, sortierte localIds', () => {
+test('loadTcgdexDatabase: Sets inkl. tcgp, cardmarketId, sortierte localIds', () => {
   const { sets, errors } = loadTcgdexDatabase(FIXTURE);
   assert.equal(errors.length, 0);
-  assert.deepEqual(sets.map((s) => s.id).sort(), ['2011bw', 'me05']);
+  assert.deepEqual(sets.map((s) => s.id).sort(), ['2011bw', 'A1', 'me05']);
   const me05 = sets.find((s) => s.id === 'me05');
   assert.equal(me05.serieId, 'me');
   assert.equal(me05.serieName.en, 'Mega Evolution');
@@ -32,9 +32,28 @@ test('loadTcgdexDatabase: Sets, Ausschluss tcgp, cardmarketId, sortierte localId
   assert.deepEqual(mc.cards.map((c) => c.localId), ['1', '2', '10']);
 });
 
-test('loadTcgdexDatabase: excludeSerieIds leer laedt tcgp mit', () => {
-  const { sets } = loadTcgdexDatabase(FIXTURE, { excludeSerieIds: [] });
-  assert.ok(sets.some((s) => s.id === 'A1'));
+test('loadTcgdexDatabase: Default laedt tcgp, excludeSerieIds schliesst aus', () => {
+  assert.ok(loadTcgdexDatabase(FIXTURE).sets.some((s) => s.id === 'A1'));
+  const { sets } = loadTcgdexDatabase(FIXTURE, { excludeSerieIds: ['tcgp'] });
+  assert.deepEqual(sets.map((s) => s.id).sort(), ['2011bw', 'me05']);
+});
+
+test('loadPokemontcg: Kartendatei ohne Set-Eintrag ergibt synthetisiertes Set', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'pt-orphan-'));
+  try {
+    fs.mkdirSync(path.join(tmp, 'sets'));
+    fs.mkdirSync(path.join(tmp, 'cards', 'en'), { recursive: true });
+    fs.writeFileSync(path.join(tmp, 'sets', 'en.json'), JSON.stringify([{ id: 'a1', name: 'A', series: 'S', printedTotal: 1, total: 1 }]));
+    fs.writeFileSync(path.join(tmp, 'cards', 'en', 'a1.json'), JSON.stringify([{ id: 'a1-1' }]));
+    fs.writeFileSync(path.join(tmp, 'cards', 'en', 'zz.json'), JSON.stringify([{ id: 'zz-1' }, { id: 'zz-2' }]));
+    const { sets, cardsBySet } = loadPokemontcg(tmp);
+    assert.deepEqual(sets.map((s) => s.id), ['a1', 'zz']);
+    assert.deepEqual(sets[1], { id: 'zz', name: 'zz', series: null, printedTotal: 2, total: 2, ptcgoCode: null, releaseDate: null, synthesized: true });
+    assert.equal(cardsBySet.get('zz').length, 2);
+    assert.equal('synthesized' in sets[0], false);
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
 });
 
 test('loadTcgdexDatabase: kaputte Karte wird als Fehler gesammelt', () => {
