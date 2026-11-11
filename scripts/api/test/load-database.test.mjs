@@ -108,3 +108,18 @@ test('Set-Pfad endet auf "ts" ohne Punkt (Furious Fists) wird korrekt aufgeloest
   assert.equal(errors.length, 0);
   assert.deepEqual(sets.find((s) => s.id === 'xy3').cards.map((c) => c.localId), ['1']);
 }));
+
+test('Doppelte (Set, localId): Kopie im eigenen Ordner gewinnt, Warnung statt Fehler', () => withTmpCopy((tmp, dir) => {
+  const mc = path.join(tmp, 'data', "McDonald's Collection", "McDonald's Collection 2011");
+  // Fremde Kopie von Set me05 liegt im Ordner eines anderen Sets, importiert aber me05 (001 existiert dort schon).
+  fs.writeFileSync(path.join(mc, '001.ts'), cardSrc("../../Mega Evolution/Pitch Black", 'rarity: "Foreign", '));
+  const { sets, errors, warnings } = loadTcgdexDatabase(tmp);
+  assert.equal(errors.length, 0);
+  assert.equal(warnings.length, 1);
+  assert.match(warnings[0].file, /McDonald's Collection 2011.001.ts$/);
+  assert.match(warnings[0].message, /Pitch Black.001.ts/);
+  const me05 = sets.find((s) => s.id === 'me05');
+  assert.deepEqual(me05.cards.map((c) => c.localId), ['001', '002']);
+  assert.equal(me05.cards[0].name.en, 'Alpha');
+  assert.notEqual(me05.cards[0].rarity, 'Foreign');
+}));

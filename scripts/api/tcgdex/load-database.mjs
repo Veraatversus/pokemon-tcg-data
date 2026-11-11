@@ -29,6 +29,7 @@ export function loadTcgdexDatabase(rootDir, { excludeSerieIds = ['tcgp'] } = {})
   const dataDir = path.join(rootDir, 'data');
   const sets = [];
   const errors = [];
+  const warnings = [];
   const setsByKey = new Map(); // aufgeloester Set-Pfad (ohne .ts) -> cards[]
   const pendingCardDirs = [];
   const failedSetKeys = new Set(); // Set-Datei nicht parsebar (Fehler bereits erfasst)
@@ -63,7 +64,7 @@ export function loadTcgdexDatabase(rootDir, { excludeSerieIds = ['tcgp'] } = {})
       const cards = [];
       const cardDir = path.join(serieDir, setName);
       pendingCardDirs.push(cardDir);
-      setsByKey.set(setKey(setFile), cards);
+      setsByKey.set(setKey(setFile), { cards, ownDir: path.resolve(cardDir), byLocalId: new Map() });
 
       const rd = set.releaseDate;
       sets.push({
@@ -95,12 +96,27 @@ export function loadTcgdexDatabase(rootDir, { excludeSerieIds = ['tcgp'] } = {})
         if (failedSetKeys.has(key)) continue;
         const target = setsByKey.get(key);
         if (!target) throw new Error(`set-Import "${spec}" zeigt auf kein geladenes Set`);
-        target.push({ ...rest, localId });
+        const entry = { card: { ...rest, localId }, file: cardFile };
+        const prev = target.byLocalId.get(localId);
+        if (!prev) {
+          target.byLocalId.set(localId, entry);
+          target.cards.push(entry.card);
+          continue;
+        }
+        // Doppelte (Set, localId): Kopie im eigenen Set-Ordner gewinnt.
+        const own = (e) => path.resolve(path.dirname(e.file)) === target.ownDir;
+        const keepNew = own(entry) !== own(prev) ? own(entry) : entry.file < prev.file;
+        const [kept, dropped] = keepNew ? [entry, prev] : [prev, entry];
+        if (keepNew) {
+          target.cards[target.cards.indexOf(prev.card)] = entry.card;
+          target.byLocalId.set(localId, entry);
+        }
+        warnings.push({ file: dropped.file, message: `doppelte Karte ${localId} im Set; behalten wird ${kept.file}` });
       } catch (e) {
         record(cardFile, e);
       }
     }
   }
-  for (const cards of setsByKey.values()) cards.sort((x, y) => sortLocalIds(x.localId, y.localId));
-  return { sets, errors };
+  for (const { cards } of setsByKey.values()) cards.sort((x, y) => sortLocalIds(x.localId, y.localId));
+  return { sets, errors, warnings };
 }
