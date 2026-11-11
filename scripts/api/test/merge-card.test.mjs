@@ -241,3 +241,64 @@ test('mergeCard: Bildreihenfolge TCGdex EN -> TCGdex DE -> pt-Legacy; ohne Bild 
   assert.equal('images' in none, false);
   assert.equal(none.i18n.de.images, undefined); // DE-Bilder nur echte DE-Assets
 });
+
+const meTd = {
+  localId: '001', set: { id: 'me02.5', serieId: 'me' }, dexId: [43], name: { en: "Erika's Oddish", de: 'Erikas Myrapla' }, category: 'Pokemon', stage: 'Basic',
+  hp: 60, types: ['Grass'], rarity: 'Common', retreat: 1, regulationMark: 'J', illustrator: 'Ill',
+  attacks: [{ cost: ['Grass'], name: { en: 'Reckless Charge' }, effect: { en: 'This Pokémon also does 10 damage to itself.' }, damage: 30 }],
+  weaknesses: [{ type: 'Fire', value: '×2' }],
+  variants: [{ type: 'normal', thirdParty: { cardmarket: 1 } }, { type: 'reverse' }],
+};
+const mePt = {
+  id: 'me2pt5-1', supertype: 'Pokémon', subtypes: ['Basic Stage', 'Trainer-Owned'], types: ['Grass'], hp: 60, name: "Erika's Oddish", rarity: 'Common',
+  attacks: [{ name: 'Reckless Charge', text: 'x', cost: 'G', damage: '30', convertedEnergyCost: 1 }], abilities: [], resistances: [],
+  weaknesses: [{ type: 'Fire', value: '×2' }], number: '1', regulationMark: 'J', retreatCost: ['Colorless'], convertedRetreatCost: 1,
+  nationalPokedexNumbers: [], images: { small: 'https://images.pokedata.ovh/en/me2-5/1.webp', large: 'https://images.pokedata.ovh/en/me2-5/1_hires.webp' },
+};
+const meArgs = (ptCard, tdCards = [meTd]) => ({
+  canonicalSetId: 'me2pt5', canonicalCardId: '1',
+  registryCard: { pokemontcg: 'me2pt5-1', tcgdex: tdCards.map((c) => ({ set: c.set.id, localId: c.localId })), keys: { pokemontcg: ['1'], tcgdex: ['1'] } },
+  ptCard, tcgdexCards: tdCards, tcgdexSet: meTd.set, tables, legals, assetsIndex: {}, sourceCommits,
+});
+
+test('mergeCard: Julien-Format-pt-Karte -> Spielfelder aus TCGdex, pokemontcg-kompatible Formen', () => {
+  const c = mergeCard(meArgs(mePt));
+  assert.equal(c.matchStatus, 'matched');
+  assert.equal(c.hp, '60');
+  assert.deepEqual(c.subtypes, ['Basic']);
+  assert.deepEqual(c.attacks, [{ name: 'Reckless Charge', cost: ['Grass'], convertedEnergyCost: 1, damage: '30', text: 'This Pokémon also does 10 damage to itself.' }]);
+  assert.equal('abilities' in c, false);
+  assert.equal('resistances' in c, false);
+  assert.deepEqual(c.retreatCost, ['Colorless']);
+  assert.equal(c.name, "Erika's Oddish");
+  assert.equal(c.number, '1');
+  assert.equal(c.artist, 'Ill'); // pt ohne artist -> TCGdex
+  assert.deepEqual(c.nationalPokedexNumbers, [43]); // pt leer -> TCGdex
+  assert.equal(c.images.small, 'https://images.pokedata.ovh/en/me2-5/1.webp');
+});
+
+test('mergeCard: generische Normalisierung pt-Werte; normale pt-Karte unveraendert', () => {
+  const pt = { ...charizardPt, abilities: [{ name: 'A', text: 't' }], resistances: [], hp: '330' };
+  const c = mergeCard({
+    canonicalSetId: 'sv3pt5', canonicalCardId: '6',
+    registryCard: { pokemontcg: 'sv3pt5-6', tcgdex: [], keys: { pokemontcg: ['6'], tcgdex: [] } },
+    ptCard: pt, tcgdexCards: [], tcgdexSet: sv035, tables, legals, assetsIndex: {}, sourceCommits,
+  });
+  assert.deepEqual(c.abilities, [{ name: 'A', text: 't', type: 'Ability' }]);
+  assert.equal('resistances' in c, false);
+  for (const k of ['subtypes', 'attacks', 'rules', 'retreatCost', 'weaknesses', 'types', 'hp', 'supertype', 'evolvesFrom', 'convertedRetreatCost']) {
+    assert.deepEqual(c[k], charizardPt[k], k);
+  }
+  const primaryJulien = mergeCard({ ...meArgs(mePt, []), tcgdexSet: null });
+  assert.equal(primaryJulien.hp, '60');
+  assert.equal('abilities' in primaryJulien, false);
+});
+
+test('mergeCard: Varianten ueber mehrere TCGdex-Refs dedupliziert; rarity "None" entfaellt', () => {
+  const second = { ...meTd, localId: '001a', variants: [{ type: 'normal', thirdParty: { cardmarket: 1 } }, { type: 'holo' }] };
+  const c = mergeCard(meArgs(mePt, [meTd, second]));
+  assert.deepEqual(c.variants, [{ type: 'normal', cardmarketId: 1 }, { type: 'reverse' }, { type: 'holo' }]);
+  const none = mergeCard({ ...meArgs(null, [{ ...meTd, rarity: 'None' }]), registryCard: { pokemontcg: null, tcgdex: [{ set: 'me02.5', localId: '001' }], keys: { pokemontcg: ['1'], tcgdex: ['1'] } } });
+  assert.equal('rarity' in none, false);
+  assert.equal(mergeRarity('None', tables), undefined);
+});

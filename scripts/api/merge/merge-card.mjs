@@ -48,7 +48,9 @@ const anyText = (langs) => (langs ? firstOf(textOf(langs, 'en'), ...Object.value
 
 // Rarity ohne pt-Gegenstueck: Tabelle nur, wenn sie eine reine Schreibvariante liefert
 // (Kleinschreibung ohne Leerzeichen gleich); die Schreibung mit Leerzeichen wird bevorzugt.
+// TCGdex 'None' (keine Seltenheit) -> Feld entfaellt.
 export function mergeRarity(tdRarity, tables) {
+  if (tdRarity === 'None') return undefined;
   if (!tdRarity) return tdRarity;
   const learned = tables?.rarity?.[tdRarity];
   const squash = (s) => String(s).toLowerCase().replace(/\s+/g, '');
@@ -96,6 +98,24 @@ const deTexts = (list) => {
   return out.some((a) => a.name !== undefined || a.text !== undefined) ? out : undefined;
 };
 
+// Julien-Format (pt-Snapshot-Sets aus JulienGitHub, z. B. me2pt5/me3/mep): Energiekosten als
+// String ("G") oder hp als Zahl. Dann kommen die Spielfelder aus TCGdex (wie bei tcgdex_only).
+export const isJulienFormat = (pt) => typeof pt?.hp === 'number'
+  || (Array.isArray(pt?.attacks) && pt.attacks.some((a) => typeof a?.cost === 'string'));
+const GAMEPLAY = new Set(['supertype', 'subtypes', 'hp', 'types', 'evolvesFrom', 'attacks', 'abilities', 'weaknesses',
+  'resistances', 'retreatCost', 'convertedRetreatCost', 'rules']);
+
+// Sicherheitsnormalisierung fuer alle pt-Werte: hp als String, leere Listen entfallen,
+// Faehigkeit ohne type -> 'Ability', nationalPokedexNumbers nur als Zahlenliste.
+function normalizePt(key, value) {
+  if (value === undefined || value === null) return undefined;
+  if (Array.isArray(value) && !value.length) return undefined;
+  if (key === 'hp') return String(value);
+  if (key === 'abilities' && Array.isArray(value)) return value.map((a) => (a && a.type === undefined ? { ...a, type: 'Ability' } : a));
+  if (key === 'nationalPokedexNumbers' && !(Array.isArray(value) && value.every((n) => Number.isInteger(n)))) return undefined;
+  return value;
+}
+
 function variantsOf(td) {
   const v = td.variants;
   if (Array.isArray(v)) {
@@ -117,7 +137,15 @@ export function mergeCard({
   const td = tcgdexCards[0] ?? null;
   const pt = ptCard ?? {};
   const has = (k) => ptCard && ptCard[k] !== undefined && ptCard[k] !== null;
-  const from = (k, derive) => (has(k) ? pt[k] : (td ? derive() : undefined));
+  const julien = isJulienFormat(ptCard);
+  // pt-Wert (normalisiert), sonst TCGdex-abgeleitet; Julien-Format: Spielfelder aus TCGdex,
+  // pt nur, wenn keine TCGdex-Karte existiert.
+  const from = (k, derive) => {
+    const ptValue = ptCard ? normalizePt(k, pt[k]) : undefined;
+    if (julien && GAMEPLAY.has(k) && td) return derive();
+    if (ptValue !== undefined) return ptValue;
+    return td ? derive() : undefined;
+  };
 
   const matchStatus = ptCard ? (td ? 'matched' : 'primary_only') : 'tcgdex_only';
   const retreat = typeof td?.retreat === 'number' ? td.retreat : undefined;
@@ -149,7 +177,8 @@ export function mergeCard({
     images: deImages ?? undefined,
   }) : {};
 
-  const variants = tcgdexCards.flatMap(variantsOf);
+  // Gleiche Varianten aus mehreren TCGdex-Refs nur einmal; verschiedene bleiben ueber ihren Inhalt unterscheidbar.
+  const variants = [...new Map(tcgdexCards.flatMap(variantsOf).map((v) => [JSON.stringify(v), v])).values()];
   const thirdParty = tcgdexCards.map((c) => c.thirdParty ?? {});
   const tdRef = registryCard?.tcgdex?.[0];
 
