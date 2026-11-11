@@ -1,0 +1,104 @@
+// Spiegelt das TCGdex-Repo (nur Text, nichts wird ausgefuehrt) nach sources/tcgdex/.
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { loadTcgdexDatabase } from '../tcgdex/load-database.mjs';
+import { parseTcgdexModule } from '../tcgdex/parse-module.mjs';
+import { updateSourcesManifest } from './manifest.mjs';
+
+const REPO = 'https://github.com/tcgdex/cards-database.git';
+const ASSETS_URL = 'https://assets.tcgdex.net/datas.json';
+
+export function reduceAssetsIndex(datas, langs = ['en', 'de', 'univ']) {
+  return Object.fromEntries(langs.filter((l) => l in datas).map((l) => [l, datas[l]]));
+}
+
+function serieIdOf(file) {
+  try {
+    return parseTcgdexModule(fs.readFileSync(file, 'utf8'), file).exports.default?.id;
+  } catch {
+    return undefined;
+  }
+}
+
+function copyData(srcData, dstData, excludeSerieIds) {
+  fs.mkdirSync(dstData, { recursive: true });
+  const entries = fs.readdirSync(srcData, { withFileTypes: true });
+  const skip = new Set();
+  for (const e of entries) {
+    if (e.isFile() && e.name.endsWith('.ts') && excludeSerieIds.includes(serieIdOf(path.join(srcData, e.name)))) {
+      skip.add(e.name);
+      skip.add(e.name.slice(0, -3));
+    }
+  }
+  for (const e of entries) {
+    if (skip.has(e.name)) continue;
+    fs.cpSync(path.join(srcData, e.name), path.join(dstData, e.name), { recursive: true });
+  }
+}
+
+export function mirrorTcgdex({ cloneDir, targetDir, excludeSerieIds, assetsIndex }) {
+  const tmpDir = `${targetDir}.tmp`;
+  const oldDir = `${targetDir}.old`;
+  fs.rmSync(tmpDir, { recursive: true, force: true });
+  fs.rmSync(oldDir, { recursive: true, force: true });
+  try {
+    if (!fs.existsSync(path.join(cloneDir, 'data'))) throw new Error(`Kein data/-Ordner in ${cloneDir}`);
+    copyData(path.join(cloneDir, 'data'), path.join(tmpDir, 'data'), excludeSerieIds);
+    for (const f of ['interfaces.d.ts', 'LICENSE', path.join('meta', 'legals.ts')]) {
+      const src = path.join(cloneDir, f);
+      if (!fs.existsSync(src)) continue;
+      fs.mkdirSync(path.dirname(path.join(tmpDir, f)), { recursive: true });
+      fs.copyFileSync(src, path.join(tmpDir, f));
+    }
+    if (assetsIndex) fs.writeFileSync(path.join(tmpDir, 'assets-index.json'), `${JSON.stringify(assetsIndex)}\n`);
+
+    const { sets, errors } = loadTcgdexDatabase(tmpDir, { excludeSerieIds });
+    if (sets.length < 1) throw new Error('Plausibilitaetspruefung: kein Set geladen');
+    if (errors.length > 0) throw new Error(`Plausibilitaetspruefung: ${errors.length} Fehler, z. B. ${errors[0].file}: ${errors[0].message}`);
+    const result = { setCount: sets.length, cardCount: sets.reduce((n, s) => n + s.cards.length, 0) };
+
+    const hadTarget = fs.existsSync(targetDir);
+    if (hadTarget) fs.renameSync(targetDir, oldDir);
+    try {
+      fs.renameSync(tmpDir, targetDir);
+    } catch (e) {
+      if (hadTarget) fs.renameSync(oldDir, targetDir);
+      throw e;
+    }
+    fs.rmSync(oldDir, { recursive: true, force: true });
+    return result;
+  } catch (e) {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+    throw e;
+  }
+}
+
+async function main() {
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
+  const sourcesDir = path.join(repoRoot, 'sources');
+  const clone = fs.mkdtempSync(path.join(os.tmpdir(), 'tcgdex-clone-'));
+  const git = (...args) => execFileSync('git', args, { cwd: clone, encoding: 'utf8' }).trim();
+  try {
+    execFileSync('git', ['clone', '--depth', '1', '--filter=blob:none', '--sparse', REPO, clone], { stdio: 'inherit' });
+    git('sparse-checkout', 'set', 'data', 'meta', 'interfaces.d.ts', 'LICENSE');
+    const commit = git('rev-parse', 'HEAD');
+    const ref = git('rev-parse', '--abbrev-ref', 'HEAD');
+    const res = await fetch(ASSETS_URL);
+    if (!res.ok) throw new Error(`${ASSETS_URL}: HTTP ${res.status}`);
+    const assetsIndex = reduceAssetsIndex(await res.json());
+    const result = mirrorTcgdex({ cloneDir: clone, targetDir: path.join(sourcesDir, 'tcgdex'), excludeSerieIds: ['tcgp'], assetsIndex });
+    updateSourcesManifest(path.join(sourcesDir, 'SOURCES.json'), 'tcgdex', {
+      repo: 'tcgdex/cards-database', ref, commit, fetchedAt: new Date().toISOString(), status: 'active',
+    });
+    console.log(`TCGdex ${commit}: ${result.setCount} Sets, ${result.cardCount} Karten`);
+  } finally {
+    fs.rmSync(clone, { recursive: true, force: true });
+  }
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((e) => { console.error(e); process.exit(1); });
+}
