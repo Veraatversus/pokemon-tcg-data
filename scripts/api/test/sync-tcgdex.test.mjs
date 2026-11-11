@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { mirrorTcgdex, reduceAssetsIndex, shouldUpdate } from '../sources/sync-tcgdex.mjs';
+import { mirrorTcgdex, reduceAssetsIndex, shouldUpdate, runSync } from '../sources/sync-tcgdex.mjs';
 import { updateSourcesManifest } from '../sources/manifest.mjs';
 
 const fixture = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fixtures', 'tcgdex');
@@ -89,4 +89,41 @@ test('shouldUpdate: nur bei geaendertem Commit (oder fehlendem Manifest-Eintrag)
   assert.equal(shouldUpdate({ tcgdex: { commit: 'abc' } }, 'def'), true);
   assert.equal(shouldUpdate({}, 'abc'), true);
   assert.equal(shouldUpdate(null, 'abc'), true);
+});
+
+test('runSync: unveraenderter Commit -> kein Mirror, SOURCES.json byte-identisch', async () => {
+  const root = tmp();
+  fs.mkdirSync(path.join(root, 'sources'));
+  const manifestFile = path.join(root, 'sources', 'SOURCES.json');
+  updateSourcesManifest(manifestFile, 'tcgdex', { commit: 'abc', fetchedAt: 'alt' });
+  const before = fs.readFileSync(manifestFile);
+  let fetched = false;
+  const r = await runSync({
+    repoRoot: root,
+    cloneTcgdex: () => ({ commit: 'abc', ref: 'master' }),
+    fetchAssets: async () => { fetched = true; return {}; },
+  });
+  assert.equal(r.updated, false);
+  assert.equal(fetched, false);
+  assert.ok(fs.readFileSync(manifestFile).equals(before));
+  assert.equal(fs.existsSync(path.join(root, 'sources', 'tcgdex')), false);
+});
+
+test('runSync: geaenderter Commit -> Mirror und Manifest aktualisiert', async () => {
+  const root = tmp();
+  fs.mkdirSync(path.join(root, 'sources'));
+  const manifestFile = path.join(root, 'sources', 'SOURCES.json');
+  updateSourcesManifest(manifestFile, 'tcgdex', { commit: 'abc', fetchedAt: 'alt' });
+  const r = await runSync({
+    repoRoot: root,
+    cloneTcgdex: (dir) => { fs.cpSync(makeClone(), dir, { recursive: true }); return { commit: 'def', ref: 'master' }; },
+    fetchAssets: async () => ({ en: { a: 1 }, fr: {} }),
+    now: () => new Date('2026-01-02T03:04:05Z'),
+  });
+  assert.equal(r.updated, true);
+  const m = JSON.parse(fs.readFileSync(manifestFile, 'utf8'));
+  assert.equal(m.tcgdex.commit, 'def');
+  assert.equal(m.tcgdex.fetchedAt, '2026-01-02T03:04:05.000Z');
+  assert.ok(fs.existsSync(path.join(root, 'sources', 'tcgdex', 'data')));
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(root, 'sources', 'tcgdex', 'assets-index.json'), 'utf8')), { en: { a: 1 } });
 });

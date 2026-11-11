@@ -85,27 +85,47 @@ export function mirrorTcgdex({ cloneDir, targetDir, excludeSerieIds, assetsIndex
   }
 }
 
-async function main() {
-  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
+// Klont TCGdex (sparse) nach cloneDir und liefert Commit und Branch.
+function cloneTcgdex(cloneDir) {
+  const git = (...args) => execFileSync('git', args, { cwd: cloneDir, encoding: 'utf8' }).trim();
+  execFileSync('git', ['clone', '--depth', '1', '--filter=blob:none', '--sparse', REPO, cloneDir], { stdio: 'inherit' });
+  git('sparse-checkout', 'set', '--no-cone', '/data/', '/meta/', '/interfaces.d.ts', '/LICENSE');
+  return { commit: git('rev-parse', 'HEAD'), ref: git('rev-parse', '--abbrev-ref', 'HEAD') };
+}
+
+async function fetchAssets() {
+  const res = await fetch(ASSETS_URL);
+  if (!res.ok) throw new Error(`${ASSETS_URL}: HTTP ${res.status}`);
+  return res.json();
+}
+
+// Abhaengigkeiten injizierbar (Tests); main() verdrahtet die echten.
+export async function runSync({ repoRoot, cloneTcgdex: clonePort = cloneTcgdex, fetchAssets: assetsPort = fetchAssets, now = () => new Date() }) {
   const sourcesDir = path.join(repoRoot, 'sources');
+  const manifestFile = path.join(sourcesDir, 'SOURCES.json');
   const clone = fs.mkdtempSync(path.join(os.tmpdir(), 'tcgdex-clone-'));
-  const git = (...args) => execFileSync('git', args, { cwd: clone, encoding: 'utf8' }).trim();
   try {
-    execFileSync('git', ['clone', '--depth', '1', '--filter=blob:none', '--sparse', REPO, clone], { stdio: 'inherit' });
-    git('sparse-checkout', 'set', '--no-cone', '/data/', '/meta/', '/interfaces.d.ts', '/LICENSE');
-    const commit = git('rev-parse', 'HEAD');
-    const ref = git('rev-parse', '--abbrev-ref', 'HEAD');
-    const res = await fetch(ASSETS_URL);
-    if (!res.ok) throw new Error(`${ASSETS_URL}: HTTP ${res.status}`);
-    const assetsIndex = reduceAssetsIndex(await res.json());
+    const { commit, ref } = clonePort(clone);
+    const manifest = fs.existsSync(manifestFile) ? JSON.parse(fs.readFileSync(manifestFile, 'utf8')) : {};
+    if (!shouldUpdate(manifest, commit)) {
+      console.log(`TCGdex unveraendert (${commit})`);
+      return { updated: false, commit };
+    }
+    const assetsIndex = reduceAssetsIndex(await assetsPort());
     const result = mirrorTcgdex({ cloneDir: clone, targetDir: path.join(sourcesDir, 'tcgdex'), excludeSerieIds: ['tcgp'], assetsIndex });
     updateSourcesManifest(manifestFile, 'tcgdex', {
-      repo: 'tcgdex/cards-database', ref, commit, fetchedAt: new Date().toISOString(), status: 'active',
+      repo: 'tcgdex/cards-database', ref, commit, fetchedAt: now().toISOString(), status: 'active',
     });
     console.log(`TCGdex ${commit}: ${result.setCount} Sets, ${result.cardCount} Karten`);
+    return { updated: true, commit, ...result };
   } finally {
     fs.rmSync(clone, { recursive: true, force: true });
   }
+}
+
+async function main() {
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
+  await runSync({ repoRoot });
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

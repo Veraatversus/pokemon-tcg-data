@@ -59,6 +59,7 @@ jobs:
             exit 0
           fi
           git commit -m "chore: sync TCGdex data"
+          git pull --rebase origin master
           git push origin master
 
       - name: Create issue on failure
