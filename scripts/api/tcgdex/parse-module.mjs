@@ -44,7 +44,9 @@ export function parseTcgdexModule(source, filePath) {
       case 'ArrayExpression':
         return node.elements.map((el) => {
           if (el === null) fail('Array-Luecke nicht erlaubt');
-          return evalNode(el); // SpreadElement landet im default-Fall
+          const v = evalNode(el); // SpreadElement landet im default-Fall
+          if (v === undefined) fail('undefined im Array nicht erlaubt');
+          return v;
         });
       case 'ObjectExpression': {
         const obj = {};
@@ -58,7 +60,8 @@ export function parseTcgdexModule(source, filePath) {
           else if (p.key.type === 'Literal') key = String(p.key.value);
           else fail(`nicht erlaubter Schluessel ${p.key.type}`);
           if (key === '__proto__') fail('Schluessel __proto__ nicht erlaubt');
-          obj[key] = evalNode(p.value); // shorthand: value ist Identifier
+          const v = evalNode(p.value); // shorthand: value ist Identifier
+          if (v !== undefined) obj[key] = v; // undefined = Feld fehlt
         }
         return obj;
       }
@@ -69,7 +72,17 @@ export function parseTcgdexModule(source, filePath) {
           resolving.add(node.name);
           try { return evalNode(locals.get(node.name)); } finally { resolving.delete(node.name); }
         }
+        // undefined ist nur ohne Shadowing (kein Import, keine lokale const) erlaubt.
+        if (node.name === 'undefined') return undefined;
         return fail(`unbekannter Bezeichner ${node.name}`);
+      }
+      case 'BinaryExpression': {
+        // Nur String-Verkettung mit + (mehrzeilige lange Texte in TCGdex-Daten).
+        if (node.operator !== '+') return fail(`nicht erlaubter Knoten BinaryExpression (${node.operator})`);
+        const l = evalNode(node.left);
+        const r = evalNode(node.right);
+        if (typeof l !== 'string' || typeof r !== 'string') fail('nicht erlaubter Knoten BinaryExpression (+ nur mit Strings)');
+        return l + r;
       }
       default:
         return fail(`nicht erlaubter Knoten ${node.type}`);
