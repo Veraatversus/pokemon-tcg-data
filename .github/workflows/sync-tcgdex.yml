@@ -75,9 +75,22 @@ jobs:
         with:
           script: |
             const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const { owner, repo } = context.repo;
+            const open = await github.rest.issues.listForRepo({ owner, repo, state: 'open', labels: 'upstream-sync', per_page: 1 });
+            if (open.data.length) {
+              const existing = open.data[0];
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: existing.number,
+                body: `Der TCGdex-Sync ist erneut fehlgeschlagen: ${runUrl}`
+              });
+              console.log('Commented on existing issue:', existing.number);
+              return;
+            }
             const issue = await github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
+              owner,
+              repo,
               title: 'TCGdex-Sync fehlgeschlagen - manuelle Pruefung erforderlich',
               body: `Der automatische TCGdex-Sync auf \`master\` ist fehlgeschlagen. Es wurde nichts committet.
 
@@ -92,6 +105,9 @@ jobs:
 
               **Erforderliche Aktion:**
               Bitte das Log des Laufs pruefen, die Ursache beheben und den Workflow erneut starten.
+              Bei Registry-Drift: Anleitung in [scripts/api/README.md](${context.serverUrl}/${owner}/${repo}/blob/master/scripts/api/README.md#registry-drift-beheben).
+
+              Weitere Fehlschlaege werden als Kommentar an diesem Issue ergaenzt.
               `,
               labels: ['upstream-sync', 'manual-action-required']
             });

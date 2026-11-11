@@ -85,7 +85,7 @@ test('runBuild: Mini-Repo, zwei Laeufe identisch, Registry geschrieben, alte Dat
     assert.ok(r1.registryChanges.length > 0);
     const v3 = path.join(root, 'api', 'v3');
     assert.deepEqual(Object.keys(snapshot(v3)).sort(), [
-      'cards/TCGDEX-A1.json', 'cards/sv1.json', 'meta.json', 'reports/matching.json', 'search-index.json', 'sets.json',
+      'cards/TCGDEX-A1.json', 'cards/sv1.json', 'meta.json', 'reports/learned-tables.json', 'reports/matching.json', 'search-index.json', 'sets.json',
     ]);
     const sv1 = readJson(path.join(v3, 'cards', 'sv1.json'));
     assert.deepEqual(sv1.map((c) => c.cardId), ['1', '2', '3', '4']);
@@ -203,4 +203,75 @@ test('requiredFieldViolations: Pflichtfelder fuer Karten und Sets (Bilder nicht 
   ]);
   const w = requiredFieldViolations({ sets: [], cardsBySet: new Map([['s', [{ ...ok, number: ' ' }, { ...ok, id: undefined }]]]) });
   assert.deepEqual(w, ['Karte s-1: number fehlt', 'Karte ?: id fehlt']);
+});
+
+test('runBuild: schreibt gelernte Tabellen deterministisch nach reports/learned-tables.json', () => {
+  const root = makeRepo();
+  try {
+    runBuild({ repoRoot: root });
+    const f = path.join(root, 'api', 'v3', 'reports', 'learned-tables.json');
+    const a = fs.readFileSync(f, 'utf8');
+    assert.ok(a.endsWith('\n'));
+    assert.equal(typeof JSON.parse(a), 'object');
+    runBuild({ repoRoot: root });
+    assert.equal(fs.readFileSync(f, 'utf8'), a);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('runBuild: verschwundene Quelle einer Registry-Karte ist ein Build-Fehler mit Set/Karte/Ref', () => {
+  const root = makeRepo();
+  try {
+    runBuild({ repoRoot: root });
+    // pt-Karte sv1-3 (nur pokemontcg) verschwindet aus der Quelle
+    write(root, 'sources/pokemontcg/cards/en/sv1.json', readJson(path.join(root, 'sources/pokemontcg/cards/en/sv1.json')).filter((c) => c.id !== 'sv1-3'));
+    assert.throws(() => runBuild({ repoRoot: root }), (e) => /sv1\/3/.test(e.message)
+      && (e instanceof BuildValidationError || e instanceof RegistryFrozenError));
+    // tcgdex-only darf pt-only-Karten weiterhin auslassen
+    const ok = makeRepo();
+    try {
+      runBuild({ repoRoot: ok });
+      fs.rmSync(path.join(ok, 'sources', 'pokemontcg'), { recursive: true });
+      assert.deepEqual(runBuild({ repoRoot: ok, tcgdexOnly: true, outDir: 'out-td' }).skippedNoSource, ['sv1/3']);
+    } finally {
+      fs.rmSync(ok, { recursive: true, force: true });
+    }
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('runBuild: synthetisiertes pt-Set nimmt Name/printedTotal aus TCGdex, total aus Kartenzahl', () => {
+  const root = makeRepo();
+  try {
+    const d = 'sources/tcgdex/data';
+    write(root, `${d}/Scarlet & Violet/Promo.ts`, setTs('Scarlet & Violet', 'mep', 'Mega Promos').replace('cardCount: { official: 3 }', 'cardCount: { official: 99 }'));
+    write(root, `${d}/Scarlet & Violet/Promo/001.ts`, cardTs('Promo', 'name: { en: "Promo A", de: "Promo A DE" }, category: "Pokemon", stage: "Basic", rarity: "Promo", hp: 60'));
+    write(root, 'sources/pokemontcg/cards/en/mep.json', [{ id: 'mep-1', name: 'Promo A', number: '1', supertype: 'Pokémon', subtypes: ['Basic'], images: { small: 'x', large: 'y' } }]);
+    write(root, 'api/mappings/set-map.json', { pairs: [{ pokemontcg: 'sv1', tcgdex: 'sv01' }, { pokemontcg: 'mep', tcgdex: 'mep' }] });
+    runBuild({ repoRoot: root });
+    const mep = readJson(path.join(root, 'api', 'v3', 'sets.json')).find((s) => s.id === 'mep');
+    assert.equal(mep.name, 'Mega Promos');
+    assert.equal(mep.i18n.de.name, 'Mega Promos DE');
+    assert.equal(mep.printedTotal, 99);
+    assert.equal(mep.total, 1);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('runBuild: unsichere Set-IDs werden nie zu Dateinamen', () => {
+  for (const bad of ['../x', 'a/b']) {
+    const root = makeRepo();
+    try {
+      const sets = readJson(path.join(root, 'sources/pokemontcg/sets/en.json'));
+      sets[0].id = bad;
+      write(root, 'sources/pokemontcg/sets/en.json', sets);
+      assert.throws(() => runBuild({ repoRoot: root }), /Ungueltige Set-ID|ungueltig/);
+      assert.equal(fs.existsSync(path.join(root, 'api', 'v3', 'cards')), false);
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  }
 });

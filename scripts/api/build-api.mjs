@@ -9,7 +9,7 @@ import { runMatching } from './match/run-matching.mjs';
 import {
   buildRegistry, assertFrozen, registryChanges, RegistryFrozenError, RegistryInvariantError,
 } from './registry/build-registry.mjs';
-import { readRegistry, writeRegistry, toJson } from './registry/registry-io.mjs';
+import { readRegistry, writeRegistry, toJson, assertSafeSetId } from './registry/registry-io.mjs';
 import { learnTables } from './merge/learn-tables.mjs';
 import { loadLegals } from './merge/legalities.mjs';
 import { mergeCard } from './merge/merge-card.mjs';
@@ -23,8 +23,8 @@ const short = (commit) => (commit ? String(commit).slice(0, 8) : undefined);
 const STATUSES = ['matched', 'primary_only', 'tcgdex_only'];
 
 export class BuildValidationError extends Error {
-  constructor(violations) {
-    super(`Pflichtfelder fehlen (${violations.length}):\n  ${violations.slice(0, 50).join('\n  ')}`);
+  constructor(violations, heading = 'Pflichtfelder fehlen') {
+    super(`${heading} (${violations.length}):\n  ${violations.slice(0, 50).join('\n  ')}`);
     this.name = 'BuildValidationError';
     this.violations = violations;
   }
@@ -86,6 +86,7 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
     canonicalKeyOverrides: readJson(p('api', 'mappings', 'canonical-keys.json')),
     previous,
   });
+  for (const id of Object.keys(registry.sets)) assertSafeSetId(id);
   if (previous) assertFrozen(previous, registry);
   const changes = registryChanges(previous, registry);
 
@@ -116,6 +117,7 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
   const sets = [];
   const cardsBySet = new Map();
   const skippedNoSource = [];
+  const lostSource = [];
   const matchStatus = Object.fromEntries(STATUSES.map((s) => [s, 0]));
   for (const setId of Object.keys(registry.sets).sort(cmp)) {
     const registrySet = registry.sets[setId];
@@ -129,6 +131,12 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
         return { ...c, set: tdById.get(r.set) };
       });
       if (!ptCard && !tcgdexCards.length) {
+        // Ohne pokemontcg-Quelle (--tcgdex-only) ist eine reine pt-Karte erwartbar; im Vollbuild
+        // heisst das: Quelle verschwunden -> Abbruch statt stillem Auslassen.
+        if (!tcgdexOnly) {
+          const refs = (rc.tcgdex ?? []).map((r) => `${r.set}/${r.localId}`).join(', ') || '-';
+          lostSource.push(`${setId}/${cardId} (pokemontcg ${rc.pokemontcg ?? '-'}, tcgdex ${refs})`);
+        }
         skippedNoSource.push(`${setId}/${cardId}`);
         continue;
       }
@@ -149,6 +157,9 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
   }
   sets.sort((a, b) => cmp(a.releaseDate ?? '9999', b.releaseDate ?? '9999') || cmp(a.id, b.id));
 
+  if (lostSource.length) {
+    throw new BuildValidationError(lostSource, 'Registry-Karten ohne Quelle (weder pokemontcg- noch TCGdex-Karte; siehe scripts/api/README.md, Registry-Drift beheben)');
+  }
   const violations = requiredFieldViolations({ sets, cardsBySet });
   if (violations.length) throw new BuildValidationError(violations);
 
@@ -192,6 +203,9 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
   writeIfChanged(path.join(outAbs, 'sets.json'), toJson(sets));
   writeIfChanged(path.join(outAbs, 'search-index.json'), toJson(searchIndex));
   writeIfChanged(path.join(outAbs, 'meta.json'), toJson(meta));
+  // Gelernte Tabellen deterministisch ablegen, damit Aenderungen im Diff sichtbar werden.
+  fs.mkdirSync(path.join(outAbs, 'reports'), { recursive: true });
+  writeIfChanged(path.join(outAbs, 'reports', 'learned-tables.json'), toJson(tables));
   if (doWriteRegistry && !tcgdexOnly) writeRegistry(registryAbs, registry);
 
   return {

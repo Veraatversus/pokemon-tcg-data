@@ -23,14 +23,21 @@ export function mergeSet({ canonicalSetId, registrySet, ptSet = null, tcgdexSet 
   });
   const deLogo = td ? resolveSetImages(assetsIndex, { lang: 'de', serieId: td.serieId, setId: td.id }).logo : undefined;
   const de = compact({ name: td?.name?.de, images: deLogo ? { logo: deLogo } : undefined });
+  // Synthetisierte pt-Sets (Kartendatei ohne Set-Eintrag, z. B. mep) haben nur die Id als Namen:
+  // Name und gedruckte Gesamtzahl kommen dann aus TCGdex, nie die nackte Id.
+  const synth = ptSet?.synthesized === true;
+  const ptName = synth ? undefined : ptSet?.name;
+  // Offizielle Zahl 0/fehlend (z. B. Promo-Sets ohne Zaehlung): Kartenzahl statt 0.
+  const tdOfficial = td?.cardCountOfficial > 0 ? td.cardCountOfficial : undefined;
+  const ptPrinted = synth ? tdOfficial ?? cardCount : ptSet?.printedTotal;
   const ptId = registrySet?.pokemontcg ?? ptSet?.id ?? null;
   const trackerId = ptId ? toNumber(cardmarketTracker?.bySetId?.[ptId]) : null;
 
   return compact({
     id: canonicalSetId,
-    name: ptSet?.name ?? anyName(td?.name),
+    name: ptName ?? anyName(td?.name),
     series: ptSet?.series ?? td?.serieName?.en ?? undefined,
-    printedTotal: ptSet?.printedTotal ?? td?.cardCountOfficial ?? cardCount,
+    printedTotal: ptPrinted ?? td?.cardCountOfficial ?? cardCount,
     total: cardCount,
     releaseDate: ptSet?.releaseDate ?? (td?.releaseDate ? td.releaseDate.replaceAll('-', '/') : undefined),
     ptcgoCode: ptSet?.ptcgoCode ?? td?.abbreviationOfficial ?? undefined,

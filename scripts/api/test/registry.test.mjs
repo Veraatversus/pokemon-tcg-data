@@ -454,3 +454,40 @@ test('readRegistry wirft, wenn eine Kartendatei eines Sets fehlt', () => {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
 });
+
+test('registryViolations: unsichere Set-IDs und case-insensitive Kartenschluessel-Kollision', () => {
+  const reg = (sets, cards) => ({ sets, cards });
+  const v1 = registryViolations(reg({ '../x': {}, 'a/b': {}, ok: {} }, {}));
+  assert.equal(v1.filter((x) => x.includes('ungueltig')).length, 2);
+  const v2 = registryViolations(reg({ s: {} }, { s: { A: { keys: { pokemontcg: ['A'], tcgdex: [] } }, a: { keys: { pokemontcg: ['a'], tcgdex: [] } } } }));
+  assert.ok(v2.some((x) => x.includes('Gross-/Kleinschreibung')));
+});
+
+test('writeRegistry/readRegistry: lehnen unsichere Set-IDs ab', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'reg-id-'));
+  try {
+    for (const bad of ['../x', 'a/b']) {
+      assert.throws(() => writeRegistry(dir, { sets: { [bad]: {} }, cards: {} }), /Ungueltige Set-ID/);
+    }
+    fs.writeFileSync(path.join(dir, 'sets.json'), JSON.stringify({ '../x': {} }));
+    assert.throws(() => readRegistry(dir), /Ungueltige Set-ID/);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('buildRegistry: neue Schluessel gelten als vergeben, wenn sie nur in der Schreibweise abweichen', () => {
+  // zwei neue TCGdex-Karten, deren localIds sich nur in der Schreibweise unterscheiden (A / a)
+  const r = buildRegistry({
+    tcgdexSets: [td('cs', ['A', 'a'])], setPairs: [],
+    cardResults: new Map([['cs', result({ tcgdexOnly: [ref('cs', 'A'), ref('cs', 'a')] })]]),
+  });
+  assert.deepEqual(registryViolations(r), []);
+  const sets = Object.keys(r.cards);
+  assert.equal(sets.length, 1);
+  const ids = Object.keys(r.cards[sets[0]]);
+  assert.equal(ids.length, 2);
+  assert.equal(new Set(ids.map((x) => x.toLowerCase())).size, 2);
+  const keys = Object.values(r.cards[sets[0]]).flatMap((c) => c.keys.tcgdex);
+  assert.equal(new Set(keys.map((x) => x.toLowerCase())).size, keys.length);
+});
