@@ -226,6 +226,8 @@ npx serve frontend/tcg-tracker-web --listen 8080
 npx serve . --listen 8080    # im Repo-Root ausgeführt
 # oder per npm-Skript:
 npm run start:dev:full        # serviert ../.. mit http-server
+# api/v3 liegt im Repo-Root: lokal start:dev:full nutzen (start:dev serviert nur die App)
+# oder CONFIG.APIS.V3_BASE / REGISTRY_BASE ueberschreiben.
 
 # Production Build (optional)
 # (Derzeit: SPA lädt direkt von Quelle)

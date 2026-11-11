@@ -86,3 +86,46 @@ test('other loaders hit expected files', async () => {
   assert.ok(calls[1].endsWith('/api/v3/meta.json'));
   assert.ok(calls[2].endsWith('/api/registry/sets.json'));
 });
+
+test('abort of caller A does not reject caller B; cache still populated', async () => {
+  resetV3Caches();
+  let release;
+  const gate = new Promise((r) => { release = r; });
+  const { calls, fetchImpl } = stub(async () => { await gate; return ok([7]); });
+  const ca = new AbortController();
+  const cb = new AbortController();
+  const a = loadV3Sets({ fetchImpl, href: APP, signal: ca.signal });
+  const b = loadV3Sets({ fetchImpl, href: APP, signal: cb.signal });
+  ca.abort();
+  await assert.rejects(a, { name: 'AbortError' });
+  release();
+  assert.deepEqual(await b, [7]);
+  assert.deepEqual(await loadV3Sets({ fetchImpl, href: APP }), [7]);
+  assert.equal(calls.length, 1);
+});
+
+test('own abort of B rejects only B', async () => {
+  resetV3Caches();
+  let release;
+  const gate = new Promise((r) => { release = r; });
+  const { fetchImpl } = stub(async () => { await gate; return ok([1]); });
+  const cb = new AbortController();
+  const a = loadV3Sets({ fetchImpl, href: APP });
+  const b = loadV3Sets({ fetchImpl, href: APP, signal: cb.signal });
+  cb.abort();
+  await assert.rejects(b, { name: 'AbortError' });
+  release();
+  assert.deepEqual(await a, [1]);
+});
+
+test('override bases are absolutised against href', () => {
+  const r = resolveV3Bases({ href: APP, config: { APIS: { V3_BASE: '../../data/v3', REGISTRY_BASE: '/reg' } } });
+  assert.equal(r.v3, 'https://x.github.io/pokemon-tcg-data/data/v3/');
+  assert.equal(r.registry, 'https://x.github.io/reg/');
+});
+
+test('unresolvable bases reject instead of throwing synchronously', async () => {
+  const p = loadV3Sets({ href: '', config: { APIS: {} }, fetchImpl: async () => ok([]) });
+  assert.ok(p instanceof Promise);
+  await assert.rejects(p, /cannot resolve/);
+});
