@@ -118,3 +118,30 @@ test('Kompaktform kuerzt nach 20', () => {
   const md = renderMatchingMarkdown(buildMatchingReport({ setResult: sr, cardResults: cr, sources: {}, ptSets, tcgdexSets: [], ptCardsBySet: new Map([['a1', nums]]), generatedAt: 'x' }));
   assert.match(md, /…\(\+5\)/);
 });
+
+test('Warnungen: Windows- und POSIX-Pfade werden zum gleichen relativen Pfad', () => {
+  const rel = 'sources/tcgdex/data/Platinum/Supreme Victors/AR1.ts';
+  const keptRel = 'sources/tcgdex/data/Platinum/Arceus/AR1.ts';
+  const win = { file: String.raw`E:\Proggn\Repo\sources\tcgdex\data\Platinum\Supreme Victors\AR1.ts`, message: `doppelte Karte AR1; behalten wird ${String.raw`E:\Proggn\Repo\sources\tcgdex\data\Platinum\Arceus\AR1.ts`}` };
+  const posix = { file: '/home/ci/repo/sources/tcgdex/data/Platinum/Supreme Victors/AR1.ts', message: 'doppelte Karte AR1; behalten wird /home/ci/repo/sources/tcgdex/data/Platinum/Arceus/AR1.ts' };
+  const expected = `${rel}: doppelte Karte AR1; behalten wird ${keptRel}`;
+  const r = build({ warnings: [win, posix] });
+  assert.deepEqual(r.warnings, [expected, expected]);
+  const md = renderMatchingMarkdown(r);
+  assert.ok(md.includes(`- ${expected}`));
+  assert.ok(!/[A-Za-z]:\|\/home\//.test(JSON.stringify(r) + md));
+});
+
+test('Ausgabe byte-identisch bei identischen Eingaben inkl. generatedAt', () => {
+  const a = build({ warnings: [{ file: 'a', message: 'b' }] });
+  const b = build({ warnings: [{ file: 'a', message: 'b' }] });
+  assert.equal(JSON.stringify(a, null, 2), JSON.stringify(b, null, 2));
+  assert.equal(renderMatchingMarkdown(a), renderMatchingMarkdown(b));
+});
+
+test('doppelte Zuordnung innerhalb eines Paars', () => {
+  const cr = cardResults();
+  cr.get('a1').matched.push({ ptId: 'a1-7', ptNumber: '7', tcgdex: [{ setId: 'A1', localId: '1' }], method: 'mapping', suspicious: false });
+  const r = build({ cardResults: cr });
+  assert.deepEqual(r.doubleAssigned, [{ setId: 'A1', localId: '1', ptIds: ['a1-1', 'a1-7'] }]);
+});

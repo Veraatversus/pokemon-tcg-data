@@ -44,6 +44,7 @@ function main() {
 
   const report = buildMatchingReport({
     setResult, cardResults, sources, ptSets, tcgdexSets: db.sets, ptCardsBySet, warnings: db.warnings,
+    generatedAt: sources.tcgdex?.fetchedAt ?? new Date().toISOString(),
   });
   const outDir = path.join(root, 'api', 'v3', 'reports');
   fs.mkdirSync(outDir, { recursive: true });
@@ -67,7 +68,7 @@ function main() {
     console.error(`FEHLER: cardMatchRatio ${s.cardMatchRatio} < ${opts.minCardMatch}`);
     failed = true;
   }
-  process.exit(failed ? 1 : 0);
+  process.exitCode = failed ? 1 : 0;
 }
 
 main();

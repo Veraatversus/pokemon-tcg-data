@@ -4,6 +4,16 @@ const cmp = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 const key = (setId, localId) => `${setId}\u0000${localId}`;
 const SHOW = 20;
 
+// Absolute Pfade (Windows oder POSIX) bis vor 'sources/' entfernen, Trenner vereinheitlichen.
+export function relativizePaths(text) {
+  const str = String(text ?? '');
+  const abs = /(?:[A-Za-z]:[\\/]|\/)[^\n]*?(?=sources[\\/])/g;
+  return abs.test(str) ? str.replace(abs, '').replace(/\\/g, '/') : str;
+}
+const formatWarning = (w) => (typeof w === 'string'
+  ? relativizePaths(w)
+  : `${relativizePaths(w.file)}: ${relativizePaths(w.message)}`);
+
 export function buildMatchingReport({
   setResult, cardResults, sources, ptSets = [], tcgdexSets = [], ptCardsBySet = null,
   warnings = [], generatedAt = new Date().toISOString(),
@@ -82,7 +92,7 @@ export function buildMatchingReport({
     unmatchedPokemontcg: setResult.unmatchedPokemontcg,
     unmatchedTcgdex: setResult.unmatchedTcgdex,
     doubleAssigned,
-    warnings: warnings.map((w) => (typeof w === 'string' ? w : JSON.stringify(w))),
+    warnings: warnings.map(formatWarning),
   };
 }
 
