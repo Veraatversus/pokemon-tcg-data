@@ -68,8 +68,13 @@ export const CONFIG = {
     POKEMONTCG: 'https://api.pokemontcg.io/v2',
     TCGDEX_DE: 'https://api.tcgdex.net/v2/de',  // kein trailing slash!
     TCGDEX_EN: 'https://api.tcgdex.net/v2/en',
-    VERA_BASE: 'https://veraatversus.github.io/pokemon-tcg-data'
+    VERA_BASE: 'https://veraatversus.github.io/pokemon-tcg-data',
+    V3_BASE: '',        // leer = relativ zur App: ../../api/v3/
+    REGISTRY_BASE: ''   // leer = relativ zur App: ../../api/registry/
   },
+
+  // db_cards-Schreiben (Legacy-Sheet), gekapselt
+  WRITE_DB_CARDS: true,
 
   // ── Support & Kontakt ───────────────────────────────────────
   SUPPORT: {
