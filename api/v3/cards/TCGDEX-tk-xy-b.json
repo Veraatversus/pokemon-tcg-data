@@ -21,10 +21,6 @@
         98147
       ]
     },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/1/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/1/low.webp"
-    },
     "legalities": {
       "unlimited": "Legal"
     },
@@ -82,10 +78,6 @@
         98148
       ]
     },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/2/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/2/low.webp"
-    },
     "legalities": {
       "unlimited": "Legal"
     },
@@ -121,10 +113,6 @@
       "tcgplayer": [
         98149
       ]
-    },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/3/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/3/low.webp"
     },
     "legalities": {
       "unlimited": "Legal"
@@ -165,10 +153,6 @@
       "tcgplayer": [
         98159
       ]
-    },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/4/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/4/low.webp"
     },
     "legalities": {
       "unlimited": "Legal"
@@ -222,10 +206,6 @@
         98150
       ]
     },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/5/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/5/low.webp"
-    },
     "legalities": {
       "unlimited": "Legal"
     },
@@ -261,10 +241,6 @@
       "tcgplayer": [
         98151
       ]
-    },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/6/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/6/low.webp"
     },
     "legalities": {
       "unlimited": "Legal"
@@ -302,10 +278,6 @@
         98152
       ]
     },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/7/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/7/low.webp"
-    },
     "legalities": {
       "unlimited": "Legal"
     },
@@ -341,10 +313,6 @@
       "tcgplayer": [
         98153
       ]
-    },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/8/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/8/low.webp"
     },
     "legalities": {
       "unlimited": "Legal"
@@ -382,10 +350,6 @@
         98154
       ]
     },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/9/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/9/low.webp"
-    },
     "legalities": {
       "unlimited": "Legal"
     },
@@ -421,10 +385,6 @@
       "tcgplayer": [
         98155
       ]
-    },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/10/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/10/low.webp"
     },
     "legalities": {
       "unlimited": "Legal"
@@ -463,10 +423,6 @@
       "tcgplayer": [
         98160
       ]
-    },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/11/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/11/low.webp"
     },
     "legalities": {
       "unlimited": "Legal"
@@ -528,10 +484,6 @@
         98161
       ]
     },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/12/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/12/low.webp"
-    },
     "legalities": {
       "unlimited": "Legal"
     },
@@ -586,10 +538,6 @@
       "tcgplayer": [
         98162
       ]
-    },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/13/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/13/low.webp"
     },
     "legalities": {
       "unlimited": "Legal"
@@ -652,10 +600,6 @@
         98163
       ]
     },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/14/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/14/low.webp"
-    },
     "legalities": {
       "unlimited": "Legal"
     },
@@ -716,10 +660,6 @@
         98164
       ]
     },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/15/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/15/low.webp"
-    },
     "legalities": {
       "unlimited": "Legal"
     },
@@ -776,10 +716,6 @@
       "tcgplayer": [
         98165
       ]
-    },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/16/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/16/low.webp"
     },
     "legalities": {
       "unlimited": "Legal"
@@ -840,10 +776,6 @@
         98166
       ]
     },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/17/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/17/low.webp"
-    },
     "legalities": {
       "unlimited": "Legal"
     },
@@ -895,10 +827,6 @@
         98156
       ]
     },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/18/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/18/low.webp"
-    },
     "legalities": {
       "unlimited": "Legal"
     },
@@ -937,10 +865,6 @@
       "tcgplayer": [
         98167
       ]
-    },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/19/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/19/low.webp"
     },
     "legalities": {
       "unlimited": "Legal"
@@ -984,10 +908,6 @@
         98168
       ]
     },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/20/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/20/low.webp"
-    },
     "legalities": {
       "unlimited": "Legal"
     },
@@ -1028,10 +948,6 @@
       "tcgplayer": [
         98169
       ]
-    },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/21/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/21/low.webp"
     },
     "legalities": {
       "unlimited": "Legal"
@@ -1090,10 +1006,6 @@
         98157
       ]
     },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/22/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/22/low.webp"
-    },
     "legalities": {
       "unlimited": "Legal"
     },
@@ -1133,10 +1045,6 @@
       "tcgplayer": [
         98170
       ]
-    },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/23/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/23/low.webp"
     },
     "legalities": {
       "unlimited": "Legal"
@@ -1196,10 +1104,6 @@
         98158
       ]
     },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/24/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/24/low.webp"
-    },
     "legalities": {
       "unlimited": "Legal"
     },
@@ -1238,10 +1142,6 @@
       "tcgplayer": [
         98171
       ]
-    },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/25/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/25/low.webp"
     },
     "legalities": {
       "unlimited": "Legal"
@@ -1283,10 +1183,6 @@
       "tcgplayer": [
         98173
       ]
-    },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/26/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/26/low.webp"
     },
     "legalities": {
       "unlimited": "Legal"
@@ -1342,10 +1238,6 @@
       "tcgplayer": [
         98174
       ]
-    },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/27/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/27/low.webp"
     },
     "legalities": {
       "unlimited": "Legal"
@@ -1409,10 +1301,6 @@
         98175
       ]
     },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/28/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/28/low.webp"
-    },
     "legalities": {
       "unlimited": "Legal"
     },
@@ -1468,10 +1356,6 @@
         98172
       ]
     },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/29/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/29/low.webp"
-    },
     "legalities": {
       "unlimited": "Legal"
     },
@@ -1514,10 +1398,6 @@
       "tcgplayer": [
         98176
       ]
-    },
-    "images": {
-      "large": "https://assets.tcgdex.net/de/tk/tk-xy-b/30/high.webp",
-      "small": "https://assets.tcgdex.net/de/tk/tk-xy-b/30/low.webp"
     },
     "legalities": {
       "unlimited": "Legal"

@@ -14115,8 +14115,8 @@
       ]
     },
     "images": {
-      "large": "https://assets.tcgdex.net/de/sm/sm2/143/high.webp",
-      "small": "https://assets.tcgdex.net/de/sm/sm2/143/low.webp"
+      "large": "https://images.pokemontcg.io/sm2/143_hires.png",
+      "small": "https://images.pokemontcg.io/sm2/143.png"
     },
     "legalities": {
       "expanded": "Legal",

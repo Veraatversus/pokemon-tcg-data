@@ -13436,8 +13436,8 @@
       "tcgplayer": []
     },
     "images": {
-      "large": "https://assets.tcgdex.net/de/xy/xy8/146a/high.webp",
-      "small": "https://assets.tcgdex.net/de/xy/xy8/146a/low.webp"
+      "large": "https://images.pokemontcg.io/xy8/146a_hires.png",
+      "small": "https://images.pokemontcg.io/xy8/146a.png"
     },
     "legalities": {
       "expanded": "Legal",
