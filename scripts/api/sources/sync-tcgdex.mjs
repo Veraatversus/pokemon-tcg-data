@@ -15,6 +15,12 @@ export function reduceAssetsIndex(datas, langs = ['en', 'de', 'univ']) {
   return Object.fromEntries(langs.filter((l) => l in datas).map((l) => [l, datas[l]]));
 }
 
+// Nur bei geaendertem TCGdex-Commit wird gespiegelt. Folge: der Assets-Index (datas.json)
+// wird nur zusammen mit einem Commit-Wechsel aktualisiert, nicht allein bei eigener Aenderung.
+export function shouldUpdate(manifest, newCommit) {
+  return manifest?.tcgdex?.commit !== newCommit;
+}
+
 function serieIdOf(file) {
   let id;
   try {
@@ -93,7 +99,7 @@ async function main() {
     if (!res.ok) throw new Error(`${ASSETS_URL}: HTTP ${res.status}`);
     const assetsIndex = reduceAssetsIndex(await res.json());
     const result = mirrorTcgdex({ cloneDir: clone, targetDir: path.join(sourcesDir, 'tcgdex'), excludeSerieIds: ['tcgp'], assetsIndex });
-    updateSourcesManifest(path.join(sourcesDir, 'SOURCES.json'), 'tcgdex', {
+    updateSourcesManifest(manifestFile, 'tcgdex', {
       repo: 'tcgdex/cards-database', ref, commit, fetchedAt: new Date().toISOString(), status: 'active',
     });
     console.log(`TCGdex ${commit}: ${result.setCount} Sets, ${result.cardCount} Karten`);

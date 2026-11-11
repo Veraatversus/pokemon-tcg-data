@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { mirrorTcgdex, reduceAssetsIndex } from '../sources/sync-tcgdex.mjs';
+import { mirrorTcgdex, reduceAssetsIndex, shouldUpdate } from '../sources/sync-tcgdex.mjs';
 import { updateSourcesManifest } from '../sources/manifest.mjs';
 
 const fixture = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fixtures', 'tcgdex');
@@ -82,4 +82,11 @@ test('nicht parsebare Serie-Datei bricht den Mirror ab, Ziel bleibt unverändert
     assert.equal(fs.readFileSync(path.join(target, 'marker'), 'utf8'), 'alt');
     assert.ok(!fs.existsSync(`${target}.tmp`));
   }
+});
+
+test('shouldUpdate: nur bei geaendertem Commit (oder fehlendem Manifest-Eintrag)', () => {
+  assert.equal(shouldUpdate({ tcgdex: { commit: 'abc' } }, 'abc'), false);
+  assert.equal(shouldUpdate({ tcgdex: { commit: 'abc' } }, 'def'), true);
+  assert.equal(shouldUpdate({}, 'abc'), true);
+  assert.equal(shouldUpdate(null, 'abc'), true);
 });

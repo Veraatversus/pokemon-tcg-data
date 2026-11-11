@@ -3,7 +3,7 @@ name: Build Cardmarket Data
 on:
   workflow_run:
     workflows:
-      - Daily Sync All Upstreams to Master
+      - Daily Sync TCGdex to Master
     types:
       - completed
   workflow_dispatch:
