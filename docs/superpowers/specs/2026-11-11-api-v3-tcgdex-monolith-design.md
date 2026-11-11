@@ -60,14 +60,13 @@ Abgleich mit dem heutigen Frontend-Matcher (`findMatchingTcgdexSet`) und `normal
 - **ID-Drift:** Ein Set, das heute TCGdex-only ist (`TCGDEX-<id>`), wechselt im heutigen Frontend zur pokemontcg-ID, sobald pokemontcg-Daten erscheinen. Damit ändert sich der Schlüssel in `db_collection`.
 - **Julien-Daten:** Das DE-Format weicht stark ab (`id: "sv3-5_6"`, `rarity: "DoubleRare"`, Kosten als String) und wird nicht genutzt. Relevant ist nur `en`: Julien ist der einzige Lieferant der englischen pokemontcg-Daten für `me2pt5`, `me3`, `me4`, `me5` und `mep` (49 Karten). TCGdex deckt diese Sets vollständig ab (`mep`: 112 Karten, durchgehend mit Cardmarket-ID). Die Sheet-Schlüssel dieser Sets (`me2pt5` …) stammen aber aus den Julien-Daten.
 
-  **Entscheidung:** Julien wird **einmalig als eingefrorener Snapshot** nach `sources/julien/` übernommen, nur `cards/en` und `sets/en.json`, und nicht weiter synchronisiert. Er dient nur dem Befüllen der Registry und als Legacy-EN-Fallback. Der laufende Betrieb braucht ihn nicht.
+  **Entscheidung:** Juliens EN-Daten sind im Repo-Root bereits mit pokemontcg gemergt und gehen im **einmaligen eingefrorenen Snapshot** `sources/pokemontcg/` auf (nur `cards/en`, `sets/en.json`, `decks/en`); es gibt keinen separaten Julien-Ordner und keinen weiteren Sync. Er dient nur dem Befüllen der Registry und als Legacy-EN-Fallback. Der laufende Betrieb braucht ihn nicht.
 
 ## 3. Zielarchitektur
 
 ```text
                     ┌──────────────── master ────────────────┐
-PokemonTCG ──einmal─▶ sources/pokemontcg/ (cards/en, sets/en.json, decks/; eingefroren)
-Julien     ──einmal─▶ sources/julien/     (cards/en, sets/en.json; eingefroren)
+PokemonTCG+Julien ──einmal─▶ sources/pokemontcg/ (gemergter Root-Stand: cards/en, sets/en.json, decks/en; eingefroren)
 TCGdex     ──snap──▶ sources/tcgdex/      (data/ ohne Pocket, datas.json)
 Cardmarket ──feed──▶ (Build-Input, nicht committet)
                          │
@@ -88,8 +87,7 @@ Cardmarket ──feed──▶ (Build-Input, nicht committet)
 
 ```text
 sources/
-  pokemontcg/      eingefrorener Snapshot des heutigen Repo-Stands (Upstream PokemonTCG + Julien bereits gemergt), kein Sync
-  julien/          eingefrorener Snapshot JulienGitHub/pokemon-tcg-data, nur cards/en + sets/en.json (kein Sync)
+  pokemontcg/      eingefrorener Snapshot des heutigen Repo-Roots (Upstream PokemonTCG + Julien bereits gemergt, inkl. Juliens EN-Beiträge für me2pt5, me3, me4, me5, mep), nur cards/en, sets/en.json, decks/en, kein Sync; kein eigener julien/-Ordner
   tcgdex/          Snapshot tcgdex/cards-database: data/ (ohne "Pokémon TCG Pocket"), interfaces.d.ts, LICENSE
                    + assets-index.json (aus assets.tcgdex.net/datas.json, auf en/de/univ reduziert)
                    Hinweis: Die TS-Dateien bleiben unverändert, sie enthalten alle Sprachen. Reduziert wird erst in v3.
@@ -124,13 +122,13 @@ Die Root-Ordner `cards/`, `sets/`, `decks/` und `cardmarket/` bleiben bis Phase 
 
 Damit gibt es keine Merge-Konflikte mehr.
 
-**Entscheidung (Einfrieren):** pokemontcg und Julien werden **sofort und einmalig** eingefroren. Grundlage ist der aktuelle Stand im Repo-Root, inklusive `me6`. Der Commit-SHA wird in `SOURCES.json` festgehalten (`status: frozen`). Danach synchronisiert nur noch TCGdex. Bis zum Snapshot bekannte Sets behalten ihre pokemontcg-ID, jedes spätere Set bekommt `TCGDEX-<id>`.
+**Entscheidung (Einfrieren):** Der gemergte Stand aus pokemontcg und Julien wird **sofort und einmalig** als ein Snapshot (`sources/pokemontcg/`) eingefroren. Grundlage ist der aktuelle Stand im Repo-Root, inklusive `me6`. Der Commit-SHA wird in `SOURCES.json` festgehalten (`status: frozen`). Danach synchronisiert nur noch TCGdex. Bis zum Snapshot bekannte Sets behalten ihre pokemontcg-ID, jedes spätere Set bekommt `TCGDEX-<id>`.
 
 ## 4. Build-Pipeline (`scripts/api/`)
 
 ### 4.1 Schritte
 
-1. **Laden:** pokemontcg (en, Legacy, falls vorhanden), Julien (en, eingefroren), TCGdex (AST-geparst), TCGdex-Assets-Index, Cardmarket-Feeds.
+1. **Laden:** pokemontcg (en, gemergter eingefrorener Stand inkl. Julien-EN, Legacy), TCGdex (AST-geparst), TCGdex-Assets-Index, Cardmarket-Feeds.
 2. **Set-Matching** (4.3) → Set-Paare plus Konfidenz. Sets ohne sicheren Treffer → Report, kein Raten.
 3. **Karten-Matching** je Set-Paar (4.4).
 4. **Registry fortschreiben** (5): Neue Sets und Karten bekommen einmalig eine kanonische ID, bestehende Einträge bleiben unverändert.
@@ -282,14 +280,14 @@ Ein Set bzw. eine Karte enthält **pokemontcg-kompatible Felder auf oberster Ebe
 | 1 | `sources/tcgdex/` + Snapshot-Sync, AST-Parser, Set-/Karten-Matcher, Mappings, Matching-Report | master | Report: ≥ 99,5 % Karten-Match, 0 falsche Set-Paare (manuelles Review) |
 | 2 | Registry (initial aus heutigem Stand), Merge, `api/v3/` + Workflow; TCGdex-only-Build-Test | master | Kompatibilitäts-Suite grün, deterministischer Build |
 | 3 | Frontend auf v3, Laufzeit-API-Aufrufe entfernen, Aufräumen `pokecode-compat.js`/`app.js`-Teile, DE-Sprachwahl | dev | Smoke-Tests grün, echte Sheets geprüft |
-| 4 | pokemontcg/Julien-Snapshots nach `sources/` verschieben, Root-Ordner entfernen, `cardmarket/` → `api/v3/cardmarket/`, Workflows und Doku anpassen | master → dev | Pages-Pfade geprüft, Promote-Workflows grün |
+| 4 | Gemergten pokemontcg-Snapshot nach `sources/pokemontcg/` verschieben, Root-Ordner entfernen, `cardmarket/` → `api/v3/cardmarket/`, Workflows und Doku anpassen | master → dev | Pages-Pfade geprüft, Promote-Workflows grün |
 | 5 | Apps Script `pokecode.js` umstellen | dev | manueller Test im Sheet |
 
 ## 9. Workflows (Zielbild)
 
 | Workflow | Änderung |
 |---|---|
-| `sync-upstream.yml` | wird zu `sync-tcgdex.yml`: nur noch TCGdex-Snapshot nach `sources/tcgdex/`. pokemontcg/Julien-Remotes entfallen. |
+| `sync-upstream.yml` | wird zu `sync-tcgdex.yml`: nur noch TCGdex-Snapshot nach `sources/tcgdex/`. pokemontcg- und Julien-Remotes entfallen. |
 | `build-cardmarket-data.yml` → `build-api.yml` | Tests → `build-api.mjs` (inkl. Cardmarket) → Commit `api/v3/` auf `master` |
 | `propagate-master-to-dev-release.yml` | Schutzpfade um `sources/`, `api/` ergänzen (statt Root-Daten) |
 | `verify-dev-preview.yml` | Kompatibilitäts-Suite + v3-Schema-Check |
@@ -297,7 +295,7 @@ Ein Set bzw. eine Karte enthält **pokemontcg-kompatible Felder auf oberster Ebe
 ## 10. Entscheidungen (2026-11-11)
 
 1. **Nicht-eindeutige Nummern:** eindeutige Schlüssel mit einmaliger Migration (§5.3).
-2. **Julien:** nur als eingefrorener EN-Snapshot für Registry und Legacy-Fallback, kein laufender Sync (§2.2).
+2. **Julien:** kein separater Snapshot; Juliens EN-Beiträge stecken im gemergten, eingefrorenen `sources/pokemontcg/` (Registry und Legacy-Fallback), kein laufender Sync (§2.2).
 3. **Sprachen in v3:** `en` + `de`. TCGdex-Snapshot und Assets-Index werden auf diese beiden Sprachen (plus `univ` für Symbole) reduziert.
 4. **Kompatibilitäts-Fixture:** CSV-Export der Produktiv-DB, lokal und gitignored (§5.5).
 5. **Sets ohne pokemontcg-Gegenstück:** Alle werden aufgenommen (Trainer Kits, McDonald's, Promos usw.), außer Pocket und `data-asia`.
