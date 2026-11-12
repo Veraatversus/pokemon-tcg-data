@@ -23,6 +23,13 @@ import {
   planSetScopedUpsert,
   planSetScopedDedup
 } from './set-scoped-upsert.js';
+import {
+  ensureResolverForSet,
+  buildCollectionMap,
+  cellsForUpdate
+} from './collection-aliases.js';
+
+export { cellsForUpdate };
 
 function quoteSheetName(sheetName) {
   const name = String(sheetName ?? '').replace(/'/g, "''");
@@ -719,12 +726,6 @@ function buildEmptyRow(columnCount) {
   return Array.from({ length: columnCount }, () => '');
 }
 
-function findLastRowIndex(rows, predicate) {
-  for (let index = rows.length - 1; index >= 0; index -= 1) {
-    if (predicate(rows[index], index)) return index;
-  }
-  return -1;
-}
 
 async function applySetScopedPlan(sheetName, columnCount, plan) {
   if (!plan) return;
@@ -781,6 +782,8 @@ function isCardImageSplitFormat(row) {
 }
 
 async function upsertDbSet(setMeta, imported = false) {
+  // db_sets ist ein Cache (Spec §7.1); die Overview-Zeile schreibt upsertOverviewEntry unabhaengig davon.
+  if (!CONFIG.WRITE_DB_CARDS) return;
   await ensureNormalizedSchema();
   const setId = toSafeCellString(setMeta?.setId);
   if (!setId) return;
@@ -882,6 +885,7 @@ async function resolveSetIdFromName(setSheetName) {
 }
 
 async function writeDbCardsForSet(setId, cards) {
+  if (!CONFIG.WRITE_DB_CARDS) return;
   await ensureNormalizedSchema();
   const setRows = cards.map((card) => [
     setId,                                                                     // [0]  setId
@@ -936,29 +940,118 @@ async function writeDbCardsForSet(setId, cards) {
   }
 }
 
-async function writeDbCollectionForSet(setId, cards, existingMap = new Map()) {
-  await ensureNormalizedSchema();
-  const setRows = cards.map((card) => {
-    const key = normalizeCardNumber(card.number);
-    const existing = existingMap.get(key);
-    const g = Boolean(existing?.g);
-    const rh = Boolean(existing?.rh && g);
-    return [setId, toSafeCellString(card.number), g, rh, nowIso()];
-  });
-  const currentRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
-  const upsertPlan = planSetScopedUpsert({
-    rows: currentRows,
-    setId,
-    incomingRows: setRows,
-    clearMissing: true
-  });
-  await applySetScopedPlan(DB_SHEETS.collection, DB_HEADERS.collection.length, upsertPlan);
-
-  const refreshedRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
-  const dedupPlan = planSetScopedDedup({ rows: refreshedRows, setId });
-  if (dedupPlan.clearIndices.length > 0) {
-    await applySetScopedPlan(DB_SHEETS.collection, DB_HEADERS.collection.length, dedupPlan);
+/**
+ * Kanonische Set-ID + Resolver fuer einen (evtl. Alias-)Set-Schluessel. null, wenn die Registry nicht
+ * erreichbar ist oder das Set dort fehlt -> Aufrufer nutzen den exakten Set-ID-Pfad (keine leere Sammlung).
+ * Ein uebergebener Resolver ohne geladene Karten (CARDS_NOT_LOADED) wird durch ensureResolverForSet ersetzt.
+ */
+async function resolveCollectionContext(setKey, resolver = null) {
+  const key = toSafeCellString(setKey);
+  if (!key) return null;
+  const probe = (candidate) => {
+    const canonicalSetId = candidate?.resolveSetKey?.(key);
+    if (!canonicalSetId) return null;
+    // Wirft CARDS_NOT_LOADED, falls die Karten des Sets fehlen.
+    candidate.resolve(canonicalSetId, '0');
+    return { resolver: candidate, canonicalSetId };
+  };
+  if (resolver) {
+    try {
+      const ctx = probe(resolver);
+      if (ctx) return ctx;
+    } catch (err) {
+      if (err?.code !== 'CARDS_NOT_LOADED') throw err;
+    }
   }
+  try {
+    return probe(await ensureResolverForSet(key));
+  } catch (err) {
+    console.warn('[sheets-db] Registry nicht verfuegbar, Sammlung ohne Aliase:', err?.message || err);
+    return null;
+  }
+}
+
+function collectionKeyOfCard(card, ctx) {
+  const explicit = toSafeCellString(card?.collectionKey);
+  if (explicit) return explicit;
+  const number = toSafeCellString(card?.number);
+  if (!number) return '';
+  const hit = ctx ? ctx.resolver.resolve(ctx.canonicalSetId, number) : null;
+  return hit?.collectionKey || normalizeCardNumber(number);
+}
+
+/**
+ * Schreibt db_collection-Zeilen fuer die Karten eines Sets (Schluessel: card.collectionKey).
+ * - Zeilen unter Alias-Set-IDs bleiben unangetastet; nichts wird umbenannt.
+ * - Bestehende Zeilen unter der kanonischen Set-ID werden mit dem ODER-Status der Karte synchronisiert
+ *   (nur bei Abweichung, eigener Zeilenschluessel bleibt).
+ * - Karten ohne jede Zeile bekommen eine neue Zeile [kanonischeSetId, collectionKey, ...].
+ *   Karten, die nur unter Aliasen Zeilen haben, bekommen keine Doppelzeile.
+ * - clearMissing nur fuer Zeilen unter der kanonischen Set-ID, deren cardId ein kanonischer
+ *   collectionKey ist, der nicht importiert wird, und nur ohne Haken (kein Haken geht verloren).
+ */
+async function writeDbCollectionForSet(setId, cards, existingMap = new Map(), { resolver = null } = {}) {
+  await ensureNormalizedSchema();
+  const ctx = await resolveCollectionContext(setId, resolver);
+  const currentRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
+
+  if (!ctx) {
+    // Ohne Registry: exakter Set-ID-Pfad, ohne Leeren/Deduplizieren (nichts loeschen).
+    const setRows = cards.map((card) => {
+      const key = collectionKeyOfCard(card, null);
+      const existing = existingMap?.get?.(key);
+      const g = Boolean(existing?.g);
+      const rh = Boolean(existing?.rh && g);
+      return [setId, key, g, rh, nowIso()];
+    }).filter((row) => row[1]);
+    const upsertPlan = planSetScopedUpsert({ rows: currentRows, setId, incomingRows: setRows, clearMissing: false });
+    upsertPlan.clearIndices = [];
+    await applySetScopedPlan(DB_SHEETS.collection, DB_HEADERS.collection.length, upsertPlan);
+    return;
+  }
+
+  const canonicalSetId = ctx.canonicalSetId;
+  const canonicalLower = canonicalSetId.toLowerCase();
+  const { map: currentMap } = buildCollectionMap(currentRows, ctx);
+  const isCanonicalCell = (cell) => cell.setKey.toLowerCase() === canonicalLower;
+
+  const incomingKeys = new Set();
+  const updates = [];
+  const appendRows = [];
+  for (const card of cards || []) {
+    const key = collectionKeyOfCard(card, ctx);
+    if (!key || incomingKeys.has(key)) continue;
+    incomingKeys.add(key);
+    const current = currentMap.get(key);
+    const known = existingMap?.get?.(key) || current;
+    const g = Boolean(known?.g);
+    const rh = Boolean(known?.rh && g);
+    const cells = current?.cells || [];
+    if (cells.length === 0) {
+      appendRows.push([canonicalSetId, key, g, rh, nowIso()]);
+      continue;
+    }
+    cells.filter(isCanonicalCell).forEach((cell) => {
+      if (cell.g === g && cell.rhRaw === rh) return;
+      updates.push({ rowIndex: cell.rowNo - 2, rowValues: [cell.setKey, cell.cardKey, g, rh, nowIso()] });
+    });
+  }
+
+  const clearIndices = [];
+  for (const [key, entry] of currentMap) {
+    if (incomingKeys.has(key) || entry.orphan) continue;
+    entry.cells.forEach((cell) => {
+      if (!isCanonicalCell(cell) || cell.cardKey !== key) return;
+      if (cell.g || cell.rhRaw) return;
+      clearIndices.push(cell.rowNo - 2);
+    });
+  }
+
+  await applySetScopedPlan(DB_SHEETS.collection, DB_HEADERS.collection.length, {
+    updates,
+    appendRows,
+    clearIndices: clearIndices.sort((a, b) => a - b)
+  });
 }
 
 /**
@@ -1476,7 +1569,8 @@ export async function importSetIntoCollection(setMeta, cards) {
   const setId = toSafeCellString(setMeta.setId);
   const setName = toSafeCellString(setMeta.setName);
 
-  const existingMap = await readSetCollectionMap(setName).catch(() => new Map());
+  // setId explizit: Zeilen unter allen Aliasen zaehlen, auch wenn db_sets das Set (noch) nicht kennt.
+  const existingMap = await readSetCollectionMap(setName, { setId }).catch(() => new Map());
   await upsertDbSet({ ...setMeta, setId, setName }, true);
   await writeDbCardsForSet(setId, cards);
   await writeDbCollectionForSet(setId, cards, existingMap);
@@ -1530,122 +1624,167 @@ async function readLegacySetCollectionMap(setSheetName) {
   return map;
 }
 
-export async function readSetCollectionMap(setSheetName) {
-  await ensureNormalizedSchema();
-  const setId = await resolveSetIdFromName(setSheetName);
-  if (!setId) return new Map();
-
-  const values = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length);
-
+// Alter Pfad ohne Registry: nur Zeilen mit exakt dieser Set-ID, Schluessel normalizeCardNumber(cardId).
+function buildExactSetCollectionMap(rows, setId) {
   const map = new Map();
-  values.forEach((row, index) => {
-    if (toSafeCellString(row[0]).toLowerCase() !== setId.toLowerCase()) return;
-    const displayId = toSafeCellString(row[1]);
+  const setLower = toSafeCellString(setId).toLowerCase();
+  (rows || []).forEach((row, index) => {
+    if (toSafeCellString(row?.[0]).toLowerCase() !== setLower) return;
+    const displayId = toSafeCellString(row?.[1]);
     if (!displayId) return;
     const normalizedId = normalizeCardNumber(displayId);
     const g = toBoolean(row[2]);
-    const rh = toBoolean(row[3]) && g;
+    const rhRaw = toBoolean(row[3]);
+    const rh = rhRaw && g;
     const rowNo = index + 2;
+    const cell = {
+      setKey: toSafeCellString(row[0]),
+      cardKey: displayId,
+      rowNo,
+      g,
+      rh,
+      rhRaw,
+      gCell: { row: rowNo, col: 3 },
+      rhCell: { row: rowNo, col: 4 }
+    };
+    // Wie bisher gewinnt die letzte Zeile; alle Zeilen bleiben als Zellen erhalten.
+    const cells = [...(map.get(normalizedId)?.cells || []), cell];
     map.set(normalizedId, {
+      collectionKey: normalizedId,
       displayId,
       g,
       rh,
-      gCell: { row: rowNo, col: 3 },
-      rhCell: { row: rowNo, col: 4 }
+      cells,
+      gCell: cell.gCell,
+      rhCell: cell.rhCell
     });
   });
+  return map;
+}
 
-  if (map.size > 0) return map;
+async function resolveCollectionSetKey(setSheetName, options) {
+  const explicit = toSafeCellString(options?.setId);
+  if (explicit) return explicit;
+  return resolveSetIdFromName(setSheetName);
+}
+
+/**
+ * Sammlungs-Map eines Sets: Map<collectionKey, { collectionKey, displayId, g, rh, cells, gCell, rhCell, ambiguous? }>.
+ * Beruecksichtigt db_collection-Zeilen unter allen Registry-Aliasen des kanonischen Sets (Spec §5.2/§7.1);
+ * g/rh = ODER ueber alle Zeilen der Karte. Mehrdeutige Altzeilen (§5.3) stehen nur unter `ambiguous`.
+ * Ohne Zeilen greift der Legacy-Grid-Fallback; migrierte Zeilen werden unter der kanonischen Set-ID
+ * mit collectionKey angehaengt.
+ * @param {string} setSheetName Set-Name (Set-Blatt / db_sets / Overview)
+ * @param {{ setId?: string, resolver?: object }} [options] setId darf ein Alias sein
+ */
+export async function readSetCollectionMap(setSheetName, options = {}) {
+  await ensureNormalizedSchema();
+  const setKey = await resolveCollectionSetKey(setSheetName, options);
+  if (!setKey) return new Map();
+
+  const ctx = await resolveCollectionContext(setKey, options?.resolver || null);
+  const values = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length);
+
+  if (!ctx) {
+    const map = buildExactSetCollectionMap(values, setKey);
+    if (map.size > 0) return map;
+    const legacy = await readLegacySetCollectionMap(setSheetName).catch(() => new Map());
+    if (legacy.size === 0) return map;
+    await appendDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, Array.from(legacy.values()).map((entry) => [
+      setKey,
+      toSafeCellString(entry.displayId),
+      Boolean(entry.g),
+      Boolean(entry.rh && entry.g),
+      nowIso()
+    ]));
+    const refreshed = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
+    return buildExactSetCollectionMap(refreshed, setKey);
+  }
+
+  const { map, stats } = buildCollectionMap(values, ctx);
+  if (stats.matchedRows > 0) return map;
 
   const legacy = await readLegacySetCollectionMap(setSheetName).catch(() => new Map());
   if (legacy.size === 0) return map;
 
-  const legacyRows = Array.from(legacy.values()).map((entry) => [
-    setId,
-    toSafeCellString(entry.displayId),
-    Boolean(entry.g),
-    Boolean(entry.rh && entry.g),
-    nowIso()
-  ]);
+  // Alte Grid-Nummern: zuerst im Namensraum des kanonischen Sets, dann im Namensraum des Set-Schluessels.
+  const legacyKey = (displayId) => {
+    const hit = ctx.resolver.resolve(ctx.canonicalSetId, displayId)
+      || (setKey.toLowerCase() !== ctx.canonicalSetId.toLowerCase() ? ctx.resolver.resolve(setKey, displayId) : null);
+    return hit?.collectionKey || normalizeCardNumber(displayId);
+  };
+  const legacyRows = [];
+  const seen = new Set();
+  for (const entry of legacy.values()) {
+    const key = legacyKey(toSafeCellString(entry.displayId));
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    legacyRows.push([ctx.canonicalSetId, key, Boolean(entry.g), Boolean(entry.rh && entry.g), nowIso()]);
+  }
 
   await appendDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, legacyRows);
-
-  const migrated = new Map();
   const refreshed = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
-  refreshed.forEach((row, index) => {
-    if (toSafeCellString(row[0]).toLowerCase() !== setId.toLowerCase()) return;
-    const displayId = toSafeCellString(row[1]);
-    if (!displayId) return;
-    const normalizedId = normalizeCardNumber(displayId);
-    const g = toBoolean(row[2]);
-    const rh = toBoolean(row[3]) && g;
-    const rowNo = index + 2;
-    migrated.set(normalizedId, {
-      displayId,
-      g,
-      rh,
-      gCell: { row: rowNo, col: 3 },
-      rhCell: { row: rowNo, col: 4 }
-    });
-  });
-
-  return migrated;
+  return buildCollectionMap(refreshed, ctx).map;
 }
 
-export async function ensureCollectionEntry(setSheetName, cardNumber) {
+/**
+ * Liefert den Sammlungs-Eintrag einer Karte (mit allen Zellen, ueber Aliase). Fehlt jede Zeile, wird
+ * [kanonischeSetId, collectionKey, false, false, now] angehaengt. Mehrdeutige Altzeilen zaehlen nicht als
+ * Zeile der Karte (sie bleiben unveraendert).
+ * @param {string} setSheetName
+ * @param {string} collectionKey kanonischer Schluessel (alte Kartennummern werden ueber die Registry aufgeloest)
+ * @param {{ setId?: string, resolver?: object }} [options]
+ */
+export async function ensureCollectionEntry(setSheetName, collectionKey, options = {}) {
   await ensureNormalizedSchema();
-  const setId = await resolveSetIdFromName(setSheetName);
-  if (!setId) {
-    throw new Error(`Set-ID fÃ¼r â€ž${setSheetName}â€œ konnte nicht aufgelÃ¶st werden.`);
+  const setKey = await resolveCollectionSetKey(setSheetName, options);
+  if (!setKey) {
+    throw new Error(`Set-ID für „${setSheetName}“ konnte nicht aufgelöst werden.`);
   }
 
-  const normalizedCard = normalizeCardNumber(cardNumber);
+  const ctx = await resolveCollectionContext(setKey, options?.resolver || null);
+  const rawKey = toSafeCellString(collectionKey);
   const currentRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
 
-  const existingIndex = findLastRowIndex(currentRows, (row) => {
-    const rowSetId = toSafeCellString(row[0]).toLowerCase();
-    const rowCard = normalizeCardNumber(toSafeCellString(row[1]));
-    return rowSetId === setId.toLowerCase() && rowCard === normalizedCard;
-  });
-
-  if (existingIndex >= 0) {
-    const rowNo = existingIndex + 2;
-    return {
-      displayId: toSafeCellString(currentRows[existingIndex][1]) || toSafeCellString(cardNumber),
-      g: toBoolean(currentRows[existingIndex][2]),
-      rh: toBoolean(currentRows[existingIndex][3]),
-      gCell: { row: rowNo, col: 3 },
-      rhCell: { row: rowNo, col: 4 }
-    };
+  if (!ctx) {
+    const normalizedCard = normalizeCardNumber(rawKey);
+    const existing = buildExactSetCollectionMap(currentRows, setKey).get(normalizedCard);
+    if (existing) return existing;
+    await appendDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, [[setKey, rawKey, false, false, nowIso()]]);
+    const refreshedRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
+    const created = buildExactSetCollectionMap(refreshedRows, setKey).get(normalizedCard);
+    if (!created) throw new Error(`Collection-Eintrag für Karte ${collectionKey} konnte nicht erstellt werden.`);
+    return created;
   }
 
-  const upsertPlan = planSetScopedUpsert({
-    rows: currentRows,
-    setId,
-    incomingRows: [[setId, toSafeCellString(cardNumber), false, false, nowIso()]],
-    clearMissing: false
-  });
-  await applySetScopedPlan(DB_SHEETS.collection, DB_HEADERS.collection.length, upsertPlan);
+  const hit = rawKey ? ctx.resolver.resolve(ctx.canonicalSetId, rawKey) : null;
+  const writeKey = hit?.collectionKey || rawKey;
+  const lookupKey = hit?.collectionKey || normalizeCardNumber(rawKey);
+  if (!writeKey) throw new Error('Collection-Eintrag ohne Kartenschlüssel.');
 
+  const existing = buildCollectionMap(currentRows, ctx).map.get(lookupKey);
+  if (existing?.cells?.length) return existing;
+
+  await appendDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, [[ctx.canonicalSetId, writeKey, false, false, nowIso()]]);
   const refreshedRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
-  const newIndex = findLastRowIndex(refreshedRows, (row) => {
-    const rowSetId = toSafeCellString(row[0]).toLowerCase();
-    const rowCard = normalizeCardNumber(toSafeCellString(row[1]));
-    return rowSetId === setId.toLowerCase() && rowCard === normalizedCard;
-  });
-
-  if (newIndex < 0) {
-    throw new Error(`Collection-Eintrag fÃ¼r Karte ${cardNumber} konnte nicht erstellt werden.`);
+  const created = buildCollectionMap(refreshedRows, ctx).map.get(lookupKey);
+  if (!created?.cells?.length) {
+    throw new Error(`Collection-Eintrag für Karte ${collectionKey} konnte nicht erstellt werden.`);
   }
+  return created;
+}
 
-  const rowNo = newIndex + 2;
-  return {
-    displayId: toSafeCellString(refreshedRows[newIndex][1]) || toSafeCellString(cardNumber),
-    g: toBoolean(refreshedRows[newIndex][2]),
-    rh: toBoolean(refreshedRows[newIndex][3]),
-    gCell: { row: rowNo, col: 3 },
-    rhCell: { row: rowNo, col: 4 }
-  };
+// Gecachte db_collection-Zeilen nach Zell-Writes mitfuehren, damit ein erneutes Lesen nicht den alten
+// Stand liefert (z. B. Abwaehlen ueber mehrere Zeilen einer Karte).
+function patchCollectionRowCache(updates) {
+  const rows = dbRowsCache.get(`${DB_SHEETS.collection}:${DB_HEADERS.collection.length}`);
+  if (!Array.isArray(rows)) return;
+  for (const { row, col, value } of updates) {
+    const target = rows[row - 2];
+    if (!Array.isArray(target)) continue;
+    while (target.length < col) target.push('');
+    target[col - 1] = Boolean(value);
+  }
 }
 
 export async function updateCellBoolean(sheetName, row, col, value) {
@@ -1655,6 +1794,7 @@ export async function updateCellBoolean(sheetName, row, col, value) {
   await ensureSheetCapacity(targetSheet, Number(row), Number(col));
   const a1 = buildRange(targetSheet, `${colToA1(col)}${row}`);
   await putValues(a1, [[Boolean(value)]]);
+  if (useNormalizedCollection) patchCollectionRowCache([{ row: Number(row), col: Number(col), value }]);
 }
 
 export async function updateCellBooleansBatch(sheetName, updates = [], { chunkSize = 250 } = {}) {
@@ -1688,6 +1828,7 @@ export async function updateCellBooleansBatch(sheetName, updates = [], { chunkSi
         range: buildRange(targetSheet, `${colToA1(entry.col)}${entry.row}`),
         values: [[Boolean(entry.value)]]
       })));
+      if (targetSheet === DB_SHEETS.collection) patchCollectionRowCache(chunk);
     }
   }
 
