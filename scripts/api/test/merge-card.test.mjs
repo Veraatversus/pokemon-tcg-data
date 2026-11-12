@@ -177,11 +177,26 @@ test('mergeSet: pt-Set mit TCGdex-Gegenstueck', () => {
   assert.equal(s.total, 207);
   assert.equal(s.releaseDate, '2023/09/22');
   assert.equal(s.ptcgoCode, 'MEW');
-  assert.deepEqual(s.images, { logo: 'https://assets.tcgdex.net/en/sv/sv03.5/logo.webp', symbol: 'https://assets.tcgdex.net/univ/sv/sv03.5/symbol.webp' });
+  assert.deepEqual(s.images, { logo: 'https://assets.tcgdex.net/en/sv/sv03.5/logo.webp', symbol: 'https://assets.tcgdex.net/en/sv/sv03.5/symbol.webp' });
   assert.equal(s.i18n.de.name, '151');
   assert.equal(s.i18n.de.images.logo, 'https://assets.tcgdex.net/de/sv/sv03.5/logo.webp');
   assert.deepEqual(s.ids, { pokemontcg: 'sv3pt5', tcgdex: 'sv03.5', cardmarket: 5402, tcgplayer: 23237 });
   assert.deepEqual(s.aliases, ['TCGDEX-sv03.5']);
+});
+
+test('mergeSet: verifiziert fehlende TCGdex-Assets -> pt-Fallback oben, kein DE-Logo', () => {
+  const miss = { status: 'missing', checkedAt: '2026-11-12T00:00:00.000Z' };
+  const A = 'https://assets.tcgdex.net';
+  const assetsVerified = Object.fromEntries([
+    `${A}/en/sv/sv03.5/symbol.webp`, `${A}/en/sv/sv03.5/symbol.png`, `${A}/de/sv/sv03.5/logo.webp`, `${A}/de/sv/sv03.5/logo.png`,
+  ].map((u) => [u, miss]));
+  const s = mergeSet({
+    canonicalSetId: 'sv3pt5', registrySet: { pokemontcg: 'sv3pt5', tcgdex: 'sv03.5', mergedSubsets: [], aliases: [] },
+    ptSet: { id: 'sv3pt5', name: '151', images: { symbol: 'pt-s', logo: 'pt-l' } },
+    tcgdexSet: sv035, cardCount: 207, assetsIndex, assetsVerified, cardmarketTracker: tracker,
+  });
+  assert.deepEqual(s.images, { logo: `${A}/en/sv/sv03.5/logo.webp`, symbol: 'pt-s' });
+  assert.deepEqual(s.i18n.de, { name: '151' });
 });
 
 test('mergeSet: pt-Set ohne TCGdex -> Legacy-Bilder, Cardmarket aus Tracker', () => {

@@ -38,6 +38,15 @@ test('mirror kopiert ohne Pocket und ersetzt atomar', () => {
   assert.ok(!fs.existsSync(target + '.tmp'));
 });
 
+test('mirror behaelt assets-verified.json (eigener Pruefstand, nicht aus dem Upstream)', () => {
+  const clone = makeClone();
+  const target = path.join(tmp(), 'tcgdex');
+  fs.mkdirSync(target);
+  fs.writeFileSync(path.join(target, 'assets-verified.json'), '{"u":{"status":"ok"}}\n');
+  mirrorTcgdex({ cloneDir: clone, targetDir: target, excludeSerieIds: [], assetsIndex: { en: {} } });
+  assert.equal(fs.readFileSync(path.join(target, 'assets-verified.json'), 'utf8'), '{"u":{"status":"ok"}}\n');
+});
+
 test('leeres oder kaputtes cloneDir lässt Ziel unverändert', () => {
   const target = path.join(tmp(), 'tcgdex');
   fs.mkdirSync(target);

@@ -83,6 +83,10 @@ export function mirrorTcgdex({ cloneDir, targetDir, excludeSerieIds, assetsIndex
       copyTree(src, path.join(tmpDir, f));
     }
     if (assetsIndex) fs.writeFileSync(path.join(tmpDir, 'assets-index.json'), `${JSON.stringify(assetsIndex)}\n`);
+    // Eigener Pruefstand (verify-assets.mjs), kommt nicht aus dem Upstream: beim Austausch behalten,
+    // sonst wuerde nach jedem TCGdex-Commit alles neu geprueft.
+    const verified = path.join(targetDir, 'assets-verified.json');
+    if (fs.existsSync(verified)) fs.copyFileSync(verified, path.join(tmpDir, 'assets-verified.json'));
 
     const { sets, errors } = loadTcgdexDatabase(tmpDir, { excludeSerieIds });
     if (sets.length < 1) throw new Error('Plausibilitaetspruefung: kein Set geladen');

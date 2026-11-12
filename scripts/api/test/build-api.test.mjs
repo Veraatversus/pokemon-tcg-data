@@ -127,6 +127,27 @@ test('runBuild: Mini-Repo, zwei Laeufe identisch, Registry geschrieben, alte Dat
   }
 });
 
+test('runBuild: assets-verified.json filtert fehlende Set-Logos, Zusammenfassung der Assets', () => {
+  const root = makeRepo();
+  try {
+    const A = 'https://assets.tcgdex.net';
+    const at = '2026-11-12T00:00:00.000Z';
+    write(root, 'sources/tcgdex/assets-verified.json', {
+      [`${A}/en/sv/sv01/logo.webp`]: { status: 'missing', checkedAt: at },
+      [`${A}/en/sv/sv01/logo.png`]: { status: 'missing', checkedAt: at },
+      [`${A}/en/tcgp/A1/logo.webp`]: { status: 'ok', checkedAt: at },
+      [`${A}/en/gone/gone/logo.webp`]: { status: 'ok', checkedAt: at }, // kein Kandidat mehr -> zaehlt nicht
+    });
+    const r = runBuild({ repoRoot: root });
+    const sets = readJson(path.join(root, 'api', 'v3', 'sets.json'));
+    assert.equal(sets.find((s) => s.id === 'sv1').images.logo, 'pt-l');
+    assert.equal(sets.find((s) => s.id === 'TCGDEX-A1').images.logo, `${A}/en/tcgp/A1/logo.webp`);
+    assert.deepEqual(r.assets, { ok: 1, missing: 2 });
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test('runBuild tcgdexOnly: kanonische IDs aus der Registry, Registry nicht geschrieben', () => {
   const root = makeRepo();
   try {

@@ -14,14 +14,16 @@ const toNumber = (v) => {
 // Name: pt, sonst TCGdex EN, sonst erste vorhandene Sprache (z. B. franzoesische McDonald's-Sets).
 const anyName = (langs) => (langs ? langs.en ?? Object.values(langs).find((v) => typeof v === 'string') : undefined);
 
-export function mergeSet({ canonicalSetId, registrySet, ptSet = null, tcgdexSet = null, cardCount, assetsIndex, cardmarketTracker }) {
+// assetsVerified: sources/tcgdex/assets-verified.json; als fehlend verifizierte Logos/Symbole entfallen
+// (oben greift dann die pt-Legacy-URL, i18n.de.images.logo entfaellt).
+export function mergeSet({ canonicalSetId, registrySet, ptSet = null, tcgdexSet = null, cardCount, assetsIndex, assetsVerified = {}, cardmarketTracker }) {
   const td = tcgdexSet;
-  const tdImages = td ? resolveSetImages(assetsIndex, { lang: 'en', serieId: td.serieId, setId: td.id }) : {};
+  const tdImages = td ? resolveSetImages(assetsIndex, assetsVerified, { lang: 'en', serieId: td.serieId, setId: td.id }) : {};
   const images = compact({
     logo: tdImages.logo ?? ptSet?.images?.logo,
     symbol: tdImages.symbol ?? ptSet?.images?.symbol,
   });
-  const deLogo = td ? resolveSetImages(assetsIndex, { lang: 'de', serieId: td.serieId, setId: td.id }).logo : undefined;
+  const deLogo = td ? resolveSetImages(assetsIndex, assetsVerified, { lang: 'de', serieId: td.serieId, setId: td.id }).logo : undefined;
   const de = compact({ name: td?.name?.de, images: deLogo ? { logo: deLogo } : undefined });
   // Synthetisierte pt-Sets (Kartendatei ohne Set-Eintrag, z. B. mep) haben nur die Id als Namen:
   // Name und gedruckte Gesamtzahl kommen dann aus TCGdex, nie die nackte Id.
