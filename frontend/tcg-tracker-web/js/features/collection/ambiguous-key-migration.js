@@ -110,16 +110,38 @@ export async function applyAmbiguousMigration(plan, choices, deps = {}) {
     toAppend.push([row[0], row[1], false, false, now]);
   }
 
+  const snapshotData = { kind: 'ambiguous-migration', setId, migrations: [] };
   for (const item of selected) {
+    // Veralteter Plan: Altzeile muss im frischen Stand noch gesetzt sein, sonst wurde sie schon migriert.
+    let legacyCells = item.row.cells;
+    if (fresh instanceof Map) {
+      let group = null;
+      for (const entry of fresh.values()) {
+        if (entry?.ambiguous && str(entry.ambiguous.legacyKey) === str(item.legacyKey)) { group = entry.ambiguous; break; }
+      }
+      if (!group || !hasCells(group) || !(group.g || group.rh)) continue;
+      legacyCells = group.cells;
+    }
+    const migration = {
+      legacyKey: item.legacyKey,
+      legacyRows: legacyCells.map((c) => ({ row: c.rowNo, g: Boolean(c.g), rh: Boolean(c.rh) })),
+      chosen: [],
+      updatedRows: [],
+      created: []
+    };
     const keys = chosenKeys(choices, item.legacyKey);
     for (const candidate of item.candidates) {
       const key = str(candidate.collectionKey);
       if (!keys.has(key)) continue;
+      migration.chosen.push(candidate.collectionKey);
       const own = freshEntry(key, candidate.hasRow ? { cells: candidate.cells, g: false, rh: false } : null);
       if (hasCells(own)) {
         // Eigene Zeile existiert: Altstatus hinzuodern (nie einen vorhandenen Haken zuruecknehmen).
         const g = item.row.g || Boolean(own.g);
         const rh = g && (item.row.rh || Boolean(own.rh));
+        own.cells.forEach((c) => migration.updatedRows.push({
+          collectionKey: candidate.collectionKey, row: c.rowNo, g: Boolean(c.g), rh: Boolean(c.rh)
+        }));
         pushUpdates(cellsForUpdate(own, 'g', g));
         pushUpdates(cellsForUpdate(own, 'rh', rh));
         result.updated += 1;
@@ -128,37 +150,52 @@ export async function applyAmbiguousMigration(plan, choices, deps = {}) {
         if (pendingIdx >= 0) toAppend.splice(pendingIdx, 1); // stille Leerzeile durch die echte ersetzen
         queued.add(key);
         toAppend.push([setId, candidate.collectionKey, item.row.g, item.row.g && item.row.rh, now]);
+        migration.created.push({ setId, collectionKey: candidate.collectionKey });
       }
     }
-    // Altzeile(n) auf false, nie loeschen; Zellen aus frischem Stand, falls vorhanden.
-    let legacyCells = item.row.cells;
-    if (fresh instanceof Map) {
-      for (const entry of fresh.values()) {
-        const group = entry?.ambiguous;
-        if (group && str(group.legacyKey) === str(item.legacyKey) && hasCells(group)) {
-          legacyCells = group.cells;
-          break;
-        }
-      }
-    }
+    // Altzeile(n) auf false, nie loeschen. Update laeuft nach dem Anhaengen: bei Teilfehler bleibt der Haken.
     pushUpdates(cellsForUpdate({ cells: legacyCells }, 'g', false));
     result.cleared += 1;
     result.migrated.push(item.legacyKey);
+    snapshotData.migrations.push(migration);
   }
 
   if (!toAppend.length && !updates.size) return result;
   result.created = toAppend.length;
 
-  if (typeof createSnapshot === 'function') {
-    const data = {};
-    for (const item of plan.needsDialog || []) {
-      data[`${setId}/${item.legacyKey}`] = { g: item.row.g, rh: item.row.rh, rows: item.row.cells.map((c) => c.rowNo) };
-    }
-    await createSnapshot(`Migration mehrdeutiger Altschlüssel (${setId})`, data);
+  // Snapshot nur, wenn bestehende Haken veraendert werden (rein stille Plaene fuegen nur false-Zeilen hinzu).
+  if (snapshotData.migrations.length && typeof createSnapshot === 'function') {
+    await createSnapshot(`Migration mehrdeutiger Altschlüssel (${setId})`, snapshotData);
   }
   if (toAppend.length) await appendRows(toAppend);
   if (updates.size) await updateCells([...updates.values()]);
   return result;
+}
+
+/**
+ * Stellt den Zustand vor einer Migration wieder her (Snapshot aus applyAmbiguousMigration): Altzeilen und
+ * aktualisierte Zeilen bekommen ihre alten g/rh, angelegte Zeilen werden auf false gesetzt (nie geloescht).
+ * deps: updateCells, readMap.
+ */
+export async function restoreAmbiguousMigration(snapshotData, deps = {}) {
+  if (snapshotData?.kind !== 'ambiguous-migration') throw new Error('Kein Migrations-Snapshot.');
+  const updates = new Map();
+  const put = (row, col, value) => updates.set(`${row}:${col}`, { row, col, value: Boolean(value) });
+  const fresh = typeof deps.readMap === 'function' ? await deps.readMap() : new Map();
+  for (const m of snapshotData.migrations || []) {
+    for (const r of [...m.legacyRows, ...m.updatedRows]) {
+      put(r.row, 3, r.g);
+      put(r.row, 4, r.rh);
+    }
+    for (const c of m.created || []) {
+      for (const cell of fresh.get?.(str(c.collectionKey))?.cells || []) {
+        put(cell.rowNo, 3, false);
+        put(cell.rowNo, 4, false);
+      }
+    }
+  }
+  if (updates.size) await deps.updateCells([...updates.values()]);
+  return updates.size;
 }
 
 /**

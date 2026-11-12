@@ -127,3 +127,71 @@ test('toggleChoice verwaltet die Mehrfachauswahl', () => {
   toggleChoice(choices, '15', '15_A1', false);
   assert.deepEqual([...choices.get('15')], ['15_A2']);
 });
+
+// ── Fix round 1 ───────────────────────────────────────────────────────────────
+import { restoreAmbiguousMigration } from '../js/features/collection/ambiguous-key-migration.js';
+
+test('Snapshot enthaelt alles fuer die Wiederherstellung; restore bringt exakt den Vorzustand zurueck', async () => {
+  const deps = makeDeps([
+    ['cel25c', '15', true, true, 'x'],
+    ['cel25c', '15_A1', true, false, 'x'] // eigene Zeile wird aktualisiert (rh false -> true)
+  ]);
+  const before = deps.rows.map((r) => r.slice(0, 4));
+  let snap = null;
+  deps.createSnapshot = async (name, data) => { snap = data; };
+  await applyAmbiguousMigration(planOf(deps), new Map([['15', new Set(['15_A1', '15_A2'])]]), deps);
+  assert.ok(snap);
+  const m = snap.migrations[0];
+  assert.equal(snap.setId, 'cel25c');
+  assert.deepEqual(m.legacyRows, [{ row: 2, g: true, rh: true }]);
+  assert.deepEqual(m.chosen.sort(), ['15_A1', '15_A2']);
+  assert.deepEqual(m.updatedRows, [{ collectionKey: '15_A1', row: 3, g: true, rh: false }]);
+  assert.deepEqual(m.created, [{ setId: 'cel25c', collectionKey: '15_A2' }]);
+  assert.equal(deps.rows[0][2], false);
+  await restoreAmbiguousMigration(snap, deps);
+  assert.equal(deps.rows.length, 3, 'nichts geloescht');
+  assert.deepEqual(deps.rows.slice(0, 2).map((r) => r.slice(0, 4)), before);
+  assert.deepEqual(deps.rows[2].slice(0, 4), ['cel25c', '15_A2', false, false]);
+});
+
+test('veralteter Plan: zweiter apply aendert nichts (Altzeile nicht mehr gesetzt)', async () => {
+  const deps = makeDeps([['cel25c', '15', true, false, 'x']]);
+  const plan = planOf(deps);
+  await applyAmbiguousMigration(plan, new Map([['15', new Set(['15_A1'])]]), deps);
+  // Nutzer setzt A1 zwischenzeitlich zurueck; stale Plan darf nicht erneut Haken setzen.
+  deps.rows[1][2] = false;
+  const snapshot = JSON.stringify(deps.rows);
+  deps.calls.length = 0;
+  const result = await applyAmbiguousMigration(plan, new Map([['15', new Set(['15_A1', '15_A2'])]]), deps);
+  assert.equal(JSON.stringify(deps.rows), snapshot);
+  assert.deepEqual(deps.calls, []);
+  assert.deepEqual(result.migrated, []);
+});
+
+test('Teilfehler: append ok, update schlaegt fehl -> Wiederholung vollendet ohne Duplikate', async () => {
+  const deps = makeDeps([['cel25c', '15', true, false, 'x']]);
+  const plan = planOf(deps);
+  const choices = new Map([['15', new Set(['15_A1', '15_A2'])]]);
+  const realUpdate = deps.updateCells;
+  deps.updateCells = async () => { throw new Error('quota'); };
+  await assert.rejects(applyAmbiguousMigration(plan, choices, deps), /quota/);
+  assert.equal(deps.rows[0][2], true, 'Altzeile bleibt gesetzt, solange nicht alles geschrieben ist');
+  deps.updateCells = realUpdate;
+  await applyAmbiguousMigration(plan, choices, deps);
+  assert.deepEqual(deps.rows.map((r) => r[1]), ['15', '15_A1', '15_A2']);
+  assert.deepEqual(deps.rows.map((r) => r[2]), [false, true, true]);
+});
+
+test('Altzeile nur mit rh (ohne g) gilt als nicht gesetzt -> still, kein Dialog', () => {
+  const map = mapFor([['cel25c', '15', false, true, 'x']]);
+  const plan = planAmbiguousMigration(ambiguousOf(map), { setId: 'cel25c', now: NOW });
+  assert.equal(plan.needsDialog.length, 0);
+  assert.equal(plan.silent.length, 2);
+});
+
+test('rein stille Migration legt keinen Snapshot an', async () => {
+  const deps = makeDeps([['cel25c', '15', false, false, 'x']]);
+  await applyAmbiguousMigration(planOf(deps), new Map(), deps);
+  assert.ok(!deps.calls.includes('snapshot'));
+  assert.deepEqual(deps.rows.map((r) => r[1]), ['15', '15_A1', '15_A2']);
+});

@@ -8601,8 +8601,14 @@ async function runAmbiguousMigrationFlow(set, { force = false } = {}) {
     let map = state.dbMap;
     const silentPlan = planFor(map);
     if (silentPlan.silent.length) {
-      await applyAmbiguousMigration(silentPlan, new Map(), deps);
-      map = await reloadDbMapForSet(set);
+      // Stille Migration: Fehler nur loggen, kein Toast (Quota/Netz); naechstes Oeffnen versucht es erneut.
+      try {
+        await applyAmbiguousMigration(silentPlan, new Map(), deps);
+        map = await reloadDbMapForSet(set);
+      } catch (silentErr) {
+        console.warn('[ambiguous-migration] stille Migration uebersprungen:', silentErr);
+        return;
+      }
     }
     const plan = planFor(map);
     if (!plan.needsDialog.length) return;
