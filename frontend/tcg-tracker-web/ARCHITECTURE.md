@@ -141,7 +141,7 @@ Bekannte Schlüssel:
 ## Import-Specifier und Service-Worker
 
 - Jedes Modul wird ueberall unter demselben Specifier importiert (Test `tests/module-specifier-consistency.test.mjs`), sonst entstehen im Browser zwei Modulinstanzen. `core/config.js`, `core/auth.js`, `core/utils.js`, `data/schema-contract.js` und `data/cardmarket-data.js` sind bewusst unversioniert (Mehrheit des Graphen; Tests importieren unversioniert und teilen so die Modulidentitaet mit der App). `version:sync` aendert nur vorhandene `?v=`.
-- Service Worker: JS/CSS und `api/v3`/`api/registry` network-first mit `cache: 'no-cache'` (Revalidierung, kein veralteter HTTP-Cache nach Deploys), Cache nur als Offline-Fallback; API-Runtime-Cache auf 60 Kartendateien begrenzt (sets/meta/search-index bleiben).
+- Service Worker: JS/CSS und network-first mit `cache: 'no-cache'` (kein veralteter HTTP-Cache nach Deploys); `api/v3`/`api/registry` (aendert sich nur taeglich) cache-first mit 24-h-Frische (Zeitstempel `x-sw-fetched-at`), danach Revalidierung per Netz, veraltete Kopie nur als Offline-Fallback; API-Runtime-Cache auf 60 Kartendateien begrenzt (sets/meta/search-index bleiben).
 
 ## Cache-Strategie
 

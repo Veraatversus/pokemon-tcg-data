@@ -4,13 +4,14 @@
 
 const SW_SCOPE_PATH = new URL(self.registration.scope).pathname.toLowerCase();
 const SW_SCOPE = /(^|\/)dev(\/|$)/.test(SW_SCOPE_PATH) ? 'dev' : 'release';
-const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v57`;
-const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v57`;
-const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v57`;
+const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v58`;
+const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v58`;
+const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v58`;
 
 // api/v3 + api/registry JSON in the runtime cache: keep at most API_CACHE_MAX_ENTRIES
 // non-pinned entries (card files); oldest-inserted are evicted first (cache.keys() is insertion-ordered).
 const API_CACHE_MAX_ENTRIES = 60;
+const API_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 const API_PINNED_RE = /\/api\/(v3\/(sets|meta|search-index)\.json|registry\/sets\.json)$/;
 const API_ENTRY_RE = /\/api\/(v3|registry)\//;
 
@@ -23,6 +24,42 @@ async function trimApiCache(cache) {
   const excess = evictable.length - API_CACHE_MAX_ENTRIES;
   for (let i = 0; i < excess; i += 1) {
     await cache.delete(evictable[i]);
+  }
+}
+
+// Freshness decision for cached API responses (pure; unit-tested in tests/service-worker-api-cache.test.mjs).
+function isFresh(fetchedAtMs, nowMs, maxAgeMs) {
+  if (!Number.isFinite(fetchedAtMs) || !Number.isFinite(nowMs)) return false;
+  const age = nowMs - fetchedAtMs;
+  return age >= 0 && age < maxAgeMs;
+}
+
+async function handleApiRequest(request) {
+  const cache = await caches.open(RUNTIME_CACHE);
+  const cached = await cache.match(request);
+  if (cached && isFresh(Number(cached.headers.get('x-sw-fetched-at')), Date.now(), API_MAX_AGE_MS)) {
+    return cached;
+  }
+  try {
+    const response = await fetch(request, { cache: 'no-cache' });
+    if (response && response.status === 200) {
+      const headers = new Headers(response.headers);
+      headers.set('x-sw-fetched-at', String(Date.now()));
+      const stored = new Response(await response.clone().blob(), {
+        status: response.status,
+        statusText: response.statusText,
+        headers
+      });
+      try {
+        await cache.put(request, stored);
+        await trimApiCache(cache);
+      } catch (err) {
+        console.warn('[SW] cache.put failed:', err);
+      }
+    }
+    return response;
+  } catch (err) {
+    return cached || Response.error();
   }
 }
 
@@ -176,24 +213,10 @@ self.addEventListener('fetch', (event) => {
       return;
     }
 
-    // Same-origin API data (api/v3, api/registry): network-first, so updated card data is
-    // never shadowed by an old cached copy; the runtime cache is only an offline fallback.
-    if (/\/api\/(v3|registry)\//.test(url.pathname)) {
-      event.respondWith(
-        fetch(request, { cache: 'no-cache' })
-          .then((response) => {
-            if (response && response.status === 200) {
-              const responseToCache = response.clone();
-              caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, responseToCache)
-                .then(() => trimApiCache(cache))
-                .catch((err) => {
-                  console.warn('[SW] cache.put failed:', err);
-                }));
-            }
-            return response;
-          })
-          .catch(() => caches.match(request).then((cached) => cached || Response.error()))
-      );
+    // Same-origin API data (api/v3, api/registry): changes at most once a day, so cache-first
+    // with a 24 h freshness window (fetch time stored in x-sw-fetched-at); stale copy = offline fallback.
+    if (API_ENTRY_RE.test(url.pathname)) {
+      event.respondWith(handleApiRequest(request));
       return;
     }
 
