@@ -7,7 +7,7 @@
 //               den Fallback uebernimmt resolveFieldValue nach Kartensprache)
 //  - updatedAt: wie in den alten Buildern `new Date().toISOString()`, sofern nicht
 //               per Option `updatedAt` uebergeben (keine erfundenen festen Zeitstempel).
-import { buildCardmarketProductUrl } from './cardmarket-data.js';
+import { buildCardmarketProductUrl } from './cardmarket-url-utils.js';
 
 const str = (v) => (typeof v === 'string' ? v.trim() : '');
 const num = (v) => {
@@ -36,12 +36,30 @@ function tcgdexLocalId(tcgdexId, tcgdexSetId = '') {
   return safeDecode(rest);
 }
 
-// Cardmarket-Produkt-ID: erste Variante mit cardmarketId, sonst ids.cardmarket (Liste oder Zahl).
+const positiveId = (v) => {
+  const n = Number(v);
+  return Number.isInteger(n) && n > 0 ? n : null;
+};
+
+// Cardmarket-Produkt-ID: ids.cardmarket[0] (erste = beste, ggf. korrigiert/gematcht),
+// sonst erste Variante mit cardmarketId; null ohne ID.
 function cardmarketProductId(card) {
-  const fromVariant = list(card.variants).find((v) => v?.cardmarketId)?.cardmarketId;
-  if (fromVariant) return fromVariant;
   const ids = card.ids?.cardmarket;
-  return Array.isArray(ids) ? ids[0] : ids;
+  const fromIds = positiveId(Array.isArray(ids) ? ids[0] : ids);
+  if (fromIds) return fromIds;
+  return positiveId(list(card.variants).find((v) => positiveId(v?.cardmarketId))?.cardmarketId);
+}
+
+// Varianten mit eigener Produkt-ID (Stempel/Sondervarianten), fuer eine spaetere Varianten-Anzeige.
+function cardmarketVariants(card) {
+  return list(card.variants)
+    .filter((v) => positiveId(v?.cardmarketId))
+    .map((v) => ({
+      type: str(v.type),
+      subtype: str(v.subtype),
+      stamp: list(v.stamp),
+      cardmarketId: positiveId(v.cardmarketId)
+    }));
 }
 
 export function toSetRecord(v3Set = {}, { imported = false, updatedAt = null } = {}) {
@@ -100,7 +118,10 @@ export function toCardRecord(v3Card = {}, v3Set = null, { updatedAt = null } = {
   const tcgdexId = str(card.ids?.tcgdex);
   const matchStatus = str(card.matchStatus)
     || (pokemontcgId && tcgdexId ? 'matched' : (tcgdexId ? 'tcgdex_only' : 'primary_only'));
-  const cardmarketUrl = buildCardmarketProductUrl(cardmarketProductId(card)) || '';
+  const productId = cardmarketProductId(card);
+  // Gespeicherte URL (Sheet-Spalte) bleibt de; der angezeigte Link entsteht in resolveDisplayCard
+  // ueber resolveCardmarketLink in der Kartensprache.
+  const cardmarketUrl = buildCardmarketProductUrl(productId) || '';
 
   return {
     // Die eigene setId der Karte ist massgeblich (z.B. cel25c-Karten unter Set cel25);
@@ -159,6 +180,10 @@ export function toCardRecord(v3Card = {}, v3Set = null, { updatedAt = null } = {
     tcgdex_regulationMark: '',
     tcgdex_description: '',
     tcgdex_effect: null,
+    // Nicht-Sheet-Passthrough: Cardmarket-Produkt-ID (massgeblich fuer Link/Preis, siehe
+    // resolveCardmarketProductId) und Varianten-IDs; kein Sheet-Header.
+    cardmarketProductId: productId,
+    cardmarketVariants: cardmarketVariants(card),
     // Nicht-Sheet-Passthrough: volles DE-Objekt (name, evolvesFrom, attacks, abilities,
     // rules, flavorText, images ...); kein Sheet-Header, wird von den Writern ignoriert.
     i18n_de: card.i18n?.de || null

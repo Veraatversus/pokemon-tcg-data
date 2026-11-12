@@ -1,6 +1,6 @@
 import { normalizeCardNumber } from '../core/utils.js';
 import { scopedStorageKey } from '../core/config.js';
-import { isGeneratedCardmarketSearchUrl } from './cardmarket-url-utils.js';
+import { isGeneratedCardmarketSearchUrl, resolveCardmarketLink } from './cardmarket-url-utils.js';
 
 const SETTINGS_STORAGE_KEY = scopedStorageKey('user-settings');
 const CARD_LANGUAGES = ['de', 'en'];
@@ -663,14 +663,8 @@ export function resolveDisplayCard(cardRecord = {}) {
 
   const image = field('image');
   const imageLarge = field('imageLarge') || image;
-  // Direkte Produkt-URL vor generierter Such-URL; Quellen sprachneutral (vera -> tcgdex -> legacy).
-  const cardmarketUrl = resolvePreferredCardmarketUrl([
-    record.vera_cardmarket_url,
-    record.tcgdex_cardmarket_url,
-    record.cardmarketUrl,
-    record.cardmarket_url,
-    record.cardmarket?.url
-  ]);
+  // Produkt-ID (v3 > Legacy-URL) -> Produkt-URL in der Kartensprache; ohne ID die generierte Such-URL.
+  const cardmarketUrl = resolveCardmarketLink(record, { language });
 
   return {
     ...record,

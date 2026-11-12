@@ -1,6 +1,8 @@
 import {
+  buildCardmarketProductUrl,
   isGeneratedCardmarketSearchUrl,
   isGeneratedCardmarketUrl,
+  resolveCardmarketProductId,
 } from './cardmarket-url-utils.js';
 import { isLocalDevEnvironment } from '../core/dev-environment.js';
 
@@ -33,14 +35,7 @@ export function getCardmarketUrlFromCard(card = {}) {
   return String(card?.cardmarketUrl || card?.vera_cardmarket_url || card?.tcgdex_cardmarket_url || '').trim();
 }
 
-export { isGeneratedCardmarketSearchUrl, isGeneratedCardmarketUrl };
-
-export function buildCardmarketProductUrl(productId, { language = 'de' } = {}) {
-  const normalizedProductId = String(productId || '').trim();
-  if (!/^\d+$/.test(normalizedProductId)) return '';
-  const normalizedLanguage = String(language || 'de').trim().toLowerCase() || 'de';
-  return `https://www.cardmarket.com/${encodeURIComponent(normalizedLanguage)}/Pokemon/Products?idProduct=${normalizedProductId}`;
-}
+export { buildCardmarketProductUrl, isGeneratedCardmarketSearchUrl, isGeneratedCardmarketUrl };
 
 // Builds the official Cardmarket product image URL.
 // URL pattern: https://product-images.s3.cardmarket.com/{categoryId}/{setCode}/{productId}/{productId}.jpg
@@ -589,7 +584,9 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
 } = {}) {
   if (!Array.isArray(cards) || !cards.length) return Array.isArray(cards) ? cards : [];
 
-  const needsPromotion = cards.some((card) => isGeneratedCardmarketUrl(getCardmarketUrlFromCard(card)));
+  // v3-Produkt-IDs sind massgeblich und werden nie vom Matcher ueberschrieben.
+  const hasV3ProductId = (card) => resolveCardmarketProductId(card).source === 'v3';
+  const needsPromotion = cards.some((card) => !hasV3ProductId(card) && isGeneratedCardmarketUrl(getCardmarketUrlFromCard(card)));
   const hasDuplicateSourceNames = (() => {
     const counts = new Map();
     cards.forEach((card) => {
@@ -676,8 +673,8 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
 
   return cards.map((card) => {
     const currentUrl = getCardmarketUrlFromCard(card);
-    const isGeneratedUrl = isGeneratedCardmarketUrl(currentUrl);
-    const shouldReconcileDirectUrl = !isGeneratedUrl && hasDuplicateSourceNames;
+    const isGeneratedUrl = !hasV3ProductId(card) && isGeneratedCardmarketUrl(currentUrl);
+    const shouldReconcileDirectUrl = !isGeneratedUrl && !hasV3ProductId(card) && hasDuplicateSourceNames;
     if (!isGeneratedUrl && !shouldReconcileDirectUrl) {
       // Publish cardmarket image metadata on already-aligned cards as well.
       if (card?.cardmarketProductId && resolvedSetCode) {

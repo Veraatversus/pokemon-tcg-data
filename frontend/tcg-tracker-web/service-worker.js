@@ -69,6 +69,73 @@ async function handleApiRequest(request) {
   }
 }
 
+// --- cardmarket-data ---
+// Cardmarket-Daten (<base>/cardmarket/*.json) werden taeglich neu gebaut; meta.json.generatedAt ist der
+// Build-Stamp. Die App haengt ihn als ?v=<stamp> an jede Daten-URL (js/data/cardmarket-data.js).
+//  - meta.json und Daten ohne ?v: Netz zuerst (no-store), offline -> gecachte Kopie.
+//  - Daten mit ?v: cache-first (der Stamp steckt im Schluessel). Ein neuer Stamp ist eine neue URL und
+//    kommt daher beim ersten Laden nach dem Build aus dem Netz; danach werden aeltere Stamps entfernt.
+// Unit-getestet in tests/service-worker-cardmarket.test.mjs.
+const CARDMARKET_DATA_RE = /\/cardmarket\/(?:[^/]+\/)*[^/]+\.json$/;
+const CARDMARKET_META_RE = /\/cardmarket\/meta\.json$/;
+
+function isCardmarketDataPath(pathname) {
+  return CARDMARKET_DATA_RE.test(String(pathname || ''));
+}
+
+function stampTime(stamp) {
+  const time = Date.parse(stamp);
+  return Number.isFinite(time) ? time : -Infinity;
+}
+
+// Entfernt Cardmarket-Dateneintraege mit aelterem (oder ohne) Stamp; meta.json bleibt.
+async function pruneCardmarketStamps(cache, keepStamp) {
+  const keepTime = stampTime(keepStamp);
+  const keys = await cache.keys();
+  for (const req of keys) {
+    const url = new URL(req.url);
+    if (!isCardmarketDataPath(url.pathname) || CARDMARKET_META_RE.test(url.pathname)) continue;
+    const stamp = url.searchParams.get('v') || '';
+    if (stamp !== keepStamp && stampTime(stamp) < keepTime) await cache.delete(req);
+  }
+}
+
+// Altbestand: vor v3-Polish landeten Cardmarket-Dateien im statischen Cache (cache-first ohne Ablauf).
+async function purgeCardmarketFromCache(cache) {
+  const keys = await cache.keys();
+  for (const req of keys) {
+    if (isCardmarketDataPath(new URL(req.url).pathname)) await cache.delete(req);
+  }
+}
+
+async function handleCardmarketRequest(request) {
+  const cache = await caches.open(RUNTIME_CACHE);
+  const url = new URL(request.url);
+  const stamp = url.searchParams.get('v') || '';
+  const versioned = Boolean(stamp) && !CARDMARKET_META_RE.test(url.pathname);
+  if (versioned) {
+    const cached = await cache.match(request);
+    if (cached) return cached;
+  }
+  try {
+    const response = versioned ? await fetch(request) : await fetch(request, { cache: 'no-store' });
+    if (response && response.status === 200) {
+      try {
+        await cache.put(request, response.clone());
+        if (versioned) await pruneCardmarketStamps(cache, stamp);
+      } catch (err) {
+        console.warn('[SW] cache.put failed:', err);
+      }
+    }
+    return response;
+  } catch (err) {
+    return (await cache.match(request))
+      || (await cache.match(request, { ignoreSearch: true }))
+      || Response.error();
+  }
+}
+// --- /cardmarket-data ---
+
 const SW_DEBUG = false;
 
 function swDebug(...args) {
@@ -113,7 +180,9 @@ self.addEventListener('activate', (event) => {
             return caches.delete(name);
           })
       );
-    })
+    }).then(() => caches.open(CACHE_NAME))
+      .then((cache) => purgeCardmarketFromCache(cache))
+      .catch((err) => console.warn('[SW] cardmarket purge failed:', err))
   );
   self.clients.claim();
 });
@@ -136,13 +205,6 @@ function handleImageRequest(request) {
 // Fetch event: serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
   const { request } = event;
-  if (request.url.includes('cardmarket')) {
-    console.log('[SW] cardmarket fetch:', request.destination, request.url.slice(0, 80));
-    event.waitUntil((async () => {
-      const clients = await self.clients.matchAll();
-      clients.forEach(c => c.postMessage({ type: 'CM_FETCH', url: request.url, destination: request.destination }));
-    })());
-  }
   const url = new URL(request.url);
 
   // Skip non-HTTP requests
@@ -169,6 +231,12 @@ self.addEventListener('fetch', (event) => {
           })
           .catch(() => caches.match(request))
       );
+      return;
+    }
+
+    // Cardmarket-Daten (auch vom VERA_BASE-Host): Stamp-basierte Frische, siehe handleCardmarketRequest.
+    if (request.destination !== 'image' && isCardmarketDataPath(url.pathname)) {
+      event.respondWith(handleCardmarketRequest(request));
       return;
     }
 

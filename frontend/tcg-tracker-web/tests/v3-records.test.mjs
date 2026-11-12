@@ -234,10 +234,16 @@ test('localId: Set-Praefix wird abgeschnitten, Rest darf Bindestriche enthalten'
   assert.equal(toCardRecord(c, { id: 'y', ids: { tcgdex: 'my-set' } }).tcgdex_localId, '1');
 });
 
-test('Cardmarket-URL: erste Variante mit cardmarketId, sonst ids.cardmarket[0], sonst leer', () => {
+test('Cardmarket-URL: ids.cardmarket[0] (korrigiert/beste), sonst erste Variante mit cardmarketId, sonst leer', () => {
   const url = (id) => `https://www.cardmarket.com/de/Pokemon/Products?idProduct=${id}`;
   const base = { id: 'x-1', cardId: '1', number: '1', setId: 'x' };
-  assert.equal(toCardRecord({ ...base, variants: [{ type: 'normal', cardmarketId: 11 }], ids: { cardmarket: [99] } }).vera_cardmarket_url, url(11));
+  const both = toCardRecord({ ...base, variants: [{ type: 'normal', cardmarketId: 11 }, { type: 'holo', stamp: ['1st-edition'], cardmarketId: 12 }], ids: { cardmarket: [99] } });
+  assert.equal(both.vera_cardmarket_url, url(99));
+  assert.equal(both.cardmarketProductId, 99);
+  // Varianten-IDs bleiben erhalten (Stempel/Sondervarianten koennen eigene Produkte haben)
+  assert.deepEqual(both.cardmarketVariants.map((v) => v.cardmarketId), [11, 12]);
+  assert.deepEqual(both.cardmarketVariants[1].stamp, ['1st-edition']);
+  assert.equal(toCardRecord({ ...base }).cardmarketProductId, null);
   assert.equal(toCardRecord({ ...base, variants: [{ type: 'normal' }, { type: 'reverse', cardmarketId: 22 }] }).vera_cardmarket_url, url(22));
   assert.equal(toCardRecord({ ...base, variants: [{ type: 'normal' }], ids: { cardmarket: [33, 44] } }).vera_cardmarket_url, url(33));
   assert.equal(toCardRecord({ ...base, ids: { cardmarket: 55 } }).vera_cardmarket_url, url(55));

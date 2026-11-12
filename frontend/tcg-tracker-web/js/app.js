@@ -1,4 +1,4 @@
-import { isGeneratedCardmarketSearchUrl, applyReverseHoloQueryParam } from './data/cardmarket-url-utils.js';
+import { isGeneratedCardmarketSearchUrl, applyReverseHoloQueryParam, resolveCardmarketLink } from './data/cardmarket-url-utils.js';
 import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js';
 import {
   listImportedSets,
@@ -40,7 +40,6 @@ import { resolveSeriesGroupInfo, resolveDisplaySet, applyDeSeriesFallback, resol
 import { imageCandidates, bindImageFallback, fallbackImgAttrs } from './ui/image-fallback.js';
 import { renderDashboardSetGrid } from './views/dashboard-grid.js';
 import {
-  buildCardmarketProductUrl,
   resolveCardmarketEntryForCard,
   formatCardmarketEntryLabel,
   formatCardmarketEntryTitle
@@ -8072,10 +8071,8 @@ async function loadCardmarketPriceSummary(card = {}, { cards = null, resolverCar
     }
   )
     .then((entry) => {
-      const normalizedUrl = String(card?.cardmarketUrl || '').trim();
-      const directUrl = entry?.cardmarketProductId
-        ? buildCardmarketProductUrl(entry.cardmarketProductId)
-        : normalizedUrl;
+      // Produkt der Karte (v3/Legacy-URL) vor Matcher-Treffer, Link in Kartensprache.
+      const directUrl = resolveCardmarketLink(card, { language: getCardLanguage(), matchedEntry: entry });
       const summary = entry ? { entry, url: directUrl } : null;
       cardmarketPriceSummaryCache.set(cacheKey, summary);
       cardmarketPriceSummaryPending.delete(cacheKey);

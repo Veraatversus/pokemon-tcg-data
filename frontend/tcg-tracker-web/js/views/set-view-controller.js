@@ -13,7 +13,7 @@
  * - loadCurrentSet, renderCards, renderLightbox, etc.
  */
 
-import { isGeneratedCardmarketSearchUrl } from '../data/cardmarket-url-utils.js';
+import { isGeneratedCardmarketSearchUrl, resolveCardmarketLink } from '../data/cardmarket-url-utils.js';
 import { sanitizeDisplayText } from '../core/display-text.js';
 import { getCardLanguage } from '../data/schema-contract.js';
 import { imageCandidates, bindImageFallback } from '../ui/image-fallback.js';
@@ -338,8 +338,7 @@ function createCardElement(card, key, db, index, injections = {}) {
     state,
     dom,
     normalizeCardNumber,
-    attachImageFallback,
-    buildCardmarketProductUrl
+    attachImageFallback
   } = injections;
 
   const dbEntry = db || emptyCollectionEntry(card, key);
@@ -679,7 +678,7 @@ function renderLightboxCardmarketPrices(injections = {}, summary, opts = {}) {
 }
 
 async function loadCardmarketPriceSummary(injections = {}, card = {}) {
-  const { state, resolveCardmarketEntryForCard, buildCardmarketProductUrl, getSetById } = injections;
+  const { state, resolveCardmarketEntryForCard, getSetById } = injections;
   const cacheKey = getCardmarketPriceCacheKey(card);
   if (!cacheKey.trim()) return null;
 
@@ -717,10 +716,8 @@ async function loadCardmarketPriceSummary(injections = {}, card = {}) {
     currentSetId
   })
     .then((entry) => {
-      const normalizedUrl = String(card?.cardmarketUrl || '').trim();
-      const directUrl = entry?.cardmarketProductId
-        ? buildCardmarketProductUrl?.(entry.cardmarketProductId)
-        : normalizedUrl;
+      // Produkt der Karte (v3/Legacy-URL) vor Matcher-Treffer, Link in Kartensprache.
+      const directUrl = resolveCardmarketLink(card, { language: getCardLanguage(), matchedEntry: entry });
       const summary = entry ? { entry, url: directUrl } : null;
       cardmarketPriceSummaryCache.set(cacheKey, summary);
       cardmarketPriceSummaryPending.delete(cacheKey);

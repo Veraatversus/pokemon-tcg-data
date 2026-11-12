@@ -62,3 +62,62 @@ export function applyReverseHoloQueryParam(url = '', isReverseHolo = false) {
   const separator = value.includes('?') ? '&' : '?';
   return `${value}${separator}isReverseHolo=Y`;
 }
+
+/**
+ * Produkt-URL `https://www.cardmarket.com/<de|en>/Pokemon/Products?idProduct=<id>`;
+ * '' wenn die ID keine positive Ganzzahl ist.
+ */
+export function buildCardmarketProductUrl(productId, { language = 'de' } = {}) {
+  const normalizedProductId = normalizeCardmarketProductId(productId);
+  if (!normalizedProductId) return '';
+  const normalizedLanguage = String(language || 'de').trim().toLowerCase() || 'de';
+  return `https://www.cardmarket.com/${encodeURIComponent(normalizedLanguage)}/Pokemon/Products?idProduct=${normalizedProductId}`;
+}
+
+/** Ziffern-String einer Cardmarket-Produkt-ID oder ''. */
+export function normalizeCardmarketProductId(value) {
+  const text = String(value ?? '').trim();
+  return /^\d+$/.test(text) && Number(text) > 0 ? String(Number(text)) : '';
+}
+
+function legacyCardmarketUrls(card = {}) {
+  return [card?.cardmarketUrl, card?.vera_cardmarket_url, card?.tcgdex_cardmarket_url, card?.cardmarket_url, card?.cardmarket?.url]
+    .map((value) => String(value || '').trim())
+    .filter(Boolean);
+}
+
+function productIdFromUrl(url = '') {
+  const match = String(url || '').match(/[?&]idProduct=(\d+)/i);
+  return match ? normalizeCardmarketProductId(match[1]) : '';
+}
+
+/**
+ * Einzige Stelle, die entscheidet, welches Cardmarket-Produkt zu einer Karte gehoert
+ * (genutzt von Links, Preissuche und Bild-Metadaten):
+ *   1. v3-Produkt-ID am Record (`cardmarketProductId`, aus ids.cardmarket[0] bzw. search-index `cm`)
+ *   2. Legacy-URL (Sheet) mit `idProduct=`
+ *   3. Treffer des Name-/Nummern-Matchers (`matchedEntry`, asynchron vom Aufrufer ermittelt)
+ * Kein Treffer -> { productId: '', source: '' }; der Link faellt dann auf eine Such-URL zurueck.
+ */
+export function resolveCardmarketProductId(card = {}, { matchedEntry = null } = {}) {
+  const v3Id = normalizeCardmarketProductId(card?.cardmarketProductId);
+  if (v3Id) return { productId: v3Id, source: 'v3' };
+  for (const url of legacyCardmarketUrls(card)) {
+    const urlId = productIdFromUrl(url);
+    if (urlId) return { productId: urlId, source: 'url' };
+  }
+  const matchedId = normalizeCardmarketProductId(matchedEntry?.cardmarketProductId);
+  if (matchedId) return { productId: matchedId, source: 'matcher' };
+  return { productId: '', source: '' };
+}
+
+/**
+ * Cardmarket-Link einer Karte: Produkt-URL in der Kartensprache, sobald eine ID bekannt ist;
+ * sonst eine vorhandene (generierte) Such-URL; sonst ''.
+ */
+export function resolveCardmarketLink(card = {}, { language = 'de', matchedEntry = null } = {}) {
+  const { productId } = resolveCardmarketProductId(card, { matchedEntry });
+  if (productId) return buildCardmarketProductUrl(productId, { language });
+  const urls = legacyCardmarketUrls(card).filter((url) => /^https?:\/\//i.test(url));
+  return urls.find((url) => !isGeneratedCardmarketSearchUrl(url)) || urls[0] || '';
+}

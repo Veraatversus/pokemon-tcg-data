@@ -9,6 +9,7 @@
 // irgendein Feld treffen. Reine Zahlen treffen die Kartennummer (fuehrende Nullen egal) oder ein ganzes
 // Wort der Set-Felder (z. B. "151").
 import { loadV3SearchIndex } from '../../data/v3-api.js';
+import { buildCardmarketProductUrl, normalizeCardmarketProductId } from '../../data/cardmarket-url-utils.js';
 
 const lower = (value) => String(value ?? '').trim().toLowerCase();
 const text = (value) => String(value ?? '').trim();
@@ -180,6 +181,13 @@ export function indexEntryToCard(entry, { language = 'de' } = {}) {
     images: img ? { small: img } : {}
   };
   if (nameDe || imgDe) card.i18n = { de: { name: nameDe, images: imgDe ? { small: imgDe } : {} } };
+  // cm = Cardmarket-Produkt-ID der Karte (ids.cardmarket[0]); Link in Kartensprache, Preis ueber
+  // die Cardmarket-Setdatei (resolveCardmarketEntryForCard), ohne Kartendatei des Sets.
+  const cardmarketProductId = normalizeCardmarketProductId(entry?.cm);
+  if (cardmarketProductId) {
+    card.cardmarketProductId = Number(cardmarketProductId);
+    card.cardmarketUrl = buildCardmarketProductUrl(cardmarketProductId, { language });
+  }
   card.fromSearchIndex = true;
   return card;
 }
