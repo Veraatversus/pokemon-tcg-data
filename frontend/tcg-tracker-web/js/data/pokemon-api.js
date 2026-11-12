@@ -123,8 +123,8 @@ export async function fetchDeSeriesBySetId({ signal } = {}) {
       const de = String(set?.i18n?.de?.series || '').trim();
       if (set?.id && de) map.set(String(set.id), de);
     }
-  } catch {
-    // offline: leere Map
+  } catch (err) {
+    console.debug('[fetchDeSeriesBySetId] api/v3 nicht erreichbar:', err?.message || err);
   }
   return map;
 }

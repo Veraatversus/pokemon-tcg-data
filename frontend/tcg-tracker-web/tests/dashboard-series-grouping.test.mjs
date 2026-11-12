@@ -52,3 +52,25 @@ test('Gesamtzahl: nicht importiert nutzt total (141), nicht printedTotal', () =>
   assert.equal(resolveSetTotalCards(d), 141);
   assert.equal(resolveSetTotalCards({ totalCards: 5 }), 5);
 });
+
+test('resolveSeriesGroupInfo (Pfad von Dashboard und Import-Selector) nutzt die gemeinsame DE-Map', async () => {
+  const { resolveSeriesGroupInfo, setDeSeriesBySetId } = await import('../js/data/schema-contract.js');
+  resetResolverMatrixCache();
+  const imported = { setId: 'me6', imported: true, vera_series: 'Mega Evolution', series: 'Mega Evolution', tcgdex_serie_name: '' };
+  const notImported = resolveDisplaySet(toSetRecord(me6));
+  try {
+    setDeSeriesBySetId(new Map([['me6', 'Mega-Entwicklung']]));
+    const a = resolveSeriesGroupInfo(imported);
+    const b = resolveSeriesGroupInfo(notImported);
+    assert.equal(a.label, 'Mega-Entwicklung');
+    assert.equal(a.key, b.key);
+    assert.equal(a.label, b.label);
+    // Selector-Gruppierung: eine Gruppe fuer beide
+    const groups = new Set([imported, notImported].map((s) => resolveSeriesGroupInfo(s).key));
+    assert.equal(groups.size, 1);
+    // resolveDisplaySet nutzt denselben Resolver
+    assert.equal(resolveDisplaySet(imported).series, 'Mega-Entwicklung');
+  } finally {
+    setDeSeriesBySetId(null);
+  }
+});

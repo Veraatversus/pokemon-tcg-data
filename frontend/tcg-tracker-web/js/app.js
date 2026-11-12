@@ -36,7 +36,7 @@ import { needsApiCardEnrichment, describeCardDataFailure, NO_CARD_DATA_MESSAGE }
 import { findSetByIdOrAlias } from './data/set-aliases.js';
 import { selectSearchSets } from './features/search/search-index-prefilter.js';
 import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, fetchDeSeriesBySetId } from './data/pokemon-api.js?v=20261112-api-v3';
-import { resolveSeriesGroupInfo, resolveDisplaySet, applyDeSeriesFallback, resolveSetTotalCards } from './data/schema-contract.js';
+import { resolveSeriesGroupInfo, resolveDisplaySet, applyDeSeriesFallback, resolveSetTotalCards, setDeSeriesBySetId } from './data/schema-contract.js';
 import {
   buildCardmarketProductUrl,
   resolveCardmarketEntryForCard,
@@ -2879,6 +2879,9 @@ function initSpreadsheetDialog() {
 async function loadSets() {
   setLoading(true, 'Lade Sets\u2026');
   try {
+    // Vor jeder Gruppierung laden: Dashboard, Import-Selector und Suche teilen sich dieselbe DE-Serien-Map.
+    const deSeriesBySetId = await fetchDeSeriesBySetId();
+    setDeSeriesBySetId(deSeriesBySetId);
     let [importedSets, initialOverviewSets] = await Promise.all([
       listImportedSets(),
       listSetsOverviewData().catch(() => [])
@@ -2934,7 +2937,6 @@ async function loadSets() {
 
     // Zeilen ohne DE-Serie (z. B. aus altem Alias-Import) bekommen sie aus api/v3, damit Serien-Gruppen
     // importierter und nicht importierter Sets identisch sind.
-    const deSeriesBySetId = await fetchDeSeriesBySetId();
     state.allSets = Array.from(mergedMap.values()).map((set) => {
       const filled = applyDeSeriesFallback(set, deSeriesBySetId);
       return filled === set ? set : resolveDisplaySet(filled);

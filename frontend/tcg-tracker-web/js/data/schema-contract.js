@@ -373,10 +373,13 @@ function inferSeriesGroupKeyFromNames(setRecord = {}, displayLabel = '') {
   return '';
 }
 
-export function resolveSeriesGroupInfo(setRecord = {}) {
-  const displayLabel = [setRecord.series, setRecord.vera_series, setRecord.tcgdex_serie_name]
-    .map((value) => String(value || '').trim())
-    .find(Boolean) || 'Andere';
+export function resolveSeriesGroupInfo(rawSetRecord = {}) {
+  const setRecord = applyDeSeriesFallback(rawSetRecord, sharedDeSeriesBySetId);
+  const displayLabel = resolveSetSeriesLabel(setRecord)
+    || [setRecord.series, setRecord.vera_series, setRecord.tcgdex_serie_name]
+      .map((value) => String(value || '').trim())
+      .find(Boolean)
+    || 'Andere';
 
   const canonicalSeries = String(setRecord.tcgdex_serie_id || '').trim()
     || inferSeriesGroupKeyFromSetIds(setRecord)
@@ -660,7 +663,13 @@ export function buildCardRecordFromSources({
 
 // Serien-Label eines Sets je Sprache. DE: tcgdex_serie_name -> i18n_de.series -> deSeriesBySetId
 // (Map setId -> i18n.de.series aus api/v3) -> vera_series; EN: vera_series -> series.
-export function resolveSetSeriesLabel(set = {}, language = getCardLanguage(), deSeriesBySetId = null) {
+let sharedDeSeriesBySetId = null;
+// Gemeinsame v3-Map (setId -> DE-Serie); einmal gesetzt, nutzen alle Gruppen-/Label-Pfade sie.
+export function setDeSeriesBySetId(map) {
+  sharedDeSeriesBySetId = map instanceof Map ? map : null;
+}
+
+export function resolveSetSeriesLabel(set = {}, language = getCardLanguage(), deSeriesBySetId = sharedDeSeriesBySetId) {
   const text = (v) => String(v ?? '').trim();
   const fromMap = deSeriesBySetId?.get?.(text(set?.setId)) || '';
   const candidates = normalizeCardLanguage(language) === 'en'
@@ -688,10 +697,11 @@ export function resolveDisplaySet(setRecord = {}) {
     vera: setRecord.vera_name
   }, { fallback: setRecord.vera_name || setRecord.tcgdex_name || '' });
 
-  const series = resolveFieldByPriority(matrix.series, {
-    tcgdex: setRecord.tcgdex_serie_name || setRecord.i18n_de?.series,
-    vera: setRecord.vera_series
-  }, { fallback: setRecord.vera_series || setRecord.tcgdex_serie_name || '' });
+  const series = resolveSetSeriesLabel(setRecord)
+    || resolveFieldByPriority(matrix.series, {
+      tcgdex: setRecord.tcgdex_serie_name,
+      vera: setRecord.vera_series
+    }, { fallback: setRecord.vera_series || setRecord.tcgdex_serie_name || '' });
   const seriesGroup = resolveSeriesGroupInfo({ ...setRecord, series });
 
   const releaseDate = resolveFieldByPriority(matrix.releaseDate, {
