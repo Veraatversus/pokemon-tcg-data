@@ -86,8 +86,8 @@ const tcgdexIds = (card) => (Array.isArray(card.ids?.cardmarket) ? card.ids.card
  * subsetExpansion: Map card.id -> Cardmarket-Expansion des TCGdex-Untersets (null = keine eigene).
  *
  * Vorher: TCGdex-IDs, die mehreren Karten zugeordnet sind (duplicateTcgdexIds), werden je Karte ueber den
- * strengen Pfad korrigiert (ids.cardmarketSource 'corrected', Original in ids.cardmarketTcgdex, andere
- * variants[].cardmarketId als der Treffer entfallen, damit Leser auf ids.cardmarket zurueckfallen). Ohne
+ * strengen Pfad korrigiert (ids.cardmarketSource 'corrected', Original in ids.cardmarketTcgdex; nur geteilte
+ * IDs werden ersetzt bzw. entfernt, nicht geteilte bleiben in ids.cardmarket und an ihrer Variante). Ohne
  * eindeutigen strengen Treffer, bei schon anderweitig belegtem Produkt oder Doppelvergabe bleibt die
  * TCGdex-ID. Nicht doppelte TCGdex-IDs werden nie angefasst.
  */
@@ -109,7 +109,8 @@ export function fillCardmarketIds({ sets, cardsBySet, loadExpansion, subsetExpan
     return indexes.get(expansionId);
   };
 
-  const isShared = (card) => tcgdexIds(card).some((id) => owners.get(id).length > 1);
+  const sharedId = (id) => (owners.get(id)?.length ?? 0) > 1;
+  const isShared = (card) => tcgdexIds(card).some(sharedId);
 
   const bySet = {};
   const walk = (fn) => {
@@ -135,6 +136,7 @@ export function fillCardmarketIds({ sets, cardsBySet, loadExpansion, subsetExpan
     if (id === null) return;
     // Das Produkt darf keiner anderen Karte per TCGdex gehoeren; ist es schon die einzige ID, bleibt alles.
     if ((owners.get(id) ?? []).some((k) => k !== card.id)) return;
+    // Ist der Treffer schon die eigene, nicht geteilte ID, bleibt alles (wie base2-1 mit der geteilten).
     const ids = tcgdexIds(card);
     if (ids.length === 1 && ids[0] === id) return;
     corrections.set(card.id, { setId: set.id, card, id });
@@ -148,14 +150,14 @@ export function fillCardmarketIds({ sets, cardsBySet, loadExpansion, subsetExpan
     dup.corrected++;
     bySet[setId].corrected = (bySet[setId].corrected ?? 0) + 1;
     taken.add(id);
-    card.ids = { ...card.ids, cardmarket: [id], cardmarketSource: 'corrected', cardmarketTcgdex: tcgdexIds(card) };
+    // Nur geteilte (falsche) IDs fallen weg; eigene, nicht geteilte TCGdex-IDs bleiben hinter dem Treffer.
+    const original = tcgdexIds(card);
+    const kept = original.filter((x) => x !== id && !sharedId(x));
+    card.ids = { ...card.ids, cardmarket: [id, ...kept], cardmarketSource: 'corrected', cardmarketTcgdex: original };
     if (Array.isArray(card.variants)) {
-      // Varianten-IDs ausser dem Treffer entfallen (Leser nehmen die erste Varianten-ID vor ids.cardmarket).
-      card.variants = card.variants.map((v) => {
-        if (v.cardmarketId === undefined || v.cardmarketId === id) return v;
-        const { cardmarketId, ...rest } = v;
-        return rest;
-      });
+      // Geteilte (falsche) Varianten-ID -> Treffer (Leser nehmen die erste Varianten-ID vor ids.cardmarket);
+      // nicht geteilte Varianten-IDs (z. B. gestempelte Drucke) bleiben.
+      card.variants = card.variants.map((v) => (v.cardmarketId !== undefined && sharedId(v.cardmarketId) ? { ...v, cardmarketId: id } : v));
     }
   }
   dup.kept = dup.cards - dup.corrected;

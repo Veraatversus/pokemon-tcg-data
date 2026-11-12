@@ -118,6 +118,7 @@ jobs:
             for attempt in 1 2; do
               if git pull --rebase origin master && git push origin master; then break; fi
               if [ "$attempt" = 2 ]; then echo "Push failed after 2 attempts"; exit 1; fi
+              git rebase --abort 2>/dev/null || true
               sleep 15
             done
             echo "changed=true" >> $GITHUB_OUTPUT

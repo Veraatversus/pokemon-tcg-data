@@ -187,7 +187,7 @@ test('corrects shared tcgdex id by strict number match', () => {
   assert.deepEqual(cards[1].ids.cardmarket, [273814]);
   assert.equal(cards[1].ids.cardmarketSource, 'corrected');
   assert.deepEqual(cards[1].ids.cardmarketTcgdex, [273798]);
-  assert.deepEqual(cards[1].variants, [{ type: 'normal' }]); // falsche Varianten-ID entfaellt
+  assert.deepEqual(cards[1].variants, [{ type: 'normal', cardmarketId: 273814 }]); // geteilte Varianten-ID ersetzt
   assert.deepEqual(report.duplicateTcgdexIds, { 273798: ['s1-1', 's1-17'] });
   assert.deepEqual(report.duplicates, { ids: 1, cards: 2, corrected: 1, kept: 1 });
   assert.equal(report.bySet.s1.corrected, 1);
@@ -236,6 +236,43 @@ test('geteilte ID neben der richtigen: ids.cardmarket auf den strengen Treffer e
   assert.deepEqual(out[1].ids.cardmarket, [273814]);
   assert.equal(out[1].ids.cardmarketSource, 'corrected');
   assert.deepEqual(out[1].ids.cardmarketTcgdex, [273798, 273814]);
-  assert.deepEqual(out[1].variants, [{ type: 'normal' }, { type: 'holo', cardmarketId: 273814 }]);
+  assert.deepEqual(out[1].variants, [{ type: 'normal', cardmarketId: 273814 }, { type: 'holo', cardmarketId: 273814 }]);
   assert.deepEqual(report.duplicates, { ids: 1, cards: 2, corrected: 1, kept: 1 });
+});
+
+test('correction keeps unshared tcgdex ids', () => {
+  // ex4-73 Maxie real: 275850 geteilt (normal/reverse), 871873 nur diese Karte (gestempelte Variante)
+  const cards = [
+    { ...card('73', '73', "Team Magma's Rhydon", [275850]) },
+    {
+      ...card('74', '74', 'Maxie', [275850, 871873]),
+      variants: [
+        { type: 'normal', cardmarketId: 275850 },
+        { type: 'reverse', cardmarketId: 275850 },
+        { type: 'normal', stamp: ['tsuguyoshi-yamato'], cardmarketId: 871873 },
+      ],
+    },
+  ];
+  const products = [single(275850, "Team Magma's Rhydon [Rock Slide]", '73'), single(276050, 'Maxie', '74')];
+  const { cards: out, report } = run(cards, products);
+  assert.deepEqual(out[1].ids.cardmarket, [276050, 871873]); // Treffer zuerst, eigene ID bleibt
+  assert.equal(out[1].ids.cardmarketSource, 'corrected');
+  assert.deepEqual(out[1].ids.cardmarketTcgdex, [275850, 871873]);
+  assert.deepEqual(out[1].variants, [
+    { type: 'normal', cardmarketId: 276050 },
+    { type: 'reverse', cardmarketId: 276050 },
+    { type: 'normal', stamp: ['tsuguyoshi-yamato'], cardmarketId: 871873 },
+  ]);
+  assert.deepEqual(out[0].ids.cardmarket, [275850]);
+  assert.deepEqual(report.duplicates, { ids: 1, cards: 2, corrected: 1, kept: 1 });
+});
+
+test('jede Variante mit geteilter ID bekommt den Treffer, auch gestempelte (mcd21-Form)', () => {
+  const cards = [
+    { ...card('1', '1', 'Clefable', [273798]) },
+    { ...card('17', '17', 'Clefable', [273798]), variants: [{ type: 'normal', stamp: ['x'], cardmarketId: 273798 }] },
+  ];
+  const { cards: out } = run(cards, base2Products);
+  assert.deepEqual(out[1].ids.cardmarket, [273814]);
+  assert.deepEqual(out[1].variants, [{ type: 'normal', stamp: ['x'], cardmarketId: 273814 }]);
 });
