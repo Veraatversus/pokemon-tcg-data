@@ -142,6 +142,7 @@ Bekannte Schlüssel:
 
 - Jedes Modul wird ueberall unter demselben Specifier importiert (Test `tests/module-specifier-consistency.test.mjs`), sonst entstehen im Browser zwei Modulinstanzen. `core/config.js`, `core/auth.js`, `core/utils.js`, `data/schema-contract.js` und `data/cardmarket-data.js` sind bewusst unversioniert (Mehrheit des Graphen; Tests importieren unversioniert und teilen so die Modulidentitaet mit der App). `version:sync` aendert nur vorhandene `?v=`.
 - Service Worker: JS/CSS und network-first mit `cache: 'no-cache'` (kein veralteter HTTP-Cache nach Deploys); `api/v3`/`api/registry` (aendert sich nur taeglich) cache-first mit 24-h-Frische (Zeitstempel `x-sw-fetched-at`), danach Revalidierung per Netz, veraltete Kopie nur als Offline-Fallback; API-Runtime-Cache auf 60 Kartendateien begrenzt (sets/meta/search-index bleiben).
+- API-Basis (`resolveV3Bases` in `js/data/v3-api.js`): GitHub Pages kopiert die App flach in den Site-Root bzw. `dev/` und `api/` daneben, daher `<App-Verzeichnis>/api/v3/` und `/api/registry/`; endet das App-Verzeichnis auf `/frontend/tcg-tracker-web/` (lokal `start:dev:full`, Repo-Root) `../../api/…`. `CONFIG.APIS.V3_BASE`/`REGISTRY_BASE` ueberschreiben beides.
 
 ## Cache-Strategie
 

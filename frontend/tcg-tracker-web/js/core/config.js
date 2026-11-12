@@ -68,8 +68,11 @@ export const CONFIG = {
   // als Basis der Cardmarket-Daten (<VERA_BASE>/cardmarket, Build-Stamp).
   APIS: {
     VERA_BASE: 'https://veraatversus.github.io/pokemon-tcg-data',
-    V3_BASE: '',        // leer = relativ zur App: ../../api/v3/
-    REGISTRY_BASE: ''   // leer = relativ zur App: ../../api/registry/
+    // leer = relativ zum App-Verzeichnis: ./api/v3/ bzw. ./api/registry/ (GitHub Pages: App flach im
+    // Site-Root bzw. dev/, api/ daneben); endet das App-Verzeichnis auf /frontend/tcg-tracker-web/
+    // (lokal start:dev:full, Repo-Root) stattdessen ../../api/v3/ bzw. ../../api/registry/.
+    V3_BASE: '',
+    REGISTRY_BASE: ''
   },
 
   // db_cards-Schreiben (Legacy-Sheet), gekapselt

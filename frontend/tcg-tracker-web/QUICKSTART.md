@@ -228,6 +228,8 @@ npx serve . --listen 8080    # im Repo-Root ausgeführt
 npm run start:dev:full        # serviert ../.. mit http-server
 # api/v3 liegt im Repo-Root: lokal start:dev:full nutzen (start:dev serviert nur die App)
 # oder CONFIG.APIS.V3_BASE / REGISTRY_BASE ueberschreiben.
+# API-Basis (resolveV3Bases): App-Verzeichnis endet auf /frontend/tcg-tracker-web/ -> ../../api/v3/;
+# sonst (GitHub Pages: App flach im Site-Root bzw. dev/, api/ daneben) -> ./api/v3/ und ./api/registry/.
 
 # Production Build (optional)
 # (Derzeit: SPA lädt direkt von Quelle)

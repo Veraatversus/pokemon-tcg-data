@@ -21,8 +21,14 @@ function appDirectoryUrl(href) {
   return url;
 }
 
-// Local dev: the API lives at the repo root, so use `npm run start:dev:full` (serves the repo root)
-// or set CONFIG.APIS.V3_BASE / REGISTRY_BASE; `npm run start:dev` serves only the app directory.
+// Default bases, relative to the app directory:
+// - GitHub Pages (deploy-pages.yml copies the app flat into the site root resp. `dev/`, repo `api/`
+//   lands next to it): <appDir>/api/v3/ and <appDir>/api/registry/.
+// - Local `npm run start:dev:full` (serves the repo root, app under /frontend/tcg-tracker-web/):
+//   ../../api/v3/ and ../../api/registry/.
+// `npm run start:dev` serves only the app directory (no api/): set CONFIG.APIS.V3_BASE / REGISTRY_BASE.
+const REPO_APP_DIR_SUFFIX = '/frontend/tcg-tracker-web/';
+
 export function resolveV3Bases({ href = globalThis.location?.href, config = CONFIG } = {}) {
   const apis = config?.APIS || {};
   const absolutise = (value) => withSlash(href ? new URL(String(value).trim(), href).href : value);
@@ -31,8 +37,9 @@ export function resolveV3Bases({ href = globalThis.location?.href, config = CONF
   if (!v3 || !registry) {
     if (!href) throw new Error('v3 API: cannot resolve base URL without location');
     const dir = appDirectoryUrl(href);
-    if (!v3) v3 = new URL('../../api/v3/', dir).href;
-    if (!registry) registry = new URL('../../api/registry/', dir).href;
+    const prefix = dir.pathname.endsWith(REPO_APP_DIR_SUFFIX) ? '../../' : './';
+    if (!v3) v3 = new URL(`${prefix}api/v3/`, dir).href;
+    if (!registry) registry = new URL(`${prefix}api/registry/`, dir).href;
   }
   return { v3, registry };
 }

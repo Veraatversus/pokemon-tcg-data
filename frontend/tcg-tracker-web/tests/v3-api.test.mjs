@@ -17,13 +17,15 @@ function stub(responder) {
 }
 const ok = (data) => ({ ok: true, status: 200, json: async () => data });
 
-test('resolveV3Bases: release path with hash', () => {
+// APP is the repo layout (app under /frontend/tcg-tracker-web/, e.g. a static server on the repo root):
+// these tests keep the ../../api/ semantics for that layout; the GitHub Pages layout is tested below.
+test('resolveV3Bases: repo layout with hash', () => {
   const r = resolveV3Bases({ href: APP + '#dashboard', config: { APIS: {} } });
   assert.equal(r.v3, 'https://x.github.io/pokemon-tcg-data/api/v3/');
   assert.equal(r.registry, 'https://x.github.io/pokemon-tcg-data/api/registry/');
 });
 
-test('resolveV3Bases: dev path, index.html and query', () => {
+test('resolveV3Bases: repo layout under dev/, index.html and query', () => {
   const r = resolveV3Bases({
     href: 'https://x.github.io/pokemon-tcg-data/dev/frontend/tcg-tracker-web/index.html?env=dev#a/b',
     config: { APIS: {} },
@@ -35,6 +37,42 @@ test('resolveV3Bases: dev path, index.html and query', () => {
 test('resolveV3Bases: no trailing slash and localhost', () => {
   const r = resolveV3Bases({ href: 'http://localhost:8080/frontend/tcg-tracker-web', config: {} });
   assert.equal(r.v3, 'http://localhost:8080/api/v3/');
+});
+
+test('resolveV3Bases: GitHub Pages release root -> ./api/', () => {
+  const r = resolveV3Bases({ href: 'https://x.github.io/pokemon-tcg-data/', config: { APIS: {} } });
+  assert.equal(r.v3, 'https://x.github.io/pokemon-tcg-data/api/v3/');
+  assert.equal(r.registry, 'https://x.github.io/pokemon-tcg-data/api/registry/');
+});
+
+test('resolveV3Bases: GitHub Pages dev preview -> dev/api/', () => {
+  for (const href of [
+    'https://x.github.io/pokemon-tcg-data/dev/',
+    'https://x.github.io/pokemon-tcg-data/dev/index.html#dashboard',
+    'https://x.github.io/pokemon-tcg-data/dev',
+  ]) {
+    const r = resolveV3Bases({ href, config: { APIS: {} } });
+    assert.equal(r.v3, 'https://x.github.io/pokemon-tcg-data/dev/api/v3/', href);
+    assert.equal(r.registry, 'https://x.github.io/pokemon-tcg-data/dev/api/registry/', href);
+  }
+});
+
+test('resolveV3Bases: local start:dev:full (repo root served)', () => {
+  const r = resolveV3Bases({ href: 'http://localhost:8080/frontend/tcg-tracker-web/', config: { APIS: {} } });
+  assert.equal(r.v3, 'http://localhost:8080/api/v3/');
+  assert.equal(r.registry, 'http://localhost:8080/api/registry/');
+});
+
+test('resolveV3Bases: overrides win on the Pages layout too', () => {
+  const r = resolveV3Bases({
+    href: 'https://x.github.io/pokemon-tcg-data/dev/',
+    config: { APIS: { V3_BASE: 'https://example.org/v3', REGISTRY_BASE: '/reg' } },
+  });
+  assert.equal(r.v3, 'https://example.org/v3/');
+  assert.equal(r.registry, 'https://x.github.io/reg/');
+  const partial = resolveV3Bases({ href: 'https://x.github.io/pokemon-tcg-data/', config: { APIS: { V3_BASE: 'https://example.org/v3' } } });
+  assert.equal(partial.v3, 'https://example.org/v3/');
+  assert.equal(partial.registry, 'https://x.github.io/pokemon-tcg-data/api/registry/');
 });
 
 test('resolveV3Bases: config override gets trailing slash', () => {
