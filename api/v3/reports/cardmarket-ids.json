@@ -1,0 +1,2397 @@
+{
+  "bySet": {
+    "TCGDEX-2013bw": {
+      "ambiguous": 0,
+      "cards": 12,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 12
+    },
+    "TCGDEX-2018sm-fr": {
+      "ambiguous": 0,
+      "cards": 40,
+      "expansionId": 2361,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 40
+    },
+    "TCGDEX-2019sm-fr": {
+      "ambiguous": 0,
+      "cards": 41,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 41
+    },
+    "TCGDEX-2023sv": {
+      "ambiguous": 0,
+      "cards": 15,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 15
+    },
+    "TCGDEX-2024sv": {
+      "ambiguous": 0,
+      "cards": 15,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 15
+    },
+    "TCGDEX-A1": {
+      "ambiguous": 0,
+      "cards": 286,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 286,
+      "tcgdex": 0
+    },
+    "TCGDEX-A1a": {
+      "ambiguous": 0,
+      "cards": 86,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 86,
+      "tcgdex": 0
+    },
+    "TCGDEX-A2": {
+      "ambiguous": 0,
+      "cards": 207,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 207,
+      "tcgdex": 0
+    },
+    "TCGDEX-A2a": {
+      "ambiguous": 0,
+      "cards": 96,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 96,
+      "tcgdex": 0
+    },
+    "TCGDEX-A2b": {
+      "ambiguous": 0,
+      "cards": 111,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 111,
+      "tcgdex": 0
+    },
+    "TCGDEX-A3": {
+      "ambiguous": 0,
+      "cards": 239,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 239,
+      "tcgdex": 0
+    },
+    "TCGDEX-A3a": {
+      "ambiguous": 0,
+      "cards": 103,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 103,
+      "tcgdex": 0
+    },
+    "TCGDEX-A3b": {
+      "ambiguous": 0,
+      "cards": 107,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 107,
+      "tcgdex": 0
+    },
+    "TCGDEX-A4": {
+      "ambiguous": 0,
+      "cards": 241,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 241,
+      "tcgdex": 0
+    },
+    "TCGDEX-A4a": {
+      "ambiguous": 0,
+      "cards": 105,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 105,
+      "tcgdex": 0
+    },
+    "TCGDEX-B1": {
+      "ambiguous": 0,
+      "cards": 331,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 331,
+      "tcgdex": 0
+    },
+    "TCGDEX-B1a": {
+      "ambiguous": 0,
+      "cards": 103,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 103,
+      "tcgdex": 0
+    },
+    "TCGDEX-B2": {
+      "ambiguous": 0,
+      "cards": 234,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 234,
+      "tcgdex": 0
+    },
+    "TCGDEX-B2a": {
+      "ambiguous": 0,
+      "cards": 131,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 131,
+      "tcgdex": 0
+    },
+    "TCGDEX-P-A": {
+      "ambiguous": 0,
+      "cards": 100,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 100,
+      "tcgdex": 0
+    },
+    "TCGDEX-ex5.5": {
+      "ambiguous": 0,
+      "cards": 5,
+      "expansionId": 4505,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 5
+    },
+    "TCGDEX-jumbo": {
+      "ambiguous": 0,
+      "cards": 0,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 0
+    },
+    "TCGDEX-mee": {
+      "ambiguous": 0,
+      "cards": 16,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 16
+    },
+    "TCGDEX-mfb": {
+      "ambiguous": 0,
+      "cards": 34,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 34
+    },
+    "TCGDEX-miscp": {
+      "ambiguous": 0,
+      "cards": 1,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 1,
+      "tcgdex": 0
+    },
+    "TCGDEX-rc": {
+      "ambiguous": 0,
+      "cards": 0,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 0
+    },
+    "TCGDEX-sp": {
+      "ambiguous": 0,
+      "cards": 0,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 0
+    },
+    "TCGDEX-tk-bw-e": {
+      "ambiguous": 0,
+      "cards": 30,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 30
+    },
+    "TCGDEX-tk-bw-z": {
+      "ambiguous": 0,
+      "cards": 30,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 30
+    },
+    "TCGDEX-tk-dp-l": {
+      "ambiguous": 0,
+      "cards": 11,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 11
+    },
+    "TCGDEX-tk-dp-m": {
+      "ambiguous": 0,
+      "cards": 12,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 12
+    },
+    "TCGDEX-tk-hs-g": {
+      "ambiguous": 0,
+      "cards": 30,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 1,
+      "tcgdex": 29
+    },
+    "TCGDEX-tk-hs-r": {
+      "ambiguous": 0,
+      "cards": 30,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 30
+    },
+    "TCGDEX-tk-sm-l": {
+      "ambiguous": 0,
+      "cards": 18,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 18
+    },
+    "TCGDEX-tk-sm-r": {
+      "ambiguous": 0,
+      "cards": 30,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 30
+    },
+    "TCGDEX-tk-xy-b": {
+      "ambiguous": 0,
+      "cards": 30,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 30,
+      "tcgdex": 0
+    },
+    "TCGDEX-tk-xy-latia": {
+      "ambiguous": 0,
+      "cards": 30,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 30,
+      "tcgdex": 0
+    },
+    "TCGDEX-tk-xy-latio": {
+      "ambiguous": 0,
+      "cards": 30,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 30,
+      "tcgdex": 0
+    },
+    "TCGDEX-tk-xy-n": {
+      "ambiguous": 0,
+      "cards": 30,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 30,
+      "tcgdex": 0
+    },
+    "TCGDEX-tk-xy-p": {
+      "ambiguous": 0,
+      "cards": 30,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 30,
+      "tcgdex": 0
+    },
+    "TCGDEX-tk-xy-su": {
+      "ambiguous": 0,
+      "cards": 30,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 30,
+      "tcgdex": 0
+    },
+    "TCGDEX-tk-xy-sy": {
+      "ambiguous": 0,
+      "cards": 30,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 30,
+      "tcgdex": 0
+    },
+    "TCGDEX-tk-xy-w": {
+      "ambiguous": 0,
+      "cards": 30,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 30,
+      "tcgdex": 0
+    },
+    "TCGDEX-wp": {
+      "ambiguous": 0,
+      "cards": 0,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 0
+    },
+    "TCGDEX-xya": {
+      "ambiguous": 0,
+      "cards": 6,
+      "expansionId": null,
+      "matched": 0,
+      "missing": 6,
+      "tcgdex": 0
+    },
+    "base1": {
+      "ambiguous": 0,
+      "cards": 102,
+      "expansionId": 1523,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 102
+    },
+    "base2": {
+      "ambiguous": 0,
+      "cards": 64,
+      "expansionId": 1525,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 64
+    },
+    "base3": {
+      "ambiguous": 0,
+      "cards": 62,
+      "expansionId": 1526,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 62
+    },
+    "base4": {
+      "ambiguous": 0,
+      "cards": 130,
+      "expansionId": 1527,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 130
+    },
+    "base5": {
+      "ambiguous": 0,
+      "cards": 83,
+      "expansionId": 1528,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 83
+    },
+    "base6": {
+      "ambiguous": 0,
+      "cards": 110,
+      "expansionId": 1535,
+      "matched": 2,
+      "missing": 0,
+      "tcgdex": 108
+    },
+    "basep": {
+      "ambiguous": 0,
+      "cards": 53,
+      "expansionId": 1607,
+      "matched": 11,
+      "missing": 0,
+      "tcgdex": 42
+    },
+    "bp": {
+      "ambiguous": 0,
+      "cards": 9,
+      "expansionId": 1605,
+      "matched": 4,
+      "missing": 0,
+      "tcgdex": 5
+    },
+    "bw1": {
+      "ambiguous": 0,
+      "cards": 115,
+      "expansionId": 1571,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 115
+    },
+    "bw10": {
+      "ambiguous": 0,
+      "cards": 105,
+      "expansionId": 1580,
+      "matched": 10,
+      "missing": 1,
+      "missingCards": [
+        "9"
+      ],
+      "tcgdex": 94
+    },
+    "bw11": {
+      "ambiguous": 0,
+      "cards": 140,
+      "expansionId": 1581,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 140
+    },
+    "bw2": {
+      "ambiguous": 0,
+      "cards": 98,
+      "expansionId": 1572,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 98
+    },
+    "bw3": {
+      "ambiguous": 0,
+      "cards": 102,
+      "expansionId": 1573,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 102
+    },
+    "bw4": {
+      "ambiguous": 0,
+      "cards": 103,
+      "expansionId": 1574,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 103
+    },
+    "bw5": {
+      "ambiguous": 0,
+      "cards": 111,
+      "expansionId": 1575,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 111
+    },
+    "bw6": {
+      "ambiguous": 0,
+      "cards": 128,
+      "expansionId": 1576,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 128
+    },
+    "bw7": {
+      "ambiguous": 0,
+      "cards": 153,
+      "expansionId": 1577,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 153
+    },
+    "bw8": {
+      "ambiguous": 0,
+      "cards": 138,
+      "expansionId": 1578,
+      "matched": 12,
+      "missing": 0,
+      "tcgdex": 126
+    },
+    "bw9": {
+      "ambiguous": 0,
+      "cards": 122,
+      "expansionId": 1579,
+      "matched": 14,
+      "missing": 0,
+      "tcgdex": 108
+    },
+    "bwp": {
+      "ambiguous": 36,
+      "ambiguousCards": [
+        "BW1",
+        "BW2",
+        "BW3",
+        "BW4",
+        "BW5",
+        "BW6",
+        "BW7",
+        "BW8",
+        "BW9",
+        "BW10",
+        "BW11",
+        "BW14",
+        "BW16",
+        "BW19",
+        "BW23",
+        "BW24",
+        "BW26",
+        "BW28",
+        "BW29",
+        "BW30",
+        "BW31",
+        "BW32",
+        "BW43",
+        "BW50",
+        "BW54",
+        "BW68",
+        "BW69",
+        "BW73",
+        "BW77",
+        "BW79",
+        "BW86",
+        "BW94",
+        "BW97",
+        "BW99",
+        "BW100",
+        "BW101"
+      ],
+      "cards": 101,
+      "expansionId": 1611,
+      "matched": 64,
+      "missing": 37,
+      "missingCards": [
+        "BW1",
+        "BW2",
+        "BW3",
+        "BW4",
+        "BW5",
+        "BW6",
+        "BW7",
+        "BW8",
+        "BW9",
+        "BW10",
+        "BW11",
+        "BW14",
+        "BW16",
+        "BW19",
+        "BW23",
+        "BW24",
+        "BW26",
+        "BW28",
+        "BW29",
+        "BW30",
+        "BW31",
+        "BW32",
+        "BW43",
+        "BW50",
+        "BW54",
+        "BW68",
+        "BW69",
+        "BW73",
+        "BW77",
+        "BW78",
+        "BW79",
+        "BW86",
+        "BW94",
+        "BW97",
+        "BW99",
+        "BW100",
+        "BW101"
+      ],
+      "tcgdex": 0
+    },
+    "cel25": {
+      "ambiguous": 0,
+      "cards": 25,
+      "expansionId": 4347,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 25
+    },
+    "cel25c": {
+      "ambiguous": 0,
+      "cards": 25,
+      "expansionId": 4346,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 25
+    },
+    "col1": {
+      "ambiguous": 0,
+      "cards": 106,
+      "expansionId": 1570,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 106
+    },
+    "dc1": {
+      "ambiguous": 0,
+      "cards": 34,
+      "expansionId": 1648,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 34
+    },
+    "det1": {
+      "ambiguous": 0,
+      "cards": 19,
+      "expansionId": 2438,
+      "matched": 0,
+      "missing": 1,
+      "missingCards": [
+        "25"
+      ],
+      "tcgdex": 18
+    },
+    "dp1": {
+      "ambiguous": 4,
+      "ambiguousCards": [
+        "65",
+        "66",
+        "67",
+        "68"
+      ],
+      "cards": 130,
+      "expansionId": 1555,
+      "matched": 0,
+      "missing": 4,
+      "missingCards": [
+        "65",
+        "66",
+        "67",
+        "68"
+      ],
+      "tcgdex": 126
+    },
+    "dp2": {
+      "ambiguous": 4,
+      "ambiguousCards": [
+        "37",
+        "65",
+        "66",
+        "67"
+      ],
+      "cards": 124,
+      "expansionId": 1556,
+      "matched": 1,
+      "missing": 4,
+      "missingCards": [
+        "37",
+        "65",
+        "66",
+        "67"
+      ],
+      "tcgdex": 119
+    },
+    "dp3": {
+      "ambiguous": 6,
+      "ambiguousCards": [
+        "39",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72"
+      ],
+      "cards": 132,
+      "expansionId": 1557,
+      "matched": 1,
+      "missing": 6,
+      "missingCards": [
+        "39",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72"
+      ],
+      "tcgdex": 125
+    },
+    "dp4": {
+      "ambiguous": 4,
+      "ambiguousCards": [
+        "29",
+        "56",
+        "57",
+        "91"
+      ],
+      "cards": 106,
+      "expansionId": 1558,
+      "matched": 0,
+      "missing": 4,
+      "missingCards": [
+        "29",
+        "56",
+        "57",
+        "91"
+      ],
+      "tcgdex": 102
+    },
+    "dp5": {
+      "ambiguous": 2,
+      "ambiguousCards": [
+        "33",
+        "49"
+      ],
+      "cards": 100,
+      "expansionId": 1559,
+      "matched": 0,
+      "missing": 2,
+      "missingCards": [
+        "33",
+        "49"
+      ],
+      "tcgdex": 98
+    },
+    "dp6": {
+      "ambiguous": 6,
+      "ambiguousCards": [
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81"
+      ],
+      "cards": 146,
+      "expansionId": 1560,
+      "matched": 3,
+      "missing": 6,
+      "missingCards": [
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81"
+      ],
+      "tcgdex": 137
+    },
+    "dp7": {
+      "ambiguous": 0,
+      "cards": 106,
+      "expansionId": 1561,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 106
+    },
+    "dpp": {
+      "ambiguous": 14,
+      "ambiguousCards": [
+        "DP16",
+        "DP17",
+        "DP24",
+        "DP26",
+        "DP27",
+        "DP32",
+        "DP37",
+        "DP40",
+        "DP44",
+        "DP49",
+        "DP50",
+        "DP52",
+        "DP53",
+        "DP56"
+      ],
+      "cards": 56,
+      "expansionId": 1609,
+      "matched": 35,
+      "missing": 20,
+      "missingCards": [
+        "DP16",
+        "DP17",
+        "DP24",
+        "DP26",
+        "DP27",
+        "DP32",
+        "DP37",
+        "DP40",
+        "DP41",
+        "DP42",
+        "DP43",
+        "DP44",
+        "DP45",
+        "DP46",
+        "DP47",
+        "DP49",
+        "DP50",
+        "DP52",
+        "DP53",
+        "DP56"
+      ],
+      "tcgdex": 1
+    },
+    "dv1": {
+      "ambiguous": 0,
+      "cards": 21,
+      "expansionId": 1636,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 21
+    },
+    "ecard1": {
+      "ambiguous": 0,
+      "cards": 165,
+      "expansionId": 1536,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 165
+    },
+    "ecard2": {
+      "ambiguous": 0,
+      "cards": 182,
+      "expansionId": 1537,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 182
+    },
+    "ecard3": {
+      "ambiguous": 0,
+      "cards": 182,
+      "expansionId": 1538,
+      "matched": 2,
+      "missing": 0,
+      "tcgdex": 180
+    },
+    "ex1": {
+      "ambiguous": 0,
+      "cards": 109,
+      "expansionId": 1539,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 109
+    },
+    "ex10": {
+      "ambiguous": 0,
+      "cards": 145,
+      "expansionId": 1548,
+      "matched": 3,
+      "missing": 0,
+      "tcgdex": 142
+    },
+    "ex11": {
+      "ambiguous": 0,
+      "cards": 114,
+      "expansionId": 1549,
+      "matched": 3,
+      "missing": 0,
+      "tcgdex": 111
+    },
+    "ex12": {
+      "ambiguous": 0,
+      "cards": 93,
+      "expansionId": 1550,
+      "matched": 3,
+      "missing": 0,
+      "tcgdex": 90
+    },
+    "ex13": {
+      "ambiguous": 0,
+      "cards": 111,
+      "expansionId": 1551,
+      "matched": 1,
+      "missing": 1,
+      "missingCards": [
+        "98"
+      ],
+      "tcgdex": 109
+    },
+    "ex14": {
+      "ambiguous": 0,
+      "cards": 100,
+      "expansionId": 1552,
+      "matched": 2,
+      "missing": 0,
+      "tcgdex": 98
+    },
+    "ex15": {
+      "ambiguous": 0,
+      "cards": 101,
+      "expansionId": 1553,
+      "matched": 4,
+      "missing": 1,
+      "missingCards": [
+        "88"
+      ],
+      "tcgdex": 96
+    },
+    "ex16": {
+      "ambiguous": 0,
+      "cards": 108,
+      "expansionId": 1554,
+      "matched": 3,
+      "missing": 0,
+      "tcgdex": 105
+    },
+    "ex2": {
+      "ambiguous": 0,
+      "cards": 100,
+      "expansionId": 1540,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 100
+    },
+    "ex3": {
+      "ambiguous": 0,
+      "cards": 100,
+      "expansionId": 1541,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 100
+    },
+    "ex4": {
+      "ambiguous": 0,
+      "cards": 97,
+      "expansionId": 1542,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 97
+    },
+    "ex5": {
+      "ambiguous": 0,
+      "cards": 102,
+      "expansionId": 1543,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 102
+    },
+    "ex6": {
+      "ambiguous": 0,
+      "cards": 116,
+      "expansionId": 1544,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 116
+    },
+    "ex7": {
+      "ambiguous": 0,
+      "cards": 111,
+      "expansionId": 1545,
+      "matched": 3,
+      "missing": 0,
+      "tcgdex": 108
+    },
+    "ex8": {
+      "ambiguous": 0,
+      "cards": 108,
+      "expansionId": 1546,
+      "matched": 2,
+      "missing": 0,
+      "tcgdex": 106
+    },
+    "ex9": {
+      "ambiguous": 0,
+      "cards": 107,
+      "expansionId": 1547,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 107
+    },
+    "fut20": {
+      "ambiguous": 0,
+      "cards": 5,
+      "expansionId": 3510,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 5
+    },
+    "g1": {
+      "ambiguous": 0,
+      "cards": 117,
+      "expansionId": 1693,
+      "matched": 5,
+      "missing": 0,
+      "tcgdex": 112
+    },
+    "gym1": {
+      "ambiguous": 0,
+      "cards": 132,
+      "expansionId": 1529,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 132
+    },
+    "gym2": {
+      "ambiguous": 2,
+      "ambiguousCards": [
+        "75",
+        "76"
+      ],
+      "cards": 132,
+      "expansionId": 1530,
+      "matched": 0,
+      "missing": 2,
+      "missingCards": [
+        "75",
+        "76"
+      ],
+      "tcgdex": 130
+    },
+    "hgss1": {
+      "ambiguous": 0,
+      "cards": 124,
+      "expansionId": 1566,
+      "matched": 1,
+      "missing": 1,
+      "missingCards": [
+        "26"
+      ],
+      "tcgdex": 122
+    },
+    "hgss2": {
+      "ambiguous": 0,
+      "cards": 96,
+      "expansionId": 1567,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 96
+    },
+    "hgss3": {
+      "ambiguous": 0,
+      "cards": 91,
+      "expansionId": 1568,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 91
+    },
+    "hgss4": {
+      "ambiguous": 0,
+      "cards": 103,
+      "expansionId": 1569,
+      "matched": 2,
+      "missing": 0,
+      "tcgdex": 101
+    },
+    "hsp": {
+      "ambiguous": 0,
+      "cards": 25,
+      "expansionId": 1610,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 25
+    },
+    "mcd11": {
+      "ambiguous": 0,
+      "cards": 12,
+      "expansionId": 1571,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 12
+    },
+    "mcd12": {
+      "ambiguous": 0,
+      "cards": 12,
+      "expansionId": 1624,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 12
+    },
+    "mcd14": {
+      "ambiguous": 0,
+      "cards": 12,
+      "expansionId": 1625,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 12
+    },
+    "mcd15": {
+      "ambiguous": 0,
+      "cards": 12,
+      "expansionId": 1741,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 12
+    },
+    "mcd16": {
+      "ambiguous": 0,
+      "cards": 12,
+      "expansionId": 1752,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 12
+    },
+    "mcd17": {
+      "ambiguous": 0,
+      "cards": 12,
+      "expansionId": 1845,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 12
+    },
+    "mcd18": {
+      "ambiguous": 0,
+      "cards": 12,
+      "expansionId": 2404,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 12
+    },
+    "mcd19": {
+      "ambiguous": 0,
+      "cards": 12,
+      "expansionId": 2829,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 12
+    },
+    "mcd21": {
+      "ambiguous": 0,
+      "cards": 25,
+      "expansionId": 3738,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 25
+    },
+    "mcd22": {
+      "ambiguous": 0,
+      "cards": 15,
+      "expansionId": 5135,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 15
+    },
+    "me1": {
+      "ambiguous": 0,
+      "cards": 188,
+      "expansionId": 6209,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 188
+    },
+    "me2": {
+      "ambiguous": 0,
+      "cards": 130,
+      "expansionId": 6299,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 130
+    },
+    "me2pt5": {
+      "ambiguous": 0,
+      "cards": 295,
+      "expansionId": 6395,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 295
+    },
+    "me3": {
+      "ambiguous": 0,
+      "cards": 124,
+      "expansionId": 6443,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 124
+    },
+    "me4": {
+      "ambiguous": 0,
+      "cards": 122,
+      "expansionId": 6517,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 122
+    },
+    "me5": {
+      "ambiguous": 0,
+      "cards": 120,
+      "expansionId": 6569,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 120
+    },
+    "me55": {
+      "ambiguous": 0,
+      "cards": 161,
+      "expansionId": 6601,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 161
+    },
+    "me55c": {
+      "ambiguous": 0,
+      "cards": 30,
+      "expansionId": 6601,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 30
+    },
+    "me6": {
+      "ambiguous": 0,
+      "cards": 141,
+      "expansionId": 6704,
+      "matched": 1,
+      "missing": 10,
+      "missingCards": [
+        "90",
+        "94",
+        "95",
+        "98",
+        "99",
+        "101",
+        "126",
+        "132",
+        "133",
+        "134"
+      ],
+      "tcgdex": 130
+    },
+    "mep": {
+      "ambiguous": 0,
+      "cards": 112,
+      "expansionId": 6232,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 112
+    },
+    "neo1": {
+      "ambiguous": 0,
+      "cards": 111,
+      "expansionId": 1531,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 111
+    },
+    "neo2": {
+      "ambiguous": 0,
+      "cards": 75,
+      "expansionId": 1532,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 75
+    },
+    "neo3": {
+      "ambiguous": 0,
+      "cards": 66,
+      "expansionId": 1533,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 66
+    },
+    "neo4": {
+      "ambiguous": 0,
+      "cards": 113,
+      "expansionId": 1534,
+      "matched": 1,
+      "missing": 0,
+      "tcgdex": 112
+    },
+    "np": {
+      "ambiguous": 22,
+      "ambiguousCards": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "16",
+        "17",
+        "18",
+        "22",
+        "24",
+        "25",
+        "27",
+        "36",
+        "37",
+        "38"
+      ],
+      "cards": 40,
+      "expansionId": 1608,
+      "matched": 18,
+      "missing": 22,
+      "missingCards": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "16",
+        "17",
+        "18",
+        "22",
+        "24",
+        "25",
+        "27",
+        "36",
+        "37",
+        "38"
+      ],
+      "tcgdex": 0
+    },
+    "pgo": {
+      "ambiguous": 0,
+      "cards": 88,
+      "expansionId": 4786,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 88
+    },
+    "pl1": {
+      "ambiguous": 0,
+      "cards": 133,
+      "expansionId": 1562,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 133
+    },
+    "pl2": {
+      "ambiguous": 0,
+      "cards": 120,
+      "expansionId": 1563,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 120
+    },
+    "pl3": {
+      "ambiguous": 0,
+      "cards": 153,
+      "expansionId": 1564,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 153
+    },
+    "pl4": {
+      "ambiguous": 0,
+      "cards": 111,
+      "expansionId": 1565,
+      "matched": 6,
+      "missing": 0,
+      "tcgdex": 105
+    },
+    "pop1": {
+      "ambiguous": 0,
+      "cards": 17,
+      "expansionId": 1613,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 17
+    },
+    "pop2": {
+      "ambiguous": 0,
+      "cards": 17,
+      "expansionId": 1614,
+      "matched": 1,
+      "missing": 0,
+      "tcgdex": 16
+    },
+    "pop3": {
+      "ambiguous": 0,
+      "cards": 17,
+      "expansionId": 1615,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 17
+    },
+    "pop4": {
+      "ambiguous": 0,
+      "cards": 17,
+      "expansionId": 1616,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 17
+    },
+    "pop5": {
+      "ambiguous": 0,
+      "cards": 17,
+      "expansionId": 1617,
+      "matched": 3,
+      "missing": 1,
+      "missingCards": [
+        "9"
+      ],
+      "tcgdex": 13
+    },
+    "pop6": {
+      "ambiguous": 0,
+      "cards": 17,
+      "expansionId": 1618,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 17
+    },
+    "pop7": {
+      "ambiguous": 0,
+      "cards": 17,
+      "expansionId": 1619,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 17
+    },
+    "pop8": {
+      "ambiguous": 0,
+      "cards": 17,
+      "expansionId": 1620,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 17
+    },
+    "pop9": {
+      "ambiguous": 0,
+      "cards": 17,
+      "expansionId": 1621,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 17
+    },
+    "rsv10pt5": {
+      "ambiguous": 0,
+      "cards": 173,
+      "expansionId": 6135,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 173
+    },
+    "ru1": {
+      "ambiguous": 0,
+      "cards": 16,
+      "expansionId": 1634,
+      "matched": 2,
+      "missing": 0,
+      "tcgdex": 14
+    },
+    "si1": {
+      "ambiguous": 0,
+      "cards": 18,
+      "expansionId": 1633,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 18
+    },
+    "sm1": {
+      "ambiguous": 0,
+      "cards": 173,
+      "expansionId": 1745,
+      "matched": 0,
+      "missing": 1,
+      "missingCards": [
+        "101a"
+      ],
+      "tcgdex": 172
+    },
+    "sm10": {
+      "ambiguous": 4,
+      "ambiguousCards": [
+        "182a",
+        "182b",
+        "189a",
+        "195a"
+      ],
+      "cards": 238,
+      "expansionId": 2437,
+      "matched": 8,
+      "missing": 5,
+      "missingCards": [
+        "172",
+        "182a",
+        "182b",
+        "189a",
+        "195a"
+      ],
+      "tcgdex": 225
+    },
+    "sm11": {
+      "ambiguous": 3,
+      "ambiguousCards": [
+        "79a",
+        "191a",
+        "206a"
+      ],
+      "cards": 261,
+      "expansionId": 2487,
+      "matched": 4,
+      "missing": 3,
+      "missingCards": [
+        "79a",
+        "191a",
+        "206a"
+      ],
+      "tcgdex": 254
+    },
+    "sm115": {
+      "ambiguous": 0,
+      "cards": 69,
+      "expansionId": 2514,
+      "matched": 15,
+      "missing": 0,
+      "tcgdex": 54
+    },
+    "sm12": {
+      "ambiguous": 0,
+      "cards": 272,
+      "expansionId": 2644,
+      "matched": 10,
+      "missing": 1,
+      "missingCards": [
+        "143a"
+      ],
+      "tcgdex": 261
+    },
+    "sm2": {
+      "ambiguous": 7,
+      "ambiguousCards": [
+        "21a",
+        "51a",
+        "60a",
+        "121a",
+        "124a",
+        "125a",
+        "130a"
+      ],
+      "cards": 180,
+      "expansionId": 1800,
+      "matched": 0,
+      "missing": 11,
+      "missingCards": [
+        "19a",
+        "21a",
+        "51a",
+        "60a",
+        "92a",
+        "121a",
+        "124a",
+        "125a",
+        "128a",
+        "130a",
+        "157a"
+      ],
+      "tcgdex": 169
+    },
+    "sm3": {
+      "ambiguous": 5,
+      "ambiguousCards": [
+        "39a",
+        "88a",
+        "92a",
+        "112a",
+        "115a"
+      ],
+      "cards": 177,
+      "expansionId": 1824,
+      "matched": 0,
+      "missing": 8,
+      "missingCards": [
+        "18a",
+        "39a",
+        "88a",
+        "92a",
+        "105a",
+        "112a",
+        "115a",
+        "116a"
+      ],
+      "tcgdex": 169
+    },
+    "sm35": {
+      "ambiguous": 2,
+      "ambiguousCards": [
+        "68a",
+        "77a"
+      ],
+      "cards": 81,
+      "expansionId": 1842,
+      "matched": 0,
+      "missing": 3,
+      "missingCards": [
+        "10a",
+        "68a",
+        "77a"
+      ],
+      "tcgdex": 78
+    },
+    "sm4": {
+      "ambiguous": 1,
+      "ambiguousCards": [
+        "84a"
+      ],
+      "cards": 126,
+      "expansionId": 1843,
+      "matched": 0,
+      "missing": 2,
+      "missingCards": [
+        "63a",
+        "84a"
+      ],
+      "tcgdex": 124
+    },
+    "sm5": {
+      "ambiguous": 5,
+      "ambiguousCards": [
+        "119a",
+        "122a",
+        "125a",
+        "135a",
+        "153a"
+      ],
+      "cards": 178,
+      "expansionId": 2065,
+      "matched": 1,
+      "missing": 9,
+      "missingCards": [
+        "119a",
+        "122a",
+        "125a",
+        "135a",
+        "137",
+        "138",
+        "153a",
+        "170",
+        "171"
+      ],
+      "tcgdex": 168
+    },
+    "sm6": {
+      "ambiguous": 2,
+      "ambiguousCards": [
+        "102a",
+        "113a"
+      ],
+      "cards": 150,
+      "expansionId": 2075,
+      "matched": 1,
+      "missing": 6,
+      "missingCards": [
+        "2a",
+        "102a",
+        "112a",
+        "113a",
+        "118",
+        "146"
+      ],
+      "tcgdex": 143
+    },
+    "sm7": {
+      "ambiguous": 2,
+      "ambiguousCards": [
+        "123a",
+        "177a"
+      ],
+      "cards": 187,
+      "expansionId": 2320,
+      "matched": 4,
+      "missing": 4,
+      "missingCards": [
+        "10a",
+        "123a",
+        "148a",
+        "177a"
+      ],
+      "tcgdex": 179
+    },
+    "sm75": {
+      "ambiguous": 1,
+      "ambiguousCards": [
+        "60a"
+      ],
+      "cards": 80,
+      "expansionId": 2351,
+      "matched": 3,
+      "missing": 2,
+      "missingCards": [
+        "40a",
+        "60a"
+      ],
+      "tcgdex": 75
+    },
+    "sm8": {
+      "ambiguous": 2,
+      "ambiguousCards": [
+        "172a",
+        "188a"
+      ],
+      "cards": 240,
+      "expansionId": 2370,
+      "matched": 2,
+      "missing": 8,
+      "missingCards": [
+        "172a",
+        "174",
+        "175",
+        "176",
+        "177",
+        "187a",
+        "188a",
+        "189a"
+      ],
+      "tcgdex": 230
+    },
+    "sm9": {
+      "ambiguous": 2,
+      "ambiguousCards": [
+        "152a",
+        "152b"
+      ],
+      "cards": 198,
+      "expansionId": 2407,
+      "matched": 9,
+      "missing": 4,
+      "missingCards": [
+        "54",
+        "57",
+        "152a",
+        "152b"
+      ],
+      "tcgdex": 185
+    },
+    "sma": {
+      "ambiguous": 2,
+      "ambiguousCards": [
+        "SV66",
+        "SV67"
+      ],
+      "cards": 94,
+      "expansionId": 2514,
+      "matched": 84,
+      "missing": 10,
+      "missingCards": [
+        "SV1",
+        "SV6",
+        "SV7",
+        "SV13",
+        "SV41",
+        "SV49",
+        "SV57",
+        "SV59",
+        "SV66",
+        "SV67"
+      ],
+      "tcgdex": 0
+    },
+    "smp": {
+      "ambiguous": 3,
+      "ambiguousCards": [
+        "SM30a",
+        "SM103a",
+        "SM104a"
+      ],
+      "cards": 251,
+      "expansionId": 1757,
+      "matched": 0,
+      "missing": 3,
+      "missingCards": [
+        "SM30a",
+        "SM103a",
+        "SM104a"
+      ],
+      "tcgdex": 248
+    },
+    "sv1": {
+      "ambiguous": 0,
+      "cards": 258,
+      "expansionId": 5223,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 258
+    },
+    "sv10": {
+      "ambiguous": 0,
+      "cards": 244,
+      "expansionId": 6096,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 244
+    },
+    "sv2": {
+      "ambiguous": 0,
+      "cards": 279,
+      "expansionId": 5318,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 279
+    },
+    "sv3": {
+      "ambiguous": 0,
+      "cards": 230,
+      "expansionId": 5385,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 230
+    },
+    "sv3pt5": {
+      "ambiguous": 0,
+      "cards": 207,
+      "expansionId": 5402,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 207
+    },
+    "sv4": {
+      "ambiguous": 0,
+      "cards": 266,
+      "expansionId": 5444,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 266
+    },
+    "sv4pt5": {
+      "ambiguous": 0,
+      "cards": 245,
+      "expansionId": 5546,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 245
+    },
+    "sv5": {
+      "ambiguous": 0,
+      "cards": 218,
+      "expansionId": 5589,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 218
+    },
+    "sv6": {
+      "ambiguous": 0,
+      "cards": 226,
+      "expansionId": 5691,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 226
+    },
+    "sv6pt5": {
+      "ambiguous": 0,
+      "cards": 99,
+      "expansionId": 5760,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 99
+    },
+    "sv7": {
+      "ambiguous": 0,
+      "cards": 175,
+      "expansionId": 5802,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 175
+    },
+    "sv8": {
+      "ambiguous": 0,
+      "cards": 252,
+      "expansionId": 5879,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 252
+    },
+    "sv8pt5": {
+      "ambiguous": 0,
+      "cards": 180,
+      "expansionId": 5944,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 180
+    },
+    "sv9": {
+      "ambiguous": 0,
+      "cards": 190,
+      "expansionId": 6006,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 190
+    },
+    "sve": {
+      "ambiguous": 0,
+      "cards": 24,
+      "expansionId": 3108,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 24
+    },
+    "svp": {
+      "ambiguous": 0,
+      "cards": 226,
+      "expansionId": 5241,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 226
+    },
+    "swsh1": {
+      "ambiguous": 3,
+      "ambiguousCards": [
+        "178",
+        "201",
+        "209"
+      ],
+      "cards": 216,
+      "expansionId": 2921,
+      "matched": 0,
+      "missing": 3,
+      "missingCards": [
+        "178",
+        "201",
+        "209"
+      ],
+      "tcgdex": 213
+    },
+    "swsh10": {
+      "ambiguous": 0,
+      "cards": 246,
+      "expansionId": 4979,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 246
+    },
+    "swsh11": {
+      "ambiguous": 0,
+      "cards": 247,
+      "expansionId": 5093,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 247
+    },
+    "swsh12": {
+      "ambiguous": 0,
+      "cards": 245,
+      "expansionId": 5142,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 245
+    },
+    "swsh12pt5": {
+      "ambiguous": 0,
+      "cards": 230,
+      "expansionId": 5201,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 230
+    },
+    "swsh2": {
+      "ambiguous": 0,
+      "cards": 209,
+      "expansionId": 3143,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 209
+    },
+    "swsh3": {
+      "ambiguous": 0,
+      "cards": 201,
+      "expansionId": 3199,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 201
+    },
+    "swsh35": {
+      "ambiguous": 0,
+      "cards": 80,
+      "expansionId": 3419,
+      "matched": 1,
+      "missing": 0,
+      "tcgdex": 79
+    },
+    "swsh4": {
+      "ambiguous": 0,
+      "cards": 203,
+      "expansionId": 3484,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 203
+    },
+    "swsh45": {
+      "ambiguous": 0,
+      "cards": 195,
+      "expansionId": 3630,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 195
+    },
+    "swsh5": {
+      "ambiguous": 0,
+      "cards": 183,
+      "expansionId": 3675,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 183
+    },
+    "swsh6": {
+      "ambiguous": 0,
+      "cards": 233,
+      "expansionId": 4174,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 233
+    },
+    "swsh7": {
+      "ambiguous": 0,
+      "cards": 237,
+      "expansionId": 4328,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 237
+    },
+    "swsh8": {
+      "ambiguous": 0,
+      "cards": 284,
+      "expansionId": 4382,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 284
+    },
+    "swsh9": {
+      "ambiguous": 0,
+      "cards": 216,
+      "expansionId": 4434,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 216
+    },
+    "swshp": {
+      "ambiguous": 0,
+      "cards": 307,
+      "expansionId": 2916,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 307
+    },
+    "tk1a": {
+      "ambiguous": 0,
+      "cards": 10,
+      "expansionId": 275771,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 10
+    },
+    "tk1b": {
+      "ambiguous": 0,
+      "cards": 10,
+      "expansionId": 1626,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 10
+    },
+    "tk2a": {
+      "ambiguous": 0,
+      "cards": 12,
+      "expansionId": 1627,
+      "matched": 1,
+      "missing": 3,
+      "missingCards": [
+        "8",
+        "9",
+        "11"
+      ],
+      "tcgdex": 8
+    },
+    "tk2b": {
+      "ambiguous": 0,
+      "cards": 12,
+      "expansionId": 1627,
+      "matched": 1,
+      "missing": 0,
+      "tcgdex": 11
+    },
+    "xy0": {
+      "ambiguous": 0,
+      "cards": 39,
+      "expansionId": 1637,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 39
+    },
+    "xy1": {
+      "ambiguous": 0,
+      "cards": 146,
+      "expansionId": 1582,
+      "matched": 2,
+      "missing": 0,
+      "tcgdex": 144
+    },
+    "xy10": {
+      "ambiguous": 5,
+      "ambiguousCards": [
+        "26",
+        "69",
+        "85",
+        "118",
+        "121"
+      ],
+      "cards": 129,
+      "expansionId": 1706,
+      "matched": 0,
+      "missing": 5,
+      "missingCards": [
+        "26",
+        "69",
+        "85",
+        "118",
+        "121"
+      ],
+      "tcgdex": 124
+    },
+    "xy11": {
+      "ambiguous": 4,
+      "ambiguousCards": [
+        "68",
+        "79",
+        "109",
+        "112"
+      ],
+      "cards": 116,
+      "expansionId": 1716,
+      "matched": 1,
+      "missing": 4,
+      "missingCards": [
+        "68",
+        "79",
+        "109",
+        "112"
+      ],
+      "tcgdex": 111
+    },
+    "xy12": {
+      "ambiguous": 8,
+      "ambiguousCards": [
+        "2",
+        "13",
+        "22",
+        "65",
+        "100",
+        "101",
+        "102",
+        "105"
+      ],
+      "cards": 113,
+      "expansionId": 1742,
+      "matched": 2,
+      "missing": 9,
+      "missingCards": [
+        "2",
+        "13",
+        "22",
+        "65",
+        "100",
+        "101",
+        "102",
+        "105",
+        "109"
+      ],
+      "tcgdex": 102
+    },
+    "xy2": {
+      "ambiguous": 6,
+      "ambiguousCards": [
+        "13",
+        "69",
+        "79",
+        "107",
+        "108",
+        "109"
+      ],
+      "cards": 110,
+      "expansionId": 1583,
+      "matched": 0,
+      "missing": 6,
+      "missingCards": [
+        "13",
+        "69",
+        "79",
+        "107",
+        "108",
+        "109"
+      ],
+      "tcgdex": 104
+    },
+    "xy3": {
+      "ambiguous": 5,
+      "ambiguousCards": [
+        "5",
+        "55",
+        "55a",
+        "112",
+        "113"
+      ],
+      "cards": 114,
+      "expansionId": 1584,
+      "matched": 0,
+      "missing": 5,
+      "missingCards": [
+        "5",
+        "55",
+        "55a",
+        "112",
+        "113"
+      ],
+      "tcgdex": 109
+    },
+    "xy4": {
+      "ambiguous": 5,
+      "ambiguousCards": [
+        "24",
+        "24a",
+        "35",
+        "120",
+        "121"
+      ],
+      "cards": 124,
+      "expansionId": 1521,
+      "matched": 0,
+      "missing": 5,
+      "missingCards": [
+        "24",
+        "24a",
+        "35",
+        "120",
+        "121"
+      ],
+      "tcgdex": 119
+    },
+    "xy5": {
+      "ambiguous": 4,
+      "ambiguousCards": [
+        "94",
+        "106",
+        "154",
+        "156"
+      ],
+      "cards": 164,
+      "expansionId": 1585,
+      "matched": 1,
+      "missing": 4,
+      "missingCards": [
+        "94",
+        "106",
+        "154",
+        "156"
+      ],
+      "tcgdex": 159
+    },
+    "xy6": {
+      "ambiguous": 7,
+      "ambiguousCards": [
+        "35",
+        "59",
+        "61",
+        "76",
+        "100",
+        "102",
+        "105"
+      ],
+      "cards": 112,
+      "expansionId": 1649,
+      "matched": 0,
+      "missing": 7,
+      "missingCards": [
+        "35",
+        "59",
+        "61",
+        "76",
+        "100",
+        "102",
+        "105"
+      ],
+      "tcgdex": 105
+    },
+    "xy7": {
+      "ambiguous": 0,
+      "cards": 101,
+      "expansionId": 1660,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 101
+    },
+    "xy8": {
+      "ambiguous": 8,
+      "ambiguousCards": [
+        "22",
+        "35",
+        "63",
+        "64",
+        "154",
+        "156",
+        "159",
+        "160"
+      ],
+      "cards": 165,
+      "expansionId": 1678,
+      "matched": 0,
+      "missing": 8,
+      "missingCards": [
+        "22",
+        "35",
+        "63",
+        "64",
+        "154",
+        "156",
+        "159",
+        "160"
+      ],
+      "tcgdex": 157
+    },
+    "xy9": {
+      "ambiguous": 4,
+      "ambiguousCards": [
+        "27",
+        "77",
+        "115",
+        "120"
+      ],
+      "cards": 126,
+      "expansionId": 1687,
+      "matched": 0,
+      "missing": 4,
+      "missingCards": [
+        "27",
+        "77",
+        "115",
+        "120"
+      ],
+      "tcgdex": 122
+    },
+    "xyp": {
+      "ambiguous": 10,
+      "ambiguousCards": [
+        "XY35",
+        "XY44",
+        "XY63",
+        "XY86",
+        "XY87",
+        "XY98",
+        "XY104",
+        "XY158",
+        "XY168",
+        "XY171"
+      ],
+      "cards": 216,
+      "expansionId": 1612,
+      "matched": 12,
+      "missing": 10,
+      "missingCards": [
+        "XY35",
+        "XY44",
+        "XY63",
+        "XY86",
+        "XY87",
+        "XY98",
+        "XY104",
+        "XY158",
+        "XY168",
+        "XY171"
+      ],
+      "tcgdex": 194
+    },
+    "zsv10pt5": {
+      "ambiguous": 0,
+      "cards": 172,
+      "expansionId": 6134,
+      "matched": 0,
+      "missing": 0,
+      "tcgdex": 172
+    }
+  },
+  "totals": {
+    "ambiguous": 210,
+    "cards": 24057,
+    "matched": 385,
+    "missing": 3004,
+    "tcgdex": 20668
+  }
+}
