@@ -782,7 +782,9 @@ function buildEmptyRow(columnCount) {
 }
 
 
-async function applySetScopedPlan(sheetName, columnCount, plan) {
+// lockedRows: Aufrufer haelt bereits withSheetAppendLock(sheetName) und hat diese Zeilen frisch gelesen;
+// dann wird ohne erneute Sperre angehaengt (appendDbRows wuerde auf die eigene Sperre warten).
+async function applySetScopedPlan(sheetName, columnCount, plan, { lockedRows = null } = {}) {
   if (!plan) return;
   const updates = Array.isArray(plan.updates) ? plan.updates : [];
   const clearIndices = Array.isArray(plan.clearIndices) ? plan.clearIndices : [];
@@ -804,7 +806,8 @@ async function applySetScopedPlan(sheetName, columnCount, plan) {
   }
 
   if (appendRows.length > 0) {
-    await appendDbRows(sheetName, columnCount, appendRows);
+    if (lockedRows) await appendRowsUnlocked(sheetName, columnCount, lockedRows, appendRows);
+    else await appendDbRows(sheetName, columnCount, appendRows);
   }
 
   if (updates.length > 0 || clearIndices.length > 0 || appendRows.length > 0) {
@@ -1048,73 +1051,85 @@ function collectionKeyOfCard(card, ctx) {
  * - clearMissing nur fuer Zeilen unter der kanonischen Set-ID, deren cardId ein kanonischer
  *   collectionKey ist, der nicht importiert wird, und nur ohne Haken (kein Haken geht verloren).
  */
+// Plan und Schreiben unter der Blatt-Sperre von db_collection mit frischem strict-Read: Zellen-Writes
+// (updateCellBooleansBatch) laufen ueber dieselbe Sperre, ein paralleles Abwaehlen kann also nicht von
+// einer Vollzeilen-Aktualisierung aus einem frueheren Lesestand ueberschrieben werden.
+// Status: Hat die Karte frische Zeilen, gilt deren Stand (db_collection ist massgeblich, Legacy-Grids sind
+// beim Lesen von existingMap bereits migriert). existingMap (frueher gelesen, evtl. veraltet) zaehlt nur fuer
+// Karten ohne frische Zeile; so loescht ein Cache keinen Haken und setzt keinen veralteten.
 async function writeDbCollectionForSet(setId, cards, existingMap = new Map(), { resolver = null } = {}) {
   await ensureNormalizedSchema();
   const ctx = await resolveCollectionContext(setId, resolver);
-  const currentRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true, { strict: true });
+  const C = DB_SHEETS.collection;
+  const N = DB_HEADERS.collection.length;
 
-  if (!ctx) {
-    // Ohne Registry: exakter Set-ID-Pfad, ohne Leeren/Deduplizieren (nichts loeschen).
-    // Wie bisher die rohe Kartennummer schreiben (z. B. 'GG01'), damit bestehende Zeilen exakt getroffen
-    // und keine Doppelzeilen angehaengt werden; Status = ODER aus existingMap und frischen Zeilen.
-    const currentExact = buildExactSetCollectionMap(currentRows, setId);
-    const setRows = cards.map((card) => {
-      const rawText = toSafeCellString(card?.number) || toSafeCellString(card?.collectionKey);
-      const lookup = normalizeCardNumber(rawText);
-      const existing = existingMap?.get?.(lookup) || existingMap?.get?.(toSafeCellString(card?.collectionKey));
-      const current = currentExact.get(lookup);
-      const g = Boolean(existing?.g || current?.g);
-      const rh = Boolean((existing?.rh || current?.rh) && g);
-      return [setId, rawText, g, rh, nowIso()];
-    }).filter((row) => row[1]);
-    const upsertPlan = planSetScopedUpsert({ rows: currentRows, setId, incomingRows: setRows, clearMissing: false });
-    upsertPlan.clearIndices = [];
-    await applySetScopedPlan(DB_SHEETS.collection, DB_HEADERS.collection.length, upsertPlan);
-    return;
-  }
+  await withSheetAppendLock(C, async () => {
+    const currentRows = await readDbRows(C, N, true, { strict: true });
 
-  const canonicalSetId = ctx.canonicalSetId;
-  const canonicalLower = canonicalSetId.toLowerCase();
-  const { map: currentMap } = buildCollectionMap(currentRows, ctx);
-  const isCanonicalCell = (cell) => cell.setKey.toLowerCase() === canonicalLower;
-
-  const incomingKeys = new Set();
-  const updates = [];
-  const appendRows = [];
-  for (const card of cards || []) {
-    const key = collectionKeyOfCard(card, ctx);
-    if (!key || incomingKeys.has(key)) continue;
-    incomingKeys.add(key);
-    const current = currentMap.get(key);
-    // ODER aus (evtl. veralteter) existingMap und frischen Zeilen: ein Cache darf nie einen Haken loeschen.
-    const existing = existingMap?.get?.(key);
-    const g = Boolean(existing?.g || current?.g);
-    const rh = Boolean((existing?.rh || current?.rh) && g);
-    const cells = current?.cells || [];
-    if (cells.length === 0) {
-      appendRows.push([canonicalSetId, key, g, rh, nowIso()]);
-      continue;
+    if (!ctx) {
+      // Ohne Registry: exakter Set-ID-Pfad, ohne Leeren/Deduplizieren (nichts loeschen).
+      // Wie bisher die rohe Kartennummer schreiben (z. B. 'GG01'), damit bestehende Zeilen exakt getroffen
+      // und keine Doppelzeilen angehaengt werden.
+      const currentExact = buildExactSetCollectionMap(currentRows, setId);
+      const setRows = cards.map((card) => {
+        const rawText = toSafeCellString(card?.number) || toSafeCellString(card?.collectionKey);
+        const lookup = normalizeCardNumber(rawText);
+        const current = currentExact.get(lookup);
+        const source = current || existingMap?.get?.(lookup) || existingMap?.get?.(toSafeCellString(card?.collectionKey));
+        const g = Boolean(source?.g);
+        const rh = Boolean(source?.rh && g);
+        return [setId, rawText, g, rh, nowIso()];
+      }).filter((row) => row[1]);
+      const upsertPlan = planSetScopedUpsert({ rows: currentRows, setId, incomingRows: setRows, clearMissing: false });
+      upsertPlan.clearIndices = [];
+      await applySetScopedPlan(C, N, upsertPlan, { lockedRows: currentRows });
+      return;
     }
-    cells.filter(isCanonicalCell).forEach((cell) => {
-      if (cell.g === g && cell.rhRaw === rh) return;
-      updates.push({ rowIndex: cell.rowNo - 2, rowValues: [cell.setKey, cell.cardKey, g, rh, nowIso()] });
-    });
-  }
 
-  const clearIndices = [];
-  for (const [key, entry] of currentMap) {
-    if (incomingKeys.has(key) || entry.orphan) continue;
-    entry.cells.forEach((cell) => {
-      if (!isCanonicalCell(cell) || cell.cardKey !== key) return;
-      if (cell.g || cell.rhRaw) return;
-      clearIndices.push(cell.rowNo - 2);
-    });
-  }
+    const canonicalSetId = ctx.canonicalSetId;
+    const canonicalLower = canonicalSetId.toLowerCase();
+    const { map: currentMap } = buildCollectionMap(currentRows, ctx);
+    const isCanonicalCell = (cell) => cell.setKey.toLowerCase() === canonicalLower;
 
-  await applySetScopedPlan(DB_SHEETS.collection, DB_HEADERS.collection.length, {
-    updates,
-    appendRows,
-    clearIndices: clearIndices.sort((a, b) => a - b)
+    const incomingKeys = new Set();
+    const updates = [];
+    const appendRows = [];
+    for (const card of cards || []) {
+      const key = collectionKeyOfCard(card, ctx);
+      if (!key || incomingKeys.has(key)) continue;
+      incomingKeys.add(key);
+      const current = currentMap.get(key);
+      const cells = current?.cells || [];
+      if (cells.length === 0) {
+        const existing = existingMap?.get?.(key);
+        const g = Boolean(existing?.g);
+        appendRows.push([canonicalSetId, key, g, Boolean(existing?.rh && g), nowIso()]);
+        continue;
+      }
+      // Frischer Stand (ODER ueber alle Zeilen der Karte) wird in die kanonischen Zeilen uebernommen.
+      const g = Boolean(current.g);
+      const rh = Boolean(current.rh && g);
+      cells.filter(isCanonicalCell).forEach((cell) => {
+        if (cell.g === g && cell.rhRaw === rh) return;
+        updates.push({ rowIndex: cell.rowNo - 2, rowValues: [cell.setKey, cell.cardKey, g, rh, nowIso()] });
+      });
+    }
+
+    const clearIndices = [];
+    for (const [key, entry] of currentMap) {
+      if (incomingKeys.has(key) || entry.orphan) continue;
+      entry.cells.forEach((cell) => {
+        if (!isCanonicalCell(cell) || cell.cardKey !== key) return;
+        if (cell.g || cell.rhRaw) return;
+        clearIndices.push(cell.rowNo - 2);
+      });
+    }
+
+    await applySetScopedPlan(C, N, {
+      updates,
+      appendRows,
+      clearIndices: clearIndices.sort((a, b) => a - b)
+    }, { lockedRows: currentRows });
   });
 }
 
@@ -1820,7 +1835,13 @@ export async function importSetIntoCollection(setMeta, cards) {
   const setName = toSafeCellString(setMeta.setName);
 
   // setId explizit: Zeilen unter allen Aliasen zaehlen, auch wenn db_sets das Set (noch) nicht kennt.
-  const existingMap = await readSetCollectionMap(setName, { setId }).catch(() => new Map());
+  // Legacy-Grid-Blatt: zuerst unter dem bisherigen Overview-Namen suchen (v3 kann den Anzeigenamen aendern,
+  // das alte Blatt heisst weiter wie bisher), dann unter dem neuen Namen.
+  let existingMap = new Map();
+  for (const name of await legacyGridSheetNames(setId, setName)) {
+    existingMap = await readSetCollectionMap(name, { setId }).catch(() => new Map());
+    if (existingMap.size > 0) break;
+  }
   await upsertDbSet({ ...setMeta, setId, setName }, true);
   await writeDbCardsForSet(setId, cards);
   await writeDbCollectionForSet(setId, cards, existingMap);
@@ -1830,6 +1851,23 @@ export async function importSetIntoCollection(setMeta, cards) {
     setName,
     totalCards: Number(setMeta.totalCards) || cards.length
   });
+}
+
+/**
+ * Blattnamen fuer den Legacy-Grid-Fallback eines Imports: bestehender Overview-Name des Sets (falls vorhanden)
+ * vor dem neuen Anzeigenamen. Fehlende Overview -> nur der neue Name; andere Lesefehler brechen den Import
+ * vor jedem Write ab (wie die uebrigen strikten Lesungen des Imports).
+ */
+async function legacyGridSheetNames(setId, newName) {
+  const names = [];
+  const sheets = await resolveSheetNames();
+  const rows = sheets?.overview ? await getOverviewRows(sheets).catch(rowsOrThrowUnlessMissing) : [];
+  const wanted = toSafeCellString(setId).toLowerCase();
+  const row = rows.find((r) => toSafeCellString(extractDisplayTextFromHyperlink(r?.[0])).toLowerCase() === wanted);
+  const existingName = toSafeCellString(row?.[1]);
+  if (existingName) names.push(existingName);
+  if (!names.includes(newName)) names.push(newName);
+  return names;
 }
 
 async function readLegacySetCollectionMap(setSheetName) {
@@ -1920,7 +1958,7 @@ async function resolveCollectionSetKey(setSheetName, options) {
 
 // true nur, wenn sicher feststeht: keine db_collection-Zeile unter irgendeinem Alias des Sets und kein
 // Legacy-Set-Blatt. Bei jedem Zweifel (Registry/Sheets-Metadaten nicht lesbar) false -> normaler Pfad.
-async function hasNoCollectionSource(setSheetName, setKey) {
+async function hasNoCollectionSource(setSheetName, setKey, { strict = false } = {}) {
   let setsOnly = null;
   try {
     setsOnly = await ensureSetResolver();
@@ -1929,7 +1967,7 @@ async function hasNoCollectionSource(setSheetName, setKey) {
   }
   const canonical = setsOnly?.resolveSetKey?.(setKey);
   if (!canonical) return false;
-  const rows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length);
+  const rows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, false, { strict });
   if (collectCollectionSetIds(rows, setsOnly).has(canonical.toLowerCase())) return false;
   const sheets = await resolveSheetNames().catch(() => null);
   if (!Array.isArray(sheets?.titles)) return false;
@@ -1942,9 +1980,10 @@ async function hasNoCollectionSource(setSheetName, setKey) {
  * Sammelkandidaten), damit sie readSetCollectionMap nur fuer Sets mit Zeilen aufrufen.
  * Registry nicht erreichbar -> rohe Set-IDs.
  */
-export async function listCollectionSetIds({ checkedOnly = false } = {}) {
+export async function listCollectionSetIds({ checkedOnly = false, strict = false } = {}) {
   await ensureNormalizedSchema();
-  const rows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length);
+  // strict: Lesefehler werfen statt [] (z. B. Backup-Export: nie ein unvollstaendiges Backup schreiben).
+  const rows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, false, { strict });
   const resolver = await ensureSetResolver().catch(() => null);
   return collectCollectionSetIds(rows, resolver, { checkedOnly });
 }
@@ -1956,7 +1995,8 @@ export async function listCollectionSetIds({ checkedOnly = false } = {}) {
  * Ohne Zeilen greift der Legacy-Grid-Fallback; migrierte Zeilen werden unter der kanonischen Set-ID
  * mit collectionKey angehaengt.
  * @param {string} setSheetName Set-Name (Set-Blatt / db_sets / Overview)
- * @param {{ setId?: string, resolver?: object }} [options] setId darf ein Alias sein
+ * @param {{ setId?: string, resolver?: object, strict?: boolean }} [options] setId darf ein Alias sein;
+ *   strict: Lesefehler von db_collection werfen statt einer leeren Map (Backup-Export)
  */
 export async function readSetCollectionMap(setSheetName, options = {}) {
   await ensureNormalizedSchema();
@@ -1965,10 +2005,11 @@ export async function readSetCollectionMap(setSheetName, options = {}) {
 
   // Lazy: Registry-Karten (~27 KB/Set) nur fuer Sets laden, die Zeilen (unter irgendeinem Alias) oder ein
   // Legacy-Set-Blatt haben. Gesamt-Leser (Backup, Datencheck, Sammelkandidaten) laden so nur, was noetig ist.
-  if (!options?.resolver && await hasNoCollectionSource(setSheetName, setKey)) return new Map();
+  const strict = Boolean(options?.strict);
+  if (!options?.resolver && await hasNoCollectionSource(setSheetName, setKey, { strict })) return new Map();
 
   const ctx = await resolveCollectionContext(setKey, options?.resolver || null);
-  const values = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length);
+  const values = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, false, { strict });
 
   if (!ctx) {
     const map = buildExactSetCollectionMap(values, setKey);
@@ -2145,18 +2186,24 @@ export async function updateCellBooleansBatch(sheetName, updates = [], { chunkSi
   });
 
   for (const [targetSheet, targetUpdates] of groupedByTargetSheet.entries()) {
-    const maxRow = Math.max(...targetUpdates.map((entry) => entry.row));
-    const maxCol = Math.max(...targetUpdates.map((entry) => entry.col));
-    await ensureSheetCapacity(targetSheet, maxRow, maxCol);
+    const writeTarget = async () => {
+      const maxRow = Math.max(...targetUpdates.map((entry) => entry.row));
+      const maxCol = Math.max(...targetUpdates.map((entry) => entry.col));
+      await ensureSheetCapacity(targetSheet, maxRow, maxCol);
 
-    for (let start = 0; start < targetUpdates.length; start += chunkSize) {
-      const chunk = targetUpdates.slice(start, start + chunkSize);
-      await batchPutValues(chunk.map((entry) => ({
-        range: buildRange(targetSheet, `${colToA1(entry.col)}${entry.row}`),
-        values: [[Boolean(entry.value)]]
-      })));
-      if (targetSheet === DB_SHEETS.collection) patchCollectionRowCache(chunk);
-    }
+      for (let start = 0; start < targetUpdates.length; start += chunkSize) {
+        const chunk = targetUpdates.slice(start, start + chunkSize);
+        await batchPutValues(chunk.map((entry) => ({
+          range: buildRange(targetSheet, `${colToA1(entry.col)}${entry.row}`),
+          values: [[Boolean(entry.value)]]
+        })));
+        if (targetSheet === DB_SHEETS.collection) patchCollectionRowCache(chunk);
+      }
+    };
+    // db_collection-Zellen ueber dieselbe Sperre wie Anhaengen/Import (writeDbCollectionForSet): kein Import-Plan
+    // aus einem aelteren Lesestand kann ein paralleles Abwaehlen ueberschreiben. Nie innerhalb dieser Sperre aufrufen.
+    if (targetSheet === DB_SHEETS.collection) await withSheetAppendLock(targetSheet, writeTarget);
+    else await writeTarget();
   }
 
   return normalizedUpdates.length;

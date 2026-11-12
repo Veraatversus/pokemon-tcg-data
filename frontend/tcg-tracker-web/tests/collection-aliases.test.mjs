@@ -24,6 +24,7 @@ const {
   cellsForUpdate,
   updateCellBooleansBatch,
   importSetIntoCollection,
+  listCollectionSetIds,
   resetSheetsDataCaches
 } = sheetsDb;
 
@@ -344,6 +345,20 @@ test('Legacy-Grid-Migration: zwei parallele Erst-Lesungen haengen nur einmal an'
   assert.equal(b.get('GG1').cells.length, 1);
 });
 
+// Final-Review Finding 8: neuer v3-Anzeigename darf das alte Legacy-Grid-Blatt nicht verdecken.
+test('Import mit neuem Anzeigenamen: Legacy-Grid wird unter dem bisherigen Overview-Namen gefunden', async () => {
+  const grid = [[], [], ['001', '', '', 'GG01', '', ''], [], [true, true, '', true, false, ''], []];
+  const fake = setup({ overview: [['swsh12pt5', 'Crown Zenith']], extraSheets: { 'Crown Zenith': grid } });
+  await importSetIntoCollection({ setId: 'swsh12pt5', setName: 'Crown Zenith (TCGdex)' }, v3Cards(['1', 'GG1', '2']));
+  const rows = collectionRows(fake).map((r) => r.slice(0, 4));
+  assert.deepEqual(rows.filter((r) => r[2] === true), [
+    ['swsh12pt5', '1', true, true],
+    ['swsh12pt5', 'GG1', true, false]
+  ], 'Haken aus dem alten Blatt uebernommen');
+  assert.deepEqual(rows.find((r) => r[1] === '2'), ['swsh12pt5', '2', false, false]);
+  assert.equal(new Set(rows.map((r) => r[1])).size, rows.length, 'keine Doppelzeilen');
+});
+
 test('Legacy-Grid-Migration ohne Registry: parallele Erst-Lesungen haengen nur einmal an', async () => {
   const grid = [[], [], ['001', '', ''], [], [true, false, ''], []];
   const fake = setup({ extraSheets: { Altset: grid }, registry: [undefined, {}], readDelayMs: { Altset: 60 } });
@@ -508,6 +523,24 @@ test('Import: veraltete existingMap loescht keinen frischen Haken (ODER)', async
   // importSetIntoCollection liest existingMap aus dem Cache, writeDbCollectionForSet liest frisch.
   await importSetIntoCollection({ setId: 'swsh12pt5', setName: 'Crown Zenith' }, v3CardsAt('swsh12pt5', ['1']));
   assert.deepEqual(collectionRows(fake)[0].slice(0, 4), ['swsh12pt5', '1', true, true]);
+});
+
+// Final-Review Finding 6: Plan unter der Sperre mit frischem Read – kein veraltetes true nach parallelem Abwaehlen.
+test('Import: paralleles Abwaehlen waehrend des Imports bleibt abgewaehlt (kein veraltetes true)', async () => {
+  for (const registry of [[SYN_SETS, SYN_CARDS], [undefined, {}]]) {
+    const fake = setup({
+      overview: [['swsh12pt5', 'Crown Zenith']],
+      collection: [['swsh12pt5', '1', true, true, T0]],
+      registry,
+      // db_cards-Lesung (writeDbCardsForSet) verzoegern: das Abwaehlen faellt zwischen frueher Lesung und Plan.
+      readDelayMs: { db_cards: (range) => (range.includes('A2:AI200000') ? 60 : 0) }
+    });
+    const importing = importSetIntoCollection({ setId: 'swsh12pt5', setName: 'Crown Zenith' }, v3CardsAt('swsh12pt5', ['1']));
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    await updateCellBooleansBatch('Crown Zenith', [{ row: 2, col: 3, value: false }, { row: 2, col: 4, value: false }]);
+    await importing;
+    assert.deepEqual(collectionRows(fake)[0].slice(0, 4), ['swsh12pt5', '1', false, false], registry[0] ? 'mit Registry' : 'ohne Registry');
+  }
 });
 
 test('Registry nicht erreichbar: Import schreibt rohe Nummer, trifft GG01 ohne Doppelzeile', async () => {
@@ -682,4 +715,23 @@ test('Referenz-DBs: buildCollectionMap ueber echte db_collection-Zeilen (nur Zae
     assert.equal(lost, 0);
     assert.equal(total.unresolvedAlias, 0);
   }
+});
+
+// Final-Review Finding 7: strikte Lesungen fuer den Backup-Export.
+test('strict: db_collection-Lesefehler werfen statt leerer Map / leerer Set-Liste', async () => {
+  const dataRange = { match: (range) => range.includes('!A2:') };
+  const fail = Object.assign(new Error('Backend Error'), { status: 500 });
+  const fake = setup({ collection: [['me5', '1', true, false, T0]] });
+  fake.failNextReads('db_collection', 1, fail, dataRange);
+  await assert.rejects(listCollectionSetIds({ checkedOnly: true, strict: true }), /Backend Error/);
+  resetSheetsDataCaches();
+  fake.failNextReads('db_collection', 1, fail, dataRange);
+  await assert.rejects(readSetCollectionMap('Mega Evolution 5', { setId: 'me5', strict: true }), /Backend Error/);
+  // Nicht-strikt (Anzeige) bleibt tolerant: leere Liste statt Fehler
+  resetSheetsDataCaches();
+  fake.failNextReads('db_collection', 1, fail, dataRange);
+  assert.equal((await listCollectionSetIds({ checkedOnly: true })).size, 0);
+  resetSheetsDataCaches();
+  const ok = await readSetCollectionMap('Mega Evolution 5', { setId: 'me5', strict: true });
+  assert.equal(ok.get('1').g, true);
 });

@@ -82,7 +82,7 @@ export function createFakeSpreadsheet(initial = {}, { readDelayMs = {} } = {}) {
         get: async (args) => {
           const sheetOfRange = parseRange(args.range).sheet;
           const pending = failures.get(sheetOfRange);
-          if (pending && pending.count > 0) {
+          if (pending && pending.count > 0 && (!pending.match || pending.match(args.range))) {
             pending.count -= 1;
             reads.push(args.range);
             throw pending.error;
@@ -119,9 +119,10 @@ export function createFakeSpreadsheet(initial = {}, { readDelayMs = {} } = {}) {
     reads,
     rows: (title) => sheets.get(title),
     writesTo: (title) => writes.filter((w) => w.sheet === title),
-    // Die naechsten count Lesezugriffe auf das Blatt title schlagen mit error fehl.
-    failNextReads: (title, count = 1, error = Object.assign(new Error('Backend Error'), { status: 500 })) => {
-      failures.set(title, { count, error });
+    // Die naechsten count Lesezugriffe auf das Blatt title schlagen mit error fehl (optional nur Ranges, fuer
+    // die match(range) true liefert).
+    failNextReads: (title, count = 1, error = Object.assign(new Error('Backend Error'), { status: 500 }), { match = null } = {}) => {
+      failures.set(title, { count, error, match });
     }
   };
 }
