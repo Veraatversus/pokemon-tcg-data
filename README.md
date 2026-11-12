@@ -21,7 +21,7 @@ Die Pokémon TCG API (pokemontcg.io) wird am 1. März 2027 abgeschaltet. Dieses 
 ## Automatisierung
 
 - **Daily Sync TCGdex to Master** (`sync-tcgdex.yml`, täglich 02:00 UTC, auf `master`): Tests → TCGdex spiegeln → Set-Assets prüfen (inkrementell, darf fehlschlagen) → Matching mit Qualitätsschwelle → Regressionstests → v3-API und Registry bauen → committen. Bei einem Fehler wird nichts committet, und es entsteht ein Issue mit dem Label `upstream-sync`.
-- **Build Cardmarket Data** startet nach dem Sync und erzeugt `cardmarket/`.
+- **Build Cardmarket Data** startet nach dem Sync und zusätzlich täglich um 03:30 UTC (falls der Auslöser über den Sync ausbleibt; zwei Läufe am Tag laufen nacheinander) und erzeugt `cardmarket/` mit den Tagespreisen. Der v3-Build liest daraus fehlende Cardmarket-IDs nach (`api/v3/reports/cardmarket-ids.json`).
 - **Promote Master to Dev and Release** startet danach und führt `master` in `dev` und `release` zusammen. Die App-Dateien dieser Branches bleiben dabei erhalten.
 - **Promote Dev to Release** / **Manual Merge Dev to Release** (manuell) übernehmen `dev` nach `release`.
 - **Deploy Pages** veröffentlicht `release` im Wurzelverzeichnis und `dev` als Vorschau unter `/dev`.

@@ -14,6 +14,7 @@ import { learnTables } from './merge/learn-tables.mjs';
 import { loadLegals } from './merge/legalities.mjs';
 import { mergeCard } from './merge/merge-card.mjs';
 import { mergeSet } from './merge/merge-set.mjs';
+import { fillCardmarketIds } from './merge/cardmarket-ids.mjs';
 import { setAssetCandidates } from './merge/images.mjs';
 import { countGroups } from './sources/verify-assets.mjs';
 import { sortLocalIds } from '../cardmarket/tcgdex-helper/generate-tcgdex-helpers.mjs';
@@ -122,6 +123,7 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
   const sets = [];
   const cardsBySet = new Map();
   const skippedNoSource = [];
+  const subsetExpansion = new Map(); // Unterset-Karte -> Cardmarket-Expansion ihres TCGdex-Untersets
   const lostSource = [];
   const matchStatus = Object.fromEntries(STATUSES.map((s) => [s, 0]));
   for (const setId of Object.keys(registry.sets).sort(cmp)) {
@@ -150,6 +152,8 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
         tables, legals, assetsIndex, sourceCommits,
       });
       matchStatus[card.matchStatus]++;
+      const primarySet = tcgdexCards[0]?.set;
+      if (primarySet && tcgdexSet && primarySet.id !== tcgdexSet.id) subsetExpansion.set(card.id, primarySet.cardmarketId ?? null);
       cards.push(card);
     }
     cards.sort((a, b) => sortLocalIds(a.cardId, b.cardId) || cmp(a.cardId, b.cardId));
@@ -160,6 +164,11 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
       tcgdexSet, cardCount: cards.length, assetsIndex, assetsVerified, cardmarketTracker,
     }));
   }
+  // Fehlende Cardmarket-IDs aus cardmarket/sets/<expansionId>.json nachtragen (Nummer + Name, kein Raten).
+  const cardmarketIds = fillCardmarketIds({
+    sets, cardsBySet, subsetExpansion,
+    loadExpansion: (id) => (Number.isInteger(id) ? readJsonOr(p('cardmarket', 'sets', `${id}.json`), null) : null),
+  });
   sets.sort((a, b) => cmp(a.releaseDate ?? '9999', b.releaseDate ?? '9999') || cmp(a.id, b.id));
 
   if (lostSource.length) {
@@ -181,6 +190,9 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
   for (const [setId, cards] of [...cardsBySet].sort((a, b) => cmp(a[0], b[0]))) {
     for (const c of cards) {
       const entry = { setId, cardId: c.cardId, number: c.number, name: c.name };
+      // cm: Cardmarket-Produkt-ID wie im Frontend: erste Variante mit cardmarketId, sonst ids.cardmarket[0].
+      const cm = (c.variants ?? []).find((v) => typeof v.cardmarketId === 'number')?.cardmarketId ?? c.ids?.cardmarket?.[0];
+      if (typeof cm === 'number') entry.cm = cm;
       const optional = {
         nameDe: c.i18n?.de?.name, img: c.images?.small, imgDe: c.i18n?.de?.images?.small,
         types: c.types, rarity: c.rarity, artist: c.artist, supertype: c.supertype,
@@ -217,10 +229,11 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
   // Gelernte Tabellen deterministisch ablegen, damit Aenderungen im Diff sichtbar werden.
   fs.mkdirSync(path.join(outAbs, 'reports'), { recursive: true });
   writeIfChanged(path.join(outAbs, 'reports', 'learned-tables.json'), toJson(tables));
+  writeIfChanged(path.join(outAbs, 'reports', 'cardmarket-ids.json'), toJson(cardmarketIds));
   if (doWriteRegistry && !tcgdexOnly) writeRegistry(registryAbs, registry);
 
   return {
-    sets: sets.length, cards: cardTotal, matchStatus, registryChanges: changes, skippedNoSource, missingImages, assets,
+    sets: sets.length, cards: cardTotal, matchStatus, cardmarketIds: { ...cardmarketIds.totals, duplicates: cardmarketIds.duplicates }, registryChanges: changes, skippedNoSource, missingImages, assets,
     tables: Object.fromEntries(Object.entries(tables).map(([k, v]) => [k, Object.keys(v).length])),
     warnings: db.warnings.length,
   };
@@ -268,6 +281,8 @@ function main() {
       console.log(`WARNUNG: ${mi.total} Karten ohne Bild (images fehlt):`);
       for (const [setId, n] of Object.entries(mi.bySet).sort((a, b) => b[1] - a[1] || cmp(a[0], b[0]))) console.log(`  ${setId}: ${n}`);
     }
+    const cm = r.cardmarketIds;
+    console.log(`Cardmarket-IDs: ${cm.cards} Karten, ${cm.tcgdex} von TCGdex, ${cm.matched} nachgetragen, ${cm.missing} fehlen (${cm.ambiguous} mehrdeutig); doppelte TCGdex-IDs ${cm.duplicates.ids} (${cm.duplicates.cards} Karten, ${cm.duplicates.corrected} korrigiert, ${cm.duplicates.kept} belassen); Details api/v3/reports/cardmarket-ids.json`);
     console.log(`Assets: ${r.assets.ok} ok, ${r.assets.missing} fehlen`);
     console.log(`Gelernte Tabellen: ${Object.entries(r.tables).map(([k, n]) => `${k} ${n}`).join(', ')}`);
     const counts = new Map();
