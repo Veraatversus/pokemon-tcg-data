@@ -101,7 +101,6 @@ export function createStatsRenderer({
       ]);
 
       (Array.isArray(cards) ? cards : []).forEach((card) => {
-        const normalizedNumber = normalizeCardNumber(card?.number || '');
         const collectionKey = collectionKeyOf(card);
         if (!collectionKey) return;
 
@@ -109,7 +108,7 @@ export function createStatsRenderer({
         const isCollected = Boolean(mapEntry?.g);
         if (!isCollected) return;
 
-        const cardKey = `${setId}::${normalizedNumber}`;
+        const cardKey = `${setId}::${collectionKey}`;
         if (dedupe.has(cardKey)) return;
         dedupe.add(cardKey);
 

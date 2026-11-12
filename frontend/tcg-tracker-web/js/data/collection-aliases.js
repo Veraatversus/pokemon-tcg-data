@@ -76,7 +76,22 @@ export function ensureSetResolver(opts = {}) {
  * Nicht aufloesbare Set-Schluessel erscheinen unveraendert.
  * @returns {Set<string>} kleingeschriebene Set-IDs
  */
+// Memo je Zeilen-Array (readDbRows-Cache) und Resolver, nur fuer checkedOnly=false: Zeilen-Existenz aendert
+// sich nur durch Anhaengen (neues Array), Zell-Patches (g/rh) mutieren in place und betreffen nur checkedOnly.
+const collectionSetIdsMemo = new WeakMap();
+
 export function collectCollectionSetIds(rows, resolver, { checkedOnly = false } = {}) {
+  if (!checkedOnly && Array.isArray(rows)) {
+    const cached = collectionSetIdsMemo.get(rows);
+    if (cached && cached.resolver === resolver && cached.length === rows.length) return cached.result;
+    const result = computeCollectionSetIds(rows, resolver, { checkedOnly });
+    collectionSetIdsMemo.set(rows, { resolver, length: rows.length, result });
+    return result;
+  }
+  return computeCollectionSetIds(rows, resolver, { checkedOnly });
+}
+
+function computeCollectionSetIds(rows, resolver, { checkedOnly = false } = {}) {
   const out = new Set();
   const memo = new Map();
   (rows || []).forEach((row) => {

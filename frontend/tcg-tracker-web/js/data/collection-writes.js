@@ -36,10 +36,10 @@ export function emptyCollectionEntry(card, key = collectionKeyOf(card)) {
   };
 }
 
-/** true, wenn der Eintrag mindestens eine beschreibbare Zeile hat. */
+/** true, wenn der Eintrag mindestens eine beschreibbare Zelle hat (gleiche Regel wie cellsForUpdate). */
 export function hasEntryCells(entry) {
   if (Array.isArray(entry?.cells) && entry.cells.length > 0) return true;
-  return Boolean(entry?.gCell && entry?.rhCell);
+  return Boolean(entry?.gCell || entry?.rhCell);
 }
 
 /**
@@ -183,4 +183,27 @@ export async function ensureEntryWith(ensureCollectionEntry, set, entry, key) {
   if (pending) throw pending;
   const ensured = await ensureCollectionEntry(set.setName, key, { setId: set?.setId });
   return adoptEnsuredEntry(entry, ensured);
+}
+
+/**
+ * Teilt Karten-Updates ({ updates: [] } je Karte) in Chunks von hoechstens `maxCells` Zellen, ohne eine Karte
+ * zu teilen (eine Karte mit mehr Zellen bildet einen eigenen Chunk). Karten ohne Updates entfallen.
+ */
+export function chunkCardUpdates(items, maxCells = 200) {
+  const chunks = [];
+  let current = [];
+  let size = 0;
+  for (const item of Array.isArray(items) ? items : []) {
+    const count = Array.isArray(item?.updates) ? item.updates.length : 0;
+    if (!count) continue;
+    if (current.length && size + count > maxCells) {
+      chunks.push(current);
+      current = [];
+      size = 0;
+    }
+    current.push(item);
+    size += count;
+  }
+  if (current.length) chunks.push(current);
+  return chunks;
 }

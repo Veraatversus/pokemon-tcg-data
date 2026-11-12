@@ -22,6 +22,7 @@ const {
   readSetCollectionMap,
   readDbCardsForSet,
   listCollectionSetIds,
+  readSummarySheet,
 
   resetSheetsDataCaches
 } = await import('../js/data/sheets-db.js');
@@ -163,4 +164,29 @@ test('readDbCardsForSet (Offline-Fallback) setzt collectionKey aus der v3-id, so
   setup({ dbCards: [row('swsh12pt5-GG1', 'GG01'), row('swsh12pt5-1', '001'), row('swsh12pt5gg-GG02', 'GG02')] });
   const cards = await readDbCardsForSet('swsh12pt5');
   assert.deepEqual(cards.map((c) => [c.cardId, c.collectionKey]), [['swsh12pt5-GG1', 'GG1'], ['swsh12pt5-1', '1'], ['swsh12pt5gg-GG02', 'GG2']]);
+});
+
+test('readSummarySheet: Alias-Zeilen zaehlen zum Hauptset, eine Karte unter zwei Aliasen zaehlt einmal', async () => {
+  setup({
+    dbSets: [
+      dbSetRow('swsh12pt5', true, 'Crown Zenith'),
+      dbSetRow('swsh12pt5gg', false, 'Crown Zenith Galarian Gallery'),
+      dbSetRow('me5', true, 'Mega Evolution 5')
+    ],
+    collection: [
+      ['swsh12pt5', '1', true, false, T0],
+      ['swsh12pt5', 'GG1', false, false, T0],
+      ['swsh12pt5gg', 'GG01', true, true, T0],
+      ['me5', '1', true, false, T0],
+      ['me5', '001', false, false, T0]
+    ]
+  });
+  const summary = await readSummarySheet();
+  const crz = summary.find((row) => row.setName === 'Crown Zenith');
+  assert.deepEqual([crz.total, crz.collected, crz.rh], [2, 2, 1]);
+  assert.equal(summary.some((row) => row.setName === 'Crown Zenith Galarian Gallery'), false);
+  const me5 = summary.find((row) => row.setName === 'Mega Evolution 5');
+  assert.deepEqual([me5.total, me5.collected], [1, 1]);
+  // Registry-Karten nur fuer das Set mit Zeilen unter mehreren Aliasen
+  assert.deepEqual(fetchLog, [`${REG}sets.json`, `${REG}cards/swsh12pt5.json`]);
 });

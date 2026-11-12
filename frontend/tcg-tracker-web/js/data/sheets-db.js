@@ -1371,6 +1371,80 @@ async function readRawSetsOverviewData() {
  * Liest den aktuellen Stand der Collection Summary.
  * @returns {Promise<Array<{setName, total, collected, rh, percent, ptcgoCode}>>}
  */
+/**
+ * Zaehler je kanonischem Set (kleingeschrieben) aus db_collection.
+ * - Sets, deren Zeilen nur unter einem Set-Schluessel liegen: Dedupe per normalizeCardNumber(cardId) –
+ *   ohne Registry-Karten (lazy).
+ * - Sets mit Zeilen unter mehreren Aliasen: Registry-Karten nur dieses Sets laden und per collectionKey
+ *   deduplizieren (buildCollectionMap; g = ODER ueber alle Zeilen). Mehrdeutige Altzeilen zaehlen als eine Karte.
+ * Registry nicht erreichbar -> rohe Set-IDs wie bisher.
+ */
+async function aggregateCollectionCounts(collectionRows, setsResolver) {
+  const groups = new Map(); // canonicalLower -> { canonical, setKeys:Set, rows: [] }
+  const memo = new Map();
+  (collectionRows || []).forEach((row) => {
+    const setKey = toSafeCellString(row?.[0]);
+    if (!setKey || !toSafeCellString(row?.[1])) return;
+    const lowerKey = setKey.toLowerCase();
+    let canonical = memo.get(lowerKey);
+    if (canonical === undefined) {
+      canonical = setsResolver?.resolveSetKey?.(setKey) || setKey;
+      memo.set(lowerKey, canonical);
+    }
+    const key = canonical.toLowerCase();
+    if (!groups.has(key)) groups.set(key, { canonical, setKeys: new Set(), rows: [] });
+    const group = groups.get(key);
+    group.setKeys.add(lowerKey);
+    group.rows.push(row);
+  });
+
+  const agg = new Map();
+  for (const [key, group] of groups) {
+    const counts = { total: 0, collected: 0, rh: 0 };
+    let counted = false;
+    if (setsResolver && group.setKeys.size > 1) {
+      try {
+        const resolver = await ensureResolverForSet(group.canonical);
+        // Zeilenindizes spielen fuer die Zaehlung keine Rolle.
+        const { map } = buildCollectionMap(group.rows, { canonicalSetId: group.canonical, resolver });
+        const seenAmbiguous = new Set();
+        for (const entry of map.values()) {
+          if (entry.cells?.length) {
+            counts.total += 1;
+            if (entry.g) counts.collected += 1;
+            if (entry.rh) counts.rh += 1;
+          } else if (entry.ambiguous && !seenAmbiguous.has(entry.ambiguous)) {
+            seenAmbiguous.add(entry.ambiguous);
+            counts.total += 1;
+            if (entry.ambiguous.g) counts.collected += 1;
+            if (entry.ambiguous.rh) counts.rh += 1;
+          }
+        }
+        counted = true;
+      } catch (err) {
+        console.warn('[readSummarySheet] Registry-Karten nicht verfuegbar, Zaehlung ohne Alias-Dedupe:', group.canonical, err?.message || err);
+      }
+    }
+    if (!counted) {
+      const perCard = new Map();
+      group.rows.forEach((row) => {
+        const cardKey = `${toSafeCellString(row[0]).toLowerCase()}::${normalizeCardNumber(toSafeCellString(row[1]))}`;
+        const g = toBoolean(row[2]);
+        const rh = toBoolean(row[3]) && g;
+        const previous = perCard.get(cardKey) || { g: false, rh: false };
+        perCard.set(cardKey, { g: previous.g || g, rh: previous.rh || rh });
+      });
+      perCard.forEach(({ g, rh }) => {
+        counts.total += 1;
+        if (g) counts.collected += 1;
+        if (rh) counts.rh += 1;
+      });
+    }
+    agg.set(key, counts);
+  }
+  return agg;
+}
+
 export async function readSummarySheet() {
   await ensureNormalizedSchema();
   const setRows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length);
@@ -1406,30 +1480,31 @@ export async function readSummarySheet() {
       }
     });
 
-    const latestPerCard = new Map();
-    collectionRows.forEach((row) => {
-      const setId = toSafeCellString(row[0]);
-      const cardId = toSafeCellString(row[1]);
-      if (!setId || !cardId) return;
-      latestPerCard.set(`${setId}::${cardId}`, row);
-    });
+    // Alias-faehig: Zeilen und db_sets-Zeilen unter Alias-IDs (z. B. swsh12pt5gg) zaehlen zum kanonischen Set;
+    // eine Karte mit Zeilen unter mehreren Aliasen zaehlt einmal (gesammelt, wenn irgendeine Zeile g hat).
+    const setsResolver = await ensureSetResolver().catch(() => null);
+    const canonicalKey = (setId) => (setsResolver?.resolveSetKey?.(setId) || setId).toLowerCase();
+    const agg = await aggregateCollectionCounts(collectionRows, setsResolver);
 
-    const agg = new Map();
-    latestPerCard.forEach((row) => {
-      const setId = toSafeCellString(row[0]);
-      if (!agg.has(setId)) agg.set(setId, { total: 0, collected: 0, rh: 0 });
-      const bucket = agg.get(setId);
-      const g = toBoolean(row[2]);
-      const rh = toBoolean(row[3]) && g;
-      bucket.total += 1;
-      if (g) bucket.collected += 1;
-      if (rh) bucket.rh += 1;
-    });
+    const canonicalMeta = new Map();
+    for (const [setId, meta] of setsById.entries()) {
+      const key = canonicalKey(setId);
+      const isCanonicalRow = key === setId.toLowerCase();
+      const current = canonicalMeta.get(key);
+      if (!current) {
+        canonicalMeta.set(key, { ...meta, isCanonicalRow });
+      } else {
+        const imported = current.imported || meta.imported;
+        canonicalMeta.set(key, isCanonicalRow && !current.isCanonicalRow
+          ? { ...meta, imported, isCanonicalRow }
+          : { ...current, imported });
+      }
+    }
 
     const result = [];
-    for (const [setId, meta] of setsById.entries()) {
+    for (const [key, meta] of canonicalMeta.entries()) {
       if (!meta.imported) continue;
-      const counts = agg.get(setId) || { total: 0, collected: 0, rh: 0 };
+      const counts = agg.get(key) || { total: 0, collected: 0, rh: 0 };
       const total = counts.total || meta.totalMeta || 0;
       const collected = counts.collected || 0;
       const rh = counts.rh || 0;

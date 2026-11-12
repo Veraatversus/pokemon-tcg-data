@@ -27,10 +27,12 @@ import {
   pendingAmbiguityError,
   isAmbiguousLegacyKeyError,
   describeAmbiguousLegacyKey,
-  compareSetCollection
+  compareSetCollection,
+  chunkCardUpdates
 } from './data/collection-writes.js';
 import { needsApiCardEnrichment, describeCardDataFailure, NO_CARD_DATA_MESSAGE } from './core/card-enrichment.js';
 import { findSetByIdOrAlias } from './data/set-aliases.js';
+import { selectSearchSets } from './features/search/search-index-prefilter.js';
 import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets } from './data/pokemon-api.js?v=20260613-tcgdex-merge-fix-v2';
 import { resolveSeriesGroupInfo } from './data/schema-contract.js?v=20260613-tcgdex-merge-fix-v2';
 import {
@@ -6080,7 +6082,7 @@ function buildStatsPriceTabContent({
             const reverseClass = isReverse ? ' is-reverse' : '';
             const cardmarketUrl = getItemCardmarketUrl(card);
             return `
-            <li class="stats-price-rich-item${reverseClass}" data-set-id="${escapeHtml(card?.setId || '')}" data-stats-card-key="${escapeHtml(`${escapeHtml(card?.setId || '')}::${normalizeCardNumber(card?.card?.number || card?.cardNumber || card?.cardKey || '')}`)}">
+            <li class="stats-price-rich-item${reverseClass}" data-set-id="${escapeHtml(card?.setId || '')}" data-stats-card-key="${escapeHtml(statsPriceCardKey(card))}">
               <span class="stats-price-rich-rank">${index + 1}</span>
               <div class="stats-price-rich-main">
                 <strong>${escapeHtml(card?.cardName || 'Unbekannte Karte')}${isReverse ? ' <span class="stats-price-rh-badge" title="Als Reverse Holo gesammelt">RH</span>' : ''}</strong>
@@ -6217,7 +6219,7 @@ function buildStatsPriceTabContent({
             const reverseClass = isReverse ? ' is-reverse' : '';
             const cardmarketUrl = getItemCardmarketUrl(item);
             return `
-            <li class="stats-price-rich-item stats-price-rich-item--thumb${reverseClass}" data-set-id="${escapeHtml(item?.setId || '')}" data-stats-card-key="${escapeHtml(`${escapeHtml(item?.setId || '')}::${normalizeCardNumber(item?.card?.number || item?.cardKey || '')}`)}" data-watchlist-card="1" data-watchlist-card-number="${escapeHtml(watchlistCardNumber)}">
+            <li class="stats-price-rich-item stats-price-rich-item--thumb${reverseClass}" data-set-id="${escapeHtml(item?.setId || '')}" data-stats-card-key="${escapeHtml(statsPriceCardKey(item))}" data-watchlist-card="1" data-watchlist-card-key="${escapeHtml(collectionKeyOf(item?.card))}" data-watchlist-card-number="${escapeHtml(watchlistCardNumber)}">
               <span class="stats-price-rich-rank">${globalRank}</span>
               <span class="stats-price-thumb" aria-hidden="true">
                 ${renderStatsPriceThumbMarkup(item)}
@@ -6290,7 +6292,7 @@ function buildStatsPriceTabContent({
         const reverseClass = isReverse ? ' is-reverse' : '';
         const cardmarketUrl = getItemCardmarketUrl(item);
         return `
-            <li class="stats-price-rich-item${reverseClass}" ${item?.setId ? `data-set-id="${escapeHtml(item.setId)}" data-stats-card-key="${escapeHtml(`${escapeHtml(item.setId)}::${normalizeCardNumber(item?.card?.number || item?.cardKey || '')}`)}"` : ''}>
+            <li class="stats-price-rich-item${reverseClass}" ${item?.setId ? `data-set-id="${escapeHtml(item.setId)}" data-stats-card-key="${escapeHtml(statsPriceCardKey(item))}"` : ''}>
               <span class="stats-price-rich-rank">${index + 1}</span>
               <div class="stats-price-rich-main">
                 <strong>${escapeHtml(item?.cardName || item?.card?.name || 'Unbekannte Karte')}${isReverse ? ' <span class="stats-price-rh-badge" title="Als Reverse Holo gesammelt">RH</span>' : ''}</strong>
@@ -6894,16 +6896,16 @@ function renderStatsPriceSnapshot({
     if (!setId) return null;
 
     const cardNumberRaw = String(watchlistRow.dataset.watchlistCardNumber || '').trim();
+    // collectionKey zuerst (eindeutig); Nummer nur als Fallback fuer Zeilen ohne data-watchlist-card-key.
+    const targetCollectionKey = String(watchlistRow.dataset.watchlistCardKey || '').trim();
     const targetCardKey = normalizeCardNumber(cardNumberRaw);
-    if (!targetCardKey) return null;
+    if (!targetCollectionKey && !targetCardKey) return null;
 
     const sourceItems = Array.isArray(state.statsPrice.items) ? state.statsPrice.items : [];
-    const matched = sourceItems.find((item) => {
-      const itemSetId = String(item?.setId || '').trim();
-      if (itemSetId !== setId) return false;
-      const itemCardKey = normalizeCardNumber(item?.card?.number || item?.cardKey || '');
-      return itemCardKey === targetCardKey;
-    }) || null;
+    const inSet = sourceItems.filter((item) => String(item?.setId || '').trim() === setId);
+    const matched = (targetCollectionKey && inSet.find((item) => collectionKeyOf(item?.card) === targetCollectionKey))
+      || inSet.find((item) => normalizeCardNumber(item?.card?.number || item?.cardKey || '') === targetCardKey)
+      || null;
 
     const setMeta = getSetById(setId) || {
       setId,
@@ -7094,10 +7096,11 @@ async function buildCollectedCardCandidates() {
       const isCollected = Boolean(mapEntry?.g);
       if (!isCollected) return;
 
-      if (dedupe.has(`${setId}::${collectionKey}`)) return;
-      dedupe.add(`${setId}::${collectionKey}`);
-      // Anzeige-/Watchlist-Schluessel der Preisstatistik bleibt nummernbasiert (kein Sammlungs-Lookup).
-      const cardKey = `${setId}::${normalizeCardNumber(card?.number || '') || collectionKey}`;
+      // Schluessel der Preisstatistik = setId::collectionKey (nicht persistiert; Watchlist-Zeilen tragen
+      // zusaetzlich die Nummer als Fallback).
+      const cardKey = `${setId}::${collectionKey}`;
+      if (dedupe.has(cardKey)) return;
+      dedupe.add(cardKey);
 
       candidates.push({
         cardKey,
@@ -7581,30 +7584,6 @@ function getSearchResultKey(card = {}, set = null) {
   return `${setId}::${cardKey || fallbackName || 'card'}`;
 }
 
-function getSearchResultsInOrder(resultsMap, orderedKeys = []) {
-  if (!(resultsMap instanceof Map)) return [];
-  if (!Array.isArray(orderedKeys) || !orderedKeys.length) {
-    return Array.from(resultsMap.values());
-  }
-
-  const orderedResults = [];
-  const seenKeys = new Set();
-
-  orderedKeys.forEach((key) => {
-    if (!resultsMap.has(key)) return;
-    orderedResults.push(resultsMap.get(key));
-    seenKeys.add(key);
-  });
-
-  resultsMap.forEach((value, key) => {
-    if (!seenKeys.has(key)) {
-      orderedResults.push(value);
-    }
-  });
-
-  return orderedResults;
-}
-
 function renderSearchToolbarMeta({
   rawQuery = '',
   searchScopeMode = SEARCH_SCOPE_IMPORTED,
@@ -7770,7 +7749,7 @@ async function runSearch(options = {}) {
   }
   // Fr die eigentliche Suche das importierte Set bevorzugen (hat Collection-Daten),
   // fallback auf das Set aus allSets falls nicht importiert.
-  const setsToSearch = structuredQuery
+  let setsToSearch = structuredQuery
     ? [baseSetsToSearch.find((s) => s.setId === structuredQuery.setId) ?? structuredQuery.set]
     : baseSetsToSearch;
   if (!setsToSearch.length) {
@@ -7789,10 +7768,25 @@ async function runSearch(options = {}) {
     isSearching: true,
   });
 
+  // Vorauswahl ueber api/v3/search-index.json (Name/Name DE/Nummer + Set-Felder): Kartendateien nur fuer
+  // Sets mit Treffern laden. Strukturierte Suche = ein Set, ohne Vorauswahl. Kein Treffer im Index (z. B.
+  // Suche nach Seltenheit/Typ/Kuenstler) oder Index nicht erreichbar -> alle Sets wie bisher.
+  if (!structuredQuery && setsToSearch.length > 1) {
+    const preselected = await selectSearchSets({
+      sets: setsToSearch,
+      matchCard: (card) => computeSearchScore(card, query, null, mixedQuery, null) >= 0,
+      matchSet: (set) => !mixedQuery && computeSearchScore({}, query, null, null, set) >= 0,
+      signal: abortController.signal
+    }).catch((err) => {
+      if (err?.name !== 'AbortError') console.warn('[runSearch] search-index nicht verfuegbar, voller Scan:', err?.message || err);
+      return null;
+    });
+    if (isStale() || isAborted()) return;
+    if (Array.isArray(preselected)) setsToSearch = preselected;
+  }
+
   const resultsMap = new Map();
-  const apiRenderOrderKeys = null;
   let searchedSetsCount = 0;
-  const apiProcessedCount = 0;
   let shouldStopSearch = false;
 
   const upsertMatches = (cards, set, dbMap) => {
@@ -7804,7 +7798,6 @@ async function runSearch(options = {}) {
 
       matchCount += 1;
       const resultKey = getSearchResultKey(card, set);
-      const hadKey = resultsMap.has(resultKey);
       resultsMap.set(resultKey, {
         card,
         set,
@@ -7814,23 +7807,13 @@ async function runSearch(options = {}) {
         apiOnly: Boolean(card?.__searchApiOnly) || !toBoolean(set?.imported),
         resultKey,
       });
-      if (!hadKey && Array.isArray(apiRenderOrderKeys) && !apiRenderOrderKeys.includes(resultKey)) {
-        apiRenderOrderKeys.push(resultKey);
-      }
     });
 
     return matchCount;
   };
 
-  const renderCurrentResults = ({
-    isSearching = false,
-    preserveSortedPrefix = false,
-    apiProcessed = apiProcessedCount,
-    totalApiSets = 0,
-  } = {}) => {
-    const currentResults = preserveSortedPrefix
-      ? getSearchResultsInOrder(resultsMap, apiRenderOrderKeys)
-      : Array.from(resultsMap.values());
+  const renderCurrentResults = ({ isSearching = false } = {}) => {
+    const currentResults = Array.from(resultsMap.values());
 
     if (!currentResults.length) return;
     state.lastSearchResults = currentResults.slice(0, 60);
@@ -7839,8 +7822,8 @@ async function runSearch(options = {}) {
       rawQuery,
       setsProcessed: searchedSetsCount,
       totalSets: setsToSearch.length,
-      apiProcessed,
-      totalApiSets,
+      apiProcessed: 0,
+      totalApiSets: 0,
       isSearching,
     });
   };
@@ -8743,6 +8726,7 @@ function updateCardState(article, db) {
   if (card && state?.currentSet?.setId) {
     refreshStatsPriceItem({
       setId: state.currentSet.setId,
+      collectionKey: collectionKeyOf(card),
       number: card?.number,
       rh: Boolean(db?.rh),
     });
@@ -8752,18 +8736,25 @@ function updateCardState(article, db) {
 /**
  * Live-Update eines Eintrags in `state.statsPrice.items`, wenn der
  * Sammelstatus einer Karte in der Set-Ansicht umgeschaltet wird. Findet
- * das passende Item per `cardKey` (= `setId::normalizedNumber`), patcht
+ * das passende Item per `cardKey` (= `setId::collectionKey`), patcht
  * `isReverseHolo` + `card.rh`, und aktualisiert — wenn die Stats-View
  * gerade gerendert ist — das `<a class="stats-price-cardmarket-link">`-
  * Element (mit neuem `?isReverseHolo=Y`-Suffix) sowie die
  * `is-reverse`-Klasse und den RH-Badge.
  */
-function refreshStatsPriceItem({ setId, number, rh = false } = {}) {
+/** Schluessel eines Preisstatistik-Eintrags: `setId::collectionKey` (eindeutig auch bei gleicher Nummer). */
+function statsPriceCardKey(entry) {
+  const setId = String(entry?.setId || '').trim();
+  const key = collectionKeyOf(entry?.card) || normalizeCardNumber(entry?.cardNumber || '');
+  return key ? `${setId}::${key}` : String(entry?.cardKey || '');
+}
+
+function refreshStatsPriceItem({ setId, collectionKey = '', number, rh = false } = {}) {
   if (!state.statsPrice?.items?.length) return;
   if (!setId) return;
-  const normalizedNumber = normalizeCardNumber(number || '');
-  if (!normalizedNumber) return;
-  const cardKey = `${setId}::${normalizedNumber}`;
+  const key = String(collectionKey || '').trim() || normalizeCardNumber(number || '');
+  if (!key) return;
+  const cardKey = `${setId}::${key}`;
 
   const item = state.statsPrice.items.find((entry) => entry?.cardKey === cardKey);
   if (!item) return;
@@ -9332,10 +9323,17 @@ async function bulkUpdate(g, rh) {
       if (!hasEntryCells(db)) continue;
       pending.push({ key, db, prevState: { g: Boolean(db?.g), rh: Boolean(db?.rh) }, updates: stateCellUpdates(db, targetState) });
     }
-    try {
-      const updates = pending.flatMap((entry) => entry.updates);
-      if (updates.length) await updateCellBooleansBatch(state.currentSet.setName, updates, { chunkSize: 200 });
-      for (const { key, db, prevState } of pending) {
+    // Kartenweise Chunks (eine Karte nie ueber zwei Requests verteilt): Status nur fuer erfolgreich
+    // geschriebene Chunks uebernehmen, Fehler nur fuer fehlgeschlagene Chunks zaehlen.
+    for (const chunk of chunkCardUpdates(pending, 200)) {
+      try {
+        await updateCellBooleansBatch(state.currentSet.setName, chunk.flatMap((entry) => entry.updates), { chunkSize: 200 });
+      } catch (err) {
+        console.warn('[bulkUpdate] chunk error', err);
+        errors += chunk.length;
+        continue;
+      }
+      for (const { key, db, prevState } of chunk) {
         applyEntryState(db, targetState);
         const article = dom.cards.querySelector(`[data-card-id="${key}"]`);
         if (article) updateCardState(article, db);
@@ -9343,9 +9341,6 @@ async function bulkUpdate(g, rh) {
         broadcastRealtimeCardUpdate(key, db);
         updated++;
       }
-    } catch (err) {
-      console.warn('[bulkUpdate] batch error', err);
-      errors += pending.length;
     }
   } finally {
     setLoading(false);

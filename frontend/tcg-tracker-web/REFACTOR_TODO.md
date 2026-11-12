@@ -5,7 +5,7 @@ Status: 2026-05-07 final (Waves 1-11 abgeschlossen: Entkopplung + Domain-Haertun
 ## Masterplan (alle 4 Prioritaeten)
 
 - [x] Wave 1 (Basis ueber alle 4 Bereiche):
-  - [x] Architektur: Data-Quality-Logik aus `js/app.js` in `js/features/collection/data-quality.js` extrahiert
+  - [x] Architektur: Data-Quality-Logik aus `js/app.js` in `js/features/collection/data-quality.js` extrahiert (2026-11-12 entfernt: ohne Importer, Logik lebt in `js/app.js` `runDataHealthCheck`)
   - [x] API/Domain: Data-Health/Parity-Orchestrierung als dedizierter Controller mit DI-Dependencies gekapselt
   - [x] Frontend: Runtime-Hardening-Styles aus `css/main.css` nach `css/components/runtime-hardening.css` verschoben
   - [x] Qualitaet: erweiterte Regression-Suite (Legacy-Import, Support-Hub, Module-Import) gemeinsam mit Cardmarket-Tests gruen
@@ -105,10 +105,10 @@ Status: 2026-05-07 final (Waves 1-11 abgeschlossen: Entkopplung + Domain-Haertun
 - [x] Allgemeine Theme-/Button-/Custom-Select-Overrides aus `css/main.css` nach `css/components/theme-overrides.css` ausgelagert.
 - [x] Queue-Builder-/Preset-Dialoglogik aus `js/app.js` nach `js/features/queue/queue-builder-dialog.js` ausgelagert.
 - [x] Support-Hub-Flow aus `js/app.js` nach `js/features/support/support-hub.js` ausgelagert.
-- [x] Backup-Import/Export-Flow aus `js/app.js` nach `js/features/collection/backup-import-export.js` ausgelagert.
+- [x] Backup-Import/Export-Flow aus `js/app.js` nach `js/features/collection/backup-import-export.js` ausgelagert (2026-11-12 entfernt: ohne Importer, Logik lebt in `js/app.js`).
 - [x] Keyboard-Shortcuts-/Share-Styles aus `css/main.css` nach `css/components/shortcuts-share.css` ausgelagert.
 - [x] Search-Set-Filter-Stabilisierung aus `css/main.css` nach `css/views/search-enhancements.css` verschoben.
-- [x] Data-Health/Parity-Logik aus `js/app.js` nach `js/features/collection/data-quality.js` ausgelagert.
+- [x] Data-Health/Parity-Logik aus `js/app.js` nach `js/features/collection/data-quality.js` ausgelagert (2026-11-12 entfernt: ohne Importer).
 - [x] Spreadsheet-/Settings-Dialogflow aus `js/app.js` nach `js/features/settings/spreadsheet-dialog.js` ausgelagert.
 - [x] Runtime-Hardening-Styles (Loading-Overlay/Brand-Logo) aus `css/main.css` nach `css/components/runtime-hardening.css` ausgelagert.
 - [x] EventBus-Basis in `js/core/event-bus.js` und Storage-Key-Registry in `js/core/storage-keys.js` eingefuehrt.
@@ -144,8 +144,8 @@ Status: 2026-05-07 final (Waves 1-11 abgeschlossen: Entkopplung + Domain-Haertun
   - [x] Support-Hub-Flow in `js/features/support/support-hub.js`
   - [x] Job-/Queue-Basisfunktionen in `js/features/queue/queue-runtime.js`
   - [x] Legacy-Import-Dialogstate+Renderer in `js/features/collection/legacy-import-dialog.js`
-  - [x] Backup-Import/Export in `js/features/collection/backup-import-export.js`
-  - [x] Data-Health/Parity in `js/features/collection/data-quality.js`
+  - [x] Backup-Import/Export in `js/features/collection/backup-import-export.js` (2026-11-12 entfernt: ohne Importer)
+  - [x] Data-Health/Parity in `js/features/collection/data-quality.js` (2026-11-12 entfernt: ohne Importer)
   - [x] Stats-Price-Renderingblock in `js/views/stats-price-view.js`
 
 ## Umsetzungsplan (direkt in Arbeit)

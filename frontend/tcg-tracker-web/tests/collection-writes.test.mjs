@@ -240,3 +240,32 @@ test('writeEntryStateWith/ensureEntryWith: Batch bevorzugt, Einzelzellen-Fallbac
   );
   assert.equal(calls, 1);
 });
+
+test('chunkCardUpdates: Karten nie geteilt, Grenze in Zellen, leere Karten entfallen', async () => {
+  const { chunkCardUpdates } = await import('../js/data/collection-writes.js');
+  const card = (key, n) => ({ key, updates: Array.from({ length: n }, (_, i) => ({ row: i + 2, col: 3, value: true })) });
+  const chunks = chunkCardUpdates([card('a', 2), card('b', 2), card('c', 0), card('d', 3), card('e', 5)], 4);
+  assert.deepEqual(chunks.map((c) => c.map((x) => x.key)), [['a', 'b'], ['d'], ['e']]);
+  assert.deepEqual(chunkCardUpdates([], 4), []);
+});
+
+test('hasEntryCells: eine Zelle (gCell oder rhCell) genuegt wie bei cellsForUpdate', () => {
+  assert.equal(hasEntryCells({ gCell: { row: 2, col: 3 }, rhCell: null }), true);
+  assert.equal(hasEntryCells({ gCell: null, rhCell: { row: 2, col: 4 } }), true);
+  assert.equal(hasEntryCells({ cells: [], gCell: null, rhCell: null }), false);
+});
+
+test('collectCollectionSetIds: Memo je Zeilen-Array (nur ohne checkedOnly), neu bei geaenderter Laenge', async () => {
+  const { collectCollectionSetIds } = await import('../js/data/collection-aliases.js');
+  let calls = 0;
+  const counting = { resolveSetKey: (k) => { calls += 1; return resolver.resolveSetKey(k); } };
+  const rows = [['swsh12pt5gg', 'GG01', true], ['TCGDEX-me05', '1', false]];
+  const first = collectCollectionSetIds(rows, counting);
+  const again = collectCollectionSetIds(rows, counting);
+  assert.equal(first, again);
+  assert.equal(calls, 2);
+  assert.deepEqual([...first].sort(), ['me5', 'swsh12pt5']);
+  assert.deepEqual([...collectCollectionSetIds(rows, counting, { checkedOnly: true })], ['swsh12pt5']);
+  rows.push(['base1', '1', false]);
+  assert.ok(collectCollectionSetIds(rows, counting).has('base1'));
+});
