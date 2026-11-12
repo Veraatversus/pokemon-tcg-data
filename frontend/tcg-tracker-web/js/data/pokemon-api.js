@@ -111,3 +111,20 @@ export async function fetchAllAvailableSets({ signal } = {}) {
     }))
     .sort(compareSets);
 }
+
+/**
+ * Map setId -> deutsche Serie (i18n.de.series) aus api/v3, fuer Sheet-Zeilen ohne tcgdex_serie_name.
+ * Fehler (api/v3 offline) liefern eine leere Map; das Dashboard faellt dann auf vera_series zurueck.
+ */
+export async function fetchDeSeriesBySetId({ signal } = {}) {
+  const map = new Map();
+  try {
+    for (const set of (await loadV3Sets({ signal })) || []) {
+      const de = String(set?.i18n?.de?.series || '').trim();
+      if (set?.id && de) map.set(String(set.id), de);
+    }
+  } catch {
+    // offline: leere Map
+  }
+  return map;
+}

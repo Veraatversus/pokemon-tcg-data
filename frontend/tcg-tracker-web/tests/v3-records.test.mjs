@@ -53,7 +53,9 @@ test('Set sv3pt5: matched, EN vera, DE tcgdex', () => {
   assert.equal(r.tcgdex_name, '151');
   assert.match(r.tcgdex_logo, /\/de\/sv\/sv03\.5\/logo\.webp$/);
   assert.equal(r.tcgdex_symbol, '');
-  assert.equal(r.tcgdex_serie_name, '');
+  assert.equal(r.tcgdex_serie_name, 'Karmesin & Purpur');
+  assert.equal(r.tcgdex_cardCount_official, 165);
+  assert.equal(r.tcgdex_cardCount_total, 207);
   assert.equal(r.tcgdex_legal, null);
   assert.ok(!Number.isNaN(Date.parse(r.updatedAt)));
 });
@@ -242,4 +244,22 @@ test('Cardmarket-URL: erste Variante mit cardmarketId, sonst ids.cardmarket[0], 
   assert.equal(toCardRecord({ ...base, ids: { cardmarket: [] } }).vera_cardmarket_url, '');
   // realer Fall: base6-75 hat nur ids.cardmarket
   assert.equal(toCardRecord(card('base6', 'base6-75'), setById('base6')).vera_cardmarket_url, url(274840));
+});
+
+test('toSetRecord fills DE series and counts', () => {
+  const r = toSetRecord(setById('me6'));
+  assert.equal(r.tcgdex_serie_name, 'Mega-Entwicklung');
+  assert.equal(r.tcgdex_name, 'Delta-Herrschaft');
+  assert.equal(r.tcgdex_cardCount_official, 103);
+  assert.equal(r.tcgdex_cardCount_total, 141);
+});
+
+test('toSetRecord: Fallback auf printedTotal/total und leere DE-Serie ohne i18n.de.series', () => {
+  const r = toSetRecord({ id: 'x1', series: 'Foo', printedTotal: 50, total: 60, i18n: { de: { cardCount: { official: 0 } } } });
+  assert.equal(r.tcgdex_serie_name, '');
+  assert.equal(r.tcgdex_cardCount_official, 50);
+  assert.equal(r.tcgdex_cardCount_total, 60);
+  const r2 = toSetRecord({ id: 'x2', printedTotal: 7, total: 9 });
+  assert.equal(r2.tcgdex_cardCount_official, 7);
+  assert.equal(r2.tcgdex_cardCount_total, 9);
 });

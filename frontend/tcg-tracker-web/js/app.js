@@ -35,8 +35,8 @@ import {
 import { needsApiCardEnrichment, describeCardDataFailure, NO_CARD_DATA_MESSAGE } from './core/card-enrichment.js';
 import { findSetByIdOrAlias } from './data/set-aliases.js';
 import { selectSearchSets } from './features/search/search-index-prefilter.js';
-import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets } from './data/pokemon-api.js?v=20261112-api-v3';
-import { resolveSeriesGroupInfo } from './data/schema-contract.js';
+import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, fetchDeSeriesBySetId } from './data/pokemon-api.js?v=20261112-api-v3';
+import { resolveSeriesGroupInfo, resolveDisplaySet, applyDeSeriesFallback, resolveSetTotalCards } from './data/schema-contract.js';
 import {
   buildCardmarketProductUrl,
   resolveCardmarketEntryForCard,
@@ -2932,7 +2932,13 @@ async function loadSets() {
       });
     });
 
-    state.allSets = Array.from(mergedMap.values());
+    // Zeilen ohne DE-Serie (z. B. aus altem Alias-Import) bekommen sie aus api/v3, damit Serien-Gruppen
+    // importierter und nicht importierter Sets identisch sind.
+    const deSeriesBySetId = await fetchDeSeriesBySetId();
+    state.allSets = Array.from(mergedMap.values()).map((set) => {
+      const filled = applyDeSeriesFallback(set, deSeriesBySetId);
+      return filled === set ? set : resolveDisplaySet(filled);
+    });
     resetDashboardVirtualization();
     renderRecentSets();
     renderSetSelectorOptions();
@@ -3200,7 +3206,7 @@ function createDashSetCard(set, summary) {
       <p class="dash-set-name">${set.setName}</p>
       <p class="dash-set-series">${set.series || ''}</p>
       <div class="dash-progress-bar"><div class="dash-progress-fill" style="width:${set.imported ? percent : 0}%"></div></div>
-      <p class="dash-progress-text">${set.imported ? `${collected}\u202f/\u202f${total || '?'} (${percent}%)` : `Noch nicht importiert (${set.totalCards || '?' } Karten)`}</p>
+      <p class="dash-progress-text">${set.imported ? `${collected}\u202f/\u202f${total || '?'} (${percent}%)` : `Noch nicht importiert (${resolveSetTotalCards(set) || '?'} Karten)`}</p>
       ${rh > 0 ? `<p class="dash-rh-text">RH: ${rh}</p>` : ''}
       <div class="dash-card-actions">
         ${set.imported 

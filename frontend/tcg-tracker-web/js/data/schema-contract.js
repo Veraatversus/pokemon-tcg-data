@@ -658,6 +658,29 @@ export function buildCardRecordFromSources({
   };
 }
 
+// Serien-Label eines Sets je Sprache. DE: tcgdex_serie_name -> i18n_de.series -> deSeriesBySetId
+// (Map setId -> i18n.de.series aus api/v3) -> vera_series; EN: vera_series -> series.
+export function resolveSetSeriesLabel(set = {}, language = getCardLanguage(), deSeriesBySetId = null) {
+  const text = (v) => String(v ?? '').trim();
+  const fromMap = deSeriesBySetId?.get?.(text(set?.setId)) || '';
+  const candidates = normalizeCardLanguage(language) === 'en'
+    ? [set?.vera_series, set?.series, set?.i18n_de?.series, fromMap, set?.tcgdex_serie_name]
+    : [set?.tcgdex_serie_name, set?.i18n_de?.series, fromMap, set?.vera_series, set?.series];
+  return candidates.map(text).find(Boolean) || '';
+}
+
+// Ergaenzt eine leere tcgdex_serie_name aus der v3-Map (setId -> DE-Serie); bestehende Werte bleiben.
+export function applyDeSeriesFallback(set = {}, deSeriesBySetId = null) {
+  if (String(set?.tcgdex_serie_name || '').trim()) return set;
+  const de = String(deSeriesBySetId?.get?.(String(set?.setId ?? '').trim()) || '').trim();
+  return de ? { ...set, tcgdex_serie_name: de } : set;
+}
+
+// Gesamtzahl der Karten eines Sets (inkl. Secret Rares): vera_total, dann DE total, dann totalCards.
+export function resolveSetTotalCards(set = {}) {
+  return toNumber(set?.vera_total) || toNumber(set?.tcgdex_cardCount_total) || toNumber(set?.totalCards);
+}
+
 export function resolveDisplaySet(setRecord = {}) {
   const matrix = getResolverMatrix().set;
   const setName = resolveFieldByPriority(matrix.setName, {
@@ -666,7 +689,7 @@ export function resolveDisplaySet(setRecord = {}) {
   }, { fallback: setRecord.vera_name || setRecord.tcgdex_name || '' });
 
   const series = resolveFieldByPriority(matrix.series, {
-    tcgdex: setRecord.tcgdex_serie_name,
+    tcgdex: setRecord.tcgdex_serie_name || setRecord.i18n_de?.series,
     vera: setRecord.vera_series
   }, { fallback: setRecord.vera_series || setRecord.tcgdex_serie_name || '' });
   const seriesGroup = resolveSeriesGroupInfo({ ...setRecord, series });

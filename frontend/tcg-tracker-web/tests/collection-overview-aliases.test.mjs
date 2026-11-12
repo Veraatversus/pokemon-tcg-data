@@ -237,3 +237,18 @@ test('Set loeschen bleibt: Alias-Zeilen (db_sets + Overview) auf imported=false,
   assert.equal(fake.rows('db_sets').slice(1).find((r) => r[0] === 'swsh12pt5')[1], false, 'sync ODERt nicht zurueck');
   assert.equal(fake.rows('Sets Overview').slice(2).find((r) => r[0] === 'swsh12pt5')[IMP], false);
 });
+
+test('re-import fills empty tcgdex_serie_name without appending a row', async () => {
+  const fake = setup({ dbSets: [dbSetRow('me5', true, 'Mega Evolution 5')] });
+  const before = fake.rows('db_sets').length;
+  await syncOverviewWithApiSets([{
+    setId: 'me5', setName: 'X', aliases: ['TCGDEX-me05'],
+    tcgdex_serie_name: 'Mega-Entwicklung', tcgdex_cardCount_official: 103, tcgdex_cardCount_total: 141
+  }], []);
+  const rows = fake.rows('db_sets');
+  assert.equal(rows.length, before, 'keine neue Zeile');
+  const row = rows.find((r) => r[0] === 'me5');
+  const h = (name) => SET_DB_HEADERS.indexOf(name);
+  assert.equal(row[h('tcgdex_serie_name')], 'Mega-Entwicklung');
+  assert.equal(row[h('imported')], true);
+});
