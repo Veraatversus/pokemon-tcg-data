@@ -1,0 +1,142 @@
+// Abbildung von API-v3-Sets/-Karten auf die bestehenden internen Record-Felder
+// (identisch zu buildSetRecordFromSources / buildCardRecordFromSources).
+//
+// Semantik:
+//  - vera_*   = EN-Oberfelder von v3
+//  - tcgdex_* = ausschliesslich DE aus i18n.de (leer ohne DE-Wert, kein EN-Fallback;
+//               den Fallback uebernimmt die Resolver-Matrix)
+//  - updatedAt: wie in den alten Buildern `new Date().toISOString()`, sofern nicht
+//               per Option `updatedAt` uebergeben (keine erfundenen festen Zeitstempel).
+import { buildCardmarketProductUrl } from './cardmarket-data.js';
+
+const str = (v) => (typeof v === 'string' ? v.trim() : '');
+const num = (v) => {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+};
+const list = (v) => (Array.isArray(v) ? v : []);
+
+function safeDecode(text) {
+  try {
+    return decodeURIComponent(text);
+  } catch {
+    return text;
+  }
+}
+
+function tcgdexLocalId(tcgdexId) {
+  const id = str(tcgdexId);
+  if (!id) return '';
+  return safeDecode(id.slice(id.lastIndexOf('-') + 1));
+}
+
+export function toSetRecord(v3Set = {}, { imported = false, updatedAt = null } = {}) {
+  const set = v3Set || {};
+  const de = set.i18n?.de || {};
+  const id = str(set.id);
+  const pokemontcgId = str(set.ids?.pokemontcg);
+  const tcgdexId = str(set.ids?.tcgdex);
+  const isTcgdexOnly = id.startsWith('TCGDEX-');
+  const matchStatus = pokemontcgId && tcgdexId
+    ? 'matched'
+    : (tcgdexId ? 'tcgdex_only' : 'primary_only');
+
+  return {
+    setId: id,
+    imported: Boolean(imported),
+    updatedAt: updatedAt || new Date().toISOString(),
+    matchStatus,
+    isTcgdexOnly,
+    // vera (EN)
+    vera_id: pokemontcgId,
+    vera_name: str(set.name),
+    vera_series: str(set.series),
+    vera_printedTotal: num(set.printedTotal),
+    vera_total: num(set.total),
+    vera_ptcgoCode: str(set.ptcgoCode),
+    vera_releaseDate: str(set.releaseDate),
+    vera_legalities: set.legalities || null,
+    vera_images_symbol: str(set.images?.symbol),
+    vera_images_logo: str(set.images?.logo),
+    // tcgdex (DE)
+    tcgdex_id: tcgdexId,
+    tcgdex_name: str(de.name),
+    tcgdex_serie_id: '',
+    tcgdex_serie_name: '',
+    tcgdex_abbreviation_official: '',
+    tcgdex_releaseDate: '',
+    tcgdex_legal: null,
+    tcgdex_logo: str(de.images?.logo),
+    tcgdex_symbol: str(de.images?.symbol),
+    tcgdex_cardCount_official: 0,
+    tcgdex_cardCount_total: 0,
+    tcgdex_cardCount_holo: 0,
+    tcgdex_cardCount_reverse: 0,
+    tcgdex_cardCount_firstEdition: 0,
+    tcgdex_cardCount_normal: 0
+  };
+}
+
+export function toCardRecord(v3Card = {}, v3Set = null, { updatedAt = null } = {}) {
+  const card = v3Card || {};
+  const de = card.i18n?.de || {};
+  const pokemontcgId = str(card.ids?.pokemontcg);
+  const tcgdexId = str(card.ids?.tcgdex);
+  const matchStatus = str(card.matchStatus)
+    || (pokemontcgId && tcgdexId ? 'matched' : (tcgdexId ? 'tcgdex_only' : 'primary_only'));
+  const cardmarketUrl = buildCardmarketProductUrl(card.variants?.[0]?.cardmarketId) || '';
+
+  return {
+    setId: str(v3Set?.id) || str(card.setId),
+    cardId: str(card.id),
+    collectionKey: str(card.cardId),
+    number: str(card.number),
+    updatedAt: updatedAt || new Date().toISOString(),
+    matchStatus,
+    isPrimaryOnly: matchStatus === 'primary_only',
+    isTcgdexOnly: matchStatus === 'tcgdex_only',
+    // vera (EN)
+    vera_id: pokemontcgId,
+    vera_name: str(card.name),
+    vera_supertype: str(card.supertype),
+    vera_subtypes: list(card.subtypes),
+    vera_hp: card.hp ? String(card.hp) : '',
+    vera_types: list(card.types),
+    vera_evolvesFrom: str(card.evolvesFrom),
+    vera_abilities: list(card.abilities),
+    vera_attacks: list(card.attacks),
+    vera_weaknesses: list(card.weaknesses),
+    vera_resistances: list(card.resistances),
+    vera_retreatCost: list(card.retreatCost).filter(Boolean),
+    vera_convertedRetreatCost: num(card.convertedRetreatCost),
+    vera_number: str(card.number),
+    vera_artist: str(card.artist),
+    vera_rarity: str(card.rarity),
+    vera_flavorText: str(card.flavorText),
+    vera_nationalPokedexNumbers: list(card.nationalPokedexNumbers),
+    vera_legalities: card.legalities || null,
+    vera_regulationMark: str(card.regulationMark),
+    vera_rules: list(card.rules),
+    vera_images_small: str(card.images?.small),
+    vera_images_large: str(card.images?.large),
+    vera_cardmarket_url: cardmarketUrl,
+    // tcgdex (DE, nur echte DE-Werte)
+    tcgdex_id: tcgdexId,
+    tcgdex_name: str(de.name),
+    tcgdex_localId: tcgdexLocalId(tcgdexId),
+    tcgdex_image_small: str(de.images?.small),
+    tcgdex_image_large: str(de.images?.large),
+    tcgdex_cardmarket_url: '',
+    tcgdex_rarity: '',
+    tcgdex_hp: '',
+    tcgdex_types: [],
+    tcgdex_category: '',
+    tcgdex_stage: '',
+    tcgdex_suffix: '',
+    tcgdex_evolvesFrom: str(de.evolvesFrom),
+    tcgdex_illustrator: '',
+    tcgdex_regulationMark: '',
+    tcgdex_description: '',
+    tcgdex_effect: null
+  };
+}
