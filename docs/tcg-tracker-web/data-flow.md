@@ -16,7 +16,7 @@ Nutzer-Browser
   │     ├── Lesen:  db_sets, db_cards, db_collection → JS-Objekte
   │     └── Schreiben: Collection-Updates → Sheets
   │
-  ├── Pokémon TCG API / Vera-API (pokemon-api.js)
+  ├── api/v3 + api/registry (pokemon-api.js → v3-api.js)
   │     └── Set-/Karten-Metadaten → In-Memory Cache (cache.js)
   │
   └── IndexedDB Offline Store (features/search/engine.js)

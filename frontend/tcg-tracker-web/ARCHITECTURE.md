@@ -33,10 +33,7 @@ sets[] → <select> befüllen
 loadCurrentSet(setId)
   ├── cache.get("cards_" + setId)  →  Hit: sofort weiter
   │     Miss: fetchMergedCards(setId)
-  │             ├── fetchVeraCards()         Vera GitHub Pages
-  │             │     ↓ 404/Fehler → fetchPokemontcgCards()
-  │             ├── fetchTcgdexSet(tcgdexId) api.tcgdex.net/v2/de
-  │             └── merge + TCGDex-Union
+  │             └── v3-api.js: api/v3/sets/<id>.json (+ api/registry für Set-Aliase)
   │           cache.set(...)
   │
   └── cache.get("db_" + setId)     →  Hit: sofort weiter

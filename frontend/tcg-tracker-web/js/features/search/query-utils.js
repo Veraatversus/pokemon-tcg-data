@@ -1,4 +1,4 @@
-import { normalizeCardNumber } from '../../core/utils.js?v=20260613-tcgdex-merge-fix-v2';
+import { normalizeCardNumber } from '../../core/utils.js';
 
 const SEARCH_NOISE_TOKENS = new Set([
   'karte', 'karten', 'kartennummer', 'kartennr', 'nummer', 'nr', 'no', 'num',

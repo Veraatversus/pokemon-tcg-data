@@ -1,6 +1,6 @@
 import { normalizeCardNumber, toBoolean, colToA1 } from '../../core/utils.js';
 import { normalizeSetId } from '../../core/set-id-helpers.js';
-import { CONFIG } from '../../core/config.js?v=20260613-tcgdex-merge-fix-v2';
+import { CONFIG } from '../../core/config.js';
 
 const LEGACY_IGNORED_SHEETS = new Set([
   CONFIG.SHEETS.OVERVIEW,

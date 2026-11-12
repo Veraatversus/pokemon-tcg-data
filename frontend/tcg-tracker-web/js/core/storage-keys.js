@@ -6,7 +6,7 @@
  * Scope can be: user, app, cache, preferences, sync.
  */
 
-import { scopedStorageKey } from './config.js?v=20260613-tcgdex-merge-fix-v2';
+import { scopedStorageKey } from './config.js';
 
 // ============================================================================
 // User & Identity Keys

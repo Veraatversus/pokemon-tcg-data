@@ -4,9 +4,9 @@
 
 const SW_SCOPE_PATH = new URL(self.registration.scope).pathname.toLowerCase();
 const SW_SCOPE = /(^|\/)dev(\/|$)/.test(SW_SCOPE_PATH) ? 'dev' : 'release';
-const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v55`;
-const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v55`;
-const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v55`;
+const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v56`;
+const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v56`;
+const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v56`;
 
 const SW_DEBUG = false;
 
@@ -154,6 +154,27 @@ self.addEventListener('fetch', (event) => {
               );
             });
           })
+      );
+      return;
+    }
+
+    // Same-origin API data (api/v3, api/registry): network-first, so updated card data is
+    // never shadowed by an old cached copy; the runtime cache is only an offline fallback.
+    if (/\/api\/(v3|registry)\//.test(url.pathname)) {
+      event.respondWith(
+        fetch(request)
+          .then((response) => {
+            if (response && response.status === 200) {
+              const responseToCache = response.clone();
+              caches.open(RUNTIME_CACHE).then((cache) => {
+                cache.put(request, responseToCache).catch((err) => {
+                  console.warn('[SW] cache.put failed:', err);
+                });
+              });
+            }
+            return response;
+          })
+          .catch(() => caches.match(request).then((cached) => cached || Response.error()))
       );
       return;
     }

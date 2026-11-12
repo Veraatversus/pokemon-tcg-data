@@ -6,7 +6,7 @@
 // (promoteCardmarketUrlsForCards) entfaellt hier: es haette die massgeblichen v3-IDs nur
 // ueberschrieben (Produkt-URLs gelten dort als "generiert") und vergibt fuer Karten ohne URL
 // keine neue.
-import { resolveDisplayCard, resolveDisplaySet } from './schema-contract.js?v=20260613-tcgdex-merge-fix-v2';
+import { resolveDisplayCard, resolveDisplaySet } from './schema-contract.js';
 import { loadV3Sets, loadV3Cards, loadRegistrySets } from './v3-api.js';
 import { createCollectionKeyResolver } from './v3-collection-keys.js';
 import { toSetRecord, toCardRecord } from './v3-records.js';

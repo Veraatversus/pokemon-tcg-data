@@ -1,4 +1,4 @@
-import { formatCardmarketEntryLabel, formatCardmarketEntryTitle } from '../data/cardmarket-data.js?v=20260613-tcgdex-merge-fix-v2';
+import { formatCardmarketEntryLabel, formatCardmarketEntryTitle } from '../data/cardmarket-data.js';
 import { isGeneratedCardmarketSearchUrl, applyReverseHoloQueryParam } from '../data/cardmarket-url-utils.js';
 
 // ============================================================================

@@ -21,7 +21,7 @@ import {
   applyCardmarketPriceSummary as applyCardmarketPriceSummaryUi,
   getCardmarketPriceCacheKey,
   renderLightboxCardmarketPrices as renderLightboxCardmarketPricesUi,
-} from '../ui/cardmarket-price.js?v=20260613-tcgdex-merge-fix-v2';
+} from '../ui/cardmarket-price.js?v=20261112-api-v3';
 
 let focusedCardIndex = -1;
 const cardmarketPriceSummaryCache = new Map();

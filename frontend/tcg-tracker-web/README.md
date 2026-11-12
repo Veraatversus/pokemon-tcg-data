@@ -110,10 +110,8 @@ Absolute Sheet-Zeile für Karte i (0-basiert):
 ```
 loadCurrentSet(setId)
   ├─ fetchMergedCards(setId)           pokemon-api.js
-  │    ├─ fetchVeraCards()             → Vera GitHub Pages (schnell)
-  │    │    └── Fallback: fetchPokemontcgCards()
-  │    ├─ fetchTcgdexSet(tcgdexId)     → api.tcgdex.net/v2/de
-  │    └─ merge + union → [{number, name, image, cardmarketUrl}]
+  │    └── v3-api.js → api/v3 (vorberechnet, EN + i18n.de) + api/registry (Set-Aliase)
+  │        → [{number, name, image, cardmarketUrl}]
   │
   └─ readSetCollectionMap(sheetName)   sheets-db.js
        └─ gapi.client.sheets → Grid-Werte lesen

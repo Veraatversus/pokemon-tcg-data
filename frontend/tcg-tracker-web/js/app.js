@@ -1,5 +1,5 @@
 import { isGeneratedCardmarketSearchUrl, applyReverseHoloQueryParam } from './data/cardmarket-url-utils.js';
-import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js?v=20260613-tcgdex-merge-fix-v2';
+import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js';
 import {
   listImportedSets,
   listSetsOverviewData,
@@ -17,7 +17,7 @@ import {
   resetSheetsDataCaches,
   recoverImportedIdsFromOverview,
   listCollectionSetIds,
-} from './data/sheets-db.js?v=20260613-tcgdex-merge-fix-v2';
+} from './data/sheets-db.js?v=20261112-api-v3';
 import {
   collectionKeyOf,
   emptyCollectionEntry,
@@ -34,15 +34,15 @@ import {
 import { needsApiCardEnrichment, describeCardDataFailure, NO_CARD_DATA_MESSAGE } from './core/card-enrichment.js';
 import { findSetByIdOrAlias } from './data/set-aliases.js';
 import { selectSearchSets } from './features/search/search-index-prefilter.js';
-import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets } from './data/pokemon-api.js?v=20260613-tcgdex-merge-fix-v2';
-import { resolveSeriesGroupInfo } from './data/schema-contract.js?v=20260613-tcgdex-merge-fix-v2';
+import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets } from './data/pokemon-api.js?v=20261112-api-v3';
+import { resolveSeriesGroupInfo } from './data/schema-contract.js';
 import {
   buildCardmarketProductUrl,
   resolveCardmarketEntryForCard,
   formatCardmarketEntryLabel,
   formatCardmarketEntryTitle
-} from './data/cardmarket-data.js?v=20260613-tcgdex-merge-fix-v2';
-import { applyCardmarketBuildStampCheck, forceRefreshCardmarketPrices } from './data/cardmarket-versioning.js?v=20260613-tcgdex-merge-fix-v2';
+} from './data/cardmarket-data.js';
+import { applyCardmarketBuildStampCheck, forceRefreshCardmarketPrices } from './data/cardmarket-versioning.js?v=20261112-api-v3';
 import {
   buildCombinedSearchDropdownOptions,
   buildSearchProgressLabel,
@@ -50,10 +50,10 @@ import {
   normalizeCardNumber,
   resolveCombinedSearchSelection,
   toBoolean
-} from './core/utils.js?v=20260613-tcgdex-merge-fix-v2';
-import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle } from './core/collection-state.js?v=20260613-tcgdex-merge-fix-v2';
+} from './core/utils.js';
+import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle } from './core/collection-state.js?v=20261112-api-v3';
 import * as cache from './core/cache.js';
-import { CONFIG, scopedStorageKey } from './core/config.js?v=20260613-tcgdex-merge-fix-v2';
+import { CONFIG, scopedStorageKey } from './core/config.js';
 import {
   initSmartEngine,
   startAutoHealing,
@@ -78,7 +78,7 @@ import {
   summarizeLegacyImportPlan,
   pickCanonicalCardId,
   extractLegacySpreadsheetId
-} from './features/collection/legacy-import.js?v=20260613-tcgdex-merge-fix-v2';
+} from './features/collection/legacy-import.js?v=20261112-api-v3';
 import { ensureResolverForSet } from './data/collection-aliases.js';
 import {
   planAmbiguousMigration,
@@ -86,18 +86,18 @@ import {
   showAmbiguousMigrationDialog
 } from './features/collection/ambiguous-key-migration.js';
 import { initCommandPalette } from './ui/command-palette.js';
-import { filterSetsBySeriesKey, getStatsSeriesLabel } from './ui/stats-series.js?v=20260613-tcgdex-merge-fix-v2';
+import { filterSetsBySeriesKey, getStatsSeriesLabel } from './ui/stats-series.js?v=20261112-api-v3';
 import {
   computePriceAnalyticsFromSummaries,
   pickCardPriceFromSummary,
-} from './ui/stats-price-analytics.js?v=20260613-tcgdex-merge-fix-v2';
+} from './ui/stats-price-analytics.js?v=20261112-api-v3';
 import {
   applyCardmarketPriceSummary as applyCardmarketPriceSummaryUi,
   getCardmarketPriceCacheKey,
   normalizeCardmarketBasePriceType,
   renderLightboxCardmarketPrices as renderLightboxCardmarketPricesUi,
   CARDMARKET_BASE_PRICE_DEFAULT,
-} from './ui/cardmarket-price.js?v=20260613-tcgdex-merge-fix-v2';
+} from './ui/cardmarket-price.js?v=20261112-api-v3';
 import {
   loadFavorites, saveFavorites, toggleFavorite, isFavorite,
   loadSearchHistory, addSearchHistory, clearSearchHistory,
@@ -105,13 +105,13 @@ import {
   loadSettings, saveSettings, updateSetting,
   applyQuickFilters, calculateCollectionStats,
   getSyncStatus, setSyncStatus
-} from './enhanced-features.js?v=20260613-tcgdex-merge-fix-v2';
+} from './enhanced-features.js?v=20261112-api-v3';
 
 import {
   initQuickFiltersUI, createSearchHistoryWidget, createStatisticsPanel,
   createExportDialog, createSettingsPanel,
   createBulkActionsToolbar
-} from './ui/components.js?v=20260613-tcgdex-merge-fix-v2';
+} from './ui/components.js?v=20261112-api-v3';
 import {
   createInitialSheetsRetryMetrics,
   initSheetsWriteFeedback as initSheetsWriteFeedbackUi,
