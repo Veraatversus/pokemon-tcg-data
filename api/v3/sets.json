@@ -1,6 +1,13 @@
 [
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 1
+        }
+      }
+    },
     "id": "TCGDEX-miscp",
     "ids": {
       "cardmarket": null,
@@ -20,7 +27,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Grundset"
+        "cardCount": {
+          "official": 102
+        },
+        "name": "Grundset",
+        "series": "Grund"
       }
     },
     "id": "base1",
@@ -47,7 +58,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Dschungel"
+        "cardCount": {
+          "official": 64
+        },
+        "name": "Dschungel",
+        "series": "Grund"
       }
     },
     "id": "base2",
@@ -74,7 +89,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Wizards Black Star Promos"
+        "cardCount": {
+          "official": 53
+        },
+        "name": "Wizards Black Star Promos",
+        "series": "Grund"
       }
     },
     "id": "basep",
@@ -97,6 +116,14 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 7
+        },
+        "series": "Grund"
+      }
+    },
     "id": "TCGDEX-wp",
     "ids": {
       "cardmarket": null,
@@ -116,7 +143,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Fossil"
+        "cardCount": {
+          "official": 62
+        },
+        "name": "Fossil",
+        "series": "Grund"
       }
     },
     "id": "base3",
@@ -139,6 +170,13 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 160
+        }
+      }
+    },
     "id": "TCGDEX-jumbo",
     "ids": {
       "cardmarket": null,
@@ -156,6 +194,14 @@
     "aliases": [
       "TCGDEX-base4"
     ],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 130
+        },
+        "series": "Grund"
+      }
+    },
     "id": "base4",
     "ids": {
       "cardmarket": 1527,
@@ -180,7 +226,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Team Rocket"
+        "cardCount": {
+          "official": 82
+        },
+        "name": "Team Rocket",
+        "series": "Grund"
       }
     },
     "id": "base5",
@@ -205,6 +255,13 @@
     "aliases": [
       "TCGDEX-gym1"
     ],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 132
+        }
+      }
+    },
     "id": "gym1",
     "ids": {
       "cardmarket": 1529,
@@ -227,6 +284,13 @@
     "aliases": [
       "TCGDEX-gym2"
     ],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 132
+        }
+      }
+    },
     "id": "gym2",
     "ids": {
       "cardmarket": 1530,
@@ -251,7 +315,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Neo Genesis"
+        "cardCount": {
+          "official": 111
+        },
+        "name": "Neo Genesis",
+        "series": "Neo"
       }
     },
     "id": "neo1",
@@ -278,7 +346,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Neo Entdeckung"
+        "cardCount": {
+          "official": 75
+        },
+        "name": "Neo Entdeckung",
+        "series": "Neo"
       }
     },
     "id": "neo2",
@@ -303,6 +375,14 @@
     "aliases": [
       "TCGDEX-si1"
     ],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 18
+        },
+        "series": "Neo"
+      }
+    },
     "id": "si1",
     "ids": {
       "cardmarket": 1633,
@@ -327,7 +407,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Neo Revelation"
+        "cardCount": {
+          "official": 64
+        },
+        "name": "Neo Revelation",
+        "series": "Neo"
       }
     },
     "id": "neo3",
@@ -354,7 +438,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Neo Destiny"
+        "cardCount": {
+          "official": 105
+        },
+        "name": "Neo Destiny",
+        "series": "Neo"
       }
     },
     "id": "neo4",
@@ -379,6 +467,14 @@
     "aliases": [
       "TCGDEX-lc"
     ],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 110
+        },
+        "series": "Ruf der Legenden"
+      }
+    },
     "id": "base6",
     "ids": {
       "cardmarket": 1535,
@@ -399,6 +495,14 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 10
+        },
+        "series": "e-Card"
+      }
+    },
     "id": "TCGDEX-sp",
     "ids": {
       "cardmarket": null,
@@ -418,7 +522,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Expedition"
+        "cardCount": {
+          "official": 165
+        },
+        "name": "Expedition",
+        "series": "e-Card"
       }
     },
     "id": "ecard1",
@@ -443,6 +551,14 @@
     "aliases": [
       "TCGDEX-bog"
     ],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 9
+        },
+        "series": "e-Card"
+      }
+    },
     "id": "bp",
     "ids": {
       "cardmarket": 1605,
@@ -467,7 +583,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Aquapolis"
+        "cardCount": {
+          "official": 147
+        },
+        "name": "Aquapolis",
+        "series": "e-Card"
       }
     },
     "id": "ecard2",
@@ -494,7 +614,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Skyridge"
+        "cardCount": {
+          "official": 144
+        },
+        "name": "Skyridge",
+        "series": "e-Card"
       }
     },
     "id": "ecard3",
@@ -521,7 +645,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "EX Rubin & Saphir"
+        "cardCount": {
+          "official": 109
+        },
+        "name": "EX Rubin & Saphir",
+        "series": "EX"
       }
     },
     "id": "ex1",
@@ -548,7 +676,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "EX Sandsturm"
+        "cardCount": {
+          "official": 100
+        },
+        "name": "EX Sandsturm",
+        "series": "EX"
       }
     },
     "id": "ex2",
@@ -575,6 +707,9 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 40
+        },
         "name": "Nintendo Black Star Promos"
       }
     },
@@ -602,7 +737,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "EX Drache"
+        "cardCount": {
+          "official": 97
+        },
+        "name": "EX Drache",
+        "series": "EX"
       }
     },
     "id": "ex3",
@@ -629,7 +768,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "EX Team Magma vs Team Aqua"
+        "cardCount": {
+          "official": 95
+        },
+        "name": "EX Team Magma vs Team Aqua",
+        "series": "EX"
       }
     },
     "id": "ex4",
@@ -654,6 +797,14 @@
     "aliases": [
       "TCGDEX-ex5"
     ],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 101
+        },
+        "series": "EX"
+      }
+    },
     "id": "ex5",
     "ids": {
       "cardmarket": 1543,
@@ -678,6 +829,9 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 10
+        },
         "name": "EX trainer Kit (Latias)"
       }
     },
@@ -705,6 +859,9 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 10
+        },
         "name": "EX trainer Kit (Latios)"
       }
     },
@@ -728,6 +885,14 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 5
+        },
+        "series": "EX"
+      }
+    },
     "id": "TCGDEX-ex5.5",
     "ids": {
       "cardmarket": 4505,
@@ -747,7 +912,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "EX Feuerrot & Blattgrün"
+        "cardCount": {
+          "official": 112
+        },
+        "name": "EX Feuerrot & Blattgrün",
+        "series": "EX"
       }
     },
     "id": "ex6",
@@ -774,6 +943,9 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 17
+        },
         "name": "POP Serie 1"
       }
     },
@@ -799,6 +971,14 @@
     "aliases": [
       "TCGDEX-ex7"
     ],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 109
+        },
+        "series": "EX"
+      }
+    },
     "id": "ex7",
     "ids": {
       "cardmarket": 1545,
@@ -823,7 +1003,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "EX Deoxys"
+        "cardCount": {
+          "official": 107
+        },
+        "name": "EX Deoxys",
+        "series": "EX"
       }
     },
     "id": "ex8",
@@ -850,7 +1034,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "EX Smaragd"
+        "cardCount": {
+          "official": 106
+        },
+        "name": "EX Smaragd",
+        "series": "EX"
       }
     },
     "id": "ex9",
@@ -878,7 +1066,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "EX Verborgene Mächte"
+        "cardCount": {
+          "official": 115
+        },
+        "name": "EX Verborgene Mächte",
+        "series": "EX"
       }
     },
     "id": "ex10",
@@ -905,6 +1097,9 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 17
+        },
         "name": "POP Serie 2"
       }
     },
@@ -932,7 +1127,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "EX Delta Species"
+        "cardCount": {
+          "official": 113
+        },
+        "name": "EX Delta Species",
+        "series": "EX"
       }
     },
     "id": "ex11",
@@ -959,7 +1158,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "EX Legend Maker"
+        "cardCount": {
+          "official": 92
+        },
+        "name": "EX Legend Maker",
+        "series": "EX"
       }
     },
     "id": "ex12",
@@ -984,6 +1187,13 @@
     "aliases": [
       "TCGDEX-tk-ex-p"
     ],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 12
+        }
+      }
+    },
     "id": "tk2a",
     "ids": {
       "cardmarket": 1627,
@@ -1006,6 +1216,13 @@
     "aliases": [
       "TCGDEX-tk-ex-m"
     ],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 12
+        }
+      }
+    },
     "id": "tk2b",
     "ids": {
       "cardmarket": 1627,
@@ -1030,6 +1247,9 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 17
+        },
         "name": "POP Serie 3"
       }
     },
@@ -1057,7 +1277,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "EX Holon Phantoms"
+        "cardCount": {
+          "official": 110
+        },
+        "name": "EX Holon Phantoms",
+        "series": "EX"
       }
     },
     "id": "ex13",
@@ -1084,7 +1308,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "EX Crystal Guardians"
+        "cardCount": {
+          "official": 100
+        },
+        "name": "EX Crystal Guardians",
+        "series": "EX"
       }
     },
     "id": "ex14",
@@ -1111,6 +1339,9 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 17
+        },
         "name": "POP Serie 4"
       }
     },
@@ -1138,7 +1369,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "EX Dragon Frontiers"
+        "cardCount": {
+          "official": 101
+        },
+        "name": "EX Dragon Frontiers",
+        "series": "EX"
       }
     },
     "id": "ex15",
@@ -1165,7 +1400,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "EX Power Keepers"
+        "cardCount": {
+          "official": 108
+        },
+        "name": "EX Power Keepers",
+        "series": "EX"
       }
     },
     "id": "ex16",
@@ -1192,6 +1431,9 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 17
+        },
         "name": "POP Serie 5"
       }
     },
@@ -1219,7 +1461,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Diamant & Perl"
+        "cardCount": {
+          "official": 130
+        },
+        "name": "Diamant & Perl",
+        "series": "Diamant & Perl"
       }
     },
     "id": "dp1",
@@ -1246,7 +1492,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Promo DP"
+        "cardCount": {
+          "official": 56
+        },
+        "name": "Promo DP",
+        "series": "Diamant & Perl"
       }
     },
     "id": "dpp",
@@ -1273,7 +1523,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Geheimnisvolle Schätze"
+        "cardCount": {
+          "official": 123
+        },
+        "name": "Geheimnisvolle Schätze",
+        "series": "Diamant & Perl"
       }
     },
     "id": "dp2",
@@ -1296,6 +1550,13 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 11
+        }
+      }
+    },
     "id": "TCGDEX-tk-dp-l",
     "ids": {
       "cardmarket": null,
@@ -1312,6 +1573,13 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 12
+        }
+      }
+    },
     "id": "TCGDEX-tk-dp-m",
     "ids": {
       "cardmarket": null,
@@ -1332,6 +1600,9 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 17
+        },
         "name": "POP Series 6"
       }
     },
@@ -1359,7 +1630,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Rätselhafte Wunder"
+        "cardCount": {
+          "official": 132
+        },
+        "name": "Rätselhafte Wunder",
+        "series": "Diamant & Perl"
       }
     },
     "id": "dp3",
@@ -1386,7 +1661,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Epische Begegnungen"
+        "cardCount": {
+          "official": 106
+        },
+        "name": "Epische Begegnungen",
+        "series": "Diamant & Perl"
       }
     },
     "id": "dp4",
@@ -1413,6 +1692,9 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 17
+        },
         "name": "POP Serie 7"
       }
     },
@@ -1440,7 +1722,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Majestätischer Morgen"
+        "cardCount": {
+          "official": 100
+        },
+        "name": "Majestätischer Morgen",
+        "series": "Diamant & Perl"
       }
     },
     "id": "dp5",
@@ -1467,7 +1753,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Erwachte Legenden"
+        "cardCount": {
+          "official": 146
+        },
+        "name": "Erwachte Legenden",
+        "series": "Diamant & Perl"
       }
     },
     "id": "dp6",
@@ -1494,6 +1784,9 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 17
+        },
         "name": "POP Series 8"
       }
     },
@@ -1521,7 +1814,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Sturmtief"
+        "cardCount": {
+          "official": 100
+        },
+        "name": "Sturmtief",
+        "series": "Diamant & Perl"
       }
     },
     "id": "dp7",
@@ -1548,7 +1845,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Platin"
+        "cardCount": {
+          "official": 127
+        },
+        "name": "Platin",
+        "series": "Platin"
       }
     },
     "id": "pl1",
@@ -1575,6 +1876,9 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 17
+        },
         "name": "POP Serie 9"
       }
     },
@@ -1602,7 +1906,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Aufstieg der Rivalen"
+        "cardCount": {
+          "official": 111
+        },
+        "name": "Aufstieg der Rivalen",
+        "series": "Platin"
       }
     },
     "id": "pl2",
@@ -1629,7 +1937,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Ultimative Sieger"
+        "cardCount": {
+          "official": 147
+        },
+        "name": "Ultimative Sieger",
+        "series": "Platin"
       }
     },
     "id": "pl3",
@@ -1656,7 +1968,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Arceus"
+        "cardCount": {
+          "official": 99
+        },
+        "name": "Arceus",
+        "series": "Platin"
       }
     },
     "id": "pl4",
@@ -1681,6 +1997,14 @@
     "aliases": [
       "TCGDEX-ru1"
     ],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 16
+        },
+        "series": "Platin"
+      }
+    },
     "id": "ru1",
     "ids": {
       "cardmarket": 1634,
@@ -1705,7 +2029,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "HeartGold SoulSilver"
+        "cardCount": {
+          "official": 123
+        },
+        "name": "HeartGold SoulSilver",
+        "series": "HeartGold SoulSilver"
       }
     },
     "id": "hgss1",
@@ -1732,7 +2060,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Promo HGSS"
+        "cardCount": {
+          "official": 25
+        },
+        "name": "Promo HGSS",
+        "series": "HeartGold SoulSilver"
       }
     },
     "id": "hsp",
@@ -1755,6 +2087,13 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 30
+        }
+      }
+    },
     "id": "TCGDEX-tk-hs-g",
     "ids": {
       "cardmarket": null,
@@ -1771,6 +2110,13 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 30
+        }
+      }
+    },
     "id": "TCGDEX-tk-hs-r",
     "ids": {
       "cardmarket": null,
@@ -1791,7 +2137,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Entfesselt"
+        "cardCount": {
+          "official": 95
+        },
+        "name": "Entfesselt",
+        "series": "HeartGold SoulSilver"
       }
     },
     "id": "hgss2",
@@ -1818,7 +2168,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Unerschrocken"
+        "cardCount": {
+          "official": 90
+        },
+        "name": "Unerschrocken",
+        "series": "HeartGold SoulSilver"
       }
     },
     "id": "hgss3",
@@ -1845,7 +2199,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Triumph"
+        "cardCount": {
+          "official": 102
+        },
+        "name": "Triumph",
+        "series": "HeartGold SoulSilver"
       }
     },
     "id": "hgss4",
@@ -1872,7 +2230,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Ruf der Legenden"
+        "cardCount": {
+          "official": 95
+        },
+        "name": "Ruf der Legenden",
+        "series": "Ruf der Legenden"
       }
     },
     "id": "col1",
@@ -1899,7 +2261,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "SW Promokarten"
+        "cardCount": {
+          "official": 101
+        },
+        "name": "SW Promokarten",
+        "series": "Schwarz & Weiß"
       }
     },
     "id": "bwp",
@@ -1926,7 +2292,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Schwarz & Weiß"
+        "cardCount": {
+          "official": 114
+        },
+        "name": "Schwarz & Weiß",
+        "series": "Schwarz & Weiß"
       }
     },
     "id": "bw1",
@@ -1953,6 +2323,9 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 12
+        },
         "name": "McDonald’s Kollektion 2011"
       }
     },
@@ -1980,7 +2353,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Aufstreben der Mächtigen"
+        "cardCount": {
+          "official": 98
+        },
+        "name": "Aufstreben der Mächtigen",
+        "series": "Schwarz & Weiß"
       }
     },
     "id": "bw2",
@@ -2003,6 +2380,13 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 30
+        }
+      }
+    },
     "id": "TCGDEX-tk-bw-e",
     "ids": {
       "cardmarket": null,
@@ -2019,6 +2403,13 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 30
+        }
+      }
+    },
     "id": "TCGDEX-tk-bw-z",
     "ids": {
       "cardmarket": null,
@@ -2039,7 +2430,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Königliche Siege"
+        "cardCount": {
+          "official": 101
+        },
+        "name": "Königliche Siege",
+        "series": "Schwarz & Weiß"
       }
     },
     "id": "bw3",
@@ -2066,7 +2461,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Kommende Schicksale"
+        "cardCount": {
+          "official": 99
+        },
+        "name": "Kommende Schicksale",
+        "series": "Schwarz & Weiß"
       }
     },
     "id": "bw4",
@@ -2093,7 +2492,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Erforscher der Finsternis"
+        "cardCount": {
+          "official": 108
+        },
+        "name": "Erforscher der Finsternis",
+        "series": "Schwarz & Weiß"
       }
     },
     "id": "bw5",
@@ -2118,6 +2521,13 @@
     "aliases": [
       "TCGDEX-2012bw"
     ],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 12
+        }
+      }
+    },
     "id": "mcd12",
     "ids": {
       "cardmarket": 1624,
@@ -2142,7 +2552,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Hoheit der Drachen"
+        "cardCount": {
+          "official": 124
+        },
+        "name": "Hoheit der Drachen",
+        "series": "Schwarz & Weiß"
       }
     },
     "id": "bw6",
@@ -2169,7 +2583,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Drachengruft"
+        "cardCount": {
+          "official": 20
+        },
+        "name": "Drachengruft",
+        "series": "Schwarz & Weiß"
       }
     },
     "id": "dv1",
@@ -2196,7 +2614,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Überschrittene Schwellen"
+        "cardCount": {
+          "official": 149
+        },
+        "name": "Überschrittene Schwellen",
+        "series": "Schwarz & Weiß"
       }
     },
     "id": "bw7",
@@ -2223,7 +2645,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Plasma-Sturm"
+        "cardCount": {
+          "official": 135
+        },
+        "name": "Plasma-Sturm",
+        "series": "Schwarz & Weiß"
       }
     },
     "id": "bw8",
@@ -2250,7 +2676,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Plasma-Frost"
+        "cardCount": {
+          "official": 116
+        },
+        "name": "Plasma-Frost",
+        "series": "Schwarz & Weiß"
       }
     },
     "id": "bw9",
@@ -2277,7 +2707,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Plasma-Blaster"
+        "cardCount": {
+          "official": 101
+        },
+        "name": "Plasma-Blaster",
+        "series": "Schwarz & Weiß"
       }
     },
     "id": "bw10",
@@ -2304,7 +2738,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "XY Promokarten"
+        "cardCount": {
+          "official": 211
+        },
+        "name": "XY Promokarten",
+        "series": "XY"
       }
     },
     "id": "xyp",
@@ -2327,6 +2765,13 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 12
+        }
+      }
+    },
     "id": "TCGDEX-2013bw",
     "ids": {
       "cardmarket": null,
@@ -2342,6 +2787,14 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 25
+        },
+        "series": "Schwarz & Weiß"
+      }
+    },
     "id": "TCGDEX-rc",
     "ids": {
       "cardmarket": null,
@@ -2361,7 +2814,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Legendäre Schätze"
+        "cardCount": {
+          "official": 113
+        },
+        "name": "Legendäre Schätze",
+        "series": "Schwarz & Weiß"
       }
     },
     "id": "bw11",
@@ -2388,7 +2845,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Willkommen in Kalos"
+        "cardCount": {
+          "official": 39
+        },
+        "name": "Willkommen in Kalos",
+        "series": "XY"
       }
     },
     "id": "xy0",
@@ -2413,7 +2874,11 @@
     "aliases": [],
     "i18n": {
       "de": {
-        "name": "Gelbes-A-Alternativkarten"
+        "cardCount": {
+          "official": 6
+        },
+        "name": "Gelbes-A-Alternativkarten",
+        "series": "XY"
       }
     },
     "id": "TCGDEX-xya",
@@ -2435,7 +2900,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "XY"
+        "cardCount": {
+          "official": 146
+        },
+        "name": "XY",
+        "series": "XY"
       }
     },
     "id": "xy1",
@@ -2458,6 +2927,13 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 30
+        }
+      }
+    },
     "id": "TCGDEX-tk-xy-n",
     "ids": {
       "cardmarket": null,
@@ -2474,6 +2950,13 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 30
+        }
+      }
+    },
     "id": "TCGDEX-tk-xy-sy",
     "ids": {
       "cardmarket": null,
@@ -2494,7 +2977,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Flammenmeer"
+        "cardCount": {
+          "official": 106
+        },
+        "name": "Flammenmeer",
+        "series": "XY"
       }
     },
     "id": "xy2",
@@ -2519,6 +3006,13 @@
     "aliases": [
       "TCGDEX-2014xy"
     ],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 12
+        }
+      }
+    },
     "id": "mcd14",
     "ids": {
       "cardmarket": 1625,
@@ -2543,7 +3037,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Fliegende Fäuste"
+        "cardCount": {
+          "official": 111
+        },
+        "name": "Fliegende Fäuste",
+        "series": "XY"
       }
     },
     "id": "xy3",
@@ -2566,6 +3064,13 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 30
+        }
+      }
+    },
     "id": "TCGDEX-tk-xy-b",
     "ids": {
       "cardmarket": null,
@@ -2582,6 +3087,13 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 30
+        }
+      }
+    },
     "id": "TCGDEX-tk-xy-w",
     "ids": {
       "cardmarket": null,
@@ -2602,7 +3114,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Phantomkräfte"
+        "cardCount": {
+          "official": 119
+        },
+        "name": "Phantomkräfte",
+        "series": "XY"
       }
     },
     "id": "xy4",
@@ -2629,7 +3145,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Protoshock"
+        "cardCount": {
+          "official": 160
+        },
+        "name": "Protoshock",
+        "series": "XY"
       }
     },
     "id": "xy5",
@@ -2654,6 +3174,14 @@
     "aliases": [
       "TCGDEX-dc1"
     ],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 34
+        },
+        "series": "XY"
+      }
+    },
     "id": "dc1",
     "ids": {
       "cardmarket": 1648,
@@ -2674,6 +3202,13 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 30
+        }
+      }
+    },
     "id": "TCGDEX-tk-xy-latia",
     "ids": {
       "cardmarket": null,
@@ -2690,6 +3225,13 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 30
+        }
+      }
+    },
     "id": "TCGDEX-tk-xy-latio",
     "ids": {
       "cardmarket": null,
@@ -2710,7 +3252,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Drachenleuchten"
+        "cardCount": {
+          "official": 108
+        },
+        "name": "Drachenleuchten",
+        "series": "XY"
       }
     },
     "id": "xy6",
@@ -2737,7 +3283,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Ewiger Anfang"
+        "cardCount": {
+          "official": 98
+        },
+        "name": "Ewiger Anfang",
+        "series": "XY"
       }
     },
     "id": "xy7",
@@ -2764,7 +3314,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "TURBOstart"
+        "cardCount": {
+          "official": 162
+        },
+        "name": "TURBOstart",
+        "series": "XY"
       }
     },
     "id": "xy8",
@@ -2789,6 +3343,13 @@
     "aliases": [
       "TCGDEX-2015xy"
     ],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 12
+        }
+      }
+    },
     "id": "mcd15",
     "ids": {
       "cardmarket": 1741,
@@ -2813,7 +3374,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "TURBOfieber"
+        "cardCount": {
+          "official": 122
+        },
+        "name": "TURBOfieber",
+        "series": "XY"
       }
     },
     "id": "xy9",
@@ -2840,7 +3405,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Generationen"
+        "cardCount": {
+          "official": 83
+        },
+        "name": "Generationen",
+        "series": "XY"
       }
     },
     "id": "g1",
@@ -2863,6 +3432,13 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 30
+        }
+      }
+    },
     "id": "TCGDEX-tk-xy-p",
     "ids": {
       "cardmarket": null,
@@ -2879,6 +3455,13 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 30
+        }
+      }
+    },
     "id": "TCGDEX-tk-xy-su",
     "ids": {
       "cardmarket": null,
@@ -2899,7 +3482,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Schicksalsschmiede"
+        "cardCount": {
+          "official": 124
+        },
+        "name": "Schicksalsschmiede",
+        "series": "XY"
       }
     },
     "id": "xy10",
@@ -2926,7 +3513,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Dampfkessel"
+        "cardCount": {
+          "official": 114
+        },
+        "name": "Dampfkessel",
+        "series": "XY"
       }
     },
     "id": "xy11",
@@ -2951,6 +3542,13 @@
     "aliases": [
       "TCGDEX-2016xy"
     ],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 12
+        }
+      }
+    },
     "id": "mcd16",
     "ids": {
       "cardmarket": 1752,
@@ -2975,7 +3573,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Evolution"
+        "cardCount": {
+          "official": 108
+        },
+        "name": "Evolution",
+        "series": "XY"
       }
     },
     "id": "xy12",
@@ -3002,7 +3604,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Sonne & Mond"
+        "cardCount": {
+          "official": 149
+        },
+        "name": "Sonne & Mond",
+        "series": "Sonne & Mond"
       }
     },
     "id": "sm1",
@@ -3029,7 +3635,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "SM Promokarten"
+        "cardCount": {
+          "official": 248
+        },
+        "name": "SM Promokarten",
+        "series": "Sonne & Mond"
       }
     },
     "id": "smp",
@@ -3052,6 +3662,13 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 30
+        }
+      }
+    },
     "id": "TCGDEX-tk-sm-l",
     "ids": {
       "cardmarket": null,
@@ -3068,6 +3685,13 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 30
+        }
+      }
+    },
     "id": "TCGDEX-tk-sm-r",
     "ids": {
       "cardmarket": null,
@@ -3088,7 +3712,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Stunde der Wächter"
+        "cardCount": {
+          "official": 145
+        },
+        "name": "Stunde der Wächter",
+        "series": "Sonne & Mond"
       }
     },
     "id": "sm2",
@@ -3115,7 +3743,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Nacht in Flammen"
+        "cardCount": {
+          "official": 147
+        },
+        "name": "Nacht in Flammen",
+        "series": "Sonne & Mond"
       }
     },
     "id": "sm3",
@@ -3142,7 +3774,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Schimmernde Legenden"
+        "cardCount": {
+          "official": 73
+        },
+        "name": "Schimmernde Legenden",
+        "series": "Sonne & Mond"
       }
     },
     "id": "sm35",
@@ -3169,7 +3805,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Aufziehen der Sturmröte"
+        "cardCount": {
+          "official": 111
+        },
+        "name": "Aufziehen der Sturmröte",
+        "series": "Sonne & Mond"
       }
     },
     "id": "sm4",
@@ -3196,6 +3836,9 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 12
+        },
         "name": "McDonald’s Kollektion 2017"
       }
     },
@@ -3223,7 +3866,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Ultra-Prisma"
+        "cardCount": {
+          "official": 156
+        },
+        "name": "Ultra-Prisma",
+        "series": "Sonne & Mond"
       }
     },
     "id": "sm5",
@@ -3250,7 +3897,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Grauen Der Lichtfinsternis"
+        "cardCount": {
+          "official": 131
+        },
+        "name": "Grauen Der Lichtfinsternis",
+        "series": "Sonne & Mond"
       }
     },
     "id": "sm6",
@@ -3273,6 +3924,13 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 40
+        }
+      }
+    },
     "id": "TCGDEX-2018sm-fr",
     "ids": {
       "cardmarket": 2361,
@@ -3292,7 +3950,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Sturm Am Firmament"
+        "cardCount": {
+          "official": 168
+        },
+        "name": "Sturm Am Firmament",
+        "series": "Sonne & Mond"
       }
     },
     "id": "sm7",
@@ -3319,7 +3981,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Majestät Der Drachen"
+        "cardCount": {
+          "official": 70
+        },
+        "name": "Majestät Der Drachen",
+        "series": "Sonne & Mond"
       }
     },
     "id": "sm75",
@@ -3344,6 +4010,13 @@
     "aliases": [
       "TCGDEX-2018sm"
     ],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 12
+        }
+      }
+    },
     "id": "mcd18",
     "ids": {
       "cardmarket": 2404,
@@ -3368,7 +4041,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Echo des Donners"
+        "cardCount": {
+          "official": 214
+        },
+        "name": "Echo des Donners",
+        "series": "Sonne & Mond"
       }
     },
     "id": "sm8",
@@ -3395,7 +4072,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Teams Sind Trumpf"
+        "cardCount": {
+          "official": 181
+        },
+        "name": "Teams Sind Trumpf",
+        "series": "Sonne & Mond"
       }
     },
     "id": "sm9",
@@ -3422,7 +4103,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Meisterdetektiv Pikachu"
+        "cardCount": {
+          "official": 18
+        },
+        "name": "Meisterdetektiv Pikachu",
+        "series": "Sonne & Mond"
       }
     },
     "id": "det1",
@@ -3449,7 +4134,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Kräfte im Einklang"
+        "cardCount": {
+          "official": 214
+        },
+        "name": "Kräfte im Einklang",
+        "series": "Sonne & Mond"
       }
     },
     "id": "sm10",
@@ -3476,7 +4165,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Bund der Gleichgesinnten"
+        "cardCount": {
+          "official": 236
+        },
+        "name": "Bund der Gleichgesinnten",
+        "series": "Sonne & Mond"
       }
     },
     "id": "sm11",
@@ -3503,7 +4196,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Verborgenes Schicksal"
+        "cardCount": {
+          "official": 68
+        },
+        "name": "Verborgenes Schicksal",
+        "series": "Sonne & Mond"
       }
     },
     "id": "sm115",
@@ -3530,7 +4227,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Verborgenes Schicksal Glitzer-Tresor"
+        "cardCount": {
+          "official": 94
+        },
+        "name": "Verborgenes Schicksal Glitzer-Tresor",
+        "series": "Sonne & Mond"
       }
     },
     "id": "sma",
@@ -3557,6 +4258,9 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 12
+        },
         "name": "McDonald’s Kollektion 2019"
       }
     },
@@ -3580,6 +4284,13 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 40
+        }
+      }
+    },
     "id": "TCGDEX-2019sm-fr",
     "ids": {
       "cardmarket": null,
@@ -3599,7 +4310,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Welten im Wandel"
+        "cardCount": {
+          "official": 236
+        },
+        "name": "Welten im Wandel",
+        "series": "Sonne & Mond"
       }
     },
     "id": "sm12",
@@ -3626,10 +4341,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 307
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/swsh/swshp/logo.webp"
         },
-        "name": "SCSC Promokarten"
+        "name": "SCSC Promokarten",
+        "series": "Schwert & Schild"
       }
     },
     "id": "swshp",
@@ -3656,10 +4375,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 202
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/swsh/swsh1/logo.webp"
         },
-        "name": "Schwert & Schild"
+        "name": "Schwert & Schild",
+        "series": "Schwert & Schild"
       }
     },
     "id": "swsh1",
@@ -3686,10 +4409,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 192
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/swsh/swsh2/logo.webp"
         },
-        "name": "Clash der Rebellen"
+        "name": "Clash der Rebellen",
+        "series": "Schwert & Schild"
       }
     },
     "id": "swsh2",
@@ -3716,10 +4443,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 189
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/swsh/swsh3/logo.webp"
         },
-        "name": "Flammende Finsternis"
+        "name": "Flammende Finsternis",
+        "series": "Schwert & Schild"
       }
     },
     "id": "swsh3",
@@ -3744,6 +4475,14 @@
     "aliases": [
       "TCGDEX-fut2020"
     ],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 5
+        },
+        "series": "Schwert & Schild"
+      }
+    },
     "id": "fut20",
     "ids": {
       "cardmarket": 3510,
@@ -3768,10 +4507,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 73
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/swsh/swsh3.5/logo.webp"
         },
-        "name": "Weg des Champs"
+        "name": "Weg des Champs",
+        "series": "Schwert & Schild"
       }
     },
     "id": "swsh35",
@@ -3798,10 +4541,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 185
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/swsh/swsh4/logo.webp"
         },
-        "name": "Farbenschock"
+        "name": "Farbenschock",
+        "series": "Schwert & Schild"
       }
     },
     "id": "swsh4",
@@ -3828,6 +4575,9 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 25
+        },
         "name": "McDonald’s Kollektion 2021"
       }
     },
@@ -3857,10 +4607,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 72
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/swsh/swsh4.5/logo.webp"
         },
-        "name": "Glänzendes Schicksal"
+        "name": "Glänzendes Schicksal",
+        "series": "Schwert & Schild"
       }
     },
     "id": "swsh45",
@@ -3887,10 +4641,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 163
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/swsh/swsh5/logo.webp"
         },
-        "name": "Kampfstile"
+        "name": "Kampfstile",
+        "series": "Schwert & Schild"
       }
     },
     "id": "swsh5",
@@ -3917,10 +4675,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 198
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/swsh/swsh6/logo.webp"
         },
-        "name": "Schaurige Herrschaft"
+        "name": "Schaurige Herrschaft",
+        "series": "Schwert & Schild"
       }
     },
     "id": "swsh6",
@@ -3947,10 +4709,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 203
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/swsh/swsh7/logo.webp"
         },
-        "name": "Drachenwandel"
+        "name": "Drachenwandel",
+        "series": "Schwert & Schild"
       }
     },
     "id": "swsh7",
@@ -3977,10 +4743,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 25
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/swsh/cel25/logo.webp"
         },
-        "name": "Celebrations"
+        "name": "Celebrations",
+        "series": "Schwert & Schild"
       }
     },
     "id": "cel25",
@@ -4007,7 +4777,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Celebrations Klassische Kollektion"
+        "cardCount": {
+          "official": 25
+        },
+        "name": "Celebrations Klassische Kollektion",
+        "series": "Schwert & Schild"
       }
     },
     "id": "cel25c",
@@ -4034,10 +4808,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 264
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/swsh/swsh8/logo.webp"
         },
-        "name": "Fusionsangriff"
+        "name": "Fusionsangriff",
+        "series": "Schwert & Schild"
       }
     },
     "id": "swsh8",
@@ -4066,10 +4844,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 172
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/swsh/swsh9/logo.webp"
         },
-        "name": "Strahlende Sterne"
+        "name": "Strahlende Sterne",
+        "series": "Schwert & Schild"
       }
     },
     "id": "swsh9",
@@ -4098,10 +4880,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 189
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/swsh/swsh10/logo.webp"
         },
-        "name": "Astralglanz"
+        "name": "Astralglanz",
+        "series": "Schwert & Schild"
       }
     },
     "id": "swsh10",
@@ -4128,10 +4914,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 78
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/swsh/swsh10.5/logo.webp"
         },
-        "name": "Pokémon GO"
+        "name": "Pokémon GO",
+        "series": "Schwert & Schild"
       }
     },
     "id": "pgo",
@@ -4158,6 +4948,9 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 15
+        },
         "name": "McDonald's Kollektion 2022"
       }
     },
@@ -4187,10 +4980,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 196
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/swsh/swsh11/logo.webp"
         },
-        "name": "Verlorener Ursprung"
+        "name": "Verlorener Ursprung",
+        "series": "Schwert & Schild"
       }
     },
     "id": "swsh11",
@@ -4219,10 +5016,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 195
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/swsh/swsh12/logo.webp"
         },
-        "name": "Silberne Sturmwinde"
+        "name": "Silberne Sturmwinde",
+        "series": "Schwert & Schild"
       }
     },
     "id": "swsh12",
@@ -4249,7 +5050,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "SVP Black Star Promos"
+        "cardCount": {
+          "official": 225
+        },
+        "name": "SVP Black Star Promos",
+        "series": "Karmesin & Purpur"
       }
     },
     "id": "svp",
@@ -4278,10 +5083,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 159
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/swsh/swsh12.5/logo.webp"
         },
-        "name": "Zenit der Könige"
+        "name": "Zenit der Könige",
+        "series": "Schwert & Schild"
       }
     },
     "id": "swsh12pt5",
@@ -4308,10 +5117,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 198
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/sv/sv01/logo.webp"
         },
-        "name": "Karmesin & Purpur"
+        "name": "Karmesin & Purpur",
+        "series": "Karmesin & Purpur"
       }
     },
     "id": "sv1",
@@ -4338,7 +5151,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Karmesin & Purpur Energie"
+        "cardCount": {
+          "official": 24
+        },
+        "name": "Karmesin & Purpur Energie",
+        "series": "Karmesin & Purpur"
       }
     },
     "id": "sve",
@@ -4365,10 +5182,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 193
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/sv/sv02/logo.webp"
         },
-        "name": "Entwicklungen in Paldea"
+        "name": "Entwicklungen in Paldea",
+        "series": "Karmesin & Purpur"
       }
     },
     "id": "sv2",
@@ -4393,6 +5214,9 @@
     "aliases": [],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 15
+        },
         "name": "McDonald's Kollektion 2023"
       }
     },
@@ -4416,10 +5240,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 197
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/sv/sv03/logo.webp"
         },
-        "name": "Obsidian Flammen"
+        "name": "Obsidian Flammen",
+        "series": "Karmesin & Purpur"
       }
     },
     "id": "sv3",
@@ -4446,10 +5274,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 165
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/sv/sv03.5/logo.webp"
         },
-        "name": "151"
+        "name": "151",
+        "series": "Karmesin & Purpur"
       }
     },
     "id": "sv3pt5",
@@ -4472,6 +5304,14 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 48
+        },
+        "series": "Karmesin & Purpur"
+      }
+    },
     "id": "TCGDEX-mfb",
     "ids": {
       "cardmarket": null,
@@ -4492,10 +5332,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 182
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/sv/sv04/logo.webp"
         },
-        "name": "Paradoxrift"
+        "name": "Paradoxrift",
+        "series": "Karmesin & Purpur"
       }
     },
     "id": "sv4",
@@ -4522,10 +5366,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 91
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/sv/sv04.5/logo.webp"
         },
-        "name": "Paldeas Schicksale"
+        "name": "Paldeas Schicksale",
+        "series": "Karmesin & Purpur"
       }
     },
     "id": "sv4pt5",
@@ -4552,10 +5400,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 162
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/sv/sv05/logo.webp"
         },
-        "name": "Gewalten der Zeit"
+        "name": "Gewalten der Zeit",
+        "series": "Karmesin & Purpur"
       }
     },
     "id": "sv5",
@@ -4582,10 +5434,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 167
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/sv/sv06/logo.webp"
         },
-        "name": "Maskerade im Zwielicht"
+        "name": "Maskerade im Zwielicht",
+        "series": "Karmesin & Purpur"
       }
     },
     "id": "sv6",
@@ -4612,10 +5468,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 64
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/sv/sv06.5/logo.webp"
         },
-        "name": "Nebel der Sagen"
+        "name": "Nebel der Sagen",
+        "series": "Karmesin & Purpur"
       }
     },
     "id": "sv6pt5",
@@ -4642,10 +5502,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 142
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/sv/sv07/logo.webp"
         },
-        "name": "Stellarkrone"
+        "name": "Stellarkrone",
+        "series": "Karmesin & Purpur"
       }
     },
     "id": "sv7",
@@ -4670,7 +5534,11 @@
     "aliases": [],
     "i18n": {
       "de": {
-        "name": "Unschlagbare Gene"
+        "cardCount": {
+          "official": 226
+        },
+        "name": "Unschlagbare Gene",
+        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
       }
     },
     "id": "TCGDEX-A1",
@@ -4694,7 +5562,8 @@
     "aliases": [],
     "i18n": {
       "de": {
-        "name": "PROMO-A"
+        "name": "PROMO-A",
+        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
       }
     },
     "id": "TCGDEX-P-A",
@@ -4719,10 +5588,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 191
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/sv/sv08/logo.webp"
         },
-        "name": "Stürmische Funken"
+        "name": "Stürmische Funken",
+        "series": "Karmesin & Purpur"
       }
     },
     "id": "sv8",
@@ -4747,6 +5620,9 @@
     "aliases": [],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 15
+        },
         "name": "McDonald's Kollektion 2024"
       }
     },
@@ -4768,7 +5644,11 @@
     "aliases": [],
     "i18n": {
       "de": {
-        "name": "Mysteriöse Insel"
+        "cardCount": {
+          "official": 68
+        },
+        "name": "Mysteriöse Insel",
+        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
       }
     },
     "id": "TCGDEX-A1a",
@@ -4793,10 +5673,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 131
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/sv/sv08.5/logo.webp"
         },
-        "name": "Prismatische Entwicklungen"
+        "name": "Prismatische Entwicklungen",
+        "series": "Karmesin & Purpur"
       }
     },
     "id": "sv8pt5",
@@ -4821,7 +5705,11 @@
     "aliases": [],
     "i18n": {
       "de": {
-        "name": "Kollision von Raum und Zeit"
+        "cardCount": {
+          "official": 140
+        },
+        "name": "Kollision von Raum und Zeit",
+        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
       }
     },
     "id": "TCGDEX-A2",
@@ -4844,7 +5732,11 @@
     "aliases": [],
     "i18n": {
       "de": {
-        "name": "Licht des Triumphs"
+        "cardCount": {
+          "official": 75
+        },
+        "name": "Licht des Triumphs",
+        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
       }
     },
     "id": "TCGDEX-A2a",
@@ -4868,7 +5760,11 @@
     "aliases": [],
     "i18n": {
       "de": {
-        "name": "Glänzendes Festival"
+        "cardCount": {
+          "official": 72
+        },
+        "name": "Glänzendes Festival",
+        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
       }
     },
     "id": "TCGDEX-A2b",
@@ -4894,10 +5790,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 159
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/sv/sv09/logo.webp"
         },
-        "name": "Reisegefährten"
+        "name": "Reisegefährten",
+        "series": "Karmesin & Purpur"
       }
     },
     "id": "sv9",
@@ -4922,7 +5822,11 @@
     "aliases": [],
     "i18n": {
       "de": {
-        "name": "Hüter des Firmaments"
+        "cardCount": {
+          "official": 155
+        },
+        "name": "Hüter des Firmaments",
+        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
       }
     },
     "id": "TCGDEX-A3",
@@ -4943,6 +5847,14 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 69
+        },
+        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
+      }
+    },
     "id": "TCGDEX-A3a",
     "ids": {
       "cardmarket": null,
@@ -4962,10 +5874,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 182
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/sv/sv10/logo.webp"
         },
-        "name": "Ewige Rivalen"
+        "name": "Ewige Rivalen",
+        "series": "Karmesin & Purpur"
       }
     },
     "id": "sv10",
@@ -4988,6 +5904,14 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 69
+        },
+        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
+      }
+    },
     "id": "TCGDEX-A3b",
     "ids": {
       "cardmarket": null,
@@ -5007,7 +5931,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Weiße Flammen"
+        "cardCount": {
+          "official": 86
+        },
+        "name": "Weiße Flammen",
+        "series": "Karmesin & Purpur"
       }
     },
     "id": "rsv10pt5",
@@ -5034,7 +5962,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Schwarze Blitze"
+        "cardCount": {
+          "official": 86
+        },
+        "name": "Schwarze Blitze",
+        "series": "Karmesin & Purpur"
       }
     },
     "id": "zsv10pt5",
@@ -5057,6 +5989,14 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 161
+        },
+        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
+      }
+    },
     "id": "TCGDEX-A4",
     "ids": {
       "cardmarket": null,
@@ -5077,7 +6017,11 @@
     "aliases": [],
     "i18n": {
       "de": {
-        "name": "Verborgene Quelle"
+        "cardCount": {
+          "official": 71
+        },
+        "name": "Verborgene Quelle",
+        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
       }
     },
     "id": "TCGDEX-A4a",
@@ -5101,7 +6045,11 @@
     "aliases": [],
     "i18n": {
       "de": {
-        "name": "Mega-Entwicklung Energie"
+        "cardCount": {
+          "official": 16
+        },
+        "name": "Mega-Entwicklung Energie",
+        "series": "Mega-Entwicklung"
       }
     },
     "id": "TCGDEX-mee",
@@ -5124,10 +6072,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 132
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/me/me01/logo.webp"
         },
-        "name": "Mega-Entwicklung"
+        "name": "Mega-Entwicklung",
+        "series": "Mega-Entwicklung"
       }
     },
     "id": "me1",
@@ -5154,7 +6106,8 @@
     ],
     "i18n": {
       "de": {
-        "name": "MEP Black Star Promos"
+        "name": "MEP Black Star Promos",
+        "series": "Mega-Entwicklung"
       }
     },
     "id": "mep",
@@ -5173,6 +6126,14 @@
   },
   {
     "aliases": [],
+    "i18n": {
+      "de": {
+        "cardCount": {
+          "official": 226
+        },
+        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
+      }
+    },
     "id": "TCGDEX-B1",
     "ids": {
       "cardmarket": null,
@@ -5196,10 +6157,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 94
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/me/me02/logo.webp"
         },
-        "name": "Fatale Flammen"
+        "name": "Fatale Flammen",
+        "series": "Mega-Entwicklung"
       }
     },
     "id": "me2",
@@ -5224,7 +6189,11 @@
     "aliases": [],
     "i18n": {
       "de": {
-        "name": "Feuerrote Flammen"
+        "cardCount": {
+          "official": 69
+        },
+        "name": "Feuerrote Flammen",
+        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
       }
     },
     "id": "TCGDEX-B1a",
@@ -5244,7 +6213,11 @@
     "aliases": [],
     "i18n": {
       "de": {
-        "name": "Traumhafte Parade"
+        "cardCount": {
+          "official": 155
+        },
+        "name": "Traumhafte Parade",
+        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
       }
     },
     "id": "TCGDEX-B2",
@@ -5270,10 +6243,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 217
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/me/me02.5/logo.webp"
         },
-        "name": "Erhabene Helden"
+        "name": "Erhabene Helden",
+        "series": "Mega-Entwicklung"
       }
     },
     "id": "me2pt5",
@@ -5298,7 +6275,11 @@
     "aliases": [],
     "i18n": {
       "de": {
-        "name": "Paldean Wonders"
+        "cardCount": {
+          "official": 93
+        },
+        "name": "Paldean Wonders",
+        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
       }
     },
     "id": "TCGDEX-B2a",
@@ -5320,10 +6301,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 88
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/me/me03/logo.webp"
         },
-        "name": "Optimale Ordnung"
+        "name": "Optimale Ordnung",
+        "series": "Mega-Entwicklung"
       }
     },
     "id": "me3",
@@ -5350,10 +6335,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 86
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/me/me04/logo.webp"
         },
-        "name": "Wachsendes Chaos"
+        "name": "Wachsendes Chaos",
+        "series": "Mega-Entwicklung"
       }
     },
     "id": "me4",
@@ -5380,10 +6369,14 @@
     ],
     "i18n": {
       "de": {
+        "cardCount": {
+          "official": 84
+        },
         "images": {
           "logo": "https://assets.tcgdex.net/de/me/me05/logo.png"
         },
-        "name": "Dunkelnacht"
+        "name": "Dunkelnacht",
+        "series": "Mega-Entwicklung"
       }
     },
     "id": "me5",
@@ -5410,7 +6403,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "30 Jahre"
+        "cardCount": {
+          "official": 128
+        },
+        "name": "30 Jahre",
+        "series": "Mega-Entwicklung"
       }
     },
     "id": "me55",
@@ -5437,7 +6434,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "30 Jahre: Klassische Sammlung"
+        "cardCount": {
+          "official": 30
+        },
+        "name": "30 Jahre: Klassische Sammlung",
+        "series": "Mega-Entwicklung"
       }
     },
     "id": "me55c",
@@ -5464,7 +6465,11 @@
     ],
     "i18n": {
       "de": {
-        "name": "Delta-Herrschaft"
+        "cardCount": {
+          "official": 103
+        },
+        "name": "Delta-Herrschaft",
+        "series": "Mega-Entwicklung"
       }
     },
     "id": "me6",
