@@ -212,6 +212,11 @@ Grid: 5 Blocks × 3 Spalten × 4 Reihen = 60 Karten/Block
 | "Checkboxen nicht gespeichert" | Spreadsheet-Berechtigungen prüfen |
 | Theme wirkt veraltet | Browser-Cache leeren (Ctrl+Shift+Del) |
 
+### Hinweise
+
+- Kartensprache (EN/DE) wird pro Browser gespeichert (localStorage), nicht im Spreadsheet.
+- Migration mehrdeutiger Altzeilen: vorher wird ein Auto-Snapshot erstellt, eine Undo-Oberflaeche dafuer gibt es noch nicht.
+
 ---
 
 ## 🎯 Kommandos (Dev)

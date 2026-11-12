@@ -155,3 +155,6 @@ node --test frontend/tcg-tracker-web/tests/cardmarket-data.test.mjs
 - Diese Version ist ein MVP-Startpunkt.
 - Der bestehende Grid-Aufbau der Set-Blätter (5x3, Höhe 4) wird für das Lesen/Schreiben der Checkboxen verwendet.
 - Für Karten ohne TCGDex-Bild wird auf `https://images.pokemontcg.io/{setId}/{cardNumber}.png` zurückgefallen.
+- Die Kartensprache (Englisch/Deutsch) wird pro Browser gespeichert (localStorage), nicht im Spreadsheet; auf einem anderen Gerät oder in einem anderen Browser gilt wieder die Voreinstellung.
+- Vor der Zuordnung mehrdeutiger Altzeilen wird ein Auto-Snapshot angelegt; eine Rueckgaengig-Funktion fuer diese Migration gibt es in der Oberflaeche noch nicht.
+- Noch nicht zugeordnete Kandidaten mehrdeutiger Altzeilen zeigen den gemeinsamen Altstatus mit dem Hinweis „nicht zugeordnet“; ein Klick auf G oeffnet die Zuordnung.
