@@ -669,6 +669,12 @@ async function appendDbRows(sheetName, columnCount, rows) {
   });
 }
 
+/** Haengt db_collection-Zeilen an (serialisiert ueber die Blatt-Sperre), z. B. fuer die Altschluessel-Migration. */
+export async function appendCollectionRows(rows) {
+  await ensureNormalizedSchema();
+  await appendDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, rows);
+}
+
 async function ensureSheetCapacity(sheetName, requiredRows, requiredCols) {
   const normalizedSheetName = normalizeName(sheetName);
   const targetRows = Math.max(0, Number(requiredRows) || 0);

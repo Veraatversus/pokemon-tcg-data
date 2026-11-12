@@ -2894,3 +2894,9 @@ dialog h2 {
 
 
 
+
+/* Migrationsdialog fuer mehrdeutige Altschluessel (Task 7) */
+.ambiguous-migration-dialog { width: min(640px, calc(100vw - 32px)); max-height: 88vh; overflow: auto; padding: 18px; }
+.ambiguous-migration-dialog fieldset { margin: 12px 0; display: flex; flex-wrap: wrap; gap: 12px; }
+.ambiguous-candidate { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; font-size: 0.85rem; }
+.ambiguous-candidate img { border-radius: 4px; }

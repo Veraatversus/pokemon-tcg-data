@@ -7,6 +7,7 @@ import {
   readDbCardsForSet,
   ensureCollectionEntry,
   updateCellBooleansBatch,
+  appendCollectionRows,
   readSummarySheet,
   readSettings,
   writeSetting,
@@ -78,6 +79,12 @@ import {
   pickCanonicalCardId,
   extractLegacySpreadsheetId
 } from './features/collection/legacy-import.js?v=20260613-tcgdex-merge-fix-v2';
+import { ensureResolverForSet } from './data/collection-aliases.js';
+import {
+  planAmbiguousMigration,
+  applyAmbiguousMigration,
+  showAmbiguousMigrationDialog
+} from './features/collection/ambiguous-key-migration.js';
 import { initCommandPalette } from './ui/command-palette.js';
 import { filterSetsBySeriesKey, getStatsSeriesLabel } from './ui/stats-series.js?v=20260613-tcgdex-merge-fix-v2';
 import {
@@ -8556,10 +8563,64 @@ function syncCollectionCheckboxUi(gInput, rhInput, db, { isEditable = Boolean(st
   }
 }
 
-// Hook fuer Task 7 (Migrationsdialog, Spec §5.3): mehrdeutige Altzeile mit gesetztem Status.
-// Bis dahin nur eine verstaendliche Meldung; es wird nichts geschrieben (auch keine Ersatzzeile).
+// Migrationsdialog (Task 7, Spec §5.3): mehrdeutige Altzeile mit gesetztem Status. Ohne Dialog-Ergebnis
+// ("Spaeter") wird nichts geschrieben; die Karten zeigen weiter den gemeinsamen Altstatus.
 function onAmbiguousLegacyKey(err) {
   showToast(describeAmbiguousLegacyKey(err), 'info', 8000);
+  const set = state.currentSet;
+  if (set?.setId) void runAmbiguousMigrationFlow(set, { force: true });
+}
+
+const ambiguousMigrationRunning = new Set();
+const ambiguousMigrationDeclined = new Set();
+
+async function reloadDbMapForSet(set) {
+  const map = await readSetCollectionMap(set.setName, { setId: set.setId });
+  cache.set(`db_${set.setId}`, map, CONFIG.CACHE_TTL_MS);
+  if (state.currentSet?.setId === set.setId) state.dbMap = map;
+  return map;
+}
+
+/** Stille Migration automatisch, danach Dialog fuer Altzeilen mit Haken. force: auch nach "Spaeter". */
+async function runAmbiguousMigrationFlow(set, { force = false } = {}) {
+  if (!set?.setId || ambiguousMigrationRunning.has(set.setId)) return;
+  if (!force && ambiguousMigrationDeclined.has(set.setId)) return;
+  const ambiguousIn = (map) => [...(map?.values?.() || [])].filter((entry) => entry.ambiguous);
+  if (!ambiguousIn(state.dbMap).length) return;
+  ambiguousMigrationRunning.add(set.setId);
+  try {
+    const resolver = await ensureResolverForSet(set.setId);
+    const canonicalSetId = resolver.resolveSetKey(set.setId) || set.setId;
+    const deps = {
+      createSnapshot: (name, data) => createAutoSnapshot(name, data),
+      appendRows: (rows) => appendCollectionRows(rows),
+      updateCells: (updates) => updateCellBooleansBatch(set.setName, updates, { chunkSize: 200 }),
+      readMap: () => readSetCollectionMap(set.setName, { setId: set.setId })
+    };
+    const planFor = (map) => planAmbiguousMigration(ambiguousIn(map), { setId: canonicalSetId, cards: state.cards });
+    let map = state.dbMap;
+    const silentPlan = planFor(map);
+    if (silentPlan.silent.length) {
+      await applyAmbiguousMigration(silentPlan, new Map(), deps);
+      map = await reloadDbMapForSet(set);
+    }
+    const plan = planFor(map);
+    if (!plan.needsDialog.length) return;
+    const { action, choices } = await showAmbiguousMigrationDialog(plan);
+    if (action !== 'apply') {
+      ambiguousMigrationDeclined.add(set.setId);
+      return;
+    }
+    const result = await applyAmbiguousMigration(plan, choices, deps);
+    await reloadDbMapForSet(set);
+    if (state.currentSet?.setId === set.setId) renderCards();
+    showToast(`${result.migrated.length} alte Einträge zugeordnet.`, 'success', 4000);
+  } catch (err) {
+    console.error('[ambiguous-migration]', err);
+    showToast(`Zuordnung fehlgeschlagen: ${err?.message || err}`, 'error');
+  } finally {
+    ambiguousMigrationRunning.delete(set.setId);
+  }
 }
 
 function reportCollectionWriteError(err, prefix = 'Speichern fehlgeschlagen') {
@@ -9596,6 +9657,7 @@ async function loadCurrentSet(forceRefresh = false) {
     document.querySelector('.filter-btn[data-filter="all"]')?.classList.add('active');
 
     renderCards();
+    void runAmbiguousMigrationFlow(selected);
     await writeSetting('lastSetId', setId);
     markSetAsRecent(selected);
     setGlobalStatus(`${selected.setName}: ${cards.length} Karten.`);
