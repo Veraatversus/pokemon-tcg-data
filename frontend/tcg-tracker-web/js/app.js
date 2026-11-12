@@ -34,7 +34,7 @@ import {
 } from './data/collection-writes.js';
 import { needsApiCardEnrichment, describeCardDataFailure, NO_CARD_DATA_MESSAGE } from './core/card-enrichment.js';
 import { findSetByIdOrAlias } from './data/set-aliases.js';
-import { selectSearchSets } from './features/search/search-index-prefilter.js';
+import { searchFromIndex, indexEntryToCard } from './features/search/search-index-prefilter.js';
 import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, fetchDeSeriesBySetId } from './data/pokemon-api.js?v=20261112-api-v3';
 import { resolveSeriesGroupInfo, resolveDisplaySet, applyDeSeriesFallback, resolveSetTotalCards, setDeSeriesBySetId, getCardLanguage } from './data/schema-contract.js';
 import { imageCandidates, bindImageFallback, fallbackImgAttrs } from './ui/image-fallback.js';
@@ -565,6 +565,8 @@ const REALTIME_CLIENT_STORAGE_KEY = scopedStorageKey('realtime_client_id');
 const USER_ID_STORAGE_KEY = scopedStorageKey('user_id');
 const DEV_COMPLETION_STORAGE_KEY = scopedStorageKey('dev_completion_mode');
 const SEARCH_INPUT_DEBOUNCE_MS = 900;
+// Suche: hoechstens so viele Treffer als Karten zeichnen (z. B. 'pokemon' trifft ~20 000 Indexeintraege).
+const SEARCH_RESULT_RENDER_LIMIT = 240;
 const SEARCH_SCOPE_IMPORTED = 'imported';
 const SEARCH_SCOPE_ALL = 'all';
 const SEARCH_SCOPE_ONLINE = 'online';
@@ -7113,37 +7115,6 @@ function parseStructuredSearchQuery(rawQuery, availableSets = []) {
   };
 }
 
-/**
- * Erkennt freie Kombinationen aus Kartennummer + Namenstokens, z.B. "57 Digda" oder "Digda 57".
- * Gibt null zurck, wenn kein sinnvolles gemischtes Muster erkannt wird.
- */
-function parseMixedQuery(rawQuery) {
-  const normalized = normalizeSearchText(rawQuery).trim();
-  if (!normalized) return null;
-
-  const parts = normalized
-    .split(/\s+/)
-    .map((part) => sanitizeSearchToken(part))
-    .filter(Boolean);
-  if (parts.length < 2) return null;
-
-  const hasSetLikeMarker = parts.some((token) => token === 'set' || token === 'series' || token === 'serie');
-  if (hasSetLikeMarker) return null;
-
-  // Tokens die wie eine Kartennummer aussehen: optionale alpha-Praefix + Zahlen + optionales Suffix
-  const numberTokens = parts.filter((p) => /^[a-z._-]*\d+[a-z._-]*$/.test(p));
-  const nameTokensRaw = parts.filter((p) => !/^[a-z._-]*\d+[a-z._-]*$/.test(p));
-  const nameTokens = extractMeaningfulNameTokens(nameTokensRaw);
-
-  // Nur sinnvoll wenn mindestens ein Namentoken UND genau ein Nummerntoken vorhanden ist
-  if (!nameTokens.length || !numberTokens.length) return null;
-
-  return {
-    cardNumber: normalizeCardNumberForSearch(numberTokens[0]),
-    nameTokens
-  };
-}
-
 function normalizeSearchText(value) {
   return String(value || '')
     .toLowerCase()
@@ -7272,175 +7243,13 @@ function matchesDashboardSetFilter(set, rawQuery = '') {
   return scoreDashboardSetMatch(set, rawQuery) >= 0;
 }
 
-function buildCardSearchContext(card, set = null) {
-  const nameValues = collectSearchStrings([
-    card?.name,
-    card?.vera_name,
-    card?.tcgdex_name
-  ]);
-
-  const setValues = collectSearchStrings([
-    set?.setName,
-    set?.vera_name,
-    set?.tcgdex_name,
-    set?.series,
-    set?.vera_series,
-    set?.tcgdex_serie_name,
-    set?.ptcgoCode,
-    set?.vera_ptcgoCode,
-    set?.tcgdex_abbreviation_official,
-    set?.setId
-  ]);
-
-  const taxonomyValues = collectSearchStrings([
-    card?.rarity,
-    card?.hp,
-    card?.types,
-    card?.vera_types,
-    card?.supertype,
-    card?.subtypes,
-    card?.evolvesFrom,
-    card?.vera_evolvesFrom,
-    card?.artist,
-    card?.regulationMark,
-    card?.flavorText,
-    card?.vera_flavorText,
-    card?.rules,
-    card?.abilities,
-    card?.attacks,
-    card?.weaknesses,
-    card?.resistances
-  ]);
-
-  const numberValues = collectSearchStrings([
-    card?.number,
-    card?.vera_number,
-    card?.tcgdex_localId
-  ]);
-
-  return {
-    nameValues,
-    setValues,
-    taxonomyValues,
-    numberValues,
-    fullText: [...nameValues, ...setValues, ...taxonomyValues, ...numberValues].join(' ')
-  };
-}
-
-function computeSearchScore(card, normalizedQuery, structuredQuery, mixedQuery, set = null) {
-  const context = buildCardSearchContext(card, set);
-  const numberRaw = String(card.number || '').toLowerCase();
-  const normalizedCardNumber = normalizeCardNumberForSearch(card.number);
-
-  if (structuredQuery) {
-    const numberMatch = !structuredQuery.cardNumber || cardNumberMatchesQuery(card.number, structuredQuery.cardNumber);
-    const nameMatch = !structuredQuery.namePart || matchesTokensInValues(structuredQuery.namePart, context.nameValues.length ? context.nameValues : [context.fullText]);
-    if (!numberMatch || !nameMatch) return -1;
-
-    let score = 1000;
-    if (structuredQuery.cardNumber) score += 250;
-    if (structuredQuery.namePart?.length) {
-      score += structuredQuery.namePart.length * 45;
-      score += 90;
-    }
-    return score;
-  }
-
-  if (mixedQuery) {
-    const numberMatch = cardNumberMatchesQuery(card.number, mixedQuery.cardNumber);
-    const nameMatch = matchesTokensInValues(mixedQuery.nameTokens, context.nameValues.length ? context.nameValues : [context.fullText]);
-    if (!numberMatch || !nameMatch) return -1;
-
-    return 900 + (mixedQuery.nameTokens.length * 45) + 220;
-  }
-
-  const normalizedFreeQuery = normalizeSearchText(normalizedQuery).trim();
-  const queryTokens = normalizedFreeQuery
-    .split(/\s+/)
-    .map((token) => sanitizeSearchToken(token))
-    .filter(Boolean);
-  const meaningfulTokens = extractMeaningfulNameTokens(queryTokens);
-
-  if (!queryTokens.length) return -1;
-
-  const exactNameMatch = context.nameValues.some((value) => value === normalizedFreeQuery);
-  const nameStartsWith = context.nameValues.some((value) => value.startsWith(normalizedFreeQuery));
-  const nameContains = context.nameValues.some((value) => value.includes(normalizedFreeQuery));
-  const setExactMatch = context.setValues.some((value) => value === normalizedFreeQuery);
-  const setContains = context.setValues.some((value) => value.includes(normalizedFreeQuery));
-  const taxonomyContains = context.taxonomyValues.some((value) => value.includes(normalizedFreeQuery));
-  const numberContains = context.numberValues.some((value) => value.includes(normalizedFreeQuery))
-    || normalizedCardNumber.includes(normalizedFreeQuery)
-    || numberRaw.includes(normalizedFreeQuery)
-    || cardNumberMatchesQuery(card.number, normalizedFreeQuery);
-
-  const numberLikeTokens = queryTokens.filter((token) => /^[a-z._-]*\d+[a-z._-]*$/.test(token));
-  const nameLikeTokens = meaningfulTokens;
-  const nameTokenMatch = nameLikeTokens.length ? matchesTokensInValues(nameLikeTokens, context.nameValues.length ? context.nameValues : [context.fullText]) : false;
-  const setTokenMatch = nameLikeTokens.length ? matchesTokensInValues(nameLikeTokens, context.setValues) : false;
-  const taxonomyTokenMatch = nameLikeTokens.length ? matchesTokensInValues(nameLikeTokens, context.taxonomyValues) : false;
-  const numberTokenMatch = numberLikeTokens.length ? numberLikeTokens.every((token) => cardNumberMatchesQuery(card.number, token)) : false;
-  const fullTokenMatch = queryTokens.every((token) => context.fullText.includes(token) || cardNumberMatchesQuery(card.number, token));
-
-  const isMatch = exactNameMatch
-    || nameStartsWith
-    || nameContains
-    || setExactMatch
-    || setContains
-    || taxonomyContains
-    || numberContains
-    || nameTokenMatch
-    || setTokenMatch
-    || taxonomyTokenMatch
-    || numberTokenMatch
-    || fullTokenMatch;
-
-  if (!isMatch) return -1;
-
-  let score = 0;
-  if (exactNameMatch) score += 420;
-  else if (nameStartsWith) score += 320;
-  else if (nameContains) score += 220;
-
-  if (numberContains) score += 190;
-  if (setExactMatch) score += 240;
-  else if (setContains) score += 140;
-  if (taxonomyContains || taxonomyTokenMatch) score += 60;
-  if (nameTokenMatch) score += 110;
-  if (setTokenMatch) score += 95;
-  if (numberTokenMatch) score += 135;
-  if (fullTokenMatch && queryTokens.length > 1) score += 120;
-  if (nameTokenMatch && numberTokenMatch) score += 180;
-
-  return score;
-}
-
-function matchesCardSearch(card, normalizedQuery, structuredQuery, mixedQuery, set = null) {
-  return computeSearchScore(card, normalizedQuery, structuredQuery, mixedQuery, set) >= 0;
-}
-
 // hasRichCardDetails/needsApiCardEnrichment: js/core/card-enrichment.js (v3 massgeblich, siehe dort).
-
-function sortSearchResults(results = []) {
-  return results.sort((left, right) => {
-    if (right.score !== left.score) return right.score - left.score;
-    const setCompare = String(left.set?.setName || '').localeCompare(String(right.set?.setName || ''), 'de', { sensitivity: 'base' });
-    if (setCompare !== 0) return setCompare;
-    return String(left.card?.number || '').localeCompare(String(right.card?.number || ''), undefined, { numeric: true, sensitivity: 'base' });
-  });
-}
-
-function getSearchResultKey(card = {}, set = null) {
-  const setId = String(set?.setId || '').trim();
-  const cardKey = collectionKeyOf(card);
-  const fallbackName = normalizeSearchText(card?.name || '');
-  return `${setId}::${cardKey || fallbackName || 'card'}`;
-}
 
 function renderSearchToolbarMeta({
   rawQuery = '',
   searchScopeMode = SEARCH_SCOPE_IMPORTED,
   resultCount = 0,
+  totalCount = resultCount,
   setsProcessed = 0,
   totalSets = 0,
   apiProcessed = 0,
@@ -7464,7 +7273,8 @@ function renderSearchToolbarMeta({
     if (isSearching) {
       statusText = `${safeResultCount || '0'} Ergebnis${safeResultCount === 1 ? '' : 'se'} - Suche läuft${progressSuffix}`;
     } else if (safeResultCount > 0) {
-      statusText = `${safeResultCount} Ergebnis${safeResultCount === 1 ? '' : 'se'} gefunden`;
+      statusText = `${totalCount} Ergebnis${totalCount === 1 ? '' : 'se'} gefunden`
+        + (totalCount > safeResultCount ? ` (erste ${safeResultCount} angezeigt)` : '');
     } else {
       statusText = `Keine Treffer${progressSuffix}`;
     }
@@ -7476,11 +7286,19 @@ function renderSearchToolbarMeta({
   `;
 }
 
+// Sammlungs-Map eines Sets aus dem Cache; null = noch nicht geladen (Haken bleiben bis dahin gesperrt,
+// sonst koennte ein Klick eine zweite Zeile neben einer noch nicht gelesenen anlegen).
+function cachedSearchCollectionMap(set) {
+  const key = `db_${set?.setId}`;
+  return cache.has(key) ? cache.get(key) : null;
+}
+
 function renderSearchResultsList(results = [], searchScopeMode, options = {}) {
   if (!dom.searchResults) return;
 
   const {
     rawQuery = '',
+    totalCount = Array.isArray(results) ? results.length : 0,
     setsProcessed = 0,
     totalSets = 0,
     apiProcessed = 0,
@@ -7502,6 +7320,7 @@ function renderSearchResultsList(results = [], searchScopeMode, options = {}) {
     rawQuery,
     searchScopeMode,
     resultCount: safeResults.length,
+    totalCount,
     setsProcessed,
     totalSets,
     apiProcessed,
@@ -7524,32 +7343,49 @@ function renderSearchResultsList(results = [], searchScopeMode, options = {}) {
       <div class="search-results-head">
         <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
       </div>
-      <p class="empty-state">Keine Karten fuer "${rawQuery}" gefunden (durchsucht: ${totalSets} Sets, ${modeMeta.hint}).</p>
+      <p class="empty-state">Keine Karten fuer "${escapeHtml(rawQuery)}" gefunden (durchsucht: ${totalSets} Sets, ${modeMeta.hint}).</p>
     `;
     return;
   }
 
+  const countLabel = totalCount > safeResults.length
+    ? `${totalCount} Ergebnisse (erste ${safeResults.length} angezeigt, Suche verfeinern)`
+    : `${safeResults.length} Ergebnis${safeResults.length !== 1 ? 'se' : ''}`;
   dom.searchResults.innerHTML = `
     <div class="search-results-head">
-      <p class="search-result-count">${safeResults.length} Ergebnis${safeResults.length !== 1 ? 'se' : ''}${isSearching ? ' · Suche laeuft...' : ''}</p>
+      <p class="search-result-count">${countLabel}</p>
       <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
     </div>
   `;
 
   const frag = document.createDocumentFragment();
-  safeResults.forEach(({ card, set, dbMap, apiOnly }) => {
+  safeResults.forEach(({ card, set, apiOnly }) => {
     const key = collectionKeyOf(card);
-    frag.appendChild(createSearchResultCard(card, key, dbMap.get(key), set, apiOnly));
+    const dbMap = cachedSearchCollectionMap(set);
+    frag.appendChild(createSearchResultCard(card, key, dbMap?.get(key), set, apiOnly, {
+      collectionPending: Boolean(set?.setName && set?.imported) && !dbMap
+    }));
   });
 
-  if (isSearching) {
-    const loading = document.createElement('p');
-    loading.className = 'loading-placeholder';
-    loading.textContent = `Suche laeuft...${progressSuffix}`;
-    frag.appendChild(loading);
-  }
-
   dom.searchResults.appendChild(frag);
+}
+
+// Sammlungs-Maps der importierten Sets mit Treffern laden (max. 4 parallel, Ergebnis im Cache wie bisher).
+// Fehler werden nicht als leere Map gecacht: die Haken dieser Karten bleiben dann gesperrt.
+async function loadSearchCollectionMaps(sets = [], { isCancelled = () => false } = {}) {
+  const queue = [...sets];
+  const worker = async () => {
+    while (queue.length && !isCancelled()) {
+      const set = queue.shift();
+      try {
+        const map = await readSetCollectionMap(set.setName, { setId: set.setId });
+        cache.set(`db_${set.setId}`, map instanceof Map ? map : new Map(), CONFIG.CACHE_TTL_MS);
+      } catch (err) {
+        console.warn('[runSearch] Sammlung nicht lesbar fuer', set.setId, err?.message || err);
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(4, queue.length) }, worker));
 }
 
 async function runSearch(options = {}) {
@@ -7561,7 +7397,7 @@ async function runSearch(options = {}) {
   }
   const abortController = new AbortController();
   state.searchAbortController = abortController;
-  const isAborted = () => abortController.signal.aborted;
+  const isCancelled = () => isStale() || abortController.signal.aborted;
 
   const rawQuery = dom.searchInput.value.trim();
   const query = normalizeSearchText(rawQuery);
@@ -7584,9 +7420,7 @@ async function runSearch(options = {}) {
   // da state.sets (aus Google Sheets) ptcgoCode leer haben kann.
   const lookupPool = state.allSets?.length ? state.allSets : baseSetsToSearch;
   const structuredQuery = parseStructuredSearchQuery(rawQuery, lookupPool);
-  // Freie Kombinations-Suche (z.B. "57 Digda") nur wenn kein Set-Praefix erkannt wurde
-  const mixedQuery = !structuredQuery ? parseMixedQuery(rawQuery) : null;
-  if (!force && !structuredQuery && !mixedQuery && query.length < 2) {
+  if (!force && !structuredQuery && query.length < 2) {
     state.lastSearchResults = [];
     renderSearchToolbarMeta({
       rawQuery,
@@ -7597,12 +7431,12 @@ async function runSearch(options = {}) {
     return;
   }
 
-  if (force || structuredQuery || mixedQuery || rawQuery.length >= 3) {
+  if (force || structuredQuery || rawQuery.length >= 3) {
     window.SEARCH_HISTORY = addSearchHistory(rawQuery);
   }
   // Fr die eigentliche Suche das importierte Set bevorzugen (hat Collection-Daten),
   // fallback auf das Set aus allSets falls nicht importiert.
-  let setsToSearch = structuredQuery
+  const setsToSearch = structuredQuery
     ? [baseSetsToSearch.find((s) => s.setId === structuredQuery.setId) ?? structuredQuery.set]
     : baseSetsToSearch;
   if (!setsToSearch.length) {
@@ -7614,171 +7448,57 @@ async function runSearch(options = {}) {
     dom.searchResults.innerHTML = '<p class="empty-state">Keine passenden Sets verfuegbar.</p>';
     return;
   }
-  renderSearchResultsList([], searchScopeMode, {
-    rawQuery,
-    setsProcessed: 0,
-    totalSets: setsToSearch.length,
-    isSearching: true,
-  });
+  renderSearchResultsList([], searchScopeMode, { rawQuery, totalSets: setsToSearch.length, isSearching: true });
 
-  // Vorauswahl ueber api/v3/search-index.json (Name/Name DE/Nummer + Set-Felder): Kartendateien nur fuer
-  // Sets mit Treffern laden. Strukturierte Suche = ein Set, ohne Vorauswahl. Kein Treffer im Index (z. B.
-  // Suche nach Seltenheit/Typ/Kuenstler) oder Index nicht erreichbar -> alle Sets wie bisher.
-  if (!structuredQuery && setsToSearch.length > 1) {
-    const preselected = await selectSearchSets({
+  // Treffer direkt aus api/v3/search-index.json (Name DE/EN, Nummer, Kuenstler, Typen, Seltenheit, Set),
+  // ohne Kartendateien je Set. Strukturierte Suche ("SVI 12 Pikachu"): Set-Kuerzel waehlt das Set.
+  const indexQuery = structuredQuery
+    ? [structuredQuery.cardNumber, ...(structuredQuery.namePart || [])].filter(Boolean).join(' ')
+    : rawQuery;
+  let hits;
+  try {
+    hits = await searchFromIndex(indexQuery, {
       sets: setsToSearch,
-      matchCard: (card) => computeSearchScore(card, query, null, mixedQuery, null) >= 0,
-      matchSet: (set) => !mixedQuery && computeSearchScore({}, query, null, null, set) >= 0,
-      signal: abortController.signal
-    }).catch((err) => {
-      if (err?.name !== 'AbortError') console.warn('[runSearch] search-index nicht verfuegbar, voller Scan:', err?.message || err);
-      return null;
-    });
-    if (isStale() || isAborted()) return;
-    if (Array.isArray(preselected)) setsToSearch = preselected;
-  }
-
-  const resultsMap = new Map();
-  let searchedSetsCount = 0;
-  let shouldStopSearch = false;
-
-  const upsertMatches = (cards, set, dbMap) => {
-    let matchCount = 0;
-
-    (Array.isArray(cards) ? cards : []).forEach((card) => {
-      const score = computeSearchScore(card, query, structuredQuery, mixedQuery, set);
-      if (score < 0) return;
-
-      matchCount += 1;
-      const resultKey = getSearchResultKey(card, set);
-      resultsMap.set(resultKey, {
-        card,
-        set,
-        dbMap,
-        score,
-        // Karten nicht importierter Sets: Haken loest den Auto-Import aus (pendingSearchSetImport).
-        apiOnly: Boolean(card?.__searchApiOnly) || !toBoolean(set?.imported),
-        resultKey,
-      });
-    });
-
-    return matchCount;
-  };
-
-  const renderCurrentResults = ({ isSearching = false } = {}) => {
-    const currentResults = Array.from(resultsMap.values());
-
-    if (!currentResults.length) return;
-    state.lastSearchResults = currentResults.slice(0, 60);
-    if (isStale() || isAborted()) return;
-    renderSearchResultsList(currentResults, searchScopeMode, {
-      rawQuery,
-      setsProcessed: searchedSetsCount,
-      totalSets: setsToSearch.length,
-      apiProcessed: 0,
-      totalApiSets: 0,
-      isSearching,
-    });
-  };
-
-  for (const set of setsToSearch) {
-    if (isStale() || isAborted()) return;
-    let setMatchCount = 0;
-
-    try {
-      const dbCacheKey = `db_${set.setId}`;
-      const searchCacheKey = `${set.setId}::${searchScopeMode}`;
-
-      // Karten aus api/v3 (massgeblich, gecacht); db_cards nur als Offline-Fallback (loadSetCardsV3First).
-      let setCards = state.searchCache.get(searchCacheKey);
-      if (!Array.isArray(setCards)) {
-        const loaded = await loadSetCardsV3First(set.setId, { signal: abortController.signal });
-        setCards = loaded.cards;
-        if (setCards.length > 0) state.searchCache.set(searchCacheKey, setCards);
-      }
-
-      let dbMap = new Map();
-      if (cache.has(dbCacheKey)) dbMap = cache.get(dbCacheKey);
-      else {
-        dbMap = await readSetCollectionMap(set.setName, { setId: set.setId }).catch(() => new Map());
-        cache.set(dbCacheKey, dbMap, CONFIG.CACHE_TTL_MS);
-      }
-
-      if (setCards.length > 0) {
-        setMatchCount = upsertMatches(setCards, set, dbMap);
-      }
-
-      if (!structuredQuery && !mixedQuery && resultsMap.size >= 200 && searchScopeMode === SEARCH_SCOPE_IMPORTED) {
-        shouldStopSearch = true;
-      }
-      if (structuredQuery?.cardNumber && !structuredQuery?.namePart && resultsMap.size >= 1) {
-        shouldStopSearch = true;
-      }
-    } catch (err) {
-      if (err?.name === 'AbortError') {
-        return;
-      }
-      console.warn('[runSearch] error for set', set.setId, err);
-    }
-
-    searchedSetsCount += 1;
-
-    if (setMatchCount > 0 && resultsMap.size > 0) {
-      renderCurrentResults({
-        isSearching: searchedSetsCount < setsToSearch.length && !shouldStopSearch,
-      });
-    }
-
-    if (shouldStopSearch) break;
-  }
-
-  if (resultsMap.size > 0) {
-    const sortedResults = sortSearchResults(Array.from(resultsMap.values()));
-    state.lastSearchResults = sortedResults.slice(0, 60);
-
-    if (isStale() || isAborted()) return;
-    renderSearchResultsList(sortedResults, searchScopeMode, {
-      rawQuery,
-      setsProcessed: searchedSetsCount,
-      totalSets: setsToSearch.length,
-      apiProcessed: 0,
-      totalApiSets: 0,
-      isSearching: false,
-    });
-  }
-
-  if (!resultsMap.size) {
-    const modeMeta = getSearchModeMeta(searchScopeMode);
-    renderSearchToolbarMeta({
-      rawQuery,
-      searchScopeMode,
-      resultCount: 0,
-      setsProcessed: setsToSearch.length,
-      totalSets: setsToSearch.length,
-      emptyMessage: `Keine Treffer - ${setsToSearch.length} Sets geprft`
-    });
-    dom.searchResults.innerHTML = `
-      <div class="search-results-head">
-        <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
-      </div>
-      <p class="empty-state">Keine Karten fuer ${rawQuery} gefunden (durchsucht: ${setsToSearch.length} Sets, ${modeMeta.hint}).</p>
-    `;
+      setFilter: structuredQuery?.setId || ''
+    }, { signal: abortController.signal });
+  } catch (err) {
+    if (err?.name === 'AbortError' || isCancelled()) return;
+    console.warn('[runSearch] search-index nicht verfuegbar:', err?.message || err);
+    state.lastSearchResults = [];
+    renderSearchToolbarMeta({ rawQuery, searchScopeMode, emptyMessage: 'Suchindex nicht erreichbar.' });
+    dom.searchResults.innerHTML = '<p class="empty-state">Suchindex nicht erreichbar - bitte spaeter erneut versuchen.</p>';
     return;
   }
+  if (isCancelled()) return;
 
-  const finalResults = sortSearchResults(Array.from(resultsMap.values()));
-  state.lastSearchResults = finalResults.slice(0, 60);
+  const language = getCardLanguage();
+  const results = hits.map(({ entry, set, score }) => ({
+    card: indexEntryToCard(entry, { language }),
+    set,
+    score,
+    // Karten nicht importierter Sets: Haken loest den Auto-Import aus (pendingSearchSetImport).
+    apiOnly: !toBoolean(set?.imported)
+  }));
+  state.lastSearchResults = results.slice(0, 60);
 
-  if (isStale() || isAborted()) return;
-  renderSearchResultsList(finalResults, searchScopeMode, {
+  const shown = results.slice(0, SEARCH_RESULT_RENDER_LIMIT);
+  const renderShown = () => renderSearchResultsList(shown, searchScopeMode, {
     rawQuery,
-    setsProcessed: setsToSearch.length,
-    totalSets: setsToSearch.length,
-    isSearching: false,
+    totalCount: results.length,
+    totalSets: setsToSearch.length
   });
+  renderShown();
+  if (!shown.length) return;
+
+  const pendingSets = [...new Map(shown
+    .filter(({ set }) => Boolean(set?.setName && set?.imported) && !cachedSearchCollectionMap(set))
+    .map(({ set }) => [set.setId, set])).values()];
+  if (!pendingSets.length) return;
+  await loadSearchCollectionMaps(pendingSets, { isCancelled });
+  if (!isCancelled()) renderShown();
 }
 
-function createSearchResultCard(card, key, db, set, apiOnly = false) {
+function createSearchResultCard(card, key, db, set, apiOnly = false, { collectionPending = false } = {}) {
   const article = document.createElement('article');
   article.className = 'card search-result-card';
   const shownStatus = effectiveCollectionStatus(db);
@@ -7798,7 +7518,7 @@ function createSearchResultCard(card, key, db, set, apiOnly = false) {
   const cardLabel = `${card.number} \u2013 ${card.name || '?'}`;
   const title   = document.createElement('div'); title.className = 'title'; title.textContent = cardLabel; title.title = cardLabel;
 
-  const isEditable = Boolean(set?.setName && set?.imported);
+  const isEditable = Boolean(set?.setName && set?.imported) && !collectionPending;
   const checksDiv = document.createElement('div'); checksDiv.className = 'checks search-checks-bar';
   checksDiv.append(
     makeCheckbox('G', 'g', shownStatus.g, !isEditable),
