@@ -179,6 +179,8 @@ test('runBuild: Cardmarket-IDs per Nummer+Name nachgetragen, Report und cm im Su
     assert.deepEqual(report.bySet.sv1, { expansionId: 4999, cards: 4, tcgdex: 3, matched: 1, missing: 0, ambiguous: 0 });
     assert.equal(report.totals.matched, 1);
     assert.equal(r.cardmarketIds.matched, 1);
+    assert.deepEqual(r.cardmarketIds.duplicates, { ids: 0, cards: 0, corrected: 0, kept: 0 });
+    assert.deepEqual(report.duplicateTcgdexIds, {});
     const raw = fs.readFileSync(path.join(v3, 'reports', 'cardmarket-ids.json'), 'utf8');
     assert.ok(raw.includes('\n  '), 'Report eingerueckt');
     const idx = readJson(path.join(v3, 'search-index.json'));

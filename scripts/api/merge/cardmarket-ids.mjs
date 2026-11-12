@@ -63,8 +63,19 @@ function matchOne(card, index, taken) {
   const sameName = index.byName.get(name) ?? [];
   const unnumbered = sameName.filter((p) => p.number === null && !taken.has(p.id));
   if (sameName.length === 1 && unnumbered.length === 1) return { id: unnumbered[0].id };
-  if (unnumbered.length > 1) return { ambiguous: true };
+  // Unnummerierte Kandidaten, aber der Name ist in der Expansion nicht eindeutig -> mehrdeutig
+  if (unnumbered.length && sameName.length > 1) return { ambiguous: true };
   return null;
+}
+
+// Strenger Pfad (nur fuer Korrekturen): genau ein Produkt mit gleicher Nummer und gleichem Namen,
+// unabhaengig von belegten IDs; nie nur per Name.
+function strictMatch(card, index) {
+  const name = normalizeCmName(card.name);
+  const number = normalizeCmNumber(card.number);
+  if (!name || !number) return null;
+  const hits = (index.byNumber.get(number) ?? []).filter((p) => p.name === name);
+  return hits.length === 1 ? hits[0].id : null;
 }
 
 const tcgdexIds = (card) => (Array.isArray(card.ids?.cardmarket) ? card.ids.cardmarket : []);
@@ -73,10 +84,21 @@ const tcgdexIds = (card) => (Array.isArray(card.ids?.cardmarket) ? card.ids.card
  * Fuellt ids.cardmarket der Karten in cardsBySet (in place) und liefert den Report.
  * sets: v3-Sets ({ id, ids: { cardmarket } }); loadExpansion(expansionId) -> { cards } | null;
  * subsetExpansion: Map card.id -> Cardmarket-Expansion des TCGdex-Untersets (null = keine eigene).
+ *
+ * Vorher: TCGdex-IDs, die mehreren Karten zugeordnet sind (duplicateTcgdexIds), werden je Karte ueber den
+ * strengen Pfad korrigiert (ids.cardmarketSource 'corrected', Original in ids.cardmarketTcgdex, andere
+ * variants[].cardmarketId als der Treffer entfallen, damit Leser auf ids.cardmarket zurueckfallen). Ohne
+ * eindeutigen strengen Treffer, bei schon anderweitig belegtem Produkt oder Doppelvergabe bleibt die
+ * TCGdex-ID. Nicht doppelte TCGdex-IDs werden nie angefasst.
  */
 export function fillCardmarketIds({ sets, cardsBySet, loadExpansion, subsetExpansion = new Map() }) {
-  const taken = new Set();
-  for (const cards of cardsBySet.values()) for (const c of cards) for (const id of tcgdexIds(c)) taken.add(id);
+  const owners = new Map(); // TCGdex-Produkt-ID -> card.id[]
+  for (const cards of cardsBySet.values()) {
+    for (const c of cards) for (const id of new Set(tcgdexIds(c))) owners.set(id, [...(owners.get(id) ?? []), c.id]);
+  }
+  const taken = new Set(owners.keys());
+  const duplicateTcgdexIds = {};
+  for (const [id, cardIds] of owners) if (cardIds.length > 1) duplicateTcgdexIds[id] = [...cardIds].sort();
 
   const indexes = new Map();
   const indexFor = (expansionId) => {
@@ -87,31 +109,71 @@ export function fillCardmarketIds({ sets, cardsBySet, loadExpansion, subsetExpan
     return indexes.get(expansionId);
   };
 
-  // 1. Kandidaten je Karte
-  const results = new Map(); // card.id -> { setId, card, result }
+  const isShared = (card) => tcgdexIds(card).some((id) => owners.get(id).length > 1);
+
   const bySet = {};
-  for (const set of sets) {
-    const cards = cardsBySet.get(set.id) ?? [];
-    const expansionId = typeof set.ids?.cardmarket === 'number' ? set.ids.cardmarket : null;
-    const row = { expansionId, cards: cards.length, tcgdex: 0, matched: 0, missing: 0, ambiguous: 0 };
-    bySet[set.id] = row;
-    for (const card of cards) {
-      if (tcgdexIds(card).length) { row.tcgdex++; continue; }
-      const subset = subsetExpansion.has(card.id);
-      const own = subset ? subsetExpansion.get(card.id) : null;
-      const exp = typeof own === 'number' ? own : expansionId;
-      const index = exp === null ? null : indexFor(exp);
-      if (exp !== null && !index) row.expansionFileMissing = true;
-      results.set(card.id, { setId: set.id, card, subset, result: index ? matchOne(card, index, taken) : null });
+  const walk = (fn) => {
+    for (const set of sets) {
+      const expansionId = typeof set.ids?.cardmarket === 'number' ? set.ids.cardmarket : null;
+      bySet[set.id] ??= { expansionId, cards: (cardsBySet.get(set.id) ?? []).length, tcgdex: 0, matched: 0, missing: 0, ambiguous: 0 };
+      for (const card of cardsBySet.get(set.id) ?? []) {
+        const subset = subsetExpansion.has(card.id);
+        const own = subset ? subsetExpansion.get(card.id) : null;
+        const exp = typeof own === 'number' ? own : expansionId;
+        fn({ set, row: bySet[set.id], card, subset, exp, index: exp === null ? null : indexFor(exp) });
+      }
+    }
+  };
+
+  // 1. Geteilte TCGdex-IDs: strenger Treffer je Karte
+  const corrections = new Map(); // card.id -> { setId, card, id }
+  const dup = { ids: Object.keys(duplicateTcgdexIds).length, cards: 0, corrected: 0, kept: 0 };
+  walk(({ set, card, index }) => {
+    if (!tcgdexIds(card).length || !isShared(card)) return;
+    dup.cards++;
+    const id = index ? strictMatch(card, index) : null;
+    if (id === null) return;
+    // Das Produkt darf keiner anderen Karte per TCGdex gehoeren; ist es schon die einzige ID, bleibt alles.
+    if ((owners.get(id) ?? []).some((k) => k !== card.id)) return;
+    const ids = tcgdexIds(card);
+    if (ids.length === 1 && ids[0] === id) return;
+    corrections.set(card.id, { setId: set.id, card, id });
+  });
+
+  // Korrekturen: dasselbe Produkt fuer mehrere Karten -> keine korrigieren
+  const corrClaims = new Map();
+  for (const c of corrections.values()) corrClaims.set(c.id, (corrClaims.get(c.id) ?? 0) + 1);
+  for (const { setId, card, id } of corrections.values()) {
+    if (corrClaims.get(id) > 1) continue;
+    dup.corrected++;
+    bySet[setId].corrected = (bySet[setId].corrected ?? 0) + 1;
+    taken.add(id);
+    card.ids = { ...card.ids, cardmarket: [id], cardmarketSource: 'corrected', cardmarketTcgdex: tcgdexIds(card) };
+    if (Array.isArray(card.variants)) {
+      // Varianten-IDs ausser dem Treffer entfallen (Leser nehmen die erste Varianten-ID vor ids.cardmarket).
+      card.variants = card.variants.map((v) => {
+        if (v.cardmarketId === undefined || v.cardmarketId === id) return v;
+        const { cardmarketId, ...rest } = v;
+        return rest;
+      });
     }
   }
+  dup.kept = dup.cards - dup.corrected;
 
-  // 2. Dasselbe Produkt fuer mehrere Karten -> alle mehrdeutig
+  // 2. Luecken: Kandidaten je Karte ohne TCGdex-ID
+  const results = new Map(); // card.id -> { setId, card, subset, result }
+  walk(({ set, row, card, subset, exp, index }) => {
+    if (tcgdexIds(card).length) { row.tcgdex++; return; }
+    if (exp !== null && !index) row.expansionFileMissing = true;
+    results.set(card.id, { setId: set.id, card, subset, result: index ? matchOne(card, index, taken) : null });
+  });
+
+  // 3. Dasselbe Produkt fuer mehrere Karten -> alle mehrdeutig
   const claims = new Map();
   for (const r of results.values()) if (r.result?.id !== undefined) claims.set(r.result.id, (claims.get(r.result.id) ?? 0) + 1);
   for (const r of results.values()) if (r.result?.id !== undefined && claims.get(r.result.id) > 1) r.result = { ambiguous: true };
 
-  // 3. Schreiben und zaehlen
+  // 4. Schreiben und zaehlen
   const push = (row, key, cardId) => { (row[key] ??= []).push(cardId); };
   for (const { setId, card, subset, result } of results.values()) {
     const row = bySet[setId];
@@ -129,5 +191,5 @@ export function fillCardmarketIds({ sets, cardsBySet, loadExpansion, subsetExpan
 
   const totals = { cards: 0, tcgdex: 0, matched: 0, missing: 0, ambiguous: 0 };
   for (const row of Object.values(bySet)) for (const k of Object.keys(totals)) totals[k] += row[k];
-  return { totals, bySet };
+  return { totals, bySet, duplicateTcgdexIds, duplicates: dup };
 }

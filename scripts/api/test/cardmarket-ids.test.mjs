@@ -171,3 +171,71 @@ test('Unterset-Karte: eigene Expansion des Untersets, sonst die des Haupt-Sets; 
   assert.deepEqual(report.bySet.s1.subsetMissing, ['TG03']);
   assert.equal(report.totals.matched, 2);
 });
+
+// Geteilte TCGdex-IDs (base2-1 / base2-17 teilen 273798; Cardmarket: #1 -> 273798, #17 -> 273814)
+const shared = () => [
+  { ...card('1', '1', 'Clefable', [273798]), variants: [{ type: 'holo', cardmarketId: 273798 }] },
+  { ...card('17', '17', 'Clefable', [273798]), variants: [{ type: 'normal', cardmarketId: 273798 }] },
+];
+const base2Products = [single(273798, 'Clefable [Metronome | Minimize]', '1'), single(273814, 'Clefable [Metronome | Minimize]', '17')];
+
+test('corrects shared tcgdex id by strict number match', () => {
+  const { cards, report } = run(shared(), base2Products);
+  assert.deepEqual(cards[0].ids.cardmarket, [273798]); // bestaetigt, unveraendert
+  assert.equal(cards[0].ids.cardmarketSource, undefined);
+  assert.deepEqual(cards[0].variants, [{ type: 'holo', cardmarketId: 273798 }]);
+  assert.deepEqual(cards[1].ids.cardmarket, [273814]);
+  assert.equal(cards[1].ids.cardmarketSource, 'corrected');
+  assert.deepEqual(cards[1].ids.cardmarketTcgdex, [273798]);
+  assert.deepEqual(cards[1].variants, [{ type: 'normal' }]); // falsche Varianten-ID entfaellt
+  assert.deepEqual(report.duplicateTcgdexIds, { 273798: ['s1-1', 's1-17'] });
+  assert.deepEqual(report.duplicates, { ids: 1, cards: 2, corrected: 1, kept: 1 });
+  assert.equal(report.bySet.s1.corrected, 1);
+});
+
+test('keeps shared id when no strict match', () => {
+  // #17 nur ohne Nummer bei Cardmarket -> kein strenger Treffer, nie nur per Name
+  const { cards, report } = run(shared(), [single(273798, 'Clefable [Metronome]', '1'), single(273814, 'Clefable [Metronome]', null)]);
+  assert.deepEqual(cards[1].ids.cardmarket, [273798]);
+  assert.equal(cards[1].ids.cardmarketSource, undefined);
+  assert.deepEqual(cards[1].variants, [{ type: 'normal', cardmarketId: 273798 }]);
+  assert.deepEqual(report.duplicates, { ids: 1, cards: 2, corrected: 0, kept: 2 });
+  // strenger Treffer ist schon von einer anderen TCGdex-Karte belegt -> bleibt
+  const other = { ...card('99', '99', 'Pikachu', [273814]) };
+  const r2 = run([...shared(), other], base2Products);
+  assert.deepEqual(r2.cards[1].ids.cardmarket, [273798]);
+  // zwei Karten mit demselben strengen Treffer -> keine korrigiert
+  const three = [...shared(), { ...card('17b', '17', 'Clefable', [273798]) }];
+  const r3 = run(three, base2Products);
+  assert.deepEqual(r3.cards[1].ids.cardmarket, [273798]);
+  assert.deepEqual(r3.cards[2].ids.cardmarket, [273798]);
+});
+
+test('never touches non-duplicated tcgdex id', () => {
+  // TCGdex-ID passt nicht zur Nummer, ist aber nicht geteilt -> bleibt
+  const { cards, report } = run([card('17', '17', 'Clefable', [273798])], base2Products);
+  assert.deepEqual(cards[0].ids.cardmarket, [273798]);
+  assert.equal(cards[0].ids.cardmarketSource, undefined);
+  assert.deepEqual(report.duplicateTcgdexIds, {});
+  assert.deepEqual(report.duplicates, { ids: 0, cards: 0, corrected: 0, kept: 0 });
+});
+
+test('nur Name: mehrere gleichnamige Produkte, eines ohne Nummer -> mehrdeutig gezaehlt', () => {
+  const { cards, report } = run([card('DP02', 'DP02', 'Chimchar')], [single(11, 'Chimchar [Scratch]', null), single(12, 'Chimchar [Ember]', '7')]);
+  assert.deepEqual(cards[0].ids.cardmarket, []);
+  assert.equal(report.totals.ambiguous, 1);
+});
+
+test('geteilte ID neben der richtigen: ids.cardmarket auf den strengen Treffer eingeengt', () => {
+  // base2-17 real: ids [273798, 273814], erste Variante traegt die geteilte 273798
+  const cards = [
+    { ...card('1', '1', 'Clefable', [273798]) },
+    { ...card('17', '17', 'Clefable', [273798, 273814]), variants: [{ type: 'normal', cardmarketId: 273798 }, { type: 'holo', cardmarketId: 273814 }] },
+  ];
+  const { cards: out, report } = run(cards, base2Products);
+  assert.deepEqual(out[1].ids.cardmarket, [273814]);
+  assert.equal(out[1].ids.cardmarketSource, 'corrected');
+  assert.deepEqual(out[1].ids.cardmarketTcgdex, [273798, 273814]);
+  assert.deepEqual(out[1].variants, [{ type: 'normal' }, { type: 'holo', cardmarketId: 273814 }]);
+  assert.deepEqual(report.duplicates, { ids: 1, cards: 2, corrected: 1, kept: 1 });
+});

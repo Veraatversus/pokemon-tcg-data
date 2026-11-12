@@ -233,7 +233,7 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
   if (doWriteRegistry && !tcgdexOnly) writeRegistry(registryAbs, registry);
 
   return {
-    sets: sets.length, cards: cardTotal, matchStatus, cardmarketIds: cardmarketIds.totals, registryChanges: changes, skippedNoSource, missingImages, assets,
+    sets: sets.length, cards: cardTotal, matchStatus, cardmarketIds: { ...cardmarketIds.totals, duplicates: cardmarketIds.duplicates }, registryChanges: changes, skippedNoSource, missingImages, assets,
     tables: Object.fromEntries(Object.entries(tables).map(([k, v]) => [k, Object.keys(v).length])),
     warnings: db.warnings.length,
   };
@@ -282,7 +282,7 @@ function main() {
       for (const [setId, n] of Object.entries(mi.bySet).sort((a, b) => b[1] - a[1] || cmp(a[0], b[0]))) console.log(`  ${setId}: ${n}`);
     }
     const cm = r.cardmarketIds;
-    console.log(`Cardmarket-IDs: ${cm.cards} Karten, ${cm.tcgdex} von TCGdex, ${cm.matched} nachgetragen, ${cm.missing} fehlen (${cm.ambiguous} mehrdeutig); Details api/v3/reports/cardmarket-ids.json`);
+    console.log(`Cardmarket-IDs: ${cm.cards} Karten, ${cm.tcgdex} von TCGdex, ${cm.matched} nachgetragen, ${cm.missing} fehlen (${cm.ambiguous} mehrdeutig); doppelte TCGdex-IDs ${cm.duplicates.ids} (${cm.duplicates.cards} Karten, ${cm.duplicates.corrected} korrigiert, ${cm.duplicates.kept} belassen); Details api/v3/reports/cardmarket-ids.json`);
     console.log(`Assets: ${r.assets.ok} ok, ${r.assets.missing} fehlen`);
     console.log(`Gelernte Tabellen: ${Object.entries(r.tables).map(([k, n]) => `${k} ${n}`).join(', ')}`);
     const counts = new Map();
