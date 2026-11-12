@@ -229,3 +229,9 @@ test('installImageFallback registriert genau einen Capture-Listener je Dokument'
   installImageFallback(doc);
   assert.deepEqual(calls, [['error', true]]);
 });
+
+test('fallbackImgAttrs ohne Kandidaten und ohne Platzhalter erzeugt kein src=""', () => {
+  const attrs = fallbackImgAttrs([], { placeholder: '' });
+  assert.doesNotMatch(attrs, /src=""/);
+  assert.doesNotMatch(attrs, /(^|\s)src=/);
+});

@@ -4,9 +4,9 @@
 
 const SW_SCOPE_PATH = new URL(self.registration.scope).pathname.toLowerCase();
 const SW_SCOPE = /(^|\/)dev(\/|$)/.test(SW_SCOPE_PATH) ? 'dev' : 'release';
-const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v58`;
-const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v58`;
-const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v58`;
+const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v59`;
+const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v59`;
+const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v59`;
 
 // api/v3 + api/registry JSON in the runtime cache: keep at most API_CACHE_MAX_ENTRIES
 // non-pinned entries (card files); oldest-inserted are evicted first (cache.keys() is insertion-ordered).
@@ -112,6 +112,21 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Images: cache first, then network. Netzwerkfehler (DNS, Host down, Reset) als Response.error(),
+// damit das <img> ein error-Event bekommt und die Fallback-Kette (js/ui/image-fallback.js)
+// zum naechsten Kandidaten weiterrueckt. Echte Antworten (auch 404) gehen unveraendert durch.
+function handleImageRequest(request) {
+  return caches.open(IMAGE_CACHE).then((cache) => cache.match(request).then((cached) => {
+    if (cached) return cached;
+    return fetch(request).then((response) => {
+      if (response && response.status === 200) {
+        cache.put(request, response.clone());
+      }
+      return response;
+    }).catch(() => Response.error());
+  }));
+}
+
 // Fetch event: serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
   const { request } = event;
@@ -153,28 +168,7 @@ self.addEventListener('fetch', (event) => {
 
     // Images: cache first, then network
     if (request.destination === 'image') {
-      event.respondWith(
-        caches.open(IMAGE_CACHE).then((cache) => {
-          return cache.match(request).then((response) => {
-            if (response) return response;
-
-            return fetch(request).then((response) => {
-              if (response && response.status === 200) {
-                cache.put(request, response.clone());
-              }
-              return response;
-            }).catch(() => {
-              // Return placeholder for failed images
-              return new Response(
-                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 280"><rect fill="#ccc" width="200" height="280"/><text x="100" y="140" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="#999">No Image</text></svg>',
-                {
-                  headers: { 'Content-Type': 'image/svg+xml' }
-                }
-              );
-            });
-          });
-        })
-      );
+      event.respondWith(handleImageRequest(request));
       return;
     }
 

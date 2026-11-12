@@ -187,7 +187,10 @@ export function installImageFallback(doc = globalThis.document) {
 export function fallbackImgAttrs(candidates = [], { placeholder = IMAGE_PLACEHOLDER_SRC } = {}) {
   installImageFallback();
   const [first = placeholder, ...rest] = Array.isArray(candidates) ? candidates.filter(Boolean) : [];
-  return `src="${escapeAttr(first)}" data-fallbacks="${escapeAttr(JSON.stringify(rest))}" data-placeholder="${escapeAttr(placeholder)}"`;
+  const data = `data-fallbacks="${escapeAttr(JSON.stringify(rest))}" data-placeholder="${escapeAttr(placeholder)}"`;
+  // Ohne Kandidat und ohne Platzhalter kein src="" (wuerde die Seite selbst anfragen): Bild ausblenden.
+  if (!first) return `${data} style="display:none"`;
+  return `src="${escapeAttr(first)}" ${data}`;
 }
 
 // Fuer bestehende <img>-Elemente (auch wiederverwendete, z. B. Lightbox/Set-Kopf).
