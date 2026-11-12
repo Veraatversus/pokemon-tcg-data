@@ -85,7 +85,7 @@ test('runBuild: Mini-Repo, zwei Laeufe identisch, Registry geschrieben, alte Dat
     assert.ok(r1.registryChanges.length > 0);
     const v3 = path.join(root, 'api', 'v3');
     assert.deepEqual(Object.keys(snapshot(v3)).sort(), [
-      'cards/TCGDEX-A1.json', 'cards/sv1.json', 'meta.json', 'reports/learned-tables.json', 'reports/matching.json', 'search-index.json', 'sets.json',
+      'cards/TCGDEX-A1.json', 'cards/sv1.json', 'meta.json', 'reports/cardmarket-ids.json', 'reports/learned-tables.json', 'reports/matching.json', 'search-index.json', 'sets.json',
     ]);
     const sv1 = readJson(path.join(v3, 'cards', 'sv1.json'));
     assert.deepEqual(sv1.map((c) => c.cardId), ['1', '2', '3', '4']);
@@ -147,10 +147,46 @@ test('search index carries display fields', () => {
     assert.equal(alpha.rarity, 'Common');
     assert.equal(alpha.artist, 'Ann Artist');
     assert.equal(alpha.supertype, 'Pokémon');
+    assert.equal(alpha.cm, 701); // Cardmarket-Produkt-ID: erste Variante mit cardmarketId
     const beta = idx.find((e) => e.setId === 'sv1' && e.cardId === '2');
     assert.ok(!('imgDe' in beta));
     assert.ok(!('artist' in beta));
     for (const e of idx) for (const v of Object.values(e)) assert.notEqual(v, undefined);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('runBuild: Cardmarket-IDs per Nummer+Name nachgetragen, Report und cm im Suchindex', () => {
+  const root = makeRepo();
+  try {
+    // sv1-3 (Gamma) hat keine TCGdex-Cardmarket-ID; Expansion 4999 kennt sie als #003.
+    write(root, 'cardmarket/sets/4999.json', {
+      expansionId: 4999,
+      cards: [
+        { cardmarketProductId: 801, name: 'Alpha [Tackle]', collectorNumber: '001', categoryId: 51, categoryName: 'Pokémon Single' },
+        { cardmarketProductId: 803, name: 'Gamma [Gnaw | Bite]', collectorNumber: '003', categoryId: 51, categoryName: 'Pokémon Single' },
+      ],
+    });
+    const r = runBuild({ repoRoot: root });
+    const v3 = path.join(root, 'api', 'v3');
+    const sv1 = readJson(path.join(v3, 'cards', 'sv1.json'));
+    assert.deepEqual(sv1[0].ids.cardmarket, [701]); // TCGdex-ID bleibt
+    assert.equal(sv1[0].ids.cardmarketSource, undefined);
+    assert.deepEqual(sv1[2].ids.cardmarket, [803]);
+    assert.equal(sv1[2].ids.cardmarketSource, 'matched');
+    const report = readJson(path.join(v3, 'reports', 'cardmarket-ids.json'));
+    assert.deepEqual(report.bySet.sv1, { expansionId: 4999, cards: 4, tcgdex: 3, matched: 1, missing: 0, ambiguous: 0 });
+    assert.equal(report.totals.matched, 1);
+    assert.equal(r.cardmarketIds.matched, 1);
+    const raw = fs.readFileSync(path.join(v3, 'reports', 'cardmarket-ids.json'), 'utf8');
+    assert.ok(raw.includes('\n  '), 'Report eingerueckt');
+    const idx = readJson(path.join(v3, 'search-index.json'));
+    const cm = (setId, cardId) => idx.find((e) => e.setId === setId && e.cardId === cardId).cm;
+    assert.equal(cm('sv1', '1'), 701);
+    assert.equal(cm('sv1', '3'), 803);
+    assert.equal(cm('sv1', '4'), 704);
+    assert.ok(idx.filter((e) => e.setId === 'TCGDEX-A1').every((e) => !('cm' in e)));
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }

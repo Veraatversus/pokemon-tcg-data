@@ -6,15 +6,23 @@ on:
       - Daily Sync TCGdex to Master
     types:
       - completed
+  # Taeglich nach dem TCGdex-Sync (02:00 UTC), auch wenn workflow_run ausbleibt: Preise sollen jeden Tag frisch sein.
+  schedule:
+    - cron: '30 3 * * *'
   workflow_dispatch:
 
 permissions:
   contents: write
   issues: write
 
+# Zwei Ausloeser am selben Tag (workflow_run + schedule) laufen nacheinander, nie parallel.
+concurrency:
+  group: build-cardmarket-data
+  cancel-in-progress: false
+
 jobs:
   build_cardmarket_data:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
 
     steps:
@@ -67,8 +75,7 @@ jobs:
       - name: Commit generated Cardmarket data if changed
         id: commit_generated
         run: |
-          git add cardmarket
-                    git add cardmarket scripts/cardmarket/helpers/tcgdex-data
+          git add cardmarket scripts/cardmarket/helpers/tcgdex-data
           if git diff --cached --quiet; then
             echo "changed=false" >> $GITHUB_OUTPUT
             echo "No generated Cardmarket changes to commit"
@@ -76,6 +83,8 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git commit -m "chore: refresh generated cardmarket data"
+            # master kann sich seit dem Checkout bewegt haben (z. B. Sync-Commit); nur cardmarket/ ist betroffen.
+            git pull --rebase origin master
             git push origin master
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
