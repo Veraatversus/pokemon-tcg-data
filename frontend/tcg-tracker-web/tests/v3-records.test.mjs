@@ -140,7 +140,7 @@ test('cel25c 15_A1: collectionKey 15_A1, number 15, localId CC003', () => {
   assert.equal(r.collectionKey, '15_A1');
   assert.equal(r.number, '15');
   assert.equal(r.tcgdex_localId, 'CC003');
-  assert.equal(r.setId, 'cel25');
+  assert.equal(r.setId, 'cel25c');
 });
 
 test('localId: Teil nach letztem Bindestrich, URL-dekodiert', () => {
@@ -199,4 +199,35 @@ test('resolveDisplaySet nutzt gemappten Satz', () => {
   assert.equal(d.setName, "151");
   assert.equal(d.ptcgoCode, "MEW");
   assert.ok(d.logoUrl);
+});
+
+test('i18n_de: Passthrough auf Karten/Sets, kein Sheet-Header, ueber resolveDisplayCard sichtbar', () => {
+  const v3 = card('sv3pt5', 'sv3pt5-6');
+  const r = toCardRecord(v3, setById('sv3pt5'));
+  assert.deepEqual(r.i18n_de, v3.i18n.de);
+  assert.equal(r.i18n_de.attacks.length, 2);
+  assert.equal(r.tcgdex_description, '');
+  assert.deepEqual(resolveDisplayCard(r).i18n_de, v3.i18n.de);
+  assert.ok(!CARD_DB_HEADERS.includes('i18n_de'));
+  assert.ok(!SET_DB_HEADERS.includes('i18n_de'));
+  assert.equal(toCardRecord({ id: 'a-1', cardId: '1', ids: {} }, { id: 'a' }).i18n_de, null);
+  assert.deepEqual(toSetRecord(setById('sv3pt5')).i18n_de, setById('sv3pt5').i18n.de);
+  assert.equal(toSetRecord({ id: 'q', ids: {} }).i18n_de, null);
+});
+
+test('setId: Karten-setId ist massgeblich, Mismatch wird nicht eingemischt', () => {
+  const c = card('sv3pt5', 'sv3pt5-6');
+  assert.equal(toCardRecord(c, setById('svp')).setId, 'sv3pt5');
+  assert.equal(toCardRecord({ ...c, setId: undefined }, setById('svp')).setId, 'svp');
+});
+
+test('Set matchStatus: explizites v3-Feld hat Vorrang', () => {
+  assert.equal(toSetRecord({ id: 'a', matchStatus: 'primary_only', ids: { pokemontcg: 'a', tcgdex: 'b' } }).matchStatus, 'primary_only');
+});
+
+test('localId: Set-Praefix wird abgeschnitten, Rest darf Bindestriche enthalten', () => {
+  const c = { id: 'x-1', cardId: '1', number: '1', setId: 'x', ids: { tcgdex: 'my-set-A-1' } };
+  assert.equal(toCardRecord(c, { id: 'x', ids: { tcgdex: 'my-set' } }).tcgdex_localId, 'A-1');
+  assert.equal(toCardRecord(c, { id: 'x', ids: { tcgdex: 'other' } }).tcgdex_localId, '1');
+  assert.equal(toCardRecord(c, { id: 'y', ids: { tcgdex: 'my-set' } }).tcgdex_localId, '1');
 });

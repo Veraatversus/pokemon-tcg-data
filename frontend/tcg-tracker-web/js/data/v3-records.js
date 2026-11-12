@@ -24,10 +24,16 @@ function safeDecode(text) {
   }
 }
 
-function tcgdexLocalId(tcgdexId) {
+// localId = alles nach dem TCGdex-Set-Praefix `<tcgdexSetId>-` (bekannt aus dem Set),
+// sonst Teil nach dem letzten '-'. URL-dekodiert.
+function tcgdexLocalId(tcgdexId, tcgdexSetId = '') {
   const id = str(tcgdexId);
   if (!id) return '';
-  return safeDecode(id.slice(id.lastIndexOf('-') + 1));
+  const prefix = str(tcgdexSetId) ? `${str(tcgdexSetId)}-` : '';
+  const rest = prefix && id.startsWith(prefix) && id.length > prefix.length
+    ? id.slice(prefix.length)
+    : id.slice(id.lastIndexOf('-') + 1);
+  return safeDecode(rest);
 }
 
 export function toSetRecord(v3Set = {}, { imported = false, updatedAt = null } = {}) {
@@ -37,9 +43,8 @@ export function toSetRecord(v3Set = {}, { imported = false, updatedAt = null } =
   const pokemontcgId = str(set.ids?.pokemontcg);
   const tcgdexId = str(set.ids?.tcgdex);
   const isTcgdexOnly = id.startsWith('TCGDEX-');
-  const matchStatus = pokemontcgId && tcgdexId
-    ? 'matched'
-    : (tcgdexId ? 'tcgdex_only' : 'primary_only');
+  const matchStatus = str(set.matchStatus)
+    || (pokemontcgId && tcgdexId ? 'matched' : (tcgdexId ? 'tcgdex_only' : 'primary_only'));
 
   return {
     setId: id,
@@ -73,7 +78,9 @@ export function toSetRecord(v3Set = {}, { imported = false, updatedAt = null } =
     tcgdex_cardCount_holo: 0,
     tcgdex_cardCount_reverse: 0,
     tcgdex_cardCount_firstEdition: 0,
-    tcgdex_cardCount_normal: 0
+    tcgdex_cardCount_normal: 0,
+    // Nicht-Sheet-Passthrough: volles DE-Objekt aus v3 (kein Sheet-Header)
+    i18n_de: set.i18n?.de || null
   };
 }
 
@@ -87,7 +94,9 @@ export function toCardRecord(v3Card = {}, v3Set = null, { updatedAt = null } = {
   const cardmarketUrl = buildCardmarketProductUrl(card.variants?.[0]?.cardmarketId) || '';
 
   return {
-    setId: str(v3Set?.id) || str(card.setId),
+    // Die eigene setId der Karte ist massgeblich (z.B. cel25c-Karten unter Set cel25);
+    // v3Set ist nur Fallback und wird bei Abweichung nicht eingemischt.
+    setId: str(card.setId) || str(v3Set?.id),
     cardId: str(card.id),
     collectionKey: str(card.cardId),
     number: str(card.number),
@@ -123,7 +132,10 @@ export function toCardRecord(v3Card = {}, v3Set = null, { updatedAt = null } = {
     // tcgdex (DE, nur echte DE-Werte)
     tcgdex_id: tcgdexId,
     tcgdex_name: str(de.name),
-    tcgdex_localId: tcgdexLocalId(tcgdexId),
+    tcgdex_localId: tcgdexLocalId(
+      tcgdexId,
+      !card.setId || !v3Set?.id || card.setId === v3Set.id ? v3Set?.ids?.tcgdex : ''
+    ),
     tcgdex_image_small: str(de.images?.small),
     tcgdex_image_large: str(de.images?.large),
     tcgdex_cardmarket_url: '',
@@ -137,6 +149,9 @@ export function toCardRecord(v3Card = {}, v3Set = null, { updatedAt = null } = {
     tcgdex_illustrator: '',
     tcgdex_regulationMark: '',
     tcgdex_description: '',
-    tcgdex_effect: null
+    tcgdex_effect: null,
+    // Nicht-Sheet-Passthrough: volles DE-Objekt (name, evolvesFrom, attacks, abilities,
+    // rules, flavorText, images ...); kein Sheet-Header, wird von den Writern ignoriert.
+    i18n_de: card.i18n?.de || null
   };
 }
