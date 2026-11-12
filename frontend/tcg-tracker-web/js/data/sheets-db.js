@@ -77,6 +77,7 @@ export function resetSheetsDataCaches() {
   dbRowsCache.clear();
   sheetCapacityCache.clear();
   legacyMigrationLocks.clear();
+  sheetAppendLocks.clear();
   sheetsWriteQueue = Promise.resolve();
 }
 
@@ -611,15 +612,42 @@ async function rewriteDbRows(sheetName, columnCount, rows) {
   dbRowsCache.set(`${sheetName}:${columnCount}`, rows);
 }
 
-async function appendDbRows(sheetName, columnCount, rows) {
-  if (!Array.isArray(rows) || rows.length === 0) return;
-  const existing = await readDbRows(sheetName, columnCount);
+// Anhaengen wird pro Blatt serialisiert: Die Startzeile ergibt sich aus der tatsaechlichen Zeilenzahl,
+// nachdem alle vorherigen Anhaenge-Writes gelandet sind. Ohne Sperre lasen parallele Aufrufer dieselbe
+// Zeilenzahl und ueberschrieben sich gegenseitig. (enqueueSheetsMutation ist nicht nutzbar: putValues und
+// ensureSheetCapacity reihen sich selbst dort ein -> Verschachtelung wuerde blockieren.)
+const sheetAppendLocks = new Map();
+
+function withSheetAppendLock(sheetName, task) {
+  const key = normalizeName(sheetName);
+  const previous = sheetAppendLocks.get(key) || Promise.resolve();
+  const run = previous.catch(() => undefined).then(task);
+  const tail = run.catch(() => undefined);
+  sheetAppendLocks.set(key, tail);
+  tail.then(() => {
+    if (sheetAppendLocks.get(key) === tail) sheetAppendLocks.delete(key);
+  });
+  return run;
+}
+
+// Nur innerhalb von withSheetAppendLock aufrufen; `existing` = frisch gelesene Zeilen. Liefert die neuen Zeilen.
+async function appendRowsUnlocked(sheetName, columnCount, existing, rows) {
   const start = existing.length + 2;
   const end = start + rows.length - 1;
   const endCol = colToA1(columnCount);
   await ensureSheetCapacity(sheetName, end, columnCount);
   await putValues(buildRange(sheetName, `A${start}:${endCol}${end}`), rows);
-  dbRowsCache.set(`${sheetName}:${columnCount}`, [...existing, ...rows]);
+  const next = [...existing, ...rows];
+  dbRowsCache.set(`${sheetName}:${columnCount}`, next);
+  return next;
+}
+
+async function appendDbRows(sheetName, columnCount, rows) {
+  if (!Array.isArray(rows) || rows.length === 0) return;
+  await withSheetAppendLock(sheetName, async () => {
+    const existing = await readDbRows(sheetName, columnCount, true);
+    await appendRowsUnlocked(sheetName, columnCount, existing, rows);
+  });
 }
 
 async function ensureSheetCapacity(sheetName, requiredRows, requiredCols) {
@@ -790,79 +818,82 @@ async function upsertDbSet(setMeta, imported = false) {
   const setId = toSafeCellString(setMeta?.setId);
   if (!setId) return;
 
-  const rows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length);
-  // Neues SET_DB_HEADERS-Format
-  const target = [
-    setId,                                                                   // [0]  setId
-    Boolean(imported),                                                       // [1]  imported
-    nowIso(),                                                                // [2]  updatedAt
-    toSafeCellString(setMeta?.matchStatus ?? ''),                            // [3]  matchStatus
-    Boolean(setMeta?.isTcgdexOnly),                                          // [4]  isTcgdexOnly
-    toSafeCellString(setMeta?.vera_id ?? ''),                                // [5]  vera_id
-    toSafeCellString(setMeta?.tcgdex_id ?? setMeta?.tcgdexId ?? ''),         // [6]  tcgdex_id
-    toSafeCellString(setMeta?.vera_name ?? ''),                              // [7]  vera_name
-    toSafeCellString(setMeta?.tcgdex_name ?? setMeta?.tcgdexName ?? ''),     // [8]  tcgdex_name
-    toSafeCellString(setMeta?.vera_series ?? ''),                            // [9]  vera_series
-    toSafeCellString(setMeta?.tcgdex_serie_name ?? ''),                      // [10] tcgdex_serie_name
-    toSafeCellString(setMeta?.tcgdex_serie_id ?? ''),                        // [11] tcgdex_serie_id
-    Number(setMeta?.vera_printedTotal) || 0,                                 // [12] vera_printedTotal
-    Number(setMeta?.tcgdex_cardCount_official) || 0,                         // [13] tcgdex_cardCount_official
-    Number(setMeta?.vera_total) || 0,                                        // [14] vera_total
-    Number(setMeta?.tcgdex_cardCount_total) || 0,                            // [15] tcgdex_cardCount_total
-    Number(setMeta?.tcgdex_cardCount_holo) || 0,                             // [16] tcgdex_cardCount_holo
-    Number(setMeta?.tcgdex_cardCount_reverse) || 0,                          // [17] tcgdex_cardCount_reverse
-    Number(setMeta?.tcgdex_cardCount_firstEdition) || 0,                     // [18] tcgdex_cardCount_firstEdition
-    Number(setMeta?.tcgdex_cardCount_normal) || 0,                           // [19] tcgdex_cardCount_normal
-    toSafeCellString(setMeta?.vera_ptcgoCode ?? ''),                         // [20] vera_ptcgoCode
-    toSafeCellString(setMeta?.tcgdex_abbreviation_official ?? ''),           // [21] tcgdex_abbreviation_official
-    toSafeCellString(setMeta?.vera_releaseDate ?? ''),                       // [22] vera_releaseDate
-    toSafeCellString(setMeta?.tcgdex_releaseDate ?? ''),                     // [23] tcgdex_releaseDate
-    toSafeJsonString(setMeta?.vera_legalities),                              // [24] vera_legalities
-    toSafeJsonString(setMeta?.tcgdex_legal),                                 // [25] tcgdex_legal
-    toPersistableMediaString(setMeta?.vera_images_logo ?? ''),               // [26] vera_images_logo
-    toPersistableMediaString(setMeta?.tcgdex_logo ?? ''),                    // [27] tcgdex_logo
-    toPersistableMediaString(setMeta?.vera_images_symbol ?? ''),             // [28] vera_images_symbol
-    toPersistableMediaString(setMeta?.tcgdex_symbol ?? '')                   // [29] tcgdex_symbol
-  ];
+  // Pro Blatt serialisiert: neue Zeile ans tatsaechliche Ende (frisch gelesen), kein Ueberschreiben paralleler Upserts.
+  await withSheetAppendLock(DB_SHEETS.sets, async () => {
+    const rows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length, true);
+    // Neues SET_DB_HEADERS-Format
+    const target = [
+      setId,                                                                   // [0]  setId
+      Boolean(imported),                                                       // [1]  imported
+      nowIso(),                                                                // [2]  updatedAt
+      toSafeCellString(setMeta?.matchStatus ?? ''),                            // [3]  matchStatus
+      Boolean(setMeta?.isTcgdexOnly),                                          // [4]  isTcgdexOnly
+      toSafeCellString(setMeta?.vera_id ?? ''),                                // [5]  vera_id
+      toSafeCellString(setMeta?.tcgdex_id ?? setMeta?.tcgdexId ?? ''),         // [6]  tcgdex_id
+      toSafeCellString(setMeta?.vera_name ?? ''),                              // [7]  vera_name
+      toSafeCellString(setMeta?.tcgdex_name ?? setMeta?.tcgdexName ?? ''),     // [8]  tcgdex_name
+      toSafeCellString(setMeta?.vera_series ?? ''),                            // [9]  vera_series
+      toSafeCellString(setMeta?.tcgdex_serie_name ?? ''),                      // [10] tcgdex_serie_name
+      toSafeCellString(setMeta?.tcgdex_serie_id ?? ''),                        // [11] tcgdex_serie_id
+      Number(setMeta?.vera_printedTotal) || 0,                                 // [12] vera_printedTotal
+      Number(setMeta?.tcgdex_cardCount_official) || 0,                         // [13] tcgdex_cardCount_official
+      Number(setMeta?.vera_total) || 0,                                        // [14] vera_total
+      Number(setMeta?.tcgdex_cardCount_total) || 0,                            // [15] tcgdex_cardCount_total
+      Number(setMeta?.tcgdex_cardCount_holo) || 0,                             // [16] tcgdex_cardCount_holo
+      Number(setMeta?.tcgdex_cardCount_reverse) || 0,                          // [17] tcgdex_cardCount_reverse
+      Number(setMeta?.tcgdex_cardCount_firstEdition) || 0,                     // [18] tcgdex_cardCount_firstEdition
+      Number(setMeta?.tcgdex_cardCount_normal) || 0,                           // [19] tcgdex_cardCount_normal
+      toSafeCellString(setMeta?.vera_ptcgoCode ?? ''),                         // [20] vera_ptcgoCode
+      toSafeCellString(setMeta?.tcgdex_abbreviation_official ?? ''),           // [21] tcgdex_abbreviation_official
+      toSafeCellString(setMeta?.vera_releaseDate ?? ''),                       // [22] vera_releaseDate
+      toSafeCellString(setMeta?.tcgdex_releaseDate ?? ''),                     // [23] tcgdex_releaseDate
+      toSafeJsonString(setMeta?.vera_legalities),                              // [24] vera_legalities
+      toSafeJsonString(setMeta?.tcgdex_legal),                                 // [25] tcgdex_legal
+      toPersistableMediaString(setMeta?.vera_images_logo ?? ''),               // [26] vera_images_logo
+      toPersistableMediaString(setMeta?.tcgdex_logo ?? ''),                    // [27] tcgdex_logo
+      toPersistableMediaString(setMeta?.vera_images_symbol ?? ''),             // [28] vera_images_symbol
+      toPersistableMediaString(setMeta?.tcgdex_symbol ?? '')                   // [29] tcgdex_symbol
+    ];
 
-  const existingIndices = [];
-  rows.forEach((row, rowIndex) => {
-    if (toSafeCellString(row[0]).toLowerCase() === setId.toLowerCase()) {
-      existingIndices.push(rowIndex);
+    const existingIndices = [];
+    rows.forEach((row, rowIndex) => {
+      if (toSafeCellString(row[0]).toLowerCase() === setId.toLowerCase()) {
+        existingIndices.push(rowIndex);
+      }
+    });
+
+    if (existingIndices.length > 0) {
+      const keepIndex = existingIndices[existingIndices.length - 1];
+      const rowNo = keepIndex + 2;
+      const existingRow = rows[keepIndex];
+      // imported-Status erhalten: altes Format hat imported bei [8], neues bei [1]
+      const existingImported = isNewSetFormat(existingRow)
+        ? toBoolean(existingRow[1])
+        : toBoolean(existingRow[8]);
+      target[1] = imported === false ? false : Boolean(imported || existingImported);
+      await putValues(buildRange(DB_SHEETS.sets, `A${rowNo}:${colToA1(DB_HEADERS.sets.length)}${rowNo}`), [target]);
+      rows[keepIndex] = target;
+
+      if (existingIndices.length > 1) {
+        const emptyRow = buildEmptyRow(DB_HEADERS.sets.length);
+        const duplicateRanges = existingIndices
+          .slice(0, -1)
+          .map((index) => ({
+            range: buildRange(DB_SHEETS.sets, `A${index + 2}:${colToA1(DB_HEADERS.sets.length)}${index + 2}`),
+            values: [emptyRow]
+          }));
+        await batchPutValues(duplicateRanges);
+        existingIndices.slice(0, -1).forEach((index) => {
+          rows[index] = emptyRow.slice();
+        });
+      }
+    } else {
+      const rowNo = rows.length + 2;
+      await putValues(buildRange(DB_SHEETS.sets, `A${rowNo}:${colToA1(DB_HEADERS.sets.length)}${rowNo}`), [target]);
+      rows.push(target);
     }
+    dbRowsCache.set(`${DB_SHEETS.sets}:${DB_HEADERS.sets.length}`, rows);
   });
-
-  if (existingIndices.length > 0) {
-    const keepIndex = existingIndices[existingIndices.length - 1];
-    const rowNo = keepIndex + 2;
-    const existingRow = rows[keepIndex];
-    // imported-Status erhalten: altes Format hat imported bei [8], neues bei [1]
-    const existingImported = isNewSetFormat(existingRow)
-      ? toBoolean(existingRow[1])
-      : toBoolean(existingRow[8]);
-    target[1] = imported === false ? false : Boolean(imported || existingImported);
-    await putValues(buildRange(DB_SHEETS.sets, `A${rowNo}:${colToA1(DB_HEADERS.sets.length)}${rowNo}`), [target]);
-    rows[keepIndex] = target;
-
-    if (existingIndices.length > 1) {
-      const emptyRow = buildEmptyRow(DB_HEADERS.sets.length);
-      const duplicateRanges = existingIndices
-        .slice(0, -1)
-        .map((index) => ({
-          range: buildRange(DB_SHEETS.sets, `A${index + 2}:${colToA1(DB_HEADERS.sets.length)}${index + 2}`),
-          values: [emptyRow]
-        }));
-      await batchPutValues(duplicateRanges);
-      existingIndices.slice(0, -1).forEach((index) => {
-        rows[index] = emptyRow.slice();
-      });
-    }
-  } else {
-    const rowNo = rows.length + 2;
-    await putValues(buildRange(DB_SHEETS.sets, `A${rowNo}:${colToA1(DB_HEADERS.sets.length)}${rowNo}`), [target]);
-    rows.push(target);
-  }
-  dbRowsCache.set(`${DB_SHEETS.sets}:${DB_HEADERS.sets.length}`, rows);
 }
 
 async function resolveSetIdFromName(setSheetName) {
@@ -1437,24 +1468,27 @@ async function upsertOverviewEntry(setMeta, imported = true) {
 
   const sheets = await resolveSheetNames();
   if (!sheets.overview) return;
-  const overviewRange = buildRange(sheets.overview, 'A3:J');
-  const rows = await getFormulas(overviewRange).catch(() => []);
-  const normalizedTargetId = toSafeCellString(setMeta.setId).toLowerCase();
+  // Pro Blatt serialisiert: Zielzeile aus dem aktuellen Stand nach vorherigen Writes.
+  await withSheetAppendLock(sheets.overview, async () => {
+    const overviewRange = buildRange(sheets.overview, 'A3:J');
+    const rows = await getFormulas(overviewRange).catch(() => []);
+    const normalizedTargetId = toSafeCellString(setMeta.setId).toLowerCase();
 
-  let targetRow = -1;
-  for (let index = 0; index < rows.length; index++) {
-    const rowSetId = extractDisplayTextFromHyperlink(rows[index]?.[0]);
-    if (toSafeCellString(rowSetId).toLowerCase() === normalizedTargetId) {
-      targetRow = 3 + index;
-      break;
+    let targetRow = -1;
+    for (let index = 0; index < rows.length; index++) {
+      const rowSetId = extractDisplayTextFromHyperlink(rows[index]?.[0]);
+      if (toSafeCellString(rowSetId).toLowerCase() === normalizedTargetId) {
+        targetRow = 3 + index;
+        break;
+      }
     }
-  }
 
-  if (targetRow < 0) {
-    targetRow = Math.max(4, 3 + rows.length);
-  }
+    if (targetRow < 0) {
+      targetRow = Math.max(4, 3 + rows.length);
+    }
 
-  await putValues(buildRange(sheets.overview, `A${targetRow}:J${targetRow}`), buildOverviewRowValues(setMeta, imported));
+    await putValues(buildRange(sheets.overview, `A${targetRow}:J${targetRow}`), buildOverviewRowValues(setMeta, imported));
+  });
 }
 
 export async function upsertOverviewSet(setMeta, imported = false) {
@@ -1465,99 +1499,103 @@ export async function syncOverviewWithApiSets(sets, importedSetIds = []) {
   await ensureNormalizedSchema();
   const normalizedImported = new Set(Array.from(importedSetIds).map((id) => toSafeCellString(id).toLowerCase()));
 
-  const dbRows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length);
-  const mergedById = new Map();
-  dbRows.forEach((row) => {
-    const key = toSafeCellString(row[0]).toLowerCase();
-    if (!key) return;
-    mergedById.set(key, row);
+  await withSheetAppendLock(DB_SHEETS.sets, async () => {
+    const dbRows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length);
+    const mergedById = new Map();
+    dbRows.forEach((row) => {
+      const key = toSafeCellString(row[0]).toLowerCase();
+      if (!key) return;
+      mergedById.set(key, row);
+    });
+
+    for (const set of (sets || [])) {
+      const key = toSafeCellString(set?.setId).toLowerCase();
+      if (!key) continue;
+      const existing = mergedById.get(key) || [];
+      mergedById.set(key, [
+        toSafeCellString(set.setId),                                                                                                                     // [0]  setId
+        Boolean(normalizedImported.has(key) || (isNewSetFormat(existing) ? toBoolean(existing[1]) : toBoolean(existing[8]))),                            // [1]  imported
+        nowIso(),                                                                                                                                         // [2]  updatedAt
+        toSafeCellString(set.matchStatus ?? ''),                                                                                                          // [3]  matchStatus
+        Boolean(set.isTcgdexOnly),                                                                                                                        // [4]  isTcgdexOnly
+        toSafeCellString(set.vera_id ?? ''),                                                                                                              // [5]  vera_id
+        toSafeCellString(set.tcgdex_id ?? set.tcgdexId ?? ''),                                                                                           // [6]  tcgdex_id
+        toSafeCellString(set.vera_name ?? ''),                                                                                                            // [7]  vera_name
+        toSafeCellString(set.tcgdex_name ?? set.tcgdexName ?? ''),                                                                                       // [8]  tcgdex_name
+        toSafeCellString(set.vera_series ?? ''),                                                                                                          // [9]  vera_series
+        toSafeCellString(set.tcgdex_serie_name ?? '') || toSafeCellString(existing[10] ?? ''),                                                           // [10] tcgdex_serie_name       (bewahre bestehenden Wert wenn neu leer)
+        toSafeCellString(set.tcgdex_serie_id ?? '') || toSafeCellString(existing[11] ?? ''),                                                             // [11] tcgdex_serie_id         (bewahre bestehenden Wert wenn neu leer)
+        Number(set.vera_printedTotal) || 0,                                                                                                              // [12] vera_printedTotal
+        Number(set.tcgdex_cardCount_official) || 0,                                                                                                      // [13] tcgdex_cardCount_official
+        Number(set.vera_total) || 0,                                                                                                                      // [14] vera_total
+        Number(set.tcgdex_cardCount_total) || 0,                                                                                                         // [15] tcgdex_cardCount_total
+        Number(set.tcgdex_cardCount_holo) || 0,                                                                                                          // [16] tcgdex_cardCount_holo
+        Number(set.tcgdex_cardCount_reverse) || 0,                                                                                                       // [17] tcgdex_cardCount_reverse
+        Number(set.tcgdex_cardCount_firstEdition) || 0,                                                                                                  // [18] tcgdex_cardCount_firstEdition
+        Number(set.tcgdex_cardCount_normal) || 0,                                                                                                        // [19] tcgdex_cardCount_normal
+        toSafeCellString(set.vera_ptcgoCode ?? ''),                                                                                                       // [20] vera_ptcgoCode
+        toSafeCellString(set.tcgdex_abbreviation_official ?? '') || toSafeCellString(existing[21] ?? ''),                                                // [21] tcgdex_abbreviation_official (bewahre bestehenden Wert wenn neu leer)
+        toSafeCellString(set.vera_releaseDate ?? ''),                                                                                                     // [22] vera_releaseDate
+        toSafeCellString(set.tcgdex_releaseDate ?? '') || toSafeCellString(existing[23] ?? ''),                                                          // [23] tcgdex_releaseDate      (bewahre bestehenden Wert wenn neu leer)
+        toSafeJsonString(set.vera_legalities),                                                                                                            // [24] vera_legalities
+        toSafeJsonString(set.tcgdex_legal) || toSafeJsonString(existing[25]),                                                                            // [25] tcgdex_legal            (bewahre bestehenden Wert wenn neu leer/null)
+        toSafeCellString(set.vera_images_logo ?? ''),                                                                                                     // [26] vera_images_logo
+        toSafeCellString(set.tcgdex_logo ?? '') || toSafeCellString(existing[27] ?? ''),                                                                 // [27] tcgdex_logo             (bewahre bestehenden Wert wenn neu leer)
+        toSafeCellString(set.vera_images_symbol ?? '')                                                                                                    // [28] vera_images_symbol
+      ]);
+    }
+
+    await rewriteDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length, Array.from(mergedById.values()));
   });
-
-  for (const set of (sets || [])) {
-    const key = toSafeCellString(set?.setId).toLowerCase();
-    if (!key) continue;
-    const existing = mergedById.get(key) || [];
-    mergedById.set(key, [
-      toSafeCellString(set.setId),                                                                                                                     // [0]  setId
-      Boolean(normalizedImported.has(key) || (isNewSetFormat(existing) ? toBoolean(existing[1]) : toBoolean(existing[8]))),                            // [1]  imported
-      nowIso(),                                                                                                                                         // [2]  updatedAt
-      toSafeCellString(set.matchStatus ?? ''),                                                                                                          // [3]  matchStatus
-      Boolean(set.isTcgdexOnly),                                                                                                                        // [4]  isTcgdexOnly
-      toSafeCellString(set.vera_id ?? ''),                                                                                                              // [5]  vera_id
-      toSafeCellString(set.tcgdex_id ?? set.tcgdexId ?? ''),                                                                                           // [6]  tcgdex_id
-      toSafeCellString(set.vera_name ?? ''),                                                                                                            // [7]  vera_name
-      toSafeCellString(set.tcgdex_name ?? set.tcgdexName ?? ''),                                                                                       // [8]  tcgdex_name
-      toSafeCellString(set.vera_series ?? ''),                                                                                                          // [9]  vera_series
-      toSafeCellString(set.tcgdex_serie_name ?? '') || toSafeCellString(existing[10] ?? ''),                                                           // [10] tcgdex_serie_name       (bewahre bestehenden Wert wenn neu leer)
-      toSafeCellString(set.tcgdex_serie_id ?? '') || toSafeCellString(existing[11] ?? ''),                                                             // [11] tcgdex_serie_id         (bewahre bestehenden Wert wenn neu leer)
-      Number(set.vera_printedTotal) || 0,                                                                                                              // [12] vera_printedTotal
-      Number(set.tcgdex_cardCount_official) || 0,                                                                                                      // [13] tcgdex_cardCount_official
-      Number(set.vera_total) || 0,                                                                                                                      // [14] vera_total
-      Number(set.tcgdex_cardCount_total) || 0,                                                                                                         // [15] tcgdex_cardCount_total
-      Number(set.tcgdex_cardCount_holo) || 0,                                                                                                          // [16] tcgdex_cardCount_holo
-      Number(set.tcgdex_cardCount_reverse) || 0,                                                                                                       // [17] tcgdex_cardCount_reverse
-      Number(set.tcgdex_cardCount_firstEdition) || 0,                                                                                                  // [18] tcgdex_cardCount_firstEdition
-      Number(set.tcgdex_cardCount_normal) || 0,                                                                                                        // [19] tcgdex_cardCount_normal
-      toSafeCellString(set.vera_ptcgoCode ?? ''),                                                                                                       // [20] vera_ptcgoCode
-      toSafeCellString(set.tcgdex_abbreviation_official ?? '') || toSafeCellString(existing[21] ?? ''),                                                // [21] tcgdex_abbreviation_official (bewahre bestehenden Wert wenn neu leer)
-      toSafeCellString(set.vera_releaseDate ?? ''),                                                                                                     // [22] vera_releaseDate
-      toSafeCellString(set.tcgdex_releaseDate ?? '') || toSafeCellString(existing[23] ?? ''),                                                          // [23] tcgdex_releaseDate      (bewahre bestehenden Wert wenn neu leer)
-      toSafeJsonString(set.vera_legalities),                                                                                                            // [24] vera_legalities
-      toSafeJsonString(set.tcgdex_legal) || toSafeJsonString(existing[25]),                                                                            // [25] tcgdex_legal            (bewahre bestehenden Wert wenn neu leer/null)
-      toSafeCellString(set.vera_images_logo ?? ''),                                                                                                     // [26] vera_images_logo
-      toSafeCellString(set.tcgdex_logo ?? '') || toSafeCellString(existing[27] ?? ''),                                                                 // [27] tcgdex_logo             (bewahre bestehenden Wert wenn neu leer)
-      toSafeCellString(set.vera_images_symbol ?? '')                                                                                                    // [28] vera_images_symbol
-    ]);
-  }
-
-  await rewriteDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length, Array.from(mergedById.values()));
 
   const sheets = await resolveSheetNames();
   if (!sheets.overview) return;
-  const rows = await getOverviewRows(sheets).catch(() => []);
+  await withSheetAppendLock(sheets.overview, async () => {
+    const rows = await getOverviewRows(sheets).catch(() => []);
 
-  const rowBySetId = new Map();
-  rows.forEach((row, index) => {
-    const setId = toSafeCellString(extractDisplayTextFromHyperlink(row[0])).toLowerCase();
-    if (!setId) return;
-    rowBySetId.set(setId, {
-      rowIndex: 3 + index,
-      imported: toBoolean(row[CONFIG.GRID.IMPORTED_COL_INDEX - 1])
+    const rowBySetId = new Map();
+    rows.forEach((row, index) => {
+      const setId = toSafeCellString(extractDisplayTextFromHyperlink(row[0])).toLowerCase();
+      if (!setId) return;
+      rowBySetId.set(setId, {
+        rowIndex: 3 + index,
+        imported: toBoolean(row[CONFIG.GRID.IMPORTED_COL_INDEX - 1])
+      });
     });
-  });
 
-  const appendValues = [];
-  const updates = [];
-  const uniqueSets = new Map();
-  (sets || []).forEach((set) => {
-    const key = toSafeCellString(set?.setId).toLowerCase();
-    if (key) uniqueSets.set(key, set);
-  });
+    const appendValues = [];
+    const updates = [];
+    const uniqueSets = new Map();
+    (sets || []).forEach((set) => {
+      const key = toSafeCellString(set?.setId).toLowerCase();
+      if (key) uniqueSets.set(key, set);
+    });
 
-  uniqueSets.forEach((set, key) => {
-    const existing = rowBySetId.get(key);
-    const imported = normalizedImported.has(key) || Boolean(existing?.imported);
-    const rowValues = buildOverviewRowValues(set, imported)[0];
+    uniqueSets.forEach((set, key) => {
+      const existing = rowBySetId.get(key);
+      const imported = normalizedImported.has(key) || Boolean(existing?.imported);
+      const rowValues = buildOverviewRowValues(set, imported)[0];
 
-    if (existing) {
-      updates.push({ rowIndex: existing.rowIndex, rowValues });
-    } else {
-      appendValues.push(rowValues);
+      if (existing) {
+        updates.push({ rowIndex: existing.rowIndex, rowValues });
+      } else {
+        appendValues.push(rowValues);
+      }
+    });
+
+    if (updates.length) {
+      await batchPutValues(updates.map((update) => ({
+        range: buildRange(sheets.overview, `A${update.rowIndex}:J${update.rowIndex}`),
+        values: [update.rowValues]
+      })));
+    }
+
+    if (appendValues.length) {
+      const start = Math.max(4, 3 + rows.length);
+      const end = start + appendValues.length - 1;
+      await putValues(buildRange(sheets.overview, `A${start}:J${end}`), appendValues);
     }
   });
-
-  if (updates.length) {
-    await batchPutValues(updates.map((update) => ({
-      range: buildRange(sheets.overview, `A${update.rowIndex}:J${update.rowIndex}`),
-      values: [update.rowValues]
-    })));
-  }
-
-  if (appendValues.length) {
-    const start = Math.max(4, 3 + rows.length);
-    const end = start + appendValues.length - 1;
-    await putValues(buildRange(sheets.overview, `A${start}:J${end}`), appendValues);
-  }
 }
 
 /**
@@ -1698,7 +1736,7 @@ export async function readSetCollectionMap(setSheetName, options = {}) {
     if (map.size > 0) return map;
     // Pro Set gesperrt: parallele Erst-Lesungen duerfen das Legacy-Grid nicht doppelt migrieren.
     return withLegacyMigrationLock(setKey.toLowerCase(), async () => {
-      const again = buildExactSetCollectionMap(await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length), setKey);
+      const again = buildExactSetCollectionMap(await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true), setKey);
       if (again.size > 0) return again;
       const legacy = await readLegacySetCollectionMap(setSheetName).catch(() => new Map());
       if (legacy.size === 0) return again;
@@ -1721,7 +1759,7 @@ export async function readSetCollectionMap(setSheetName, options = {}) {
 
 async function migrateLegacyGrid(setSheetName, setKey, ctx) {
   // Unter der Sperre erneut pruefen: eine parallele Lesung kann schon migriert haben (Cache wird beim Anhaengen fortgeschrieben).
-  const current = buildCollectionMap(await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length), ctx);
+  const current = buildCollectionMap(await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true), ctx);
   if (current.stats.matchedRows > 0) return current.map;
   const map = current.map;
 
@@ -1765,17 +1803,21 @@ export async function ensureCollectionEntry(setSheetName, collectionKey, options
 
   const ctx = await resolveCollectionContext(setKey, options?.resolver || null);
   const rawKey = toSafeCellString(collectionKey);
-  const currentRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
+  const C = DB_SHEETS.collection;
+  const N = DB_HEADERS.collection.length;
 
   if (!ctx) {
     const normalizedCard = normalizeCardNumber(rawKey);
-    const existing = buildExactSetCollectionMap(currentRows, setKey).get(normalizedCard);
-    if (existing) return existing;
-    await appendDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, [[setKey, rawKey, false, false, nowIso()]]);
-    const refreshedRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
-    const created = buildExactSetCollectionMap(refreshedRows, setKey).get(normalizedCard);
-    if (!created) throw new Error(`Collection-Eintrag für Karte ${collectionKey} konnte nicht erstellt werden.`);
-    return created;
+    // Pruefen und Anhaengen unter der Blatt-Sperre: frische Zeilen, keine parallelen Doppel-/Ueberschreib-Zeilen.
+    return withSheetAppendLock(C, async () => {
+      const currentRows = await readDbRows(C, N, true);
+      const existing = buildExactSetCollectionMap(currentRows, setKey).get(normalizedCard);
+      if (existing) return existing;
+      const next = await appendRowsUnlocked(C, N, currentRows, [[setKey, rawKey, false, false, nowIso()]]);
+      const created = buildExactSetCollectionMap(next, setKey).get(normalizedCard);
+      if (!created) throw new Error(`Collection-Eintrag für Karte ${collectionKey} konnte nicht erstellt werden.`);
+      return created;
+    });
   }
 
   const hit = rawKey ? ctx.resolver.resolve(ctx.canonicalSetId, rawKey) : null;
@@ -1796,16 +1838,17 @@ export async function ensureCollectionEntry(setSheetName, collectionKey, options
   const lookupKey = hit?.collectionKey || normalizeCardNumber(rawKey);
   if (!writeKey) throw new Error('Collection-Eintrag ohne Kartenschlüssel.');
 
-  const existing = buildCollectionMap(currentRows, ctx).map.get(lookupKey);
-  if (existing?.cells?.length) return existing;
-
-  await appendDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, [[ctx.canonicalSetId, writeKey, false, false, nowIso()]]);
-  const refreshedRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
-  const created = buildCollectionMap(refreshedRows, ctx).map.get(lookupKey);
-  if (!created?.cells?.length) {
-    throw new Error(`Collection-Eintrag für Karte ${collectionKey} konnte nicht erstellt werden.`);
-  }
-  return created;
+  return withSheetAppendLock(C, async () => {
+    const currentRows = await readDbRows(C, N, true);
+    const existing = buildCollectionMap(currentRows, ctx).map.get(lookupKey);
+    if (existing?.cells?.length) return existing;
+    const next = await appendRowsUnlocked(C, N, currentRows, [[ctx.canonicalSetId, writeKey, false, false, nowIso()]]);
+    const created = buildCollectionMap(next, ctx).map.get(lookupKey);
+    if (!created?.cells?.length) {
+      throw new Error(`Collection-Eintrag für Karte ${collectionKey} konnte nicht erstellt werden.`);
+    }
+    return created;
+  });
 }
 
 function withLegacyMigrationLock(key, task) {

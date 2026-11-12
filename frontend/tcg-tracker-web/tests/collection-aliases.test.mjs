@@ -355,6 +355,75 @@ test('Legacy-Grid-Migration ohne Registry: parallele Erst-Lesungen haengen nur e
   assert.equal(fake.writesTo('db_collection').length, 1, 'genau ein Anhaenge-Write');
 });
 
+// ── Serialisiertes Anhaengen (parallele Aufrufer) ─────────────────────────────
+function assertOwnRow(fake, entry, setId, cardId) {
+  assert.equal(entry.cells.length, 1);
+  const row = fake.rows('db_collection')[entry.gCell.row - 1];
+  assert.deepEqual(row.slice(0, 2), [setId, cardId], `Zelle ${entry.gCell.row} gehoert zu ${setId}/${cardId}`);
+  assert.equal(entry.rhCell.row, entry.gCell.row);
+}
+
+test('parallel: ensureCollectionEntry fuer verschiedene Karten desselben Sets -> eigene Zeilen', async () => {
+  const fake = setup({ collection: [['me5', '1', true, false, T0]], readDelayMs: { db_collection: 30 } });
+  const [a, b] = await Promise.all([
+    ensureCollectionEntry('x', '2', { setId: 'me5' }),
+    ensureCollectionEntry('x', '1', { setId: 'TCGDEX-me05' }),
+  ]);
+  await ensureResolverForSet('swsh12pt5'); // Karten vorab geladen: beide Aufrufe starten im selben Tick
+  const [c, d] = await Promise.all([
+    ensureCollectionEntry('x', '5', { setId: 'swsh12pt5' }),
+    ensureCollectionEntry('x', '6', { setId: 'swsh12pt5' })
+  ]);
+  assert.deepEqual(collectionRows(fake).map((r) => r.slice(0, 2)), [['me5', '1'], ['me5', '2'], ['swsh12pt5', '5'], ['swsh12pt5', '6']]);
+  assertOwnRow(fake, a, 'me5', '2');
+  assertOwnRow(fake, b, 'me5', '1');
+  assertOwnRow(fake, c, 'swsh12pt5', '5');
+  assertOwnRow(fake, d, 'swsh12pt5', '6');
+  assert.notEqual(c.gCell.row, d.gCell.row);
+});
+
+test('parallel: ensureCollectionEntry fuer verschiedene Sets -> eigene Zeilen', async () => {
+  const fake = setup({ readDelayMs: { db_collection: 30 } });
+  const entries = await Promise.all([
+    ensureCollectionEntry('x', '2', { setId: 'me5' }),
+    ensureCollectionEntry('x', 'GG01', { setId: 'swsh12pt5gg' }),
+    ensureCollectionEntry('x', '1', { setId: 'cel25c' })
+  ]);
+  const rows = collectionRows(fake).map((r) => r.slice(0, 2));
+  assert.equal(rows.length, 3);
+  assert.deepEqual([...rows].sort(), [['cel25c', '1'], ['me5', '2'], ['swsh12pt5', 'GG1']]);
+  assertOwnRow(fake, entries[0], 'me5', '2');
+  assertOwnRow(fake, entries[1], 'swsh12pt5', 'GG1');
+  assertOwnRow(fake, entries[2], 'cel25c', '1');
+  assert.equal(new Set(entries.map((e) => e.gCell.row)).size, 3);
+});
+
+test('parallel: gleiche Karte zweimal -> nur eine Zeile', async () => {
+  const fake = setup({ readDelayMs: { db_collection: 30 } });
+  const [a, b] = await Promise.all([
+    ensureCollectionEntry('x', '2', { setId: 'me5' }),
+    ensureCollectionEntry('x', '2', { setId: 'TCGDEX-me05' })
+  ]);
+  assert.equal(collectionRows(fake).length, 1);
+  assert.equal(a.gCell.row, b.gCell.row);
+});
+
+test('parallel: Anhaengen + Checkbox-Update -> Haken landet in der richtigen Zeile', async () => {
+  const fake = setup({ readDelayMs: { db_collection: 30 } });
+  await Promise.all([
+    ensureCollectionEntry('x', '1', { setId: 'me5' })
+      .then((entry) => updateCellBooleansBatch('x', cellsForUpdate(entry, 'g', true))),
+    ensureCollectionEntry('x', '2', { setId: 'me5' }),
+    ensureCollectionEntry('x', 'GG1', { setId: 'swsh12pt5' })
+      .then((entry) => updateCellBooleansBatch('x', cellsForUpdate(entry, 'rh', true)))
+  ]);
+  const byKey = new Map(collectionRows(fake).map((r) => [`${r[0]}/${r[1]}`, r]));
+  assert.equal(byKey.size, 3);
+  assert.deepEqual(byKey.get('me5/1').slice(2, 4), [true, false]);
+  assert.deepEqual(byKey.get('me5/2').slice(2, 4), [false, false]);
+  assert.deepEqual(byKey.get('swsh12pt5/GG1').slice(2, 4), [true, true]);
+});
+
 // ── writeDbCollectionForSet / importSetIntoCollection ─────────────────────────
 test('Import: veraltete existingMap loescht keinen frischen Haken (ODER)', async () => {
   const fake = setup({
