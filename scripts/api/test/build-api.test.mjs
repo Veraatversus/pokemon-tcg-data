@@ -127,11 +127,19 @@ test('runBuild: Mini-Repo, zwei Laeufe identisch, Registry geschrieben, alte Dat
   }
 });
 
+const isCompact = (s) => s.endsWith('\n') && s.indexOf('\n') === s.length - 1;
+
 test('search index carries display fields', () => {
   const root = makeRepo();
   try {
     runBuild({ repoRoot: root });
     const idx = readJson(path.join(root, 'api', 'v3', 'search-index.json'));
+    const raw = fs.readFileSync(path.join(root, 'api', 'v3', 'search-index.json'), 'utf8');
+    assert.ok(isCompact(raw) && !raw.includes('\n  '), 'Suchindex kompakt, eine Zeile');
+    assert.ok(isCompact(fs.readFileSync(path.join(root, 'api', 'v3', 'cards', 'sv1.json'), 'utf8')), 'Kartendatei kompakt');
+    for (const f of [path.join(root, 'api', 'v3', 'sets.json'), path.join(root, 'api', 'v3', 'meta.json'), path.join(root, 'api', 'registry', 'sets.json')]) {
+      assert.ok(fs.readFileSync(f, 'utf8').includes('\n  '), `${path.basename(f)} bleibt eingerueckt`);
+    }
     const alpha = idx.find((e) => e.setId === 'sv1' && e.cardId === '1');
     assert.equal(alpha.img, 'https://assets.tcgdex.net/en/sv/sv01/001/low.webp');
     assert.equal(alpha.imgDe, 'https://assets.tcgdex.net/de/sv/sv01/001/low.webp');

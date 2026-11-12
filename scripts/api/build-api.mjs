@@ -9,7 +9,7 @@ import { runMatching } from './match/run-matching.mjs';
 import {
   buildRegistry, assertFrozen, registryChanges, RegistryFrozenError, RegistryInvariantError,
 } from './registry/build-registry.mjs';
-import { readRegistry, writeRegistry, toJson, assertSafeSetId } from './registry/registry-io.mjs';
+import { readRegistry, writeRegistry, toJson, toCompactJson, assertSafeSetId } from './registry/registry-io.mjs';
 import { learnTables } from './merge/learn-tables.mjs';
 import { loadLegals } from './merge/legalities.mjs';
 import { mergeCard } from './merge/merge-card.mjs';
@@ -206,13 +206,13 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
   const wanted = new Set();
   for (const [setId, cards] of cardsBySet) {
     wanted.add(`${setId}.json`);
-    writeIfChanged(path.join(cardsDir, `${setId}.json`), toJson(cards));
+    writeIfChanged(path.join(cardsDir, `${setId}.json`), toCompactJson(cards));
   }
   for (const f of fs.readdirSync(cardsDir)) {
     if (f.endsWith('.json') && !wanted.has(f)) fs.rmSync(path.join(cardsDir, f));
   }
   writeIfChanged(path.join(outAbs, 'sets.json'), toJson(sets));
-  writeIfChanged(path.join(outAbs, 'search-index.json'), toJson(searchIndex));
+  writeIfChanged(path.join(outAbs, 'search-index.json'), toCompactJson(searchIndex));
   writeIfChanged(path.join(outAbs, 'meta.json'), toJson(meta));
   // Gelernte Tabellen deterministisch ablegen, damit Aenderungen im Diff sichtbar werden.
   fs.mkdirSync(path.join(outAbs, 'reports'), { recursive: true });
