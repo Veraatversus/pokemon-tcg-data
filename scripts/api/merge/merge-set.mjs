@@ -24,7 +24,14 @@ export function mergeSet({ canonicalSetId, registrySet, ptSet = null, tcgdexSet 
     symbol: tdImages.symbol ?? ptSet?.images?.symbol,
   });
   const deLogo = td ? resolveSetImages(assetsIndex, assetsVerified, { lang: 'de', serieId: td.serieId, setId: td.id }).logo : undefined;
-  const de = compact({ name: td?.name?.de, images: deLogo ? { logo: deLogo } : undefined });
+  const positive = (v) => (typeof v === 'number' && v > 0 ? v : undefined);
+  const deCounts = td ? compact({ official: positive(td.cardCountOfficial), total: positive(td.cardCountTotal) }) : {};
+  const de = compact({
+    name: td?.name?.de,
+    series: td?.serieName?.de,
+    cardCount: Object.keys(deCounts).length ? deCounts : undefined,
+    images: deLogo ? { logo: deLogo } : undefined,
+  });
   // Synthetisierte pt-Sets (Kartendatei ohne Set-Eintrag, z. B. mep) haben nur die Id als Namen:
   // Name und gedruckte Gesamtzahl kommen dann aus TCGdex, nie die nackte Id.
   const synth = ptSet?.synthesized === true;
