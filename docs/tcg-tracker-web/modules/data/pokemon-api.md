@@ -6,25 +6,25 @@
 
 ## Zweck
 
-API-Adapter für Pokémon-Karten-/Set-Daten inkl. Vera-API, PokemonTCG-Fallback und TCGDex-Merge.
+Adapter für Karten-/Setdaten aus `api/v3` (vorberechnet, EN + `i18n.de`) und `api/registry` (Set-Aliase). Keine Laufzeit-Aufrufe an pokemontcg.io oder TCGdex.
 
 ## Öffentliche API
 
 | Export | Beschreibung |
 |---|---|
-| `fetchMergedCards(setId, { signal })` | Lädt/merged Karten für ein Set |
-| `fetchAllAvailableSets()` | Liefert vollständige Set-Liste für Overview |
-| `runPokecodeParityCheck({ setIds, maxSets })` | Konsistenzcheck Adapter vs Compat |
+| `fetchMergedCards(setId, { signal })` | Display-Karten eines Sets (`setId` darf ein Alias sein) |
+| `fetchMergedCardsWithSetMeta(setId, { signal })` | `{ cards, setMetaPatch }`; jede Karte trägt `collectionKey`, `cardId`, `number`, `i18n_de` |
+| `fetchAllAvailableSets()` | Set-Liste für die Overview (ohne Alias-Sets, mit `aliases`) |
+| `V3_UNREACHABLE_MESSAGE` | Fehlermeldung „Kartendaten (api/v3) nicht erreichbar“ (`err.code = 'V3_UNREACHABLE'`) |
 
 ## Abhängigkeiten
 
-- `core/config.js`
-- `core/utils.js`
-- `pokecode-compat.js` (Legacy-Kompatibilitätslayer)
+- `data/v3-api.js`, `data/v3-collection-keys.js`, `data/v3-records.js`
+- `data/schema-contract.js` (Resolver-Matrix)
 
 ## Datenfluss
 
-Primärquelle ist Vera-API (`USE_VERA_API=true`), fallback auf PokemonTCG. Zusätzliche TCGDex-Daten werden für DE-Namen/Bilder gemerged.
+`api/v3` → `toSetRecord`/`toCardRecord` → `resolveDisplaySet`/`resolveDisplayCard`. Cardmarket-Links kommen aus den v3-Produkt-IDs. Ist `api/v3` nicht erreichbar, nutzen die Aufrufer `db_cards` als Fallback.
 
 ## Verwandte Seiten
 

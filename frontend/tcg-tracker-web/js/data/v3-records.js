@@ -36,6 +36,14 @@ function tcgdexLocalId(tcgdexId, tcgdexSetId = '') {
   return safeDecode(rest);
 }
 
+// Cardmarket-Produkt-ID: erste Variante mit cardmarketId, sonst ids.cardmarket (Liste oder Zahl).
+function cardmarketProductId(card) {
+  const fromVariant = list(card.variants).find((v) => v?.cardmarketId)?.cardmarketId;
+  if (fromVariant) return fromVariant;
+  const ids = card.ids?.cardmarket;
+  return Array.isArray(ids) ? ids[0] : ids;
+}
+
 export function toSetRecord(v3Set = {}, { imported = false, updatedAt = null } = {}) {
   const set = v3Set || {};
   const de = set.i18n?.de || {};
@@ -91,7 +99,7 @@ export function toCardRecord(v3Card = {}, v3Set = null, { updatedAt = null } = {
   const tcgdexId = str(card.ids?.tcgdex);
   const matchStatus = str(card.matchStatus)
     || (pokemontcgId && tcgdexId ? 'matched' : (tcgdexId ? 'tcgdex_only' : 'primary_only'));
-  const cardmarketUrl = buildCardmarketProductUrl(card.variants?.[0]?.cardmarketId) || '';
+  const cardmarketUrl = buildCardmarketProductUrl(cardmarketProductId(card)) || '';
 
   return {
     // Die eigene setId der Karte ist massgeblich (z.B. cel25c-Karten unter Set cel25);

@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
-import { combineSetsForOverviewCompat, findMatchingTcgdexSet, resolvePreferredTcgdexSetBases } from '../js/pokecode-compat.js';
-import { buildCardRecordFromSources, resolveDisplayCard, resolveDisplaySet, resolveSeriesGroupInfo } from '../js/data/schema-contract.js';
+import { buildCardRecordFromSources, resolveDisplayCard, resolveSeriesGroupInfo } from '../js/data/schema-contract.js';
 import { getCollectionUiState, resolveCollectionToggleState } from '../js/core/collection-state.js';
 import {
   buildCombinedSearchDropdownOptions,
@@ -10,87 +9,6 @@ import {
   shouldFetchApiCardsForSearchSet
 } from '../js/core/utils.js';
 import { filterSetsBySeriesKey, getStatsSeriesLabel } from '../js/ui/stats-series.js';
-
-function testDoesNotFalseMatchSubsetName() {
-  const result = findMatchingTcgdexSet(
-    { id: 'ex7', name: 'Team Rocket Returns', ptcgoCode: '' },
-    [
-      {
-        id: 'base5',
-        name: 'Team Rocket',
-        abbreviation: { official: 'RO' }
-      }
-    ],
-    {}
-  );
-
-  assert.equal(
-    result,
-    null,
-    'A subset-name fallback must not map Team Rocket Returns (ex7) to Team Rocket (base5).'
-  );
-}
-
-function testDirectIdWinsWhenEnglishFallbackSetExists() {
-  const result = findMatchingTcgdexSet(
-    { id: 'ex7', name: 'Team Rocket Returns', ptcgoCode: 'TRR' },
-    [
-      {
-        id: 'base5',
-        name: 'Team Rocket',
-        abbreviation: { official: 'RO' }
-      },
-      {
-        id: 'ex7',
-        name: 'Team Rocket Returns',
-        abbreviation: { official: 'TRR' }
-      }
-    ],
-    {}
-  );
-
-  assert.equal(result?.id, 'ex7');
-}
-
-function testExactEnglishNameBeatsConflictingCode() {
-  const result = findMatchingTcgdexSet(
-    { id: 'unknown-set', name: 'Team Rocket Returns', ptcgoCode: 'RO' },
-    [
-      {
-        id: 'base5',
-        name: 'Team Rocket',
-        abbreviation: { official: 'RO' }
-      },
-      {
-        id: 'ex7',
-        name: 'Team Rocket Returns',
-        abbreviation: { official: 'TR' }
-      }
-    ],
-    {}
-  );
-
-  assert.equal(
-    result?.id,
-    'ex7',
-    'Exact English set-name matching must win even if a conflicting code would point to base5.'
-  );
-}
-
-function testLocaleResolutionSkipsGerman404WhenSetIsKnownEnOnly() {
-  const bases = resolvePreferredTcgdexSetBases('ex7', {
-    tcgdexBase: 'https://api.tcgdex.net/v2/de',
-    tcgdexFallbackBase: 'https://api.tcgdex.net/v2/en',
-    tcgdexDeSetIds: new Set(['base5']),
-    tcgdexEnSetIds: new Set(['base5', 'ex7'])
-  });
-
-  assert.deepEqual(
-    bases,
-    ['https://api.tcgdex.net/v2/en'],
-    'Known EN-only sets should skip the DE endpoint instead of producing a predictable 404 first.'
-  );
-}
 
 function testSeriesGroupingUsesStableTcgdexKeyAcrossLocalizedLabels() {
   const germanDisplay = resolveSeriesGroupInfo({
@@ -111,44 +29,6 @@ function testSeriesGroupingUsesStableTcgdexKeyAcrossLocalizedLabels() {
 
   assert.equal(germanDisplay.key, englishFallbackDisplay.key, 'Localized and English display labels must land in the same dashboard series bucket even when one set has no TCGDex series metadata.');
   assert.equal(germanDisplay.label, 'Schwert & Schild', 'When a localized Vera label exists, it should remain available for UI display.');
-}
-
-function testGermanTcgdexSetAssetsFallbackToEnglishSummaryAssets() {
-  const [combined] = combineSetsForOverviewCompat({
-    primarySets: [{
-      id: 'sv1',
-      name: 'Karmesin & Purpur',
-      series: 'Karmesin & Purpur',
-      total: 198,
-      printedTotal: 198,
-      images: { logo: '', symbol: '' },
-      legalities: {},
-      releaseDate: '2023-03-31',
-      ptcgoCode: 'SVI'
-    }],
-    tcgdexSets: [{
-      id: 'sv1',
-      name: 'Scarlet & Violet',
-      logo: 'https://assets.tcgdex.net/en/sv/sv1/logo.webp',
-      symbol: 'https://assets.tcgdex.net/en/sv/sv1/symbol.webp',
-      abbreviation: { official: 'SVI' },
-      serie: { id: 'sv', name: 'Scarlet & Violet' }
-    }],
-    tcgdexResolvedSets: [{
-      id: 'sv1',
-      name: 'Karmesin & Purpur',
-      logo: '',
-      symbol: '',
-      abbreviation: { official: 'SVI' },
-      serie: { id: 'sv', name: 'Karmesin & Purpur' }
-    }],
-    customMappings: {},
-    mapPrimarySetToOverviewModel: (set) => ({ setId: set.id }),
-    toNumber: Number
-  }).map((set) => resolveDisplaySet(set));
-
-  assert.equal(combined.logoUrl, 'https://assets.tcgdex.net/en/sv/sv1/logo.webp');
-  assert.equal(combined.symbolUrl, 'https://assets.tcgdex.net/en/sv/sv1/symbol.webp');
 }
 
 function testCardResolverUsesTcgdexDetailFieldsWhenPrimaryDataIsMissing() {
@@ -426,12 +306,7 @@ function testSearchProgressLabelIncludesApiPhaseAfterSetScanFinishes() {
 }
 
 try {
-  testDoesNotFalseMatchSubsetName();
-  testDirectIdWinsWhenEnglishFallbackSetExists();
-  testExactEnglishNameBeatsConflictingCode();
-  testLocaleResolutionSkipsGerman404WhenSetIsKnownEnOnly();
   testSeriesGroupingUsesStableTcgdexKeyAcrossLocalizedLabels();
-  testGermanTcgdexSetAssetsFallbackToEnglishSummaryAssets();
   testCardResolverUsesTcgdexDetailFieldsWhenPrimaryDataIsMissing();
   testCardImageResolverDefaultsToTcgdexFirstPriority();
   testCardmarketResolverPrefersDirectProductLinksOverSearchFallbacks();

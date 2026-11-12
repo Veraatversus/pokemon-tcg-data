@@ -147,9 +147,7 @@ node --test frontend/tcg-tracker-web/tests/cardmarket-data.test.mjs
 ## Bekannte Einschränkungen
 
 - OAuth-Token läuft nach 1h ab; auto-refresh via GIS beim nächsten Request
-- pokemontcg.io Rate-Limit: 1000/Tag → mit `USE_VERA_API: true` umgehen
-- TCGDex-Bilder fehlen für ältere Sets → Fallback auf pokemontcg.io CDN
-- TCGDex-ID-Mappings (`CUSTOM_SET_ID_MAPPINGS`) ggf. bei neuen Sets ergänzen
+- Karten-/Setdaten kommen aus `api/v3`; ist es nicht erreichbar, werden bereits importierte Sets aus `db_cards` angezeigt
 
 3. Lokal testen:
    - z. B. `python -m http.server 8000`

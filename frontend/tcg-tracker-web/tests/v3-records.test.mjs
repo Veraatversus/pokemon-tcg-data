@@ -231,3 +231,15 @@ test('localId: Set-Praefix wird abgeschnitten, Rest darf Bindestriche enthalten'
   assert.equal(toCardRecord(c, { id: 'x', ids: { tcgdex: 'other' } }).tcgdex_localId, '1');
   assert.equal(toCardRecord(c, { id: 'y', ids: { tcgdex: 'my-set' } }).tcgdex_localId, '1');
 });
+
+test('Cardmarket-URL: erste Variante mit cardmarketId, sonst ids.cardmarket[0], sonst leer', () => {
+  const url = (id) => `https://www.cardmarket.com/de/Pokemon/Products?idProduct=${id}`;
+  const base = { id: 'x-1', cardId: '1', number: '1', setId: 'x' };
+  assert.equal(toCardRecord({ ...base, variants: [{ type: 'normal', cardmarketId: 11 }], ids: { cardmarket: [99] } }).vera_cardmarket_url, url(11));
+  assert.equal(toCardRecord({ ...base, variants: [{ type: 'normal' }, { type: 'reverse', cardmarketId: 22 }] }).vera_cardmarket_url, url(22));
+  assert.equal(toCardRecord({ ...base, variants: [{ type: 'normal' }], ids: { cardmarket: [33, 44] } }).vera_cardmarket_url, url(33));
+  assert.equal(toCardRecord({ ...base, ids: { cardmarket: 55 } }).vera_cardmarket_url, url(55));
+  assert.equal(toCardRecord({ ...base, ids: { cardmarket: [] } }).vera_cardmarket_url, '');
+  // realer Fall: base6-75 hat nur ids.cardmarket
+  assert.equal(toCardRecord(card('base6', 'base6-75'), setById('base6')).vera_cardmarket_url, url(274840));
+});

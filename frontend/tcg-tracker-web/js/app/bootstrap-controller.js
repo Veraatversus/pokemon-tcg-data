@@ -53,7 +53,6 @@ export function createBootstrapController({
   openBatchImportDialog,
   runDataHealthCheck,
   downloadJson,
-  runPokecodeParityTest,
   loadSnapshots,
   openSettingsDialog,
   generateCollectionReport,
@@ -244,15 +243,6 @@ export function createBootstrapController({
         downloadJson(`poke_backup_${stamp}.json`, payload);
         showToast(`Backup exportiert (${sets.length} Sets).`, 'success', 4000);
       },
-      'parity-test': async () => {
-        showToast('Parity-Test wird ausgeführt...', 'info');
-        try {
-          await runPokecodeParityTest({ skipPrompt: true, maxSets: 10 });
-          showToast('Parity-Test abgeschlossen.', 'success', 4000);
-        } catch (error) {
-          showToast(`Parity-Test fehlgeschlagen: ${error.message}`, 'error', 5000);
-        }
-      },
       search: () => {
         dom.search?.focus();
         showToast('Suchfeld aktiviert', 'info', 2000);
@@ -273,7 +263,7 @@ export function createBootstrapController({
         dialog.addEventListener('close', () => dialog.remove());
       },
       help: () => {
-        showToast('Verfügbare Befehle: import, health-check, backup, parity, search, snapshots, settings, export', 'info', 5000);
+        showToast('Verfügbare Befehle: import, health-check, backup, search, snapshots, settings, export', 'info', 5000);
       },
       wishlists: () => {
         const panel = createWishlistPanel();

@@ -17,7 +17,7 @@ import {
   resetSheetsDataCaches,
   recoverImportedIdsFromOverview,
 } from './data/sheets-db.js?v=20260613-tcgdex-merge-fix-v2';
-import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, runPokecodeParityCheck } from './data/pokemon-api.js?v=20260613-tcgdex-merge-fix-v2';
+import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets } from './data/pokemon-api.js?v=20260613-tcgdex-merge-fix-v2';
 import { resolveSeriesGroupInfo } from './data/schema-contract.js?v=20260613-tcgdex-merge-fix-v2';
 import {
   buildCardmarketProductUrl,
@@ -238,7 +238,6 @@ const dom = {
   btnDataHealthAutofix: document.getElementById('btn-data-health-autofix'),
   btnManageImportedSets: document.getElementById('btn-manage-imported-sets'),
   btnSheetsRetryReport: document.getElementById('btn-sheets-retry-report'),
-  btnParityCheck: document.getElementById('dashboard-action-parity'),
   btnQueueAutofixRefresh: document.getElementById('btn-queue-autofix-refresh'),
   btnQueueBuilder: document.getElementById('btn-queue-builder'),
   btnQueueRun: document.getElementById('btn-queue-run'),
@@ -1232,12 +1231,6 @@ function getQueueBuilderActionsCatalog() {
       label: 'Datencheck-Report exportieren',
       description: 'Erstellt Konsistenzreport als JSON',
       action: () => runDataHealthCheck({ autoFix: false })
-    },
-    {
-      id: 'pokecode-parity-test',
-      label: 'Pokecode-Parity-Test',
-      description: 'Vergleicht Adapter/Compat und exportiert einen Parity-Report',
-      action: () => runPokecodeParityTest({ skipPrompt: true, maxSets: 10 })
     }
   ];
 }
@@ -4274,45 +4267,6 @@ async function runDataHealthCheck({ autoFix = false } = {}) {
   finishJob(job, `Auto-Fix ausgefuehrt (${uniqueSets.length} Sets)`, false);
 }
 
-async function runPokecodeParityTest({ skipPrompt = false, maxSets: presetMaxSets = null } = {}) {
-  let maxSets = 10;
-  if (Number.isFinite(presetMaxSets) && presetMaxSets > 0) {
-    maxSets = Math.min(Number(presetMaxSets), 50);
-  } else if (!skipPrompt) {
-    const input = window.prompt('Wie viele Sets sollen geprft werden? (Standard: 10)', '10');
-    const parsed = Number.parseInt(String(input || '10'), 10);
-    maxSets = Number.isFinite(parsed) && parsed > 0 ? Math.min(parsed, 50) : 10;
-  }
-
-  setLoading(true, 'Pokecode-Parity-Test laeuft');
-  setGlobalStatus(`Parity-Test laeuft (max. ${maxSets} Sets)`);
-  const job = startJob('Pokecode-Parity-Test', maxSets);
-
-  try {
-    const report = await runPokecodeParityCheck({ maxSets });
-    updateJob(job, report.checkedSetCount || 0, `Parity-Test beendet: ${report.ok ? 'OK' : 'Abweichungen gefunden'}`);
-    finishJob(job, report.ok ? 'Parity-Test erfolgreich' : 'Parity-Test mit Abweichungen', !report.ok);
-
-    const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-    downloadJson(`poke_parity_report_${stamp}.json`, report);
-
-    if (report.ok) {
-      showToast(`Parity-Test OK (${report.checkedSetCount} Sets, keine Abweichungen). Report exportiert.`, 'success', 5000);
-    } else {
-      showToast(`Parity-Test fertig: ${report.overviewMismatches.length} Overview- und ${report.cardMismatches.length} Karten-Abweichungen. Report exportiert.`, 'error', 7000);
-      console.group('[ParityTest] Abweichungen');
-      if (report.overviewMismatches.length) console.table(report.overviewMismatches);
-      if (report.cardMismatches.length) console.table(report.cardMismatches);
-      console.groupEnd();
-    }
-  } catch (err) {
-    finishJob(job, err?.message || 'Parity-Test fehlgeschlagen', true);
-    throw err;
-  } finally {
-    setLoading(false);
-  }
-}
-
 function parseBackupPayload(rawText) {
   const parsed = JSON.parse(rawText);
   if (!parsed || typeof parsed !== 'object') throw new Error('Ungueltiges Backup-Format.');
@@ -5166,10 +5120,6 @@ function initDashboardControls() {
   dom.btnDataHealthCheck?.addEventListener('click', () => runDataHealthCheck({ autoFix: false }));
   dom.btnDataHealthAutofix?.addEventListener('click', () => runDataHealthCheck({ autoFix: true }));
   dom.btnCardmarketReloadPrices?.addEventListener('click', reloadCardmarketPricesManually);
-  dom.btnParityCheck?.addEventListener('click', () => runPokecodeParityTest().catch((err) => {
-    console.error('[runPokecodeParityTest]', err);
-    showToast(`Parity-Test fehlgeschlagen: ${err.message}`, 'error', 6000);
-  }));
   dom.btnQueueAutofixRefresh?.addEventListener('click', () => {
     enqueueAction('Datencheck + Auto-Fix', () => runDataHealthCheck({ autoFix: true }));
     enqueueAction('Power-Refresh Overview', () => powerRefreshOverviewFromApi());
@@ -7615,7 +7565,7 @@ function needsApiCardEnrichment(cards = []) {
   const needsCardmarketUpgrade = sample.some((card) => {
     const cardmarketUrl = String(card?.cardmarketUrl || card?.vera_cardmarket_url || card?.tcgdex_cardmarket_url || '').trim();
     // Bug fix: use isGeneratedCardmarketUrl (not just SearchUrl) so stale idProduct= URLs
-    // are also treated as auto-generated and trigger an API re-promotion via promoteCardmarketUrlsForCards.
+    // are also treated as auto-generated and trigger a re-hydration from api/v3 (fetchMergedCardsWithSetMeta).
     return !cardmarketUrl || isGeneratedCardmarketUrl(cardmarketUrl);
   });
 
@@ -9830,7 +9780,6 @@ function createBootstrapRuntimeController() {
     openBatchImportDialog,
     runDataHealthCheck,
     downloadJson,
-    runPokecodeParityTest,
     loadSnapshots,
     openSettingsDialog,
     generateCollectionReport,

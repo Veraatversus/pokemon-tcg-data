@@ -72,7 +72,6 @@ test('bootstrapPostCore exposes post-core bootstrap stage for command/auth wirin
     openBatchImportDialog: () => {},
     runDataHealthCheck: () => {},
     downloadJson: () => {},
-    runPokecodeParityTest: async () => {},
     loadSnapshots: () => [],
     openSettingsDialog: () => {},
     generateCollectionReport: () => ({}),

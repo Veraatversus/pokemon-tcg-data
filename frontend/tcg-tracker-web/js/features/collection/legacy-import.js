@@ -1,5 +1,5 @@
 import { normalizeCardNumber, toBoolean, colToA1 } from '../../core/utils.js';
-import { normalizeSetId, buildSetIdAliasCandidates } from '../../pokecode-compat.js';
+import { normalizeSetId } from '../../core/set-id-helpers.js';
 import { CONFIG } from '../../core/config.js?v=20260613-tcgdex-merge-fix-v2';
 
 const LEGACY_IGNORED_SHEETS = new Set([
@@ -218,6 +218,10 @@ export function parseLegacyWorkbook(workbook) {
   return parsed;
 }
 
+function normalizeSetIdForMatch(setId) {
+  return normalizeSetId(String(setId || '').replace(/^TCGDEX-/i, ''));
+}
+
 function getSetMatchCandidates(sheetEntry, allSets) {
   const matches = new Map();
   const sourceSetIdRaw = String(sheetEntry?.sourceSetIdRaw || '').trim();
@@ -234,11 +238,13 @@ function getSetMatchCandidates(sheetEntry, allSets) {
   };
 
   if (sourceSetIdRaw) {
-    const aliasCandidates = buildSetIdAliasCandidates(sourceSetIdRaw, CONFIG.CUSTOM_SET_ID_MAPPINGS);
-    const normalizedAliases = new Set(aliasCandidates.map((entry) => normalizeSetId(String(entry).replace(/^TCGDEX-/i, ''))).filter(Boolean));
+    // Set-ID und v3-Aliase (z. B. Subset "swsh12pt5gg", "TCGDEX-me05") normalisiert vergleichen.
+    const normalizedSource = normalizeSetIdForMatch(sourceSetIdRaw);
     allSets.forEach((setMeta) => {
-      const normalizedSetId = normalizeSetId(setMeta?.setId || '');
-      if (normalizedSetId && normalizedAliases.has(normalizedSetId)) {
+      const keys = [setMeta?.setId, ...(Array.isArray(setMeta?.aliases) ? setMeta.aliases : [])]
+        .map(normalizeSetIdForMatch)
+        .filter(Boolean);
+      if (normalizedSource && keys.includes(normalizedSource)) {
         addMatch(setMeta, 'set-id');
       }
     });

@@ -15,7 +15,6 @@ export function initDashboardControlsFeature({
   reimportAllImportedSets,
   exportCollectionSummaryCsv,
   runDataHealthCheck,
-  runPokecodeParityTest,
   enqueueAction,
   runQueuedActions,
   clearQueuedActions,
@@ -82,11 +81,6 @@ export function initDashboardControlsFeature({
 
   dom.btnDataHealthCheck?.addEventListener('click', () => runDataHealthCheck({ autoFix: false }));
   dom.btnDataHealthAutofix?.addEventListener('click', () => runDataHealthCheck({ autoFix: true }));
-
-  dom.btnParityCheck?.addEventListener('click', () => runPokecodeParityTest().catch((err) => {
-    console.error('[runPokecodeParityTest]', err);
-    showToast(`Parity-Test fehlgeschlagen: ${err.message}`, 'error', 6000);
-  }));
 
   dom.btnQueueAutofixRefresh?.addEventListener('click', () => {
     enqueueAction('Datencheck + Auto-Fix', () => runDataHealthCheck({ autoFix: true }));

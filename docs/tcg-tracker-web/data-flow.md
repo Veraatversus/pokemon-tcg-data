@@ -39,8 +39,8 @@ Nutzer-Browser
 app.js
   → sheets-db.js: listSetsOverviewData()
       → Google Sheets API: 'Sets Overview'
-  → pokemon-api.js: fetchAllSets()
-      → Vera-API (USE_VERA_API=true) oder PokemonTCG-API
+  → pokemon-api.js: fetchAllAvailableSets()
+      → api/v3/sets.json (vorberechnet, relativ zur App)
   → cache.js: set('sets', ...)       ← TTL 10 min
 ```
 

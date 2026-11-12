@@ -10,7 +10,6 @@ const COMMANDS = [
   { id: 'import-batch', label: '📦 Batch-Import', desc: 'Mehrere Sets importieren', category: 'Import', hotkey: null },
   { id: 'health-check', label: '🩺 Datencheck', desc: 'Sucht nach Inkonsistenzen', category: 'Maintenance', hotkey: null },
   { id: 'backup-download', label: '💾 Backup exportieren', desc: 'Sichert Daten lokal', category: 'Backup', hotkey: 'Shift+B' },
-  { id: 'parity-test', label: '🧪 Parity-Test', desc: 'Vergleicht Adapter/Compat', category: 'Testing', hotkey: null },
   { id: 'search', label: '🔍 Suche', desc: 'Fuzzy-Suche für Karten/Sets', category: 'Navigation', hotkey: '/' },
   { id: 'settings', label: '⚙️ Einstellungen', desc: 'App-Einstellungen', category: 'System', hotkey: null },
   { id: 'snapshots', label: '📸 Snapshots', desc: 'Collection-Versionen', category: 'Versioning', hotkey: null },
