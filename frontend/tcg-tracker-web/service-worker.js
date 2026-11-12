@@ -4,9 +4,27 @@
 
 const SW_SCOPE_PATH = new URL(self.registration.scope).pathname.toLowerCase();
 const SW_SCOPE = /(^|\/)dev(\/|$)/.test(SW_SCOPE_PATH) ? 'dev' : 'release';
-const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v56`;
-const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v56`;
-const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v56`;
+const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v57`;
+const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v57`;
+const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v57`;
+
+// api/v3 + api/registry JSON in the runtime cache: keep at most API_CACHE_MAX_ENTRIES
+// non-pinned entries (card files); oldest-inserted are evicted first (cache.keys() is insertion-ordered).
+const API_CACHE_MAX_ENTRIES = 60;
+const API_PINNED_RE = /\/api\/(v3\/(sets|meta|search-index)\.json|registry\/sets\.json)$/;
+const API_ENTRY_RE = /\/api\/(v3|registry)\//;
+
+async function trimApiCache(cache) {
+  const keys = await cache.keys();
+  const evictable = keys.filter((req) => {
+    const p = new URL(req.url).pathname;
+    return API_ENTRY_RE.test(p) && !API_PINNED_RE.test(p);
+  });
+  const excess = evictable.length - API_CACHE_MAX_ENTRIES;
+  for (let i = 0; i < excess; i += 1) {
+    await cache.delete(evictable[i]);
+  }
+}
 
 const SW_DEBUG = false;
 
@@ -162,15 +180,15 @@ self.addEventListener('fetch', (event) => {
     // never shadowed by an old cached copy; the runtime cache is only an offline fallback.
     if (/\/api\/(v3|registry)\//.test(url.pathname)) {
       event.respondWith(
-        fetch(request)
+        fetch(request, { cache: 'no-cache' })
           .then((response) => {
             if (response && response.status === 200) {
               const responseToCache = response.clone();
-              caches.open(RUNTIME_CACHE).then((cache) => {
-                cache.put(request, responseToCache).catch((err) => {
+              caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, responseToCache)
+                .then(() => trimApiCache(cache))
+                .catch((err) => {
                   console.warn('[SW] cache.put failed:', err);
-                });
-              });
+                }));
             }
             return response;
           })
@@ -186,7 +204,7 @@ self.addEventListener('fetch', (event) => {
       || url.pathname.endsWith('.css');
     if (isCodeAsset) {
       event.respondWith(
-        fetch(request)
+        fetch(request, { cache: 'no-cache' })
           .then((response) => {
             if (response && response.status === 200) {
               const responseToCache = response.clone();
