@@ -38,6 +38,7 @@ import { selectSearchSets } from './features/search/search-index-prefilter.js';
 import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, fetchDeSeriesBySetId } from './data/pokemon-api.js?v=20261112-api-v3';
 import { resolveSeriesGroupInfo, resolveDisplaySet, applyDeSeriesFallback, resolveSetTotalCards, setDeSeriesBySetId, getCardLanguage } from './data/schema-contract.js';
 import { imageCandidates, bindImageFallback, fallbackImgAttrs } from './ui/image-fallback.js';
+import { renderDashboardSetGrid } from './views/dashboard-grid.js';
 import {
   buildCardmarketProductUrl,
   resolveCardmarketEntryForCard,
@@ -516,7 +517,6 @@ const state = {
   recentSets: [],
   dashboardView: 'all',
   dashboardDensity: 'comfortable',
-  dashboardVirtualCount: 180,
   quickFilters: {
     completed: false,
     inProgress: false,
@@ -564,9 +564,7 @@ const RECENT_SETS_STORAGE_KEY = scopedStorageKey('recent_sets_v1');
 const REALTIME_CLIENT_STORAGE_KEY = scopedStorageKey('realtime_client_id');
 const USER_ID_STORAGE_KEY = scopedStorageKey('user_id');
 const DEV_COMPLETION_STORAGE_KEY = scopedStorageKey('dev_completion_mode');
-const DASHBOARD_VIRTUAL_PAGE_SIZE = 180;
 const SEARCH_INPUT_DEBOUNCE_MS = 900;
-const DASHBOARD_VIRTUAL_THRESHOLD = 220;
 const SEARCH_SCOPE_IMPORTED = 'imported';
 const SEARCH_SCOPE_ALL = 'all';
 const SEARCH_SCOPE_ONLINE = 'online';
@@ -944,35 +942,6 @@ function markSetAsRecent(setMeta) {
   state.recentSets = next;
   saveRecentSets();
   renderRecentSets();
-}
-
-function resetDashboardVirtualization() {
-  state.dashboardVirtualCount = DASHBOARD_VIRTUAL_PAGE_SIZE;
-}
-
-function createDashboardVirtualFooter(total, visible) {
-  const wrapper = document.createElement('div');
-  wrapper.className = 'dashboard-virtual-footer';
-  const remaining = Math.max(0, total - visible);
-
-  wrapper.innerHTML = `
-    <p>Zeige ${visible} von ${total} Sets${remaining > 0 ? ` - ${remaining} weitere` : ''}</p>
-    <div class="dashboard-virtual-actions">
-      <button class="btn-secondary" type="button" data-action="more">Mehr laden (+${DASHBOARD_VIRTUAL_PAGE_SIZE})</button>
-      <button class="btn-secondary" type="button" data-action="all">Alle laden</button>
-    </div>
-  `;
-
-  wrapper.querySelector('[data-action="more"]')?.addEventListener('click', () => {
-    state.dashboardVirtualCount = Math.min(total, (state.dashboardVirtualCount || DASHBOARD_VIRTUAL_PAGE_SIZE) + DASHBOARD_VIRTUAL_PAGE_SIZE);
-    renderDashboard();
-  });
-  wrapper.querySelector('[data-action="all"]')?.addEventListener('click', () => {
-    state.dashboardVirtualCount = total;
-    renderDashboard();
-  });
-
-  return wrapper;
 }
 
 function initSheetsWriteFeedback() {
@@ -2863,7 +2832,6 @@ async function loadSets() {
       const filled = applyDeSeriesFallback(set, deSeriesBySetId);
       return filled === set ? set : resolveDisplaySet(filled);
     });
-    resetDashboardVirtualization();
     renderRecentSets();
     renderSetSelectorOptions();
 
@@ -3045,44 +3013,13 @@ async function renderDashboard() {
       return;
     }
 
-    dom.dashboardGrid.innerHTML = '';
-
-    const shouldVirtualize = sets.length > DASHBOARD_VIRTUAL_THRESHOLD;
-    const visibleCount = shouldVirtualize
-      ? Math.min(sets.length, Math.max(DASHBOARD_VIRTUAL_PAGE_SIZE, state.dashboardVirtualCount || DASHBOARD_VIRTUAL_PAGE_SIZE))
-      : sets.length;
-    const visibleSets = shouldVirtualize ? sets.slice(0, visibleCount) : sets;
-
-    if (sortBy === 'series-date') {
-      const seriesMap = buildSeriesMap(visibleSets);
-      seriesMap.forEach((groupInfo) => {
-        const section = document.createElement('section');
-        section.className = 'dash-series-group';
-        const h3 = document.createElement('h3');
-        h3.textContent = groupInfo.label;
-        section.appendChild(h3);
-        const grid = document.createElement('div');
-        grid.className = 'dash-sets-row';
-        groupInfo.sets.forEach((set) => {
-          const summary = summaryByName.get(set.setName) || summaryByName.get(set.setId);
-          grid.appendChild(createDashSetCard(set, summary));
-        });
-        section.appendChild(grid);
-        dom.dashboardGrid.appendChild(section);
-      });
-    } else {
-      const grid = document.createElement('div');
-      grid.className = 'dash-sets-row';
-      visibleSets.forEach((set) => {
-        const summary = summaryByName.get(set.setName) || summaryByName.get(set.setId);
-        grid.appendChild(createDashSetCard(set, summary));
-      });
-      dom.dashboardGrid.appendChild(grid);
-    }
-
-    if (shouldVirtualize) {
-      dom.dashboardGrid.appendChild(createDashboardVirtualFooter(sets.length, visibleSets.length));
-    }
+    renderDashboardSetGrid({
+      container: dom.dashboardGrid,
+      sets,
+      sortBy,
+      buildSeriesMap,
+      createCard: (set) => createDashSetCard(set, summaryByName.get(set.setName) || summaryByName.get(set.setId))
+    });
 
   } catch (err) {
     console.error('[renderDashboard]', err);
@@ -5060,16 +4997,13 @@ async function handleSettingsAction(action) {
 function initDashboardControls() {
   let debounce;
   dom.dashFilter.addEventListener('input', () => {
-    resetDashboardVirtualization();
     clearTimeout(debounce);
     debounce = setTimeout(renderDashboard, 200);
   });
   dom.dashSeriesFilter.addEventListener('change', () => {
-    resetDashboardVirtualization();
     renderDashboard();
   });
   dom.dashSort.addEventListener('change', () => {
-    resetDashboardVirtualization();
     renderDashboard();
   });
   document.querySelectorAll('.dashboard-view-tab').forEach((button) => {
@@ -5078,7 +5012,6 @@ function initDashboardControls() {
       const view = button.dataset.dashboardView || 'all';
       if (state.dashboardView === view) return;
       state.dashboardView = view;
-      resetDashboardVirtualization();
       saveDashboardPreferences();
       renderDashboard();
     });
@@ -9664,7 +9597,6 @@ function createBootstrapRuntimeController() {
     realtimeClientStorageKey: REALTIME_CLIENT_STORAGE_KEY,
     applyIncomingRealtimeUpdate,
     initQuickFiltersUI,
-    resetDashboardVirtualization,
     saveDashboardPreferences,
     renderDashboard,
     loadSearchHistory,

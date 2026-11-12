@@ -44,7 +44,6 @@ export function createBootstrapController({
   realtimeClientStorageKey,
   applyIncomingRealtimeUpdate,
   initQuickFiltersUI,
-  resetDashboardVirtualization,
   saveDashboardPreferences,
   renderDashboard,
   loadSearchHistory,
@@ -196,7 +195,6 @@ export function createBootstrapController({
           ...state.quickFilters,
           ...(detail || {}),
         };
-        resetDashboardVirtualization();
         saveDashboardPreferences();
         renderDashboard();
       });

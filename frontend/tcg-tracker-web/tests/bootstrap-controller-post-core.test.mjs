@@ -63,7 +63,6 @@ test('bootstrapPostCore exposes post-core bootstrap stage for command/auth wirin
     realtimeClientStorageKey: 'realtime-client-id',
     applyIncomingRealtimeUpdate: () => {},
     initQuickFiltersUI: () => {},
-    resetDashboardVirtualization: () => {},
     saveDashboardPreferences: () => {},
     renderDashboard: () => {},
     loadSearchHistory: () => [],

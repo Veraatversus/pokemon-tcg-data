@@ -1059,31 +1059,6 @@ label:active {
   padding: 8px;
 }
 
-.dashboard-virtual-footer {
-  grid-column: 1 / -1;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  margin-top: 10px;
-  padding: 10px;
-  border: 1px dashed var(--color-border);
-  border-radius: 8px;
-  background: var(--color-surface-elevated);
-}
-
-.dashboard-virtual-footer p {
-  margin: 0;
-  font-size: 12px;
-  color: var(--color-muted);
-}
-
-.dashboard-virtual-actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
 .batch-dialog {
   width: min(680px, 95vw);
 }

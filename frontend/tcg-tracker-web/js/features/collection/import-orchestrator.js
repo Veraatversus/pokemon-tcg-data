@@ -12,7 +12,6 @@ export function createImportOrchestrator({
   syncOverviewWithApiSets,
   recoverImportedIdsFromOverview,
   toBoolean,
-  resetDashboardVirtualization,
   renderRecentSets,
   renderSetSelectorOptions,
   syncRefreshControls,
@@ -86,7 +85,6 @@ export function createImportOrchestrator({
       });
 
       state.allSets = Array.from(mergedMap.values());
-      resetDashboardVirtualization();
       renderRecentSets();
       renderSetSelectorOptions();
 

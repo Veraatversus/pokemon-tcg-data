@@ -82,7 +82,6 @@ test('bootstrapCore initializes early runtime wiring and quick-filter handlers',
     realtimeClientStorageKey: 'realtime-client-id',
     applyIncomingRealtimeUpdate: () => {},
     initQuickFiltersUI: () => callLog.push('initQuickFiltersUI'),
-    resetDashboardVirtualization: () => callLog.push('resetDashboardVirtualization'),
     saveDashboardPreferences: () => callLog.push('saveDashboardPreferences'),
     renderDashboard: () => callLog.push('renderDashboard'),
     loadSearchHistory: () => {
