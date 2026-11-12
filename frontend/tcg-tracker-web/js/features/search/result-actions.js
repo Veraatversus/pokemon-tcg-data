@@ -1,4 +1,6 @@
 import { isGeneratedCardmarketSearchUrl } from '../../data/cardmarket-url-utils.js';
+import { collectionKeyOf, emptyCollectionEntry, writeEntryStateWith, ensureEntryWith, isAmbiguousLegacyKeyError, describeAmbiguousLegacyKey } from '../../data/collection-writes.js';
+import { describeCardDataFailure } from '../../core/card-enrichment.js';
 
 export function createSearchResultActionsController({
   state,
@@ -15,6 +17,7 @@ export function createSearchResultActionsController({
   ensureCollectionEntry,
   resolveCollectionToggleState,
   updateCellBoolean,
+  updateCellBooleansBatch,
   pushUndoEntry,
   updateUndoUi,
   finishTrackedWrite,
@@ -115,19 +118,14 @@ export function createSearchResultActionsController({
     return article;
   }
 
-  function attachSearchResultCheckboxListeners(article, db, key, set, card) {
+  function attachSearchResultCheckboxListeners(article, dbEntry, key, set, card) {
     const gInput = article.querySelector('input[data-type="g"]');
     const rhInput = article.querySelector('input[data-type="rh"]');
+    const db = dbEntry || emptyCollectionEntry(card, key);
+    const writers = { updateCellBooleansBatch: updateCellBooleansBatch, updateCellBoolean };
 
     async function ensureDbEntry() {
-      if (db?.gCell && db?.rhCell) return db;
-      const ensured = await ensureCollectionEntry(set.setName, db?.displayId || key);
-      db.g = Boolean(db?.g);
-      db.rh = Boolean(db?.rh && db?.g);
-      db.gCell = ensured.gCell;
-      db.rhCell = ensured.rhCell;
-      db.displayId = ensured.displayId || db.displayId || key;
-      return db;
+      return ensureEntryWith(ensureCollectionEntry, set, db, key);
     }
 
     function updateSearchCardState() {
@@ -152,12 +150,7 @@ export function createSearchResultActionsController({
       try {
         await ensureDbEntry();
         const nextState = resolveCollectionToggleState(db, { isG: true, checked });
-        await updateCellBoolean(set.setName, db.gCell.row, db.gCell.col, nextState.g);
-        if (db?.rhCell && nextState.rh !== Boolean(db?.rh)) {
-          await updateCellBoolean(set.setName, db.rhCell.row, db.rhCell.col, nextState.rh);
-        }
-        db.g = nextState.g;
-        db.rh = nextState.rh;
+        await writeEntryStateWith(writers, set.setName, db, nextState);
         updateSearchCardState();
         pushUndoEntry({
           setId: set?.setId,
@@ -169,7 +162,7 @@ export function createSearchResultActionsController({
         setCardSaveState(article, 'saved');
         finishTrackedWrite(`Karte #${db?.displayId || key} speichern`, null);
       } catch (error) {
-        showToast(`Speichern fehlgeschlagen: ${error.message}`, 'error');
+        if (isAmbiguousLegacyKeyError(error)) showToast(describeAmbiguousLegacyKey(error), 'info', 8000); else showToast(`Speichern fehlgeschlagen: ${error.message}`, 'error');
         gInput.checked = !checked;
         setCardSaveState(article, 'error');
         finishTrackedWrite(`Karte #${db?.displayId || key} speichern`, error);
@@ -192,12 +185,7 @@ export function createSearchResultActionsController({
           return;
         }
         const nextState = resolveCollectionToggleState(db, { isG: false, checked });
-        if (nextState.g !== Boolean(db?.g)) {
-          await updateCellBoolean(set.setName, db.gCell.row, db.gCell.col, nextState.g);
-        }
-        await updateCellBoolean(set.setName, db.rhCell.row, db.rhCell.col, nextState.rh);
-        db.g = nextState.g;
-        db.rh = nextState.rh;
+        await writeEntryStateWith(writers, set.setName, db, nextState);
         updateSearchCardState();
         pushUndoEntry({
           setId: set?.setId,
@@ -209,7 +197,7 @@ export function createSearchResultActionsController({
         setCardSaveState(article, 'saved');
         finishTrackedWrite(`Karte #${db?.displayId || key} RH speichern`, null);
       } catch (error) {
-        showToast(`Speichern fehlgeschlagen: ${error.message}`, 'error');
+        if (isAmbiguousLegacyKeyError(error)) showToast(describeAmbiguousLegacyKey(error), 'info', 8000); else showToast(`Speichern fehlgeschlagen: ${error.message}`, 'error');
         rhInput.checked = !checked;
         setCardSaveState(article, 'error');
         finishTrackedWrite(`Karte #${db?.displayId || key} RH speichern`, error);
@@ -221,7 +209,7 @@ export function createSearchResultActionsController({
     if (!set?.setId) return;
     const resolvedSet = getSetById(set.setId) || set;
     state.pendingSearchSetImport = Boolean(!resolvedSet?.imported);
-    state.pendingSearchCardFocusKey = card?.number ? normalizeCardNumber(card.number) : null;
+    state.pendingSearchCardFocusKey = card ? (collectionKeyOf(card) || null) : null;
     ensureSetSelectorOption(resolvedSet);
     dom.selector.value = resolvedSet.setId;
 
@@ -246,41 +234,25 @@ export function createSearchResultActionsController({
     const [cards, dbMap] = await Promise.all([
       state.searchCache.has(searchCacheKey)
         ? state.searchCache.get(searchCacheKey)
-        : readDbCardsForSet(set.setId).then(async (loadedCards) => {
-          const dbCards = Array.isArray(loadedCards) ? loadedCards : [];
-          if (dbCards.length > 0) {
+        // api/v3 ist massgeblich; db_cards nur Offline-Fallback.
+        : fetchMergedCardsWithSetMeta(set.setId).then((payload) => {
+          const apiCards = Array.isArray(payload?.cards) ? payload.cards : [];
+          if (apiCards.length > 0) cache.set(`cards_${set.setId}`, apiCards, config.CACHE_TTL_MS);
+          state.searchCache.set(searchCacheKey, apiCards);
+          return apiCards;
+        }, async (v3Error) => {
+          if (v3Error?.name === 'AbortError') throw v3Error;
+          const dbCards = await readDbCardsForSet(set.setId).catch(() => []);
+          if (Array.isArray(dbCards) && dbCards.length > 0) {
             cache.set(cardsCacheKey, dbCards, config.CACHE_TTL_MS);
-          }
-
-          const hasDbCards = Array.isArray(dbCards) && dbCards.length > 0;
-          const shouldFetchApiCards = shouldFetchApiCardsForSearchSet(searchScopeMode, set, hasDbCards)
-            || needsApiCardEnrichment(dbCards);
-
-          if (!shouldFetchApiCards) {
             state.searchCache.set(searchCacheKey, dbCards);
             return dbCards;
           }
-
-          let apiCards = [];
-          if (cache.has(`cards_${set.setId}`)) {
-            apiCards = cache.get(`cards_${set.setId}`) || [];
-          } else {
-            const apiPayload = await fetchMergedCardsWithSetMeta(set.setId).catch(() => ({ cards: [], setMetaPatch: null }));
-            apiCards = Array.isArray(apiPayload?.cards) ? apiPayload.cards : [];
-          }
-          if (Array.isArray(apiCards) && apiCards.length > 0) {
-            cache.set(`cards_${set.setId}`, apiCards, config.CACHE_TTL_MS);
-          }
-
-          const mergedCards = searchScopeMode === searchScopeOnline
-            ? mergeSearchCards([], apiCards)
-            : mergeSearchCards(dbCards, apiCards);
-          state.searchCache.set(searchCacheKey, mergedCards);
-          return mergedCards;
+          throw new Error(describeCardDataFailure(v3Error));
         }),
       cache.has(dbCacheKey)
         ? cache.get(dbCacheKey)
-        : readSetCollectionMap(set.setName).then((loadedDbMap) => {
+        : readSetCollectionMap(set.setName, { setId: set.setId }).then((loadedDbMap) => {
           const safeDbMap = loadedDbMap instanceof Map ? loadedDbMap : new Map();
           cache.set(dbCacheKey, safeDbMap, config.CACHE_TTL_MS);
           return safeDbMap;
@@ -296,8 +268,8 @@ export function createSearchResultActionsController({
       return;
     }
 
-    const targetKey = normalizeCardNumber(card.number);
-    const targetIndex = cards.findIndex((item) => normalizeCardNumber(item.number) === targetKey);
+    const targetKey = collectionKeyOf(card);
+    const targetIndex = cards.findIndex((item) => collectionKeyOf(item) === targetKey);
     if (targetIndex < 0) return;
 
     state.currentSet = set;

@@ -1,3 +1,6 @@
+import { hasEntryCells, writeEntryStateWith } from '../../data/collection-writes.js';
+import { findSetByIdOrAlias } from '../../data/set-aliases.js';
+
 export function createBackupImportExportController(deps = {}) {
   const {
     dom,

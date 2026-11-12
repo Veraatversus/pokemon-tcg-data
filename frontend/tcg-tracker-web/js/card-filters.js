@@ -1,3 +1,4 @@
+import { collectionKeyOf } from './data/collection-writes.js';
 // ══════════════════════════════════════════════════════════════════════════
 // CARD FILTERING & VALUE CALCULATION SYSTEM
 // ══════════════════════════════════════════════════════════════════════════
@@ -112,7 +113,7 @@ export function calculateCollectionValue(collectionData, cards) {
     let cardCount = 0;
 
     cards.forEach((card) => {
-      const cardNum = normalizeCardNumber(card.number);
+      const cardNum = collectionKeyOf(card);
       const collectionCard = collectionData[cardNum];
 
       if (collectionCard) {

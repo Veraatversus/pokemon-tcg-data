@@ -1,3 +1,4 @@
+import { collectionKeyOf } from '../data/collection-writes.js';
 /**
  * stats-rendering.js
  * Factory module for stats view rendering, charts, and price analytics.
@@ -96,14 +97,15 @@ export function createStatsRenderer({
 
       const [cards, collectionMap] = await Promise.all([
         readDbCardsForSet(setId).catch(() => []),
-        readSetCollectionMap(setName).catch(() => new Map())
+        readSetCollectionMap(setName, { setId }).catch(() => new Map())
       ]);
 
       (Array.isArray(cards) ? cards : []).forEach((card) => {
         const normalizedNumber = normalizeCardNumber(card?.number || '');
-        if (!normalizedNumber) return;
+        const collectionKey = collectionKeyOf(card);
+        if (!collectionKey) return;
 
-        const mapEntry = collectionMap.get(normalizedNumber) || {};
+        const mapEntry = collectionMap.get(collectionKey) || {};
         const isCollected = Boolean(mapEntry?.g);
         if (!isCollected) return;
 
@@ -653,7 +655,7 @@ export function createStatsRenderer({
     const total = state.cards.length;
     let collected = 0, rh = 0;
     state.cards.forEach((card) => {
-      const db = state.dbMap.get(normalizeCardNumber(card.number));
+      const db = state.dbMap.get(collectionKeyOf(card));
       if (db?.g) collected++;
       if (db?.rh) rh++;
     });

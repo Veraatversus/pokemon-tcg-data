@@ -1,3 +1,4 @@
+import { collectionKeyOf } from '../data/collection-writes.js';
 export function renderSearchToolbarMetaView({
   dom,
   getSearchModeMeta,
@@ -126,7 +127,7 @@ export function renderSearchResultsListView({
 
   const frag = document.createDocumentFragment();
   safeResults.forEach(({ card, set, dbMap, apiOnly }) => {
-    const key = normalizeCardNumber(card.number);
+    const key = collectionKeyOf(card);
     frag.appendChild(createSearchResultCard(card, key, dbMap.get(key), set, apiOnly));
   });
 

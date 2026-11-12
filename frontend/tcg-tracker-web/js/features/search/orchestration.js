@@ -163,28 +163,34 @@ export async function runSearchOrchestrated(options = {}) {
       const dbCardsCacheKey = `db_cards_${set.setId}`;
       const dbCacheKey = `db_${set.setId}`;
       const searchCacheKey = `${set.setId}::${searchScopeMode}`;
-      const useApiForSet = shouldUseApiForSearchSet(searchScopeMode, set);
 
+      // api/v3 ist massgeblich (Karten gecacht unter cards_<setId>); db_cards nur Offline-Fallback.
       let dbCards = [];
-      if (cache.has(dbCardsCacheKey)) {
-        dbCards = cache.get(dbCardsCacheKey) || [];
+      if (cache.has(cacheKey)) {
+        dbCards = cache.get(cacheKey) || [];
       } else {
-        dbCards = await readDbCardsForSet(set.setId).catch(() => []);
-        if (Array.isArray(dbCards) && dbCards.length > 0) {
-          cache.set(dbCardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
+        try {
+          const payload = await fetchMergedCardsWithSetMeta(set.setId, { signal: abortController?.signal });
+          dbCards = Array.isArray(payload?.cards) ? payload.cards : [];
+          if (dbCards.length > 0) cache.set(cacheKey, dbCards, CONFIG.CACHE_TTL_MS);
+        } catch (v3Error) {
+          if (v3Error?.name === 'AbortError') throw v3Error;
+          dbCards = cache.has(dbCardsCacheKey) ? (cache.get(dbCardsCacheKey) || []) : await readDbCardsForSet(set.setId).catch(() => []);
+          if (Array.isArray(dbCards) && dbCards.length > 0) cache.set(dbCardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
         }
       }
 
       let dbMap = new Map();
       if (cache.has(dbCacheKey)) dbMap = cache.get(dbCacheKey);
       else {
-        dbMap = await readSetCollectionMap(set.setName).catch(() => new Map());
+        dbMap = await readSetCollectionMap(set.setName, { setId: set.setId }).catch(() => new Map());
         cache.set(dbCacheKey, dbMap, CONFIG.CACHE_TTL_MS);
       }
 
       const hasDbCards = Array.isArray(dbCards) && dbCards.length > 0;
-      const shouldFetchApiCards = shouldFetchApiCardsForSearchSet(searchScopeMode, set, hasDbCards);
-      const dbSearchCards = !useApiForSet && hasDbCards ? dbCards : [];
+      // Karten sind bereits v3 (oder Offline-Fallback): keine zweite API-Phase mehr.
+      const shouldFetchApiCards = false;
+      const dbSearchCards = hasDbCards ? dbCards : [];
 
       if (dbSearchCards.length > 0) {
         setMatchCount = upsertMatches(dbSearchCards, set, dbMap);

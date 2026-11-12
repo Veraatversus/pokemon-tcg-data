@@ -15,6 +15,8 @@
 
 import { isGeneratedCardmarketSearchUrl } from '../data/cardmarket-url-utils.js';
 import { sanitizeDisplayText } from '../core/display-text.js';
+import { collectionKeyOf, emptyCollectionEntry, hasEntryCells, stateCellUpdates, applyEntryState, writeEntryStateWith, ensureEntryWith, isAmbiguousLegacyKeyError, describeAmbiguousLegacyKey } from '../data/collection-writes.js';
+import { describeCardDataFailure, NO_CARD_DATA_MESSAGE } from '../core/card-enrichment.js';
 import {
   applyCardmarketPriceSummary as applyCardmarketPriceSummaryUi,
   getCardmarketPriceCacheKey,
@@ -233,7 +235,6 @@ export async function loadCurrentSet(injections = {}, forceRefresh = false) {
   try {
     const cardsCacheKey = `db_cards_${setId}`;
     const dbCacheKey = `db_${setId}`;
-    const allowApiFallback = getSearchScopeMode?.() === SEARCH_SCOPE_ONLINE || Boolean(state.pendingSearchSetImport) || !Boolean(selected.imported);
 
     if (forceRefresh) {
       cache?.del?.(cardsCacheKey);
@@ -243,38 +244,24 @@ export async function loadCurrentSet(injections = {}, forceRefresh = false) {
     const [cards, dbMap] = await Promise.all([
       cache?.has?.(cardsCacheKey)
         ? cache?.get?.(cardsCacheKey)
-        : readDbCardsForSet?.(setId).then(async (dbCards) => {
-          if (Array.isArray(dbCards) && dbCards.length > 0) {
-            const shouldHydrateFromApi = allowApiFallback || needsApiCardEnrichment?.(dbCards);
-            if (!shouldHydrateFromApi) {
-              cache?.set?.(cardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
-              return dbCards;
-            }
-
-            const apiPayload = await fetchMergedCardsWithSetMeta?.(setId).catch(() => ({ cards: [], setMetaPatch: null }));
-            const apiCards = Array.isArray(apiPayload?.cards) ? apiPayload.cards : [];
-            const mergedCards = apiCards.length > 0 ? mergeSearchCards?.(dbCards, apiCards) : dbCards;
-            cache?.set?.(cardsCacheKey, mergedCards, CONFIG.CACHE_TTL_MS);
-            return mergedCards;
-          }
-
-          if (allowApiFallback) {
-            const apiPayload = await fetchMergedCardsWithSetMeta?.(setId).catch(() => ({ cards: [], setMetaPatch: null }));
-            const apiCards = Array.isArray(apiPayload?.cards) ? apiPayload.cards : [];
-            if (apiCards.length > 0) {
-              cache?.set?.(cardsCacheKey, apiCards, CONFIG.CACHE_TTL_MS);
-            }
-            return apiCards;
-          }
-          return [];
+        // api/v3 ist massgeblich; db_cards nur Offline-Fallback. Ohne beides die v3-Meldung.
+        : fetchMergedCardsWithSetMeta?.(setId).then((payload) => {
+          const apiCards = Array.isArray(payload?.cards) ? payload.cards : [];
+          if (apiCards.length > 0) cache?.set?.(cardsCacheKey, apiCards, CONFIG.CACHE_TTL_MS);
+          return apiCards;
+        }, async (v3Error) => {
+          if (v3Error?.name === 'AbortError') throw v3Error;
+          const dbCards = await readDbCardsForSet?.(setId).catch(() => []);
+          if (Array.isArray(dbCards) && dbCards.length > 0) return dbCards;
+          throw new Error(describeCardDataFailure(v3Error));
         }),
       cache?.has?.(dbCacheKey)
         ? cache?.get?.(dbCacheKey)
-        : readSetCollectionMap?.(selected.setName).then((m) => { cache?.set?.(dbCacheKey, m, CONFIG.CACHE_TTL_MS); return m; })
+        : readSetCollectionMap?.(selected.setName, { setId: selected.setId }).then((m) => { cache?.set?.(dbCacheKey, m, CONFIG.CACHE_TTL_MS); return m; })
     ]);
 
     if (!Array.isArray(cards) || cards.length === 0) {
-      throw new Error('Keine Kartendaten in der Datenbank gefunden. Bitte Set importieren/aktualisieren oder API-Fallback aktivieren.');
+      throw new Error(NO_CARD_DATA_MESSAGE);
     }
 
     state.cards = cards;
@@ -329,7 +316,7 @@ export function renderCards(injections = {}) {
   setEmptyState?.(false);
   const fragment = document.createDocumentFragment();
   state.cards.forEach((card, index) => {
-    const key = normalizeCardNumber(card.number);
+    const key = collectionKeyOf(card);
     const db = state.dbMap.get(key);
     fragment.appendChild(createCardElement(card, key, db, index, injections));
   });
@@ -352,13 +339,7 @@ function createCardElement(card, key, db, index, injections = {}) {
     buildCardmarketProductUrl
   } = injections;
 
-  const dbEntry = db || {
-    displayId: card.number,
-    g: false,
-    rh: false,
-    gCell: null,
-    rhCell: null
-  };
+  const dbEntry = db || emptyCollectionEntry(card, key);
   const isEditable = Boolean(state.currentSet?.setName);
 
   const article = document.createElement('article');
@@ -525,7 +506,7 @@ function attachCheckboxListeners(injections = {}, article, db, key) {
 
         state.currentSet = refreshedSet || { ...setToImport, imported: true };
         state.pendingSearchSetImport = false;
-        state.dbMap = await readSetCollectionMap?.(state.currentSet.setName).catch(() => new Map());
+        state.dbMap = await readSetCollectionMap?.(state.currentSet.setName, { setId: state.currentSet.setId }).catch(() => new Map());
         cache?.set?.(`db_${setId}`, state.dbMap, CONFIG.CACHE_TTL_MS);
         db = state.dbMap.get(key) || db;
       } finally {
@@ -533,13 +514,7 @@ function attachCheckboxListeners(injections = {}, article, db, key) {
       }
     }
 
-    if (db?.gCell && db?.rhCell) return db;
-    const ensured = await ensureCollectionEntry?.(state.currentSet.setName, db?.displayId || key);
-    db.g = Boolean(db?.g);
-    db.rh = Boolean(db?.rh && db?.g);
-    db.gCell = ensured.gCell;
-    db.rhCell = ensured.rhCell;
-    db.displayId = ensured.displayId || db.displayId || key;
+    await ensureEntryWith(ensureCollectionEntry, state.currentSet, db, key);
     state.dbMap.set(key, db);
     return db;
   }
@@ -556,12 +531,7 @@ function attachCheckboxListeners(injections = {}, article, db, key) {
     try {
       await ensureDbEntry({ checked, source: 'set-grid' });
       const nextState = resolveCollectionToggleState?.( db, { isG: true, checked });
-      await updateCellBoolean?.(state.currentSet.setName, db.gCell.row, db.gCell.col, nextState.g);
-      if (db?.rhCell && nextState.rh !== Boolean(db?.rh)) {
-        await updateCellBoolean?.(state.currentSet.setName, db.rhCell.row, db.rhCell.col, nextState.rh);
-      }
-      db.g = nextState.g;
-      db.rh = nextState.rh;
+      await writeEntryStateWith({ updateCellBooleansBatch: injections.updateCellBooleansBatch, updateCellBoolean }, state.currentSet.setName, db, nextState);
       updateCardState?.(injections, article, db);
       updateStats?.();
       applyFilter?.();
@@ -577,7 +547,7 @@ function attachCheckboxListeners(injections = {}, article, db, key) {
       setCardSaveState?.(article, 'saved');
       finishTrackedWrite?.(`Karte #${db?.displayId || key} speichern`, null);
     } catch (err) {
-      showToast?.(`Speichern fehlgeschlagen: ${err.message}`, 'error');
+      if (isAmbiguousLegacyKeyError(err)) showToast?.(describeAmbiguousLegacyKey(err), 'info', 8000); else showToast?.(`Speichern fehlgeschlagen: ${err.message}`, 'error');
       gInput.checked = !checked;
       setCardSaveState?.(article, 'error');
       finishTrackedWrite?.(`Karte #${db?.displayId || key} speichern`, err);
@@ -600,12 +570,7 @@ function attachCheckboxListeners(injections = {}, article, db, key) {
         return;
       }
       const nextState = resolveCollectionToggleState?.(db, { isG: false, checked });
-      if (nextState.g !== Boolean(db?.g)) {
-        await updateCellBoolean?.(state.currentSet.setName, db.gCell.row, db.gCell.col, nextState.g);
-      }
-      await updateCellBoolean?.(state.currentSet.setName, db.rhCell.row, db.rhCell.col, nextState.rh);
-      db.g = nextState.g;
-      db.rh = nextState.rh;
+      await writeEntryStateWith({ updateCellBooleansBatch: injections.updateCellBooleansBatch, updateCellBoolean }, state.currentSet.setName, db, nextState);
       updateCardState?.(injections, article, db);
       updateStats?.();
       applyFilter?.();
@@ -621,7 +586,7 @@ function attachCheckboxListeners(injections = {}, article, db, key) {
       setCardSaveState?.(article, 'saved');
       finishTrackedWrite?.(`Karte #${db?.displayId || key} RH speichern`, null);
     } catch (err) {
-      showToast?.(`Speichern fehlgeschlagen: ${err.message}`, 'error');
+      if (isAmbiguousLegacyKeyError(err)) showToast?.(describeAmbiguousLegacyKey(err), 'info', 8000); else showToast?.(`Speichern fehlgeschlagen: ${err.message}`, 'error');
       rhInput.checked = !checked;
       setCardSaveState?.(article, 'error');
       finishTrackedWrite?.(`Karte #${db?.displayId || key} RH speichern`, err);
@@ -854,8 +819,8 @@ export function renderLightbox(injections = {}, index) {
   const card = state.cards[index];
   if (!card) return;
 
-  const key = normalizeCardNumber(card.number);
-  const db = state.dbMap.get(key) || { displayId: card.number, g: false, rh: false, gCell: null, rhCell: null };
+  const key = collectionKeyOf(card);
+  const db = state.dbMap.get(key) || emptyCollectionEntry(card, key);
 
   const listToText = (value) => Array.isArray(value) ? value.filter(Boolean).join(', ') : '';
   const rulesText = Array.isArray(card.rules) ? card.rules.filter(Boolean).join('\n') : '';
@@ -1069,9 +1034,9 @@ function initLightbox(injections = {}) {
     const card = state.cards[state.lightboxIndex];
     if (!card) return;
 
-    const key = injections.normalizeCardNumber?.(card.number);
+    const key = collectionKeyOf(card);
     const article = dom.cards.querySelector(`[data-card-index="${state.lightboxIndex}"]`);
-    let db = state.dbMap.get(key) || { displayId: card.number, g: false, rh: false, gCell: null, rhCell: null };
+    let db = state.dbMap.get(key) || emptyCollectionEntry(card, key);
 
     const prevState = { g: Boolean(db?.g), rh: Boolean(db?.rh) };
     const shouldEnsureImportedSet = checked && (Boolean(state.pendingSearchSetImport) || !Boolean(state.currentSet?.imported));
@@ -1098,7 +1063,7 @@ function initLightbox(injections = {}) {
 
         state.currentSet = refreshedSet || { ...setToImport, imported: true };
         state.pendingSearchSetImport = false;
-        state.dbMap = await readSetCollectionMap?.(state.currentSet.setName).catch(() => new Map());
+        state.dbMap = await readSetCollectionMap?.(state.currentSet.setName, { setId: state.currentSet.setId }).catch(() => new Map());
         cache?.set?.(`db_${setId}`, state.dbMap, CONFIG.CACHE_TTL_MS);
         db = state.dbMap.get(key) || db;
       } catch (err) {
@@ -1110,32 +1075,18 @@ function initLightbox(injections = {}) {
       }
     }
 
-    if (!db?.gCell) {
-      const ensured = await ensureCollectionEntry?.(state.currentSet.setName, card.number || db?.displayId || key);
-      db.displayId = ensured.displayId || db.displayId || card.number || key;
-      db.gCell = ensured.gCell;
-      db.rhCell = ensured.rhCell;
-      state.dbMap.set(key, db);
-    }
-
     setCardSaveState?.(article, 'saving');
     beginTrackedWrite?.(`Lightbox #${db?.displayId || key}`);
     try {
+      await ensureEntryWith(ensureCollectionEntry, state.currentSet, db, key);
+      state.dbMap.set(key, db);
       if (!isG && !db?.rhCell) {
         renderLightbox?.(injections, state.lightboxIndex);
         return;
       }
 
       const nextState = resolveCollectionToggleState?.(db, { isG, checked });
-      if (nextState.g !== Boolean(db?.g)) {
-        await updateCellBoolean?.(state.currentSet.setName, db.gCell.row, db.gCell.col, nextState.g);
-      }
-      if (db?.rhCell && nextState.rh !== Boolean(db?.rh)) {
-        await updateCellBoolean?.(state.currentSet.setName, db.rhCell.row, db.rhCell.col, nextState.rh);
-      }
-
-      db.g = nextState.g;
-      db.rh = nextState.rh;
+      await writeEntryStateWith({ updateCellBooleansBatch: injections.updateCellBooleansBatch, updateCellBoolean }, state.currentSet.setName, db, nextState);
       renderLightbox?.(injections, state.lightboxIndex);
 
       if (article) updateCardState?.(injections, article, db);
@@ -1232,18 +1183,11 @@ async function bulkUpdate(injections = {}, g, rh) {
   try {
     for (const key of state.bulkSelected) {
       const db = state.dbMap.get(key);
-      if (!db?.gCell) continue;
+      if (!hasEntryCells(db)) continue;
 
       const prevState = { g: Boolean(db?.g), rh: Boolean(db?.rh) };
       try {
-        await updateCellBoolean?.(state.currentSet.setName, db.gCell.row, db.gCell.col, g);
-        db.g = g;
-
-        if (db.rhCell) {
-          const newRh = g && rh;
-          await updateCellBoolean?.(state.currentSet.setName, db.rhCell.row, db.rhCell.col, newRh);
-          db.rh = newRh;
-        }
+        await writeEntryStateWith({ updateCellBooleansBatch: injections.updateCellBooleansBatch, updateCellBoolean }, state.currentSet.setName, db, { g, rh: g && rh });
 
         const article = dom.cards.querySelector(`[data-card-id="${key}"]`);
         if (article) updateCardState?.(injections, article, db);
@@ -1359,7 +1303,7 @@ function initKeyboardNav(injections = {}) {
 
 function getMissingCards(injections = {}) {
   const { state, normalizeCardNumber } = injections;
-  return state.cards.filter((card) => !state.dbMap.get(normalizeCardNumber(card.number))?.g);
+  return state.cards.filter((card) => !state.dbMap.get(collectionKeyOf(card))?.g);
 }
 
 function exportMissingCards(injections = {}) {

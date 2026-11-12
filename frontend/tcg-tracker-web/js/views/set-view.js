@@ -1,10 +1,11 @@
+import { collectionKeyOf } from '../data/collection-writes.js';
 export function updateSetStats({ state, dom, normalizeCardNumber, syncDashboardCardForSet }) {
   const total = state.cards.length;
   let collected = 0;
   let rh = 0;
 
   state.cards.forEach((card) => {
-    const db = state.dbMap.get(normalizeCardNumber(card.number));
+    const db = state.dbMap.get(collectionKeyOf(card));
     if (db?.g) collected++;
     if (db?.rh) rh++;
   });
@@ -67,8 +68,8 @@ export function applySetSortOrder({ state, dom, normalizeCardNumber }) {
   articles.sort((a, b) => {
     const ka = a.dataset.cardId;
     const kb = b.dataset.cardId;
-    const cardA = state.cards.find((c) => normalizeCardNumber(c.number) === ka);
-    const cardB = state.cards.find((c) => normalizeCardNumber(c.number) === kb);
+    const cardA = state.cards.find((c) => collectionKeyOf(c) === ka);
+    const cardB = state.cards.find((c) => collectionKeyOf(c) === kb);
     if (sortBy === 'name') return (cardA?.name || '').localeCompare(cardB?.name || '');
     if (sortBy === 'status') {
       const ra = state.dbMap.get(ka)?.rh ? 2 : state.dbMap.get(ka)?.g ? 1 : 0;
@@ -325,7 +326,7 @@ export function renderSetCardsView({
   setEmptyState(false);
   const fragment = document.createDocumentFragment();
   state.cards.forEach((card, index) => {
-    const key = normalizeCardNumber(card.number);
+    const key = collectionKeyOf(card);
     fragment.appendChild(createCardElementView({
       card,
       key,

@@ -216,3 +216,27 @@ test('findSetByIdOrAlias: exakte ID vor Alias, ohne Gross-/Kleinschreibung', asy
   assert.equal(findSetByIdOrAlias(sets, 'base1'), null);
   assert.equal(findSetByIdOrAlias(sets, ''), null);
 });
+
+test('writeEntryStateWith/ensureEntryWith: Batch bevorzugt, Einzelzellen-Fallback, Mehrdeutigkeit ohne Write', async () => {
+  const { writeEntryStateWith, ensureEntryWith } = await import('../js/data/collection-writes.js');
+  const gg = entry('GG1', [cell(5), cell(9)]);
+  const batches = [];
+  await writeEntryStateWith({ updateCellBooleansBatch: async (s, u) => batches.push([s, u.length]) }, 'CRZ', gg, { g: true });
+  assert.deepEqual(batches, [['CRZ', 4]]);
+  assert.equal(gg.g, true);
+  const singles = [];
+  await writeEntryStateWith({ updateCellBoolean: async (s, r, c, v) => singles.push([r, c, v]) }, 'CRZ', gg, { g: false });
+  assert.equal(singles.length, 4);
+
+  let calls = 0;
+  const ensure = async () => { calls += 1; return entry('1', [cell(3)]); };
+  const db = emptyCollectionEntry({ collectionKey: '1' });
+  await ensureEntryWith(ensure, { setId: 'base1', setName: 'Base' }, db, '1');
+  assert.equal(db.cells.length, 1);
+  const amb = { legacyKey: '15', collectionKeys: ['15_A1', '15_A2'], g: true, cells: [cell(4, true)] };
+  await assert.rejects(
+    ensureEntryWith(ensure, { setId: 'cel25c', setName: 'CC' }, { ...emptyCollectionEntry({ collectionKey: '15_A1' }), ambiguous: amb }, '15_A1'),
+    (err) => isAmbiguousLegacyKeyError(err)
+  );
+  assert.equal(calls, 1);
+});

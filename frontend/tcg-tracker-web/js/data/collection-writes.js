@@ -155,3 +155,32 @@ export function compareSetCollection(apiCards = [], collectionMap = new Map()) {
     mismatch: missingKeys.length > 0 || extraKeys.length > 0
   };
 }
+
+/**
+ * Fuer Module mit injizierten Sheets-Funktionen: {g, rh} in alle Zeilen der Karte schreiben.
+ * Bevorzugt `updateCellBooleansBatch` (ein Request), sonst Zelle fuer Zelle ueber `updateCellBoolean`.
+ */
+export async function writeEntryStateWith({ updateCellBooleansBatch, updateCellBoolean } = {}, setName, entry, nextState) {
+  const updates = stateCellUpdates(entry, nextState);
+  if (!updates.length) throw new Error('Keine Sammlungszeile fuer diese Karte gefunden.');
+  if (typeof updateCellBooleansBatch === 'function') {
+    await updateCellBooleansBatch(setName, updates, { chunkSize: 200 });
+  } else if (typeof updateCellBoolean === 'function') {
+    for (const update of updates) await updateCellBoolean(setName, update.row, update.col, update.value);
+  } else {
+    throw new Error('writeEntryStateWith: kein Sheets-Writer uebergeben');
+  }
+  return applyEntryState(entry, nextState);
+}
+
+/**
+ * Fuer Module mit injiziertem `ensureCollectionEntry`: Zeile sicherstellen (collectionKey, alle Aliase).
+ * Mehrdeutige Altzeile mit gesetztem Status -> AMBIGUOUS_LEGACY_KEY, kein Write.
+ */
+export async function ensureEntryWith(ensureCollectionEntry, set, entry, key) {
+  if (hasEntryCells(entry)) return entry;
+  const pending = pendingAmbiguityError(entry, { setId: set?.setId });
+  if (pending) throw pending;
+  const ensured = await ensureCollectionEntry(set.setName, key, { setId: set?.setId });
+  return adoptEnsuredEntry(entry, ensured);
+}

@@ -36,7 +36,8 @@ export function sortSearchResults(results = []) {
 
 export function getSearchResultKey(card = {}, set = null, normalizeSearchText, normalizeCardNumber) {
   const setId = String(set?.setId || '').trim();
-  const cardNumber = normalizeCardNumber(card?.number || '');
+  // collectionKey (v3) zuerst: Karten mit gleicher Nummer (z. B. cel25c 15_A1..A4) bleiben getrennt.
+  const cardNumber = String(card?.collectionKey ?? '').trim() || normalizeCardNumber(card?.number || '');
   const fallbackName = normalizeSearchText(card?.name || '');
   return `${setId}::${cardNumber || fallbackName || 'card'}`;
 }
