@@ -15,6 +15,8 @@
 
 import { isGeneratedCardmarketSearchUrl } from '../data/cardmarket-url-utils.js';
 import { sanitizeDisplayText } from '../core/display-text.js';
+import { getCardLanguage } from '../data/schema-contract.js';
+import { imageCandidates, bindImageFallback } from '../ui/image-fallback.js';
 import { collectionKeyOf, emptyCollectionEntry, hasEntryCells, stateCellUpdates, applyEntryState, writeEntryStateWith, ensureEntryWith, isAmbiguousLegacyKeyError, describeAmbiguousLegacyKey } from '../data/collection-writes.js';
 import { describeCardDataFailure, NO_CARD_DATA_MESSAGE } from '../core/card-enrichment.js';
 import {
@@ -89,7 +91,6 @@ export function initSetViewController(injections = {}) {
     syncRefreshControls,
     syncSetNavLink,
     sanitizeSetAssetUrl,
-    attachSetAssetFallback,
     attachImageFallback,
     markSetAsRecent,
     ensureSetSelectorOption,
@@ -185,7 +186,6 @@ export async function loadCurrentSet(injections = {}, forceRefresh = false) {
     syncRefreshControls,
     syncSetNavLink,
     sanitizeSetAssetUrl,
-    attachSetAssetFallback,
     markSetAsRecent,
     ensureSetSelectorOption,
     getSetById,
@@ -211,18 +211,21 @@ export async function loadCurrentSet(injections = {}, forceRefresh = false) {
   setGlobalStatus?.(`Lade ${selected.setName}…`);
   setLoading?.(true, `Lade ${selected.setName}…`);
 
-  const safeSetLogoUrl = sanitizeSetAssetUrl?.(selected.logoUrl, selected.setId);
-  const safeSetSymbolUrl = sanitizeSetAssetUrl?.(selected.symbolUrl, selected.setId);
+  // Fallback-Kette in Sprachreihenfolge (image-fallback.js) statt logoUrl/symbolUrl aus der Resolver-Matrix.
+  const setAssetCandidates = (kind) => {
+    const seen = new Set();
+    return imageCandidates(selected, kind, getCardLanguage())
+      .map((url) => (sanitizeSetAssetUrl ? sanitizeSetAssetUrl(url, selected.setId) : url))
+      .filter((url) => url && !seen.has(url) && seen.add(url));
+  };
+  const setLogoCandidates = setAssetCandidates('setLogo');
+  const setSymbolCandidates = setAssetCandidates('setSymbol');
 
-  if (safeSetLogoUrl && dom.setLogo) {
-    attachSetAssetFallback?.(dom.setLogo, './assets/pokeball-fallback.svg', selected.logoUrlCandidates);
-    dom.setLogo.style.display = '';
-    dom.setLogo.src = safeSetLogoUrl;
+  if (setLogoCandidates.length && dom.setLogo) {
+    bindImageFallback(dom.setLogo, setLogoCandidates);
 
-    if (safeSetSymbolUrl && dom.setSymbol) {
-      attachSetAssetFallback?.(dom.setSymbol, '', selected.symbolUrlCandidates);
-      dom.setSymbol.style.display = '';
-      dom.setSymbol.src = safeSetSymbolUrl;
+    if (setSymbolCandidates.length && dom.setSymbol) {
+      bindImageFallback(dom.setSymbol, setSymbolCandidates, { placeholder: '' });
     } else if (dom.setSymbol) {
       dom.setSymbol.style.display = 'none';
       dom.setSymbol.removeAttribute('src');
@@ -362,13 +365,10 @@ function createCardElement(card, key, db, index, injections = {}) {
   });
 
   const img = document.createElement('img');
-  const cardImage = String(card.image || '').trim();
-  if (cardImage) img.src = cardImage;
-  else img.removeAttribute('src');
   img.alt = card.name || key;
   img.loading = 'lazy';
-  attachImageFallback?.(img, card, state.currentSet?.setId || '');
   imgWrap.appendChild(img);
+  attachImageFallback?.(img, card);
 
   // Bulk overlay
   const overlay = document.createElement('div');
@@ -832,18 +832,7 @@ export function renderLightbox(injections = {}, index) {
     node.classList.toggle('lightbox-fact-long', longText && text !== '—');
   };
 
-  const lightboxCard = {
-    ...card,
-    image: card.imageLarge || card.image || '',
-    imageCandidates: Array.isArray(card.imageLargeCandidates) && card.imageLargeCandidates.length
-      ? card.imageLargeCandidates
-      : (Array.isArray(card.imageCandidates) ? card.imageCandidates : [])
-  };
-
-  const lightboxImage = String(lightboxCard.image || '').trim();
-  if (lightboxImage) dom.lightboxImg.src = lightboxImage;
-  else dom.lightboxImg.removeAttribute('src');
-  attachImageFallback?.(dom.lightboxImg, lightboxCard, state.currentSet?.setId || '');
+  attachImageFallback?.(dom.lightboxImg, card, { kind: 'cardLarge' });
   dom.lightboxImg.alt = card.name || key;
   dom.lightboxTitle.textContent = sanitizeDisplayText(card.name, 'Unbekannt');
   dom.lightboxSubtitle.textContent = `#${sanitizeDisplayText(card.number, '?')}`;

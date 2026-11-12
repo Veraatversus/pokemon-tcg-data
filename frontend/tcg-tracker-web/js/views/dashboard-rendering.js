@@ -1,3 +1,5 @@
+import { getCardLanguage } from '../data/schema-contract.js';
+import { imageCandidates, fallbackImgAttrs } from '../ui/image-fallback.js';
 /**
  * dashboard-rendering.js
  * Factory module for Dashboard view rendering functions.
@@ -161,13 +163,17 @@ export function createDashboardRenderer({
       imported: Boolean(set.imported)
     });
 
-    const safeLogoUrl = sanitizeSetAssetUrl(set.logoUrl, set.setId);
+    const logoSeen = new Set();
+    // Fallback-Kette in Sprachreihenfolge (image-fallback.js) statt logoUrl aus der Resolver-Matrix.
+    const logoCandidates = imageCandidates(set, 'setLogo', getCardLanguage())
+      .map((url) => sanitizeSetAssetUrl(url, set.setId))
+      .filter((url) => url && !logoSeen.has(url) && logoSeen.add(url));
     const placeholderCode = String(set.ptcgoCode || set.setId || 'SET').toUpperCase();
 
     card.innerHTML = `
       <div class="dash-set-logo-wrap">
-        ${safeLogoUrl
-          ? `<img src="${safeLogoUrl}" alt="${set.setName}" class="dash-set-logo" loading="lazy" onerror="this.onerror=null;this.src='./assets/pokeball-fallback.svg';this.classList.add('img-fallback')"/>`
+        ${logoCandidates.length
+          ? `<img ${fallbackImgAttrs(logoCandidates)} alt="${set.setName}" class="dash-set-logo" loading="lazy"/>`
           : `<div class="dash-set-placeholder" role="img" aria-label="Kein Setlogo für ${set.setName} verfügbar">
                <img src="./assets/pokeball-fallback.svg" alt="" class="dash-set-placeholder-icon" loading="lazy" />
                <span class="dash-set-placeholder-badge">Kein Setlogo</span>

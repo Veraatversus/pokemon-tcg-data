@@ -36,7 +36,8 @@ import { needsApiCardEnrichment, describeCardDataFailure, NO_CARD_DATA_MESSAGE }
 import { findSetByIdOrAlias } from './data/set-aliases.js';
 import { selectSearchSets } from './features/search/search-index-prefilter.js';
 import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, fetchDeSeriesBySetId } from './data/pokemon-api.js?v=20261112-api-v3';
-import { resolveSeriesGroupInfo, resolveDisplaySet, applyDeSeriesFallback, resolveSetTotalCards, setDeSeriesBySetId } from './data/schema-contract.js';
+import { resolveSeriesGroupInfo, resolveDisplaySet, applyDeSeriesFallback, resolveSetTotalCards, setDeSeriesBySetId, getCardLanguage } from './data/schema-contract.js';
+import { imageCandidates, bindImageFallback, fallbackImgAttrs } from './ui/image-fallback.js';
 import {
   buildCardmarketProductUrl,
   resolveCardmarketEntryForCard,
@@ -1995,8 +1996,6 @@ function isAuthError(err) {
     || message.includes('anmelden');
 }
 
-const brokenSetAssetUrls = new Set();
-
 function sanitizeSetAssetUrl(url, setIdHint = '') {
   const value = String(url || '').trim();
   if (!value) return '';
@@ -2011,8 +2010,6 @@ function sanitizeSetAssetUrl(url, setIdHint = '') {
   ) {
     return '';
   }
-
-  if (brokenSetAssetUrls.has(value)) return '';
 
   const withTcgdexExtension = (() => {
     if (/\.(?:webp|png|jpe?g|svg)(?:[?#]|$)/i.test(value)) return value;
@@ -2042,106 +2039,31 @@ function sanitizeSetAssetUrl(url, setIdHint = '') {
   return '';
 }
 
-function buildMediaCandidateQueue(currentValue, candidateUrls = []) {
-  const current = String(currentValue || '').trim();
+// Set-Logo/-Symbol-Kandidaten in Sprachreihenfolge (image-fallback.js), ueber sanitizeSetAssetUrl normalisiert.
+function setAssetCandidates(set, kind) {
   const seen = new Set();
-  const queue = [];
-  const add = (value) => {
-    const text = String(value || '').trim();
-    if (!text || /pokeball-fallback\.svg/i.test(text)) return;
-    if (current && text === current) return;
-    if (seen.has(text)) return;
-    seen.add(text);
-    queue.push(text);
-  };
-  (Array.isArray(candidateUrls) ? candidateUrls : []).forEach(add);
-  return queue;
+  return imageCandidates(set, kind, getCardLanguage())
+    .map((url) => sanitizeSetAssetUrl(url, set?.setId))
+    .filter((url) => url && !seen.has(url) && seen.add(url));
 }
 
-function attachSetAssetFallback(img, fallbackUrl = './assets/pokeball-fallback.svg', candidateUrls = []) {
-  const fallbackQueue = buildMediaCandidateQueue(img?.src || '', candidateUrls);
-  img.onerror = () => {
-    const failedUrl = String(img?.src || '').trim();
-    if (failedUrl) brokenSetAssetUrls.add(failedUrl);
-
-    while (fallbackQueue.length) {
-      const next = fallbackQueue.shift();
-      if (next && next !== img.src) {
-        img.src = next;
-        return;
-      }
-    }
-
-    img.onerror = null;
-    if (fallbackUrl) {
-      img.src = fallbackUrl;
-      img.classList.add('img-fallback');
-    } else {
-      img.style.display = 'none';
-    }
-  };
-}
-
-function attachImageFallback(img, card, setIdHint = '') {
-  void setIdHint;
-  const fallbackQueue = buildMediaCandidateQueue(
-    img?.src || card?.image || card?.imageUrl || '',
-    Array.isArray(card?.imageCandidates) ? card.imageCandidates : []
-  );
+// Kartenbild mit Fallback-Kette (DE -> EN -> legacy bzw. EN -> DE -> legacy), am Ende Platzhalter.
+// `preferred` (z. B. das bereits geladene Lightbox-Bild) wird vorangestellt.
+function attachImageFallback(img, card, { kind = 'cardSmall', preferred = '' } = {}) {
+  const candidates = imageCandidates(card, kind, getCardLanguage());
+  const pref = String(preferred || '').trim();
   const wrap = img.closest('.card-img-wrap');
-  const applyVisualFallback = () => {
-    if (wrap) {
-      wrap.classList.add('missing-image');
-      wrap.dataset.placeholder = card?.number
-        ? `${card.number} - Kein Kartenbild`
-        : 'Kein Kartenbild';
-    }
-    img.onerror = null;
-    img.style.display = '';
-    img.src = './assets/pokeball-fallback.svg';
-    img.classList.add('img-fallback');
-    img.alt = `Kein Kartenbild fuer ${card?.name || card?.number || 'diese Karte'}`;
-  };
-
   if (wrap) {
-    wrap.classList.remove('missing-image');
-    delete wrap.dataset.placeholder;
+    wrap.dataset.placeholder = card?.number
+      ? `${card.number} - Kein Kartenbild`
+      : 'Kein Kartenbild';
   }
-  img.classList.remove('img-fallback');
-  img.style.display = '';
-
-  const currentImage = String(card?.image || img?.src || '').trim();
-  if (!currentImage || /pokeball-fallback\.svg/i.test(currentImage)) {
-    while (fallbackQueue.length) {
-      const next = fallbackQueue.shift();
-      if (next) {
-        img.src = next;
-        break;
-      }
-    }
+  bindImageFallback(img, pref && pref !== window.location.href
+    ? [pref, ...candidates.filter((url) => url !== pref)]
+    : candidates);
+  if (!candidates.length && !pref) {
+    img.alt = `Kein Kartenbild fuer ${card?.name || card?.number || 'diese Karte'}`;
   }
-
-  const activeImage = String(img?.src || '').trim();
-  const sameAsDocument = activeImage && activeImage === window.location.href;
-  if (!activeImage || /pokeball-fallback\.svg/i.test(activeImage)) {
-    applyVisualFallback();
-    return;
-  }
-  if (sameAsDocument) {
-    applyVisualFallback();
-    return;
-  }
-
-  img.onerror = () => {
-    while (fallbackQueue.length) {
-      const next = fallbackQueue.shift();
-      if (next && next !== img.src) {
-        img.src = next;
-        return;
-      }
-    }
-    applyVisualFallback();
-  };
 }
 
 function setEmptyState(show) {
@@ -3191,13 +3113,13 @@ function createDashSetCard(set, summary) {
     imported: Boolean(set.imported)
   });
 
-  const safeLogoUrl = sanitizeSetAssetUrl(set.logoUrl, set.setId);
+  const logoCandidates = setAssetCandidates(set, 'setLogo');
   const placeholderCode = String(set.ptcgoCode || set.setId || 'SET').toUpperCase();
 
   card.innerHTML = `
     <div class="dash-set-logo-wrap">
-      ${safeLogoUrl
-        ? `<img src="${safeLogoUrl}" alt="${set.setName}" class="dash-set-logo" loading="lazy" onerror="this.onerror=null;this.src='./assets/pokeball-fallback.svg';this.classList.add('img-fallback')"/>`
+      ${logoCandidates.length
+        ? `<img ${fallbackImgAttrs(logoCandidates)} alt="${set.setName}" class="dash-set-logo" loading="lazy"/>`
         : `<div class="dash-set-placeholder" role="img" aria-label="Kein Setlogo für ${set.setName} verfügbar">
              <img src="./assets/pokeball-fallback.svg" alt="" class="dash-set-placeholder-icon" loading="lazy" />
              <span class="dash-set-placeholder-badge">Kein Setlogo</span>
@@ -5806,65 +5728,31 @@ function getStatsPriceItemImageUrl(item = {}) {
 }
 
 function getStatsPriceItemImageCandidates(item = {}) {
-  const card = item?.card || {};
-  // Vollständige Kandidatenkette in der Reihenfolge, die der Set-View
-  // (`attachImageFallback`) durchrotiert. Beim ersten onerror wird das
-  // nächste Bild probiert; am Ende pokeball-fallback.svg.
+  // Kartenbild-Kette aus image-fallback.js (Sprachreihenfolge); item.image/imageUrl nur als Reserve
+  // fuer Eintraege ohne Karten-Record.
   const candidates = [
+    ...imageCandidates(item?.card || {}, 'cardSmall', getCardLanguage()),
     item?.image,
-    item?.imageUrl,
-    card?.imageSmall,
-    card?.image,
-    card?.imageUrl,
-    card?.imageLarge,
-    card?.imageCandidates,
-    card?.images?.small,
-    card?.images?.large,
+    item?.imageUrl
   ];
   const seen = new Set();
-  const out = [];
-  for (const list of candidates) {
-    if (Array.isArray(list)) {
-      for (const value of list) {
-        const trimmed = String(value || '').trim();
-        if (trimmed && !seen.has(trimmed)) {
-          seen.add(trimmed);
-          out.push(trimmed);
-        }
-      }
-    } else {
-      const trimmed = String(list || '').trim();
-      if (trimmed && !seen.has(trimmed)) {
-        seen.add(trimmed);
-        out.push(trimmed);
-      }
-    }
-  }
-  return out;
+  return candidates
+    .map((value) => String(value || '').trim())
+    .filter((value) => value && !seen.has(value) && seen.add(value));
 }
 
 /**
  * Rendert das Thumbnail-Markup für einen Stats-Price-Listeneintrag.
- * Spiegelt das Verhalten von `attachImageFallback` aus dem Set-View:
- * onerror rotiert durch `imageCandidates`, am Ende pokeball-fallback.svg.
- * Markiert das Element zusätzlich mit `is-reverse`, wenn die Karte als
- * Reverse Holo gesammelt ist — gleicher visueller Marker wie in der
- * Set-Cell (Klasse `article.reverse`).
+ * Fallback-Kette ueber data-fallbacks (delegierter Handler in image-fallback.js),
+ * am Ende pokeball-fallback.svg + .stats-price-thumb--missing.
  */
 function renderStatsPriceThumbMarkup(item = {}) {
   const candidates = getStatsPriceItemImageCandidates(item);
   if (!candidates.length) {
     return '<span class="stats-price-thumb-fallback" aria-hidden="true">?</span>';
   }
-
-  const [primary, ...rest] = candidates;
   const altText = String(item?.cardName || item?.card?.name || item?.card?.number || 'Kartenbild').trim();
-  // data-candidates enthält die Fallback-Liste als JSON (Bild-URLs).
-  // Der onerror-Handler rotiert per Index, am Ende wird pokeball-fallback.svg
-  // geladen und die CSS-Klasse `img-fallback` gesetzt.
-  const dataAttr = ` data-image-candidates='${escapeHtml(JSON.stringify(rest))}'`;
-  const onerrorAttr = "this.onerror=null;var c=this.dataset.imageCandidates;if(c){var arr;try{arr=JSON.parse(c);}catch(e){arr=[];}if(Array.isArray(arr)&&arr.length){this.dataset.imageCandidates=JSON.stringify(arr.slice(1));this.src=arr[0];return;}}this.src='./assets/pokeball-fallback.svg';this.classList.add('img-fallback');this.closest('.stats-price-thumb')?.classList.add('stats-price-thumb--missing');";
-  return `<img class="stats-price-thumb-img" src="${escapeHtml(primary)}" alt="${escapeHtml(altText)}" loading="lazy" decoding="async"${dataAttr} onerror="${onerrorAttr}" />`;
+  return `<img class="stats-price-thumb-img" ${fallbackImgAttrs(candidates)} alt="${escapeHtml(altText)}" loading="lazy" decoding="async" />`;
 }
 
 function computeWatchlistWorkspace(items = [], filters = {}, analytics = null) {
@@ -7967,13 +7855,10 @@ function createSearchResultCard(card, key, db, set, apiOnly = false) {
   const imgWrap = document.createElement('div');
   imgWrap.className = 'card-img-wrap';
   const img = document.createElement('img');
-  const cardImage = String(card.image || '').trim();
-  if (cardImage) img.src = cardImage;
-  else img.removeAttribute('src');
   img.alt = card.name || key;
   img.loading = 'lazy';
-  attachImageFallback(img, card, set?.setId || '');
   imgWrap.appendChild(img);
+  attachImageFallback(img, card);
 
   const meta    = document.createElement('div'); meta.className = 'meta';
   const setTag  = document.createElement('span'); setTag.className = 'search-set-tag'; setTag.textContent = set.setName;
@@ -8390,13 +8275,10 @@ function createCardElement(card, key, db, index) {
   });
 
   const img = document.createElement('img');
-  const cardImage = String(card.image || '').trim();
-  if (cardImage) img.src = cardImage;
-  else img.removeAttribute('src');
   img.alt = card.name || key;
   img.loading = 'lazy';
-  attachImageFallback(img, card, state.currentSet?.setId || '');
   imgWrap.appendChild(img);
+  attachImageFallback(img, card);
 
   // Bulk overlay
   const overlay = document.createElement('div'); overlay.className = 'bulk-overlay';
@@ -9017,17 +8899,7 @@ function renderLightbox(index) {
     node.classList.toggle('lightbox-fact-long', longText && text !== '—');
   };
 
-  const lightboxCard = {
-    ...card,
-    image: card.imageLarge || card.image || '',
-    imageCandidates: Array.isArray(card.imageLargeCandidates) && card.imageLargeCandidates.length
-      ? card.imageLargeCandidates
-      : (Array.isArray(card.imageCandidates) ? card.imageCandidates : [])
-  };
-  const lightboxImage = String(lightboxCard.image || '').trim();
-  if (lightboxImage) dom.lightboxImg.src = lightboxImage;
-  else dom.lightboxImg.removeAttribute('src');
-  attachImageFallback(dom.lightboxImg, lightboxCard, state.currentSet?.setId || '');
+  attachImageFallback(dom.lightboxImg, card, { kind: 'cardLarge' });
   dom.lightboxImg.alt              = card.name  || key;
   dom.lightboxTitle.textContent    = card.name  || 'Unbekannt';
   dom.lightboxSubtitle.textContent = `#${card.number}`;
@@ -9185,17 +9057,9 @@ function initLightbox() {
     const syncFullscreenImage = (resetTransform = false) => {
       const card = state.cards[state.lightboxIndex];
       if (!card) return;
-      const fullscreenCard = {
-        ...card,
-        image: card.imageLarge || dom.lightboxImg?.currentSrc || card.image || '',
-        imageCandidates: Array.isArray(card.imageLargeCandidates) && card.imageLargeCandidates.length
-          ? card.imageLargeCandidates
-          : (Array.isArray(card.imageCandidates) ? card.imageCandidates : [])
-      };
-      const fullscreenImage = String(fullscreenCard.image || '').trim();
-      if (fullscreenImage) dom.lightboxImageFull.src = fullscreenImage;
-      else dom.lightboxImageFull.removeAttribute('src');
-      attachImageFallback(dom.lightboxImageFull, fullscreenCard, state.currentSet?.setId || '');
+      // Bereits geladenes Lightbox-Bild zuerst (kein Platzhalter), dann die grosse Fallback-Kette.
+      const loadedSrc = dom.lightboxImg?.classList.contains('img-fallback') ? '' : dom.lightboxImg?.currentSrc;
+      attachImageFallback(dom.lightboxImageFull, card, { kind: 'cardLarge', preferred: loadedSrc || '' });
       dom.lightboxImageFull.alt = card.name || '';
       if (resetTransform) resetFullscreenTransform();
     };
@@ -9667,18 +9531,14 @@ async function loadCurrentSet(forceRefresh = false) {
   setGlobalStatus(`Lade ${selected.setName}\u2026`);
   setLoading(true, `Lade ${selected.setName}\u2026`);
 
-  const safeSetLogoUrl = sanitizeSetAssetUrl(selected.logoUrl, selected.setId);
-  const safeSetSymbolUrl = sanitizeSetAssetUrl(selected.symbolUrl, selected.setId);
+  const setLogoCandidates = setAssetCandidates(selected, 'setLogo');
+  const setSymbolCandidates = setAssetCandidates(selected, 'setSymbol');
 
-  if (safeSetLogoUrl) {
-    attachSetAssetFallback(dom.setLogo, './assets/pokeball-fallback.svg', selected.logoUrlCandidates);
-    dom.setLogo.style.display = '';
-    dom.setLogo.src = safeSetLogoUrl;
+  if (setLogoCandidates.length) {
+    bindImageFallback(dom.setLogo, setLogoCandidates);
 
-    if (safeSetSymbolUrl) {
-      attachSetAssetFallback(dom.setSymbol, '', selected.symbolUrlCandidates);
-      dom.setSymbol.style.display = '';
-      dom.setSymbol.src = safeSetSymbolUrl;
+    if (setSymbolCandidates.length) {
+      bindImageFallback(dom.setSymbol, setSymbolCandidates, { placeholder: '' });
     } else {
       dom.setSymbol.style.display = 'none';
       dom.setSymbol.removeAttribute('src');
