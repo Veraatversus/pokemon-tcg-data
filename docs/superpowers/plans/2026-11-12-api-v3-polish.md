@@ -150,6 +150,21 @@
 - [ ] **Step 2–4:** Run → FAIL, implement, run → PASS. Also address the three deferred minors from the Phase 3 ledger: v2 backup keys under an alias setId are collectionKeys (do not reinterpret as localIds); `markAliasSetRowsNotImported` must not clear the canonical when an unmerged alias set is deleted; strict `listCollectionSetIds` must propagate a registry failure. One test each.
 - [ ] **Step 5: Commit.**
 
+### Task 8b: Replace the resolver matrix by a language rule
+
+**Decision (2026-11-12, after user question):** since v3 is one build, `tcgdex_*` = DE and `vera_*` = EN; German exists only for name, images, attacks/abilities/rules, flavorText. The per-field resolver matrix (sources tcgdex/vera/legacy, dev-only cardmarket) and its expert mode no longer express a real choice and conflict with the language setting.
+
+**Files:**
+- Modify: `js/data/schema-contract.js` (remove `getResolverMatrix`, `DEFAULT_RESOLVER_MATRIX`, `normalizeResolverMatrix`, expert-mode branch, dev-only `cardmarket` source; keep `getCardLanguage`), every caller of the matrix, `js/ui/components.js` (remove matrix editor + expert toggle from settings), `js/enhanced-features.js` (drop `expertResolverMode`/`resolverMatrix` defaults; ignore stored values).
+- Test: replace matrix tests with `tests/field-resolution.test.mjs`.
+
+**Interfaces:**
+- Produces `resolveFieldValue(record, scope, field, language) => value` — language-dependent fields (set: setName, logoUrl; card: name, image, imageLarge, evolvesFrom, rules, flavorText, attacks, abilities): chosen language source → other language → legacy; all other fields: v3/EN value (`vera_*`) → `tcgdex_*` → legacy. Images still go through Task 5 `imageCandidates`.
+
+- [ ] **Step 1: Failing tests:** DE prefers tcgdex_ name, EN prefers vera_ name, both fall back; neutral field (rarity) identical in both languages; stored `resolverMatrix`/`expertResolverMode` in user-settings has no effect; settings panel renders without matrix editor.
+- [ ] **Step 2–4:** Run → FAIL, implement (callers switch to `resolveFieldValue`), run full suite + `check:imports` → PASS.
+- [ ] **Step 5: Commit.**
+
 ### Task 9: Clean code pass and release prep
 
 **Files:**
