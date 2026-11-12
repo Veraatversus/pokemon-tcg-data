@@ -4210,7 +4210,9 @@ async function applyCollectionBackup(payload) {
       });
       unresolvedCards += unresolved;
       ambiguousCards += ambiguous;
-      const liveMap = await readSetCollectionMap(liveSet.setName, { setId: liveSet.setId }).catch(() => new Map());
+      // Frisch und strikt von db_collection lesen (nicht aus dem Cache): sonst plant der Restore gegen einen
+      // veralteten Stand; ein Lesefehler bricht ab, statt gegen eine leere Map zu planen.
+      const liveMap = await readSetCollectionMap(liveSet.setName, { setId: liveSet.setId, strict: true, fresh: true });
       const pendingUpdates = [];
       const restorePlan = planBackupRestore(liveMap, {
         snapshot,

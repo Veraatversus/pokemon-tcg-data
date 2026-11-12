@@ -53,8 +53,9 @@ const mergeState = (previous, next) => {
 
 /**
  * Snapshot eines Live-Sets aus seinen Backup-Sets (mehrere Backup-Sets je Live-Set werden per ODER vereinigt).
- * - Backup-Version >= 2 und Backup-Set-ID == Live-Set-ID: Schluessel sind bereits collectionKeys.
- * - Sonst (Version 1 oder Alias-Set-ID wie `TCGDEX-30th-c`): Aufloesung im Namensraum der Backup-Set-ID.
+ * - Backup-Version >= 2: Schluessel sind collectionKeys des Live-Sets – auch unter einer Alias-Set-ID
+ *   (der Export schreibt immer collectionKeys); sie werden nie als localIds des Alias-Namensraums gedeutet.
+ * - Version 1 (Nummern, bei Alias-Set-ID wie `TCGDEX-30th-c` localIds): Aufloesung im Namensraum der Backup-Set-ID.
  * @param {Array<{ setId: string, cards?: Array<{ cardId, g, rh }> }>} backupSets
  * @returns {{ snapshot: Map<string,{g:boolean,rh:boolean}>, protectedKeys: Set<string>, unresolved: number, ambiguous: number }}
  *   protectedKeys: Kandidaten mehrdeutiger Schluessel – der Restore laesst sie unveraendert.
@@ -66,7 +67,7 @@ export function buildBackupRestoreSnapshot(backupSets, { liveSetId, version = 1,
   let ambiguous = 0;
   for (const backupSet of (Array.isArray(backupSets) ? backupSets : [])) {
     const backupSetId = String(backupSet?.setId ?? '').trim();
-    const direct = Number(version) >= 2 && lower(backupSetId) === lower(liveSetId);
+    const direct = Number(version) >= 2;
     const sourceKey = direct ? null : pickSourceSetKey(resolver, { sourceSetId: backupSetId, liveSetId });
     for (const entry of (Array.isArray(backupSet?.cards) ? backupSet.cards : [])) {
       const raw = String(entry?.cardId ?? '').trim();

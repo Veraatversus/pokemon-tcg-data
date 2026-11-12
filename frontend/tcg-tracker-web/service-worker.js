@@ -17,14 +17,20 @@ const API_ENTRY_RE = /\/api\/(v3|registry)\//;
 
 async function trimApiCache(cache) {
   const keys = await cache.keys();
-  const evictable = keys.filter((req) => {
-    const p = new URL(req.url).pathname;
-    return API_ENTRY_RE.test(p) && !API_PINNED_RE.test(p);
-  });
-  const excess = evictable.length - API_CACHE_MAX_ENTRIES;
-  for (let i = 0; i < excess; i += 1) {
+  const apiKeys = keys.filter((req) => API_ENTRY_RE.test(new URL(req.url).pathname));
+  const evictable = apiKeys.filter((req) => !API_PINNED_RE.test(new URL(req.url).pathname));
+  const excess = apiKeys.length - API_CACHE_MAX_ENTRIES;
+  for (let i = 0; i < excess && i < evictable.length; i += 1) {
     await cache.delete(evictable[i]);
   }
+}
+
+// Serialisiert: parallele puts zaehlen sonst jeweils vor den anderen und lassen den Cache ueber der Grenze.
+let apiTrimQueue = Promise.resolve();
+function enqueueApiTrim(cache) {
+  const run = apiTrimQueue.then(() => trimApiCache(cache));
+  apiTrimQueue = run.catch(() => {});
+  return run;
 }
 
 // Freshness decision for cached API responses (pure; unit-tested in tests/service-worker-api-cache.test.mjs).
@@ -52,7 +58,7 @@ async function handleApiRequest(request) {
       });
       try {
         await cache.put(request, stored);
-        await trimApiCache(cache);
+        await enqueueApiTrim(cache);
       } catch (err) {
         console.warn('[SW] cache.put failed:', err);
       }

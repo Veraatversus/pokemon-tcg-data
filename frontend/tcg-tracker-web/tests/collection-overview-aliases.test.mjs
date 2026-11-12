@@ -252,3 +252,35 @@ test('re-import fills empty tcgdex_serie_name without appending a row', async ()
   assert.equal(row[h('tcgdex_serie_name')], 'Mega-Entwicklung');
   assert.equal(row[h('imported')], true);
 });
+
+test('readSetCollectionMap fresh: liest db_collection neu statt aus dem Cache (Restore plant gegen frischen Stand)', async () => {
+  const fake = setup({ collection: [['me5', '1', true, false, T0]] });
+  const cached = await readSetCollectionMap('Mega Evolution 5', { setId: 'me5' });
+  assert.equal(cached.get('1').g, true);
+  fake.rows('db_collection')[1][2] = false; // anderes Geraet hat den Haken entfernt
+  const stale = await readSetCollectionMap('Mega Evolution 5', { setId: 'me5' });
+  assert.equal(stale.get('1').g, true, 'ohne fresh: Cache');
+  const fresh = await readSetCollectionMap('Mega Evolution 5', { setId: 'me5', strict: true, fresh: true });
+  assert.equal(fresh.get('1').g, false);
+});
+
+test('markAliasSetRowsNotImported: ungemergtes Alias-Set loescht den imported-Status des kanonischen Sets nicht', async () => {
+  const fake = setup({
+    dbSets: [
+      dbSetRow('swsh12pt5', true, 'Crown Zenith'),
+      dbSetRow('swsh12pt5gg', true, 'Crown Zenith Galarian Gallery')
+    ]
+  });
+  const changed = await markAliasSetRowsNotImported({ setId: 'swsh12pt5gg', setName: 'Crown Zenith Galarian Gallery' });
+  assert.deepEqual(changed, { dbSets: 0, overview: 0 });
+  assert.deepEqual(fake.rows('db_sets').slice(1).map((r) => [r[0], r[1]]), [['swsh12pt5', true], ['swsh12pt5gg', true]]);
+});
+
+test('listCollectionSetIds strict: Registry-Fehler wird durchgereicht, nicht-strict faellt auf rohe IDs zurueck', async () => {
+  setup({ collection: [['TCGDEX-me05', '001', true, false, T0]] });
+  globalThis.fetch = async () => { throw new TypeError('Failed to fetch'); };
+  assert.deepEqual([...await listCollectionSetIds()], ['tcgdex-me05']);
+  resetV3Caches();
+  resetCollectionResolverCache();
+  await assert.rejects(listCollectionSetIds({ strict: true }), /Failed to fetch|Registry|fetch/i);
+});

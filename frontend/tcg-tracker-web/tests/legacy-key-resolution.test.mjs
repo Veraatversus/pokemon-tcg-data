@@ -135,14 +135,18 @@ test('Restore v1 cel25c (pokemontcg-Nummern) und TCGDEX-cel25cc (CC-localIds)', 
   assert.equal(liveMap.get('15_A1').g, true, 'Kandidat des mehrdeutigen Schluessels bleibt');
 });
 
-test('Restore v2 mit kanonischer Set-ID nutzt collectionKeys direkt; v2 unter Alias-ID wird aufgeloest', () => {
+test('Restore v2 mit kanonischer Set-ID nutzt collectionKeys direkt; v2 unter Alias-ID: Schluessel bleiben collectionKeys', () => {
   const rows = [['me55c', '11g', false, false, T0], ['me55c', '4', false, false, T0]];
   const v2 = restore(rows, 'me55c', [{ setId: 'me55c', cards: [{ cardId: '11g', g: true }] }], 2);
   assert.equal(v2.liveMap.get('11g').g, true);
   assert.equal(v2.liveMap.get('4').g, false);
-  const alias = restore(rows, 'me55c', [{ setId: 'TCGDEX-30th-c', cards: [{ cardId: '1', g: true }] }], 2);
+  const alias = restore(rows, 'me55c', [{ setId: 'TCGDEX-30th-c', cards: [{ cardId: '4', g: true }] }], 2);
   assert.equal(alias.liveMap.get('4').g, true);
   assert.equal(alias.liveMap.get('11g').g, false);
+  // '1' ist unter v2 der collectionKey '1' (kein Treffer im Live-Set), nicht die TCGdex-localId von Karte 4
+  const notLocalId = restore(rows, 'me55c', [{ setId: 'TCGDEX-30th-c', cards: [{ cardId: '1', g: true }] }], 2);
+  assert.equal(notLocalId.liveMap.get('4').g, false);
+  assert.equal(notLocalId.snap.unresolved, 0);
 });
 
 test('Restore: nicht aufloesbare Schluessel -> gezaehlt, nie roh geschrieben, und keine Haken entfernt', () => {

@@ -1656,8 +1656,11 @@ export async function markAliasSetRowsNotImported(setMeta) {
   try {
     const resolver = await ensureSetResolver();
     const canonical = resolver.resolveSetKey(setMeta.setId) || setMeta.setId;
-    (resolver.aliasesOf(canonical) || []).forEach((alias) => aliasKeys.add(toSafeCellString(alias).toLowerCase()));
-    aliasKeys.add(toSafeCellString(canonical).toLowerCase());
+    // Kanonisches Set samt Aliasen nur, wenn das geloeschte Set das kanonische (gemergte) ist; ein ungemergt
+    // unter eigener Alias-ID gezeigtes Set darf den Status des kanonischen Sets nicht loeschen.
+    if (toSafeCellString(canonical).toLowerCase() === own) {
+      (resolver.aliasesOf(canonical) || []).forEach((alias) => aliasKeys.add(toSafeCellString(alias).toLowerCase()));
+    }
   } catch (err) {
     console.warn('[sheets-db] Registry nicht verfuegbar, Alias-Zeilen nur aus Set-Metadaten:', err?.message || err);
   }
@@ -1958,7 +1961,7 @@ async function resolveCollectionSetKey(setSheetName, options) {
 
 // true nur, wenn sicher feststeht: keine db_collection-Zeile unter irgendeinem Alias des Sets und kein
 // Legacy-Set-Blatt. Bei jedem Zweifel (Registry/Sheets-Metadaten nicht lesbar) false -> normaler Pfad.
-async function hasNoCollectionSource(setSheetName, setKey, { strict = false } = {}) {
+async function hasNoCollectionSource(setSheetName, setKey, { strict = false, fresh = false } = {}) {
   let setsOnly = null;
   try {
     setsOnly = await ensureSetResolver();
@@ -1967,7 +1970,7 @@ async function hasNoCollectionSource(setSheetName, setKey, { strict = false } = 
   }
   const canonical = setsOnly?.resolveSetKey?.(setKey);
   if (!canonical) return false;
-  const rows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, false, { strict });
+  const rows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, fresh, { strict });
   if (collectCollectionSetIds(rows, setsOnly).has(canonical.toLowerCase())) return false;
   const sheets = await resolveSheetNames().catch(() => null);
   if (!Array.isArray(sheets?.titles)) return false;
@@ -1984,7 +1987,8 @@ export async function listCollectionSetIds({ checkedOnly = false, strict = false
   await ensureNormalizedSchema();
   // strict: Lesefehler werfen statt [] (z. B. Backup-Export: nie ein unvollstaendiges Backup schreiben).
   const rows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, false, { strict });
-  const resolver = await ensureSetResolver().catch(() => null);
+  // strict: ein Registry-Fehler wird durchgereicht (rohe IDs wuerden Alias-Zeilen dem falschen Set zuordnen).
+  const resolver = strict ? await ensureSetResolver() : await ensureSetResolver().catch(() => null);
   return collectCollectionSetIds(rows, resolver, { checkedOnly });
 }
 
@@ -1996,7 +2000,8 @@ export async function listCollectionSetIds({ checkedOnly = false, strict = false
  * mit collectionKey angehaengt.
  * @param {string} setSheetName Set-Name (Set-Blatt / db_sets / Overview)
  * @param {{ setId?: string, resolver?: object, strict?: boolean }} [options] setId darf ein Alias sein;
- *   strict: Lesefehler von db_collection werfen statt einer leeren Map (Backup-Export)
+ *   strict: Lesefehler von db_collection werfen statt einer leeren Map (Backup-Export);
+ *   fresh: db_collection neu lesen statt aus dem Cache (Backup-Restore plant gegen den aktuellen Stand)
  */
 export async function readSetCollectionMap(setSheetName, options = {}) {
   await ensureNormalizedSchema();
@@ -2006,10 +2011,11 @@ export async function readSetCollectionMap(setSheetName, options = {}) {
   // Lazy: Registry-Karten (~27 KB/Set) nur fuer Sets laden, die Zeilen (unter irgendeinem Alias) oder ein
   // Legacy-Set-Blatt haben. Gesamt-Leser (Backup, Datencheck, Sammelkandidaten) laden so nur, was noetig ist.
   const strict = Boolean(options?.strict);
-  if (!options?.resolver && await hasNoCollectionSource(setSheetName, setKey, { strict })) return new Map();
+  const fresh = Boolean(options?.fresh);
+  if (!options?.resolver && await hasNoCollectionSource(setSheetName, setKey, { strict, fresh })) return new Map();
 
   const ctx = await resolveCollectionContext(setKey, options?.resolver || null);
-  const values = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, false, { strict });
+  const values = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, fresh, { strict });
 
   if (!ctx) {
     const map = buildExactSetCollectionMap(values, setKey);
