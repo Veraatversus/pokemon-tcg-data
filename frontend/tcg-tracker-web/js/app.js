@@ -13,6 +13,7 @@ import {
   writeSetting,
   importSetIntoCollection,
   upsertOverviewSet,
+  markAliasSetRowsNotImported,
   syncOverviewWithApiSets,
   resetSheetsDataCaches,
   recoverImportedIdsFromOverview,
@@ -76,10 +77,10 @@ import {
   buildLegacyImportSelectionTree,
   filterLegacyImportPlanBySelection,
   summarizeLegacyImportPlan,
-  pickCanonicalCardId,
   extractLegacySpreadsheetId
 } from './features/collection/legacy-import.js?v=20261112-api-v3';
 import { ensureResolverForSet } from './data/collection-aliases.js';
+import { buildBackupRestoreSnapshot, planBackupRestore, pickSourceSetKey, resolveSourceCardKey } from './features/collection/legacy-key-resolution.js';
 import {
   planAmbiguousMigration,
   applyAmbiguousMigration,
@@ -3552,6 +3553,15 @@ async function deleteSetFromCollection(set, options = {}) {
     });
 
     await upsertOverviewSet(set, false);
+    // Alias-Zeilen (db_sets/Overview) ebenfalls auf imported=false, sonst ODERt die Alias-Zuordnung das Set
+    // beim naechsten Laden wieder als importiert zurueck. Nur Status-Zellen; keine Zeile wird geloescht.
+    let aliasWarning = '';
+    try {
+      await markAliasSetRowsNotImported(set);
+    } catch (err) {
+      console.warn('[deleteSetFromCollection] Alias-Zeilen nicht aktualisiert', err);
+      aliasWarning = ` Alias-Zeilen konnten nicht aktualisiert werden (${err?.message || err}); bitte erneut loeschen.`;
+    }
 
     cache.del(`cards_${set.setId}`);
     cache.del(`db_${set.setId}`);
@@ -3566,7 +3576,7 @@ async function deleteSetFromCollection(set, options = {}) {
       await renderDashboard();
     }
     
-    showToast(`${set.setName} wurde geloescht.`, 'success', 3000);
+    showToast(`${set.setName} wurde geloescht.${aliasWarning}`, aliasWarning ? 'error' : 'success', aliasWarning ? 6000 : 3000);
     setGlobalStatus(`${set.setName} wurde geloescht.`);
   } catch (err) {
     console.error('[deleteSetFromCollection]', err);
@@ -4306,9 +4316,12 @@ async function applyCollectionBackup(payload) {
 
   let updated = 0;
   let skipped = 0;
+  let unresolvedCards = 0;
+  let ambiguousCards = 0;
+  const version = Number(payload?.version) || 1;
 
-  // Backup-Sets dem Live-Set zuordnen (auch ueber Aliase, z. B. swsh12pt5gg aus Version-1-Backups) und
-  // je Live-Set zusammenfuehren (ODER), damit ein Alias-Backup die Haken des Hauptsets nicht abwaehlt.
+  // Backup-Sets dem Live-Set zuordnen (auch ueber Aliase, z. B. swsh12pt5gg/TCGDEX-30th-c) und je Live-Set
+  // zusammenfuehren (ODER), damit ein Alias-Backup die Haken des Hauptsets nicht abwaehlt.
   const byLiveSet = new Map();
   for (const backupSet of sets) {
     const liveSet = findSetByIdOrAlias(state.sets, backupSet?.setId);
@@ -4316,38 +4329,38 @@ async function applyCollectionBackup(payload) {
       skipped++;
       continue;
     }
-    if (!byLiveSet.has(liveSet.setId)) byLiveSet.set(liveSet.setId, { liveSet, snapshot: new Map() });
-    const { snapshot } = byLiveSet.get(liveSet.setId);
-    (backupSet.cards || []).forEach((entry) => {
-      const raw = String(entry?.cardId ?? '').trim();
-      if (!raw) return;
-      const merged = { g: Boolean(entry.g), rh: Boolean(entry.g && entry.rh) };
-      // Version 2: collectionKey; Version 1: normalisierte Nummer (fuer fast alle Karten identisch).
-      for (const key of new Set([raw, normalizeCardNumber(raw)])) {
-        const previous = snapshot.get(key);
-        snapshot.set(key, previous
-          ? { g: previous.g || merged.g, rh: (previous.rh || merged.rh) && (previous.g || merged.g) }
-          : merged);
-      }
-    });
+    if (!byLiveSet.has(liveSet.setId)) byLiveSet.set(liveSet.setId, { liveSet, backupSets: [] });
+    byLiveSet.get(liveSet.setId).backupSets.push(backupSet);
   }
 
   setLoading(true, 'Spiele Backup ein...');
   try {
     let setIndex = 0;
-    for (const { liveSet, snapshot } of byLiveSet.values()) {
+    for (const { liveSet, backupSets } of byLiveSet.values()) {
       setIndex++;
       setGlobalStatus(`Backup ${setIndex}/${byLiveSet.size}: ${liveSet.setName}`);
+      // Schluessel gelten im Namensraum der Backup-Set-ID (v1: Nummern, bei TCGDEX-Aliasen localIds):
+      // Aufloesung ueber die Registry; mehrdeutig/nicht aufloesbar -> uebersprungen, nie der rohe Schluessel.
+      const resolver = await ensureResolverForSet(liveSet.setId);
+      const { snapshot, protectedKeys, unresolved, ambiguous } = buildBackupRestoreSnapshot(backupSets, {
+        liveSetId: liveSet.setId,
+        version,
+        resolver
+      });
+      unresolvedCards += unresolved;
+      ambiguousCards += ambiguous;
       const liveMap = await readSetCollectionMap(liveSet.setName, { setId: liveSet.setId }).catch(() => new Map());
       const pendingUpdates = [];
-
-      for (const [collectionKey, db] of liveMap.entries()) {
-        if (!hasEntryCells(db)) continue;
-        const target = snapshot.get(collectionKey) || { g: false, rh: false };
-        const targetState = { g: Boolean(target.g), rh: Boolean(target.g && target.rh) };
-        if (Boolean(db.g) === targetState.g && Boolean(db.rh) === targetState.rh) continue;
-        pendingUpdates.push(...stateCellUpdates(db, targetState));
-        applyEntryState(db, targetState);
+      const restorePlan = planBackupRestore(liveMap, {
+        snapshot,
+        protectedKeys,
+        // Nicht aufloesbare Schluessel koennten jede Karte meinen: dann nur Haken setzen, keine entfernen.
+        allowUncheck: unresolved === 0,
+        hasCells: hasEntryCells
+      });
+      for (const { entry, target } of restorePlan) {
+        pendingUpdates.push(...stateCellUpdates(entry, target));
+        applyEntryState(entry, target);
         updated++;
       }
       if (pendingUpdates.length) {
@@ -4362,7 +4375,12 @@ async function applyCollectionBackup(payload) {
   if (state.currentSet) {
     await loadCurrentSet(true).catch(() => {});
   }
-  showToast(`Backup eingespielt. aenderungen: ${updated}, uebersprungen: ${skipped}.`, skipped ? 'info' : 'success', 5000);
+  const notAssigned = unresolvedCards + ambiguousCards;
+  const notAssignedText = notAssigned
+    ? ` Nicht zuordenbare Karten: ${notAssigned} (${ambiguousCards} mehrdeutig, ${unresolvedCards} unbekannt) - nicht geschrieben.`
+    : '';
+  showToast(`Backup eingespielt. aenderungen: ${updated}, uebersprungene Sets: ${skipped}.${notAssignedText}`,
+    skipped || notAssigned ? 'info' : 'success', notAssigned ? 8000 : 5000);
 }
 
 function buildLegacyImportPreviewText(plan) {
@@ -4477,6 +4495,8 @@ async function applyLegacyImportPlan(plan, cardsBySetId) {
   }
 
   let updatedCells = 0;
+  let legacyAmbiguous = 0;
+  let legacyUnresolved = 0;
   const ambiguousSkipped = [];
   setLoading(true, 'Synchronisiere Altbestand...');
   try {
@@ -4489,32 +4509,32 @@ async function applyLegacyImportPlan(plan, cardsBySetId) {
 
       setGlobalStatus(`Altbestand-Import ${setIndex + 1}/${plan.matchedSets.length}: ${liveSet.setName}`);
       const liveMap = await readSetCollectionMap(liveSet.setName, { setId: liveSet.setId }).catch(() => new Map());
-      const setCards = Array.isArray(cardsBySetId?.[matchedSet.setId]) ? cardsBySetId[matchedSet.setId] : [];
-      // Quellnummer -> v3-Karten; nur eindeutige Treffer liefern direkt den collectionKey.
-      const setCardLookup = new Map();
-      setCards.forEach((sourceCard) => {
-        const cardId = pickCanonicalCardId(sourceCard);
-        if (!cardId) return;
-        const lookupKey = normalizeCardNumber(cardId);
-        if (!setCardLookup.has(lookupKey)) setCardLookup.set(lookupKey, []);
-        setCardLookup.get(lookupKey).push(sourceCard);
-      });
+      // Quellnummern gelten im Namensraum des QUELL-Sets (Blatt-Set-ID, z. B. TCGDEX-30th-c mit localIds;
+      // ohne Set-ID: das Live-Set). Nur eindeutig aufgeloeste collectionKeys werden geschrieben, nie rohe Nummern.
+      const resolver = await ensureResolverForSet(liveSet.setId);
+      const sourceSetKey = pickSourceSetKey(resolver, { sourceSetId: matchedSet.sourceSetIdRaw, liveSetId: liveSet.setId });
       const pendingCellUpdates = [];
 
       for (const target of (matchedSet.cards || [])) {
-        const rawCardId = String(target?.cardId || target?.sourceCardId || '').trim();
+        const rawCardId = String(target?.sourceCardId || target?.cardId || '').trim();
         if (!rawCardId) continue;
-        const sourceMatches = setCardLookup.get(normalizeCardNumber(rawCardId)) || [];
-        // Eindeutige v3-Karte -> ihr collectionKey; sonst die Quellnummer, die ensureCollectionEntry ueber
-        // die Registry aufloest (mehrdeutig -> AMBIGUOUS_LEGACY_KEY, dann wird nichts geschrieben).
-        const key = sourceMatches.length === 1 ? collectionKeyOf(sourceMatches[0]) : rawCardId;
+        const resolved = resolveSourceCardKey(resolver, sourceSetKey, rawCardId);
+        if (resolved.skip === 'ambiguous') {
+          legacyAmbiguous++;
+          continue;
+        }
+        if (resolved.skip) {
+          legacyUnresolved++;
+          continue;
+        }
+        const key = resolved.collectionKey;
 
         let entry = liveMap.get(key) || null;
         if (!hasEntryCells(entry)) {
           try {
             const pending = pendingAmbiguityError(entry, { setId: liveSet.setId });
             if (pending) throw pending;
-            entry = adoptEnsuredEntry(entry || emptyCollectionEntry({ collectionKey: key, number: rawCardId }, key),
+            entry = adoptEnsuredEntry(entry || emptyCollectionEntry({ collectionKey: key, number: key }, key),
               await ensureCollectionEntry(liveSet.setName, key, { setId: liveSet.setId }));
             liveMap.set(entry.collectionKey || key, entry);
           } catch (err) {
@@ -4549,7 +4569,12 @@ async function applyLegacyImportPlan(plan, cardsBySetId) {
 
   if (ambiguousSkipped.length) onAmbiguousLegacyKey(ambiguousSkipped[0]);
   setGlobalStatus(`Altbestand importiert: ${plan.matchedSets.length} Sets, ${updatedCells} aenderungen.`);
-  showToast(`Altbestand importiert: ${plan.matchedSets.length} Sets synchronisiert, ${updatedCells} aenderungen geschrieben.`, 'success', 5000);
+  const legacySkipped = legacyAmbiguous + legacyUnresolved + ambiguousSkipped.length;
+  const legacySkippedText = legacySkipped
+    ? ` Nicht zuordenbar und nicht geschrieben: ${legacySkipped} Karte(n) (${legacyAmbiguous + ambiguousSkipped.length} mehrdeutig, ${legacyUnresolved} unbekannt).`
+    : '';
+  showToast(`Altbestand importiert: ${plan.matchedSets.length} Sets synchronisiert, ${updatedCells} aenderungen geschrieben.${legacySkippedText}`,
+    legacySkipped ? 'info' : 'success', legacySkipped ? 8000 : 5000);
 }
 
 function setLegacySheetDialogError(message = '') {

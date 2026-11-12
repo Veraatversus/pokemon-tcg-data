@@ -1623,6 +1623,66 @@ export async function upsertOverviewSet(setMeta, imported = false) {
   await upsertOverviewEntry(setMeta, imported);
 }
 
+/**
+ * Nach dem Loeschen eines Sets: bestehende Alias-Zeilen (db_sets und Overview, z. B. `swsh12pt5gg`,
+ * `TCGDEX-me05`) mit imported=true auf false setzen, sonst ODERn mergeAliasOverviewSets/syncOverviewWithApiSets
+ * den Status wieder aufs kanonische Set. Nur die imported-Zelle wird geschrieben; keine Zeile wird geloescht
+ * oder angelegt. Aliase: setMeta.aliases + mergedAliasIds + Registry (falls erreichbar).
+ * @returns {Promise<{ dbSets: number, overview: number }>} Anzahl geaenderter Zeilen
+ */
+export async function markAliasSetRowsNotImported(setMeta) {
+  const own = toSafeCellString(setMeta?.setId).toLowerCase();
+  const result = { dbSets: 0, overview: 0 };
+  if (!own) return result;
+  const aliasKeys = new Set([
+    ...setAliasKeys(setMeta),
+    ...(Array.isArray(setMeta?.mergedAliasIds) ? setMeta.mergedAliasIds : []).map((id) => toSafeCellString(id).toLowerCase())
+  ]);
+  try {
+    const resolver = await ensureSetResolver();
+    const canonical = resolver.resolveSetKey(setMeta.setId) || setMeta.setId;
+    (resolver.aliasesOf(canonical) || []).forEach((alias) => aliasKeys.add(toSafeCellString(alias).toLowerCase()));
+    aliasKeys.add(toSafeCellString(canonical).toLowerCase());
+  } catch (err) {
+    console.warn('[sheets-db] Registry nicht verfuegbar, Alias-Zeilen nur aus Set-Metadaten:', err?.message || err);
+  }
+  aliasKeys.delete(own);
+  aliasKeys.delete('');
+  if (!aliasKeys.size) return result;
+
+  await ensureNormalizedSchema();
+  await withSheetAppendLock(DB_SHEETS.sets, async () => {
+    const rows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length, true, { strict: true });
+    const updates = [];
+    rows.forEach((row, index) => {
+      if (!aliasKeys.has(toSafeCellString(row?.[0]).toLowerCase())) return;
+      const col = isNewSetFormat(row) ? 1 : 8; // imported: neues Format [1], altes Format [8]
+      if (!toBoolean(row[col])) return;
+      updates.push({ range: buildRange(DB_SHEETS.sets, `${colToA1(col + 1)}${index + 2}`), values: [[false]] });
+      row[col] = false;
+    });
+    if (updates.length) await batchPutValues(updates);
+    dbRowsCache.set(`${DB_SHEETS.sets}:${DB_HEADERS.sets.length}`, rows);
+    result.dbSets = updates.length;
+  });
+
+  const sheets = await resolveSheetNames();
+  if (!sheets.overview) return result;
+  await withSheetAppendLock(sheets.overview, async () => {
+    const rows = await getOverviewRows(sheets).catch(rowsOrThrowUnlessMissing);
+    const col = CONFIG.GRID.IMPORTED_COL_INDEX;
+    const updates = [];
+    rows.forEach((row, index) => {
+      const setId = toSafeCellString(extractDisplayTextFromHyperlink(row?.[0])).toLowerCase();
+      if (!aliasKeys.has(setId) || !toBoolean(row?.[col - 1])) return;
+      updates.push({ range: buildRange(sheets.overview, `${colToA1(col)}${3 + index}`), values: [[false]] });
+    });
+    if (updates.length) await batchPutValues(updates);
+    result.overview = updates.length;
+  });
+  return result;
+}
+
 // Kleingeschriebene Alias-IDs eines API-Sets (fetchAllAvailableSets liefert `aliases`), ohne die eigene ID.
 function setAliasKeys(set) {
   const own = toSafeCellString(set?.setId).toLowerCase();

@@ -23,6 +23,8 @@ const {
   readDbCardsForSet,
   listCollectionSetIds,
   readSummarySheet,
+  upsertOverviewSet,
+  markAliasSetRowsNotImported,
 
   resetSheetsDataCaches
 } = await import('../js/data/sheets-db.js');
@@ -189,4 +191,49 @@ test('readSummarySheet: Alias-Zeilen zaehlen zum Hauptset, eine Karte unter zwei
   assert.deepEqual([me5.total, me5.collected], [1, 1]);
   // Registry-Karten nur fuer das Set mit Zeilen unter mehreren Aliasen
   assert.deepEqual(fetchLog, [`${REG}sets.json`, `${REG}cards/swsh12pt5.json`]);
+});
+
+test('Set loeschen bleibt: Alias-Zeilen (db_sets + Overview) auf imported=false, nichts geloescht, kein ODER zurueck', async () => {
+  const IMP = CONFIG.GRID.IMPORTED_COL_INDEX - 1;
+  const ovRow = (id, name, imported) => [id, name, '', '', '', '', '', '', imported, false];
+  const fake = setup({
+    dbSets: [
+      dbSetRow('swsh12pt5', true, 'Crown Zenith'),
+      dbSetRow('swsh12pt5gg', true, 'Crown Zenith Galarian Gallery'),
+      dbSetRow('TCGDEX-swsh12.5', true, 'Crown Zenith (TCGdex)'),
+      dbSetRow('base1', true, 'Base')
+    ],
+    overview: [
+      ovRow('swsh12pt5', 'Crown Zenith', true),
+      ovRow('swsh12pt5gg', 'Crown Zenith GG', true),
+      ovRow('base1', 'Base', true)
+    ]
+  });
+  const [set] = (await listSetsOverviewData()).filter((s) => s.setId === 'swsh12pt5');
+  assert.equal(set.imported, true);
+  const dbCountBefore = fake.rows('db_sets').length;
+  const ovCountBefore = fake.rows('Sets Overview').length;
+
+  await upsertOverviewSet(set, false);
+  const changed = await markAliasSetRowsNotImported(set);
+  assert.deepEqual(changed, { dbSets: 2, overview: 1 });
+
+  assert.equal(fake.rows('db_sets').length, dbCountBefore, 'keine db_sets-Zeile geloescht/angelegt');
+  assert.equal(fake.rows('Sets Overview').length, ovCountBefore, 'keine Overview-Zeile geloescht/angelegt');
+  assert.deepEqual(fake.rows('db_sets').slice(1).map((r) => [r[0], r[1]]),
+    [['swsh12pt5', false], ['swsh12pt5gg', false], ['TCGDEX-swsh12.5', false], ['base1', true]]);
+  assert.deepEqual(fake.rows('Sets Overview').slice(2).map((r) => [r[0], r[IMP]]),
+    [['swsh12pt5', false], ['swsh12pt5gg', false], ['base1', true]]);
+  // Nur Status-Zellen geschrieben (Alias-Zeilen: je eine Zelle)
+  const aliasWrites = fake.writes.filter((w) => /!(B|I)[0-9]+$/.test(w.range));
+  assert.ok(aliasWrites.length >= 3);
+
+  resetSheetsDataCaches();
+  const after = await listSetsOverviewData();
+  assert.equal(after.find((s) => s.setId === 'swsh12pt5').imported, false);
+  assert.equal(after.find((s) => s.setId === 'base1').imported, true);
+
+  await syncOverviewWithApiSets([{ setId: 'swsh12pt5', setName: 'Crown Zenith', aliases: SYN_SETS.swsh12pt5.aliases }], []);
+  assert.equal(fake.rows('db_sets').slice(1).find((r) => r[0] === 'swsh12pt5')[1], false, 'sync ODERt nicht zurueck');
+  assert.equal(fake.rows('Sets Overview').slice(2).find((r) => r[0] === 'swsh12pt5')[IMP], false);
 });
