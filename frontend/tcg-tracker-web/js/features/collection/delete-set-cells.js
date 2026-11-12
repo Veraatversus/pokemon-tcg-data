@@ -14,24 +14,39 @@
 
 /**
  * Wandelt eine `readSetCollectionMap`-Map in die flache Update-Liste, die
- * `updateCellBooleansBatch` erwartet. Es werden nur Einträge mit gültiger
- * `gCell`/`rhCell` (Zeile & Spalte) berücksichtigt; der Wert ist immer
- * `false`, weil das Set gelöscht wird.
+ * `updateCellBooleansBatch` erwartet. Beruecksichtigt werden **alle** Zeilen
+ * einer Karte (`cells`, ueber alle Set-Aliase), die Zeilen mehrdeutiger
+ * Altschluessel (`ambiguous.cells`) und – fuer alte Eintraege ohne `cells` –
+ * `gCell`/`rhCell`. Nur gueltige Koordinaten, jede Zelle einmal; der Wert ist
+ * immer `false`, weil das Set gelöscht wird.
  *
- * @param {Map<string, {gCell?: {row:number,col:number}, rhCell?: {row:number,col:number}}>} collectionMap
+ * @param {Map<string, {cells?: Array, ambiguous?: {cells?: Array}, gCell?: {row:number,col:number}, rhCell?: {row:number,col:number}}>} collectionMap
  * @returns {Array<{row:number,col:number,value:false}>}
  */
 export function collectDeleteSetCellUpdates(collectionMap) {
   if (!collectionMap || typeof collectionMap.values !== 'function') return [];
 
   const updates = [];
+  const seen = new Set();
+  const push = (cell) => {
+    if (!cell?.row || !cell?.col) return;
+    const row = Number(cell.row);
+    const col = Number(cell.col);
+    const key = `${row}:${col}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    updates.push({ row, col, value: false });
+  };
   for (const db of collectionMap.values()) {
-    if (db?.gCell?.row && db?.gCell?.col) {
-      updates.push({ row: Number(db.gCell.row), col: Number(db.gCell.col), value: false });
-    }
-    if (db?.rhCell?.row && db?.rhCell?.col) {
-      updates.push({ row: Number(db.rhCell.row), col: Number(db.rhCell.col), value: false });
-    }
+    const cells = [
+      ...(Array.isArray(db?.cells) ? db.cells : []),
+      ...(Array.isArray(db?.ambiguous?.cells) ? db.ambiguous.cells : [])
+    ];
+    if (!cells.length) cells.push({ gCell: db?.gCell, rhCell: db?.rhCell });
+    cells.forEach((cell) => {
+      push(cell?.gCell);
+      push(cell?.rhCell);
+    });
   }
   return updates;
 }

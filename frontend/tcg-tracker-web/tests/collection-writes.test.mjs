@@ -193,3 +193,26 @@ test('needsApiCardEnrichment: alte Suchlinks oder duenne Altzeilen loesen Nachla
   assert.equal(needsApiCardEnrichment([{ name: 'A' }, { name: 'B' }, rich('')]), true);
   assert.equal(needsApiCardEnrichment([]), false);
 });
+
+test('describeCardDataFailure: v3 nicht erreichbar -> v3-Meldung statt „Keine Kartendaten …“', async () => {
+  const { describeCardDataFailure, NO_CARD_DATA_MESSAGE } = await import('../js/core/card-enrichment.js');
+  const { V3_UNREACHABLE_MESSAGE } = await import('../js/data/pokemon-api.js');
+  const unreachable = Object.assign(new Error(V3_UNREACHABLE_MESSAGE), { code: 'V3_UNREACHABLE' });
+  assert.match(describeCardDataFailure(unreachable), /^Kartendaten \(api\/v3\) nicht erreichbar – .*db_cards/);
+  const unknown = Object.assign(new Error("Set 'xy' ist in api/v3 nicht vorhanden"), { code: 'V3_SET_UNKNOWN' });
+  assert.equal(describeCardDataFailure(unknown), "Set 'xy' ist in api/v3 nicht vorhanden.");
+  assert.equal(describeCardDataFailure(null), NO_CARD_DATA_MESSAGE);
+});
+
+test('findSetByIdOrAlias: exakte ID vor Alias, ohne Gross-/Kleinschreibung', async () => {
+  const { findSetByIdOrAlias } = await import('../js/data/set-aliases.js');
+  const sets = [
+    { setId: 'swsh12pt5', aliases: ['swsh12pt5gg', 'TCGDEX-swsh12.5'] },
+    { setId: 'me5', aliases: ['TCGDEX-me05'] }
+  ];
+  assert.equal(findSetByIdOrAlias(sets, 'swsh12pt5gg').setId, 'swsh12pt5');
+  assert.equal(findSetByIdOrAlias(sets, 'tcgdex-ME05').setId, 'me5');
+  assert.equal(findSetByIdOrAlias(sets, 'me5').setId, 'me5');
+  assert.equal(findSetByIdOrAlias(sets, 'base1'), null);
+  assert.equal(findSetByIdOrAlias(sets, ''), null);
+});

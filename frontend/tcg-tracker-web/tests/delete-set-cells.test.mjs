@@ -130,3 +130,18 @@ test('applyDeleteSetCellUpdates verarbeitet 240 Karten (Batch < 429-Limit) in ei
   assert.equal(calls[0], 240);
   assert.equal(result, 240);
 });
+
+test('collectDeleteSetCellUpdates: alle Zeilen einer Karte (Aliase) und mehrdeutige Altzeilen, ohne Duplikate', () => {
+  const cell = (row) => ({ gCell: { row, col: 3 }, rhCell: { row, col: 4 } });
+  const amb = { legacyKey: '15', collectionKeys: ['15_A1', '15_A2'], cells: [cell(9)] };
+  const map = new Map([
+    ['GG1', { cells: [cell(5), cell(7)], gCell: { row: 5, col: 3 }, rhCell: { row: 5, col: 4 } }],
+    ['15_A1', { cells: [], ambiguous: amb, gCell: null, rhCell: null }],
+    ['15_A2', { cells: [], ambiguous: amb, gCell: null, rhCell: null }]
+  ]);
+  assert.deepEqual(collectDeleteSetCellUpdates(map), [
+    { row: 5, col: 3, value: false }, { row: 5, col: 4, value: false },
+    { row: 7, col: 3, value: false }, { row: 7, col: 4, value: false },
+    { row: 9, col: 3, value: false }, { row: 9, col: 4, value: false }
+  ]);
+});

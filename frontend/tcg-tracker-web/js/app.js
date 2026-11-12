@@ -1,4 +1,4 @@
-import { isGeneratedCardmarketSearchUrl, isGeneratedCardmarketUrl, applyReverseHoloQueryParam } from './data/cardmarket-url-utils.js';
+import { isGeneratedCardmarketSearchUrl, applyReverseHoloQueryParam } from './data/cardmarket-url-utils.js';
 import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js?v=20260613-tcgdex-merge-fix-v2';
 import {
   listImportedSets,
@@ -6,7 +6,6 @@ import {
   readSetCollectionMap,
   readDbCardsForSet,
   ensureCollectionEntry,
-  updateCellBoolean,
   updateCellBooleansBatch,
   readSummarySheet,
   readSettings,
@@ -16,7 +15,22 @@ import {
   syncOverviewWithApiSets,
   resetSheetsDataCaches,
   recoverImportedIdsFromOverview,
+  listCollectionSetIds,
 } from './data/sheets-db.js?v=20260613-tcgdex-merge-fix-v2';
+import {
+  collectionKeyOf,
+  emptyCollectionEntry,
+  hasEntryCells,
+  stateCellUpdates,
+  applyEntryState,
+  adoptEnsuredEntry,
+  pendingAmbiguityError,
+  isAmbiguousLegacyKeyError,
+  describeAmbiguousLegacyKey,
+  compareSetCollection
+} from './data/collection-writes.js';
+import { needsApiCardEnrichment, describeCardDataFailure, NO_CARD_DATA_MESSAGE } from './core/card-enrichment.js';
+import { findSetByIdOrAlias } from './data/set-aliases.js';
 import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets } from './data/pokemon-api.js?v=20260613-tcgdex-merge-fix-v2';
 import { resolveSeriesGroupInfo } from './data/schema-contract.js?v=20260613-tcgdex-merge-fix-v2';
 import {
@@ -32,7 +46,6 @@ import {
   createSpreadsheetSwitchStatePatch,
   normalizeCardNumber,
   resolveCombinedSearchSelection,
-  shouldFetchApiCardsForSearchSet,
   toBoolean
 } from './core/utils.js?v=20260613-tcgdex-merge-fix-v2';
 import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle } from './core/collection-state.js?v=20260613-tcgdex-merge-fix-v2';
@@ -666,16 +679,6 @@ function getSetsForSearchMode(mode) {
     return state.sets || [];
   }
   return state.allSets?.length ? state.allSets : (state.sets || []);
-}
-
-function shouldUseApiForSearchSet(mode, set) {
-  if (mode === SEARCH_SCOPE_ONLINE) {
-    return true;
-  }
-  if (mode === SEARCH_SCOPE_ALL) {
-    return !toBoolean(set?.imported);
-  }
-  return false;
 }
 
 function getSearchModeMeta(mode) {
@@ -1923,19 +1926,18 @@ async function undoLastChange() {
   setLoading(true, 'Undo laeuft');
   let reverted = 0;
   try {
+    // Alle Zeilen jeder Karte (Aliase) in einem gebuendelten Write zuruecksetzen.
+    const reverts = [];
     for (const change of entry.changes) {
       const db = state.dbMap.get(change.key);
-      if (!db?.gCell) continue;
-      const prevG = Boolean(change.prev?.g);
-      const prevRh = Boolean(change.prev?.rh && prevG);
-      await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, prevG);
-      db.g = prevG;
-      if (db.rhCell) {
-        await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, prevRh);
-        db.rh = prevRh;
-      } else {
-        db.rh = false;
-      }
+      if (!hasEntryCells(db)) continue;
+      const prevState = { g: Boolean(change.prev?.g), rh: Boolean(change.prev?.rh && change.prev?.g) };
+      reverts.push({ change, db, prevState, updates: stateCellUpdates(db, prevState) });
+    }
+    const revertUpdates = reverts.flatMap((item) => item.updates);
+    if (revertUpdates.length) await updateCellBooleansBatch(state.currentSet.setName, revertUpdates, { chunkSize: 200 });
+    for (const { change, db, prevState } of reverts) {
+      applyEntryState(db, prevState);
 
       const article = dom.cards.querySelector(`[data-card-id="${change.key}"]`);
       if (article) updateCardState(article, db);
@@ -3532,7 +3534,7 @@ async function deleteSetFromCollection(set, options = {}) {
     // Wir sammeln alle Cell-Updates zuerst und schicken sie gebündelt in EINEM
     // batchUpdate an die Google-Sheets-API, um das Per-Request-Rate-Limit (429)
     // bei großen Sets zu vermeiden (vgl. updateCellBooleansBatch).
-    const range = await readSetCollectionMap(set.setName).catch(() => new Map());
+    const range = await readSetCollectionMap(set.setName, { setId: set.setId }).catch(() => new Map());
     await applyDeleteSetCellUpdates({
       setName: set.setName,
       collectionMap: range,
@@ -3567,7 +3569,9 @@ async function deleteSetFromCollection(set, options = {}) {
 }
 
 function getSetById(setId) {
-  return state.allSets.find((set) => set.setId === setId) || state.sets.find((set) => set.setId === setId) || null;
+  return state.allSets.find((set) => set.setId === setId) || state.sets.find((set) => set.setId === setId)
+    // Alte IDs (Alias-Sets wie swsh12pt5gg, TCGDEX-me05) auf das kanonische Set abbilden.
+    || findSetByIdOrAlias(state.allSets, setId) || findSetByIdOrAlias(state.sets, setId) || null;
 }
 
 function ensureSetSelectorOption(set) {
@@ -4143,14 +4147,19 @@ async function exportCollectionBackup() {
   setLoading(true, 'Erstelle Backup...');
   try {
     const backupSets = [];
+    // db_collection einmal lesen; Registry-Karten nur fuer Sets mit Haken aufloesen (lazy).
+    const setsWithChecks = await listCollectionSetIds({ checkedOnly: true }).catch(() => null);
     for (let index = 0; index < state.sets.length; index++) {
       const set = state.sets[index];
       setGlobalStatus(`Backup ${index + 1}/${state.sets.length}: ${set.setName}`);
-      const dbMap = await readSetCollectionMap(set.setName).catch(() => new Map());
       const cards = [];
-      for (const [cardId, db] of dbMap.entries()) {
-        if (!db?.g && !db?.rh) continue;
-        cards.push({ cardId, g: Boolean(db?.g), rh: Boolean(db?.rh) });
+      if (!setsWithChecks || setsWithChecks.has(String(set.setId || '').toLowerCase())) {
+        const dbMap = await readSetCollectionMap(set.setName, { setId: set.setId }).catch(() => new Map());
+        // Schluessel = collectionKey (Backup-Version 2).
+        for (const [cardId, db] of dbMap.entries()) {
+          if (!db?.g && !db?.rh) continue;
+          cards.push({ cardId, g: Boolean(db?.g), rh: Boolean(db?.rh) });
+        }
       }
       backupSets.push({ setId: set.setId, setName: set.setName, cards });
     }
@@ -4158,7 +4167,7 @@ async function exportCollectionBackup() {
     const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
     const payload = {
       app: 'poke-tcg-try4',
-      version: 1,
+      version: 2, // cardId = collectionKey (v3), Sets kanonisch
       createdAt: new Date().toISOString(),
       spreadsheetId: CONFIG.SPREADSHEET_ID,
       sets: backupSets
@@ -4198,18 +4207,23 @@ async function runDataHealthCheck({ autoFix = false } = {}) {
       try {
         const [apiCards, sheetMap] = await Promise.all([
           fetchMergedCards(set.setId),
-          readSetCollectionMap(set.setName)
+          readSetCollectionMap(set.setName, { setId: set.setId })
         ]);
 
-        const apiCount = Array.isArray(apiCards) ? apiCards.length : 0;
-        const sheetCount = sheetMap instanceof Map ? sheetMap.size : 0;
-        if (apiCount !== sheetCount) {
+        // Kanonische v3-Karten gegen die alias-faehige Sammlungs-Map (zusammengefuehrte Untersets wie
+        // swsh12pt5gg zaehlen zum Hauptset; Waisen/mehrdeutige Altzeilen sind keine Abweichung).
+        const comparison = compareSetCollection(apiCards, sheetMap);
+        const { apiCount, sheetCount } = comparison;
+        if (comparison.mismatch) {
           mismatchSets.push(set);
           report.mismatches.push({
             setId: set.setId,
             setName: set.setName,
             apiCount,
             sheetCount,
+            missingKeys: comparison.missingKeys.slice(0, 50),
+            extraKeys: comparison.extraKeys.slice(0, 50),
+            orphanCount: comparison.orphanCount,
             delta: sheetCount - apiCount
           });
         }
@@ -4281,40 +4295,54 @@ async function applyCollectionBackup(payload) {
     return;
   }
 
-  const byId = new Map(state.sets.map((set) => [set.setId, set]));
   let updated = 0;
   let skipped = 0;
 
+  // Backup-Sets dem Live-Set zuordnen (auch ueber Aliase, z. B. swsh12pt5gg aus Version-1-Backups) und
+  // je Live-Set zusammenfuehren (ODER), damit ein Alias-Backup die Haken des Hauptsets nicht abwaehlt.
+  const byLiveSet = new Map();
+  for (const backupSet of sets) {
+    const liveSet = findSetByIdOrAlias(state.sets, backupSet?.setId);
+    if (!liveSet) {
+      skipped++;
+      continue;
+    }
+    if (!byLiveSet.has(liveSet.setId)) byLiveSet.set(liveSet.setId, { liveSet, snapshot: new Map() });
+    const { snapshot } = byLiveSet.get(liveSet.setId);
+    (backupSet.cards || []).forEach((entry) => {
+      const raw = String(entry?.cardId ?? '').trim();
+      if (!raw) return;
+      const merged = { g: Boolean(entry.g), rh: Boolean(entry.g && entry.rh) };
+      // Version 2: collectionKey; Version 1: normalisierte Nummer (fuer fast alle Karten identisch).
+      for (const key of new Set([raw, normalizeCardNumber(raw)])) {
+        const previous = snapshot.get(key);
+        snapshot.set(key, previous
+          ? { g: previous.g || merged.g, rh: (previous.rh || merged.rh) && (previous.g || merged.g) }
+          : merged);
+      }
+    });
+  }
+
   setLoading(true, 'Spiele Backup ein...');
   try {
-    for (let setIndex = 0; setIndex < sets.length; setIndex++) {
-      const backupSet = sets[setIndex];
-      const liveSet = byId.get(backupSet.setId);
-      if (!liveSet) {
-        skipped++;
-        continue;
+    let setIndex = 0;
+    for (const { liveSet, snapshot } of byLiveSet.values()) {
+      setIndex++;
+      setGlobalStatus(`Backup ${setIndex}/${byLiveSet.size}: ${liveSet.setName}`);
+      const liveMap = await readSetCollectionMap(liveSet.setName, { setId: liveSet.setId }).catch(() => new Map());
+      const pendingUpdates = [];
+
+      for (const [collectionKey, db] of liveMap.entries()) {
+        if (!hasEntryCells(db)) continue;
+        const target = snapshot.get(collectionKey) || { g: false, rh: false };
+        const targetState = { g: Boolean(target.g), rh: Boolean(target.g && target.rh) };
+        if (Boolean(db.g) === targetState.g && Boolean(db.rh) === targetState.rh) continue;
+        pendingUpdates.push(...stateCellUpdates(db, targetState));
+        applyEntryState(db, targetState);
+        updated++;
       }
-
-      setGlobalStatus(`Backup ${setIndex + 1}/${sets.length}: ${liveSet.setName}`);
-      const liveMap = await readSetCollectionMap(liveSet.setName).catch(() => new Map());
-      const snapshotByCard = new Map((backupSet.cards || []).map((entry) => [normalizeCardNumber(entry.cardId), entry]));
-
-      for (const [cardId, db] of liveMap.entries()) {
-        if (!db?.gCell || !db?.rhCell) continue;
-        const target = snapshotByCard.get(cardId) || { g: false, rh: false };
-        const targetG = Boolean(target.g);
-        const targetRh = Boolean(target.g && target.rh);
-
-        if (Boolean(db.g) !== targetG) {
-          await updateCellBoolean(liveSet.setName, db.gCell.row, db.gCell.col, targetG);
-          db.g = targetG;
-          updated++;
-        }
-        if (Boolean(db.rh) !== targetRh) {
-          await updateCellBoolean(liveSet.setName, db.rhCell.row, db.rhCell.col, targetRh);
-          db.rh = targetRh;
-          updated++;
-        }
+      if (pendingUpdates.length) {
+        await updateCellBooleansBatch(liveSet.setName, pendingUpdates, { chunkSize: 200 });
       }
     }
   } finally {
@@ -4440,6 +4468,7 @@ async function applyLegacyImportPlan(plan, cardsBySetId) {
   }
 
   let updatedCells = 0;
+  const ambiguousSkipped = [];
   setLoading(true, 'Synchronisiere Altbestand...');
   try {
     for (let setIndex = 0; setIndex < plan.matchedSets.length; setIndex++) {
@@ -4450,46 +4479,49 @@ async function applyLegacyImportPlan(plan, cardsBySetId) {
       }
 
       setGlobalStatus(`Altbestand-Import ${setIndex + 1}/${plan.matchedSets.length}: ${liveSet.setName}`);
-      const liveMap = await readSetCollectionMap(liveSet.setName).catch(() => new Map());
+      const liveMap = await readSetCollectionMap(liveSet.setName, { setId: liveSet.setId }).catch(() => new Map());
       const setCards = Array.isArray(cardsBySetId?.[matchedSet.setId]) ? cardsBySetId[matchedSet.setId] : [];
+      // Quellnummer -> v3-Karten; nur eindeutige Treffer liefern direkt den collectionKey.
       const setCardLookup = new Map();
       setCards.forEach((sourceCard) => {
         const cardId = pickCanonicalCardId(sourceCard);
         if (!cardId) return;
-        setCardLookup.set(normalizeCardNumber(cardId), sourceCard);
+        const lookupKey = normalizeCardNumber(cardId);
+        if (!setCardLookup.has(lookupKey)) setCardLookup.set(lookupKey, []);
+        setCardLookup.get(lookupKey).push(sourceCard);
       });
       const pendingCellUpdates = [];
 
       for (const target of (matchedSet.cards || [])) {
-        const normalizedCardId = normalizeCardNumber(target?.cardId || target?.sourceCardId);
-        const sourceCard = setCardLookup.get(normalizedCardId) || null;
-        const cardId = pickCanonicalCardId(sourceCard) || String(target?.cardId || target?.sourceCardId || '').trim();
-        if (!cardId) continue;
+        const rawCardId = String(target?.cardId || target?.sourceCardId || '').trim();
+        if (!rawCardId) continue;
+        const sourceMatches = setCardLookup.get(normalizeCardNumber(rawCardId)) || [];
+        // Eindeutige v3-Karte -> ihr collectionKey; sonst die Quellnummer, die ensureCollectionEntry ueber
+        // die Registry aufloest (mehrdeutig -> AMBIGUOUS_LEGACY_KEY, dann wird nichts geschrieben).
+        const key = sourceMatches.length === 1 ? collectionKeyOf(sourceMatches[0]) : rawCardId;
 
-        let entry = liveMap.get(normalizedCardId) || null;
-        if (!entry) {
-          entry = await ensureCollectionEntry(liveSet.setName, cardId);
-          liveMap.set(normalizedCardId, entry);
+        let entry = liveMap.get(key) || null;
+        if (!hasEntryCells(entry)) {
+          try {
+            const pending = pendingAmbiguityError(entry, { setId: liveSet.setId });
+            if (pending) throw pending;
+            entry = adoptEnsuredEntry(entry || emptyCollectionEntry({ collectionKey: key, number: rawCardId }, key),
+              await ensureCollectionEntry(liveSet.setName, key, { setId: liveSet.setId }));
+            liveMap.set(entry.collectionKey || key, entry);
+          } catch (err) {
+            if (!isAmbiguousLegacyKeyError(err)) throw err;
+            ambiguousSkipped.push(err);
+            continue;
+          }
         }
 
         const targetG = Boolean(target.g);
         const targetRh = Boolean(target.g && target.rh);
-
-        if (!targetG && Boolean(entry.rh)) {
-          pendingCellUpdates.push({ row: entry.rhCell.row, col: entry.rhCell.col, value: false });
-          entry.rh = false;
-          updatedCells += 1;
-        }
-        if (Boolean(entry.g) !== targetG) {
-          pendingCellUpdates.push({ row: entry.gCell.row, col: entry.gCell.col, value: targetG });
-          entry.g = targetG;
-          updatedCells += 1;
-        }
-        if (targetG && Boolean(entry.rh) !== targetRh) {
-          pendingCellUpdates.push({ row: entry.rhCell.row, col: entry.rhCell.col, value: targetRh });
-          entry.rh = targetRh;
-          updatedCells += 1;
-        }
+        if (Boolean(entry.g) === targetG && Boolean(entry.rh) === targetRh) continue;
+        const updates = stateCellUpdates(entry, { g: targetG, rh: targetRh });
+        pendingCellUpdates.push(...updates);
+        applyEntryState(entry, { g: targetG, rh: targetRh });
+        updatedCells += updates.length;
       }
 
       if (pendingCellUpdates.length) {
@@ -4506,6 +4538,7 @@ async function applyLegacyImportPlan(plan, cardsBySetId) {
     await loadCurrentSet(true).catch(() => {});
   }
 
+  if (ambiguousSkipped.length) onAmbiguousLegacyKey(ambiguousSkipped[0]);
   setGlobalStatus(`Altbestand importiert: ${plan.matchedSets.length} Sets, ${updatedCells} aenderungen.`);
   showToast(`Altbestand importiert: ${plan.matchedSets.length} Sets synchronisiert, ${updatedCells} aenderungen geschrieben.`, 'success', 5000);
 }
@@ -7038,28 +7071,33 @@ async function buildCollectedCardCandidates() {
 
   const candidates = [];
   const dedupe = new Set();
+  // Nur Sets mit gesammelten Zeilen (ueber alle Aliase) lesen: spart Registry-Karten und Kartendaten
+  // fuer Sets ohne Haken. Registry/Sheet nicht lesbar -> null -> alle Sets wie bisher.
+  const setsWithChecks = await listCollectionSetIds({ checkedOnly: true }).catch(() => null);
 
   for (const set of importedSets) {
     const setId = String(set.setId || '').trim();
     const setName = String(set.setName || '').trim();
     if (!setId || !setName) continue;
+    if (setsWithChecks && !setsWithChecks.has(setId.toLowerCase())) continue;
 
     const [cards, collectionMap] = await Promise.all([
       loadSetCardsWithHydration(setId, { allowApiFallback: false }),
-      readSetCollectionMap(setName).catch(() => new Map())
+      readSetCollectionMap(setName, { setId }).catch(() => new Map())
     ]);
 
     (Array.isArray(cards) ? cards : []).forEach((card) => {
-      const normalizedNumber = normalizeCardNumber(card?.number || '');
-      if (!normalizedNumber) return;
+      const collectionKey = collectionKeyOf(card);
+      if (!collectionKey) return;
 
-      const mapEntry = collectionMap.get(normalizedNumber) || {};
+      const mapEntry = collectionMap.get(collectionKey) || {};
       const isCollected = Boolean(mapEntry?.g);
       if (!isCollected) return;
 
-      const cardKey = `${setId}::${normalizedNumber}`;
-      if (dedupe.has(cardKey)) return;
-      dedupe.add(cardKey);
+      if (dedupe.has(`${setId}::${collectionKey}`)) return;
+      dedupe.add(`${setId}::${collectionKey}`);
+      // Anzeige-/Watchlist-Schluessel der Preisstatistik bleibt nummernbasiert (kein Sammlungs-Lookup).
+      const cardKey = `${setId}::${normalizeCardNumber(card?.number || '') || collectionKey}`;
 
       candidates.push({
         cardKey,
@@ -7525,52 +7563,7 @@ function matchesCardSearch(card, normalizedQuery, structuredQuery, mixedQuery, s
   return computeSearchScore(card, normalizedQuery, structuredQuery, mixedQuery, set) >= 0;
 }
 
-function mergeSearchCards(dbCards = [], apiCards = []) {
-  const byNumber = new Map();
-  (Array.isArray(dbCards) ? dbCards : []).forEach((entry) => {
-    const cardNumberKey = normalizeCardNumber(entry?.number || '');
-    if (!cardNumberKey) return;
-    byNumber.set(cardNumberKey, { ...entry, __searchApiOnly: false });
-  });
-  (Array.isArray(apiCards) ? apiCards : []).forEach((entry) => {
-    const cardNumberKey = normalizeCardNumber(entry?.number || '');
-    if (!cardNumberKey) return;
-    const existing = byNumber.get(cardNumberKey);
-    if (existing) {
-      byNumber.set(cardNumberKey, { ...existing, ...entry, __searchApiOnly: false });
-    } else {
-      byNumber.set(cardNumberKey, { ...entry, __searchApiOnly: true });
-    }
-  });
-  return Array.from(byNumber.values());
-}
-
-function hasRichCardDetails(card = {}) {
-  return Boolean(
-    String(card?.rarity || '').trim()
-    || String(card?.hp || '').trim()
-    || (Array.isArray(card?.types) && card.types.length)
-    || String(card?.supertype || '').trim()
-    || String(card?.artist || '').trim()
-    || (Array.isArray(card?.rules) && card.rules.length)
-    || String(card?.flavorText || '').trim()
-  );
-}
-
-function needsApiCardEnrichment(cards = []) {
-  const sample = (Array.isArray(cards) ? cards : []).filter(Boolean).slice(0, 12);
-  if (!sample.length) return false;
-
-  const richCount = sample.filter((card) => hasRichCardDetails(card)).length;
-  const needsCardmarketUpgrade = sample.some((card) => {
-    const cardmarketUrl = String(card?.cardmarketUrl || card?.vera_cardmarket_url || card?.tcgdex_cardmarket_url || '').trim();
-    // Bug fix: use isGeneratedCardmarketUrl (not just SearchUrl) so stale idProduct= URLs
-    // are also treated as auto-generated and trigger a re-hydration from api/v3 (fetchMergedCardsWithSetMeta).
-    return !cardmarketUrl || isGeneratedCardmarketUrl(cardmarketUrl);
-  });
-
-  return richCount < Math.max(1, Math.ceil(sample.length * 0.4)) || needsCardmarketUpgrade;
-}
+// hasRichCardDetails/needsApiCardEnrichment: js/core/card-enrichment.js (v3 massgeblich, siehe dort).
 
 function sortSearchResults(results = []) {
   return results.sort((left, right) => {
@@ -7583,9 +7576,9 @@ function sortSearchResults(results = []) {
 
 function getSearchResultKey(card = {}, set = null) {
   const setId = String(set?.setId || '').trim();
-  const cardNumber = normalizeCardNumber(card?.number || '');
+  const cardKey = collectionKeyOf(card);
   const fallbackName = normalizeSearchText(card?.name || '');
-  return `${setId}::${cardNumber || fallbackName || 'card'}`;
+  return `${setId}::${cardKey || fallbackName || 'card'}`;
 }
 
 function getSearchResultsInOrder(resultsMap, orderedKeys = []) {
@@ -7713,7 +7706,7 @@ function renderSearchResultsList(results = [], searchScopeMode, options = {}) {
 
   const frag = document.createDocumentFragment();
   safeResults.forEach(({ card, set, dbMap, apiOnly }) => {
-    const key = normalizeCardNumber(card.number);
+    const key = collectionKeyOf(card);
     frag.appendChild(createSearchResultCard(card, key, dbMap.get(key), set, apiOnly));
   });
 
@@ -7797,10 +7790,9 @@ async function runSearch(options = {}) {
   });
 
   const resultsMap = new Map();
-  const apiPhaseQueue = [];
-  let apiRenderOrderKeys = null;
+  const apiRenderOrderKeys = null;
   let searchedSetsCount = 0;
-  let apiProcessedCount = 0;
+  const apiProcessedCount = 0;
   let shouldStopSearch = false;
 
   const upsertMatches = (cards, set, dbMap) => {
@@ -7818,7 +7810,8 @@ async function runSearch(options = {}) {
         set,
         dbMap,
         score,
-        apiOnly: Boolean(card?.__searchApiOnly),
+        // Karten nicht importierter Sets: Haken loest den Auto-Import aus (pendingSearchSetImport).
+        apiOnly: Boolean(card?.__searchApiOnly) || !toBoolean(set?.imported),
         resultKey,
       });
       if (!hadKey && Array.isArray(apiRenderOrderKeys) && !apiRenderOrderKeys.includes(resultKey)) {
@@ -7857,46 +7850,32 @@ async function runSearch(options = {}) {
     let setMatchCount = 0;
 
     try {
-      const cacheKey = `cards_${set.setId}`;
-      const dbCardsCacheKey = `db_cards_${set.setId}`;
       const dbCacheKey = `db_${set.setId}`;
       const searchCacheKey = `${set.setId}::${searchScopeMode}`;
-      const useApiForSet = shouldUseApiForSearchSet(searchScopeMode, set);
 
-      let dbCards = [];
-      if (cache.has(dbCardsCacheKey)) {
-        dbCards = cache.get(dbCardsCacheKey) || [];
-      } else {
-        dbCards = await readDbCardsForSet(set.setId).catch(() => []);
-        if (Array.isArray(dbCards) && dbCards.length > 0) {
-          cache.set(dbCardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
-        }
+      // Karten aus api/v3 (massgeblich, gecacht); db_cards nur als Offline-Fallback (loadSetCardsV3First).
+      let setCards = state.searchCache.get(searchCacheKey);
+      if (!Array.isArray(setCards)) {
+        const loaded = await loadSetCardsV3First(set.setId, { signal: abortController.signal });
+        setCards = loaded.cards;
+        if (setCards.length > 0) state.searchCache.set(searchCacheKey, setCards);
       }
 
       let dbMap = new Map();
       if (cache.has(dbCacheKey)) dbMap = cache.get(dbCacheKey);
       else {
-        dbMap = await readSetCollectionMap(set.setName).catch(() => new Map());
+        dbMap = await readSetCollectionMap(set.setName, { setId: set.setId }).catch(() => new Map());
         cache.set(dbCacheKey, dbMap, CONFIG.CACHE_TTL_MS);
       }
 
-      const hasDbCards = Array.isArray(dbCards) && dbCards.length > 0;
-      const shouldFetchApiCards = shouldFetchApiCardsForSearchSet(searchScopeMode, set, hasDbCards);
-      const dbSearchCards = !useApiForSet && hasDbCards ? dbCards : [];
-
-      if (dbSearchCards.length > 0) {
-        setMatchCount = upsertMatches(dbSearchCards, set, dbMap);
-        state.searchCache.set(searchCacheKey, dbSearchCards);
-      }
-
-      if (shouldFetchApiCards) {
-        apiPhaseQueue.push({ set, dbCards, dbMap, cacheKey, searchCacheKey });
+      if (setCards.length > 0) {
+        setMatchCount = upsertMatches(setCards, set, dbMap);
       }
 
       if (!structuredQuery && !mixedQuery && resultsMap.size >= 200 && searchScopeMode === SEARCH_SCOPE_IMPORTED) {
         shouldStopSearch = true;
       }
-      if (structuredQuery?.cardNumber && !structuredQuery?.namePart && resultsMap.size >= 1 && !shouldFetchApiCards) {
+      if (structuredQuery?.cardNumber && !structuredQuery?.namePart && resultsMap.size >= 1) {
         shouldStopSearch = true;
       }
     } catch (err) {
@@ -7910,86 +7889,26 @@ async function runSearch(options = {}) {
 
     if (setMatchCount > 0 && resultsMap.size > 0) {
       renderCurrentResults({
-        isSearching: searchedSetsCount < setsToSearch.length || (!shouldStopSearch && apiPhaseQueue.length > 0),
+        isSearching: searchedSetsCount < setsToSearch.length && !shouldStopSearch,
       });
     }
 
     if (shouldStopSearch) break;
   }
 
-  if (shouldStopSearch) {
-    apiPhaseQueue.length = 0;
-  }
-
-  const hasPendingApiPhase = apiPhaseQueue.length > 0;
   if (resultsMap.size > 0) {
-    const dbSortedResults = sortSearchResults(Array.from(resultsMap.values()));
-    apiRenderOrderKeys = hasPendingApiPhase
-      ? dbSortedResults.map((entry) => entry.resultKey)
-      : null;
-    state.lastSearchResults = dbSortedResults.slice(0, 60);
+    const sortedResults = sortSearchResults(Array.from(resultsMap.values()));
+    state.lastSearchResults = sortedResults.slice(0, 60);
 
     if (isStale() || isAborted()) return;
-    renderSearchResultsList(dbSortedResults, searchScopeMode, {
+    renderSearchResultsList(sortedResults, searchScopeMode, {
       rawQuery,
       setsProcessed: searchedSetsCount,
       totalSets: setsToSearch.length,
       apiProcessed: 0,
-      totalApiSets: apiPhaseQueue.length,
-      isSearching: hasPendingApiPhase,
+      totalApiSets: 0,
+      isSearching: false,
     });
-  }
-
-  if (!shouldStopSearch && hasPendingApiPhase) {
-    for (let apiIndex = 0; apiIndex < apiPhaseQueue.length; apiIndex += 1) {
-      if (isStale() || isAborted()) return;
-      const { set, dbCards, dbMap, cacheKey, searchCacheKey } = apiPhaseQueue[apiIndex];
-
-      try {
-        let apiCards = [];
-        if (cache.has(cacheKey)) {
-          apiCards = cache.get(cacheKey) || [];
-        } else {
-          const apiPayload = await fetchMergedCardsWithSetMeta(set.setId, { signal: abortController.signal }).catch(() => ({ cards: [], setMetaPatch: null }));
-          apiCards = Array.isArray(apiPayload?.cards) ? apiPayload.cards : [];
-          if (apiCards.length > 0) {
-            cache.set(cacheKey, apiCards, CONFIG.CACHE_TTL_MS);
-          }
-        }
-
-        const mergedCards = searchScopeMode === SEARCH_SCOPE_ONLINE
-          ? mergeSearchCards([], apiCards)
-          : mergeSearchCards(dbCards, apiCards);
-
-        state.searchCache.set(searchCacheKey, mergedCards || []);
-
-        let apiMatchCount = 0;
-        if (mergedCards.length > 0) {
-          apiMatchCount = upsertMatches(mergedCards, set, dbMap);
-        }
-
-        apiProcessedCount = apiIndex + 1;
-        if (apiMatchCount > 0 && resultsMap.size > 0) {
-          renderCurrentResults({
-            isSearching: apiProcessedCount < apiPhaseQueue.length,
-            preserveSortedPrefix: true,
-            apiProcessed: apiProcessedCount,
-            totalApiSets: apiPhaseQueue.length,
-          });
-        }
-
-        if (structuredQuery?.cardNumber && !structuredQuery?.namePart && resultsMap.size >= 1) {
-          shouldStopSearch = true;
-        }
-      } catch (err) {
-        if (err?.name === 'AbortError') {
-          return;
-        }
-        console.warn('[runSearch] api phase error for set', set.setId, err);
-      }
-
-      if (shouldStopSearch) break;
-    }
   }
 
   if (!resultsMap.size) {
@@ -8094,18 +8013,16 @@ function createSearchResultCard(card, key, db, set, apiOnly = false) {
   return article;
 }
 
-function attachSearchResultCheckboxListeners(article, db, key, set, card) {
+function attachSearchResultCheckboxListeners(article, dbEntry, key, set, card) {
   const gInput  = article.querySelector('input[data-type="g"]');
   const rhInput = article.querySelector('input[data-type="rh"]');
+  const db = dbEntry || emptyCollectionEntry(card, key);
 
-  async function ensureDbEntry({ checked = false } = {}) {
-    if (db?.gCell && db?.rhCell) return db;
-    const ensured = await ensureCollectionEntry(set.setName, db?.displayId || key);
-    db.g = Boolean(db?.g);
-    db.rh = Boolean(db?.rh && db?.g);
-    db.gCell = ensured.gCell;
-    db.rhCell = ensured.rhCell;
-    db.displayId = ensured.displayId || db.displayId || key;
+  async function ensureDbEntry() {
+    await ensureWritableCollectionEntry(set, db, key);
+    // Neu angelegte Eintraege in der gecachten Sammlungs-Map des Sets fuehren (Suche/Set-Ansicht).
+    const cachedMap = cache.get(`db_${set.setId}`);
+    if (cachedMap instanceof Map) cachedMap.set(key, db);
     return db;
   }
 
@@ -8126,14 +8043,9 @@ function attachSearchResultCheckboxListeners(article, db, key, set, card) {
     setCardSaveState(article, 'saving');
     beginTrackedWrite(`Karte #${db?.displayId || key} speichern`);
     try {
-      await ensureDbEntry({ checked });
+      await ensureDbEntry();
       const nextState = resolveCollectionToggleState(db, { isG: true, checked });
-      await updateCellBoolean(set.setName, db.gCell.row, db.gCell.col, nextState.g);
-      if (db?.rhCell && nextState.rh !== Boolean(db?.rh)) {
-        await updateCellBoolean(set.setName, db.rhCell.row, db.rhCell.col, nextState.rh);
-      }
-      db.g = nextState.g;
-      db.rh = nextState.rh;
+      await writeCollectionEntryState(set.setName, db, nextState);
       updateSearchCardState();
       pushUndoEntry({
         setId: set?.setId,
@@ -8145,7 +8057,7 @@ function attachSearchResultCheckboxListeners(article, db, key, set, card) {
       setCardSaveState(article, 'saved');
       finishTrackedWrite(`Karte #${db?.displayId || key} speichern`, null);
     } catch (err) {
-      showToast(`Speichern fehlgeschlagen: ${err.message}`, 'error');
+      reportCollectionWriteError(err);
       gInput.checked = !checked;
       setCardSaveState(article, 'error');
       finishTrackedWrite(`Karte #${db?.displayId || key} speichern`, err);
@@ -8159,15 +8071,10 @@ function attachSearchResultCheckboxListeners(article, db, key, set, card) {
     setCardSaveState(article, 'saving');
     beginTrackedWrite(`Karte #${db?.displayId || key} RH speichern`);
     try {
-      await ensureDbEntry({ checked });
-      if (!db?.rhCell) { rhInput.checked = false; return; }
+      await ensureDbEntry();
+      if (!db?.rhCell) { rhInput.checked = false; setCardSaveState(article, ''); finishTrackedWrite(`Karte #${db?.displayId || key} RH speichern`, null); return; }
       const nextState = resolveCollectionToggleState(db, { isG: false, checked });
-      if (nextState.g !== Boolean(db?.g)) {
-        await updateCellBoolean(set.setName, db.gCell.row, db.gCell.col, nextState.g);
-      }
-      await updateCellBoolean(set.setName, db.rhCell.row, db.rhCell.col, nextState.rh);
-      db.g = nextState.g;
-      db.rh = nextState.rh;
+      await writeCollectionEntryState(set.setName, db, nextState);
       updateSearchCardState();
       pushUndoEntry({
         setId: set?.setId,
@@ -8179,7 +8086,7 @@ function attachSearchResultCheckboxListeners(article, db, key, set, card) {
       setCardSaveState(article, 'saved');
       finishTrackedWrite(`Karte #${db?.displayId || key} RH speichern`, null);
     } catch (err) {
-      showToast(`Speichern fehlgeschlagen: ${err.message}`, 'error');
+      reportCollectionWriteError(err);
       rhInput.checked = !checked;
       setCardSaveState(article, 'error');
       finishTrackedWrite(`Karte #${db?.displayId || key} RH speichern`, err);
@@ -8191,7 +8098,7 @@ function navigateToSearchResultSet(set, card = null) {
   if (!set?.setId) return;
   const resolvedSet = getSetById(set.setId) || set;
   state.pendingSearchSetImport = Boolean(!resolvedSet?.imported);
-  state.pendingSearchCardFocusKey = card?.number ? normalizeCardNumber(card.number) : null;
+  state.pendingSearchCardFocusKey = card ? (collectionKeyOf(card) || null) : null;
   ensureSetSelectorOption(resolvedSet);
   dom.selector.value = resolvedSet.setId;
 
@@ -8208,50 +8115,22 @@ function navigateToSearchResultSet(set, card = null) {
 async function openSearchResultLightbox(card, set, { apiOnly = false } = {}) {
   if (!set?.setId || !card) return;
 
-  const cardsCacheKey = `db_cards_${set.setId}`;
   const dbCacheKey = `db_${set.setId}`;
   const searchScopeMode = getSearchScopeMode();
-  const useApiForSet = shouldUseApiForSearchSet(searchScopeMode, set);
   const searchCacheKey = `${set.setId}::${searchScopeMode}`;
 
+  // Karten aus api/v3 (massgeblich), db_cards nur als Offline-Fallback.
   const [cards, dbMap] = await Promise.all([
     state.searchCache.has(searchCacheKey)
       ? state.searchCache.get(searchCacheKey)
-      : readDbCardsForSet(set.setId).then(async (loadedCards) => {
-        const dbCards = Array.isArray(loadedCards) ? loadedCards : [];
-        if (dbCards.length > 0) {
-          cache.set(cardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
-        }
-
-        const hasDbCards = Array.isArray(dbCards) && dbCards.length > 0;
-        const shouldFetchApiCards = shouldFetchApiCardsForSearchSet(searchScopeMode, set, hasDbCards)
-          || needsApiCardEnrichment(dbCards);
-
-        if (!shouldFetchApiCards) {
-          state.searchCache.set(searchCacheKey, dbCards);
-          return dbCards;
-        }
-
-        let apiCards = [];
-        if (cache.has(`cards_${set.setId}`)) {
-          apiCards = cache.get(`cards_${set.setId}`) || [];
-        } else {
-          const apiPayload = await fetchMergedCardsWithSetMeta(set.setId).catch(() => ({ cards: [], setMetaPatch: null }));
-          apiCards = Array.isArray(apiPayload?.cards) ? apiPayload.cards : [];
-        }
-        if (Array.isArray(apiCards) && apiCards.length > 0) {
-          cache.set(`cards_${set.setId}`, apiCards, CONFIG.CACHE_TTL_MS);
-        }
-
-        const mergedCards = searchScopeMode === SEARCH_SCOPE_ONLINE
-          ? mergeSearchCards([], apiCards)
-          : mergeSearchCards(dbCards, apiCards);
-        state.searchCache.set(searchCacheKey, mergedCards);
-        return mergedCards;
+      : loadSetCardsV3First(set.setId).then(({ cards: loadedCards, error }) => {
+        if (!loadedCards.length && error) throw new Error(describeCardDataFailure(error));
+        state.searchCache.set(searchCacheKey, loadedCards);
+        return loadedCards;
       }),
     cache.has(dbCacheKey)
       ? cache.get(dbCacheKey)
-      : readSetCollectionMap(set.setName).then((loadedDbMap) => {
+      : readSetCollectionMap(set.setName, { setId: set.setId }).then((loadedDbMap) => {
         const safeDbMap = loadedDbMap instanceof Map ? loadedDbMap : new Map();
         cache.set(dbCacheKey, safeDbMap, CONFIG.CACHE_TTL_MS);
         return safeDbMap;
@@ -8267,8 +8146,8 @@ async function openSearchResultLightbox(card, set, { apiOnly = false } = {}) {
     return;
   }
 
-  const targetKey = normalizeCardNumber(card.number);
-  const targetIndex = cards.findIndex((item) => normalizeCardNumber(item.number) === targetKey);
+  const targetKey = collectionKeyOf(card);
+  const targetIndex = cards.findIndex((item) => collectionKeyOf(item) === targetKey);
   if (targetIndex < 0) return;
 
   state.currentSet = set;
@@ -8341,7 +8220,7 @@ function updateStats() {
   const total = state.cards.length;
   let collected = 0, rh = 0;
   state.cards.forEach((card) => {
-    const db = state.dbMap.get(normalizeCardNumber(card.number));
+    const db = state.dbMap.get(collectionKeyOf(card));
     if (db?.g) collected++;
     if (db?.rh) rh++;
   });
@@ -8402,8 +8281,8 @@ function applySortOrder() {
   const sortBy = state.sortOrder;
   articles.sort((a, b) => {
     const ka = a.dataset.cardId, kb = b.dataset.cardId;
-    const cardA = state.cards.find((c) => normalizeCardNumber(c.number) === ka);
-    const cardB = state.cards.find((c) => normalizeCardNumber(c.number) === kb);
+    const cardA = state.cards.find((c) => collectionKeyOf(c) === ka);
+    const cardB = state.cards.find((c) => collectionKeyOf(c) === kb);
     if (sortBy === 'name')   return (cardA?.name || '').localeCompare(cardB?.name || '');
     if (sortBy === 'status') {
       const ra = state.dbMap.get(ka)?.rh ? 2 : state.dbMap.get(ka)?.g ? 1 : 0;
@@ -8442,7 +8321,7 @@ function renderCards() {
   setEmptyState(false);
   const fragment = document.createDocumentFragment();
   state.cards.forEach((card, index) => {
-    const key = normalizeCardNumber(card.number);
+    const key = collectionKeyOf(card);
     fragment.appendChild(createCardElement(card, key, state.dbMap.get(key), index));
   });
   dom.cards.appendChild(fragment);
@@ -8467,13 +8346,7 @@ function revealPendingSearchCardFocus() {
 }
 
 function createCardElement(card, key, db, index) {
-  const dbEntry = db || {
-    displayId: card.number,
-    g: false,
-    rh: false,
-    gCell: null,
-    rhCell: null
-  };
+  const dbEntry = db || emptyCollectionEntry(card, key);
   const isEditable = Boolean(state.currentSet?.setName);
   const article = document.createElement('article');
   article.className = 'card';
@@ -8700,6 +8573,41 @@ function syncCollectionCheckboxUi(gInput, rhInput, db, { isEditable = Boolean(st
   }
 }
 
+// Hook fuer Task 7 (Migrationsdialog, Spec §5.3): mehrdeutige Altzeile mit gesetztem Status.
+// Bis dahin nur eine verstaendliche Meldung; es wird nichts geschrieben (auch keine Ersatzzeile).
+function onAmbiguousLegacyKey(err) {
+  showToast(describeAmbiguousLegacyKey(err), 'info', 8000);
+}
+
+function reportCollectionWriteError(err, prefix = 'Speichern fehlgeschlagen') {
+  if (isAmbiguousLegacyKeyError(err)) {
+    onAmbiguousLegacyKey(err);
+    return;
+  }
+  showToast(`${prefix}: ${err?.message || err}`, 'error');
+}
+
+/**
+ * Sorgt dafuer, dass `db` mindestens eine Sammlungszeile hat (Schluessel = collectionKey, Zeilen ueber alle
+ * Aliase). Mehrdeutige Altzeilen mit gesetztem Status -> Fehler AMBIGUOUS_LEGACY_KEY, kein Write.
+ */
+async function ensureWritableCollectionEntry(set, db, key) {
+  if (hasEntryCells(db)) return db;
+  const pending = pendingAmbiguityError(db, { setId: set?.setId });
+  if (pending) throw pending;
+  const ensured = await ensureCollectionEntry(set.setName, key, { setId: set.setId });
+  return adoptEnsuredEntry(db, ensured);
+}
+
+/** Schreibt {g, rh} in alle Zeilen der Karte (ein gebuendelter Write) und uebernimmt den Status. */
+async function writeCollectionEntryState(setName, db, nextState) {
+  const updates = stateCellUpdates(db, nextState);
+  if (!updates.length) throw new Error('Keine Sammlungszeile fuer diese Karte gefunden.');
+  await updateCellBooleansBatch(setName, updates, { chunkSize: 200 });
+  applyEntryState(db, nextState);
+  return db;
+}
+
 function attachCheckboxListeners(article, db, key) {
   const gInput  = article.querySelector('input[data-type="g"]');
   const rhInput = article.querySelector('input[data-type="rh"]');
@@ -8735,21 +8643,15 @@ function attachCheckboxListeners(article, db, key) {
 
         state.currentSet = refreshedSet || { ...setToImport, imported: true };
         state.pendingSearchSetImport = false;
-        state.dbMap = await readSetCollectionMap(state.currentSet.setName).catch(() => new Map());
-        cache.set(`db_${setId}`, state.dbMap, CONFIG.CACHE_TTL_MS);
+        state.dbMap = await readSetCollectionMap(state.currentSet.setName, { setId: state.currentSet.setId }).catch(() => new Map());
+        cache.set(`db_${state.currentSet.setId}`, state.dbMap, CONFIG.CACHE_TTL_MS);
         db = state.dbMap.get(key) || db;
       } finally {
         setLoading(false);
       }
     }
 
-    if (db?.gCell && db?.rhCell) return db;
-    const ensured = await ensureCollectionEntry(state.currentSet.setName, db?.displayId || key);
-    db.g = Boolean(db?.g);
-    db.rh = Boolean(db?.rh && db?.g);
-    db.gCell = ensured.gCell;
-    db.rhCell = ensured.rhCell;
-    db.displayId = ensured.displayId || db.displayId || key;
+    await ensureWritableCollectionEntry(state.currentSet, db, key);
     state.dbMap.set(key, db);
     return db;
   }
@@ -8763,12 +8665,7 @@ function attachCheckboxListeners(article, db, key) {
     try {
       await ensureDbEntry({ checked, source: 'set-grid' });
       const nextState = resolveCollectionToggleState(db, { isG: true, checked });
-      await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, nextState.g);
-      if (db?.rhCell && nextState.rh !== Boolean(db?.rh)) {
-        await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, nextState.rh);
-      }
-      db.g = nextState.g;
-      db.rh = nextState.rh;
+      await writeCollectionEntryState(state.currentSet.setName, db, nextState);
       updateCardState(article, db);
       updateStats(); applyFilter();
       state.summaryData = null;
@@ -8783,7 +8680,7 @@ function attachCheckboxListeners(article, db, key) {
       setCardSaveState(article, 'saved');
       finishTrackedWrite(`Karte #${db?.displayId || key} speichern`, null);
     } catch (err) {
-      showToast(`Speichern fehlgeschlagen: ${err.message}`, 'error');
+      reportCollectionWriteError(err);
       gInput.checked = !checked;
       setCardSaveState(article, 'error');
       finishTrackedWrite(`Karte #${db?.displayId || key} speichern`, err);
@@ -8798,14 +8695,9 @@ function attachCheckboxListeners(article, db, key) {
     beginTrackedWrite(`Karte #${db?.displayId || key} RH speichern`);
     try {
       await ensureDbEntry({ checked, source: 'set-grid-rh' });
-      if (!db?.rhCell) { rhInput.checked = false; return; }
+      if (!db?.rhCell) { rhInput.checked = false; setCardSaveState(article, ''); finishTrackedWrite(`Karte #${db?.displayId || key} RH speichern`, null); return; }
       const nextState = resolveCollectionToggleState(db, { isG: false, checked });
-      if (nextState.g !== Boolean(db?.g)) {
-        await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, nextState.g);
-      }
-      await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, nextState.rh);
-      db.g = nextState.g;
-      db.rh = nextState.rh;
+      await writeCollectionEntryState(state.currentSet.setName, db, nextState);
       updateCardState(article, db);
       updateStats(); applyFilter();
       state.summaryData = null;
@@ -8820,7 +8712,7 @@ function attachCheckboxListeners(article, db, key) {
       setCardSaveState(article, 'saved');
       finishTrackedWrite(`Karte #${db?.displayId || key} RH speichern`, null);
     } catch (err) {
-      showToast(`Speichern fehlgeschlagen: ${err.message}`, 'error');
+      reportCollectionWriteError(err);
       rhInput.checked = !checked;
       setCardSaveState(article, 'error');
       finishTrackedWrite(`Karte #${db?.displayId || key} RH speichern`, err);
@@ -8943,19 +8835,19 @@ function applyIncomingRealtimeUpdate(payload) {
     payload.setName === state.currentSet.setName;
   if (!isSameSet) return;
 
-  const key = normalizeCardNumber(payload.cardNumber);
+  // cardNumber traegt seit v3 den collectionKey (broadcastRealtimeCardUpdate(key, …)).
+  const key = String(payload.cardNumber ?? '').trim();
   const db = state.dbMap.get(key);
   if (!db) return;
 
-  db.g = Boolean(payload.g);
-  db.rh = Boolean(payload.g && payload.rh);
+  applyEntryState(db, { g: payload.g, rh: payload.rh });
 
   const article = dom.cards.querySelector(`[data-card-id="${key}"]`);
   if (article) updateCardState(article, db);
 
   if (dom.lightboxDialog.open) {
     const card = state.cards[state.lightboxIndex];
-    const lightboxKey = card ? normalizeCardNumber(card.number) : null;
+    const lightboxKey = card ? collectionKeyOf(card) : null;
     if (lightboxKey && lightboxKey === key) renderLightbox(state.lightboxIndex);
   }
 
@@ -9003,8 +8895,8 @@ function closeLightbox() {
 function renderLightbox(index) {
   const card = state.cards[index];
   if (!card) return;
-  const key = normalizeCardNumber(card.number);
-  const db  = state.dbMap.get(key) || { displayId: card.number, g: false, rh: false, gCell: null, rhCell: null };
+  const key = collectionKeyOf(card);
+  const db  = state.dbMap.get(key) || emptyCollectionEntry(card, key);
   const listToText = (value) => Array.isArray(value) ? value.filter(Boolean).join(', ') : '';
   const rulesText = Array.isArray(card.rules) ? card.rules.filter(Boolean).join('\n') : '';
   const setFact = (node, value, { longText = false } = {}) => {
@@ -9327,9 +9219,9 @@ function initLightbox() {
   async function lightboxToggle(isG, checked) {
     const card = state.cards[state.lightboxIndex];
     if (!card) return;
-    const key = normalizeCardNumber(card.number);
+    const key = collectionKeyOf(card);
     const article = dom.cards.querySelector(`[data-card-index="${state.lightboxIndex}"]`);
-    let db = state.dbMap.get(key) || { displayId: card.number, g: false, rh: false, gCell: null, rhCell: null };
+    let db = state.dbMap.get(key) || emptyCollectionEntry(card, key);
     const prevState = { g: Boolean(db?.g), rh: Boolean(db?.rh) };
     const shouldEnsureImportedSet = checked && (Boolean(state.pendingSearchSetImport) || !Boolean(state.currentSet?.imported));
     if (shouldEnsureImportedSet) {
@@ -9351,8 +9243,8 @@ function initLightbox() {
         });
         state.currentSet = refreshedSet || { ...setToImport, imported: true };
         state.pendingSearchSetImport = false;
-        state.dbMap = await readSetCollectionMap(state.currentSet.setName).catch(() => new Map());
-        cache.set(`db_${setId}`, state.dbMap, CONFIG.CACHE_TTL_MS);
+        state.dbMap = await readSetCollectionMap(state.currentSet.setName, { setId: state.currentSet.setId }).catch(() => new Map());
+        cache.set(`db_${state.currentSet.setId}`, state.dbMap, CONFIG.CACHE_TTL_MS);
         db = state.dbMap.get(key) || db;
       } catch (err) {
         showToast(`Automatischer Set-Import fehlgeschlagen: ${err.message || err}`, 'error', 4200);
@@ -9362,29 +9254,19 @@ function initLightbox() {
         setLoading(false);
       }
     }
-    if (!db?.gCell) {
-      const ensured = await ensureCollectionEntry(state.currentSet.setName, card.number || db?.displayId || key);
-      db.displayId = ensured.displayId || db.displayId || card.number || key;
-      db.gCell = ensured.gCell;
-      db.rhCell = ensured.rhCell;
-      state.dbMap.set(key, db);
-    }
     setCardSaveState(article, 'saving');
     beginTrackedWrite(`Lightbox #${db?.displayId || key}`);
     try {
+      await ensureWritableCollectionEntry(state.currentSet, db, key);
+      state.dbMap.set(key, db);
       if (!isG && !db?.rhCell) {
         renderLightbox(state.lightboxIndex);
+        setCardSaveState(article, 'idle');
+        finishTrackedWrite(`Lightbox #${db?.displayId || key}`, null);
         return;
       }
       const nextState = resolveCollectionToggleState(db, { isG, checked });
-      if (nextState.g !== Boolean(db?.g)) {
-        await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, nextState.g);
-      }
-      if (db?.rhCell && nextState.rh !== Boolean(db?.rh)) {
-        await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, nextState.rh);
-      }
-      db.g = nextState.g;
-      db.rh = nextState.rh;
+      await writeCollectionEntryState(state.currentSet.setName, db, nextState);
       renderLightbox(state.lightboxIndex);
       if (article) updateCardState(article, db);
       updateStats();
@@ -9401,7 +9283,7 @@ function initLightbox() {
       setCardSaveState(article, 'saved');
       finishTrackedWrite(`Lightbox #${db?.displayId || key}`, null);
     } catch (err) {
-      showToast(`Fehler: ${err.message}`, 'error');
+      reportCollectionWriteError(err, 'Fehler');
       renderLightbox(state.lightboxIndex); // revert UI
       setCardSaveState(article, 'error');
       finishTrackedWrite(`Lightbox #${db?.displayId || key}`, err);
@@ -9442,27 +9324,28 @@ async function bulkUpdate(g, rh) {
   let updated = 0, errors = 0;
   const undoChanges = [];
   try {
+    // Alle Zeilen jeder Karte (cellsForUpdate) in einem gebuendelten Write.
+    const targetState = { g: Boolean(g), rh: Boolean(g && rh) };
+    const pending = [];
     for (const key of state.bulkSelected) {
       const db = state.dbMap.get(key);
-      if (!db?.gCell) continue;
-      const prevState = { g: Boolean(db?.g), rh: Boolean(db?.rh) };
-      try {
-        await updateCellBoolean(state.currentSet.setName, db.gCell.row, db.gCell.col, g);
-        db.g = g;
-        if (db.rhCell) {
-          const newRh = g && rh;
-          await updateCellBoolean(state.currentSet.setName, db.rhCell.row, db.rhCell.col, newRh);
-          db.rh = newRh;
-        }
+      if (!hasEntryCells(db)) continue;
+      pending.push({ key, db, prevState: { g: Boolean(db?.g), rh: Boolean(db?.rh) }, updates: stateCellUpdates(db, targetState) });
+    }
+    try {
+      const updates = pending.flatMap((entry) => entry.updates);
+      if (updates.length) await updateCellBooleansBatch(state.currentSet.setName, updates, { chunkSize: 200 });
+      for (const { key, db, prevState } of pending) {
+        applyEntryState(db, targetState);
         const article = dom.cards.querySelector(`[data-card-id="${key}"]`);
         if (article) updateCardState(article, db);
         undoChanges.push({ key, prev: prevState, next: { g: Boolean(db.g), rh: Boolean(db.rh) } });
         broadcastRealtimeCardUpdate(key, db);
         updated++;
-      } catch (err) {
-        console.warn('[bulkUpdate] error for key', key, err);
-        errors++;
       }
+    } catch (err) {
+      console.warn('[bulkUpdate] batch error', err);
+      errors += pending.length;
     }
   } finally {
     setLoading(false);
@@ -9496,7 +9379,7 @@ function initBulkEdit() {
 // FEHLENDE KARTEN EXPORTIEREN
 // --------------------------------------------------------------------------
 function getMissingCards() {
-  return state.cards.filter((card) => !state.dbMap.get(normalizeCardNumber(card.number))?.g);
+  return state.cards.filter((card) => !state.dbMap.get(collectionKeyOf(card))?.g);
 }
 
 function exportMissingCards() {
@@ -9566,66 +9449,100 @@ function initKeyboardNav() {
 // --------------------------------------------------------------------------
 
 /**
- * Lädt die Karten für ein Set aus dem In-Memory-Cache oder aus der DB, optional
- * mit API-Hydration. Wird sowohl vom Set-View (`loadCurrentSet`) als auch vom
- * Stats-View (`buildCollectedCardCandidates`) benutzt, damit beide Pfade die
- * identische Array-Referenz an den Cardmarket-Resolver reichen — das ist
- * Voraussetzung dafür, dass `setAssignmentMapCache` per Reference-Identity
- * (cardmarket-data.js) greift und die Pro-Set-Produkt-Blacklist erhalten bleibt.
+ * Karten eines Sets: api/v3 ist massgeblich (Spec §7.1), db_cards nur Offline-Fallback.
+ * v3-Karten liegen unter `cards_${setId}`, db_cards unter `db_cards_${setId}` im Cache.
+ * @returns {Promise<{ cards: Array, source: 'v3'|'db_cards'|'none', error?: Error }>}
+ */
+async function loadSetCardsV3First(setId, { signal, forceRefresh = false } = {}) {
+  const normalizedSetId = String(setId || '').trim();
+  if (!normalizedSetId) return { cards: [], source: 'none' };
+  const v3CacheKey = `cards_${normalizedSetId}`;
+  const dbCardsCacheKey = `db_cards_${normalizedSetId}`;
+  if (forceRefresh) { cache.del(v3CacheKey); cache.del(dbCardsCacheKey); }
+  if (cache.has(v3CacheKey)) return { cards: cache.get(v3CacheKey) || [], source: 'v3' };
+
+  try {
+    const payload = await fetchMergedCardsWithSetMeta(normalizedSetId, { signal });
+    const cards = Array.isArray(payload?.cards) ? payload.cards : [];
+    if (cards.length > 0) {
+      cache.set(v3CacheKey, cards, CONFIG.CACHE_TTL_MS);
+      return { cards, source: 'v3' };
+    }
+    return { cards: [], source: 'none' };
+  } catch (error) {
+    if (error?.name === 'AbortError') throw error;
+    console.warn('[cards] api/v3 nicht verfuegbar, db_cards als Offline-Fallback:', normalizedSetId, error?.message || error);
+    let dbCards = cache.has(dbCardsCacheKey) ? cache.get(dbCardsCacheKey) : null;
+    if (!Array.isArray(dbCards)) {
+      dbCards = await readDbCardsForSet(normalizedSetId).catch(() => []);
+      if (dbCards.length > 0) cache.set(dbCardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
+    }
+    return dbCards.length > 0
+      ? { cards: dbCards, source: 'db_cards', error }
+      : { cards: [], source: 'none', error };
+  }
+}
+
+/**
+ * Lädt die Karten für ein Set. Wird vom Set-View (`loadCurrentSet`, `preferV3`) und vom Stats-View
+ * (`buildCollectedCardCandidates`) benutzt. Bereits geladene v3-Karten (`cards_${setId}`) werden von beiden
+ * Pfaden geteilt (gleiche Array-Referenz fuer den Cardmarket-Resolver, `setAssignmentMapCache`).
  *
- * Cache-Key ist `db_cards_${setId}` (gleich wie der Set-View).
+ * - `preferV3` (Set-View): api/v3 zuerst, db_cards nur als Offline-Fallback. Ohne beides wird ein Fehler mit
+ *   der v3-Meldung („Kartendaten (api/v3) nicht erreichbar …“) geworfen.
+ * - sonst (Gesamt-Leser ueber viele Sets): db_cards zuerst, damit nicht jede v3-Kartendatei geladen wird;
+ *   api/v3 nur bei Altdaten (`needsApiCardEnrichment`) oder wenn `allowApiFallback` und keine db_cards.
  *
  * @param {string} setId
- * @param {object} [opts]
- * @param {boolean} [opts.allowApiFallback=false]  Set-View setzt das auf true,
- *   wenn der Such-Scope ONLINE ist, ein Search-Import ansteht oder das Set
- *   noch nicht importiert ist. Der Stats-View lässt es auf false und
- *   hydratisiert nur, wenn `needsApiCardEnrichment` es aktiv fordert.
- * @param {boolean} [opts.forceRefresh=false]     Cache-Eintrag ignorieren und
- *   neu laden.
- * @returns {Promise<Array>}  Array der Karten (hydriert wenn nötig).
+ * @param {{ allowApiFallback?: boolean, forceRefresh?: boolean, preferV3?: boolean }} [opts]
+ * @returns {Promise<Array>}
  */
-async function loadSetCardsWithHydration(setId, { allowApiFallback = false, forceRefresh = false } = {}) {
+async function loadSetCardsWithHydration(setId, { allowApiFallback = false, forceRefresh = false, preferV3 = false } = {}) {
   const normalizedSetId = String(setId || '').trim();
   if (!normalizedSetId) return [];
+  const v3CacheKey = `cards_${normalizedSetId}`;
+  const dbCardsCacheKey = `db_cards_${normalizedSetId}`;
+  if (forceRefresh) { cache.del(v3CacheKey); cache.del(dbCardsCacheKey); }
+  if (cache.has(v3CacheKey)) return cache.get(v3CacheKey);
 
-  const cardsCacheKey = `db_cards_${normalizedSetId}`;
-  if (!forceRefresh && cache.has(cardsCacheKey)) {
-    return cache.get(cardsCacheKey);
-  }
-
-  const dbCards = await readDbCardsForSet(normalizedSetId).catch(() => []);
-
-  if (Array.isArray(dbCards) && dbCards.length > 0) {
-    const shouldHydrate = allowApiFallback || needsApiCardEnrichment(dbCards);
-    if (!shouldHydrate) {
-      cache.set(cardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
-      return dbCards;
+  if (preferV3) {
+    const { cards, error } = await loadSetCardsV3First(normalizedSetId);
+    if (!cards.length) {
+      const failure = new Error(describeCardDataFailure(error), error ? { cause: error } : undefined);
+      if (error?.code) failure.code = error.code;
+      throw failure;
     }
-    const apiPayload = await fetchMergedCardsWithSetMeta(normalizedSetId).catch(() => ({ cards: [], setMetaPatch: null }));
-    const apiCards = Array.isArray(apiPayload?.cards) ? apiPayload.cards : [];
-    const mergedCards = apiCards.length > 0 ? mergeSearchCards(dbCards, apiCards) : dbCards;
-    cache.set(cardsCacheKey, mergedCards, CONFIG.CACHE_TTL_MS);
-    return mergedCards;
+    return cards;
   }
 
-  if (allowApiFallback) {
-    const apiPayload = await fetchMergedCardsWithSetMeta(normalizedSetId).catch(() => ({ cards: [], setMetaPatch: null }));
-    const apiCards = Array.isArray(apiPayload?.cards) ? apiPayload.cards : [];
-    if (apiCards.length > 0) cache.set(cardsCacheKey, apiCards, CONFIG.CACHE_TTL_MS);
-    return apiCards;
+  if (cache.has(dbCardsCacheKey)) return cache.get(dbCardsCacheKey);
+  const dbCards = await readDbCardsForSet(normalizedSetId).catch(() => []);
+  const hasDbCards = Array.isArray(dbCards) && dbCards.length > 0;
+  if (hasDbCards && !needsApiCardEnrichment(dbCards)) {
+    cache.set(dbCardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
+    return dbCards;
   }
-
+  if (hasDbCards || allowApiFallback) {
+    const { cards } = await loadSetCardsV3First(normalizedSetId).catch(() => ({ cards: [] }));
+    if (cards.length > 0) return cards;
+  }
+  if (hasDbCards) {
+    cache.set(dbCardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
+    return dbCards;
+  }
   return [];
 }
 
 async function loadCurrentSet(forceRefresh = false) {
-  const setId   = dom.selector.value;
-  if (!setId) return;
-  const selected = state.sets.find((s) => s.setId === setId) || getSetById(setId);
+  const requestedSetId = dom.selector.value;
+  if (!requestedSetId) return;
+  const selected = state.sets.find((s) => s.setId === requestedSetId) || getSetById(requestedSetId);
   if (!selected) return;
+  // Alias-ID (z. B. aus lastSetId) -> kanonisches Set.
+  const setId = selected.setId;
 
   ensureSetSelectorOption(selected);
+  if (dom.selector.value !== setId) dom.selector.value = setId;
 
   state.currentSet = selected;
   syncRefreshControls();
@@ -9658,18 +9575,18 @@ async function loadCurrentSet(forceRefresh = false) {
 
   try {
     const dbCacheKey = `db_${setId}`;
-    const allowApiFallback = getSearchScopeMode() === SEARCH_SCOPE_ONLINE || Boolean(state.pendingSearchSetImport) || !Boolean(selected.imported);
-    if (forceRefresh) { cache.del(`db_cards_${setId}`); cache.del(dbCacheKey); }
+    if (forceRefresh) { cache.del(`db_cards_${setId}`); cache.del(`cards_${setId}`); cache.del(dbCacheKey); }
 
+    // api/v3 zuerst, db_cards nur Offline-Fallback; ohne beides die v3-Meldung (describeCardDataFailure).
     const [cards, dbMap] = await Promise.all([
-      loadSetCardsWithHydration(setId, { allowApiFallback, forceRefresh }),
+      loadSetCardsWithHydration(setId, { preferV3: true, forceRefresh }),
       cache.has(dbCacheKey)
         ? cache.get(dbCacheKey)
-        : readSetCollectionMap(selected.setName).then((m) => { cache.set(dbCacheKey, m, CONFIG.CACHE_TTL_MS); return m; }),
+        : readSetCollectionMap(selected.setName, { setId: selected.setId }).then((m) => { cache.set(dbCacheKey, m, CONFIG.CACHE_TTL_MS); return m; }),
     ]);
 
     if (!Array.isArray(cards) || cards.length === 0) {
-      throw new Error('Keine Kartendaten in der Datenbank gefunden. Bitte Set importieren/aktualisieren oder API-Fallback aktivieren.');
+      throw new Error(NO_CARD_DATA_MESSAGE);
     }
 
     state.cards = cards;

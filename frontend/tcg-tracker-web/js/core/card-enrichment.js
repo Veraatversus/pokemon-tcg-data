@@ -34,3 +34,19 @@ export function needsApiCardEnrichment(cards = []) {
 
   return richCount < Math.max(1, Math.ceil(sample.length * 0.4)) || hasPreV3SearchLink;
 }
+
+export const NO_CARD_DATA_MESSAGE = 'Keine Kartendaten in der Datenbank gefunden. Bitte Set importieren/aktualisieren oder API-Fallback aktivieren.';
+
+/**
+ * Meldung, wenn fuer ein Set weder api/v3-Karten noch db_cards (Offline-Fallback) vorliegen.
+ * api/v3 nicht erreichbar -> die v3-Meldung statt des allgemeinen „Keine Kartendaten …“.
+ */
+export function describeCardDataFailure(err) {
+  if (err?.code === 'V3_UNREACHABLE') {
+    return `${err.message} – und für dieses Set sind keine gespeicherten Kartendaten (db_cards) vorhanden. Bitte Verbindung prüfen und erneut laden.`;
+  }
+  if (err?.code === 'V3_SET_UNKNOWN') {
+    return `${err.message}.`;
+  }
+  return NO_CARD_DATA_MESSAGE;
+}

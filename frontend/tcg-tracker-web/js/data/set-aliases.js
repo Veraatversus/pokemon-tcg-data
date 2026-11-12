@@ -75,3 +75,16 @@ export function mergeAliasOverviewSets(sets, resolver) {
     return set;
   });
 }
+
+/**
+ * Set per ID oder Alias finden (z. B. alte Backups/Einstellungen mit `swsh12pt5gg` -> `swsh12pt5`).
+ * Exakte ID gewinnt vor Alias; Vergleich ohne Gross-/Kleinschreibung.
+ */
+export function findSetByIdOrAlias(sets, setId) {
+  const wanted = lower(setId);
+  if (!wanted) return null;
+  const list = Array.isArray(sets) ? sets : [];
+  return list.find((set) => lower(set?.setId) === wanted)
+    || list.find((set) => (Array.isArray(set?.aliases) ? set.aliases : []).some((alias) => lower(alias) === wanted))
+    || null;
+}
