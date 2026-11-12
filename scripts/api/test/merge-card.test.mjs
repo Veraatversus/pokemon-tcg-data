@@ -332,3 +332,36 @@ test('mergeCard: Varianten ueber mehrere TCGdex-Refs dedupliziert; rarity "None"
   assert.equal('rarity' in none, false);
   assert.equal(mergeRarity('None', tables), undefined);
 });
+
+// Unterset-Karten (Galarian Gallery u. a.): TCGdex liefert die Assets unter dem Eltern-Set-Pfad.
+import { resolveImages } from '../merge/images.mjs';
+
+test('resolveImages: Unterset-Karte loest Bild unter dem Eltern-Set-Pfad auf', () => {
+  const index = { de: { swsh: { 'swsh12.5': { GG01: 'h' } } } };
+  const r = resolveImages(index, { lang: 'de', serieId: 'swsh', setId: 'swsh12.5gg', localId: 'GG01', parentSetId: 'swsh12.5' });
+  assert.deepEqual(r, { small: 'https://assets.tcgdex.net/de/swsh/swsh12.5/GG01/low.webp', large: 'https://assets.tcgdex.net/de/swsh/swsh12.5/GG01/high.webp' });
+});
+
+test('resolveImages: eigener Set-Pfad gewinnt vor dem Eltern-Set', () => {
+  const index = { de: { swsh: { 'swsh12.5gg': { GG01: 'a' }, 'swsh12.5': { GG01: 'b' } } } };
+  const r = resolveImages(index, { lang: 'de', serieId: 'swsh', setId: 'swsh12.5gg', localId: 'GG01', parentSetId: 'swsh12.5' });
+  assert.equal(r.small, 'https://assets.tcgdex.net/de/swsh/swsh12.5gg/GG01/low.webp');
+});
+
+test('resolveImages: kein Bild, wenn weder Set noch Eltern-Set es haben', () => {
+  const index = { de: { swsh: { 'swsh12.5': { GG02: 'b' } } } };
+  assert.equal(resolveImages(index, { lang: 'de', serieId: 'swsh', setId: 'swsh12.5gg', localId: 'GG01', parentSetId: 'swsh12.5' }), null);
+});
+
+test('mergeCard: Unterset-Karte erhaelt i18n.de.images aus dem Eltern-Set-Pfad, oben nur EN', () => {
+  const sub = { id: 'swsh12.5gg', serieId: 'swsh' };
+  const td = { localId: 'GG01', set: sub, name: { en: 'Hisuian', de: 'Hisui' }, category: 'Pokemon', stage: 'Basic', rarity: 'Rare Holo', regulationMark: 'F' };
+  const assets = { de: { swsh: { 'swsh12.5': { GG01: 'h' } } } };
+  const c = mergeCard({
+    canonicalSetId: 'swsh12pt5', canonicalCardId: 'GG1',
+    registryCard: { pokemontcg: null, tcgdex: [{ set: 'swsh12.5gg', localId: 'GG01' }], keys: { pokemontcg: [], tcgdex: ['GG1'] } },
+    ptCard: null, tcgdexCards: [td], tcgdexSet: { id: 'swsh12.5', serieId: 'swsh' }, tables, legals, assetsIndex: assets, sourceCommits,
+  });
+  assert.equal(c.i18n.de.images.small, 'https://assets.tcgdex.net/de/swsh/swsh12.5/GG01/low.webp');
+  assert.equal(c.images, undefined);
+});
