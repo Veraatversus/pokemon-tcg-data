@@ -1,115 +1,48 @@
-# Pokémon TCG Data
+# pokemon-tcg-data (Veraatversus)
 
-> [!IMPORTANT]
->
-> ## This project is being deprecated
->
-> Pokémon TCG Data and the Pokémon TCG API are legacy projects and are no longer recommended for new integrations.
->
-> **The Pokémon TCG API is scheduled to be taken offline on March 1, 2027.**
->
-> For actively maintained Pokémon TCG data, pricing, price history, graded card data, population reports, image recognition, and support for additional trading card games, please use **[Scrydex](https://scrydex.com)**.
->
-> **Scrydex:** https://scrydex.com
-> **API Documentation:** https://scrydex.com/docs
->
-> Existing data in this repository will remain available for historical and compatibility purposes. Developers currently using the Pokémon TCG API should migrate to Scrydex before March 1, 2027.
+Statische Daten-API **v3** für Veras Pokémon-TCG-Tracker (Web-App), ausgeliefert über GitHub Pages.
 
----
+Die Pokémon TCG API (pokemontcg.io) wird am 1. März 2027 abgeschaltet. Dieses Repo baut die Daten deshalb aus dem täglich gespiegelten [TCGdex cards-database](https://github.com/tcgdex/cards-database). Der eingefrorene pokemontcg-Datenstand dient als Legacy-Schicht (Feldformat, Schlüssel, Bild-Fallback). Felder auf oberster Ebene sind Englisch, deutsche Texte und Bilder stehen unter `i18n.de`.
 
-This repository contains the card data historically used by the [Pokémon TCG API](https://pokemontcg.io/).
+## Ordnerstruktur
 
-The project is now considered legacy. The existing JSON files will remain available for developers who depend on them, but this repository should not be used as the primary data source for new applications.
+| Pfad | Inhalt |
+|---|---|
+| `api/v3/` | Generierte API: `sets.json`, `cards/<set>.json`, `search-index.json`, `meta.json` (Zähler, Quell-Commits, Warnungen), `reports/` (Matching-Report, gelernte Tabellen) |
+| `api/registry/` | Eingefrorene Registry: kanonische Set-IDs und Kartenschlüssel, ändert sich nur additiv |
+| `api/mappings/` | Handgepflegte Zuordnungen (Set-/Kartenpaare, Subset-Merges, kanonische Schlüssel) |
+| `sources/pokemontcg/` | Eingefrorener pokemontcg-Snapshot (`cards/`, `sets/`, `decks/`) |
+| `sources/tcgdex/` | Täglicher TCGdex-Spiegel (nur Daten-/Textdateien), dazu `assets-index.json` (Asset-Liste von assets.tcgdex.net) und `assets-verified.json` (Prüfstand der Set-Logos und -Symbole) |
+| `sources/SOURCES.json` | Quell-Commits und Abrufzeitpunkte |
+| `cardmarket/` | Generierte Cardmarket-Daten (`index/`, `sets/`, `meta.json`) |
+| `scripts/api/` | Build-Toolchain der v3-API (Node, Tests) |
+| `cards/`, `sets/`, `decks/`, `v2_to_v1.rb` | Alte pokemontcg-Struktur im Wurzelverzeichnis. Bleibt aus Kompatibilitätsgründen bis zu einer späteren Umstrukturierung erhalten. |
 
-For current Pokémon TCG data and actively maintained API access, use [Scrydex](https://scrydex.com).
+## Automatisierung
 
-## Scrydex
+- **Daily Sync TCGdex to Master** (`sync-tcgdex.yml`, täglich 02:00 UTC, auf `master`): Tests → TCGdex spiegeln → Set-Assets prüfen (inkrementell, darf fehlschlagen) → Matching mit Qualitätsschwelle → Regressionstests → v3-API und Registry bauen → committen. Bei einem Fehler wird nichts committet, und es entsteht ein Issue mit dem Label `upstream-sync`.
+- **Build Cardmarket Data** startet nach dem Sync und erzeugt `cardmarket/`.
+- **Promote Master to Dev and Release** startet danach und führt `master` in `dev` und `release` zusammen. Die App-Dateien dieser Branches bleiben dabei erhalten.
+- **Promote Dev to Release** / **Manual Merge Dev to Release** (manuell) übernehmen `dev` nach `release`.
+- **Deploy Pages** veröffentlicht `release` im Wurzelverzeichnis und `dev` als Vorschau unter `/dev`.
 
-Scrydex is the actively maintained platform for developers building applications around trading card game data.
-
-In addition to Pokémon, Scrydex supports multiple trading card games and provides access to features including:
-
-* Card and expansion metadata
-* Raw card pricing
-* Graded card pricing
-* Historical price data
-* Graded sold listings
-* Population reports
-* Market trends
-* Card image recognition
-* Additional TCGs beyond Pokémon
-
-For more information:
-
-* [Scrydex](https://scrydex.com)
-* [API Documentation](https://scrydex.com/docs)
-
-## Downloading the Data
-
-The historical JSON data in this repository can still be cloned directly:
+## Lokal
 
 ```bash
-git clone https://github.com/PokemonTCG/pokemon-tcg-data.git
+cd scripts/api
+npm ci
+npm test
+cd ../..
+node scripts/api/sources/verify-assets.mjs   # optional, prüft Set-Logos/-Symbole (Netzwerk)
+node scripts/api/build-api.mjs               # baut api/v3 und api/registry
 ```
 
-You can also download data from the repository's releases.
+Runbook (Registry-Drift, Asset-Prüfung, Ausgabeformate): [scripts/api/README.md](scripts/api/README.md).
 
-This repository should primarily be considered a historical or compatibility data source.
+## Quellen und Lizenzen
 
-Applications that require continuously maintained card data should use the [Scrydex API](https://scrydex.com).
+- **pokemontcg-Daten**: aus [PokemonTCG/pokemon-tcg-data](https://github.com/PokemonTCG/pokemon-tcg-data), zusammengeführt mit [JulienGitHub/pokemon-tcg-data](https://github.com/JulienGitHub/pokemon-tcg-data). Der Stand ist in `sources/pokemontcg/` eingefroren, der Commit steht in `sources/SOURCES.json`. Eine eigene Lizenzdatei liegt dafür nicht vor.
+- **TCGdex**: [tcgdex/cards-database](https://github.com/tcgdex/cards-database), MIT-Lizenz (Copyright (c) 2021 TCGdex), siehe `sources/tcgdex/LICENSE`. Die Bilder werden von assets.tcgdex.net verlinkt, nicht kopiert.
+- Dieses Repo selbst hat keine eigene Lizenzdatei.
 
-## Pokémon TCG API Deprecation
-
-The [Pokémon TCG API](https://pokemontcg.io/) is being deprecated and is scheduled to be taken offline on **March 1, 2027**.
-
-Existing integrations may continue to function until the shutdown date, but developers should avoid starting new integrations against the Pokémon TCG API.
-
-If your application currently relies on the Pokémon TCG API, please migrate to [Scrydex](https://scrydex.com) before **March 1, 2027**.
-
-New applications should use Scrydex from the start.
-
-## Version 1 and Version 2 Data
-
-Version 1 data is no longer maintained.
-
-The `v2_to_v1.rb` Ruby script is retained for developers who still need to generate the legacy V1 JSON format from V2 data.
-
-To install Ruby:
-
-https://www.ruby-lang.org/en/documentation/installation/
-
-You will also need the `json` gem:
-
-```bash
-gem install json
-```
-
-To generate the V1 data:
-
-```bash
-ruby v2_to_v1.rb
-```
-
-The generated card data will be written to:
-
-```text
-/cards/en/v1
-```
-
-## Contributing
-
-This repository is maintained primarily for historical and compatibility purposes.
-
-Routine card-data updates and new feature development are no longer the focus of this project.
-
-For current data, API access, or support, please use [Scrydex](https://scrydex.com).
-
-## Migrating to Scrydex
-
-If you currently use Pokémon TCG Data or the Pokémon TCG API in an application, please migrate to Scrydex before the Pokémon TCG API shutdown on **March 1, 2027**.
-
-Scrydex provides a maintained API designed for production applications and expands on the original Pokémon TCG API with pricing, historical market data, graded card information, population reports, image recognition, and support for additional trading card games.
-
-Documentation is available at:
-
-https://scrydex.com/docs
+Pokémon und alle zugehörigen Namen, Kartentexte und Bilder sind Eigentum ihrer jeweiligen Rechteinhaber (Nintendo, Creatures Inc., GAME FREAK inc., The Pokémon Company). Dies ist ein nicht-kommerzielles Fanprojekt ohne Verbindung zu diesen Unternehmen.
