@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { learnTables } from '../merge/learn-tables.mjs';
 import { deriveLegalities, loadLegals } from '../merge/legalities.mjs';
-import { resolveImages, resolveSetImages } from '../merge/images.mjs';
+import { resolveImages, resolveSetImages, setAssetCandidates } from '../merge/images.mjs';
 
 const pair = (td, pt) => ({ tcgdexCard: td, ptCard: pt });
 const rep = (n, f) => Array.from({ length: n }, (_, i) => f(i));
@@ -73,8 +73,40 @@ test('resolveImages / resolveSetImages', () => {
   });
   assert.equal(resolveImages(idx, { lang: 'en', serieId: 'sv', setId: 'sv1', localId: '2' }), null);
   assert.equal(resolveImages(idx, { lang: 'de', serieId: 'sv', setId: 'sv1', localId: '1' }), null);
-  assert.deepEqual(resolveSetImages(idx, { lang: 'en', serieId: 'sv', setId: 'sv1' }), {
-    logo: 'https://assets.tcgdex.net/en/sv/sv1/logo.webp', symbol: 'https://assets.tcgdex.net/univ/sv/sv1/symbol.webp',
+  // Ohne Verifikation (unbekannt) wird wie bisher emittiert; das Symbol liegt unter /en/ (univ liefert HTTP 400).
+  assert.deepEqual(resolveSetImages(idx, {}, { lang: 'en', serieId: 'sv', setId: 'sv1' }), {
+    logo: 'https://assets.tcgdex.net/en/sv/sv1/logo.webp', symbol: 'https://assets.tcgdex.net/en/sv/sv1/symbol.webp',
   });
-  assert.deepEqual(resolveSetImages(idx, { lang: 'de', serieId: 'sv', setId: 'sv1' }), { symbol: 'https://assets.tcgdex.net/univ/sv/sv1/symbol.webp' });
+  assert.deepEqual(resolveSetImages(idx, undefined, { lang: 'de', serieId: 'sv', setId: 'sv1' }), { symbol: 'https://assets.tcgdex.net/en/sv/sv1/symbol.webp' });
+});
+
+const A = 'https://assets.tcgdex.net';
+const idxDe = { en: { me: { me05: { logo: 'l' } } }, de: { me: { me05: { logo: 'l' } } }, univ: { me: { me05: { symbol: 's' } } } };
+const miss = { status: 'missing', checkedAt: '2026-11-12T00:00:00.000Z' };
+const ok = { status: 'ok', checkedAt: '2026-11-12T00:00:00.000Z' };
+
+test('missing DE logo is not emitted, EN logo kept', () => {
+  const verified = {
+    [`${A}/de/me/me05/logo.webp`]: miss, [`${A}/de/me/me05/logo.png`]: miss,
+    [`${A}/en/me/me05/logo.webp`]: ok,
+    [`${A}/en/me/me05/symbol.webp`]: miss, [`${A}/en/me/me05/symbol.png`]: miss,
+  };
+  assert.deepEqual(resolveSetImages(idxDe, verified, { lang: 'de', serieId: 'me', setId: 'me05' }), {});
+  assert.deepEqual(resolveSetImages(idxDe, verified, { lang: 'en', serieId: 'me', setId: 'me05' }), { logo: `${A}/en/me/me05/logo.webp` });
+});
+
+test('png chosen when webp missing', () => {
+  const verified = { [`${A}/de/me/me05/logo.webp`]: miss, [`${A}/de/me/me05/logo.png`]: ok, [`${A}/en/me/me05/symbol.webp`]: miss };
+  assert.deepEqual(resolveSetImages(idxDe, verified, { lang: 'de', serieId: 'me', setId: 'me05' }), {
+    logo: `${A}/de/me/me05/logo.png`, symbol: `${A}/en/me/me05/symbol.png`,
+  });
+});
+
+test('setAssetCandidates: Logos en/de, Symbol unter /en/, je webp dann png', () => {
+  assert.deepEqual(setAssetCandidates(idxDe), [
+    [`${A}/en/me/me05/logo.webp`, `${A}/en/me/me05/logo.png`],
+    [`${A}/de/me/me05/logo.webp`, `${A}/de/me/me05/logo.png`],
+    [`${A}/en/me/me05/symbol.webp`, `${A}/en/me/me05/symbol.png`],
+  ]);
+  assert.deepEqual(setAssetCandidates({}), []);
 });

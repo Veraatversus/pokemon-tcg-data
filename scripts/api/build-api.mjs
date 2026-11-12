@@ -9,11 +9,13 @@ import { runMatching } from './match/run-matching.mjs';
 import {
   buildRegistry, assertFrozen, registryChanges, RegistryFrozenError, RegistryInvariantError,
 } from './registry/build-registry.mjs';
-import { readRegistry, writeRegistry, toJson, assertSafeSetId } from './registry/registry-io.mjs';
+import { readRegistry, writeRegistry, toJson, toCompactJson, assertSafeSetId } from './registry/registry-io.mjs';
 import { learnTables } from './merge/learn-tables.mjs';
 import { loadLegals } from './merge/legalities.mjs';
 import { mergeCard } from './merge/merge-card.mjs';
 import { mergeSet } from './merge/merge-set.mjs';
+import { setAssetCandidates } from './merge/images.mjs';
+import { countGroups } from './sources/verify-assets.mjs';
 import { sortLocalIds } from '../cardmarket/tcgdex-helper/generate-tcgdex-helpers.mjs';
 
 const cmp = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
@@ -108,6 +110,9 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
   const tables = learnTables(pairs);
   const legals = loadLegals(p('sources', 'tcgdex', 'meta', 'legals.ts'));
   const assetsIndex = readJsonOr(p('sources', 'tcgdex', 'assets-index.json'), {});
+  // Pruefstand der Set-Logos/-Symbole (verify-assets.mjs); fehlt die Datei, wird alles ausgegeben.
+  const assetsVerified = readJsonOr(p('sources', 'tcgdex', 'assets-verified.json'), {});
+  const assets = countGroups(assetsVerified, setAssetCandidates(assetsIndex));
   const cardmarketTracker = readJsonOr(p('cardmarket', 'index', 'tracker.json'), { bySetId: {} });
   const sources = readJson(p('sources', 'SOURCES.json'));
   const sourceCommits = { pokemontcg: short(sources.pokemontcg?.commit), tcgdex: short(sources.tcgdex?.commit) };
@@ -152,7 +157,7 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
     sets.push(mergeSet({
       canonicalSetId: setId, registrySet,
       ptSet: registrySet.pokemontcg ? ptSetById.get(registrySet.pokemontcg) ?? null : null,
-      tcgdexSet, cardCount: cards.length, assetsIndex, cardmarketTracker,
+      tcgdexSet, cardCount: cards.length, assetsIndex, assetsVerified, cardmarketTracker,
     }));
   }
   sets.sort((a, b) => cmp(a.releaseDate ?? '9999', b.releaseDate ?? '9999') || cmp(a.id, b.id));
@@ -175,7 +180,13 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
   const searchIndex = [];
   for (const [setId, cards] of [...cardsBySet].sort((a, b) => cmp(a[0], b[0]))) {
     for (const c of cards) {
-      searchIndex.push({ setId, cardId: c.cardId, name: c.name, nameDe: c.i18n?.de?.name, number: c.number });
+      const entry = { setId, cardId: c.cardId, number: c.number, name: c.name };
+      const optional = {
+        nameDe: c.i18n?.de?.name, img: c.images?.small, imgDe: c.i18n?.de?.images?.small,
+        types: c.types, rarity: c.rarity, artist: c.artist, supertype: c.supertype,
+      };
+      for (const [k, v] of Object.entries(optional)) if (Array.isArray(v) ? v.length : filled(v)) entry[k] = v;
+      searchIndex.push(entry);
     }
   }
   const meta = {
@@ -195,13 +206,13 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
   const wanted = new Set();
   for (const [setId, cards] of cardsBySet) {
     wanted.add(`${setId}.json`);
-    writeIfChanged(path.join(cardsDir, `${setId}.json`), toJson(cards));
+    writeIfChanged(path.join(cardsDir, `${setId}.json`), toCompactJson(cards));
   }
   for (const f of fs.readdirSync(cardsDir)) {
     if (f.endsWith('.json') && !wanted.has(f)) fs.rmSync(path.join(cardsDir, f));
   }
   writeIfChanged(path.join(outAbs, 'sets.json'), toJson(sets));
-  writeIfChanged(path.join(outAbs, 'search-index.json'), toJson(searchIndex));
+  writeIfChanged(path.join(outAbs, 'search-index.json'), toCompactJson(searchIndex));
   writeIfChanged(path.join(outAbs, 'meta.json'), toJson(meta));
   // Gelernte Tabellen deterministisch ablegen, damit Aenderungen im Diff sichtbar werden.
   fs.mkdirSync(path.join(outAbs, 'reports'), { recursive: true });
@@ -209,7 +220,7 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
   if (doWriteRegistry && !tcgdexOnly) writeRegistry(registryAbs, registry);
 
   return {
-    sets: sets.length, cards: cardTotal, matchStatus, registryChanges: changes, skippedNoSource, missingImages,
+    sets: sets.length, cards: cardTotal, matchStatus, registryChanges: changes, skippedNoSource, missingImages, assets,
     tables: Object.fromEntries(Object.entries(tables).map(([k, v]) => [k, Object.keys(v).length])),
     warnings: db.warnings.length,
   };
@@ -257,6 +268,7 @@ function main() {
       console.log(`WARNUNG: ${mi.total} Karten ohne Bild (images fehlt):`);
       for (const [setId, n] of Object.entries(mi.bySet).sort((a, b) => b[1] - a[1] || cmp(a[0], b[0]))) console.log(`  ${setId}: ${n}`);
     }
+    console.log(`Assets: ${r.assets.ok} ok, ${r.assets.missing} fehlen`);
     console.log(`Gelernte Tabellen: ${Object.entries(r.tables).map(([k, n]) => `${k} ${n}`).join(', ')}`);
     const counts = new Map();
     for (const c of r.registryChanges) {

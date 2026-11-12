@@ -48,6 +48,13 @@ jobs:
       - name: Sync TCGdex
         run: node scripts/api/sources/sync-tcgdex.mjs
 
+      # Inkrementell: nur neue URLs und seit 7 Tagen fehlende Set-Logos/-Symbole werden angefragt.
+      # Ein Netzwerkfehler darf den Lauf nicht abbrechen; der Build nutzt dann den letzten Pruefstand.
+      - name: Verify set assets
+        continue-on-error: true
+        timeout-minutes: 10
+        run: node scripts/api/sources/verify-assets.mjs
+
       - name: Build matching report
         run: node scripts/api/build-matching.mjs --min-card-match 0.995 --fail-on-pair-drift
 
