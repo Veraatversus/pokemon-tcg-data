@@ -409,6 +409,14 @@ export function createSettingsPanel(currentSettings = {}, onSave, options = {}) 
         </label>
       `).join('')}
 
+      <label style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+        <span>Kartensprache</span>
+        <select data-key="cardLanguage" style="min-width: 200px;">
+          <option value="de" ${String(currentSettings.cardLanguage) !== 'en' ? 'selected' : ''}>Deutsch (Standard)</option>
+          <option value="en" ${String(currentSettings.cardLanguage) === 'en' ? 'selected' : ''}>Englisch</option>
+        </select>
+      </label>
+
       <div style="border:1px solid var(--color-border); border-radius:8px; padding:10px 12px; background: var(--color-surface);">
         <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600;">
           <input type="checkbox" data-key="expertResolverMode" ${expertEnabled ? 'checked' : ''} />

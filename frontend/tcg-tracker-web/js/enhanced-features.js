@@ -30,6 +30,7 @@ const DEFAULT_SETTINGS = {
   autoBackup: false,
   notificationsEnabled: false,
   expertResolverMode: false,
+  cardLanguage: 'de',
   cardmarketBasePriceType: CARDMARKET_BASE_PRICE_DEFAULT
 };
 
@@ -118,6 +119,7 @@ export function generateCollectionReport(collection = {}, sets = []) {
 function sanitizeSettings(settings = {}) {
   const normalized = settings && typeof settings === 'object' ? { ...settings } : {};
   delete normalized.autoImportMode;
+  normalized.cardLanguage = String(normalized.cardLanguage || '').toLowerCase() === 'en' ? 'en' : 'de';
   normalized.cardmarketBasePriceType = normalizeCardmarketBasePriceType(normalized.cardmarketBasePriceType);
   return normalized;
 }

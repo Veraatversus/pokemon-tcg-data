@@ -20,6 +20,52 @@ function getResolverSources() {
 // Defaults are computed at first access (in `getDefaultResolverMatrix()`) so the
 // dev-only `cardmarket` source is only inserted when running on a loopback /
 // private-network host. Tests can call this directly.
+const CARD_LANGUAGES = ['de', 'en'];
+// Sprachabhaengige Felder: DE = tcgdex-Quelle, EN = vera-Quelle. Alles andere ist sprachneutral.
+const LANGUAGE_DEPENDENT_FIELDS = {
+  set: ['setName', 'logoUrl'],
+  card: ['name', 'image', 'imageLarge', 'evolvesFrom', 'rules', 'flavorText']
+};
+
+function normalizeCardLanguage(value) {
+  const lang = String(value || '').trim().toLowerCase();
+  return CARD_LANGUAGES.includes(lang) ? lang : 'de';
+}
+
+function readStoredSettings() {
+  try {
+    const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
+    return raw ? (JSON.parse(raw) || {}) : {};
+  } catch {
+    return {};
+  }
+}
+
+// Kartensprache fuer die Anzeige (Standard 'de'); wird pro Browser in den user-settings gehalten.
+export function getCardLanguage() {
+  return normalizeCardLanguage(readStoredSettings().cardLanguage);
+}
+
+// Setzt bei EN `vera` vor `tcgdex` in den sprachabhaengigen Feldern (Rest der Reihenfolge bleibt).
+function applyLanguageOrder(matrix, language) {
+  if (language !== 'en') return matrix;
+  Object.entries(LANGUAGE_DEPENDENT_FIELDS).forEach(([scope, fields]) => {
+    fields.forEach((field) => {
+      const order = matrix[scope]?.[field];
+      if (!Array.isArray(order)) return;
+      matrix[scope][field] = [
+        ...order.filter((src) => src === 'vera'),
+        ...order.filter((src) => src !== 'vera')
+      ];
+    });
+  });
+  return matrix;
+}
+
+export function resetResolverMatrixCache() {
+  resolverMatrixCache = null;
+}
+
 function getDefaultResolverMatrix() {
   const sources = getResolverSources();
   const imageOrder = isLocalDevEnvironment()
@@ -114,26 +160,48 @@ function normalizeResolverMatrix(input) {
   return normalized;
 }
 
-function getResolverMatrix() {
+export function getResolverMatrix() {
   if (resolverMatrixCache) return resolverMatrixCache;
   try {
-    const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
-    if (!raw) {
-      // Bypass the DEFAULT_RESOLVER_MATRIX Proxy: JSON.stringify on an
-      // empty Proxy({}, ...) returns '{}' (the get-trap is never invoked),
-      // so deepClone would lose the .set/.card sub-trees and any caller
-      // doing `getResolverMatrix().set` would crash. Calling the factory
-      // directly yields a real object that deepClone can clone safely.
-      resolverMatrixCache = deepClone(getDefaultResolverMatrix());
-      return resolverMatrixCache;
-    }
-    const parsed = JSON.parse(raw);
-    resolverMatrixCache = normalizeResolverMatrix(parsed?.resolverMatrix || null);
+    const settings = readStoredSettings();
+    const language = normalizeCardLanguage(settings.cardLanguage);
+    // Bypass the DEFAULT_RESOLVER_MATRIX Proxy (JSON.stringify on it yields '{}').
+    const matrix = settings.resolverMatrix
+      ? normalizeResolverMatrix(settings.resolverMatrix)
+      : deepClone(getDefaultResolverMatrix());
+    // Im Expert-Modus hat die vom Nutzer gespeicherte Matrix Vorrang vor der Sprachwahl.
+    resolverMatrixCache = settings.expertResolverMode ? matrix : applyLanguageOrder(matrix, language);
     return resolverMatrixCache;
   } catch {
     resolverMatrixCache = deepClone(getDefaultResolverMatrix());
     return resolverMatrixCache;
   }
+}
+
+// Bevorzugte Karten-Texte je Sprache: DE -> i18n_de, EN -> vera_*; jeweils Fallback auf die andere Sprache.
+export function getPreferredCardTexts(cardRecord = {}, language = 'de') {
+  const de = cardRecord?.i18n_de || {};
+  const arr = (v) => (Array.isArray(v) ? v : []);
+  const pick = (primary, secondary) => (primary.length ? primary : secondary);
+  const enTexts = {
+    attacks: arr(cardRecord?.vera_attacks),
+    abilities: arr(cardRecord?.vera_abilities),
+    rules: arr(cardRecord?.vera_rules),
+    flavorText: String(cardRecord?.vera_flavorText || '')
+  };
+  const deTexts = {
+    attacks: arr(de.attacks),
+    abilities: arr(de.abilities),
+    rules: arr(de.rules),
+    flavorText: String(de.flavorText || '')
+  };
+  const [first, second] = normalizeCardLanguage(language) === 'en' ? [enTexts, deTexts] : [deTexts, enTexts];
+  return {
+    attacks: pick(first.attacks, second.attacks),
+    abilities: pick(first.abilities, second.abilities),
+    rules: pick(first.rules, second.rules),
+    flavorText: first.flavorText || second.flavorText
+  };
 }
 
 function resolveFieldByPriority(priority, sourceValues, options = {}) {
@@ -780,17 +848,19 @@ export function resolveDisplayCard(cardRecord = {}) {
   }, { fallback: cardRecord.vera_regulationMark || cardRecord.tcgdex_regulationMark || '' });
 
   const resolvedRules = resolveFieldByPriority(matrix.rules, {
-    tcgdex: normalizeRules(null, {
-      description: cardRecord.tcgdex_description,
-      effect: cardRecord.tcgdex_effect
-    }),
+    tcgdex: (Array.isArray(cardRecord.i18n_de?.rules) && cardRecord.i18n_de.rules.length)
+      ? cardRecord.i18n_de.rules
+      : normalizeRules(null, {
+        description: cardRecord.tcgdex_description,
+        effect: cardRecord.tcgdex_effect
+      }),
     vera: Array.isArray(cardRecord.vera_rules) ? cardRecord.vera_rules : []
   }, { fallback: rules });
 
   const flavorText = resolveFieldByPriority(matrix.flavorText, {
-    tcgdex: cardRecord.tcgdex_description,
+    tcgdex: cardRecord.tcgdex_description || cardRecord.i18n_de?.flavorText,
     vera: cardRecord.vera_flavorText
-  }, { fallback: cardRecord.vera_flavorText || cardRecord.tcgdex_description || '' });
+  }, { fallback: cardRecord.vera_flavorText || cardRecord.tcgdex_description || cardRecord.i18n_de?.flavorText || '' });
 
   return {
     ...cardRecord,
