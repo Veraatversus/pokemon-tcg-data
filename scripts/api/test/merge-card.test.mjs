@@ -177,11 +177,37 @@ test('mergeSet: pt-Set mit TCGdex-Gegenstueck', () => {
   assert.equal(s.total, 207);
   assert.equal(s.releaseDate, '2023/09/22');
   assert.equal(s.ptcgoCode, 'MEW');
-  assert.deepEqual(s.images, { logo: 'https://assets.tcgdex.net/en/sv/sv03.5/logo.webp', symbol: 'https://assets.tcgdex.net/univ/sv/sv03.5/symbol.webp' });
+  assert.deepEqual(s.images, { logo: 'https://assets.tcgdex.net/en/sv/sv03.5/logo.webp', symbol: 'https://assets.tcgdex.net/en/sv/sv03.5/symbol.webp' });
   assert.equal(s.i18n.de.name, '151');
   assert.equal(s.i18n.de.images.logo, 'https://assets.tcgdex.net/de/sv/sv03.5/logo.webp');
   assert.deepEqual(s.ids, { pokemontcg: 'sv3pt5', tcgdex: 'sv03.5', cardmarket: 5402, tcgplayer: 23237 });
   assert.deepEqual(s.aliases, ['TCGDEX-sv03.5']);
+});
+
+test('merge-set adds DE series and cardCount', () => {
+  const me6 = { id: 'me06', serieId: 'me', serieName: { en: 'Mega Evolution', de: 'Mega-Entwicklung' }, name: { en: 'X', de: 'X' }, cardCountOfficial: 103, cardCountTotal: 141, releaseDate: '2026-01-01', cardmarketId: null, tcgplayerId: null };
+  const s = mergeSet({ canonicalSetId: 'me6', registrySet: { pokemontcg: null, tcgdex: 'me06', aliases: [] }, ptSet: null, tcgdexSet: me6, cardCount: 141, assetsIndex, cardmarketTracker: tracker });
+  assert.equal(s.series, 'Mega Evolution');
+  assert.equal(s.i18n.de.series, 'Mega-Entwicklung');
+  assert.deepEqual(s.i18n.de.cardCount, { official: 103, total: 141 });
+  const partial = mergeSet({ canonicalSetId: 'me6', registrySet: { tcgdex: 'me06', aliases: [] }, tcgdexSet: { ...me6, cardCountTotal: null, serieName: { en: 'Mega Evolution' } }, cardCount: 141, assetsIndex, cardmarketTracker: tracker });
+  assert.deepEqual(partial.i18n.de.cardCount, { official: 103 });
+  assert.equal(partial.i18n.de.series, undefined);
+});
+
+test('mergeSet: verifiziert fehlende TCGdex-Assets -> pt-Fallback oben, kein DE-Logo', () => {
+  const miss = { status: 'missing', checkedAt: '2026-11-12T00:00:00.000Z' };
+  const A = 'https://assets.tcgdex.net';
+  const assetsVerified = Object.fromEntries([
+    `${A}/en/sv/sv03.5/symbol.webp`, `${A}/en/sv/sv03.5/symbol.png`, `${A}/de/sv/sv03.5/logo.webp`, `${A}/de/sv/sv03.5/logo.png`,
+  ].map((u) => [u, miss]));
+  const s = mergeSet({
+    canonicalSetId: 'sv3pt5', registrySet: { pokemontcg: 'sv3pt5', tcgdex: 'sv03.5', mergedSubsets: [], aliases: [] },
+    ptSet: { id: 'sv3pt5', name: '151', images: { symbol: 'pt-s', logo: 'pt-l' } },
+    tcgdexSet: sv035, cardCount: 207, assetsIndex, assetsVerified, cardmarketTracker: tracker,
+  });
+  assert.deepEqual(s.images, { logo: `${A}/en/sv/sv03.5/logo.webp`, symbol: 'pt-s' });
+  assert.deepEqual(s.i18n.de, { name: '151', series: 'Karmesin & Purpur', cardCount: { official: 165 } });
 });
 
 test('mergeSet: pt-Set ohne TCGdex -> Legacy-Bilder, Cardmarket aus Tracker', () => {
@@ -214,7 +240,7 @@ test('mergeSet: TCGDEX-Set und Pocket-Set', () => {
     ptSet: null, tcgdexSet: { ...svp, id: 'A1', name: { en: 'Genetic Apex', de: 'Unschlagbare Gene' }, cardmarketId: 7 }, cardCount: 286, assetsIndex, cardmarketTracker: tracker,
   });
   assert.deepEqual(a1.images, { logo: 'https://assets.tcgdex.net/en/tcgp/A1/logo.webp' });
-  assert.deepEqual(a1.i18n.de, { name: 'Unschlagbare Gene', images: { logo: 'https://assets.tcgdex.net/de/tcgp/A1/logo.webp' } });
+  assert.deepEqual(a1.i18n.de, { name: 'Unschlagbare Gene', cardCount: { official: 100 }, images: { logo: 'https://assets.tcgdex.net/de/tcgp/A1/logo.webp' } });
   assert.equal(a1.ids.cardmarket, 7);
 });
 

@@ -75,6 +75,7 @@ export function loadTcgdexDatabase(rootDir, { excludeSerieIds = [] } = {}) {
         name: set.name,
         abbreviationOfficial: set.abbreviations?.official ?? null,
         cardCountOfficial: numberOrNull(set.cardCount?.official),
+        cardCountTotal: numberOrNull(set.cardCount?.total),
         releaseDate: typeof rd === 'string' ? rd : (typeof rd?.en === 'string' ? rd.en : null),
         cardmarketId: numberOrNull(set.thirdParty?.cardmarket),
         tcgplayerId: numberOrNull(set.thirdParty?.tcgplayer),

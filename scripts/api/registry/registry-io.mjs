@@ -7,13 +7,16 @@ import { SAFE_ID } from './build-registry.mjs';
 const cmp = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 
 // Schluessel rekursiv sortiert (Ganzzahl-Schluessel ordnet JS ohnehin numerisch voran).
-function sortKeys(value) {
+export function sortKeys(value) {
   if (Array.isArray(value)) return value.map(sortKeys);
   if (value && typeof value === 'object') {
     return Object.fromEntries(Object.keys(value).sort(cmp).map((k) => [k, sortKeys(value[k])]));
   }
   return value;
 }
+
+// Kompakt (eine Zeile), Schluessel sortiert wie toJson; fuer grosse Dateien (Suchindex).
+export const toCompactJson = (value) => `${JSON.stringify(sortKeys(value))}\n`;
 
 export const toJson = (value) => `${JSON.stringify(sortKeys(value), null, 2)}\n`;
 
