@@ -29,7 +29,7 @@ function makeRepo() {
     id: `sv1-${n}`, name, supertype: 'Pokémon', subtypes: ['Basic'], number: String(n), rarity: 'Common', hp: '60',
     images: { small: `https://images.pokemontcg.io/sv1/${n}.png`, large: `https://images.pokemontcg.io/sv1/${n}_hires.png` }, ...extra,
   });
-  write(root, 'sources/pokemontcg/cards/en/sv1.json', [pt(1, 'Alpha'), pt(2, 'Beta'), pt(3, 'Gamma')]);
+  write(root, 'sources/pokemontcg/cards/en/sv1.json', [pt(1, 'Alpha', { types: ['Grass'], artist: 'Ann Artist' }), pt(2, 'Beta'), pt(3, 'Gamma')]);
 
   const d = 'sources/tcgdex/data';
   write(root, `${d}/Scarlet & Violet.ts`, serieTs('sv', 'Scarlet & Violet'));
@@ -111,7 +111,7 @@ test('runBuild: Mini-Repo, zwei Laeufe identisch, Registry geschrieben, alte Dat
     assert.deepEqual(r1.missingImages, { total: 0, bySet: {} });
     const idx = readJson(path.join(v3, 'search-index.json'));
     assert.equal(idx.length, 7);
-    assert.deepEqual(idx[0], { cardId: '1', name: 'Pocket 001', nameDe: 'Tasche 001', number: '001', setId: 'TCGDEX-A1' });
+    assert.deepEqual(idx[0], { cardId: '1', name: 'Pocket 001', nameDe: 'Tasche 001', number: '001', setId: 'TCGDEX-A1', img: 'https://assets.tcgdex.net/en/tcgp/A1/001/low.webp', rarity: 'One Diamond', supertype: 'Pokémon' });
     assert.ok(fs.existsSync(path.join(root, 'api', 'registry', 'sets.json')));
     assert.deepEqual(readJson(path.join(v3, 'reports', 'matching.json')), { untouched: true });
     for (const s of Object.values(snapshot(v3))) assert.ok(s.endsWith('\n') && !s.includes('\r'));
@@ -122,6 +122,27 @@ test('runBuild: Mini-Repo, zwei Laeufe identisch, Registry geschrieben, alte Dat
     assert.deepEqual(r2.registryChanges, []);
     assert.deepEqual(snapshot(v3), before.v3);
     assert.deepEqual(snapshot(path.join(root, 'api', 'registry')), before.reg);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('search index carries display fields', () => {
+  const root = makeRepo();
+  try {
+    runBuild({ repoRoot: root });
+    const idx = readJson(path.join(root, 'api', 'v3', 'search-index.json'));
+    const alpha = idx.find((e) => e.setId === 'sv1' && e.cardId === '1');
+    assert.equal(alpha.img, 'https://assets.tcgdex.net/en/sv/sv01/001/low.webp');
+    assert.equal(alpha.imgDe, 'https://assets.tcgdex.net/de/sv/sv01/001/low.webp');
+    assert.deepEqual(alpha.types, ['Grass']);
+    assert.equal(alpha.rarity, 'Common');
+    assert.equal(alpha.artist, 'Ann Artist');
+    assert.equal(alpha.supertype, 'Pokémon');
+    const beta = idx.find((e) => e.setId === 'sv1' && e.cardId === '2');
+    assert.ok(!('imgDe' in beta));
+    assert.ok(!('artist' in beta));
+    for (const e of idx) for (const v of Object.values(e)) assert.notEqual(v, undefined);
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }

@@ -180,7 +180,13 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
   const searchIndex = [];
   for (const [setId, cards] of [...cardsBySet].sort((a, b) => cmp(a[0], b[0]))) {
     for (const c of cards) {
-      searchIndex.push({ setId, cardId: c.cardId, name: c.name, nameDe: c.i18n?.de?.name, number: c.number });
+      const entry = { setId, cardId: c.cardId, number: c.number, name: c.name };
+      const optional = {
+        nameDe: c.i18n?.de?.name, img: c.images?.small, imgDe: c.i18n?.de?.images?.small,
+        types: c.types, rarity: c.rarity, artist: c.artist, supertype: c.supertype,
+      };
+      for (const [k, v] of Object.entries(optional)) if (Array.isArray(v) ? v.length : filled(v)) entry[k] = v;
+      searchIndex.push(entry);
     }
   }
   const meta = {
