@@ -1,11 +1,15 @@
 // Bild-URLs aus dem reduzierten assets.tcgdex.net-Index (nur wenn vorhanden).
 const BASE = 'https://assets.tcgdex.net';
 
-export function resolveImages(index, { lang, serieId, setId, localId }) {
-  const hash = index?.[lang]?.[serieId]?.[setId]?.[localId];
-  if (!hash) return null;
-  const base = `${BASE}/${lang}/${serieId}/${setId}/${localId}`;
-  return { small: `${base}/low.webp`, large: `${base}/high.webp` };
+// Unterset-Karten (Galerien, Shiny Vault) liegen im CDN unter dem Pfad des Eltern-Sets
+// (parentSetId); der eigene Set-Pfad gewinnt, wenn er das Asset fuehrt.
+export function resolveImages(index, { lang, serieId, setId, localId, parentSetId }) {
+  for (const id of new Set([setId, parentSetId].filter(Boolean))) {
+    if (!index?.[lang]?.[serieId]?.[id]?.[localId]) continue;
+    const base = `${BASE}/${lang}/${serieId}/${id}/${localId}`;
+    return { small: `${base}/low.webp`, large: `${base}/high.webp` };
+  }
+  return null;
 }
 
 // Set-Assets: je Asset erst .webp, dann .png. Logos je Sprache; das Symbol fuehrt der Index unter
