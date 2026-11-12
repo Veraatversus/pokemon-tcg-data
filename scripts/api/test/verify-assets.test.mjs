@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { verifyAssets, verifySetAssets, classifyStatus, updateVerifiedFile } from '../sources/verify-assets.mjs';
+import { verifyAssets, verifySetAssets, classifyStatus, updateVerifiedFile, countGroups } from '../sources/verify-assets.mjs';
 
 const NOW = new Date('2026-11-12T02:00:00.000Z');
 const now = () => NOW;
@@ -67,11 +67,20 @@ test('Nebenlaeufigkeit ist begrenzt', async () => {
   assert.ok(peak <= 4, `peak ${peak}`);
 });
 
-test('classifyStatus: 2xx ok, 4xx fehlt, 408/429/5xx/null transient', () => {
+test('classifyStatus: 2xx ok, 4xx fehlt, 401/403/408/429/5xx/null transient', () => {
   assert.equal(classifyStatus(200), 'ok');
   assert.equal(classifyStatus(404), 'missing');
   assert.equal(classifyStatus(400), 'missing');
-  for (const s of [null, 408, 429, 500, 503]) assert.equal(classifyStatus(s), null);
+  for (const s of [null, 401, 403, 408, 429, 500, 503]) assert.equal(classifyStatus(s), null);
+});
+
+test('countGroups: Gruppe fehlt nur, wenn alle Varianten fehlen', () => {
+  const m = { status: 'missing', checkedAt: 'x' };
+  const o = { status: 'ok', checkedAt: 'x' };
+  const verified = { 'a.webp': o, 'b.webp': m, 'b.png': o, 'c.webp': m, 'c.png': m, 'd.webp': m };
+  const groups = [['a.webp', 'a.png'], ['b.webp', 'b.png'], ['c.webp', 'c.png'], ['d.webp', 'd.png'], ['e.webp', 'e.png']];
+  // a ok, b ok (png), c fehlt, d unbekannt (png ungeprueft), e unbekannt
+  assert.deepEqual(countGroups(verified, groups), { ok: 2, missing: 1 });
 });
 
 test('verifySetAssets: png nur pruefen, wenn webp fehlt', async () => {

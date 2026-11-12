@@ -16,8 +16,7 @@ export function sortKeys(value) {
 }
 
 // Kompakt (eine Zeile), Schluessel sortiert wie toJson; fuer grosse Dateien (Suchindex).
-export const toCompactJson = (value) => `${JSON.stringify(sortKeys(value))}
-`;
+export const toCompactJson = (value) => `${JSON.stringify(sortKeys(value))}\n`;
 
 export const toJson = (value) => `${JSON.stringify(sortKeys(value), null, 2)}\n`;
 

@@ -52,6 +52,7 @@ jobs:
       # Ein Netzwerkfehler darf den Lauf nicht abbrechen; der Build nutzt dann den letzten Pruefstand.
       - name: Verify set assets
         continue-on-error: true
+        timeout-minutes: 10
         run: node scripts/api/sources/verify-assets.mjs
 
       - name: Build matching report

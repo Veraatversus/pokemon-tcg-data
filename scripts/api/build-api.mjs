@@ -15,7 +15,7 @@ import { loadLegals } from './merge/legalities.mjs';
 import { mergeCard } from './merge/merge-card.mjs';
 import { mergeSet } from './merge/merge-set.mjs';
 import { setAssetCandidates } from './merge/images.mjs';
-import { countStatuses } from './sources/verify-assets.mjs';
+import { countGroups } from './sources/verify-assets.mjs';
 import { sortLocalIds } from '../cardmarket/tcgdex-helper/generate-tcgdex-helpers.mjs';
 
 const cmp = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
@@ -112,7 +112,7 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
   const assetsIndex = readJsonOr(p('sources', 'tcgdex', 'assets-index.json'), {});
   // Pruefstand der Set-Logos/-Symbole (verify-assets.mjs); fehlt die Datei, wird alles ausgegeben.
   const assetsVerified = readJsonOr(p('sources', 'tcgdex', 'assets-verified.json'), {});
-  const assets = countStatuses(assetsVerified, setAssetCandidates(assetsIndex).flat());
+  const assets = countGroups(assetsVerified, setAssetCandidates(assetsIndex));
   const cardmarketTracker = readJsonOr(p('cardmarket', 'index', 'tracker.json'), { bySetId: {} });
   const sources = readJson(p('sources', 'SOURCES.json'));
   const sourceCommits = { pokemontcg: short(sources.pokemontcg?.commit), tcgdex: short(sources.tcgdex?.commit) };

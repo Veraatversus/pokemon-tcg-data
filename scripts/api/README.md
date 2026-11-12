@@ -11,6 +11,10 @@ Node 24 (ESM). Tests: `cd scripts/api && npm test`.
 
 Kartenbilder: oben in `images` strikt Englisch (TCGdex EN, sonst pokemontcg-Legacy-URL), Deutsch nur in `i18n.de.images`; `warnings.missingImages` zaehlt Karten ohne EN-Bild und ohne `i18n.de.images`.
 
+Set-Logos und -Symbole: `sources/verify-assets.mjs` (im Workflow nach dem Sync, `continue-on-error`) prueft nur Set-Logos (en/de) und -Symbole aus `sources/tcgdex/assets-index.json` gegen assets.tcgdex.net, nie Kartenbilder, und fuehrt das Ergebnis in `sources/tcgdex/assets-verified.json` (`{ url: { status: ok|missing, checkedAt } }`). `ok` wird nie erneut geprueft, `missing` nach 7 Tagen, neue URLs einmal; je Asset erst `.webp`, `.png` nur wenn `.webp` fehlt. Netzwerkfehler, Timeouts sowie HTTP 401/403/408/429/5xx aendern nichts (bekannter Status bleibt, Unbekanntes bleibt unbekannt). Der Build gibt als fehlend verifizierte URLs nicht aus (oben greift die pokemontcg-Legacy-URL, `i18n.de.images.logo` entfaellt) und meldet `Assets: <ok> ok, <missing> fehlen` je Asset-Gruppe. Erneute Pruefung erzwingen: den Eintrag aus `assets-verified.json` loeschen. Etwa woechentlich aendert sich `checkedAt` der fehlenden Eintraege; der Sync committet das mit.
+
+Ausgabeformat: `api/v3/cards/*.json` und `api/v3/search-index.json` sind kompakt (eine Zeile, `toCompactJson`); `api/registry/**`, `api/v3/sets.json`, `api/v3/meta.json` und `api/v3/reports/learned-tables.json` sind eingerueckt (`toJson`). Beide mit sortierten Schluesseln und abschliessendem Zeilenumbruch.
+
 Die Registry vergibt kanonische Set-IDs und Kartenschluessel. Sie ist die Grundlage der Zeilenschluessel in `db_collection` und darf sich daher nur additiv aendern.
 
 ## Registry-Drift beheben

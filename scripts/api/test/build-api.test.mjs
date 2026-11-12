@@ -171,7 +171,7 @@ test('runBuild: assets-verified.json filtert fehlende Set-Logos, Zusammenfassung
     const sets = readJson(path.join(root, 'api', 'v3', 'sets.json'));
     assert.equal(sets.find((s) => s.id === 'sv1').images.logo, 'pt-l');
     assert.equal(sets.find((s) => s.id === 'TCGDEX-A1').images.logo, `${A}/en/tcgp/A1/logo.webp`);
-    assert.deepEqual(r.assets, { ok: 1, missing: 2 });
+    assert.deepEqual(r.assets, { ok: 1, missing: 1 }); // je Asset-Gruppe (webp+png), nicht je URL
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }

@@ -14,10 +14,12 @@ const DAY_MS = 86400000;
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36';
 
 // HTTP-Status -> 'ok' | 'missing' | null (voruebergehend, nichts aendern).
+// 401/403 (Sperre, Bot-Schutz), 408/429 und 5xx sagen nichts ueber das Asset aus.
+const TRANSIENT_4XX = new Set([401, 403, 408, 429]);
 export function classifyStatus(status) {
   if (typeof status !== 'number') return null;
   if (status >= 200 && status < 300) return 'ok';
-  if (status >= 400 && status < 500 && status !== 408 && status !== 429) return 'missing';
+  if (status >= 400 && status < 500 && !TRANSIENT_4XX.has(status)) return 'missing';
   return null;
 }
 
@@ -87,11 +89,14 @@ export function updateVerifiedFile(file, verified) {
   return true;
 }
 
-export function countStatuses(verified, urls) {
+// Zaehlt je Asset-Gruppe ([webp, png]): ok, wenn eine Variante ok ist; fehlt nur, wenn alle Varianten
+// als fehlend verifiziert sind; sonst unbekannt (nicht gezaehlt).
+export function countGroups(verified, groups) {
   const counts = { ok: 0, missing: 0 };
-  for (const url of urls) {
-    const s = verified?.[url]?.status;
-    if (s in counts) counts[s]++;
+  for (const group of groups) {
+    const statuses = group.map((u) => verified?.[u]?.status);
+    if (statuses.includes('ok')) counts.ok++;
+    else if (statuses.every((s) => s === 'missing')) counts.missing++;
   }
   return counts;
 }
@@ -111,8 +116,8 @@ async function main() {
   };
   const verified = await verifySetAssets({ groups, previous, probe });
   const written = updateVerifiedFile(file, verified);
-  const c = countStatuses(verified, Object.keys(verified));
-  console.log(`Set-Assets: ${groups.length} Kandidaten, ${probes} Anfragen, URLs ${c.ok} ok, ${c.missing} fehlen (${((Date.now() - started) / 1000).toFixed(1)} s)${written ? '' : ', unveraendert'}`);
+  const c = countGroups(verified, groups);
+  console.log(`Set-Assets: ${groups.length} Kandidaten, ${probes} Anfragen, ${c.ok} ok, ${c.missing} fehlen (${((Date.now() - started) / 1000).toFixed(1)} s)${written ? '' : ', unveraendert'}`);
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
