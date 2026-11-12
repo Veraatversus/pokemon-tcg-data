@@ -1,9 +1,28 @@
+/**
+ * Angezeigter Sammlungsstatus einer Karte (Spec §5.3, Plan Task 7 "Spaeter").
+ * Kandidat einer mehrdeutigen Altzeile ohne eigene Zeile: der gemeinsame Altstatus (g/rh der Altzeile) gilt
+ * als besessen (`shared: true`, nur lesend, Badge "nicht zugeordnet"), bis die Migration entschieden hat.
+ * Hat die Karte eine eigene Zeile, ist sie zugeordnet und nur ihr eigener Status zaehlt.
+ * @returns {{ g: boolean, rh: boolean, shared: boolean }}
+ */
+export function effectiveCollectionStatus(db = {}) {
+  const ownCells = (Array.isArray(db?.cells) && db.cells.length > 0) || Boolean(db?.gCell || db?.rhCell);
+  const amb = db?.ambiguous;
+  if (!ownCells && !db?.g && !db?.rh && amb && (amb.g || amb.rh)) {
+    return { g: true, rh: Boolean(amb.rh), shared: true };
+  }
+  return { g: Boolean(db?.g), rh: Boolean(db?.rh), shared: false };
+}
+
 export function getCollectionUiState(db = {}, { isEditable = true } = {}) {
+  const status = effectiveCollectionStatus(db);
   return {
-    gChecked: Boolean(db?.g),
-    rhChecked: Boolean(db?.rh),
+    gChecked: status.g,
+    rhChecked: status.rh,
+    // Geteilter Altstatus: G bleibt klickbar (oeffnet den Migrationsdialog, schreibt nichts).
     gDisabled: !isEditable,
-    rhDisabled: !isEditable || !Boolean(db?.rhCell)
+    rhDisabled: !isEditable || !Boolean(db?.rhCell),
+    sharedLegacy: status.shared
   };
 }
 

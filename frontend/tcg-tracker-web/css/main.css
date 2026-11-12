@@ -1626,6 +1626,19 @@ dialog h2 {
   background: linear-gradient(135deg, rgba(255, 183, 77, 0.95), rgba(255, 234, 167, 0.9));
 }
 
+/* Geteilter Altstatus (mehrdeutige Altzeile, noch nicht zugeordnet) */
+.legacy-shared-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #3b2a00;
+  background: rgba(255, 213, 79, 0.9);
+  white-space: nowrap;
+}
+
 .legacy-tree-badge.is-reverse {
   color: #031725;
   background: linear-gradient(135deg, rgba(103, 232, 249, 0.95), rgba(147, 197, 253, 0.9));

@@ -195,3 +195,40 @@ test('rein stille Migration legt keinen Snapshot an', async () => {
   assert.ok(!deps.calls.includes('snapshot'));
   assert.deepEqual(deps.rows.map((r) => r[1]), ['15', '15_A1', '15_A2']);
 });
+
+// Final-Review Finding 5: Kandidaten ohne eigene Zeile zeigen den gemeinsamen Altstatus (nur lesend).
+test('effectiveCollectionStatus/getCollectionUiState: geteilter Altstatus gilt als besessen, bis zugeordnet', async () => {
+  const { effectiveCollectionStatus, getCollectionUiState } = await import('../js/core/collection-state.js');
+  const { pendingAmbiguityError } = await import('../js/data/collection-writes.js');
+  const shared = mapFor([['cel25c', '15', true, true, 'x']]);
+  for (const key of ['15_A1', '15_A2']) {
+    const entry = shared.get(key);
+    assert.deepEqual(effectiveCollectionStatus(entry), { g: true, rh: true, shared: true }, key);
+    const ui = getCollectionUiState(entry, { isEditable: true });
+    assert.equal(ui.gChecked, true);
+    assert.equal(ui.rhChecked, true);
+    assert.equal(ui.sharedLegacy, true);
+    assert.equal(ui.gDisabled, false, 'G bleibt klickbar: Klick oeffnet den Migrationsdialog');
+    assert.equal(ui.rhDisabled, true, 'RH nur lesend (keine eigene Zelle)');
+    assert.ok(pendingAmbiguityError(entry, { setId: 'cel25c' }), 'Schreiben blockiert -> Dialog');
+  }
+  // Statistik/Fehlend-Filter wie updateStats/applyFilter: Kandidaten zaehlen als gesammelt
+  const collected = cardList.filter((c) => effectiveCollectionStatus(shared.get(c.collectionKey)).g).length;
+  assert.equal(collected, 2);
+  const missing = cardList.filter((c) => !effectiveCollectionStatus(shared.get(c.collectionKey)).g).length;
+  assert.equal(missing, 0);
+
+  // Altzeile ohne Haken -> kein geteilter Status
+  const unchecked = mapFor([['cel25c', '15', false, false, 'x']]);
+  assert.deepEqual(effectiveCollectionStatus(unchecked.get('15_A1')), { g: false, rh: false, shared: false });
+
+  // Eigene Zeile vorhanden -> zugeordnet, nur der eigene Status zaehlt
+  const decided = mapFor([['cel25c', '15', true, false, 'x'], ['cel25c', '15_A1', false, false, 'y']]);
+  assert.deepEqual(effectiveCollectionStatus(decided.get('15_A1')), { g: false, rh: false, shared: false });
+  assert.equal(effectiveCollectionStatus(decided.get('15_A2')).shared, true);
+
+  // Normale Karte
+  const normal = mapFor([['cel25c', '1', true, false, 'x']]);
+  assert.deepEqual(effectiveCollectionStatus(normal.get('1')), { g: true, rh: false, shared: false });
+  assert.deepEqual(effectiveCollectionStatus(undefined), { g: false, rh: false, shared: false });
+});

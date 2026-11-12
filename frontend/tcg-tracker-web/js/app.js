@@ -52,7 +52,7 @@ import {
   resolveCombinedSearchSelection,
   toBoolean
 } from './core/utils.js';
-import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle } from './core/collection-state.js?v=20261112-api-v3';
+import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle, effectiveCollectionStatus } from './core/collection-state.js?v=20261112-api-v3';
 import * as cache from './core/cache.js';
 import { CONFIG, scopedStorageKey } from './core/config.js';
 import {
@@ -80,6 +80,7 @@ import {
   extractLegacySpreadsheetId
 } from './features/collection/legacy-import.js?v=20261112-api-v3';
 import { ensureResolverForSet } from './data/collection-aliases.js';
+import { buildCollectionBackupSets } from './features/collection/backup-export.js';
 import { buildBackupRestoreSnapshot, planBackupRestore, pickSourceSetKey, resolveSourceCardKey } from './features/collection/legacy-key-resolution.js';
 import {
   planAmbiguousMigration,
@@ -4165,23 +4166,14 @@ async function exportCollectionBackup() {
 
   setLoading(true, 'Erstelle Backup...');
   try {
-    const backupSets = [];
-    // db_collection einmal lesen; Registry-Karten nur fuer Sets mit Haken aufloesen (lazy).
-    const setsWithChecks = await listCollectionSetIds({ checkedOnly: true }).catch(() => null);
-    for (let index = 0; index < state.sets.length; index++) {
-      const set = state.sets[index];
-      setGlobalStatus(`Backup ${index + 1}/${state.sets.length}: ${set.setName}`);
-      const cards = [];
-      if (!setsWithChecks || setsWithChecks.has(String(set.setId || '').toLowerCase())) {
-        const dbMap = await readSetCollectionMap(set.setName, { setId: set.setId }).catch(() => new Map());
-        // Schluessel = collectionKey (Backup-Version 2).
-        for (const [cardId, db] of dbMap.entries()) {
-          if (!db?.g && !db?.rh) continue;
-          cards.push({ cardId, g: Boolean(db?.g), rh: Boolean(db?.rh) });
-        }
-      }
-      backupSets.push({ setId: set.setId, setName: set.setName, cards });
-    }
+    // db_collection einmal strikt lesen; Registry-Karten nur fuer Sets mit Haken (lazy). Jeder Lesefehler
+    // bricht den Export ab (BackupExportError) – nie ein unvollstaendiges Backup schreiben.
+    const backupSets = await buildCollectionBackupSets(state.sets, {
+      listSetIds: () => listCollectionSetIds({ checkedOnly: true, strict: true }),
+      ensureResolver: (setId) => ensureResolverForSet(setId),
+      readMap: (set) => readSetCollectionMap(set.setName, { setId: set.setId, strict: true }),
+      onProgress: (index, total, set) => setGlobalStatus(`Backup ${index + 1}/${total}: ${set.setName}`)
+    });
 
     const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
     const payload = {
@@ -4195,7 +4187,7 @@ async function exportCollectionBackup() {
     showToast(`Backup exportiert (${backupSets.length} Sets).`, 'success', 4000);
   } catch (err) {
     console.error('[exportCollectionBackup]', err);
-    showToast(`Backup-Export fehlgeschlagen: ${err.message}`, 'error', 5000);
+    showToast(`Backup-Export fehlgeschlagen: ${err.message}`, 'error', 8000);
   } finally {
     setLoading(false);
   }
@@ -7960,8 +7952,9 @@ async function runSearch(options = {}) {
 function createSearchResultCard(card, key, db, set, apiOnly = false) {
   const article = document.createElement('article');
   article.className = 'card search-result-card';
-  if (db?.rh)     article.classList.add('reverse');
-  else if (db?.g) article.classList.add('collected');
+  const shownStatus = effectiveCollectionStatus(db);
+  if (shownStatus.rh)     article.classList.add('reverse');
+  else if (shownStatus.g) article.classList.add('collected');
 
   const imgWrap = document.createElement('div');
   imgWrap.className = 'card-img-wrap';
@@ -7982,9 +7975,10 @@ function createSearchResultCard(card, key, db, set, apiOnly = false) {
   const isEditable = Boolean(set?.setName && set?.imported);
   const checksDiv = document.createElement('div'); checksDiv.className = 'checks search-checks-bar';
   checksDiv.append(
-    makeCheckbox('G', 'g', db?.g ?? false, !isEditable),
-    makeCheckbox('RH', 'rh', db?.rh ?? false, !isEditable || !db?.rhCell)
+    makeCheckbox('G', 'g', shownStatus.g, !isEditable),
+    makeCheckbox('RH', 'rh', shownStatus.rh, !isEditable || !db?.rhCell)
   );
+  syncSharedLegacyBadge(checksDiv, db);
 
   const goToSetBtn = document.createElement('button');
   goToSetBtn.type = 'button';
@@ -8043,8 +8037,10 @@ function attachSearchResultCheckboxListeners(article, dbEntry, key, set, card) {
 
   function updateSearchCardState() {
     syncCollectionCheckboxUi(gInput, rhInput, db, { isEditable: true });
-    article.classList.toggle('reverse',   Boolean(db?.rh));
-    article.classList.toggle('collected', Boolean(db?.g) && !db?.rh);
+    const status = effectiveCollectionStatus(db);
+    article.classList.toggle('reverse',   status.rh);
+    article.classList.toggle('collected', status.g && !status.rh);
+    syncSharedLegacyBadge(article.querySelector('.checks'), db);
     const cm = article.querySelector('.card-cm-link');
     if (cm) {
       hydrateCardmarketLink(cm, card, { compact: true, preferReverseHolo: Boolean(db?.rh) });
@@ -8235,9 +8231,10 @@ function updateStats() {
   const total = state.cards.length;
   let collected = 0, rh = 0;
   state.cards.forEach((card) => {
-    const db = state.dbMap.get(collectionKeyOf(card));
-    if (db?.g) collected++;
-    if (db?.rh) rh++;
+    // Geteilter Altstatus mehrdeutiger Altzeilen zaehlt als gesammelt (effectiveCollectionStatus).
+    const status = effectiveCollectionStatus(state.dbMap.get(collectionKeyOf(card)));
+    if (status.g) collected++;
+    if (status.rh) rh++;
   });
   const missing = total - collected;
   const percent = total > 0 ? Math.round((collected / total) * 100) : 0;
@@ -8279,14 +8276,15 @@ function updateStats() {
 function applyFilter() {
   dom.cards.querySelectorAll('.card').forEach((article) => {
     const db = state.dbMap.get(article.dataset.cardId);
+    const status = effectiveCollectionStatus(db);
     let visible = true;
-    if (state.filter === 'missing')   visible = !db?.g;
+    if (state.filter === 'missing')   visible = !status.g;
     if (state.filter === 'missing-rh') {
-      const isMissingCard = !db?.g;
-      const isMissingReverse = Boolean(db?.g && db?.rhCell && !db?.rh);
+      const isMissingCard = !status.g;
+      const isMissingReverse = Boolean(status.g && db?.rhCell && !status.rh);
       visible = isMissingCard || isMissingReverse;
     }
-    if (state.filter === 'collected') visible = Boolean(db?.g);
+    if (state.filter === 'collected') visible = status.g;
     article.classList.toggle('hidden', !visible);
   });
 }
@@ -8370,8 +8368,9 @@ function createCardElement(card, key, db, index) {
   article.setAttribute('role', 'listitem');
   article.setAttribute('tabindex', '-1');
 
-  if (dbEntry?.rh)     article.classList.add('reverse');
-  else if (dbEntry?.g) article.classList.add('collected');
+  const shownStatus = effectiveCollectionStatus(dbEntry);
+  if (shownStatus.rh)     article.classList.add('reverse');
+  else if (shownStatus.g) article.classList.add('collected');
 
   // Image wrap (click ? lightbox)
   const imgWrap = document.createElement('div');
@@ -8403,9 +8402,10 @@ function createCardElement(card, key, db, index) {
 
   const checksDiv = document.createElement('div'); checksDiv.className = 'checks';
   checksDiv.append(
-    makeCheckbox('G', 'g', dbEntry?.g ?? false, !isEditable),
-    makeCheckbox('RH', 'rh', dbEntry?.rh ?? false, !isEditable || !dbEntry?.rhCell)
+    makeCheckbox('G', 'g', shownStatus.g, !isEditable),
+    makeCheckbox('RH', 'rh', shownStatus.rh, !isEditable || !dbEntry?.rhCell)
   );
+  syncSharedLegacyBadge(checksDiv, dbEntry);
   meta.append(titleDiv, checksDiv);
 
   if (card.cardmarketUrl) {
@@ -8588,8 +8588,26 @@ function syncCollectionCheckboxUi(gInput, rhInput, db, { isEditable = Boolean(st
   }
 }
 
+/** Badge "nicht zugeordnet" fuer Karten, die nur den geteilten Altstatus einer mehrdeutigen Altzeile zeigen. */
+function syncSharedLegacyBadge(container, db) {
+  if (!container) return;
+  const shared = effectiveCollectionStatus(db).shared;
+  let badge = container.querySelector('.legacy-shared-badge');
+  if (shared && !badge) {
+    badge = document.createElement('span');
+    badge.className = 'legacy-shared-badge';
+    badge.textContent = 'nicht zugeordnet';
+    badge.title = 'Status aus einer alten Sammlungszeile, die mehreren Karten entspricht. Klick auf G ordnet sie zu.';
+    container.appendChild(badge);
+  } else if (!shared && badge) {
+    badge.remove();
+  }
+}
+
 // Migrationsdialog (Task 7, Spec §5.3): mehrdeutige Altzeile mit gesetztem Status. Ohne Dialog-Ergebnis
-// ("Spaeter") wird nichts geschrieben; die Karten zeigen weiter den gemeinsamen Altstatus.
+// ("Spaeter") wird nichts geschrieben. Kandidaten ohne eigene Zeile zeigen den gemeinsamen Altstatus als
+// besessen (nur lesend, Badge "nicht zugeordnet", zaehlt in Statistik/Fehlend-Filter, effectiveCollectionStatus);
+// ein Klick auf G loest ueber pendingAmbiguityError erneut diesen Dialog aus.
 function onAmbiguousLegacyKey(err) {
   showToast(describeAmbiguousLegacyKey(err), 'info', 8000);
   const set = state.currentSet;
@@ -8799,8 +8817,10 @@ function updateCardState(article, db) {
   const gInput = article?.querySelector('input[data-type="g"]');
   const rhInput = article?.querySelector('input[data-type="rh"]');
   syncCollectionCheckboxUi(gInput, rhInput, db);
-  article.classList.toggle('reverse',   Boolean(db?.rh));
-  article.classList.toggle('collected', Boolean(db?.g) && !db?.rh);
+  const status = effectiveCollectionStatus(db);
+  article.classList.toggle('reverse',   status.rh);
+  article.classList.toggle('collected', status.g && !status.rh);
+  syncSharedLegacyBadge(article?.querySelector('.checks'), db);
   const cardmarketLink = article?.querySelector('.card-cm-link');
   const cardIndex = Number.parseInt(article?.dataset?.cardIndex || '-1', 10);
   const card = Number.isFinite(cardIndex) && cardIndex >= 0 ? state.cards[cardIndex] : null;
