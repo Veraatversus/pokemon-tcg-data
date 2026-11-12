@@ -96,7 +96,7 @@ function useRegistry(sets, cardsBySetId) {
 const COLLECTION_HEADER = ['setId', 'cardId', 'g', 'rh', 'updatedAt'];
 const T0 = '2026-01-01T00:00:00.000Z';
 
-function setup({ collection = [], overview = [], dbSets = [], extraSheets = {}, registry = [SYN_SETS, SYN_CARDS] } = {}) {
+function setup({ collection = [], overview = [], dbSets = [], extraSheets = {}, registry = [SYN_SETS, SYN_CARDS], readDelayMs = {} } = {}) {
   resetSheetsDataCaches();
   resetCollectionResolverCache();
   resetV3Caches();
@@ -108,7 +108,7 @@ function setup({ collection = [], overview = [], dbSets = [], extraSheets = {}, 
     db_collection: [COLLECTION_HEADER, ...collection],
     'Sets Overview': [['Sets Overview'], ['setId', 'setName'], ...overview],
     ...extraSheets
-  });
+  }, { readDelayMs });
   globalThis.gapi = fake.gapi;
   return fake;
 }
@@ -311,7 +311,86 @@ test('Legacy-Grid-Fallback: alte Nummern werden aufgeloest und unter kanonischer
   assert.equal(map.get('GG1').cells.length, 1);
 });
 
+test('ensureCollectionEntry mit mehrdeutigem Altschluessel: kein Write, typisierter Fehler mit Kandidaten', async () => {
+  const fake = setup({ collection: [['cel25c', '15', true, false, T0]] });
+  const before = JSON.stringify(collectionRows(fake));
+  const writesBefore = fake.writesTo('db_collection').length;
+  for (let i = 0; i < 2; i += 1) {
+    await assert.rejects(
+      ensureCollectionEntry('x', '15', { setId: 'cel25c' }),
+      (err) => err.code === 'AMBIGUOUS_LEGACY_KEY'
+        && err.legacyKey === '15'
+        && JSON.stringify(err.collectionKeys) === JSON.stringify(['15_A1', '15_A2'])
+    );
+  }
+  assert.equal(JSON.stringify(collectionRows(fake)), before, 'keine Zeile angehaengt');
+  assert.equal(fake.writesTo('db_collection').length, writesBefore);
+});
+
+test('Legacy-Grid-Migration: zwei parallele Erst-Lesungen haengen nur einmal an', async () => {
+  const grid = [[], [], ['001', '', '', 'GG01', '', ''], [], [true, true, '', true, false, ''], []];
+  const fake = setup({ overview: [['swsh12pt5', 'Crown Zenith']], extraSheets: { 'Crown Zenith': grid }, readDelayMs: { 'Crown Zenith': 60 } });
+  const [a, b] = await Promise.all([
+    readSetCollectionMap('Crown Zenith', { setId: 'swsh12pt5' }),
+    readSetCollectionMap('Crown Zenith', { setId: 'swsh12pt5gg' })
+  ]);
+  assert.deepEqual(collectionRows(fake).map((r) => r.slice(0, 4)), [
+    ['swsh12pt5', '1', true, true],
+    ['swsh12pt5', 'GG1', true, false]
+  ]);
+  // Ohne Sperre schreiben beide Lesungen (gleiche Startzeile -> ueberschreiben sich gegenseitig)
+  assert.equal(fake.writesTo('db_collection').length, 1, 'genau ein Anhaenge-Write');
+  assert.equal(a.get('GG1').cells.length, 1);
+  assert.equal(b.get('GG1').cells.length, 1);
+});
+
+test('Legacy-Grid-Migration ohne Registry: parallele Erst-Lesungen haengen nur einmal an', async () => {
+  const grid = [[], [], ['001', '', ''], [], [true, false, ''], []];
+  const fake = setup({ extraSheets: { Altset: grid }, registry: [undefined, {}], readDelayMs: { Altset: 60 } });
+  await Promise.all([
+    readSetCollectionMap('Altset', { setId: 'old1' }),
+    readSetCollectionMap('Altset', { setId: 'old1' })
+  ]);
+  assert.deepEqual(collectionRows(fake).map((r) => r.slice(0, 4)), [['old1', '001', true, false]]);
+  assert.equal(fake.writesTo('db_collection').length, 1, 'genau ein Anhaenge-Write');
+});
+
 // ── writeDbCollectionForSet / importSetIntoCollection ─────────────────────────
+test('Import: veraltete existingMap loescht keinen frischen Haken (ODER)', async () => {
+  const fake = setup({
+    overview: [['swsh12pt5', 'Crown Zenith']],
+    collection: [['swsh12pt5', '1', false, false, T0]]
+  });
+  const map = await readSetCollectionMap('Crown Zenith', { setId: 'swsh12pt5' });
+  assert.equal(map.get('1').g, false);
+  // Ein anderer Writer setzt den Haken; der Zeilen-Cache ist jetzt veraltet.
+  fake.rows('db_collection')[1][2] = true;
+  fake.rows('db_collection')[1][3] = true;
+  // importSetIntoCollection liest existingMap aus dem Cache, writeDbCollectionForSet liest frisch.
+  await importSetIntoCollection({ setId: 'swsh12pt5', setName: 'Crown Zenith' }, v3CardsAt('swsh12pt5', ['1']));
+  assert.deepEqual(collectionRows(fake)[0].slice(0, 4), ['swsh12pt5', '1', true, true]);
+});
+
+test('Registry nicht erreichbar: Import schreibt rohe Nummer, trifft GG01 ohne Doppelzeile', async () => {
+  const fake = setup({
+    overview: [['swsh12pt5gg', 'Crown Zenith GG']],
+    collection: [['swsh12pt5gg', 'GG01', true, false, T0]],
+    registry: [undefined, {}]
+  });
+  await importSetIntoCollection(
+    { setId: 'swsh12pt5gg', setName: 'Crown Zenith GG' },
+    [{ collectionKey: 'GG1', number: 'GG01' }, { collectionKey: 'GG2', number: 'GG02' }]
+  );
+  assert.deepEqual(collectionRows(fake).map((r) => r.slice(0, 4)), [
+    ['swsh12pt5gg', 'GG01', true, false],
+    ['swsh12pt5gg', 'GG02', false, false]
+  ]);
+});
+
+function v3CardsAt(setId, keys) {
+  return keys.map((k) => ({ collectionKey: k, number: k, cardId: `${setId}-${k}` }));
+}
+
 const v3Cards = (keys) => keys.map((k) => ({ collectionKey: k, number: k, cardId: `swsh12pt5-${k}` }));
 
 test('Import: Alias-Zeilen unangetastet, neue Karten unter kanonischer ID, clearMissing nur kanonisch', async () => {

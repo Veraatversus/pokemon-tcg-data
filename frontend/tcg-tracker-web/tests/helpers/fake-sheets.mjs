@@ -23,7 +23,7 @@ export function parseRange(range) {
   return { sheet, c1: s.col, r1: s.row ?? 0, c2: e.col, r2: e.row ?? Number.POSITIVE_INFINITY };
 }
 
-export function createFakeSpreadsheet(initial = {}) {
+export function createFakeSpreadsheet(initial = {}, { readDelayMs = {} } = {}) {
   const sheets = new Map(Object.entries(initial).map(([title, rows]) => [title, rows.map((r) => [...r])]));
   const writes = []; // { sheet, range, values }
   const reads = [];
@@ -78,7 +78,11 @@ export function createFakeSpreadsheet(initial = {}) {
         return { result: {} };
       },
       values: {
-        get: async (args) => get(args),
+        get: async (args) => {
+          const ms = readDelayMs[parseRange(args.range).sheet];
+          if (ms) await new Promise((resolve) => setTimeout(resolve, ms));
+          return get(args);
+        },
         update: async ({ range, resource }) => { write(range, resource.values); return { result: {} }; },
         batchUpdate: async ({ resource }) => {
           for (const entry of resource.data) write(entry.range, entry.values);

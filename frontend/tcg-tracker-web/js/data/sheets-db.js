@@ -51,6 +51,7 @@ let resolvedSheetsCache = null;
 let schemaEnsuredPromise = null;
 const dbRowsCache = new Map();
 const sheetCapacityCache = new Map();
+const legacyMigrationLocks = new Map();
 let sheetsWriteQueue = Promise.resolve();
 const SHEETS_WRITE_GAP_MS = 90;
 
@@ -75,6 +76,7 @@ export function resetSheetsDataCaches() {
   schemaEnsuredPromise = null;
   dbRowsCache.clear();
   sheetCapacityCache.clear();
+  legacyMigrationLocks.clear();
   sheetsWriteQueue = Promise.resolve();
 }
 
@@ -997,12 +999,17 @@ async function writeDbCollectionForSet(setId, cards, existingMap = new Map(), { 
 
   if (!ctx) {
     // Ohne Registry: exakter Set-ID-Pfad, ohne Leeren/Deduplizieren (nichts loeschen).
+    // Wie bisher die rohe Kartennummer schreiben (z. B. 'GG01'), damit bestehende Zeilen exakt getroffen
+    // und keine Doppelzeilen angehaengt werden; Status = ODER aus existingMap und frischen Zeilen.
+    const currentExact = buildExactSetCollectionMap(currentRows, setId);
     const setRows = cards.map((card) => {
-      const key = collectionKeyOfCard(card, null);
-      const existing = existingMap?.get?.(key);
-      const g = Boolean(existing?.g);
-      const rh = Boolean(existing?.rh && g);
-      return [setId, key, g, rh, nowIso()];
+      const rawText = toSafeCellString(card?.number) || toSafeCellString(card?.collectionKey);
+      const lookup = normalizeCardNumber(rawText);
+      const existing = existingMap?.get?.(lookup) || existingMap?.get?.(toSafeCellString(card?.collectionKey));
+      const current = currentExact.get(lookup);
+      const g = Boolean(existing?.g || current?.g);
+      const rh = Boolean((existing?.rh || current?.rh) && g);
+      return [setId, rawText, g, rh, nowIso()];
     }).filter((row) => row[1]);
     const upsertPlan = planSetScopedUpsert({ rows: currentRows, setId, incomingRows: setRows, clearMissing: false });
     upsertPlan.clearIndices = [];
@@ -1023,9 +1030,10 @@ async function writeDbCollectionForSet(setId, cards, existingMap = new Map(), { 
     if (!key || incomingKeys.has(key)) continue;
     incomingKeys.add(key);
     const current = currentMap.get(key);
-    const known = existingMap?.get?.(key) || current;
-    const g = Boolean(known?.g);
-    const rh = Boolean(known?.rh && g);
+    // ODER aus (evtl. veralteter) existingMap und frischen Zeilen: ein Cache darf nie einen Haken loeschen.
+    const existing = existingMap?.get?.(key);
+    const g = Boolean(existing?.g || current?.g);
+    const rh = Boolean((existing?.rh || current?.rh) && g);
     const cells = current?.cells || [];
     if (cells.length === 0) {
       appendRows.push([canonicalSetId, key, g, rh, nowIso()]);
@@ -1688,21 +1696,34 @@ export async function readSetCollectionMap(setSheetName, options = {}) {
   if (!ctx) {
     const map = buildExactSetCollectionMap(values, setKey);
     if (map.size > 0) return map;
-    const legacy = await readLegacySetCollectionMap(setSheetName).catch(() => new Map());
-    if (legacy.size === 0) return map;
-    await appendDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, Array.from(legacy.values()).map((entry) => [
-      setKey,
-      toSafeCellString(entry.displayId),
-      Boolean(entry.g),
-      Boolean(entry.rh && entry.g),
-      nowIso()
-    ]));
-    const refreshed = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
-    return buildExactSetCollectionMap(refreshed, setKey);
+    // Pro Set gesperrt: parallele Erst-Lesungen duerfen das Legacy-Grid nicht doppelt migrieren.
+    return withLegacyMigrationLock(setKey.toLowerCase(), async () => {
+      const again = buildExactSetCollectionMap(await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length), setKey);
+      if (again.size > 0) return again;
+      const legacy = await readLegacySetCollectionMap(setSheetName).catch(() => new Map());
+      if (legacy.size === 0) return again;
+      await appendDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, Array.from(legacy.values()).map((entry) => [
+        setKey,
+        toSafeCellString(entry.displayId),
+        Boolean(entry.g),
+        Boolean(entry.rh && entry.g),
+        nowIso()
+      ]));
+      const refreshed = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
+      return buildExactSetCollectionMap(refreshed, setKey);
+    });
   }
 
   const { map, stats } = buildCollectionMap(values, ctx);
   if (stats.matchedRows > 0) return map;
+  return withLegacyMigrationLock(ctx.canonicalSetId.toLowerCase(), () => migrateLegacyGrid(setSheetName, setKey, ctx));
+}
+
+async function migrateLegacyGrid(setSheetName, setKey, ctx) {
+  // Unter der Sperre erneut pruefen: eine parallele Lesung kann schon migriert haben (Cache wird beim Anhaengen fortgeschrieben).
+  const current = buildCollectionMap(await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length), ctx);
+  if (current.stats.matchedRows > 0) return current.map;
+  const map = current.map;
 
   const legacy = await readLegacySetCollectionMap(setSheetName).catch(() => new Map());
   if (legacy.size === 0) return map;
@@ -1758,6 +1779,19 @@ export async function ensureCollectionEntry(setSheetName, collectionKey, options
   }
 
   const hit = rawKey ? ctx.resolver.resolve(ctx.canonicalSetId, rawKey) : null;
+  if (!hit && rawKey) {
+    // Alter mehrdeutiger Schluessel (§5.3): nie eine weitere mehrdeutige Zeile anhaengen, sondern die
+    // Migration (Task 7) ausloesen lassen.
+    const amb = ctx.resolver.ambiguous(ctx.canonicalSetId, rawKey);
+    if (amb) {
+      const err = new Error(`Kartenschlüssel „${rawKey}“ ist mehrdeutig (${amb.collectionKeys.join(', ')}).`);
+      err.code = 'AMBIGUOUS_LEGACY_KEY';
+      err.setId = amb.setId;
+      err.legacyKey = amb.legacyKey;
+      err.collectionKeys = [...amb.collectionKeys];
+      throw err;
+    }
+  }
   const writeKey = hit?.collectionKey || rawKey;
   const lookupKey = hit?.collectionKey || normalizeCardNumber(rawKey);
   if (!writeKey) throw new Error('Collection-Eintrag ohne Kartenschlüssel.');
@@ -1772,6 +1806,17 @@ export async function ensureCollectionEntry(setSheetName, collectionKey, options
     throw new Error(`Collection-Eintrag für Karte ${collectionKey} konnte nicht erstellt werden.`);
   }
   return created;
+}
+
+function withLegacyMigrationLock(key, task) {
+  const previous = legacyMigrationLocks.get(key) || Promise.resolve();
+  const run = previous.catch(() => undefined).then(task);
+  const tail = run.catch(() => undefined);
+  legacyMigrationLocks.set(key, tail);
+  tail.then(() => {
+    if (legacyMigrationLocks.get(key) === tail) legacyMigrationLocks.delete(key);
+  });
+  return run;
 }
 
 // Gecachte db_collection-Zeilen nach Zell-Writes mitfuehren, damit ein erneutes Lesen nicht den alten
