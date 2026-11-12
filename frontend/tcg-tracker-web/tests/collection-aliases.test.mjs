@@ -424,6 +424,76 @@ test('parallel: Anhaengen + Checkbox-Update -> Haken landet in der richtigen Zei
   assert.deepEqual(byKey.get('swsh12pt5/GG1').slice(2, 4), [true, true]);
 });
 
+// ── Lesefehler duerfen nie zu Ueberschreiben fuehren ──────────────────────────
+const transient = () => Object.assign(new Error('Backend Error'), { status: 500 });
+const quietErrors = async (fn) => {
+  const original = console.error;
+  console.error = () => {};
+  try { return await fn(); } finally { console.error = original; }
+};
+
+test('Lesefehler beim Anhaengen: kein Write, Cache nicht vergiftet, Retry haengt hinter der echten letzten Zeile an', async () => {
+  const fake = setup({ collection: [['me5', '1', true, false, T0]] });
+  await readSetCollectionMap('x', { setId: 'me5' }); // Schema + Cache
+  const writesBefore = fake.writesTo('db_collection').length;
+  fake.failNextReads('db_collection', 1, transient());
+  await quietErrors(() => assert.rejects(ensureCollectionEntry('x', '2', { setId: 'me5' }), (err) => err.status === 500));
+  assert.equal(fake.writesTo('db_collection').length, writesBefore, 'kein Write');
+  const map = await readSetCollectionMap('x', { setId: 'me5' });
+  assert.equal(map.get('1').g, true, 'Cache nicht durch [] ersetzt');
+  const entry = await ensureCollectionEntry('x', '2', { setId: 'me5' });
+  assert.deepEqual(collectionRows(fake).map((r) => r.slice(0, 3)), [['me5', '1', true], ['me5', '2', false]]);
+  assert.equal(entry.gCell.row, 3);
+});
+
+test('Lesefehler im Import (db_collection, db_sets, Overview): Import bricht ab, nichts ueberschrieben', async () => {
+  for (const sheet of ['db_collection', 'db_sets', 'Sets Overview']) {
+    const fake = setup({
+      overview: [['me5', 'Mega Evolution 5'], ['base1', 'Base']],
+      collection: [['me5', '1', true, false, T0], ['base1', '1', true, true, T0]]
+    });
+    await readSetCollectionMap('x', { setId: 'me5' }); // Schema + Cache
+    const snapshot = JSON.stringify(fake.rows(sheet));
+    fake.failNextReads(sheet, 1, transient());
+    await quietErrors(() => assert.rejects(
+      importSetIntoCollection({ setId: 'me5', setName: 'Mega Evolution 5' }, [{ collectionKey: '1', number: '1' }, { collectionKey: '2', number: '2' }]),
+      (err) => err.status === 500,
+      sheet
+    ));
+    assert.equal(fake.writesTo(sheet).length, 0, `kein Write auf ${sheet}`);
+    assert.equal(JSON.stringify(fake.rows(sheet)), snapshot, `${sheet} unveraendert`);
+    // Erneuter Versuch nach Erholung: bestehende Zeilen bleiben, neue Karte hinter der letzten Zeile
+    await importSetIntoCollection({ setId: 'me5', setName: 'Mega Evolution 5' }, [{ collectionKey: '1', number: '1' }, { collectionKey: '2', number: '2' }]);
+    assert.deepEqual(collectionRows(fake).map((r) => r.slice(0, 4)), [
+      ['me5', '1', true, false], ['base1', '1', true, true], ['me5', '2', false, false]
+    ], sheet);
+    const overview = fake.rows('Sets Overview').slice(2).map((r) => r[0]);
+    assert.deepEqual(overview, ['me5', 'base1'], `Overview-Zeilen intakt (${sheet})`);
+  }
+});
+
+test('Fehlendes Blatt/Range (invalid range) gilt weiter als leer: Anhaengen ab Zeile 2', async () => {
+  const fake = setup();
+  await readSetCollectionMap('x', { setId: 'me5' });
+  fake.failNextReads('db_collection', 1, Object.assign(new Error('Unable to parse range: db_collection'), { status: 400 }));
+  const entry = await quietErrors(() => ensureCollectionEntry('x', '2', { setId: 'me5' }));
+  assert.deepEqual(collectionRows(fake).map((r) => r.slice(0, 2)), [['me5', '2']]);
+  assert.equal(entry.gCell.row, 2);
+});
+
+test('Reset waehrend eines laufenden Anhaengens erlaubt keine Ueberlappung', async () => {
+  const fake = setup({ readDelayMs: { db_collection: (range) => (range.includes('A2:') ? 80 : 0) } });
+  await readSetCollectionMap('x', { setId: 'me5' });
+  await ensureResolverForSet('swsh12pt5');
+  const p1 = ensureCollectionEntry('x', '2', { setId: 'me5' });
+  await new Promise((resolve) => setTimeout(resolve, 15)); // p1 haelt die Sperre und liest
+  resetSheetsDataCaches();
+  const p2 = ensureCollectionEntry('x', '5', { setId: 'swsh12pt5' });
+  const [a, b] = await Promise.all([p1, p2]);
+  assert.deepEqual(collectionRows(fake).map((r) => r.slice(0, 2)), [['me5', '2'], ['swsh12pt5', '5']]);
+  assert.notEqual(a.gCell.row, b.gCell.row);
+});
+
 // ── writeDbCollectionForSet / importSetIntoCollection ─────────────────────────
 test('Import: veraltete existingMap loescht keinen frischen Haken (ODER)', async () => {
   const fake = setup({

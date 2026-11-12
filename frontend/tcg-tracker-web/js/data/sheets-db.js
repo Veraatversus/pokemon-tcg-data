@@ -76,8 +76,8 @@ export function resetSheetsDataCaches() {
   schemaEnsuredPromise = null;
   dbRowsCache.clear();
   sheetCapacityCache.clear();
-  legacyMigrationLocks.clear();
-  sheetAppendLocks.clear();
+  // Sperren (legacyMigrationLocks, sheetAppendLocks) bleiben bewusst erhalten: Ein Reset waehrend eines
+  // laufenden Writes darf keinen parallelen Anhaenge-Vorgang zulassen. Sie raeumen sich selbst auf.
   sheetsWriteQueue = Promise.resolve();
 }
 
@@ -232,6 +232,12 @@ async function resolveSheetNames() {
 function isInvalidRangeError(err) {
   const message = String(err?.result?.error?.message || err?.message || '').toLowerCase();
   return err?.status === 400 || message.includes('invalid_argument') || message.includes('unable to parse range');
+}
+
+// Fuer Lesungen, die Zielzeilen bestimmen: nur ein fehlendes Blatt/Range gilt als leer, alles andere wirft.
+function rowsOrThrowUnlessMissing(err) {
+  if (isInvalidRangeError(err)) return [];
+  throw err;
 }
 
 async function getOverviewRows(sheets) {
@@ -592,12 +598,22 @@ async function ensureNormalizedSchema() {
   await schemaEnsuredPromise;
 }
 
-async function readDbRows(sheetName, columnCount, force = false) {
+// Lesefehler werden nie gecacht. strict: Lesungen, die eine Anhaenge-Startzeile oder ein Update-Ziel
+// bestimmen, werfen bei jedem Fehler ausser "Blatt/Range existiert nicht" (dann leer, ungecacht) -
+// sonst wuerde ab Zeile 2 ueberschrieben. Nicht-strict (Anzeige) liefert bei Fehlern [] (ungecacht).
+async function readDbRows(sheetName, columnCount, force = false, { strict = false } = {}) {
   const key = `${sheetName}:${columnCount}`;
   if (!force && dbRowsCache.has(key)) {
     return dbRowsCache.get(key);
   }
-  const rows = await getValues(buildDataRange(sheetName, columnCount, 2, 200000)).catch(() => []);
+  let rows;
+  try {
+    rows = await getValues(buildDataRange(sheetName, columnCount, 2, 200000));
+  } catch (err) {
+    if (isInvalidRangeError(err)) return [];
+    if (strict) throw err;
+    return [];
+  }
   dbRowsCache.set(key, rows);
   return rows;
 }
@@ -645,7 +661,7 @@ async function appendRowsUnlocked(sheetName, columnCount, existing, rows) {
 async function appendDbRows(sheetName, columnCount, rows) {
   if (!Array.isArray(rows) || rows.length === 0) return;
   await withSheetAppendLock(sheetName, async () => {
-    const existing = await readDbRows(sheetName, columnCount, true);
+    const existing = await readDbRows(sheetName, columnCount, true, { strict: true });
     await appendRowsUnlocked(sheetName, columnCount, existing, rows);
   });
 }
@@ -820,7 +836,7 @@ async function upsertDbSet(setMeta, imported = false) {
 
   // Pro Blatt serialisiert: neue Zeile ans tatsaechliche Ende (frisch gelesen), kein Ueberschreiben paralleler Upserts.
   await withSheetAppendLock(DB_SHEETS.sets, async () => {
-    const rows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length, true);
+    const rows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length, true, { strict: true });
     // Neues SET_DB_HEADERS-Format
     const target = [
       setId,                                                                   // [0]  setId
@@ -957,7 +973,7 @@ async function writeDbCardsForSet(setId, cards) {
     toSafeJsonString(card.vera_resistances),                                   // [33] vera_resistances
     toSafeJsonString(card.vera_rules)                                          // [34] vera_rules
   ]);
-  const currentRows = await readDbRows(DB_SHEETS.cards, DB_HEADERS.cards.length, true);
+  const currentRows = await readDbRows(DB_SHEETS.cards, DB_HEADERS.cards.length, true, { strict: true });
   const upsertPlan = planSetScopedUpsert({
     rows: currentRows,
     setId,
@@ -966,7 +982,7 @@ async function writeDbCardsForSet(setId, cards) {
   });
   await applySetScopedPlan(DB_SHEETS.cards, DB_HEADERS.cards.length, upsertPlan);
 
-  const refreshedRows = await readDbRows(DB_SHEETS.cards, DB_HEADERS.cards.length, true);
+  const refreshedRows = await readDbRows(DB_SHEETS.cards, DB_HEADERS.cards.length, true, { strict: true });
   const dedupPlan = planSetScopedDedup({ rows: refreshedRows, setId });
   if (dedupPlan.clearIndices.length > 0) {
     await applySetScopedPlan(DB_SHEETS.cards, DB_HEADERS.cards.length, dedupPlan);
@@ -1026,7 +1042,7 @@ function collectionKeyOfCard(card, ctx) {
 async function writeDbCollectionForSet(setId, cards, existingMap = new Map(), { resolver = null } = {}) {
   await ensureNormalizedSchema();
   const ctx = await resolveCollectionContext(setId, resolver);
-  const currentRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
+  const currentRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true, { strict: true });
 
   if (!ctx) {
     // Ohne Registry: exakter Set-ID-Pfad, ohne Leeren/Deduplizieren (nichts loeschen).
@@ -1471,7 +1487,7 @@ async function upsertOverviewEntry(setMeta, imported = true) {
   // Pro Blatt serialisiert: Zielzeile aus dem aktuellen Stand nach vorherigen Writes.
   await withSheetAppendLock(sheets.overview, async () => {
     const overviewRange = buildRange(sheets.overview, 'A3:J');
-    const rows = await getFormulas(overviewRange).catch(() => []);
+    const rows = await getFormulas(overviewRange).catch(rowsOrThrowUnlessMissing);
     const normalizedTargetId = toSafeCellString(setMeta.setId).toLowerCase();
 
     let targetRow = -1;
@@ -1500,7 +1516,7 @@ export async function syncOverviewWithApiSets(sets, importedSetIds = []) {
   const normalizedImported = new Set(Array.from(importedSetIds).map((id) => toSafeCellString(id).toLowerCase()));
 
   await withSheetAppendLock(DB_SHEETS.sets, async () => {
-    const dbRows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length);
+    const dbRows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length, false, { strict: true });
     const mergedById = new Map();
     dbRows.forEach((row) => {
       const key = toSafeCellString(row[0]).toLowerCase();
@@ -1551,7 +1567,7 @@ export async function syncOverviewWithApiSets(sets, importedSetIds = []) {
   const sheets = await resolveSheetNames();
   if (!sheets.overview) return;
   await withSheetAppendLock(sheets.overview, async () => {
-    const rows = await getOverviewRows(sheets).catch(() => []);
+    const rows = await getOverviewRows(sheets).catch(rowsOrThrowUnlessMissing);
 
     const rowBySetId = new Map();
     rows.forEach((row, index) => {
@@ -1736,7 +1752,7 @@ export async function readSetCollectionMap(setSheetName, options = {}) {
     if (map.size > 0) return map;
     // Pro Set gesperrt: parallele Erst-Lesungen duerfen das Legacy-Grid nicht doppelt migrieren.
     return withLegacyMigrationLock(setKey.toLowerCase(), async () => {
-      const again = buildExactSetCollectionMap(await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true), setKey);
+      const again = buildExactSetCollectionMap(await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true, { strict: true }), setKey);
       if (again.size > 0) return again;
       const legacy = await readLegacySetCollectionMap(setSheetName).catch(() => new Map());
       if (legacy.size === 0) return again;
@@ -1759,7 +1775,7 @@ export async function readSetCollectionMap(setSheetName, options = {}) {
 
 async function migrateLegacyGrid(setSheetName, setKey, ctx) {
   // Unter der Sperre erneut pruefen: eine parallele Lesung kann schon migriert haben (Cache wird beim Anhaengen fortgeschrieben).
-  const current = buildCollectionMap(await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true), ctx);
+  const current = buildCollectionMap(await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true, { strict: true }), ctx);
   if (current.stats.matchedRows > 0) return current.map;
   const map = current.map;
 
@@ -1810,7 +1826,7 @@ export async function ensureCollectionEntry(setSheetName, collectionKey, options
     const normalizedCard = normalizeCardNumber(rawKey);
     // Pruefen und Anhaengen unter der Blatt-Sperre: frische Zeilen, keine parallelen Doppel-/Ueberschreib-Zeilen.
     return withSheetAppendLock(C, async () => {
-      const currentRows = await readDbRows(C, N, true);
+      const currentRows = await readDbRows(C, N, true, { strict: true });
       const existing = buildExactSetCollectionMap(currentRows, setKey).get(normalizedCard);
       if (existing) return existing;
       const next = await appendRowsUnlocked(C, N, currentRows, [[setKey, rawKey, false, false, nowIso()]]);
@@ -1839,7 +1855,7 @@ export async function ensureCollectionEntry(setSheetName, collectionKey, options
   if (!writeKey) throw new Error('Collection-Eintrag ohne Kartenschlüssel.');
 
   return withSheetAppendLock(C, async () => {
-    const currentRows = await readDbRows(C, N, true);
+    const currentRows = await readDbRows(C, N, true, { strict: true });
     const existing = buildCollectionMap(currentRows, ctx).map.get(lookupKey);
     if (existing?.cells?.length) return existing;
     const next = await appendRowsUnlocked(C, N, currentRows, [[ctx.canonicalSetId, writeKey, false, false, nowIso()]]);

@@ -26,6 +26,7 @@ export function parseRange(range) {
 export function createFakeSpreadsheet(initial = {}, { readDelayMs = {} } = {}) {
   const sheets = new Map(Object.entries(initial).map(([title, rows]) => [title, rows.map((r) => [...r])]));
   const writes = []; // { sheet, range, values }
+  const failures = new Map(); // sheet -> { count, error }
   const reads = [];
 
   const ensureSheet = (title) => {
@@ -79,9 +80,19 @@ export function createFakeSpreadsheet(initial = {}, { readDelayMs = {} } = {}) {
       },
       values: {
         get: async (args) => {
-          const ms = readDelayMs[parseRange(args.range).sheet];
+          const sheetOfRange = parseRange(args.range).sheet;
+          const pending = failures.get(sheetOfRange);
+          if (pending && pending.count > 0) {
+            pending.count -= 1;
+            reads.push(args.range);
+            throw pending.error;
+          }
+          // Stand zum Zeitpunkt des Requests (wie die echte API), Antwort erst nach der Verzoegerung.
+          const snapshot = JSON.parse(JSON.stringify(get(args)));
+          const delay = readDelayMs[sheetOfRange];
+          const ms = typeof delay === 'function' ? delay(args.range) : delay;
           if (ms) await new Promise((resolve) => setTimeout(resolve, ms));
-          return get(args);
+          return snapshot;
         },
         update: async ({ range, resource }) => { write(range, resource.values); return { result: {} }; },
         batchUpdate: async ({ resource }) => {
@@ -107,6 +118,10 @@ export function createFakeSpreadsheet(initial = {}, { readDelayMs = {} } = {}) {
     writes,
     reads,
     rows: (title) => sheets.get(title),
-    writesTo: (title) => writes.filter((w) => w.sheet === title)
+    writesTo: (title) => writes.filter((w) => w.sheet === title),
+    // Die naechsten count Lesezugriffe auf das Blatt title schlagen mit error fehl.
+    failNextReads: (title, count = 1, error = Object.assign(new Error('Backend Error'), { status: 500 })) => {
+      failures.set(title, { count, error });
+    }
   };
 }
