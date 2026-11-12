@@ -25,9 +25,12 @@ import {
 } from './set-scoped-upsert.js';
 import {
   ensureResolverForSet,
+  ensureSetResolver,
+  collectCollectionSetIds,
   buildCollectionMap,
   cellsForUpdate
 } from './collection-aliases.js';
+import { mergeAliasOverviewSets } from './set-aliases.js';
 
 export { cellsForUpdate };
 
@@ -1230,15 +1233,43 @@ export async function readDbCardsForSet(setId) {
         // tcgdex_* not available in legacy format (were never written)
       });
     })
-    .filter((card) => card.number);
+    .filter((card) => card.number)
+    .map((card) => ({ ...card, collectionKey: dbCardCollectionKey(card, normalizedSetId) }));
+}
+
+// db_cards ist nur noch Offline-Fallback. Ab v3 ist cardId = v3-id `<setId>-<collectionKey>`; aeltere Zeilen
+// (pokemontcg-IDs, z. B. `swsh12pt5gg-GG01`) fallen auf die normalisierte Nummer zurueck – denselben
+// Schluessel nutzt die Sammlungs-Map ohne Registry.
+function dbCardCollectionKey(card, normalizedSetId) {
+  const cardId = toSafeCellString(card?.cardId);
+  const prefix = `${normalizedSetId}-`;
+  if (cardId.toLowerCase().startsWith(prefix) && cardId.length > prefix.length) {
+    // Alle Registry-collectionKeys sind Fixpunkte von normalizeCardNumber (geprueft ueber api/registry).
+    return normalizeCardNumber(cardId.slice(prefix.length));
+  }
+  return normalizeCardNumber(card?.number);
 }
 
 /**
  * Gibt ALLE Sets (auch nicht importierte) mit vollstÃ¤ndigen Metadaten zurÃ¼ck.
  * NÃ¼tzlich zum Anzeigen einer vollstÃ¤ndigen Set-Liste.
- * @returns {Promise<Array<{setId, setName, series, releaseDate, totalCards, ptcgoCode, imported}>>}
+ * Overview-/db_sets-Zeilen unter Alias-Set-IDs (z. B. `swsh12pt5gg`, `TCGDEX-me05`) werden dem kanonischen
+ * Set zugeordnet (`imported` per ODER) und nicht als eigenes Set geliefert; jedes Set traegt `aliases`.
+ * Im Sheet wird dabei nichts geaendert. Registry nicht erreichbar -> Zeilen unveraendert.
+ * @returns {Promise<Array<{setId, setName, series, releaseDate, totalCards, ptcgoCode, imported, aliases}>>}
  */
 export async function listSetsOverviewData() {
+  const rawSets = await readRawSetsOverviewData();
+  let resolver = null;
+  try {
+    resolver = await ensureSetResolver();
+  } catch (err) {
+    console.warn('[sheets-db] Registry nicht verfuegbar, Overview ohne Alias-Zuordnung:', err?.message || err);
+  }
+  return mergeAliasOverviewSets(rawSets, resolver);
+}
+
+async function readRawSetsOverviewData() {
   await ensureNormalizedSchema();
   const dbRows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length);
   const dbSets = dbRows
@@ -1511,6 +1542,18 @@ export async function upsertOverviewSet(setMeta, imported = false) {
   await upsertOverviewEntry(setMeta, imported);
 }
 
+// Kleingeschriebene Alias-IDs eines API-Sets (fetchAllAvailableSets liefert `aliases`), ohne die eigene ID.
+function setAliasKeys(set) {
+  const own = toSafeCellString(set?.setId).toLowerCase();
+  return (Array.isArray(set?.aliases) ? set.aliases : [])
+    .map((alias) => toSafeCellString(alias).toLowerCase())
+    .filter((alias) => alias && alias !== own);
+}
+
+/**
+ * Schreibt API-Sets nach db_sets und in die Overview. Bestehende Zeilen (auch unter Alias-IDs) bleiben
+ * erhalten; ein `imported` einer Alias-Zeile wird per ODER auf das kanonische Set uebertragen.
+ */
 export async function syncOverviewWithApiSets(sets, importedSetIds = []) {
   await ensureNormalizedSchema();
   const normalizedImported = new Set(Array.from(importedSetIds).map((id) => toSafeCellString(id).toLowerCase()));
@@ -1524,13 +1567,16 @@ export async function syncOverviewWithApiSets(sets, importedSetIds = []) {
       mergedById.set(key, row);
     });
 
+    const rowImported = (row) => Boolean(row?.length) && (isNewSetFormat(row) ? toBoolean(row[1]) : toBoolean(row[8]));
     for (const set of (sets || [])) {
       const key = toSafeCellString(set?.setId).toLowerCase();
       if (!key) continue;
       const existing = mergedById.get(key) || [];
+      // Alias-Zeilen (z. B. swsh12pt5gg) bleiben stehen; ihr imported geht per ODER auf das kanonische Set.
+      const aliasImported = setAliasKeys(set).some((alias) => rowImported(mergedById.get(alias)));
       mergedById.set(key, [
         toSafeCellString(set.setId),                                                                                                                     // [0]  setId
-        Boolean(normalizedImported.has(key) || (isNewSetFormat(existing) ? toBoolean(existing[1]) : toBoolean(existing[8]))),                            // [1]  imported
+        Boolean(normalizedImported.has(key) || rowImported(existing) || aliasImported),                                                                // [1]  imported
         nowIso(),                                                                                                                                         // [2]  updatedAt
         toSafeCellString(set.matchStatus ?? ''),                                                                                                          // [3]  matchStatus
         Boolean(set.isTcgdexOnly),                                                                                                                        // [4]  isTcgdexOnly
@@ -1589,7 +1635,8 @@ export async function syncOverviewWithApiSets(sets, importedSetIds = []) {
 
     uniqueSets.forEach((set, key) => {
       const existing = rowBySetId.get(key);
-      const imported = normalizedImported.has(key) || Boolean(existing?.imported);
+      const imported = normalizedImported.has(key) || Boolean(existing?.imported)
+        || setAliasKeys(set).some((alias) => Boolean(rowBySetId.get(alias)?.imported));
       const rowValues = buildOverviewRowValues(set, imported)[0];
 
       if (existing) {
@@ -1730,6 +1777,37 @@ async function resolveCollectionSetKey(setSheetName, options) {
   return resolveSetIdFromName(setSheetName);
 }
 
+// true nur, wenn sicher feststeht: keine db_collection-Zeile unter irgendeinem Alias des Sets und kein
+// Legacy-Set-Blatt. Bei jedem Zweifel (Registry/Sheets-Metadaten nicht lesbar) false -> normaler Pfad.
+async function hasNoCollectionSource(setSheetName, setKey) {
+  let setsOnly = null;
+  try {
+    setsOnly = await ensureSetResolver();
+  } catch {
+    return false;
+  }
+  const canonical = setsOnly?.resolveSetKey?.(setKey);
+  if (!canonical) return false;
+  const rows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length);
+  if (collectCollectionSetIds(rows, setsOnly).has(canonical.toLowerCase())) return false;
+  const sheets = await resolveSheetNames().catch(() => null);
+  if (!Array.isArray(sheets?.titles)) return false;
+  return !sheets.titles.includes(setSheetName);
+}
+
+/**
+ * Kanonische Set-IDs (kleingeschrieben), unter denen db_collection-Zeilen existieren – ueber alle Aliase,
+ * ohne Registry-Karten zu laden. `checkedOnly`: nur Zeilen mit g=true. Fuer Gesamt-Leser (Backup,
+ * Sammelkandidaten), damit sie readSetCollectionMap nur fuer Sets mit Zeilen aufrufen.
+ * Registry nicht erreichbar -> rohe Set-IDs.
+ */
+export async function listCollectionSetIds({ checkedOnly = false } = {}) {
+  await ensureNormalizedSchema();
+  const rows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length);
+  const resolver = await ensureSetResolver().catch(() => null);
+  return collectCollectionSetIds(rows, resolver, { checkedOnly });
+}
+
 /**
  * Sammlungs-Map eines Sets: Map<collectionKey, { collectionKey, displayId, g, rh, cells, gCell, rhCell, ambiguous? }>.
  * Beruecksichtigt db_collection-Zeilen unter allen Registry-Aliasen des kanonischen Sets (Spec §5.2/§7.1);
@@ -1743,6 +1821,10 @@ export async function readSetCollectionMap(setSheetName, options = {}) {
   await ensureNormalizedSchema();
   const setKey = await resolveCollectionSetKey(setSheetName, options);
   if (!setKey) return new Map();
+
+  // Lazy: Registry-Karten (~27 KB/Set) nur fuer Sets laden, die Zeilen (unter irgendeinem Alias) oder ein
+  // Legacy-Set-Blatt haben. Gesamt-Leser (Backup, Datencheck, Sammelkandidaten) laden so nur, was noetig ist.
+  if (!options?.resolver && await hasNoCollectionSource(setSheetName, setKey)) return new Map();
 
   const ctx = await resolveCollectionContext(setKey, options?.resolver || null);
   const values = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length);

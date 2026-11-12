@@ -62,6 +62,38 @@ export async function ensureResolverForSet(setKey, { loadSets = loadRegistrySets
   return resolver;
 }
 
+/**
+ * Resolver nur mit Registry-Sets (keine Karten-Requests): resolveSetKey/aliasesOf fuer Overview-Zuordnung
+ * und die Pruefung, ob ein Set ueberhaupt Sammlungszeilen hat.
+ */
+export function ensureSetResolver(opts = {}) {
+  return ensureResolverForSet('', opts);
+}
+
+/**
+ * Kanonische Set-IDs, unter denen (ueber alle Aliase) db_collection-Zeilen existieren.
+ * Nur Registry-Sets noetig. `checkedOnly`: nur Zeilen mit g=true zaehlen.
+ * Nicht aufloesbare Set-Schluessel erscheinen unveraendert.
+ * @returns {Set<string>} kleingeschriebene Set-IDs
+ */
+export function collectCollectionSetIds(rows, resolver, { checkedOnly = false } = {}) {
+  const out = new Set();
+  const memo = new Map();
+  (rows || []).forEach((row) => {
+    const setKey = str(row?.[0]);
+    if (!setKey || !str(row?.[1])) return;
+    if (checkedOnly && !toBoolean(row?.[2])) return;
+    const lowerKey = setKey.toLowerCase();
+    let canonical = memo.get(lowerKey);
+    if (canonical === undefined) {
+      canonical = (resolver?.resolveSetKey?.(setKey) || setKey).toLowerCase();
+      memo.set(lowerKey, canonical);
+    }
+    out.add(canonical);
+  });
+  return out;
+}
+
 const str = (value) => String(value ?? '').trim();
 
 function makeCell(row, index) {
