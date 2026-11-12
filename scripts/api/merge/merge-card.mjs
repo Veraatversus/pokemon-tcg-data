@@ -23,14 +23,15 @@ export const decodeLocalId = (localId) => {
 
 // Bild-URLs; der Assets-Index kann die localId dekodiert ('?') oder roh ('%3F') fuehren.
 // Der URL-Pfad ist immer die URL-kodierte dekodierte Form.
-export function cardImages(index, lang, card) {
+// parentSetId: TCGdex-Id des Sets, in das ein Unterset gemergt ist (Asset-Ordner der Unterset-Karten).
+export function cardImages(index, lang, card, parentSetId) {
   const decoded = decodeLocalId(card.localId);
   for (const key of [...new Set([decoded, card.localId])]) {
-    const found = resolveImages(index, { lang, serieId: card.set?.serieId, setId: card.set?.id, localId: key });
+    const found = resolveImages(index, { lang, serieId: card.set?.serieId, setId: card.set?.id, localId: key, parentSetId });
     if (!found) continue;
     const seg = encodeURIComponent(decoded);
     if (seg === key) return found;
-    const base = `https://assets.tcgdex.net/${lang}/${card.set.serieId}/${card.set.id}/${seg}`;
+    const base = `https://assets.tcgdex.net/${lang}/${card.set.serieId}/${found.small.split('/')[5]}/${seg}`;
     return { small: `${base}/low.webp`, large: `${base}/high.webp` };
   }
   return null;
@@ -160,7 +161,7 @@ export function mergeCard({
   // Warnung missingImages (build-api.mjs): oben kein EN-Bild UND kein i18n.de.images.
   const firstImages = (lang) => {
     for (const c of tcgdexCards) {
-      const found = cardImages(assetsIndex, lang, c);
+      const found = cardImages(assetsIndex, lang, c, tcgdexSet?.id);
       if (found) return found;
     }
     return null;

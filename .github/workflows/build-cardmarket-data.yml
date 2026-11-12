@@ -6,15 +6,54 @@ on:
       - Daily Sync TCGdex to Master
     types:
       - completed
+  # Taeglich nach dem TCGdex-Sync (02:00 UTC), auch wenn workflow_run ausbleibt: Preise sollen jeden Tag frisch sein.
+  schedule:
+    - cron: '30 3 * * *'
   workflow_dispatch:
 
 permissions:
   contents: write
   issues: write
 
+# Zwei Ausloeser am selben Tag (workflow_run + schedule) laufen nacheinander, nie parallel.
+concurrency:
+  group: build-cardmarket-data
+  cancel-in-progress: false
+
 jobs:
+  # Leichter Vorab-Check: schedule/workflow_run bauen hoechstens einmal pro UTC-Tag
+  # (cardmarket/meta.json generatedAt von heute -> ueberspringen); workflow_dispatch baut immer.
+  guard:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    outputs:
+      build: ${{ steps.check.outputs.build }}
+    steps:
+      - name: Checkout cardmarket/meta.json
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 1
+          sparse-checkout: cardmarket/meta.json
+          sparse-checkout-cone-mode: false
+
+      - name: Already built today?
+        id: check
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          today=$(date -u +%Y-%m-%d)
+          generated=$(grep -oE '"generatedAt": *"[0-9]{4}-[0-9]{2}-[0-9]{2}' cardmarket/meta.json 2>/dev/null | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' || true)
+          if [ "$EVENT_NAME" != "workflow_dispatch" ] && [ "$generated" = "$today" ]; then
+            echo "Cardmarket data already generated today ($generated) - skipping"
+            echo "build=false" >> $GITHUB_OUTPUT
+          else
+            echo "build=true" >> $GITHUB_OUTPUT
+          fi
+
   build_cardmarket_data:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    needs: guard
+    if: needs.guard.outputs.build == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -67,8 +106,7 @@ jobs:
       - name: Commit generated Cardmarket data if changed
         id: commit_generated
         run: |
-          git add cardmarket
-                    git add cardmarket scripts/cardmarket/helpers/tcgdex-data
+          git add cardmarket scripts/cardmarket/helpers/tcgdex-data
           if git diff --cached --quiet; then
             echo "changed=false" >> $GITHUB_OUTPUT
             echo "No generated Cardmarket changes to commit"
@@ -76,7 +114,13 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git commit -m "chore: refresh generated cardmarket data"
-            git push origin master
+            # master kann sich seit dem Checkout bewegt haben (z. B. Sync-Commit); nur cardmarket/ ist betroffen.
+            for attempt in 1 2; do
+              if git pull --rebase origin master && git push origin master; then break; fi
+              if [ "$attempt" = 2 ]; then echo "Push failed after 2 attempts"; exit 1; fi
+              git rebase --abort 2>/dev/null || true
+              sleep 15
+            done
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
 
