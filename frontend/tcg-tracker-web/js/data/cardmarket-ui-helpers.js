@@ -602,7 +602,7 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
 
   // Resolve the setCode for the Cardmarket image URL up front so that the
   // image URL can be published on every card (including those that don't need
-  // URL promotion), giving the resolver-matrix a cardmarket source value.
+  // URL promotion) as `cardmarketImageUrl` (metadata only; the display image chain is image-fallback.js).
   // Trust order: explicit setRecord.ptcgoCode > tracker.byPtcgoCode[ptcgoCode] verification > card.ptcgoCode.
   // The setCode is the upper-cased ptcgoCode (Cardmarket uses the same short code in product image paths).
   // NOTE: this assumes a single-set batch. For mixed-set batches (e.g. watchlist) callers MUST pass
@@ -622,7 +622,7 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
 
   if (!needsPromotion && !hasDuplicateSourceNames) {
     // Even when the URL is unchanged we still want to publish cardmarket image metadata
-    // for already-aligned cards so the resolver-matrix has a cardmarket source value available.
+    // for already-aligned cards as well.
     if (!resolvedSetCode) return cards;
     let mutated = false;
     const enriched = cards.map((card) => {
@@ -679,8 +679,7 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
     const isGeneratedUrl = isGeneratedCardmarketUrl(currentUrl);
     const shouldReconcileDirectUrl = !isGeneratedUrl && hasDuplicateSourceNames;
     if (!isGeneratedUrl && !shouldReconcileDirectUrl) {
-      // Publish cardmarket image metadata on already-aligned cards so the
-      // resolver-matrix has a cardmarket source value available.
+      // Publish cardmarket image metadata on already-aligned cards as well.
       if (card?.cardmarketProductId && resolvedSetCode) {
         const cardmarketImageUrl = buildCardmarketImageUrl({
           cardmarketProductId: card.cardmarketProductId,
@@ -718,7 +717,7 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
     const matchedProductId = String(matchedEntry?.cardmarketProductId || '').trim();
     if (currentProductId && matchedProductId && currentProductId === matchedProductId) {
       // Card is already aligned with the matched entry. Still publish cardmarket image
-      // metadata so the resolver-matrix has a cardmarket source value.
+      // metadata.
       if (card?.cardmarketProductId && resolvedSetCode && !card.cardmarketImageUrl) {
         const cardmarketImageUrl = buildCardmarketImageUrl({
           cardmarketProductId: card.cardmarketProductId,

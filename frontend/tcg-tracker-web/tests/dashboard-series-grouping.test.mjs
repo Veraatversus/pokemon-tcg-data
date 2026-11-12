@@ -14,8 +14,7 @@ const {
   resolveSetSeriesLabel,
   resolveSetTotalCards,
   applyDeSeriesFallback,
-  resolveDisplaySet,
-  resetResolverMatrixCache
+  resolveDisplaySet
 } = await import('../js/data/schema-contract.js');
 
 const SETS = JSON.parse(readFileSync(fileURLToPath(new URL('../../../api/v3/sets.json', import.meta.url)), 'utf8'));
@@ -34,7 +33,6 @@ test('resolveSetSeriesLabel prefers DE series in de, EN in en', () => {
 });
 
 test('imported and not-imported sets of one series share one group', () => {
-  resetResolverMatrixCache();
   const notImported = resolveDisplaySet(toSetRecord(me6));
   // Importierte Zeile aus altem Alias-Import: ohne DE-Serie (nur EN)
   const oldRow = { setId: 'me6', imported: true, vera_series: 'Mega Evolution', vera_name: 'Phantasmal Flames', tcgdex_serie_name: '' };
@@ -55,7 +53,6 @@ test('Gesamtzahl: nicht importiert nutzt total (141), nicht printedTotal', () =>
 
 test('resolveSeriesGroupInfo (Pfad von Dashboard und Import-Selector) nutzt die gemeinsame DE-Map', async () => {
   const { resolveSeriesGroupInfo, setDeSeriesBySetId } = await import('../js/data/schema-contract.js');
-  resetResolverMatrixCache();
   const imported = { setId: 'me6', imported: true, vera_series: 'Mega Evolution', series: 'Mega Evolution', tcgdex_serie_name: '' };
   const notImported = resolveDisplaySet(toSetRecord(me6));
   try {

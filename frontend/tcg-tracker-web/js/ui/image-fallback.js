@@ -58,6 +58,7 @@ function legacyCardUrl(record, suffix) {
 }
 
 // Je Bildart: [DE-Werte], [EN-Werte], [Legacy-Werte] in Prioritaetsreihenfolge.
+// legacy*: rohe Legacy-URLs, die resolveDisplaySet/resolveDisplayCard neben den aufgeloesten Feldern behalten.
 function sourcesFor(record, kind) {
   const r = record || {};
   // DE-Bilder: v3-Objekt (i18n.de.images) oder Record-Passthrough (i18n_de.images).
@@ -68,25 +69,25 @@ function sourcesFor(record, kind) {
       return {
         de: [...de('logo'), r.tcgdex_logo],
         en: [en.logo, r.vera_images_logo],
-        legacy: [r.logoUrl, legacySetUrl(r, 'logo.png')]
+        legacy: [r.legacyLogoUrl, r.logoUrl,legacySetUrl(r, 'logo.png')]
       };
     case 'setSymbol':
       return {
         de: [...de('symbol'), r.tcgdex_symbol],
         en: [en.symbol, r.vera_images_symbol],
-        legacy: [r.symbolUrl, legacySetUrl(r, 'symbol.png')]
+        legacy: [r.legacySymbolUrl, r.symbolUrl,legacySetUrl(r, 'symbol.png')]
       };
     case 'cardSmall':
       return {
         de: [...de('small'), r.tcgdex_image_small, r.tcgdex_image],
         en: [en.small, r.vera_images_small],
-        legacy: [r.image, r.imageUrl, legacyCardUrl(r, '')]
+        legacy: [r.legacyImage, r.image, r.imageUrl,legacyCardUrl(r, '')]
       };
     case 'cardLarge':
       return {
         de: [...de('large'), r.tcgdex_image_large],
         en: [en.large, r.vera_images_large],
-        legacy: [r.imageLarge, r.imageLargeUrl, legacyCardUrl(r, '_hires')]
+        legacy: [r.legacyImageLarge, r.imageLarge, r.imageLargeUrl,legacyCardUrl(r, '_hires')]
       };
     default:
       return null;

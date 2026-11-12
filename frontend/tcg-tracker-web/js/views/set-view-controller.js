@@ -211,7 +211,7 @@ export async function loadCurrentSet(injections = {}, forceRefresh = false) {
   setGlobalStatus?.(`Lade ${selected.setName}…`);
   setLoading?.(true, `Lade ${selected.setName}…`);
 
-  // Fallback-Kette in Sprachreihenfolge (image-fallback.js) statt logoUrl/symbolUrl aus der Resolver-Matrix.
+  // Fallback-Kette in Sprachreihenfolge (image-fallback.js) statt der aufgeloesten logoUrl/symbolUrl.
   const setAssetCandidates = (kind) => {
     const seen = new Set();
     return imageCandidates(selected, kind, getCardLanguage())

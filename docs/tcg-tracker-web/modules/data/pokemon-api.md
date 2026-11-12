@@ -20,7 +20,7 @@ Adapter für Karten-/Setdaten aus `api/v3` (vorberechnet, EN + `i18n.de`) und `a
 ## Abhängigkeiten
 
 - `data/v3-api.js`, `data/v3-collection-keys.js`, `data/v3-records.js`
-- `data/schema-contract.js` (Resolver-Matrix)
+- `data/schema-contract.js` (resolveDisplaySet/resolveDisplayCard, Feldauflösung nach Kartensprache)
 
 ## Datenfluss
 

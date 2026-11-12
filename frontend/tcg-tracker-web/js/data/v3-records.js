@@ -4,7 +4,7 @@
 // Semantik:
 //  - vera_*   = EN-Oberfelder von v3
 //  - tcgdex_* = ausschliesslich DE aus i18n.de (leer ohne DE-Wert, kein EN-Fallback;
-//               den Fallback uebernimmt die Resolver-Matrix)
+//               den Fallback uebernimmt resolveFieldValue nach Kartensprache)
 //  - updatedAt: wie in den alten Buildern `new Date().toISOString()`, sofern nicht
 //               per Option `updatedAt` uebergeben (keine erfundenen festen Zeitstempel).
 import { buildCardmarketProductUrl } from './cardmarket-data.js';
