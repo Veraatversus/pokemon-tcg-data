@@ -53,3 +53,22 @@ test('runWithRetry bricht bei nicht retry-fähigem Fehler sofort ab', async () =
 
   assert.equal(attempts, 1);
 });
+
+test('isRetryableError: v3-Wrapper (V3_UNREACHABLE) folgt der Ursache', () => {
+  const wrap = (cause) => {
+    const err = new Error('Kartendaten (api/v3) nicht erreichbar', { cause });
+    err.code = 'V3_UNREACHABLE';
+    return err;
+  };
+  const http = (status) => Object.assign(new Error(`v3 API error ${status}: https://x.test/api/v3/sets.json`), { status });
+  assert.equal(isRetryableError(wrap(http(500))), true);
+  assert.equal(isRetryableError(wrap(http(502))), true);
+  assert.equal(isRetryableError(wrap(http(429))), true);
+  assert.equal(isRetryableError(wrap(new TypeError('Failed to fetch'))), true);
+  assert.equal(isRetryableError(wrap(http(404))), false);
+  assert.equal(isRetryableError(wrap(undefined)), false);
+  // Zyklische Ursachen duerfen nicht endlos laufen.
+  const loop = wrap(null);
+  loop.cause = loop;
+  assert.equal(isRetryableError(loop), false);
+});

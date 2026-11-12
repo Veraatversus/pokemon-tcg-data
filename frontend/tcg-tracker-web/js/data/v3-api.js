@@ -59,7 +59,11 @@ function fetchCached(url, { signal, fetchImpl } = {}) {
     const doFetch = fetchImpl || ((u, o) => fetch(u, o));
     promise = (async () => {
       const response = await doFetch(url);
-      if (!response.ok) throw new Error(`v3 API error ${response.status}: ${url}`);
+      if (!response.ok) {
+        const err = new Error(`v3 API error ${response.status}: ${url}`);
+        err.status = response.status; // fuer isRetryableError (5xx/429 ueber die Ursache des v3-Wrappers)
+        throw err;
+      }
       return response.json();
     })();
     cache.set(url, promise);
