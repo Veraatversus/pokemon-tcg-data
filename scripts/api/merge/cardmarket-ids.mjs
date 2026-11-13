@@ -75,12 +75,15 @@ export function cmNameMatches(cmName, cardName) {
   return forms.some((f) => normalizeCmName(f) === card);
 }
 
-// Primaere Cardmarket-ID einer Karte (gleiche Regel im Frontend): erste ungestempelte Variante mit
-// cardmarketId, sonst erste Variante mit cardmarketId, sonst ids.cardmarket[0].
+// Primaere Cardmarket-ID einer Karte (gleiche Regel im Frontend), je erste Variante mit cardmarketId:
+// ungestempelt und nicht Jumbo (size "jumbo"), sonst nicht Jumbo, sonst ungestempelt, sonst irgendeine,
+// sonst ids.cardmarket[0]. Karten nur mit Jumbo-Variante behalten deren ID.
 export function primaryCardmarketId(card) {
   const variants = (card?.variants ?? []).filter((v) => typeof v?.cardmarketId === 'number');
   const stamped = (v) => (Array.isArray(v.stamp) ? v.stamp.length > 0 : Boolean(v.stamp));
-  const id = (variants.find((v) => !stamped(v)) ?? variants[0])?.cardmarketId ?? card?.ids?.cardmarket?.[0];
+  const jumbo = (v) => v.size === 'jumbo';
+  const id = (variants.find((v) => !stamped(v) && !jumbo(v)) ?? variants.find((v) => !jumbo(v))
+    ?? variants.find((v) => !stamped(v)) ?? variants[0])?.cardmarketId ?? card?.ids?.cardmarket?.[0];
   return typeof id === 'number' ? id : undefined;
 }
 
@@ -235,29 +238,6 @@ const tcgdexIds = (card) => (Array.isArray(card.ids?.cardmarket) ? card.ids.card
 export function fillCardmarketIds({
   sets, cardsBySet, loadExpansion, subsetExpansion = new Map(), knownExpansions = null, productExpansion = null, overrides = {},
 }) {
-  // Overrides zuerst: gewinnen vor TCGdex und allen Regeln; die Karte ist danach fuer alle Schritte gesperrt.
-  // Zahl -> ids.cardmarket = [id] (Produkt muss im Produktindex stehen), null -> keine ID; Varianten-IDs
-  // fallen weg, damit die primaere ID (primaryCardmarketId) die des Overrides ist.
-  const overrideReport = { applied: 0, removed: 0, warnings: [] };
-  const locked = new Set();
-  const cardByKey = new Map();
-  for (const [setId, cards] of cardsBySet) for (const c of cards) cardByKey.set(`${setId}/${c.cardId}`, c);
-  for (const key of Object.keys(overrides ?? {}).filter((k) => !k.startsWith('_')).sort()) {
-    const value = overrides[key];
-    const c = cardByKey.get(key);
-    if (!c) { overrideReport.warnings.push(`${key}: Karte nicht gefunden, ignoriert`); continue; }
-    if (value !== null && !(Number.isInteger(value) && typeof productExpansion?.(value) === 'number')) {
-      overrideReport.warnings.push(`${key}: Produkt ${value} nicht in cardmarket/index/products.json, ignoriert`);
-      continue;
-    }
-    const original = tcgdexIds(c);
-    c.ids = { ...c.ids, cardmarket: value === null ? [] : [value], cardmarketSource: 'override', ...(original.length ? { cardmarketTcgdex: original } : {}) };
-    if (Array.isArray(c.variants)) c.variants = c.variants.map(({ cardmarketId, ...rest }) => rest);
-    locked.add(c.id);
-    if (value === null) overrideReport.removed++;
-    else overrideReport.applied++;
-  }
-
   const indexes = new Map();
   const indexFor = (expansionId) => {
     if (!indexes.has(expansionId)) {
@@ -273,6 +253,59 @@ export function fillCardmarketIds({
     if (typeof expansion !== 'number') return null;
     return { expansion, name: indexFor(expansion)?.byId.get(id)?.name ?? null };
   };
+
+  // Overrides zuerst: gewinnen vor TCGdex und allen Regeln; die Karte ist danach fuer alle Schritte gesperrt.
+  // Zahl -> ids.cardmarket = [id] (Produkt muss im Produktindex stehen), null -> keine ID; Varianten-IDs
+  // fallen weg, damit die primaere ID (primaryCardmarketId) die des Overrides ist.
+  // Auffaelligkeiten (fremde Expansion, kein Single, [Oversized], doppelt vergeben, schon per TCGdex bei
+  // einer anderen Karte) sind nur Warnungen: der Eintrag ist eine bewusste Entscheidung.
+  const overrideReport = { applied: 0, removed: 0, warnings: [] };
+  const locked = new Set();
+  const cardByKey = new Map();
+  const heldBefore = new Map(); // Produkt-ID -> card.id[] (TCGdex-IDs und Varianten vor den Overrides)
+  for (const [setId, cards] of cardsBySet) {
+    for (const c of cards) {
+      cardByKey.set(`${setId}/${c.cardId}`, c);
+      const ids = new Set([...tcgdexIds(c), ...(c.variants ?? []).map((v) => v?.cardmarketId).filter((id) => typeof id === 'number')]);
+      for (const id of ids) heldBefore.set(id, [...(heldBefore.get(id) ?? []), c.id]);
+    }
+  }
+  const setById = new Map(sets.map((x) => [x.id, x]));
+  const overrideKeys = Object.keys(overrides ?? {}).filter((k) => !k.startsWith('_')).sort();
+  const keysByProduct = new Map();
+  for (const key of overrideKeys) {
+    const value = overrides[key];
+    if (Number.isInteger(value)) keysByProduct.set(value, [...(keysByProduct.get(value) ?? []), key]);
+  }
+  for (const key of overrideKeys) {
+    const value = overrides[key];
+    const c = cardByKey.get(key);
+    if (!c) { overrideReport.warnings.push(`${key}: Karte nicht gefunden, ignoriert`); continue; }
+    if (value !== null && !(Number.isInteger(value) && typeof productExpansion?.(value) === 'number')) {
+      overrideReport.warnings.push(`${key}: Produkt ${value} nicht in cardmarket/index/products.json, ignoriert`);
+      continue;
+    }
+    if (value !== null) {
+      const warn = (why) => overrideReport.warnings.push(`${key}: Produkt ${value} ${why} (Warnung, uebernommen)`);
+      const expansion = productExpansion(value);
+      const setExp = setById.get(key.slice(0, key.lastIndexOf('/')))?.ids?.cardmarket;
+      const ownExp = subsetExpansion.get(c.id);
+      if (expansion !== setExp && expansion !== ownExp) warn(`liegt in Expansion ${expansion}, nicht in der des Sets (${setExp ?? '-'})`);
+      const p = indexFor(expansion)?.byId.get(value);
+      if (p && !isSingle(p)) warn(`ist kein Pokémon-Single (Kategorie ${p.categoryId ?? p.categoryName ?? '?'})`);
+      if (p && OVERSIZED.test(String(p.name ?? ''))) warn('ist ein [Oversized]-Produkt');
+      const keys = keysByProduct.get(value) ?? [];
+      if (keys.length > 1) warn(`steht mehrfach in den Overrides (${keys.join(', ')})`);
+      const others = (heldBefore.get(value) ?? []).filter((id) => id !== c.id);
+      if (others.length) warn(`gehoert per TCGdex schon zu ${others.join(', ')}`);
+    }
+    const original = tcgdexIds(c);
+    c.ids = { ...c.ids, cardmarket: value === null ? [] : [value], cardmarketSource: 'override', ...(original.length ? { cardmarketTcgdex: original } : {}) };
+    if (Array.isArray(c.variants)) c.variants = c.variants.map(({ cardmarketId, ...rest }) => rest);
+    locked.add(c.id);
+    if (value === null) overrideReport.removed++;
+    else overrideReport.applied++;
+  }
 
   // 0. Set-Ebene: Expansion pruefen, notfalls aus den Karten ableiten
   const expansionMismatch = {
@@ -456,14 +489,47 @@ export function fillCardmarketIds({
 
   // 3b. Gleichnamige Gruppen je Expansion (Left/Right, Reihenfolge): nur wenn jede Karte dieses Namens in
   // der Expansion noch offen ist (keine TCGdex-ID, kein Override, kein Treffer) und kein Produkt belegt ist.
-  const groups = new Map(); // `${exp}|${name}` -> { index, name, cards }
-  walk(({ card, exp, index }) => {
+  // Reihenfolge nur, wenn die Produkt-IDs zu den Nachbarn passen: Offset (Produkt-ID - Kartennummer) gleich
+  // dem eines naechsten Nachbarn darunter oder darueber (+-2; Nachbarn = Karten mit ID in dieser Expansion und
+  // nummerierte Produkte), ohne Nachbarn liegen die IDs der Gruppe hoechstens 50 auseinander. Sonst orderedRejected.
+  const groups = new Map(); // `${exp}|${name}` -> { exp, index, name, cards }
+  const neighbours = new Map(); // exp -> [{ n, offset }]
+  const keyOf = new Map(); // card.id -> "<setId>/<cardId>"
+  walk(({ set, card, exp, index }) => {
+    keyOf.set(card.id, `${set.id}/${card.cardId}`);
+    if (exp === null || !index) return;
+    const number = normalizeCmNumber(card.number);
+    if (number && /^\d+$/.test(number)) {
+      const id = results.get(card.id)?.result?.id ?? tcgdexIds(card).find((x) => index.byId.has(x));
+      if (id !== undefined) neighbours.set(exp, [...(neighbours.get(exp) ?? []), { n: Number(number), offset: id - Number(number) }]);
+    }
     const name = normalizeCmName(card.name);
-    if (exp === null || !index || !name) return;
+    if (!name) return;
     const key = `${exp}|${name}`;
-    if (!groups.has(key)) groups.set(key, { index, name, cards: [] });
+    if (!groups.has(key)) groups.set(key, { exp, index, name, cards: [] });
     groups.get(key).cards.push(card);
   });
+  for (const [exp, index] of indexes) {
+    if (!index) continue;
+    for (const p of index.all) if (p.number && /^\d+$/.test(p.number)) neighbours.set(exp, [...(neighbours.get(exp) ?? []), { n: Number(p.number), offset: p.id - Number(p.number) }]);
+  }
+  const orderedRejected = [];
+  const plausibleOrder = (g, hit) => {
+    const near = neighbours.get(g.exp) ?? [];
+    if (!near.length) {
+      const ids = hit.products.map((p) => p.id);
+      return Math.max(...ids) - Math.min(...ids) <= 50;
+    }
+    return g.cards.every((c, i) => {
+      const n = Number(normalizeCmNumber(c.number));
+      const offset = hit.products[i].id - n;
+      const below = near.filter((x) => x.n < n);
+      const above = near.filter((x) => x.n > n);
+      const lo = below.length ? Math.max(...below.map((x) => x.n)) : null;
+      const hi = above.length ? Math.min(...above.map((x) => x.n)) : null;
+      return near.some((x) => (x.n === lo || x.n === hi) && Math.abs(x.offset - offset) <= 2);
+    });
+  };
   const claimedNow = new Set([...results.values()].map((r) => r.result?.id).filter((id) => id !== undefined));
   for (const g of groups.values()) {
     if (g.cards.length < 2 || g.cards.some((c) => !results.has(c.id) || results.get(c.id).result?.id !== undefined)) continue;
@@ -471,6 +537,11 @@ export function fillCardmarketIds({
     if (products.some((p) => taken.has(p.id) || claimedNow.has(p.id))) continue;
     const hit = assignGroup(g.cards, products);
     if (!hit) continue;
+    if (hit.source === 'ordered' && !plausibleOrder(g, hit)) {
+      const order = g.cards.map((c, i) => ({ c, p: hit.products[i] })).sort((a, b) => a.p.id - b.p.id);
+      orderedRejected.push({ expansionId: g.exp, name: g.cards[0].name, cards: order.map(({ c }) => keyOf.get(c.id)), products: order.map(({ p }) => p.id) });
+      continue;
+    }
     g.cards.forEach((c, i) => {
       results.get(c.id).result = { id: hit.products[i].id, source: hit.source };
       claimedNow.add(hit.products[i].id);
@@ -478,7 +549,7 @@ export function fillCardmarketIds({
   }
 
   // 4. Schreiben und zaehlen
-  const rules = { energySymbol: 0, leftRight: 0, ordered: 0, override: overrideReport.applied + overrideReport.removed, oversizeExcluded: 0, versionSuffixSkipped: 0 };
+  const rules = { energySymbol: 0, leftRight: 0, ordered: 0, orderedRejected: orderedRejected.length, override: overrideReport.applied + overrideReport.removed, oversizeExcluded: 0, versionSuffixSkipped: 0 };
   const push = (row, key, cardId) => { (row[key] ??= []).push(cardId); };
   const open = [];
   for (const entry of results.values()) {
@@ -508,6 +579,26 @@ export function fillCardmarketIds({
       for (const v of c.variants ?? []) if (typeof v?.cardmarketId === 'number') held.add(v.cardmarketId);
     }
   }
+  // Hinweise je Kandidat: mehrere gleichnamige Produkte ohne Nummer (Sonder-/Oversize-Druck moeglich) oder
+  // Produkt-ID weit ausserhalb des Hauptbereichs der Expansion (10.-90. Perzentil, Abstand > Spanne + 100).
+  const idRange = new Map();
+  const rangeOf = (index) => {
+    if (!idRange.has(index)) {
+      const ids = index.all.map((p) => p.id).sort((a, b) => a - b);
+      const lo = ids[Math.floor(0.1 * (ids.length - 1))];
+      const hi = ids[Math.floor(0.9 * (ids.length - 1))];
+      const margin = hi - lo + 100;
+      idRange.set(index, [lo - margin, hi + margin]);
+    }
+    return idRange.get(index);
+  };
+  const hintFor = (p, index) => {
+    const hints = [];
+    if ((index.byName.get(p.name) ?? []).filter((x) => x.number === null).length > 1) hints.push('same-name-unnumbered');
+    const [lo, hi] = rangeOf(index);
+    if (p.id < lo || p.id > hi) hints.push('id-outlier');
+    return hints.length ? { hint: hints.join(', ') } : {};
+  };
   const candidatesFor = (card, index) => {
     if (!index) return [];
     const name = normalizeCmName(card.name);
@@ -521,7 +612,7 @@ export function fillCardmarketIds({
     });
     let pick = scored.filter((x) => x.score > 0);
     if (!pick.length && free.length <= 5) pick = scored;
-    return pick.sort((a, b) => b.score - a.score || a.p.id - b.p.id).slice(0, 5).map(({ p }) => ({ productId: p.id, name: p.raw }));
+    return pick.sort((a, b) => b.score - a.score || a.p.id - b.p.id).slice(0, 5).map(({ p }) => ({ productId: p.id, name: p.raw, ...hintFor(p, index) }));
   };
   const stillMissing = open.map(({ setId, card, exp, index }) => ({
     cardKey: `${setId}/${card.cardId}`, name: card.name, deName: card.i18n?.de?.name ?? null, set: setId, expansionId: exp,
@@ -556,6 +647,6 @@ export function fillCardmarketIds({
   for (const row of Object.values(bySet)) for (const k of Object.keys(totals)) totals[k] += row[k] ?? 0;
   return {
     totals, rules, bySet, duplicateTcgdexIds, duplicates: dup, expansionMismatch,
-    overrides: overrideReport, oversizeExcludedProducts, versionSuffixSkippedByExpansion, stillMissing, stillMissingByExpansion,
+    overrides: overrideReport, orderedRejected, oversizeExcludedProducts, versionSuffixSkippedByExpansion, stillMissing, stillMissingByExpansion,
   };
 }

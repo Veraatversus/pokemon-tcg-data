@@ -638,7 +638,99 @@ test('stillMissing worklist with candidates', () => {
   );
   assert.deepEqual(report.stillMissing, [{
     cardKey: 's1/94', name: 'Legendary Pyroduct', deName: 'Legendäre Lavaröhre', set: 's1', expansionId: 100,
-    candidates: [{ productId: 918923, name: 'Legendary Lava Tube [Left]' }, { productId: 918924, name: 'Legendary Lava Tube [Right]' }],
+    // Left/Right teilen den normalisierten Namen -> Hinweis auf mehrere gleichnamige Produkte ohne Nummer
+    candidates: [
+      { productId: 918923, name: 'Legendary Lava Tube [Left]', hint: 'same-name-unnumbered' },
+      { productId: 918924, name: 'Legendary Lava Tube [Right]', hint: 'same-name-unnumbered' },
+    ],
   }]);
   assert.deepEqual(report.stillMissingByExpansion, [{ expansionId: 100, count: 1, sets: ['s1'] }]);
+});
+
+// --- Haertung nach Review ---
+test('ordered rule checks product id offsets against neighbours', () => {
+  // xy10-Form: Nachbarkarten mit bekannter ID, Offset (Produkt-ID - Nummer) passt -> zugeordnet
+  const xy = run(
+    [card('25', '25', 'Abra', [289851]), card('26', '26', 'M Alakazam-EX'), card('117', '117', 'Kadabra', [289937]), card('118', '118', 'M Alakazam-EX')],
+    [single(289851, 'Abra', null), single(289852, 'MAlakazam EX [Zen Force]', null), single(289937, 'Kadabra', null), single(289938, 'MAlakazam EX [Zen Force]', null)],
+  );
+  assert.deepEqual(xy.cards.map((c) => c.ids.cardmarket), [[289851], [289852], [289937], [289938]]);
+  assert.equal(xy.cards[1].ids.cardmarketSource, 'ordered');
+  assert.equal(xy.report.rules.orderedRejected, 0);
+  // bwp-Form: zweites Produkt ist ein spaeterer Nachdruck (547296), Offset passt nicht zum Nachbarn -> abgelehnt
+  const bwp = run(
+    [card('1', '1', 'Snivy'), card('2', '2', 'Snivy'), card('3', '3', 'Tepig', [279927])],
+    [single(279925, 'Snivy [Slam]', null), single(547296, 'Snivy [Slam]', null), single(279927, 'Tepig [Ember]', null)],
+  );
+  assert.deepEqual(bwp.cards.slice(0, 2).map((c) => c.ids.cardmarket), [[], []]);
+  assert.equal(bwp.report.rules.ordered, 0);
+  assert.equal(bwp.report.rules.orderedRejected, 1);
+  assert.deepEqual(bwp.report.orderedRejected, [{ expansionId: 100, name: 'Snivy', cards: ['s1/1', 's1/2'], products: [279925, 547296] }]);
+  // ohne Nachbarn: Produkt-IDs zu weit auseinander (> 50) -> abgelehnt
+  const lonely = run([card('1', '1', 'Snivy'), card('2', '2', 'Snivy')], [single(279925, 'Snivy [Slam]', null), single(547296, 'Snivy [Slam]', null)]);
+  assert.deepEqual(lonely.cards.map((c) => c.ids.cardmarket), [[], []]);
+  assert.equal(lonely.report.rules.orderedRejected, 1);
+  // nummerierte Produkte zaehlen als Nachbarn
+  const numbered = run(
+    [card('5', '5', 'Lantern'), card('9', '9', 'Lantern')],
+    [single(1004, 'Pineco', '4'), single(1005, 'Lantern', null), single(1009, 'Lantern', null), single(1010, 'Heracross', '10')],
+  );
+  assert.deepEqual(numbered.cards.map((c) => c.ids.cardmarket), [[1005], [1009]]);
+  const off = run(
+    [card('5', '5', 'Lantern'), card('9', '9', 'Lantern')],
+    [single(1004, 'Pineco', '4'), single(1005, 'Lantern', null), single(1030, 'Lantern', null), single(1010, 'Heracross', '10')],
+  );
+  assert.deepEqual(off.cards.map((c) => c.ids.cardmarket), [[], []]);
+});
+
+test('primary id skips jumbo variants unless only jumbo exists', () => {
+  const v = (cardmarket, variants) => ({ ids: { cardmarket }, variants });
+  // swshp-SWSH139-Form, Jumbo zuerst
+  assert.equal(primaryCardmarketId(v([576911, 576738], [{ type: 'holo', size: 'jumbo', cardmarketId: 576911 }, { type: 'holo', cardmarketId: 576738 }])), 576738);
+  // gestempelte Normalgroesse vor ungestempeltem Jumbo
+  assert.equal(primaryCardmarketId(v([1], [{ type: 'holo', size: 'jumbo', cardmarketId: 9 }, { type: 'normal', stamp: ['x'], cardmarketId: 8 }])), 8);
+  // nur Jumbo (mep-Museum, svp-500): bleibt
+  assert.equal(primaryCardmarketId(v([865392], [{ type: 'normal', size: 'jumbo', cardmarketId: 865392 }])), 865392);
+  // ungestempelter Jumbo vor gestempeltem Jumbo
+  assert.equal(primaryCardmarketId(v([1], [{ size: 'jumbo', stamp: ['x'], cardmarketId: 3 }, { size: 'jumbo', cardmarketId: 4 }])), 4);
+});
+
+test('override warnings for suspicious products', () => {
+  const products100 = [single(70, 'Pineco', '1'), single(71, 'Heracross', '2')];
+  const products200 = [single(80, 'Pikachu V-UNION [Oversized]', null), { ...single(81, 'Booster', null), categoryId: 52, categoryName: 'Pokémon Booster' }];
+  const cardsBySet = new Map([['s1', [card('1', '1', 'Pineco'), card('2', '2', 'Heracross', [71]), card('3', '3', 'Pikachu V-UNION'), card('4', '4', 'Booster')]]]);
+  const report = fillCardmarketIds({
+    sets: [{ id: 's1', ids: { cardmarket: 100 } }],
+    cardsBySet,
+    productExpansion: (id) => (id >= 80 ? 200 : 100),
+    knownExpansions: new Set([100, 200]),
+    loadExpansion: (id) => ({ 100: { cards: products100 }, 200: { cards: products200 } })[id] ?? null,
+    overrides: { 's1/1': 71, 's1/3': 80, 's1/4': 81, 's1/2': 71 },
+  });
+  const out = cardsBySet.get('s1');
+  // Warnungen, aber uebernommen
+  assert.deepEqual(out.map((c) => c.ids.cardmarket), [[71], [71], [80], [81]]);
+  assert.deepEqual(report.overrides.warnings, [
+    's1/1: Produkt 71 steht mehrfach in den Overrides (s1/1, s1/2) (Warnung, uebernommen)',
+    's1/1: Produkt 71 gehoert per TCGdex schon zu s1-2 (Warnung, uebernommen)',
+    's1/2: Produkt 71 steht mehrfach in den Overrides (s1/1, s1/2) (Warnung, uebernommen)',
+    's1/3: Produkt 80 liegt in Expansion 200, nicht in der des Sets (100) (Warnung, uebernommen)',
+    's1/3: Produkt 80 ist ein [Oversized]-Produkt (Warnung, uebernommen)',
+    's1/4: Produkt 81 liegt in Expansion 200, nicht in der des Sets (100) (Warnung, uebernommen)',
+    's1/4: Produkt 81 ist kein Pokémon-Single (Kategorie 52) (Warnung, uebernommen)',
+  ]);
+});
+
+test('stillMissing candidates carry oversize/special hints', () => {
+  const { report } = run(
+    [card('BW1', 'BW1', 'Snivy')],
+    [
+      single(279920, 'Oshawott', '1'), single(279921, 'Tepig', '2'), single(279922, 'Pansage', '3'), single(279923, 'Pansear', '4'),
+      single(279924, 'Panpour', '5'), single(279925, 'Snivy [Slam]', null), single(547296, 'Snivy [Slam]', null),
+    ],
+  );
+  assert.deepEqual(report.stillMissing[0].candidates, [
+    { productId: 279925, name: 'Snivy [Slam]', hint: 'same-name-unnumbered' },
+    { productId: 547296, name: 'Snivy [Slam]', hint: 'same-name-unnumbered, id-outlier' },
+  ]);
 });

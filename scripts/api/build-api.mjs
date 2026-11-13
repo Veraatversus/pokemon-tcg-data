@@ -294,7 +294,7 @@ function main() {
     const cm = r.cardmarketIds;
     console.log(`Cardmarket-IDs: ${cm.cards} Karten, ${cm.tcgdex} von TCGdex, ${cm.matched} nachgetragen, ${cm.missing} fehlen (${cm.ambiguous} mehrdeutig); doppelte TCGdex-IDs ${cm.duplicates.ids} (${cm.duplicates.cards} Karten, ${cm.duplicates.corrected} korrigiert, ${cm.duplicates.kept} belassen); Details api/v3/reports/cardmarket-ids.json`);
     const ru = cm.rules;
-    console.log(`Cardmarket-Regeln: Energie-Symbol ${ru.energySymbol}, Left/Right ${ru.leftRight}, Reihenfolge ${ru.ordered}, Override ${ru.override}, Oversize ausgeschlossen ${ru.oversizeExcluded}, Versions-Suffix ohne Karte ${ru.versionSuffixSkipped}; Arbeitsliste stillMissing ${cm.stillMissing}`);
+    console.log(`Cardmarket-Regeln: Energie-Symbol ${ru.energySymbol}, Left/Right ${ru.leftRight}, Reihenfolge ${ru.ordered} (${ru.orderedRejected} abgelehnt), Override ${ru.override}, Oversize ausgeschlossen ${ru.oversizeExcluded}, Versions-Suffix ohne Karte ${ru.versionSuffixSkipped}; Arbeitsliste stillMissing ${cm.stillMissing}`);
     for (const w of cm.overrideWarnings) console.log(`WARNUNG cardmarket-overrides.json: ${w}`);
     const x = cm.expansion;
     console.log(`Cardmarket-Expansionspruefung: ${x.checked} IDs, ${x.corrected} ersetzt, ${x.dropped} entfernt, ${x.keptMismatch} belassen (Name passt nicht), ${x.noSetExpansion} ohne Set-Expansion, ${x.unknownProduct} unbekannt, ${x.foreignNameOk} namensgleich in fremder Expansion; Sets: ${x.sets.map((s) => `${s.setId} ${s.oldId}->${s.newId ?? '-'} (${s.reason})`).join(', ') || '-'}`);
