@@ -708,8 +708,7 @@
       "expansionId": 1561,
       "matched": 0,
       "missing": 0,
-      "stabilityKept": 3,
-      "tcgdex": 103
+      "tcgdex": 106
     },
     "dpp": {
       "ambiguous": 8,
@@ -755,13 +754,21 @@
       "tcgdex": 21
     },
     "ecard1": {
-      "ambiguous": 0,
+      "ambiguous": 2,
+      "ambiguousCards": [
+        "47",
+        "68"
+      ],
       "cards": 165,
       "customSet": 161,
       "expansionId": 1536,
       "matched": 0,
-      "missing": 0,
-      "tcgdex": 4
+      "missing": 2,
+      "missingCards": [
+        "47",
+        "68"
+      ],
+      "tcgdex": 2
     },
     "ecard2": {
       "ambiguous": 0,
@@ -1271,8 +1278,7 @@
       "expansionId": 1562,
       "matched": 0,
       "missing": 0,
-      "stabilityKept": 4,
-      "tcgdex": 129
+      "tcgdex": 133
     },
     "pl2": {
       "ambiguous": 0,
@@ -1300,8 +1306,8 @@
       "expansionId": 1565,
       "matched": 5,
       "missing": 0,
-      "stabilityKept": 4,
-      "tcgdex": 102
+      "stabilityKept": 1,
+      "tcgdex": 105
     },
     "pop1": {
       "ambiguous": 0,
@@ -2315,8 +2321,8 @@
         "XY168",
         "XY171"
       ],
-      "stabilityKept": 45,
-      "tcgdex": 156
+      "stabilityKept": 44,
+      "tcgdex": 157
     },
     "zsv10pt5": {
       "ambiguous": 0,
@@ -2337,6 +2343,23 @@
     "applied": 746,
     "changed": 208,
     "conflicts": [],
+    "dropped": [
+      {
+        "cardKey": "ecard1/47",
+        "number": "12",
+        "productId": 274887
+      },
+      {
+        "cardKey": "ecard1/66",
+        "number": "29",
+        "productId": 274904
+      },
+      {
+        "cardKey": "ecard1/68",
+        "number": "30",
+        "productId": 274905
+      }
+    ],
     "missingProducts": [
       {
         "collectorNumber": "224a",
@@ -2819,18 +2842,6 @@
     "274600": [
       "neo3-14",
       "neo3-27"
-    ],
-    "274887": [
-      "ecard1-12",
-      "ecard1-47"
-    ],
-    "274904": [
-      "ecard1-29",
-      "ecard1-66"
-    ],
-    "274905": [
-      "ecard1-30",
-      "ecard1-68"
     ],
     "275778": [
       "ex2-1",
@@ -5452,10 +5463,10 @@
     ]
   },
   "duplicates": {
-    "cards": 1586,
+    "cards": 1583,
     "corrected": 366,
-    "ids": 747,
-    "kept": 1220
+    "ids": 744,
+    "kept": 1217
   },
   "expansionMismatch": {
     "cards": [
@@ -7907,6 +7918,7 @@
     "sets": [
       {
         "evidence": "15/15",
+        "evidenceSource": "tcgdex",
         "newId": 5430,
         "oldId": null,
         "reason": "derived",
@@ -7914,6 +7926,7 @@
       },
       {
         "evidence": "15/15",
+        "evidenceSource": "tcgdex",
         "newId": 5978,
         "oldId": null,
         "reason": "derived",
@@ -7921,6 +7934,7 @@
       },
       {
         "evidence": "16/16",
+        "evidenceSource": "tcgdex",
         "newId": 6324,
         "oldId": null,
         "reason": "derived",
@@ -7928,6 +7942,7 @@
       },
       {
         "evidence": "34/34",
+        "evidenceSource": "tcgdex",
         "newId": 5526,
         "oldId": null,
         "reason": "derived",
@@ -7935,6 +7950,7 @@
       },
       {
         "evidence": "30/30",
+        "evidenceSource": "tcgdex",
         "newId": 1630,
         "oldId": null,
         "reason": "derived",
@@ -7942,6 +7958,7 @@
       },
       {
         "evidence": "12/12",
+        "evidenceSource": "tcgdex",
         "newId": 1628,
         "oldId": null,
         "reason": "derived",
@@ -7949,6 +7966,7 @@
       },
       {
         "evidence": "30/30",
+        "evidenceSource": "tcgdex",
         "newId": 1629,
         "oldId": null,
         "reason": "derived",
@@ -7956,6 +7974,7 @@
       },
       {
         "evidence": "18/18",
+        "evidenceSource": "tcgdex",
         "newId": 1758,
         "oldId": null,
         "reason": "derived",
@@ -7963,6 +7982,7 @@
       },
       {
         "evidence": "74/74",
+        "evidenceSource": "previous",
         "newId": 1611,
         "oldId": null,
         "reason": "derived",
@@ -7970,6 +7990,7 @@
       },
       {
         "evidence": "25/25",
+        "evidenceSource": "tcgdex",
         "newId": 4347,
         "oldId": null,
         "reason": "derived",
@@ -7977,6 +7998,7 @@
       },
       {
         "evidence": "42/42",
+        "evidenceSource": "mixed",
         "newId": 1609,
         "oldId": null,
         "reason": "derived",
@@ -7984,6 +8006,7 @@
       },
       {
         "evidence": "5/5",
+        "evidenceSource": "tcgdex",
         "newId": 3510,
         "oldId": null,
         "reason": "derived",
@@ -7991,6 +8014,7 @@
       },
       {
         "evidence": "25/25",
+        "evidenceSource": "tcgdex",
         "newId": 1610,
         "oldId": null,
         "reason": "derived",
@@ -7998,6 +8022,7 @@
       },
       {
         "evidence": "12/12",
+        "evidenceSource": "tcgdex",
         "newId": 1623,
         "oldId": null,
         "reason": "derived",
@@ -8005,6 +8030,7 @@
       },
       {
         "evidence": "12/12",
+        "evidenceSource": "tcgdex",
         "newId": 1624,
         "oldId": null,
         "reason": "derived",
@@ -8012,6 +8038,7 @@
       },
       {
         "evidence": "12/12",
+        "evidenceSource": "tcgdex",
         "newId": 1625,
         "oldId": null,
         "reason": "derived",
@@ -8019,6 +8046,7 @@
       },
       {
         "evidence": "12/12",
+        "evidenceSource": "tcgdex",
         "newId": 1741,
         "oldId": null,
         "reason": "derived",
@@ -8026,6 +8054,7 @@
       },
       {
         "evidence": "12/12",
+        "evidenceSource": "tcgdex",
         "newId": 1752,
         "oldId": null,
         "reason": "derived",
@@ -8033,6 +8062,7 @@
       },
       {
         "evidence": "12/12",
+        "evidenceSource": "tcgdex",
         "newId": 1845,
         "oldId": null,
         "reason": "derived",
@@ -8040,6 +8070,7 @@
       },
       {
         "evidence": "12/12",
+        "evidenceSource": "tcgdex",
         "newId": 2404,
         "oldId": null,
         "reason": "derived",
@@ -8047,6 +8078,7 @@
       },
       {
         "evidence": "12/12",
+        "evidenceSource": "tcgdex",
         "newId": 2829,
         "oldId": null,
         "reason": "derived",
@@ -8054,6 +8086,7 @@
       },
       {
         "evidence": "25/25",
+        "evidenceSource": "tcgdex",
         "newId": 3738,
         "oldId": null,
         "reason": "derived",
@@ -8061,6 +8094,7 @@
       },
       {
         "evidence": "15/15",
+        "evidenceSource": "tcgdex",
         "newId": 5135,
         "oldId": null,
         "reason": "derived",
@@ -8068,6 +8102,7 @@
       },
       {
         "evidence": "26/26",
+        "evidenceSource": "previous",
         "newId": 1608,
         "oldId": null,
         "reason": "derived",
@@ -8075,6 +8110,7 @@
       },
       {
         "evidence": "91/91",
+        "evidenceSource": "previous",
         "newId": 2514,
         "oldId": null,
         "reason": "derived",
@@ -8082,6 +8118,7 @@
       },
       {
         "evidence": "244/244",
+        "evidenceSource": "tcgdex",
         "newId": 6096,
         "oldId": null,
         "reason": "derived",
@@ -8089,6 +8126,7 @@
       },
       {
         "evidence": "24/24",
+        "evidenceSource": "tcgdex",
         "newId": 5224,
         "oldId": null,
         "reason": "derived",
@@ -8096,6 +8134,7 @@
       },
       {
         "evidence": "10/10",
+        "evidenceSource": "tcgdex",
         "newId": 1626,
         "oldId": 275771,
         "reason": "derived",
@@ -8103,6 +8142,7 @@
       },
       {
         "evidence": "10/10",
+        "evidenceSource": "tcgdex",
         "newId": 1626,
         "oldId": null,
         "reason": "derived",
@@ -8110,6 +8150,7 @@
       },
       {
         "evidence": "9/9",
+        "evidenceSource": "mixed",
         "newId": 1627,
         "oldId": null,
         "reason": "derived",
@@ -8117,6 +8158,7 @@
       },
       {
         "evidence": "12/12",
+        "evidenceSource": "mixed",
         "newId": 1627,
         "oldId": null,
         "reason": "derived",
@@ -8124,13 +8166,13 @@
       }
     ],
     "totals": {
-      "checked": 21941,
+      "checked": 21938,
       "corrected": 35,
       "dropped": 11,
       "foreignNameOk": 1348,
       "keptMismatch": 103,
       "noSetExpansion": 178,
-      "ok": 20263,
+      "ok": 20260,
       "unknownProduct": 3
     }
   },
@@ -8368,210 +8410,245 @@
     {
       "cards": 12,
       "evidence": "2/12",
+      "evidenceSource": "tcgdex",
       "setId": "TCGDEX-2013bw",
       "tcgdexExpansion": null
     },
     {
       "cards": 41,
       "evidence": "4/41",
+      "evidenceSource": "tcgdex",
       "setId": "TCGDEX-2019sm-fr",
       "tcgdexExpansion": null
     },
     {
       "cards": 286,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-A1",
       "tcgdexExpansion": null
     },
     {
       "cards": 86,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-A1a",
       "tcgdexExpansion": null
     },
     {
       "cards": 207,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-A2",
       "tcgdexExpansion": null
     },
     {
       "cards": 96,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-A2a",
       "tcgdexExpansion": null
     },
     {
       "cards": 111,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-A2b",
       "tcgdexExpansion": null
     },
     {
       "cards": 239,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-A3",
       "tcgdexExpansion": null
     },
     {
       "cards": 103,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-A3a",
       "tcgdexExpansion": null
     },
     {
       "cards": 107,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-A3b",
       "tcgdexExpansion": null
     },
     {
       "cards": 241,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-A4",
       "tcgdexExpansion": null
     },
     {
       "cards": 105,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-A4a",
       "tcgdexExpansion": null
     },
     {
       "cards": 331,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-B1",
       "tcgdexExpansion": null
     },
     {
       "cards": 103,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-B1a",
       "tcgdexExpansion": null
     },
     {
       "cards": 234,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-B2",
       "tcgdexExpansion": null
     },
     {
       "cards": 131,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-B2a",
       "tcgdexExpansion": null
     },
     {
       "cards": 100,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-P-A",
       "tcgdexExpansion": null
     },
     {
       "cards": 0,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-jumbo",
       "tcgdexExpansion": null
     },
     {
       "cards": 1,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-miscp",
       "tcgdexExpansion": null
     },
     {
       "cards": 0,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-rc",
       "tcgdexExpansion": null
     },
     {
       "cards": 0,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-sp",
       "tcgdexExpansion": null
     },
     {
       "cards": 30,
       "evidence": "0/30",
+      "evidenceSource": "tcgdex",
       "setId": "TCGDEX-tk-bw-e",
       "tcgdexExpansion": null
     },
     {
       "cards": 11,
       "evidence": "0/11",
+      "evidenceSource": "tcgdex",
       "setId": "TCGDEX-tk-dp-l",
       "tcgdexExpansion": null
     },
     {
       "cards": 30,
       "evidence": "0/29",
+      "evidenceSource": "tcgdex",
       "setId": "TCGDEX-tk-hs-g",
       "tcgdexExpansion": null
     },
     {
       "cards": 30,
       "evidence": "4/30",
+      "evidenceSource": "tcgdex",
       "setId": "TCGDEX-tk-sm-r",
       "tcgdexExpansion": null
     },
     {
       "cards": 30,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-tk-xy-b",
       "tcgdexExpansion": null
     },
     {
       "cards": 30,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-tk-xy-latia",
       "tcgdexExpansion": null
     },
     {
       "cards": 30,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-tk-xy-latio",
       "tcgdexExpansion": null
     },
     {
       "cards": 30,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-tk-xy-n",
       "tcgdexExpansion": null
     },
     {
       "cards": 30,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-tk-xy-p",
       "tcgdexExpansion": null
     },
     {
       "cards": 30,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-tk-xy-su",
       "tcgdexExpansion": null
     },
     {
       "cards": 30,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-tk-xy-sy",
       "tcgdexExpansion": null
     },
     {
       "cards": 30,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-tk-xy-w",
       "tcgdexExpansion": null
     },
     {
       "cards": 0,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-wp",
       "tcgdexExpansion": null
     },
     {
       "cards": 6,
       "evidence": "0/0",
+      "evidenceSource": null,
       "setId": "TCGDEX-xya",
       "tcgdexExpansion": null
     }
@@ -8959,27 +9036,6 @@
       "source": "matched",
       "todayId": null,
       "todaySource": null
-    },
-    {
-      "cardKey": "dp7/58",
-      "productId": 278297,
-      "source": "tcgdex",
-      "todayId": 278356,
-      "todaySource": "corrected"
-    },
-    {
-      "cardKey": "dp7/59",
-      "productId": 278298,
-      "source": "tcgdex",
-      "todayId": 278357,
-      "todaySource": "corrected"
-    },
-    {
-      "cardKey": "dp7/80",
-      "productId": 278296,
-      "source": "tcgdex",
-      "todayId": 278378,
-      "todaySource": "corrected"
     },
     {
       "cardKey": "dpp/DP5",
@@ -9556,60 +9612,11 @@
       "todaySource": "tcgdex"
     },
     {
-      "cardKey": "pl1/6",
-      "productId": 278426,
-      "source": "tcgdex",
-      "todayId": 278427,
-      "todaySource": "corrected"
-    },
-    {
-      "cardKey": "pl1/81",
-      "productId": 278419,
-      "source": "tcgdex",
-      "todayId": 278502,
-      "todaySource": "corrected"
-    },
-    {
-      "cardKey": "pl1/97",
-      "productId": 278421,
-      "source": "tcgdex",
-      "todayId": 278518,
-      "todaySource": "corrected"
-    },
-    {
-      "cardKey": "pl1/102",
-      "productId": 278420,
-      "source": "tcgdex",
-      "todayId": 278523,
-      "todaySource": "corrected"
-    },
-    {
       "cardKey": "pl3/70",
       "productId": 882910,
       "source": "corrected",
       "todayId": 882910,
       "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "pl4/46",
-      "productId": 278869,
-      "source": "tcgdex",
-      "todayId": 278918,
-      "todaySource": "corrected"
-    },
-    {
-      "cardKey": "pl4/52",
-      "productId": 278870,
-      "source": "tcgdex",
-      "todayId": 278924,
-      "todaySource": "corrected"
-    },
-    {
-      "cardKey": "pl4/74",
-      "productId": 278872,
-      "source": "tcgdex",
-      "todayId": 278946,
-      "todaySource": "corrected"
     },
     {
       "cardKey": "pl4/94",
@@ -11166,13 +11173,6 @@
       "todaySource": "tcgdex"
     },
     {
-      "cardKey": "xyp/XY93",
-      "productId": 553429,
-      "source": "tcgdex",
-      "todayId": 289795,
-      "todaySource": "corrected"
-    },
-    {
       "cardKey": "xyp/XY101",
       "productId": 289820,
       "source": "corrected",
@@ -12229,6 +12229,42 @@
       "expansionId": 1609,
       "name": "Arceus LV.X",
       "set": "dpp"
+    },
+    {
+      "candidates": [
+        {
+          "name": "Feraligatr [Major Tsunami | Rending Jaws]",
+          "productId": 274922
+        },
+        {
+          "hint": "id-outlier",
+          "name": "Feraligatr [Major Tsunami | Rending Jaws]",
+          "productId": 362884
+        }
+      ],
+      "cardKey": "ecard1/47",
+      "deName": "Impergator",
+      "expansionId": 1536,
+      "name": "Feraligatr",
+      "set": "ecard1"
+    },
+    {
+      "candidates": [
+        {
+          "name": "Venusaur [Harvest Bounty | Body Slam]",
+          "productId": 274943
+        },
+        {
+          "hint": "id-outlier",
+          "name": "Venusaur [Harvest Bounty | Body Slam]",
+          "productId": 362896
+        }
+      ],
+      "cardKey": "ecard1/68",
+      "deName": "Bisaflor",
+      "expansionId": 1536,
+      "name": "Venusaur",
+      "set": "ecard1"
     },
     {
       "candidates": [
@@ -15537,6 +15573,13 @@
     },
     {
       "count": 2,
+      "expansionId": 1536,
+      "sets": [
+        "ecard1"
+      ]
+    },
+    {
+      "count": 2,
       "expansionId": 1687,
       "sets": [
         "xy9"
@@ -15642,14 +15685,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 150,
+    "ambiguous": 152,
     "cards": 24057,
     "customSet": 746,
     "matched": 414,
-    "missing": 2904,
+    "missing": 2906,
     "override": 7,
-    "stabilityKept": 405,
-    "tcgdex": 19581
+    "stabilityKept": 394,
+    "tcgdex": 19590
   },
   "versionSuffixSkippedByExpansion": {
     "1537": 7,
