@@ -10,6 +10,7 @@ import { parseCsv } from '../lib/csv.mjs';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 const registry = readRegistry(path.join(repoRoot, 'api', 'registry'));
 const fixtureDir = path.join(repoRoot, '.local', 'fixtures');
+const legacySetAliases = JSON.parse(fs.readFileSync(path.join(repoRoot, 'api', 'mappings', 'legacy-set-aliases.json'), 'utf8'));
 const files = fs.existsSync(fixtureDir) ? fs.readdirSync(fixtureDir).filter((f) => f.endsWith('db_collection.csv')).sort() : [];
 
 test('Registry ist vorhanden und verletzt keine Invarianten', () => {
@@ -65,12 +66,25 @@ test('Registry: jeder Set-Alias und jedes mergedSubset erreicht mindestens eine 
         else if (res.cardId !== cid) bad.push(`Alias ${a}/${key}: erwartet ${setId}/${cid}, erhalten ${res.setId}/${res.cardId}`);
         else reachable++;
       }
-      if (!reachable) bad.push(`Alias ${a} (Set ${setId}): keine Karte erreichbar (${candidates.length} Kandidaten)`);
+      // Alt-App-Set-IDs (legacy-set-aliases.json) haben keine Karten, nur die Set-Zuordnung zaehlt.
+      if (!reachable && !legacySetAliases[a]) bad.push(`Alias ${a} (Set ${setId}): keine Karte erreichbar (${candidates.length} Kandidaten)`);
     }
   }
   t.diagnostic(`Set-Aliase/mergedSubsets geprueft: ${aliasCount}`);
   assert.deepEqual(bad.slice(0, 20), []);
   assert.ok(aliasCount > 100);
+});
+
+test('Registry: Alt-App-Trainer-Galerie-IDs sind Aliase der Hauptsets', () => {
+  const expected = {
+    'TCGDEX-swsh9.5tg': 'swsh9', 'TCGDEX-swsh10.5tg': 'swsh10',
+    'TCGDEX-swsh11.5tg': 'swsh11', 'TCGDEX-swsh12.5tg': 'swsh12',
+  };
+  assert.deepEqual(Object.fromEntries(Object.entries(legacySetAliases).map(([a, e]) => [a, e.set])), expected);
+  for (const [alias, setId] of Object.entries(expected)) {
+    const owners = Object.entries(registry.sets).filter(([, s]) => (s.aliases ?? []).includes(alias)).map(([id]) => id);
+    assert.deepEqual(owners, [setId], alias);
+  }
 });
 
 test('Registry: keys.tcgdex-Aliase loesen unter TCGDEX-<set> auf ihre Karte auf (oder sind mehrdeutig)', (t) => {

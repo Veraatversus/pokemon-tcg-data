@@ -21,6 +21,8 @@ Ausgabeformat: `api/v3/cards/*.json` und `api/v3/search-index.json` sind kompakt
 
 Die Registry vergibt kanonische Set-IDs und Kartenschluessel. Sie ist die Grundlage der Zeilenschluessel in `db_collection` und darf sich daher nur additiv aendern.
 
+Alt-App-Set-IDs ohne eigene Karten (z. B. `TCGDEX-swsh9.5tg` fuer die Trainer-Galerie aus `db_sets`/Uebersicht der alten App) stehen in `api/mappings/legacy-set-aliases.json` (`{ "<alias>": { "set": "<kanonische Set-ID>", "reason": "..." } }`). Der Build nimmt sie additiv in `aliases` des Zielsets auf (Registry und `api/v3/sets.json`); ein unbekanntes Zielset bricht ab, eine Kollision mit einem fremden Alias ist ein `RegistryInvariantError`. Einmal eingetragen bleiben sie eingefroren, auch wenn der Mapping-Eintrag spaeter fehlt.
+
 ## Registry-Drift beheben
 
 ### Was die Fehler bedeuten
