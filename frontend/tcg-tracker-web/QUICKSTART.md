@@ -161,8 +161,14 @@ Top 5 vollständigste Sets:
 
 **Beispiele:**
 - `pikachu` → Alle Pikachu-Karten in allen Sets
+- `glurak` oder `charizard` → deutscher und englischer Name treffen dieselbe Karte
 - `001` → Alle Karten mit "001" in der Nummer
+- `arita` → Karten des Künstlers Mitsuhiro Arita
+- `feuer` oder `fire` → Feuer-Karten (Typnamen deutsch oder englisch)
+- `pikachu rare holo` → jedes Wort muss treffen (Name, Nummer, Künstler, Typ, Seltenheit oder Set)
 - Set-Filter: `sv04` → Nur in SV04 suchen
+
+**Nicht durchsucht:** Attacken- und Fähigkeitstexte (sie stehen nicht im Suchindex).
 
 **Ergebnis:** Karten-Karten mit Set-Tag, Status (G/RH/Fehlend)
 
