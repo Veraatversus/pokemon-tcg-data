@@ -71,3 +71,47 @@ test('resolveSeriesGroupInfo (Pfad von Dashboard und Import-Selector) nutzt die 
     setDeSeriesBySetId(null);
   }
 });
+
+test('Mega-Entwicklung: Sets mit und ohne tcgdex_serie_id landen in einer Gruppe (Task 11)', async () => {
+  const { resolveSeriesGroupInfo, setDeSeriesBySetId } = await import('../js/data/schema-contract.js');
+  const base = { vera_series: 'Mega Evolution', tcgdex_serie_name: 'Mega-Entwicklung' };
+  const rows = [
+    { ...base, setId: 'me4' },
+    { ...base, setId: 'mep' },
+    // TCGDEX-mee / me55c: Serien-ID gesetzt, Rest identisch
+    { ...base, setId: 'TCGDEX-mee', tcgdex_serie_id: 'me', tcgdex_name: 'Mega-Entwicklung Energie' },
+    { ...base, setId: 'me55c', tcgdex_serie_id: 'me', vera_name: '30th Celebration: Classic Collection' },
+    // ganz ohne DE-Serie, nur ueber die gemeinsame Map
+    { setId: 'me2', vera_series: 'Mega Evolution', tcgdex_serie_name: '' }
+  ];
+  try {
+    setDeSeriesBySetId(new Map([['me2', 'Mega-Entwicklung']]));
+    const keys = new Set(rows.map((r) => resolveSeriesGroupInfo(r).key));
+    assert.equal(keys.size, 1, [...keys].join(','));
+  } finally {
+    setDeSeriesBySetId(null);
+  }
+});
+
+test('Set-Name: leerer tcgdex_name faellt in DE auf den Namen aus api/v3 (gemeinsame Set-Meta-Map)', async () => {
+  const { setV3SetMeta, resolveDisplaySet, resolveFieldValue } = await import('../js/data/schema-contract.js');
+  const row = { setId: 'me55c', vera_name: '30th Celebration: Classic Collection', tcgdex_name: '' };
+  try {
+    setV3SetMeta(new Map([['me55c', { deName: '30 Jahre: Klassische Sammlung', deSeries: 'Mega-Entwicklung' }]]));
+    assert.equal(resolveFieldValue(row, 'set', 'setName', 'de'), '30 Jahre: Klassische Sammlung');
+    assert.equal(resolveFieldValue(row, 'set', 'setName', 'en'), '30th Celebration: Classic Collection');
+    assert.equal(resolveFieldValue({ ...row, tcgdex_name: 'Eigener' }, 'set', 'setName', 'de'), 'Eigener');
+    assert.equal(resolveDisplaySet(row).series, 'Mega-Entwicklung');
+  } finally {
+    setV3SetMeta(null);
+  }
+  assert.equal(resolveFieldValue(row, 'set', 'setName', 'de'), '30th Celebration: Classic Collection');
+});
+
+test('fetchV3SetMeta liefert DE-Name und DE-Serie je Set', async () => {
+  const { fetchV3SetMeta } = await import('../js/data/pokemon-api.js');
+  const meta = await fetchV3SetMeta({ loadSets: async () => SETS });
+  assert.equal(meta.get('me55c').deName, '30 Jahre: Klassische Sammlung');
+  assert.equal(meta.get('me6').deSeries, 'Mega-Entwicklung');
+  assert.equal((await fetchV3SetMeta({ loadSets: async () => { throw new Error('x'); } })).size, 0);
+});

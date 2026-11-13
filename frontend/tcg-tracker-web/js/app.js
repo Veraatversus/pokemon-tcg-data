@@ -48,8 +48,8 @@ import {
   collectSearchStrings,
   matchesTokensInValues,
 } from './features/search/query-utils.js';
-import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, fetchDeSeriesBySetId } from './data/pokemon-api.js?v=20261113-api-v3-polish';
-import { resolveSeriesGroupInfo, resolveDisplaySet, applyDeSeriesFallback, resolveSetTotalCards, setDeSeriesBySetId, getCardLanguage } from './data/schema-contract.js';
+import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, fetchV3SetMeta } from './data/pokemon-api.js?v=20261113-api-v3-polish';
+import { resolveSeriesGroupInfo, resolveDisplaySet, applyDeSeriesFallback, resolveSetTotalCards, setV3SetMeta, getCardLanguage } from './data/schema-contract.js';
 import { imageCandidates, bindImageFallback, fallbackImgAttrs } from './ui/image-fallback.js';
 import { renderDashboardSetGrid } from './views/dashboard-grid.js';
 import {
@@ -2791,11 +2791,12 @@ async function loadSets() {
   try {
     // DE-Serien-Map (api/v3, mit Zeitlimit) parallel zum Sheets-Read von db_sets laden; registriert wird sie
     // vor jeder Gruppierung: Dashboard, Import-Selector und Suche teilen sich dieselbe Map.
-    const [deSeriesBySetId] = await Promise.all([
-      fetchDeSeriesBySetId(),
+    const [v3SetMeta] = await Promise.all([
+      fetchV3SetMeta(),
       prefetchSetsOverviewRows().catch(() => {})
     ]);
-    setDeSeriesBySetId(deSeriesBySetId);
+    setV3SetMeta(v3SetMeta);
+    const deSeriesBySetId = new Map([...v3SetMeta].filter(([, m]) => m.deSeries).map(([id, m]) => [id, m.deSeries]));
     let [importedSets, initialOverviewSets] = await Promise.all([
       listImportedSets(),
       listSetsOverviewData().catch(() => [])
@@ -2852,8 +2853,8 @@ async function loadSets() {
     // Zeilen ohne DE-Serie (z. B. aus altem Alias-Import) bekommen sie aus api/v3, damit Serien-Gruppen
     // importierter und nicht importierter Sets identisch sind.
     state.allSets = Array.from(mergedMap.values()).map((set) => {
-      const filled = applyDeSeriesFallback(set, deSeriesBySetId);
-      return filled === set ? set : resolveDisplaySet(filled);
+      // immer neu aufloesen: DE-Setname und DE-Serie aus der v3-Meta gelten auch fuer bereits aufgeloeste Zeilen
+      return resolveDisplaySet(applyDeSeriesFallback(set, deSeriesBySetId));
     });
     renderRecentSets();
     renderSetSelectorOptions();
