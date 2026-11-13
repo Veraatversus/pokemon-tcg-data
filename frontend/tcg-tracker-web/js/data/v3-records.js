@@ -41,19 +41,28 @@ const positiveId = (v) => {
   return Number.isInteger(n) && n > 0 ? n : null;
 };
 
-const isUnstamped = (variant) => !Array.isArray(variant?.stamp) || variant.stamp.length === 0;
+// Wie master (primaryCardmarketId): Array -> gestempelt bei Laenge > 0, sonst truthy-Wert = gestempelt.
+const isUnstamped = (variant) => (Array.isArray(variant?.stamp) ? variant.stamp.length === 0 : !variant?.stamp);
+const isNotJumbo = (variant) => str(variant?.size).toLowerCase() !== 'jumbo';
 
 /**
  * Primaere Cardmarket-Produkt-ID einer v3-Karte - dieselbe Regel wie search-index `cm` (API-Build):
- *   1. erste UNGESTEMPELTE Variante (ohne `stamp` bzw. leeres Array) mit cardmarketId
- *   2. sonst erste Variante mit cardmarketId
- *   3. sonst ids.cardmarket[0]
+ *   1. erste UNGESTEMPELTE Variante (ohne `stamp` bzw. leeres Array) in Normalgroesse (nicht `size: "jumbo"`) mit cardmarketId
+ *   2. sonst erste Variante in Normalgroesse mit cardmarketId
+ *   3. sonst erste ungestempelte Variante (auch Jumbo) mit cardmarketId
+ *   4. sonst erste Variante mit cardmarketId
+ *   5. sonst ids.cardmarket[0]
  * null ohne ID. Stempel-Produkte (pre-release, set-logo ...) stehen teils vorn (sv3-72: 727119 Pre-Release
  * statt 725152), ids.cardmarket[0] ist bei TCGdex-IDs teils ein Stempel-Produkt ohne Nummer (sv3pt5-1).
+ * Jumbo-Karten sind eigene Cardmarket-Produkte und nie die Standardkarte, solange es eine andere gibt.
  */
 export function primaryCardmarketProductId(card = {}) {
   const variants = list(card?.variants).filter((v) => positiveId(v?.cardmarketId));
-  const fromVariant = positiveId((variants.find(isUnstamped) || variants[0])?.cardmarketId);
+  const chosen = variants.find((v) => isUnstamped(v) && isNotJumbo(v))
+    || variants.find(isNotJumbo)
+    || variants.find(isUnstamped)
+    || variants[0];
+  const fromVariant = positiveId(chosen?.cardmarketId);
   if (fromVariant) return fromVariant;
   const ids = card?.ids?.cardmarket;
   return positiveId(Array.isArray(ids) ? ids[0] : ids);

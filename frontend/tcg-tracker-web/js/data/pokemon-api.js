@@ -6,7 +6,7 @@
 // (promoteCardmarketUrlsForCards) entfaellt hier: es haette die massgeblichen v3-IDs nur
 // ueberschrieben (Produkt-URLs gelten dort als "generiert") und vergibt fuer Karten ohne URL
 // keine neue.
-import { resolveDisplayCard, resolveDisplaySet, seriesGroupKeyForName } from './schema-contract.js?v=20261113-series-keys';
+import { resolveDisplayCard, resolveDisplaySet, seriesGroupKeyForName } from './schema-contract.js?v=20261114-api-images';
 import { loadV3Sets, loadV3Cards, loadRegistrySets } from './v3-api.js';
 import { createCollectionKeyResolver } from './v3-collection-keys.js';
 import { toSetRecord, toCardRecord } from './v3-records.js';
@@ -136,7 +136,18 @@ export async function fetchV3SetMeta({ signal, timeoutMs = DE_SERIES_TIMEOUT_MS,
       // seriesKey: DE-Serie (TCGdex) aus v3; enSeriesKey: EN-Serie als Rueckfall, wenn weder v3 noch die Zeile eine DE-Serie kennen.
       const seriesKey = deSeries ? seriesGroupKeyForName(deSeries) : '';
       const enSeriesKey = seriesGroupKeyForName(set?.series);
-      if (set?.id && (deName || deSeries || enSeriesKey)) map.set(String(set.id), { deName, deSeries, seriesKey, enSeriesKey });
+      // Set-Bilder aus api/v3 (taeglich aktualisiert): gewinnen in resolveDisplaySet vor den Sheet-Spalten vom Importzeitpunkt.
+      const text = (v) => String(v || '').trim();
+      const images = {
+        deLogo: text(set?.i18n?.de?.images?.logo),
+        deSymbol: text(set?.i18n?.de?.images?.symbol),
+        logo: text(set?.images?.logo),
+        symbol: text(set?.images?.symbol)
+      };
+      const hasImages = Object.values(images).some(Boolean);
+      if (set?.id && (deName || deSeries || enSeriesKey || hasImages)) {
+        map.set(String(set.id), { deName, deSeries, seriesKey, enSeriesKey, images });
+      }
     }
   } catch (err) {
     console.debug('[fetchV3SetMeta] api/v3 nicht erreichbar:', err?.message || err);
