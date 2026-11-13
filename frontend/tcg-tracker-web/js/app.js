@@ -9137,24 +9137,6 @@ async function loadCurrentSet(forceRefresh = false) {
 // --------------------------------------------------------------------------
 // BOOTSTRAP
 // --------------------------------------------------------------------------
-const RUNTIME_BOOTSTRAP_NOOP = () => {};
-const RUNTIME_BOOTSTRAP_EMPTY = () => ({});
-
-const RUNTIME_BOOTSTRAP_STUBS = {
-  initSetViewController: RUNTIME_BOOTSTRAP_NOOP,
-  createSetViewInjections: RUNTIME_BOOTSTRAP_EMPTY,
-  createDashboardRenderer: RUNTIME_BOOTSTRAP_EMPTY,
-  createStatsRenderer: RUNTIME_BOOTSTRAP_EMPTY,
-  createSettingsController: RUNTIME_BOOTSTRAP_EMPTY,
-  createStatsPriceViewController: RUNTIME_BOOTSTRAP_EMPTY,
-  dashboardRendererDeps: {},
-  statsRendererDeps: {},
-  settingsControllerDeps: {},
-  assignDashboardRenderer: RUNTIME_BOOTSTRAP_NOOP,
-  assignStatsRenderer: RUNTIME_BOOTSTRAP_NOOP,
-  assignSettingsController: RUNTIME_BOOTSTRAP_NOOP,
-};
-
 function createBootstrapRuntimeController() {
   return createBootstrapController({
     state,
@@ -9184,7 +9166,6 @@ function createBootstrapRuntimeController() {
     initManageImportedSetsDialog,
     initBackupImportExport,
     initQueueBuilderDialog,
-    ...RUNTIME_BOOTSTRAP_STUBS,
     initDashboardControls,
     initSheetsWriteFeedback,
     initAuditAndSaveUi,
