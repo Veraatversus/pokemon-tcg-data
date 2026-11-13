@@ -156,7 +156,7 @@ Bekannte Schlüssel:
 - Sprachabhaengige Felder (Set: `setName`, `logoUrl`; Karte: `name`, `image`, `imageLarge`, `evolvesFrom`, `rules`, `flavorText`, `attacks`, `abilities`): gewaehlte Kartensprache -> andere Sprache -> legacy.
 - Alle anderen Felder: `vera_*` (v3/EN) -> `tcgdex_*` -> legacy.
 
-`resolveDisplaySet`/`resolveDisplayCard` nutzen nur diese Regel; die fruehere konfigurierbare Resolver-Matrix gibt es nicht mehr (auch nicht in `scripts/cardmarket/lib/tracker-regression-helpers.mjs`; der CI-Test dort importiert die Frontend-Funktionen).
+`resolveDisplaySet`/`resolveDisplayCard` nutzen nur diese Regel; die fruehere konfigurierbare Resolver-Matrix gibt es im Frontend nicht mehr. `scripts/` gehoert dem master-Zweig; die Kopie in `scripts/cardmarket/lib/tracker-regression-helpers.mjs` wird dort gepflegt.
 
 ## Bilder: Fallback-Kette
 

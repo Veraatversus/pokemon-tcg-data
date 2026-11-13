@@ -32,7 +32,7 @@ Status: 2026-05-07 final (Waves 1-11 abgeschlossen: Entkopplung + Domain-Haertun
   - [x] 20 Module ohne Importer entfernt (u. a. `js/app/router.js`, `js/app/bootstrap-init.js`, `js/features/queue/*`, `js/features/system/*`, `js/features/share/share-dialog.js`, `js/views/search-view.js`, Shims `js/realtime-sync.js`, `js/smart-engine.js`)
   - [x] tote View-Kopien `js/views/set-view-controller.js`, `js/views/stats-price-view.js`, `js/features/layout/topbar-autohide.js` samt Tests entfernt; No-op-Stubs im Bootstrap entfernt
   - [x] `app.js` importiert statt zu kopieren: `features/search/query-utils.js`, `core/storage-keys.js`, `app/pwa-init.js`
-  - [x] Frontend-Kopie `js/data/cardmarket-ui-helpers.mjs` entfernt; Resolver-Matrix aus `scripts/cardmarket/lib/tracker-regression-helpers.mjs` entfernt
+  - [x] Frontend-Kopie `js/data/cardmarket-ui-helpers.mjs` entfernt (`scripts/` bleibt unveraendert, gehoert master)
   - [x] app.js: 10378 -> 10150 Zeilen
 
 - [x] **Wave 5 (27. Apr 2026): Set-View-Controller Extraktion**
