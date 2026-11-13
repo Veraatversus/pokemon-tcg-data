@@ -18,6 +18,7 @@ import {
   resetSheetsDataCaches,
   recoverImportedIdsFromOverview,
   listCollectionSetIds,
+  invalidateCollectionRowCache,
 } from './data/sheets-db.js?v=20261113-api-v3-polish';
 import {
   collectionKeyOf,
@@ -4211,6 +4212,10 @@ async function applyCollectionBackup(payload) {
 
   setLoading(true, 'Spiele Backup ein...');
   try {
+    // Einmal frisch lesen (Cache verwerfen) statt je Set: bei 100-200 Sets waeren das sonst ebenso viele
+    // volle db_collection-Reads und die Sheets-Quote wuerde den Restore mittendrin abbrechen. Die eigenen
+    // Writes fuehrt sheets-db im Zeilen-Cache mit.
+    invalidateCollectionRowCache();
     let setIndex = 0;
     for (const { liveSet, backupSets } of byLiveSet.values()) {
       setIndex++;
@@ -4225,9 +4230,9 @@ async function applyCollectionBackup(payload) {
       });
       unresolvedCards += unresolved;
       ambiguousCards += ambiguous;
-      // Frisch und strikt von db_collection lesen (nicht aus dem Cache): sonst plant der Restore gegen einen
-      // veralteten Stand; ein Lesefehler bricht ab, statt gegen eine leere Map zu planen.
-      const liveMap = await readSetCollectionMap(liveSet.setName, { setId: liveSet.setId, strict: true, fresh: true });
+      // Strikt lesen (Stand der einen frischen Lesung oben); ein Lesefehler bricht ab, statt gegen eine
+      // leere Map zu planen.
+      const liveMap = await readSetCollectionMap(liveSet.setName, { setId: liveSet.setId, strict: true });
       const pendingUpdates = [];
       const restorePlan = planBackupRestore(liveMap, {
         snapshot,

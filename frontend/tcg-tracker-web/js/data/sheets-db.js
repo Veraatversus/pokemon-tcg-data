@@ -1964,22 +1964,35 @@ async function resolveCollectionSetKey(setSheetName, options) {
   return resolveSetIdFromName(setSheetName);
 }
 
-// true nur, wenn sicher feststeht: keine db_collection-Zeile unter irgendeinem Alias des Sets und kein
+// none=true nur, wenn sicher feststeht: keine db_collection-Zeile unter irgendeinem Alias des Sets und kein
 // Legacy-Set-Blatt. Bei jedem Zweifel (Registry/Sheets-Metadaten nicht lesbar) false -> normaler Pfad.
+// rows: die dabei gelesenen db_collection-Zeilen (null, wenn nicht gelesen), damit der Aufrufer nicht
+// ein zweites Mal liest (bei fresh waere das ein zweiter voller Sheets-Read).
 async function hasNoCollectionSource(setSheetName, setKey, { strict = false, fresh = false } = {}) {
   let setsOnly = null;
   try {
     setsOnly = await ensureSetResolver();
   } catch {
-    return false;
+    return { none: false, rows: null };
   }
   const canonical = setsOnly?.resolveSetKey?.(setKey);
-  if (!canonical) return false;
-  const rows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, fresh, { strict });
-  if (collectCollectionSetIds(rows, setsOnly).has(canonical.toLowerCase())) return false;
+  if (!canonical) return { none: false, rows: null };
+  const readRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, fresh, { strict });
+  // Nur eine erfolgreiche Lesung (landet im Cache) weiterreichen; ein nicht-strikter Fehler liefert [].
+  const rows = dbRowsCache.get(`${DB_SHEETS.collection}:${DB_HEADERS.collection.length}`) === readRows ? readRows : null;
+  if (collectCollectionSetIds(readRows, setsOnly).has(canonical.toLowerCase())) return { none: false, rows };
   const sheets = await resolveSheetNames().catch(() => null);
-  if (!Array.isArray(sheets?.titles)) return false;
-  return !sheets.titles.includes(setSheetName);
+  if (!Array.isArray(sheets?.titles)) return { none: false, rows };
+  return { none: !sheets.titles.includes(setSheetName), rows };
+}
+
+/**
+ * Verwirft die gecachten db_collection-Zeilen; die naechste Lesung holt den aktuellen Stand.
+ * Fuer Gesamt-Leser wie den Backup-Restore: einmal invalidieren, dann ohne `fresh` je Set lesen
+ * (ein voller Sheets-Read statt einem je Set).
+ */
+export function invalidateCollectionRowCache() {
+  invalidateSheetRowCache(DB_SHEETS.collection);
 }
 
 /**
@@ -2017,10 +2030,15 @@ export async function readSetCollectionMap(setSheetName, options = {}) {
   // Legacy-Set-Blatt haben. Gesamt-Leser (Backup, Datencheck, Sammelkandidaten) laden so nur, was noetig ist.
   const strict = Boolean(options?.strict);
   const fresh = Boolean(options?.fresh);
-  if (!options?.resolver && await hasNoCollectionSource(setSheetName, setKey, { strict, fresh })) return new Map();
+  let sourceRows = null;
+  if (!options?.resolver) {
+    const source = await hasNoCollectionSource(setSheetName, setKey, { strict, fresh });
+    if (source.none) return new Map();
+    sourceRows = source.rows;
+  }
 
   const ctx = await resolveCollectionContext(setKey, options?.resolver || null);
-  const values = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, fresh, { strict });
+  const values = sourceRows || await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, fresh, { strict });
 
   if (!ctx) {
     const map = buildExactSetCollectionMap(values, setKey);
