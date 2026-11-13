@@ -18,18 +18,6 @@ export function createBootstrapController({
   initManageImportedSetsDialog,
   initBackupImportExport,
   initQueueBuilderDialog,
-  initSetViewController,
-  createSetViewInjections,
-  createDashboardRenderer,
-  createStatsRenderer,
-  createSettingsController,
-  createStatsPriceViewController,
-  dashboardRendererDeps,
-  statsRendererDeps,
-  settingsControllerDeps,
-  assignDashboardRenderer,
-  assignStatsRenderer,
-  assignSettingsController,
   initDashboardControls,
   initSheetsWriteFeedback,
   initAuditAndSaveUi,
@@ -44,7 +32,6 @@ export function createBootstrapController({
   realtimeClientStorageKey,
   applyIncomingRealtimeUpdate,
   initQuickFiltersUI,
-  resetDashboardVirtualization,
   saveDashboardPreferences,
   renderDashboard,
   loadSearchHistory,
@@ -138,35 +125,6 @@ export function createBootstrapController({
     initBackupImportExport();
     initQueueBuilderDialog();
 
-    try {
-      initSetViewController(createSetViewInjections());
-    } catch (error) {
-      console.warn('Set-View-Controller init failed:', error);
-    }
-
-    try {
-      assignDashboardRenderer(createDashboardRenderer({
-        ...dashboardRendererDeps,
-      }));
-    } catch (error) {
-      console.warn('Dashboard-Renderer init failed:', error);
-    }
-
-    try {
-      assignStatsRenderer(createStatsRenderer({
-        ...statsRendererDeps,
-        createStatsPriceViewController,
-      }));
-    } catch (error) {
-      console.warn('Stats-Renderer init failed:', error);
-    }
-
-    try {
-      assignSettingsController(createSettingsController(settingsControllerDeps));
-    } catch (error) {
-      console.warn('Settings-Controller init failed:', error);
-    }
-
     initDashboardControls();
     initSheetsWriteFeedback();
     initAuditAndSaveUi();
@@ -196,7 +154,6 @@ export function createBootstrapController({
           ...state.quickFilters,
           ...(detail || {}),
         };
-        resetDashboardVirtualization();
         saveDashboardPreferences();
         renderDashboard();
       });

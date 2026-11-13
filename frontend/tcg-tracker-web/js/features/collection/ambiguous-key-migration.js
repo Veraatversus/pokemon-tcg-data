@@ -7,6 +7,8 @@
 //   aktualisiert statt dupliziert.
 // - showAmbiguousMigrationDialog (DOM): Kartenbilder, Mehrfachauswahl, "Uebernehmen"/"Spaeter".
 import { cellsForUpdate } from '../../data/collection-aliases.js';
+import { getCardLanguage } from '../../data/schema-contract.js';
+import { imageCandidates, bindImageFallback } from '../../ui/image-fallback.js';
 
 const str = (value) => String(value ?? '').trim();
 
@@ -241,10 +243,13 @@ export function showAmbiguousMigrationDialog(plan, { document: doc = globalThis.
           refresh();
         });
         label.appendChild(input);
-        const src = candidate.card?.images?.small || candidate.card?.imageSmall || '';
-        if (src) {
+        const sources = [
+          ...imageCandidates(candidate.card, 'cardSmall', getCardLanguage()),
+          candidate.card?.imageSmall
+        ].filter(Boolean);
+        if (sources.length) {
           const img = doc.createElement('img');
-          img.src = src;
+          bindImageFallback(img, [...new Set(sources)]);
           img.alt = candidate.card?.name || candidate.collectionKey;
           img.loading = 'lazy';
           img.width = 72;

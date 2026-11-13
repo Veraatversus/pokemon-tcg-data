@@ -17,8 +17,10 @@ import {
   SET_MATCH_STATUS,
   CARD_MATCH_STATUS,
   resolveDisplaySet,
-  resolveDisplayCard
+  resolveDisplayCard,
+  getCardLanguage
 } from './schema-contract.js';
+import { withV3CardmarketIds } from './v3-cardmarket-ids.js';
 import {
   planSetScopedUpsert,
   planSetScopedDedup
@@ -1163,7 +1165,7 @@ export async function readDbCardsForSet(setId) {
     latestPerCard.set(cardId, row);
   });
 
-  return Array.from(latestPerCard.values())
+  const cards = Array.from(latestPerCard.values())
     .map((row) => {
       if (isNewCardFormat(row)) {
         // CARD_DB_HEADERS format; unterstÃ¼tzt altes Bild-Schema (ohne tcgdex_image_large) rÃ¼ckwÃ¤rtskompatibel.
@@ -1256,6 +1258,9 @@ export async function readDbCardsForSet(setId) {
     })
     .filter((card) => card.number)
     .map((card) => ({ ...card, collectionKey: dbCardCollectionKey(card, normalizedSetId) }));
+  // Gespeicherte URLs stammen teils vom alten Namens-Matcher (z. B. me55-150 -> "Pikachu [Store Up]"):
+  // die v3-ID aus search-index.json gewinnt fuer Link und Preis. Das Sheet wird dabei nicht geschrieben.
+  return withV3CardmarketIds(cards, { setId: normalizedSetId, language: getCardLanguage() });
 }
 
 // db_cards ist nur noch Offline-Fallback. Ab v3 ist cardId = v3-id `<setId>-<collectionKey>`; aeltere Zeilen
@@ -1288,6 +1293,15 @@ export async function listSetsOverviewData() {
     console.warn('[sheets-db] Registry nicht verfuegbar, Overview ohne Alias-Zuordnung:', err?.message || err);
   }
   return mergeAliasOverviewSets(rawSets, resolver);
+}
+
+/**
+ * Liest db_sets in den Zeilen-Cache, ohne Serien zu gruppieren. loadSets ruft das parallel zum Laden der
+ * DE-Serien-Map auf; die Gruppierung (resolveDisplaySet) folgt erst, wenn die Map registriert ist.
+ */
+export async function prefetchSetsOverviewRows() {
+  await ensureNormalizedSchema();
+  await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length);
 }
 
 async function readRawSetsOverviewData() {
@@ -1656,8 +1670,11 @@ export async function markAliasSetRowsNotImported(setMeta) {
   try {
     const resolver = await ensureSetResolver();
     const canonical = resolver.resolveSetKey(setMeta.setId) || setMeta.setId;
-    (resolver.aliasesOf(canonical) || []).forEach((alias) => aliasKeys.add(toSafeCellString(alias).toLowerCase()));
-    aliasKeys.add(toSafeCellString(canonical).toLowerCase());
+    // Kanonisches Set samt Aliasen nur, wenn das geloeschte Set das kanonische (gemergte) ist; ein ungemergt
+    // unter eigener Alias-ID gezeigtes Set darf den Status des kanonischen Sets nicht loeschen.
+    if (toSafeCellString(canonical).toLowerCase() === own) {
+      (resolver.aliasesOf(canonical) || []).forEach((alias) => aliasKeys.add(toSafeCellString(alias).toLowerCase()));
+    }
   } catch (err) {
     console.warn('[sheets-db] Registry nicht verfuegbar, Alias-Zeilen nur aus Set-Metadaten:', err?.message || err);
   }
@@ -1956,22 +1973,35 @@ async function resolveCollectionSetKey(setSheetName, options) {
   return resolveSetIdFromName(setSheetName);
 }
 
-// true nur, wenn sicher feststeht: keine db_collection-Zeile unter irgendeinem Alias des Sets und kein
+// none=true nur, wenn sicher feststeht: keine db_collection-Zeile unter irgendeinem Alias des Sets und kein
 // Legacy-Set-Blatt. Bei jedem Zweifel (Registry/Sheets-Metadaten nicht lesbar) false -> normaler Pfad.
-async function hasNoCollectionSource(setSheetName, setKey, { strict = false } = {}) {
+// rows: die dabei gelesenen db_collection-Zeilen (null, wenn nicht gelesen), damit der Aufrufer nicht
+// ein zweites Mal liest (bei fresh waere das ein zweiter voller Sheets-Read).
+async function hasNoCollectionSource(setSheetName, setKey, { strict = false, fresh = false } = {}) {
   let setsOnly = null;
   try {
     setsOnly = await ensureSetResolver();
   } catch {
-    return false;
+    return { none: false, rows: null };
   }
   const canonical = setsOnly?.resolveSetKey?.(setKey);
-  if (!canonical) return false;
-  const rows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, false, { strict });
-  if (collectCollectionSetIds(rows, setsOnly).has(canonical.toLowerCase())) return false;
+  if (!canonical) return { none: false, rows: null };
+  const readRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, fresh, { strict });
+  // Nur eine erfolgreiche Lesung (landet im Cache) weiterreichen; ein nicht-strikter Fehler liefert [].
+  const rows = dbRowsCache.get(`${DB_SHEETS.collection}:${DB_HEADERS.collection.length}`) === readRows ? readRows : null;
+  if (collectCollectionSetIds(readRows, setsOnly).has(canonical.toLowerCase())) return { none: false, rows };
   const sheets = await resolveSheetNames().catch(() => null);
-  if (!Array.isArray(sheets?.titles)) return false;
-  return !sheets.titles.includes(setSheetName);
+  if (!Array.isArray(sheets?.titles)) return { none: false, rows };
+  return { none: !sheets.titles.includes(setSheetName), rows };
+}
+
+/**
+ * Verwirft die gecachten db_collection-Zeilen; die naechste Lesung holt den aktuellen Stand.
+ * Fuer Gesamt-Leser wie den Backup-Restore: einmal invalidieren, dann ohne `fresh` je Set lesen
+ * (ein voller Sheets-Read statt einem je Set).
+ */
+export function invalidateCollectionRowCache() {
+  invalidateSheetRowCache(DB_SHEETS.collection);
 }
 
 /**
@@ -1984,7 +2014,8 @@ export async function listCollectionSetIds({ checkedOnly = false, strict = false
   await ensureNormalizedSchema();
   // strict: Lesefehler werfen statt [] (z. B. Backup-Export: nie ein unvollstaendiges Backup schreiben).
   const rows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, false, { strict });
-  const resolver = await ensureSetResolver().catch(() => null);
+  // strict: ein Registry-Fehler wird durchgereicht (rohe IDs wuerden Alias-Zeilen dem falschen Set zuordnen).
+  const resolver = strict ? await ensureSetResolver() : await ensureSetResolver().catch(() => null);
   return collectCollectionSetIds(rows, resolver, { checkedOnly });
 }
 
@@ -1996,7 +2027,8 @@ export async function listCollectionSetIds({ checkedOnly = false, strict = false
  * mit collectionKey angehaengt.
  * @param {string} setSheetName Set-Name (Set-Blatt / db_sets / Overview)
  * @param {{ setId?: string, resolver?: object, strict?: boolean }} [options] setId darf ein Alias sein;
- *   strict: Lesefehler von db_collection werfen statt einer leeren Map (Backup-Export)
+ *   strict: Lesefehler von db_collection werfen statt einer leeren Map (Backup-Export);
+ *   fresh: db_collection neu lesen statt aus dem Cache (Backup-Restore plant gegen den aktuellen Stand)
  */
 export async function readSetCollectionMap(setSheetName, options = {}) {
   await ensureNormalizedSchema();
@@ -2006,10 +2038,16 @@ export async function readSetCollectionMap(setSheetName, options = {}) {
   // Lazy: Registry-Karten (~27 KB/Set) nur fuer Sets laden, die Zeilen (unter irgendeinem Alias) oder ein
   // Legacy-Set-Blatt haben. Gesamt-Leser (Backup, Datencheck, Sammelkandidaten) laden so nur, was noetig ist.
   const strict = Boolean(options?.strict);
-  if (!options?.resolver && await hasNoCollectionSource(setSheetName, setKey, { strict })) return new Map();
+  const fresh = Boolean(options?.fresh);
+  let sourceRows = null;
+  if (!options?.resolver) {
+    const source = await hasNoCollectionSource(setSheetName, setKey, { strict, fresh });
+    if (source.none) return new Map();
+    sourceRows = source.rows;
+  }
 
   const ctx = await resolveCollectionContext(setKey, options?.resolver || null);
-  const values = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, false, { strict });
+  const values = sourceRows || await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, fresh, { strict });
 
   if (!ctx) {
     const map = buildExactSetCollectionMap(values, setKey);

@@ -1,31 +1,9 @@
 import { normalizeCardNumber } from '../core/utils.js';
 import { scopedStorageKey } from '../core/config.js';
-import { isGeneratedCardmarketSearchUrl } from './cardmarket-url-utils.js';
-import { isLocalDevEnvironment } from '../core/dev-environment.js';
+import { isGeneratedCardmarketSearchUrl, resolveCardmarketLink } from './cardmarket-url-utils.js';
 
 const SETTINGS_STORAGE_KEY = scopedStorageKey('user-settings');
-// Base resolver sources are always available. `cardmarket` is an opt-in
-// debug source that only appears in local-dev environments — see
-// `getResolverSources()`. Production builds never expose it in the
-// matrix, the candidate lists, or the settings UI.
-const BASE_RESOLVER_SOURCES = ['tcgdex', 'vera', 'legacy'];
-const DEV_ONLY_RESOLVER_SOURCE = 'cardmarket';
-
-function getResolverSources() {
-  return isLocalDevEnvironment()
-    ? [...BASE_RESOLVER_SOURCES, DEV_ONLY_RESOLVER_SOURCE]
-    : [...BASE_RESOLVER_SOURCES];
-}
-
-// Defaults are computed at first access (in `getDefaultResolverMatrix()`) so the
-// dev-only `cardmarket` source is only inserted when running on a loopback /
-// private-network host. Tests can call this directly.
 const CARD_LANGUAGES = ['de', 'en'];
-// Sprachabhaengige Felder: DE = tcgdex-Quelle, EN = vera-Quelle. Alles andere ist sprachneutral.
-const LANGUAGE_DEPENDENT_FIELDS = {
-  set: ['setName', 'logoUrl'],
-  card: ['name', 'image', 'imageLarge', 'evolvesFrom', 'rules', 'flavorText']
-};
 
 function normalizeCardLanguage(value) {
   const lang = String(value || '').trim().toLowerCase();
@@ -46,173 +24,12 @@ export function getCardLanguage() {
   return normalizeCardLanguage(readStoredSettings().cardLanguage);
 }
 
-// Setzt bei EN `vera` vor `tcgdex` in den sprachabhaengigen Feldern (Rest der Reihenfolge bleibt).
-function applyLanguageOrder(matrix, language) {
-  if (language !== 'en') return matrix;
-  Object.entries(LANGUAGE_DEPENDENT_FIELDS).forEach(([scope, fields]) => {
-    fields.forEach((field) => {
-      const order = matrix[scope]?.[field];
-      if (!Array.isArray(order)) return;
-      matrix[scope][field] = [
-        ...order.filter((src) => src === 'vera'),
-        ...order.filter((src) => src !== 'vera')
-      ];
-    });
-  });
-  return matrix;
-}
-
-export function resetResolverMatrixCache() {
-  resolverMatrixCache = null;
-}
-
-function getDefaultResolverMatrix() {
-  const sources = getResolverSources();
-  const imageOrder = isLocalDevEnvironment()
-    ? [...BASE_RESOLVER_SOURCES.slice(0, 2), 'cardmarket', 'legacy']
-    : [...BASE_RESOLVER_SOURCES];
-  const field = (order) => (Array.isArray(order) && order.length ? order : [...sources]);
-  return {
-    set: {
-      setName: field(['tcgdex', 'vera', 'legacy']),
-      series: field(['tcgdex', 'vera', 'legacy']),
-      releaseDate: field(['tcgdex', 'vera', 'legacy']),
-      totalCards: field(['tcgdex', 'vera', 'legacy']),
-      ptcgoCode: field(['tcgdex', 'vera', 'legacy']),
-      logoUrl: field(['tcgdex', 'vera', 'legacy']),
-      symbolUrl: field(['tcgdex', 'vera', 'legacy']),
-      legalities: field(['tcgdex', 'vera', 'legacy'])
-    },
-    card: {
-      number: field(['tcgdex', 'vera', 'legacy']),
-      name: field(['tcgdex', 'vera', 'legacy']),
-      image: field(imageOrder),
-      imageLarge: field(imageOrder),
-      cardmarketUrl: field(['tcgdex', 'vera', 'legacy']),
-      rarity: field(['tcgdex', 'vera', 'legacy']),
-      hp: field(['tcgdex', 'vera', 'legacy']),
-      types: field(['tcgdex', 'vera', 'legacy']),
-      supertype: field(['tcgdex', 'vera', 'legacy']),
-      subtypes: field(['tcgdex', 'vera', 'legacy']),
-      evolvesFrom: field(['tcgdex', 'vera', 'legacy']),
-      artist: field(['tcgdex', 'vera', 'legacy']),
-      regulationMark: field(['tcgdex', 'vera', 'legacy']),
-      rules: field(['tcgdex', 'vera', 'legacy']),
-      flavorText: field(['tcgdex', 'vera', 'legacy'])
-    }
-  };
-}
-
-// Backwards-compatible const reference. Built lazily on first read so dev
-// detection runs at access time, not at module evaluation time.
-let _defaultResolverMatrix = null;
-const DEFAULT_RESOLVER_MATRIX = new Proxy({}, {
-  get(_t, prop) {
-    if (!_defaultResolverMatrix) _defaultResolverMatrix = getDefaultResolverMatrix();
-    return _defaultResolverMatrix[prop];
-  }
-});
-
-let resolverMatrixCache = null;
-
-function deepClone(value) {
-  return JSON.parse(JSON.stringify(value));
-}
-
 function isValuePresent(value, { numeric = false } = {}) {
   if (value == null) return false;
   if (numeric) return Number(value) > 0;
   if (Array.isArray(value)) return value.length > 0;
   if (typeof value === 'object') return Object.keys(value).length > 0;
   return String(value).trim() !== '';
-}
-
-function normalizePriority(priority, fallback) {
-  if (!Array.isArray(priority) || priority.length === 0) return fallback;
-  const allowedSources = getResolverSources();
-  const normalized = [];
-  priority.forEach((entry) => {
-    const source = String(entry || '').trim().toLowerCase();
-    if (allowedSources.includes(source) && !normalized.includes(source)) {
-      normalized.push(source);
-    }
-  });
-  if (normalized.length === 0) return fallback;
-  allowedSources.forEach((source) => {
-    if (!normalized.includes(source)) normalized.push(source);
-  });
-  return normalized;
-}
-
-function normalizeResolverMatrix(input) {
-  const defaults = getDefaultResolverMatrix();
-  const normalized = deepClone(defaults);
-  if (!input || typeof input !== 'object') return normalized;
-
-  ['set', 'card'].forEach((scope) => {
-    const scopeInput = input?.[scope];
-    if (!scopeInput || typeof scopeInput !== 'object') return;
-    Object.keys(defaults[scope]).forEach((field) => {
-      normalized[scope][field] = normalizePriority(scopeInput[field], defaults[scope][field]);
-    });
-  });
-
-  return normalized;
-}
-
-export function getResolverMatrix() {
-  if (resolverMatrixCache) return resolverMatrixCache;
-  try {
-    const settings = readStoredSettings();
-    const language = normalizeCardLanguage(settings.cardLanguage);
-    // Bypass the DEFAULT_RESOLVER_MATRIX Proxy (JSON.stringify on it yields '{}').
-    const matrix = settings.resolverMatrix
-      ? normalizeResolverMatrix(settings.resolverMatrix)
-      : deepClone(getDefaultResolverMatrix());
-    // Im Expert-Modus hat die vom Nutzer gespeicherte Matrix Vorrang vor der Sprachwahl.
-    resolverMatrixCache = settings.expertResolverMode ? matrix : applyLanguageOrder(matrix, language);
-    return resolverMatrixCache;
-  } catch {
-    resolverMatrixCache = deepClone(getDefaultResolverMatrix());
-    return resolverMatrixCache;
-  }
-}
-
-// Bevorzugte Karten-Texte je Sprache: DE -> i18n_de, EN -> vera_*; jeweils Fallback auf die andere Sprache.
-export function getPreferredCardTexts(cardRecord = {}, language = 'de') {
-  const de = cardRecord?.i18n_de || {};
-  const arr = (v) => (Array.isArray(v) ? v : []);
-  const pick = (primary, secondary) => (primary.length ? primary : secondary);
-  const enTexts = {
-    attacks: arr(cardRecord?.vera_attacks),
-    abilities: arr(cardRecord?.vera_abilities),
-    rules: arr(cardRecord?.vera_rules),
-    flavorText: String(cardRecord?.vera_flavorText || '')
-  };
-  const deTexts = {
-    attacks: arr(de.attacks),
-    abilities: arr(de.abilities),
-    rules: arr(de.rules),
-    flavorText: String(de.flavorText || '')
-  };
-  const [first, second] = normalizeCardLanguage(language) === 'en' ? [enTexts, deTexts] : [deTexts, enTexts];
-  return {
-    attacks: pick(first.attacks, second.attacks),
-    abilities: pick(first.abilities, second.abilities),
-    rules: pick(first.rules, second.rules),
-    flavorText: first.flavorText || second.flavorText
-  };
-}
-
-function resolveFieldByPriority(priority, sourceValues, options = {}) {
-  const fallback = options?.fallback;
-  for (const source of priority) {
-    const value = sourceValues?.[source];
-    if (isValuePresent(value, options)) {
-      return value;
-    }
-  }
-  return fallback;
 }
 
 function normalizeTcgdexSetAssetUrl(value) {
@@ -228,23 +45,139 @@ function sanitizeMediaValue(value) {
   return normalizeTcgdexSetAssetUrl(text);
 }
 
-function collectValuesByPriority(priority, sourceValues, options = {}) {
-  const values = [];
-  const seen = new Set();
-  const pushIfPresent = (value) => {
-    if (!isValuePresent(value, options)) return;
-    const normalized = typeof value === 'string' ? value.trim() : value;
-    const key = typeof normalized === 'string' ? normalized : JSON.stringify(normalized);
-    if (seen.has(key)) return;
-    seen.add(key);
-    values.push(normalized);
-  };
+// Rohe Legacy-Bild-URLs bleiben auf aufgeloesten Records unter legacy* erhalten; image-fallback.js nutzt
+// sie als Legacy-Slot. Ist legacy* schon gesetzt (erneutes Aufloesen), gilt es statt des inzwischen
+// aufgeloesten Anzeige-Felds.
+const LEGACY_MEDIA_KEYS = {
+  legacyLogoUrl: ['logoUrl'],
+  legacySymbolUrl: ['symbolUrl'],
+  legacyImage: ['image', 'imageUrl'],
+  legacyImageLarge: ['imageLarge', 'imageLargeUrl']
+};
 
-  for (const source of priority) {
-    pushIfPresent(sourceValues?.[source]);
+function legacyMedia(record, legacyKey) {
+  if (Object.prototype.hasOwnProperty.call(record, legacyKey)) return sanitizeMediaValue(record[legacyKey]);
+  return LEGACY_MEDIA_KEYS[legacyKey].map((key) => sanitizeMediaValue(record[key])).find(Boolean) || '';
+}
+
+const list = (value) => (Array.isArray(value) ? value : []);
+
+function tcgdexRules(record) {
+  const deRules = list(record.i18n_de?.rules);
+  return deRules.length
+    ? deRules
+    : normalizeRules(null, { description: record.tcgdex_description, effect: record.tcgdex_effect });
+}
+
+// Feldquellen: de = tcgdex_* / i18n_de (DE), en = vera_* (v3/EN), legacy = alte Sheet-Spalten.
+// lang: true = sprachabhaengig (gewaehlte Sprache -> andere Sprache -> legacy),
+// sonst sprachneutral (vera_* -> tcgdex_* -> legacy). empty = Wert, wenn keine Quelle etwas liefert.
+const FIELD_SOURCES = {
+  set: {
+    setName: { lang: true, empty: '', de: (r) => r.tcgdex_name, en: (r) => r.vera_name, legacy: (r) => r.setName },
+    releaseDate: { empty: '', de: (r) => r.tcgdex_releaseDate, en: (r) => r.vera_releaseDate, legacy: (r) => r.releaseDate },
+    // Aufgedruckte Kartenzahl (official / printedTotal); die Gesamtzahl liefert resolveSetTotalCards.
+    totalCards: {
+      numeric: true,
+      empty: 0,
+      de: (r) => toNumber(r.tcgdex_cardCount_official),
+      en: (r) => toNumber(r.vera_printedTotal) || toNumber(r.vera_total),
+      legacy: (r) => toNumber(r.totalCards)
+    },
+    ptcgoCode: { empty: '', de: (r) => r.tcgdex_abbreviation_official, en: (r) => r.vera_ptcgoCode, legacy: (r) => r.ptcgoCode },
+    logoUrl: {
+      lang: true,
+      empty: '',
+      de: (r) => sanitizeMediaValue(r.tcgdex_logo),
+      en: (r) => sanitizeMediaValue(r.vera_images_logo),
+      legacy: (r) => legacyMedia(r, 'legacyLogoUrl')
+    },
+    symbolUrl: {
+      empty: '',
+      de: (r) => sanitizeMediaValue(r.tcgdex_symbol),
+      en: (r) => sanitizeMediaValue(r.vera_images_symbol),
+      legacy: (r) => legacyMedia(r, 'legacySymbolUrl')
+    },
+    legalities: { empty: null, de: (r) => r.tcgdex_legal, en: (r) => r.vera_legalities, legacy: (r) => r.legalities }
+  },
+  card: {
+    number: {
+      empty: '',
+      de: (r) => normalizeCardNumber(r.tcgdex_localId || ''),
+      en: (r) => normalizeCardNumber(r.vera_number || ''),
+      legacy: (r) => r.number
+    },
+    name: { lang: true, empty: '', de: (r) => r.tcgdex_name, en: (r) => r.vera_name, legacy: (r) => r.name },
+    image: {
+      lang: true,
+      empty: '',
+      de: (r) => sanitizeMediaValue(r.tcgdex_image_small || r.tcgdex_image),
+      en: (r) => sanitizeMediaValue(r.vera_images_small),
+      legacy: (r) => legacyMedia(r, 'legacyImage')
+    },
+    imageLarge: {
+      lang: true,
+      empty: '',
+      de: (r) => sanitizeMediaValue(r.tcgdex_image_large),
+      en: (r) => sanitizeMediaValue(r.vera_images_large),
+      legacy: (r) => legacyMedia(r, 'legacyImageLarge')
+    },
+    rarity: { empty: '', de: (r) => r.tcgdex_rarity, en: (r) => r.vera_rarity, legacy: (r) => r.rarity },
+    hp: { empty: '', de: (r) => r.tcgdex_hp, en: (r) => r.vera_hp, legacy: (r) => r.hp },
+    types: { empty: [], de: (r) => list(r.tcgdex_types), en: (r) => list(r.vera_types), legacy: (r) => list(r.types) },
+    supertype: { empty: '', de: (r) => r.tcgdex_category, en: (r) => r.vera_supertype, legacy: (r) => r.supertype },
+    subtypes: {
+      empty: [],
+      de: (r) => [r.tcgdex_stage || r.tcgdex_suffix].filter(Boolean),
+      en: (r) => list(r.vera_subtypes),
+      legacy: (r) => list(r.subtypes)
+    },
+    evolvesFrom: { lang: true, empty: '', de: (r) => r.tcgdex_evolvesFrom, en: (r) => r.vera_evolvesFrom, legacy: (r) => r.evolvesFrom },
+    artist: { empty: '', de: (r) => r.tcgdex_illustrator, en: (r) => r.vera_artist, legacy: (r) => r.artist },
+    regulationMark: { empty: '', de: (r) => r.tcgdex_regulationMark, en: (r) => r.vera_regulationMark, legacy: (r) => r.regulationMark },
+    rules: { lang: true, empty: [], de: tcgdexRules, en: (r) => list(r.vera_rules), legacy: (r) => list(r.rules) },
+    flavorText: {
+      lang: true,
+      empty: '',
+      de: (r) => r.tcgdex_description || r.i18n_de?.flavorText,
+      en: (r) => r.vera_flavorText,
+      legacy: (r) => r.flavorText
+    },
+    attacks: { lang: true, empty: [], de: (r) => list(r.i18n_de?.attacks), en: (r) => list(r.vera_attacks), legacy: (r) => list(r.attacks) },
+    abilities: { lang: true, empty: [], de: (r) => list(r.i18n_de?.abilities), en: (r) => list(r.vera_abilities), legacy: (r) => list(r.abilities) }
   }
-  pushIfPresent(options?.fallback);
-  return values;
+};
+
+/**
+ * Anzeige-Wert eines Felds nach Kartensprache (ersetzt die fruehere Resolver-Matrix).
+ * Sprachabhaengige Felder (set: setName, logoUrl; card: name, image, imageLarge, evolvesFrom, rules,
+ * flavorText, attacks, abilities): gewaehlte Sprache -> andere Sprache -> legacy.
+ * Alle anderen Felder: vera_* (v3/EN) -> tcgdex_* -> legacy. Unbekannte Felder: undefined.
+ * Bild-Fallback-Ketten fuer die Anzeige liefert weiterhin imageCandidates (ui/image-fallback.js).
+ */
+export function resolveFieldValue(record, scope, field, language = getCardLanguage()) {
+  const spec = FIELD_SOURCES[scope]?.[field];
+  if (!spec) return undefined;
+  const source = record && typeof record === 'object' ? record : {};
+  const order = spec.lang && normalizeCardLanguage(language) === 'de'
+    ? [spec.de, spec.en, spec.legacy]
+    : [spec.en, spec.de, spec.legacy];
+  for (const read of order) {
+    const value = read(source);
+    if (isValuePresent(value, spec)) return typeof value === 'string' ? value.trim() : value;
+  }
+  return Array.isArray(spec.empty) ? [] : spec.empty;
+}
+
+// Bevorzugte Karten-Texte je Sprache (gleiche Regel wie resolveFieldValue).
+export function getPreferredCardTexts(cardRecord = {}, language = 'de') {
+  const pick = (field) => resolveFieldValue(cardRecord, 'card', field, language);
+  return {
+    attacks: pick('attacks'),
+    abilities: pick('abilities'),
+    rules: pick('rules'),
+    flavorText: pick('flavorText')
+  };
 }
 
 export const SET_MATCH_STATUS = {
@@ -373,10 +306,13 @@ function inferSeriesGroupKeyFromNames(setRecord = {}, displayLabel = '') {
   return '';
 }
 
-export function resolveSeriesGroupInfo(setRecord = {}) {
-  const displayLabel = [setRecord.series, setRecord.vera_series, setRecord.tcgdex_serie_name]
-    .map((value) => String(value || '').trim())
-    .find(Boolean) || 'Andere';
+export function resolveSeriesGroupInfo(rawSetRecord = {}) {
+  const setRecord = applyDeSeriesFallback(rawSetRecord, sharedDeSeriesBySetId);
+  const displayLabel = resolveSetSeriesLabel(setRecord)
+    || [setRecord.series, setRecord.vera_series, setRecord.tcgdex_serie_name]
+      .map((value) => String(value || '').trim())
+      .find(Boolean)
+    || 'Andere';
 
   const canonicalSeries = String(setRecord.tcgdex_serie_id || '').trim()
     || inferSeriesGroupKeyFromSetIds(setRecord)
@@ -658,230 +594,100 @@ export function buildCardRecordFromSources({
   };
 }
 
+// Serien-Label eines Sets je Sprache. DE: tcgdex_serie_name -> i18n_de.series -> deSeriesBySetId
+// (Map setId -> i18n.de.series aus api/v3) -> vera_series; EN: vera_series -> series.
+let sharedDeSeriesBySetId = null;
+// Gemeinsame v3-Map (setId -> DE-Serie); einmal gesetzt, nutzen alle Gruppen-/Label-Pfade sie.
+export function setDeSeriesBySetId(map) {
+  sharedDeSeriesBySetId = map instanceof Map ? map : null;
+}
+
+export function resolveSetSeriesLabel(set = {}, language = getCardLanguage(), deSeriesBySetId = sharedDeSeriesBySetId) {
+  const text = (v) => String(v ?? '').trim();
+  const fromMap = deSeriesBySetId?.get?.(text(set?.setId)) || '';
+  const candidates = normalizeCardLanguage(language) === 'en'
+    ? [set?.vera_series, set?.series, set?.i18n_de?.series, fromMap, set?.tcgdex_serie_name]
+    : [set?.tcgdex_serie_name, set?.i18n_de?.series, fromMap, set?.vera_series, set?.series];
+  return candidates.map(text).find(Boolean) || '';
+}
+
+// Ergaenzt eine leere tcgdex_serie_name aus der v3-Map (setId -> DE-Serie); bestehende Werte bleiben.
+export function applyDeSeriesFallback(set = {}, deSeriesBySetId = null) {
+  if (String(set?.tcgdex_serie_name || '').trim()) return set;
+  const de = String(deSeriesBySetId?.get?.(String(set?.setId ?? '').trim()) || '').trim();
+  return de ? { ...set, tcgdex_serie_name: de } : set;
+}
+
+// Gesamtzahl der Karten eines Sets (inkl. Secret Rares): vera_total, dann DE total, dann totalCards.
+export function resolveSetTotalCards(set = {}) {
+  return toNumber(set?.vera_total) || toNumber(set?.tcgdex_cardCount_total) || toNumber(set?.totalCards);
+}
+
 export function resolveDisplaySet(setRecord = {}) {
-  const matrix = getResolverMatrix().set;
-  const setName = resolveFieldByPriority(matrix.setName, {
-    tcgdex: setRecord.tcgdex_name,
-    vera: setRecord.vera_name
-  }, { fallback: setRecord.vera_name || setRecord.tcgdex_name || '' });
+  const record = setRecord || {};
+  const language = getCardLanguage();
+  const field = (name) => resolveFieldValue(record, 'set', name, language);
 
-  const series = resolveFieldByPriority(matrix.series, {
-    tcgdex: setRecord.tcgdex_serie_name,
-    vera: setRecord.vera_series
-  }, { fallback: setRecord.vera_series || setRecord.tcgdex_serie_name || '' });
-  const seriesGroup = resolveSeriesGroupInfo({ ...setRecord, series });
-
-  const releaseDate = resolveFieldByPriority(matrix.releaseDate, {
-    tcgdex: setRecord.tcgdex_releaseDate,
-    vera: setRecord.vera_releaseDate
-  }, { fallback: setRecord.vera_releaseDate || setRecord.tcgdex_releaseDate || '' });
-
-  const totalCards = resolveFieldByPriority(matrix.totalCards, {
-    tcgdex: toNumber(setRecord.tcgdex_cardCount_official),
-    vera: toNumber(setRecord.vera_total) || toNumber(setRecord.vera_printedTotal)
-  }, { numeric: true, fallback: toNumber(setRecord.vera_total) || toNumber(setRecord.tcgdex_cardCount_official) });
-
-  const ptcgoCode = resolveFieldByPriority(matrix.ptcgoCode, {
-    tcgdex: setRecord.tcgdex_abbreviation_official,
-    vera: setRecord.vera_ptcgoCode
-  }, { fallback: setRecord.vera_ptcgoCode || setRecord.tcgdex_abbreviation_official || '' });
-
-  const logoUrlCandidates = collectValuesByPriority(matrix.logoUrl, {
-    tcgdex: sanitizeMediaValue(setRecord.tcgdex_logo),
-    vera: sanitizeMediaValue(setRecord.vera_images_logo),
-    legacy: sanitizeMediaValue(setRecord.logoUrl)
-  }, {
-    fallback: sanitizeMediaValue(setRecord.vera_images_logo)
-      || sanitizeMediaValue(setRecord.tcgdex_logo)
-      || sanitizeMediaValue(setRecord.logoUrl)
-      || ''
-  });
-  const logoUrl = logoUrlCandidates[0] || '';
-
-  const symbolUrlCandidates = collectValuesByPriority(matrix.symbolUrl, {
-    tcgdex: sanitizeMediaValue(setRecord.tcgdex_symbol),
-    vera: sanitizeMediaValue(setRecord.vera_images_symbol),
-    legacy: sanitizeMediaValue(setRecord.symbolUrl)
-  }, {
-    fallback: sanitizeMediaValue(setRecord.vera_images_symbol)
-      || sanitizeMediaValue(setRecord.tcgdex_symbol)
-      || sanitizeMediaValue(setRecord.symbolUrl)
-      || ''
-  });
-  const symbolUrl = symbolUrlCandidates[0] || '';
-
-  const legalities = resolveFieldByPriority(matrix.legalities, {
-    tcgdex: setRecord.tcgdex_legal,
-    vera: setRecord.vera_legalities
-  }, { fallback: setRecord.vera_legalities || setRecord.tcgdex_legal || null });
+  const series = resolveSetSeriesLabel(record, language);
+  const seriesGroup = resolveSeriesGroupInfo({ ...record, series });
 
   return {
-    ...setRecord,
-    setName,
+    ...record,
+    setName: field('setName'),
     series,
     seriesGroupKey: seriesGroup.key,
     seriesGroupLabel: seriesGroup.label,
     seriesCanonicalName: seriesGroup.canonicalName,
-    releaseDate,
-    totalCards,
-    ptcgoCode,
-    logoUrl,
-    logoUrlCandidates,
-    symbolUrl,
-    symbolUrlCandidates,
-    tcgdexId: setRecord.tcgdex_id || '',
-    tcgdexName: setRecord.tcgdex_name || '',
-    legalities,
-    cardCountTotal: toNumber(setRecord.tcgdex_cardCount_total),
-    cardCountHolo: toNumber(setRecord.tcgdex_cardCount_holo),
-    cardCountReverse: toNumber(setRecord.tcgdex_cardCount_reverse),
-    cardCountFirstEdition: toNumber(setRecord.tcgdex_cardCount_firstEdition),
-    cardCountNormal: toNumber(setRecord.tcgdex_cardCount_normal)
+    releaseDate: field('releaseDate'),
+    totalCards: field('totalCards'),
+    ptcgoCode: field('ptcgoCode'),
+    logoUrl: field('logoUrl'),
+    symbolUrl: field('symbolUrl'),
+    legacyLogoUrl: legacyMedia(record, 'legacyLogoUrl'),
+    legacySymbolUrl: legacyMedia(record, 'legacySymbolUrl'),
+    tcgdexId: record.tcgdex_id || '',
+    tcgdexName: record.tcgdex_name || '',
+    legalities: field('legalities'),
+    cardCountTotal: toNumber(record.tcgdex_cardCount_total),
+    cardCountHolo: toNumber(record.tcgdex_cardCount_holo),
+    cardCountReverse: toNumber(record.tcgdex_cardCount_reverse),
+    cardCountFirstEdition: toNumber(record.tcgdex_cardCount_firstEdition),
+    cardCountNormal: toNumber(record.tcgdex_cardCount_normal)
   };
 }
 
 export function resolveDisplayCard(cardRecord = {}) {
-  const matrix = getResolverMatrix().card;
-  const rules = Array.isArray(cardRecord.vera_rules) && cardRecord.vera_rules.length
-    ? cardRecord.vera_rules
-    : normalizeRules(null, {
-      description: cardRecord.tcgdex_description,
-      effect: cardRecord.tcgdex_effect
-    });
+  const record = cardRecord || {};
+  const language = getCardLanguage();
+  const field = (name) => resolveFieldValue(record, 'card', name, language);
 
-  const number = resolveFieldByPriority(matrix.number, {
-    tcgdex: normalizeCardNumber(cardRecord.tcgdex_localId || ''),
-    vera: normalizeCardNumber(cardRecord.vera_number || '')
-  }, { fallback: cardRecord.vera_number || cardRecord.tcgdex_localId || '' });
-
-  const name = resolveFieldByPriority(matrix.name, {
-    tcgdex: cardRecord.tcgdex_name,
-    vera: cardRecord.vera_name
-  }, { fallback: cardRecord.vera_name || cardRecord.tcgdex_name || '' });
-
-  // The `cardmarket` source is dev-only. In production, drop the slot from
-  // the candidate list so the resolver-matrix never resolves to it.
-  const cardmarketSourceSlot = isLocalDevEnvironment()
-    ? { cardmarket: sanitizeMediaValue(cardRecord.cardmarketImageUrl) }
-    : null;
-  const imageCandidates = collectValuesByPriority(matrix.image, {
-    tcgdex: sanitizeMediaValue(cardRecord.tcgdex_image_small || cardRecord.tcgdex_image),
-    vera: sanitizeMediaValue(cardRecord.vera_images_small),
-    ...(cardmarketSourceSlot || {}),
-    legacy: sanitizeMediaValue(cardRecord.image || cardRecord.imageUrl)
-  }, {
-    fallback: sanitizeMediaValue(cardRecord.vera_images_small)
-      || sanitizeMediaValue(cardRecord.tcgdex_image_small || cardRecord.tcgdex_image)
-      || (cardmarketSourceSlot ? sanitizeMediaValue(cardRecord.cardmarketImageUrl) : '')
-      || sanitizeMediaValue(cardRecord.image)
-      || sanitizeMediaValue(cardRecord.imageUrl)
-      || ''
-  });
-  const image = imageCandidates[0] || '';
-
-  const imageLargeCandidates = collectValuesByPriority(matrix.imageLarge, {
-    tcgdex: sanitizeMediaValue(cardRecord.tcgdex_image_large),
-    vera: sanitizeMediaValue(cardRecord.vera_images_large),
-    ...(cardmarketSourceSlot || {}),
-    legacy: sanitizeMediaValue(cardRecord.imageLarge || cardRecord.imageLargeUrl || cardRecord.image || cardRecord.imageUrl)
-  }, {
-    fallback: sanitizeMediaValue(cardRecord.vera_images_large)
-      || sanitizeMediaValue(cardRecord.tcgdex_image_large)
-      || (cardmarketSourceSlot ? sanitizeMediaValue(cardRecord.cardmarketImageUrl) : '')
-      || sanitizeMediaValue(cardRecord.imageLarge)
-      || sanitizeMediaValue(cardRecord.imageLargeUrl)
-      || sanitizeMediaValue(cardRecord.vera_images_small)
-      || sanitizeMediaValue(cardRecord.tcgdex_image_small || cardRecord.tcgdex_image)
-      || sanitizeMediaValue(cardRecord.image)
-      || sanitizeMediaValue(cardRecord.imageUrl)
-      || ''
-  });
-  const imageLarge = imageLargeCandidates[0] || image || '';
-
-  const cardmarketUrlCandidates = collectValuesByPriority(matrix.cardmarketUrl, {
-    tcgdex: cardRecord.tcgdex_cardmarket_url,
-    vera: cardRecord.vera_cardmarket_url,
-    legacy: cardRecord.cardmarketUrl || cardRecord.cardmarket_url || cardRecord.cardmarket?.url || ''
-  }, {
-    fallback: cardRecord.cardmarketUrl || cardRecord.vera_cardmarket_url || cardRecord.tcgdex_cardmarket_url || ''
-  });
-  const cardmarketUrl = resolvePreferredCardmarketUrl(cardmarketUrlCandidates);
-
-  const rarity = resolveFieldByPriority(matrix.rarity, {
-    tcgdex: cardRecord.tcgdex_rarity,
-    vera: cardRecord.vera_rarity
-  }, { fallback: cardRecord.vera_rarity || cardRecord.tcgdex_rarity || '' });
-
-  const hp = resolveFieldByPriority(matrix.hp, {
-    tcgdex: cardRecord.tcgdex_hp,
-    vera: cardRecord.vera_hp
-  }, { fallback: cardRecord.vera_hp || cardRecord.tcgdex_hp || '' });
-
-  const types = resolveFieldByPriority(matrix.types, {
-    tcgdex: Array.isArray(cardRecord.tcgdex_types) ? cardRecord.tcgdex_types : [],
-    vera: Array.isArray(cardRecord.vera_types) ? cardRecord.vera_types : []
-  }, { fallback: cardRecord.vera_types || cardRecord.tcgdex_types || [] });
-
-  const supertype = resolveFieldByPriority(matrix.supertype, {
-    tcgdex: cardRecord.tcgdex_category,
-    vera: cardRecord.vera_supertype
-  }, { fallback: cardRecord.vera_supertype || cardRecord.tcgdex_category || '' });
-
-  const subtypes = resolveFieldByPriority(matrix.subtypes, {
-    tcgdex: [cardRecord.tcgdex_stage || cardRecord.tcgdex_suffix].filter(Boolean),
-    vera: Array.isArray(cardRecord.vera_subtypes) ? cardRecord.vera_subtypes : []
-  }, { fallback: cardRecord.vera_subtypes || [cardRecord.tcgdex_stage, cardRecord.tcgdex_suffix].filter(Boolean) || [] });
-
-  const evolvesFrom = resolveFieldByPriority(matrix.evolvesFrom, {
-    tcgdex: cardRecord.tcgdex_evolvesFrom,
-    vera: cardRecord.vera_evolvesFrom
-  }, { fallback: cardRecord.vera_evolvesFrom || cardRecord.tcgdex_evolvesFrom || '' });
-
-  const artist = resolveFieldByPriority(matrix.artist, {
-    tcgdex: cardRecord.tcgdex_illustrator,
-    vera: cardRecord.vera_artist
-  }, { fallback: cardRecord.vera_artist || cardRecord.tcgdex_illustrator || '' });
-
-  const regulationMark = resolveFieldByPriority(matrix.regulationMark, {
-    tcgdex: cardRecord.tcgdex_regulationMark,
-    vera: cardRecord.vera_regulationMark
-  }, { fallback: cardRecord.vera_regulationMark || cardRecord.tcgdex_regulationMark || '' });
-
-  const resolvedRules = resolveFieldByPriority(matrix.rules, {
-    tcgdex: (Array.isArray(cardRecord.i18n_de?.rules) && cardRecord.i18n_de.rules.length)
-      ? cardRecord.i18n_de.rules
-      : normalizeRules(null, {
-        description: cardRecord.tcgdex_description,
-        effect: cardRecord.tcgdex_effect
-      }),
-    vera: Array.isArray(cardRecord.vera_rules) ? cardRecord.vera_rules : []
-  }, { fallback: rules });
-
-  const flavorText = resolveFieldByPriority(matrix.flavorText, {
-    tcgdex: cardRecord.tcgdex_description || cardRecord.i18n_de?.flavorText,
-    vera: cardRecord.vera_flavorText
-  }, { fallback: cardRecord.vera_flavorText || cardRecord.tcgdex_description || cardRecord.i18n_de?.flavorText || '' });
+  const image = field('image');
+  const imageLarge = field('imageLarge') || image;
+  // Produkt-ID (v3 > Legacy-URL) -> Produkt-URL in der Kartensprache; ohne ID die generierte Such-URL.
+  const cardmarketUrl = resolveCardmarketLink(record, { language });
 
   return {
-    ...cardRecord,
-    number,
-    name,
+    ...record,
+    number: field('number'),
+    name: field('name'),
     image,
     imageUrl: image,
-    imageCandidates,
     imageLarge,
     imageLargeUrl: imageLarge,
-    imageLargeCandidates,
+    legacyImage: legacyMedia(record, 'legacyImage'),
+    legacyImageLarge: legacyMedia(record, 'legacyImageLarge'),
     cardmarketUrl,
-    rarity,
-    hp,
-    types,
-    supertype,
-    subtypes,
-    evolvesFrom,
-    artist,
-    regulationMark,
-    rules: resolvedRules,
-    flavorText
+    rarity: field('rarity'),
+    hp: field('hp'),
+    types: field('types'),
+    supertype: field('supertype'),
+    subtypes: field('subtypes'),
+    evolvesFrom: field('evolvesFrom'),
+    artist: field('artist'),
+    regulationMark: field('regulationMark'),
+    rules: field('rules'),
+    flavorText: field('flavorText'),
+    attacks: field('attacks'),
+    abilities: field('abilities')
   };
 }

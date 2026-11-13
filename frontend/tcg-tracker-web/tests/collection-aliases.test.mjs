@@ -735,3 +735,38 @@ test('strict: db_collection-Lesefehler werfen statt leerer Map / leerer Set-List
   const ok = await readSetCollectionMap('Mega Evolution 5', { setId: 'me5', strict: true });
   assert.equal(ok.get('1').g, true);
 });
+
+// ── Backup-Restore: ein frischer Lesevorgang fuer alle Sets ─────────────────────
+test('Restore-Lesemuster: einmal invalidieren, dann strikte Lesungen fuer 3 Sets -> 1 db_collection-Read', async () => {
+  const fake = setup({
+    collection: [
+      ['me5', '1', true, false, T0],
+      ['swsh12pt5', 'GG1', true, true, T0],
+      ['cel25c', '1', true, false, T0]
+    ]
+  });
+  // Vorher gecachter (veralteter) Stand darf nicht verwendet werden.
+  await readSetCollectionMap('Mega Evolution 5', { setId: 'me5' });
+  fake.rows('db_collection')[1][2] = false;
+  const before = fake.reads.filter((r) => r.startsWith("'db_collection'!A2")).length;
+
+  sheetsDb.invalidateCollectionRowCache();
+  const maps = [];
+  for (const [name, setId] of [['Mega Evolution 5', 'me5'], ['Crown Zenith', 'swsh12pt5'], ['Celebrations Classic', 'cel25c']]) {
+    maps.push(await readSetCollectionMap(name, { setId, strict: true }));
+  }
+  const collectionReads = fake.reads.filter((r) => r.startsWith("'db_collection'!A2")).length - before;
+  assert.equal(collectionReads, 1);
+  assert.equal(maps[0].get('1').g, false, 'frischer Stand nach der Invalidierung');
+  assert.equal(maps[1].get('GG1').g, true);
+  assert.equal(maps[2].get('1').g, true);
+});
+
+test('readSetCollectionMap mit fresh liest db_collection nur einmal', async () => {
+  const fake = setup({ collection: [['me5', '1', true, false, T0]] });
+  await readSetCollectionMap('Mega Evolution 5', { setId: 'me5' });
+  const before = fake.reads.filter((r) => r.startsWith("'db_collection'!A2")).length;
+  const map = await readSetCollectionMap('Mega Evolution 5', { setId: 'me5', strict: true, fresh: true });
+  assert.equal(fake.reads.filter((r) => r.startsWith("'db_collection'!A2")).length - before, 1);
+  assert.equal(map.get('1').g, true);
+});

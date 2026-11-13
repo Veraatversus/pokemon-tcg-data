@@ -99,9 +99,10 @@ function testCardmarketResolverPrefersDirectProductLinksOverSearchFallbacks() {
     tcgdex_cardmarket_url: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=SVI+001'
   });
 
-  assert.equal(
+  // Produkt-URLs werden auf die kanonische Form /Pokemon/Products?idProduct=<id> gebracht.
+  assert.match(
     display.cardmarketUrl,
-    'https://www.cardmarket.com/de/Pokemon/Products/Singles?idProduct=696421',
+    /\/Pokemon\/Products\?idProduct=696421$/,
     'Display cards should surface the stable product URL when one source has already resolved it.'
   );
 }

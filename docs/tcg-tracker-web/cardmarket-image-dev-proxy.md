@@ -2,8 +2,11 @@
 
 ## Was
 
-Die Resolver-Matrix für Kartenbilder hat eine vierte optionale Quelle
-`cardmarket`. URLs werden zur Laufzeit aus `cardmarketProductId`,
+Karten tragen nach dem Cardmarket-Abgleich zusätzlich `cardmarketImageUrl`.
+Seit Task 8b (API v3 Polish) ist das **keine Anzeige-Quelle mehr**: die
+Resolver-Matrix samt Expert-Modus wurde entfernt, Kartenbilder kommen nur
+noch aus der Kette in `js/ui/image-fallback.js` (Kartensprache → andere
+Sprache → Legacy). Die URLs werden zur Laufzeit aus `cardmarketProductId`,
 `categoryId` und `ptcgoCode` (z.B. `CRI`) gebaut:
 
 ```
@@ -81,33 +84,20 @@ laden Cardmarket-Bilder via Proxy nach.
 - `CARDMARKET_PROXY_PORT` (default `8090`): Port des Proxys
 - `CARDMARKET_PROXY_CORS` (default `*`): `Access-Control-Allow-Origin`
 
-## Resolver-Matrix (Expert-Modus)
+## Anzeige (entfernt)
 
-`Einstellungen → Expert Resolver Modus aktivieren → Karten-Felder → image`
-
-Vier Optionen stehen in Dev zur Auswahl (Production zeigt sie nicht):
-
-| Reihenfolge                  | Was passiert bei Karten-Render |
-| ---------------------------- | ------------------------------ |
-| `Cardmarket > TCGDex > Vera > Legacy` | Cardmarket als primäres Bild (nur wenn URL vorhanden) |
-| `TCGDex > Cardmarket > Vera > Legacy` | TCGDex primär, Cardmarket als 1. Fallback |
-| `TCGDex > Vera > Cardmarket > Legacy` | TCGDex/Vera primär, Cardmarket als 2. Fallback (Default) |
-| `TCGDex > Vera > Legacy > Cardmarket` | Cardmarket nur als letzter Ausweg |
-
-Andere Felder (Name, Rarity, HP, …) bleiben 3-Quellen-Defaults, da die
-Cardmarket-URL nur für Bilder sinnvoll ist.
+Die frühere Auswahl unter `Einstellungen → Expert Resolver Modus → Karten-Felder → image`
+gibt es nicht mehr. Gespeicherte `resolverMatrix`/`expertResolverMode`-Werte werden
+ignoriert und beim nächsten Speichern der Einstellungen verworfen.
 
 ## Code-Architektur
 
 ```
 js/core/dev-environment.js        ← isLocalDevEnvironment() (loopback + private-net detector)
-js/data/schema-contract.js       ← RESOLVER_SOURCES & DEFAULT_MATRIX dynamisch (cardmarket nur in dev)
 js/data/cardmarket-ui-helpers.js ← buildCardmarketImageUrl({ productId, categoryId, setCode, proxyUrl })
                                    → env-gated: proxyUrl nur in dev wirksam
 js/data/cardmarket-data.js       ← getCardmarketImageProxyUrl() (liest aus localStorage, '' in prod)
                                    → wrapper buildCardmarketImageUrl injiziert proxyUrl automatisch
-js/ui/components.js              ← resolverImageOptions + Default-Order nur in dev
-                                   (IMAGE_FIELDS bleibt; getResolverOptionsForField gated)
 scripts/dev-cardmarket-proxy.mjs ← standalone Node-Proxy
 scripts/dev-proxy-runner.mjs     ← startet http-server + Proxy parallel
 ```

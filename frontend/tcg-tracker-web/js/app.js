@@ -1,4 +1,4 @@
-import { isGeneratedCardmarketSearchUrl, applyReverseHoloQueryParam } from './data/cardmarket-url-utils.js';
+import { isGeneratedCardmarketSearchUrl, resolveCardmarketLink, resolveItemCardmarketUrl } from './data/cardmarket-url-utils.js';
 import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js';
 import {
   listImportedSets,
@@ -18,7 +18,9 @@ import {
   resetSheetsDataCaches,
   recoverImportedIdsFromOverview,
   listCollectionSetIds,
-} from './data/sheets-db.js?v=20261112-api-v3';
+  invalidateCollectionRowCache,
+  prefetchSetsOverviewRows,
+} from './data/sheets-db.js?v=20261113-api-v3-polish';
 import {
   collectionKeyOf,
   emptyCollectionEntry,
@@ -34,16 +36,28 @@ import {
 } from './data/collection-writes.js';
 import { needsApiCardEnrichment, describeCardDataFailure, NO_CARD_DATA_MESSAGE } from './core/card-enrichment.js';
 import { findSetByIdOrAlias } from './data/set-aliases.js';
-import { selectSearchSets } from './features/search/search-index-prefilter.js';
-import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets } from './data/pokemon-api.js?v=20261112-api-v3';
-import { resolveSeriesGroupInfo } from './data/schema-contract.js';
+import { searchFromIndex, searchResultsForDisplay } from './features/search/search-index-prefilter.js';
+import { readCollectionMapCached } from './features/search/search-collection-maps.js';
 import {
-  buildCardmarketProductUrl,
+  sanitizeSearchToken,
+  extractMeaningfulNameTokens,
+  parseStructuredSearchQuery,
+  normalizeSearchText,
+  normalizeCardNumberForSearch,
+  cardNumberMatchesQuery,
+  collectSearchStrings,
+  matchesTokensInValues,
+} from './features/search/query-utils.js';
+import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, fetchDeSeriesBySetId } from './data/pokemon-api.js?v=20261113-api-v3-polish';
+import { resolveSeriesGroupInfo, resolveDisplaySet, applyDeSeriesFallback, resolveSetTotalCards, setDeSeriesBySetId, getCardLanguage } from './data/schema-contract.js';
+import { imageCandidates, bindImageFallback, fallbackImgAttrs } from './ui/image-fallback.js';
+import { renderDashboardSetGrid } from './views/dashboard-grid.js';
+import {
   resolveCardmarketEntryForCard,
   formatCardmarketEntryLabel,
   formatCardmarketEntryTitle
 } from './data/cardmarket-data.js';
-import { applyCardmarketBuildStampCheck, forceRefreshCardmarketPrices } from './data/cardmarket-versioning.js?v=20261112-api-v3';
+import { applyCardmarketBuildStampCheck, forceRefreshCardmarketPrices } from './data/cardmarket-versioning.js?v=20261113-api-v3-polish';
 import {
   buildCombinedSearchDropdownOptions,
   buildSearchProgressLabel,
@@ -52,9 +66,18 @@ import {
   resolveCombinedSearchSelection,
   toBoolean
 } from './core/utils.js';
-import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle, effectiveCollectionStatus } from './core/collection-state.js?v=20261112-api-v3';
+import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle, effectiveCollectionStatus } from './core/collection-state.js?v=20261113-api-v3-polish';
 import * as cache from './core/cache.js';
 import { CONFIG, scopedStorageKey } from './core/config.js';
+import {
+  QUEUE_PRESETS_STORAGE_KEY,
+  DASHBOARD_PREFS_STORAGE_KEY,
+  RECENT_SETS_STORAGE_KEY,
+  REALTIME_CLIENT_STORAGE_KEY,
+  USER_ID_STORAGE_KEY,
+  DEV_COMPLETION_STORAGE_KEY,
+  GRID_ZOOM_STORAGE_KEY,
+} from './core/storage-keys.js';
 import {
   initSmartEngine,
   startAutoHealing,
@@ -78,7 +101,7 @@ import {
   filterLegacyImportPlanBySelection,
   summarizeLegacyImportPlan,
   extractLegacySpreadsheetId
-} from './features/collection/legacy-import.js?v=20261112-api-v3';
+} from './features/collection/legacy-import.js?v=20261113-api-v3-polish';
 import { ensureResolverForSet } from './data/collection-aliases.js';
 import { buildCollectionBackupSets } from './features/collection/backup-export.js';
 import { buildBackupRestoreSnapshot, planBackupRestore, pickSourceSetKey, resolveSourceCardKey } from './features/collection/legacy-key-resolution.js';
@@ -88,18 +111,20 @@ import {
   showAmbiguousMigrationDialog
 } from './features/collection/ambiguous-key-migration.js';
 import { initCommandPalette } from './ui/command-palette.js';
-import { filterSetsBySeriesKey, getStatsSeriesLabel } from './ui/stats-series.js?v=20261112-api-v3';
+import { filterSetsBySeriesKey, getStatsSeriesLabel } from './ui/stats-series.js?v=20261113-api-v3-polish';
 import {
   computePriceAnalyticsFromSummaries,
   pickCardPriceFromSummary,
-} from './ui/stats-price-analytics.js?v=20261112-api-v3';
+} from './ui/stats-price-analytics.js?v=20261113-api-v3-polish';
 import {
   applyCardmarketPriceSummary as applyCardmarketPriceSummaryUi,
+  cardmarketPriceSummaryCache,
+  cardmarketPriceSummaryPending,
   getCardmarketPriceCacheKey,
   normalizeCardmarketBasePriceType,
   renderLightboxCardmarketPrices as renderLightboxCardmarketPricesUi,
   CARDMARKET_BASE_PRICE_DEFAULT,
-} from './ui/cardmarket-price.js?v=20261112-api-v3';
+} from './ui/cardmarket-price.js?v=20261113-api-v3-polish';
 import {
   loadFavorites, saveFavorites, toggleFavorite, isFavorite,
   loadSearchHistory, addSearchHistory, clearSearchHistory,
@@ -107,13 +132,13 @@ import {
   loadSettings, saveSettings, updateSetting,
   applyQuickFilters, calculateCollectionStats,
   getSyncStatus, setSyncStatus
-} from './enhanced-features.js?v=20261112-api-v3';
+} from './enhanced-features.js?v=20261113-api-v3-polish';
 
 import {
   initQuickFiltersUI, createSearchHistoryWidget, createStatisticsPanel,
   createExportDialog, createSettingsPanel,
   createBulkActionsToolbar
-} from './ui/components.js?v=20261112-api-v3';
+} from './ui/components.js?v=20261113-api-v3-polish';
 import {
   createInitialSheetsRetryMetrics,
   initSheetsWriteFeedback as initSheetsWriteFeedbackUi,
@@ -193,6 +218,7 @@ import {
 import { sanitizeDisplayText } from './core/display-text.js';
 import { runWithRetry, isRetryableError } from './core/retry.js';
 import { createBootstrapController } from './app/bootstrap-controller.js';
+import { initPwaFeatures } from './app/pwa-init.js';
 import { isSheetsQuotaError, getImportCooldownMs } from './features/collection/import-rate-limit.js';
 import { isAuthReloginRequiredError, getAuthReloginImportMessage } from './features/collection/import-auth-guard.js';
 // --------------------------------------------------------------------------
@@ -515,7 +541,6 @@ const state = {
   recentSets: [],
   dashboardView: 'all',
   dashboardDensity: 'comfortable',
-  dashboardVirtualCount: 180,
   quickFilters: {
     completed: false,
     inProgress: false,
@@ -557,15 +582,9 @@ let spreadsheetDialogReturnFocusEl = null;
 const LOADING_MAX_BLOCK_MS = 12000;
 let loadingFailsafeTimer = null;
 
-const QUEUE_PRESETS_STORAGE_KEY = scopedStorageKey('queue_presets_v1');
-const DASHBOARD_PREFS_STORAGE_KEY = scopedStorageKey('dashboard_prefs_v1');
-const RECENT_SETS_STORAGE_KEY = scopedStorageKey('recent_sets_v1');
-const REALTIME_CLIENT_STORAGE_KEY = scopedStorageKey('realtime_client_id');
-const USER_ID_STORAGE_KEY = scopedStorageKey('user_id');
-const DEV_COMPLETION_STORAGE_KEY = scopedStorageKey('dev_completion_mode');
-const DASHBOARD_VIRTUAL_PAGE_SIZE = 180;
 const SEARCH_INPUT_DEBOUNCE_MS = 900;
-const DASHBOARD_VIRTUAL_THRESHOLD = 220;
+// Suche: hoechstens so viele Treffer als Karten zeichnen (z. B. 'pokemon' trifft ~20 000 Indexeintraege).
+const SEARCH_RESULT_RENDER_LIMIT = 240;
 const SEARCH_SCOPE_IMPORTED = 'imported';
 const SEARCH_SCOPE_ALL = 'all';
 const SEARCH_SCOPE_ONLINE = 'online';
@@ -943,35 +962,6 @@ function markSetAsRecent(setMeta) {
   state.recentSets = next;
   saveRecentSets();
   renderRecentSets();
-}
-
-function resetDashboardVirtualization() {
-  state.dashboardVirtualCount = DASHBOARD_VIRTUAL_PAGE_SIZE;
-}
-
-function createDashboardVirtualFooter(total, visible) {
-  const wrapper = document.createElement('div');
-  wrapper.className = 'dashboard-virtual-footer';
-  const remaining = Math.max(0, total - visible);
-
-  wrapper.innerHTML = `
-    <p>Zeige ${visible} von ${total} Sets${remaining > 0 ? ` - ${remaining} weitere` : ''}</p>
-    <div class="dashboard-virtual-actions">
-      <button class="btn-secondary" type="button" data-action="more">Mehr laden (+${DASHBOARD_VIRTUAL_PAGE_SIZE})</button>
-      <button class="btn-secondary" type="button" data-action="all">Alle laden</button>
-    </div>
-  `;
-
-  wrapper.querySelector('[data-action="more"]')?.addEventListener('click', () => {
-    state.dashboardVirtualCount = Math.min(total, (state.dashboardVirtualCount || DASHBOARD_VIRTUAL_PAGE_SIZE) + DASHBOARD_VIRTUAL_PAGE_SIZE);
-    renderDashboard();
-  });
-  wrapper.querySelector('[data-action="all"]')?.addEventListener('click', () => {
-    state.dashboardVirtualCount = total;
-    renderDashboard();
-  });
-
-  return wrapper;
 }
 
 function initSheetsWriteFeedback() {
@@ -1995,8 +1985,6 @@ function isAuthError(err) {
     || message.includes('anmelden');
 }
 
-const brokenSetAssetUrls = new Set();
-
 function sanitizeSetAssetUrl(url, setIdHint = '') {
   const value = String(url || '').trim();
   if (!value) return '';
@@ -2011,8 +1999,6 @@ function sanitizeSetAssetUrl(url, setIdHint = '') {
   ) {
     return '';
   }
-
-  if (brokenSetAssetUrls.has(value)) return '';
 
   const withTcgdexExtension = (() => {
     if (/\.(?:webp|png|jpe?g|svg)(?:[?#]|$)/i.test(value)) return value;
@@ -2042,106 +2028,31 @@ function sanitizeSetAssetUrl(url, setIdHint = '') {
   return '';
 }
 
-function buildMediaCandidateQueue(currentValue, candidateUrls = []) {
-  const current = String(currentValue || '').trim();
+// Set-Logo/-Symbol-Kandidaten in Sprachreihenfolge (image-fallback.js), ueber sanitizeSetAssetUrl normalisiert.
+function setAssetCandidates(set, kind) {
   const seen = new Set();
-  const queue = [];
-  const add = (value) => {
-    const text = String(value || '').trim();
-    if (!text || /pokeball-fallback\.svg/i.test(text)) return;
-    if (current && text === current) return;
-    if (seen.has(text)) return;
-    seen.add(text);
-    queue.push(text);
-  };
-  (Array.isArray(candidateUrls) ? candidateUrls : []).forEach(add);
-  return queue;
+  return imageCandidates(set, kind, getCardLanguage())
+    .map((url) => sanitizeSetAssetUrl(url, set?.setId))
+    .filter((url) => url && !seen.has(url) && seen.add(url));
 }
 
-function attachSetAssetFallback(img, fallbackUrl = './assets/pokeball-fallback.svg', candidateUrls = []) {
-  const fallbackQueue = buildMediaCandidateQueue(img?.src || '', candidateUrls);
-  img.onerror = () => {
-    const failedUrl = String(img?.src || '').trim();
-    if (failedUrl) brokenSetAssetUrls.add(failedUrl);
-
-    while (fallbackQueue.length) {
-      const next = fallbackQueue.shift();
-      if (next && next !== img.src) {
-        img.src = next;
-        return;
-      }
-    }
-
-    img.onerror = null;
-    if (fallbackUrl) {
-      img.src = fallbackUrl;
-      img.classList.add('img-fallback');
-    } else {
-      img.style.display = 'none';
-    }
-  };
-}
-
-function attachImageFallback(img, card, setIdHint = '') {
-  void setIdHint;
-  const fallbackQueue = buildMediaCandidateQueue(
-    img?.src || card?.image || card?.imageUrl || '',
-    Array.isArray(card?.imageCandidates) ? card.imageCandidates : []
-  );
+// Kartenbild mit Fallback-Kette (DE -> EN -> legacy bzw. EN -> DE -> legacy), am Ende Platzhalter.
+// `preferred` (z. B. das bereits geladene Lightbox-Bild) wird vorangestellt.
+function attachImageFallback(img, card, { kind = 'cardSmall', preferred = '' } = {}) {
+  const candidates = imageCandidates(card, kind, getCardLanguage());
+  const pref = String(preferred || '').trim();
   const wrap = img.closest('.card-img-wrap');
-  const applyVisualFallback = () => {
-    if (wrap) {
-      wrap.classList.add('missing-image');
-      wrap.dataset.placeholder = card?.number
-        ? `${card.number} - Kein Kartenbild`
-        : 'Kein Kartenbild';
-    }
-    img.onerror = null;
-    img.style.display = '';
-    img.src = './assets/pokeball-fallback.svg';
-    img.classList.add('img-fallback');
-    img.alt = `Kein Kartenbild fuer ${card?.name || card?.number || 'diese Karte'}`;
-  };
-
   if (wrap) {
-    wrap.classList.remove('missing-image');
-    delete wrap.dataset.placeholder;
+    wrap.dataset.placeholder = card?.number
+      ? `${card.number} - Kein Kartenbild`
+      : 'Kein Kartenbild';
   }
-  img.classList.remove('img-fallback');
-  img.style.display = '';
-
-  const currentImage = String(card?.image || img?.src || '').trim();
-  if (!currentImage || /pokeball-fallback\.svg/i.test(currentImage)) {
-    while (fallbackQueue.length) {
-      const next = fallbackQueue.shift();
-      if (next) {
-        img.src = next;
-        break;
-      }
-    }
+  bindImageFallback(img, pref && pref !== window.location.href
+    ? [pref, ...candidates.filter((url) => url !== pref)]
+    : candidates);
+  if (!candidates.length && !pref) {
+    img.alt = `Kein Kartenbild fuer ${card?.name || card?.number || 'diese Karte'}`;
   }
-
-  const activeImage = String(img?.src || '').trim();
-  const sameAsDocument = activeImage && activeImage === window.location.href;
-  if (!activeImage || /pokeball-fallback\.svg/i.test(activeImage)) {
-    applyVisualFallback();
-    return;
-  }
-  if (sameAsDocument) {
-    applyVisualFallback();
-    return;
-  }
-
-  img.onerror = () => {
-    while (fallbackQueue.length) {
-      const next = fallbackQueue.shift();
-      if (next && next !== img.src) {
-        img.src = next;
-        return;
-      }
-    }
-    applyVisualFallback();
-  };
 }
 
 function setEmptyState(show) {
@@ -2202,7 +2113,6 @@ function resetRuntimeUiForSpreadsheetSwitch() {
 // --------------------------------------------------------------------------
 // GRID ZOOM
 // --------------------------------------------------------------------------
-const GRID_ZOOM_STORAGE_KEY = 'gridZoom';
 
 function applyGridZoom(value) {
   const cssValue = value + 'px';
@@ -2879,6 +2789,13 @@ function initSpreadsheetDialog() {
 async function loadSets() {
   setLoading(true, 'Lade Sets\u2026');
   try {
+    // DE-Serien-Map (api/v3, mit Zeitlimit) parallel zum Sheets-Read von db_sets laden; registriert wird sie
+    // vor jeder Gruppierung: Dashboard, Import-Selector und Suche teilen sich dieselbe Map.
+    const [deSeriesBySetId] = await Promise.all([
+      fetchDeSeriesBySetId(),
+      prefetchSetsOverviewRows().catch(() => {})
+    ]);
+    setDeSeriesBySetId(deSeriesBySetId);
     let [importedSets, initialOverviewSets] = await Promise.all([
       listImportedSets(),
       listSetsOverviewData().catch(() => [])
@@ -2932,8 +2849,12 @@ async function loadSets() {
       });
     });
 
-    state.allSets = Array.from(mergedMap.values());
-    resetDashboardVirtualization();
+    // Zeilen ohne DE-Serie (z. B. aus altem Alias-Import) bekommen sie aus api/v3, damit Serien-Gruppen
+    // importierter und nicht importierter Sets identisch sind.
+    state.allSets = Array.from(mergedMap.values()).map((set) => {
+      const filled = applyDeSeriesFallback(set, deSeriesBySetId);
+      return filled === set ? set : resolveDisplaySet(filled);
+    });
     renderRecentSets();
     renderSetSelectorOptions();
 
@@ -3115,44 +3036,13 @@ async function renderDashboard() {
       return;
     }
 
-    dom.dashboardGrid.innerHTML = '';
-
-    const shouldVirtualize = sets.length > DASHBOARD_VIRTUAL_THRESHOLD;
-    const visibleCount = shouldVirtualize
-      ? Math.min(sets.length, Math.max(DASHBOARD_VIRTUAL_PAGE_SIZE, state.dashboardVirtualCount || DASHBOARD_VIRTUAL_PAGE_SIZE))
-      : sets.length;
-    const visibleSets = shouldVirtualize ? sets.slice(0, visibleCount) : sets;
-
-    if (sortBy === 'series-date') {
-      const seriesMap = buildSeriesMap(visibleSets);
-      seriesMap.forEach((groupInfo) => {
-        const section = document.createElement('section');
-        section.className = 'dash-series-group';
-        const h3 = document.createElement('h3');
-        h3.textContent = groupInfo.label;
-        section.appendChild(h3);
-        const grid = document.createElement('div');
-        grid.className = 'dash-sets-row';
-        groupInfo.sets.forEach((set) => {
-          const summary = summaryByName.get(set.setName) || summaryByName.get(set.setId);
-          grid.appendChild(createDashSetCard(set, summary));
-        });
-        section.appendChild(grid);
-        dom.dashboardGrid.appendChild(section);
-      });
-    } else {
-      const grid = document.createElement('div');
-      grid.className = 'dash-sets-row';
-      visibleSets.forEach((set) => {
-        const summary = summaryByName.get(set.setName) || summaryByName.get(set.setId);
-        grid.appendChild(createDashSetCard(set, summary));
-      });
-      dom.dashboardGrid.appendChild(grid);
-    }
-
-    if (shouldVirtualize) {
-      dom.dashboardGrid.appendChild(createDashboardVirtualFooter(sets.length, visibleSets.length));
-    }
+    renderDashboardSetGrid({
+      container: dom.dashboardGrid,
+      sets,
+      sortBy,
+      buildSeriesMap,
+      createCard: (set) => createDashSetCard(set, summaryByName.get(set.setName) || summaryByName.get(set.setId))
+    });
 
   } catch (err) {
     console.error('[renderDashboard]', err);
@@ -3183,13 +3073,13 @@ function createDashSetCard(set, summary) {
     imported: Boolean(set.imported)
   });
 
-  const safeLogoUrl = sanitizeSetAssetUrl(set.logoUrl, set.setId);
+  const logoCandidates = setAssetCandidates(set, 'setLogo');
   const placeholderCode = String(set.ptcgoCode || set.setId || 'SET').toUpperCase();
 
   card.innerHTML = `
     <div class="dash-set-logo-wrap">
-      ${safeLogoUrl
-        ? `<img src="${safeLogoUrl}" alt="${set.setName}" class="dash-set-logo" loading="lazy" onerror="this.onerror=null;this.src='./assets/pokeball-fallback.svg';this.classList.add('img-fallback')"/>`
+      ${logoCandidates.length
+        ? `<img ${fallbackImgAttrs(logoCandidates)} alt="${set.setName}" class="dash-set-logo" loading="lazy"/>`
         : `<div class="dash-set-placeholder" role="img" aria-label="Kein Setlogo für ${set.setName} verfügbar">
              <img src="./assets/pokeball-fallback.svg" alt="" class="dash-set-placeholder-icon" loading="lazy" />
              <span class="dash-set-placeholder-badge">Kein Setlogo</span>
@@ -3200,7 +3090,7 @@ function createDashSetCard(set, summary) {
       <p class="dash-set-name">${set.setName}</p>
       <p class="dash-set-series">${set.series || ''}</p>
       <div class="dash-progress-bar"><div class="dash-progress-fill" style="width:${set.imported ? percent : 0}%"></div></div>
-      <p class="dash-progress-text">${set.imported ? `${collected}\u202f/\u202f${total || '?'} (${percent}%)` : `Noch nicht importiert (${set.totalCards || '?' } Karten)`}</p>
+      <p class="dash-progress-text">${set.imported ? `${collected}\u202f/\u202f${total || '?'} (${percent}%)` : `Noch nicht importiert (${resolveSetTotalCards(set) || '?'} Karten)`}</p>
       ${rh > 0 ? `<p class="dash-rh-text">RH: ${rh}</p>` : ''}
       <div class="dash-card-actions">
         ${set.imported 
@@ -4327,6 +4217,10 @@ async function applyCollectionBackup(payload) {
 
   setLoading(true, 'Spiele Backup ein...');
   try {
+    // Einmal frisch lesen (Cache verwerfen) statt je Set: bei 100-200 Sets waeren das sonst ebenso viele
+    // volle db_collection-Reads und die Sheets-Quote wuerde den Restore mittendrin abbrechen. Die eigenen
+    // Writes fuehrt sheets-db im Zeilen-Cache mit.
+    invalidateCollectionRowCache();
     let setIndex = 0;
     for (const { liveSet, backupSets } of byLiveSet.values()) {
       setIndex++;
@@ -4341,7 +4235,9 @@ async function applyCollectionBackup(payload) {
       });
       unresolvedCards += unresolved;
       ambiguousCards += ambiguous;
-      const liveMap = await readSetCollectionMap(liveSet.setName, { setId: liveSet.setId }).catch(() => new Map());
+      // Strikt lesen (Stand der einen frischen Lesung oben); ein Lesefehler bricht ab, statt gegen eine
+      // leere Map zu planen.
+      const liveMap = await readSetCollectionMap(liveSet.setName, { setId: liveSet.setId, strict: true });
       const pendingUpdates = [];
       const restorePlan = planBackupRestore(liveMap, {
         snapshot,
@@ -5130,16 +5026,13 @@ async function handleSettingsAction(action) {
 function initDashboardControls() {
   let debounce;
   dom.dashFilter.addEventListener('input', () => {
-    resetDashboardVirtualization();
     clearTimeout(debounce);
     debounce = setTimeout(renderDashboard, 200);
   });
   dom.dashSeriesFilter.addEventListener('change', () => {
-    resetDashboardVirtualization();
     renderDashboard();
   });
   dom.dashSort.addEventListener('change', () => {
-    resetDashboardVirtualization();
     renderDashboard();
   });
   document.querySelectorAll('.dashboard-view-tab').forEach((button) => {
@@ -5148,7 +5041,6 @@ function initDashboardControls() {
       const view = button.dataset.dashboardView || 'all';
       if (state.dashboardView === view) return;
       state.dashboardView = view;
-      resetDashboardVirtualization();
       saveDashboardPreferences();
       renderDashboard();
     });
@@ -5515,19 +5407,9 @@ function formatStatsPriceNumber(value) {
   return Number(value || 0).toLocaleString('de-DE');
 }
 
+// v3-ID vor gespeicherter URL, `?isReverseHolo=Y` fuer als Reverse Holo gesammelte Karten.
 function getItemCardmarketUrl(item = {}) {
-  const base = String(
-    item?.card?.cardmarketUrl
-    || item?.card?.vera_cardmarket_url
-    || item?.card?.tcgdex_cardmarket_url
-    || item?.cardmarketUrl
-    || item?.vera_cardmarket_url
-    || item?.tcgdex_cardmarket_url
-    || ''
-  ).trim();
-  // Hängt `?isReverseHolo=Y` an, wenn die Karte als Reverse Holo gesammelt
-  // ist — Cardmarket zeigt dann direkt die korrekte Variante an.
-  return applyReverseHoloQueryParam(base, Boolean(item?.isReverseHolo));
+  return resolveItemCardmarketUrl(item, { language: getCardLanguage() });
 }
 
 const STATS_PRICE_TABS = [
@@ -5798,65 +5680,31 @@ function getStatsPriceItemImageUrl(item = {}) {
 }
 
 function getStatsPriceItemImageCandidates(item = {}) {
-  const card = item?.card || {};
-  // Vollständige Kandidatenkette in der Reihenfolge, die der Set-View
-  // (`attachImageFallback`) durchrotiert. Beim ersten onerror wird das
-  // nächste Bild probiert; am Ende pokeball-fallback.svg.
+  // Kartenbild-Kette aus image-fallback.js (Sprachreihenfolge); item.image/imageUrl nur als Reserve
+  // fuer Eintraege ohne Karten-Record.
   const candidates = [
+    ...imageCandidates(item?.card || {}, 'cardSmall', getCardLanguage()),
     item?.image,
-    item?.imageUrl,
-    card?.imageSmall,
-    card?.image,
-    card?.imageUrl,
-    card?.imageLarge,
-    card?.imageCandidates,
-    card?.images?.small,
-    card?.images?.large,
+    item?.imageUrl
   ];
   const seen = new Set();
-  const out = [];
-  for (const list of candidates) {
-    if (Array.isArray(list)) {
-      for (const value of list) {
-        const trimmed = String(value || '').trim();
-        if (trimmed && !seen.has(trimmed)) {
-          seen.add(trimmed);
-          out.push(trimmed);
-        }
-      }
-    } else {
-      const trimmed = String(list || '').trim();
-      if (trimmed && !seen.has(trimmed)) {
-        seen.add(trimmed);
-        out.push(trimmed);
-      }
-    }
-  }
-  return out;
+  return candidates
+    .map((value) => String(value || '').trim())
+    .filter((value) => value && !seen.has(value) && seen.add(value));
 }
 
 /**
  * Rendert das Thumbnail-Markup für einen Stats-Price-Listeneintrag.
- * Spiegelt das Verhalten von `attachImageFallback` aus dem Set-View:
- * onerror rotiert durch `imageCandidates`, am Ende pokeball-fallback.svg.
- * Markiert das Element zusätzlich mit `is-reverse`, wenn die Karte als
- * Reverse Holo gesammelt ist — gleicher visueller Marker wie in der
- * Set-Cell (Klasse `article.reverse`).
+ * Fallback-Kette ueber data-fallbacks (delegierter Handler in image-fallback.js),
+ * am Ende pokeball-fallback.svg + .stats-price-thumb--missing.
  */
 function renderStatsPriceThumbMarkup(item = {}) {
   const candidates = getStatsPriceItemImageCandidates(item);
   if (!candidates.length) {
     return '<span class="stats-price-thumb-fallback" aria-hidden="true">?</span>';
   }
-
-  const [primary, ...rest] = candidates;
   const altText = String(item?.cardName || item?.card?.name || item?.card?.number || 'Kartenbild').trim();
-  // data-candidates enthält die Fallback-Liste als JSON (Bild-URLs).
-  // Der onerror-Handler rotiert per Index, am Ende wird pokeball-fallback.svg
-  // geladen und die CSS-Klasse `img-fallback` gesetzt.
-  const dataAttr = ` data-image-candidates='${escapeHtml(JSON.stringify(rest))}'`;
-  const onerrorAttr = "this.onerror=null;var c=this.dataset.imageCandidates;if(c){var arr;try{arr=JSON.parse(c);}catch(e){arr=[];}if(Array.isArray(arr)&&arr.length){this.dataset.imageCandidates=JSON.stringify(arr.slice(1));this.src=arr[0];return;}}this.src='./assets/pokeball-fallback.svg';this.classList.add('img-fallback');this.closest('.stats-price-thumb')?.classList.add('stats-price-thumb--missing');";
-  return `<img class="stats-price-thumb-img" src="${escapeHtml(primary)}" alt="${escapeHtml(altText)}" loading="lazy" decoding="async"${dataAttr} onerror="${onerrorAttr}" />`;
+  return `<img class="stats-price-thumb-img" ${fallbackImgAttrs(candidates)} alt="${escapeHtml(altText)}" loading="lazy" decoding="async" />`;
 }
 
 function computeWatchlistWorkspace(items = [], filters = {}, analytics = null) {
@@ -7229,149 +7077,6 @@ async function loadStatsPriceAnalyticsLazy({ requestId } = {}) {
 // --------------------------------------------------------------------------
 // SUCHE (cross-set)
 // --------------------------------------------------------------------------
-const SEARCH_NOISE_TOKENS = new Set([
-  'karte', 'karten', 'kartennummer', 'kartennr', 'nummer', 'nr', 'no', 'num',
-  'pokemon', 'pokemontcg', 'tcg', 'set', 'im', 'in', 'von', 'die', 'der', 'das'
-]);
-
-function sanitizeSearchToken(token) {
-  return normalizeSearchText(token).replace(/^[^a-z0-9]+|[^a-z0-9]+$/g, '');
-}
-
-function extractMeaningfulNameTokens(tokens = []) {
-  return tokens
-    .map((token) => sanitizeSearchToken(token))
-    .filter((token) => token && token.length >= 2)
-    .filter((token) => !SEARCH_NOISE_TOKENS.has(token));
-}
-
-function parseStructuredSearchQuery(rawQuery, availableSets = []) {
-  const trimmedQuery = String(rawQuery || '').trim();
-  if (!trimmedQuery) return null;
-
-  const normalizedQuery = trimmedQuery.replace(/^\(+|\)+$/g, '').trim();
-  if (!normalizedQuery) return null;
-
-  const parts = normalizedQuery.split(/\s+/).filter(Boolean);
-  if (!parts.length) return null;
-
-  const requestedCode = parts[0].toLowerCase();
-  const matchingSet = availableSets.find((set) =>
-    (set?.ptcgoCode && String(set.ptcgoCode).toLowerCase() === requestedCode) ||
-    String(set?.setId || '').toLowerCase() === requestedCode
-  );
-  if (!matchingSet) return null;
-
-  // Remaining tokens after set code: separate number from name tokens
-  const remaining = parts.slice(1);
-  let cardNumber = '';
-  const nameTokens = [];
-  for (const part of remaining) {
-    const token = sanitizeSearchToken(part);
-    if (!token) continue;
-    if (!cardNumber && /^[a-z._-]*\d+[a-z._-]*$/.test(token)) {
-      cardNumber = normalizeCardNumberForSearch(token);
-    } else {
-      nameTokens.push(token);
-    }
-  }
-  const meaningfulNameTokens = extractMeaningfulNameTokens(nameTokens);
-  return {
-    set: matchingSet,
-    setId: String(matchingSet.setId),
-    cardNumber,
-    namePart: meaningfulNameTokens.length ? meaningfulNameTokens : null
-  };
-}
-
-/**
- * Erkennt freie Kombinationen aus Kartennummer + Namenstokens, z.B. "57 Digda" oder "Digda 57".
- * Gibt null zurck, wenn kein sinnvolles gemischtes Muster erkannt wird.
- */
-function parseMixedQuery(rawQuery) {
-  const normalized = normalizeSearchText(rawQuery).trim();
-  if (!normalized) return null;
-
-  const parts = normalized
-    .split(/\s+/)
-    .map((part) => sanitizeSearchToken(part))
-    .filter(Boolean);
-  if (parts.length < 2) return null;
-
-  const hasSetLikeMarker = parts.some((token) => token === 'set' || token === 'series' || token === 'serie');
-  if (hasSetLikeMarker) return null;
-
-  // Tokens die wie eine Kartennummer aussehen: optionale alpha-Praefix + Zahlen + optionales Suffix
-  const numberTokens = parts.filter((p) => /^[a-z._-]*\d+[a-z._-]*$/.test(p));
-  const nameTokensRaw = parts.filter((p) => !/^[a-z._-]*\d+[a-z._-]*$/.test(p));
-  const nameTokens = extractMeaningfulNameTokens(nameTokensRaw);
-
-  // Nur sinnvoll wenn mindestens ein Namentoken UND genau ein Nummerntoken vorhanden ist
-  if (!nameTokens.length || !numberTokens.length) return null;
-
-  return {
-    cardNumber: normalizeCardNumberForSearch(numberTokens[0]),
-    nameTokens
-  };
-}
-
-function normalizeSearchText(value) {
-  return String(value || '')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
-}
-
-function normalizeCardNumberForSearch(value) {
-  const raw = String(value || '').trim().toLowerCase();
-  if (!raw) return '';
-  const withoutTotal = raw.split('/')[0];
-  return normalizeCardNumber(withoutTotal).toLowerCase();
-}
-
-function cardNumberMatchesQuery(cardNumber, queryNumber) {
-  const normalizedCard = normalizeCardNumberForSearch(cardNumber);
-  const normalizedQuery = normalizeCardNumberForSearch(queryNumber);
-  if (!normalizedCard || !normalizedQuery) return false;
-  if (normalizedCard === normalizedQuery) return true;
-
-  const cardDigits = (normalizedCard.match(/\d+/) || [''])[0];
-  const queryDigits = (normalizedQuery.match(/\d+/) || [''])[0];
-  return Boolean(queryDigits && cardDigits === queryDigits);
-}
-
-function collectSearchStrings(values = []) {
-  const seen = new Set();
-  const result = [];
-
-  const visit = (value) => {
-    if (value == null) return;
-    if (Array.isArray(value)) {
-      value.forEach(visit);
-      return;
-    }
-    if (typeof value === 'object') {
-      Object.values(value).forEach(visit);
-      return;
-    }
-
-    const raw = String(value || '').trim();
-    if (!raw || /^https?:\/\//i.test(raw)) return;
-    const normalized = normalizeSearchText(raw).replace(/\s+/g, ' ').trim();
-    if (!normalized || seen.has(normalized)) return;
-    seen.add(normalized);
-    result.push(normalized);
-  };
-
-  values.forEach(visit);
-  return result;
-}
-
-function matchesTokensInValues(tokens = [], values = []) {
-  if (!tokens.length) return false;
-  return tokens.every((token) => values.some((value) => value.includes(token)));
-}
-
 function buildSetSearchContext(set = null) {
   const nameValues = collectSearchStrings([
     set?.setName,
@@ -7443,175 +7148,13 @@ function matchesDashboardSetFilter(set, rawQuery = '') {
   return scoreDashboardSetMatch(set, rawQuery) >= 0;
 }
 
-function buildCardSearchContext(card, set = null) {
-  const nameValues = collectSearchStrings([
-    card?.name,
-    card?.vera_name,
-    card?.tcgdex_name
-  ]);
-
-  const setValues = collectSearchStrings([
-    set?.setName,
-    set?.vera_name,
-    set?.tcgdex_name,
-    set?.series,
-    set?.vera_series,
-    set?.tcgdex_serie_name,
-    set?.ptcgoCode,
-    set?.vera_ptcgoCode,
-    set?.tcgdex_abbreviation_official,
-    set?.setId
-  ]);
-
-  const taxonomyValues = collectSearchStrings([
-    card?.rarity,
-    card?.hp,
-    card?.types,
-    card?.vera_types,
-    card?.supertype,
-    card?.subtypes,
-    card?.evolvesFrom,
-    card?.vera_evolvesFrom,
-    card?.artist,
-    card?.regulationMark,
-    card?.flavorText,
-    card?.vera_flavorText,
-    card?.rules,
-    card?.abilities,
-    card?.attacks,
-    card?.weaknesses,
-    card?.resistances
-  ]);
-
-  const numberValues = collectSearchStrings([
-    card?.number,
-    card?.vera_number,
-    card?.tcgdex_localId
-  ]);
-
-  return {
-    nameValues,
-    setValues,
-    taxonomyValues,
-    numberValues,
-    fullText: [...nameValues, ...setValues, ...taxonomyValues, ...numberValues].join(' ')
-  };
-}
-
-function computeSearchScore(card, normalizedQuery, structuredQuery, mixedQuery, set = null) {
-  const context = buildCardSearchContext(card, set);
-  const numberRaw = String(card.number || '').toLowerCase();
-  const normalizedCardNumber = normalizeCardNumberForSearch(card.number);
-
-  if (structuredQuery) {
-    const numberMatch = !structuredQuery.cardNumber || cardNumberMatchesQuery(card.number, structuredQuery.cardNumber);
-    const nameMatch = !structuredQuery.namePart || matchesTokensInValues(structuredQuery.namePart, context.nameValues.length ? context.nameValues : [context.fullText]);
-    if (!numberMatch || !nameMatch) return -1;
-
-    let score = 1000;
-    if (structuredQuery.cardNumber) score += 250;
-    if (structuredQuery.namePart?.length) {
-      score += structuredQuery.namePart.length * 45;
-      score += 90;
-    }
-    return score;
-  }
-
-  if (mixedQuery) {
-    const numberMatch = cardNumberMatchesQuery(card.number, mixedQuery.cardNumber);
-    const nameMatch = matchesTokensInValues(mixedQuery.nameTokens, context.nameValues.length ? context.nameValues : [context.fullText]);
-    if (!numberMatch || !nameMatch) return -1;
-
-    return 900 + (mixedQuery.nameTokens.length * 45) + 220;
-  }
-
-  const normalizedFreeQuery = normalizeSearchText(normalizedQuery).trim();
-  const queryTokens = normalizedFreeQuery
-    .split(/\s+/)
-    .map((token) => sanitizeSearchToken(token))
-    .filter(Boolean);
-  const meaningfulTokens = extractMeaningfulNameTokens(queryTokens);
-
-  if (!queryTokens.length) return -1;
-
-  const exactNameMatch = context.nameValues.some((value) => value === normalizedFreeQuery);
-  const nameStartsWith = context.nameValues.some((value) => value.startsWith(normalizedFreeQuery));
-  const nameContains = context.nameValues.some((value) => value.includes(normalizedFreeQuery));
-  const setExactMatch = context.setValues.some((value) => value === normalizedFreeQuery);
-  const setContains = context.setValues.some((value) => value.includes(normalizedFreeQuery));
-  const taxonomyContains = context.taxonomyValues.some((value) => value.includes(normalizedFreeQuery));
-  const numberContains = context.numberValues.some((value) => value.includes(normalizedFreeQuery))
-    || normalizedCardNumber.includes(normalizedFreeQuery)
-    || numberRaw.includes(normalizedFreeQuery)
-    || cardNumberMatchesQuery(card.number, normalizedFreeQuery);
-
-  const numberLikeTokens = queryTokens.filter((token) => /^[a-z._-]*\d+[a-z._-]*$/.test(token));
-  const nameLikeTokens = meaningfulTokens;
-  const nameTokenMatch = nameLikeTokens.length ? matchesTokensInValues(nameLikeTokens, context.nameValues.length ? context.nameValues : [context.fullText]) : false;
-  const setTokenMatch = nameLikeTokens.length ? matchesTokensInValues(nameLikeTokens, context.setValues) : false;
-  const taxonomyTokenMatch = nameLikeTokens.length ? matchesTokensInValues(nameLikeTokens, context.taxonomyValues) : false;
-  const numberTokenMatch = numberLikeTokens.length ? numberLikeTokens.every((token) => cardNumberMatchesQuery(card.number, token)) : false;
-  const fullTokenMatch = queryTokens.every((token) => context.fullText.includes(token) || cardNumberMatchesQuery(card.number, token));
-
-  const isMatch = exactNameMatch
-    || nameStartsWith
-    || nameContains
-    || setExactMatch
-    || setContains
-    || taxonomyContains
-    || numberContains
-    || nameTokenMatch
-    || setTokenMatch
-    || taxonomyTokenMatch
-    || numberTokenMatch
-    || fullTokenMatch;
-
-  if (!isMatch) return -1;
-
-  let score = 0;
-  if (exactNameMatch) score += 420;
-  else if (nameStartsWith) score += 320;
-  else if (nameContains) score += 220;
-
-  if (numberContains) score += 190;
-  if (setExactMatch) score += 240;
-  else if (setContains) score += 140;
-  if (taxonomyContains || taxonomyTokenMatch) score += 60;
-  if (nameTokenMatch) score += 110;
-  if (setTokenMatch) score += 95;
-  if (numberTokenMatch) score += 135;
-  if (fullTokenMatch && queryTokens.length > 1) score += 120;
-  if (nameTokenMatch && numberTokenMatch) score += 180;
-
-  return score;
-}
-
-function matchesCardSearch(card, normalizedQuery, structuredQuery, mixedQuery, set = null) {
-  return computeSearchScore(card, normalizedQuery, structuredQuery, mixedQuery, set) >= 0;
-}
-
 // hasRichCardDetails/needsApiCardEnrichment: js/core/card-enrichment.js (v3 massgeblich, siehe dort).
-
-function sortSearchResults(results = []) {
-  return results.sort((left, right) => {
-    if (right.score !== left.score) return right.score - left.score;
-    const setCompare = String(left.set?.setName || '').localeCompare(String(right.set?.setName || ''), 'de', { sensitivity: 'base' });
-    if (setCompare !== 0) return setCompare;
-    return String(left.card?.number || '').localeCompare(String(right.card?.number || ''), undefined, { numeric: true, sensitivity: 'base' });
-  });
-}
-
-function getSearchResultKey(card = {}, set = null) {
-  const setId = String(set?.setId || '').trim();
-  const cardKey = collectionKeyOf(card);
-  const fallbackName = normalizeSearchText(card?.name || '');
-  return `${setId}::${cardKey || fallbackName || 'card'}`;
-}
 
 function renderSearchToolbarMeta({
   rawQuery = '',
   searchScopeMode = SEARCH_SCOPE_IMPORTED,
   resultCount = 0,
+  totalCount = resultCount,
   setsProcessed = 0,
   totalSets = 0,
   apiProcessed = 0,
@@ -7635,7 +7178,8 @@ function renderSearchToolbarMeta({
     if (isSearching) {
       statusText = `${safeResultCount || '0'} Ergebnis${safeResultCount === 1 ? '' : 'se'} - Suche läuft${progressSuffix}`;
     } else if (safeResultCount > 0) {
-      statusText = `${safeResultCount} Ergebnis${safeResultCount === 1 ? '' : 'se'} gefunden`;
+      statusText = `${totalCount} Ergebnis${totalCount === 1 ? '' : 'se'} gefunden`
+        + (totalCount > safeResultCount ? ` (erste ${safeResultCount} angezeigt)` : '');
     } else {
       statusText = `Keine Treffer${progressSuffix}`;
     }
@@ -7647,11 +7191,19 @@ function renderSearchToolbarMeta({
   `;
 }
 
+// Sammlungs-Map eines Sets aus dem Cache; null = noch nicht geladen (Haken bleiben bis dahin gesperrt,
+// sonst koennte ein Klick eine zweite Zeile neben einer noch nicht gelesenen anlegen).
+function cachedSearchCollectionMap(set) {
+  const key = `db_${set?.setId}`;
+  return cache.has(key) ? cache.get(key) : null;
+}
+
 function renderSearchResultsList(results = [], searchScopeMode, options = {}) {
   if (!dom.searchResults) return;
 
   const {
     rawQuery = '',
+    totalCount = Array.isArray(results) ? results.length : 0,
     setsProcessed = 0,
     totalSets = 0,
     apiProcessed = 0,
@@ -7673,6 +7225,7 @@ function renderSearchResultsList(results = [], searchScopeMode, options = {}) {
     rawQuery,
     searchScopeMode,
     resultCount: safeResults.length,
+    totalCount,
     setsProcessed,
     totalSets,
     apiProcessed,
@@ -7695,32 +7248,49 @@ function renderSearchResultsList(results = [], searchScopeMode, options = {}) {
       <div class="search-results-head">
         <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
       </div>
-      <p class="empty-state">Keine Karten fuer "${rawQuery}" gefunden (durchsucht: ${totalSets} Sets, ${modeMeta.hint}).</p>
+      <p class="empty-state">Keine Karten fuer "${escapeHtml(rawQuery)}" gefunden (durchsucht: ${totalSets} Sets, ${modeMeta.hint}).</p>
     `;
     return;
   }
 
+  const countLabel = totalCount > safeResults.length
+    ? `${totalCount} Ergebnisse (erste ${safeResults.length} angezeigt, Suche verfeinern)`
+    : `${safeResults.length} Ergebnis${safeResults.length !== 1 ? 'se' : ''}`;
   dom.searchResults.innerHTML = `
     <div class="search-results-head">
-      <p class="search-result-count">${safeResults.length} Ergebnis${safeResults.length !== 1 ? 'se' : ''}${isSearching ? ' · Suche laeuft...' : ''}</p>
+      <p class="search-result-count">${countLabel}</p>
       <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
     </div>
   `;
 
   const frag = document.createDocumentFragment();
-  safeResults.forEach(({ card, set, dbMap, apiOnly }) => {
+  safeResults.forEach(({ card, set, apiOnly }) => {
     const key = collectionKeyOf(card);
-    frag.appendChild(createSearchResultCard(card, key, dbMap.get(key), set, apiOnly));
+    const dbMap = cachedSearchCollectionMap(set);
+    frag.appendChild(createSearchResultCard(card, key, dbMap?.get(key), set, apiOnly, {
+      collectionPending: Boolean(set?.setName && set?.imported) && !dbMap
+    }));
   });
 
-  if (isSearching) {
-    const loading = document.createElement('p');
-    loading.className = 'loading-placeholder';
-    loading.textContent = `Suche laeuft...${progressSuffix}`;
-    frag.appendChild(loading);
-  }
-
   dom.searchResults.appendChild(frag);
+}
+
+// Sammlungs-Maps der importierten Sets mit Treffern laden (max. 4 parallel, Ergebnis im Cache wie bisher).
+// Fehler werden nicht als leere Map gecacht: die Haken dieser Karten bleiben dann gesperrt.
+async function loadSearchCollectionMaps(sets = [], { isCancelled = () => false } = {}) {
+  const queue = [...sets];
+  const worker = async () => {
+    while (queue.length && !isCancelled()) {
+      const set = queue.shift();
+      await readCollectionMapCached(set, {
+        cache,
+        read: readSetCollectionMap,
+        ttlMs: CONFIG.CACHE_TTL_MS,
+        onError: (err) => console.warn('[runSearch] Sammlung nicht lesbar fuer', set.setId, err?.message || err),
+      });
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(4, queue.length) }, worker));
 }
 
 async function runSearch(options = {}) {
@@ -7732,7 +7302,7 @@ async function runSearch(options = {}) {
   }
   const abortController = new AbortController();
   state.searchAbortController = abortController;
-  const isAborted = () => abortController.signal.aborted;
+  const isCancelled = () => isStale() || abortController.signal.aborted;
 
   const rawQuery = dom.searchInput.value.trim();
   const query = normalizeSearchText(rawQuery);
@@ -7755,9 +7325,7 @@ async function runSearch(options = {}) {
   // da state.sets (aus Google Sheets) ptcgoCode leer haben kann.
   const lookupPool = state.allSets?.length ? state.allSets : baseSetsToSearch;
   const structuredQuery = parseStructuredSearchQuery(rawQuery, lookupPool);
-  // Freie Kombinations-Suche (z.B. "57 Digda") nur wenn kein Set-Praefix erkannt wurde
-  const mixedQuery = !structuredQuery ? parseMixedQuery(rawQuery) : null;
-  if (!force && !structuredQuery && !mixedQuery && query.length < 2) {
+  if (!force && !structuredQuery && query.length < 2) {
     state.lastSearchResults = [];
     renderSearchToolbarMeta({
       rawQuery,
@@ -7768,12 +7336,12 @@ async function runSearch(options = {}) {
     return;
   }
 
-  if (force || structuredQuery || mixedQuery || rawQuery.length >= 3) {
+  if (force || structuredQuery || rawQuery.length >= 3) {
     window.SEARCH_HISTORY = addSearchHistory(rawQuery);
   }
   // Fr die eigentliche Suche das importierte Set bevorzugen (hat Collection-Daten),
   // fallback auf das Set aus allSets falls nicht importiert.
-  let setsToSearch = structuredQuery
+  const setsToSearch = structuredQuery
     ? [baseSetsToSearch.find((s) => s.setId === structuredQuery.setId) ?? structuredQuery.set]
     : baseSetsToSearch;
   if (!setsToSearch.length) {
@@ -7785,171 +7353,55 @@ async function runSearch(options = {}) {
     dom.searchResults.innerHTML = '<p class="empty-state">Keine passenden Sets verfuegbar.</p>';
     return;
   }
-  renderSearchResultsList([], searchScopeMode, {
-    rawQuery,
-    setsProcessed: 0,
-    totalSets: setsToSearch.length,
-    isSearching: true,
-  });
+  renderSearchResultsList([], searchScopeMode, { rawQuery, totalSets: setsToSearch.length, isSearching: true });
 
-  // Vorauswahl ueber api/v3/search-index.json (Name/Name DE/Nummer + Set-Felder): Kartendateien nur fuer
-  // Sets mit Treffern laden. Strukturierte Suche = ein Set, ohne Vorauswahl. Kein Treffer im Index (z. B.
-  // Suche nach Seltenheit/Typ/Kuenstler) oder Index nicht erreichbar -> alle Sets wie bisher.
-  if (!structuredQuery && setsToSearch.length > 1) {
-    const preselected = await selectSearchSets({
+  // Treffer direkt aus api/v3/search-index.json (Name DE/EN, Nummer, Kuenstler, Typen, Seltenheit, Set),
+  // ohne Kartendateien je Set. Strukturierte Suche ("SVI 12 Pikachu"): Set-Kuerzel waehlt das Set.
+  const indexQuery = structuredQuery
+    ? [structuredQuery.cardNumber, ...(structuredQuery.namePart || [])].filter(Boolean).join(' ')
+    : rawQuery;
+  let hits;
+  try {
+    hits = await searchFromIndex(indexQuery, {
       sets: setsToSearch,
-      matchCard: (card) => computeSearchScore(card, query, null, mixedQuery, null) >= 0,
-      matchSet: (set) => !mixedQuery && computeSearchScore({}, query, null, null, set) >= 0,
-      signal: abortController.signal
-    }).catch((err) => {
-      if (err?.name !== 'AbortError') console.warn('[runSearch] search-index nicht verfuegbar, voller Scan:', err?.message || err);
-      return null;
-    });
-    if (isStale() || isAborted()) return;
-    if (Array.isArray(preselected)) setsToSearch = preselected;
-  }
-
-  const resultsMap = new Map();
-  let searchedSetsCount = 0;
-  let shouldStopSearch = false;
-
-  const upsertMatches = (cards, set, dbMap) => {
-    let matchCount = 0;
-
-    (Array.isArray(cards) ? cards : []).forEach((card) => {
-      const score = computeSearchScore(card, query, structuredQuery, mixedQuery, set);
-      if (score < 0) return;
-
-      matchCount += 1;
-      const resultKey = getSearchResultKey(card, set);
-      resultsMap.set(resultKey, {
-        card,
-        set,
-        dbMap,
-        score,
-        // Karten nicht importierter Sets: Haken loest den Auto-Import aus (pendingSearchSetImport).
-        apiOnly: Boolean(card?.__searchApiOnly) || !toBoolean(set?.imported),
-        resultKey,
-      });
-    });
-
-    return matchCount;
-  };
-
-  const renderCurrentResults = ({ isSearching = false } = {}) => {
-    const currentResults = Array.from(resultsMap.values());
-
-    if (!currentResults.length) return;
-    state.lastSearchResults = currentResults.slice(0, 60);
-    if (isStale() || isAborted()) return;
-    renderSearchResultsList(currentResults, searchScopeMode, {
-      rawQuery,
-      setsProcessed: searchedSetsCount,
-      totalSets: setsToSearch.length,
-      apiProcessed: 0,
-      totalApiSets: 0,
-      isSearching,
-    });
-  };
-
-  for (const set of setsToSearch) {
-    if (isStale() || isAborted()) return;
-    let setMatchCount = 0;
-
-    try {
-      const dbCacheKey = `db_${set.setId}`;
-      const searchCacheKey = `${set.setId}::${searchScopeMode}`;
-
-      // Karten aus api/v3 (massgeblich, gecacht); db_cards nur als Offline-Fallback (loadSetCardsV3First).
-      let setCards = state.searchCache.get(searchCacheKey);
-      if (!Array.isArray(setCards)) {
-        const loaded = await loadSetCardsV3First(set.setId, { signal: abortController.signal });
-        setCards = loaded.cards;
-        if (setCards.length > 0) state.searchCache.set(searchCacheKey, setCards);
-      }
-
-      let dbMap = new Map();
-      if (cache.has(dbCacheKey)) dbMap = cache.get(dbCacheKey);
-      else {
-        dbMap = await readSetCollectionMap(set.setName, { setId: set.setId }).catch(() => new Map());
-        cache.set(dbCacheKey, dbMap, CONFIG.CACHE_TTL_MS);
-      }
-
-      if (setCards.length > 0) {
-        setMatchCount = upsertMatches(setCards, set, dbMap);
-      }
-
-      if (!structuredQuery && !mixedQuery && resultsMap.size >= 200 && searchScopeMode === SEARCH_SCOPE_IMPORTED) {
-        shouldStopSearch = true;
-      }
-      if (structuredQuery?.cardNumber && !structuredQuery?.namePart && resultsMap.size >= 1) {
-        shouldStopSearch = true;
-      }
-    } catch (err) {
-      if (err?.name === 'AbortError') {
-        return;
-      }
-      console.warn('[runSearch] error for set', set.setId, err);
-    }
-
-    searchedSetsCount += 1;
-
-    if (setMatchCount > 0 && resultsMap.size > 0) {
-      renderCurrentResults({
-        isSearching: searchedSetsCount < setsToSearch.length && !shouldStopSearch,
-      });
-    }
-
-    if (shouldStopSearch) break;
-  }
-
-  if (resultsMap.size > 0) {
-    const sortedResults = sortSearchResults(Array.from(resultsMap.values()));
-    state.lastSearchResults = sortedResults.slice(0, 60);
-
-    if (isStale() || isAborted()) return;
-    renderSearchResultsList(sortedResults, searchScopeMode, {
-      rawQuery,
-      setsProcessed: searchedSetsCount,
-      totalSets: setsToSearch.length,
-      apiProcessed: 0,
-      totalApiSets: 0,
-      isSearching: false,
-    });
-  }
-
-  if (!resultsMap.size) {
-    const modeMeta = getSearchModeMeta(searchScopeMode);
-    renderSearchToolbarMeta({
-      rawQuery,
-      searchScopeMode,
-      resultCount: 0,
-      setsProcessed: setsToSearch.length,
-      totalSets: setsToSearch.length,
-      emptyMessage: `Keine Treffer - ${setsToSearch.length} Sets geprft`
-    });
-    dom.searchResults.innerHTML = `
-      <div class="search-results-head">
-        <span class="search-mode-badge ${modeMeta.className}">${modeMeta.label}</span>
-      </div>
-      <p class="empty-state">Keine Karten fuer ${rawQuery} gefunden (durchsucht: ${setsToSearch.length} Sets, ${modeMeta.hint}).</p>
-    `;
+      setFilter: structuredQuery?.setId || ''
+    }, { signal: abortController.signal });
+  } catch (err) {
+    if (err?.name === 'AbortError' || isCancelled()) return;
+    console.warn('[runSearch] search-index nicht verfuegbar:', err?.message || err);
+    state.lastSearchResults = [];
+    renderSearchToolbarMeta({ rawQuery, searchScopeMode, emptyMessage: 'Suchindex nicht erreichbar.' });
+    dom.searchResults.innerHTML = '<p class="empty-state">Suchindex nicht erreichbar - bitte spaeter erneut versuchen.</p>';
     return;
   }
+  if (isCancelled()) return;
 
-  const finalResults = sortSearchResults(Array.from(resultsMap.values()));
-  state.lastSearchResults = finalResults.slice(0, 60);
+  // Karten-Objekte nur fuer die gezeigten Treffer bauen.
+  const shown = searchResultsForDisplay(hits, { limit: SEARCH_RESULT_RENDER_LIMIT, language: getCardLanguage() })
+    .map((result) => ({
+      ...result,
+      // Karten nicht importierter Sets: Haken loest den Auto-Import aus (pendingSearchSetImport).
+      apiOnly: !toBoolean(result.set?.imported)
+    }));
+  state.lastSearchResults = shown.slice(0, 60);
 
-  if (isStale() || isAborted()) return;
-  renderSearchResultsList(finalResults, searchScopeMode, {
+  const renderShown = () => renderSearchResultsList(shown, searchScopeMode, {
     rawQuery,
-    setsProcessed: setsToSearch.length,
-    totalSets: setsToSearch.length,
-    isSearching: false,
+    totalCount: hits.length,
+    totalSets: setsToSearch.length
   });
+  renderShown();
+  if (!shown.length) return;
+
+  const pendingSets = [...new Map(shown
+    .filter(({ set }) => Boolean(set?.setName && set?.imported) && !cachedSearchCollectionMap(set))
+    .map(({ set }) => [set.setId, set])).values()];
+  if (!pendingSets.length) return;
+  await loadSearchCollectionMaps(pendingSets, { isCancelled });
+  if (!isCancelled()) renderShown();
 }
 
-function createSearchResultCard(card, key, db, set, apiOnly = false) {
+function createSearchResultCard(card, key, db, set, apiOnly = false, { collectionPending = false } = {}) {
   const article = document.createElement('article');
   article.className = 'card search-result-card';
   const shownStatus = effectiveCollectionStatus(db);
@@ -7959,20 +7411,17 @@ function createSearchResultCard(card, key, db, set, apiOnly = false) {
   const imgWrap = document.createElement('div');
   imgWrap.className = 'card-img-wrap';
   const img = document.createElement('img');
-  const cardImage = String(card.image || '').trim();
-  if (cardImage) img.src = cardImage;
-  else img.removeAttribute('src');
   img.alt = card.name || key;
   img.loading = 'lazy';
-  attachImageFallback(img, card, set?.setId || '');
   imgWrap.appendChild(img);
+  attachImageFallback(img, card);
 
   const meta    = document.createElement('div'); meta.className = 'meta';
   const setTag  = document.createElement('span'); setTag.className = 'search-set-tag'; setTag.textContent = set.setName;
   const cardLabel = `${card.number} \u2013 ${card.name || '?'}`;
   const title   = document.createElement('div'); title.className = 'title'; title.textContent = cardLabel; title.title = cardLabel;
 
-  const isEditable = Boolean(set?.setName && set?.imported);
+  const isEditable = Boolean(set?.setName && set?.imported) && !collectionPending;
   const checksDiv = document.createElement('div'); checksDiv.className = 'checks search-checks-bar';
   checksDiv.append(
     makeCheckbox('G', 'g', shownStatus.g, !isEditable),
@@ -8126,7 +7575,6 @@ function navigateToSearchResultSet(set, card = null) {
 async function openSearchResultLightbox(card, set, { apiOnly = false } = {}) {
   if (!set?.setId || !card) return;
 
-  const dbCacheKey = `db_${set.setId}`;
   const searchScopeMode = getSearchScopeMode();
   const searchCacheKey = `${set.setId}::${searchScopeMode}`;
 
@@ -8139,17 +7587,13 @@ async function openSearchResultLightbox(card, set, { apiOnly = false } = {}) {
         state.searchCache.set(searchCacheKey, loadedCards);
         return loadedCards;
       }),
-    cache.has(dbCacheKey)
-      ? cache.get(dbCacheKey)
-      : readSetCollectionMap(set.setName, { setId: set.setId }).then((loadedDbMap) => {
-        const safeDbMap = loadedDbMap instanceof Map ? loadedDbMap : new Map();
-        cache.set(dbCacheKey, safeDbMap, CONFIG.CACHE_TTL_MS);
-        return safeDbMap;
-      }).catch(() => {
-        const emptyDbMap = new Map();
-        cache.set(dbCacheKey, emptyDbMap, CONFIG.CACHE_TTL_MS);
-        return emptyDbMap;
-      })
+    // Lesefehler: leere Map nur fuer diese Ansicht, nicht im Cache (wie bei den Suchergebnissen).
+    readCollectionMapCached(set, {
+      cache,
+      read: readSetCollectionMap,
+      ttlMs: CONFIG.CACHE_TTL_MS,
+      onError: (err) => console.warn('[openSearchResultLightbox] Sammlung nicht lesbar fuer', set.setId, err?.message || err),
+    }).then((loadedDbMap) => loadedDbMap || new Map())
   ]);
 
   if (!Array.isArray(cards) || cards.length === 0) {
@@ -8382,13 +7826,10 @@ function createCardElement(card, key, db, index) {
   });
 
   const img = document.createElement('img');
-  const cardImage = String(card.image || '').trim();
-  if (cardImage) img.src = cardImage;
-  else img.removeAttribute('src');
   img.alt = card.name || key;
   img.loading = 'lazy';
-  attachImageFallback(img, card, state.currentSet?.setId || '');
   imgWrap.appendChild(img);
+  attachImageFallback(img, card);
 
   // Bulk overlay
   const overlay = document.createElement('div'); overlay.className = 'bulk-overlay';
@@ -8439,18 +7880,8 @@ function createCardElement(card, key, db, index) {
   return article;
 }
 
-const cardmarketPriceSummaryCache = new Map();
-const cardmarketPriceSummaryPending = new Map();
-
-/**
- * Leert die Lightbox-eigenen Cardmarket-Price-Caches. Wird nach einem
- * täglichen Cardmarket-Build-Wechsel aufgerufen, damit das Lightbox-
- * Pre-Panel keine veralteten Preise mehr anzeigt.
- */
-function resetLightboxCardmarketPriceCaches() {
-  cardmarketPriceSummaryCache.clear();
-  cardmarketPriceSummaryPending.clear();
-}
+// cardmarketPriceSummaryCache/-Pending kommen aus js/ui/cardmarket-price.js;
+// cardmarket-versioning.js leert sie bei neuem Build-Stamp und "Preise neu laden".
 
 // Aktueller Basis-Preistyp aus den User-Settings. Wird an den kanonischen
 // Picker in `js/ui/cardmarket-price.js` durchgereicht.
@@ -8527,10 +7958,8 @@ async function loadCardmarketPriceSummary(card = {}, { cards = null, resolverCar
     }
   )
     .then((entry) => {
-      const normalizedUrl = String(card?.cardmarketUrl || '').trim();
-      const directUrl = entry?.cardmarketProductId
-        ? buildCardmarketProductUrl(entry.cardmarketProductId)
-        : normalizedUrl;
+      // Produkt der Karte (v3/Legacy-URL) vor Matcher-Treffer, Link in Kartensprache.
+      const directUrl = resolveCardmarketLink(card, { language: getCardLanguage(), matchedEntry: entry });
       const summary = entry ? { entry, url: directUrl } : null;
       cardmarketPriceSummaryCache.set(cacheKey, summary);
       cardmarketPriceSummaryPending.delete(cacheKey);
@@ -9009,17 +8438,7 @@ function renderLightbox(index) {
     node.classList.toggle('lightbox-fact-long', longText && text !== '—');
   };
 
-  const lightboxCard = {
-    ...card,
-    image: card.imageLarge || card.image || '',
-    imageCandidates: Array.isArray(card.imageLargeCandidates) && card.imageLargeCandidates.length
-      ? card.imageLargeCandidates
-      : (Array.isArray(card.imageCandidates) ? card.imageCandidates : [])
-  };
-  const lightboxImage = String(lightboxCard.image || '').trim();
-  if (lightboxImage) dom.lightboxImg.src = lightboxImage;
-  else dom.lightboxImg.removeAttribute('src');
-  attachImageFallback(dom.lightboxImg, lightboxCard, state.currentSet?.setId || '');
+  attachImageFallback(dom.lightboxImg, card, { kind: 'cardLarge' });
   dom.lightboxImg.alt              = card.name  || key;
   dom.lightboxTitle.textContent    = card.name  || 'Unbekannt';
   dom.lightboxSubtitle.textContent = `#${card.number}`;
@@ -9177,17 +8596,9 @@ function initLightbox() {
     const syncFullscreenImage = (resetTransform = false) => {
       const card = state.cards[state.lightboxIndex];
       if (!card) return;
-      const fullscreenCard = {
-        ...card,
-        image: card.imageLarge || dom.lightboxImg?.currentSrc || card.image || '',
-        imageCandidates: Array.isArray(card.imageLargeCandidates) && card.imageLargeCandidates.length
-          ? card.imageLargeCandidates
-          : (Array.isArray(card.imageCandidates) ? card.imageCandidates : [])
-      };
-      const fullscreenImage = String(fullscreenCard.image || '').trim();
-      if (fullscreenImage) dom.lightboxImageFull.src = fullscreenImage;
-      else dom.lightboxImageFull.removeAttribute('src');
-      attachImageFallback(dom.lightboxImageFull, fullscreenCard, state.currentSet?.setId || '');
+      // Bereits geladenes Lightbox-Bild zuerst (kein Platzhalter), dann die grosse Fallback-Kette.
+      const loadedSrc = dom.lightboxImg?.classList.contains('img-fallback') ? '' : dom.lightboxImg?.currentSrc;
+      attachImageFallback(dom.lightboxImageFull, card, { kind: 'cardLarge', preferred: loadedSrc || '' });
       dom.lightboxImageFull.alt = card.name || '';
       if (resetTransform) resetFullscreenTransform();
     };
@@ -9659,18 +9070,14 @@ async function loadCurrentSet(forceRefresh = false) {
   setGlobalStatus(`Lade ${selected.setName}\u2026`);
   setLoading(true, `Lade ${selected.setName}\u2026`);
 
-  const safeSetLogoUrl = sanitizeSetAssetUrl(selected.logoUrl, selected.setId);
-  const safeSetSymbolUrl = sanitizeSetAssetUrl(selected.symbolUrl, selected.setId);
+  const setLogoCandidates = setAssetCandidates(selected, 'setLogo');
+  const setSymbolCandidates = setAssetCandidates(selected, 'setSymbol');
 
-  if (safeSetLogoUrl) {
-    attachSetAssetFallback(dom.setLogo, './assets/pokeball-fallback.svg', selected.logoUrlCandidates);
-    dom.setLogo.style.display = '';
-    dom.setLogo.src = safeSetLogoUrl;
+  if (setLogoCandidates.length) {
+    bindImageFallback(dom.setLogo, setLogoCandidates);
 
-    if (safeSetSymbolUrl) {
-      attachSetAssetFallback(dom.setSymbol, '', selected.symbolUrlCandidates);
-      dom.setSymbol.style.display = '';
-      dom.setSymbol.src = safeSetSymbolUrl;
+    if (setSymbolCandidates.length) {
+      bindImageFallback(dom.setSymbol, setSymbolCandidates, { placeholder: '' });
     } else {
       dom.setSymbol.style.display = 'none';
       dom.setSymbol.removeAttribute('src');
@@ -9734,24 +9141,6 @@ async function loadCurrentSet(forceRefresh = false) {
 // --------------------------------------------------------------------------
 // BOOTSTRAP
 // --------------------------------------------------------------------------
-const RUNTIME_BOOTSTRAP_NOOP = () => {};
-const RUNTIME_BOOTSTRAP_EMPTY = () => ({});
-
-const RUNTIME_BOOTSTRAP_STUBS = {
-  initSetViewController: RUNTIME_BOOTSTRAP_NOOP,
-  createSetViewInjections: RUNTIME_BOOTSTRAP_EMPTY,
-  createDashboardRenderer: RUNTIME_BOOTSTRAP_EMPTY,
-  createStatsRenderer: RUNTIME_BOOTSTRAP_EMPTY,
-  createSettingsController: RUNTIME_BOOTSTRAP_EMPTY,
-  createStatsPriceViewController: RUNTIME_BOOTSTRAP_EMPTY,
-  dashboardRendererDeps: {},
-  statsRendererDeps: {},
-  settingsControllerDeps: {},
-  assignDashboardRenderer: RUNTIME_BOOTSTRAP_NOOP,
-  assignStatsRenderer: RUNTIME_BOOTSTRAP_NOOP,
-  assignSettingsController: RUNTIME_BOOTSTRAP_NOOP,
-};
-
 function createBootstrapRuntimeController() {
   return createBootstrapController({
     state,
@@ -9781,7 +9170,6 @@ function createBootstrapRuntimeController() {
     initManageImportedSetsDialog,
     initBackupImportExport,
     initQueueBuilderDialog,
-    ...RUNTIME_BOOTSTRAP_STUBS,
     initDashboardControls,
     initSheetsWriteFeedback,
     initAuditAndSaveUi,
@@ -9796,7 +9184,6 @@ function createBootstrapRuntimeController() {
     realtimeClientStorageKey: REALTIME_CLIENT_STORAGE_KEY,
     applyIncomingRealtimeUpdate,
     initQuickFiltersUI,
-    resetDashboardVirtualization,
     saveDashboardPreferences,
     renderDashboard,
     loadSearchHistory,
@@ -9946,105 +9333,9 @@ bootstrap().catch((err) => {
 });
 
 // --------------------------------------------------------------------------
-// SERVICE WORKER REGISTRATION
+// SERVICE WORKER + PWA-INSTALL (js/app/pwa-init.js)
 // --------------------------------------------------------------------------
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async () => {
-    try {
-      const registration = await navigator.serviceWorker.register('./service-worker.js', {
-        scope: './'
-      });
-
-      if (registration.waiting) {
-        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-      }
-
-      registration.addEventListener('updatefound', () => {
-        const newWorker = registration.installing;
-        if (!newWorker) return;
-        newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            newWorker.postMessage({ type: 'SKIP_WAITING' });
-          }
-        });
-      });
-      
-      // Check for updates periodically
-      setInterval(() => {
-        registration.update().catch(err => console.warn('SW update check failed:', err));
-      }, 60000); // Check every minute
-      
-      // Handle controller change (new SW ready)
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        showToast('App wurde aktualisiert', 'success', 1500);
-        window.setTimeout(() => {
-          window.location.reload();
-        }, 300);
-      });
-      
-      // Listen for messages from Service Worker
-      navigator.serviceWorker.addEventListener('message', (event) => {
-        if (event.data.type === 'sync-complete') {
-          showToast('Daten synchronisiert', 'success', 2000);
-        }
-      });
-    } catch (err) {
-      console.warn('Service Worker registration failed:', err);
-    }
-  });
-}
-
-// PWA Install Prompt Handler
-let deferredPrompt;
-let installBtn = null;
-const isAppInstalled = () => {
-  const isStandalone = Boolean(navigator.standalone);
-  const hasMatchMedia = typeof window.matchMedia === 'function';
-  const isDisplayStandalone = hasMatchMedia && window.matchMedia('(display-mode: standalone)').matches;
-  return isStandalone || isDisplayStandalone;
-};
-const removeInstallButton = () => {
-  if (installBtn?.parentElement) {
-    installBtn.parentElement.removeChild(installBtn);
-  }
-  installBtn = null;
-};
-
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  
-  // Show install button
-  removeInstallButton();
-  installBtn = document.createElement('button');
-  installBtn.className = 'btn-primary';
-  installBtn.textContent = 'App installieren';
-  installBtn.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 100;';
-  
-  installBtn.addEventListener('click', async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const choice = await deferredPrompt.userChoice;
-      if (choice.outcome === 'accepted') {
-        showToast('App installiert!', 'success', 3000);
-        removeInstallButton();
-      }
-      deferredPrompt = null;
-    }
-  });
-  
-  // Only show if not already installed
-  if (document.body && !isAppInstalled()) {
-    document.body.appendChild(installBtn);
-  }
-});
-
-// Handle app installed event
-window.addEventListener('appinstalled', () => {
-  removeInstallButton();
-  showToast('App erfolgreich installiert!', 'success', 4000);
-});
+initPwaFeatures({ showToast });
 
 const _featureInitFlags = {
   offline: false,

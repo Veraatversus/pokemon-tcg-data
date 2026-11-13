@@ -43,6 +43,14 @@ function writeStoredStamp(storageRef, stamp) {
   }
 }
 
+/** Zuletzt gespeicherter Build-Stamp ('' ohne Wert/ohne Storage), z. B. als Offline-Fallback. */
+export function readCardmarketBuildStamp({
+  storageRef = (typeof localStorage !== 'undefined' ? localStorage : null),
+} = {}) {
+  if (!storageRef) return '';
+  return readStoredStamp(storageRef);
+}
+
 /**
  * Parst das `meta.json`-Payload und gibt den relevanten `generatedAt`-Wert
  * zurück. Defensive gegen Schema-Änderungen: fehlt das Feld, ist das

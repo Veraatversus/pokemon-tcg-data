@@ -111,3 +111,32 @@ export async function fetchAllAvailableSets({ signal } = {}) {
     }))
     .sort(compareSets);
 }
+
+/**
+ * Map setId -> deutsche Serie (i18n.de.series) aus api/v3, fuer Sheet-Zeilen ohne tcgdex_serie_name.
+ * Fehler (api/v3 offline) oder keine Antwort binnen timeoutMs liefern eine leere Map; das Dashboard faellt
+ * dann auf vera_series zurueck (ein haengender Request blockiert loadSets so nicht).
+ */
+export const DE_SERIES_TIMEOUT_MS = 8_000;
+
+export async function fetchDeSeriesBySetId({ signal, timeoutMs = DE_SERIES_TIMEOUT_MS, loadSets = loadV3Sets } = {}) {
+  const map = new Map();
+  let timer;
+  try {
+    const timeout = new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error(`sets.json: keine Antwort nach ${timeoutMs} ms`)), timeoutMs);
+    });
+    const sets = timeoutMs > 0
+      ? await Promise.race([Promise.resolve().then(() => loadSets({ signal })), timeout])
+      : await loadSets({ signal });
+    for (const set of sets || []) {
+      const de = String(set?.i18n?.de?.series || '').trim();
+      if (set?.id && de) map.set(String(set.id), de);
+    }
+  } catch (err) {
+    console.debug('[fetchDeSeriesBySetId] api/v3 nicht erreichbar:', err?.message || err);
+  } finally {
+    clearTimeout(timer);
+  }
+  return map;
+}

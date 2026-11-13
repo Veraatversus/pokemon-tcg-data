@@ -14,6 +14,7 @@ globalThis.localStorage = {
 const { CONFIG } = await import('../js/core/config.js');
 const { SET_DB_HEADERS, CARD_DB_HEADERS } = await import('../js/data/schema-contract.js');
 const { resetV3Caches } = await import('../js/data/v3-api.js');
+const { resetV3CardmarketIdCache } = await import('../js/data/v3-cardmarket-ids.js');
 const { resetCollectionResolverCache } = await import('../js/data/collection-aliases.js');
 const {
   listSetsOverviewData,
@@ -168,6 +169,35 @@ test('readDbCardsForSet (Offline-Fallback) setzt collectionKey aus der v3-id, so
   assert.deepEqual(cards.map((c) => [c.cardId, c.collectionKey]), [['swsh12pt5-GG1', 'GG1'], ['swsh12pt5-1', '1'], ['swsh12pt5gg-GG02', 'GG2']]);
 });
 
+test('readDbCardsForSet: v3-ID (search-index cm) schlaegt die gespeicherte Matcher-URL (me55-150), Sheet unveraendert', async () => {
+  const urlCol = CARD_DB_HEADERS.indexOf('vera_cardmarket_url');
+  const stale = 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=907655';
+  const row = (cardId, number, name) => {
+    const r = new Array(CARD_DB_HEADERS.length).fill('');
+    r[0] = 'me55'; r[1] = cardId; r[2] = T0; r[3] = 'matched'; r[8] = number; r[10] = name; r[urlCol] = stale;
+    return r;
+  };
+  const fake = setup({ dbCards: [row('me55-150', '150', 'Pikachu ex'), row('me55-48', '48', 'Pikachu'), row('me55-999', '999', 'Unbekannt')] });
+  const registryFetch = globalThis.fetch;
+  globalThis.fetch = async (url) => (String(url) === 'https://reg.test/v3/search-index.json'
+    ? { ok: true, status: 200, json: async () => [
+      { setId: 'me55', cardId: '150', cm: 907757 },
+      { setId: 'me55', cardId: '48', cm: 907655 },
+    ] }
+    : registryFetch(url));
+  // fruehere Tests ohne Index haben den Fehlschlag negativ gecacht (60 s)
+  resetV3CardmarketIdCache();
+  const before = fake.rows('db_cards').map((r) => [...r]);
+  const cards = await readDbCardsForSet('me55');
+  const byId = Object.fromEntries(cards.map((c) => [c.cardId, c]));
+  assert.equal(byId['me55-150'].cardmarketProductId, 907757);
+  assert.equal(byId['me55-150'].cardmarketUrl, 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=907757');
+  assert.equal(byId['me55-48'].cardmarketUrl, stale);
+  assert.equal(byId['me55-999'].cardmarketProductId, undefined);
+  assert.equal(byId['me55-999'].cardmarketUrl, stale, 'ohne v3-ID bleibt die gespeicherte URL');
+  assert.deepEqual(fake.rows('db_cards'), before, 'db_cards wird nicht geschrieben');
+});
+
 test('readSummarySheet: Alias-Zeilen zaehlen zum Hauptset, eine Karte unter zwei Aliasen zaehlt einmal', async () => {
   setup({
     dbSets: [
@@ -236,4 +266,51 @@ test('Set loeschen bleibt: Alias-Zeilen (db_sets + Overview) auf imported=false,
   await syncOverviewWithApiSets([{ setId: 'swsh12pt5', setName: 'Crown Zenith', aliases: SYN_SETS.swsh12pt5.aliases }], []);
   assert.equal(fake.rows('db_sets').slice(1).find((r) => r[0] === 'swsh12pt5')[1], false, 'sync ODERt nicht zurueck');
   assert.equal(fake.rows('Sets Overview').slice(2).find((r) => r[0] === 'swsh12pt5')[IMP], false);
+});
+
+test('re-import fills empty tcgdex_serie_name without appending a row', async () => {
+  const fake = setup({ dbSets: [dbSetRow('me5', true, 'Mega Evolution 5')] });
+  const before = fake.rows('db_sets').length;
+  await syncOverviewWithApiSets([{
+    setId: 'me5', setName: 'X', aliases: ['TCGDEX-me05'],
+    tcgdex_serie_name: 'Mega-Entwicklung', tcgdex_cardCount_official: 103, tcgdex_cardCount_total: 141
+  }], []);
+  const rows = fake.rows('db_sets');
+  assert.equal(rows.length, before, 'keine neue Zeile');
+  const row = rows.find((r) => r[0] === 'me5');
+  const h = (name) => SET_DB_HEADERS.indexOf(name);
+  assert.equal(row[h('tcgdex_serie_name')], 'Mega-Entwicklung');
+  assert.equal(row[h('imported')], true);
+});
+
+test('readSetCollectionMap fresh: liest db_collection neu statt aus dem Cache (Restore plant gegen frischen Stand)', async () => {
+  const fake = setup({ collection: [['me5', '1', true, false, T0]] });
+  const cached = await readSetCollectionMap('Mega Evolution 5', { setId: 'me5' });
+  assert.equal(cached.get('1').g, true);
+  fake.rows('db_collection')[1][2] = false; // anderes Geraet hat den Haken entfernt
+  const stale = await readSetCollectionMap('Mega Evolution 5', { setId: 'me5' });
+  assert.equal(stale.get('1').g, true, 'ohne fresh: Cache');
+  const fresh = await readSetCollectionMap('Mega Evolution 5', { setId: 'me5', strict: true, fresh: true });
+  assert.equal(fresh.get('1').g, false);
+});
+
+test('markAliasSetRowsNotImported: ungemergtes Alias-Set loescht den imported-Status des kanonischen Sets nicht', async () => {
+  const fake = setup({
+    dbSets: [
+      dbSetRow('swsh12pt5', true, 'Crown Zenith'),
+      dbSetRow('swsh12pt5gg', true, 'Crown Zenith Galarian Gallery')
+    ]
+  });
+  const changed = await markAliasSetRowsNotImported({ setId: 'swsh12pt5gg', setName: 'Crown Zenith Galarian Gallery' });
+  assert.deepEqual(changed, { dbSets: 0, overview: 0 });
+  assert.deepEqual(fake.rows('db_sets').slice(1).map((r) => [r[0], r[1]]), [['swsh12pt5', true], ['swsh12pt5gg', true]]);
+});
+
+test('listCollectionSetIds strict: Registry-Fehler wird durchgereicht, nicht-strict faellt auf rohe IDs zurueck', async () => {
+  setup({ collection: [['TCGDEX-me05', '001', true, false, T0]] });
+  globalThis.fetch = async () => { throw new TypeError('Failed to fetch'); };
+  assert.deepEqual([...await listCollectionSetIds()], ['tcgdex-me05']);
+  resetV3Caches();
+  resetCollectionResolverCache();
+  await assert.rejects(listCollectionSetIds({ strict: true }), /Failed to fetch|Registry|fetch/i);
 });

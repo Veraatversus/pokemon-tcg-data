@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { toSetRecord, toCardRecord } from '../js/data/v3-records.js';
+import { toSetRecord, toCardRecord, primaryCardmarketProductId } from '../js/data/v3-records.js';
 import {
   buildSetRecordFromSources,
   buildCardRecordFromSources,
@@ -53,7 +53,9 @@ test('Set sv3pt5: matched, EN vera, DE tcgdex', () => {
   assert.equal(r.tcgdex_name, '151');
   assert.match(r.tcgdex_logo, /\/de\/sv\/sv03\.5\/logo\.webp$/);
   assert.equal(r.tcgdex_symbol, '');
-  assert.equal(r.tcgdex_serie_name, '');
+  assert.equal(r.tcgdex_serie_name, 'Karmesin & Purpur');
+  assert.equal(r.tcgdex_cardCount_official, 165);
+  assert.equal(r.tcgdex_cardCount_total, 207);
   assert.equal(r.tcgdex_legal, null);
   assert.ok(!Number.isNaN(Date.parse(r.updatedAt)));
 });
@@ -232,14 +234,64 @@ test('localId: Set-Praefix wird abgeschnitten, Rest darf Bindestriche enthalten'
   assert.equal(toCardRecord(c, { id: 'y', ids: { tcgdex: 'my-set' } }).tcgdex_localId, '1');
 });
 
-test('Cardmarket-URL: erste Variante mit cardmarketId, sonst ids.cardmarket[0], sonst leer', () => {
+test('Primaere Produkt-ID: erste ungestempelte Variante, sonst erste Variante, sonst ids.cardmarket[0]', () => {
+  const base = { id: 'x-1', cardId: '1', number: '1', setId: 'x' };
+  const rec = (variants, ids) => toCardRecord({ ...base, variants, ids: { cardmarket: ids } }).cardmarketProductId;
+  // gestempelte Variante vorn (Pre-Release/Set-Logo) -> erste ungestempelte
+  assert.equal(rec([{ type: 'normal', stamp: ['pre-release'], cardmarketId: 7 }, { type: 'holo', cardmarketId: 8 }], [8, 7]), 8);
+  // leeres stamp-Array zaehlt als ungestempelt
+  assert.equal(rec([{ type: 'normal', stamp: ['set-logo'], cardmarketId: 7 }, { type: 'holo', stamp: [], cardmarketId: 9 }], [9]), 9);
+  // nur gestempelte Varianten -> erste davon (z. B. me55-150 30th-anniversary)
+  assert.equal(rec([{ type: 'holo', stamp: ['30th-anniversary'], cardmarketId: 5 }, { type: 'holo', stamp: ['staff'], cardmarketId: 6 }], [6]), 5);
+  // ungestempelte Variante ohne ID wird uebersprungen
+  assert.equal(rec([{ type: 'normal' }, { type: 'holo', stamp: ['staff'], cardmarketId: 4 }], [3]), 4);
+  // reale Faelle (pre-release / set-logo vorn)
+  const real = (setId, id) => toCardRecord(card(setId, id), setById(setId)).cardmarketProductId;
+  assert.equal(real('sv3', 'sv3-72'), 725152);
+  assert.equal(real('sv3', 'sv3-85'), 725165);
+  assert.equal(real('swsh11', 'swsh11-76'), 670814);
+  assert.equal(real('swsh12', 'swsh12-131'), 682178);
+  assert.equal(real('me55', 'me55-150'), 907757);
+  assert.equal(primaryCardmarketProductId({}), null);
+});
+
+test('Cardmarket-URL wie der API-Suchindex (cm): erste Variante mit cardmarketId, sonst ids.cardmarket[0], sonst leer', () => {
   const url = (id) => `https://www.cardmarket.com/de/Pokemon/Products?idProduct=${id}`;
   const base = { id: 'x-1', cardId: '1', number: '1', setId: 'x' };
-  assert.equal(toCardRecord({ ...base, variants: [{ type: 'normal', cardmarketId: 11 }], ids: { cardmarket: [99] } }).vera_cardmarket_url, url(11));
+  const both = toCardRecord({ ...base, variants: [{ type: 'normal', cardmarketId: 11 }, { type: 'holo', stamp: ['1st-edition'], cardmarketId: 12 }], ids: { cardmarket: [99] } });
+  assert.equal(both.vera_cardmarket_url, url(11));
+  assert.equal(both.cardmarketProductId, 11);
+  // realer Fall: sv3pt5-1 ids.cardmarket [720365 (Set-Logo-Stempel, ohne Nummer), 733596 (#001), ...];
+  // die normale Variante (und search-index cm) zeigt auf 733596.
+  assert.equal(toCardRecord(card('sv3pt5', 'sv3pt5-1'), setById('sv3pt5')).cardmarketProductId, 733596);
+  // korrigierte Karte: Varianten tragen die Korrektur, beide Regeln liefern dieselbe ID
+  assert.equal(toCardRecord(card('me55', 'me55-150'), setById('me55')).cardmarketProductId, 907757);
+  // Varianten-IDs bleiben erhalten (Stempel/Sondervarianten koennen eigene Produkte haben)
+  assert.deepEqual(both.cardmarketVariants.map((v) => v.cardmarketId), [11, 12]);
+  assert.deepEqual(both.cardmarketVariants[1].stamp, ['1st-edition']);
+  assert.equal(toCardRecord({ ...base }).cardmarketProductId, null);
   assert.equal(toCardRecord({ ...base, variants: [{ type: 'normal' }, { type: 'reverse', cardmarketId: 22 }] }).vera_cardmarket_url, url(22));
   assert.equal(toCardRecord({ ...base, variants: [{ type: 'normal' }], ids: { cardmarket: [33, 44] } }).vera_cardmarket_url, url(33));
   assert.equal(toCardRecord({ ...base, ids: { cardmarket: 55 } }).vera_cardmarket_url, url(55));
   assert.equal(toCardRecord({ ...base, ids: { cardmarket: [] } }).vera_cardmarket_url, '');
   // realer Fall: base6-75 hat nur ids.cardmarket
   assert.equal(toCardRecord(card('base6', 'base6-75'), setById('base6')).vera_cardmarket_url, url(274840));
+});
+
+test('toSetRecord fills DE series and counts', () => {
+  const r = toSetRecord(setById('me6'));
+  assert.equal(r.tcgdex_serie_name, 'Mega-Entwicklung');
+  assert.equal(r.tcgdex_name, 'Delta-Herrschaft');
+  assert.equal(r.tcgdex_cardCount_official, 103);
+  assert.equal(r.tcgdex_cardCount_total, 141);
+});
+
+test('toSetRecord: Fallback auf printedTotal/total und leere DE-Serie ohne i18n.de.series', () => {
+  const r = toSetRecord({ id: 'x1', series: 'Foo', printedTotal: 50, total: 60, i18n: { de: { cardCount: { official: 0 } } } });
+  assert.equal(r.tcgdex_serie_name, '');
+  assert.equal(r.tcgdex_cardCount_official, 50);
+  assert.equal(r.tcgdex_cardCount_total, 60);
+  const r2 = toSetRecord({ id: 'x2', printedTotal: 7, total: 9 });
+  assert.equal(r2.tcgdex_cardCount_official, 7);
+  assert.equal(r2.tcgdex_cardCount_total, 9);
 });

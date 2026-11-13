@@ -42,10 +42,19 @@ export function hasReliableHoloPrices(prices = {}) {
   return false;
 }
 
+// Preis-Zusammenfassungen je Karte (Kartenlinks + Lightbox in app.js).
+// Liegen hier, damit cardmarket-versioning.js sie bei neuem Build-Stamp und
+// bei "Preise neu laden" leeren kann.
+export const cardmarketPriceSummaryCache = new Map();
+export const cardmarketPriceSummaryPending = new Map();
+
+export function resetCardmarketPriceSummaryCaches() {
+  cardmarketPriceSummaryCache.clear();
+  cardmarketPriceSummaryPending.clear();
+}
+
 // Stable cache key for a card's price summary. Uses setId/number/name when
 // available, falls back to the cardmarket URL for purely-URL-keyed lookups.
-// Imported by app.js and views/set-view-controller.js for the price summary
-// Map caches.
 export function getCardmarketPriceCacheKey(card = {}) {
   const setId = String(card?.setId || '').trim();
   const number = String(card?.number || '').trim();

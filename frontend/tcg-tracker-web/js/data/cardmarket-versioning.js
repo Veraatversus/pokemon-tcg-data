@@ -10,9 +10,9 @@
  * UI-Blocker läuft. Im Offline-Fall wird der bisherige Stand beibehalten.
  */
 
-import { syncCardmarketBuildStamp } from './cardmarket-build-stamp.js?v=20261112-api-v3';
-import { resetCardmarketDataCaches } from './cardmarket-data.js';
-import { resetCardmarketPriceCaches } from '../views/set-view-controller.js?v=20261112-api-v3';
+import { syncCardmarketBuildStamp } from './cardmarket-build-stamp.js?v=20261113-api-v3-polish';
+import { resetCardmarketDataCaches, setCardmarketDataVersion } from './cardmarket-data.js';
+import { resetCardmarketPriceSummaryCaches } from '../ui/cardmarket-price.js?v=20261113-api-v3-polish';
 
 function safeInvoke(reset) {
   try {
@@ -31,7 +31,7 @@ function safeInvoke(reset) {
 export function resetAllCardmarketCaches() {
   const reset = [];
   if (safeInvoke(resetCardmarketDataCaches)) reset.push('cardmarket-data');
-  if (safeInvoke(resetCardmarketPriceCaches)) reset.push('set-view-price-cache');
+  if (safeInvoke(resetCardmarketPriceSummaryCaches)) reset.push('price-summary-cache');
   return { reset };
 }
 
@@ -55,6 +55,8 @@ export async function applyCardmarketBuildStampCheck(options = {}) {
     const result = resetAllCardmarketCaches();
     reset = result.reset;
   }
+  // Daten-URLs tragen ab jetzt diesen Stamp (?v=), damit der Service Worker die neuen Dateien holt.
+  if (currentStamp) setCardmarketDataVersion(currentStamp);
 
   return { changed, reason, previousStamp, currentStamp, reset };
 }
@@ -78,6 +80,7 @@ export async function forceRefreshCardmarketPrices(options = {}) {
 
   // Caches immer leeren – der User hat explizit "neu laden" gedrueckt.
   const result = resetAllCardmarketCaches();
+  if (currentStamp) setCardmarketDataVersion(currentStamp);
 
   return {
     changed,

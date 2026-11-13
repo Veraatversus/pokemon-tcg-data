@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
+import { buildCardmarketProductUrl } from '../js/data/cardmarket-url-utils.js';
 import {
-  buildCardmarketProductUrl,
   extractCardmarketProductId,
   formatCardmarketEntryLabel,
   formatCardmarketEntryTitle,
@@ -11,7 +11,7 @@ import {
   promoteCardmarketUrlsForCards,
   resolveCardmarketEntryForCardFromSetPayload,
   resolveCardmarketEntryFromSetPayload,
-} from '../../../scripts/cardmarket/lib/cardmarket-ui-helpers.mjs';
+} from '../js/data/cardmarket-ui-helpers.js';
 import {
   resolveCardmarketEntryForCardFromSetPayload as resolveCardmarketEntryForCardFromSetPayloadFrontend,
 } from '../js/data/cardmarket-data.js';
@@ -146,7 +146,10 @@ test('inferCardmarketExpansionIdFromCards falls back to bySetName when neither b
   );
 });
 
-test('resolveCardmarketEntryForCardFromSetPayload disambiguates same-name cards using attack names', () => {
+// Ausgelieferter Matcher (js/data/cardmarket-ui-helpers.js): Attackennamen werden nicht ausgewertet; ohne
+// Sammlernummer entscheidet das Vorkommen im Set (erste Karte -> erster Eintrag). Der alte Teilstring-Matcher
+// (scripts/cardmarket/lib) waehlte hier per Attackenname 1002.
+test('resolveCardmarketEntryForCardFromSetPayload ignores attack names and falls back to set occurrence', () => {
   const card = {
     vera_name: 'Pikachu',
     tcgdex_name: 'Pikachu',
@@ -175,8 +178,8 @@ test('resolveCardmarketEntryForCardFromSetPayload disambiguates same-name cards 
 
   const result = resolveCardmarketEntryForCardFromSetPayload(card, setPayload);
 
-  assert.equal(result?.cardmarketProductId, 1002);
-  assert.equal(result?.prices?.trend, 4.6);
+  assert.equal(result?.cardmarketProductId, 1001);
+  assert.equal(result?.prices?.trend, 1.2);
 });
 
 test('resolveCardmarketEntryForCardFromSetPayload falls back to source names when the localized display name differs', () => {
@@ -286,7 +289,9 @@ test('promoteCardmarketUrlsForCards upgrades search fallbacks to direct product 
   assert.equal(promoted[0].vera_cardmarket_url, 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=1001');
 });
 
-test('promoteCardmarketUrlsForCards keeps duplicate same-name cards aligned to their occurrence in the set', async () => {
+// Identische Namen ohne Sammlernummer sind mehrdeutig: der ausgelieferte Matcher waehlt nicht, der generierte
+// Suchlink wird entfernt (frueher: Zuordnung nach Vorkommen, 1015/1088).
+test('promoteCardmarketUrlsForCards leaves identically-named cards without collector numbers unmatched', async () => {
   const cards = [
     {
       setId: 'base1',
@@ -317,11 +322,15 @@ test('promoteCardmarketUrlsForCards keeps duplicate same-name cards aligned to t
     }
   });
 
-  assert.equal(promoted[0].cardmarketUrl, 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=1015');
-  assert.equal(promoted[1].cardmarketUrl, 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=1088');
+  assert.equal(promoted[0].cardmarketUrl, undefined);
+  assert.equal(promoted[1].cardmarketUrl, undefined);
+  assert.equal(promoted[0].cardmarketMatchedProductId, undefined);
+  assert.equal(promoted[1].cardmarketMatchedProductId, undefined);
 });
 
-test('promoteCardmarketUrlsForCards publishes cardmarketImageUrl/categoryId/setCode when setRecord.ptcgoCode is provided', async () => {
+// Matcher-Treffer stehen in cardmarketMatchedProductId (cardmarketProductId bleibt v3-IDs vorbehalten);
+// Bild-Metadaten (cardmarketImageUrl/-SetCode/-CategoryId) setzt der Matcher nicht mehr (kein Leser).
+test('promoteCardmarketUrlsForCards promotes the URL and records the matched product id', async () => {
   const cards = [
     {
       setId: 'me4',
@@ -344,16 +353,13 @@ test('promoteCardmarketUrlsForCards publishes cardmarketImageUrl/categoryId/setC
     setRecord: { setId: 'me4', ptcgoCode: 'cri' }
   });
 
-  assert.equal(promoted[0].cardmarketProductId, 886394);
-  assert.equal(promoted[0].cardmarketCategoryId, 51);
-  assert.equal(promoted[0].cardmarketSetCode, 'cri');
-  assert.equal(
-    promoted[0].cardmarketImageUrl,
-    'https://product-images.s3.cardmarket.com/51/CRI/886394/886394.jpg'
-  );
+  assert.equal(promoted[0].cardmarketUrl, 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=886394');
+  assert.equal(promoted[0].cardmarketMatchedProductId, 886394);
+  assert.equal(promoted[0].cardmarketProductId, undefined);
+  assert.equal('cardmarketImageUrl' in promoted[0], false);
 });
 
-test('promoteCardmarketUrlsForCards backfills cardmarketImageUrl on already-aligned cards when no URL promotion is needed', async () => {
+test('promoteCardmarketUrlsForCards leaves already-aligned cards unchanged (no image metadata backfill)', async () => {
   const cards = [
     {
       setId: 'me4',
@@ -378,14 +384,11 @@ test('promoteCardmarketUrlsForCards backfills cardmarketImageUrl on already-alig
     setRecord: { setId: 'me4', ptcgoCode: 'cri' }
   });
 
-  assert.equal(
-    promoted[0].cardmarketImageUrl,
-    'https://product-images.s3.cardmarket.com/51/CRI/886394/886394.jpg'
-  );
-  assert.equal(promoted[0].cardmarketSetCode, 'cri');
+  assert.equal(promoted, cards);
+  assert.equal(promoted[0].cardmarketImageUrl, undefined);
 });
 
-test('promoteCardmarketUrlsForCards returns unchanged cards when ptcgoCode is unknown to the tracker', async () => {
+test('promoteCardmarketUrlsForCards promotes the URL even when ptcgoCode is unknown to the tracker', async () => {
   const cards = [
     {
       setId: 'me4',
@@ -412,12 +415,10 @@ test('promoteCardmarketUrlsForCards returns unchanged cards when ptcgoCode is un
     }
   });
 
-  // URL promotion still happens (search fallback → direct product URL) but the
-  // cardmarket image metadata is intentionally empty so the resolver doesn't
-  // emit a broken URL.
+  // URL promotion still happens (search fallback → direct product URL); image metadata is no longer set.
   assert.equal(promoted[0].cardmarketUrl, 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=886394');
-  assert.equal(promoted[0].cardmarketImageUrl, '');
-  assert.equal(promoted[0].cardmarketSetCode, '');
+  assert.equal(promoted[0].cardmarketImageUrl, undefined);
+  assert.equal(promoted[0].cardmarketSetCode, undefined);
 });
 
 test('isLocalDevEnvironment returns false for github.io and other public hosts (gating the cardmarket image source)', () => {
@@ -501,7 +502,9 @@ test('frontend wrapper forwards sourceCards for duplicate-name disambiguation', 
   assert.equal(result?.prices?.trend, 4.6);
 });
 
-test('resolveCardmarketEntryForCardFromSetPayload disambiguates using variant-name occurrence when candidates share base names', () => {
+// Variantenmarker muessen passen: "Nidoran M" trifft keinen "Nidoran [F]"-Eintrag (der alte Matcher ordnete
+// ihm nach Vorkommen den zweiten F-Eintrag 275340 zu).
+test('resolveCardmarketEntryForCardFromSetPayload respects variant markers when candidates share base names', () => {
   const cards = [
     {
       number: '79',
@@ -537,7 +540,7 @@ test('resolveCardmarketEntryForCardFromSetPayload disambiguates using variant-na
   const result2 = resolveCardmarketEntryForCardFromSetPayload(cards[1], setPayload, { sourceCards: cards });
 
   assert.equal(result1?.cardmarketProductId, 275339);
-  assert.equal(result2?.cardmarketProductId, 275340);
+  assert.equal(result2, null);
 });
 
 test('formatCardmarketEntryLabel prefers the trend price for compact UI badges', () => {
@@ -599,7 +602,9 @@ test('resolveCardmarketEntryForCardFromSetPayload disambiguates identically-name
   assert.equal(result2?.cardmarketProductId, 275238);
 });
 
-test('resolveCardmarketEntryForCardFromSetPayload in frontend falls back to holo-vs-regular price profiles when collector numbers are unavailable', () => {
+// Ohne Sammlernummern entscheidet das Vorkommen im Set; das Preisprofil (holo vs. normal) des alten
+// Matchers (Erwartung 275260/275238) wertet der ausgelieferte Matcher nicht aus.
+test('resolveCardmarketEntryForCardFromSetPayload falls back to set occurrence when collector numbers are unavailable', () => {
   const cards = [
     {
       number: '2',
@@ -636,8 +641,8 @@ test('resolveCardmarketEntryForCardFromSetPayload in frontend falls back to holo
   };
 
   const result1 = resolveCardmarketEntryForCardFromSetPayload(cards[0], setPayload, { sourceCards: cards });
-  assert.equal(result1?.cardmarketProductId, 275260);
+  assert.equal(result1?.cardmarketProductId, 275238);
 
   const result2 = resolveCardmarketEntryForCardFromSetPayload(cards[1], setPayload, { sourceCards: cards });
-  assert.equal(result2?.cardmarketProductId, 275238);
+  assert.equal(result2?.cardmarketProductId, 275260);
 });

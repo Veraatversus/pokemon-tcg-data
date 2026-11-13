@@ -25,6 +25,7 @@ Kein Server, kein Build-Schritt – direkt auf GitHub Pages deploybar.
 | Lade-Overlay mit Spinner | ✅ |
 | Responsive Layout (Mobile ≤ 768 px) | ✅ |
 | Cardmarket-Links | ✅ |
+| Kartensuche über alle Sets (Suchindex, ohne Laden der Kartendateien) | ✅ |
 
 ---
 
@@ -154,7 +155,9 @@ node --test frontend/tcg-tracker-web/tests/cardmarket-data.test.mjs
 ## Hinweise
 - Diese Version ist ein MVP-Startpunkt.
 - Der bestehende Grid-Aufbau der Set-Blätter (5x3, Höhe 4) wird für das Lesen/Schreiben der Checkboxen verwendet.
-- Für Karten ohne TCGDex-Bild wird auf `https://images.pokemontcg.io/{setId}/{cardNumber}.png` zurückgefallen.
+- Kartenbilder, Set-Logos und Set-Symbole: zuerst in der gewählten Kartensprache, dann in der anderen Sprache, zuletzt `https://images.pokemontcg.io/…`; danach erscheint der Pokéball-Platzhalter.
+- Die Suche findet Namen (deutsch und englisch), Kartennummer, Künstler, Typ (deutsch oder englisch, z. B. „Feuer“ oder „Fire“), Seltenheit und Set (Name, Kürzel, Serie). Attacken- und Fähigkeitstexte werden nicht durchsucht.
+- Cardmarket-Preise werden täglich neu gebaut; die App holt einen neuen Stand automatisch, „Preise neu laden“ in den Einstellungen leert zusätzlich alle Preis-Caches.
 - Die Kartensprache (Englisch/Deutsch) wird pro Browser gespeichert (localStorage), nicht im Spreadsheet; auf einem anderen Gerät oder in einem anderen Browser gilt wieder die Voreinstellung.
 - Vor der Zuordnung mehrdeutiger Altzeilen wird ein Auto-Snapshot angelegt; eine Rueckgaengig-Funktion fuer diese Migration gibt es in der Oberflaeche noch nicht.
 - Noch nicht zugeordnete Kandidaten mehrdeutiger Altzeilen zeigen den gemeinsamen Altstatus mit dem Hinweis „nicht zugeordnet“; ein Klick auf G oeffnet die Zuordnung.
