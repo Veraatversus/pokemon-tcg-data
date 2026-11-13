@@ -10,7 +10,8 @@ const {
   searchIndexEntries,
   searchIndexResults,
   searchFromIndex,
-  indexEntryToCard
+  indexEntryToCard,
+  searchResultsForDisplay
 } = await import('../js/features/search/search-index-prefilter.js');
 
 const V3 = 'https://x.test/v3/';
@@ -121,4 +122,40 @@ test('grosser Index (24k Eintraege) wird schnell durchsucht', () => {
   const elapsed = performance.now() - start;
   assert.ok(hits.length > 3000);
   assert.ok(elapsed < 250, `Suche dauerte ${elapsed.toFixed(1)} ms`);
+});
+
+test('deutsche Typnamen treffen die englischen Index-Typen', () => {
+  assert.deepEqual(ids(searchIndexEntries(INDEX, 'Feuer', { sets: SETS })), ['base1/4']);
+  assert.deepEqual(ids(searchIndexEntries(INDEX, 'pflanze bisasam', { sets: SETS })), ['me5/1']);
+  assert.deepEqual(ids(searchIndexEntries(INDEX, 'elektro', { sets: SETS })).sort(), ['base1/58', 'swsh12pt5/GG1']);
+  assert.deepEqual(ids(searchIndexEntries(INDEX, 'Kampf', { sets: SETS })), ['sv1/57']);
+  const typed = [
+    ['Water', 'wasser'], ['Psychic', 'psycho'], ['Darkness', 'finsternis'], ['Metal', 'metall'],
+    ['Dragon', 'drache'], ['Fairy', 'fee'], ['Colorless', 'farblos']
+  ].map(([type, de], i) => ({ entry: { setId: 'sv1', cardId: `t${i}`, number: String(200 + i), name: `Typkarte ${i}`, types: [type] }, de }));
+  const index = typed.map((t) => t.entry);
+  for (const { entry, de } of typed) {
+    assert.deepEqual(ids(searchIndexEntries(index, de, { sets: SETS })), [`sv1/${entry.cardId}`], de);
+  }
+  // Englische Typnamen treffen weiterhin.
+  assert.deepEqual(ids(searchIndexEntries(INDEX, 'fire', { sets: SETS })), ['base1/4']);
+});
+
+test('Nummern-Sortierung numerisch (2 vor 10)', () => {
+  const index = [
+    { setId: 'sv1', cardId: '10', number: '10', name: 'Pikachu' },
+    { setId: 'sv1', cardId: '2', number: '2', name: 'Pikachu' }
+  ];
+  assert.deepEqual(ids(searchIndexEntries(index, 'pikachu', { sets: SETS })), ['sv1/2', 'sv1/10']);
+});
+
+test('searchResultsForDisplay baut Karten nur fuer die gezeigten Treffer', () => {
+  const hits = searchIndexResults(INDEX, 'pokemon', { sets: SETS });
+  assert.equal(hits.length, 6);
+  const shown = searchResultsForDisplay(hits, { limit: 2, language: 'de' });
+  assert.equal(shown.length, 2);
+  assert.deepEqual(shown.map((r) => `${r.card.setId}/${r.card.cardId}`), ids(hits.slice(0, 2).map((h) => h.entry)));
+  assert.equal(shown[0].set, hits[0].set);
+  assert.equal(shown[0].score, hits[0].score);
+  assert.equal(searchResultsForDisplay(hits, { language: 'de' }).length, 6);
 });

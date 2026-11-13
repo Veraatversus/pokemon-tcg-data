@@ -34,7 +34,7 @@ import {
 } from './data/collection-writes.js';
 import { needsApiCardEnrichment, describeCardDataFailure, NO_CARD_DATA_MESSAGE } from './core/card-enrichment.js';
 import { findSetByIdOrAlias } from './data/set-aliases.js';
-import { searchFromIndex, indexEntryToCard } from './features/search/search-index-prefilter.js';
+import { searchFromIndex, searchResultsForDisplay } from './features/search/search-index-prefilter.js';
 import {
   sanitizeSearchToken,
   extractMeaningfulNameTokens,
@@ -7365,20 +7365,18 @@ async function runSearch(options = {}) {
   }
   if (isCancelled()) return;
 
-  const language = getCardLanguage();
-  const results = hits.map(({ entry, set, score }) => ({
-    card: indexEntryToCard(entry, { language }),
-    set,
-    score,
-    // Karten nicht importierter Sets: Haken loest den Auto-Import aus (pendingSearchSetImport).
-    apiOnly: !toBoolean(set?.imported)
-  }));
-  state.lastSearchResults = results.slice(0, 60);
+  // Karten-Objekte nur fuer die gezeigten Treffer bauen.
+  const shown = searchResultsForDisplay(hits, { limit: SEARCH_RESULT_RENDER_LIMIT, language: getCardLanguage() })
+    .map((result) => ({
+      ...result,
+      // Karten nicht importierter Sets: Haken loest den Auto-Import aus (pendingSearchSetImport).
+      apiOnly: !toBoolean(result.set?.imported)
+    }));
+  state.lastSearchResults = shown.slice(0, 60);
 
-  const shown = results.slice(0, SEARCH_RESULT_RENDER_LIMIT);
   const renderShown = () => renderSearchResultsList(shown, searchScopeMode, {
     rawQuery,
-    totalCount: results.length,
+    totalCount: hits.length,
     totalSets: setsToSearch.length
   });
   renderShown();

@@ -60,8 +60,7 @@ test('indexEntryToCard: Anzeige-Karte mit collectionKey, Namen und Bildern', () 
     types: [],
     supertype: '',
     images: {},
-    i18n: { de: { name: 'Glurak', images: {} } },
-    fromSearchIndex: true
+    i18n: { de: { name: 'Glurak', images: {} } }
   });
   assert.equal(indexEntryToCard(INDEX[0], { language: 'de' }).name, 'Pikachu');
 });

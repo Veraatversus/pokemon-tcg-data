@@ -2,7 +2,7 @@
 // Kartendateien je Set (api/v3/cards/<set>.json) werden fuer die Suche nicht mehr geladen; nur die
 // Detailansicht (Lightbox) laedt das eine Set der angeklickten Karte nach.
 //
-// Durchsucht werden je Indexeintrag: Name (EN), Name DE, Nummer, Kuenstler, Typen, Seltenheit, Supertyp
+// Durchsucht werden je Indexeintrag: Name (EN), Name DE, Nummer, Kuenstler, Typen (EN und DE), Seltenheit, Supertyp
 // sowie die Set-Felder (Name, Kuerzel, Serie, Set-ID). Attacken-/Faehigkeitstexte stehen nicht im Index
 // und werden nicht durchsucht (bewusster Tausch gegen sofortige Treffer).
 // Regeln: Gross-/Kleinschreibung und Diakritika egal ("pokemon" = "Pokémon"); jedes Suchwort muss
@@ -15,12 +15,31 @@ const lower = (value) => String(value ?? '').trim().toLowerCase();
 const text = (value) => String(value ?? '').trim();
 const NUMBER_LIKE = /^[a-z._-]*\d+[a-z._-]*$/;
 const DIGITS_ONLY = /^\d+$/;
+// Nummern-Sortierung (numerisch, ohne Gross-/Kleinschreibung); einmal je Modul statt je Vergleich.
+const NUMBER_COLLATOR = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+// Der Index fuehrt Energietypen englisch; deutsche Namen treffen dieselben Karten.
+const TYPE_NAMES_DE = {
+  Grass: 'Pflanze',
+  Fire: 'Feuer',
+  Water: 'Wasser',
+  Lightning: 'Elektro',
+  Psychic: 'Psycho',
+  Fighting: 'Kampf',
+  Darkness: 'Finsternis',
+  Metal: 'Metall',
+  Dragon: 'Drache',
+  Fairy: 'Fee',
+  Colorless: 'Farblos'
+};
+const withGermanTypeNames = (types) => (Array.isArray(types) ? types : [])
+  .flatMap((type) => [type, TYPE_NAMES_DE[text(type)]])
+  .filter(Boolean);
 
 /** Kleinbuchstaben ohne Diakritika, Leerraum zusammengefasst. */
 export function normalizeSearchValue(value) {
   return String(value ?? '')
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/\s+/g, ' ')
     .trim();
@@ -62,7 +81,7 @@ function prepareIndex(index) {
       setKey: lower(entry?.setId),
       names,
       nameText: names.join(' | '),
-      fieldText: joinValues([entry?.artist, entry?.types || [], entry?.rarity, entry?.supertype].filter(Boolean)),
+      fieldText: joinValues([entry?.artist, withGermanTypeNames(entry?.types), entry?.rarity, entry?.supertype].filter(Boolean)),
       number: normalizeNumber(entry?.number),
       cardId: normalizeNumber(entry?.cardId),
       numberSort: text(entry?.number)
@@ -141,7 +160,7 @@ export function searchIndexResults(index, query, { sets = null, setFilter = '' }
 
   hits.sort((a, b) => (b.score - a.score)
     || (a.setInfo.order - b.setInfo.order)
-    || a.prepared.numberSort.localeCompare(b.prepared.numberSort, undefined, { numeric: true, sensitivity: 'base' }));
+    || NUMBER_COLLATOR.compare(a.prepared.numberSort, b.prepared.numberSort));
   return hits.map(({ prepared, setInfo, score }) => ({ entry: prepared.entry, set: setInfo.set, score }));
 }
 
@@ -188,6 +207,15 @@ export function indexEntryToCard(entry, { language = 'de' } = {}) {
     card.cardmarketProductId = Number(cardmarketProductId);
     card.cardmarketUrl = buildCardmarketProductUrl(cardmarketProductId, { language });
   }
-  card.fromSearchIndex = true;
   return card;
+}
+
+/**
+ * Anzeige-Ergebnisse fuer die ersten `limit` Treffer: Karten-Objekte entstehen nur fuer gezeigte
+ * Treffer (eine Suche wie "pokemon" trifft ~20 000 Indexeintraege).
+ * @returns {{ card: object, set: object|null, score: number }[]}
+ */
+export function searchResultsForDisplay(hits, { limit = Infinity, language = 'de' } = {}) {
+  if (!Array.isArray(hits)) return [];
+  return hits.slice(0, limit).map(({ entry, set, score }) => ({ card: indexEntryToCard(entry, { language }), set, score }));
 }
