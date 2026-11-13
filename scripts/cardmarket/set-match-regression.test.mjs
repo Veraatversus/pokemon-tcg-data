@@ -13,12 +13,12 @@ import {
   getStatsSeriesLabel,
   resolveCollectionToggleState,
   resolveCombinedSearchSelection,
-  resolveDisplayCard,
-  resolveDisplaySet,
   resolvePreferredTcgdexSetBases,
   resolveSeriesGroupInfo,
   shouldFetchApiCardsForSearchSet,
 } from './lib/tracker-regression-helpers.mjs';
+// Anzeige-Aufloesung kommt aus dem Frontend (Sprachregel resolveFieldValue), nicht aus einer eigenen Kopie.
+import { resolveDisplayCard, resolveDisplaySet } from '../../frontend/tcg-tracker-web/js/data/schema-contract.js';
 
 test('does not false-match subset names', () => {
   const result = findMatchingTcgdexSet(
@@ -265,9 +265,10 @@ test('cardmarket resolver prefers direct product links over search fallbacks', (
     tcgdex_cardmarket_url: 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchString=SVI+001+Tannza',
   });
 
-  assert.equal(
+  // Produkt-URLs werden auf die kanonische Form /Pokemon/Products?idProduct=<id> gebracht.
+  assert.match(
     display.cardmarketUrl,
-    'https://www.cardmarket.com/de/Pokemon/Products/Singles?idProduct=696421',
+    /\/Pokemon\/Products\?idProduct=696421$/,
     'Display cards should surface the stable product URL when one source has already resolved it.'
   );
 });
