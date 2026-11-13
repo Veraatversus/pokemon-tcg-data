@@ -67,6 +67,15 @@ import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportFor
 import * as cache from './core/cache.js';
 import { CONFIG, scopedStorageKey } from './core/config.js';
 import {
+  QUEUE_PRESETS_STORAGE_KEY,
+  DASHBOARD_PREFS_STORAGE_KEY,
+  RECENT_SETS_STORAGE_KEY,
+  REALTIME_CLIENT_STORAGE_KEY,
+  USER_ID_STORAGE_KEY,
+  DEV_COMPLETION_STORAGE_KEY,
+  GRID_ZOOM_STORAGE_KEY,
+} from './core/storage-keys.js';
+import {
   initSmartEngine,
   startAutoHealing,
   fuzzySearch,
@@ -567,12 +576,6 @@ let spreadsheetDialogReturnFocusEl = null;
 const LOADING_MAX_BLOCK_MS = 12000;
 let loadingFailsafeTimer = null;
 
-const QUEUE_PRESETS_STORAGE_KEY = scopedStorageKey('queue_presets_v1');
-const DASHBOARD_PREFS_STORAGE_KEY = scopedStorageKey('dashboard_prefs_v1');
-const RECENT_SETS_STORAGE_KEY = scopedStorageKey('recent_sets_v1');
-const REALTIME_CLIENT_STORAGE_KEY = scopedStorageKey('realtime_client_id');
-const USER_ID_STORAGE_KEY = scopedStorageKey('user_id');
-const DEV_COMPLETION_STORAGE_KEY = scopedStorageKey('dev_completion_mode');
 const SEARCH_INPUT_DEBOUNCE_MS = 900;
 // Suche: hoechstens so viele Treffer als Karten zeichnen (z. B. 'pokemon' trifft ~20 000 Indexeintraege).
 const SEARCH_RESULT_RENDER_LIMIT = 240;
@@ -2104,7 +2107,6 @@ function resetRuntimeUiForSpreadsheetSwitch() {
 // --------------------------------------------------------------------------
 // GRID ZOOM
 // --------------------------------------------------------------------------
-const GRID_ZOOM_STORAGE_KEY = 'gridZoom';
 
 function applyGridZoom(value) {
   const cssValue = value + 'px';
