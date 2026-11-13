@@ -716,6 +716,7 @@
     "id": "np",
     "ids": {
       "cardmarket": 1608,
+      "cardmarketSetSource": "derived",
       "pokemontcg": "np",
       "tcgdex": "np",
       "tcgplayer": 1423
@@ -870,6 +871,7 @@
     "id": "tk1b",
     "ids": {
       "cardmarket": 1626,
+      "cardmarketSetSource": "derived",
       "pokemontcg": "tk1b",
       "tcgdex": "tk-ex-latio",
       "tcgplayer": 1543
@@ -1199,6 +1201,7 @@
     "id": "tk2a",
     "ids": {
       "cardmarket": 1627,
+      "cardmarketSetSource": "derived",
       "pokemontcg": "tk2a",
       "tcgdex": "tk-ex-p",
       "tcgplayer": 1542
@@ -1228,6 +1231,7 @@
     "id": "tk2b",
     "ids": {
       "cardmarket": 1627,
+      "cardmarketSetSource": "derived",
       "pokemontcg": "tk2b",
       "tcgdex": "tk-ex-m",
       "tcgplayer": 1542
@@ -1504,6 +1508,7 @@
     "id": "dpp",
     "ids": {
       "cardmarket": 1609,
+      "cardmarketSetSource": "derived",
       "pokemontcg": "dpp",
       "tcgdex": "dpp",
       "tcgplayer": 1421
@@ -1584,7 +1589,8 @@
     },
     "id": "TCGDEX-tk-dp-m",
     "ids": {
-      "cardmarket": null,
+      "cardmarket": 1628,
+      "cardmarketSetSource": "derived",
       "pokemontcg": null,
       "tcgdex": "tk-dp-m",
       "tcgplayer": 609
@@ -2072,6 +2078,7 @@
     "id": "hsp",
     "ids": {
       "cardmarket": 1610,
+      "cardmarketSetSource": "derived",
       "pokemontcg": "hsp",
       "tcgdex": "hgssp",
       "tcgplayer": 1453
@@ -2121,7 +2128,8 @@
     },
     "id": "TCGDEX-tk-hs-r",
     "ids": {
-      "cardmarket": null,
+      "cardmarket": 1629,
+      "cardmarketSetSource": "derived",
       "pokemontcg": null,
       "tcgdex": "tk-hs-r",
       "tcgplayer": 1540
@@ -2273,6 +2281,7 @@
     "id": "bwp",
     "ids": {
       "cardmarket": 1611,
+      "cardmarketSetSource": "derived",
       "pokemontcg": "bwp",
       "tcgdex": "bwp",
       "tcgplayer": 1407
@@ -2333,7 +2342,8 @@
     },
     "id": "mcd11",
     "ids": {
-      "cardmarket": 1571,
+      "cardmarket": 1623,
+      "cardmarketSetSource": "derived",
       "pokemontcg": "mcd11",
       "tcgdex": "2011bw",
       "tcgplayer": 1401
@@ -2414,7 +2424,8 @@
     },
     "id": "TCGDEX-tk-bw-z",
     "ids": {
-      "cardmarket": null,
+      "cardmarket": 1630,
+      "cardmarketSetSource": "derived",
       "pokemontcg": null,
       "tcgdex": "tk-bw-z",
       "tcgplayer": 1538
@@ -2533,6 +2544,7 @@
     "id": "mcd12",
     "ids": {
       "cardmarket": 1624,
+      "cardmarketSetSource": "derived",
       "pokemontcg": "mcd12",
       "tcgdex": "2012bw",
       "tcgplayer": 1427
@@ -3018,6 +3030,7 @@
     "id": "mcd14",
     "ids": {
       "cardmarket": 1625,
+      "cardmarketSetSource": "derived",
       "pokemontcg": "mcd14",
       "tcgdex": "2014xy",
       "tcgplayer": 1692
@@ -3355,6 +3368,7 @@
     "id": "mcd15",
     "ids": {
       "cardmarket": 1741,
+      "cardmarketSetSource": "derived",
       "pokemontcg": "mcd15",
       "tcgdex": "2015xy",
       "tcgplayer": 1694
@@ -3554,6 +3568,7 @@
     "id": "mcd16",
     "ids": {
       "cardmarket": 1752,
+      "cardmarketSetSource": "derived",
       "pokemontcg": "mcd16",
       "tcgdex": "2016xy",
       "tcgplayer": 3087
@@ -3673,7 +3688,8 @@
     },
     "id": "TCGDEX-tk-sm-l",
     "ids": {
-      "cardmarket": null,
+      "cardmarket": 1758,
+      "cardmarketSetSource": "derived",
       "pokemontcg": null,
       "tcgdex": "tk-sm-l",
       "tcgplayer": 2069
@@ -3847,6 +3863,7 @@
     "id": "mcd17",
     "ids": {
       "cardmarket": 1845,
+      "cardmarketSetSource": "derived",
       "pokemontcg": "mcd17",
       "tcgdex": "2017sm",
       "tcgplayer": 2148
@@ -4022,6 +4039,7 @@
     "id": "mcd18",
     "ids": {
       "cardmarket": 2404,
+      "cardmarketSetSource": "derived",
       "pokemontcg": "mcd18",
       "tcgdex": "2018sm",
       "tcgplayer": 2364
@@ -4239,6 +4257,7 @@
     "id": "sma",
     "ids": {
       "cardmarket": 2514,
+      "cardmarketSetSource": "derived",
       "pokemontcg": "sma",
       "tcgdex": "sma",
       "tcgplayer": null
@@ -4269,6 +4288,7 @@
     "id": "mcd19",
     "ids": {
       "cardmarket": 2829,
+      "cardmarketSetSource": "derived",
       "pokemontcg": "mcd19",
       "tcgdex": "2019sm",
       "tcgplayer": 2555
@@ -4488,6 +4508,7 @@
     "id": "fut20",
     "ids": {
       "cardmarket": 3510,
+      "cardmarketSetSource": "derived",
       "pokemontcg": "fut20",
       "tcgdex": "fut2020",
       "tcgplayer": null
@@ -4586,6 +4607,7 @@
     "id": "mcd21",
     "ids": {
       "cardmarket": 3738,
+      "cardmarketSetSource": "derived",
       "pokemontcg": "mcd21",
       "tcgdex": "2021swsh",
       "tcgplayer": null
@@ -4788,7 +4810,8 @@
     },
     "id": "cel25c",
     "ids": {
-      "cardmarket": 4346,
+      "cardmarket": 4347,
+      "cardmarketSetSource": "derived",
       "pokemontcg": "cel25c",
       "tcgdex": "cel25cc",
       "tcgplayer": null
@@ -4961,6 +4984,7 @@
     "id": "mcd22",
     "ids": {
       "cardmarket": 5135,
+      "cardmarketSetSource": "derived",
       "pokemontcg": "mcd22",
       "tcgdex": "2022swsh",
       "tcgplayer": null
@@ -5166,7 +5190,8 @@
     },
     "id": "sve",
     "ids": {
-      "cardmarket": 3108,
+      "cardmarket": 5224,
+      "cardmarketSetSource": "derived",
       "pokemontcg": "sve",
       "tcgdex": "sve",
       "tcgplayer": null
@@ -5228,7 +5253,8 @@
     },
     "id": "TCGDEX-2023sv",
     "ids": {
-      "cardmarket": null,
+      "cardmarket": 5430,
+      "cardmarketSetSource": "derived",
       "pokemontcg": null,
       "tcgdex": "2023sv",
       "tcgplayer": null
@@ -5320,7 +5346,8 @@
     },
     "id": "TCGDEX-mfb",
     "ids": {
-      "cardmarket": null,
+      "cardmarket": 5526,
+      "cardmarketSetSource": "derived",
       "pokemontcg": null,
       "tcgdex": "mfb",
       "tcgplayer": null
@@ -5634,7 +5661,8 @@
     },
     "id": "TCGDEX-2024sv",
     "ids": {
-      "cardmarket": null,
+      "cardmarket": 5978,
+      "cardmarketSetSource": "derived",
       "pokemontcg": null,
       "tcgdex": "2024sv",
       "tcgplayer": null
@@ -5893,6 +5921,7 @@
     "id": "sv10",
     "ids": {
       "cardmarket": 6096,
+      "cardmarketSetSource": "derived",
       "pokemontcg": "sv10",
       "tcgdex": "sv10",
       "tcgplayer": 24269
@@ -6060,7 +6089,8 @@
     },
     "id": "TCGDEX-mee",
     "ids": {
-      "cardmarket": null,
+      "cardmarket": 6324,
+      "cardmarketSetSource": "derived",
       "pokemontcg": null,
       "tcgdex": "mee",
       "tcgplayer": null

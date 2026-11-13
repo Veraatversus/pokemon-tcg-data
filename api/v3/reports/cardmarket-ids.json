@@ -27,7 +27,7 @@
     "TCGDEX-2023sv": {
       "ambiguous": 0,
       "cards": 15,
-      "expansionId": null,
+      "expansionId": 5430,
       "matched": 0,
       "missing": 0,
       "tcgdex": 15
@@ -35,7 +35,7 @@
     "TCGDEX-2024sv": {
       "ambiguous": 0,
       "cards": 15,
-      "expansionId": null,
+      "expansionId": 5978,
       "matched": 0,
       "missing": 0,
       "tcgdex": 15
@@ -179,7 +179,7 @@
     "TCGDEX-mee": {
       "ambiguous": 0,
       "cards": 16,
-      "expansionId": null,
+      "expansionId": 6324,
       "matched": 0,
       "missing": 0,
       "tcgdex": 16
@@ -187,7 +187,7 @@
     "TCGDEX-mfb": {
       "ambiguous": 0,
       "cards": 34,
-      "expansionId": null,
+      "expansionId": 5526,
       "matched": 0,
       "missing": 0,
       "tcgdex": 34
@@ -227,7 +227,7 @@
     "TCGDEX-tk-bw-z": {
       "ambiguous": 0,
       "cards": 30,
-      "expansionId": null,
+      "expansionId": 1630,
       "matched": 0,
       "missing": 0,
       "tcgdex": 30
@@ -243,7 +243,7 @@
     "TCGDEX-tk-dp-m": {
       "ambiguous": 0,
       "cards": 12,
-      "expansionId": null,
+      "expansionId": 1628,
       "matched": 0,
       "missing": 0,
       "tcgdex": 12
@@ -259,7 +259,7 @@
     "TCGDEX-tk-hs-r": {
       "ambiguous": 0,
       "cards": 30,
-      "expansionId": null,
+      "expansionId": 1629,
       "matched": 0,
       "missing": 0,
       "tcgdex": 30
@@ -267,7 +267,7 @@
     "TCGDEX-tk-sm-l": {
       "ambiguous": 0,
       "cards": 18,
-      "expansionId": null,
+      "expansionId": 1758,
       "matched": 0,
       "missing": 0,
       "tcgdex": 18
@@ -371,11 +371,11 @@
     "base2": {
       "ambiguous": 0,
       "cards": 64,
-      "corrected": 16,
       "expansionId": 1525,
       "matched": 0,
       "missing": 0,
-      "tcgdex": 64
+      "stabilityKept": 16,
+      "tcgdex": 48
     },
     "base3": {
       "ambiguous": 0,
@@ -396,11 +396,11 @@
     "base5": {
       "ambiguous": 0,
       "cards": 83,
-      "corrected": 17,
       "expansionId": 1528,
       "matched": 0,
       "missing": 0,
-      "tcgdex": 83
+      "stabilityKept": 17,
+      "tcgdex": 66
     },
     "base6": {
       "ambiguous": 0,
@@ -414,16 +414,18 @@
       "ambiguous": 0,
       "cards": 53,
       "expansionId": 1607,
-      "matched": 11,
+      "matched": 9,
       "missing": 0,
+      "stabilityKept": 2,
       "tcgdex": 42
     },
     "bp": {
       "ambiguous": 0,
       "cards": 9,
       "expansionId": 1605,
-      "matched": 4,
+      "matched": 0,
       "missing": 0,
+      "stabilityKept": 4,
       "tcgdex": 5
     },
     "bw1": {
@@ -435,16 +437,21 @@
       "tcgdex": 115
     },
     "bw10": {
-      "ambiguous": 0,
+      "ambiguous": 1,
+      "ambiguousCards": [
+        "9"
+      ],
       "cards": 105,
-      "corrected": 3,
+      "corrected": 1,
       "expansionId": 1580,
-      "matched": 10,
+      "matched": 7,
       "missing": 1,
       "missingCards": [
         "9"
       ],
-      "tcgdex": 94
+      "ordered": 6,
+      "stabilityKept": 5,
+      "tcgdex": 92
     },
     "bw11": {
       "ambiguous": 0,
@@ -505,20 +512,24 @@
     "bw8": {
       "ambiguous": 0,
       "cards": 138,
-      "corrected": 15,
+      "corrected": 14,
       "expansionId": 1578,
       "matched": 12,
       "missing": 0,
-      "tcgdex": 126
+      "ordered": 8,
+      "stabilityKept": 1,
+      "tcgdex": 125
     },
     "bw9": {
       "ambiguous": 0,
       "cards": 122,
-      "corrected": 7,
+      "corrected": 6,
       "expansionId": 1579,
-      "matched": 14,
+      "matched": 12,
       "missing": 0,
-      "tcgdex": 108
+      "ordered": 10,
+      "stabilityKept": 3,
+      "tcgdex": 107
     },
     "bwp": {
       "ambiguous": 26,
@@ -597,19 +608,20 @@
       "ambiguous": 0,
       "cards": 25,
       "corrected": 2,
-      "expansionId": 4346,
+      "expansionId": 4347,
       "matched": 0,
       "missing": 0,
-      "tcgdex": 25
+      "stabilityKept": 2,
+      "tcgdex": 23
     },
     "col1": {
       "ambiguous": 0,
       "cards": 106,
-      "corrected": 2,
       "expansionId": 1570,
       "matched": 0,
       "missing": 0,
-      "tcgdex": 106
+      "stabilityKept": 2,
+      "tcgdex": 104
     },
     "dc1": {
       "ambiguous": 0,
@@ -681,21 +693,23 @@
       "cards": 146,
       "corrected": 8,
       "expansionId": 1560,
-      "matched": 8,
+      "matched": 6,
       "missing": 1,
       "missingCards": [
         "76"
       ],
+      "stabilityKept": 2,
       "tcgdex": 137
     },
     "dp7": {
       "ambiguous": 0,
       "cards": 106,
-      "corrected": 8,
+      "corrected": 11,
       "expansionId": 1561,
       "matched": 0,
       "missing": 0,
-      "tcgdex": 106
+      "stabilityKept": 3,
+      "tcgdex": 103
     },
     "dpp": {
       "ambiguous": 8,
@@ -711,7 +725,7 @@
       ],
       "cards": 56,
       "expansionId": 1609,
-      "matched": 41,
+      "matched": 38,
       "missing": 14,
       "missingCards": [
         "DP16",
@@ -729,6 +743,7 @@
         "DP50",
         "DP53"
       ],
+      "stabilityKept": 3,
       "tcgdex": 1
     },
     "dv1": {
@@ -742,29 +757,29 @@
     "ecard1": {
       "ambiguous": 0,
       "cards": 165,
-      "corrected": 41,
+      "customSet": 161,
       "expansionId": 1536,
       "matched": 0,
       "missing": 0,
-      "tcgdex": 165
+      "tcgdex": 4
     },
     "ecard2": {
       "ambiguous": 0,
       "cards": 182,
-      "corrected": 16,
+      "customSet": 178,
       "expansionId": 1537,
       "matched": 0,
       "missing": 0,
-      "tcgdex": 182
+      "tcgdex": 4
     },
     "ecard3": {
       "ambiguous": 0,
       "cards": 182,
-      "corrected": 10,
+      "customSet": 182,
       "expansionId": 1538,
-      "matched": 2,
+      "matched": 0,
       "missing": 0,
-      "tcgdex": 180
+      "tcgdex": 0
     },
     "ex1": {
       "ambiguous": 0,
@@ -785,11 +800,12 @@
     "ex11": {
       "ambiguous": 0,
       "cards": 114,
-      "corrected": 14,
+      "corrected": 5,
       "expansionId": 1549,
       "matched": 3,
       "missing": 0,
-      "tcgdex": 111
+      "stabilityKept": 9,
+      "tcgdex": 102
     },
     "ex12": {
       "ambiguous": 0,
@@ -861,7 +877,7 @@
         "48"
       ],
       "cards": 97,
-      "corrected": 89,
+      "corrected": 69,
       "expansionId": 1542,
       "matched": 0,
       "missing": 1,
@@ -922,41 +938,48 @@
     "g1": {
       "ambiguous": 0,
       "cards": 117,
-      "corrected": 7,
+      "corrected": 2,
       "expansionId": 1693,
-      "matched": 5,
+      "matched": 4,
       "missing": 0,
-      "tcgdex": 112
+      "stabilityKept": 6,
+      "tcgdex": 107
     },
     "gym1": {
       "ambiguous": 0,
       "cards": 132,
-      "corrected": 18,
+      "corrected": 17,
       "expansionId": 1529,
       "matched": 0,
       "missing": 0,
-      "tcgdex": 132
+      "stabilityKept": 1,
+      "tcgdex": 131
     },
     "gym2": {
       "ambiguous": 0,
       "cards": 132,
-      "corrected": 6,
+      "corrected": 5,
       "expansionId": 1530,
       "matched": 2,
       "missing": 0,
-      "tcgdex": 130
+      "stabilityKept": 1,
+      "tcgdex": 129
     },
     "hgss1": {
-      "ambiguous": 0,
+      "ambiguous": 1,
+      "ambiguousCards": [
+        "26"
+      ],
       "cards": 124,
-      "corrected": 8,
+      "corrected": 2,
       "expansionId": 1566,
       "matched": 1,
       "missing": 1,
       "missingCards": [
         "26"
       ],
-      "tcgdex": 122
+      "stabilityKept": 6,
+      "tcgdex": 116
     },
     "hgss2": {
       "ambiguous": 0,
@@ -977,11 +1000,11 @@
     "hgss4": {
       "ambiguous": 0,
       "cards": 103,
-      "corrected": 6,
       "expansionId": 1569,
       "matched": 2,
       "missing": 0,
-      "tcgdex": 101
+      "stabilityKept": 6,
+      "tcgdex": 95
     },
     "hsp": {
       "ambiguous": 0,
@@ -994,7 +1017,7 @@
     "mcd11": {
       "ambiguous": 0,
       "cards": 12,
-      "expansionId": 1571,
+      "expansionId": 1623,
       "matched": 0,
       "missing": 0,
       "tcgdex": 12
@@ -1058,11 +1081,11 @@
     "mcd21": {
       "ambiguous": 0,
       "cards": 25,
-      "corrected": 3,
       "expansionId": 3738,
       "matched": 0,
       "missing": 0,
-      "tcgdex": 25
+      "stabilityKept": 3,
+      "tcgdex": 22
     },
     "mcd22": {
       "ambiguous": 0,
@@ -1139,13 +1162,13 @@
     "me6": {
       "ambiguous": 0,
       "cards": 141,
-      "corrected": 30,
       "energySymbol": 3,
       "expansionId": 6704,
       "matched": 4,
       "missing": 0,
       "override": 7,
-      "tcgdex": 130
+      "stabilityKept": 30,
+      "tcgdex": 100
     },
     "mep": {
       "ambiguous": 0,
@@ -1158,20 +1181,22 @@
     "neo1": {
       "ambiguous": 0,
       "cards": 111,
-      "corrected": 9,
+      "corrected": 6,
       "expansionId": 1531,
       "matched": 0,
       "missing": 0,
-      "tcgdex": 111
+      "stabilityKept": 3,
+      "tcgdex": 108
     },
     "neo2": {
       "ambiguous": 0,
       "cards": 75,
-      "corrected": 17,
+      "corrected": 3,
       "expansionId": 1532,
       "matched": 0,
       "missing": 0,
-      "tcgdex": 75
+      "stabilityKept": 14,
+      "tcgdex": 61
     },
     "neo3": {
       "ambiguous": 0,
@@ -1242,11 +1267,12 @@
     "pl1": {
       "ambiguous": 0,
       "cards": 133,
-      "corrected": 9,
+      "corrected": 13,
       "expansionId": 1562,
       "matched": 0,
       "missing": 0,
-      "tcgdex": 133
+      "stabilityKept": 4,
+      "tcgdex": 129
     },
     "pl2": {
       "ambiguous": 0,
@@ -1260,20 +1286,22 @@
     "pl3": {
       "ambiguous": 0,
       "cards": 153,
-      "corrected": 9,
+      "corrected": 8,
       "expansionId": 1564,
       "matched": 0,
       "missing": 0,
-      "tcgdex": 153
+      "stabilityKept": 1,
+      "tcgdex": 152
     },
     "pl4": {
       "ambiguous": 0,
       "cards": 111,
-      "corrected": 20,
+      "corrected": 23,
       "expansionId": 1565,
-      "matched": 6,
+      "matched": 5,
       "missing": 0,
-      "tcgdex": 105
+      "stabilityKept": 4,
+      "tcgdex": 102
     },
     "pop1": {
       "ambiguous": 0,
@@ -1381,14 +1409,14 @@
         "101a"
       ],
       "cards": 173,
-      "corrected": 1,
       "expansionId": 1745,
       "matched": 0,
       "missing": 1,
       "missingCards": [
         "101a"
       ],
-      "tcgdex": 172
+      "stabilityKept": 1,
+      "tcgdex": 171
     },
     "sm10": {
       "ambiguous": 4,
@@ -1399,9 +1427,9 @@
         "195a"
       ],
       "cards": 238,
-      "corrected": 18,
+      "corrected": 8,
       "expansionId": 2437,
-      "matched": 8,
+      "matched": 6,
       "missing": 5,
       "missingCards": [
         "172",
@@ -1410,7 +1438,9 @@
         "189a",
         "195a"
       ],
-      "tcgdex": 225
+      "ordered": 4,
+      "stabilityKept": 12,
+      "tcgdex": 215
     },
     "sm11": {
       "ambiguous": 3,
@@ -1420,24 +1450,26 @@
         "206a"
       ],
       "cards": 261,
-      "corrected": 14,
+      "corrected": 12,
       "expansionId": 2487,
-      "matched": 4,
+      "matched": 0,
       "missing": 3,
       "missingCards": [
         "79a",
         "191a",
         "206a"
       ],
-      "tcgdex": 254
+      "stabilityKept": 6,
+      "tcgdex": 252
     },
     "sm115": {
       "ambiguous": 0,
       "cards": 69,
       "corrected": 1,
       "expansionId": 2514,
-      "matched": 15,
+      "matched": 13,
       "missing": 0,
+      "stabilityKept": 2,
       "tcgdex": 54
     },
     "sm12": {
@@ -1446,14 +1478,14 @@
         "143a"
       ],
       "cards": 272,
-      "corrected": 12,
       "expansionId": 2644,
-      "matched": 10,
+      "matched": 0,
       "missing": 1,
       "missingCards": [
         "143a"
       ],
-      "tcgdex": 261
+      "stabilityKept": 22,
+      "tcgdex": 249
     },
     "sm2": {
       "ambiguous": 11,
@@ -1471,7 +1503,7 @@
         "157a"
       ],
       "cards": 180,
-      "corrected": 5,
+      "corrected": 1,
       "expansionId": 1800,
       "matched": 0,
       "missing": 11,
@@ -1488,7 +1520,8 @@
         "130a",
         "157a"
       ],
-      "tcgdex": 169
+      "stabilityKept": 4,
+      "tcgdex": 165
     },
     "sm3": {
       "ambiguous": 8,
@@ -1526,7 +1559,6 @@
         "77a"
       ],
       "cards": 81,
-      "corrected": 1,
       "expansionId": 1842,
       "matched": 0,
       "missing": 3,
@@ -1535,7 +1567,8 @@
         "68a",
         "77a"
       ],
-      "tcgdex": 78
+      "stabilityKept": 1,
+      "tcgdex": 77
     },
     "sm4": {
       "ambiguous": 2,
@@ -1563,7 +1596,7 @@
         "153a"
       ],
       "cards": 178,
-      "corrected": 19,
+      "corrected": 7,
       "expansionId": 2065,
       "matched": 1,
       "missing": 9,
@@ -1578,7 +1611,8 @@
         "170",
         "171"
       ],
-      "tcgdex": 168
+      "stabilityKept": 12,
+      "tcgdex": 156
     },
     "sm6": {
       "ambiguous": 4,
@@ -1589,7 +1623,7 @@
         "113a"
       ],
       "cards": 150,
-      "corrected": 7,
+      "corrected": 5,
       "expansionId": 2075,
       "matched": 1,
       "missing": 6,
@@ -1601,7 +1635,8 @@
         "118",
         "146"
       ],
-      "tcgdex": 143
+      "stabilityKept": 2,
+      "tcgdex": 141
     },
     "sm7": {
       "ambiguous": 4,
@@ -1612,9 +1647,9 @@
         "177a"
       ],
       "cards": 187,
-      "corrected": 9,
+      "corrected": 8,
       "expansionId": 2320,
-      "matched": 4,
+      "matched": 2,
       "missing": 4,
       "missingCards": [
         "10a",
@@ -1622,7 +1657,9 @@
         "148a",
         "177a"
       ],
-      "tcgdex": 179
+      "ordered": 2,
+      "stabilityKept": 3,
+      "tcgdex": 178
     },
     "sm75": {
       "ambiguous": 2,
@@ -1631,7 +1668,7 @@
         "60a"
       ],
       "cards": 80,
-      "corrected": 2,
+      "corrected": 1,
       "expansionId": 2351,
       "matched": 3,
       "missing": 2,
@@ -1639,7 +1676,9 @@
         "40a",
         "60a"
       ],
-      "tcgdex": 75
+      "ordered": 2,
+      "stabilityKept": 1,
+      "tcgdex": 74
     },
     "sm8": {
       "ambiguous": 4,
@@ -1652,7 +1691,7 @@
       "cards": 240,
       "corrected": 14,
       "expansionId": 2370,
-      "matched": 2,
+      "matched": 0,
       "missing": 8,
       "missingCards": [
         "172a",
@@ -1664,6 +1703,7 @@
         "188a",
         "189a"
       ],
+      "stabilityKept": 2,
       "tcgdex": 230
     },
     "sm9": {
@@ -1675,7 +1715,7 @@
       "cards": 198,
       "corrected": 7,
       "expansionId": 2407,
-      "matched": 9,
+      "matched": 5,
       "missing": 4,
       "missingCards": [
         "54",
@@ -1683,6 +1723,8 @@
         "152a",
         "152b"
       ],
+      "ordered": 4,
+      "stabilityKept": 4,
       "tcgdex": 185
     },
     "sma": {
@@ -1710,7 +1752,6 @@
         "SM104a"
       ],
       "cards": 251,
-      "corrected": 17,
       "expansionId": 1757,
       "matched": 0,
       "missing": 3,
@@ -1719,7 +1760,8 @@
         "SM103a",
         "SM104a"
       ],
-      "tcgdex": 248
+      "stabilityKept": 17,
+      "tcgdex": 231
     },
     "sv1": {
       "ambiguous": 0,
@@ -1748,11 +1790,11 @@
     "sv3": {
       "ambiguous": 0,
       "cards": 230,
-      "corrected": 4,
       "expansionId": 5385,
       "matched": 0,
       "missing": 0,
-      "tcgdex": 230
+      "stabilityKept": 4,
+      "tcgdex": 226
     },
     "sv3pt5": {
       "ambiguous": 0,
@@ -1837,7 +1879,7 @@
     "sve": {
       "ambiguous": 0,
       "cards": 24,
-      "expansionId": 3108,
+      "expansionId": 5224,
       "matched": 0,
       "missing": 0,
       "tcgdex": 24
@@ -1845,10 +1887,11 @@
     "svp": {
       "ambiguous": 0,
       "cards": 226,
+      "customSet": 225,
       "expansionId": 5241,
       "matched": 0,
       "missing": 0,
-      "tcgdex": 226
+      "tcgdex": 1
     },
     "swsh1": {
       "ambiguous": 3,
@@ -1858,7 +1901,7 @@
         "209"
       ],
       "cards": 216,
-      "corrected": 23,
+      "corrected": 22,
       "expansionId": 2921,
       "matched": 0,
       "missing": 3,
@@ -1867,7 +1910,8 @@
         "201",
         "209"
       ],
-      "tcgdex": 213
+      "stabilityKept": 1,
+      "tcgdex": 212
     },
     "swsh10": {
       "ambiguous": 0,
@@ -1880,11 +1924,11 @@
     "swsh11": {
       "ambiguous": 0,
       "cards": 247,
-      "corrected": 1,
       "expansionId": 5093,
       "matched": 0,
       "missing": 0,
-      "tcgdex": 247
+      "stabilityKept": 1,
+      "tcgdex": 246
     },
     "swsh12": {
       "ambiguous": 0,
@@ -2035,20 +2079,21 @@
     "xy0": {
       "ambiguous": 0,
       "cards": 39,
-      "corrected": 1,
       "expansionId": 1637,
       "matched": 0,
       "missing": 0,
-      "tcgdex": 39
+      "stabilityKept": 1,
+      "tcgdex": 38
     },
     "xy1": {
       "ambiguous": 0,
       "cards": 146,
-      "corrected": 11,
+      "corrected": 5,
       "expansionId": 1582,
       "matched": 2,
       "missing": 0,
-      "tcgdex": 144
+      "stabilityKept": 6,
+      "tcgdex": 138
     },
     "xy10": {
       "ambiguous": 1,
@@ -2056,7 +2101,7 @@
         "85"
       ],
       "cards": 129,
-      "corrected": 12,
+      "corrected": 7,
       "expansionId": 1706,
       "matched": 4,
       "missing": 1,
@@ -2064,7 +2109,8 @@
         "85"
       ],
       "ordered": 4,
-      "tcgdex": 124
+      "stabilityKept": 5,
+      "tcgdex": 119
     },
     "xy11": {
       "ambiguous": 0,
@@ -2097,9 +2143,9 @@
         "108"
       ],
       "cards": 110,
-      "corrected": 14,
+      "corrected": 6,
       "expansionId": 1583,
-      "matched": 2,
+      "matched": 0,
       "missing": 4,
       "missingCards": [
         "13",
@@ -2107,8 +2153,8 @@
         "107",
         "108"
       ],
-      "ordered": 2,
-      "tcgdex": 104
+      "stabilityKept": 10,
+      "tcgdex": 96
     },
     "xy3": {
       "ambiguous": 3,
@@ -2118,17 +2164,17 @@
         "113"
       ],
       "cards": 114,
-      "corrected": 9,
+      "corrected": 2,
       "expansionId": 1584,
-      "matched": 2,
+      "matched": 0,
       "missing": 3,
       "missingCards": [
         "55",
         "55a",
         "113"
       ],
-      "ordered": 2,
-      "tcgdex": 109
+      "stabilityKept": 9,
+      "tcgdex": 102
     },
     "xy4": {
       "ambiguous": 3,
@@ -2138,27 +2184,27 @@
         "120"
       ],
       "cards": 124,
-      "corrected": 9,
+      "corrected": 1,
       "expansionId": 1521,
-      "matched": 2,
+      "matched": 0,
       "missing": 3,
       "missingCards": [
         "24",
         "24a",
         "120"
       ],
-      "ordered": 2,
-      "tcgdex": 119
+      "stabilityKept": 10,
+      "tcgdex": 111
     },
     "xy5": {
       "ambiguous": 0,
       "cards": 164,
-      "corrected": 32,
+      "corrected": 3,
       "expansionId": 1585,
-      "matched": 5,
+      "matched": 1,
       "missing": 0,
-      "ordered": 4,
-      "tcgdex": 159
+      "stabilityKept": 33,
+      "tcgdex": 130
     },
     "xy6": {
       "ambiguous": 5,
@@ -2170,9 +2216,9 @@
         "105"
       ],
       "cards": 112,
-      "corrected": 20,
+      "corrected": 3,
       "expansionId": 1649,
-      "matched": 2,
+      "matched": 0,
       "missing": 5,
       "missingCards": [
         "59",
@@ -2181,17 +2227,18 @@
         "102",
         "105"
       ],
-      "ordered": 2,
-      "tcgdex": 105
+      "stabilityKept": 19,
+      "tcgdex": 88
     },
     "xy7": {
       "ambiguous": 0,
       "cards": 101,
-      "corrected": 16,
+      "corrected": 1,
       "expansionId": 1660,
       "matched": 0,
       "missing": 0,
-      "tcgdex": 101
+      "stabilityKept": 15,
+      "tcgdex": 86
     },
     "xy8": {
       "ambiguous": 4,
@@ -2202,7 +2249,7 @@
         "160"
       ],
       "cards": 165,
-      "corrected": 14,
+      "corrected": 8,
       "expansionId": 1678,
       "matched": 4,
       "missing": 4,
@@ -2213,7 +2260,8 @@
         "160"
       ],
       "ordered": 4,
-      "tcgdex": 157
+      "stabilityKept": 6,
+      "tcgdex": 151
     },
     "xy9": {
       "ambiguous": 2,
@@ -2222,7 +2270,7 @@
         "115"
       ],
       "cards": 126,
-      "corrected": 4,
+      "corrected": 1,
       "expansionId": 1687,
       "matched": 2,
       "missing": 2,
@@ -2231,7 +2279,8 @@
         "115"
       ],
       "ordered": 2,
-      "tcgdex": 122
+      "stabilityKept": 3,
+      "tcgdex": 119
     },
     "xyp": {
       "ambiguous": 11,
@@ -2249,9 +2298,9 @@
         "XY171"
       ],
       "cards": 216,
-      "corrected": 47,
+      "corrected": 16,
       "expansionId": 1612,
-      "matched": 12,
+      "matched": 4,
       "missing": 11,
       "missingCards": [
         "XY35",
@@ -2266,7 +2315,8 @@
         "XY168",
         "XY171"
       ],
-      "tcgdex": 193
+      "stabilityKept": 45,
+      "tcgdex": 156
     },
     "zsv10pt5": {
       "ambiguous": 0,
@@ -2276,6 +2326,45 @@
       "missing": 0,
       "tcgdex": 172
     }
+  },
+  "customSets": {
+    "ambiguous": [
+      "ecard1/1",
+      "ecard1/47",
+      "ecard1/66",
+      "ecard1/68"
+    ],
+    "applied": 746,
+    "changed": 208,
+    "conflicts": [],
+    "missingProducts": [
+      {
+        "collectorNumber": "224a",
+        "expansionId": 5241,
+        "productId": 726926
+      },
+      {
+        "collectorNumber": "224b",
+        "expansionId": 5241,
+        "productId": 783444
+      },
+      {
+        "collectorNumber": "224c",
+        "expansionId": 5241,
+        "productId": 844369
+      },
+      {
+        "collectorNumber": "224d",
+        "expansionId": 5241,
+        "productId": 814297
+      },
+      {
+        "collectorNumber": "224f",
+        "expansionId": 5241,
+        "productId": 740323
+      }
+    ],
+    "nameWarnings": []
   },
   "duplicateTcgdexIds": {
     "273539": [
@@ -2731,119 +2820,9 @@
       "neo3-14",
       "neo3-27"
     ],
-    "274876": [
-      "ecard1-1",
-      "ecard1-33"
-    ],
-    "274877": [
-      "ecard1-2",
-      "ecard1-34"
-    ],
-    "274878": [
-      "ecard1-3",
-      "ecard1-35"
-    ],
-    "274879": [
-      "ecard1-36",
-      "ecard1-37",
-      "ecard1-4"
-    ],
-    "274880": [
-      "ecard1-38",
-      "ecard1-5"
-    ],
-    "274881": [
-      "ecard1-39",
-      "ecard1-40",
-      "ecard1-6"
-    ],
-    "274882": [
-      "ecard1-41",
-      "ecard1-7"
-    ],
-    "274883": [
-      "ecard1-42",
-      "ecard1-8"
-    ],
-    "274884": [
-      "ecard1-43",
-      "ecard1-9"
-    ],
-    "274885": [
-      "ecard1-10",
-      "ecard1-44"
-    ],
-    "274886": [
-      "ecard1-11",
-      "ecard1-45"
-    ],
     "274887": [
       "ecard1-12",
-      "ecard1-46",
       "ecard1-47"
-    ],
-    "274888": [
-      "ecard1-13",
-      "ecard1-48"
-    ],
-    "274889": [
-      "ecard1-14",
-      "ecard1-49"
-    ],
-    "274890": [
-      "ecard1-15",
-      "ecard1-50"
-    ],
-    "274891": [
-      "ecard1-16",
-      "ecard1-51"
-    ],
-    "274892": [
-      "ecard1-17",
-      "ecard1-52"
-    ],
-    "274893": [
-      "ecard1-18",
-      "ecard1-53",
-      "ecard1-54"
-    ],
-    "274894": [
-      "ecard1-19",
-      "ecard1-55",
-      "ecard1-56"
-    ],
-    "274896": [
-      "ecard1-21",
-      "ecard1-57"
-    ],
-    "274897": [
-      "ecard1-22",
-      "ecard1-58"
-    ],
-    "274898": [
-      "ecard1-23",
-      "ecard1-59"
-    ],
-    "274899": [
-      "ecard1-24",
-      "ecard1-60"
-    ],
-    "274900": [
-      "ecard1-25",
-      "ecard1-61"
-    ],
-    "274901": [
-      "ecard1-26",
-      "ecard1-62"
-    ],
-    "274902": [
-      "ecard1-27",
-      "ecard1-63"
-    ],
-    "274903": [
-      "ecard1-28",
-      "ecard1-64",
-      "ecard1-65"
     ],
     "274904": [
       "ecard1-29",
@@ -2851,138 +2830,7 @@
     ],
     "274905": [
       "ecard1-30",
-      "ecard1-67",
       "ecard1-68"
-    ],
-    "274906": [
-      "ecard1-31",
-      "ecard1-69"
-    ],
-    "274907": [
-      "ecard1-32",
-      "ecard1-70"
-    ],
-    "274969": [
-      "ecard1-94",
-      "ecard1-95"
-    ],
-    "274972": [
-      "ecard1-97",
-      "ecard1-98"
-    ],
-    "274974": [
-      "ecard1-100",
-      "ecard1-99"
-    ],
-    "274979": [
-      "ecard1-104",
-      "ecard1-105"
-    ],
-    "275006": [
-      "ecard1-131",
-      "ecard1-132"
-    ],
-    "275009": [
-      "ecard1-134",
-      "ecard1-135"
-    ],
-    "275084": [
-      "ecard2-13",
-      "ecard2-H10"
-    ],
-    "275086": [
-      "ecard2-15",
-      "ecard2-H11"
-    ],
-    "275091": [
-      "ecard2-148",
-      "ecard2-H14"
-    ],
-    "275092": [
-      "ecard2-21",
-      "ecard2-H15"
-    ],
-    "275096": [
-      "ecard2-150",
-      "ecard2-H18"
-    ],
-    "275117": [
-      "ecard2-45",
-      "ecard2-68"
-    ],
-    "275124": [
-      "ecard2-51",
-      "ecard2-80"
-    ],
-    "275125": [
-      "ecard2-52",
-      "ecard2-91"
-    ],
-    "275130": [
-      "ecard2-106",
-      "ecard2-57"
-    ],
-    "275135": [
-      "ecard2-111",
-      "ecard2-62"
-    ],
-    "275137": [
-      "ecard2-115",
-      "ecard2-64"
-    ],
-    "275139": [
-      "ecard2-117",
-      "ecard2-66"
-    ],
-    "275143": [
-      "ecard2-70",
-      "ecard2-71"
-    ],
-    "275150": [
-      "ecard2-76",
-      "ecard2-77"
-    ],
-    "275158": [
-      "ecard2-84",
-      "ecard2-85"
-    ],
-    "275160": [
-      "ecard2-86",
-      "ecard2-87"
-    ],
-    "275252": [
-      "ecard3-33",
-      "ecard3-H31"
-    ],
-    "275264": [
-      "ecard3-147",
-      "ecard3-H5"
-    ],
-    "275267": [
-      "ecard3-56",
-      "ecard3-H8"
-    ],
-    "275272": [
-      "ecard3-150",
-      "ecard3-H13"
-    ],
-    "275276": [
-      "ecard3-18",
-      "ecard3-H16",
-      "ecard3-H17"
-    ],
-    "275277": [
-      "ecard3-20",
-      "ecard3-H18",
-      "ecard3-H19"
-    ],
-    "275288": [
-      "ecard3-44",
-      "ecard3-H28"
-    ],
-    "275301": [
-      "ecard3-43",
-      "ecard3-H22"
     ],
     "275778": [
       "ex2-1",
@@ -5604,10 +5452,10 @@
     ]
   },
   "duplicates": {
-    "cards": 1714,
-    "corrected": 766,
-    "ids": 805,
-    "kept": 948
+    "cards": 1586,
+    "corrected": 366,
+    "ids": 747,
+    "kept": 1220
   },
   "expansionMismatch": {
     "cards": [
@@ -6183,13 +6031,6 @@
         "newId": null,
         "oldExpansion": 3354,
         "oldId": 581895,
-        "reason": "no-set-expansion"
-      },
-      {
-        "cardKey": "TCGDEX-mfb-9",
-        "newId": null,
-        "oldExpansion": 5526,
-        "oldId": 741976,
         "reason": "no-set-expansion"
       },
       {
@@ -7131,6 +6972,13 @@
         "reason": "kept-mismatch"
       },
       {
+        "cardKey": "TCGDEX-mfb-9",
+        "newId": null,
+        "oldExpansion": 5526,
+        "oldId": 741976,
+        "reason": "kept-mismatch"
+      },
+      {
         "cardKey": "base1-73",
         "newId": null,
         "oldExpansion": 1523,
@@ -7180,55 +7028,6 @@
         "reason": "kept-mismatch"
       },
       {
-        "cardKey": "ecard3-129",
-        "newId": null,
-        "oldExpansion": 1538,
-        "oldId": 275387,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "ecard3-130",
-        "newId": null,
-        "oldExpansion": 1538,
-        "oldId": 275388,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "ecard3-131",
-        "newId": null,
-        "oldExpansion": 1538,
-        "oldId": 275389,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "ecard3-133",
-        "newId": null,
-        "oldExpansion": 1538,
-        "oldId": 275391,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "ecard3-134",
-        "newId": null,
-        "oldExpansion": 1538,
-        "oldId": 275392,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "ecard3-135",
-        "newId": null,
-        "oldExpansion": 1538,
-        "oldId": 275393,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "ecard3-136",
-        "newId": null,
-        "oldExpansion": 1538,
-        "oldId": 275394,
-        "reason": "kept-mismatch"
-      },
-      {
         "cardKey": "ex4-24",
         "newId": null,
         "oldExpansion": 1540,
@@ -7243,10 +7042,171 @@
         "reason": "dropped-mismatch"
       },
       {
+        "cardKey": "ex4-69",
+        "newId": 276046,
+        "oldExpansion": 1540,
+        "oldId": 275846,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "ex4-70",
+        "newId": 276047,
+        "oldExpansion": 1540,
+        "oldId": 275847,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "ex4-71",
+        "newId": 276048,
+        "oldExpansion": 1540,
+        "oldId": 275848,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "ex4-72",
+        "newId": 276049,
+        "oldExpansion": 1540,
+        "oldId": 275849,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "ex4-73",
+        "newId": 276050,
+        "oldExpansion": 1540,
+        "oldId": 275850,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "ex4-74",
+        "newId": 276051,
+        "oldExpansion": 1540,
+        "oldId": 275851,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "ex4-75",
+        "newId": 276052,
+        "oldExpansion": 1540,
+        "oldId": 275852,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "ex4-76",
+        "newId": 276053,
+        "oldExpansion": 1540,
+        "oldId": 275853,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "ex4-77",
+        "newId": 276054,
+        "oldExpansion": 1540,
+        "oldId": 275854,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "ex4-78",
+        "newId": 276055,
+        "oldExpansion": 1540,
+        "oldId": 275855,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "ex4-79",
+        "newId": 276056,
+        "oldExpansion": 1540,
+        "oldId": 275856,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "ex4-80",
+        "newId": 276057,
+        "oldExpansion": 1540,
+        "oldId": 275857,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "ex4-81",
+        "newId": 276058,
+        "oldExpansion": 1540,
+        "oldId": 275858,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "ex4-82",
+        "newId": 276059,
+        "oldExpansion": 1540,
+        "oldId": 275859,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "ex4-83",
+        "newId": 276060,
+        "oldExpansion": 1540,
+        "oldId": 275860,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "ex4-84",
+        "newId": 276061,
+        "oldExpansion": 1540,
+        "oldId": 275861,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "ex4-85",
+        "newId": 276062,
+        "oldExpansion": 1540,
+        "oldId": 275862,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "ex4-86",
+        "newId": 276063,
+        "oldExpansion": 1540,
+        "oldId": 275863,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "ex4-87",
+        "newId": 276064,
+        "oldExpansion": 1540,
+        "oldId": 275864,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "ex4-88",
+        "newId": 276065,
+        "oldExpansion": 1540,
+        "oldId": 275865,
+        "reason": "corrected-expansion"
+      },
+      {
         "cardKey": "ex6-98",
         "newId": null,
         "oldExpansion": 1544,
         "oldId": 276274,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "mcd21-5",
+        "newId": null,
+        "oldExpansion": 3738,
+        "oldId": 538808,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "mcd21-16",
+        "newId": null,
+        "oldExpansion": 3738,
+        "oldId": 538918,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "mcd21-21",
+        "newId": null,
+        "oldExpansion": 3738,
+        "oldId": 538968,
         "reason": "kept-mismatch"
       },
       {
@@ -7474,6 +7434,13 @@
         "reason": "kept-mismatch"
       },
       {
+        "cardKey": "sm10-199",
+        "newId": null,
+        "oldExpansion": 2437,
+        "oldId": 372373,
+        "reason": "kept-mismatch"
+      },
+      {
         "cardKey": "sm115-22",
         "newId": 396617,
         "oldExpansion": 2514,
@@ -7495,6 +7462,20 @@
         "reason": "dropped-mismatch"
       },
       {
+        "cardKey": "sv3-62",
+        "newId": null,
+        "oldExpansion": 5385,
+        "oldId": 781858,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "sv3-196",
+        "newId": null,
+        "oldExpansion": 6041,
+        "oldId": 811161,
+        "reason": "dropped-mismatch"
+      },
+      {
         "cardKey": "swsh1-48",
         "newId": null,
         "oldExpansion": 2921,
@@ -7507,6 +7488,13 @@
         "oldExpansion": 2921,
         "oldId": 427236,
         "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "swsh11-201",
+        "newId": null,
+        "oldExpansion": 5093,
+        "oldId": 670816,
+        "reason": "kept-mismatch"
       },
       {
         "cardKey": "swsh2-172",
@@ -7572,6 +7560,20 @@
         "reason": "kept-mismatch"
       },
       {
+        "cardKey": "xy1-144",
+        "newId": null,
+        "oldExpansion": 1582,
+        "oldId": 281415,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "xy1-146",
+        "newId": null,
+        "oldExpansion": 1582,
+        "oldId": 281433,
+        "reason": "kept-mismatch"
+      },
+      {
         "cardKey": "xy11-25",
         "newId": null,
         "oldExpansion": 1716,
@@ -7614,6 +7616,27 @@
         "reason": "corrected-expansion"
       },
       {
+        "cardKey": "xy5-148",
+        "newId": null,
+        "oldExpansion": 1585,
+        "oldId": 273584,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "xy5-150",
+        "newId": null,
+        "oldExpansion": 1585,
+        "oldId": 273615,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "xy7-67",
+        "newId": null,
+        "oldExpansion": 1660,
+        "oldId": 284245,
+        "reason": "kept-mismatch"
+      },
+      {
         "cardKey": "xyp-XY20",
         "newId": 281310,
         "oldExpansion": 4159,
@@ -7622,17 +7645,17 @@
       },
       {
         "cardKey": "xyp-XY51",
-        "newId": 289714,
+        "newId": null,
         "oldExpansion": 1612,
         "oldId": 289704,
-        "reason": "corrected-expansion"
+        "reason": "kept-mismatch"
       },
       {
         "cardKey": "xyp-XY52",
-        "newId": 289715,
+        "newId": null,
         "oldExpansion": 1612,
         "oldId": 289705,
-        "reason": "corrected-expansion"
+        "reason": "kept-mismatch"
       },
       {
         "cardKey": "xyp-XY62",
@@ -7671,10 +7694,10 @@
       },
       {
         "cardKey": "xyp-XY84",
-        "newId": 289809,
+        "newId": null,
         "oldExpansion": 4159,
         "oldId": 554190,
-        "reason": "corrected-expansion"
+        "reason": "dropped-mismatch"
       },
       {
         "cardKey": "xyp-XY90",
@@ -7689,6 +7712,48 @@
         "oldExpansion": 1612,
         "oldId": 289557,
         "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "xyp-XY101",
+        "newId": null,
+        "oldExpansion": 4159,
+        "oldId": 554275,
+        "reason": "dropped-mismatch"
+      },
+      {
+        "cardKey": "xyp-XY107",
+        "newId": 289557,
+        "oldExpansion": 4159,
+        "oldId": 554275,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "xyp-XY124",
+        "newId": null,
+        "oldExpansion": 4159,
+        "oldId": 554190,
+        "reason": "dropped-mismatch"
+      },
+      {
+        "cardKey": "xyp-XY125",
+        "newId": null,
+        "oldExpansion": 4159,
+        "oldId": 554275,
+        "reason": "dropped-mismatch"
+      },
+      {
+        "cardKey": "xyp-XY149",
+        "newId": null,
+        "oldExpansion": 4159,
+        "oldId": 552954,
+        "reason": "dropped-mismatch"
+      },
+      {
+        "cardKey": "xyp-XY150",
+        "newId": null,
+        "oldExpansion": 4159,
+        "oldId": 552959,
+        "reason": "dropped-mismatch"
       },
       {
         "cardKey": "xyp-XY162",
@@ -7706,13 +7771,6 @@
       }
     ],
     "foreignNameOkBySet": {
-      "cel25c": {
-        "4347": 23
-      },
-      "ecard1": {
-        "1753": 8,
-        "1754": 1
-      },
       "ex10": {
         "1755": 14,
         "1756": 4
@@ -7759,9 +7817,6 @@
       "hgss3": {
         "2395": 3,
         "2749": 2
-      },
-      "mcd11": {
-        "1623": 12
       },
       "me1": {
         "6290": 15
@@ -7819,21 +7874,13 @@
         "5834": 4,
         "5849": 1,
         "5992": 1,
-        "6041": 1
+        "6041": 2
       },
       "sv8pt5": {
         "6009": 196
       },
       "sv9": {
         "6088": 24
-      },
-      "sve": {
-        "5224": 56
-      },
-      "svp": {
-        "3108": 3,
-        "5431": 4,
-        "5546": 3
       },
       "swsh7": {
         "5204": 1,
@@ -7846,7 +7893,7 @@
         "6194": 2
       },
       "xyp": {
-        "4159": 24
+        "4159": 39
       },
       "zsv10pt5": {
         "3108": 1,
@@ -7859,25 +7906,428 @@
     },
     "sets": [
       {
+        "evidence": "15/15",
+        "newId": 5430,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "TCGDEX-2023sv"
+      },
+      {
+        "evidence": "15/15",
+        "newId": 5978,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "TCGDEX-2024sv"
+      },
+      {
+        "evidence": "16/16",
+        "newId": 6324,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "TCGDEX-mee"
+      },
+      {
+        "evidence": "34/34",
+        "newId": 5526,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "TCGDEX-mfb"
+      },
+      {
+        "evidence": "30/30",
+        "newId": 1630,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "TCGDEX-tk-bw-z"
+      },
+      {
+        "evidence": "12/12",
+        "newId": 1628,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "TCGDEX-tk-dp-m"
+      },
+      {
+        "evidence": "30/30",
+        "newId": 1629,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "TCGDEX-tk-hs-r"
+      },
+      {
+        "evidence": "18/18",
+        "newId": 1758,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "TCGDEX-tk-sm-l"
+      },
+      {
+        "evidence": "74/74",
+        "newId": 1611,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "bwp"
+      },
+      {
+        "evidence": "25/25",
+        "newId": 4347,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "cel25c"
+      },
+      {
+        "evidence": "42/42",
+        "newId": 1609,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "dpp"
+      },
+      {
+        "evidence": "5/5",
+        "newId": 3510,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "fut20"
+      },
+      {
+        "evidence": "25/25",
+        "newId": 1610,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "hsp"
+      },
+      {
+        "evidence": "12/12",
+        "newId": 1623,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "mcd11"
+      },
+      {
+        "evidence": "12/12",
+        "newId": 1624,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "mcd12"
+      },
+      {
+        "evidence": "12/12",
+        "newId": 1625,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "mcd14"
+      },
+      {
+        "evidence": "12/12",
+        "newId": 1741,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "mcd15"
+      },
+      {
+        "evidence": "12/12",
+        "newId": 1752,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "mcd16"
+      },
+      {
+        "evidence": "12/12",
+        "newId": 1845,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "mcd17"
+      },
+      {
+        "evidence": "12/12",
+        "newId": 2404,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "mcd18"
+      },
+      {
+        "evidence": "12/12",
+        "newId": 2829,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "mcd19"
+      },
+      {
+        "evidence": "25/25",
+        "newId": 3738,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "mcd21"
+      },
+      {
+        "evidence": "15/15",
+        "newId": 5135,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "mcd22"
+      },
+      {
+        "evidence": "26/26",
+        "newId": 1608,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "np"
+      },
+      {
+        "evidence": "91/91",
+        "newId": 2514,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "sma"
+      },
+      {
+        "evidence": "244/244",
+        "newId": 6096,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "sv10"
+      },
+      {
+        "evidence": "24/24",
+        "newId": 5224,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "sve"
+      },
+      {
         "evidence": "10/10",
         "newId": 1626,
         "oldId": 275771,
         "reason": "derived",
         "setId": "tk1a"
+      },
+      {
+        "evidence": "10/10",
+        "newId": 1626,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "tk1b"
+      },
+      {
+        "evidence": "9/9",
+        "newId": 1627,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "tk2a"
+      },
+      {
+        "evidence": "12/12",
+        "newId": 1627,
+        "oldId": null,
+        "reason": "derived",
+        "setId": "tk2b"
       }
     ],
     "totals": {
-      "checked": 22744,
-      "corrected": 17,
-      "dropped": 4,
-      "foreignNameOk": 1442,
-      "keptMismatch": 96,
-      "noSetExpansion": 179,
-      "ok": 21003,
+      "checked": 21941,
+      "corrected": 35,
+      "dropped": 11,
+      "foreignNameOk": 1348,
+      "keptMismatch": 103,
+      "noSetExpansion": 178,
+      "ok": 20263,
       "unknownProduct": 3
     }
   },
-  "orderedRejected": [],
+  "orderedRejected": [
+    {
+      "cards": [
+        "sm10/175",
+        "sm10/209"
+      ],
+      "expansionId": 2437,
+      "name": "Green's Exploration",
+      "products": [
+        372460,
+        372496
+      ]
+    },
+    {
+      "cards": [
+        "sm11/188",
+        "sm11/231"
+      ],
+      "expansionId": 2487,
+      "name": "Blue's Tactics",
+      "products": [
+        388727,
+        388942
+      ]
+    },
+    {
+      "cards": [
+        "sm11/202",
+        "sm11/235"
+      ],
+      "expansionId": 2487,
+      "name": "Misty's Favor",
+      "products": [
+        388797,
+        388962
+      ]
+    },
+    {
+      "cards": [
+        "sm115/57",
+        "sm115/67"
+      ],
+      "expansionId": 2514,
+      "name": "Giovanni's Exile",
+      "products": [
+        394717,
+        396677
+      ]
+    },
+    {
+      "cards": [
+        "sm12/195",
+        "sm12/266"
+      ],
+      "expansionId": 2644,
+      "name": "Lana's Fishing Rod",
+      "products": [
+        408584,
+        410659
+      ]
+    },
+    {
+      "cards": [
+        "sm12/196",
+        "sm12/230"
+      ],
+      "expansionId": 2644,
+      "name": "Lillie's Full Force",
+      "products": [
+        408589,
+        408744
+      ]
+    },
+    {
+      "cards": [
+        "sm12/197",
+        "sm12/267"
+      ],
+      "expansionId": 2644,
+      "name": "Lillie's Poké Doll",
+      "products": [
+        408594,
+        410664
+      ]
+    },
+    {
+      "cards": [
+        "sm12/200",
+        "sm12/232"
+      ],
+      "expansionId": 2644,
+      "name": "N's Resolve",
+      "products": [
+        408599,
+        408754
+      ]
+    },
+    {
+      "cards": [
+        "sm12/201",
+        "sm12/233"
+      ],
+      "expansionId": 2644,
+      "name": "Professor Oak's Setup",
+      "products": [
+        408604,
+        408759
+      ]
+    },
+    {
+      "cards": [
+        "sm9/140",
+        "sm9/174"
+      ],
+      "expansionId": 2407,
+      "name": "Erika's Hospitality",
+      "products": [
+        368074,
+        369099
+      ]
+    },
+    {
+      "cards": [
+        "xy2/79",
+        "xy2/109"
+      ],
+      "expansionId": 1583,
+      "name": "M Kangaskhan-EX",
+      "products": [
+        281562,
+        281592
+      ]
+    },
+    {
+      "cards": [
+        "xy3/5",
+        "xy3/112"
+      ],
+      "expansionId": 1584,
+      "name": "M Heracross-EX",
+      "products": [
+        281669,
+        281776
+      ]
+    },
+    {
+      "cards": [
+        "xy4/35",
+        "xy4/121"
+      ],
+      "expansionId": 1521,
+      "name": "M Gengar-EX",
+      "products": [
+        281841,
+        281928
+      ]
+    },
+    {
+      "cards": [
+        "xy5/94",
+        "xy5/154"
+      ],
+      "expansionId": 1585,
+      "name": "M Aggron-EX",
+      "products": [
+        273625,
+        273685
+      ]
+    },
+    {
+      "cards": [
+        "xy5/106",
+        "xy5/156"
+      ],
+      "expansionId": 1585,
+      "name": "M Gardevoir-EX",
+      "products": [
+        273637,
+        273687
+      ]
+    },
+    {
+      "cards": [
+        "xy6/35",
+        "xy6/100"
+      ],
+      "expansionId": 1649,
+      "name": "M Gallade-EX",
+      "products": [
+        282703,
+        282768
+      ]
+    }
+  ],
   "overrides": {
     "applied": 7,
     "removed": 0,
@@ -7908,16 +8358,3071 @@
   "rules": {
     "energySymbol": 3,
     "leftRight": 0,
-    "ordered": 36,
-    "orderedRejected": 0,
+    "ordered": 60,
+    "orderedRejected": 16,
     "override": 7,
     "oversizeExcluded": 4,
     "versionSuffixSkipped": 10
   },
+  "setsWithoutExpansion": [
+    {
+      "cards": 12,
+      "evidence": "2/12",
+      "setId": "TCGDEX-2013bw",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 41,
+      "evidence": "4/41",
+      "setId": "TCGDEX-2019sm-fr",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 286,
+      "evidence": "0/0",
+      "setId": "TCGDEX-A1",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 86,
+      "evidence": "0/0",
+      "setId": "TCGDEX-A1a",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 207,
+      "evidence": "0/0",
+      "setId": "TCGDEX-A2",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 96,
+      "evidence": "0/0",
+      "setId": "TCGDEX-A2a",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 111,
+      "evidence": "0/0",
+      "setId": "TCGDEX-A2b",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 239,
+      "evidence": "0/0",
+      "setId": "TCGDEX-A3",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 103,
+      "evidence": "0/0",
+      "setId": "TCGDEX-A3a",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 107,
+      "evidence": "0/0",
+      "setId": "TCGDEX-A3b",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 241,
+      "evidence": "0/0",
+      "setId": "TCGDEX-A4",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 105,
+      "evidence": "0/0",
+      "setId": "TCGDEX-A4a",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 331,
+      "evidence": "0/0",
+      "setId": "TCGDEX-B1",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 103,
+      "evidence": "0/0",
+      "setId": "TCGDEX-B1a",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 234,
+      "evidence": "0/0",
+      "setId": "TCGDEX-B2",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 131,
+      "evidence": "0/0",
+      "setId": "TCGDEX-B2a",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 100,
+      "evidence": "0/0",
+      "setId": "TCGDEX-P-A",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 0,
+      "evidence": "0/0",
+      "setId": "TCGDEX-jumbo",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 1,
+      "evidence": "0/0",
+      "setId": "TCGDEX-miscp",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 0,
+      "evidence": "0/0",
+      "setId": "TCGDEX-rc",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 0,
+      "evidence": "0/0",
+      "setId": "TCGDEX-sp",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 30,
+      "evidence": "0/30",
+      "setId": "TCGDEX-tk-bw-e",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 11,
+      "evidence": "0/11",
+      "setId": "TCGDEX-tk-dp-l",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 30,
+      "evidence": "0/29",
+      "setId": "TCGDEX-tk-hs-g",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 30,
+      "evidence": "4/30",
+      "setId": "TCGDEX-tk-sm-r",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 30,
+      "evidence": "0/0",
+      "setId": "TCGDEX-tk-xy-b",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 30,
+      "evidence": "0/0",
+      "setId": "TCGDEX-tk-xy-latia",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 30,
+      "evidence": "0/0",
+      "setId": "TCGDEX-tk-xy-latio",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 30,
+      "evidence": "0/0",
+      "setId": "TCGDEX-tk-xy-n",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 30,
+      "evidence": "0/0",
+      "setId": "TCGDEX-tk-xy-p",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 30,
+      "evidence": "0/0",
+      "setId": "TCGDEX-tk-xy-su",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 30,
+      "evidence": "0/0",
+      "setId": "TCGDEX-tk-xy-sy",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 30,
+      "evidence": "0/0",
+      "setId": "TCGDEX-tk-xy-w",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 0,
+      "evidence": "0/0",
+      "setId": "TCGDEX-wp",
+      "tcgdexExpansion": null
+    },
+    {
+      "cards": 6,
+      "evidence": "0/0",
+      "setId": "TCGDEX-xya",
+      "tcgdexExpansion": null
+    }
+  ],
+  "stabilityConflicts": [],
+  "stabilityDropped": [],
+  "stabilityKept": [
+    {
+      "cardKey": "base2/17",
+      "productId": 273814,
+      "source": "corrected",
+      "todayId": 273814,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base2/18",
+      "productId": 273815,
+      "source": "corrected",
+      "todayId": 273815,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base2/19",
+      "productId": 273816,
+      "source": "corrected",
+      "todayId": 273816,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base2/20",
+      "productId": 273817,
+      "source": "corrected",
+      "todayId": 273817,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base2/21",
+      "productId": 273818,
+      "source": "corrected",
+      "todayId": 273818,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base2/22",
+      "productId": 273819,
+      "source": "corrected",
+      "todayId": 273819,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base2/23",
+      "productId": 273820,
+      "source": "corrected",
+      "todayId": 273820,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base2/24",
+      "productId": 273821,
+      "source": "corrected",
+      "todayId": 273821,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base2/25",
+      "productId": 273822,
+      "source": "corrected",
+      "todayId": 273822,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base2/26",
+      "productId": 273823,
+      "source": "corrected",
+      "todayId": 273823,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base2/27",
+      "productId": 273824,
+      "source": "corrected",
+      "todayId": 273824,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base2/28",
+      "productId": 273825,
+      "source": "corrected",
+      "todayId": 273825,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base2/29",
+      "productId": 273826,
+      "source": "corrected",
+      "todayId": 273826,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base2/30",
+      "productId": 273827,
+      "source": "corrected",
+      "todayId": 273827,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base2/31",
+      "productId": 273828,
+      "source": "corrected",
+      "todayId": 273828,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base2/32",
+      "productId": 273829,
+      "source": "corrected",
+      "todayId": 273829,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base5/18",
+      "productId": 274071,
+      "source": "corrected",
+      "todayId": 274071,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base5/19",
+      "productId": 274072,
+      "source": "corrected",
+      "todayId": 274072,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base5/20",
+      "productId": 274073,
+      "source": "corrected",
+      "todayId": 274073,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base5/21",
+      "productId": 274074,
+      "source": "corrected",
+      "todayId": 274074,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base5/22",
+      "productId": 274075,
+      "source": "corrected",
+      "todayId": 274075,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base5/23",
+      "productId": 274076,
+      "source": "corrected",
+      "todayId": 274076,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base5/24",
+      "productId": 274077,
+      "source": "corrected",
+      "todayId": 274077,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base5/25",
+      "productId": 274078,
+      "source": "corrected",
+      "todayId": 274078,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base5/26",
+      "productId": 274079,
+      "source": "corrected",
+      "todayId": 274079,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base5/27",
+      "productId": 274080,
+      "source": "corrected",
+      "todayId": 274080,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base5/28",
+      "productId": 274081,
+      "source": "corrected",
+      "todayId": 274081,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base5/29",
+      "productId": 274082,
+      "source": "corrected",
+      "todayId": 274082,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base5/30",
+      "productId": 274083,
+      "source": "corrected",
+      "todayId": 274083,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base5/31",
+      "productId": 274084,
+      "source": "corrected",
+      "todayId": 274084,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base5/71",
+      "productId": 274124,
+      "source": "corrected",
+      "todayId": 274124,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base5/72",
+      "productId": 274125,
+      "source": "corrected",
+      "todayId": 274125,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "base5/80",
+      "productId": 274133,
+      "source": "corrected",
+      "todayId": 274133,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "basep/3",
+      "productId": 275422,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "basep/11",
+      "productId": 275430,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "bp/4",
+      "productId": 275414,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "bp/5",
+      "productId": 275415,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "bp/8",
+      "productId": 275418,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "bp/9",
+      "productId": 275419,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "bw10/60",
+      "productId": 281081,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "bw10/96",
+      "productId": 281117,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "bw10/98",
+      "productId": 281119,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "bw10/101",
+      "productId": 281122,
+      "source": "corrected",
+      "todayId": 281102,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "bw10/105",
+      "productId": 281126,
+      "source": "corrected",
+      "todayId": 281106,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "bw8/135",
+      "productId": 280875,
+      "source": "corrected",
+      "todayId": 280858,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "bw9/53",
+      "productId": 280931,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "bw9/111",
+      "productId": 280989,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "bw9/115",
+      "productId": 280993,
+      "source": "corrected",
+      "todayId": 280979,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "cel25c/113",
+      "productId": 577423,
+      "source": "corrected",
+      "todayId": 576790,
+      "todaySource": "corrected"
+    },
+    {
+      "cardKey": "cel25c/114",
+      "productId": 577424,
+      "source": "corrected",
+      "todayId": 576791,
+      "todaySource": "corrected"
+    },
+    {
+      "cardKey": "col1/94",
+      "productId": 279737,
+      "source": "corrected",
+      "todayId": 279729,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "col1/95",
+      "productId": 279738,
+      "source": "corrected",
+      "todayId": 279730,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "dp6/42",
+      "productId": 278191,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "dp6/82",
+      "displaced": [
+        "dp6/76"
+      ],
+      "productId": 278225,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "dp7/58",
+      "productId": 278297,
+      "source": "tcgdex",
+      "todayId": 278356,
+      "todaySource": "corrected"
+    },
+    {
+      "cardKey": "dp7/59",
+      "productId": 278298,
+      "source": "tcgdex",
+      "todayId": 278357,
+      "todaySource": "corrected"
+    },
+    {
+      "cardKey": "dp7/80",
+      "productId": 278296,
+      "source": "tcgdex",
+      "todayId": 278378,
+      "todaySource": "corrected"
+    },
+    {
+      "cardKey": "dpp/DP5",
+      "productId": 275534,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "dpp/DP25",
+      "productId": 275552,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "dpp/DP48",
+      "productId": 275559,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "ex11/36",
+      "productId": 276799,
+      "source": "corrected",
+      "todayId": 276798,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "ex11/37",
+      "productId": 276800,
+      "source": "corrected",
+      "todayId": 276798,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "ex11/38",
+      "productId": 276801,
+      "source": "corrected",
+      "todayId": 276798,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "ex11/39",
+      "productId": 276802,
+      "source": "corrected",
+      "todayId": 276798,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "ex11/40",
+      "productId": 276803,
+      "source": "corrected",
+      "todayId": 276798,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "ex11/61",
+      "productId": 276824,
+      "source": "corrected",
+      "todayId": 276798,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "ex11/62",
+      "productId": 276825,
+      "source": "corrected",
+      "todayId": 276798,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "ex11/63",
+      "productId": 276826,
+      "source": "corrected",
+      "todayId": 276798,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "ex11/64",
+      "productId": 276827,
+      "source": "corrected",
+      "todayId": 276798,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "g1/28a",
+      "productId": 297892,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "g1/73a",
+      "productId": 311413,
+      "source": "corrected",
+      "todayId": 288508,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "g1/RC9",
+      "productId": 288518,
+      "source": "corrected",
+      "todayId": 288465,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "g1/RC28",
+      "productId": 288537,
+      "source": "corrected",
+      "todayId": 288515,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "g1/RC29",
+      "productId": 288538,
+      "source": "corrected",
+      "todayId": 288464,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "g1/RC32",
+      "productId": 288541,
+      "source": "corrected",
+      "todayId": 288530,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "gym1/15",
+      "productId": 274234,
+      "source": "corrected",
+      "todayId": 274151,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "gym2/20",
+      "productId": 274378,
+      "source": "corrected",
+      "todayId": 274288,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "hgss1/105",
+      "productId": 279077,
+      "source": "corrected",
+      "todayId": 278986,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "hgss1/106",
+      "productId": 279078,
+      "source": "corrected",
+      "todayId": 279008,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "hgss1/108",
+      "productId": 279080,
+      "source": "corrected",
+      "todayId": 278992,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "hgss1/110",
+      "productId": 279082,
+      "source": "corrected",
+      "todayId": 279004,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "hgss1/112",
+      "productId": 279084,
+      "source": "corrected",
+      "todayId": 279083,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "hgss1/114",
+      "productId": 279086,
+      "source": "corrected",
+      "todayId": 279085,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "hgss4/92",
+      "productId": 279622,
+      "source": "corrected",
+      "todayId": 279533,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "hgss4/93",
+      "productId": 279623,
+      "source": "corrected",
+      "todayId": 279564,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "hgss4/95",
+      "productId": 279625,
+      "source": "corrected",
+      "todayId": 279556,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "hgss4/98",
+      "productId": 279628,
+      "source": "corrected",
+      "todayId": 279584,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "hgss4/100",
+      "productId": 279630,
+      "source": "corrected",
+      "todayId": 279629,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "hgss4/102",
+      "productId": 279632,
+      "source": "corrected",
+      "todayId": 279631,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "mcd21/5",
+      "productId": 538818,
+      "source": "corrected",
+      "todayId": 538808,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "mcd21/16",
+      "productId": 538928,
+      "source": "corrected",
+      "todayId": 538918,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "mcd21/21",
+      "productId": 538978,
+      "source": "corrected",
+      "todayId": 538968,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/97",
+      "productId": 918927,
+      "source": "corrected",
+      "todayId": 918926,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/104",
+      "productId": 918940,
+      "source": "corrected",
+      "todayId": 918812,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/105",
+      "productId": 918941,
+      "source": "corrected",
+      "todayId": 918821,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/106",
+      "productId": 918943,
+      "source": "corrected",
+      "todayId": 918832,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/107",
+      "productId": 918944,
+      "source": "corrected",
+      "todayId": 918836,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/108",
+      "productId": 918945,
+      "source": "corrected",
+      "todayId": 918847,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/109",
+      "productId": 918947,
+      "source": "corrected",
+      "todayId": 918853,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/110",
+      "productId": 918948,
+      "source": "corrected",
+      "todayId": 918869,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/111",
+      "productId": 918949,
+      "source": "corrected",
+      "todayId": 918876,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/112",
+      "productId": 918950,
+      "source": "corrected",
+      "todayId": 918891,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/113",
+      "productId": 918952,
+      "source": "corrected",
+      "todayId": 918893,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/114",
+      "productId": 918953,
+      "source": "corrected",
+      "todayId": 918906,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/115",
+      "productId": 918954,
+      "source": "corrected",
+      "todayId": 918908,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/116",
+      "productId": 918955,
+      "source": "corrected",
+      "todayId": 918910,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/117",
+      "productId": 918956,
+      "source": "corrected",
+      "todayId": 918911,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/118",
+      "productId": 918957,
+      "source": "corrected",
+      "todayId": 918820,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/119",
+      "productId": 918958,
+      "source": "corrected",
+      "todayId": 918838,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/120",
+      "productId": 918959,
+      "source": "corrected",
+      "todayId": 918845,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/121",
+      "productId": 918960,
+      "source": "corrected",
+      "todayId": 918849,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/122",
+      "productId": 918961,
+      "source": "corrected",
+      "todayId": 918868,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/123",
+      "productId": 918962,
+      "source": "corrected",
+      "todayId": 918895,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/124",
+      "productId": 918963,
+      "source": "corrected",
+      "todayId": 918916,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/125",
+      "productId": 918964,
+      "source": "corrected",
+      "todayId": 918917,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/127",
+      "productId": 918966,
+      "source": "corrected",
+      "todayId": 918919,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/135",
+      "productId": 918979,
+      "source": "corrected",
+      "todayId": 918820,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/136",
+      "productId": 918980,
+      "source": "corrected",
+      "todayId": 918849,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/137",
+      "productId": 918981,
+      "source": "corrected",
+      "todayId": 918868,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/138",
+      "productId": 918982,
+      "source": "corrected",
+      "todayId": 918912,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/139",
+      "productId": 918983,
+      "source": "corrected",
+      "todayId": 918917,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "me6/141",
+      "productId": 918985,
+      "source": "corrected",
+      "todayId": 918912,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "neo1/54",
+      "productId": 274454,
+      "source": "corrected",
+      "todayId": 274453,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "neo1/57",
+      "productId": 274457,
+      "source": "corrected",
+      "todayId": 274456,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "neo1/81",
+      "productId": 274481,
+      "source": "corrected",
+      "todayId": 274480,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "neo2/21",
+      "productId": 274532,
+      "source": "corrected",
+      "todayId": 274513,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "neo2/22",
+      "productId": 274533,
+      "source": "corrected",
+      "todayId": 274514,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "neo2/23",
+      "productId": 274534,
+      "source": "corrected",
+      "todayId": 274515,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "neo2/24",
+      "productId": 274535,
+      "source": "corrected",
+      "todayId": 274516,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "neo2/25",
+      "productId": 274536,
+      "source": "corrected",
+      "todayId": 274517,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "neo2/26",
+      "productId": 274537,
+      "source": "corrected",
+      "todayId": 274518,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "neo2/27",
+      "productId": 274538,
+      "source": "corrected",
+      "todayId": 274519,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "neo2/28",
+      "productId": 274539,
+      "source": "corrected",
+      "todayId": 274520,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "neo2/29",
+      "productId": 274540,
+      "source": "corrected",
+      "todayId": 274521,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "neo2/30",
+      "productId": 274541,
+      "source": "corrected",
+      "todayId": 274522,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "neo2/31",
+      "productId": 274542,
+      "source": "corrected",
+      "todayId": 274523,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "neo2/34",
+      "productId": 274545,
+      "source": "corrected",
+      "todayId": 274526,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "neo2/35",
+      "productId": 274546,
+      "source": "corrected",
+      "todayId": 274527,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "neo2/36",
+      "productId": 274547,
+      "source": "corrected",
+      "todayId": 274528,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "pl1/6",
+      "productId": 278426,
+      "source": "tcgdex",
+      "todayId": 278427,
+      "todaySource": "corrected"
+    },
+    {
+      "cardKey": "pl1/81",
+      "productId": 278419,
+      "source": "tcgdex",
+      "todayId": 278502,
+      "todaySource": "corrected"
+    },
+    {
+      "cardKey": "pl1/97",
+      "productId": 278421,
+      "source": "tcgdex",
+      "todayId": 278518,
+      "todaySource": "corrected"
+    },
+    {
+      "cardKey": "pl1/102",
+      "productId": 278420,
+      "source": "tcgdex",
+      "todayId": 278523,
+      "todaySource": "corrected"
+    },
+    {
+      "cardKey": "pl3/70",
+      "productId": 882910,
+      "source": "corrected",
+      "todayId": 882910,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "pl4/46",
+      "productId": 278869,
+      "source": "tcgdex",
+      "todayId": 278918,
+      "todaySource": "corrected"
+    },
+    {
+      "cardKey": "pl4/52",
+      "productId": 278870,
+      "source": "tcgdex",
+      "todayId": 278924,
+      "todaySource": "corrected"
+    },
+    {
+      "cardKey": "pl4/74",
+      "productId": 278872,
+      "source": "tcgdex",
+      "todayId": 278946,
+      "todaySource": "corrected"
+    },
+    {
+      "cardKey": "pl4/94",
+      "productId": 278966,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm1/168",
+      "productId": 368687,
+      "source": "corrected",
+      "todayId": 295475,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm10/82",
+      "productId": 372480,
+      "source": "corrected",
+      "todayId": 370787,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm10/175",
+      "productId": 372460,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm10/191",
+      "productId": 372473,
+      "source": "corrected",
+      "todayId": 370785,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm10/192",
+      "productId": 372474,
+      "source": "corrected",
+      "todayId": 370785,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm10/196",
+      "productId": 372478,
+      "source": "corrected",
+      "todayId": 370786,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm10/197",
+      "productId": 372479,
+      "source": "corrected",
+      "todayId": 370786,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm10/199",
+      "productId": 372481,
+      "source": "corrected",
+      "todayId": 372373,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm10/200",
+      "productId": 372482,
+      "source": "corrected",
+      "todayId": 370788,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm10/201",
+      "productId": 372483,
+      "source": "corrected",
+      "todayId": 370788,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm10/204",
+      "productId": 372486,
+      "source": "corrected",
+      "todayId": 370790,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm10/205",
+      "productId": 372487,
+      "source": "corrected",
+      "todayId": 370790,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm10/209",
+      "productId": 372496,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm11/28",
+      "productId": 387972,
+      "source": "corrected",
+      "todayId": 387967,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm11/116",
+      "productId": 388382,
+      "source": "corrected",
+      "todayId": 388372,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm11/188",
+      "productId": 388727,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm11/202",
+      "productId": 388797,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm11/231",
+      "productId": 388942,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm11/235",
+      "productId": 388962,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm115/57",
+      "productId": 394717,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm115/67",
+      "productId": 396677,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm12/195",
+      "productId": 408584,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm12/196",
+      "productId": 408589,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm12/197",
+      "productId": 408594,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm12/200",
+      "productId": 408599,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm12/201",
+      "productId": 408604,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm12/230",
+      "productId": 408744,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm12/232",
+      "productId": 408754,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm12/233",
+      "productId": 408759,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm12/237",
+      "productId": 407794,
+      "source": "corrected",
+      "todayId": 398524,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm12/238",
+      "productId": 407869,
+      "source": "corrected",
+      "todayId": 398529,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm12/239",
+      "productId": 407919,
+      "source": "corrected",
+      "todayId": 398504,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm12/240",
+      "productId": 407959,
+      "source": "corrected",
+      "todayId": 398509,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm12/241",
+      "productId": 407979,
+      "source": "corrected",
+      "todayId": 398534,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm12/242",
+      "productId": 407989,
+      "source": "corrected",
+      "todayId": 398539,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm12/243",
+      "productId": 408024,
+      "source": "corrected",
+      "todayId": 398544,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm12/244",
+      "productId": 408054,
+      "source": "corrected",
+      "todayId": 398549,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm12/245",
+      "productId": 408129,
+      "source": "corrected",
+      "todayId": 398514,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm12/246",
+      "productId": 408224,
+      "source": "corrected",
+      "todayId": 398554,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm12/247",
+      "productId": 408344,
+      "source": "corrected",
+      "todayId": 398559,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm12/248",
+      "productId": 408504,
+      "source": "corrected",
+      "todayId": 398519,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm12/266",
+      "productId": 410659,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm12/267",
+      "productId": 410664,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm2/46",
+      "productId": 297508,
+      "source": "corrected",
+      "todayId": 297478,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm2/55",
+      "productId": 297517,
+      "source": "corrected",
+      "todayId": 297478,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm2/56",
+      "productId": 297518,
+      "source": "corrected",
+      "todayId": 297478,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm2/143",
+      "productId": 297578,
+      "source": "corrected",
+      "todayId": 296848,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm35/78",
+      "productId": 302215,
+      "source": "corrected",
+      "todayId": 301167,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm5/32",
+      "productId": 315963,
+      "source": "corrected",
+      "todayId": 315962,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm5/157",
+      "productId": 316081,
+      "source": "corrected",
+      "todayId": 315503,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm5/158",
+      "productId": 316082,
+      "source": "corrected",
+      "todayId": 316064,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm5/159",
+      "productId": 316083,
+      "source": "corrected",
+      "todayId": 315504,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm5/160",
+      "productId": 316084,
+      "source": "corrected",
+      "todayId": 316066,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm5/161",
+      "productId": 316085,
+      "source": "corrected",
+      "todayId": 315828,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm5/162",
+      "productId": 316086,
+      "source": "corrected",
+      "todayId": 316068,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm5/163",
+      "productId": 316087,
+      "source": "corrected",
+      "todayId": 315829,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm5/164",
+      "productId": 316088,
+      "source": "corrected",
+      "todayId": 316026,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm5/165",
+      "productId": 316089,
+      "source": "corrected",
+      "todayId": 316027,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm5/167",
+      "productId": 316091,
+      "source": "corrected",
+      "todayId": 316047,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm5/168",
+      "productId": 316092,
+      "source": "corrected",
+      "todayId": 316054,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm6/15",
+      "productId": 355535,
+      "source": "corrected",
+      "todayId": 355534,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm6/128",
+      "productId": 355616,
+      "source": "corrected",
+      "todayId": 327209,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm7/8",
+      "productId": 361255,
+      "source": "corrected",
+      "todayId": 361254,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm7/145",
+      "productId": 360407,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm7/165",
+      "productId": 361402,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm75/35",
+      "productId": 363507,
+      "source": "corrected",
+      "todayId": 363506,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sm8/188",
+      "productId": 365822,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm8/213",
+      "productId": 365846,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm9/51",
+      "productId": 368982,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm9/133",
+      "productId": 369060,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm9/140",
+      "productId": 368074,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "sm9/174",
+      "productId": 369099,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "smp/SM31",
+      "productId": 298285,
+      "source": "corrected",
+      "todayId": 298284,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "smp/SM50",
+      "productId": 299580,
+      "source": "corrected",
+      "todayId": 298287,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "smp/SM80",
+      "productId": 311415,
+      "source": "corrected",
+      "todayId": 301978,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "smp/SM81",
+      "productId": 311416,
+      "source": "corrected",
+      "todayId": 295296,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "smp/SM123",
+      "productId": 358428,
+      "source": "corrected",
+      "todayId": 321166,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "smp/SM124",
+      "productId": 358426,
+      "source": "corrected",
+      "todayId": 321167,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "smp/SM148",
+      "productId": 363381,
+      "source": "corrected",
+      "todayId": 313448,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "smp/SM175",
+      "productId": 369354,
+      "source": "corrected",
+      "todayId": 369353,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "smp/SM176",
+      "productId": 369355,
+      "source": "corrected",
+      "todayId": 369353,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "smp/SM209",
+      "productId": 377541,
+      "source": "corrected",
+      "todayId": 371773,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "smp/SM223",
+      "productId": 399669,
+      "source": "corrected",
+      "todayId": 377529,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "smp/SM226",
+      "productId": 412909,
+      "source": "corrected",
+      "todayId": 368851,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "smp/SM231",
+      "productId": 394837,
+      "source": "corrected",
+      "todayId": 313448,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "smp/SM233",
+      "productId": 369362,
+      "source": "corrected",
+      "todayId": 369353,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "smp/SM242",
+      "productId": 369363,
+      "source": "corrected",
+      "todayId": 369353,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "smp/SM247",
+      "productId": 399314,
+      "source": "corrected",
+      "todayId": 397969,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "smp/SM248",
+      "productId": 576720,
+      "source": "corrected",
+      "todayId": 369468,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sv3/57",
+      "productId": 725137,
+      "source": "corrected",
+      "todayId": 725137,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sv3/62",
+      "productId": 725142,
+      "source": "corrected",
+      "todayId": 725142,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sv3/164",
+      "productId": 725244,
+      "source": "corrected",
+      "todayId": 725244,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "sv3/196",
+      "productId": 725276,
+      "source": "corrected",
+      "todayId": 725276,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "swsh1/76",
+      "productId": 436509,
+      "source": "corrected",
+      "todayId": 436504,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "swsh11/201",
+      "productId": 674207,
+      "source": "corrected",
+      "todayId": 670816,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy0/33",
+      "productId": 281299,
+      "source": "corrected",
+      "todayId": 281298,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy1/141",
+      "productId": 281478,
+      "source": "corrected",
+      "todayId": 281338,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy1/142",
+      "productId": 281479,
+      "source": "corrected",
+      "todayId": 281366,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy1/143",
+      "productId": 281480,
+      "source": "corrected",
+      "todayId": 281383,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy1/144",
+      "productId": 281481,
+      "source": "corrected",
+      "todayId": 281415,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy1/145",
+      "productId": 281482,
+      "source": "corrected",
+      "todayId": 281417,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy1/146",
+      "productId": 281483,
+      "source": "corrected",
+      "todayId": 281433,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy10/43a",
+      "productId": 311406,
+      "source": "corrected",
+      "todayId": 289867,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy10/54a",
+      "productId": 297893,
+      "source": "corrected",
+      "todayId": 289875,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy10/63",
+      "productId": 289884,
+      "source": "corrected",
+      "todayId": 289869,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy10/105a",
+      "productId": 295213,
+      "source": "corrected",
+      "todayId": 289925,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy10/111a",
+      "productId": 311411,
+      "source": "corrected",
+      "todayId": 289931,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy2/79",
+      "productId": 281562,
+      "source": "ordered",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xy2/88a",
+      "productId": 311412,
+      "source": "corrected",
+      "todayId": 281571,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy2/100",
+      "productId": 281583,
+      "source": "corrected",
+      "todayId": 281494,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy2/101",
+      "productId": 281584,
+      "source": "corrected",
+      "todayId": 281518,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy2/102",
+      "productId": 281585,
+      "source": "corrected",
+      "todayId": 281524,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy2/103",
+      "productId": 281586,
+      "source": "corrected",
+      "todayId": 281561,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy2/104",
+      "productId": 281587,
+      "source": "corrected",
+      "todayId": 281573,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy2/105",
+      "productId": 281588,
+      "source": "corrected",
+      "todayId": 281576,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy2/106",
+      "productId": 281589,
+      "source": "corrected",
+      "todayId": 281577,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy2/109",
+      "productId": 281592,
+      "source": "ordered",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xy3/5",
+      "productId": 281669,
+      "source": "ordered",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xy3/105",
+      "productId": 281769,
+      "source": "corrected",
+      "todayId": 281668,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy3/106",
+      "productId": 281770,
+      "source": "corrected",
+      "todayId": 281684,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy3/107",
+      "productId": 281771,
+      "source": "corrected",
+      "todayId": 281718,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy3/108",
+      "productId": 281772,
+      "source": "corrected",
+      "todayId": 281738,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy3/109",
+      "productId": 281773,
+      "source": "corrected",
+      "todayId": 281752,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy3/110",
+      "productId": 281774,
+      "source": "corrected",
+      "todayId": 281756,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy3/111",
+      "productId": 281775,
+      "source": "corrected",
+      "todayId": 281759,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy3/112",
+      "productId": 281776,
+      "source": "ordered",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xy4/35",
+      "productId": 281841,
+      "source": "ordered",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xy4/65a",
+      "productId": 311407,
+      "source": "corrected",
+      "todayId": 281871,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy4/113",
+      "productId": 281920,
+      "source": "corrected",
+      "todayId": 281827,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy4/114",
+      "productId": 281921,
+      "source": "corrected",
+      "todayId": 281840,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy4/115",
+      "productId": 281922,
+      "source": "corrected",
+      "todayId": 281864,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy4/116",
+      "productId": 281923,
+      "source": "corrected",
+      "todayId": 281873,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy4/117",
+      "productId": 281924,
+      "source": "corrected",
+      "todayId": 281897,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy4/119",
+      "productId": 281926,
+      "source": "corrected",
+      "todayId": 281917,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy4/121",
+      "productId": 281928,
+      "source": "ordered",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xy4/122",
+      "productId": 281929,
+      "source": "corrected",
+      "todayId": 281868,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/9",
+      "productId": 273540,
+      "source": "corrected",
+      "todayId": 273539,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/24",
+      "productId": 273555,
+      "source": "corrected",
+      "todayId": 273554,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/26",
+      "productId": 273557,
+      "source": "corrected",
+      "todayId": 273556,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/37",
+      "productId": 273568,
+      "source": "corrected",
+      "todayId": 273543,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/41",
+      "productId": 273572,
+      "source": "corrected",
+      "todayId": 273571,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/52",
+      "productId": 273583,
+      "source": "corrected",
+      "todayId": 273582,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/60",
+      "productId": 273591,
+      "source": "corrected",
+      "todayId": 273590,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/64",
+      "productId": 273595,
+      "source": "corrected",
+      "todayId": 273594,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/69",
+      "productId": 273600,
+      "source": "corrected",
+      "todayId": 273599,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/71",
+      "productId": 273602,
+      "source": "corrected",
+      "todayId": 273601,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/81",
+      "productId": 273612,
+      "source": "corrected",
+      "todayId": 273611,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/94",
+      "productId": 273625,
+      "source": "ordered",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xy5/97",
+      "productId": 273628,
+      "source": "corrected",
+      "todayId": 273627,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/104",
+      "productId": 273635,
+      "source": "corrected",
+      "todayId": 273634,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/106",
+      "productId": 273637,
+      "source": "ordered",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xy5/108",
+      "productId": 273639,
+      "source": "corrected",
+      "todayId": 273638,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/117",
+      "productId": 273648,
+      "source": "corrected",
+      "todayId": 273647,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/121",
+      "productId": 273652,
+      "source": "corrected",
+      "todayId": 273651,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/145",
+      "productId": 273676,
+      "source": "corrected",
+      "todayId": 273550,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/146",
+      "productId": 273677,
+      "source": "corrected",
+      "todayId": 273560,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/147",
+      "productId": 273678,
+      "source": "corrected",
+      "todayId": 273569,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/148",
+      "productId": 273679,
+      "source": "corrected",
+      "todayId": 273584,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/149",
+      "productId": 273680,
+      "source": "corrected",
+      "todayId": 273586,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/150",
+      "productId": 273681,
+      "source": "corrected",
+      "todayId": 273615,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/151",
+      "productId": 273682,
+      "source": "corrected",
+      "todayId": 273617,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/152",
+      "productId": 273683,
+      "source": "corrected",
+      "todayId": 273622,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/153",
+      "productId": 273684,
+      "source": "corrected",
+      "todayId": 273624,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/154",
+      "productId": 273685,
+      "source": "ordered",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xy5/155",
+      "productId": 273686,
+      "source": "corrected",
+      "todayId": 273636,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/156",
+      "productId": 273687,
+      "source": "ordered",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xy5/160",
+      "productId": 273691,
+      "source": "corrected",
+      "todayId": 273672,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/161",
+      "productId": 273692,
+      "source": "corrected",
+      "todayId": 273656,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy5/164",
+      "productId": 273695,
+      "source": "corrected",
+      "todayId": 273673,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy6/8",
+      "productId": 282676,
+      "source": "corrected",
+      "todayId": 282675,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy6/17",
+      "productId": 282685,
+      "source": "corrected",
+      "todayId": 282684,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy6/28",
+      "productId": 282696,
+      "source": "corrected",
+      "todayId": 282695,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy6/32",
+      "productId": 282700,
+      "source": "corrected",
+      "todayId": 282699,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy6/35",
+      "productId": 282703,
+      "source": "ordered",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xy6/52",
+      "productId": 282720,
+      "source": "corrected",
+      "todayId": 282719,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy6/72",
+      "productId": 282740,
+      "source": "corrected",
+      "todayId": 282739,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy6/75",
+      "productId": 282743,
+      "source": "corrected",
+      "todayId": 282728,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy6/77a",
+      "productId": 282774,
+      "source": "corrected",
+      "todayId": 282745,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy6/81",
+      "productId": 282749,
+      "source": "corrected",
+      "todayId": 282748,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy6/98",
+      "productId": 282766,
+      "source": "corrected",
+      "todayId": 282694,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy6/99",
+      "productId": 282767,
+      "source": "corrected",
+      "todayId": 282702,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy6/100",
+      "productId": 282768,
+      "source": "ordered",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xy6/101",
+      "productId": 282769,
+      "source": "corrected",
+      "todayId": 282726,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy6/103",
+      "productId": 282771,
+      "source": "corrected",
+      "todayId": 282730,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy6/104",
+      "productId": 282772,
+      "source": "corrected",
+      "todayId": 282728,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy6/106",
+      "productId": 295202,
+      "source": "corrected",
+      "todayId": 282745,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy6/107",
+      "productId": 282775,
+      "source": "corrected",
+      "todayId": 282762,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy6/108",
+      "productId": 282776,
+      "source": "corrected",
+      "todayId": 282764,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy7/11",
+      "productId": 284192,
+      "source": "corrected",
+      "todayId": 284191,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy7/15",
+      "productId": 284196,
+      "source": "corrected",
+      "todayId": 284195,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy7/18",
+      "productId": 284199,
+      "source": "corrected",
+      "todayId": 284198,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy7/32",
+      "productId": 284213,
+      "source": "corrected",
+      "todayId": 284212,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy7/50",
+      "productId": 284231,
+      "source": "corrected",
+      "todayId": 284230,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy7/67",
+      "productId": 284248,
+      "source": "corrected",
+      "todayId": 284245,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy7/75a",
+      "productId": 295259,
+      "source": "corrected",
+      "todayId": 284256,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy7/84",
+      "productId": 284265,
+      "source": "corrected",
+      "todayId": 284188,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy7/86",
+      "productId": 284267,
+      "source": "corrected",
+      "todayId": 284206,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy7/87",
+      "productId": 284268,
+      "source": "corrected",
+      "todayId": 284208,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy7/89",
+      "productId": 284270,
+      "source": "corrected",
+      "todayId": 284217,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy7/90",
+      "productId": 284271,
+      "source": "corrected",
+      "todayId": 284218,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy7/91",
+      "productId": 284272,
+      "source": "corrected",
+      "todayId": 284223,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy7/93",
+      "productId": 284274,
+      "source": "corrected",
+      "todayId": 284238,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy7/94",
+      "productId": 284275,
+      "source": "corrected",
+      "todayId": 284249,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy8/32",
+      "productId": 286278,
+      "source": "corrected",
+      "todayId": 286277,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy8/62",
+      "productId": 286308,
+      "source": "corrected",
+      "todayId": 286307,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy8/157",
+      "productId": 286403,
+      "source": "corrected",
+      "todayId": 286307,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy8/158",
+      "productId": 286404,
+      "source": "corrected",
+      "todayId": 286307,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy8/163",
+      "productId": 286409,
+      "source": "corrected",
+      "todayId": 286307,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy8/164",
+      "productId": 286410,
+      "source": "corrected",
+      "todayId": 286307,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy9/98a",
+      "productId": 311410,
+      "source": "corrected",
+      "todayId": 288273,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy9/98b",
+      "productId": 782672,
+      "source": "corrected",
+      "todayId": 288273,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xy9/107a",
+      "productId": 297896,
+      "source": "corrected",
+      "todayId": 288282,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY17",
+      "productId": 281320,
+      "source": "corrected",
+      "todayId": 552849,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY29",
+      "productId": 281321,
+      "source": "corrected",
+      "todayId": 281320,
+      "todaySource": "corrected"
+    },
+    {
+      "cardKey": "xyp/XY31",
+      "productId": 281325,
+      "source": "corrected",
+      "todayId": 552954,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY32",
+      "productId": 281323,
+      "source": "corrected",
+      "todayId": 552959,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY51",
+      "productId": 289714,
+      "source": "corrected-expansion",
+      "todayId": 289704,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY52",
+      "productId": 289715,
+      "source": "corrected-expansion",
+      "todayId": 289705,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY67a",
+      "productId": 291575,
+      "source": "corrected",
+      "todayId": 289787,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY84",
+      "productId": 289809,
+      "source": "corrected-expansion",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xyp/XY91",
+      "productId": 289793,
+      "source": "corrected",
+      "todayId": 709547,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY93",
+      "productId": 553429,
+      "source": "tcgdex",
+      "todayId": 289795,
+      "todaySource": "corrected"
+    },
+    {
+      "cardKey": "xyp/XY101",
+      "productId": 289820,
+      "source": "corrected",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xyp/XY107",
+      "productId": 293004,
+      "source": "corrected",
+      "todayId": 289557,
+      "todaySource": "corrected-expansion"
+    },
+    {
+      "cardKey": "xyp/XY112",
+      "productId": 295179,
+      "source": "corrected",
+      "todayId": 289787,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY116",
+      "productId": 291973,
+      "source": "corrected",
+      "todayId": 289806,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY124",
+      "productId": 293003,
+      "source": "corrected",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xyp/XY125",
+      "productId": 295172,
+      "source": "corrected",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xyp/XY133",
+      "productId": 289562,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xyp/XY149",
+      "productId": 290108,
+      "source": "corrected",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xyp/XY150",
+      "productId": 290109,
+      "source": "corrected",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xyp/XY150a",
+      "productId": 311267,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xyp/XY164",
+      "productId": 295155,
+      "source": "corrected",
+      "todayId": 553958,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY174",
+      "productId": 295165,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xyp/XY177a",
+      "productId": 311408,
+      "source": "corrected",
+      "todayId": 293006,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY183",
+      "productId": 363907,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xyp/XY185",
+      "productId": 295174,
+      "source": "corrected",
+      "todayId": 553958,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY187",
+      "productId": 295175,
+      "source": "corrected",
+      "todayId": 553429,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY188",
+      "productId": 295181,
+      "source": "corrected",
+      "todayId": 291578,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY190",
+      "productId": 295182,
+      "source": "corrected",
+      "todayId": 291576,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY191",
+      "productId": 295177,
+      "source": "corrected",
+      "todayId": 293189,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY192",
+      "productId": 295183,
+      "source": "corrected",
+      "todayId": 554275,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY193",
+      "productId": 295184,
+      "source": "corrected",
+      "todayId": 295150,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY194",
+      "productId": 295178,
+      "source": "corrected",
+      "todayId": 552884,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY195",
+      "productId": 311403,
+      "source": "corrected",
+      "todayId": 553364,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY196",
+      "productId": 295185,
+      "source": "corrected",
+      "todayId": 295149,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY197",
+      "productId": 295186,
+      "source": "corrected",
+      "todayId": 289806,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY198",
+      "productId": 311401,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xyp/XY198a",
+      "productId": 311405,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xyp/XY200",
+      "productId": 311398,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xyp/XY200a",
+      "productId": 311404,
+      "source": "matched",
+      "todayId": null,
+      "todaySource": null
+    },
+    {
+      "cardKey": "xyp/XY204",
+      "productId": 295189,
+      "source": "corrected",
+      "todayId": 554217,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY205",
+      "productId": 295190,
+      "source": "corrected",
+      "todayId": 554217,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY206",
+      "productId": 295191,
+      "source": "corrected",
+      "todayId": 554217,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY207",
+      "productId": 295192,
+      "source": "corrected",
+      "todayId": 554217,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY208",
+      "productId": 295193,
+      "source": "corrected",
+      "todayId": 554217,
+      "todaySource": "tcgdex"
+    },
+    {
+      "cardKey": "xyp/XY210",
+      "productId": 295195,
+      "source": "corrected",
+      "todayId": 554217,
+      "todaySource": "tcgdex"
+    }
+  ],
   "stillMissing": [
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Virizion EX [Verdant Wind | Emerald Slash]",
           "productId": 281030
         }
@@ -8773,6 +12278,7 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Meganium [Leaf Trans | Solarbeam | Prime]",
           "productId": 279081
         }
@@ -9080,6 +12586,7 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Eevee [Energy Evolution | Quick Draw]",
           "productId": 366834
         }
@@ -9294,7 +12801,7 @@
     {
       "candidates": [
         {
-          "hint": "id-outlier",
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Togepi & Cleffa & Igglybuff GX [Rolling Panic | Supreme Puff GX]",
           "productId": 582672
         }
@@ -9308,6 +12815,7 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Alolan Sandshrew [Defense Curl | Ice Ball]",
           "productId": 366837
         },
@@ -9322,6 +12830,7 @@
           "productId": 312250
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Alolan Ninetales GX [Ice Blade | Blizzard Edge | Ice Path GX]",
           "productId": 312251
         },
@@ -9437,6 +12946,7 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Sylveon GX [Magical Ribbon | Fairy Wind | Plea GX]",
           "productId": 365544
         }
@@ -9537,6 +13047,7 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Max Potion",
           "productId": 371641
         }
@@ -9584,7 +13095,7 @@
     {
       "candidates": [
         {
-          "hint": "id-outlier",
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Metagross GX [Geotech System | Giga Hammer | Algorithm GX]",
           "productId": 450878
         }
@@ -9598,6 +13109,7 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Charmander [Scratch | Flame Tail]",
           "productId": 367771
         }
@@ -9668,6 +13180,7 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Porygon-Z [Initialize | Zap Cannon]",
           "productId": 361591
         }
@@ -9749,7 +13262,7 @@
     {
       "candidates": [
         {
-          "hint": "id-outlier",
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Kiawe",
           "productId": 448148
         }
@@ -9763,6 +13276,7 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Entei GX [Combustion | Fire Fang | Brave Burn GX]",
           "productId": 321006
         }
@@ -9824,10 +13338,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Guzzlord GX [Eat Sloppily | Tyrannical Hole | Glutton GX]",
           "productId": 316307
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Guzzlord GX [Eat Sloppily | Tyrannical Hole | Glutton GX]",
           "productId": 363944
         }
@@ -10151,6 +13667,7 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Alolan Exeggutor [Tropical Shake]",
           "productId": 364325
         }
@@ -10198,7 +13715,7 @@
     {
       "candidates": [
         {
-          "hint": "id-outlier",
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Metal Frying Pan",
           "productId": 448158
         }
@@ -10304,6 +13821,7 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Sceptile [Power of Nature | Powerful Storm]",
           "productId": 370821
         }
@@ -10346,7 +13864,7 @@
     {
       "candidates": [
         {
-          "hint": "id-outlier",
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Tate & Liza",
           "productId": 562701
         }
@@ -10384,7 +13902,7 @@
     {
       "candidates": [
         {
-          "hint": "id-outlier",
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Altaria [Fight Song | Pierce]",
           "productId": 364324
         }
@@ -10557,7 +14075,7 @@
     {
       "candidates": [
         {
-          "hint": "id-outlier",
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Net Ball",
           "productId": 450048
         }
@@ -10605,7 +14123,7 @@
     {
       "candidates": [
         {
-          "hint": "id-outlier",
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Sightseer",
           "productId": 562700
         }
@@ -10711,6 +14229,7 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Charizard GX [Flamethrower | Flare Blitz GX]",
           "productId": 394737
         },
@@ -10780,6 +14299,7 @@
           "productId": 358590
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Tapu Koko GX [Aero Trail | Sky-High Claws | Tapu Thunder GX]",
           "productId": 363918
         }
@@ -11000,10 +14520,12 @@
           "productId": 295246
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Audino EX [Drain Slap | Do the Wave]",
           "productId": 295247
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Audino Spirit Link",
           "productId": 295265
         }
@@ -11696,10 +15218,12 @@
           "productId": 363675
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Rayquaza [Dual Claw | Dragon Blast]",
           "productId": 291582
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Rayquaza [Ozone Wall | Dragon Pulse]",
           "productId": 363673
         }
@@ -11818,6 +15342,7 @@
           "productId": 363901
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Garchomp EX [Dual Chop | Power Blast]",
           "productId": 363659
         }
@@ -12117,12 +15642,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 148,
+    "ambiguous": 150,
     "cards": 24057,
-    "matched": 480,
+    "customSet": 746,
+    "matched": 414,
     "missing": 2904,
     "override": 7,
-    "tcgdex": 20666
+    "stabilityKept": 405,
+    "tcgdex": 19581
   },
   "versionSuffixSkippedByExpansion": {
     "1537": 7,
