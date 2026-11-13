@@ -4,7 +4,7 @@ Node 24 (ESM). Tests: `cd scripts/api && npm test`.
 
 ## Ueberblick
 
-1. **Sync** (`sources/sync-tcgdex.mjs`, taeglich per `.github/workflows/sync-tcgdex.yml`): spiegelt die TCGdex-Daten nach `sources/tcgdex`. Der pokemontcg-Snapshot in `sources/pokemontcg` ist eingefroren.
+1. **Sync** (taeglich per `.github/workflows/sync-tcgdex.yml`, siehe [Taeglicher Workflow](#taeglicher-workflow-daily-sync)): `sources/sync-tcgdex.mjs` spiegelt die TCGdex-Daten nach `sources/tcgdex`, `sources/sync-cardmarket.mjs` laedt Cardmarkets Einzelkarten-Katalog nach `sources/cardmarket/` und den Preisguide nach `.cache/cardmarket/price-guide.json` (nie committet). Der pokemontcg-Snapshot in `sources/pokemontcg` ist eingefroren.
 2. **Matching** (`build-matching.mjs`): ordnet pokemontcg-Sets/-Karten den TCGdex-Sets/-Karten zu, schreibt `api/v3/reports/matching.{json,md}` und bricht bei Qualitaets- oder Paar-Drift ab (`--min-card-match 0.995 --fail-on-pair-drift`).
 3. **Build** (`build-api.mjs`): erzeugt aus Quellen, Matching und der **eingefrorenen Registry** (`api/registry/`) die statische API unter `api/v3/` (`sets.json`, `cards/<set>.json`, `search-index.json`, `meta.json`) und ergaenzt die Registry nur additiv.
 4. **Reports** (`api/v3/reports/`): `matching.*`, `learned-tables.json` (aus Paaren gelernte Ableitungstabellen; Aenderungen erscheinen im Diff) und `cardmarket-ids.json` (Cardmarket-Abdeckung je Set).
@@ -37,6 +37,24 @@ Ausgabeformat: `api/v3/cards/*.json` und `api/v3/search-index.json` sind kompakt
 Die Registry vergibt kanonische Set-IDs und Kartenschluessel. Sie ist die Grundlage der Zeilenschluessel in `db_collection` und darf sich daher nur additiv aendern.
 
 Alt-App-Set-IDs ohne eigene Karten (z. B. `TCGDEX-swsh9.5tg` fuer die Trainer-Galerie aus `db_sets`/Uebersicht der alten App) stehen in `api/mappings/legacy-set-aliases.json` (`{ "<alias>": { "set": "<kanonische Set-ID>", "reason": "..." } }`). Der Build nimmt sie additiv in `aliases` des Zielsets auf (Registry und `api/v3/sets.json`); ein unbekanntes Zielset bricht ab, eine Kollision mit einem fremden Alias ist ein `RegistryInvariantError`. Einmal eingetragen bleiben sie eingefroren, auch wenn der Mapping-Eintrag spaeter fehlt.
+
+## Taeglicher Workflow (Daily Sync)
+
+Ein Workflow, `.github/workflows/sync-tcgdex.yml` ("Daily Sync"), laeuft taeglich um 02:00 UTC (und manuell) auf `master`; Laeufe warten aufeinander (Concurrency `sync-tcgdex`). Der alte Workflow "Build Cardmarket Data" ist entfallen; `cardmarket/` (Altformat) ist eingefroren und wird nicht mehr erzeugt. Die Tests unter `scripts/cardmarket/` (Altbestand bis zur Release-Umstellung) laufen nicht mehr in CI.
+
+Schritte:
+1. **Tests** (`npm test` in `scripts/api`).
+2. **Sync TCGdex** (`sources/sync-tcgdex.mjs`); ein Fehler bricht den Lauf ab.
+3. **Verify set assets** (`sources/verify-assets.mjs`, `continue-on-error`, 10 min).
+4. **Sync Cardmarket** (`sources/sync-cardmarket.mjs`): Einzelkarten-Liste und Preisguide, je 30 s Timeout und 1 Wiederholung. Endet immer mit Exit 0, ausser bei Programmfehlern. Erfolg: `sources/cardmarket/catalog.jsonl` (nur bei Aenderung), `expansions.json`, `meta.json` (`consecutiveFailures: 0`) und `.cache/cardmarket/price-guide.json`. Ausfall (`failed`) oder unplausible Daten (`defective`, < 80 % der Eintraege des letzten Erfolgs): nur `meta.consecutiveFailures` steigt, der Preisguide-Cache wird geloescht.
+5. **Matching-Pruefung** (`build-matching.mjs --min-card-match 0.995 --fail-on-pair-drift`) und **Regressionstests** gegen die frischen Quellen.
+6. **Build** (`build-api.mjs`): Karten, Registry, Cardmarket-IDs, Preise, Reports. Ohne Preisguide von heute bleiben `api/v3/prices/*` und `prices/meta.json` unveraendert (Vortagespreise, altes Datum). Schreibt zusaetzlich `.cache/cardmarket/issue.json` (`{ open, title, body }`, `report/cardmarket-issue.mjs`).
+7. **Commit und Push**: ein Commit `chore: daily sync (TCGdex, Cardmarket)` mit `sources/tcgdex sources/cardmarket sources/SOURCES.json api/v3 api/registry`; Push mit Rebase, 2 Versuche. Ohne Aenderungen kein Commit.
+8. **Weitergabe**: startet per `workflow_dispatch` (Ref `release`) "Promote Master to Dev and Release" (`propagate-master-to-dev-release.yml`), auch ohne Commit. Ein Fehlschlag ist nur eine Warnung; dann die Weitergabe manuell starten.
+9. **Cardmarket-Issue** (`continue-on-error`): genau ein offenes Issue mit Label `cardmarket-mapping` und Titel "Cardmarket-Zuordnung prüfen". `open: true` und keins offen -> anlegen; schon offen -> nur Titel/Text aktualisieren, wenn sie sich geaendert haben (kein taeglicher Kommentar); `open: false` -> mit kurzem Kommentar schliessen. Ausloeser: neues/junges Set (nicht in der vorherigen `sets.json` oder hoechstens 60 Tage alt) mit < 80 % Abdeckung oder ohne ermittelbare Erweiterung, Override-/custom-set-Eintrag mit nicht mehr vorhandenem Produkt, 3 Cardmarket-Ausfaelle in Folge. Kleinere Luecken stehen nur in `api/v3/reports/cardmarket-ids.md`.
+10. **Bei Fehlschlag** eines Schritts ohne `continue-on-error` (Tests, TCGdex, Matching, Regression, Build, Push, Programmfehler im Cardmarket-Schritt): nichts wird committet, Issue mit Label `upstream-sync` (neu oder Kommentar am offenen).
+
+Neu starten: Actions -> "Daily Sync" -> "Run workflow" (Branch `release`; die Workflow-Definition kommt von `release`, ausgecheckt wird immer `master`). Ein zweiter Lauf am selben Tag ist unschaedlich: er laedt Cardmarket erneut, baut und committet nur Aenderungen. Nur die Weitergabe: "Promote Master to Dev and Release" manuell starten. Lokal nachstellen (aus dem Repo-Root): `node scripts/api/sources/sync-cardmarket.mjs`, dann `node scripts/api/build-api.mjs`; danach `.cache/cardmarket/issue.json` ansehen. Hinweis: Lokal kann der 30-s-Timeout bei langsamer Leitung greifen (Datei ~14 MB); das ergibt `failed` und erhoeht `consecutiveFailures` in `sources/cardmarket/meta.json`, diese Aenderung dann verwerfen.
 
 ## Registry-Drift beheben
 
