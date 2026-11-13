@@ -7877,6 +7877,7 @@
       "unknownProduct": 3
     }
   },
+  "orderedRejected": [],
   "overrides": {
     "applied": 7,
     "removed": 0,
@@ -7908,6 +7909,7 @@
     "energySymbol": 3,
     "leftRight": 0,
     "ordered": 36,
+    "orderedRejected": 0,
     "override": 7,
     "oversizeExcluded": 4,
     "versionSuffixSkipped": 10
@@ -7929,10 +7931,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Snivy [Slam]",
           "productId": 279925
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Snivy [Slam]",
           "productId": 547296
         }
@@ -7946,10 +7950,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Tepig [Ember]",
           "productId": 279924
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Tepig [Ember]",
           "productId": 547301
         }
@@ -7963,10 +7969,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Oshawott [Water Pulse]",
           "productId": 279923
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Oshawott [Water Pulse]",
           "productId": 547306
         }
@@ -7980,10 +7988,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Reshiram [Outrage | Blue Flare]",
           "productId": 279922
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Reshiram [Outrage | Blue Flare]",
           "productId": 279949
         }
@@ -7997,10 +8007,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Zekrom [Outrage | Bolt Strike]",
           "productId": 279926
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Zekrom [Outrage | Bolt Strike]",
           "productId": 279945
         }
@@ -8014,10 +8026,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Axew [Dragon Rage]",
           "productId": 279916
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Axew [Dragon Rage]",
           "productId": 279921
         }
@@ -8031,10 +8045,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Pansage [Bullet Seed]",
           "productId": 279913
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Pansage [Bullet Seed]",
           "productId": 279915
         }
@@ -8048,10 +8064,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Pansage [Bullet Seed]",
           "productId": 279913
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Pansage [Bullet Seed]",
           "productId": 279915
         }
@@ -8065,10 +8083,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Axew [Dragon Rage]",
           "productId": 279916
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Axew [Dragon Rage]",
           "productId": 279921
         }
@@ -8082,10 +8102,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Zoroark [Punishment | Snarl]",
           "productId": 279917
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Zoroark [Punishment | Snarl]",
           "productId": 363651
         }
@@ -8099,10 +8121,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Reshiram [Outrage | Blue Flare]",
           "productId": 279922
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Reshiram [Outrage | Blue Flare]",
           "productId": 279949
         }
@@ -8116,10 +8140,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Zekrom [Outrage | Bolt Strike]",
           "productId": 279926
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Zekrom [Outrage | Bolt Strike]",
           "productId": 279945
         }
@@ -8133,10 +8159,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Tropical Beach",
           "productId": 279875
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Tropical Beach",
           "productId": 279950
         }
@@ -8150,14 +8178,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Victory Cup",
           "productId": 279943
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Victory Cup",
           "productId": 279947
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Victory Cup",
           "productId": 279952
         }
@@ -8171,14 +8202,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Victory Cup",
           "productId": 279943
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Victory Cup",
           "productId": 279947
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Victory Cup",
           "productId": 279952
         }
@@ -8192,14 +8226,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Victory Cup",
           "productId": 279943
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Victory Cup",
           "productId": 279947
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Victory Cup",
           "productId": 279952
         }
@@ -8213,10 +8250,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Victini [Victory Star | Stored Power]",
           "productId": 279936
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Victini [Victory Star | Stored Power]",
           "productId": 398039
         }
@@ -8230,10 +8269,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Tropical Beach",
           "productId": 279875
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Tropical Beach",
           "productId": 279950
         }
@@ -8260,10 +8301,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Darkrai [Hide in Shadows | Dark Hole]",
           "productId": 279901
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Darkrai [Hide in Shadows | Dark Hole]",
           "productId": 363655
         }
@@ -8298,10 +8341,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Eevee [Growl | Quick Attack]",
           "productId": 279888
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Eevee [Growl | Quick Attack]",
           "productId": 279893
         }
@@ -8315,10 +8360,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Eevee [Growl | Quick Attack]",
           "productId": 279888
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Eevee [Growl | Quick Attack]",
           "productId": 279893
         }
@@ -8332,10 +8379,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Genesect [Hyper Beam | Breaker Bazooka]",
           "productId": 279890
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Genesect [Hyper Beam | Breaker Bazooka]",
           "productId": 279914
         }
@@ -8349,10 +8398,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "N",
           "productId": 279920
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "N",
           "productId": 371592
         }
@@ -8366,10 +8417,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Genesect [Hyper Beam | Breaker Bazooka]",
           "productId": 279890
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Genesect [Hyper Beam | Breaker Bazooka]",
           "productId": 279914
         }
@@ -8391,6 +8444,7 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Unown [?] Lv.18 [? | Hidden Power]",
           "productId": 278231
         }
@@ -8404,10 +8458,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Pikachu Lv.15 [Electro Recycle | BikaBika]",
           "productId": 275563
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Pikachu Lv.15 [Electro Recycle | BikaBika]",
           "productId": 787789
         }
@@ -8421,18 +8477,22 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Dialga LV.X [Time Skip | Metal Flash]",
           "productId": 275514
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Dialga LV.X [Time Skip | Metal Flash]",
           "productId": 275564
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Dialga Lv.68 [Time Bellow | Flash Cannon]",
           "productId": 275560
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Dialga Lv.68 [Time Bellow | Flash Cannon]",
           "productId": 362913
         }
@@ -8446,18 +8506,22 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Dialga Lv.68 [Time Bellow | Flash Cannon]",
           "productId": 275560
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Dialga Lv.68 [Time Bellow | Flash Cannon]",
           "productId": 362913
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Dialga LV.X [Time Skip | Metal Flash]",
           "productId": 275514
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Dialga LV.X [Time Skip | Metal Flash]",
           "productId": 275564
         }
@@ -8471,10 +8535,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Palkia Lv.67 [Spacial Rend | Transback]",
           "productId": 275541
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Palkia Lv.67 [Spacial Rend | Transback]",
           "productId": 362914
         }
@@ -8488,18 +8554,22 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Dialga LV.X [Time Skip | Metal Flash]",
           "productId": 275514
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Dialga LV.X [Time Skip | Metal Flash]",
           "productId": 275564
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Dialga Lv.68 [Time Bellow | Flash Cannon]",
           "productId": 275560
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Dialga Lv.68 [Time Bellow | Flash Cannon]",
           "productId": 362913
         }
@@ -8513,10 +8583,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Regigigas Lv.46 [Drag Off | Giga Hammer]",
           "productId": 275518
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Regigigas Lv.46 [Drag Off | Giga Hammer]",
           "productId": 362915
         }
@@ -8608,14 +8680,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Arceus Lv.100 [Judgment]",
           "productId": 275529
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Arceus Lv.100 [Judgment]",
           "productId": 362916
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Arceus LV.X [Multitype | Ominiscient]",
           "productId": 275531
         }
@@ -8629,14 +8704,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Arceus LV.X [Multitype | Ominiscient]",
           "productId": 275531
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Arceus Lv.100 [Judgment]",
           "productId": 275529
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Arceus Lv.100 [Judgment]",
           "productId": 362916
         }
@@ -8676,10 +8754,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Team Aqua's Carvanha [Wave Splash | Water Fin]",
           "productId": 276025
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Team Aqua's Cacnea [Paralyzing Gaze | Pin Missile]",
           "productId": 276001
         }
@@ -8706,10 +8786,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Treecko [Tail Slap | Razor Leaf]",
           "productId": 275476
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Treecko [Tail Slap | Razor Leaf]",
           "productId": 275480
         }
@@ -8723,10 +8805,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Grovyle [Poison Breath | Swift]",
           "productId": 275477
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Grovyle [Poison Breath | Swift]",
           "productId": 362869
         }
@@ -8740,10 +8824,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Mudkip [Pound | Fury Swipes]",
           "productId": 275478
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Mudkip [Pound | Fury Swipes]",
           "productId": 275483
         }
@@ -8757,14 +8843,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Torchic [Peck | Fireworks]",
           "productId": 275479
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Torchic [Peck | Fireworks]",
           "productId": 275481
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Torchic [Ember | ADV]",
           "productId": 275490
         }
@@ -8778,10 +8867,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Treecko [Tail Slap | Razor Leaf]",
           "productId": 275476
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Treecko [Tail Slap | Razor Leaf]",
           "productId": 275480
         }
@@ -8795,14 +8886,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Torchic [Peck | Fireworks]",
           "productId": 275479
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Torchic [Peck | Fireworks]",
           "productId": 275481
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Torchic [Ember | ADV]",
           "productId": 275490
         }
@@ -8816,10 +8910,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Combusken [Flare | Double Kick]",
           "productId": 275482
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Combusken [Flare | Double Kick]",
           "productId": 362868
         }
@@ -8833,10 +8929,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Mudkip [Pound | Fury Swipes]",
           "productId": 275478
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Mudkip [Pound | Fury Swipes]",
           "productId": 275483
         }
@@ -8850,10 +8948,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Marshtomp [Bubble | Slash]",
           "productId": 275484
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Marshtomp [Bubble | Slash]",
           "productId": 362870
         }
@@ -8867,10 +8967,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Pikachu [Agility | Thundershock]",
           "productId": 275485
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Pikachu [Agility | Thundershock]",
           "productId": 573476
         }
@@ -8884,14 +8986,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Torchic [Peck | Fireworks]",
           "productId": 275479
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Torchic [Peck | Fireworks]",
           "productId": 275481
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Torchic [Ember | ADV]",
           "productId": 275490
         }
@@ -8905,10 +9010,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Beldum [Magnetic Call | Metal Charge]",
           "productId": 275495
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Beldum [Magnetic Call | Metal Charge]",
           "productId": 921281
         }
@@ -8922,10 +9029,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Chimecho [Resonate | Healing Sound]",
           "productId": 275497
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Chimecho [Resonate | Healing Sound]",
           "productId": 280586
         }
@@ -8939,10 +9048,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Flygon [Sand Pit | Dragonbreath]",
           "productId": 275498
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Flygon [Sand Pit | Dragonbreath]",
           "productId": 280587
         }
@@ -8995,14 +9106,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Pokégear 3.0",
           "productId": 407059
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Pokégear 3.0",
           "productId": 448188
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Pokégear 3.0",
           "productId": 475144
         }
@@ -9016,14 +9130,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Pokégear 3.0",
           "productId": 407059
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Pokégear 3.0",
           "productId": 448188
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Pokégear 3.0",
           "productId": 475144
         }
@@ -9037,18 +9154,22 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Welder",
           "productId": 407024
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Welder",
           "productId": 407144
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Welder",
           "productId": 407239
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Welder",
           "productId": 448178
         }
@@ -9062,22 +9183,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Dedenne GX [Dedechange | Static Shock | Tingly Return GX]",
           "productId": 406964
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Dedenne GX [Dedechange | Static Shock | Tingly Return GX]",
           "productId": 407114
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Dedenne GX [Dedechange | Static Shock | Tingly Return GX]",
           "productId": 407204
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Dedenne GX [Dedechange | Static Shock | Tingly Return GX]",
           "productId": 407299
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Dedenne GX [Dedechange | Static Shock | Tingly Return GX]",
           "productId": 475149
         }
@@ -9091,10 +9217,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Jirachi GX [Psychic Zone | Star Search | Star Shield GX]",
           "productId": 406979
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Jirachi GX [Psychic Zone | Star Search | Star Shield GX]",
           "productId": 523095
         }
@@ -9108,22 +9236,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Cherish Ball",
           "productId": 407049
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Cherish Ball",
           "productId": 407184
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Cherish Ball",
           "productId": 407259
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Cherish Ball",
           "productId": 407394
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Cherish Ball",
           "productId": 426056
         }
@@ -9137,14 +9270,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Reset Stamp",
           "productId": 407189
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Reset Stamp",
           "productId": 407399
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Reset Stamp",
           "productId": 475134
         }
@@ -9158,6 +9294,7 @@
     {
       "candidates": [
         {
+          "hint": "id-outlier",
           "name": "Togepi & Cleffa & Igglybuff GX [Rolling Panic | Supreme Puff GX]",
           "productId": 582672
         }
@@ -9175,10 +9312,12 @@
           "productId": 366837
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Alolan Vulpix [Beacon | Icy Snow]",
           "productId": 312206
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Alolan Vulpix [Beacon | Icy Snow]",
           "productId": 312250
         },
@@ -9187,6 +9326,7 @@
           "productId": 312251
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Alolan Vulpix [Beacon | Icy Snow]",
           "productId": 319255
         }
@@ -9200,22 +9340,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Alolan Vulpix [Beacon | Icy Snow]",
           "productId": 312206
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Alolan Vulpix [Beacon | Icy Snow]",
           "productId": 312250
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Alolan Vulpix [Beacon | Icy Snow]",
           "productId": 319255
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Alolan Vulpix [Beacon | Icy Snow]",
           "productId": 468924
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Alolan Vulpix [Beacon | Icy Snow]",
           "productId": 886902
         }
@@ -9229,18 +9374,22 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Garbodor [Trashalanche | Acid Spray]",
           "productId": 312229
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Garbodor [Trashalanche | Acid Spray]",
           "productId": 321171
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Garbodor [Trashalanche | Acid Spray]",
           "productId": 368706
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Garbodor [Trashalanche | Acid Spray]",
           "productId": 368739
         }
@@ -9254,22 +9403,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Tapu Lele GX [Wonder Tag | Energy Drive | Tapu Cure GX]",
           "productId": 312205
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Tapu Lele GX [Wonder Tag | Energy Drive | Tapu Cure GX]",
           "productId": 312232
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Tapu Lele GX [Wonder Tag | Energy Drive | Tapu Cure GX]",
           "productId": 312254
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Tapu Lele GX [Wonder Tag | Energy Drive | Tapu Cure GX]",
           "productId": 312279
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Tapu Lele GX [Wonder Tag | Energy Drive | Tapu Cure GX]",
           "productId": 366835
         }
@@ -9296,22 +9450,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Choice Band",
           "productId": 312225
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Choice Band",
           "productId": 312244
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Choice Band",
           "productId": 312271
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Choice Band",
           "productId": 312294
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Choice Band",
           "productId": 368675
         }
@@ -9325,10 +9484,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Enhanced Hammer",
           "productId": 368753
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Enhanced Hammer",
           "productId": 371640
         }
@@ -9342,22 +9503,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Field Blower",
           "productId": 312221
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Field Blower",
           "productId": 312246
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Field Blower",
           "productId": 312273
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Field Blower",
           "productId": 312295
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Field Blower",
           "productId": 368668
         }
@@ -9384,22 +9550,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Rescue Stretcher",
           "productId": 312224
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Rescue Stretcher",
           "productId": 312247
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Rescue Stretcher",
           "productId": 368692
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Rescue Stretcher",
           "productId": 368745
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Rescue Stretcher",
           "productId": 368757
         }
@@ -9413,6 +9584,7 @@
     {
       "candidates": [
         {
+          "hint": "id-outlier",
           "name": "Metagross GX [Geotech System | Giga Hammer | Algorithm GX]",
           "productId": 450878
         }
@@ -9439,10 +9611,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Tapu Fini GX [Aqua Ring | Hydro Shot | Tapu Storm GX]",
           "productId": 366836
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Tapu Fini GX [Aqua Ring | Hydro Shot | Tapu Storm GX]",
           "productId": 604983
         }
@@ -9456,10 +9630,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Darkrai GX [Restoration | Dark Cleave | Dead End GX]",
           "productId": 363945
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Darkrai GX [Restoration | Dark Cleave | Dead End GX]",
           "productId": 657889
         }
@@ -9473,10 +9649,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Kirlia [Smack | Magical Shot]",
           "productId": 312202
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Kirlia [Smack | Magical Shot]",
           "productId": 665136
         }
@@ -9503,22 +9681,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Acerola",
           "productId": 312216
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Acerola",
           "productId": 312241
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Acerola",
           "productId": 312288
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Acerola",
           "productId": 371642
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Acerola",
           "productId": 449243
         }
@@ -9532,22 +9715,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Guzma",
           "productId": 312218
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Guzma",
           "productId": 312240
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Guzma",
           "productId": 312262
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Guzma",
           "productId": 312287
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Guzma",
           "productId": 368673
         }
@@ -9561,6 +9749,7 @@
     {
       "candidates": [
         {
+          "hint": "id-outlier",
           "name": "Kiawe",
           "productId": 448148
         }
@@ -9587,18 +9776,22 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Ultra Ball",
           "productId": 368667
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Ultra Ball",
           "productId": 368689
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Ultra Ball",
           "productId": 368773
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Ultra Ball",
           "productId": 371643
         }
@@ -9612,10 +9805,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Zoroark GX [Trade | Riotous Beating | Trickster GX]",
           "productId": 368748
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Zoroark GX [Trade | Riotous Beating | Trickster GX]",
           "productId": 450888
         }
@@ -9646,22 +9841,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Regigigas [Seal of Antiquity | Giant Stomp]",
           "productId": 321170
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Regigigas [Seal of Antiquity | Giant Stomp]",
           "productId": 450288
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Regigigas [Seal of Antiquity | Giant Stomp]",
           "productId": 450293
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Regigigas [Seal of Antiquity | Giant Stomp]",
           "productId": 450298
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Regigigas [Seal of Antiquity | Giant Stomp]",
           "productId": 450303
         }
@@ -9675,22 +9875,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Cynthia",
           "productId": 368674
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Cynthia",
           "productId": 368700
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Cynthia",
           "productId": 368738
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Cynthia",
           "productId": 407139
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Cynthia",
           "productId": 407349
         }
@@ -9704,14 +9909,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Escape Board",
           "productId": 407274
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Escape Board",
           "productId": 448138
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Escape Board",
           "productId": 449483
         }
@@ -9725,10 +9933,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Lillie",
           "productId": 368774
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Lillie",
           "productId": 449158
         }
@@ -9742,22 +9952,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Volkner",
           "productId": 407344
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Volkner",
           "productId": 450488
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Volkner",
           "productId": 450493
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Volkner",
           "productId": 450498
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Volkner",
           "productId": 450503
         }
@@ -9771,22 +9986,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Unit Energy [GRW]",
           "productId": 316061
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Unit Energy [LPM]",
           "productId": 316062
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Unit Energy [GRW]",
           "productId": 316094
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Unit Energy [LPM]",
           "productId": 316095
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Unit Energy [LPM]",
           "productId": 368742
         }
@@ -9800,22 +10020,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Unit Energy [GRW]",
           "productId": 316061
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Unit Energy [LPM]",
           "productId": 316062
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Unit Energy [GRW]",
           "productId": 316094
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Unit Energy [LPM]",
           "productId": 316095
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Unit Energy [LPM]",
           "productId": 368742
         }
@@ -9829,18 +10054,22 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Lusamine",
           "productId": 448153
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Lusamine",
           "productId": 449878
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Lusamine",
           "productId": 449883
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Lusamine",
           "productId": 449888
         }
@@ -9854,22 +10083,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Unit Energy [GRW]",
           "productId": 316061
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Unit Energy [LPM]",
           "productId": 316062
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Unit Energy [GRW]",
           "productId": 316094
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Unit Energy [LPM]",
           "productId": 316095
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Unit Energy [LPM]",
           "productId": 368742
         }
@@ -9883,22 +10117,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Unit Energy [GRW]",
           "productId": 316061
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Unit Energy [LPM]",
           "productId": 316062
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Unit Energy [GRW]",
           "productId": 316094
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Unit Energy [LPM]",
           "productId": 316095
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Unit Energy [LPM]",
           "productId": 368742
         }
@@ -9925,22 +10164,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Beast Ring",
           "productId": 368676
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Beast Ring",
           "productId": 371632
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Beast Ring",
           "productId": 407179
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Beast Ring",
           "productId": 449288
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Beast Energy ◇ [Prism]",
           "productId": 368669
         }
@@ -9954,6 +10198,7 @@
     {
       "candidates": [
         {
+          "hint": "id-outlier",
           "name": "Metal Frying Pan",
           "productId": 448158
         }
@@ -9967,22 +10212,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Mysterious Treasure",
           "productId": 368695
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Mysterious Treasure",
           "productId": 368750
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Mysterious Treasure",
           "productId": 368767
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Mysterious Treasure",
           "productId": 407064
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Mysterious Treasure",
           "productId": 407174
         }
@@ -9996,18 +10246,22 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Unit Energy [FDY]",
           "productId": 355629
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Unit Energy [FDY]",
           "productId": 355657
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Beast Energy ◇ [Prism]",
           "productId": 368669
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Beast Energy ◇ [Prism]",
           "productId": 407129
         }
@@ -10021,18 +10275,22 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Unit Energy [FDY]",
           "productId": 355629
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Unit Energy [FDY]",
           "productId": 355657
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Beast Energy ◇ [Prism]",
           "productId": 368669
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Beast Energy ◇ [Prism]",
           "productId": 407129
         }
@@ -10059,18 +10317,22 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Acro Bike",
           "productId": 368762
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Acro Bike",
           "productId": 407044
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Acro Bike",
           "productId": 407254
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Acro Bike",
           "productId": 441433
         }
@@ -10084,6 +10346,7 @@
     {
       "candidates": [
         {
+          "hint": "id-outlier",
           "name": "Tate & Liza",
           "productId": 562701
         }
@@ -10097,14 +10360,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Rayquaza GX [Stormy Winds | Dragon Break | Tempest GX]",
           "productId": 368772
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Rayquaza GX [Stormy Winds | Dragon Break | Tempest GX]",
           "productId": 450883
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Rayquaza GX [Stormy Winds | Dragon Break | Tempest GX]",
           "productId": 465979
         }
@@ -10118,6 +10384,7 @@
     {
       "candidates": [
         {
+          "hint": "id-outlier",
           "name": "Altaria [Fight Song | Pierce]",
           "productId": 364324
         }
@@ -10131,10 +10398,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Fiery Flint",
           "productId": 407279
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Fiery Flint",
           "productId": 448143
         }
@@ -10148,14 +10417,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Electropower",
           "productId": 371659
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Electropower",
           "productId": 407379
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Electropower",
           "productId": 449478
         }
@@ -10169,18 +10441,22 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Fairy Charm [G]",
           "productId": 365810
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Fairy Charm [P]",
           "productId": 365811
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Fairy Charm [F]",
           "productId": 365812
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Fairy Charm [N]",
           "productId": 365813
         }
@@ -10194,18 +10470,22 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Fairy Charm [G]",
           "productId": 365810
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Fairy Charm [P]",
           "productId": 365811
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Fairy Charm [F]",
           "productId": 365812
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Fairy Charm [N]",
           "productId": 365813
         }
@@ -10219,18 +10499,22 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Fairy Charm [G]",
           "productId": 365810
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Fairy Charm [P]",
           "productId": 365811
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Fairy Charm [F]",
           "productId": 365812
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Fairy Charm [N]",
           "productId": 365813
         }
@@ -10244,18 +10528,22 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Fairy Charm [G]",
           "productId": 365810
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Fairy Charm [P]",
           "productId": 365811
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Fairy Charm [F]",
           "productId": 365812
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Fairy Charm [N]",
           "productId": 365813
         }
@@ -10269,6 +10557,7 @@
     {
       "candidates": [
         {
+          "hint": "id-outlier",
           "name": "Net Ball",
           "productId": 450048
         }
@@ -10282,22 +10571,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Professor Elm's Lecture",
           "productId": 426051
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Professor Elm's Lecture",
           "productId": 451213
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Professor Elm's Lecture",
           "productId": 451218
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Professor Elm's Lecture",
           "productId": 451223
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Professor Elm's Lecture",
           "productId": 451233
         }
@@ -10311,6 +10605,7 @@
     {
       "candidates": [
         {
+          "hint": "id-outlier",
           "name": "Sightseer",
           "productId": 562700
         }
@@ -10358,18 +10653,22 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Pokémon Communication",
           "productId": 407264
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Pokémon Communication",
           "productId": 407389
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Pokémon Communication",
           "productId": 451568
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Pokémon Communication",
           "productId": 475139
         }
@@ -10383,18 +10682,22 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Pokémon Communication",
           "productId": 407264
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Pokémon Communication",
           "productId": 407389
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Pokémon Communication",
           "productId": 451568
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Pokémon Communication",
           "productId": 475139
         }
@@ -10416,6 +10719,7 @@
           "productId": 394022
         },
         {
+          "hint": "id-outlier",
           "name": "Online Code Card (Hidden Fates: Charizard GX Collection)",
           "productId": 560794
         }
@@ -10442,6 +10746,7 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Lycanroc GX [Twilight Eyes | Accelerock | Splintered Shard GX]",
           "productId": 396972
         }
@@ -10455,18 +10760,22 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Tapu Koko [Flying Flip | Electric Ball]",
           "productId": 312231
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Tapu Koko [Flying Flip | Electric Ball]",
           "productId": 312255
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Tapu Koko [Flying Flip | Electric Ball]",
           "productId": 312280
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Tapu Koko [Flying Flip | Electric Ball]",
           "productId": 358590
         },
@@ -10484,10 +10793,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Lunala GX [Glide | Lunar Javelin | Requiem GX]",
           "productId": 441403
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Lunala GX [Glide | Lunar Javelin | Requiem GX]",
           "productId": 611224
         }
@@ -10501,14 +10812,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Solgaleo GX [Shining Mane | Turbo Strike | Prominence GX]",
           "productId": 368296
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Solgaleo GX [Shining Mane | Turbo Strike | Prominence GX]",
           "productId": 407009
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Solgaleo GX [Shining Mane | Turbo Strike | Prominence GX]",
           "productId": 449203
         }
@@ -10522,22 +10836,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Professor's Research - Professor Magnolia",
           "productId": 433949
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Professor's Research - Professor Magnolia",
           "productId": 436984
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Professor's Research - Professor Magnolia",
           "productId": 437134
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Professor's Research - Professor Magnolia",
           "productId": 448168
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Professor's Research - Professor Magnolia",
           "productId": 701504
         }
@@ -10551,22 +10870,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Professor's Research - Professor Magnolia",
           "productId": 433949
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Professor's Research - Professor Magnolia",
           "productId": 436984
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Professor's Research - Professor Magnolia",
           "productId": 437134
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Professor's Research - Professor Magnolia",
           "productId": 448168
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Professor's Research - Professor Magnolia",
           "productId": 701504
         }
@@ -10580,22 +10904,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Professor's Research - Professor Magnolia",
           "productId": 433949
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Professor's Research - Professor Magnolia",
           "productId": 436984
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Professor's Research - Professor Magnolia",
           "productId": 437134
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Professor's Research - Professor Magnolia",
           "productId": 448168
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "Professor's Research - Professor Magnolia",
           "productId": 701504
         }
@@ -10609,10 +10938,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Energy Search",
           "productId": 277190
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Lightning Energy",
           "productId": 277185
         }
@@ -10626,6 +10957,7 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Potion",
           "productId": 277189
         }
@@ -10639,10 +10971,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Lightning Energy",
           "productId": 277185
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Energy Search",
           "productId": 277190
         }
@@ -10656,10 +10990,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MAudino EX [Magical Symphony]",
           "productId": 289906
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MAudino EX [Magical Symphony]",
           "productId": 295246
         },
@@ -10689,22 +11025,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MCharizard EX [Crimson Dive]",
           "productId": 281496
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MCharizard EX [Wild Blaze]",
           "productId": 281552
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MCharizard EX [Crimson Dive]",
           "productId": 281590
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MCharizard EX [Wild Blaze]",
           "productId": 281591
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "MCharizard EX [Crimson Dive]",
           "productId": 363662
         }
@@ -10718,22 +11059,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MCharizard EX [Crimson Dive]",
           "productId": 281496
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MCharizard EX [Wild Blaze]",
           "productId": 281552
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MCharizard EX [Crimson Dive]",
           "productId": 281590
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MCharizard EX [Wild Blaze]",
           "productId": 281591
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "MCharizard EX [Crimson Dive]",
           "productId": 363662
         }
@@ -10747,22 +11093,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MCharizard EX [Crimson Dive]",
           "productId": 281496
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MCharizard EX [Wild Blaze]",
           "productId": 281552
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MCharizard EX [Crimson Dive]",
           "productId": 281590
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MCharizard EX [Wild Blaze]",
           "productId": 281591
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "MCharizard EX [Crimson Dive]",
           "productId": 363662
         }
@@ -10776,22 +11127,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MCharizard EX [Crimson Dive]",
           "productId": 281496
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MCharizard EX [Wild Blaze]",
           "productId": 281552
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MCharizard EX [Crimson Dive]",
           "productId": 281590
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MCharizard EX [Wild Blaze]",
           "productId": 281591
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "MCharizard EX [Crimson Dive]",
           "productId": 363662
         }
@@ -10805,18 +11161,22 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MLucario EX [Rising Fist]",
           "productId": 281719
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MLucario EX [Rising Fist]",
           "productId": 281777
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MLucario EX [Rising Fist]",
           "productId": 297891
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "MLucario EX [Rising Fist]",
           "productId": 363917
         }
@@ -10830,18 +11190,22 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MLucario EX [Rising Fist]",
           "productId": 281719
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MLucario EX [Rising Fist]",
           "productId": 281777
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MLucario EX [Rising Fist]",
           "productId": 297891
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "MLucario EX [Rising Fist]",
           "productId": 363917
         }
@@ -10855,18 +11219,22 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MLucario EX [Rising Fist]",
           "productId": 281719
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MLucario EX [Rising Fist]",
           "productId": 281777
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MLucario EX [Rising Fist]",
           "productId": 297891
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "MLucario EX [Rising Fist]",
           "productId": 363917
         }
@@ -10880,14 +11248,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MManectric EX [Turbo Bolt]",
           "productId": 281828
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MManectric EX [Turbo Bolt]",
           "productId": 281927
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MManectric EX [Turbo Bolt]",
           "productId": 297894
         }
@@ -10901,14 +11272,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MManectric EX [Turbo Bolt]",
           "productId": 281828
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MManectric EX [Turbo Bolt]",
           "productId": 281927
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MManectric EX [Turbo Bolt]",
           "productId": 297894
         }
@@ -10922,14 +11296,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MManectric EX [Turbo Bolt]",
           "productId": 281828
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MManectric EX [Turbo Bolt]",
           "productId": 281927
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MManectric EX [Turbo Bolt]",
           "productId": 297894
         }
@@ -10943,14 +11320,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MLatios EX [Sonic Ace]",
           "productId": 282727
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MLatios EX [Sonic Ace]",
           "productId": 282770
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "MLatios EX [Sonic Ace]",
           "productId": 398044
         }
@@ -10964,14 +11344,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MRayquaza EX [Dragon Ascent]",
           "productId": 282729
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MRayquaza EX [Emerald Break]",
           "productId": 282744
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MRayquaza EX [Emerald Break]",
           "productId": 282773
         }
@@ -10985,14 +11368,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MRayquaza EX [Dragon Ascent]",
           "productId": 282729
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MRayquaza EX [Emerald Break]",
           "productId": 282744
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MRayquaza EX [Emerald Break]",
           "productId": 282773
         }
@@ -11006,14 +11392,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MLatios EX [Sonic Ace]",
           "productId": 282727
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MLatios EX [Sonic Ace]",
           "productId": 282770
         },
         {
+          "hint": "same-name-unnumbered, id-outlier",
           "name": "MLatios EX [Sonic Ace]",
           "productId": 398044
         }
@@ -11027,14 +11416,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MRayquaza EX [Dragon Ascent]",
           "productId": 282729
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MRayquaza EX [Emerald Break]",
           "productId": 282744
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MRayquaza EX [Emerald Break]",
           "productId": 282773
         }
@@ -11048,22 +11440,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MMewtwo EX [Vanishing Strike]",
           "productId": 286309
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MMewtwo EX [Psychic Infinity]",
           "productId": 286310
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MMewtwo EX [Vanishing Strike]",
           "productId": 286405
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MMewtwo EX [Psychic Infinity]",
           "productId": 286406
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MMewtwo EX [Vanishing Strike]",
           "productId": 363682
         }
@@ -11077,22 +11474,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MMewtwo EX [Vanishing Strike]",
           "productId": 286309
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MMewtwo EX [Psychic Infinity]",
           "productId": 286310
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MMewtwo EX [Vanishing Strike]",
           "productId": 286405
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MMewtwo EX [Psychic Infinity]",
           "productId": 286406
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MMewtwo EX [Vanishing Strike]",
           "productId": 363682
         }
@@ -11106,22 +11508,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MMewtwo EX [Vanishing Strike]",
           "productId": 286309
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MMewtwo EX [Psychic Infinity]",
           "productId": 286310
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MMewtwo EX [Vanishing Strike]",
           "productId": 286405
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MMewtwo EX [Psychic Infinity]",
           "productId": 286406
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MMewtwo EX [Vanishing Strike]",
           "productId": 363682
         }
@@ -11135,22 +11542,27 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MMewtwo EX [Vanishing Strike]",
           "productId": 286309
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MMewtwo EX [Psychic Infinity]",
           "productId": 286310
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MMewtwo EX [Vanishing Strike]",
           "productId": 286405
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MMewtwo EX [Psychic Infinity]",
           "productId": 286406
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MMewtwo EX [Vanishing Strike]",
           "productId": 363682
         }
@@ -11164,14 +11576,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MGyarados EX [Blast Geyser]",
           "productId": 288202
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MGyarados EX [Blast Geyser]",
           "productId": 288290
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MGyarados EX [Blast Geyser]",
           "productId": 363687
         }
@@ -11185,14 +11600,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MGyarados EX [Blast Geyser]",
           "productId": 288202
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MGyarados EX [Blast Geyser]",
           "productId": 288290
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MGyarados EX [Blast Geyser]",
           "productId": 363687
         }
@@ -11206,10 +11624,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MMetagross EX [Gatling Slug]",
           "productId": 289698
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MMetagross EX [Gatling Slug]",
           "productId": 363666
         }
@@ -11223,10 +11643,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MDiancie EX [Diamond Force]",
           "productId": 289707
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MDiancie EX [Diamond Force]",
           "productId": 363667
         }
@@ -11240,10 +11662,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MAbsol EX [Disaster Wing]",
           "productId": 289721
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MAbsol EX [Disaster Wing]",
           "productId": 363672
         }
@@ -11257,14 +11681,17 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "Rayquaza EX [Mega Ascension | Aeroscream]",
           "productId": 289780
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Rayquaza EX [Mega Ascension | Aeroscream]",
           "productId": 363674
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "Rayquaza EX [Mega Ascension | Aeroscream]",
           "productId": 363675
         },
@@ -11286,10 +11713,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MBlaziken EX [Moonsault Blaze]",
           "productId": 289807
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MBlaziken EX [Moonsault Blaze]",
           "productId": 363680
         }
@@ -11303,10 +11732,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MSwampert EX [Strongarm Impact]",
           "productId": 289808
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MSwampert EX [Strongarm Impact]",
           "productId": 363681
         }
@@ -11320,10 +11751,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MAerodactyl EX [Rock Drill Dive]",
           "productId": 289818
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MAerodactyl EX [Rock Drill Dive]",
           "productId": 363684
         }
@@ -11337,10 +11770,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MMawile EX [Twin Grapple]",
           "productId": 290097
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MMawile EX [Twin Grapple]",
           "productId": 363894
         }
@@ -11354,10 +11789,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MBeedrill EX [Hazard Stinger]",
           "productId": 290963
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MBeedrill EX [Hazard Stinger]",
           "productId": 363900
         }
@@ -11371,10 +11808,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MGarchomp EX [Crimson Edge]",
           "productId": 295159
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MGarchomp EX [Crimson Edge]",
           "productId": 363901
         },
@@ -11392,10 +11831,12 @@
     {
       "candidates": [
         {
+          "hint": "same-name-unnumbered",
           "name": "MSalamence EX [Savage Wing]",
           "productId": 295162
         },
         {
+          "hint": "same-name-unnumbered",
           "name": "MSalamence EX [Savage Wing]",
           "productId": 363902
         }
