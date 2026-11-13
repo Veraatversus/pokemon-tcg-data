@@ -5,14 +5,26 @@
 export const CARDMARKET_ISSUE_TITLE = 'Cardmarket-Zuordnung prüfen';
 export const COVERAGE_THRESHOLD = 0.8;
 export const FAILURE_THRESHOLD = 3;
+export const RECENT_DAYS = 60;
 
 const REPORT_PATH = 'api/v3/reports/cardmarket-ids.md';
 
-export function evaluateCardmarketIssue({ report, meta, previousSetIds, excludedSetIds = [] }) {
+// sets: [{ id, releaseDate }] (api/v3/sets.json, Datum "YYYY/MM/DD"); now: Build-Zeitpunkt.
+export function evaluateCardmarketIssue({ report, meta, previousSetIds, excludedSetIds = [], sets = [], now = new Date() }) {
   const excluded = new Set(excludedSetIds);
-  // Ohne bekannte Vorgaenger-Sets ist jedes Set "neu" -> Neu-Regeln aussetzen statt Fehlalarm
-  const known = Array.isArray(previousSetIds) ? new Set(previousSetIds) : null;
-  const isNew = (setId) => known !== null && !known.has(setId) && !excluded.has(setId);
+  // "Juengst": nicht in den Vorgaenger-Sets ODER Erscheinungsdatum in den letzten RECENT_DAYS Tagen, damit das Issue
+  // nicht schon am Folgetag schliesst. Leere/unbekannte Vorgaenger-Sets geben kein "neu"-Signal (sonst waere alles neu).
+  const known = Array.isArray(previousSetIds) && previousSetIds.length ? new Set(previousSetIds) : null;
+  const nowMs = new Date(now).getTime();
+  const released = new Map(sets.map((s) => [s.id, Date.parse(String(s.releaseDate ?? '').replaceAll('/', '-'))]));
+  const isNew = (setId) => {
+    if (excluded.has(setId)) return false;
+    if (known !== null && !known.has(setId)) return true;
+    const t = released.get(setId);
+    if (!Number.isFinite(t)) return false;
+    const age = Math.floor((nowMs - t) / 86400000); // ganze Tage; Datum ohne Uhrzeit
+    return age <= RECENT_DAYS && age >= -1;
+  };
   const sections = [];
 
   const lowCoverage = Object.entries(report?.bySet ?? {})
@@ -22,16 +34,16 @@ export function evaluateCardmarketIssue({ report, meta, previousSetIds, excluded
       const pct = Math.floor((c.withId / c.cards) * 100);
       return `- \`${setId}\`: ${c.withId} von ${c.cards} Karten (${pct} %)${r.searchUrl ? `, [Cardmarket-Suche](${r.searchUrl})` : ' (keine Erweiterung bekannt)'}`;
     });
-  if (lowCoverage.length) sections.push(['Neue Sets mit weniger als 80 % Abdeckung', lowCoverage]);
+  if (lowCoverage.length) sections.push(['Neue/junge Sets mit weniger als 80 % Abdeckung', lowCoverage]);
 
   const noExpansion = (report?.setsWithoutExpansion ?? [])
     .filter((s) => isNew(s.setId) && (s.cards ?? 0) > 0)
     .map((s) => `- \`${s.setId}\`: ${s.cards} Karten, Hinweis ${s.evidence ?? '-'}${s.evidenceSource ? ` (${s.evidenceSource})` : ''}`);
-  if (noExpansion.length) sections.push(['Ohne Cardmarket-Erweiterung (neue Sets)', noExpansion]);
+  if (noExpansion.length) sections.push(['Ohne Cardmarket-Erweiterung (neue/junge Sets)', noExpansion]);
 
   const gone = [
     ...(report?.customSets?.missingProducts ?? []).map((m) => `- custom-sets/${m.expansionId}.json: Produkt ${m.productId} (Nummer ${m.collectorNumber}) ist nicht im Katalog${m.actualExpansion ? ` (gehört jetzt zu Erweiterung ${m.actualExpansion})` : ''}`),
-    ...(report?.overrides?.warnings ?? []).filter((w) => /nicht im Cardmarket-Katalog/.test(w)).map((w) => `- cardmarket-overrides.json: ${w}`),
+    ...(report?.overrides?.problems ?? []).map((p) => `- cardmarket-overrides.json: ${p.key}: ${p.kind === 'missing-expansion' ? `Erweiterung ${p.expansionId}` : `Produkt ${p.productId}`} nicht im Cardmarket-Katalog`),
   ];
   if (gone.length) sections.push(['Einträge mit Produkt nicht mehr im Katalog', gone]);
 

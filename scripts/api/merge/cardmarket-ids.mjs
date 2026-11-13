@@ -295,7 +295,8 @@ export function fillCardmarketIds({
   // fallen weg, damit die primaere ID (primaryCardmarketId) die des Overrides ist.
   // Auffaelligkeiten (fremde Expansion, kein Single, [Oversized], doppelt vergeben, schon per TCGdex bei
   // einer anderen Karte) sind nur Warnungen: der Eintrag ist eine bewusste Entscheidung.
-  const overrideReport = { applied: 0, removed: 0, warnings: [] };
+  // problems: strukturierte Fassung der Warnungen, deren Ziel im Katalog fehlt ({ kind: missing-product | missing-expansion, key }).
+  const overrideReport = { applied: 0, removed: 0, warnings: [], problems: [] };
   const locked = new Set();
   const cardByKey = new Map();
   const heldBefore = new Map(); // Produkt-ID -> card.id[] (TCGdex-IDs und Varianten vor den Overrides)
@@ -328,6 +329,7 @@ export function fillCardmarketIds({
     if (!c) { overrideReport.warnings.push(`${key}: Karte nicht gefunden, ignoriert`); continue; }
     if (value !== null && !(Number.isInteger(value) && typeof productExpansion?.(value) === 'number')) {
       overrideReport.warnings.push(`${key}: Produkt ${value} nicht im Cardmarket-Katalog, ignoriert`);
+      overrideReport.problems.push({ kind: 'missing-product', key, productId: value });
       continue;
     }
     if (value !== null) {
@@ -373,6 +375,7 @@ export function fillCardmarketIds({
         continue;
       }
       overrideReport.warnings.push(`${set.id}: Expansion ${forced} nicht im Cardmarket-Katalog, ignoriert`);
+      overrideReport.problems.push({ kind: 'missing-expansion', key: set.id, expansionId: forced });
     }
     if (validExpansion(raw) || !productExpansion) {
       refExpansion.set(set.id, validExpansion(raw) ? raw : null);

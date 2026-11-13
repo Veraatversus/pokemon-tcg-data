@@ -9,7 +9,7 @@ const clean = () => ({
     bySet: { old: row(100, 50), fresh: row(100, 95) },
     setsWithoutExpansion: [],
     customSets: { missingProducts: [] },
-    overrides: { warnings: [] },
+    overrides: { warnings: [], problems: [] },
   },
   meta: { consecutiveFailures: 0 },
   previousSetIds: ['old'],
@@ -76,14 +76,47 @@ test('custom-set-Eintrag mit Produkt nicht im Katalog -> Issue', () => {
   assert.match(r.body, /99/);
 });
 
-test('Zuordnungsdatei-Eintrag mit Produkt nicht im Katalog -> Issue; sonstige Warnungen nicht', () => {
+test('Zuordnungsdatei-Eintrag mit Produkt/Erweiterung nicht im Katalog -> Issue; sonstige Warnungen nicht', () => {
   const input = clean();
-  input.report.overrides.warnings = ['s1/3: Karte nicht gefunden, ignoriert'];
-  assert.equal(evaluateCardmarketIssue(input).open, false);
-  input.report.overrides.warnings.push('s1/4: Produkt 555 nicht im Cardmarket-Katalog, ignoriert');
-  const r = evaluateCardmarketIssue(input);
+  input.report.overrides = { warnings: ['s1/3: Karte nicht gefunden, ignoriert', 's1/9: Produkt 5 nicht im Cardmarket-Katalog, ignoriert'], problems: [] };
+  assert.equal(evaluateCardmarketIssue(input).open, false); // Textwarnungen allein loesen nichts aus
+  input.report.overrides.problems = [{ kind: 'missing-product', key: 's1/4', productId: 555 }];
+  let r = evaluateCardmarketIssue(input);
   assert.equal(r.open, true);
   assert.match(r.body, /s1\/4: Produkt 555/);
+  input.report.overrides.problems = [{ kind: 'missing-expansion', key: 's1', expansionId: 77 }];
+  r = evaluateCardmarketIssue(input);
+  assert.equal(r.open, true);
+  assert.match(r.body, /s1: Erweiterung 77/);
+});
+
+const NOW = new Date('2026-11-13T12:00:00Z');
+
+test('junges Set (Erscheinungsdatum <= 60 Tage) bleibt auch ohne "neu" im Issue; aelteres faellt heraus', () => {
+  const input = { ...clean(), now: NOW, sets: [{ id: 'old', releaseDate: '1999/01/09' }, { id: 'fresh', releaseDate: '2026/09/20' }] };
+  input.previousSetIds = ['old', 'fresh']; // fresh ist laengst veroeffentlicht
+  input.report.bySet.fresh = row(100, 10);
+  assert.equal(evaluateCardmarketIssue(input).open, true);
+  input.sets[1].releaseDate = '2026/09/10'; // 64 Tage
+  assert.equal(evaluateCardmarketIssue(input).open, false);
+  input.sets[1].releaseDate = '2026/09/14'; // 60 Tage
+  assert.equal(evaluateCardmarketIssue(input).open, true);
+});
+
+test('junges Set ohne Erweiterung bleibt im Issue', () => {
+  const input = { ...clean(), now: NOW, sets: [{ id: 'fresh', releaseDate: '2026/11/01' }] };
+  input.previousSetIds = ['old', 'fresh'];
+  input.report.setsWithoutExpansion = [{ setId: 'fresh', cards: 5, evidence: '0/5', evidenceSource: 'tcgdex' }];
+  assert.equal(evaluateCardmarketIssue(input).open, true);
+});
+
+test('leere vorherige sets.json = unbekannt: kein "neu"-Signal, Datumsregel gilt weiter', () => {
+  const input = { ...clean(), now: NOW, sets: [{ id: 'old', releaseDate: '1999/01/09' }, { id: 'fresh', releaseDate: '2020/01/01' }] };
+  input.previousSetIds = [];
+  input.report.bySet.fresh = row(100, 10);
+  assert.equal(evaluateCardmarketIssue(input).open, false);
+  input.sets[1].releaseDate = '2026/11/10';
+  assert.equal(evaluateCardmarketIssue(input).open, true);
 });
 
 test('3 Ausfaelle in Folge -> Issue, 2 nicht', () => {

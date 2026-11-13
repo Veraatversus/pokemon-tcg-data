@@ -1030,3 +1030,18 @@ test('Report je Set: ohne Expansion keine searchUrl', () => {
   assert.equal(report.bySet.s2.searchUrl, null);
   assert.equal(report.bySet.s2.coverage.withId, 0);
 });
+
+test('Override mit Produkt nicht im Katalog: strukturierte problems neben der Textwarnung', () => {
+  const { report } = run([card('1', '1', 'Pineco')], [single(11, 'Pineco', '1')], {
+    overrides: { 's1/1': 999 }, productExpansion: () => null, knownExpansions: new Set([100]),
+  });
+  assert.deepEqual(report.overrides.problems, [{ kind: 'missing-product', key: 's1/1', productId: 999 }]);
+  assert.ok(report.overrides.warnings.some((w) => w.includes('nicht im Cardmarket-Katalog')));
+});
+
+test('Override mit Expansion nicht im Katalog: problems missing-expansion', () => {
+  const { report } = run([card('1', '1', 'Pineco')], [single(11, 'Pineco', '1')], {
+    overrides: { s1: 555 }, knownExpansions: new Set([100]),
+  });
+  assert.deepEqual(report.overrides.problems, [{ kind: 'missing-expansion', key: 's1', expansionId: 555 }]);
+});

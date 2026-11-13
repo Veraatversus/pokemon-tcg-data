@@ -263,7 +263,7 @@ export function runBuild({
   writeIfChanged(path.join(outAbs, 'reports', 'cardmarket-ids.md'), renderCardmarketReportMd(cardmarketIds));
   // Meldung "Cardmarket-Zuordnung pruefen": nur das Ergebnis, der Workflow legt das Issue an/aktualisiert/schliesst es.
   const cardmarketIssue = evaluateCardmarketIssue({
-    report: cardmarketIds, meta: readJsonOr(p('sources', 'cardmarket', 'meta.json'), {}), previousSetIds, excludedSetIds,
+    report: cardmarketIds, meta: readJsonOr(p('sources', 'cardmarket', 'meta.json'), {}), previousSetIds, excludedSetIds, sets, now: new Date(),
   });
   fs.mkdirSync(p('.cache', 'cardmarket'), { recursive: true });
   fs.writeFileSync(p('.cache', 'cardmarket', 'issue.json'), `${JSON.stringify(cardmarketIssue, null, 2)}
