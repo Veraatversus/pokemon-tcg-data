@@ -180,3 +180,22 @@ test('Sammelserien Other/Miscellaneous: Schluessel aus DE-Serie, sonst Set-Fallb
     localStorage.removeItem(SETTINGS_KEY);
   }
 });
+
+test('np/pop und tk1a/Trainer Kits: DE-Serie der Zeile schlaegt die EN-Serie aus v3 (echte sets.json)', async () => {
+  const { resolveSeriesGroupInfo, setV3SetMeta } = await import('../js/data/schema-contract.js');
+  const { fetchV3SetMeta } = await import('../js/data/pokemon-api.js');
+  const meta = await fetchV3SetMeta({ loadSets: async () => SETS });
+  const row = (id, vera, de) => ({ setId: id, vera_series: vera, tcgdex_serie_name: de });
+  try {
+    setV3SetMeta(meta);
+    for (const lang of ['de', 'en']) {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify({ cardLanguage: lang }));
+      assert.equal(resolveSeriesGroupInfo(row('np', 'NP', 'POP')).key, resolveSeriesGroupInfo(row('pop1', 'POP', 'POP')).key, lang);
+      assert.equal(resolveSeriesGroupInfo(row('tk1a', 'EX', 'Trainer Kits')).key, resolveSeriesGroupInfo(row('TCGDEX-tk-dp-l', 'Trainer kits', 'Trainer Kits')).key, lang);
+      assert.notEqual(resolveSeriesGroupInfo(row('tk1a', 'EX', 'Trainer Kits')).key, resolveSeriesGroupInfo(row('ex1', 'EX', 'EX')).key, lang);
+    }
+  } finally {
+    setV3SetMeta(null);
+    localStorage.removeItem(SETTINGS_KEY);
+  }
+});
