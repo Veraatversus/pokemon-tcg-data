@@ -391,7 +391,7 @@ test('derives set expansion when majority agrees', () => {
   assert.equal(sets[0].ids.cardmarket, 1626);
   assert.equal(sets[0].ids.cardmarketSetSource, 'derived');
   assert.equal(sets[0].ids.cardmarketTcgdexSet, 275771);
-  assert.deepEqual(report.expansionMismatch.sets, [{ setId: 's1', oldId: 275771, newId: 1626, reason: 'derived', evidence: '3/3' }]);
+  assert.deepEqual(report.expansionMismatch.sets, [{ setId: 's1', oldId: 275771, newId: 1626, reason: 'derived', evidence: '3/3', evidenceSource: 'tcgdex' }]);
   assert.equal(report.bySet.s1.expansionId, 1626);
   assert.deepEqual(out[3].ids.cardmarket, [275772]); // Luecke aus der abgeleiteten Expansion gefuellt
 });
@@ -405,7 +405,7 @@ test('keeps set expansion when evidence is weak', () => {
   }, { sets });
   assert.equal(sets[0].ids.cardmarket, 999); // 2/3 < 80 % -> nicht erfunden
   assert.equal(sets[0].ids.cardmarketSetSource, undefined);
-  assert.deepEqual(report.expansionMismatch.sets, [{ setId: 's1', oldId: 999, newId: null, reason: 'invalid-kept', evidence: '2/3' }]);
+  assert.deepEqual(report.expansionMismatch.sets, [{ setId: 's1', oldId: 999, newId: null, reason: 'invalid-kept', evidence: '2/3', evidenceSource: 'tcgdex' }]);
 });
 
 test('swapped ids in the same expansion: both replaced by number+name', () => {
@@ -902,7 +902,88 @@ test('no expansion → no ids and flagged', () => {
   assert.deepEqual(latias.ids.cardmarket, []); // nicht aus irgendeiner Expansion geraten
   assert.deepEqual(bagon.ids.cardmarket, [1]); // TCGdex-IDs bleiben
   assert.deepEqual(torchic.ids.cardmarket, [9]);
-  assert.deepEqual(report.setsWithoutExpansion, [{ setId: 's1', tcgdexExpansion: null, evidence: '1/2', cards: 3 }]);
+  assert.deepEqual(report.setsWithoutExpansion, [{ setId: 's1', tcgdexExpansion: null, evidence: '1/2', evidenceSource: 'tcgdex', cards: 3 }]);
   // anderes Set unberuehrt
   assert.deepEqual(cardsBySet.get('s2')[0].ids.cardmarket, [7]);
+});
+
+// --- Fix-Runde 1 ------------------------------------------------------------------------------------
+test('stability never restores a shared tcgdex id over today’s correction', () => {
+  // dp7-58-Form: Drifloon #58 und SH1 teilen TCGdex-ID 297 (= SH1-Produkt); heute korrigieren die Angriffe #58
+  const atk = (c, ...names) => ({ ...c, attacks: names.map((name) => ({ name })) });
+  const cards = [atk(card('58', '58', 'Drifloon', [297]), 'Constrict', 'Linear Attack'), atk(card('SH1', 'SH1', 'Drifloon', [297]), 'Unburden', 'Tackle')];
+  const previous = new Map([['s1/58', { ids: [297], source: 'tcgdex' }]]);
+  const { cards: out, report } = runCat(cards, {
+    100: [single(297, 'Drifloon Lv.16 [Unburden | Tackle]', null), single(356, 'Drifloon Lv.15 [Constrict | Linear Attack]', null)],
+  }, { previous });
+  assert.deepEqual(out[0].ids.cardmarket, [356]);
+  assert.equal(out[0].ids.cardmarketSource, 'corrected');
+  assert.deepEqual(report.stabilityKept, []);
+  // heute ohne jede ID, gestrige TCGdex-ID ist heute geteilt -> nicht zurueck
+  const r2 = runCat([card('58', '58', 'Drifloon', [297]), card('SH1', 'SH1', 'Drifloon', [297])], {
+    100: [single(297, 'Drifloon Lv.16 [Unburden | Tackle]', null)],
+  }, { previous: new Map([['s1/58', { ids: [297], source: 'tcgdex' }]]) });
+  assert.deepEqual(r2.report.stabilityKept, []);
+});
+
+test('custom-set: stamped variant never holds the base product when a normal print exists', () => {
+  // svp-190-Form: TCGdex normal -> 190V2, worlds-Stempel -> 190 (Basis)
+  const c = { ...card('190', '190', 'Pikachu', [80, 84]), variants: [{ type: 'normal', cardmarketId: 84 }, { type: 'normal', stamp: ['worlds-2024'], cardmarketId: 80 }] };
+  const { cards: out } = runCat([c], { 100: [csp(80, 'Pikachu', '190'), csp(84, 'Pikachu', '190V2')] });
+  assert.deepEqual(out[0].variants, [{ type: 'normal', cardmarketId: 80 }, { type: 'normal', stamp: ['worlds-2024'] }]);
+  assert.equal(primaryCardmarketId(out[0]), 80);
+  assert.deepEqual(out[0].ids.cardmarket, [80, 84]);
+  // nur gestempelte Drucke (svp-101-Form): kein normaler Druck, dem das Basisprodukt gehoerte -> bleibt
+  const s = { ...card('101', '101', 'Pikachu', [31, 30]), variants: [{ type: 'normal', stamp: ['a'], cardmarketId: 31 }, { type: 'normal', stamp: ['b'], cardmarketId: 30 }] };
+  const r2 = runCat([s], { 100: [csp(30, 'Pikachu', '101'), csp(31, 'Pikachu', '101V2')] });
+  assert.deepEqual(r2.cards[0].variants.map((v) => v.cardmarketId), [31, 30]);
+});
+
+test('custom-set contradiction drops tcgdex id even when custom-set leaves the card ambiguous', () => {
+  // ecard1-47-Form: zwei Produkte "47" (keine Entscheidung), TCGdex-ID 12 ist laut custom-set #12
+  const cards = [
+    { ...card('47', '47', 'Feraligatr', [12]), variants: [{ type: 'normal', cardmarketId: 12 }] },
+    card('12', '12', 'Feraligatr', [12]),
+  ];
+  const previous = new Map([['s1/47', { ids: [12], source: 'tcgdex' }]]);
+  const { cards: out, report } = runCat(cards, {
+    100: [csp(12, 'Feraligatr', '12'), csp(470, 'Feraligatr', '47'), csp(471, 'Feraligatr', '47')],
+  }, { previous });
+  assert.deepEqual(out[0].ids.cardmarket, []);
+  assert.deepEqual(out[0].ids.cardmarketTcgdex, [12]);
+  assert.deepEqual(out[0].variants, [{ type: 'normal' }]);
+  assert.deepEqual(out[1].ids.cardmarket, [12]);
+  assert.deepEqual(report.customSets.ambiguous, ['s1/47']);
+  assert.deepEqual(report.customSets.dropped, [{ cardKey: 's1/47', productId: 12, number: '12' }]);
+  assert.deepEqual(report.stabilityKept, []); // Stufe 2 hat entschieden
+  assert.deepEqual(report.stabilityDropped, [{ cardKey: 's1/47', productId: 12, source: 'tcgdex', reason: 'custom-set' }]);
+  assert.deepEqual(report.duplicateTcgdexIds, {});
+  // Nummer der Karte steht nicht im custom-set (svp-500 vs. Lot-Nummer 224e) -> custom-set sagt nichts, ID bleibt
+  const lot = runCat([card('500', '500', 'Terapagos & Friends', [9])], { 100: [csp(9, 'Terapagos & Friends', '224e'), csp(8, 'Mew', '224')] });
+  assert.deepEqual(lot.cards[0].ids.cardmarket, [9]);
+  assert.deepEqual(lot.report.customSets.dropped, []);
+});
+
+test('name-only rules need unique evidence (SIR/alt-art without numbers)', () => {
+  const atk = (c, ...names) => ({ ...c, attacks: names.map((name) => ({ name })) });
+  const pair = () => [atk(card('25', '25', 'Pikachu ex'), 'Thunder'), atk(card('230', '230', 'Pikachu ex'), 'Thunder')];
+  // a) mehr gleichnamige Produkte als Karten -> nichts
+  const a = runCat(pair(), { 100: [single(1000, 'Pikachu ex [Thunder]', null), single(1300, 'Pikachu ex [Thunder]', null), single(1301, 'Pikachu ex [Thunder]', null)] });
+  assert.deepEqual(a.cards.map((c) => c.ids.cardmarket), [[], []]);
+  assert.equal(a.report.totals.ambiguous, 2);
+  // b) gleiche Anzahl, keine Nachbarn, IDs weit auseinander (Sonderdruck spaeter angelegt) -> abgelehnt
+  const b = runCat(pair(), { 100: [single(1000, 'Pikachu ex [Thunder]', null), single(1300, 'Pikachu ex [Thunder]', null)] });
+  assert.deepEqual(b.cards.map((c) => c.ids.cardmarket), [[], []]);
+  assert.equal(b.report.orderedRejected.length, 1);
+  // c) gleiche Anzahl, IDs nah, aber Nachbar-Offset passt nicht zur SIR-Nummer -> abgelehnt
+  const c = runCat([...pair(), card('24', '24', 'Raichu', [999])], {
+    100: [single(1000, 'Pikachu ex [Thunder]', null), single(1010, 'Pikachu ex [Thunder]', null), single(999, 'Raichu', null)],
+  });
+  assert.deepEqual(c.cards.slice(0, 2).map((x) => x.ids.cardmarket), [[], []]);
+  assert.equal(c.report.orderedRejected.length, 1);
+  // d) eindeutige Angriffsnamen sind Evidenz -> zugeordnet
+  const d = runCat([atk(card('25', '25', 'Pikachu ex'), 'Thunder'), atk(card('230', '230', 'Pikachu ex'), 'Thunderbolt')], {
+    100: [single(1000, 'Pikachu ex [Thunder]', null), single(1300, 'Pikachu ex [Thunderbolt]', null)],
+  });
+  assert.deepEqual(d.cards.map((x) => x.ids.cardmarket), [[1000], [1300]]);
 });

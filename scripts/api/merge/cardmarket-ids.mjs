@@ -373,12 +373,14 @@ export function fillCardmarketIds({
     }
     const counts = new Map();
     let withIds = 0;
+    const from = { tcgdex: 0, previous: 0 };
     for (const card of cardsBySet.get(set.id) ?? []) {
       // Karten-IDs: heutige TCGdex-IDs, sonst die zuletzt veroeffentlichten (previous; z. B. pt-Sets ohne TCGdex-IDs)
       const todayIds = locked.has(card.id) ? [] : tcgdexIds(card);
       const ids = todayIds.length || locked.has(card.id) ? todayIds : (previous?.get(`${set.id}/${card.cardId}`)?.ids ?? []);
       if (!ids.length) continue;
       withIds++;
+      from[todayIds.length ? 'tcgdex' : 'previous']++;
       const exps = new Set();
       for (const id of ids) {
         const p = productOf(id);
@@ -389,14 +391,16 @@ export function fillCardmarketIds({
     const ranked = [...counts].sort((a, b) => b[1] - a[1] || a[0] - b[0]);
     const [best, second] = ranked;
     const evidence = `${best?.[1] ?? 0}/${withIds}`;
+    // Herkunft der Evidenz: heutige TCGdex-IDs, veroeffentlichte IDs (previous) oder beides
+    const evidenceSource = !withIds ? null : !from.previous ? 'tcgdex' : !from.tcgdex ? 'previous' : 'mixed';
     if (best && best[1] >= 0.8 * withIds && (!second || second[1] < best[1])) {
       set.ids = { ...set.ids, cardmarket: best[0], cardmarketSetSource: 'derived', ...(raw != null ? { cardmarketTcgdexSet: raw } : {}) };
       refExpansion.set(set.id, best[0]);
-      expansionMismatch.sets.push({ setId: set.id, oldId: raw ?? null, newId: best[0], reason: 'derived', evidence });
+      expansionMismatch.sets.push({ setId: set.id, oldId: raw ?? null, newId: best[0], reason: 'derived', evidence, evidenceSource });
     } else {
       refExpansion.set(set.id, null);
-      if (raw != null) expansionMismatch.sets.push({ setId: set.id, oldId: raw, newId: null, reason: 'invalid-kept', evidence });
-      setsWithoutExpansion.push({ setId: set.id, tcgdexExpansion: raw ?? null, evidence, cards: (cardsBySet.get(set.id) ?? []).length });
+      if (raw != null) expansionMismatch.sets.push({ setId: set.id, oldId: raw, newId: null, reason: 'invalid-kept', evidence, evidenceSource });
+      setsWithoutExpansion.push({ setId: set.id, tcgdexExpansion: raw ?? null, evidence, evidenceSource, cards: (cardsBySet.get(set.id) ?? []).length });
     }
   }
 
@@ -408,15 +412,26 @@ export function fillCardmarketIds({
   };
 
   // 0b. custom-set (Stufe 2): exakte Nummer inkl. Zusatz ("4" ist die normale Karte, "4V2"/"224a"/"H1" nie).
-  // Gewinnt vor TCGdex: TCGdex-IDs, die laut custom-set zu einer anderen Nummer gehoeren, werden ersetzt
-  // (auch an Varianten); IDs von Drucken derselben Basisnummer ("101V2" bei Karte 101) und unbekannte IDs
-  // bleiben hinter dem Treffer. Mehrere Produkte zur Nummer oder dasselbe Produkt fuer mehrere Karten ->
-  // custom-set entscheidet nicht (customSets.ambiguous / conflicts). Die Karte ist danach gesperrt.
-  const customSetReport = { applied: 0, changed: 0, ambiguous: [], conflicts: [], nameWarnings: [] };
+  // Gewinnt vor TCGdex: TCGdex-IDs, die laut custom-set zu einer anderen Basisnummer gehoeren, fallen weg bzw.
+  // werden ersetzt (auch an Varianten) - auch bei Karten, fuer die custom-set selbst nichts entscheidet
+  // (mehrere Produkte zur Nummer, keine Nummer, Konflikt; Report customSets.dropped). IDs von Drucken derselben
+  // Basisnummer ("101V2" bei Karte 101) und unbekannte IDs bleiben hinter dem Treffer. Mehrere Produkte zur
+  // Nummer oder dasselbe Produkt fuer mehrere Karten -> custom-set entscheidet nicht (customSets.ambiguous /
+  // conflicts). Eine Karte mit Treffer ist danach gesperrt.
+  const customSetReport = { applied: 0, changed: 0, ambiguous: [], conflicts: [], nameWarnings: [], dropped: [] };
   const csLocked = new Set();
+  const csRejected = new Map(); // card.id -> Set der laut custom-set falschen Produkt-IDs (auch fuer die Stabilitaetsregel)
   const overrideProducts = new Set();
   for (const key of cardOverrideKeys) if (Number.isInteger(overrides[key]) && locked.has(cardByKey.get(key)?.id)) overrideProducts.add(overrides[key]);
-  const csClaims = new Map(); // Produkt-ID -> [{ set, card, hit, index }]
+  // Nummer eines Produkts laut custom-set (auch mehrfach vergebene: beide Produkte "1" in 1536 sind Drucke von #1)
+  const csNumber = (index, id) => {
+    const p = index.byId.get(id);
+    return p?.customSet ? normalizeCmNumber(p.collectorNumber) : null;
+  };
+  const isStamped = (v) => (Array.isArray(v.stamp) ? v.stamp.length > 0 : Boolean(v.stamp));
+  const normalPrint = (v) => !isStamped(v) && v.size !== 'jumbo';
+  const csCards = []; // { set, card, index, hits }
+  const csClaims = new Map(); // Produkt-ID -> [eintrag]
   for (const set of sets) {
     for (const card of cardsBySet.get(set.id) ?? []) {
       if (locked.has(card.id)) continue;
@@ -424,42 +439,43 @@ export function fillCardmarketIds({
       const index = exp === null ? null : indexFor(exp);
       if (!index?.customSet.size) continue;
       const hits = index.customSet.get(normalizeCmNumber(card.number)) ?? [];
+      const entry = { set, card, index, hits };
+      csCards.push(entry);
       if (hits.length > 1) { customSetReport.ambiguous.push(`${set.id}/${card.cardId}`); continue; }
-      if (!hits.length) continue;
-      csClaims.set(hits[0].id, [...(csClaims.get(hits[0].id) ?? []), { set, card, hit: hits[0], index }]);
+      if (hits.length) csClaims.set(hits[0].id, [...(csClaims.get(hits[0].id) ?? []), entry]);
     }
   }
+  const applied = new Set();
   for (const [productId, claims] of csClaims) {
     if (claims.length > 1 || overrideProducts.has(productId)) {
       customSetReport.conflicts.push({ productId, cards: claims.map(({ set, card }) => `${set.id}/${card.cardId}`), ...(overrideProducts.has(productId) ? { reason: 'override' } : {}) });
       continue;
     }
-    const [{ set, card, hit, index }] = claims;
+    const [{ set, card, hits: [hit], index }] = claims;
     const base = customSetBase(hit.number);
-    // Nummer eines Produkts laut custom-set (auch mehrfach vergebene: beide Produkte "1" in 1536 sind Drucke von #1)
-    const csNumber = (id) => {
-      const p = index.byId.get(id);
-      const n = p?.customSet ? normalizeCmNumber(p.collectorNumber) : null;
-      return n;
-    };
     // Gehoert laut custom-set zu einer anderen Basisnummer derselben Expansion -> falsch fuer diese Karte
-    const contradicted = (id) => { const n = csNumber(id); return id !== productId && n !== null && customSetBase(n) !== base; };
+    const contradicted = (id) => { const n = csNumber(index, id); return id !== productId && n !== null && customSetBase(n) !== base; };
     // Druck derselben Basisnummer mit Zusatz ("149V2" bei Karte 149): Variante, nie die normale Karte
-    const suffixed = (id) => { const n = csNumber(id); return id !== productId && n !== null && n !== base && customSetBase(n) === base; };
-    const isStamped = (v) => (Array.isArray(v.stamp) ? v.stamp.length > 0 : Boolean(v.stamp));
-    const normalPrint = (v) => !isStamped(v) && v.size !== 'jumbo';
+    const suffixed = (id) => { const n = csNumber(index, id); return id !== productId && n !== null && n !== base && customSetBase(n) === base; };
     const original = tcgdexIds(card);
-    const kept = original.filter((x) => x !== productId && !contradicted(x));
+    const rejected = new Set([...original, ...(card.variants ?? []).map((v) => v?.cardmarketId)].filter((id) => typeof id === 'number' && contradicted(id)));
+    const kept = original.filter((x) => x !== productId && !rejected.has(x));
     const ids = [productId, ...kept];
     let changed = ids.length !== original.length || ids.some((x, i) => x !== original[i]);
     if (Array.isArray(card.variants)) {
       // Normale Drucke (ungestempelt, nicht Jumbo) mit falscher oder Zusatz-ID -> Treffer; gestempelte/Jumbo-
-      // Varianten verlieren eine widersprochene ID (nie auf das normale Produkt umbiegen), Zusatz-IDs bleiben dort.
+      // Varianten verlieren eine widersprochene ID und - wenn die Karte einen normalen Druck hat - auch das
+      // Basisprodukt (das gehoert dem normalen Druck); Zusatz-IDs derselben Nummer bleiben dort.
+      const hasNormal = card.variants.some((v) => v && normalPrint(v));
       card.variants = card.variants.map((v) => {
         const id = v.cardmarketId;
-        if (typeof id !== 'number' || !(contradicted(id) || suffixed(id))) return v;
-        if (normalPrint(v)) { changed = true; return { ...v, cardmarketId: productId }; }
-        if (suffixed(id)) return v;
+        if (typeof id !== 'number') return v;
+        if (normalPrint(v)) {
+          if (!(rejected.has(id) || suffixed(id))) return v;
+          changed = true;
+          return { ...v, cardmarketId: productId };
+        }
+        if (!rejected.has(id) && !(id === productId && hasNormal)) return v;
         changed = true;
         const { cardmarketId, ...rest } = v;
         return rest;
@@ -469,8 +485,34 @@ export function fillCardmarketIds({
     if (!cmNameMatches(hit.raw, card.name)) customSetReport.nameWarnings.push({ cardKey: `${set.id}/${card.cardId}`, name: card.name, productId, productName: hit.raw });
     customSetReport.applied++;
     if (changed && original.length) customSetReport.changed++;
+    if (rejected.size) csRejected.set(card.id, rejected);
+    applied.add(card.id);
     csLocked.add(card.id);
     locked.add(card.id);
+  }
+  // Karten ohne custom-set-Treffer: widersprochene TCGdex-IDs fallen trotzdem weg (z. B. ecard1-47 mit #12),
+  // aber nur, wenn das custom-set die Nummer der Karte ueberhaupt fuehrt (svp-500 fehlt dort; die
+  // Lot-Eintraege "224a-f" sind vergebene Nummern und sagen nichts ueber andere Karten).
+  const basesOf = new Map();
+  for (const { set, card, index } of csCards) {
+    if (applied.has(card.id)) continue;
+    const base = customSetBase(normalizeCmNumber(card.number));
+    if (!basesOf.has(index)) basesOf.set(index, new Set([...index.customSet.keys()].map(customSetBase)));
+    if (!basesOf.get(index).has(base)) continue;
+    const contradicted = (id) => { const n = csNumber(index, id); return n !== null && customSetBase(n) !== base; };
+    const original = tcgdexIds(card);
+    const rejected = new Set([...original, ...(card.variants ?? []).map((v) => v?.cardmarketId)].filter((id) => typeof id === 'number' && contradicted(id)));
+    if (!rejected.size) continue;
+    csRejected.set(card.id, rejected);
+    for (const id of [...rejected].sort((a, b) => a - b)) customSetReport.dropped.push({ cardKey: `${set.id}/${card.cardId}`, productId: id, number: csNumber(index, id) });
+    card.ids = { ...card.ids, cardmarket: original.filter((x) => !rejected.has(x)), cardmarketTcgdex: card.ids.cardmarketTcgdex ?? original };
+    if (Array.isArray(card.variants)) {
+      card.variants = card.variants.map((v) => {
+        if (!rejected.has(v?.cardmarketId)) return v;
+        const { cardmarketId, ...rest } = v;
+        return rest;
+      });
+    }
   }
   customSetReport.ambiguous.sort();
 
@@ -712,14 +754,28 @@ export function fillCardmarketIds({
     walk(({ set, card }) => {
       if (locked.has(card.id)) return;
       const key = `${set.id}/${card.cardId}`;
-      const prev = previous.get(key);
-      const prevSource = prev?.source ?? 'tcgdex';
-      if (!prev || !STABLE_SOURCES.has(prevSource)) return;
-      const productId = primaryCardmarketId({ ids: { cardmarket: prev.ids ?? [] }, variants: prev.variants ?? [] });
+      const raw = previous.get(key);
+      const prevSource = raw?.source ?? 'tcgdex';
+      if (!raw || !STABLE_SOURCES.has(prevSource)) return;
+      // Laut custom-set falsche IDs (Stufe 2) kommen nie zurueck
+      const rejected = csRejected.get(card.id) ?? new Set();
+      const prev = {
+        ...raw,
+        ids: (raw.ids ?? []).filter((id) => !rejected.has(id)),
+        variants: (raw.variants ?? []).map((v) => (rejected.has(v?.cardmarketId) ? (({ cardmarketId, ...rest }) => rest)(v) : v)),
+      };
+      const rawPrimary = primaryCardmarketId({ ids: { cardmarket: raw.ids ?? [] }, variants: raw.variants ?? [] });
+      if (rejected.has(rawPrimary)) { stabilityDropped.push({ cardKey: key, productId: rawPrimary, source: prevSource, reason: 'custom-set' }); return; }
+      const productId = primaryCardmarketId({ ids: { cardmarket: prev.ids }, variants: prev.variants });
       if (productId === undefined) return;
       const today = todayOf(card);
       if (sameState(card, prev)) return;
-      if (prevSource === 'tcgdex' && today.source === 'tcgdex') return;
+      // Gestrige TCGdex-ID: nur wenn heute gar keine Stufe eine ID liefert und sie heute nicht geteilt ist
+      // (sonst gewaenne eine geteilte, falsche TCGdex-ID dauerhaft gegen die heutige Korrektur).
+      if (prevSource === 'tcgdex') {
+        if (today.id !== null) return;
+        if (duplicateTcgdexIds[productId]) { stabilityDropped.push({ cardKey: key, productId, source: prevSource, reason: 'shared-tcgdex-id' }); return; }
+      }
       if (!exists(productId)) { stabilityDropped.push({ cardKey: key, productId, source: prevSource, reason: 'product-gone' }); return; }
       candidates.push({ set, card, key, prev, prevSource, productId, today });
     });
