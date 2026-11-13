@@ -521,17 +521,13 @@
       "tcgdex": 108
     },
     "bwp": {
-      "ambiguous": 36,
+      "ambiguous": 26,
       "ambiguousCards": [
         "BW1",
         "BW2",
         "BW3",
         "BW4",
         "BW5",
-        "BW6",
-        "BW7",
-        "BW8",
-        "BW9",
         "BW10",
         "BW11",
         "BW14",
@@ -539,21 +535,15 @@
         "BW19",
         "BW23",
         "BW24",
-        "BW26",
         "BW28",
         "BW29",
         "BW30",
         "BW31",
         "BW32",
-        "BW43",
         "BW50",
         "BW54",
-        "BW68",
-        "BW69",
         "BW73",
         "BW77",
-        "BW79",
-        "BW86",
         "BW94",
         "BW97",
         "BW99",
@@ -562,18 +552,14 @@
       ],
       "cards": 101,
       "expansionId": 1611,
-      "matched": 64,
-      "missing": 37,
+      "matched": 74,
+      "missing": 27,
       "missingCards": [
         "BW1",
         "BW2",
         "BW3",
         "BW4",
         "BW5",
-        "BW6",
-        "BW7",
-        "BW8",
-        "BW9",
         "BW10",
         "BW11",
         "BW14",
@@ -581,22 +567,16 @@
         "BW19",
         "BW23",
         "BW24",
-        "BW26",
         "BW28",
         "BW29",
         "BW30",
         "BW31",
         "BW32",
-        "BW43",
         "BW50",
         "BW54",
-        "BW68",
-        "BW69",
         "BW73",
         "BW77",
         "BW78",
-        "BW79",
-        "BW86",
         "BW94",
         "BW97",
         "BW99",
@@ -616,6 +596,7 @@
     "cel25c": {
       "ambiguous": 0,
       "cards": 25,
+      "corrected": 2,
       "expansionId": 4346,
       "matched": 0,
       "missing": 0,
@@ -650,180 +631,103 @@
       "tcgdex": 18
     },
     "dp1": {
-      "ambiguous": 4,
-      "ambiguousCards": [
-        "65",
-        "66",
-        "67",
-        "68"
-      ],
+      "ambiguous": 0,
       "cards": 130,
       "expansionId": 1555,
-      "matched": 0,
-      "missing": 4,
-      "missingCards": [
-        "65",
-        "66",
-        "67",
-        "68"
-      ],
+      "matched": 4,
+      "missing": 0,
       "tcgdex": 126
     },
     "dp2": {
-      "ambiguous": 4,
-      "ambiguousCards": [
-        "37",
-        "65",
-        "66",
-        "67"
-      ],
+      "ambiguous": 0,
       "cards": 124,
+      "corrected": 1,
       "expansionId": 1556,
-      "matched": 1,
-      "missing": 4,
-      "missingCards": [
-        "37",
-        "65",
-        "66",
-        "67"
-      ],
+      "matched": 5,
+      "missing": 0,
       "tcgdex": 119
     },
     "dp3": {
-      "ambiguous": 6,
-      "ambiguousCards": [
-        "39",
-        "68",
-        "69",
-        "70",
-        "71",
-        "72"
-      ],
+      "ambiguous": 0,
       "cards": 132,
       "expansionId": 1557,
-      "matched": 1,
-      "missing": 6,
-      "missingCards": [
-        "39",
-        "68",
-        "69",
-        "70",
-        "71",
-        "72"
-      ],
+      "matched": 7,
+      "missing": 0,
       "tcgdex": 125
     },
     "dp4": {
-      "ambiguous": 4,
-      "ambiguousCards": [
-        "29",
-        "56",
-        "57",
-        "91"
-      ],
+      "ambiguous": 0,
       "cards": 106,
+      "corrected": 2,
       "expansionId": 1558,
-      "matched": 0,
-      "missing": 4,
-      "missingCards": [
-        "29",
-        "56",
-        "57",
-        "91"
-      ],
+      "matched": 4,
+      "missing": 0,
       "tcgdex": 102
     },
     "dp5": {
-      "ambiguous": 2,
-      "ambiguousCards": [
-        "33",
-        "49"
-      ],
+      "ambiguous": 0,
       "cards": 100,
+      "corrected": 4,
       "expansionId": 1559,
-      "matched": 0,
-      "missing": 2,
-      "missingCards": [
-        "33",
-        "49"
-      ],
+      "matched": 2,
+      "missing": 0,
       "tcgdex": 98
     },
     "dp6": {
-      "ambiguous": 6,
+      "ambiguous": 1,
       "ambiguousCards": [
-        "76",
-        "77",
-        "78",
-        "79",
-        "80",
-        "81"
+        "76"
       ],
       "cards": 146,
+      "corrected": 8,
       "expansionId": 1560,
-      "matched": 3,
-      "missing": 6,
+      "matched": 8,
+      "missing": 1,
       "missingCards": [
-        "76",
-        "77",
-        "78",
-        "79",
-        "80",
-        "81"
+        "76"
       ],
       "tcgdex": 137
     },
     "dp7": {
       "ambiguous": 0,
       "cards": 106,
+      "corrected": 8,
       "expansionId": 1561,
       "matched": 0,
       "missing": 0,
       "tcgdex": 106
     },
     "dpp": {
-      "ambiguous": 14,
+      "ambiguous": 8,
       "ambiguousCards": [
         "DP16",
         "DP17",
-        "DP24",
         "DP26",
         "DP27",
-        "DP32",
         "DP37",
         "DP40",
-        "DP44",
-        "DP49",
         "DP50",
-        "DP52",
-        "DP53",
-        "DP56"
+        "DP53"
       ],
       "cards": 56,
       "expansionId": 1609,
-      "matched": 35,
-      "missing": 20,
+      "matched": 41,
+      "missing": 14,
       "missingCards": [
         "DP16",
         "DP17",
-        "DP24",
         "DP26",
         "DP27",
-        "DP32",
         "DP37",
         "DP40",
         "DP41",
         "DP42",
         "DP43",
-        "DP44",
         "DP45",
         "DP46",
         "DP47",
-        "DP49",
         "DP50",
-        "DP52",
-        "DP53",
-        "DP56"
+        "DP53"
       ],
       "tcgdex": 1
     },
@@ -881,7 +785,7 @@
     "ex11": {
       "ambiguous": 0,
       "cards": 114,
-      "corrected": 9,
+      "corrected": 14,
       "expansionId": 1549,
       "matched": 3,
       "missing": 0,
@@ -898,6 +802,7 @@
     "ex13": {
       "ambiguous": 0,
       "cards": 111,
+      "corrected": 6,
       "expansionId": 1551,
       "matched": 1,
       "missing": 1,
@@ -917,6 +822,7 @@
     "ex15": {
       "ambiguous": 0,
       "cards": 101,
+      "corrected": 4,
       "expansionId": 1553,
       "matched": 4,
       "missing": 1,
@@ -950,13 +856,19 @@
       "tcgdex": 100
     },
     "ex4": {
-      "ambiguous": 0,
+      "ambiguous": 1,
+      "ambiguousCards": [
+        "48"
+      ],
       "cards": 97,
-      "corrected": 32,
+      "corrected": 89,
       "expansionId": 1542,
       "matched": 0,
-      "missing": 0,
-      "tcgdex": 97
+      "missing": 1,
+      "missingCards": [
+        "48"
+      ],
+      "tcgdex": 96
     },
     "ex5": {
       "ambiguous": 0,
@@ -985,7 +897,7 @@
     "ex8": {
       "ambiguous": 0,
       "cards": 108,
-      "corrected": 4,
+      "corrected": 5,
       "expansionId": 1546,
       "matched": 2,
       "missing": 0,
@@ -1019,27 +931,19 @@
     "gym1": {
       "ambiguous": 0,
       "cards": 132,
-      "corrected": 1,
+      "corrected": 18,
       "expansionId": 1529,
       "matched": 0,
       "missing": 0,
       "tcgdex": 132
     },
     "gym2": {
-      "ambiguous": 2,
-      "ambiguousCards": [
-        "75",
-        "76"
-      ],
+      "ambiguous": 0,
       "cards": 132,
-      "corrected": 1,
+      "corrected": 6,
       "expansionId": 1530,
-      "matched": 0,
-      "missing": 2,
-      "missingCards": [
-        "75",
-        "76"
-      ],
+      "matched": 2,
+      "missing": 0,
       "tcgdex": 130
     },
     "hgss1": {
@@ -1297,10 +1201,8 @@
       "tcgdex": 112
     },
     "np": {
-      "ambiguous": 22,
+      "ambiguous": 16,
       "ambiguousCards": [
-        "1",
-        "2",
         "3",
         "4",
         "5",
@@ -1311,24 +1213,18 @@
         "10",
         "11",
         "12",
-        "16",
         "17",
-        "18",
         "22",
         "24",
         "25",
         "27",
-        "36",
-        "37",
-        "38"
+        "36"
       ],
       "cards": 40,
       "expansionId": 1608,
-      "matched": 18,
-      "missing": 22,
+      "matched": 24,
+      "missing": 16,
       "missingCards": [
-        "1",
-        "2",
         "3",
         "4",
         "5",
@@ -1339,16 +1235,12 @@
         "10",
         "11",
         "12",
-        "16",
         "17",
-        "18",
         "22",
         "24",
         "25",
         "27",
-        "36",
-        "37",
-        "38"
+        "36"
       ],
       "tcgdex": 0
     },
@@ -1363,7 +1255,7 @@
     "pl1": {
       "ambiguous": 0,
       "cards": 133,
-      "corrected": 1,
+      "corrected": 9,
       "expansionId": 1562,
       "matched": 0,
       "missing": 0,
@@ -1372,6 +1264,7 @@
     "pl2": {
       "ambiguous": 0,
       "cards": 120,
+      "corrected": 1,
       "expansionId": 1563,
       "matched": 0,
       "missing": 0,
@@ -1380,7 +1273,7 @@
     "pl3": {
       "ambiguous": 0,
       "cards": 153,
-      "corrected": 8,
+      "corrected": 9,
       "expansionId": 1564,
       "matched": 0,
       "missing": 0,
@@ -1389,6 +1282,7 @@
     "pl4": {
       "ambiguous": 0,
       "cards": 111,
+      "corrected": 20,
       "expansionId": 1565,
       "matched": 6,
       "missing": 0,
@@ -1480,6 +1374,7 @@
     "ru1": {
       "ambiguous": 0,
       "cards": 16,
+      "corrected": 1,
       "expansionId": 1634,
       "matched": 2,
       "missing": 0,
@@ -1538,7 +1433,7 @@
         "206a"
       ],
       "cards": 261,
-      "corrected": 12,
+      "corrected": 14,
       "expansionId": 2487,
       "matched": 4,
       "missing": 3,
@@ -1768,7 +1663,7 @@
         "189a"
       ],
       "cards": 240,
-      "corrected": 13,
+      "corrected": 14,
       "expansionId": 2370,
       "matched": 2,
       "missing": 8,
@@ -1804,32 +1699,18 @@
       "tcgdex": 185
     },
     "sma": {
-      "ambiguous": 9,
+      "ambiguous": 2,
       "ambiguousCards": [
-        "SV1",
-        "SV6",
-        "SV7",
-        "SV13",
-        "SV41",
         "SV49",
-        "SV59",
-        "SV66",
         "SV67"
       ],
       "cards": 94,
       "expansionId": 2514,
-      "matched": 84,
-      "missing": 10,
+      "matched": 91,
+      "missing": 3,
       "missingCards": [
-        "SV1",
-        "SV6",
-        "SV7",
-        "SV13",
-        "SV41",
         "SV49",
         "SV57",
-        "SV59",
-        "SV66",
         "SV67"
       ],
       "tcgdex": 0
@@ -1990,7 +1871,7 @@
         "209"
       ],
       "cards": 216,
-      "corrected": 22,
+      "corrected": 23,
       "expansionId": 2921,
       "matched": 0,
       "missing": 3,
@@ -2125,7 +2006,7 @@
     "tk1a": {
       "ambiguous": 0,
       "cards": 10,
-      "expansionId": 275771,
+      "expansionId": 1626,
       "matched": 0,
       "missing": 0,
       "tcgdex": 10
@@ -2214,6 +2095,7 @@
         "112"
       ],
       "cards": 116,
+      "corrected": 3,
       "expansionId": 1716,
       "matched": 1,
       "missing": 4,
@@ -2433,11 +2315,12 @@
       "tcgdex": 122
     },
     "xyp": {
-      "ambiguous": 10,
+      "ambiguous": 11,
       "ambiguousCards": [
         "XY35",
         "XY44",
         "XY63",
+        "XY66",
         "XY86",
         "XY87",
         "XY98",
@@ -2447,14 +2330,15 @@
         "XY171"
       ],
       "cards": 216,
-      "corrected": 46,
+      "corrected": 47,
       "expansionId": 1612,
       "matched": 12,
-      "missing": 10,
+      "missing": 11,
       "missingCards": [
         "XY35",
         "XY44",
         "XY63",
+        "XY66",
         "XY86",
         "XY87",
         "XY98",
@@ -2463,7 +2347,7 @@
         "XY168",
         "XY171"
       ],
-      "tcgdex": 194
+      "tcgdex": 193
     },
     "zsv10pt5": {
       "ambiguous": 0,
@@ -5802,15 +5686,2283 @@
   },
   "duplicates": {
     "cards": 1714,
-    "corrected": 607,
+    "corrected": 766,
     "ids": 805,
-    "kept": 1107
+    "kept": 948
+  },
+  "expansionMismatch": {
+    "cards": [
+      {
+        "cardKey": "TCGDEX-2013bw-1",
+        "newId": null,
+        "oldExpansion": 2352,
+        "oldId": 361721,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2013bw-2",
+        "newId": null,
+        "oldExpansion": 2352,
+        "oldId": 361722,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2013bw-3",
+        "newId": null,
+        "oldExpansion": 2352,
+        "oldId": 361723,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2013bw-4",
+        "newId": null,
+        "oldExpansion": 2352,
+        "oldId": 361724,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2013bw-6",
+        "newId": null,
+        "oldExpansion": 2352,
+        "oldId": 361726,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2013bw-7",
+        "newId": null,
+        "oldExpansion": 2352,
+        "oldId": 361727,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2013bw-8",
+        "newId": null,
+        "oldExpansion": 2352,
+        "oldId": 361728,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2013bw-9",
+        "newId": null,
+        "oldExpansion": 2352,
+        "oldId": 361729,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2013bw-10",
+        "newId": null,
+        "oldExpansion": 2352,
+        "oldId": 361730,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2013bw-12",
+        "newId": null,
+        "oldExpansion": 2352,
+        "oldId": 361732,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-1",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479674,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-1",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581844,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-2",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479679,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-2",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581845,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-4",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479689,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-4",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581847,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-5",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479694,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-5",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581848,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-6",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479699,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-6",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581849,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-7",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479704,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-7",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581850,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-8",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479709,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-8",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581851,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-9",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479714,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-9",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581852,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-11",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479724,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-11",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581854,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-12",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479729,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-12",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581855,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-13",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479734,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-13",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581856,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-14",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479739,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-14",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581857,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-15",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479744,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-15",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581858,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-16",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479749,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-16",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581859,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-17",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479754,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-17",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581860,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-18",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479759,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-18",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581861,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-19",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479764,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-19",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581862,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-21",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479774,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-21",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581865,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-22",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479779,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-22",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581866,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-23",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479784,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-23",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581867,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-24",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479789,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-24",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581868,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-25",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479794,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-25",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581869,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-26",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479799,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-26",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581870,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-27",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479804,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-27",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581872,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-28",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479809,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-28",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581874,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-30",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479819,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-30",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581878,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-31",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479824,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-31",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581880,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-32",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479829,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-32",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581882,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-33",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479839,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-33b",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479834,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-34",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479844,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-34",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581884,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-35",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479849,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-35",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581886,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-36",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479854,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-36",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581888,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-37",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479859,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-37",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581890,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-38",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479864,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-38",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581892,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-39",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479869,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-39",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581893,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-40",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 479874,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-2019sm-fr-40",
+        "newId": null,
+        "oldExpansion": 3354,
+        "oldId": 581895,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-mfb-9",
+        "newId": null,
+        "oldExpansion": 5526,
+        "oldId": 741976,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-mfb-33",
+        "newId": null,
+        "oldExpansion": null,
+        "oldId": 524029,
+        "reason": "unknown-product"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-1",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280093,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-2",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280066,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-3",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280087,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-4",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280081,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-5",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280080,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-6",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280082,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-7",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280083,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-8",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280085,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-9",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280084,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-10",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280073,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-11",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280072,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-12",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280074,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-13",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280075,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-14",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280077,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-15",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280076,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-16",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280071,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-17",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280070,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-18",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280065,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-19",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280064,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-20",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280067,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-21",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280069,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-22",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280068,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-23",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280078,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-24",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280079,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-25",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280089,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-26",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280088,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-27",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280090,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-28",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280091,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-29",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280092,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-bw-e-30",
+        "newId": null,
+        "oldExpansion": 1630,
+        "oldId": 280086,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-dp-l-1",
+        "newId": null,
+        "oldExpansion": 1628,
+        "oldId": 278010,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-dp-l-2",
+        "newId": null,
+        "oldExpansion": 1628,
+        "oldId": 278012,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-dp-l-3",
+        "newId": null,
+        "oldExpansion": 1628,
+        "oldId": 278013,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-dp-l-4",
+        "newId": null,
+        "oldExpansion": 1628,
+        "oldId": 278016,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-dp-l-5",
+        "newId": null,
+        "oldExpansion": 1628,
+        "oldId": 278017,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-dp-l-6",
+        "newId": null,
+        "oldExpansion": 1628,
+        "oldId": 278020,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-dp-l-7",
+        "newId": null,
+        "oldExpansion": 1628,
+        "oldId": 278022,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-dp-l-8",
+        "newId": null,
+        "oldExpansion": 1628,
+        "oldId": 278023,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-dp-l-9",
+        "newId": null,
+        "oldExpansion": 1628,
+        "oldId": 278026,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-dp-l-10",
+        "newId": null,
+        "oldExpansion": 1628,
+        "oldId": 278028,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-dp-l-11",
+        "newId": null,
+        "oldExpansion": 1628,
+        "oldId": 278029,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-1",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279125,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-2",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279098,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-3",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279119,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-4",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279113,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-5",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279112,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-6",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279114,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-7",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279115,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-8",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279117,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-9",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279116,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-10",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279105,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-11",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279104,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-12",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279106,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-13",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279107,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-14",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279109,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-15",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279108,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-16",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279103,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-17",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279102,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-18",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279097,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-19",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279096,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-21",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279101,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-22",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279100,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-23",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279110,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-24",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279111,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-25",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279121,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-26",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279120,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-27",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279122,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-28",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279123,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-29",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279124,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-hs-g-30",
+        "newId": null,
+        "oldExpansion": 1629,
+        "oldId": 279118,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-1",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297232,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-2",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297233,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-3",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297234,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-4",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297241,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-5",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297235,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-6",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297236,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-7",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297237,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-8",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297238,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-9",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297239,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-10",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297240,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-11",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297242,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-12",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297243,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-13",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297244,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-14",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297245,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-15",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297246,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-16",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297247,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-17",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297248,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-18",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297253,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-20",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297249,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-22",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297256,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-24",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297250,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-26",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297251,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-27",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297259,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-28",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297252,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-29",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297260,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "TCGDEX-tk-sm-r-30",
+        "newId": null,
+        "oldExpansion": 1758,
+        "oldId": 297261,
+        "reason": "no-set-expansion"
+      },
+      {
+        "cardKey": "ex7-83",
+        "newId": null,
+        "oldExpansion": null,
+        "oldId": 477604,
+        "reason": "unknown-product"
+      },
+      {
+        "cardKey": "hgss3-88",
+        "newId": null,
+        "oldExpansion": null,
+        "oldId": 86553,
+        "reason": "unknown-product"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-1",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362772,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-2",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362773,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-3",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362774,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-4",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362775,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-5",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362776,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-6",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362777,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-7",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362778,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-8",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362779,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-9",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362780,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-10",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362781,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-11",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362782,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-12",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362783,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-13",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362784,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-15",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362786,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-16",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362787,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-18",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362789,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-19",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362790,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-21",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362792,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-22",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362793,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-25",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362796,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-26",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362797,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-27",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362798,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-28",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362799,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-29",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362800,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-30",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362801,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-31",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362802,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-32",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362803,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-33",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362804,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-34",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362805,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-35",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362806,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-36",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362807,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-37",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362808,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-38",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362810,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-39",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362810,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "TCGDEX-2018sm-fr-40",
+        "newId": null,
+        "oldExpansion": 2361,
+        "oldId": 362811,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "base1-73",
+        "newId": null,
+        "oldExpansion": 1523,
+        "oldId": 273768,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "base1-73",
+        "newId": null,
+        "oldExpansion": 1523,
+        "oldId": 660146,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "bw10-103",
+        "newId": 281124,
+        "oldExpansion": 1580,
+        "oldId": 281030,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "bw6-117",
+        "newId": null,
+        "oldExpansion": 1576,
+        "oldId": 280556,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "bw6-117",
+        "newId": null,
+        "oldExpansion": 1576,
+        "oldId": 449303,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "bw6-118",
+        "newId": null,
+        "oldExpansion": 1576,
+        "oldId": 280557,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "bw6-118",
+        "newId": null,
+        "oldExpansion": 1576,
+        "oldId": 449308,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "ecard3-129",
+        "newId": null,
+        "oldExpansion": 1538,
+        "oldId": 275387,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "ecard3-130",
+        "newId": null,
+        "oldExpansion": 1538,
+        "oldId": 275388,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "ecard3-131",
+        "newId": null,
+        "oldExpansion": 1538,
+        "oldId": 275389,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "ecard3-133",
+        "newId": null,
+        "oldExpansion": 1538,
+        "oldId": 275391,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "ecard3-134",
+        "newId": null,
+        "oldExpansion": 1538,
+        "oldId": 275392,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "ecard3-135",
+        "newId": null,
+        "oldExpansion": 1538,
+        "oldId": 275393,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "ecard3-136",
+        "newId": null,
+        "oldExpansion": 1538,
+        "oldId": 275394,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "ex4-24",
+        "newId": null,
+        "oldExpansion": 1540,
+        "oldId": 275801,
+        "reason": "dropped-mismatch"
+      },
+      {
+        "cardKey": "ex4-48",
+        "newId": null,
+        "oldExpansion": 1540,
+        "oldId": 275825,
+        "reason": "dropped-mismatch"
+      },
+      {
+        "cardKey": "ex6-98",
+        "newId": null,
+        "oldExpansion": 1544,
+        "oldId": 276274,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "me55c-11_3",
+        "newId": null,
+        "oldExpansion": 6601,
+        "oldId": 907949,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pgo-52",
+        "newId": 664600,
+        "oldExpansion": 5051,
+        "oldId": 669498,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "pl2-2",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278569,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl2-3",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278572,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl2-4",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278571,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl2-6",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278574,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl2-16",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278590,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl2-17",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278591,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl2-18",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278592,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl2-20",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278594,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl2-23",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278597,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl2-24",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278598,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl2-28",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278602,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl2-32",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278606,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl2-35",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278609,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl2-37",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278611,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl2-38",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278612,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl2-42",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278616,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl2-43",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278617,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl2-47",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278621,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl2-48",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278622,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl2-54",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278628,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl2-60",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278634,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl2-62",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278636,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl2-65",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278639,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl2-103",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278677,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl2-106",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278680,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl2-108",
+        "newId": null,
+        "oldExpansion": 1563,
+        "oldId": 278682,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl3-8",
+        "newId": null,
+        "oldExpansion": 1564,
+        "oldId": 278690,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "pl3-9",
+        "newId": null,
+        "oldExpansion": 1564,
+        "oldId": 278691,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "sm10-81",
+        "newId": null,
+        "oldExpansion": 2437,
+        "oldId": 370787,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "sm10-198",
+        "newId": null,
+        "oldExpansion": 2437,
+        "oldId": 372373,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "sm115-22",
+        "newId": 396617,
+        "oldExpansion": 2514,
+        "oldId": 394782,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "sm6-71",
+        "newId": null,
+        "oldExpansion": 2075,
+        "oldId": 327207,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "sv10-24",
+        "newId": null,
+        "oldExpansion": 6140,
+        "oldId": 878005,
+        "reason": "dropped-mismatch"
+      },
+      {
+        "cardKey": "swsh1-48",
+        "newId": null,
+        "oldExpansion": 2921,
+        "oldId": 427241,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "swsh1-140",
+        "newId": 436799,
+        "oldExpansion": 2921,
+        "oldId": 427236,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "swsh2-172",
+        "newId": null,
+        "oldExpansion": 3143,
+        "oldId": 458238,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "swsh2-173",
+        "newId": null,
+        "oldExpansion": 3143,
+        "oldId": 458243,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "swsh3-174",
+        "newId": null,
+        "oldExpansion": 3199,
+        "oldId": 483749,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "swsh3-175",
+        "newId": null,
+        "oldExpansion": 3199,
+        "oldId": 483754,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "swsh3-176",
+        "newId": null,
+        "oldExpansion": 3199,
+        "oldId": 483759,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "swsh4-162",
+        "newId": null,
+        "oldExpansion": 3484,
+        "oldId": 512520,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "swsh4-163",
+        "newId": null,
+        "oldExpansion": 3484,
+        "oldId": 512525,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "swsh4-164",
+        "newId": null,
+        "oldExpansion": 3484,
+        "oldId": 512530,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "swsh4-165",
+        "newId": null,
+        "oldExpansion": 3484,
+        "oldId": 512535,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "xy11-25",
+        "newId": null,
+        "oldExpansion": 1716,
+        "oldId": 290990,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "xy11-65",
+        "newId": null,
+        "oldExpansion": 1716,
+        "oldId": 291480,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "xy11-81",
+        "newId": null,
+        "oldExpansion": 1716,
+        "oldId": 291546,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "xy12-59",
+        "newId": null,
+        "oldExpansion": 1742,
+        "oldId": 293413,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "xy4-12",
+        "newId": 281815,
+        "oldExpansion": 1521,
+        "oldId": 281814,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "xy4-95",
+        "newId": 281902,
+        "oldExpansion": 1521,
+        "oldId": 281901,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "xyp-XY20",
+        "newId": 281310,
+        "oldExpansion": 4159,
+        "oldId": 678788,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "xyp-XY51",
+        "newId": 289714,
+        "oldExpansion": 1612,
+        "oldId": 289704,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "xyp-XY52",
+        "newId": 289715,
+        "oldExpansion": 1612,
+        "oldId": 289705,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "xyp-XY62",
+        "newId": 289720,
+        "oldExpansion": 4159,
+        "oldId": 786640,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "xyp-XY66",
+        "newId": null,
+        "oldExpansion": 4159,
+        "oldId": 553219,
+        "reason": "dropped-mismatch"
+      },
+      {
+        "cardKey": "xyp-XY71",
+        "newId": 289790,
+        "oldExpansion": 4159,
+        "oldId": 553491,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "xyp-XY72",
+        "newId": 289791,
+        "oldExpansion": 4159,
+        "oldId": 553449,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "xyp-XY79",
+        "newId": 289802,
+        "oldExpansion": 1612,
+        "oldId": 289791,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "xyp-XY84",
+        "newId": 289809,
+        "oldExpansion": 4159,
+        "oldId": 554190,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "xyp-XY90",
+        "newId": 289813,
+        "oldExpansion": 1612,
+        "oldId": 289790,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "xyp-XY100",
+        "newId": null,
+        "oldExpansion": 1612,
+        "oldId": 289557,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "xyp-XY162",
+        "newId": 295153,
+        "oldExpansion": 1612,
+        "oldId": 281310,
+        "reason": "corrected-expansion"
+      },
+      {
+        "cardKey": "xyp-XY178",
+        "newId": 295167,
+        "oldExpansion": 1612,
+        "oldId": 289720,
+        "reason": "corrected-expansion"
+      }
+    ],
+    "foreignNameOkBySet": {
+      "cel25c": {
+        "4347": 23
+      },
+      "ecard1": {
+        "1753": 8,
+        "1754": 1
+      },
+      "ex10": {
+        "1755": 14,
+        "1756": 4
+      },
+      "ex2": {
+        "1753": 11,
+        "1754": 5
+      },
+      "ex4": {
+        "1753": 13,
+        "1754": 1
+      },
+      "ex5": {
+        "1753": 10,
+        "1754": 15,
+        "1755": 6
+      },
+      "ex6": {
+        "1754": 16,
+        "1755": 12
+      },
+      "ex7": {
+        "1754": 3
+      },
+      "ex8": {
+        "1754": 13,
+        "1755": 5,
+        "1756": 2
+      },
+      "ex9": {
+        "1754": 13,
+        "1755": 3
+      },
+      "hgss1": {
+        "2026": 6,
+        "2395": 17,
+        "2749": 8
+      },
+      "hgss2": {
+        "2026": 6,
+        "2395": 11,
+        "2749": 3
+      },
+      "hgss3": {
+        "2395": 3,
+        "2749": 2
+      },
+      "mcd11": {
+        "1623": 12
+      },
+      "me1": {
+        "6290": 15
+      },
+      "me2": {
+        "6300": 16
+      },
+      "me2pt5": {
+        "6455": 287,
+        "6616": 9
+      },
+      "me3": {
+        "6516": 14,
+        "6616": 7
+      },
+      "me4": {
+        "6518": 9
+      },
+      "me5": {
+        "6640": 6
+      },
+      "pgo": {
+        "5051": 89,
+        "5431": 1,
+        "5992": 2,
+        "6194": 2
+      },
+      "pl2": {
+        "2026": 8,
+        "2028": 20
+      },
+      "pl3": {
+        "2026": 5
+      },
+      "pop7": {
+        "2026": 1,
+        "2027": 3
+      },
+      "rsv10pt5": {
+        "6198": 157
+      },
+      "sm1": {
+        "6697": 7
+      },
+      "sv10": {
+        "6140": 26
+      },
+      "sv2": {
+        "5796": 1
+      },
+      "sv3": {
+        "2107": 1,
+        "5620": 6,
+        "5796": 5,
+        "5834": 4,
+        "5849": 1,
+        "5992": 1,
+        "6041": 1
+      },
+      "sv8pt5": {
+        "6009": 196
+      },
+      "sv9": {
+        "6088": 24
+      },
+      "sve": {
+        "5224": 56
+      },
+      "svp": {
+        "3108": 3,
+        "5431": 4,
+        "5546": 3
+      },
+      "swsh7": {
+        "5204": 1,
+        "5313": 1
+      },
+      "swshp": {
+        "3108": 1,
+        "5204": 4,
+        "5313": 2,
+        "6194": 2
+      },
+      "xyp": {
+        "4159": 24
+      },
+      "zsv10pt5": {
+        "3108": 1,
+        "5834": 2,
+        "6197": 156,
+        "6425": 6,
+        "6454": 4,
+        "6616": 2
+      }
+    },
+    "sets": [
+      {
+        "evidence": "10/10",
+        "newId": 1626,
+        "oldId": 275771,
+        "reason": "derived",
+        "setId": "tk1a"
+      }
+    ],
+    "totals": {
+      "checked": 22744,
+      "corrected": 17,
+      "dropped": 4,
+      "foreignNameOk": 1442,
+      "keptMismatch": 96,
+      "noSetExpansion": 179,
+      "ok": 21003,
+      "unknownProduct": 3
+    }
   },
   "totals": {
-    "ambiguous": 238,
+    "ambiguous": 184,
     "cards": 24057,
-    "matched": 385,
-    "missing": 3004,
-    "tcgdex": 20668
+    "matched": 441,
+    "missing": 2950,
+    "tcgdex": 20666
   }
 }

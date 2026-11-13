@@ -14,7 +14,7 @@ import { learnTables } from './merge/learn-tables.mjs';
 import { loadLegals } from './merge/legalities.mjs';
 import { mergeCard } from './merge/merge-card.mjs';
 import { mergeSet } from './merge/merge-set.mjs';
-import { fillCardmarketIds } from './merge/cardmarket-ids.mjs';
+import { fillCardmarketIds, primaryCardmarketId } from './merge/cardmarket-ids.mjs';
 import { setAssetCandidates } from './merge/images.mjs';
 import { countGroups } from './sources/verify-assets.mjs';
 import { sortLocalIds } from '../cardmarket/tcgdex-helper/generate-tcgdex-helpers.mjs';
@@ -164,9 +164,16 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
       tcgdexSet, cardCount: cards.length, assetsIndex, assetsVerified, cardmarketTracker,
     }));
   }
-  // Fehlende Cardmarket-IDs aus cardmarket/sets/<expansionId>.json nachtragen (Nummer + Name, kein Raten).
+  // Fehlende Cardmarket-IDs aus cardmarket/sets/<expansionId>.json nachtragen (Nummer + Name, kein Raten);
+  // vorhandene gegen die Expansion des Sets pruefen (cardmarket/index/products.json, .../sets.json).
+  // Fehlen die Index-Dateien, entfaellt die Pruefung.
+  const cmProducts = readJsonOr(p('cardmarket', 'index', 'products.json'), null);
+  const cmSets = readJsonOr(p('cardmarket', 'index', 'sets.json'), null);
+  const cmIndexed = Boolean(cmProducts && cmSets);
   const cardmarketIds = fillCardmarketIds({
     sets, cardsBySet, subsetExpansion,
+    knownExpansions: cmIndexed ? new Set((cmSets.sets ?? []).map((s) => s.expansionId)) : null,
+    productExpansion: cmIndexed ? (id) => cmProducts[id]?.expansionId ?? null : null,
     loadExpansion: (id) => (Number.isInteger(id) ? readJsonOr(p('cardmarket', 'sets', `${id}.json`), null) : null),
   });
   sets.sort((a, b) => cmp(a.releaseDate ?? '9999', b.releaseDate ?? '9999') || cmp(a.id, b.id));
@@ -190,8 +197,8 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
   for (const [setId, cards] of [...cardsBySet].sort((a, b) => cmp(a[0], b[0]))) {
     for (const c of cards) {
       const entry = { setId, cardId: c.cardId, number: c.number, name: c.name };
-      // cm: Cardmarket-Produkt-ID wie im Frontend: erste Variante mit cardmarketId, sonst ids.cardmarket[0].
-      const cm = (c.variants ?? []).find((v) => typeof v.cardmarketId === 'number')?.cardmarketId ?? c.ids?.cardmarket?.[0];
+      // cm: primaere Cardmarket-Produkt-ID, gleiche Regel wie im Frontend (ungestempelte Variante zuerst).
+      const cm = primaryCardmarketId(c);
       if (typeof cm === 'number') entry.cm = cm;
       const optional = {
         nameDe: c.i18n?.de?.name, img: c.images?.small, imgDe: c.i18n?.de?.images?.small,
@@ -233,7 +240,7 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
   if (doWriteRegistry && !tcgdexOnly) writeRegistry(registryAbs, registry);
 
   return {
-    sets: sets.length, cards: cardTotal, matchStatus, cardmarketIds: { ...cardmarketIds.totals, duplicates: cardmarketIds.duplicates }, registryChanges: changes, skippedNoSource, missingImages, assets,
+    sets: sets.length, cards: cardTotal, matchStatus, cardmarketIds: { ...cardmarketIds.totals, duplicates: cardmarketIds.duplicates, expansion: { ...cardmarketIds.expansionMismatch.totals, sets: cardmarketIds.expansionMismatch.sets } }, registryChanges: changes, skippedNoSource, missingImages, assets,
     tables: Object.fromEntries(Object.entries(tables).map(([k, v]) => [k, Object.keys(v).length])),
     warnings: db.warnings.length,
   };
@@ -283,6 +290,8 @@ function main() {
     }
     const cm = r.cardmarketIds;
     console.log(`Cardmarket-IDs: ${cm.cards} Karten, ${cm.tcgdex} von TCGdex, ${cm.matched} nachgetragen, ${cm.missing} fehlen (${cm.ambiguous} mehrdeutig); doppelte TCGdex-IDs ${cm.duplicates.ids} (${cm.duplicates.cards} Karten, ${cm.duplicates.corrected} korrigiert, ${cm.duplicates.kept} belassen); Details api/v3/reports/cardmarket-ids.json`);
+    const x = cm.expansion;
+    console.log(`Cardmarket-Expansionspruefung: ${x.checked} IDs, ${x.corrected} ersetzt, ${x.dropped} entfernt, ${x.keptMismatch} belassen (Name passt nicht), ${x.noSetExpansion} ohne Set-Expansion, ${x.unknownProduct} unbekannt, ${x.foreignNameOk} namensgleich in fremder Expansion; Sets: ${x.sets.map((s) => `${s.setId} ${s.oldId}->${s.newId ?? '-'} (${s.reason})`).join(', ') || '-'}`);
     console.log(`Assets: ${r.assets.ok} ok, ${r.assets.missing} fehlen`);
     console.log(`Gelernte Tabellen: ${Object.entries(r.tables).map(([k, n]) => `${k} ${n}`).join(', ')}`);
     const counts = new Map();
