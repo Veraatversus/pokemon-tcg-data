@@ -213,6 +213,7 @@ import {
 import { sanitizeDisplayText } from './core/display-text.js';
 import { runWithRetry, isRetryableError } from './core/retry.js';
 import { createBootstrapController } from './app/bootstrap-controller.js';
+import { initPwaFeatures } from './app/pwa-init.js';
 import { isSheetsQuotaError, getImportCooldownMs } from './features/collection/import-rate-limit.js';
 import { isAuthReloginRequiredError, getAuthReloginImportMessage } from './features/collection/import-auth-guard.js';
 // --------------------------------------------------------------------------
@@ -9355,105 +9356,9 @@ bootstrap().catch((err) => {
 });
 
 // --------------------------------------------------------------------------
-// SERVICE WORKER REGISTRATION
+// SERVICE WORKER + PWA-INSTALL (js/app/pwa-init.js)
 // --------------------------------------------------------------------------
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async () => {
-    try {
-      const registration = await navigator.serviceWorker.register('./service-worker.js', {
-        scope: './'
-      });
-
-      if (registration.waiting) {
-        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-      }
-
-      registration.addEventListener('updatefound', () => {
-        const newWorker = registration.installing;
-        if (!newWorker) return;
-        newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            newWorker.postMessage({ type: 'SKIP_WAITING' });
-          }
-        });
-      });
-      
-      // Check for updates periodically
-      setInterval(() => {
-        registration.update().catch(err => console.warn('SW update check failed:', err));
-      }, 60000); // Check every minute
-      
-      // Handle controller change (new SW ready)
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        showToast('App wurde aktualisiert', 'success', 1500);
-        window.setTimeout(() => {
-          window.location.reload();
-        }, 300);
-      });
-      
-      // Listen for messages from Service Worker
-      navigator.serviceWorker.addEventListener('message', (event) => {
-        if (event.data.type === 'sync-complete') {
-          showToast('Daten synchronisiert', 'success', 2000);
-        }
-      });
-    } catch (err) {
-      console.warn('Service Worker registration failed:', err);
-    }
-  });
-}
-
-// PWA Install Prompt Handler
-let deferredPrompt;
-let installBtn = null;
-const isAppInstalled = () => {
-  const isStandalone = Boolean(navigator.standalone);
-  const hasMatchMedia = typeof window.matchMedia === 'function';
-  const isDisplayStandalone = hasMatchMedia && window.matchMedia('(display-mode: standalone)').matches;
-  return isStandalone || isDisplayStandalone;
-};
-const removeInstallButton = () => {
-  if (installBtn?.parentElement) {
-    installBtn.parentElement.removeChild(installBtn);
-  }
-  installBtn = null;
-};
-
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  
-  // Show install button
-  removeInstallButton();
-  installBtn = document.createElement('button');
-  installBtn.className = 'btn-primary';
-  installBtn.textContent = 'App installieren';
-  installBtn.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 100;';
-  
-  installBtn.addEventListener('click', async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const choice = await deferredPrompt.userChoice;
-      if (choice.outcome === 'accepted') {
-        showToast('App installiert!', 'success', 3000);
-        removeInstallButton();
-      }
-      deferredPrompt = null;
-    }
-  });
-  
-  // Only show if not already installed
-  if (document.body && !isAppInstalled()) {
-    document.body.appendChild(installBtn);
-  }
-});
-
-// Handle app installed event
-window.addEventListener('appinstalled', () => {
-  removeInstallButton();
-  showToast('App erfolgreich installiert!', 'success', 4000);
-});
+initPwaFeatures({ showToast });
 
 const _featureInitFlags = {
   offline: false,

@@ -35,7 +35,7 @@ export function initPwaFeatures({
 
         // Handle controller change (new SW ready)
         navigatorRef.serviceWorker.addEventListener('controllerchange', () => {
-          showToast('🔄 App wurde aktualisiert', 'success', 1500);
+          showToast('App wurde aktualisiert', 'success', 1500);
           windowRef.setTimeout(() => {
             windowRef.location.reload();
           }, 300);
@@ -44,7 +44,7 @@ export function initPwaFeatures({
         // Listen for messages from Service Worker
         navigatorRef.serviceWorker.addEventListener('message', (event) => {
           if (event.data.type === 'sync-complete') {
-            showToast('✅ Daten synchronisiert', 'success', 2000);
+            showToast('Daten synchronisiert', 'success', 2000);
           }
         });
       } catch (err) {
