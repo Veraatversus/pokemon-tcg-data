@@ -258,3 +258,25 @@ test('readDbCardsForSet: imgDe aus dem Suchindex schlaegt tcgdex_image_small der
     }
   }
 });
+
+test('db_cards: Index nur mit EN-Bild, Zeile mit DE-Bild -> Anzeigefelder DE aus der Zeile, EN aus api/v3', () => {
+  const map = buildV3CardDataMap([{ setId: 'sv1', cardId: '5', img: 'https://assets.tcgdex.net/en/sv/sv01/005/low.webp' }]);
+  const deSheet = 'https://assets.tcgdex.net/de/sv/sv01/005/low.webp';
+  const row = dbCard({ cardId: 'sv1-5', collectionKey: '5', deSmall: deSheet });
+  const [de] = attachV3CardData([row], map, { setId: 'sv1', language: 'de' });
+  assert.equal(de.image, deSheet);
+  assert.equal(de.imageUrl, deSheet);
+  assert.equal(de.imageLarge, 'https://assets.tcgdex.net/de/sv/sv01/005/high.webp');
+  assert.equal(de.image, imageCandidates(de, 'cardSmall', 'de')[0]);
+  const [en] = attachV3CardData([row], map, { setId: 'sv1', language: 'en' });
+  assert.equal(en.image, 'https://assets.tcgdex.net/en/sv/sv01/005/low.webp');
+  assert.equal(en.imageLarge, 'https://assets.tcgdex.net/en/sv/sv01/005/high.webp');
+});
+
+test('primaryCardmarketProductId: truthy Nicht-Array-stamp zaehlt als gestempelt (wie master)', () => {
+  assert.equal(primaryCardmarketProductId({ variants: [
+    { type: 'normal', stamp: 'pre-release', cardmarketId: 1 },
+    { type: 'holo', cardmarketId: 2 }
+  ] }), 2);
+  assert.equal(primaryCardmarketProductId({ variants: [{ stamp: '', cardmarketId: 3 }, { cardmarketId: 4 }] }), 3);
+});

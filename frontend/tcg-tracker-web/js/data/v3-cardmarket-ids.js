@@ -7,6 +7,7 @@
 // Fehler (offline, kein Index) liefern leere Tabellen: Aufrufer fallen dann auf ihren bisherigen Weg zurueck.
 import { loadV3SearchIndex, loadV3Sets } from './v3-api.js';
 import { attachV3CardmarketIds, normalizeCardmarketProductId, v3CardmarketKeys } from './cardmarket-url-utils.js';
+import { imageCandidates } from '../ui/image-fallback.js';
 
 const idMapByIndex = new WeakMap();
 const dataMapByIndex = new WeakMap();
@@ -98,11 +99,14 @@ function withIndexImages(record, data, language) {
     const i18nDe = record.i18n_de && typeof record.i18n_de === 'object' ? record.i18n_de : {};
     out.i18n_de = { ...i18nDe, images: { ...(i18nDe.images || {}), ...sized(imgDe) } };
   }
-  // Anzeigefelder (resolveDisplayCard) in Kartensprache nachziehen; Sheet-Spalten (vera_*/tcgdex_*) bleiben unveraendert.
-  const preferred = language === 'en' ? (img || imgDe) : (imgDe || img);
-  const large = tcgdexLargeImageUrl(preferred) || text(record.imageLarge) || preferred;
-  out.image = preferred;
-  out.imageUrl = preferred;
+  // Anzeigefelder (resolveDisplayCard, von einigen Stellen direkt gelesen) aus derselben Kette wie die Bild-Fallbacks:
+  // erstes Element von imageCandidates in Kartensprache. So bleibt z. B. ein DE-Bild der Zeile vorn, wenn der Index
+  // nur ein EN-Bild kennt. Sheet-Spalten (vera_*/tcgdex_*) bleiben unveraendert.
+  const lang = language === 'en' ? 'en' : 'de';
+  const small = imageCandidates(out, 'cardSmall', lang)[0] || '';
+  const large = imageCandidates(out, 'cardLarge', lang)[0] || small;
+  out.image = small;
+  out.imageUrl = small;
   out.imageLarge = large;
   out.imageLargeUrl = large;
   return out;

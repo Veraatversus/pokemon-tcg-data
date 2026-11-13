@@ -41,7 +41,8 @@ const positiveId = (v) => {
   return Number.isInteger(n) && n > 0 ? n : null;
 };
 
-const isUnstamped = (variant) => !Array.isArray(variant?.stamp) || variant.stamp.length === 0;
+// Wie master (primaryCardmarketId): Array -> gestempelt bei Laenge > 0, sonst truthy-Wert = gestempelt.
+const isUnstamped = (variant) => (Array.isArray(variant?.stamp) ? variant.stamp.length === 0 : !variant?.stamp);
 const isNotJumbo = (variant) => str(variant?.size).toLowerCase() !== 'jumbo';
 
 /**
