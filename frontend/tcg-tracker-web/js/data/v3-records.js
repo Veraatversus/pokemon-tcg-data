@@ -41,13 +41,15 @@ const positiveId = (v) => {
   return Number.isInteger(n) && n > 0 ? n : null;
 };
 
-// Cardmarket-Produkt-ID: ids.cardmarket[0] (erste = beste, ggf. korrigiert/gematcht),
-// sonst erste Variante mit cardmarketId; null ohne ID.
+// Cardmarket-Produkt-ID nach der Regel der API (scripts/api/build-api.mjs, search-index `cm`): erste
+// Variante mit cardmarketId, sonst ids.cardmarket[0]; null ohne ID. Damit liefern Set-Ansicht (Kartendatei),
+// Suche und db_cards-Anreicherung (beide search-index) dieselbe ID. Korrekturen der API stehen auch in den
+// Varianten; ids.cardmarket[0] ist bei TCGdex-IDs teils ein Stempel-Produkt ohne Nummer (z. B. sv3pt5-1).
 function cardmarketProductId(card) {
+  const fromVariant = positiveId(list(card.variants).find((v) => positiveId(v?.cardmarketId))?.cardmarketId);
+  if (fromVariant) return fromVariant;
   const ids = card.ids?.cardmarket;
-  const fromIds = positiveId(Array.isArray(ids) ? ids[0] : ids);
-  if (fromIds) return fromIds;
-  return positiveId(list(card.variants).find((v) => positiveId(v?.cardmarketId))?.cardmarketId);
+  return positiveId(Array.isArray(ids) ? ids[0] : ids);
 }
 
 // Varianten mit eigener Produkt-ID (Stempel/Sondervarianten), fuer eine spaetere Varianten-Anzeige.

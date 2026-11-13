@@ -234,12 +234,17 @@ test('localId: Set-Praefix wird abgeschnitten, Rest darf Bindestriche enthalten'
   assert.equal(toCardRecord(c, { id: 'y', ids: { tcgdex: 'my-set' } }).tcgdex_localId, '1');
 });
 
-test('Cardmarket-URL: ids.cardmarket[0] (korrigiert/beste), sonst erste Variante mit cardmarketId, sonst leer', () => {
+test('Cardmarket-URL wie der API-Suchindex (cm): erste Variante mit cardmarketId, sonst ids.cardmarket[0], sonst leer', () => {
   const url = (id) => `https://www.cardmarket.com/de/Pokemon/Products?idProduct=${id}`;
   const base = { id: 'x-1', cardId: '1', number: '1', setId: 'x' };
   const both = toCardRecord({ ...base, variants: [{ type: 'normal', cardmarketId: 11 }, { type: 'holo', stamp: ['1st-edition'], cardmarketId: 12 }], ids: { cardmarket: [99] } });
-  assert.equal(both.vera_cardmarket_url, url(99));
-  assert.equal(both.cardmarketProductId, 99);
+  assert.equal(both.vera_cardmarket_url, url(11));
+  assert.equal(both.cardmarketProductId, 11);
+  // realer Fall: sv3pt5-1 ids.cardmarket [720365 (Set-Logo-Stempel, ohne Nummer), 733596 (#001), ...];
+  // die normale Variante (und search-index cm) zeigt auf 733596.
+  assert.equal(toCardRecord(card('sv3pt5', 'sv3pt5-1'), setById('sv3pt5')).cardmarketProductId, 733596);
+  // korrigierte Karte: Varianten tragen die Korrektur, beide Regeln liefern dieselbe ID
+  assert.equal(toCardRecord(card('me55', 'me55-150'), setById('me55')).cardmarketProductId, 907757);
   // Varianten-IDs bleiben erhalten (Stempel/Sondervarianten koennen eigene Produkte haben)
   assert.deepEqual(both.cardmarketVariants.map((v) => v.cardmarketId), [11, 12]);
   assert.deepEqual(both.cardmarketVariants[1].stamp, ['1st-edition']);
