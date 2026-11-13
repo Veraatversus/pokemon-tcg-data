@@ -837,7 +837,9 @@
     },
     "id": "tk1a",
     "ids": {
-      "cardmarket": 275771,
+      "cardmarket": 1626,
+      "cardmarketSetSource": "derived",
+      "cardmarketTcgdexSet": 275771,
       "pokemontcg": "tk1a",
       "tcgdex": "tk-ex-latia",
       "tcgplayer": 1543
