@@ -28,11 +28,12 @@ test('conversion: custom-set JSON yields exactly the collector numbers of the ol
   for (const id of CUSTOM_SETS) {
     const json = readJson(path.join(root, 'sources', 'cardmarket', 'custom-sets', `${id}.json`));
     assert.equal(json.expansionId, id);
-    assert.deepEqual(json.cards, legacy[id].map(([productId, collectorNumber]) => ({ productId, collectorNumber })), `custom-set ${id}`);
+    assert.deepEqual(json.cards.map(({ lot, ...c }) => c), legacy[id].map(([productId, collectorNumber]) => ({ productId, collectorNumber })), `custom-set ${id}`);
   }
-  // Loader: Nummern genau aus den JSON-Dateien; nicht im Katalog: nur die fuenf 5241-Lot-Produkte (224a-d, f)
+  // Loader: Nummern genau aus den JSON-Dateien; die fuenf 5241-Lot-Produkte (224a-d, f; nicht im Katalog) sind als lot markiert
   const catalog = loadCardmarketCatalog(path.join(root, 'sources', 'cardmarket'));
-  assert.deepEqual(catalog.missingCustomSetProducts.map((m) => `${m.expansionId}/${m.collectorNumber}`), ['5241/224a', '5241/224b', '5241/224c', '5241/224d', '5241/224f']);
+  assert.deepEqual(catalog.missingCustomSetProducts, []);
+  assert.deepEqual(catalog.lotCustomSetProducts.map((m) => `${m.expansionId}/${m.collectorNumber}`), ['5241/224a', '5241/224b', '5241/224c', '5241/224d', '5241/224f']);
   for (const id of CUSTOM_SETS) {
     const json = readJson(path.join(root, 'sources', 'cardmarket', 'custom-sets', `${id}.json`));
     const payload = catalog.loadExpansion(id);

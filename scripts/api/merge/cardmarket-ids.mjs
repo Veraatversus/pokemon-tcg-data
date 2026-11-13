@@ -27,6 +27,12 @@
 const SINGLE_CATEGORY_ID = 51;
 const SINGLE_CATEGORY = 'Pokémon Single';
 
+// Suchseite der Expansion auf Cardmarket, nach Nummer sortiert (null ohne Expansion).
+export function cardmarketSearchUrl(expansionId) {
+  if (!Number.isInteger(expansionId)) return null;
+  return `https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=${expansionId}&sortBy=collectorsnumber_asc&perSite=100&site=1`;
+}
+
 export function normalizeCmNumber(value) {
   if (value === undefined || value === null) return null;
   const s = String(value).trim().toLowerCase();
@@ -926,6 +932,13 @@ export function fillCardmarketIds({
   oversizeExcludedProducts.sort((a, b) => a.productId - b.productId);
   rules.oversizeExcluded = oversizeExcludedProducts.length;
 
+  // Abdeckung und Suchlink je Set (Report cardmarket-ids.json/.md): withId = Karten mit Cardmarket-ID, bySource nach Herkunft.
+  for (const row of Object.values(bySet)) {
+    const bySource = {};
+    for (const k of ['tcgdex', 'customSet', 'override', 'matched', 'stabilityKept']) if (row[k] > 0) bySource[k] = row[k];
+    row.coverage = { cards: row.cards, withId: row.cards - row.missing, bySource };
+    row.searchUrl = cardmarketSearchUrl(row.expansionId);
+  }
   const totals = { cards: 0, tcgdex: 0, matched: 0, missing: 0, ambiguous: 0, override: 0, customSet: 0, stabilityKept: 0 };
   for (const row of Object.values(bySet)) for (const k of Object.keys(totals)) totals[k] += row[k] ?? 0;
   return {

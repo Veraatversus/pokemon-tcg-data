@@ -1216,19 +1216,23 @@
     },
     {
       "productId": 726926,
-      "collectorNumber": "224a"
+      "collectorNumber": "224a",
+      "lot": true
     },
     {
       "productId": 783444,
-      "collectorNumber": "224b"
+      "collectorNumber": "224b",
+      "lot": true
     },
     {
       "productId": 844369,
-      "collectorNumber": "224c"
+      "collectorNumber": "224c",
+      "lot": true
     },
     {
       "productId": 814297,
-      "collectorNumber": "224d"
+      "collectorNumber": "224d",
+      "lot": true
     },
     {
       "productId": 784943,
@@ -1236,7 +1240,8 @@
     },
     {
       "productId": 740323,
-      "collectorNumber": "224f"
+      "collectorNumber": "224f",
+      "lot": true
     }
   ]
 }

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeCmNumber, normalizeCmName, fillCardmarketIds, primaryCardmarketId } from '../merge/cardmarket-ids.mjs';
+import { normalizeCmNumber, normalizeCmName, fillCardmarketIds, primaryCardmarketId, cardmarketSearchUrl } from '../merge/cardmarket-ids.mjs';
 
 const single = (cardmarketProductId, name, collectorNumber) => ({
   cardmarketProductId, name, collectorNumber, categoryId: 51, categoryName: 'Pokémon Single',
@@ -54,7 +54,7 @@ test('fills cardmarket id by number+name', () => {
   assert.equal(cards[0].ids.cardmarketSource, 'matched');
   assert.deepEqual(cards[1].ids.cardmarket, [702299]);
   assert.deepEqual(report.totals, { cards: 2, tcgdex: 0, matched: 2, missing: 0, ambiguous: 0, override: 0, customSet: 0, stabilityKept: 0 });
-  assert.deepEqual(report.bySet.s1, { expansionId: 100, cards: 2, tcgdex: 0, matched: 2, missing: 0, ambiguous: 0 });
+  assert.deepEqual(report.bySet.s1, { expansionId: 100, cards: 2, tcgdex: 0, matched: 2, missing: 0, ambiguous: 0, coverage: { cards: 2, withId: 2, bySource: { matched: 2 } }, searchUrl: cardmarketSearchUrl(100) });
 });
 
 test('no id when two products match', () => {
@@ -145,7 +145,7 @@ test('Set ohne Cardmarket-Expansion oder ohne Expansionsdatei -> leer, gezaehlt'
     loadExpansion: () => null,
   });
   // ohne Expansion fehlt alles; keine Kartenliste (z. B. Pocket-Sets)
-  assert.deepEqual(report.bySet.s1, { expansionId: null, cards: 1, tcgdex: 0, matched: 0, missing: 1, ambiguous: 0 });
+  assert.deepEqual(report.bySet.s1, { expansionId: null, cards: 1, tcgdex: 0, matched: 0, missing: 1, ambiguous: 0, coverage: { cards: 1, withId: 0, bySource: {} }, searchUrl: null });
   assert.equal(report.bySet.s2.expansionId, 404);
   assert.equal(report.bySet.s2.expansionFileMissing, true);
 });
@@ -1009,4 +1009,24 @@ test('name-only rules need unique evidence (SIR/alt-art without numbers)', () =>
     100: [single(1000, 'Pikachu ex [Thunder]', null), single(1300, 'Pikachu ex [Thunderbolt]', null)],
   });
   assert.deepEqual(d.cards.map((x) => x.ids.cardmarket), [[1000], [1300]]);
+});
+
+test('Report je Set: coverage {cards, withId, bySource} und searchUrl', () => {
+  const { report } = run(
+    [card('1', '1', 'Pineco'), card('2', '2', 'Heracross'), card('3', '3', 'Unbekannt')],
+    [single(11, 'Pineco', '1'), single(12, 'Heracross', '2')],
+  );
+  const row = report.bySet.s1;
+  assert.equal(row.expansionId, 100);
+  assert.equal(row.coverage.cards, 3);
+  assert.equal(row.coverage.withId, 2);
+  assert.equal(row.coverage.bySource.matched, 2);
+  assert.equal(row.searchUrl, 'https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=100&sortBy=collectorsnumber_asc&perSite=100&site=1');
+});
+
+test('Report je Set: ohne Expansion keine searchUrl', () => {
+  const cardsBySet = new Map([['s2', [card('1', '1', 'X')]]]);
+  const report = fillCardmarketIds({ sets: [{ id: 's2', ids: {} }], cardsBySet, loadExpansion: () => null });
+  assert.equal(report.bySet.s2.searchUrl, null);
+  assert.equal(report.bySet.s2.coverage.withId, 0);
 });

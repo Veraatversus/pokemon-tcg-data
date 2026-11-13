@@ -17,6 +17,8 @@ import { mergeSet } from './merge/merge-set.mjs';
 import { fillCardmarketIds, primaryCardmarketId, previousFromCards } from './merge/cardmarket-ids.mjs';
 import { writePriceFiles } from './merge/cardmarket-prices.mjs';
 import { loadCardmarketCatalog } from './sources/cardmarket-catalog.mjs';
+import { evaluateCardmarketIssue } from './report/cardmarket-issue.mjs';
+import { renderCardmarketReportMd } from './report/cardmarket-report.mjs';
 import { setAssetCandidates } from './merge/images.mjs';
 import { countGroups } from './sources/verify-assets.mjs';
 import { sortLocalIds } from './lib/local-ids.mjs';
@@ -248,6 +250,9 @@ export function runBuild({
   for (const f of fs.readdirSync(cardsDir)) {
     if (f.endsWith('.json') && !wanted.has(f)) fs.rmSync(path.join(cardsDir, f));
   }
+  // Bekannte Sets fuer die Issue-Regeln "neues Set": die bisher veroeffentlichte sets.json, bevor sie ueberschrieben wird.
+  let previousSetIds = null;
+  try { previousSetIds = readJson(path.join(outAbs, 'sets.json')).map((x) => x.id); } catch { previousSetIds = null; }
   writeIfChanged(path.join(outAbs, 'sets.json'), toJson(sets));
   writeIfChanged(path.join(outAbs, 'search-index.json'), toCompactJson(searchIndex));
   writeIfChanged(path.join(outAbs, 'meta.json'), toJson(meta));
@@ -255,6 +260,14 @@ export function runBuild({
   fs.mkdirSync(path.join(outAbs, 'reports'), { recursive: true });
   writeIfChanged(path.join(outAbs, 'reports', 'learned-tables.json'), toJson(tables));
   writeIfChanged(path.join(outAbs, 'reports', 'cardmarket-ids.json'), toJson(cardmarketIds));
+  writeIfChanged(path.join(outAbs, 'reports', 'cardmarket-ids.md'), renderCardmarketReportMd(cardmarketIds));
+  // Meldung "Cardmarket-Zuordnung pruefen": nur das Ergebnis, der Workflow legt das Issue an/aktualisiert/schliesst es.
+  const cardmarketIssue = evaluateCardmarketIssue({
+    report: cardmarketIds, meta: readJsonOr(p('sources', 'cardmarket', 'meta.json'), {}), previousSetIds, excludedSetIds,
+  });
+  fs.mkdirSync(p('.cache', 'cardmarket'), { recursive: true });
+  fs.writeFileSync(p('.cache', 'cardmarket', 'issue.json'), `${JSON.stringify(cardmarketIssue, null, 2)}
+`);
   // Preise (Spec §2.3): nur mit Preisguide von heute (.cache, schreibt sync-cardmarket nur bei Erfolg);
   // sonst bleiben api/v3/prices und prices/meta.json wie veroeffentlicht.
   const priceGuideFile = p('.cache', 'cardmarket', 'price-guide.json');
@@ -266,7 +279,7 @@ export function runBuild({
   if (doWriteRegistry && !tcgdexOnly) writeRegistry(registryAbs, registry);
 
   return {
-    prices,
+    prices, cardmarketIssue,
     sets: sets.length, cards: cardTotal, matchStatus, cardmarketIds: { ...cardmarketIds.totals, rules: cardmarketIds.rules, overrideWarnings: cardmarketIds.overrides.warnings, stillMissing: cardmarketIds.stillMissing.length, duplicates: cardmarketIds.duplicates, expansion: { ...cardmarketIds.expansionMismatch.totals, sets: cardmarketIds.expansionMismatch.sets }, setsWithoutExpansion: cardmarketIds.setsWithoutExpansion.length, customSetMissingProducts: cardmarketIds.customSets.missingProducts.length, stabilityDropped: cardmarketIds.stabilityDropped.length, stabilityConflicts: cardmarketIds.stabilityConflicts.length }, registryChanges: changes, skippedNoSource, missingImages, assets,
     tables: Object.fromEntries(Object.entries(tables).map(([k, v]) => [k, Object.keys(v).length])),
     warnings: db.warnings.length,

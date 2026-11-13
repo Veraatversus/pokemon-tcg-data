@@ -35,10 +35,13 @@ export function buildCatalog(products, customSets = []) {
   }
   const customSetNumbers = new Map();
   const missingCustomSetProducts = [];
+  const lotCustomSetProducts = [];
   const customSetByExpansion = new Map();
   for (const cs of customSets) {
     customSetByExpansion.set(cs.expansionId, cs);
-    for (const { productId, collectorNumber } of cs.cards ?? []) {
+    for (const { productId, collectorNumber, lot } of cs.cards ?? []) {
+      // lot: Sammel-/Sonderprodukt des alten Skripts, keine Einzelkarte -> weder Nummer noch Meldung
+      if (lot) { lotCustomSetProducts.push({ expansionId: cs.expansionId, productId, collectorNumber }); continue; }
       const p = byId.get(productId);
       if (!p) { missingCustomSetProducts.push({ expansionId: cs.expansionId, productId, collectorNumber }); continue; }
       if (p.expansionId !== cs.expansionId) {
@@ -67,7 +70,7 @@ export function buildCatalog(products, customSets = []) {
     return payloads.get(expansionId);
   };
   return {
-    byId, byExpansion, expansions: new Set(byExpansion.keys()), customSets: customSetByExpansion, customSetNumbers, missingCustomSetProducts, loadExpansion,
+    byId, byExpansion, expansions: new Set(byExpansion.keys()), customSets: customSetByExpansion, customSetNumbers, missingCustomSetProducts, lotCustomSetProducts, loadExpansion,
   };
 }
 

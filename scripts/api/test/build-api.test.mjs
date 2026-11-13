@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { runBuild, requiredFieldViolations, BuildValidationError } from '../build-api.mjs';
+import { cardmarketSearchUrl } from '../merge/cardmarket-ids.mjs';
 import { RegistryFrozenError } from '../registry/build-registry.mjs';
 
 const write = (root, rel, content) => {
@@ -86,7 +87,7 @@ test('runBuild: Mini-Repo, zwei Laeufe identisch, Registry geschrieben, alte Dat
     assert.ok(r1.registryChanges.length > 0);
     const v3 = path.join(root, 'api', 'v3');
     assert.deepEqual(Object.keys(snapshot(v3)).sort(), [
-      'cards/TCGDEX-A1.json', 'cards/sv1.json', 'meta.json', 'reports/cardmarket-ids.json', 'reports/learned-tables.json', 'reports/matching.json', 'search-index.json', 'sets.json',
+      'cards/TCGDEX-A1.json', 'cards/sv1.json', 'meta.json', 'reports/cardmarket-ids.json', 'reports/cardmarket-ids.md', 'reports/learned-tables.json', 'reports/matching.json', 'search-index.json', 'sets.json',
     ]);
     const sv1 = readJson(path.join(v3, 'cards', 'sv1.json'));
     assert.deepEqual(sv1.map((c) => c.cardId), ['1', '2', '3', '4']);
@@ -177,7 +178,7 @@ test('runBuild: Cardmarket-IDs aus Katalog und custom-set nachgetragen, Report u
     assert.deepEqual(sv1[2].ids.cardmarket, [803]);
     assert.equal(sv1[2].ids.cardmarketSource, 'matched');
     const report = readJson(path.join(v3, 'reports', 'cardmarket-ids.json'));
-    assert.deepEqual(report.bySet.sv1, { expansionId: 4999, cards: 4, tcgdex: 2, matched: 1, missing: 0, ambiguous: 0, customSet: 1 });
+    assert.deepEqual(report.bySet.sv1, { expansionId: 4999, cards: 4, tcgdex: 2, matched: 1, missing: 0, ambiguous: 0, customSet: 1, coverage: { cards: 4, withId: 4, bySource: { tcgdex: 2, customSet: 1, matched: 1 } }, searchUrl: cardmarketSearchUrl(4999) });
     assert.equal(report.totals.matched, 1);
     assert.equal(r.cardmarketIds.matched, 1);
     assert.deepEqual(r.cardmarketIds.duplicates, { ids: 0, cards: 0, corrected: 0, kept: 0 });
@@ -410,6 +411,30 @@ test('excluded-series: Pocket-Set erscheint nicht in api/v3, Registry behaelt ih
     assert.equal(r2.sets, 2);
     assert.ok(fs.existsSync(path.join(v3, 'cards', 'TCGDEX-A1.json')));
     assert.deepEqual(readJson(path.join(v3, 'meta.json')).excludedSetIds, []);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('runBuild: cardmarket-ids.md, Issue-Ergebnis in .cache; vorherige sets.json liefert die bekannten Sets', () => {
+  const root = makeRepo();
+  try {
+    write(root, 'sources/cardmarket/catalog.jsonl', `${[catalogLine(701, 'Alpha [Tackle]')].join('\n')}\n`);
+    const r1 = runBuild({ repoRoot: root });
+    const md = fs.readFileSync(path.join(root, 'api', 'v3', 'reports', 'cardmarket-ids.md'), 'utf8');
+    assert.match(md, /^# Cardmarket-Zuordnung/);
+    assert.match(md, /\| sv1 \| 4999 \|/);
+    assert.equal(r1.cardmarketIssue.open, false); // erster Lauf: keine vorherige sets.json -> Neu-Regel ausgesetzt
+    const issueFile = path.join(root, '.cache', 'cardmarket', 'issue.json');
+    assert.deepEqual(readJson(issueFile), r1.cardmarketIssue);
+    // sets.json ohne sv1 -> sv1 gilt als neu und hat < 80 % Abdeckung (3 von 4 ohne ID)
+    const setsFile = path.join(root, 'api', 'v3', 'sets.json');
+    fs.writeFileSync(setsFile, JSON.stringify(readJson(setsFile).filter((s) => s.id !== 'sv1')));
+    fs.writeFileSync(path.join(root, 'sources', 'cardmarket', 'meta.json'), JSON.stringify({ consecutiveFailures: 0 }));
+    const r2 = runBuild({ repoRoot: root });
+    assert.equal(r2.cardmarketIssue.open, true);
+    assert.match(r2.cardmarketIssue.body, /`sv1`/);
+    assert.equal(readJson(issueFile).open, r2.cardmarketIssue.open);
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
