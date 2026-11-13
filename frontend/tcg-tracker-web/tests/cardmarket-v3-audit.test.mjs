@@ -17,7 +17,7 @@ import {
 import { buildV3CardmarketIdMap, buildV3ExpansionIdMap } from '../js/data/v3-cardmarket-ids.js';
 import { buildSetCardAssignmentMap, inferCardmarketExpansionIdFromCards } from '../js/data/cardmarket-ui-helpers.js';
 import { resolveDisplayCard } from '../js/data/schema-contract.js';
-import { toCardRecord } from '../js/data/v3-records.js';
+import { primaryCardmarketProductId, toCardRecord } from '../js/data/v3-records.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const v3Dir = path.join(repoRoot, 'api', 'v3');
@@ -54,7 +54,7 @@ function staleDbRecord(v3Card, wrongId) {
 test('Audit: jede Nicht-Pocket-Karte mit v3-ID loest trotz falscher gespeicherter URL auf die v3-ID auf', { skip }, (t) => {
   const { sets, index } = loadData();
   const idMap = buildV3CardmarketIdMap(index);
-  const counts = { sets: 0, cards: 0, withV3Id: 0, indexMismatch: 0, resolved: 0, matcherKeepsV3: 0, matcherChecked: 0 };
+  const counts = { sets: 0, cards: 0, withV3Id: 0, indexMismatch: 0, indexOldRuleTolerated: 0, resolved: 0, matcherKeepsV3: 0, matcherChecked: 0 };
   const failures = [];
 
   for (const set of sets) {
@@ -66,11 +66,24 @@ test('Audit: jede Nicht-Pocket-Karte mit v3-ID loest trotz falscher gespeicherte
     const withId = [];
     for (const v3Card of v3Cards) {
       counts.cards += 1;
-      const expected = String(toCardRecord(v3Card, set).cardmarketProductId || '');
-      if (!expected) continue;
+      // Erwartung aus der gemeinsamen Regel (primaryCardmarketProductId) auf der Kartendatei, nicht aus cm.
+      const ruleId = String(primaryCardmarketProductId(v3Card) || '');
+      if (!ruleId) continue;
       counts.withV3Id += 1;
+      assert.equal(String(toCardRecord(v3Card, set).cardmarketProductId), ruleId, v3Card.id);
       const fromIndex = idMap.get(`id:${String(v3Card.id).toLowerCase()}`) || '';
-      if (fromIndex !== expected) counts.indexMismatch += 1;
+      let expected = ruleId;
+      if (fromIndex !== ruleId) {
+        // Uebergang bis zum neuen API-Build: cm nach alter Regel (erste Variante, auch gestempelt) wird
+        // nur toleriert, wenn genau das der Unterschied ist; die db_cards-Anreicherung liefert dann cm.
+        const oldRule = String((v3Card.variants || []).find((v) => Number(v?.cardmarketId) > 0)?.cardmarketId || '');
+        const stampedFirst = oldRule && oldRule === fromIndex
+          && (v3Card.variants || []).find((v) => Number(v?.cardmarketId) > 0)?.stamp?.length > 0;
+        if (stampedFirst) {
+          counts.indexOldRuleTolerated += 1;
+          expected = fromIndex;
+        } else counts.indexMismatch += 1;
+      }
       withId.push({ v3Card, expected });
     }
     if (!withId.length) continue;
@@ -113,7 +126,7 @@ test('Audit: jede Nicht-Pocket-Karte mit v3-ID loest trotz falscher gespeicherte
   t.diagnostic(`Audit Karten: ${JSON.stringify(counts)}`);
   assert.deepEqual(failures, []);
   assert.equal(counts.resolved, counts.withV3Id);
-  assert.equal(counts.indexMismatch, 0, 'search-index cm = ids.cardmarket[0] der Kartendatei');
+  assert.equal(counts.indexMismatch, 0, 'search-index cm = primaryCardmarketProductId der Kartendatei (bis auf gestempelte erste Varianten)');
   assert.equal(counts.matcherKeepsV3, counts.matcherChecked);
   assert.ok(counts.withV3Id > 15000, `zu wenige Karten mit v3-ID: ${counts.withV3Id}`);
 });

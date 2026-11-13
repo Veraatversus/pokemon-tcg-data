@@ -94,7 +94,7 @@ function productIdFromUrl(url = '') {
 /**
  * Einzige Stelle, die entscheidet, welches Cardmarket-Produkt zu einer Karte gehoert
  * (genutzt von Links, Preissuche und Bild-Metadaten):
- *   1. v3-Produkt-ID am Record (`cardmarketProductId`, aus ids.cardmarket[0] bzw. search-index `cm`;
+ *   1. v3-Produkt-ID am Record (`cardmarketProductId`, primaere ID nach primaryCardmarketProductId bzw. search-index `cm`;
  *      db_cards-Records bekommen sie ueber attachV3CardmarketIds). Das Feld traegt NUR v3-IDs.
  *   2. Legacy-URL (Sheet) mit `idProduct=`
  *   3. Treffer des Name-/Nummern-Matchers (`matchedEntry`, asynchron vom Aufrufer ermittelt, bzw.

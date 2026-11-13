@@ -181,7 +181,7 @@ export function indexEntryToCard(entry, { language = 'de' } = {}) {
     images: img ? { small: img } : {}
   };
   if (nameDe || imgDe) card.i18n = { de: { name: nameDe, images: imgDe ? { small: imgDe } : {} } };
-  // cm = Cardmarket-Produkt-ID der Karte (ids.cardmarket[0]); Link in Kartensprache, Preis ueber
+  // cm = Cardmarket-Produkt-ID der Karte (primaere ID, siehe primaryCardmarketProductId); Link in Kartensprache, Preis ueber
   // die Cardmarket-Setdatei (resolveCardmarketEntryForCard), ohne Kartendatei des Sets.
   const cardmarketProductId = normalizeCardmarketProductId(entry?.cm);
   if (cardmarketProductId) {

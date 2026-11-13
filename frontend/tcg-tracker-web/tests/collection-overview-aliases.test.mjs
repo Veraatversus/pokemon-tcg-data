@@ -14,6 +14,7 @@ globalThis.localStorage = {
 const { CONFIG } = await import('../js/core/config.js');
 const { SET_DB_HEADERS, CARD_DB_HEADERS } = await import('../js/data/schema-contract.js');
 const { resetV3Caches } = await import('../js/data/v3-api.js');
+const { resetV3CardmarketIdCache } = await import('../js/data/v3-cardmarket-ids.js');
 const { resetCollectionResolverCache } = await import('../js/data/collection-aliases.js');
 const {
   listSetsOverviewData,
@@ -184,6 +185,8 @@ test('readDbCardsForSet: v3-ID (search-index cm) schlaegt die gespeicherte Match
       { setId: 'me55', cardId: '48', cm: 907655 },
     ] }
     : registryFetch(url));
+  // fruehere Tests ohne Index haben den Fehlschlag negativ gecacht (60 s)
+  resetV3CardmarketIdCache();
   const before = fake.rows('db_cards').map((r) => [...r]);
   const cards = await readDbCardsForSet('me55');
   const byId = Object.fromEntries(cards.map((c) => [c.cardId, c]));

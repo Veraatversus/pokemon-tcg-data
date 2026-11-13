@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { toSetRecord, toCardRecord } from '../js/data/v3-records.js';
+import { toSetRecord, toCardRecord, primaryCardmarketProductId } from '../js/data/v3-records.js';
 import {
   buildSetRecordFromSources,
   buildCardRecordFromSources,
@@ -232,6 +232,27 @@ test('localId: Set-Praefix wird abgeschnitten, Rest darf Bindestriche enthalten'
   assert.equal(toCardRecord(c, { id: 'x', ids: { tcgdex: 'my-set' } }).tcgdex_localId, 'A-1');
   assert.equal(toCardRecord(c, { id: 'x', ids: { tcgdex: 'other' } }).tcgdex_localId, '1');
   assert.equal(toCardRecord(c, { id: 'y', ids: { tcgdex: 'my-set' } }).tcgdex_localId, '1');
+});
+
+test('Primaere Produkt-ID: erste ungestempelte Variante, sonst erste Variante, sonst ids.cardmarket[0]', () => {
+  const base = { id: 'x-1', cardId: '1', number: '1', setId: 'x' };
+  const rec = (variants, ids) => toCardRecord({ ...base, variants, ids: { cardmarket: ids } }).cardmarketProductId;
+  // gestempelte Variante vorn (Pre-Release/Set-Logo) -> erste ungestempelte
+  assert.equal(rec([{ type: 'normal', stamp: ['pre-release'], cardmarketId: 7 }, { type: 'holo', cardmarketId: 8 }], [8, 7]), 8);
+  // leeres stamp-Array zaehlt als ungestempelt
+  assert.equal(rec([{ type: 'normal', stamp: ['set-logo'], cardmarketId: 7 }, { type: 'holo', stamp: [], cardmarketId: 9 }], [9]), 9);
+  // nur gestempelte Varianten -> erste davon (z. B. me55-150 30th-anniversary)
+  assert.equal(rec([{ type: 'holo', stamp: ['30th-anniversary'], cardmarketId: 5 }, { type: 'holo', stamp: ['staff'], cardmarketId: 6 }], [6]), 5);
+  // ungestempelte Variante ohne ID wird uebersprungen
+  assert.equal(rec([{ type: 'normal' }, { type: 'holo', stamp: ['staff'], cardmarketId: 4 }], [3]), 4);
+  // reale Faelle (pre-release / set-logo vorn)
+  const real = (setId, id) => toCardRecord(card(setId, id), setById(setId)).cardmarketProductId;
+  assert.equal(real('sv3', 'sv3-72'), 725152);
+  assert.equal(real('sv3', 'sv3-85'), 725165);
+  assert.equal(real('swsh11', 'swsh11-76'), 670814);
+  assert.equal(real('swsh12', 'swsh12-131'), 682178);
+  assert.equal(real('me55', 'me55-150'), 907757);
+  assert.equal(primaryCardmarketProductId({}), null);
 });
 
 test('Cardmarket-URL wie der API-Suchindex (cm): erste Variante mit cardmarketId, sonst ids.cardmarket[0], sonst leer', () => {

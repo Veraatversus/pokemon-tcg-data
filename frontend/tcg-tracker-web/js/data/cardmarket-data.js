@@ -269,27 +269,35 @@ export async function resolveCardmarketEntryByUrl(cardmarketUrl, { signal, force
 }
 
 /**
- * Preis-Eintrag zu einer bekannten Produkt-ID. Guenstiger Weg zuerst: Expansion des Sets (api/v3
- * ids.cardmarket als `expansionId`, sonst tracker.json, wenige KB) -> Set-Payload; nur wenn das Produkt
- * dort nicht liegt, die Produkt->Expansion-Tabelle (products.json, mehrere MB).
+ * Preis-Eintrag zu einer bekannten Produkt-ID. Guenstiger Weg zuerst: Set-Payload der api/v3-Expansion
+ * (`expansionId` = ids.cardmarket), dann die der tracker.json-Expansion (wenige KB), falls die v3-Expansion
+ * keine Setdatei hat oder das Produkt nicht enthaelt; erst danach die Produkt->Expansion-Tabelle
+ * (products.json, mehrere MB).
  */
 export async function resolveCardmarketEntryByProductId(productId, { setId = '', expansionId: v3ExpansionId = '', signal, forceRefresh = false } = {}) {
   const normalizedProductId = String(productId || '').trim();
   if (!normalizedProductId) return null;
 
+  const findInExpansion = async (expansionId) => {
+    const setPayload = await loadCardmarketSetPayload(expansionId, { signal, forceRefresh }).catch((err) => {
+      if (err?.name === 'AbortError') throw err;
+      return null;
+    });
+    return resolveCardmarketEntryFromSetPayload(setPayload, normalizedProductId);
+  };
+
+  const v3Expansion = String(v3ExpansionId || '').trim();
+  if (v3Expansion) {
+    const entry = await findInExpansion(v3Expansion);
+    if (entry) return entry;
+  }
+
   const trackerKey = String(setId || '').replace(/^TCGDEX-/i, '').trim().toLowerCase();
-  if (v3ExpansionId || trackerKey) {
-    let expansionId = String(v3ExpansionId || '').trim();
-    if (!expansionId) {
-      const trackerSetIndex = await loadCardmarketTrackerSetIndex({ signal, forceRefresh });
-      expansionId = String(trackerSetIndex?.bySetId?.[trackerKey] || '').trim();
-    }
-    if (expansionId) {
-      const setPayload = await loadCardmarketSetPayload(expansionId, { signal, forceRefresh }).catch((err) => {
-        if (err?.name === 'AbortError') throw err;
-        return null;
-      });
-      const entry = resolveCardmarketEntryFromSetPayload(setPayload, normalizedProductId);
+  if (trackerKey) {
+    const trackerSetIndex = await loadCardmarketTrackerSetIndex({ signal, forceRefresh });
+    const trackerExpansion = String(trackerSetIndex?.bySetId?.[trackerKey] || '').trim();
+    if (trackerExpansion && trackerExpansion !== v3Expansion) {
+      const entry = await findInExpansion(trackerExpansion);
       if (entry) return entry;
     }
   }

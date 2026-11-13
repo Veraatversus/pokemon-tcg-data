@@ -41,16 +41,25 @@ const positiveId = (v) => {
   return Number.isInteger(n) && n > 0 ? n : null;
 };
 
-// Cardmarket-Produkt-ID nach der Regel der API (scripts/api/build-api.mjs, search-index `cm`): erste
-// Variante mit cardmarketId, sonst ids.cardmarket[0]; null ohne ID. Damit liefern Set-Ansicht (Kartendatei),
-// Suche und db_cards-Anreicherung (beide search-index) dieselbe ID. Korrekturen der API stehen auch in den
-// Varianten; ids.cardmarket[0] ist bei TCGdex-IDs teils ein Stempel-Produkt ohne Nummer (z. B. sv3pt5-1).
-function cardmarketProductId(card) {
-  const fromVariant = positiveId(list(card.variants).find((v) => positiveId(v?.cardmarketId))?.cardmarketId);
+const isUnstamped = (variant) => !Array.isArray(variant?.stamp) || variant.stamp.length === 0;
+
+/**
+ * Primaere Cardmarket-Produkt-ID einer v3-Karte - dieselbe Regel wie search-index `cm` (API-Build):
+ *   1. erste UNGESTEMPELTE Variante (ohne `stamp` bzw. leeres Array) mit cardmarketId
+ *   2. sonst erste Variante mit cardmarketId
+ *   3. sonst ids.cardmarket[0]
+ * null ohne ID. Stempel-Produkte (pre-release, set-logo ...) stehen teils vorn (sv3-72: 727119 Pre-Release
+ * statt 725152), ids.cardmarket[0] ist bei TCGdex-IDs teils ein Stempel-Produkt ohne Nummer (sv3pt5-1).
+ */
+export function primaryCardmarketProductId(card = {}) {
+  const variants = list(card?.variants).filter((v) => positiveId(v?.cardmarketId));
+  const fromVariant = positiveId((variants.find(isUnstamped) || variants[0])?.cardmarketId);
   if (fromVariant) return fromVariant;
-  const ids = card.ids?.cardmarket;
+  const ids = card?.ids?.cardmarket;
   return positiveId(Array.isArray(ids) ? ids[0] : ids);
 }
+
+const cardmarketProductId = primaryCardmarketProductId;
 
 // Varianten mit eigener Produkt-ID (Stempel/Sondervarianten), fuer eine spaetere Varianten-Anzeige.
 function cardmarketVariants(card) {

@@ -12,6 +12,7 @@ import {
   buildV3ExpansionIdMap,
   withV3CardmarketIds,
   getV3CardmarketExpansionId,
+  getV3CardmarketIdMap,
 } from '../js/data/v3-cardmarket-ids.js';
 import {
   buildSetCardAssignmentMap,
@@ -22,6 +23,7 @@ import {
 } from '../js/data/cardmarket-ui-helpers.js';
 import {
   resolveCardmarketEntryForCard,
+  resolveCardmarketEntryByProductId,
   resetCardmarketDataCaches,
   setCardmarketDataVersion,
 } from '../js/data/cardmarket-data.js';
@@ -288,4 +290,52 @@ test('resolveCardmarketEntryForCard: v3-Expansion ohne Setdatei (z. B. tk1a ids.
   const card = { setId: 'tk1a', number: '1', vera_name: 'Pikachu' };
   const found = await resolveCardmarketEntryForCard(card, { cards: [card], currentSetId: 'tk1a', getV3ExpansionId: async () => '275771' });
   assert.equal(found?.cardmarketProductId, 5);
+});
+
+test('getV3CardmarketIdMap: Fehlschlag wird 60 s negativ gecacht (kein erneutes Laden je Set)', async () => {
+  let calls = 0;
+  let clock = 1_000;
+  const loadIndex = async () => { calls += 1; throw new Error('offline'); };
+  const opts = { loadIndex, now: () => clock };
+  assert.equal((await getV3CardmarketIdMap(opts)).size, 0);
+  assert.equal((await getV3CardmarketIdMap(opts)).size, 0);
+  assert.equal(calls, 1, 'innerhalb des Fensters kein zweiter Ladeversuch');
+  clock += 60_001;
+  await getV3CardmarketIdMap(opts);
+  assert.equal(calls, 2, 'nach Ablauf wird wieder geladen');
+  // Erfolg wird nicht negativ gecacht; andere Loader sind unabhaengig
+  const ok = await getV3CardmarketIdMap({ loadIndex: async () => INDEX, now: () => clock });
+  assert.equal(ok.get('me55::150'), '907757');
+});
+
+test('getV3CardmarketIdMap: haengender Index -> Zeitlimit, leere Map, danach negativ gecacht', async () => {
+  let calls = 0;
+  const loadIndex = () => { calls += 1; return new Promise(() => {}); };
+  const started = Date.now();
+  const map = await getV3CardmarketIdMap({ loadIndex, timeoutMs: 30 });
+  assert.equal(map.size, 0);
+  assert.ok(Date.now() - started < 2_000);
+  await getV3CardmarketIdMap({ loadIndex, timeoutMs: 30 });
+  assert.equal(calls, 1);
+});
+
+test('resolveCardmarketEntryByProductId: v3-Expansion ohne das Produkt -> Tracker-Expansion vor products.json', async () => {
+  resetCardmarketDataCaches();
+  setCardmarketDataVersion('2026-11-13T03:00:00.000Z');
+  const calls = installFetch({
+    '/index/tracker.json': { bySetId: { me55: 77 }, byPtcgoCode: {}, bySetName: {} },
+    '/sets/6601.json': { expansionId: 6601, cards: [entry(1, 'Other')] },
+    '/sets/77.json': { expansionId: 77, cards: [entry(907757, 'Pikachu ex [Zip-Zap Frenzy | Thunder]', { prices: { trend: 3 } })] },
+  });
+  const found = await resolveCardmarketEntryByProductId(907757, { setId: 'me55', expansionId: '6601' });
+  assert.equal(found?.prices?.trend, 3);
+  assert.ok(!calls.some((u) => u.includes('/index/products.json')));
+  // v3-Expansion ohne Setdatei -> ebenfalls Tracker
+  resetCardmarketDataCaches();
+  setCardmarketDataVersion('2026-11-13T03:00:00.000Z');
+  installFetch({
+    '/index/tracker.json': { bySetId: { tk1a: 77 }, byPtcgoCode: {}, bySetName: {} },
+    '/sets/77.json': { expansionId: 77, cards: [entry(5, 'Pikachu')] },
+  });
+  assert.equal((await resolveCardmarketEntryByProductId(5, { setId: 'tk1a', expansionId: '275771' }))?.cardmarketProductId, 5);
 });
