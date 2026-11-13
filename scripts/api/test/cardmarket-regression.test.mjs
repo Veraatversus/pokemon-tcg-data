@@ -259,7 +259,9 @@ describe('real-data regression (CM_REGRESSION=1)', { skip: REGRESSION ? false : 
     assert.deepEqual(unexpected, []);
     assert.equal(withId, published - expectedLost, 'Abdeckung sinkt nur um gelistete falsche IDs');
     assert.ok(published > 21000, `${published} Karten mit ID`);
-    assert.deepEqual(report.stabilityDropped.map((d) => `${d.cardKey}:${d.reason}`).sort(), ['ecard1/47:custom-set', 'ecard1/66:custom-set', 'ecard1/68:custom-set']);
+    // nur am Umstellungstag (danach stehen die IDs nicht mehr in previous)
+    const dropped = new Set(['ecard1/47:custom-set', 'ecard1/66:custom-set', 'ecard1/68:custom-set']);
+    assert.deepEqual(report.stabilityDropped.filter((d) => !dropped.has(`${d.cardKey}:${d.reason}`)), []);
     assert.deepEqual(report.stabilityConflicts, []);
     assert.deepEqual(report.customSets.conflicts, []);
     assert.deepEqual(report.customSets.nameWarnings, []);
