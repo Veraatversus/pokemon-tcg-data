@@ -1,6 +1,6 @@
 import { getCardLanguage } from '../data/schema-contract.js';
 import { imageCandidates, fallbackImgAttrs } from '../ui/image-fallback.js';
-import { applyReverseHoloQueryParam } from '../data/cardmarket-url-utils.js';
+import { resolveItemCardmarketUrl } from '../data/cardmarket-url-utils.js';
 
 const STATS_PRICE_TABS = [
   { id: 'dashboard', label: 'Dashboard' },
@@ -32,19 +32,9 @@ function formatStatsPriceNumber(value) {
   return Number(value || 0).toLocaleString('de-DE');
 }
 
+// v3-ID vor gespeicherter URL, `?isReverseHolo=Y` fuer als Reverse Holo gesammelte Karten.
 function getItemCardmarketUrl(item = {}) {
-  const base = String(
-    item?.card?.cardmarketUrl
-    || item?.card?.vera_cardmarket_url
-    || item?.card?.tcgdex_cardmarket_url
-    || item?.cardmarketUrl
-    || item?.vera_cardmarket_url
-    || item?.tcgdex_cardmarket_url
-    || ''
-  ).trim();
-  // Hängt `?isReverseHolo=Y` an, wenn die Karte als Reverse Holo gesammelt
-  // ist — Cardmarket zeigt dann direkt die korrekte Variante an.
-  return applyReverseHoloQueryParam(base, Boolean(item?.isReverseHolo));
+  return resolveItemCardmarketUrl(item, { language: getCardLanguage() });
 }
 
 function getStatsPriceItemImageCandidates(item = {}) {

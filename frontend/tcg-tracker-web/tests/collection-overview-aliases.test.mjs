@@ -168,6 +168,33 @@ test('readDbCardsForSet (Offline-Fallback) setzt collectionKey aus der v3-id, so
   assert.deepEqual(cards.map((c) => [c.cardId, c.collectionKey]), [['swsh12pt5-GG1', 'GG1'], ['swsh12pt5-1', '1'], ['swsh12pt5gg-GG02', 'GG2']]);
 });
 
+test('readDbCardsForSet: v3-ID (search-index cm) schlaegt die gespeicherte Matcher-URL (me55-150), Sheet unveraendert', async () => {
+  const urlCol = CARD_DB_HEADERS.indexOf('vera_cardmarket_url');
+  const stale = 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=907655';
+  const row = (cardId, number, name) => {
+    const r = new Array(CARD_DB_HEADERS.length).fill('');
+    r[0] = 'me55'; r[1] = cardId; r[2] = T0; r[3] = 'matched'; r[8] = number; r[10] = name; r[urlCol] = stale;
+    return r;
+  };
+  const fake = setup({ dbCards: [row('me55-150', '150', 'Pikachu ex'), row('me55-48', '48', 'Pikachu'), row('me55-999', '999', 'Unbekannt')] });
+  const registryFetch = globalThis.fetch;
+  globalThis.fetch = async (url) => (String(url) === 'https://reg.test/v3/search-index.json'
+    ? { ok: true, status: 200, json: async () => [
+      { setId: 'me55', cardId: '150', cm: 907757 },
+      { setId: 'me55', cardId: '48', cm: 907655 },
+    ] }
+    : registryFetch(url));
+  const before = fake.rows('db_cards').map((r) => [...r]);
+  const cards = await readDbCardsForSet('me55');
+  const byId = Object.fromEntries(cards.map((c) => [c.cardId, c]));
+  assert.equal(byId['me55-150'].cardmarketProductId, 907757);
+  assert.equal(byId['me55-150'].cardmarketUrl, 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=907757');
+  assert.equal(byId['me55-48'].cardmarketUrl, stale);
+  assert.equal(byId['me55-999'].cardmarketProductId, undefined);
+  assert.equal(byId['me55-999'].cardmarketUrl, stale, 'ohne v3-ID bleibt die gespeicherte URL');
+  assert.deepEqual(fake.rows('db_cards'), before, 'db_cards wird nicht geschrieben');
+});
+
 test('readSummarySheet: Alias-Zeilen zaehlen zum Hauptset, eine Karte unter zwei Aliasen zaehlt einmal', async () => {
   setup({
     dbSets: [

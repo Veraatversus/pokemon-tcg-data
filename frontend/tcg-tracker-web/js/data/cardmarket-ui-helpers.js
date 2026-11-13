@@ -79,29 +79,70 @@ function normalizeMatcherText(value = '') {
     .trim();
 }
 
-function extractEntryBaseName(value = '') {
-  return String(value || '').split('[')[0].trim();
+// Namensschluessel fuer den Matcher: exakter Vergleich, Suffixe (ex, EX, GX, V, VMAX, VSTAR, BREAK, LEGEND,
+// Prime, LV.X, Radiant, Mega/M, ★, δ ...) bleiben Teil des Namens. Zeichen ohne Buchstaben werden zu Woertern,
+// damit sie nicht beim Normalisieren verschwinden ("Umbreon ★" != "Umbreon").
+const NAME_SYMBOL_WORDS = [
+  [/♀|&female;/g, ' F '],
+  [/♂|&male;/g, ' M '],
+  [/★/g, ' star '],
+  [/δ/g, ' delta '],
+  [/α/g, ' alpha '],
+  [/β/g, ' beta '],
+  [/γ/g, ' gamma '],
+  [/Ω/g, ' omega '],
+];
+
+function toNameKey(value = '') {
+  let text = String(value || '');
+  for (const [pattern, word] of NAME_SYMBOL_WORDS) text = text.replace(pattern, word);
+  return normalizeMatcherText(text)
+    .replace(/\bdelta(?: delta)+\b/g, 'delta')
+    .replace(/^basic (.+ energy)$/, '$1');
+}
+
+// Kurze Klammerzusaetze ("Unown [J]", Cardmarket "Nidoran [F]", "[4]") gehoeren zum Namen.
+const SHORT_BRACKET = /\[([^\]|]{1,2})\]/g;
+
+/** Namensschluessel einer Karte (vera_name/tcgdex_name/name). */
+export function normalizeCardNameKey(name = '') {
+  return toNameKey(String(name || '').replace(SHORT_BRACKET, ' $1 '));
+}
+
+/**
+ * Namensschluessel eines Cardmarket-Produkts: nur die Attacken-Klammer "[Attacke | Attacke]" faellt weg,
+ * ausserdem die Stufe "Lv.40" (Karten-Namen fuehren sie nicht). "Gold Star" = ★, "Delta Species" = δ,
+ * "MVenusaur EX" = "M Venusaur-EX", "Basic Grass Energy" = "Grass Energy", "&female;"/"&male;" = ♀/♂.
+ */
+export function normalizeCardmarketProductNameKey(name = '') {
+  return toNameKey(String(name || '')
+    .replace(SHORT_BRACKET, ' $1 ')
+    .replace(/\[[^\]]*\]/g, ' ')
+    .replace(/\bLv\.?\s*\d+\b/gi, ' ')
+    .replace(/\bGold Star\b/gi, ' star ')
+    .replace(/\bDelta Species\b/gi, ' delta ')
+    .replace(/\bM(?=[A-Z][a-z])/g, 'M '));
+}
+
+const productNameKeyCache = new WeakMap();
+function productNameKey(entry) {
+  if (!entry || typeof entry !== 'object') return normalizeCardmarketProductNameKey('');
+  if (!productNameKeyCache.has(entry)) productNameKeyCache.set(entry, normalizeCardmarketProductNameKey(entry.name));
+  return productNameKeyCache.get(entry);
 }
 
 function extractPreferredCardNames(card = {}) {
   return Array.from(new Set(
     [card?.vera_name, card?.tcgdex_name, card?.name]
-      .map((value) => normalizeMatcherText(value))
+      .map((value) => normalizeCardNameKey(value))
       .filter(Boolean)
   ));
 }
 
 function entryMatchesAnyCardName(entry = {}, normalizedCardNames = []) {
   if (!Array.isArray(normalizedCardNames) || !normalizedCardNames.length) return false;
-
-  const normalizedEntryName = normalizeMatcherText(extractEntryBaseName(entry?.name || ''));
-  if (!normalizedEntryName) return false;
-
-  if (normalizedCardNames.includes(normalizedEntryName)) return true;
-
-  return normalizedCardNames.some((normalizedCardName) => (
-    normalizedEntryName.includes(normalizedCardName) || normalizedCardName.includes(normalizedEntryName)
-  ));
+  const key = productNameKey(entry);
+  return Boolean(key) && normalizedCardNames.includes(key);
 }
 
 function normalizeCollectorNumber(value = '') {
@@ -213,7 +254,11 @@ function resolveSetLookupCandidates({ cards = [], currentSetId = '', resolveSetB
   return candidates;
 }
 
-export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {}, { nameIndex = null, trackerSetIndex = null, resolveSetById = null, currentSetId = '' } = {}) {
+export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {}, { nameIndex = null, trackerSetIndex = null, resolveSetById = null, currentSetId = '', v3ExpansionId = '' } = {}) {
+  // api/v3 sets.json ids.cardmarket ist massgeblich; Tracker-Index und Abstimmung nur als Fallback.
+  const v3Expansion = String(v3ExpansionId ?? '').trim();
+  if (/^\d+$/.test(v3Expansion) && Number(v3Expansion) > 0) return v3Expansion;
+
   if (!Array.isArray(cards) || !cards.length) {
     return '';
   }
@@ -450,80 +495,89 @@ function pickSmallestIdPerMetacardGroup(candidateIndices, entries) {
   return bestIndex;
 }
 
+function cardCollectorKeyOf(card = {}) {
+  return normalizeCollectorKey(card?.collectorNumber || card?.number || card?.vera_number || card?.tcgdex_number || '');
+}
+
+function entryCollectorKeyOf(entry = {}) {
+  return normalizeCollectorKey(entry?.collectorNumber || entry?.number || entry?.cardNumber || '');
+}
+
+/**
+ * Ordnet Karten ohne v3-ID Produkten einer Cardmarket-Setdatei zu (Map card -> entry).
+ *  0. Karten mit v3-ID belegen ihr Produkt (und nehmen sonst nicht teil) - der Matcher ueberschreibt nie v3.
+ *  1. Sammlernummer + exakter Name (Suffixe zaehlen, nur die Attacken-Klammer faellt weg).
+ *  2. Exakter Name ohne Nummer (Cardmarket fuehrt collectorNumber oft nicht): nur wenn genau ein Produkt
+ *     passt UND genau eine offene Karte dieses Produkt beansprucht. Mehrdeutig -> keine Zuordnung
+ *     (lieber kein Link als ein falscher). Produkte mit abweichender Nummer scheiden aus.
+ */
 export function buildSetCardAssignmentMap(sourceCards = [], setPayload = {}) {
   const payloadCards = Array.isArray(setPayload?.cards) ? setPayload.cards : [];
   if (!payloadCards.length || !Array.isArray(sourceCards) || !sourceCards.length) {
     return new Map();
   }
 
-  const availableEntries = [...payloadCards];
   const result = new Map();
+  const assigned = new Set();
+  const isAvailable = (entry) => !assigned.has(entry);
+  const assign = (card, entry) => {
+    result.set(card, entry);
+    assigned.add(entry);
+  };
 
+  // 0. v3-IDs
+  const entriesById = new Map();
+  payloadCards.forEach((entry) => {
+    const id = String(entry?.cardmarketProductId ?? '').trim();
+    if (id && !entriesById.has(id)) entriesById.set(id, entry);
+  });
+  const pending = [];
   for (const card of sourceCards) {
-    const normalizedCardNames = extractPreferredCardNames(card);
-    if (!normalizedCardNames.length) continue;
-
-    // 1. Collector-number-first: try to match by collectorNumber before name
-    let matchIndex = -1;
-    const cardCollectorKey = normalizeCollectorKey(
-      card?.collectorNumber || card?.number || card?.vera_number || card?.tcgdex_number || ''
-    );
-    if (cardCollectorKey) {
-      const keyMatches = [];
-      for (let i = 0; i < availableEntries.length; i += 1) {
-        const entry = availableEntries[i];
-        const entryKey = normalizeCollectorKey(
-          entry?.collectorNumber || entry?.number || entry?.cardNumber || ''
-        );
-        if (entryKey && entryKey === cardCollectorKey) {
-          keyMatches.push(i);
-        }
-      }
-      if (keyMatches.length === 1) {
-        matchIndex = keyMatches[0];
-      } else if (keyMatches.length > 1) {
-        // Tiebreak: prefer entries whose name matches the card, then the
-        // smallest cardmarketProductId per metacardId group.
-        const nameMatches = keyMatches.filter((i) => entryMatchesAnyCardName(availableEntries[i], normalizedCardNames));
-        if (nameMatches.length > 0) {
-          matchIndex = pickSmallestIdPerMetacardGroup(nameMatches, availableEntries);
-        }
-        // Otherwise fall through to the name-based fallback below.
-      }
+    const { productId, source } = resolveCardmarketProductId(card);
+    if (source !== 'v3') {
+      pending.push(card);
+      continue;
     }
-
-    // 2. Fallback: name-based match
-    if (matchIndex < 0) {
-      const nameMatches = [];
-      for (let i = 0; i < availableEntries.length; i += 1) {
-        if (entryMatchesAnyCardName(availableEntries[i], normalizedCardNames)) {
-          nameMatches.push(i);
-        }
-      }
-      if (nameMatches.length > 0) {
-        matchIndex = pickSmallestIdPerMetacardGroup(nameMatches, availableEntries);
-      }
-    }
-    if (matchIndex < 0) continue;
-
-    const [assigned] = availableEntries.splice(matchIndex, 1);
-    if (!assigned) continue;
-    result.set(card, assigned);
-
-    const sourceMetacardId = normalizeNonEmptyMetacardId(
-      card?.metacardId
-      ?? card?.metaCardId
-      ?? card?.cardmarketMetacardId
-    );
-    if (!sourceMetacardId) continue;
-
-    for (let i = availableEntries.length - 1; i >= 0; i--) {
-      const entryMetacardId = normalizeNonEmptyMetacardId(availableEntries[i]?.metacardId);
-      if (entryMetacardId && entryMetacardId === sourceMetacardId) {
-        availableEntries.splice(i, 1);
-      }
-    }
+    const entry = entriesById.get(productId);
+    // Mehrere Karten koennen dieselbe v3-ID tragen (geteilte Produkte): alle bekommen es.
+    if (entry) assign(card, entry);
   }
+
+  // 1. Sammlernummer + Name
+  const open = [];
+  for (const card of pending) {
+    const names = extractPreferredCardNames(card);
+    if (!names.length) continue;
+    const collectorKey = cardCollectorKeyOf(card);
+    if (collectorKey) {
+      const byNumber = [];
+      payloadCards.forEach((entry, index) => {
+        if (isAvailable(entry) && entryCollectorKeyOf(entry) === collectorKey && entryMatchesAnyCardName(entry, names)) {
+          byNumber.push(index);
+        }
+      });
+      if (byNumber.length) {
+        // Gleiche Nummer + gleicher Name mehrfach (Stempel-/Sonderdrucke): kleinste ID je metacard-Gruppe.
+        assign(card, payloadCards[pickSmallestIdPerMetacardGroup(byNumber, payloadCards)]);
+        continue;
+      }
+    }
+    open.push({ card, names, collectorKey });
+  }
+
+  // 2. Eindeutiger Name
+  const claims = new Map();
+  open.forEach((item) => {
+    item.candidates = payloadCards.filter((entry) => {
+      if (!isAvailable(entry) || !entryMatchesAnyCardName(entry, item.names)) return false;
+      const entryKey = entryCollectorKeyOf(entry);
+      return !entryKey || !item.collectorKey || entryKey === item.collectorKey;
+    });
+    item.candidates.forEach((entry) => claims.set(entry, (claims.get(entry) || 0) + 1));
+  });
+  open.forEach(({ card, candidates }) => {
+    if (candidates.length === 1 && claims.get(candidates[0]) === 1) assign(card, candidates[0]);
+  });
 
   return result;
 }
@@ -623,9 +677,10 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
     if (!resolvedSetCode) return cards;
     let mutated = false;
     const enriched = cards.map((card) => {
-      if (!card?.cardmarketProductId) return card;
+      const knownProductId = resolveCardmarketProductId(card).productId;
+      if (!knownProductId) return card;
       const cardmarketImageUrl = buildCardmarketImageUrl({
-        cardmarketProductId: card.cardmarketProductId,
+        cardmarketProductId: knownProductId,
         categoryId: card.cardmarketCategoryId,
         setCode: resolvedSetCode,
         proxyUrl
@@ -677,9 +732,10 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
     const shouldReconcileDirectUrl = !isGeneratedUrl && !hasV3ProductId(card) && hasDuplicateSourceNames;
     if (!isGeneratedUrl && !shouldReconcileDirectUrl) {
       // Publish cardmarket image metadata on already-aligned cards as well.
-      if (card?.cardmarketProductId && resolvedSetCode) {
+      const knownProductId = resolveCardmarketProductId(card).productId;
+      if (knownProductId && resolvedSetCode) {
         const cardmarketImageUrl = buildCardmarketImageUrl({
-          cardmarketProductId: card.cardmarketProductId,
+          cardmarketProductId: knownProductId,
           categoryId: card.cardmarketCategoryId,
           setCode: resolvedSetCode,
           proxyUrl
@@ -715,9 +771,9 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
     if (currentProductId && matchedProductId && currentProductId === matchedProductId) {
       // Card is already aligned with the matched entry. Still publish cardmarket image
       // metadata.
-      if (card?.cardmarketProductId && resolvedSetCode && !card.cardmarketImageUrl) {
+      if (matchedProductId && resolvedSetCode && !card.cardmarketImageUrl) {
         const cardmarketImageUrl = buildCardmarketImageUrl({
-          cardmarketProductId: card.cardmarketProductId,
+          cardmarketProductId: matchedProductId,
           categoryId: card.cardmarketCategoryId,
           setCode: resolvedSetCode,
           proxyUrl
@@ -748,7 +804,8 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
       cardmarketUrl: directUrl,
       vera_cardmarket_url: directUrl,
       tcgdex_cardmarket_url: directUrl,
-      cardmarketProductId: Number(matchedEntry?.cardmarketProductId || 0) || null,
+      // Herkunft Matcher: eigenes Feld, cardmarketProductId bleibt v3-IDs vorbehalten.
+      cardmarketMatchedProductId: Number(matchedEntry?.cardmarketProductId || 0) || null,
       cardmarketCategoryId: matchedCategoryId,
       cardmarketSetCode: resolvedSetCode || '',
       cardmarketImageUrl,

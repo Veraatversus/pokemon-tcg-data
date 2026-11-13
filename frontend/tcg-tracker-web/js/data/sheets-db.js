@@ -17,8 +17,10 @@ import {
   SET_MATCH_STATUS,
   CARD_MATCH_STATUS,
   resolveDisplaySet,
-  resolveDisplayCard
+  resolveDisplayCard,
+  getCardLanguage
 } from './schema-contract.js';
+import { withV3CardmarketIds } from './v3-cardmarket-ids.js';
 import {
   planSetScopedUpsert,
   planSetScopedDedup
@@ -1163,7 +1165,7 @@ export async function readDbCardsForSet(setId) {
     latestPerCard.set(cardId, row);
   });
 
-  return Array.from(latestPerCard.values())
+  const cards = Array.from(latestPerCard.values())
     .map((row) => {
       if (isNewCardFormat(row)) {
         // CARD_DB_HEADERS format; unterstÃ¼tzt altes Bild-Schema (ohne tcgdex_image_large) rÃ¼ckwÃ¤rtskompatibel.
@@ -1256,6 +1258,9 @@ export async function readDbCardsForSet(setId) {
     })
     .filter((card) => card.number)
     .map((card) => ({ ...card, collectionKey: dbCardCollectionKey(card, normalizedSetId) }));
+  // Gespeicherte URLs stammen teils vom alten Namens-Matcher (z. B. me55-150 -> "Pikachu [Store Up]"):
+  // die v3-ID aus search-index.json gewinnt fuer Link und Preis. Das Sheet wird dabei nicht geschrieben.
+  return withV3CardmarketIds(cards, { setId: normalizedSetId, language: getCardLanguage() });
 }
 
 // db_cards ist nur noch Offline-Fallback. Ab v3 ist cardId = v3-id `<setId>-<collectionKey>`; aeltere Zeilen

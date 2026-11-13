@@ -15,6 +15,7 @@ import {
   resolveCardmarketEntryFromSetPayload as sharedResolveCardmarketEntryFromSetPayload,
 } from './cardmarket-ui-helpers.js?v=20261112-api-v3';
 import { resolveCardmarketProductId } from './cardmarket-url-utils.js';
+import { getV3CardmarketExpansionId } from './v3-cardmarket-ids.js';
 import { fetchCardmarketBuildStamp, readCardmarketBuildStamp } from './cardmarket-build-stamp.js?v=20261112-api-v3';
 
 const REMOTE_CARDMARKET_BASE = `${String(CONFIG?.APIS?.VERA_BASE || '').replace(/\/$/, '')}/cardmarket`;
@@ -200,8 +201,10 @@ function extractPotentialPtcgoCodes(cards = []) {
   return Array.from(codes);
 }
 
-export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {}, { nameIndex = null, trackerSetIndex = null } = {}) {
-  return sharedInferCardmarketExpansionIdFromCards(cards, productIndex, { nameIndex, trackerSetIndex });
+// Reicht alle Optionen durch (frueher fielen resolveSetById/currentSetId hier weg, die Set-Aufloesung
+// lief dann nur ueber die setId der Karten).
+export function inferCardmarketExpansionIdFromCards(cards = [], productIndex = {}, { nameIndex = null, trackerSetIndex = null, resolveSetById = null, currentSetId = '', v3ExpansionId = '' } = {}) {
+  return sharedInferCardmarketExpansionIdFromCards(cards, productIndex, { nameIndex, trackerSetIndex, resolveSetById, currentSetId, v3ExpansionId });
 }
 
 export function resolveCardmarketEntryForCardFromSetPayload(card = {}, setPayload = {}, { sourceCards = [] } = {}) {
@@ -266,18 +269,21 @@ export async function resolveCardmarketEntryByUrl(cardmarketUrl, { signal, force
 }
 
 /**
- * Preis-Eintrag zu einer bekannten Produkt-ID. Guenstiger Weg zuerst: Set-ID -> Expansion
- * (tracker.json, wenige KB) -> Set-Payload; nur wenn das Produkt dort nicht liegt, die
- * Produkt->Expansion-Tabelle (products.json, mehrere MB).
+ * Preis-Eintrag zu einer bekannten Produkt-ID. Guenstiger Weg zuerst: Expansion des Sets (api/v3
+ * ids.cardmarket als `expansionId`, sonst tracker.json, wenige KB) -> Set-Payload; nur wenn das Produkt
+ * dort nicht liegt, die Produkt->Expansion-Tabelle (products.json, mehrere MB).
  */
-export async function resolveCardmarketEntryByProductId(productId, { setId = '', signal, forceRefresh = false } = {}) {
+export async function resolveCardmarketEntryByProductId(productId, { setId = '', expansionId: v3ExpansionId = '', signal, forceRefresh = false } = {}) {
   const normalizedProductId = String(productId || '').trim();
   if (!normalizedProductId) return null;
 
   const trackerKey = String(setId || '').replace(/^TCGDEX-/i, '').trim().toLowerCase();
-  if (trackerKey) {
-    const trackerSetIndex = await loadCardmarketTrackerSetIndex({ signal, forceRefresh });
-    const expansionId = String(trackerSetIndex?.bySetId?.[trackerKey] || '').trim();
+  if (v3ExpansionId || trackerKey) {
+    let expansionId = String(v3ExpansionId || '').trim();
+    if (!expansionId) {
+      const trackerSetIndex = await loadCardmarketTrackerSetIndex({ signal, forceRefresh });
+      expansionId = String(trackerSetIndex?.bySetId?.[trackerKey] || '').trim();
+    }
     if (expansionId) {
       const setPayload = await loadCardmarketSetPayload(expansionId, { signal, forceRefresh }).catch((err) => {
         if (err?.name === 'AbortError') throw err;
@@ -298,11 +304,19 @@ export async function resolveCardmarketEntryByProductId(productId, { setId = '',
 
 // Reihenfolge (siehe resolveCardmarketProductId): v3-Produkt-ID -> Legacy-URL mit idProduct -> Matcher.
 // Eine v3-ID ist massgeblich: fehlen dazu Preisdaten, gibt es keinen Preis statt eines Matcher-Treffers.
-export async function resolveCardmarketEntryForCard(card = {}, { cards = [], resolveSetById = null, currentSetId = '', signal, forceRefresh = false } = {}) {
+// Expansion des Sets: api/v3 sets.json ids.cardmarket (getV3ExpansionId) vor tracker.json/Abstimmung.
+export async function resolveCardmarketEntryForCard(card = {}, { cards = [], resolveSetById = null, currentSetId = '', getV3ExpansionId = getV3CardmarketExpansionId, signal, forceRefresh = false } = {}) {
+  const setId = String(card?.setId || '').trim();
+  const cardSetId = setId || String(currentSetId || '').trim();
+  const v3ExpansionId = cardSetId && typeof getV3ExpansionId === 'function'
+    ? String(await getV3ExpansionId(cardSetId, { signal }) || '').trim()
+    : '';
+
   const { productId, source } = resolveCardmarketProductId(card);
   if (productId) {
     const entry = await resolveCardmarketEntryByProductId(productId, {
-      setId: String(card?.setId || currentSetId || '').trim(),
+      setId: cardSetId,
+      expansionId: v3ExpansionId,
       signal,
       forceRefresh
     });
@@ -311,9 +325,20 @@ export async function resolveCardmarketEntryForCard(card = {}, { cards = [], res
 
   const directUrl = getCardmarketUrlFromCard(card);
 
-  const setId = String(card?.setId || '').trim();
   const cacheLookupSetId = String(currentSetId || setId || '').trim();
-  let expansionId = !forceRefresh && cacheLookupSetId ? inferredExpansionCache.get(cacheLookupSetId) : '';
+  let expansionId = '';
+  let setPayload = null;
+  if (v3ExpansionId) {
+    // v3-Expansion ohne Cardmarket-Setdatei (z. B. fehlerhafte ids.cardmarket) -> Tracker/Abstimmung.
+    setPayload = await loadCardmarketSetPayload(v3ExpansionId, { signal, forceRefresh }).catch((err) => {
+      if (err?.name === 'AbortError') throw err;
+      return null;
+    });
+    if (setPayload) expansionId = v3ExpansionId;
+  }
+  if (!expansionId && !forceRefresh && cacheLookupSetId) {
+    expansionId = inferredExpansionCache.get(cacheLookupSetId) || '';
+  }
 
   if (!expansionId) {
     const [productIndex, nameIndex, trackerSetIndex] = await Promise.all([
@@ -336,7 +361,7 @@ export async function resolveCardmarketEntryForCard(card = {}, { cards = [], res
     return directUrl ? resolveCardmarketEntryByUrl(directUrl, { signal, forceRefresh }) : null;
   }
 
-  const setPayload = await loadCardmarketSetPayload(expansionId, { signal, forceRefresh });
+  if (!setPayload) setPayload = await loadCardmarketSetPayload(expansionId, { signal, forceRefresh });
 
   // Build or reuse the set-level assignment map (blacklisting already-assigned products per set)
   const cached = !forceRefresh && setAssignmentMapCache.get(expansionId);
