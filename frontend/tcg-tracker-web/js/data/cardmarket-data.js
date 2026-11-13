@@ -387,15 +387,12 @@ export async function resolveCardmarketEntryForCard(card = {}, { cards = [], res
   return directUrl ? resolveCardmarketEntryByUrl(directUrl, { signal, forceRefresh }) : null;
 }
 
-export async function promoteCardmarketUrlsForCards(cards = [], { productIndex = null, setPayload = null, resolveSetById = null, currentSetId = '', setRecord = null, signal, forceRefresh = false } = {}) {
-  const proxyUrl = getCardmarketImageProxyUrl();
+export async function promoteCardmarketUrlsForCards(cards = [], { productIndex = null, setPayload = null, resolveSetById = null, currentSetId = '', signal, forceRefresh = false } = {}) {
   return sharedPromoteCardmarketUrlsForCards(cards, {
     productIndex,
     setPayload,
     resolveSetById,
     currentSetId,
-    setRecord,
-    proxyUrl,
     signal,
     forceRefresh,
     loadProductIndex: productIndex ? null : ({ signal, forceRefresh } = {}) => loadCardmarketProductIndex({ signal, forceRefresh }),

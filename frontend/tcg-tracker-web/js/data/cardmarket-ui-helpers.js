@@ -631,8 +631,6 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
   loadSetPayload = null,
   resolveSetById = null,
   currentSetId = '',
-  setRecord = null,
-  proxyUrl = null,
   signal,
   forceRefresh = false,
 } = {}) {
@@ -651,50 +649,7 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
     return Array.from(counts.values()).some((count) => count > 1);
   })();
 
-  // Resolve the setCode for the Cardmarket image URL up front so that the
-  // image URL can be published on every card (including those that don't need
-  // URL promotion) as `cardmarketImageUrl` (metadata only; the display image chain is image-fallback.js).
-  // Trust order: explicit setRecord.ptcgoCode > tracker.byPtcgoCode[ptcgoCode] verification > card.ptcgoCode.
-  // The setCode is the upper-cased ptcgoCode (Cardmarket uses the same short code in product image paths).
-  // NOTE: this assumes a single-set batch. For mixed-set batches (e.g. watchlist) callers MUST pass
-  // a `setRecord` that matches the cards' set — `cards[0].ptcgoCode` would otherwise apply the first
-  // set's setCode to all cards and break their image URLs.
-  const setCodeFromRecord = String(setRecord?.ptcgoCode || setRecord?.code || '').trim();
-  const cardLevelSetCode = String(cards[0]?.ptcgoCode || '').trim();
-  const fallbackPtcgoCode = setCodeFromRecord || cardLevelSetCode;
-  const trackerPtcgoCodes = trackerSetIndex && typeof trackerSetIndex === 'object'
-    ? (trackerSetIndex.byPtcgoCode || {})
-    : null;
-  const resolvedSetCode = fallbackPtcgoCode && (
-    !trackerPtcgoCodes
-    || Object.prototype.hasOwnProperty.call(trackerPtcgoCodes, fallbackPtcgoCode.toLowerCase())
-    || Object.prototype.hasOwnProperty.call(trackerPtcgoCodes, fallbackPtcgoCode)
-  ) ? fallbackPtcgoCode : '';
-
-  if (!needsPromotion && !hasDuplicateSourceNames) {
-    // Even when the URL is unchanged we still want to publish cardmarket image metadata
-    // for already-aligned cards as well.
-    if (!resolvedSetCode) return cards;
-    let mutated = false;
-    const enriched = cards.map((card) => {
-      const knownProductId = resolveCardmarketProductId(card).productId;
-      if (!knownProductId) return card;
-      const cardmarketImageUrl = buildCardmarketImageUrl({
-        cardmarketProductId: knownProductId,
-        categoryId: card.cardmarketCategoryId,
-        setCode: resolvedSetCode,
-        proxyUrl
-      });
-      if (!cardmarketImageUrl || card.cardmarketImageUrl === cardmarketImageUrl) return card;
-      mutated = true;
-      return {
-        ...card,
-        cardmarketImageUrl,
-        cardmarketSetCode: resolvedSetCode
-      };
-    });
-    return mutated ? enriched : cards;
-  }
+  if (!needsPromotion && !hasDuplicateSourceNames) return cards;
 
   let resolvedProductIndex = productIndex;
   let resolvedNameIndex = nameIndex;
@@ -730,26 +685,7 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
     const currentUrl = getCardmarketUrlFromCard(card);
     const isGeneratedUrl = !hasV3ProductId(card) && isGeneratedCardmarketUrl(currentUrl);
     const shouldReconcileDirectUrl = !isGeneratedUrl && !hasV3ProductId(card) && hasDuplicateSourceNames;
-    if (!isGeneratedUrl && !shouldReconcileDirectUrl) {
-      // Publish cardmarket image metadata on already-aligned cards as well.
-      const knownProductId = resolveCardmarketProductId(card).productId;
-      if (knownProductId && resolvedSetCode) {
-        const cardmarketImageUrl = buildCardmarketImageUrl({
-          cardmarketProductId: knownProductId,
-          categoryId: card.cardmarketCategoryId,
-          setCode: resolvedSetCode,
-          proxyUrl
-        });
-        if (cardmarketImageUrl && card.cardmarketImageUrl !== cardmarketImageUrl) {
-          return {
-            ...card,
-            cardmarketImageUrl,
-            cardmarketSetCode: resolvedSetCode
-          };
-        }
-      }
-      return card;
-    }
+    if (!isGeneratedUrl && !shouldReconcileDirectUrl) return card;
 
     const matchedEntry = assignmentMap.get(card) ?? null;
     const directUrl = buildCardmarketProductUrl(matchedEntry?.cardmarketProductId);
@@ -768,36 +704,8 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
 
     const currentProductId = extractCardmarketProductId(currentUrl);
     const matchedProductId = String(matchedEntry?.cardmarketProductId || '').trim();
-    if (currentProductId && matchedProductId && currentProductId === matchedProductId) {
-      // Card is already aligned with the matched entry. Still publish cardmarket image
-      // metadata.
-      if (matchedProductId && resolvedSetCode && !card.cardmarketImageUrl) {
-        const cardmarketImageUrl = buildCardmarketImageUrl({
-          cardmarketProductId: matchedProductId,
-          categoryId: card.cardmarketCategoryId,
-          setCode: resolvedSetCode,
-          proxyUrl
-        });
-        if (cardmarketImageUrl) {
-          return {
-            ...card,
-            cardmarketImageUrl,
-            cardmarketSetCode: resolvedSetCode
-          };
-        }
-      }
-      return card;
-    }
-
-    const matchedCategoryId = matchedEntry?.categoryId != null && /^\d+$/.test(String(matchedEntry.categoryId))
-      ? Number(matchedEntry.categoryId)
-      : null;
-    const cardmarketImageUrl = buildCardmarketImageUrl({
-      cardmarketProductId: matchedEntry?.cardmarketProductId,
-      categoryId: matchedCategoryId,
-      setCode: resolvedSetCode,
-      proxyUrl
-    });
+    // Karte zeigt schon auf den getroffenen Eintrag.
+    if (currentProductId && matchedProductId && currentProductId === matchedProductId) return card;
 
     return {
       ...card,
@@ -806,9 +714,6 @@ export async function promoteCardmarketUrlsForCards(cards = [], {
       tcgdex_cardmarket_url: directUrl,
       // Herkunft Matcher: eigenes Feld, cardmarketProductId bleibt v3-IDs vorbehalten.
       cardmarketMatchedProductId: Number(matchedEntry?.cardmarketProductId || 0) || null,
-      cardmarketCategoryId: matchedCategoryId,
-      cardmarketSetCode: resolvedSetCode || '',
-      cardmarketImageUrl,
       cardmarketResolvedName: String(matchedEntry?.name || '').trim(),
     };
   });
