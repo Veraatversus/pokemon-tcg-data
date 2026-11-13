@@ -35,6 +35,7 @@ import {
 import { needsApiCardEnrichment, describeCardDataFailure, NO_CARD_DATA_MESSAGE } from './core/card-enrichment.js';
 import { findSetByIdOrAlias } from './data/set-aliases.js';
 import { searchFromIndex, searchResultsForDisplay } from './features/search/search-index-prefilter.js';
+import { readCollectionMapCached } from './features/search/search-collection-maps.js';
 import {
   sanitizeSearchToken,
   extractMeaningfulNameTokens,
@@ -7271,12 +7272,12 @@ async function loadSearchCollectionMaps(sets = [], { isCancelled = () => false }
   const worker = async () => {
     while (queue.length && !isCancelled()) {
       const set = queue.shift();
-      try {
-        const map = await readSetCollectionMap(set.setName, { setId: set.setId });
-        cache.set(`db_${set.setId}`, map instanceof Map ? map : new Map(), CONFIG.CACHE_TTL_MS);
-      } catch (err) {
-        console.warn('[runSearch] Sammlung nicht lesbar fuer', set.setId, err?.message || err);
-      }
+      await readCollectionMapCached(set, {
+        cache,
+        read: readSetCollectionMap,
+        ttlMs: CONFIG.CACHE_TTL_MS,
+        onError: (err) => console.warn('[runSearch] Sammlung nicht lesbar fuer', set.setId, err?.message || err),
+      });
     }
   };
   await Promise.all(Array.from({ length: Math.min(4, queue.length) }, worker));
@@ -7564,7 +7565,6 @@ function navigateToSearchResultSet(set, card = null) {
 async function openSearchResultLightbox(card, set, { apiOnly = false } = {}) {
   if (!set?.setId || !card) return;
 
-  const dbCacheKey = `db_${set.setId}`;
   const searchScopeMode = getSearchScopeMode();
   const searchCacheKey = `${set.setId}::${searchScopeMode}`;
 
@@ -7577,17 +7577,13 @@ async function openSearchResultLightbox(card, set, { apiOnly = false } = {}) {
         state.searchCache.set(searchCacheKey, loadedCards);
         return loadedCards;
       }),
-    cache.has(dbCacheKey)
-      ? cache.get(dbCacheKey)
-      : readSetCollectionMap(set.setName, { setId: set.setId }).then((loadedDbMap) => {
-        const safeDbMap = loadedDbMap instanceof Map ? loadedDbMap : new Map();
-        cache.set(dbCacheKey, safeDbMap, CONFIG.CACHE_TTL_MS);
-        return safeDbMap;
-      }).catch(() => {
-        const emptyDbMap = new Map();
-        cache.set(dbCacheKey, emptyDbMap, CONFIG.CACHE_TTL_MS);
-        return emptyDbMap;
-      })
+    // Lesefehler: leere Map nur fuer diese Ansicht, nicht im Cache (wie bei den Suchergebnissen).
+    readCollectionMapCached(set, {
+      cache,
+      read: readSetCollectionMap,
+      ttlMs: CONFIG.CACHE_TTL_MS,
+      onError: (err) => console.warn('[openSearchResultLightbox] Sammlung nicht lesbar fuer', set.setId, err?.message || err),
+    }).then((loadedDbMap) => loadedDbMap || new Map())
   ]);
 
   if (!Array.isArray(cards) || cards.length === 0) {
