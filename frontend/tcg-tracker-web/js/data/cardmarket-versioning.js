@@ -10,9 +10,9 @@
  * UI-Blocker läuft. Im Offline-Fall wird der bisherige Stand beibehalten.
  */
 
-import { syncCardmarketBuildStamp } from './cardmarket-build-stamp.js?v=20261112-api-v3';
+import { syncCardmarketBuildStamp } from './cardmarket-build-stamp.js?v=20261113-api-v3-polish';
 import { resetCardmarketDataCaches, setCardmarketDataVersion } from './cardmarket-data.js';
-import { resetCardmarketPriceSummaryCaches } from '../ui/cardmarket-price.js?v=20261112-api-v3';
+import { resetCardmarketPriceSummaryCaches } from '../ui/cardmarket-price.js?v=20261113-api-v3-polish';
 
 function safeInvoke(reset) {
   try {

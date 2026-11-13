@@ -13,10 +13,10 @@ import {
   promoteCardmarketUrlsForCards as sharedPromoteCardmarketUrlsForCards,
   resolveCardmarketEntryForCardFromSetPayload as sharedResolveCardmarketEntryForCardFromSetPayload,
   resolveCardmarketEntryFromSetPayload as sharedResolveCardmarketEntryFromSetPayload,
-} from './cardmarket-ui-helpers.js?v=20261112-api-v3';
+} from './cardmarket-ui-helpers.js?v=20261113-api-v3-polish';
 import { resolveCardmarketProductId } from './cardmarket-url-utils.js';
 import { getV3CardmarketExpansionId } from './v3-cardmarket-ids.js';
-import { fetchCardmarketBuildStamp, readCardmarketBuildStamp } from './cardmarket-build-stamp.js?v=20261112-api-v3';
+import { fetchCardmarketBuildStamp, readCardmarketBuildStamp } from './cardmarket-build-stamp.js?v=20261113-api-v3-polish';
 
 const REMOTE_CARDMARKET_BASE = `${String(CONFIG?.APIS?.VERA_BASE || '').replace(/\/$/, '')}/cardmarket`;
 
