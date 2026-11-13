@@ -171,8 +171,10 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
   const cmProducts = readJsonOr(p('cardmarket', 'index', 'products.json'), null);
   const cmSets = readJsonOr(p('cardmarket', 'index', 'sets.json'), null);
   const cmIndexed = Boolean(cmProducts && cmSets);
+  // Manuelle Zuordnungen (api/mappings/cardmarket-overrides.json, "<setId>/<cardId>": id | null) gewinnen.
   const cardmarketIds = fillCardmarketIds({
     sets, cardsBySet, subsetExpansion,
+    overrides: readJsonOr(p('api', 'mappings', 'cardmarket-overrides.json'), {}),
     knownExpansions: cmIndexed ? new Set((cmSets.sets ?? []).map((s) => s.expansionId)) : null,
     productExpansion: cmIndexed ? (id) => cmProducts[id]?.expansionId ?? null : null,
     loadExpansion: (id) => (Number.isInteger(id) ? readJsonOr(p('cardmarket', 'sets', `${id}.json`), null) : null),
@@ -241,7 +243,7 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
   if (doWriteRegistry && !tcgdexOnly) writeRegistry(registryAbs, registry);
 
   return {
-    sets: sets.length, cards: cardTotal, matchStatus, cardmarketIds: { ...cardmarketIds.totals, duplicates: cardmarketIds.duplicates, expansion: { ...cardmarketIds.expansionMismatch.totals, sets: cardmarketIds.expansionMismatch.sets } }, registryChanges: changes, skippedNoSource, missingImages, assets,
+    sets: sets.length, cards: cardTotal, matchStatus, cardmarketIds: { ...cardmarketIds.totals, rules: cardmarketIds.rules, overrideWarnings: cardmarketIds.overrides.warnings, stillMissing: cardmarketIds.stillMissing.length, duplicates: cardmarketIds.duplicates, expansion: { ...cardmarketIds.expansionMismatch.totals, sets: cardmarketIds.expansionMismatch.sets } }, registryChanges: changes, skippedNoSource, missingImages, assets,
     tables: Object.fromEntries(Object.entries(tables).map(([k, v]) => [k, Object.keys(v).length])),
     warnings: db.warnings.length,
   };
@@ -291,6 +293,9 @@ function main() {
     }
     const cm = r.cardmarketIds;
     console.log(`Cardmarket-IDs: ${cm.cards} Karten, ${cm.tcgdex} von TCGdex, ${cm.matched} nachgetragen, ${cm.missing} fehlen (${cm.ambiguous} mehrdeutig); doppelte TCGdex-IDs ${cm.duplicates.ids} (${cm.duplicates.cards} Karten, ${cm.duplicates.corrected} korrigiert, ${cm.duplicates.kept} belassen); Details api/v3/reports/cardmarket-ids.json`);
+    const ru = cm.rules;
+    console.log(`Cardmarket-Regeln: Energie-Symbol ${ru.energySymbol}, Left/Right ${ru.leftRight}, Reihenfolge ${ru.ordered} (${ru.orderedRejected} abgelehnt), Override ${ru.override}, Oversize ausgeschlossen ${ru.oversizeExcluded}, Versions-Suffix ohne Karte ${ru.versionSuffixSkipped}; Arbeitsliste stillMissing ${cm.stillMissing}`);
+    for (const w of cm.overrideWarnings) console.log(`WARNUNG cardmarket-overrides.json: ${w}`);
     const x = cm.expansion;
     console.log(`Cardmarket-Expansionspruefung: ${x.checked} IDs, ${x.corrected} ersetzt, ${x.dropped} entfernt, ${x.keptMismatch} belassen (Name passt nicht), ${x.noSetExpansion} ohne Set-Expansion, ${x.unknownProduct} unbekannt, ${x.foreignNameOk} namensgleich in fremder Expansion; Sets: ${x.sets.map((s) => `${s.setId} ${s.oldId}->${s.newId ?? '-'} (${s.reason})`).join(', ') || '-'}`);
     console.log(`Assets: ${r.assets.ok} ok, ${r.assets.missing} fehlen`);

@@ -1,0 +1,10 @@
+{
+  "_comment": "Manuelle Cardmarket-Produkt-IDs je Karte: \"<setId>/<cardId>\": <cardmarketProductId> | null. Gewinnt vor TCGdex und allen Regeln; null entfernt die ID. Die ID muss in cardmarket/index/products.json stehen, sonst Build-Warnung. Kandidaten: stillMissing in api/v3/reports/cardmarket-ids.json. Siehe scripts/api/README.md.",
+  "me6/101": 918932,
+  "me6/126": 918965,
+  "me6/90": 918918,
+  "me6/94": 918923,
+  "me6/95": 918924,
+  "me6/98": 918928,
+  "me6/99": 918929
+}

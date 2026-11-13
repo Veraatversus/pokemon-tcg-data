@@ -53,7 +53,7 @@ test('fills cardmarket id by number+name', () => {
   assert.deepEqual(cards[0].ids.cardmarket, [702298]);
   assert.equal(cards[0].ids.cardmarketSource, 'matched');
   assert.deepEqual(cards[1].ids.cardmarket, [702299]);
-  assert.deepEqual(report.totals, { cards: 2, tcgdex: 0, matched: 2, missing: 0, ambiguous: 0 });
+  assert.deepEqual(report.totals, { cards: 2, tcgdex: 0, matched: 2, missing: 0, ambiguous: 0, override: 0 });
   assert.deepEqual(report.bySet.s1, { expansionId: 100, cards: 2, tcgdex: 0, matched: 2, missing: 0, ambiguous: 0 });
 });
 
@@ -76,7 +76,7 @@ test('never overwrites tcgdex id', () => {
   );
   assert.deepEqual(cards[0].ids.cardmarket, [555]);
   assert.equal(cards[0].ids.cardmarketSource, undefined);
-  assert.deepEqual(report.totals, { cards: 1, tcgdex: 1, matched: 0, missing: 0, ambiguous: 0 });
+  assert.deepEqual(report.totals, { cards: 1, tcgdex: 1, matched: 0, missing: 0, ambiguous: 0, override: 0 });
 });
 
 test('bracket suffix ignored in name check', () => {
@@ -469,4 +469,268 @@ test('primary id prefers unstamped variant', () => {
   assert.equal(primaryCardmarketId(v([1], [{ type: 'normal', stamp: ['x'], cardmarketId: 7 }, { type: 'holo' }])), 7);
   assert.equal(primaryCardmarketId(v([9, 8], [{ type: 'normal' }])), 9);
   assert.equal(primaryCardmarketId({ ids: { cardmarket: [] } }), undefined);
+});
+
+// --- Namensregeln, Reihenfolge-Heuristik, Overrides ---
+const withAttacks12 = (c, attacks) => ({ ...c, attacks: attacks.map((name) => ({ name })) });
+
+test('oversized product never matched', () => {
+  // V-UNION: einziges Produkt dieses Namens ist [Oversized] -> leer
+  const only = run([card('SWSH139', 'SWSH139', 'Pikachu V-UNION')], [single(576911, 'Pikachu V-UNION [Oversized]', null)]);
+  assert.deepEqual(only.cards[0].ids.cardmarket, []);
+  assert.equal(only.report.rules.oversizeExcluded, 1);
+  assert.deepEqual(only.report.oversizeExcludedProducts, [{ productId: 576911, name: 'Pikachu V-UNION [Oversized]', expansionId: 100 }]);
+  // daneben das normale Produkt -> das normale, Gross/Klein egal
+  const both = run([card('SWSH139', 'SWSH139', 'Pikachu V-UNION')], [single(1, 'Pikachu V-UNION [OVERSIZED]', null), single(2, 'Pikachu V-UNION', null)]);
+  assert.deepEqual(both.cards[0].ids.cardmarket, [2]);
+  // auch bei Nummerntreffer nie das Oversize-Produkt
+  const num = run([card('5', '5', 'Zacian V-UNION')], [single(3, 'Zacian V-UNION [Oversized]', '5')]);
+  assert.deepEqual(num.cards[0].ids.cardmarket, []);
+  // "Jumbo" im Angriffsnamen ist kein Oversize-Marker
+  const jumbo = run([card('7', '7', 'Wailord')], [single(4, 'Wailord [Jumbo-Sized | Special Wave]', '7')]);
+  assert.deepEqual(jumbo.cards[0].ids.cardmarket, [4]);
+  assert.equal(jumbo.report.rules.oversizeExcluded, 0);
+});
+
+test('energy symbol matches Bubbly Water Energy', () => {
+  const { cards, report } = run(
+    [card('132', '132', 'Bubbly Water Energy'), card('133', '133', 'Growing Grass Energy'), card('134', '134', 'Nitro Fire Energy'), card('81', '81', 'Nidoran ♀')],
+    [single(918974, 'Bubbly [W] Energy', null), single(918976, 'Growing [G] Energy', null), single(918977, 'Nitro [R] Energy', null), single(5, 'Nidoran [F] [Find a Friend | Gnaw]', null)],
+  );
+  assert.deepEqual(cards.map((c) => c.ids.cardmarket), [[918974], [918976], [918977], [5]]);
+  assert.deepEqual(cards.map((c) => c.ids.cardmarketSource), ['energySymbol', 'energySymbol', 'energySymbol', 'matched']);
+  assert.equal(report.rules.energySymbol, 3);
+  // [F] vor der Angriffsklammer ist kein Energie-Symbol (Nidoran ♀), wird also nicht zu "Fighting"
+  const nido = run([card('82', '82', 'Nidoran Fighting')], [single(6, 'Nidoran [F] [Find a Friend | Gnaw]', null)]);
+  assert.deepEqual(nido.cards[0].ids.cardmarket, []);
+  // zwei Produkte mit demselben Energie-Namen -> mehrdeutig
+  const two = run([card('132', '132', 'Bubbly Water Energy')], [single(7, 'Bubbly [W] Energy', null), single(8, 'Bubbly [W] Energy', null)]);
+  assert.deepEqual(two.cards[0].ids.cardmarket, []);
+  assert.equal(two.report.totals.ambiguous, 1);
+});
+
+test('left right halves by number', () => {
+  // Left hat hier die hoehere Produkt-ID: entscheidend ist das Suffix, nicht die ID
+  const { cards, report } = run(
+    [card('98', '98', 'Legendary Trench'), card('99', '99', 'Legendary Trench')],
+    [single(20, 'Legendary Trench [Right]', null), single(21, 'Legendary Trench [Left]', null)],
+  );
+  assert.deepEqual(cards.map((c) => c.ids.cardmarket), [[21], [20]]);
+  assert.deepEqual(cards.map((c) => c.ids.cardmarketSource), ['leftRight', 'leftRight']);
+  assert.equal(report.rules.leftRight, 2);
+  assert.equal(report.totals.missing, 0);
+  // nicht aufeinanderfolgende Nummern -> nichts
+  const gap = run([card('98', '98', 'Legendary Trench'), card('100', '100', 'Legendary Trench')], [single(21, 'Legendary Trench [Left]', null), single(20, 'Legendary Trench [Right]', null)]);
+  assert.deepEqual(gap.cards.map((c) => c.ids.cardmarket), [[], []]);
+  // Produkte mit collectorNumber -> Regel greift nicht
+  const numbered = run([card('98', '98', 'Legendary Trench'), card('99', '99', 'Legendary Trench')], [single(21, 'Legendary Trench [Left]', '98'), single(20, 'Legendary Trench [Right]', '199')]);
+  assert.deepEqual(numbered.cards[1].ids.cardmarket, []);
+  // zweimal [Left] -> nichts
+  const twoLeft = run([card('98', '98', 'Legendary Trench'), card('99', '99', 'Legendary Trench')], [single(21, 'Legendary Trench [Left]', null), single(20, 'Legendary Trench [Left]', null)]);
+  assert.deepEqual(twoLeft.cards.map((c) => c.ids.cardmarket), [[], []]);
+});
+
+test('order heuristic only with equal counts', () => {
+  const lantern = () => [card('90', '90', 'Adventure Lantern'), card('126', '126', 'Adventure Lantern')];
+  // positiv: 2 Karten <-> 2 Produkte, aufsteigende Nummer <-> aufsteigende Produkt-ID (nicht Listenreihenfolge)
+  const ok = run([card('90', '90', 'Adventuring Lantern'), card('126', '126', 'Adventuring Lantern')], [single(918965, 'Adventuring Lantern', null), single(918918, 'Adventuring Lantern', null)]);
+  assert.deepEqual(ok.cards.map((c) => c.ids.cardmarket), [[918918], [918965]]);
+  assert.deepEqual(ok.cards.map((c) => c.ids.cardmarketSource), ['ordered', 'ordered']);
+  assert.equal(ok.report.rules.ordered, 2);
+  // negativ: 2 Karten <-> 3 Produkte (z. B. ein unmarkiertes Oversize-Produkt) -> nichts, gemeldet
+  const three = run(lantern(), [single(1, 'Adventure Lantern', null), single(2, 'Adventure Lantern', null), single(3, 'Adventure Lantern', null)]);
+  assert.deepEqual(three.cards.map((c) => c.ids.cardmarket), [[], []]);
+  assert.equal(three.report.rules.ordered, 0);
+  assert.equal(three.report.totals.ambiguous, 2);
+  // [Oversized] zaehlt nicht mit: 2 <-> 2 + 1 Oversize -> zugeordnet
+  const over = run(lantern(), [single(1, 'Adventure Lantern', null), single(2, 'Adventure Lantern', null), single(3, 'Adventure Lantern [Oversized]', null)]);
+  assert.deepEqual(over.cards.map((c) => c.ids.cardmarket), [[1], [2]]);
+  // Produkte mit collectorNumber -> nie per Reihenfolge
+  const numbered = run(lantern(), [single(1, 'Adventure Lantern', '90a'), single(2, 'Adventure Lantern', '126a')]);
+  assert.deepEqual(numbered.cards.map((c) => c.ids.cardmarket), [[], []]);
+  // eine dritte gleichnamige Karte hat schon eine TCGdex-ID -> Gruppe nicht vollstaendig offen -> nichts
+  const claimed = run([...lantern(), card('200', '200', 'Adventure Lantern', [3])], [single(1, 'Adventure Lantern', null), single(2, 'Adventure Lantern', null), single(3, 'Adventure Lantern', null)]);
+  assert.deepEqual(claimed.cards.slice(0, 2).map((c) => c.ids.cardmarket), [[], []]);
+  // unterschiedliche Produktnamen (Angriffe) -> nie per Reihenfolge
+  const attacks = run([withAttacks12(card('1', '1', 'Pikachu'), ['Gnaw']), withAttacks12(card('2', '2', 'Pikachu'), ['Gnaw'])], [single(1, 'Pikachu [Gnaw]', null), single(2, 'Pikachu [Thunder]', null)]);
+  assert.deepEqual(attacks.cards.map((c) => c.ids.cardmarket), [[], []]);
+  // gleiche Produktnamen, aber Angriffe der Karten passen nicht -> nichts
+  const wrongAttacks = run([withAttacks12(card('1', '1', 'Pikachu'), ['Gnaw']), withAttacks12(card('2', '2', 'Pikachu'), ['Thunder'])], [single(1, 'Pikachu [Gnaw]', null), single(2, 'Pikachu [Gnaw]', null)]);
+  assert.deepEqual(wrongAttacks.cards.map((c) => c.ids.cardmarket), [[], []]);
+});
+
+test('version suffix in collector number stays significant (5241 custom set)', () => {
+  const { cards, report } = run(
+    [card('4', '4', 'Charmander'), card('5', '5', 'Charmeleon')],
+    [single(10, 'Charmander', '4'), single(11, 'Charmander', '4V2'), single(12, 'Charmeleon', '5V2'), single(13, 'Pikachu', '224a')],
+  );
+  assert.deepEqual(cards[0].ids.cardmarket, [10]);
+  assert.deepEqual(cards[1].ids.cardmarket, []); // 5V2 ist nicht 5
+  assert.equal(normalizeCmNumber('4V2') === normalizeCmNumber('4'), false);
+  assert.equal(normalizeCmNumber('224a') === normalizeCmNumber('224'), false);
+  assert.equal(normalizeCmNumber('H1') === normalizeCmNumber('1'), false);
+  assert.equal(report.rules.versionSuffixSkipped, 3); // 4V2, 5V2, 224a bleiben ohne Karte
+});
+
+// Overrides: Produkt-Existenz ueber productExpansion (cardmarket/index/products.json)
+const runOv = (cards, products, overrides) => run(cards, products, {
+  overrides, productExpansion: (id) => (products.some((p) => p.cardmarketProductId === id) || id === 918932 ? 100 : null),
+});
+
+test('override wins and validates', () => {
+  const cards = [
+    { ...card('94', '94', 'Legendary Pyroduct', [5]), variants: [{ type: 'normal', cardmarketId: 5 }, { type: 'reverse', stamp: ['x'], cardmarketId: 6 }] },
+    card('101', '101', 'Tasty Rice Ball'),
+    card('7', '7', 'Pineco'),
+  ];
+  const products = [single(5, 'Legendary Pyroduct', null), single(918923, 'Legendary Lava Tube [Left]', null), single(70, 'Pineco', '7')];
+  const { cards: out, report } = runOv(cards, products, {
+    _comment: 'test', 's1/94': 918923, 's1/101': 918932, 's1/7': 4040404, 's1/999': 70, 'xx/1': 70,
+  });
+  assert.deepEqual(out[0].ids.cardmarket, [918923]); // gewinnt auch gegen die TCGdex-ID
+  assert.equal(out[0].ids.cardmarketSource, 'override');
+  assert.deepEqual(out[0].ids.cardmarketTcgdex, [5]);
+  assert.deepEqual(out[0].variants, [{ type: 'normal' }, { type: 'reverse', stamp: ['x'] }]);
+  assert.equal(primaryCardmarketId(out[0]), 918923);
+  assert.deepEqual(out[1].ids.cardmarket, [918932]);
+  assert.equal(out[1].ids.cardmarketTcgdex, undefined);
+  // unbekanntes Produkt -> ignoriert, normale Regeln
+  assert.deepEqual(out[2].ids.cardmarket, [70]);
+  assert.equal(out[2].ids.cardmarketSource, 'matched');
+  assert.equal(report.rules.override, 2);
+  assert.equal(report.totals.override, 2);
+  assert.equal(report.bySet.s1.override, 2);
+  assert.deepEqual(report.overrides.warnings, [
+    's1/7: Produkt 4040404 nicht in cardmarket/index/products.json, ignoriert',
+    's1/999: Karte nicht gefunden, ignoriert',
+    'xx/1: Karte nicht gefunden, ignoriert',
+  ]);
+  // ohne Produktindex keine Pruefung moeglich -> Zahl-Overrides ignoriert
+  const noIndex = run([card('101', '101', 'Tasty Rice Ball')], [], { overrides: { 's1/101': 918932 } });
+  assert.deepEqual(noIndex.cards[0].ids.cardmarket, []);
+  assert.equal(noIndex.report.overrides.warnings.length, 1);
+});
+
+test('override product is not handed out again by the rules', () => {
+  const { cards: out } = runOv([card('1', '1', 'Pineco'), card('2', '2', 'Heracross')], [single(70, 'Pineco', '1')], { 's1/2': 70 });
+  assert.deepEqual(out[0].ids.cardmarket, []);
+  assert.deepEqual(out[1].ids.cardmarket, [70]);
+});
+
+test('null override removes id', () => {
+  const cards = [{ ...card('3', '3', 'Mewtwo', [5]), variants: [{ type: 'normal', cardmarketId: 5 }] }, card('4', '4', 'Mew')];
+  const { cards: out, report } = runOv(cards, [single(5, 'Mewtwo', '3'), single(6, 'Mew', '4')], { 's1/3': null, 's1/4': null });
+  assert.deepEqual(out[0].ids.cardmarket, []);
+  assert.equal(out[0].ids.cardmarketSource, 'override');
+  assert.deepEqual(out[0].ids.cardmarketTcgdex, [5]);
+  assert.deepEqual(out[0].variants, [{ type: 'normal' }]);
+  assert.equal(primaryCardmarketId(out[0]), undefined);
+  assert.deepEqual(out[1].ids.cardmarket, []); // auch keine Lueckenregel
+  assert.equal(report.overrides.removed, 2);
+  assert.equal(report.stillMissing.length, 0); // bewusst leer, keine Arbeitsliste
+});
+
+test('stillMissing worklist with candidates', () => {
+  const de = (c, name) => ({ ...c, i18n: { de: { name } } });
+  const { report } = run(
+    [de(card('94', '94', 'Legendary Pyroduct'), 'Legendäre Lavaröhre'), card('1', '1', 'Pineco')],
+    [single(918923, 'Legendary Lava Tube [Left]', null), single(918924, 'Legendary Lava Tube [Right]', null), single(70, 'Pineco', '1'), single(80, 'Heracross', '2')],
+  );
+  assert.deepEqual(report.stillMissing, [{
+    cardKey: 's1/94', name: 'Legendary Pyroduct', deName: 'Legendäre Lavaröhre', set: 's1', expansionId: 100,
+    // Left/Right teilen den normalisierten Namen -> Hinweis auf mehrere gleichnamige Produkte ohne Nummer
+    candidates: [
+      { productId: 918923, name: 'Legendary Lava Tube [Left]', hint: 'same-name-unnumbered' },
+      { productId: 918924, name: 'Legendary Lava Tube [Right]', hint: 'same-name-unnumbered' },
+    ],
+  }]);
+  assert.deepEqual(report.stillMissingByExpansion, [{ expansionId: 100, count: 1, sets: ['s1'] }]);
+});
+
+// --- Haertung nach Review ---
+test('ordered rule checks product id offsets against neighbours', () => {
+  // xy10-Form: Nachbarkarten mit bekannter ID, Offset (Produkt-ID - Nummer) passt -> zugeordnet
+  const xy = run(
+    [card('25', '25', 'Abra', [289851]), card('26', '26', 'M Alakazam-EX'), card('117', '117', 'Kadabra', [289937]), card('118', '118', 'M Alakazam-EX')],
+    [single(289851, 'Abra', null), single(289852, 'MAlakazam EX [Zen Force]', null), single(289937, 'Kadabra', null), single(289938, 'MAlakazam EX [Zen Force]', null)],
+  );
+  assert.deepEqual(xy.cards.map((c) => c.ids.cardmarket), [[289851], [289852], [289937], [289938]]);
+  assert.equal(xy.cards[1].ids.cardmarketSource, 'ordered');
+  assert.equal(xy.report.rules.orderedRejected, 0);
+  // bwp-Form: zweites Produkt ist ein spaeterer Nachdruck (547296), Offset passt nicht zum Nachbarn -> abgelehnt
+  const bwp = run(
+    [card('1', '1', 'Snivy'), card('2', '2', 'Snivy'), card('3', '3', 'Tepig', [279927])],
+    [single(279925, 'Snivy [Slam]', null), single(547296, 'Snivy [Slam]', null), single(279927, 'Tepig [Ember]', null)],
+  );
+  assert.deepEqual(bwp.cards.slice(0, 2).map((c) => c.ids.cardmarket), [[], []]);
+  assert.equal(bwp.report.rules.ordered, 0);
+  assert.equal(bwp.report.rules.orderedRejected, 1);
+  assert.deepEqual(bwp.report.orderedRejected, [{ expansionId: 100, name: 'Snivy', cards: ['s1/1', 's1/2'], products: [279925, 547296] }]);
+  // ohne Nachbarn: Produkt-IDs zu weit auseinander (> 50) -> abgelehnt
+  const lonely = run([card('1', '1', 'Snivy'), card('2', '2', 'Snivy')], [single(279925, 'Snivy [Slam]', null), single(547296, 'Snivy [Slam]', null)]);
+  assert.deepEqual(lonely.cards.map((c) => c.ids.cardmarket), [[], []]);
+  assert.equal(lonely.report.rules.orderedRejected, 1);
+  // nummerierte Produkte zaehlen als Nachbarn
+  const numbered = run(
+    [card('5', '5', 'Lantern'), card('9', '9', 'Lantern')],
+    [single(1004, 'Pineco', '4'), single(1005, 'Lantern', null), single(1009, 'Lantern', null), single(1010, 'Heracross', '10')],
+  );
+  assert.deepEqual(numbered.cards.map((c) => c.ids.cardmarket), [[1005], [1009]]);
+  const off = run(
+    [card('5', '5', 'Lantern'), card('9', '9', 'Lantern')],
+    [single(1004, 'Pineco', '4'), single(1005, 'Lantern', null), single(1030, 'Lantern', null), single(1010, 'Heracross', '10')],
+  );
+  assert.deepEqual(off.cards.map((c) => c.ids.cardmarket), [[], []]);
+});
+
+test('primary id skips jumbo variants unless only jumbo exists', () => {
+  const v = (cardmarket, variants) => ({ ids: { cardmarket }, variants });
+  // swshp-SWSH139-Form, Jumbo zuerst
+  assert.equal(primaryCardmarketId(v([576911, 576738], [{ type: 'holo', size: 'jumbo', cardmarketId: 576911 }, { type: 'holo', cardmarketId: 576738 }])), 576738);
+  // gestempelte Normalgroesse vor ungestempeltem Jumbo
+  assert.equal(primaryCardmarketId(v([1], [{ type: 'holo', size: 'jumbo', cardmarketId: 9 }, { type: 'normal', stamp: ['x'], cardmarketId: 8 }])), 8);
+  // nur Jumbo (mep-Museum, svp-500): bleibt
+  assert.equal(primaryCardmarketId(v([865392], [{ type: 'normal', size: 'jumbo', cardmarketId: 865392 }])), 865392);
+  // ungestempelter Jumbo vor gestempeltem Jumbo
+  assert.equal(primaryCardmarketId(v([1], [{ size: 'jumbo', stamp: ['x'], cardmarketId: 3 }, { size: 'jumbo', cardmarketId: 4 }])), 4);
+});
+
+test('override warnings for suspicious products', () => {
+  const products100 = [single(70, 'Pineco', '1'), single(71, 'Heracross', '2')];
+  const products200 = [single(80, 'Pikachu V-UNION [Oversized]', null), { ...single(81, 'Booster', null), categoryId: 52, categoryName: 'Pokémon Booster' }];
+  const cardsBySet = new Map([['s1', [card('1', '1', 'Pineco'), card('2', '2', 'Heracross', [71]), card('3', '3', 'Pikachu V-UNION'), card('4', '4', 'Booster')]]]);
+  const report = fillCardmarketIds({
+    sets: [{ id: 's1', ids: { cardmarket: 100 } }],
+    cardsBySet,
+    productExpansion: (id) => (id >= 80 ? 200 : 100),
+    knownExpansions: new Set([100, 200]),
+    loadExpansion: (id) => ({ 100: { cards: products100 }, 200: { cards: products200 } })[id] ?? null,
+    overrides: { 's1/1': 71, 's1/3': 80, 's1/4': 81, 's1/2': 71 },
+  });
+  const out = cardsBySet.get('s1');
+  // Warnungen, aber uebernommen
+  assert.deepEqual(out.map((c) => c.ids.cardmarket), [[71], [71], [80], [81]]);
+  assert.deepEqual(report.overrides.warnings, [
+    's1/1: Produkt 71 steht mehrfach in den Overrides (s1/1, s1/2) (Warnung, uebernommen)',
+    's1/1: Produkt 71 gehoert per TCGdex schon zu s1-2 (Warnung, uebernommen)',
+    's1/2: Produkt 71 steht mehrfach in den Overrides (s1/1, s1/2) (Warnung, uebernommen)',
+    's1/3: Produkt 80 liegt in Expansion 200, nicht in der des Sets (100) (Warnung, uebernommen)',
+    's1/3: Produkt 80 ist ein [Oversized]-Produkt (Warnung, uebernommen)',
+    's1/4: Produkt 81 liegt in Expansion 200, nicht in der des Sets (100) (Warnung, uebernommen)',
+    's1/4: Produkt 81 ist kein Pokémon-Single (Kategorie 52) (Warnung, uebernommen)',
+  ]);
+});
+
+test('stillMissing candidates carry oversize/special hints', () => {
+  const { report } = run(
+    [card('BW1', 'BW1', 'Snivy')],
+    [
+      single(279920, 'Oshawott', '1'), single(279921, 'Tepig', '2'), single(279922, 'Pansage', '3'), single(279923, 'Pansear', '4'),
+      single(279924, 'Panpour', '5'), single(279925, 'Snivy [Slam]', null), single(547296, 'Snivy [Slam]', null),
+    ],
+  );
+  assert.deepEqual(report.stillMissing[0].candidates, [
+    { productId: 279925, name: 'Snivy [Slam]', hint: 'same-name-unnumbered' },
+    { productId: 547296, name: 'Snivy [Slam]', hint: 'same-name-unnumbered, id-outlier' },
+  ]);
 });
