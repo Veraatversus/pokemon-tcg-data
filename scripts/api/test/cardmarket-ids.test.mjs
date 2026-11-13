@@ -53,7 +53,7 @@ test('fills cardmarket id by number+name', () => {
   assert.deepEqual(cards[0].ids.cardmarket, [702298]);
   assert.equal(cards[0].ids.cardmarketSource, 'matched');
   assert.deepEqual(cards[1].ids.cardmarket, [702299]);
-  assert.deepEqual(report.totals, { cards: 2, tcgdex: 0, matched: 2, missing: 0, ambiguous: 0, override: 0 });
+  assert.deepEqual(report.totals, { cards: 2, tcgdex: 0, matched: 2, missing: 0, ambiguous: 0, override: 0, customSet: 0, stabilityKept: 0 });
   assert.deepEqual(report.bySet.s1, { expansionId: 100, cards: 2, tcgdex: 0, matched: 2, missing: 0, ambiguous: 0 });
 });
 
@@ -76,7 +76,7 @@ test('never overwrites tcgdex id', () => {
   );
   assert.deepEqual(cards[0].ids.cardmarket, [555]);
   assert.equal(cards[0].ids.cardmarketSource, undefined);
-  assert.deepEqual(report.totals, { cards: 1, tcgdex: 1, matched: 0, missing: 0, ambiguous: 0, override: 0 });
+  assert.deepEqual(report.totals, { cards: 1, tcgdex: 1, matched: 0, missing: 0, ambiguous: 0, override: 0, customSet: 0, stabilityKept: 0 });
 });
 
 test('bracket suffix ignored in name check', () => {
@@ -572,7 +572,7 @@ test('version suffix in collector number stays significant (5241 custom set)', (
   assert.equal(report.rules.versionSuffixSkipped, 3); // 4V2, 5V2, 224a bleiben ohne Karte
 });
 
-// Overrides: Produkt-Existenz ueber productExpansion (cardmarket/index/products.json)
+// Overrides: Produkt-Existenz ueber productExpansion (Cardmarket-Katalog)
 const runOv = (cards, products, overrides) => run(cards, products, {
   overrides, productExpansion: (id) => (products.some((p) => p.cardmarketProductId === id) || id === 918932 ? 100 : null),
 });
@@ -601,7 +601,7 @@ test('override wins and validates', () => {
   assert.equal(report.totals.override, 2);
   assert.equal(report.bySet.s1.override, 2);
   assert.deepEqual(report.overrides.warnings, [
-    's1/7: Produkt 4040404 nicht in cardmarket/index/products.json, ignoriert',
+    's1/7: Produkt 4040404 nicht im Cardmarket-Katalog, ignoriert',
     's1/999: Karte nicht gefunden, ignoriert',
     'xx/1: Karte nicht gefunden, ignoriert',
   ]);
@@ -733,4 +733,176 @@ test('stillMissing candidates carry oversize/special hints', () => {
     { productId: 279925, name: 'Snivy [Slam]', hint: 'same-name-unnumbered' },
     { productId: 547296, name: 'Snivy [Slam]', hint: 'same-name-unnumbered, id-outlier' },
   ]);
+});
+
+// --- Task A2: custom-sets, Set-Expansion, Stabilitaet ---------------------------------------------
+// Nummern auf Cardmarket-Seite kommen nur aus custom-sets (der Feed liefert keine); der Katalog-Loader
+// markiert solche Produkte mit customSet: true. Die nummerierten Fixtures oben modellieren diese Expansionen.
+const csp = (id, name, collectorNumber) => ({ ...single(id, name, collectorNumber), customSet: true });
+// Katalog-Lauf: productExpansion/knownExpansions wie im Build (Produkt-Existenz = Katalog).
+const runCat = (cards, expansions, extra = {}) => {
+  const { sets = [{ id: 's1', ids: { cardmarket: 100 } }], ...rest } = extra;
+  const cardsBySet = new Map([['s1', cards]]);
+  const productExp = new Map();
+  for (const [e, products] of Object.entries(expansions)) for (const p of products) productExp.set(p.cardmarketProductId, Number(e));
+  const report = fillCardmarketIds({
+    sets,
+    cardsBySet,
+    knownExpansions: new Set(Object.keys(expansions).map(Number)),
+    productExpansion: (id) => productExp.get(id) ?? null,
+    loadExpansion: (id) => (expansions[id] ? { expansionId: id, cards: expansions[id] } : null),
+    ...rest,
+  });
+  return { cards: cardsBySet.get('s1'), report, sets };
+};
+
+test('custom-set suffix never matches base card', () => {
+  // Nur 4V2 bekannt -> Karte 4 bekommt nichts (auch nicht per Name); 224a ist nie 224, H1 nie 1
+  const only = runCat([card('4', '4', 'Pikachu'), card('224', '224', 'Mew'), card('1', '1', 'Ampharos')], {
+    100: [csp(11, 'Pikachu [Scrappy Spark]', '4V2'), csp(12, 'Mew [Lot]', '224a'), csp(13, 'Ampharos', 'H1')],
+  });
+  assert.deepEqual(only.cards.map((c) => c.ids.cardmarket), [[], [], []]);
+  // Basisnummer vorhanden -> die normale Karte bekommt genau diese, nie die Variante
+  const both = runCat([card('4', '4', 'Pikachu'), card('H1', 'H1', 'Ampharos')], {
+    100: [csp(11, 'Pikachu [Scrappy Spark]', '4V2'), csp(10, 'Pikachu [Scrappy Spark]', '4'), csp(13, 'Ampharos', 'H1')],
+  });
+  assert.deepEqual(both.cards[0].ids.cardmarket, [10]);
+  assert.equal(both.cards[0].ids.cardmarketSource, 'custom-set');
+  assert.deepEqual(both.cards[1].ids.cardmarket, [13]);
+  assert.equal(both.report.totals.customSet, 2);
+  // zwei Produkte mit derselben Basisnummer (1536 #1) -> custom-set entscheidet nicht
+  const dup = runCat([card('1', '1', 'Alakazam', [20])], { 100: [csp(20, 'Alakazam', '1'), csp(21, 'Alakazam', '1')] });
+  assert.deepEqual(dup.cards[0].ids.cardmarket, [20]);
+  assert.equal(dup.cards[0].ids.cardmarketSource, undefined);
+  assert.deepEqual(dup.report.customSets.ambiguous, ['s1/1']);
+});
+
+test('custom-set beats tcgdex id', () => {
+  // ecard2-Form: TCGdex vertauscht Karte 1 und H1 (gleicher Name)
+  const cards = [
+    { ...card('1', '1', 'Ampharos', [20]), variants: [{ type: 'normal', cardmarketId: 20 }, { type: 'reverse', cardmarketId: 20 }] },
+    { ...card('H1', 'H1', 'Ampharos', [10]), variants: [{ type: 'holo', cardmarketId: 10 }] },
+    // svp-101-Form: beide IDs sind Drucke derselben Nummer (101, 101V2) -> Varianten bleiben, Basis vorn
+    { ...card('101', '101', 'Pikachu', [31, 30]), variants: [{ type: 'normal', stamp: ['a'], cardmarketId: 31 }, { type: 'normal', stamp: ['b'], cardmarketId: 30 }] },
+  ];
+  const { cards: out, report } = runCat(cards, {
+    100: [csp(10, 'Ampharos [Thundershock]', '1'), csp(20, 'Ampharos [Thundershock]', 'H1'), csp(30, 'Pikachu', '101'), csp(31, 'Pikachu', '101V2')],
+  });
+  assert.deepEqual(out[0].ids.cardmarket, [10]);
+  assert.equal(out[0].ids.cardmarketSource, 'custom-set');
+  assert.deepEqual(out[0].ids.cardmarketTcgdex, [20]);
+  assert.deepEqual(out[0].variants.map((v) => v.cardmarketId), [10, 10]);
+  assert.equal(primaryCardmarketId(out[0]), 10);
+  assert.deepEqual(out[1].ids.cardmarket, [20]);
+  assert.equal(primaryCardmarketId(out[1]), 20);
+  assert.deepEqual(out[2].ids.cardmarket, [30, 31]);
+  assert.deepEqual(out[2].variants.map((v) => v.cardmarketId), [31, 30]);
+  assert.deepEqual(report.duplicateTcgdexIds, {}); // custom-set-Karten sind fuer die TCGdex-Stufe gesperrt
+  assert.equal(report.totals.customSet, 3);
+  assert.equal(report.totals.tcgdex, 0);
+  // Override gewinnt vor custom-set
+  const ov = runCat([card('1', '1', 'Ampharos', [20])], { 100: [csp(10, 'Ampharos', '1'), csp(20, 'Ampharos', 'H1')] }, { overrides: { 's1/1': 20 } });
+  assert.deepEqual(ov.cards[0].ids.cardmarket, [20]);
+  assert.equal(ov.cards[0].ids.cardmarketSource, 'override');
+});
+
+test('stability keeps yesterday\'s rule id', () => {
+  // gestern eindeutig per Name, heute gibt es ein zweites gleichnamiges Produkt -> mehrdeutig
+  const previous = new Map([['s1/5', { ids: [1], source: 'matched' }]]);
+  const products = { 100: [single(1, 'Scyther [Slash]', null), single(2, 'Scyther [Agility]', null)] };
+  const { cards, report } = runCat([card('5', '5', 'Scyther')], products, { previous });
+  assert.deepEqual(cards[0].ids.cardmarket, [1]);
+  assert.equal(cards[0].ids.cardmarketSource, 'matched');
+  assert.equal(report.totals.stabilityKept, 1);
+  assert.equal(report.totals.missing, 0);
+  assert.equal(report.totals.ambiguous, 0);
+  assert.deepEqual(report.stillMissing, []);
+  assert.deepEqual(report.stabilityKept, [{ cardKey: 's1/5', productId: 1, source: 'matched', todayId: null, todaySource: null }]);
+  // gestern korrigierte geteilte TCGdex-ID: heute fehlt der Nummernbeleg -> die Korrektur bleibt
+  const prevCorr = new Map([['s1/17', { ids: [273814], source: 'corrected', variants: [{ type: 'normal', cardmarketId: 273814 }] }]]);
+  const r2 = runCat(shared(), { 100: [single(273798, 'Clefable [Metronome | Minimize]', null), single(273814, 'Clefable [Metronome | Minimize]', null)] }, { previous: prevCorr });
+  assert.deepEqual(r2.cards[1].ids.cardmarket, [273814]);
+  assert.equal(r2.cards[1].ids.cardmarketSource, 'corrected');
+  assert.deepEqual(r2.cards[1].variants, [{ type: 'normal', cardmarketId: 273814 }]);
+  assert.equal(primaryCardmarketId(r2.cards[1]), 273814);
+  assert.deepEqual(r2.cards[0].ids.cardmarket, [273798]);
+  // TCGdex aendert die eigene ID -> TCGdex gilt (keine Regel-ID von gestern)
+  const r3 = runCat([card('7', '7', 'Pineco', [41])], { 100: [single(40, 'Pineco', null), single(41, 'Pineco [Other]', null)] }, { previous: new Map([['s1/7', { ids: [40], source: 'tcgdex' }]]) });
+  assert.deepEqual(r3.cards[0].ids.cardmarket, [41]);
+  // custom-set (Stufe 2) entscheidet anders -> custom-set gilt
+  const r4 = runCat([card('9', '9', 'Mew')], { 100: [csp(50, 'Mew', '9'), single(51, 'Mew', null)] }, { previous: new Map([['s1/9', { ids: [51], source: 'matched' }]]) });
+  assert.deepEqual(r4.cards[0].ids.cardmarket, [50]);
+  assert.equal(r4.cards[0].ids.cardmarketSource, 'custom-set');
+});
+
+
+test('stability drops id whose product vanished', () => {
+  const previous = new Map([['s1/5', { ids: [3], source: 'matched' }]]);
+  const products = { 100: [single(1, 'Scyther [Slash]', null), single(2, 'Scyther [Agility]', null)] };
+  const { cards, report } = runCat([card('5', '5', 'Scyther')], products, { previous });
+  assert.deepEqual(cards[0].ids.cardmarket, []);
+  assert.equal(report.totals.stabilityKept, 0);
+  assert.equal(report.totals.missing, 1);
+  assert.deepEqual(report.stabilityDropped, [{ cardKey: 's1/5', productId: 3, source: 'matched', reason: 'product-gone' }]);
+  // Override (Stufe 1) von gestern ist kein Stabilitaetsfall
+  const ov = runCat([card('5', '5', 'Scyther')], products, { previous: new Map([['s1/5', { ids: [1], source: 'override' }]]) });
+  assert.deepEqual(ov.cards[0].ids.cardmarket, []);
+});
+
+test('expansion by majority', () => {
+  // TCGdex liefert keine Set-Expansion (ids.cardmarket null), 4 von 5 Karten-IDs liegen in Expansion 200
+  const sets = [{ id: 's1', ids: { cardmarket: null } }];
+  const cards = [
+    card('1', '1', 'Bagon', [1]), card('2', '2', 'Combusken', [2]), card('3', '3', 'Torchic', [3]), card('4', '4', 'Mudkip', [4]),
+    card('5', '5', 'Treecko', [9]), card('6', '6', 'Latias'),
+  ];
+  const { cards: out, report } = runCat(cards, {
+    200: [single(1, 'Bagon', null), single(2, 'Combusken', null), single(3, 'Torchic', null), single(4, 'Mudkip', null), single(6, 'Latias [Mist Ball]', null)],
+    300: [single(9, 'Treecko', null)],
+  }, { sets });
+  assert.equal(sets[0].ids.cardmarket, 200);
+  assert.equal(sets[0].ids.cardmarketSetSource, 'derived');
+  assert.equal(report.bySet.s1.expansionId, 200);
+  assert.deepEqual(out[5].ids.cardmarket, [6]);
+  assert.deepEqual(report.setsWithoutExpansion, []);
+  // Zuordnungsdatei "<setId>": expansionId gewinnt vor TCGdex und Mehrheit
+  const sets2 = [{ id: 's1', ids: { cardmarket: 300 } }];
+  const r2 = runCat([card('6', '6', 'Latias')], { 200: [single(6, 'Latias', null)], 300: [] }, { sets: sets2, overrides: { s1: 200 } });
+  assert.equal(sets2[0].ids.cardmarket, 200);
+  assert.equal(sets2[0].ids.cardmarketSetSource, 'override');
+  assert.deepEqual(r2.cards[0].ids.cardmarket, [6]);
+  assert.deepEqual(r2.report.overrides.warnings, []);
+  // pt-Set ohne TCGdex-IDs: Mehrheit aus den zuletzt veroeffentlichten IDs (previous)
+  const sets3 = [{ id: 's1', ids: { cardmarket: null } }];
+  const previous = new Map([['s1/1', { ids: [1], source: 'matched' }], ['s1/2', { ids: [2], source: 'matched' }]]);
+  const r3 = runCat([card('1', '1', 'Bagon'), card('2', '2', 'Combusken'), card('6', '6', 'Latias')], {
+    200: [single(1, 'Bagon', null), single(2, 'Combusken', null), single(6, 'Latias', null)],
+  }, { sets: sets3, previous });
+  assert.equal(sets3[0].ids.cardmarket, 200);
+  assert.deepEqual(r3.cards.map((c) => c.ids.cardmarket), [[1], [2], [6]]);
+});
+
+test('no expansion → no ids and flagged', () => {
+  // keine Set-Expansion, Karten-IDs uneinig (1/2 < 80 %) -> keine Regel-IDs, Set gemeldet
+  const sets = [{ id: 's1', ids: { cardmarket: null } }, { id: 's2', ids: { cardmarket: 200 } }];
+  const cardsBySet = new Map([
+    ['s1', [card('1', '1', 'Bagon', [1]), card('2', '2', 'Torchic', [9]), card('3', '3', 'Latias')]],
+    ['s2', [{ ...card('1', '1', 'Mudkip'), id: 's2-1', setId: 's2' }]],
+  ]);
+  const productExp = new Map([[1, 200], [6, 200], [7, 200], [9, 300]]);
+  const report = fillCardmarketIds({
+    sets,
+    cardsBySet,
+    knownExpansions: new Set([200, 300]),
+    productExpansion: (id) => productExp.get(id) ?? null,
+    loadExpansion: (id) => ({ 200: { cards: [single(1, 'Bagon', null), single(6, 'Latias', null), single(7, 'Mudkip', null)] }, 300: { cards: [single(9, 'Torchic', null)] } })[id] ?? null,
+  });
+  const [bagon, torchic, latias] = cardsBySet.get('s1');
+  assert.equal(sets[0].ids.cardmarket, null);
+  assert.deepEqual(latias.ids.cardmarket, []); // nicht aus irgendeiner Expansion geraten
+  assert.deepEqual(bagon.ids.cardmarket, [1]); // TCGdex-IDs bleiben
+  assert.deepEqual(torchic.ids.cardmarket, [9]);
+  assert.deepEqual(report.setsWithoutExpansion, [{ setId: 's1', tcgdexExpansion: null, evidence: '1/2', cards: 3 }]);
+  // anderes Set unberuehrt
+  assert.deepEqual(cardsBySet.get('s2')[0].ids.cardmarket, [7]);
 });

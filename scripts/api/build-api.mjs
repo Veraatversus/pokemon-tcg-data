@@ -14,10 +14,11 @@ import { learnTables } from './merge/learn-tables.mjs';
 import { loadLegals } from './merge/legalities.mjs';
 import { mergeCard } from './merge/merge-card.mjs';
 import { mergeSet } from './merge/merge-set.mjs';
-import { fillCardmarketIds, primaryCardmarketId } from './merge/cardmarket-ids.mjs';
+import { fillCardmarketIds, primaryCardmarketId, previousFromCards } from './merge/cardmarket-ids.mjs';
+import { loadCardmarketCatalog } from './sources/cardmarket-catalog.mjs';
 import { setAssetCandidates } from './merge/images.mjs';
 import { countGroups } from './sources/verify-assets.mjs';
-import { sortLocalIds } from '../cardmarket/tcgdex-helper/generate-tcgdex-helpers.mjs';
+import { sortLocalIds } from './lib/local-ids.mjs';
 
 const cmp = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 const readJson = (p) => JSON.parse(fs.readFileSync(p, 'utf8'));
@@ -61,7 +62,9 @@ function writeIfChanged(file, content) {
   fs.writeFileSync(file, content);
 }
 
-export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', registryDir = 'api/registry', writeRegistry: doWriteRegistry = true }) {
+export function runBuild({
+  repoRoot, tcgdexOnly = false, outDir = 'api/v3', registryDir = 'api/registry', writeRegistry: doWriteRegistry = true, previousDir = null,
+}) {
   const p = (...parts) => path.join(repoRoot, ...parts);
   const db = loadTcgdexDatabase(p('sources', 'tcgdex'));
   if (db.errors.length) throw new BuildParseError(db.errors);
@@ -115,7 +118,6 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
   // Pruefstand der Set-Logos/-Symbole (verify-assets.mjs); fehlt die Datei, wird alles ausgegeben.
   const assetsVerified = readJsonOr(p('sources', 'tcgdex', 'assets-verified.json'), {});
   const assets = countGroups(assetsVerified, setAssetCandidates(assetsIndex));
-  const cardmarketTracker = readJsonOr(p('cardmarket', 'index', 'tracker.json'), { bySetId: {} });
   const sources = readJson(p('sources', 'SOURCES.json'));
   const sourceCommits = { pokemontcg: short(sources.pokemontcg?.commit), tcgdex: short(sources.tcgdex?.commit) };
   const ptSetById = new Map(ptSets.map((s) => [s.id, s]));
@@ -162,23 +164,28 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
     sets.push(mergeSet({
       canonicalSetId: setId, registrySet,
       ptSet: registrySet.pokemontcg ? ptSetById.get(registrySet.pokemontcg) ?? null : null,
-      tcgdexSet, cardCount: cards.length, assetsIndex, assetsVerified, cardmarketTracker,
+      tcgdexSet, cardCount: cards.length, assetsIndex, assetsVerified,
     }));
   }
-  // Fehlende Cardmarket-IDs aus cardmarket/sets/<expansionId>.json nachtragen (Nummer + Name, kein Raten);
-  // vorhandene gegen die Expansion des Sets pruefen (cardmarket/index/products.json, .../sets.json).
-  // Fehlen die Index-Dateien, entfaellt die Pruefung.
-  const cmProducts = readJsonOr(p('cardmarket', 'index', 'products.json'), null);
-  const cmSets = readJsonOr(p('cardmarket', 'index', 'sets.json'), null);
-  const cmIndexed = Boolean(cmProducts && cmSets);
-  // Manuelle Zuordnungen (api/mappings/cardmarket-overrides.json, "<setId>/<cardId>": id | null) gewinnen.
+  // Cardmarket-IDs (Spec §3): Katalog sources/cardmarket/catalog.jsonl + custom-sets (Nummern), Zuordnungsdatei
+  // api/mappings/cardmarket-overrides.json ("<setId>/<cardId>": id | null, "<setId>": expansionId) und
+  // Stabilitaetsregel gegen die zuletzt veroeffentlichten Karten (previousDir, Standard <outDir>/cards).
+  // Ohne Katalog entfallen Pruefung und Lueckenregeln (TCGdex-IDs bleiben wie geliefert).
+  const catalog = loadCardmarketCatalog(p('sources', 'cardmarket'));
+  const previousAbs = path.resolve(repoRoot, previousDir ?? path.join(outDir, 'cards'));
+  const previousCm = new Map();
+  if (fs.existsSync(previousAbs)) {
+    for (const f of fs.readdirSync(previousAbs).filter((x) => x.endsWith('.json')).sort()) previousFromCards(readJson(path.join(previousAbs, f)), previousCm);
+  }
   const cardmarketIds = fillCardmarketIds({
     sets, cardsBySet, subsetExpansion,
     overrides: readJsonOr(p('api', 'mappings', 'cardmarket-overrides.json'), {}),
-    knownExpansions: cmIndexed ? new Set((cmSets.sets ?? []).map((s) => s.expansionId)) : null,
-    productExpansion: cmIndexed ? (id) => cmProducts[id]?.expansionId ?? null : null,
-    loadExpansion: (id) => (Number.isInteger(id) ? readJsonOr(p('cardmarket', 'sets', `${id}.json`), null) : null),
+    knownExpansions: catalog ? catalog.expansions : null,
+    productExpansion: catalog ? (id) => catalog.byId.get(id)?.expansionId ?? null : null,
+    loadExpansion: (id) => (catalog && Number.isInteger(id) ? catalog.loadExpansion(id) : null),
+    previous: catalog ? previousCm : null,
   });
+  cardmarketIds.customSets.missingProducts = catalog?.missingCustomSetProducts ?? [];
   sets.sort((a, b) => cmp(a.releaseDate ?? '9999', b.releaseDate ?? '9999') || cmp(a.id, b.id));
 
   if (lostSource.length) {
@@ -243,7 +250,7 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
   if (doWriteRegistry && !tcgdexOnly) writeRegistry(registryAbs, registry);
 
   return {
-    sets: sets.length, cards: cardTotal, matchStatus, cardmarketIds: { ...cardmarketIds.totals, rules: cardmarketIds.rules, overrideWarnings: cardmarketIds.overrides.warnings, stillMissing: cardmarketIds.stillMissing.length, duplicates: cardmarketIds.duplicates, expansion: { ...cardmarketIds.expansionMismatch.totals, sets: cardmarketIds.expansionMismatch.sets } }, registryChanges: changes, skippedNoSource, missingImages, assets,
+    sets: sets.length, cards: cardTotal, matchStatus, cardmarketIds: { ...cardmarketIds.totals, rules: cardmarketIds.rules, overrideWarnings: cardmarketIds.overrides.warnings, stillMissing: cardmarketIds.stillMissing.length, duplicates: cardmarketIds.duplicates, expansion: { ...cardmarketIds.expansionMismatch.totals, sets: cardmarketIds.expansionMismatch.sets }, setsWithoutExpansion: cardmarketIds.setsWithoutExpansion.length, customSetMissingProducts: cardmarketIds.customSets.missingProducts.length, stabilityDropped: cardmarketIds.stabilityDropped.length, stabilityConflicts: cardmarketIds.stabilityConflicts.length }, registryChanges: changes, skippedNoSource, missingImages, assets,
     tables: Object.fromEntries(Object.entries(tables).map(([k, v]) => [k, Object.keys(v).length])),
     warnings: db.warnings.length,
   };
@@ -292,7 +299,7 @@ function main() {
       for (const [setId, n] of Object.entries(mi.bySet).sort((a, b) => b[1] - a[1] || cmp(a[0], b[0]))) console.log(`  ${setId}: ${n}`);
     }
     const cm = r.cardmarketIds;
-    console.log(`Cardmarket-IDs: ${cm.cards} Karten, ${cm.tcgdex} von TCGdex, ${cm.matched} nachgetragen, ${cm.missing} fehlen (${cm.ambiguous} mehrdeutig); doppelte TCGdex-IDs ${cm.duplicates.ids} (${cm.duplicates.cards} Karten, ${cm.duplicates.corrected} korrigiert, ${cm.duplicates.kept} belassen); Details api/v3/reports/cardmarket-ids.json`);
+    console.log(`Cardmarket-IDs: ${cm.cards} Karten, ${cm.tcgdex} von TCGdex, ${cm.customSet} aus custom-sets, ${cm.matched} nachgetragen, ${cm.stabilityKept} per Stabilitaetsregel (${cm.stabilityDropped} entfallen, ${cm.stabilityConflicts} Konflikte), ${cm.missing} fehlen (${cm.ambiguous} mehrdeutig); doppelte TCGdex-IDs ${cm.duplicates.ids} (${cm.duplicates.cards} Karten, ${cm.duplicates.corrected} korrigiert, ${cm.duplicates.kept} belassen); Sets ohne Expansion ${cm.setsWithoutExpansion}, custom-set-Produkte nicht im Katalog ${cm.customSetMissingProducts}; Details api/v3/reports/cardmarket-ids.json`);
     const ru = cm.rules;
     console.log(`Cardmarket-Regeln: Energie-Symbol ${ru.energySymbol}, Left/Right ${ru.leftRight}, Reihenfolge ${ru.ordered} (${ru.orderedRejected} abgelehnt), Override ${ru.override}, Oversize ausgeschlossen ${ru.oversizeExcluded}, Versions-Suffix ohne Karte ${ru.versionSuffixSkipped}; Arbeitsliste stillMissing ${cm.stillMissing}`);
     for (const w of cm.overrideWarnings) console.log(`WARNUNG cardmarket-overrides.json: ${w}`);

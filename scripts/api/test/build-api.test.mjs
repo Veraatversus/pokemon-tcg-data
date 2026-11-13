@@ -54,7 +54,8 @@ function makeRepo() {
   write(root, 'api/mappings/subset-merge.json', { merges: [] });
   write(root, 'api/mappings/canonical-keys.json', {});
   write(root, 'api/v3/reports/matching.json', { untouched: true });
-  write(root, 'cardmarket/index/tracker.json', { bySetId: { sv1: '5000' } });
+  // Altformat cardmarket/ (eingefroren) darf der Build nicht mehr lesen: kaputte Dateien schaden nicht.
+  for (const f of ['cardmarket/index/tracker.json', 'cardmarket/index/products.json', 'cardmarket/index/sets.json', 'cardmarket/sets/4999.json']) write(root, f, 'kein JSON {');
   return root;
 }
 
@@ -157,26 +158,26 @@ test('search index carries display fields', () => {
   }
 });
 
-test('runBuild: Cardmarket-IDs per Nummer+Name nachgetragen, Report und cm im Suchindex', () => {
+const catalogLine = (id, name, expansionId = 4999) => JSON.stringify({ id, name, expansionId, collectorNumber: null, metacardId: null, dateAdded: '2023-01-01 00:00:00' });
+
+test('runBuild: Cardmarket-IDs aus Katalog und custom-set nachgetragen, Report und cm im Suchindex', () => {
   const root = makeRepo();
   try {
-    // sv1-3 (Gamma) hat keine TCGdex-Cardmarket-ID; Expansion 4999 kennt sie als #003.
-    write(root, 'cardmarket/sets/4999.json', {
-      expansionId: 4999,
-      cards: [
-        { cardmarketProductId: 801, name: 'Alpha [Tackle]', collectorNumber: '001', categoryId: 51, categoryName: 'Pokémon Single' },
-        { cardmarketProductId: 803, name: 'Gamma [Gnaw | Bite]', collectorNumber: '003', categoryId: 51, categoryName: 'Pokémon Single' },
-      ],
-    });
+    // sv1-3 (Gamma) hat keine TCGdex-Cardmarket-ID; der Katalog kennt genau ein Gamma-Produkt (ohne Nummer).
+    // custom-set 4999: #2 -> 702 (bestaetigt die TCGdex-ID von Beta).
+    write(root, 'sources/cardmarket/catalog.jsonl', `${[catalogLine(701, 'Alpha [Tackle]'), catalogLine(702, 'Beta [Tackle]'), catalogLine(704, 'Delta [Tackle]'), catalogLine(803, 'Gamma [Gnaw | Bite]')].join('\n')}\n`);
+    write(root, 'sources/cardmarket/custom-sets/4999.json', { expansionId: 4999, name: 'Scarlet & Violet', cards: [{ productId: 702, collectorNumber: '2' }] });
     const r = runBuild({ repoRoot: root });
     const v3 = path.join(root, 'api', 'v3');
     const sv1 = readJson(path.join(v3, 'cards', 'sv1.json'));
     assert.deepEqual(sv1[0].ids.cardmarket, [701]); // TCGdex-ID bleibt
     assert.equal(sv1[0].ids.cardmarketSource, undefined);
+    assert.deepEqual(sv1[1].ids.cardmarket, [702]);
+    assert.equal(sv1[1].ids.cardmarketSource, 'custom-set');
     assert.deepEqual(sv1[2].ids.cardmarket, [803]);
     assert.equal(sv1[2].ids.cardmarketSource, 'matched');
     const report = readJson(path.join(v3, 'reports', 'cardmarket-ids.json'));
-    assert.deepEqual(report.bySet.sv1, { expansionId: 4999, cards: 4, tcgdex: 3, matched: 1, missing: 0, ambiguous: 0 });
+    assert.deepEqual(report.bySet.sv1, { expansionId: 4999, cards: 4, tcgdex: 2, matched: 1, missing: 0, ambiguous: 0, customSet: 1 });
     assert.equal(report.totals.matched, 1);
     assert.equal(r.cardmarketIds.matched, 1);
     assert.deepEqual(r.cardmarketIds.duplicates, { ids: 0, cards: 0, corrected: 0, kept: 0 });
@@ -189,6 +190,22 @@ test('runBuild: Cardmarket-IDs per Nummer+Name nachgetragen, Report und cm im Su
     assert.equal(cm('sv1', '3'), 803);
     assert.equal(cm('sv1', '4'), 704);
     assert.ok(idx.filter((e) => e.setId === 'TCGDEX-A1').every((e) => !('cm' in e)));
+
+    // Folgetag: ein zweites Gamma-Produkt macht den Namen mehrdeutig -> Stabilitaetsregel behaelt 803
+    fs.appendFileSync(path.join(root, 'sources', 'cardmarket', 'catalog.jsonl'), `${catalogLine(804, 'Gamma [Other]')}\n`);
+    const r2 = runBuild({ repoRoot: root });
+    const day2 = readJson(path.join(v3, 'cards', 'sv1.json'));
+    assert.deepEqual(day2[2].ids.cardmarket, [803]);
+    assert.equal(day2[2].ids.cardmarketSource, 'matched');
+    assert.equal(r2.cardmarketIds.stabilityKept, 1);
+    const report2 = readJson(path.join(v3, 'reports', 'cardmarket-ids.json'));
+    assert.deepEqual(report2.stabilityKept, [{ cardKey: 'sv1/3', productId: 803, source: 'matched', todayId: null, todaySource: null }]);
+    // Produkt verschwindet aus dem Katalog -> gestrige ID entfaellt, das jetzt eindeutige Gamma-Produkt gilt
+    const lines = fs.readFileSync(path.join(root, 'sources', 'cardmarket', 'catalog.jsonl'), 'utf8').split('\n').filter((l) => l && !l.includes('"id":803,'));
+    fs.writeFileSync(path.join(root, 'sources', 'cardmarket', 'catalog.jsonl'), `${lines.join('\n')}\n`);
+    runBuild({ repoRoot: root });
+    assert.deepEqual(readJson(path.join(v3, 'cards', 'sv1.json'))[2].ids.cardmarket, [804]);
+    assert.deepEqual(readJson(path.join(v3, 'reports', 'cardmarket-ids.json')).stabilityDropped, [{ cardKey: 'sv1/3', productId: 803, source: 'matched', reason: 'product-gone' }]);
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
