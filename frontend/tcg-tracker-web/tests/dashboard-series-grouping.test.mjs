@@ -110,12 +110,13 @@ test('Set-Name: leerer tcgdex_name faellt in DE auf den Namen aus api/v3 (gemein
 
 test('fetchV3SetMeta liefert DE-Name und DE-Serie je Set', async () => {
   const { fetchV3SetMeta } = await import('../js/data/pokemon-api.js');
-  const { scopedStorageKey } = await import('../js/core/config.js');
   const meta = await fetchV3SetMeta({ loadSets: async () => SETS });
   assert.equal(meta.get('me55c').deName, '30 Jahre: Klassische Sammlung');
   assert.equal(meta.get('me6').deSeries, 'Mega-Entwicklung');
   assert.equal((await fetchV3SetMeta({ loadSets: async () => { throw new Error('x'); } })).size, 0);
 });
+
+const SETTINGS_KEY = (await import('../js/core/config.js')).scopedStorageKey('user-settings');
 
 test('Gruppenschluessel ist sprachunabhaengig fuer v3-Sets (Pocket, Platinum, Mega Evolution)', async () => {
   const { resolveSeriesGroupInfo, setV3SetMeta } = await import('../js/data/schema-contract.js');
@@ -134,7 +135,7 @@ test('Gruppenschluessel ist sprachunabhaengig fuer v3-Sets (Pocket, Platinum, Me
   try {
     setV3SetMeta(meta);
     for (const lang of ['en', 'de']) {
-      globalThis.localStorage.setItem(scopedStorageKey('user-settings'), JSON.stringify({ cardLanguage: lang }));
+      globalThis.localStorage.setItem(SETTINGS_KEY, JSON.stringify({ cardLanguage: lang }));
       for (const [a, b, serEn, serDe] of [['pa1', 'pa2', 'Pokémon TCG Pocket', 'Pokémon‑Sammelkartenspiel‑Pocket'], ['pl1', 'pl2', 'Platinum', 'Platin'], ['me1', 'me2', 'Mega Evolution', 'Mega-Entwicklung']]) {
         const withDe = { setId: a, vera_series: serEn, tcgdex_serie_name: serDe };
         const without = { setId: b, vera_series: serEn, tcgdex_serie_name: '' };
@@ -143,6 +144,39 @@ test('Gruppenschluessel ist sprachunabhaengig fuer v3-Sets (Pocket, Platinum, Me
     }
   } finally {
     setV3SetMeta(null);
-    store2.removeItem(scopedStorageKey('user-settings'));
+    store2.removeItem(SETTINGS_KEY);
+  }
+});
+
+test('Sammelserien Other/Miscellaneous: Schluessel aus DE-Serie, sonst Set-Fallback (DE und EN)', async () => {
+  const { resolveSeriesGroupInfo, setV3SetMeta } = await import('../js/data/schema-contract.js');
+  const { fetchV3SetMeta } = await import('../js/data/pokemon-api.js');
+  const mk = (id, series, de) => ({ id, series, ...(de ? { i18n: { de: { series: de } } } : {}) });
+  const sets = [
+    mk('neo1', 'Neo', 'Neo'), mk('si1', 'Other', 'Neo'),
+    mk('pl1', 'Platinum', 'Platin'), mk('ru1', 'Other', 'Platin'),
+    mk('base6', 'Other', 'Ruf der Legenden'), mk('bp', 'Other', 'e-Card'),
+    mk('mcd11', 'Other'), mk('mcd12', 'Other'), mk('miscp', 'Miscellaneous')
+  ];
+  const meta = await fetchV3SetMeta({ loadSets: async () => sets });
+  const info = (id, vera, de) => resolveSeriesGroupInfo({ setId: id, vera_series: vera, tcgdex_serie_name: de });
+  try {
+    setV3SetMeta(meta);
+    for (const lang of ['de', 'en']) {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify({ cardLanguage: lang }));
+      assert.equal(info('si1', 'Other', 'Neo').key, info('neo1', 'Neo', 'Neo').key, lang);
+      assert.equal(info('ru1', 'Other', 'Platin').key, info('pl1', 'Platinum', 'Platin').key, lang);
+      assert.notEqual(info('base6', 'Other', 'Ruf der Legenden').key, info('bp', 'Other', 'e-Card').key, lang);
+      assert.notEqual(info('base6', 'Other', 'Ruf der Legenden').key, info('mcd11', 'Other', '').key, lang);
+      assert.equal(info('mcd11', 'Other', '').key, info('mcd12', 'Other', '').key, lang);
+      assert.notEqual(info('miscp', 'Miscellaneous', '').key, info('mcd11', 'Other', '').key, lang);
+    }
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify({ cardLanguage: 'de' }));
+    assert.equal(info('base6', 'Other', 'Ruf der Legenden').label, 'Ruf der Legenden');
+    // unbekanntes Pocket-Set (nicht in v3) joint die v3-Pocket-Gruppe
+    assert.equal(info('unknown-pocket', 'Pokémon TCG Pocket', '').key, (await import('../js/data/schema-contract.js')).seriesGroupKeyForName('Pokémon TCG Pocket'));
+  } finally {
+    setV3SetMeta(null);
+    localStorage.removeItem(SETTINGS_KEY);
   }
 });

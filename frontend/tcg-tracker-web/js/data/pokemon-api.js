@@ -132,7 +132,10 @@ export async function fetchV3SetMeta({ signal, timeoutMs = DE_SERIES_TIMEOUT_MS,
     for (const set of sets || []) {
       const deName = String(set?.i18n?.de?.name || '').trim();
       const deSeries = String(set?.i18n?.de?.series || '').trim();
-      const seriesKey = seriesGroupKeyForName(set?.series);
+      // Sammelserien ("Other"/"Miscellaneous") sind keine Serie: Schluessel aus der DE-Serie, sonst leer (Fallback am Set).
+      const enSeries = String(set?.series || '').trim();
+      const catchAll = /^(other|miscellaneous)$/i.test(enSeries);
+      const seriesKey = catchAll ? (deSeries ? seriesGroupKeyForName(deSeries) : '') : seriesGroupKeyForName(enSeries);
       if (set?.id && (deName || deSeries || seriesKey)) map.set(String(set.id), { deName, deSeries, seriesKey });
     }
   } catch (err) {

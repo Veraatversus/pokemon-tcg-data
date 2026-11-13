@@ -266,6 +266,8 @@ const SERIES_GROUP_KEY_ALIASES = new Map([
   ['heartgold soulsilver', 'hgss'],
   ['mega evolution', 'me'],
   ['mega entwicklung', 'me'],
+  ['platin', 'platinum'],
+  ['pokemon tcg pocket', 'pocket'],
   ['pokemon pocket', 'pocket'],
   ['pokemon sammelkartenspiel pocket', 'pocket']
 ]);
