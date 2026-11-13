@@ -15,6 +15,7 @@ import { loadLegals } from './merge/legalities.mjs';
 import { mergeCard } from './merge/merge-card.mjs';
 import { mergeSet } from './merge/merge-set.mjs';
 import { fillCardmarketIds, primaryCardmarketId, previousFromCards } from './merge/cardmarket-ids.mjs';
+import { writePriceFiles } from './merge/cardmarket-prices.mjs';
 import { loadCardmarketCatalog } from './sources/cardmarket-catalog.mjs';
 import { setAssetCandidates } from './merge/images.mjs';
 import { countGroups } from './sources/verify-assets.mjs';
@@ -247,9 +248,17 @@ export function runBuild({
   fs.mkdirSync(path.join(outAbs, 'reports'), { recursive: true });
   writeIfChanged(path.join(outAbs, 'reports', 'learned-tables.json'), toJson(tables));
   writeIfChanged(path.join(outAbs, 'reports', 'cardmarket-ids.json'), toJson(cardmarketIds));
+  // Preise (Spec §2.3): nur mit Preisguide von heute (.cache, schreibt sync-cardmarket nur bei Erfolg);
+  // sonst bleiben api/v3/prices und prices/meta.json wie veroeffentlicht.
+  const priceGuideFile = p('.cache', 'cardmarket', 'price-guide.json');
+  const prices = writePriceFiles({
+    outDir: outAbs, cardsBySet, primaryCardmarketId,
+    priceGuide: fs.existsSync(priceGuideFile) ? readJson(priceGuideFile) : null,
+  });
   if (doWriteRegistry && !tcgdexOnly) writeRegistry(registryAbs, registry);
 
   return {
+    prices,
     sets: sets.length, cards: cardTotal, matchStatus, cardmarketIds: { ...cardmarketIds.totals, rules: cardmarketIds.rules, overrideWarnings: cardmarketIds.overrides.warnings, stillMissing: cardmarketIds.stillMissing.length, duplicates: cardmarketIds.duplicates, expansion: { ...cardmarketIds.expansionMismatch.totals, sets: cardmarketIds.expansionMismatch.sets }, setsWithoutExpansion: cardmarketIds.setsWithoutExpansion.length, customSetMissingProducts: cardmarketIds.customSets.missingProducts.length, stabilityDropped: cardmarketIds.stabilityDropped.length, stabilityConflicts: cardmarketIds.stabilityConflicts.length }, registryChanges: changes, skippedNoSource, missingImages, assets,
     tables: Object.fromEntries(Object.entries(tables).map(([k, v]) => [k, Object.keys(v).length])),
     warnings: db.warnings.length,
@@ -298,6 +307,8 @@ function main() {
       console.log(`WARNUNG: ${mi.total} Karten ohne Bild (images fehlt):`);
       for (const [setId, n] of Object.entries(mi.bySet).sort((a, b) => b[1] - a[1] || cmp(a[0], b[0]))) console.log(`  ${setId}: ${n}`);
     }
+    if (r.prices) console.log(`Preise: ${r.prices.cardsWithPrice} von ${r.prices.cardsWithId} Karten mit Cardmarket-ID haben einen Preis (Preisguide ${r.prices.priceGuideCreatedAt})`);
+    else console.log('Preise: kein Preisguide von heute, api/v3/prices bleibt unveraendert');
     const cm = r.cardmarketIds;
     console.log(`Cardmarket-IDs: ${cm.cards} Karten, ${cm.tcgdex} von TCGdex, ${cm.customSet} aus custom-sets, ${cm.matched} nachgetragen, ${cm.stabilityKept} per Stabilitaetsregel (${cm.stabilityDropped} entfallen, ${cm.stabilityConflicts} Konflikte), ${cm.missing} fehlen (${cm.ambiguous} mehrdeutig); doppelte TCGdex-IDs ${cm.duplicates.ids} (${cm.duplicates.cards} Karten, ${cm.duplicates.corrected} korrigiert, ${cm.duplicates.kept} belassen); Sets ohne Expansion ${cm.setsWithoutExpansion}, custom-set-Produkte nicht im Katalog ${cm.customSetMissingProducts}; Details api/v3/reports/cardmarket-ids.json`);
     const ru = cm.rules;
