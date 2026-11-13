@@ -2,7 +2,8 @@
 // catalog.jsonl (Kategorie 51, nach ID sortiert), expansions.json, meta.json. Der Preisguide wird nie
 // committet, sondern nur fuer den Build-Schritt nach .cache/cardmarket/price-guide.json gelegt.
 // Ausfallschutz: Netzwerk-/HTTP-/Parse-Fehler ('failed') oder unplausible Daten ('defective') lassen
-// sources/cardmarket/ bis auf meta.consecutiveFailures unveraendert; der Lauf endet trotzdem mit Exit 0.
+// sources/cardmarket/ bis auf meta.consecutiveFailures unveraendert und loeschen den Preisguide-Cache;
+// der Lauf endet trotzdem mit Exit 0.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -13,8 +14,8 @@ export const PRICE_GUIDE_URL = 'https://downloads.s3.cardmarket.com/productCatal
 export const USER_AGENT = 'veraatversus-cardmarket-builder/1.0';
 export const FETCH_TIMEOUT_MS = 30_000;
 export const SINGLES_CATEGORY = 51;
-// Preisguide mit weniger als 80 % der Eintraege des letzten erfolgreichen Laufs gilt als defekt.
-export const MIN_PRICE_RATIO = 0.8;
+// Produktliste oder Preisguide mit weniger als 80 % der Eintraege des letzten erfolgreichen Laufs gilt als defekt.
+export const MIN_RATIO = 0.8;
 
 const EMPTY_META = {
   singlesCreatedAt: null,
@@ -105,6 +106,8 @@ export async function syncCardmarket({ repoRoot, fetchJson = defaultFetchJson, n
   const fail = (status, reason) => {
     console.warn(`Cardmarket ${status}: ${reason} – vorheriger Stand bleibt (Fehlschlaege in Folge: ${prev.consecutiveFailures + 1})`);
     writeAtomic(metaFile, pretty({ ...prev, consecutiveFailures: prev.consecutiveFailures + 1 }));
+    // Fehlender Cache bedeutet immer "heute kein Preisguide" – nie einen veralteten liegen lassen.
+    fs.rmSync(priceGuidePath, { force: true });
     return { status, catalogChanged: false, priceGuidePath: null };
   };
 
@@ -120,9 +123,12 @@ export async function syncCardmarket({ repoRoot, fetchJson = defaultFetchJson, n
   const catalog = toCatalog(singles);
   const prices = extractPriceGuideList(priceGuide).length;
   if (catalog.length === 0) return fail('defective', 'keine Einzelkarten in der Produktliste');
+  if (prev.products > 0 && catalog.length < prev.products * MIN_RATIO) {
+    return fail('defective', `Produktliste mit ${catalog.length} statt zuletzt ${prev.products} Einzelkarten (< ${MIN_RATIO * 100} %)`);
+  }
   if (prices === 0) return fail('defective', 'Preisguide ohne Eintraege');
-  if (prev.prices > 0 && prices < prev.prices * MIN_PRICE_RATIO) {
-    return fail('defective', `Preisguide mit ${prices} statt zuletzt ${prev.prices} Eintraegen (< ${MIN_PRICE_RATIO * 100} %)`);
+  if (prev.prices > 0 && prices < prev.prices * MIN_RATIO) {
+    return fail('defective', `Preisguide mit ${prices} statt zuletzt ${prev.prices} Eintraegen (< ${MIN_RATIO * 100} %)`);
   }
 
   const catalogText = serializeCatalog(catalog);

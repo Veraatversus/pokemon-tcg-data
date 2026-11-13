@@ -103,7 +103,7 @@ test('defective price guide keeps previous state', async () => {
   const before = snapshot(cmDir(repo));
 
   // 7 statt 10 Eintraege (< 80 %): defekt.
-  const fetchJson = stubFetch({ [SINGLES_URL]: singles([product(1), product(4)]), [PRICE_GUIDE_URL]: priceGuide(7) });
+  const fetchJson = stubFetch({ [SINGLES_URL]: singles([product(1), product(2), product(4)]), [PRICE_GUIDE_URL]: priceGuide(7) });
   const res = await syncCardmarket({ repoRoot: repo, fetchJson, now: () => new Date('2026-11-14T05:00:00Z'), retryDelayMs: 0 });
   assert.deepEqual(res, { status: 'defective', catalogChanged: false, priceGuidePath: null });
 
@@ -111,9 +111,10 @@ test('defective price guide keeps previous state', async () => {
   assert.equal(after['catalog.jsonl'], before['catalog.jsonl']);
   assert.equal(after['expansions.json'], before['expansions.json']);
   assert.deepEqual(readJson(path.join(cmDir(repo), 'meta.json')), { ...JSON.parse(before['meta.json']), consecutiveFailures: 1 });
+  assert.equal(fs.existsSync(path.join(repo, '.cache', 'cardmarket', 'price-guide.json')), false, 'Cache geloescht');
 
   // Genau 80 % ist noch in Ordnung.
-  const ok = await syncCardmarket({ repoRoot: repo, fetchJson: stubFetch({ [SINGLES_URL]: singles([product(1)]), [PRICE_GUIDE_URL]: priceGuide(8) }), now: () => NOW, retryDelayMs: 0 });
+  const ok = await syncCardmarket({ repoRoot: repo, fetchJson: stubFetch({ [SINGLES_URL]: singles([product(1), product(2), product(3)]), [PRICE_GUIDE_URL]: priceGuide(8) }), now: () => NOW, retryDelayMs: 0 });
   assert.equal(ok.status, 'ok');
   assert.equal(readJson(path.join(cmDir(repo), 'meta.json')).consecutiveFailures, 0);
 });
@@ -127,12 +128,35 @@ test('zero products is defective', async () => {
   assert.equal(snapshot(cmDir(repo))['catalog.jsonl'], before['catalog.jsonl']);
 });
 
+test('singles feed with fewer than 80 % products is defective', async () => {
+  const repo = tmpRepo();
+  // Vorlauf mit 10 Produkten.
+  const ten = Array.from({ length: 10 }, (_, i) => product(i + 1));
+  const first = await syncCardmarket({ repoRoot: repo, fetchJson: stubFetch({ [SINGLES_URL]: singles(ten), [PRICE_GUIDE_URL]: priceGuide(10) }), now: () => NOW, retryDelayMs: 0 });
+  assert.equal(first.status, 'ok');
+  const before = snapshot(cmDir(repo));
+
+  // 7 von 10 (< 80 %): defekt, Stand bleibt, Cache weg.
+  const res = await syncCardmarket({ repoRoot: repo, fetchJson: stubFetch({ [SINGLES_URL]: singles(ten.slice(0, 7)), [PRICE_GUIDE_URL]: priceGuide(10) }), now: () => NOW, retryDelayMs: 0 });
+  assert.deepEqual(res, { status: 'defective', catalogChanged: false, priceGuidePath: null });
+  const after = snapshot(cmDir(repo));
+  assert.equal(after['catalog.jsonl'], before['catalog.jsonl']);
+  assert.equal(after['expansions.json'], before['expansions.json']);
+  assert.equal(readJson(path.join(cmDir(repo), 'meta.json')).consecutiveFailures, 1);
+  assert.equal(fs.existsSync(path.join(repo, '.cache', 'cardmarket', 'price-guide.json')), false);
+
+  // Genau 80 % ist noch in Ordnung.
+  const ok = await syncCardmarket({ repoRoot: repo, fetchJson: stubFetch({ [SINGLES_URL]: singles(ten.slice(0, 8)), [PRICE_GUIDE_URL]: priceGuide(10) }), now: () => NOW, retryDelayMs: 0 });
+  assert.equal(ok.status, 'ok');
+  assert.equal(readJson(path.join(cmDir(repo), 'meta.json')).products, 8);
+});
+
 test('network failure increments consecutiveFailures and exits ok', async () => {
   const repo = tmpRepo();
   await seed(repo, 10);
   const before = snapshot(cmDir(repo));
   const cacheFile = path.join(repo, '.cache', 'cardmarket', 'price-guide.json');
-  const cacheBefore = fs.readFileSync(cacheFile, 'utf8');
+  assert.ok(fs.existsSync(cacheFile));
 
   const fetchJson = stubFetch({ [SINGLES_URL]: singles([product(1)]), [PRICE_GUIDE_URL]: new Error('ETIMEDOUT') });
   const res = await syncCardmarket({ repoRoot: repo, fetchJson, now: () => NOW, retryDelayMs: 0 });
@@ -146,7 +170,8 @@ test('network failure increments consecutiveFailures and exits ok', async () => 
   assert.equal(after['catalog.jsonl'], before['catalog.jsonl']);
   assert.equal(after['expansions.json'], before['expansions.json']);
   assert.deepEqual(readJson(path.join(cmDir(repo), 'meta.json')), { ...JSON.parse(before['meta.json']), consecutiveFailures: 2 });
-  assert.equal(fs.readFileSync(cacheFile, 'utf8'), cacheBefore);
+  // Fehlender Cache bedeutet immer: heute kein Preisguide.
+  assert.equal(fs.existsSync(cacheFile), false);
 });
 
 test('failure before any success writes meta with counter only', async () => {
