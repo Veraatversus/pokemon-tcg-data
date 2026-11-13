@@ -80,10 +80,13 @@ jobs:
       # Cardmarket-Build nach jedem erfolgreichen Sync (auch ohne Commit) direkt ausloesen.
       # workflow_dispatch per GITHUB_TOKEN startet Workflows (braucht actions: write).
       # source=sync: der Tagesguard dort ueberspringt, wenn heute schon gebaut wurde.
+      # Ein Fehlschlag hier darf den Sync nicht als fehlgeschlagen markieren (Daten sind schon gepusht);
+      # schedule und workflow_run bleiben als Rueckfall.
       - name: Trigger Cardmarket build
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh workflow run build-cardmarket-data.yml --repo "$GITHUB_REPOSITORY" --ref release -f source=sync
+        run: gh workflow run build-cardmarket-data.yml --repo "$GITHUB_REPOSITORY" --ref release -f source=sync || echo "::warning::Cardmarket-Dispatch fehlgeschlagen - Zeitplan/workflow_run bauen als Rueckfall"
 
       - name: Create issue on failure
         if: failure()
@@ -118,7 +121,6 @@ jobs:
               - Die Regressionstests gegen die frisch gespiegelten Quellen sind fehlgeschlagen
               - Der v3-Build (Registry eingefroren/Invariante verletzt, Parserfehler, Pflichtfeld fehlt) ist fehlgeschlagen
               - Netzwerk- oder Push-Fehler
-              - Das Ausloesen von "Build Cardmarket Data" ist fehlgeschlagen (Sync-Daten sind dann schon gepusht)
 
               **Erforderliche Aktion:**
               Bitte das Log des Laufs pruefen, die Ursache beheben und den Workflow erneut starten.
