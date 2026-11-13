@@ -327,8 +327,12 @@ export function resolveSeriesGroupInfo(rawSetRecord = {}) {
   // Schluessel aus dem aufgeloesten Label statt aus tcgdex_serie_id: Zeilen derselben Serie liefern sonst je
   // nach gefuellter Serien-ID verschiedene Schluessel und erscheinen als doppelte Gruppe.
   // Sets, die v3 kennt, tragen einen sprachunabhaengigen Schluessel (normalisierte EN-Serie aus sets.json).
-  const v3Key = sharedV3SetMeta?.get?.(String(setRecord.setId ?? '').trim())?.seriesKey || '';
-  const canonicalSeries = v3Key
+  // Reihenfolge: v3-DE-Serie -> DE-Serie der Zeile (tcgdex_serie_name) -> v3-EN-Serie -> Alias/Label.
+  const v3Meta = sharedV3SetMeta?.get?.(String(setRecord.setId ?? '').trim());
+  const rowDeKey = seriesGroupKeyForName(setRecord.tcgdex_serie_name);
+  const canonicalSeries = v3Meta?.seriesKey
+    || rowDeKey
+    || v3Meta?.enSeriesKey
     || inferSeriesGroupKeyFromNames(setRecord, displayLabel)
     || (normalizeSeriesGroupKey(displayLabel) ? displayLabel : '')
     || String(setRecord.tcgdex_serie_id || '').trim()
