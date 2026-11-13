@@ -1,12 +1,32 @@
 {
   "apiVersion": 3,
   "counts": {
-    "cards": 24057,
+    "cards": 21577,
     "matched": 20769,
     "primary_only": 56,
-    "sets": 217,
-    "tcgdex_only": 3232
+    "sets": 202,
+    "tcgdex_only": 752
   },
+  "excludedSeries": [
+    "tcgp"
+  ],
+  "excludedSetIds": [
+    "TCGDEX-A1",
+    "TCGDEX-A1a",
+    "TCGDEX-A2",
+    "TCGDEX-A2a",
+    "TCGDEX-A2b",
+    "TCGDEX-A3",
+    "TCGDEX-A3a",
+    "TCGDEX-A3b",
+    "TCGDEX-A4",
+    "TCGDEX-A4a",
+    "TCGDEX-B1",
+    "TCGDEX-B1a",
+    "TCGDEX-B2",
+    "TCGDEX-B2a",
+    "TCGDEX-P-A"
+  ],
   "languages": [
     "en",
     "de"
@@ -28,9 +48,6 @@
         "TCGDEX-2019sm-fr": 41,
         "TCGDEX-2023sv": 15,
         "TCGDEX-2024sv": 15,
-        "TCGDEX-B1a": 1,
-        "TCGDEX-B2a": 131,
-        "TCGDEX-P-A": 27,
         "TCGDEX-ex5.5": 5,
         "TCGDEX-mee": 16,
         "TCGDEX-mfb": 34,
@@ -47,7 +64,7 @@
         "svp": 32,
         "swshp": 3
       },
-      "total": 545
+      "total": 386
     }
   }
 }

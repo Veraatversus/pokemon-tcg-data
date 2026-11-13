@@ -5564,58 +5564,6 @@
     "total": 175
   },
   {
-    "aliases": [],
-    "i18n": {
-      "de": {
-        "cardCount": {
-          "official": 226
-        },
-        "name": "Unschlagbare Gene",
-        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
-      }
-    },
-    "id": "TCGDEX-A1",
-    "ids": {
-      "cardmarket": null,
-      "pokemontcg": null,
-      "tcgdex": "A1",
-      "tcgplayer": null
-    },
-    "images": {
-      "logo": "https://assets.tcgdex.net/en/tcgp/A1/logo.webp",
-      "symbol": "https://assets.tcgdex.net/en/tcgp/A1/symbol.webp"
-    },
-    "name": "Genetic Apex",
-    "printedTotal": 226,
-    "releaseDate": "2024/10/30",
-    "series": "Pokémon TCG Pocket",
-    "total": 286
-  },
-  {
-    "aliases": [],
-    "i18n": {
-      "de": {
-        "name": "PROMO-A",
-        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
-      }
-    },
-    "id": "TCGDEX-P-A",
-    "ids": {
-      "cardmarket": null,
-      "pokemontcg": null,
-      "tcgdex": "P-A",
-      "tcgplayer": null
-    },
-    "images": {
-      "logo": "https://assets.tcgdex.net/en/tcgp/P-A/logo.webp"
-    },
-    "name": "Promos-A",
-    "printedTotal": 0,
-    "releaseDate": "2024/10/30",
-    "series": "Pokémon TCG Pocket",
-    "total": 100
-  },
-  {
     "aliases": [
       "TCGDEX-sv08"
     ],
@@ -5675,33 +5623,6 @@
     "total": 15
   },
   {
-    "aliases": [],
-    "i18n": {
-      "de": {
-        "cardCount": {
-          "official": 68
-        },
-        "name": "Mysteriöse Insel",
-        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
-      }
-    },
-    "id": "TCGDEX-A1a",
-    "ids": {
-      "cardmarket": null,
-      "pokemontcg": null,
-      "tcgdex": "A1a",
-      "tcgplayer": null
-    },
-    "images": {
-      "logo": "https://assets.tcgdex.net/en/tcgp/A1a/logo.webp"
-    },
-    "name": "Mythical Island",
-    "printedTotal": 68,
-    "releaseDate": "2024/12/17",
-    "series": "Pokémon TCG Pocket",
-    "total": 86
-  },
-  {
     "aliases": [
       "TCGDEX-sv08.5"
     ],
@@ -5734,89 +5655,6 @@
     "releaseDate": "2025/01/17",
     "series": "Scarlet & Violet",
     "total": 180
-  },
-  {
-    "aliases": [],
-    "i18n": {
-      "de": {
-        "cardCount": {
-          "official": 140
-        },
-        "name": "Kollision von Raum und Zeit",
-        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
-      }
-    },
-    "id": "TCGDEX-A2",
-    "ids": {
-      "cardmarket": null,
-      "pokemontcg": null,
-      "tcgdex": "A2",
-      "tcgplayer": null
-    },
-    "images": {
-      "logo": "https://assets.tcgdex.net/en/tcgp/A2/logo.webp"
-    },
-    "name": "Space-Time Smackdown",
-    "printedTotal": 140,
-    "releaseDate": "2025/01/30",
-    "series": "Pokémon TCG Pocket",
-    "total": 207
-  },
-  {
-    "aliases": [],
-    "i18n": {
-      "de": {
-        "cardCount": {
-          "official": 75
-        },
-        "name": "Licht des Triumphs",
-        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
-      }
-    },
-    "id": "TCGDEX-A2a",
-    "ids": {
-      "cardmarket": null,
-      "pokemontcg": null,
-      "tcgdex": "A2a",
-      "tcgplayer": null
-    },
-    "images": {
-      "logo": "https://assets.tcgdex.net/en/tcgp/A2a/logo.webp",
-      "symbol": "https://assets.tcgdex.net/en/tcgp/A2a/symbol.png"
-    },
-    "name": "Triumphant Light",
-    "printedTotal": 75,
-    "releaseDate": "2025/02/28",
-    "series": "Pokémon TCG Pocket",
-    "total": 96
-  },
-  {
-    "aliases": [],
-    "i18n": {
-      "de": {
-        "cardCount": {
-          "official": 72
-        },
-        "name": "Glänzendes Festival",
-        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
-      }
-    },
-    "id": "TCGDEX-A2b",
-    "ids": {
-      "cardmarket": null,
-      "pokemontcg": null,
-      "tcgdex": "A2b",
-      "tcgplayer": null
-    },
-    "images": {
-      "logo": "https://assets.tcgdex.net/en/tcgp/A2b/logo.webp",
-      "symbol": "https://assets.tcgdex.net/en/tcgp/A2b/symbol.webp"
-    },
-    "name": "Shining Revelry",
-    "printedTotal": 72,
-    "releaseDate": "2025/03/27",
-    "series": "Pokémon TCG Pocket",
-    "total": 111
   },
   {
     "aliases": [
@@ -5853,56 +5691,6 @@
     "total": 190
   },
   {
-    "aliases": [],
-    "i18n": {
-      "de": {
-        "cardCount": {
-          "official": 155
-        },
-        "name": "Hüter des Firmaments",
-        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
-      }
-    },
-    "id": "TCGDEX-A3",
-    "ids": {
-      "cardmarket": null,
-      "pokemontcg": null,
-      "tcgdex": "A3",
-      "tcgplayer": null
-    },
-    "images": {
-      "logo": "https://assets.tcgdex.net/en/tcgp/A3/logo.webp"
-    },
-    "name": "Celestial Guardians",
-    "printedTotal": 155,
-    "releaseDate": "2025/04/30",
-    "series": "Pokémon TCG Pocket",
-    "total": 239
-  },
-  {
-    "aliases": [],
-    "i18n": {
-      "de": {
-        "cardCount": {
-          "official": 69
-        },
-        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
-      }
-    },
-    "id": "TCGDEX-A3a",
-    "ids": {
-      "cardmarket": null,
-      "pokemontcg": null,
-      "tcgdex": "A3a",
-      "tcgplayer": null
-    },
-    "name": "Extradimensional Crisis",
-    "printedTotal": 69,
-    "releaseDate": "2025/05/29",
-    "series": "Pokémon TCG Pocket",
-    "total": 103
-  },
-  {
     "aliases": [
       "TCGDEX-sv10"
     ],
@@ -5936,29 +5724,6 @@
     "releaseDate": "2025/05/30",
     "series": "Scarlet & Violet",
     "total": 244
-  },
-  {
-    "aliases": [],
-    "i18n": {
-      "de": {
-        "cardCount": {
-          "official": 69
-        },
-        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
-      }
-    },
-    "id": "TCGDEX-A3b",
-    "ids": {
-      "cardmarket": null,
-      "pokemontcg": null,
-      "tcgdex": "A3b",
-      "tcgplayer": null
-    },
-    "name": "Eevee Grove",
-    "printedTotal": 69,
-    "releaseDate": "2025/06/26",
-    "series": "Pokémon TCG Pocket",
-    "total": 107
   },
   {
     "aliases": [
@@ -6021,60 +5786,6 @@
     "releaseDate": "2025/07/18",
     "series": "Scarlet & Violet",
     "total": 172
-  },
-  {
-    "aliases": [],
-    "i18n": {
-      "de": {
-        "cardCount": {
-          "official": 161
-        },
-        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
-      }
-    },
-    "id": "TCGDEX-A4",
-    "ids": {
-      "cardmarket": null,
-      "pokemontcg": null,
-      "tcgdex": "A4",
-      "tcgplayer": null
-    },
-    "images": {
-      "logo": "https://assets.tcgdex.net/en/tcgp/A4/logo.webp"
-    },
-    "name": "Wisdom of Sea and Sky",
-    "printedTotal": 161,
-    "releaseDate": "2025/07/30",
-    "series": "Pokémon TCG Pocket",
-    "total": 241
-  },
-  {
-    "aliases": [],
-    "i18n": {
-      "de": {
-        "cardCount": {
-          "official": 71
-        },
-        "name": "Verborgene Quelle",
-        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
-      }
-    },
-    "id": "TCGDEX-A4a",
-    "ids": {
-      "cardmarket": null,
-      "pokemontcg": null,
-      "tcgdex": "A4a",
-      "tcgplayer": null
-    },
-    "images": {
-      "logo": "https://assets.tcgdex.net/en/tcgp/A4a/logo.webp",
-      "symbol": "https://assets.tcgdex.net/en/tcgp/A4a/symbol.png"
-    },
-    "name": "Secluded Springs",
-    "printedTotal": 71,
-    "releaseDate": "2025/08/28",
-    "series": "Pokémon TCG Pocket",
-    "total": 105
   },
   {
     "aliases": [],
@@ -6161,33 +5872,6 @@
     "total": 112
   },
   {
-    "aliases": [],
-    "i18n": {
-      "de": {
-        "cardCount": {
-          "official": 226
-        },
-        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
-      }
-    },
-    "id": "TCGDEX-B1",
-    "ids": {
-      "cardmarket": null,
-      "pokemontcg": null,
-      "tcgdex": "B1",
-      "tcgplayer": null
-    },
-    "images": {
-      "logo": "https://assets.tcgdex.net/en/tcgp/B1/logo.webp",
-      "symbol": "https://assets.tcgdex.net/en/tcgp/B1/symbol.webp"
-    },
-    "name": "Mega Rising",
-    "printedTotal": 226,
-    "releaseDate": "2025/10/30",
-    "series": "Pokémon TCG Pocket",
-    "total": 331
-  },
-  {
     "aliases": [
       "TCGDEX-me02"
     ],
@@ -6222,58 +5906,6 @@
     "total": 130
   },
   {
-    "aliases": [],
-    "i18n": {
-      "de": {
-        "cardCount": {
-          "official": 69
-        },
-        "name": "Feuerrote Flammen",
-        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
-      }
-    },
-    "id": "TCGDEX-B1a",
-    "ids": {
-      "cardmarket": null,
-      "pokemontcg": null,
-      "tcgdex": "B1a",
-      "tcgplayer": null
-    },
-    "name": "Crimson Blaze",
-    "printedTotal": 69,
-    "releaseDate": "2025/12/17",
-    "series": "Pokémon TCG Pocket",
-    "total": 103
-  },
-  {
-    "aliases": [],
-    "i18n": {
-      "de": {
-        "cardCount": {
-          "official": 155
-        },
-        "name": "Traumhafte Parade",
-        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
-      }
-    },
-    "id": "TCGDEX-B2",
-    "ids": {
-      "cardmarket": null,
-      "pokemontcg": null,
-      "tcgdex": "B2",
-      "tcgplayer": null
-    },
-    "images": {
-      "logo": "https://assets.tcgdex.net/en/tcgp/B2/logo.webp",
-      "symbol": "https://assets.tcgdex.net/en/tcgp/B2/symbol.webp"
-    },
-    "name": "Fantastical Parade",
-    "printedTotal": 155,
-    "releaseDate": "2026/01/29",
-    "series": "Pokémon TCG Pocket",
-    "total": 234
-  },
-  {
     "aliases": [
       "TCGDEX-me02.5"
     ],
@@ -6306,30 +5938,6 @@
     "releaseDate": "2026/01/30",
     "series": "Mega Evolution",
     "total": 295
-  },
-  {
-    "aliases": [],
-    "i18n": {
-      "de": {
-        "cardCount": {
-          "official": 93
-        },
-        "name": "Paldean Wonders",
-        "series": "Pokémon‑Sammelkartenspiel‑Pocket"
-      }
-    },
-    "id": "TCGDEX-B2a",
-    "ids": {
-      "cardmarket": null,
-      "pokemontcg": null,
-      "tcgdex": "B2a",
-      "tcgplayer": null
-    },
-    "name": "Paldean Wonders",
-    "printedTotal": 93,
-    "releaseDate": "2026/02/26",
-    "series": "Pokémon TCG Pocket",
-    "total": 131
   },
   {
     "aliases": [
