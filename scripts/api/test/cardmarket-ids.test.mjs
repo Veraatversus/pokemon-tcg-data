@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeCmNumber, normalizeCmName, fillCardmarketIds } from '../merge/cardmarket-ids.mjs';
+import { normalizeCmNumber, normalizeCmName, fillCardmarketIds, primaryCardmarketId } from '../merge/cardmarket-ids.mjs';
 
 const single = (cardmarketProductId, name, collectorNumber) => ({
   cardmarketProductId, name, collectorNumber, categoryId: 51, categoryName: 'Pokémon Single',
@@ -275,4 +275,198 @@ test('jede Variante mit geteilter ID bekommt den Treffer, auch gestempelte (mcd2
   const { cards: out } = run(cards, base2Products);
   assert.deepEqual(out[1].ids.cardmarket, [273814]);
   assert.deepEqual(out[1].variants, [{ type: 'normal', stamp: ['x'], cardmarketId: 273814 }]);
+});
+
+// --- Cardmarket-IDs gegen die Expansion des Sets pruefen ---
+// Expansionen: 100 = Set-Expansion, 200 = fremde Expansion, 300 = Unterset-Expansion.
+const runExp = (cards, expansions, { sets = [{ id: 's1', ids: { cardmarket: 100 } }], subsetExpansion } = {}) => {
+  const cardsBySet = new Map([['s1', cards]]);
+  const productExp = new Map();
+  for (const [e, products] of Object.entries(expansions)) for (const p of products) productExp.set(p.cardmarketProductId, Number(e));
+  const report = fillCardmarketIds({
+    sets,
+    cardsBySet,
+    subsetExpansion,
+    knownExpansions: new Set(Object.keys(expansions).map(Number)),
+    productExpansion: (id) => productExp.get(id) ?? null,
+    loadExpansion: (id) => (expansions[id] ? { expansionId: id, cards: expansions[id] } : null),
+  });
+  return { cards: cardsBySet.get('s1'), report, sets };
+};
+
+test('replaces id from foreign expansion by strict match', () => {
+  // ex4-74-Form: TCGdex-ID zeigt in eine fremde Expansion auf ein anders benanntes Produkt
+  const cards = [{
+    ...card('74', '74', 'Strength Charm', [275851, 871873]),
+    variants: [{ type: 'normal', cardmarketId: 275851 }, { type: 'normal', stamp: ['x'], cardmarketId: 871873 }],
+  }];
+  const { cards: out, report } = runExp(cards, {
+    100: [single(276051, 'Strength Charm', '74')],
+    200: [single(275851, 'Team Magma Ball', '74'), single(871873, 'Strength Charm', null)],
+  });
+  assert.deepEqual(out[0].ids.cardmarket, [276051, 871873]); // fremde, gleichnamige ID (Stempel) bleibt
+  assert.equal(out[0].ids.cardmarketSource, 'corrected-expansion');
+  assert.deepEqual(out[0].ids.cardmarketTcgdex, [275851, 871873]);
+  assert.deepEqual(out[0].variants, [{ type: 'normal', cardmarketId: 276051 }, { type: 'normal', stamp: ['x'], cardmarketId: 871873 }]);
+  assert.deepEqual(report.expansionMismatch.cards, [{ cardKey: 's1-74', oldId: 275851, oldExpansion: 200, newId: 276051, reason: 'corrected-expansion' }]);
+  assert.equal(report.expansionMismatch.totals.corrected, 1);
+  assert.equal(report.expansionMismatch.totals.foreignNameOk, 1);
+});
+
+test('replaces foreign id by name-only match when the set expansion has no numbers (ex4 Team Aqua)', () => {
+  const { cards: out } = runExp([card('1', '1', "Team Aqua's Cacturne", [275778])], {
+    100: [single(275978, "Team Aqua's Cacturne [Poison Payback]", null)],
+    200: [single(275778, 'Armaldo [Primal Veil | Blade Arms]', '1')],
+  });
+  assert.deepEqual(out[0].ids.cardmarket, [275978]);
+  assert.equal(out[0].ids.cardmarketSource, 'corrected-expansion');
+});
+
+test('drops id with foreign expansion and mismatching name', () => {
+  const cards = [{ ...card('2', '2', "Team Aqua's Crawdaunt", [275779]), variants: [{ type: 'normal', cardmarketId: 275779 }] }];
+  const { cards: out, report } = runExp(cards, {
+    // zwei gleichnamige Produkte ohne Nummer -> mehrdeutig, kein Ersatz
+    100: [single(275979, "Team Aqua's Crawdaunt", null), single(275991, "Team Aqua's Crawdaunt", null)],
+    200: [single(275779, 'Cacturne [Poison Payback | Feint Attack]', '2')],
+  });
+  assert.deepEqual(out[0].ids.cardmarket, []);
+  assert.deepEqual(out[0].ids.cardmarketTcgdex, [275779]);
+  assert.deepEqual(out[0].variants, [{ type: 'normal' }]);
+  assert.deepEqual(report.expansionMismatch.cards, [{ cardKey: 's1-2', oldId: 275779, oldExpansion: 200, newId: null, reason: 'dropped-mismatch' }]);
+  assert.equal(report.expansionMismatch.totals.dropped, 1);
+});
+
+test('keeps mismatching id in the set expansion without unique match and reports it', () => {
+  const { cards: out, report } = runExp([card('46', '46', "Erika's Gloom", [274152])], {
+    100: [single(274152, 'Erika', '3')],
+  });
+  assert.deepEqual(out[0].ids.cardmarket, [274152]);
+  assert.equal(out[0].ids.cardmarketSource, undefined);
+  assert.deepEqual(report.expansionMismatch.cards, [{ cardKey: 's1-46', oldId: 274152, oldExpansion: 100, newId: null, reason: 'kept-mismatch' }]);
+});
+
+test('lenient name check: Basic-Energie, Untertitel, Kurz-Tags, {X}', () => {
+  const cards = [
+    card('17', '017', 'Grass Energy', [1]),
+    card('122', '122', "Professor's Research", [2]),
+    card('8', '8', 'Lucario GL', [3]),
+    card('86', '86', 'Growing {G} Energy', [4]),
+  ];
+  const { cards: out, report } = runExp(cards, {
+    100: [],
+    200: [
+      single(1, 'Basic Grass Energy', null), single(2, "Professor's Research - Professor Oak", null),
+      single(3, 'Lucario [GL] Lv.32 [Boundary Aura]', null), single(4, 'Growing [G] Energy', null),
+    ],
+  });
+  assert.deepEqual(out.map((c) => c.ids.cardmarket), [[1], [2], [3], [4]]);
+  assert.deepEqual(report.expansionMismatch.cards, []);
+  assert.equal(report.expansionMismatch.totals.foreignNameOk, 4);
+});
+
+test('keeps subset card in its own expansion', () => {
+  const { cards: out, report } = runExp([card('TG05', 'TG05', 'Pikachu', [7])], {
+    100: [single(8, 'Pikachu', '5')],
+    300: [single(7, 'Pikachu [Thunder]', 'TG05')],
+  }, { subsetExpansion: new Map([['s1-TG05', 300]]) });
+  assert.deepEqual(out[0].ids.cardmarket, [7]);
+  assert.equal(out[0].ids.cardmarketSource, undefined);
+  assert.deepEqual(report.expansionMismatch.cards, []);
+  assert.equal(report.expansionMismatch.totals.foreignNameOk, 0);
+});
+
+test('set without valid expansion: mismatching ids are only reported', () => {
+  const { cards: out, report } = runExp([card('1', '1', 'Bulbizarre', [5])], { 200: [single(5, 'Bulbasaur', '1')] }, { sets: [{ id: 's1', ids: { cardmarket: null } }] });
+  assert.deepEqual(out[0].ids.cardmarket, [5]);
+  assert.deepEqual(report.expansionMismatch.cards, [{ cardKey: 's1-1', oldId: 5, oldExpansion: 200, newId: null, reason: 'no-set-expansion' }]);
+});
+
+test('derives set expansion when majority agrees', () => {
+  // tk1a-Form: ids.cardmarket ist eine Produkt-ID, die Karten zeigen alle auf Expansion 1626
+  const sets = [{ id: 's1', ids: { cardmarket: 275771 } }];
+  const cards = [card('1', '1', 'Bagon', [275777]), card('2', '2', 'Combusken', [275770]), card('10', '10', 'Fire Energy', [275771]), card('11', '11', 'Latias')];
+  const { cards: out, report } = runExp(cards, {
+    1626: [single(275777, 'Bagon', null), single(275770, 'Combusken', null), single(275771, 'Fire Energy', null), single(275772, 'Latias [Mist Ball]', null)],
+  }, { sets });
+  assert.equal(sets[0].ids.cardmarket, 1626);
+  assert.equal(sets[0].ids.cardmarketSetSource, 'derived');
+  assert.equal(sets[0].ids.cardmarketTcgdexSet, 275771);
+  assert.deepEqual(report.expansionMismatch.sets, [{ setId: 's1', oldId: 275771, newId: 1626, reason: 'derived', evidence: '3/3' }]);
+  assert.equal(report.bySet.s1.expansionId, 1626);
+  assert.deepEqual(out[3].ids.cardmarket, [275772]); // Luecke aus der abgeleiteten Expansion gefuellt
+});
+
+test('keeps set expansion when evidence is weak', () => {
+  const sets = [{ id: 's1', ids: { cardmarket: 999 } }];
+  const cards = [card('1', '1', 'Bagon', [1]), card('2', '2', 'Combusken', [2]), card('3', '3', 'Torchic', [3])];
+  const { report } = runExp(cards, {
+    1626: [single(1, 'Bagon', null), single(2, 'Combusken', null)],
+    1627: [single(3, 'Torchic', null)],
+  }, { sets });
+  assert.equal(sets[0].ids.cardmarket, 999); // 2/3 < 80 % -> nicht erfunden
+  assert.equal(sets[0].ids.cardmarketSetSource, undefined);
+  assert.deepEqual(report.expansionMismatch.sets, [{ setId: 's1', oldId: 999, newId: null, reason: 'invalid-kept', evidence: '2/3' }]);
+});
+
+test('swapped ids in the same expansion: both replaced by number+name', () => {
+  // xyp-Form: XY20 Greninja-EX zeigt auf "Greninja", XY162 Greninja auf "Greninja EX #XY20"
+  const { cards: out } = runExp([card('XY20', 'XY20', 'Greninja-EX', [10]), card('XY162', 'XY162', 'Greninja', [11])], {
+    100: [single(11, 'Greninja EX [Sharpshooting]', 'XY20'), single(12, 'Greninja [Mist]', 'XY162')],
+    200: [single(10, 'Greninja [Mist Concealment]', null)],
+  });
+  assert.deepEqual(out[0].ids.cardmarket, [11]);
+  assert.deepEqual(out[1].ids.cardmarket, [12]);
+});
+
+test('attack names disambiguate same-name products without numbers', () => {
+  const withAttacks = (c, attacks, abilities) => ({ ...c, attacks: attacks.map((name) => ({ name })), ...(abilities ? { abilities: abilities.map((name) => ({ name })) } : {}) });
+  // ex4-Form: zwei "Team Aqua's Crawdaunt" ohne Nummer, fremde Expansion-ID wird ersetzt
+  const ex4 = runExp([
+    withAttacks(card('2', '2', "Team Aqua's Crawdaunt", [275779]), ['Deep Impact', 'Aqua Reverse']),
+    withAttacks(card('14', '14', "Team Aqua's Crawdaunt", [275791]), ['Poison Reaction', 'Double Claw']),
+  ], {
+    100: [single(275979, "Team Aqua's Crawdaunt [Aqua Reverse | Deep Impact]", null), single(275991, "Team Aqua's Crawdaunt [Poison Reaction | Double Claw]", null)],
+    200: [single(275779, 'Cacturne [Poison Payback | Feint Attack]', '2'), single(275791, 'Zangoose [Poison Resistance]', '14')],
+  });
+  assert.deepEqual(ex4.cards[0].ids.cardmarket, [275979]); // Reihenfolge egal
+  assert.equal(ex4.cards[0].ids.cardmarketSource, 'corrected-expansion');
+  assert.deepEqual(ex4.cards[1].ids.cardmarket, [275991]);
+  // me55-Form beim Fuellen: viele "Pikachu" ohne Nummer; Faehigkeit zaehlt mit; Zahlen-Tokens fallen weg
+  const products = [
+    single(907655, 'Pikachu [Store Up]', null), single(907638, 'Pikachu [Gnaw]', null),
+    single(907635, 'Pikachu [Lonely Gaze | Pika Ball]', null), single(907630, 'Pikachu [Thunder Shock | 30]', null),
+    single(907661, 'Pikachu ex [Zip-Zap Frenzy | Thunder]', null), single(907757, 'Pikachu ex [Zip-Zap Frenzy | Thunder]', null),
+  ];
+  const { cards: out, report } = run([
+    withAttacks(card('48', '48', 'Pikachu'), ['Store Up']),
+    withAttacks(card('28', '28', 'Pikachu'), ['Pika Ball'], ['Lonely Gaze']),
+    withAttacks(card('23', '23', 'Pikachu'), ['Thunder Shock']),
+    withAttacks(card('54', '54', 'Pikachu ex'), ['Zip-Zap Frenzy', 'Thunder']), // zwei gleiche Produkte -> mehrdeutig
+    withAttacks(card('99', '99', 'Pikachu'), ['Quick Attack']), // kein gleiches Produkt -> mehrdeutig
+    card('98', '98', 'Pikachu'), // ohne Angriffe keine Unterscheidung
+  ], products);
+  assert.deepEqual(out.map((c) => c.ids.cardmarket), [[907655], [907635], [907630], [], [], []]);
+  assert.equal(out[0].ids.cardmarketSource, 'matched');
+  assert.equal(report.totals.ambiguous, 3);
+});
+
+test('attack names in the shared-id correction', () => {
+  const withAttacks = (c, attacks) => ({ ...c, attacks: attacks.map((name) => ({ name })) });
+  const cards = [
+    withAttacks(card('1', '1', 'Pikachu', [5]), ['Gnaw']),
+    withAttacks(card('2', '2', 'Pikachu', [5]), ['Store Up']),
+  ];
+  const { cards: out } = run(cards, [single(5, 'Pikachu [Gnaw]', null), single(6, 'Pikachu [Store Up]', null)]);
+  assert.deepEqual(out[1].ids.cardmarket, [6]);
+  assert.equal(out[1].ids.cardmarketSource, 'corrected');
+  assert.deepEqual(out[0].ids.cardmarket, [5]);
+});
+
+test('primary id prefers unstamped variant', () => {
+  const v = (cardmarket, variants) => ({ ids: { cardmarket }, variants });
+  assert.equal(primaryCardmarketId(v([1], [{ type: 'normal', stamp: ['pre-release'], cardmarketId: 727119 }, { type: 'normal', cardmarketId: 725152 }])), 725152);
+  assert.equal(primaryCardmarketId(v([1], [{ type: 'normal', stamp: [], cardmarketId: 5 }, { type: 'holo', cardmarketId: 6 }])), 5);
+  assert.equal(primaryCardmarketId(v([1], [{ type: 'normal', stamp: ['x'], cardmarketId: 7 }, { type: 'holo' }])), 7);
+  assert.equal(primaryCardmarketId(v([9, 8], [{ type: 'normal' }])), 9);
+  assert.equal(primaryCardmarketId({ ids: { cardmarket: [] } }), undefined);
 });
