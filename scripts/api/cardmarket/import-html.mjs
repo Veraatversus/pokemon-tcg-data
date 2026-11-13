@@ -53,26 +53,34 @@ function parseBlock(block) {
  * Parst eine oder mehrere gespeicherte Suchseiten (HTML-Strings).
  * -> { expansionId, name, cards: [{ productId, collectorNumber }] } (Produkte einmalig, natuerlich sortiert).
  * Version V2+ im Link ergibt das Suffix "V<n>" ("146V2"); V1/ohne Version behaelt die Basisnummer.
+ * Bewusste Regel (anders als das alte Skript, das je Seite die kleinste Version einer (Name, Nummer)-Gruppe zur
+ * Basis machte): V2+ bekommt IMMER das Suffix. Eine unvollstaendig gespeicherte Seite aendert so nie still eine
+ * Nummer, sondern erscheint beim Merge als gemeldeter Widerspruch.
+ * stats: { blocks, parsed, skipped } = gefundene Kartenbloecke, gelesene, uebersprungene (Markup unbekannt).
  */
 export function parseCardmarketHtml(...pages) {
   let expansionId = null;
   let name = null;
   const seen = new Set();
   const cards = [];
+  const stats = { blocks: 0, parsed: 0, skipped: 0 };
   for (const html of pages) {
     expansionId ??= expansionIdOf(html);
     name ??= setNameOf(html);
     const blocks = html.match(/<a\s+href="[^"]*"\s+class="card text-center w-100 galleryBox">[\s\S]*?<\/a>\s*<\/div>/g) ?? [];
     for (const block of blocks) {
+      stats.blocks++;
       const c = parseBlock(block);
-      if (!c || seen.has(c.productId)) continue;
+      if (!c) { stats.skipped++; continue; }
+      stats.parsed++;
+      if (seen.has(c.productId)) continue;
       seen.add(c.productId);
       cards.push({ productId: c.productId, collectorNumber: c.version > 1 ? `${c.number}V${c.version}` : c.number });
     }
   }
   if (expansionId === null) throw new Error('Expansion nicht erkannt (kein idExpansion in der Seite)');
   cards.sort((a, b) => naturalCompare(a.collectorNumber, b.collectorNumber) || a.productId - b.productId);
-  return { expansionId, name, cards };
+  return { expansionId, name, cards, stats };
 }
 
 // ---------- Merge ----------
@@ -84,6 +92,7 @@ export function parseCardmarketHtml(...pages) {
  */
 export function mergeCustomSet(existing, parsed, { force = false } = {}) {
   const set = {
+    ...(existing ?? {}), // unbekannte Schluessel bleiben erhalten
     expansionId: parsed.expansionId,
     name: existing?.name ?? parsed.name ?? String(parsed.expansionId),
     cards: (existing?.cards ?? []).map((c) => ({ ...c })),
@@ -107,7 +116,12 @@ export function mergeCustomSet(existing, parsed, { force = false } = {}) {
       if (force) { have.collectorNumber = c.collectorNumber; replaced.push(c.productId); }
     }
   }
-  return { set, added, unchanged, conflicts, replaced };
+  // Zwei verschiedene (Nicht-Lot-)Produkte mit gleicher Nummer, soweit eines davon neu/ersetzt ist
+  const touched = new Set([...added.map((c) => c.productId), ...replaced]);
+  const byNumber = new Map();
+  for (const c of set.cards) if (!c.lot) byNumber.set(String(c.collectorNumber), [...(byNumber.get(String(c.collectorNumber)) ?? []), c.productId]);
+  const duplicateNumbers = [...byNumber].filter(([, ids]) => ids.length > 1 && ids.some((id) => touched.has(id))).map(([collectorNumber, productIds]) => ({ collectorNumber, productIds }));
+  return { set, added, unchanged, conflicts, replaced, duplicateNumbers };
 }
 
 // ---------- Vorher/Nachher ----------
@@ -193,7 +207,15 @@ export function formatSummary(preview) {
 
 // ---------- Ablauf ----------
 
-const readJsonOr = (file, fallback) => { try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return fallback; } };
+// Nur eine fehlende Datei ist "leer"; jeder andere Lese-/Parsefehler bricht mit dem Dateinamen ab.
+function readJsonOr(file, fallback) {
+  let text;
+  try { text = fs.readFileSync(file, 'utf8'); } catch (e) {
+    if (e.code === 'ENOENT') return fallback;
+    throw new Error(`${file} nicht lesbar: ${e.message}`);
+  }
+  try { return JSON.parse(text); } catch (e) { throw new Error(`${file} ist kein gueltiges JSON (nichts geschrieben): ${e.message}`); }
+}
 
 /**
  * Liest die HTML-Dateien (je Expansion gruppiert), fuehrt sie mit sources/cardmarket/custom-sets/<id>.json zusammen
@@ -203,8 +225,14 @@ const readJsonOr = (file, fallback) => { try { return JSON.parse(fs.readFileSync
 export function runImport({ files, root, dryRun = false, force = false, setIds = [] }) {
   const byExpansion = new Map();
   for (const file of files) {
-    const parsed = parseCardmarketHtml(fs.readFileSync(file, 'utf8'));
-    const e = byExpansion.get(parsed.expansionId) ?? { expansionId: parsed.expansionId, name: parsed.name, cards: [] };
+    let html;
+    try { html = fs.readFileSync(file, 'utf8'); } catch (e) { throw new Error(`HTML-Datei ${file} nicht lesbar: ${e.message}`); }
+    let parsed;
+    try { parsed = parseCardmarketHtml(html); } catch (e) { throw new Error(`${file}: ${e.message}`); }
+    const st = parsed.stats;
+    if (!parsed.cards.length) throw new Error(`${file}: ${st.blocks} Bloecke gefunden, ${st.parsed} gelesen, ${st.skipped} uebersprungen - keine Karte erkannt (hat sich das Cardmarket-Markup geaendert?)`);
+    const e = byExpansion.get(parsed.expansionId) ?? { expansionId: parsed.expansionId, name: parsed.name, cards: [], stats: { blocks: 0, parsed: 0, skipped: 0 } };
+    for (const k of Object.keys(st)) e.stats[k] += st[k];
     e.name ??= parsed.name;
     e.cards.push(...parsed.cards.filter((c) => !e.cards.some((x) => x.productId === c.productId)));
     byExpansion.set(parsed.expansionId, e);
@@ -233,7 +261,7 @@ export function runImport({ files, root, dryRun = false, force = false, setIds =
         overrides: readJsonOr(path.join(root, 'api', 'mappings', 'cardmarket-overrides.json'), {}), setIds,
       });
     }
-    merged.push({ expansionId: parsed.expansionId, file, added: m.added, unchanged: m.unchanged, conflicts: m.conflicts, replaced: m.replaced, written: changed && !dryRun, preview });
+    merged.push({ expansionId: parsed.expansionId, file, added: m.added, unchanged: m.unchanged, conflicts: m.conflicts, replaced: m.replaced, duplicateNumbers: m.duplicateNumbers, stats: parsed.stats, written: changed && !dryRun, preview });
   }
   return { merged };
 }
@@ -248,11 +276,19 @@ function main() {
     process.exit(values.help ? 0 : 1);
   }
   const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
-  const { merged } = runImport({ files: positionals, root, dryRun: values['dry-run'], force: values.force, setIds: values.set ?? [] });
+  let merged;
+  try {
+    ({ merged } = runImport({ files: positionals, root, dryRun: values['dry-run'], force: values.force, setIds: values.set ?? [] }));
+  } catch (e) {
+    console.error(`Fehler: ${e.message}`);
+    process.exit(1);
+  }
   let exit = 0;
   for (const m of merged) {
+    console.log(`Seiten: ${m.stats.blocks} Bloecke gefunden, ${m.stats.parsed} gelesen, ${m.stats.skipped} uebersprungen`);
     console.log(`custom-set ${m.expansionId}: ${m.added.length} neu, ${m.unchanged} unveraendert, ${m.conflicts.length} Widerspruch(e)${m.replaced.length ? `, ${m.replaced.length} ersetzt (--force)` : ''}${m.written ? ` -> ${path.relative(root, m.file)}` : ' (nicht geschrieben)'}`);
     for (const c of m.conflicts) console.log(`  WIDERSPRUCH Produkt ${c.productId}: bisher "${c.existing}", Seite "${c.incoming}"${m.replaced.includes(c.productId) ? ' (ersetzt)' : ' (bleibt; --force ersetzt)'}`);
+    for (const d of m.duplicateNumbers) console.log(`  WARNUNG Nummer "${d.collectorNumber}" gehoert mehreren Produkten: ${d.productIds.join(', ')}`);
     if (m.conflicts.length && !values.force) exit = 2;
     console.log(m.preview ? formatSummary(m.preview) : 'Keine Vorschau (Katalog oder api/v3/sets.json fehlt).');
   }

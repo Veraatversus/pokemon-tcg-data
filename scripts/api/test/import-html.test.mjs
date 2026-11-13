@@ -100,3 +100,64 @@ test('runImport: schreibt custom-set, --dry-run schreibt nichts', () => {
   assert.equal(again.merged[0].added.length, 0);
   assert.equal(again.merged[0].unchanged, 5);
 });
+
+// --- Fix-Runde 1 ---
+const tmpRoot = () => fs.mkdtempSync(path.join(os.tmpdir(), 'imp-'));
+const writePage = (root, html = fixture) => { const f = path.join(root, 'page.html'); fs.writeFileSync(f, html); return f; };
+
+test('runImport: kaputte bestehende custom-set-Datei bricht ab und bleibt unveraendert', () => {
+  const root = tmpRoot();
+  const dir = path.join(root, 'sources/cardmarket/custom-sets');
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, '1538.json'), '{ "expansionId": 1538, "cards": [');
+  assert.throws(() => runImport({ files: [writePage(root)], root }), /1538\.json.*JSON/);
+  assert.equal(fs.readFileSync(path.join(dir, '1538.json'), 'utf8'), '{ "expansionId": 1538, "cards": [');
+});
+
+test('runImport: kaputte api/v3-Eingabe wird gemeldet statt still uebergangen', () => {
+  const root = tmpRoot();
+  fs.mkdirSync(path.join(root, 'sources/cardmarket'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'sources/cardmarket/catalog.jsonl'), '');
+  fs.mkdirSync(path.join(root, 'api/v3'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'api/v3/sets.json'), '[oops');
+  assert.throws(() => runImport({ files: [writePage(root)], root, dryRun: true }), /sets\.json/);
+});
+
+test('parseCardmarketHtml: Statistik Bloecke/gelesen/uebersprungen', () => {
+  const broken = fixture.replace('Pidgey (SK 009)', 'Pidgey ohne Nummer');
+  const r = parseCardmarketHtml(broken);
+  assert.deepEqual(r.stats, { blocks: 5, parsed: 4, skipped: 1 });
+});
+
+test('runImport: Seite ohne lesbare Karten -> klarer Fehler, nichts geschrieben', () => {
+  const root = tmpRoot();
+  const page = writePage(root, '<title>Skyridge Singles | Cardmarket</title><a href="/x?idExpansion=1538"></a><div>neues Markup</div>');
+  assert.throws(() => runImport({ files: [page], root }), /0 Bloecke gefunden, 0 gelesen, 0 uebersprungen.*Markup/);
+  assert.equal(fs.existsSync(path.join(root, 'sources/cardmarket/custom-sets')), false);
+});
+
+test('runImport: fehlende HTML-Datei -> klare Meldung', () => {
+  assert.throws(() => runImport({ files: [path.join(tmpRoot(), 'nope.html')], root: tmpRoot() }), /HTML-Datei .*nope\.html nicht lesbar/);
+});
+
+test('mergeCustomSet: gleiche Nummer bei zwei Produkten wird gemeldet', () => {
+  const existing = { expansionId: 1538, name: 'Skyridge', cards: [{ productId: 5, collectorNumber: '146' }, { productId: 6, collectorNumber: '9', lot: true }] };
+  const { duplicateNumbers } = mergeCustomSet(existing, parseCardmarketHtml(fixture));
+  assert.deepEqual(duplicateNumbers, [{ collectorNumber: '146', productIds: [5, 275500] }]);
+});
+
+test('mergeCustomSet: unbekannte Schluessel der bestehenden Datei bleiben', () => {
+  const existing = { expansionId: 1538, name: 'Skyridge', note: 'handgepflegt', cards: [] };
+  assert.equal(mergeCustomSet(existing, parseCardmarketHtml(fixture)).set.note, 'handgepflegt');
+});
+
+test('Versionsregel: V2+ immer mit Suffix; unvollstaendige Seite gibt sichtbaren Widerspruch statt stiller Aenderung', () => {
+  // Seite mit nur dem V2-Produkt (V1 fehlt): altes Skript haette "146" vergeben.
+  const onlyV2 = fixture.replace(/<div class="col-6">\s*<a href="[^"]*Charizard-SK146"[\s\S]*?<\/a>\s*<\/div>/, '');
+  const parsed = parseCardmarketHtml(onlyV2);
+  assert.equal(parsed.cards.find((c) => c.productId === 275501).collectorNumber, '146V2');
+  const existing = { expansionId: 1538, name: 'Skyridge', cards: [{ productId: 275501, collectorNumber: '146' }] };
+  const m = mergeCustomSet(existing, parsed);
+  assert.deepEqual(m.conflicts, [{ productId: 275501, existing: '146', incoming: '146V2' }]);
+  assert.equal(m.set.cards[0].collectorNumber, '146');
+});
