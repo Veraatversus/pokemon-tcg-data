@@ -418,6 +418,50 @@ test('swapped ids in the same expansion: both replaced by number+name', () => {
   assert.deepEqual(out[1].ids.cardmarket, [12]);
 });
 
+test('attack names disambiguate same-name products without numbers', () => {
+  const withAttacks = (c, attacks, abilities) => ({ ...c, attacks: attacks.map((name) => ({ name })), ...(abilities ? { abilities: abilities.map((name) => ({ name })) } : {}) });
+  // ex4-Form: zwei "Team Aqua's Crawdaunt" ohne Nummer, fremde Expansion-ID wird ersetzt
+  const ex4 = runExp([
+    withAttacks(card('2', '2', "Team Aqua's Crawdaunt", [275779]), ['Deep Impact', 'Aqua Reverse']),
+    withAttacks(card('14', '14', "Team Aqua's Crawdaunt", [275791]), ['Poison Reaction', 'Double Claw']),
+  ], {
+    100: [single(275979, "Team Aqua's Crawdaunt [Aqua Reverse | Deep Impact]", null), single(275991, "Team Aqua's Crawdaunt [Poison Reaction | Double Claw]", null)],
+    200: [single(275779, 'Cacturne [Poison Payback | Feint Attack]', '2'), single(275791, 'Zangoose [Poison Resistance]', '14')],
+  });
+  assert.deepEqual(ex4.cards[0].ids.cardmarket, [275979]); // Reihenfolge egal
+  assert.equal(ex4.cards[0].ids.cardmarketSource, 'corrected-expansion');
+  assert.deepEqual(ex4.cards[1].ids.cardmarket, [275991]);
+  // me55-Form beim Fuellen: viele "Pikachu" ohne Nummer; Faehigkeit zaehlt mit; Zahlen-Tokens fallen weg
+  const products = [
+    single(907655, 'Pikachu [Store Up]', null), single(907638, 'Pikachu [Gnaw]', null),
+    single(907635, 'Pikachu [Lonely Gaze | Pika Ball]', null), single(907630, 'Pikachu [Thunder Shock | 30]', null),
+    single(907661, 'Pikachu ex [Zip-Zap Frenzy | Thunder]', null), single(907757, 'Pikachu ex [Zip-Zap Frenzy | Thunder]', null),
+  ];
+  const { cards: out, report } = run([
+    withAttacks(card('48', '48', 'Pikachu'), ['Store Up']),
+    withAttacks(card('28', '28', 'Pikachu'), ['Pika Ball'], ['Lonely Gaze']),
+    withAttacks(card('23', '23', 'Pikachu'), ['Thunder Shock']),
+    withAttacks(card('54', '54', 'Pikachu ex'), ['Zip-Zap Frenzy', 'Thunder']), // zwei gleiche Produkte -> mehrdeutig
+    withAttacks(card('99', '99', 'Pikachu'), ['Quick Attack']), // kein gleiches Produkt -> mehrdeutig
+    card('98', '98', 'Pikachu'), // ohne Angriffe keine Unterscheidung
+  ], products);
+  assert.deepEqual(out.map((c) => c.ids.cardmarket), [[907655], [907635], [907630], [], [], []]);
+  assert.equal(out[0].ids.cardmarketSource, 'matched');
+  assert.equal(report.totals.ambiguous, 3);
+});
+
+test('attack names in the shared-id correction', () => {
+  const withAttacks = (c, attacks) => ({ ...c, attacks: attacks.map((name) => ({ name })) });
+  const cards = [
+    withAttacks(card('1', '1', 'Pikachu', [5]), ['Gnaw']),
+    withAttacks(card('2', '2', 'Pikachu', [5]), ['Store Up']),
+  ];
+  const { cards: out } = run(cards, [single(5, 'Pikachu [Gnaw]', null), single(6, 'Pikachu [Store Up]', null)]);
+  assert.deepEqual(out[1].ids.cardmarket, [6]);
+  assert.equal(out[1].ids.cardmarketSource, 'corrected');
+  assert.deepEqual(out[0].ids.cardmarket, [5]);
+});
+
 test('primary id prefers unstamped variant', () => {
   const v = (cardmarket, variants) => ({ ids: { cardmarket }, variants });
   assert.equal(primaryCardmarketId(v([1], [{ type: 'normal', stamp: ['pre-release'], cardmarketId: 727119 }, { type: 'normal', cardmarketId: 725152 }])), 725152);

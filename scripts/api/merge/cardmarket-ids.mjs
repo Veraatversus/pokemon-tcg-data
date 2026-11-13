@@ -67,11 +67,33 @@ function indexExpansion(expansion) {
   for (const p of expansion?.cards ?? []) {
     if (typeof p.cardmarketProductId === 'number') byId.set(p.cardmarketProductId, p);
     if (!isSingle(p) || typeof p.cardmarketProductId !== 'number') continue;
-    const entry = { id: p.cardmarketProductId, number: normalizeCmNumber(p.collectorNumber), name: normalizeCmName(p.name) };
+    const entry = {
+      id: p.cardmarketProductId, number: normalizeCmNumber(p.collectorNumber), name: normalizeCmName(p.name), attacks: cmAttackKey(p.name),
+    };
     if (entry.number) byNumber.set(entry.number, [...(byNumber.get(entry.number) ?? []), entry]);
     byName.set(entry.name, [...(byName.get(entry.name) ?? []), entry]);
   }
   return { byNumber, byName, byId };
+}
+
+// Angriffs-/Faehigkeitsnamen als reihenfolgefreier Schluessel ("" = keine).
+const attackKey = (names) => [...new Set(names.map((n) => normalizeCmName(n)).filter((n) => n && !/^\d+$/.test(n)))].sort().join('|');
+// Cardmarket: letzte Klammer des Produktnamens ("Pikachu [Lonely Gaze | Pika Ball]"); reine Zahlen fallen weg.
+export function cmAttackKey(cmName) {
+  const groups = [...String(cmName ?? '').matchAll(/\[([^\]]*)\]/g)];
+  return groups.length ? attackKey(groups.at(-1)[1].split('|')) : '';
+}
+// v3-Karte: EN-Angriffe und -Faehigkeiten.
+export function cardAttackKey(card) {
+  return attackKey([...(card?.attacks ?? []), ...(card?.abilities ?? [])].map((a) => a?.name ?? ''));
+}
+
+// Gleichnamige Produkte ohne Nummer: genau eines mit denselben Angriffs-/Faehigkeitsnamen -> dieses.
+function byAttacks(card, sameName) {
+  const key = cardAttackKey(card);
+  if (!key) return null;
+  const equal = sameName.filter((p) => p.attacks === key);
+  return equal.length === 1 && equal[0].number === null ? equal[0] : null;
 }
 
 // -> { id } | { ambiguous: true } | null
@@ -85,19 +107,25 @@ function matchOne(card, index, taken) {
   const sameName = index.byName.get(name) ?? [];
   const unnumbered = sameName.filter((p) => p.number === null && !taken.has(p.id));
   if (sameName.length === 1 && unnumbered.length === 1) return { id: unnumbered[0].id };
-  // Unnummerierte Kandidaten, aber der Name ist in der Expansion nicht eindeutig -> mehrdeutig
-  if (unnumbered.length && sameName.length > 1) return { ambiguous: true };
+  // Unnummerierte Kandidaten, aber der Name ist in der Expansion nicht eindeutig -> Angriffe entscheiden
+  if (unnumbered.length && sameName.length > 1) {
+    const hit = byAttacks(card, sameName);
+    return hit && !taken.has(hit.id) ? { id: hit.id } : { ambiguous: true };
+  }
   return null;
 }
 
 // Strenger Pfad (nur fuer Korrekturen): genau ein Produkt mit gleicher Nummer und gleichem Namen,
-// unabhaengig von belegten IDs; nie nur per Name.
+// unabhaengig von belegten IDs; ohne Nummerntreffer nur ein gleichnamiges Produkt ohne Nummer mit
+// denselben Angriffs-/Faehigkeitsnamen (nie nur per Name).
 function strictMatch(card, index) {
   const name = normalizeCmName(card.name);
   const number = normalizeCmNumber(card.number);
   if (!name || !number) return null;
   const hits = (index.byNumber.get(number) ?? []).filter((p) => p.name === name);
-  return hits.length === 1 ? hits[0].id : null;
+  if (hits.length === 1) return hits[0].id;
+  if (hits.length > 1) return null;
+  return byAttacks(card, index.byName.get(name) ?? [])?.id ?? null;
 }
 
 const tcgdexIds = (card) => (Array.isArray(card.ids?.cardmarket) ? card.ids.cardmarket : []);
