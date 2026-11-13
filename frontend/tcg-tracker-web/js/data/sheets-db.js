@@ -1295,6 +1295,15 @@ export async function listSetsOverviewData() {
   return mergeAliasOverviewSets(rawSets, resolver);
 }
 
+/**
+ * Liest db_sets in den Zeilen-Cache, ohne Serien zu gruppieren. loadSets ruft das parallel zum Laden der
+ * DE-Serien-Map auf; die Gruppierung (resolveDisplaySet) folgt erst, wenn die Map registriert ist.
+ */
+export async function prefetchSetsOverviewRows() {
+  await ensureNormalizedSchema();
+  await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length);
+}
+
 async function readRawSetsOverviewData() {
   await ensureNormalizedSchema();
   const dbRows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length);

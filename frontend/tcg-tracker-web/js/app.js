@@ -19,6 +19,7 @@ import {
   recoverImportedIdsFromOverview,
   listCollectionSetIds,
   invalidateCollectionRowCache,
+  prefetchSetsOverviewRows,
 } from './data/sheets-db.js?v=20261113-api-v3-polish';
 import {
   collectionKeyOf,
@@ -2788,8 +2789,12 @@ function initSpreadsheetDialog() {
 async function loadSets() {
   setLoading(true, 'Lade Sets\u2026');
   try {
-    // Vor jeder Gruppierung laden: Dashboard, Import-Selector und Suche teilen sich dieselbe DE-Serien-Map.
-    const deSeriesBySetId = await fetchDeSeriesBySetId();
+    // DE-Serien-Map (api/v3, mit Zeitlimit) parallel zum Sheets-Read von db_sets laden; registriert wird sie
+    // vor jeder Gruppierung: Dashboard, Import-Selector und Suche teilen sich dieselbe Map.
+    const [deSeriesBySetId] = await Promise.all([
+      fetchDeSeriesBySetId(),
+      prefetchSetsOverviewRows().catch(() => {})
+    ]);
     setDeSeriesBySetId(deSeriesBySetId);
     let [importedSets, initialOverviewSets] = await Promise.all([
       listImportedSets(),
