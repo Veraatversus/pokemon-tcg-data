@@ -12,7 +12,7 @@
 
 import { syncCardmarketBuildStamp } from './cardmarket-build-stamp.js?v=20261112-api-v3';
 import { resetCardmarketDataCaches, setCardmarketDataVersion } from './cardmarket-data.js';
-import { resetCardmarketPriceCaches } from '../views/set-view-controller.js?v=20261112-api-v3';
+import { resetCardmarketPriceSummaryCaches } from '../ui/cardmarket-price.js?v=20261112-api-v3';
 
 function safeInvoke(reset) {
   try {
@@ -31,7 +31,7 @@ function safeInvoke(reset) {
 export function resetAllCardmarketCaches() {
   const reset = [];
   if (safeInvoke(resetCardmarketDataCaches)) reset.push('cardmarket-data');
-  if (safeInvoke(resetCardmarketPriceCaches)) reset.push('set-view-price-cache');
+  if (safeInvoke(resetCardmarketPriceSummaryCaches)) reset.push('price-summary-cache');
   return { reset };
 }
 

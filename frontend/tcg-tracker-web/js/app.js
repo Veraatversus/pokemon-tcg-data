@@ -115,6 +115,8 @@ import {
 } from './ui/stats-price-analytics.js?v=20261112-api-v3';
 import {
   applyCardmarketPriceSummary as applyCardmarketPriceSummaryUi,
+  cardmarketPriceSummaryCache,
+  cardmarketPriceSummaryPending,
   getCardmarketPriceCacheKey,
   normalizeCardmarketBasePriceType,
   renderLightboxCardmarketPrices as renderLightboxCardmarketPricesUi,
@@ -7874,18 +7876,8 @@ function createCardElement(card, key, db, index) {
   return article;
 }
 
-const cardmarketPriceSummaryCache = new Map();
-const cardmarketPriceSummaryPending = new Map();
-
-/**
- * Leert die Lightbox-eigenen Cardmarket-Price-Caches. Wird nach einem
- * täglichen Cardmarket-Build-Wechsel aufgerufen, damit das Lightbox-
- * Pre-Panel keine veralteten Preise mehr anzeigt.
- */
-function resetLightboxCardmarketPriceCaches() {
-  cardmarketPriceSummaryCache.clear();
-  cardmarketPriceSummaryPending.clear();
-}
+// cardmarketPriceSummaryCache/-Pending kommen aus js/ui/cardmarket-price.js;
+// cardmarket-versioning.js leert sie bei neuem Build-Stamp und "Preise neu laden".
 
 // Aktueller Basis-Preistyp aus den User-Settings. Wird an den kanonischen
 // Picker in `js/ui/cardmarket-price.js` durchgereicht.

@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { forceRefreshCardmarketPrices } from '../js/data/cardmarket-versioning.js';
+import { readFileSync } from 'node:fs';
+import { applyCardmarketBuildStampCheck, forceRefreshCardmarketPrices } from '../js/data/cardmarket-versioning.js';
 import { STORAGE_KEY } from './helpers/cardmarket-storage-helper.js';
 
 function makeStorage(initial = {}) {
@@ -28,7 +29,7 @@ test('forceRefreshCardmarketPrices leert Caches auch wenn der Stamp unveraendert
   assert.equal(result.forced, true, 'forced-Flag ist immer true');
   assert.equal(result.currentStamp, '2026-06-08T03:17:25.640Z');
   assert.ok(result.reset.includes('cardmarket-data'));
-  assert.ok(result.reset.includes('set-view-price-cache'));
+  assert.ok(result.reset.includes('price-summary-cache'));
 });
 
 test('forceRefreshCardmarketPrices leert Caches und meldet changed=true bei neuem Stamp', async () => {
@@ -47,7 +48,7 @@ test('forceRefreshCardmarketPrices leert Caches und meldet changed=true bei neue
   assert.equal(result.currentStamp, '2026-06-08T03:17:25.640Z');
   assert.equal(result.previousStamp, '2026-05-25T00:00:00.000Z');
   assert.ok(result.reset.includes('cardmarket-data'));
-  assert.ok(result.reset.includes('set-view-price-cache'));
+  assert.ok(result.reset.includes('price-summary-cache'));
 });
 
 test('forceRefreshCardmarketPrices behandelt Offline-Fall graceful (Stamp bleibt erhalten)', async () => {
@@ -96,4 +97,36 @@ test('forceRefreshCardmarketPrices leert Caches bei rolled-back (aelterer Stamp 
   assert.equal(result.forced, true);
   assert.ok(result.reset.includes('cardmarket-data'),
     'force-Modus: Caches werden IMMER geleert, auch bei rolled-back');
+});
+
+// Die Preis-Zusammenfassungen der Kartenlinks/Lightbox (app.js) haengen am
+// Modul js/ui/cardmarket-price.js. Der Browser laedt es unter genau einem
+// Specifier (?v=<appVersion>); der Test nutzt denselben, damit er dieselbe
+// Modul-Instanz sieht wie cardmarket-versioning.js.
+test('Preise neu laden leert auch den Preis-Zusammenfassungs-Cache der Kartenlinks', async () => {
+  const { appVersion } = JSON.parse(readFileSync(new URL('../version.config.json', import.meta.url), 'utf8'));
+  const priceUi = await import(`../js/ui/cardmarket-price.js?v=${appVersion}`);
+  priceUi.cardmarketPriceSummaryCache.set('sv1::1::Bisasam', { trend: 1 });
+  priceUi.cardmarketPriceSummaryPending.set('sv1::2::Bisasam', Promise.resolve(null));
+
+  const storage = makeStorage({ [STORAGE_KEY]: '2026-06-08T03:17:25.640Z' });
+  const fakeFetch = async () => ({ ok: true, status: 200, json: async () => ({ generatedAt: '2026-06-08T03:17:25.640Z' }) });
+  const result = await forceRefreshCardmarketPrices({ fetchImpl: fakeFetch, storageRef: storage });
+
+  assert.equal(priceUi.cardmarketPriceSummaryCache.size, 0);
+  assert.equal(priceUi.cardmarketPriceSummaryPending.size, 0);
+  assert.ok(result.reset.includes('price-summary-cache'));
+});
+
+test('neuer Build-Stamp leert den Preis-Zusammenfassungs-Cache der Kartenlinks', async () => {
+  const { appVersion } = JSON.parse(readFileSync(new URL('../version.config.json', import.meta.url), 'utf8'));
+  const priceUi = await import(`../js/ui/cardmarket-price.js?v=${appVersion}`);
+  priceUi.cardmarketPriceSummaryCache.set('sv1::1::Bisasam', { trend: 1 });
+
+  const storage = makeStorage({ [STORAGE_KEY]: '2026-05-25T00:00:00.000Z' });
+  const fakeFetch = async () => ({ ok: true, status: 200, json: async () => ({ generatedAt: '2026-06-08T03:17:25.640Z' }) });
+  const result = await applyCardmarketBuildStampCheck({ fetchImpl: fakeFetch, storageRef: storage });
+
+  assert.equal(result.changed, true);
+  assert.equal(priceUi.cardmarketPriceSummaryCache.size, 0);
 });
