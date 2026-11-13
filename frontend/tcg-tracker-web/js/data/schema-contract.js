@@ -650,8 +650,29 @@ export function resolveSetTotalCards(set = {}) {
   return toNumber(set?.vera_total) || toNumber(set?.tcgdex_cardCount_total) || toNumber(set?.totalCards);
 }
 
+// Set-Bilder aus der v3-Meta (images: { deLogo, deSymbol, logo, symbol }) als i18n_de.images / images an den Record:
+// imageCandidates (image-fallback.js) nimmt sie vor tcgdex_logo / vera_images_* der Sheet-Zeile, die Sheet-Werte
+// bleiben Reserve. Ohne Meta (api/v3 offline) bleibt der Record unveraendert. Die Sheet-Spalten werden nicht geaendert.
+function withV3SetImages(record, v3Meta) {
+  const img = v3Meta?.images;
+  if (!img) return record;
+  const pick = (entries) => Object.fromEntries(entries.filter(([, v]) => v));
+  const de = pick([['logo', img.deLogo], ['symbol', img.deSymbol]]);
+  const en = pick([['logo', img.logo], ['symbol', img.symbol]]);
+  const out = { ...record };
+  if (Object.keys(de).length) {
+    const i18nDe = record.i18n_de && typeof record.i18n_de === 'object' ? record.i18n_de : {};
+    out.i18n_de = { ...i18nDe, images: { ...(i18nDe.images || {}), ...de } };
+  }
+  if (Object.keys(en).length) {
+    const images = record.images && typeof record.images === 'object' ? record.images : {};
+    out.images = { ...images, ...en };
+  }
+  return out;
+}
+
 export function resolveDisplaySet(setRecord = {}) {
-  const record = setRecord || {};
+  const record = withV3SetImages(setRecord || {}, sharedV3SetMeta?.get?.(String(setRecord?.setId ?? '').trim()));
   const language = getCardLanguage();
   const field = (name) => resolveFieldValue(record, 'set', name, language);
 
