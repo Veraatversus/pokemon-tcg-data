@@ -76,6 +76,18 @@ jobs:
           git pull --rebase origin master
           git push origin master
 
+      # Geplante Laeufe verspaeten sich stark und workflow_run feuert nicht zuverlaessig: den
+      # Cardmarket-Build nach jedem erfolgreichen Sync (auch ohne Commit) direkt ausloesen.
+      # workflow_dispatch per GITHUB_TOKEN startet Workflows (braucht actions: write).
+      # source=sync: der Tagesguard dort ueberspringt, wenn heute schon gebaut wurde.
+      # Ein Fehlschlag hier darf den Sync nicht als fehlgeschlagen markieren (Daten sind schon gepusht);
+      # schedule und workflow_run bleiben als Rueckfall.
+      - name: Trigger Cardmarket build
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run build-cardmarket-data.yml --repo "$GITHUB_REPOSITORY" --ref release -f source=sync || echo "::warning::Cardmarket-Dispatch fehlgeschlagen - Zeitplan/workflow_run bauen als Rueckfall"
+
       - name: Create issue on failure
         if: failure()
         uses: actions/github-script@v7

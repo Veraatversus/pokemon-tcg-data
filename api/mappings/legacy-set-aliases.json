@@ -1,0 +1,18 @@
+{
+  "TCGDEX-swsh10.5tg": {
+    "set": "swsh10",
+    "reason": "Alt-App-Set-ID 'Astralglanz Trainer-Galerie' (db_sets/Uebersicht); Trainer-Galerie swsh10tg ist in swsh10 gemergt"
+  },
+  "TCGDEX-swsh11.5tg": {
+    "set": "swsh11",
+    "reason": "Alt-App-Set-ID 'Verlorener Ursprung Trainer-Galerie' (db_sets/Uebersicht); Trainer-Galerie swsh11tg ist in swsh11 gemergt"
+  },
+  "TCGDEX-swsh12.5tg": {
+    "set": "swsh12",
+    "reason": "Alt-App-Set-ID 'Silberne Sturmwinde Trainer-Galerie' (db_sets/Uebersicht); Trainer-Galerie swsh12tg ist in swsh12 gemergt"
+  },
+  "TCGDEX-swsh9.5tg": {
+    "set": "swsh9",
+    "reason": "Alt-App-Set-ID 'Strahlende Sterne Trainer-Galerie' (db_sets/Uebersicht); Trainer-Galerie swsh9tg ist in swsh9 gemergt"
+  }
+}

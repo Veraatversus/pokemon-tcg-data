@@ -87,6 +87,7 @@ export function runBuild({ repoRoot, tcgdexOnly = false, outDir = 'api/v3', regi
     ptSets, ptCardsBySet, tcgdexSets: db.sets, setPairs: setResult.pairs, cardResults,
     subsetMerge: readJson(p('api', 'mappings', 'subset-merge.json')),
     canonicalKeyOverrides: readJson(p('api', 'mappings', 'canonical-keys.json')),
+    legacySetAliases: readJsonOr(p('api', 'mappings', 'legacy-set-aliases.json'), {}),
     previous,
   });
   for (const id of Object.keys(registry.sets)) assertSafeSetId(id);

@@ -491,3 +491,26 @@ test('buildRegistry: neue Schluessel gelten als vergeben, wenn sie nur in der Sc
   const keys = Object.values(r.cards[sets[0]]).flatMap((c) => c.keys.tcgdex);
   assert.equal(new Set(keys.map((x) => x.toLowerCase())).size, keys.length);
 });
+
+// --- Alt-App-Set-IDs (api/mappings/legacy-set-aliases.json) ----------------------------
+test('legacySetAliases: Alt-App-Set-ID wird Alias des Zielsets, additiv und eingefroren', () => {
+  const previous = build();
+  const legacySetAliases = { 'TCGDEX-swsh12.5tg': { set: 'swsh12pt5', reason: 't' } };
+  const next = build({ previous, legacySetAliases });
+  assert.deepEqual(next.sets.swsh12pt5.aliases, ['TCGDEX-swsh12.5', 'TCGDEX-swsh12.5gg', 'TCGDEX-swsh12.5tg', 'swsh12pt5gg']);
+  assert.doesNotThrow(() => assertFrozen(previous, next));
+  // nur der Alias kommt dazu, sonst bleibt alles gleich
+  const expected = structuredClone(previous);
+  expected.sets.swsh12pt5.aliases = next.sets.swsh12pt5.aliases;
+  assert.deepEqual(next, expected);
+  // ohne Mapping-Eintrag bleibt der eingefrorene Alias erhalten
+  const again = build({ previous: next });
+  assert.deepEqual(again, next);
+  // Karten loest der Alt-Alias nie in ein fremdes Set auf
+  assert.equal(resolveCollectionKey(next, 'TCGDEX-swsh12.5tg', '1'), null);
+});
+
+test('legacySetAliases: unbekanntes Zielset und Kollision mit fremdem Alias werfen', () => {
+  assert.throws(() => build({ legacySetAliases: { 'TCGDEX-x1': { set: 'gibtsnicht', reason: 't' } } }), /gibtsnicht/);
+  assert.throws(() => build({ legacySetAliases: { 'TCGDEX-me05': { set: 'swsh12pt5', reason: 't' } } }), RegistryInvariantError);
+});
