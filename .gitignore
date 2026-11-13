@@ -4,3 +4,6 @@ scripts/api/node_modules/
 
 # Lokale Fixtures (private Sammlungsdaten, nie committen)
 .local/
+
+# Lokaler Download-Cache (Cardmarket-Preisguide, nie committen)
+.cache/
