@@ -6,7 +6,7 @@
 // (promoteCardmarketUrlsForCards) entfaellt hier: es haette die massgeblichen v3-IDs nur
 // ueberschrieben (Produkt-URLs gelten dort als "generiert") und vergibt fuer Karten ohne URL
 // keine neue.
-import { resolveDisplayCard, resolveDisplaySet } from './schema-contract.js';
+import { resolveDisplayCard, resolveDisplaySet, seriesGroupKeyForName } from './schema-contract.js';
 import { loadV3Sets, loadV3Cards, loadRegistrySets } from './v3-api.js';
 import { createCollectionKeyResolver } from './v3-collection-keys.js';
 import { toSetRecord, toCardRecord } from './v3-records.js';
@@ -119,7 +119,7 @@ export async function fetchAllAvailableSets({ signal } = {}) {
  */
 export const DE_SERIES_TIMEOUT_MS = 8_000;
 
-export async function fetchDeSeriesBySetId({ signal, timeoutMs = DE_SERIES_TIMEOUT_MS, loadSets = loadV3Sets } = {}) {
+export async function fetchV3SetMeta({ signal, timeoutMs = DE_SERIES_TIMEOUT_MS, loadSets = loadV3Sets } = {}) {
   const map = new Map();
   let timer;
   try {
@@ -130,13 +130,24 @@ export async function fetchDeSeriesBySetId({ signal, timeoutMs = DE_SERIES_TIMEO
       ? await Promise.race([Promise.resolve().then(() => loadSets({ signal })), timeout])
       : await loadSets({ signal });
     for (const set of sets || []) {
-      const de = String(set?.i18n?.de?.series || '').trim();
-      if (set?.id && de) map.set(String(set.id), de);
+      const deName = String(set?.i18n?.de?.name || '').trim();
+      const deSeries = String(set?.i18n?.de?.series || '').trim();
+      // Sammelserien ("Other"/"Miscellaneous") sind keine Serie: Schluessel aus der DE-Serie, sonst leer (Fallback am Set).
+      const enSeries = String(set?.series || '').trim();
+      const catchAll = /^(other|miscellaneous)$/i.test(enSeries);
+      const seriesKey = catchAll ? (deSeries ? seriesGroupKeyForName(deSeries) : '') : seriesGroupKeyForName(enSeries);
+      if (set?.id && (deName || deSeries || seriesKey)) map.set(String(set.id), { deName, deSeries, seriesKey });
     }
   } catch (err) {
-    console.debug('[fetchDeSeriesBySetId] api/v3 nicht erreichbar:', err?.message || err);
+    console.debug('[fetchV3SetMeta] api/v3 nicht erreichbar:', err?.message || err);
   } finally {
     clearTimeout(timer);
   }
+  return map;
+}
+
+export async function fetchDeSeriesBySetId(options = {}) {
+  const map = new Map();
+  for (const [id, m] of await fetchV3SetMeta(options)) if (m.deSeries) map.set(id, m.deSeries);
   return map;
 }

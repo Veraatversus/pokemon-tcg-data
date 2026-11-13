@@ -74,7 +74,7 @@ function tcgdexRules(record) {
 // sonst sprachneutral (vera_* -> tcgdex_* -> legacy). empty = Wert, wenn keine Quelle etwas liefert.
 const FIELD_SOURCES = {
   set: {
-    setName: { lang: true, empty: '', de: (r) => r.tcgdex_name, en: (r) => r.vera_name, legacy: (r) => r.setName },
+    setName: { lang: true, empty: '', de: (r) => r.tcgdex_name || sharedV3SetMeta?.get?.(String(r.setId ?? '').trim())?.deName, en: (r) => r.vera_name, legacy: (r) => r.setName },
     releaseDate: { empty: '', de: (r) => r.tcgdex_releaseDate, en: (r) => r.vera_releaseDate, legacy: (r) => r.releaseDate },
     // Aufgedruckte Kartenzahl (official / printedTotal); die Gesamtzahl liefert resolveSetTotalCards.
     totalCards: {
@@ -242,7 +242,7 @@ export const CARD_DB_HEADERS = [
   'vera_rules'
 ];
 
-function normalizeSeriesGroupKey(value) {
+export function normalizeSeriesGroupKey(value) {
   return String(value || '')
     .trim()
     .toLowerCase()
@@ -264,9 +264,19 @@ const SERIES_GROUP_KEY_ALIASES = new Map([
   ['diamond pearl', 'dp'],
   ['diamant perl', 'dp'],
   ['heartgold soulsilver', 'hgss'],
+  ['mega evolution', 'me'],
+  ['mega entwicklung', 'me'],
+  ['platin', 'platinum'],
+  ['pokemon tcg pocket', 'pocket'],
   ['pokemon pocket', 'pocket'],
   ['pokemon sammelkartenspiel pocket', 'pocket']
 ]);
+
+// Sprachunabhaengiger Gruppenschluessel aus einem (EN-)Seriennamen: Alias-Kurzform, sonst normalisiert.
+export function seriesGroupKeyForName(name) {
+  const n = normalizeSeriesGroupKey(name);
+  return SERIES_GROUP_KEY_ALIASES.get(n) || n;
+}
 
 function inferSeriesGroupKeyFromSetIds(setRecord = {}) {
   const candidates = [setRecord.tcgdex_serie_id, setRecord.tcgdex_id, setRecord.vera_id, setRecord.setId]
@@ -314,12 +324,15 @@ export function resolveSeriesGroupInfo(rawSetRecord = {}) {
       .find(Boolean)
     || 'Andere';
 
-  const canonicalSeries = String(setRecord.tcgdex_serie_id || '').trim()
-    || inferSeriesGroupKeyFromSetIds(setRecord)
+  // Schluessel aus dem aufgeloesten Label statt aus tcgdex_serie_id: Zeilen derselben Serie liefern sonst je
+  // nach gefuellter Serien-ID verschiedene Schluessel und erscheinen als doppelte Gruppe.
+  // Sets, die v3 kennt, tragen einen sprachunabhaengigen Schluessel (normalisierte EN-Serie aus sets.json).
+  const v3Key = sharedV3SetMeta?.get?.(String(setRecord.setId ?? '').trim())?.seriesKey || '';
+  const canonicalSeries = v3Key
     || inferSeriesGroupKeyFromNames(setRecord, displayLabel)
-    || String(setRecord.tcgdex_serie_name || '').trim()
-    || String(setRecord.vera_series || '').trim()
-    || displayLabel;
+    || (normalizeSeriesGroupKey(displayLabel) ? displayLabel : '')
+    || String(setRecord.tcgdex_serie_id || '').trim()
+    || inferSeriesGroupKeyFromSetIds(setRecord);
 
   return {
     key: normalizeSeriesGroupKey(canonicalSeries) || 'andere',
@@ -597,6 +610,16 @@ export function buildCardRecordFromSources({
 // Serien-Label eines Sets je Sprache. DE: tcgdex_serie_name -> i18n_de.series -> deSeriesBySetId
 // (Map setId -> i18n.de.series aus api/v3) -> vera_series; EN: vera_series -> series.
 let sharedDeSeriesBySetId = null;
+// Gemeinsame v3-Set-Meta (setId -> { deName, deSeries }); eine Quelle fuer DE-Setnamen und DE-Serien.
+let sharedV3SetMeta = null;
+export function setV3SetMeta(meta) {
+  sharedV3SetMeta = meta instanceof Map ? meta : null;
+  sharedDeSeriesBySetId = null;
+  if (sharedV3SetMeta) {
+    sharedDeSeriesBySetId = new Map();
+    for (const [id, m] of sharedV3SetMeta) if (m?.deSeries) sharedDeSeriesBySetId.set(id, m.deSeries);
+  }
+}
 // Gemeinsame v3-Map (setId -> DE-Serie); einmal gesetzt, nutzen alle Gruppen-/Label-Pfade sie.
 export function setDeSeriesBySetId(map) {
   sharedDeSeriesBySetId = map instanceof Map ? map : null;
