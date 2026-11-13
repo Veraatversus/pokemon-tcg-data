@@ -13,6 +13,7 @@ import {
   withV3CardmarketIds,
   getV3CardmarketExpansionId,
   getV3CardmarketIdMap,
+  V3_ID_MAP_TIMEOUT_MS,
 } from '../js/data/v3-cardmarket-ids.js';
 import {
   buildSetCardAssignmentMap,
@@ -308,15 +309,24 @@ test('getV3CardmarketIdMap: Fehlschlag wird 60 s negativ gecacht (kein erneutes 
   assert.equal(ok.get('me55::150'), '907757');
 });
 
-test('getV3CardmarketIdMap: haengender Index -> Zeitlimit, leere Map, danach negativ gecacht', async () => {
+test('getV3CardmarketIdMap: Zeitlimit -> leere Map, aber kein Negativ-Cache; naechster Aufruf wartet auf den laufenden Load', async () => {
+  // Wie loadV3SearchIndex: ein Ladevorgang je Session, weitere Aufrufe bekommen dasselbe Promise.
   let calls = 0;
-  const loadIndex = () => { calls += 1; return new Promise(() => {}); };
+  let resolveIndex;
+  const inFlight = new Promise((resolve) => { resolveIndex = resolve; });
+  const loadIndex = () => { calls += 1; return inFlight; };
   const started = Date.now();
   const map = await getV3CardmarketIdMap({ loadIndex, timeoutMs: 30 });
   assert.equal(map.size, 0);
   assert.ok(Date.now() - started < 2_000);
-  await getV3CardmarketIdMap({ loadIndex, timeoutMs: 30 });
-  assert.equal(calls, 1);
+  resolveIndex(INDEX);
+  const later = await getV3CardmarketIdMap({ loadIndex, timeoutMs: 30 });
+  assert.equal(calls, 2, 'nach Zeitlimit wird der Loader erneut gefragt');
+  assert.equal(later.get('me55::150'), '907757');
+});
+
+test('getV3CardmarketIdMap: Standard-Zeitlimit 20 s', () => {
+  assert.equal(V3_ID_MAP_TIMEOUT_MS, 20_000);
 });
 
 test('resolveCardmarketEntryByProductId: v3-Expansion ohne das Produkt -> Tracker-Expansion vor products.json', async () => {

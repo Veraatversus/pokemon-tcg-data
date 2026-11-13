@@ -22,7 +22,7 @@ export function buildV3CardmarketIdMap(index = []) {
   return map;
 }
 
-export const V3_ID_MAP_TIMEOUT_MS = 10_000;
+export const V3_ID_MAP_TIMEOUT_MS = 20_000;
 export const V3_ID_MAP_NEGATIVE_CACHE_MS = 60_000;
 
 // Fehlgeschlagene Index-Ladevorgaenge je Loader: bis zu diesem Zeitpunkt wird nicht erneut geladen
@@ -47,8 +47,10 @@ function withTimeout(promise, ms) {
 }
 
 /**
- * v3-ID-Tabelle aus dem Suchindex. Fehler oder Zeitueberschreitung (timeoutMs) -> leere Map, und fuer
- * negativeCacheMs wird der Loader nicht erneut aufgerufen. Abbruch (AbortError) wird weitergereicht.
+ * v3-ID-Tabelle aus dem Suchindex. Fehler oder Zeitueberschreitung (timeoutMs) -> leere Map.
+ * Nur echte Fehler sperren den Loader fuer negativeCacheMs; nach einer Zeitueberschreitung laeuft der
+ * Index-Load weiter (loadV3SearchIndex haelt ihn je Session), der naechste Aufruf wartet darauf.
+ * Abbruch (AbortError) wird weitergereicht.
  */
 export async function getV3CardmarketIdMap({
   loadIndex = loadV3SearchIndex,
@@ -62,7 +64,7 @@ export async function getV3CardmarketIdMap({
     return buildV3CardmarketIdMap(await withTimeout(Promise.resolve().then(() => loadIndex({ signal })), timeoutMs));
   } catch (error) {
     if (error?.name === 'AbortError') throw error;
-    if (negativeCacheMs > 0) failedUntilByLoader.set(loadIndex, now() + negativeCacheMs);
+    if (error?.name !== 'TimeoutError' && negativeCacheMs > 0) failedUntilByLoader.set(loadIndex, now() + negativeCacheMs);
     return new Map();
   }
 }
