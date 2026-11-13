@@ -849,6 +849,29 @@ test('stability drops id whose product vanished', () => {
   assert.deepEqual(ov.cards[0].ids.cardmarket, []);
 });
 
+test('stability does not restore a tcgdex id that todays expansion check dropped', () => {
+  const previous = new Map([['s1/2', { ids: [275779], source: 'tcgdex', variants: [{ type: 'normal', cardmarketId: 275779 }] }]]);
+  const { cards, report } = runCat([{ ...card('2', '2', "Team Aqua's Crawdaunt", [275779]), variants: [{ type: 'normal', cardmarketId: 275779 }] }], {
+    100: [single(275979, "Team Aqua's Crawdaunt", null), single(275991, "Team Aqua's Crawdaunt", null)],
+    200: [single(275779, 'Cacturne [Poison Payback | Feint Attack]', '2')],
+  }, { previous });
+  assert.deepEqual(cards[0].ids.cardmarket, []);
+  assert.deepEqual(cards[0].variants, [{ type: 'normal' }]);
+  assert.equal(report.totals.stabilityKept, 0);
+  assert.deepEqual(report.stabilityKept, []);
+});
+
+test('stability checks every previous id for shared tcgdex ids', () => {
+  // gestern [10, 20] per TCGdex; heute liefert TCGdex nichts mehr, 20 gehoert aber zwei anderen Karten
+  const previous = new Map([['s1/1', { ids: [10, 20], source: 'tcgdex' }]]);
+  const { cards, report } = runCat([card('1', '1', 'Mew'), card('2', '2', 'Zed', [20]), card('3', '3', 'Zed', [20])], {
+    100: [single(10, 'Other', null), single(20, 'Zed', null)],
+  }, { previous });
+  assert.deepEqual(cards[0].ids.cardmarket, []);
+  assert.deepEqual(report.stabilityDropped, [{ cardKey: 's1/1', productId: 20, source: 'tcgdex', reason: 'shared-tcgdex-id' }]);
+  assert.equal(report.totals.stabilityKept, 0);
+});
+
 test('expansion by majority', () => {
   // TCGdex liefert keine Set-Expansion (ids.cardmarket null), 4 von 5 Karten-IDs liegen in Expansion 200
   const sets = [{ id: 's1', ids: { cardmarket: null } }];

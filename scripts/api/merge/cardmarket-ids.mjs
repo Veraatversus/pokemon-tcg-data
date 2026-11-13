@@ -348,6 +348,7 @@ export function fillCardmarketIds({
   }
 
   // 0. Set-Ebene: Expansion pruefen, notfalls aus den Karten ableiten
+  const expansionDropped = new Map(); // card.id -> Set der heute per Expansionspruefung entfernten IDs (nie ueber previous zurueck)
   const expansionMismatch = {
     totals: { checked: 0, ok: 0, foreignNameOk: 0, corrected: 0, dropped: 0, keptMismatch: 0, noSetExpansion: 0, unknownProduct: 0 },
     sets: [], cards: [], foreignNameOkBySet: {},
@@ -623,6 +624,7 @@ export function fillCardmarketIds({
         else { T.keptMismatch++; report(card, b.id, b.expansion, null, 'kept-mismatch'); }
       }
       if (!replaced.size && !dropped.size) continue;
+      if (dropped.size) expansionDropped.set(card.id, new Set([...(expansionDropped.get(card.id) ?? []), ...dropped]));
       const original = tcgdexIds(card);
       const kept = original.filter((x) => !replaced.has(x) && !dropped.has(x));
       card.ids = {
@@ -758,14 +760,14 @@ export function fillCardmarketIds({
       const prevSource = raw?.source ?? 'tcgdex';
       if (!raw || !STABLE_SOURCES.has(prevSource)) return;
       // Laut custom-set falsche IDs (Stufe 2) kommen nie zurueck
-      const rejected = csRejected.get(card.id) ?? new Set();
+      const rejected = new Set([...(csRejected.get(card.id) ?? []), ...(expansionDropped.get(card.id) ?? [])]);
       const prev = {
         ...raw,
         ids: (raw.ids ?? []).filter((id) => !rejected.has(id)),
         variants: (raw.variants ?? []).map((v) => (rejected.has(v?.cardmarketId) ? (({ cardmarketId, ...rest }) => rest)(v) : v)),
       };
       const rawPrimary = primaryCardmarketId({ ids: { cardmarket: raw.ids ?? [] }, variants: raw.variants ?? [] });
-      if (rejected.has(rawPrimary)) { stabilityDropped.push({ cardKey: key, productId: rawPrimary, source: prevSource, reason: 'custom-set' }); return; }
+      if (rejected.has(rawPrimary)) { stabilityDropped.push({ cardKey: key, productId: rawPrimary, source: prevSource, reason: expansionDropped.get(card.id)?.has(rawPrimary) ? 'dropped-mismatch' : 'custom-set' }); return; }
       const productId = primaryCardmarketId({ ids: { cardmarket: prev.ids }, variants: prev.variants });
       if (productId === undefined) return;
       const today = todayOf(card);
@@ -774,7 +776,9 @@ export function fillCardmarketIds({
       // (sonst gewaenne eine geteilte, falsche TCGdex-ID dauerhaft gegen die heutige Korrektur).
       if (prevSource === 'tcgdex') {
         if (today.id !== null) return;
-        if (duplicateTcgdexIds[productId]) { stabilityDropped.push({ cardKey: key, productId, source: prevSource, reason: 'shared-tcgdex-id' }); return; }
+        // Alle gestrigen IDs (ids.cardmarket und Varianten) pruefen, nicht nur die primaere
+        const shared = [productId, ...prev.ids, ...variantIds(prev)].find((id) => duplicateTcgdexIds[id]);
+        if (shared !== undefined) { stabilityDropped.push({ cardKey: key, productId: shared, source: prevSource, reason: 'shared-tcgdex-id' }); return; }
       }
       if (!exists(productId)) { stabilityDropped.push({ cardKey: key, productId, source: prevSource, reason: 'product-gone' }); return; }
       candidates.push({ set, card, key, prev, prevSource, productId, today });
