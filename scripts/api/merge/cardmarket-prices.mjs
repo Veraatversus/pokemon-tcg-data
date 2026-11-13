@@ -44,8 +44,9 @@ export function buildPriceFiles({ cardsBySet, priceGuide, primaryCardmarketId, n
 }
 
 function writeIfChanged(file, content) {
-  if (fs.existsSync(file) && fs.readFileSync(file, 'utf8') === content) return;
+  if (fs.existsSync(file) && fs.readFileSync(file, 'utf8') === content) return false;
   fs.writeFileSync(file, content);
+  return true;
 }
 
 /**
@@ -53,22 +54,25 @@ function writeIfChanged(file, content) {
  * Preisdateien von Sets ohne Preise fallen weg. Rueckgabe: meta.
  */
 export function writePriceFiles({ outDir, cardsBySet, priceGuide, primaryCardmarketId, now }) {
-  if (!priceGuide) return null;
+  // Leerer/kaputter Preisguide zaehlt wie keiner (nichts anfassen)
+  if (!priceGuide || extractPriceGuideList(priceGuide).length === 0) return null;
   const { files, meta } = buildPriceFiles({ cardsBySet, priceGuide, primaryCardmarketId, now });
   const dir = path.join(outDir, 'prices');
   fs.mkdirSync(dir, { recursive: true });
+  let changed = false;
   const wanted = new Set(['meta.json']);
   for (const [setId, entries] of files) {
     assertSafeSetId(setId);
     wanted.add(`${setId}.json`);
-    writeIfChanged(path.join(dir, `${setId}.json`), toCompactJson(entries));
+    if (writeIfChanged(path.join(dir, `${setId}.json`), toCompactJson(entries))) changed = true;
   }
-  for (const f of fs.readdirSync(dir)) if (f.endsWith('.json') && !wanted.has(f)) fs.rmSync(path.join(dir, f));
-  // meta.json nur neu schreiben, wenn sich ausser generatedAt etwas aendert (kein taeglicher Diff ohne Preisaenderung)
+  for (const f of fs.readdirSync(dir)) if (f.endsWith('.json') && !wanted.has(f)) { fs.rmSync(path.join(dir, f)); changed = true; }
+  // generatedAt dient als Cache-Buster (?v=): neu, sobald sich irgendeine Preisdatei oder die Zaehler aendern,
+  // sonst bleibt meta.json byte-gleich (kein taeglicher Diff ohne Preisaenderung)
   const metaFile = path.join(dir, 'meta.json');
   let old = null;
   try { old = JSON.parse(fs.readFileSync(metaFile, 'utf8')); } catch { /* neu */ }
-  const same = old && old.priceGuideCreatedAt === meta.priceGuideCreatedAt && old.cardsWithId === meta.cardsWithId && old.cardsWithPrice === meta.cardsWithPrice;
+  const same = !changed && old && old.priceGuideCreatedAt === meta.priceGuideCreatedAt && old.cardsWithId === meta.cardsWithId && old.cardsWithPrice === meta.cardsWithPrice;
   if (!same) fs.writeFileSync(metaFile, toJson(meta));
   return same ? old : meta;
 }

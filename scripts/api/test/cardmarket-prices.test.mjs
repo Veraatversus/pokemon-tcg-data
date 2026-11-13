@@ -82,6 +82,32 @@ test('writes files and meta, removes stale price files', () => {
   assert.deepEqual(readJson(path.join(dir, 'meta.json')), { generatedAt: NOW.toISOString(), priceGuideCreatedAt: '2026-11-13T02:44:11+0100', cardsWithId: 2, cardsWithPrice: 1 });
 });
 
+test('generatedAt changes when any price changes, stays when nothing does', () => {
+  const out = tmp();
+  const cardsBySet = new Map([['s1', [card('s1', '1', 10)]]]);
+  const metaOf = () => readJson(path.join(out, 'prices', 'meta.json'));
+  writePriceFiles({ outDir: out, cardsBySet, priceGuide: guide({ idProduct: 10, trend: 2 }), primaryCardmarketId, now: () => new Date('2026-11-13T05:00:00Z') });
+  writePriceFiles({ outDir: out, cardsBySet, priceGuide: guide({ idProduct: 10, trend: 2 }), primaryCardmarketId, now: () => new Date('2026-11-14T05:00:00Z') });
+  assert.equal(metaOf().generatedAt, '2026-11-13T05:00:00.000Z');
+  writePriceFiles({ outDir: out, cardsBySet, priceGuide: guide({ idProduct: 10, trend: 3 }), primaryCardmarketId, now: () => new Date('2026-11-15T05:00:00Z') });
+  assert.equal(metaOf().generatedAt, '2026-11-15T05:00:00.000Z');
+  assert.equal(metaOf().cardsWithPrice, 1);
+});
+
+test('empty price guide is treated like none', () => {
+  const out = tmp();
+  const dir = path.join(out, 'prices');
+  fs.mkdirSync(dir);
+  fs.writeFileSync(path.join(dir, 's1.json'), 'old');
+  fs.writeFileSync(path.join(dir, 'meta.json'), 'old-meta');
+  const cardsBySet = new Map([['s1', [card('s1', '1', 10)]]]);
+  for (const g of [{ version: 1, createdAt: 'x', priceGuides: [] }, {}, [], 'junk']) {
+    assert.equal(writePriceFiles({ outDir: out, cardsBySet, priceGuide: g, primaryCardmarketId }), null);
+  }
+  assert.equal(fs.readFileSync(path.join(dir, 's1.json'), 'utf8'), 'old');
+  assert.equal(fs.readFileSync(path.join(dir, 'meta.json'), 'utf8'), 'old-meta');
+});
+
 test('published price files stay below 8 MB', { skip: !fs.existsSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'api', 'v3', 'prices')) }, () => {
   const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'api', 'v3', 'prices');
   const total = fs.readdirSync(dir).reduce((n, f) => n + fs.statSync(path.join(dir, f)).size, 0);

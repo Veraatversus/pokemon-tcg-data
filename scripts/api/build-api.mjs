@@ -251,10 +251,9 @@ export function runBuild({
   // Preise (Spec §2.3): nur mit Preisguide von heute (.cache, schreibt sync-cardmarket nur bei Erfolg);
   // sonst bleiben api/v3/prices und prices/meta.json wie veroeffentlicht.
   const priceGuideFile = p('.cache', 'cardmarket', 'price-guide.json');
-  const prices = writePriceFiles({
-    outDir: outAbs, cardsBySet, primaryCardmarketId,
-    priceGuide: fs.existsSync(priceGuideFile) ? readJson(priceGuideFile) : null,
-  });
+  let priceGuide = null;
+  try { if (fs.existsSync(priceGuideFile)) priceGuide = readJson(priceGuideFile); } catch { priceGuide = null; } // unlesbar = kein Preisguide
+  const prices = writePriceFiles({ outDir: outAbs, cardsBySet, primaryCardmarketId, priceGuide });
   if (doWriteRegistry && !tcgdexOnly) writeRegistry(registryAbs, registry);
 
   return {
