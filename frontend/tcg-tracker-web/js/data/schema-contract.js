@@ -242,7 +242,7 @@ export const CARD_DB_HEADERS = [
   'vera_rules'
 ];
 
-function normalizeSeriesGroupKey(value) {
+export function normalizeSeriesGroupKey(value) {
   return String(value || '')
     .trim()
     .toLowerCase()
@@ -269,6 +269,12 @@ const SERIES_GROUP_KEY_ALIASES = new Map([
   ['pokemon pocket', 'pocket'],
   ['pokemon sammelkartenspiel pocket', 'pocket']
 ]);
+
+// Sprachunabhaengiger Gruppenschluessel aus einem (EN-)Seriennamen: Alias-Kurzform, sonst normalisiert.
+export function seriesGroupKeyForName(name) {
+  const n = normalizeSeriesGroupKey(name);
+  return SERIES_GROUP_KEY_ALIASES.get(n) || n;
+}
 
 function inferSeriesGroupKeyFromSetIds(setRecord = {}) {
   const candidates = [setRecord.tcgdex_serie_id, setRecord.tcgdex_id, setRecord.vera_id, setRecord.setId]
@@ -318,7 +324,10 @@ export function resolveSeriesGroupInfo(rawSetRecord = {}) {
 
   // Schluessel aus dem aufgeloesten Label statt aus tcgdex_serie_id: Zeilen derselben Serie liefern sonst je
   // nach gefuellter Serien-ID verschiedene Schluessel und erscheinen als doppelte Gruppe.
-  const canonicalSeries = inferSeriesGroupKeyFromNames(setRecord, displayLabel)
+  // Sets, die v3 kennt, tragen einen sprachunabhaengigen Schluessel (normalisierte EN-Serie aus sets.json).
+  const v3Key = sharedV3SetMeta?.get?.(String(setRecord.setId ?? '').trim())?.seriesKey || '';
+  const canonicalSeries = v3Key
+    || inferSeriesGroupKeyFromNames(setRecord, displayLabel)
     || (normalizeSeriesGroupKey(displayLabel) ? displayLabel : '')
     || String(setRecord.tcgdex_serie_id || '').trim()
     || inferSeriesGroupKeyFromSetIds(setRecord);

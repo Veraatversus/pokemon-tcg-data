@@ -110,8 +110,39 @@ test('Set-Name: leerer tcgdex_name faellt in DE auf den Namen aus api/v3 (gemein
 
 test('fetchV3SetMeta liefert DE-Name und DE-Serie je Set', async () => {
   const { fetchV3SetMeta } = await import('../js/data/pokemon-api.js');
+  const { scopedStorageKey } = await import('../js/core/config.js');
   const meta = await fetchV3SetMeta({ loadSets: async () => SETS });
   assert.equal(meta.get('me55c').deName, '30 Jahre: Klassische Sammlung');
   assert.equal(meta.get('me6').deSeries, 'Mega-Entwicklung');
   assert.equal((await fetchV3SetMeta({ loadSets: async () => { throw new Error('x'); } })).size, 0);
+});
+
+test('Gruppenschluessel ist sprachunabhaengig fuer v3-Sets (Pocket, Platinum, Mega Evolution)', async () => {
+  const { resolveSeriesGroupInfo, setV3SetMeta } = await import('../js/data/schema-contract.js');
+  const { fetchV3SetMeta } = await import('../js/data/pokemon-api.js');
+  const { scopedStorageKey } = await import('../js/core/config.js');
+  const sets = [
+    { id: 'pa1', series: 'Pokémon TCG Pocket', i18n: { de: { series: 'Pokémon‑Sammelkartenspiel‑Pocket' } } },
+    { id: 'pa2', series: 'Pokémon TCG Pocket' },
+    { id: 'pl1', series: 'Platinum', i18n: { de: { series: 'Platin' } } },
+    { id: 'pl2', series: 'Platinum' },
+    { id: 'me1', series: 'Mega Evolution', i18n: { de: { series: 'Mega-Entwicklung' } } },
+    { id: 'me2', series: 'Mega Evolution' }
+  ];
+  const meta = await fetchV3SetMeta({ loadSets: async () => sets });
+  const store2 = globalThis.localStorage;
+  try {
+    setV3SetMeta(meta);
+    for (const lang of ['en', 'de']) {
+      globalThis.localStorage.setItem(scopedStorageKey('user-settings'), JSON.stringify({ cardLanguage: lang }));
+      for (const [a, b, serEn, serDe] of [['pa1', 'pa2', 'Pokémon TCG Pocket', 'Pokémon‑Sammelkartenspiel‑Pocket'], ['pl1', 'pl2', 'Platinum', 'Platin'], ['me1', 'me2', 'Mega Evolution', 'Mega-Entwicklung']]) {
+        const withDe = { setId: a, vera_series: serEn, tcgdex_serie_name: serDe };
+        const without = { setId: b, vera_series: serEn, tcgdex_serie_name: '' };
+        assert.equal(resolveSeriesGroupInfo(withDe).key, resolveSeriesGroupInfo(without).key, `${lang} ${a}`);
+      }
+    }
+  } finally {
+    setV3SetMeta(null);
+    store2.removeItem(scopedStorageKey('user-settings'));
+  }
 });
