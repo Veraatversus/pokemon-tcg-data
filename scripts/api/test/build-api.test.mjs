@@ -380,3 +380,37 @@ test('runBuild: unsichere Set-IDs werden nie zu Dateinamen', () => {
     }
   }
 });
+
+test('excluded-series: Pocket-Set erscheint nicht in api/v3, Registry behaelt ihn, leere Konfig stellt wieder her', () => {
+  const root = makeRepo();
+  try {
+    runBuild({ repoRoot: root });
+    const v3 = path.join(root, 'api', 'v3');
+    write(root, 'api/v3/prices/TCGDEX-A1.json', []);
+    const regBefore = readJson(path.join(root, 'api', 'registry', 'sets.json'));
+    assert.ok(regBefore['TCGDEX-A1']);
+
+    write(root, 'api/mappings/excluded-series.json', { _comment: 'x', series: ['tcgp'] });
+    const r = runBuild({ repoRoot: root });
+    assert.equal(r.sets, 1);
+    assert.equal(r.cards, 4);
+    assert.ok(!fs.existsSync(path.join(v3, 'cards', 'TCGDEX-A1.json')), 'stale Kartendatei entfernt');
+    assert.ok(!fs.existsSync(path.join(v3, 'prices', 'TCGDEX-A1.json')), 'stale Preisdatei entfernt');
+    assert.deepEqual(readJson(path.join(v3, 'sets.json')).map((s) => s.id), ['sv1']);
+    assert.ok(readJson(path.join(v3, 'search-index.json')).every((e) => e.setId !== 'TCGDEX-A1'));
+    const meta = readJson(path.join(v3, 'meta.json'));
+    assert.deepEqual(meta.excludedSetIds, ['TCGDEX-A1']);
+    assert.deepEqual(meta.excludedSeries, ['tcgp']);
+    assert.equal(meta.counts.sets, 1);
+    assert.ok(readJson(path.join(root, 'api', 'registry', 'sets.json'))['TCGDEX-A1'], 'Registry behaelt den Schluessel');
+    assert.ok(readJson(path.join(root, 'api', 'registry', 'cards', 'TCGDEX-A1.json')));
+
+    write(root, 'api/mappings/excluded-series.json', { _comment: 'x', series: [] });
+    const r2 = runBuild({ repoRoot: root });
+    assert.equal(r2.sets, 2);
+    assert.ok(fs.existsSync(path.join(v3, 'cards', 'TCGDEX-A1.json')));
+    assert.deepEqual(readJson(path.join(v3, 'meta.json')).excludedSetIds, []);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});

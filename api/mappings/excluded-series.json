@@ -1,0 +1,6 @@
+{
+  "_comment": "TCGdex-Serien-IDs, die nicht in api/v3 ausgegeben werden (Mirror sources/tcgdex und Registry bleiben vollstaendig). tcgp = Pokemon TCG Pocket.",
+  "series": [
+    "tcgp"
+  ]
+}

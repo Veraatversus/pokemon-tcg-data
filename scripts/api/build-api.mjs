@@ -124,6 +124,10 @@ export function runBuild({
   const ptSetById = new Map(ptSets.map((s) => [s.id, s]));
   const tdIndex = new Map(db.sets.map((s) => [s.id, new Map(s.cards.map((c) => [c.localId, c]))]));
 
+  // Ausgeschlossene TCGdex-Serien (api/mappings/excluded-series.json): nur die API-Ausgabe entfaellt,
+  // Mirror und Registry bleiben vollstaendig.
+  const excludedSeries = readJsonOr(p('api', 'mappings', 'excluded-series.json'), { series: [] }).series ?? [];
+  const excludedSetIds = [];
   const sets = [];
   const cardsBySet = new Map();
   const skippedNoSource = [];
@@ -133,6 +137,7 @@ export function runBuild({
   for (const setId of Object.keys(registry.sets).sort(cmp)) {
     const registrySet = registry.sets[setId];
     const tcgdexSet = registrySet.tcgdex ? tdById.get(registrySet.tcgdex) ?? null : null;
+    if (tcgdexSet && excludedSeries.includes(tcgdexSet.serieId)) { excludedSetIds.push(setId); continue; }
     const cards = [];
     for (const [cardId, rc] of Object.entries(registry.cards[setId] ?? {})) {
       const ptCard = rc.pokemontcg ? ptById.get(rc.pokemontcg) ?? null : null;
@@ -223,6 +228,8 @@ export function runBuild({
     apiVersion: 3,
     languages: ['en', 'de'],
     counts: { sets: sets.length, cards: cardTotal, ...matchStatus },
+    excludedSeries: [...excludedSeries].sort(cmp),
+    excludedSetIds,
     warnings: { missingImages },
     sources: {
       pokemontcg: tcgdexOnly ? null : { commit: sources.pokemontcg?.commit ?? null },
@@ -253,6 +260,8 @@ export function runBuild({
   const priceGuideFile = p('.cache', 'cardmarket', 'price-guide.json');
   let priceGuide = null;
   try { if (fs.existsSync(priceGuideFile)) priceGuide = readJson(priceGuideFile); } catch { priceGuide = null; } // unlesbar = kein Preisguide
+  // Preisdateien ausgeschlossener Sets entfallen auch ohne Preisguide.
+  for (const id of excludedSetIds) fs.rmSync(path.join(outAbs, 'prices', `${id}.json`), { force: true });
   const prices = writePriceFiles({ outDir: outAbs, cardsBySet, primaryCardmarketId, priceGuide });
   if (doWriteRegistry && !tcgdexOnly) writeRegistry(registryAbs, registry);
 
