@@ -2433,49 +2433,21 @@
       "tcgdex": 249
     },
     "sm2": {
-      "ambiguous": 11,
-      "ambiguousCards": [
-        "19a",
-        "21a",
-        "51a",
-        "60a",
-        "92a",
-        "121a",
-        "124a",
-        "125a",
-        "128a",
-        "130a",
-        "157a"
-      ],
+      "ambiguous": 0,
       "cards": 180,
-      "corrected": 1,
       "coverage": {
         "bySource": {
-          "stabilityKept": 4,
-          "tcgdex": 165
+          "customSet": 180
         },
         "cards": 180,
-        "withId": 169
+        "withId": 180
       },
+      "customSet": 180,
       "expansionId": 1800,
       "matched": 0,
-      "missing": 11,
-      "missingCards": [
-        "19a",
-        "21a",
-        "51a",
-        "60a",
-        "92a",
-        "121a",
-        "124a",
-        "125a",
-        "128a",
-        "130a",
-        "157a"
-      ],
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1800&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 4,
-      "tcgdex": 165
+      "tcgdex": 0
     },
     "sm3": {
       "ambiguous": 8,
@@ -3802,8 +3774,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 1608,
-    "changed": 401,
+    "applied": 1788,
+    "changed": 406,
     "conflicts": [],
     "dropped": [
       {
@@ -5618,20 +5590,6 @@
       "sm1-163",
       "sm1-171"
     ],
-    "296848": [
-      "sm2-126",
-      "sm2-143"
-    ],
-    "297478": [
-      "sm2-14",
-      "sm2-46",
-      "sm2-55",
-      "sm2-56"
-    ],
-    "297523": [
-      "sm2-62",
-      "sm2-63"
-    ],
     "298284": [
       "smp-SM30",
       "smp-SM31"
@@ -6296,10 +6254,10 @@
     ]
   },
   "duplicates": {
-    "cards": 1229,
-    "corrected": 329,
-    "ids": 595,
-    "kept": 900
+    "cards": 1221,
+    "corrected": 328,
+    "ids": 592,
+    "kept": 893
   },
   "expansionMismatch": {
     "cards": [
@@ -8184,14 +8142,14 @@
       }
     ],
     "totals": {
-      "checked": 21579,
+      "checked": 21410,
       "corrected": 25,
       "dropped": 27,
       "droppedShared": 23,
       "foreignNameOk": 1309,
       "keptMismatch": 159,
       "noSetExpansion": 0,
-      "ok": 20056,
+      "ok": 19887,
       "unknownProduct": 3
     }
   },
@@ -8424,7 +8382,7 @@
     "orderedRejected": 16,
     "override": 12,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 78
+    "versionSuffixSkipped": 91
   },
   "setsWithoutExpansion": [
     {
@@ -9455,34 +9413,6 @@
       "source": "matched",
       "todayId": null,
       "todaySource": null
-    },
-    {
-      "cardKey": "sm2/46",
-      "productId": 297508,
-      "source": "corrected",
-      "todayId": 297478,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm2/55",
-      "productId": 297517,
-      "source": "corrected",
-      "todayId": 297478,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm2/56",
-      "productId": 297518,
-      "source": "corrected",
-      "todayId": 297478,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm2/143",
-      "productId": 297578,
-      "source": "corrected",
-      "todayId": 296848,
-      "todaySource": "tcgdex"
     },
     {
       "cardKey": "sm35/78",
@@ -11083,300 +11013,6 @@
       "expansionId": 2644,
       "name": "Togepi & Cleffa & Igglybuff-GX",
       "set": "sm12"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Alolan Sandshrew [Defense Curl | Ice Ball]",
-          "productId": 366837
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Alolan Vulpix [Beacon | Icy Snow]",
-          "productId": 312206
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Alolan Vulpix [Beacon | Icy Snow]",
-          "productId": 312250
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Alolan Ninetales GX [Ice Blade | Blizzard Edge | Ice Path GX]",
-          "productId": 312251
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Alolan Vulpix [Beacon | Icy Snow]",
-          "productId": 319255
-        }
-      ],
-      "cardKey": "sm2/19a",
-      "deName": null,
-      "expansionId": 1800,
-      "name": "Alolan Sandshrew",
-      "set": "sm2"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Alolan Vulpix [Beacon | Icy Snow]",
-          "productId": 312206
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Alolan Vulpix [Beacon | Icy Snow]",
-          "productId": 312250
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Alolan Vulpix [Beacon | Icy Snow]",
-          "productId": 319255
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Alolan Vulpix [Beacon | Icy Snow]",
-          "productId": 468924
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Alolan Vulpix [Beacon | Icy Snow]",
-          "productId": 886902
-        }
-      ],
-      "cardKey": "sm2/21a",
-      "deName": null,
-      "expansionId": 1800,
-      "name": "Alolan Vulpix",
-      "set": "sm2"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Garbodor [Trashalanche | Acid Spray]",
-          "productId": 312229
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Garbodor [Trashalanche | Acid Spray]",
-          "productId": 321171
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Garbodor [Trashalanche | Acid Spray]",
-          "productId": 368706
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Garbodor [Trashalanche | Acid Spray]",
-          "productId": 368739
-        }
-      ],
-      "cardKey": "sm2/51a",
-      "deName": null,
-      "expansionId": 1800,
-      "name": "Garbodor",
-      "set": "sm2"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tapu Lele GX [Wonder Tag | Energy Drive | Tapu Cure GX]",
-          "productId": 312205
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tapu Lele GX [Wonder Tag | Energy Drive | Tapu Cure GX]",
-          "productId": 312232
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tapu Lele GX [Wonder Tag | Energy Drive | Tapu Cure GX]",
-          "productId": 312254
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tapu Lele GX [Wonder Tag | Energy Drive | Tapu Cure GX]",
-          "productId": 312279
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tapu Lele GX [Wonder Tag | Energy Drive | Tapu Cure GX]",
-          "productId": 366835
-        }
-      ],
-      "cardKey": "sm2/60a",
-      "deName": null,
-      "expansionId": 1800,
-      "name": "Tapu Lele-GX",
-      "set": "sm2"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Sylveon GX [Magical Ribbon | Fairy Wind | Plea GX]",
-          "productId": 365544
-        }
-      ],
-      "cardKey": "sm2/92a",
-      "deName": null,
-      "expansionId": 1800,
-      "name": "Sylveon-GX",
-      "set": "sm2"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Choice Band",
-          "productId": 312225
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Choice Band",
-          "productId": 312244
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Choice Band",
-          "productId": 312271
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Choice Band",
-          "productId": 312294
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Choice Band",
-          "productId": 368675
-        }
-      ],
-      "cardKey": "sm2/121a",
-      "deName": null,
-      "expansionId": 1800,
-      "name": "Choice Band",
-      "set": "sm2"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Enhanced Hammer",
-          "productId": 368753
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Enhanced Hammer",
-          "productId": 371640
-        }
-      ],
-      "cardKey": "sm2/124a",
-      "deName": null,
-      "expansionId": 1800,
-      "name": "Enhanced Hammer",
-      "set": "sm2"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Field Blower",
-          "productId": 312221
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Field Blower",
-          "productId": 312246
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Field Blower",
-          "productId": 312273
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Field Blower",
-          "productId": 312295
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Field Blower",
-          "productId": 368668
-        }
-      ],
-      "cardKey": "sm2/125a",
-      "deName": null,
-      "expansionId": 1800,
-      "name": "Field Blower",
-      "set": "sm2"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Max Potion",
-          "productId": 371641
-        }
-      ],
-      "cardKey": "sm2/128a",
-      "deName": null,
-      "expansionId": 1800,
-      "name": "Max Potion",
-      "set": "sm2"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Rescue Stretcher",
-          "productId": 312224
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Rescue Stretcher",
-          "productId": 312247
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Rescue Stretcher",
-          "productId": 368692
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Rescue Stretcher",
-          "productId": 368745
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Rescue Stretcher",
-          "productId": 368757
-        }
-      ],
-      "cardKey": "sm2/130a",
-      "deName": null,
-      "expansionId": 1800,
-      "name": "Rescue Stretcher",
-      "set": "sm2"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Metagross GX [Geotech System | Giga Hammer | Algorithm GX]",
-          "productId": 450878
-        }
-      ],
-      "cardKey": "sm2/157a",
-      "deName": null,
-      "expansionId": 1800,
-      "name": "Metagross-GX",
-      "set": "sm2"
     },
     {
       "candidates": [
@@ -13461,13 +13097,6 @@
   ],
   "stillMissingByExpansion": [
     {
-      "count": 11,
-      "expansionId": 1800,
-      "sets": [
-        "sm2"
-      ]
-    },
-    {
       "count": 9,
       "expansionId": 2065,
       "sets": [
@@ -13721,14 +13350,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 94,
+    "ambiguous": 83,
     "cards": 21577,
-    "customSet": 1608,
+    "customSet": 1788,
     "matched": 239,
-    "missing": 128,
+    "missing": 117,
     "override": 12,
-    "stabilityKept": 309,
-    "tcgdex": 19281
+    "stabilityKept": 305,
+    "tcgdex": 19116
   },
   "versionSuffixSkippedByExpansion": {
     "1537": 7,
@@ -13737,6 +13366,7 @@
     "1609": 6,
     "1611": 7,
     "1612": 36,
-    "1758": 12
+    "1758": 12,
+    "1800": 13
   }
 }
