@@ -7,8 +7,8 @@
     "status": "frozen"
   },
   "tcgdex": {
-    "commit": "831a337b23e71419de34045f2b682a4890b5522f",
-    "fetchedAt": "2026-11-13T08:55:38.208Z",
+    "commit": "cff6522d736af05fd7c398607bb32297f14dc62f",
+    "fetchedAt": "2026-11-14T01:26:55.041Z",
     "ref": "master",
     "repo": "tcgdex/cards-database",
     "status": "active"

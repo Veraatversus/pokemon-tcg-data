@@ -2337,7 +2337,8 @@
         "cardCount": {
           "official": 12
         },
-        "name": "McDonald’s Kollektion 2011"
+        "name": "McDonald’s Kollektion 2011",
+        "series": "McDonald's Kollektion"
       }
     },
     "id": "mcd11",
@@ -2538,7 +2539,8 @@
       "de": {
         "cardCount": {
           "official": 12
-        }
+        },
+        "series": "McDonald's Kollektion"
       }
     },
     "id": "mcd12",
@@ -2783,7 +2785,8 @@
       "de": {
         "cardCount": {
           "official": 12
-        }
+        },
+        "series": "McDonald's Kollektion"
       }
     },
     "id": "TCGDEX-2013bw",
@@ -3024,7 +3027,8 @@
       "de": {
         "cardCount": {
           "official": 12
-        }
+        },
+        "series": "McDonald's Kollektion"
       }
     },
     "id": "mcd14",
@@ -3194,6 +3198,7 @@
         "cardCount": {
           "official": 34
         },
+        "name": "Doppeltes Dilemma",
         "series": "XY"
       }
     },
@@ -3362,7 +3367,8 @@
       "de": {
         "cardCount": {
           "official": 12
-        }
+        },
+        "series": "McDonald's Kollektion"
       }
     },
     "id": "mcd15",
@@ -3562,7 +3568,8 @@
       "de": {
         "cardCount": {
           "official": 12
-        }
+        },
+        "series": "McDonald's Kollektion"
       }
     },
     "id": "mcd16",
@@ -3857,7 +3864,8 @@
         "cardCount": {
           "official": 12
         },
-        "name": "McDonald’s Kollektion 2017"
+        "name": "McDonald’s Kollektion 2017",
+        "series": "McDonald's Kollektion"
       }
     },
     "id": "mcd17",
@@ -3947,7 +3955,8 @@
       "de": {
         "cardCount": {
           "official": 40
-        }
+        },
+        "series": "McDonald's Kollektion"
       }
     },
     "id": "TCGDEX-2018sm-fr",
@@ -4033,7 +4042,9 @@
       "de": {
         "cardCount": {
           "official": 12
-        }
+        },
+        "name": "McDonald's Kollektion 2018",
+        "series": "McDonald's Kollektion"
       }
     },
     "id": "mcd18",
@@ -4282,7 +4293,8 @@
         "cardCount": {
           "official": 12
         },
-        "name": "McDonald’s Kollektion 2019"
+        "name": "McDonald’s Kollektion 2019",
+        "series": "McDonald's Kollektion"
       }
     },
     "id": "mcd19",
@@ -4310,7 +4322,8 @@
       "de": {
         "cardCount": {
           "official": 40
-        }
+        },
+        "series": "McDonald's Kollektion"
       }
     },
     "id": "TCGDEX-2019sm-fr",
@@ -4601,7 +4614,8 @@
         "cardCount": {
           "official": 25
         },
-        "name": "McDonald’s Kollektion 2021"
+        "name": "McDonald’s Kollektion 2021",
+        "series": "McDonald's Kollektion"
       }
     },
     "id": "mcd21",
@@ -4978,7 +4992,8 @@
         "cardCount": {
           "official": 15
         },
-        "name": "McDonald's Kollektion 2022"
+        "name": "McDonald's Kollektion 2022",
+        "series": "McDonald's Kollektion"
       }
     },
     "id": "mcd22",
@@ -5248,7 +5263,8 @@
         "cardCount": {
           "official": 15
         },
-        "name": "McDonald's Kollektion 2023"
+        "name": "McDonald's Kollektion 2023",
+        "series": "McDonald's Kollektion"
       }
     },
     "id": "TCGDEX-2023sv",
@@ -5604,7 +5620,8 @@
         "cardCount": {
           "official": 15
         },
-        "name": "McDonald's Kollektion 2024"
+        "name": "McDonald's Kollektion 2024",
+        "series": "McDonald's Kollektion"
       }
     },
     "id": "TCGDEX-2024sv",

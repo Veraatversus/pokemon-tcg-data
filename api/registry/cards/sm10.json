@@ -4012,9 +4012,16 @@
       "pokemontcg": [
         "195a"
       ],
-      "tcgdex": []
+      "tcgdex": [
+        "195a"
+      ]
     },
     "pokemontcg": "sm10-195a",
-    "tcgdex": []
+    "tcgdex": [
+      {
+        "localId": "195a",
+        "set": "sm10"
+      }
+    ]
   }
 }

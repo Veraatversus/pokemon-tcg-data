@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-13T08:55:38.208Z",
+  "generatedAt": "2026-11-14T01:26:55.041Z",
   "sources": {
     "pokemontcg": {
       "commit": "bc4a5871a2468e9f3fb8aaf0916c72255ed90d99",
@@ -9,8 +9,8 @@
       "status": "frozen"
     },
     "tcgdex": {
-      "commit": "831a337b23e71419de34045f2b682a4890b5522f",
-      "fetchedAt": "2026-11-13T08:55:38.208Z",
+      "commit": "cff6522d736af05fd7c398607bb32297f14dc62f",
+      "fetchedAt": "2026-11-14T01:26:55.041Z",
       "ref": "master",
       "repo": "tcgdex/cards-database",
       "status": "active"
@@ -21,10 +21,10 @@
     "tcgdexSets": 224,
     "pairedSets": 178,
     "ptCards": 20825,
-    "matchedCards": 20768,
+    "matchedCards": 20769,
     "cardMatchRatio": 0.9973,
     "suspicious": 9,
-    "primaryOnly": 57,
+    "primaryOnly": 56,
     "tcgdexOnlyInPairedSets": 137,
     "unpairedTcgdexSets": {
       "sets": 46,
@@ -1589,16 +1589,15 @@
       "tcgdexId": "sm10",
       "tcgdexName": "Unbroken Bonds",
       "method": "exactId",
-      "overlap": 0.9831932773109243,
+      "overlap": 0.9873949579831933,
       "lowOverlap": false,
-      "matched": 234,
+      "matched": 235,
       "total": 238,
       "suspicious": [],
       "primaryOnly": [
         "182a",
         "182b",
-        "189a",
-        "195a"
+        "189a"
       ],
       "tcgdexOnly": []
     },
