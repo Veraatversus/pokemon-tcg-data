@@ -3415,48 +3415,38 @@
       "tcgdex": 10
     },
     "tk2a": {
-      "ambiguous": 3,
-      "ambiguousCards": [
-        "8",
-        "9",
-        "11"
-      ],
+      "ambiguous": 0,
       "cards": 12,
       "coverage": {
         "bySource": {
-          "matched": 1,
-          "tcgdex": 8
+          "customSet": 12
         },
         "cards": 12,
-        "withId": 9
+        "withId": 12
       },
+      "customSet": 12,
       "expansionId": 1627,
-      "matched": 1,
-      "missing": 3,
-      "missingCards": [
-        "8",
-        "9",
-        "11"
-      ],
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1627&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 8
+      "tcgdex": 0
     },
     "tk2b": {
       "ambiguous": 0,
       "cards": 12,
       "coverage": {
         "bySource": {
-          "matched": 1,
-          "tcgdex": 11
+          "customSet": 12
         },
         "cards": 12,
         "withId": 12
       },
+      "customSet": 12,
       "expansionId": 1627,
-      "matched": 1,
+      "matched": 0,
       "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1627&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 11
+      "tcgdex": 0
     },
     "xy0": {
       "ambiguous": 0,
@@ -3867,7 +3857,7 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 1316,
+    "applied": 1340,
     "changed": 308,
     "conflicts": [],
     "dropped": [
@@ -8423,14 +8413,14 @@
       }
     ],
     "totals": {
-      "checked": 21793,
+      "checked": 21774,
       "corrected": 34,
       "dropped": 34,
       "droppedShared": 23,
       "foreignNameOk": 1348,
       "keptMismatch": 162,
       "noSetExpansion": 0,
-      "ok": 20212,
+      "ok": 20193,
       "unknownProduct": 3
     }
   },
@@ -13602,58 +13592,6 @@
       "candidates": [
         {
           "hint": "same-name-unnumbered",
-          "name": "Energy Search",
-          "productId": 277190
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 277185
-        }
-      ],
-      "cardKey": "tk2a/8",
-      "deName": "Energiesuche",
-      "expansionId": 1627,
-      "name": "Energy Search",
-      "set": "tk2a"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Potion",
-          "productId": 277189
-        }
-      ],
-      "cardKey": "tk2a/9",
-      "deName": "Trank",
-      "expansionId": 1627,
-      "name": "Potion",
-      "set": "tk2a"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 277185
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Energy Search",
-          "productId": 277190
-        }
-      ],
-      "cardKey": "tk2a/11",
-      "deName": "Elektro-Energie",
-      "expansionId": 1627,
-      "name": "Lightning Energy",
-      "set": "tk2a"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
           "name": "MAudino EX [Magical Symphony]",
           "productId": 289906
         },
@@ -14700,13 +14638,6 @@
     },
     {
       "count": 3,
-      "expansionId": 1627,
-      "sets": [
-        "tk2a"
-      ]
-    },
-    {
-      "count": 3,
       "expansionId": 1757,
       "sets": [
         "smp"
@@ -14861,14 +14792,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 116,
+    "ambiguous": 113,
     "cards": 21577,
-    "customSet": 1316,
-    "matched": 283,
-    "missing": 156,
+    "customSet": 1340,
+    "matched": 281,
+    "missing": 153,
     "override": 8,
     "stabilityKept": 356,
-    "tcgdex": 19458
+    "tcgdex": 19439
   },
   "versionSuffixSkippedByExpansion": {
     "1537": 7,

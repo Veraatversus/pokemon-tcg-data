@@ -1,0 +1,106 @@
+{
+  "expansionId": 1627,
+  "name": "EX Trainer Kit 2",
+  "cards": [
+    {
+      "productId": 277205,
+      "collectorNumber": "1M"
+    },
+    {
+      "productId": 277193,
+      "collectorNumber": "1P"
+    },
+    {
+      "productId": 277195,
+      "collectorNumber": "2M"
+    },
+    {
+      "productId": 277182,
+      "collectorNumber": "2P"
+    },
+    {
+      "productId": 277199,
+      "collectorNumber": "3M"
+    },
+    {
+      "productId": 277183,
+      "collectorNumber": "3P"
+    },
+    {
+      "productId": 277200,
+      "collectorNumber": "4M"
+    },
+    {
+      "productId": 277187,
+      "collectorNumber": "4P"
+    },
+    {
+      "productId": 277204,
+      "collectorNumber": "5M"
+    },
+    {
+      "productId": 277188,
+      "collectorNumber": "5P"
+    },
+    {
+      "productId": 277203,
+      "collectorNumber": "6M"
+    },
+    {
+      "productId": 277192,
+      "collectorNumber": "6P"
+    },
+    {
+      "productId": 277202,
+      "collectorNumber": "7M"
+    },
+    {
+      "productId": 277191,
+      "collectorNumber": "7P"
+    },
+    {
+      "productId": 277201,
+      "collectorNumber": "8M"
+    },
+    {
+      "productId": 277190,
+      "collectorNumber": "8P"
+    },
+    {
+      "productId": 277194,
+      "collectorNumber": "9M"
+    },
+    {
+      "productId": 277189,
+      "collectorNumber": "9P"
+    },
+    {
+      "productId": 277198,
+      "collectorNumber": "10M"
+    },
+    {
+      "productId": 277186,
+      "collectorNumber": "10P"
+    },
+    {
+      "productId": 277197,
+      "collectorNumber": "11M"
+    },
+    {
+      "productId": 277185,
+      "collectorNumber": "11P"
+    },
+    {
+      "productId": 277196,
+      "collectorNumber": "12M"
+    },
+    {
+      "productId": 277184,
+      "collectorNumber": "12P"
+    }
+  ],
+  "setSuffix": {
+    "tk2a": "P",
+    "tk2b": "M"
+  }
+}
