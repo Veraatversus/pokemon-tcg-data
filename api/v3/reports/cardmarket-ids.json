@@ -2337,33 +2337,21 @@
       "tcgdex": 0
     },
     "sm11": {
-      "ambiguous": 3,
-      "ambiguousCards": [
-        "79a",
-        "191a",
-        "206a"
-      ],
+      "ambiguous": 0,
       "cards": 261,
-      "corrected": 12,
       "coverage": {
         "bySource": {
-          "stabilityKept": 6,
-          "tcgdex": 252
+          "customSet": 261
         },
         "cards": 261,
-        "withId": 258
+        "withId": 261
       },
+      "customSet": 261,
       "expansionId": 2487,
       "matched": 0,
-      "missing": 3,
-      "missingCards": [
-        "79a",
-        "191a",
-        "206a"
-      ],
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2487&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 6,
-      "tcgdex": 252
+      "tcgdex": 0
     },
     "sm115": {
       "ambiguous": 0,
@@ -3537,8 +3525,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 4452,
-    "changed": 622,
+    "applied": 4713,
+    "changed": 637,
     "conflicts": [],
     "dropped": [
       {
@@ -5318,62 +5306,6 @@
       "sm75-34",
       "sm75-35"
     ],
-    "377496": [
-      "sm11-114",
-      "sm11-146"
-    ],
-    "387862": [
-      "sm11-6",
-      "sm11-7"
-    ],
-    "387967": [
-      "sm11-27",
-      "sm11-28"
-    ],
-    "387997": [
-      "sm11-33",
-      "sm11-98"
-    ],
-    "388002": [
-      "sm11-34",
-      "sm11-99"
-    ],
-    "388097": [
-      "sm11-55",
-      "sm11-56"
-    ],
-    "388137": [
-      "sm11-63",
-      "sm11-64"
-    ],
-    "388262": [
-      "sm11-92",
-      "sm11-93"
-    ],
-    "388372": [
-      "sm11-115",
-      "sm11-116"
-    ],
-    "388432": [
-      "sm11-128",
-      "sm11-129"
-    ],
-    "388527": [
-      "sm11-147",
-      "sm11-148"
-    ],
-    "388537": [
-      "sm11-149",
-      "sm11-150"
-    ],
-    "388547": [
-      "sm11-151",
-      "sm11-152"
-    ],
-    "388622": [
-      "sm11-167",
-      "sm11-168"
-    ],
     "394597": [
       "sm115-38",
       "sm115-39"
@@ -5539,10 +5471,10 @@
     ]
   },
   "duplicates": {
-    "cards": 857,
-    "corrected": 236,
-    "ids": 425,
-    "kept": 621
+    "cards": 829,
+    "corrected": 224,
+    "ids": 411,
+    "kept": 605
   },
   "expansionMismatch": {
     "cards": [
@@ -7185,42 +7117,18 @@
       }
     ],
     "totals": {
-      "checked": 18815,
+      "checked": 18561,
       "corrected": 22,
       "dropped": 20,
       "droppedShared": 16,
       "foreignNameOk": 1281,
       "keptMismatch": 135,
       "noSetExpansion": 0,
-      "ok": 17354,
+      "ok": 17100,
       "unknownProduct": 3
     }
   },
   "orderedRejected": [
-    {
-      "cards": [
-        "sm11/188",
-        "sm11/231"
-      ],
-      "expansionId": 2487,
-      "name": "Blue's Tactics",
-      "products": [
-        388727,
-        388942
-      ]
-    },
-    {
-      "cards": [
-        "sm11/202",
-        "sm11/235"
-      ],
-      "expansionId": 2487,
-      "name": "Misty's Favor",
-      "products": [
-        388797,
-        388962
-      ]
-    },
     {
       "cards": [
         "sm115/57",
@@ -7350,7 +7258,7 @@
     "energySymbol": 3,
     "leftRight": 0,
     "ordered": 20,
-    "orderedRejected": 10,
+    "orderedRejected": 8,
     "override": 8,
     "oversizeExcluded": 4,
     "versionSuffixSkipped": 277
@@ -8090,48 +7998,6 @@
       "source": "corrected",
       "todayId": 295475,
       "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm11/28",
-      "productId": 387972,
-      "source": "corrected",
-      "todayId": 387967,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm11/116",
-      "productId": 388382,
-      "source": "corrected",
-      "todayId": 388372,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm11/188",
-      "productId": 388727,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "sm11/202",
-      "productId": 388797,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "sm11/231",
-      "productId": 388942,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "sm11/235",
-      "productId": 388962,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
     },
     {
       "cardKey": "sm115/57",
@@ -8976,83 +8842,6 @@
       "candidates": [
         {
           "hint": "same-name-unnumbered, id-outlier",
-          "name": "Jirachi GX [Psychic Zone | Star Search | Star Shield GX]",
-          "productId": 406979
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Jirachi GX [Psychic Zone | Star Search | Star Shield GX]",
-          "productId": 523095
-        }
-      ],
-      "cardKey": "sm11/79a",
-      "deName": null,
-      "expansionId": 2487,
-      "name": "Jirachi-GX",
-      "set": "sm11"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Cherish Ball",
-          "productId": 407049
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Cherish Ball",
-          "productId": 407184
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Cherish Ball",
-          "productId": 407259
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Cherish Ball",
-          "productId": 407394
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Cherish Ball",
-          "productId": 426056
-        }
-      ],
-      "cardKey": "sm11/191a",
-      "deName": null,
-      "expansionId": 2487,
-      "name": "Cherish Ball",
-      "set": "sm11"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Reset Stamp",
-          "productId": 407189
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Reset Stamp",
-          "productId": 407399
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Reset Stamp",
-          "productId": 475134
-        }
-      ],
-      "cardKey": "sm11/206a",
-      "deName": null,
-      "expansionId": 2487,
-      "name": "Reset Stamp",
-      "set": "sm11"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered, id-outlier",
           "name": "Togepi & Cleffa & Igglybuff GX [Rolling Panic | Supreme Puff GX]",
           "productId": 582672
         }
@@ -9350,13 +9139,6 @@
   "stillMissingByExpansion": [
     {
       "count": 3,
-      "expansionId": 2487,
-      "sets": [
-        "sm11"
-      ]
-    },
-    {
-      "count": 3,
       "expansionId": 2514,
       "sets": [
         "sma"
@@ -9490,14 +9272,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 22,
+    "ambiguous": 19,
     "cards": 21577,
-    "customSet": 4452,
+    "customSet": 4713,
     "matched": 220,
-    "missing": 39,
+    "missing": 36,
     "override": 8,
-    "stabilityKept": 197,
-    "tcgdex": 16661
+    "stabilityKept": 191,
+    "tcgdex": 16409
   },
   "versionSuffixSkippedByExpansion": {
     "1521": 9,
