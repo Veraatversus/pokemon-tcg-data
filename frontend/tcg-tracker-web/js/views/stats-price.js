@@ -723,7 +723,7 @@ function renderStatsPriceWatchlistPanel({ watchlistWorkspace, watchlistItems, wa
       <ol class="stats-price-rich-list stats-price-scroll-region stats-price-watchlist-scroll" data-watchlist-scroll-region="1" data-watchlist-total="${watchlistItems.length}">
         ${watchlistVisibleItems
           .map(renderStatsPriceWatchlistItem)
-          .join('') || '<li class="stats-price-empty">Keine Treffer ür aktuelle Filter.</li>'}
+          .join('') || '<li class="stats-price-empty">Keine Treffer für aktuelle Filter.</li>'}
         ${watchlistRemaining > 0 ? '<li class="stats-price-watchlist-sentinel" data-watchlist-sentinel="1" aria-hidden="true"></li>' : ''}
       </ol>
 
@@ -997,7 +997,7 @@ function renderStatsPriceDrilldownPanel(missingItems, errors) {
         <small>${errors > 0 ? `${formatStatsPriceNumber(errors)} technische Fehler` : 'Keine technischen Fehler gemeldet'}</small>
       </div>
       <div class="stats-price-drill-groups">
-        ${renderStatsPriceDrilldownGroups(missingItems) || '<p class="stats-price-empty">Keine Drilldown-Lcken vorhanden.</p>'}
+        ${renderStatsPriceDrilldownGroups(missingItems) || '<p class="stats-price-empty">Keine Drilldown-Lücken vorhanden.</p>'}
       </div>
     </section>`;
 }
