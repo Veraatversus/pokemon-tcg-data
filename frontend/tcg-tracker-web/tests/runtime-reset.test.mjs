@@ -123,3 +123,17 @@ test('clearServiceWorkerRuntimeCaches sendet CLEAR_CACHE und wartet auf Ack', as
   assert.equal(result.success, true);
   assert.deepEqual(result.cleared, ['runtime', 'shell']);
 });
+
+test('getResetLocalStorageKeys beruehrt Schluessel entfernter Schein-Funktionen nicht', () => {
+  const scoped = (base) => `scope:${base}`;
+  const removedFeatureKeys = ['trades', 'trade-offers', 'trade-history', 'wanted-cards'].map(scoped);
+  const keys = getResetLocalStorageKeys({
+    scopedStorageKeyFn: scoped,
+    includeAuthKeys: true,
+    includeSpreadsheetKey: true,
+  });
+
+  for (const key of removedFeatureKeys) {
+    assert.equal(keys.includes(key), false, `${key} darf nicht aktiv geloescht werden`);
+  }
+});

@@ -158,19 +158,6 @@ export function applyQuickFilters(sets = [], filterState = {}) {
   });
 }
 
-export function calculateCollectionStats(summaryData = []) {
-  const rows = Array.isArray(summaryData) ? summaryData : [];
-  const totals = rows.reduce((acc, row) => {
-    acc.total += Number(row?.total) || 0;
-    acc.collected += Number(row?.collected) || 0;
-    acc.rh += Number(row?.rh) || 0;
-    return acc;
-  }, { total: 0, collected: 0, rh: 0 });
-
-  const percent = totals.total > 0 ? Math.round((totals.collected / totals.total) * 10000) / 100 : 0;
-  return { ...totals, percent, sets: rows.length };
-}
-
 // Sync status
 export function getSyncStatus() {
   return readJson(STORAGE_KEYS.syncStatus, { state: 'idle', updatedAt: null });

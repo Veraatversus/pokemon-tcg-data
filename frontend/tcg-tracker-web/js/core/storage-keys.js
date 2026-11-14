@@ -19,12 +19,6 @@ import { scopedStorageKey } from './config.js';
  */
 export const REALTIME_CLIENT_STORAGE_KEY = scopedStorageKey('realtime_client_id');
 
-/**
- * User ID from Google authentication or local fallback.
- * Synced from profile.userId or generated as `user_<timestamp>`.
- */
-export const USER_ID_STORAGE_KEY = scopedStorageKey('user_id');
-
 // ============================================================================
 // UI Preferences Keys
 // ============================================================================

@@ -70,7 +70,6 @@ import {
   DASHBOARD_PREFS_STORAGE_KEY,
   RECENT_SETS_STORAGE_KEY,
   REALTIME_CLIENT_STORAGE_KEY,
-  USER_ID_STORAGE_KEY,
   DEV_COMPLETION_STORAGE_KEY,
   GRID_ZOOM_STORAGE_KEY,
 } from './core/storage-keys.js';
@@ -127,7 +126,7 @@ import {
   loadSearchHistory, addSearchHistory, clearSearchHistory,
   createCollectionSnapshot, generateCollectionReport,
   loadSettings, saveSettings, updateSetting,
-  applyQuickFilters, calculateCollectionStats,
+  applyQuickFilters,
   getSyncStatus, setSyncStatus
 } from './enhanced-features.js?v=20261114-cm-avg';
 
@@ -149,50 +148,10 @@ import {
   NotificationManager, PerformanceTracker
 } from './ui/tools.js';
 import {
-  loadWishlists, addTradeLog, getTradingLog, checkAchievementsProgress,
-  importCollectionFromCSV, GestureController, rateSet, getAllRatings
-} from './social-features.js';
-import {
-  createWishlistPanel, createSharingDialog, createTradingLogPanel,
-  createAchievementsPanel, createCSVExportPanel, createSetRatingWidget,
-  createRatingStatsWidget
-} from './social-ui.js';
-import {
   downloadJson, downloadCsv,
   createLocalBackup, getLocalBackups, restoreLocalBackup, deleteLocalBackup,
   generateAdvancedStatistics
 } from './advanced-features.js';
-import {
-  createUserProfile, getUserProfile, updateUserProfile,
-  createPublicShare, getSharedCollection, followUser, unfollowUser,
-  isFollowing, getFollowers, addReview, getReviewsForShare,
-  getTrendingCollections, searchPublicCollections, getCollectionsByUser,
-  checkCollectionBadges, getCommunityStats, createUserProfile as createProfile
-} from './community-features.js';
-import {
-  createUserProfileCard, createSharedCollectionCard, createCommunityTrendingPanel,
-  createReviewsPanel, createCommunitySearchPanel, createCommunityStatsBanner
-
-} from './community-ui.js';
-import {
-  detectCardRarity, detectCardType, getCardEstimatedValue,
-  calculateCollectionValue, applyCardFilters,
-  getCardsByRarity, getCardsByType, getRareCards,
-  getCollectionValueStats, getAvailableRarities, getAvailableTypes
-} from './card-filters.js';
-import {
-  getWantedCards, addWantedCard, removeWantedCard, isCardWanted,
-  getWantedCardsByPriority, createTradeOffer, getTradeOffers,
-  updateTradeOffer, acceptTradeOffer, deleteTradeOffer,
-  findMatchingTrades, recordTradeCompletion, getTradeHistory,
-  getUserTradeStats, generateTradeSuggestions, getTradePlaceSummary,
-  TRADE_STATUS
-} from './trading-system.js';
-import {
-  createWantedCardsPanel, createTradeMarketplacePanel,
-  createTradeStatsCard, createTradeSuggestionsPanel,
-  createTradeHistoryPanel
-} from './trading-ui.js';
 import {
   initRealtimeSync,
   buildCollectionUpdateEvent
@@ -9170,31 +9129,8 @@ function createBootstrapRuntimeController() {
     openSettingsDialog,
     generateCollectionReport,
     createExportDialog,
-    createWishlistPanel,
-    createSharingDialog,
-    createTradingLogPanel,
-    calculateCollectionStats,
-    createAchievementsPanel,
-    createCSVExportPanel,
     createLocalBackup,
     getLocalBackups,
-    createCommunityStatsBanner,
-    createCommunityTrendingPanel,
-    createCommunitySearchPanel,
-    createPublicShare,
-    getTrendingCollections,
-    createSharedCollectionCard,
-    createTradeStatsCard,
-    createTradeMarketplacePanel,
-    createTradeSuggestionsPanel,
-    createWantedCardsPanel,
-    getAvailableRarities,
-    getCollectionValueStats,
-    getTradePlaceSummary,
-    userIdStorageKey: USER_ID_STORAGE_KEY,
-    getUserProfile,
-    createUserProfile,
-    createUserProfileCard,
     initCommandPalette,
     getEngineMetrics,
     navigate,

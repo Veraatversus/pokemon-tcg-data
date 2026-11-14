@@ -13,9 +13,6 @@ const COMMANDS = [
   { id: 'search', label: '🔍 Suche', desc: 'Fuzzy-Suche für Karten/Sets', category: 'Navigation', hotkey: '/' },
   { id: 'settings', label: '⚙️ Einstellungen', desc: 'App-Einstellungen', category: 'System', hotkey: null },
   { id: 'snapshots', label: '📸 Snapshots', desc: 'Collection-Versionen', category: 'Versioning', hotkey: null },
-  { id: 'marketplace', label: '💱 Trading Marketplace', desc: 'Handelsangebote & Matches', category: 'Trading', hotkey: null },
-  { id: 'wanted', label: '🎯 Gesuchte Karten', desc: 'Wanted-Liste verwalten', category: 'Trading', hotkey: null },
-  { id: 'collection-value', label: '💰 Kollektionswert', desc: 'Wertschätzung deiner Sammlung', category: 'Analytics', hotkey: null },
   { id: 'live-dashboard', label: '📊 Live Dashboard', desc: 'Realtime KPIs & Health', category: 'Analytics', hotkey: null },
   { id: 'help', label: '❓ Keyboard Help', desc: 'Shortcuts anzeigen', category: 'Help', hotkey: '?' }
 ];

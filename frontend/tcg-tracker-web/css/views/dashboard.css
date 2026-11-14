@@ -410,3 +410,11 @@
 }
 
 .dash-set-card.complete-celebrate { animation: complete-flash 0.7s ease 4; }
+
+/* Leere Zustaende: Abstaende und Schriftgroesse, zuletzt geladen (frueher in trading-marketplace.css) */
+.empty-state {
+  text-align: center;
+  padding: 30px 20px;
+  color: var(--text-secondary);
+  font-size: 0.95em;
+}

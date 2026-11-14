@@ -22,8 +22,7 @@ export class VoiceCommandRecognizer {
       'alle gekauft': 'mark-all-collected',
       'zurück': 'back',
       'weiter': 'next',
-      'favoriten': 'favorites',
-      'wunschliste': 'wishlists'
+      'favoriten': 'favorites'
     };
 
     this.initRecognition();
