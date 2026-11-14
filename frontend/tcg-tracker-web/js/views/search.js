@@ -646,6 +646,328 @@ export function initSearch() {
 
 let autocompleteInitialized = false;
 
+const AUTOCOMPLETE_HIDE_DELAY_MS = 220;
+
+// Eingabefeld, Liste, Auswahlindex, Trefferliste und Ausblend-Timer des Autocompletes liegen in einem
+// Zustandsobjekt, das alle Teilfunktionen gemeinsam nutzen (vorher Closure-Variablen in initSearchAutocomplete).
+function createAutocompleteState(input, list) {
+  return { input, list, selectedIndex: -1, activeItems: [], hideTimer: null };
+}
+
+// Lokale Variante ohne &#39; (Verhalten wie zuvor); die globale escapeHtml escaped zusaetzlich das Apostroph.
+function escapeAutocompleteHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function clearAutocompleteHideTimer(ac) {
+  if (ac.hideTimer) {
+    clearTimeout(ac.hideTimer);
+    ac.hideTimer = null;
+  }
+}
+
+function hideAutocompleteList(ac) {
+  clearAutocompleteHideTimer(ac);
+  ac.list.classList.add('hidden');
+}
+
+function scheduleAutocompleteHide(ac) {
+  clearAutocompleteHideTimer(ac);
+  ac.hideTimer = setTimeout(() => {
+    ac.list.classList.add('hidden');
+  }, AUTOCOMPLETE_HIDE_DELAY_MS);
+}
+
+function pushAutocompleteCandidate(map, candidate, score = 0) {
+  if (!candidate?.key || !candidate?.label) return;
+  const label = sanitizeDisplayText(candidate.label);
+  if (!label) return;
+  const meta = sanitizeDisplayText(candidate.meta || '');
+  const badge = sanitizeDisplayText(candidate.badge || '');
+
+  const existing = map.get(candidate.key);
+  if (!existing || score > existing.score) {
+    map.set(candidate.key, {
+      ...candidate,
+      label,
+      meta,
+      badge,
+      score
+    });
+  }
+}
+
+function addHistoryCandidates(entries, history, normalizedQuery) {
+  history
+    .filter((item) => !normalizedQuery || normalizeSearchText(item).includes(normalizedQuery))
+    .slice(0, normalizedQuery ? 4 : 6)
+    .forEach((item, idx) => {
+      pushAutocompleteCandidate(entries, {
+        key: `history:${normalizeSearchText(item)}`,
+        label: item,
+        value: item,
+        badge: 'Zuletzt',
+        meta: 'Vorherige Suche',
+        type: 'history'
+      }, 120 - idx);
+    });
+}
+
+function addSetCandidates(entries, normalizedQuery) {
+  const setsPool = getSetsForSearchMode(getSearchScopeMode());
+  (Array.isArray(setsPool) ? setsPool : []).forEach((set) => {
+    const label = String(set?.setName || set?.tcgdex_name || set?.vera_name || set?.setId || '').trim();
+    if (!label) return;
+
+    const haystackValues = collectSearchStrings([
+      label,
+      set?.setId,
+      set?.series,
+      set?.vera_series,
+      set?.tcgdex_serie_name,
+      set?.ptcgoCode,
+      set?.vera_ptcgoCode,
+      set?.tcgdex_abbreviation_official,
+      set?.vera_name,
+      set?.tcgdex_name
+    ]);
+    const haystack = haystackValues.join(' ');
+    if (normalizedQuery && !haystack.includes(normalizedQuery)) return;
+
+    const labelNorm = normalizeSearchText(label);
+    let score = 70;
+    if (labelNorm === normalizedQuery) score += 180;
+    else if (labelNorm.startsWith(normalizedQuery)) score += 130;
+    else if (labelNorm.includes(normalizedQuery)) score += 95;
+
+    pushAutocompleteCandidate(entries, {
+      key: `set:${set?.setId || labelNorm}`,
+      label,
+      value: label,
+      badge: set?.ptcgoCode || set?.setId || 'Set',
+      meta: set?.series || set?.tcgdex_serie_name || 'Set',
+      type: 'set',
+      setId: set?.setId || ''
+    }, score);
+  });
+}
+
+// Karten aus letzter Suche, aktuellem Set und Such-Cache (hoechstens 800 Cache-Karten) mit ihrem Set.
+function collectCardBundles() {
+  const cardBundles = [];
+  const pushCardBundle = (card, set) => {
+    if (!card) return;
+    cardBundles.push({ card, set: set || null });
+  };
+
+  (Array.isArray(state.lastSearchResults) ? state.lastSearchResults : []).forEach((entry) => {
+    pushCardBundle(entry?.card, entry?.set);
+  });
+
+  if (Array.isArray(state.cards) && state.currentSet) {
+    state.cards.forEach((card) => pushCardBundle(card, state.currentSet));
+  }
+
+  let inspectedCards = 0;
+  state.searchCache?.forEach((cards, key) => {
+    if (inspectedCards >= 800) return;
+    const setId = String(key || '').split('::')[0];
+    const setMeta = (state.allSets || state.sets || []).find((entry) => String(entry?.setId || '') === setId) || null;
+    (Array.isArray(cards) ? cards : []).slice(0, 40).forEach((card) => {
+      if (inspectedCards >= 800) return;
+      inspectedCards += 1;
+      pushCardBundle(card, setMeta);
+    });
+  });
+  return cardBundles;
+}
+
+function addCardCandidates(entries, cardBundles, normalizedQuery) {
+  const seenCards = new Set();
+  cardBundles.forEach(({ card, set }) => {
+    const uniqueKey = `${set?.setId || 'unknown'}::${normalizeCardNumber(card?.number || card?.vera_number || card?.tcgdex_localId || '')}`;
+    if (!card?.name || seenCards.has(uniqueKey)) return;
+    seenCards.add(uniqueKey);
+
+    const label = String(card?.name || card?.tcgdex_name || card?.vera_name || '').trim();
+    if (!label) return;
+
+    const nameValues = collectSearchStrings([card?.name, card?.vera_name, card?.tcgdex_name]);
+    const haystack = collectSearchStrings([
+      label,
+      card?.number,
+      card?.vera_number,
+      card?.tcgdex_localId,
+      nameValues,
+      set?.setName,
+      set?.series,
+      set?.ptcgoCode
+    ]).join(' ');
+    if (normalizedQuery && !haystack.includes(normalizedQuery)) return;
+
+    const labelNorm = normalizeSearchText(label);
+    let score = 60;
+    if (labelNorm === normalizedQuery) score += 200;
+    else if (labelNorm.startsWith(normalizedQuery)) score += 150;
+    else if (labelNorm.includes(normalizedQuery)) score += 105;
+    if (cardNumberMatchesQuery(card?.number, normalizedQuery)) score += 120;
+
+    const altNames = nameValues.filter((value) => value !== labelNorm).slice(0, 2);
+    const metaParts = [
+      set?.setName || set?.series || '',
+      altNames.length ? `Alias: ${altNames.join(' - ')}` : ''
+    ].filter(Boolean);
+
+    pushAutocompleteCandidate(entries, {
+      key: `card:${uniqueKey}`,
+      label,
+      value: label,
+      badge: card?.number || card?.tcgdex_localId || 'Karte',
+      meta: metaParts.join(' - '),
+      type: 'card',
+      setId: set?.setId || ''
+    }, score);
+  });
+}
+
+// Eingabe -> bis zu 10 Vorschlaege (Verlauf, Sets, Karten), nach Score und Label sortiert.
+function buildAutocompleteCandidates(query) {
+  const normalizedQuery = normalizeSearchText(query).trim();
+  const entries = new Map();
+  const history = Array.isArray(window.SEARCH_HISTORY) ? window.SEARCH_HISTORY : loadSearchHistory();
+
+  addHistoryCandidates(entries, history, normalizedQuery);
+  addSetCandidates(entries, normalizedQuery);
+  addCardCandidates(entries, collectCardBundles(), normalizedQuery);
+
+  return [...entries.values()]
+    .sort((left, right) => {
+      if (right.score !== left.score) return right.score - left.score;
+      return String(left.label || '').localeCompare(String(right.label || ''), 'de', { sensitivity: 'base' });
+    })
+    .slice(0, 10);
+}
+
+function renderAutocompleteList(ac, items) {
+  ac.activeItems = items;
+  ac.selectedIndex = -1;
+  if (!items.length) {
+    ac.list.classList.add('hidden');
+    ac.list.innerHTML = '';
+    return;
+  }
+
+  ac.list.innerHTML = items.map((item, idx) => {
+    const safeLabel = sanitizeDisplayText(item.label);
+    const safeMeta = sanitizeDisplayText(item.meta || '');
+    const safeBadge = sanitizeDisplayText(item.badge || '');
+    return `
+      <li class="search-ac-item search-ac-item--${escapeAutocompleteHtml(item.type)}" role="option" data-idx="${idx}">
+        <span class="ac-main">
+          <span class="ac-label">${escapeAutocompleteHtml(safeLabel)}</span>
+          ${safeMeta ? `<small class="ac-meta">${escapeAutocompleteHtml(safeMeta)}</small>` : ''}
+        </span>
+        <span class="ac-badge">${escapeAutocompleteHtml(safeBadge)}</span>
+      </li>
+    `;
+  }).join('');
+  ac.list.classList.remove('hidden');
+}
+
+function applyAutocompleteSelection(ac, item) {
+  if (!item) return;
+  clearAutocompleteHideTimer(ac);
+  if (item.setId && dom.searchSetFilter) {
+    const hasOption = [...dom.searchSetFilter.options].some((option) => option.value === item.setId);
+    if (hasOption) dom.searchSetFilter.value = item.setId;
+  }
+  ac.input.value = item.value || item.label || '';
+  ac.list.classList.add('hidden');
+  window.SEARCH_HISTORY = addSearchHistory(ac.input.value);
+  runSearch({ force: true });
+  ac.input.focus();
+}
+
+function handleAutocompleteKeydown(ac, event) {
+  if (ac.list.classList.contains('hidden') && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+    renderAutocompleteList(ac, buildAutocompleteCandidates(ac.input.value));
+  }
+
+  const items = [...ac.list.querySelectorAll('.search-ac-item')];
+  if (!items.length || ac.list.classList.contains('hidden')) {
+    if (event.key === 'Escape') hideAutocompleteList(ac);
+    if (event.key === 'Enter') dismissSearchAutocomplete({ blurInput: shouldDismissMobileSearchKeyboard() });
+    return;
+  }
+
+  if (event.key === 'ArrowDown') {
+    event.preventDefault();
+    ac.selectedIndex = Math.min(ac.selectedIndex + 1, items.length - 1);
+  } else if (event.key === 'ArrowUp') {
+    event.preventDefault();
+    ac.selectedIndex = Math.max(ac.selectedIndex - 1, 0);
+  } else if (event.key === 'Enter') {
+    event.preventDefault();
+    if (ac.selectedIndex >= 0) {
+      applyAutocompleteSelection(ac, ac.activeItems[ac.selectedIndex]);
+    } else {
+      dismissSearchAutocomplete({ blurInput: shouldDismissMobileSearchKeyboard() });
+    }
+    return;
+  } else if (event.key === 'Escape') {
+    hideAutocompleteList(ac);
+    return;
+  } else {
+    return;
+  }
+
+  items.forEach((item, idx) => item.classList.toggle('keyboard-focus', idx === ac.selectedIndex));
+}
+
+function bindAutocompleteInputEvents(ac) {
+  const { input, list } = ac;
+  input.addEventListener('focus', () => {
+    clearAutocompleteHideTimer(ac);
+    renderAutocompleteList(ac, buildAutocompleteCandidates(input.value));
+  });
+
+  input.addEventListener('input', () => {
+    clearAutocompleteHideTimer(ac);
+    renderAutocompleteList(ac, buildAutocompleteCandidates(input.value));
+  });
+
+  input.addEventListener('blur', () => scheduleAutocompleteHide(ac));
+  list.addEventListener('pointerenter', () => clearAutocompleteHideTimer(ac));
+  list.addEventListener('pointerleave', () => {
+    if (document.activeElement !== input) scheduleAutocompleteHide(ac);
+  });
+
+  input.addEventListener('keydown', (event) => handleAutocompleteKeydown(ac, event));
+}
+
+function bindAutocompleteListEvents(ac) {
+  const { input, list } = ac;
+  list.addEventListener('mousedown', (event) => {
+    const item = event.target.closest('.search-ac-item');
+    if (!item) return;
+    event.preventDefault();
+    const idx = Number(item.dataset.idx || '-1');
+    applyAutocompleteSelection(ac, ac.activeItems[idx]);
+  });
+
+  document.addEventListener('pointerdown', (event) => {
+    if (!input.contains(event.target) && !list.contains(event.target)) {
+      scheduleAutocompleteHide(ac);
+    } else {
+      clearAutocompleteHideTimer(ac);
+    }
+  });
+}
+
 export function initSearchAutocomplete() {
   if (autocompleteInitialized) return;
   autocompleteInitialized = true;
@@ -654,299 +976,7 @@ export function initSearchAutocomplete() {
   const list = document.getElementById('search-autocomplete');
   if (!input || !list) return;
 
-  let selectedIndex = -1;
-  let activeItems = [];
-  let hideTimer = null;
-
-  const escapeHtml = (value) => String(value || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-
-  const clearHideTimer = () => {
-    if (hideTimer) {
-      clearTimeout(hideTimer);
-      hideTimer = null;
-    }
-  };
-
-  const hideList = () => {
-    clearHideTimer();
-    list.classList.add('hidden');
-  };
-
-  const scheduleHide = () => {
-    clearHideTimer();
-    hideTimer = setTimeout(() => {
-      list.classList.add('hidden');
-    }, 220);
-  };
-
-  const pushCandidate = (map, candidate, score = 0) => {
-    if (!candidate?.key || !candidate?.label) return;
-    const label = sanitizeDisplayText(candidate.label);
-    if (!label) return;
-    const meta = sanitizeDisplayText(candidate.meta || '');
-    const badge = sanitizeDisplayText(candidate.badge || '');
-
-    const existing = map.get(candidate.key);
-    if (!existing || score > existing.score) {
-      map.set(candidate.key, {
-        ...candidate,
-        label,
-        meta,
-        badge,
-        score
-      });
-    }
-  };
-
-  const buildCandidates = (query) => {
-    const normalizedQuery = normalizeSearchText(query).trim();
-    const entries = new Map();
-    const history = Array.isArray(window.SEARCH_HISTORY) ? window.SEARCH_HISTORY : loadSearchHistory();
-
-    const addHistoryEntries = () => {
-      history
-        .filter((item) => !normalizedQuery || normalizeSearchText(item).includes(normalizedQuery))
-        .slice(0, normalizedQuery ? 4 : 6)
-        .forEach((item, idx) => {
-          pushCandidate(entries, {
-            key: `history:${normalizeSearchText(item)}`,
-            label: item,
-            value: item,
-            badge: 'Zuletzt',
-            meta: 'Vorherige Suche',
-            type: 'history'
-          }, 120 - idx);
-        });
-    };
-
-    addHistoryEntries();
-
-    const setsPool = getSetsForSearchMode(getSearchScopeMode());
-    (Array.isArray(setsPool) ? setsPool : []).forEach((set) => {
-      const label = String(set?.setName || set?.tcgdex_name || set?.vera_name || set?.setId || '').trim();
-      if (!label) return;
-
-      const haystackValues = collectSearchStrings([
-        label,
-        set?.setId,
-        set?.series,
-        set?.vera_series,
-        set?.tcgdex_serie_name,
-        set?.ptcgoCode,
-        set?.vera_ptcgoCode,
-        set?.tcgdex_abbreviation_official,
-        set?.vera_name,
-        set?.tcgdex_name
-      ]);
-      const haystack = haystackValues.join(' ');
-      if (normalizedQuery && !haystack.includes(normalizedQuery)) return;
-
-      const labelNorm = normalizeSearchText(label);
-      let score = 70;
-      if (labelNorm === normalizedQuery) score += 180;
-      else if (labelNorm.startsWith(normalizedQuery)) score += 130;
-      else if (labelNorm.includes(normalizedQuery)) score += 95;
-
-      pushCandidate(entries, {
-        key: `set:${set?.setId || labelNorm}`,
-        label,
-        value: label,
-        badge: set?.ptcgoCode || set?.setId || 'Set',
-        meta: set?.series || set?.tcgdex_serie_name || 'Set',
-        type: 'set',
-        setId: set?.setId || ''
-      }, score);
-    });
-
-    const cardBundles = [];
-    const pushCardBundle = (card, set) => {
-      if (!card) return;
-      cardBundles.push({ card, set: set || null });
-    };
-
-    (Array.isArray(state.lastSearchResults) ? state.lastSearchResults : []).forEach((entry) => {
-      pushCardBundle(entry?.card, entry?.set);
-    });
-
-    if (Array.isArray(state.cards) && state.currentSet) {
-      state.cards.forEach((card) => pushCardBundle(card, state.currentSet));
-    }
-
-    let inspectedCards = 0;
-    state.searchCache?.forEach((cards, key) => {
-      if (inspectedCards >= 800) return;
-      const setId = String(key || '').split('::')[0];
-      const setMeta = (state.allSets || state.sets || []).find((entry) => String(entry?.setId || '') === setId) || null;
-      (Array.isArray(cards) ? cards : []).slice(0, 40).forEach((card) => {
-        if (inspectedCards >= 800) return;
-        inspectedCards += 1;
-        pushCardBundle(card, setMeta);
-      });
-    });
-
-    const seenCards = new Set();
-    cardBundles.forEach(({ card, set }) => {
-      const uniqueKey = `${set?.setId || 'unknown'}::${normalizeCardNumber(card?.number || card?.vera_number || card?.tcgdex_localId || '')}`;
-      if (!card?.name || seenCards.has(uniqueKey)) return;
-      seenCards.add(uniqueKey);
-
-      const label = String(card?.name || card?.tcgdex_name || card?.vera_name || '').trim();
-      if (!label) return;
-
-      const nameValues = collectSearchStrings([card?.name, card?.vera_name, card?.tcgdex_name]);
-      const haystack = collectSearchStrings([
-        label,
-        card?.number,
-        card?.vera_number,
-        card?.tcgdex_localId,
-        nameValues,
-        set?.setName,
-        set?.series,
-        set?.ptcgoCode
-      ]).join(' ');
-      if (normalizedQuery && !haystack.includes(normalizedQuery)) return;
-
-      const labelNorm = normalizeSearchText(label);
-      let score = 60;
-      if (labelNorm === normalizedQuery) score += 200;
-      else if (labelNorm.startsWith(normalizedQuery)) score += 150;
-      else if (labelNorm.includes(normalizedQuery)) score += 105;
-      if (cardNumberMatchesQuery(card?.number, normalizedQuery)) score += 120;
-
-      const altNames = nameValues.filter((value) => value !== labelNorm).slice(0, 2);
-      const metaParts = [
-        set?.setName || set?.series || '',
-        altNames.length ? `Alias: ${altNames.join(' - ')}` : ''
-      ].filter(Boolean);
-
-      pushCandidate(entries, {
-        key: `card:${uniqueKey}`,
-        label,
-        value: label,
-        badge: card?.number || card?.tcgdex_localId || 'Karte',
-        meta: metaParts.join(' - '),
-        type: 'card',
-        setId: set?.setId || ''
-      }, score);
-    });
-
-    return [...entries.values()]
-      .sort((left, right) => {
-        if (right.score !== left.score) return right.score - left.score;
-        return String(left.label || '').localeCompare(String(right.label || ''), 'de', { sensitivity: 'base' });
-      })
-      .slice(0, 10);
-  };
-
-  const renderList = (items) => {
-    activeItems = items;
-    selectedIndex = -1;
-    if (!items.length) {
-      list.classList.add('hidden');
-      list.innerHTML = '';
-      return;
-    }
-
-    list.innerHTML = items.map((item, idx) => {
-      const safeLabel = sanitizeDisplayText(item.label);
-      const safeMeta = sanitizeDisplayText(item.meta || '');
-      const safeBadge = sanitizeDisplayText(item.badge || '');
-      return `
-      <li class="search-ac-item search-ac-item--${escapeHtml(item.type)}" role="option" data-idx="${idx}">
-        <span class="ac-main">
-          <span class="ac-label">${escapeHtml(safeLabel)}</span>
-          ${safeMeta ? `<small class="ac-meta">${escapeHtml(safeMeta)}</small>` : ''}
-        </span>
-        <span class="ac-badge">${escapeHtml(safeBadge)}</span>
-      </li>
-    `;
-    }).join('');
-    list.classList.remove('hidden');
-  };
-
-  const applySelection = (item) => {
-    if (!item) return;
-    clearHideTimer();
-    if (item.setId && dom.searchSetFilter) {
-      const hasOption = [...dom.searchSetFilter.options].some((option) => option.value === item.setId);
-      if (hasOption) dom.searchSetFilter.value = item.setId;
-    }
-    input.value = item.value || item.label || '';
-    list.classList.add('hidden');
-    window.SEARCH_HISTORY = addSearchHistory(input.value);
-    runSearch({ force: true });
-    input.focus();
-  };
-
-  input.addEventListener('focus', () => {
-    clearHideTimer();
-    renderList(buildCandidates(input.value));
-  });
-
-  input.addEventListener('input', () => {
-    clearHideTimer();
-    renderList(buildCandidates(input.value));
-  });
-
-  input.addEventListener('blur', scheduleHide);
-  list.addEventListener('pointerenter', clearHideTimer);
-  list.addEventListener('pointerleave', () => {
-    if (document.activeElement !== input) scheduleHide();
-  });
-
-  input.addEventListener('keydown', (event) => {
-    if (list.classList.contains('hidden') && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
-      renderList(buildCandidates(input.value));
-    }
-
-    const items = [...list.querySelectorAll('.search-ac-item')];
-    if (!items.length || list.classList.contains('hidden')) {
-      if (event.key === 'Escape') hideList();
-      if (event.key === 'Enter') dismissSearchAutocomplete({ blurInput: shouldDismissMobileSearchKeyboard() });
-      return;
-    }
-
-    if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
-    } else if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      selectedIndex = Math.max(selectedIndex - 1, 0);
-    } else if (event.key === 'Enter') {
-      event.preventDefault();
-      if (selectedIndex >= 0) {
-        applySelection(activeItems[selectedIndex]);
-      } else {
-        dismissSearchAutocomplete({ blurInput: shouldDismissMobileSearchKeyboard() });
-      }
-      return;
-    } else if (event.key === 'Escape') {
-      hideList();
-      return;
-    } else {
-      return;
-    }
-
-    items.forEach((item, idx) => item.classList.toggle('keyboard-focus', idx === selectedIndex));
-  });
-
-  list.addEventListener('mousedown', (event) => {
-    const item = event.target.closest('.search-ac-item');
-    if (!item) return;
-    event.preventDefault();
-    const idx = Number(item.dataset.idx || '-1');
-    applySelection(activeItems[idx]);
-  });
-
-  document.addEventListener('pointerdown', (event) => {
-    if (!input.contains(event.target) && !list.contains(event.target)) {
-      scheduleHide();
-    } else {
-      clearHideTimer();
-    }
-  });
+  const ac = createAutocompleteState(input, list);
+  bindAutocompleteInputEvents(ac);
+  bindAutocompleteListEvents(ac);
 }
