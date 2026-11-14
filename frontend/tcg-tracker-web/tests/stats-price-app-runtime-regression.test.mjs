@@ -44,7 +44,9 @@ test('app runtime renders the card set in the lightbox facts', async () => {
   const source = await readAppSource();
 
   assert.match(source, /setFact\(dom\.lightboxSet,/);
-  assert.match(source, /lightbox-set/);
+  // Die DOM-Referenz liegt seit der Auslagerung in js/app/dom.js.
+  const domSource = await readFile(path.join(__dirname, '..', 'js', 'app', 'dom.js'), 'utf8');
+  assert.match(domSource, /lightbox-set/);
 });
 
 test('app runtime supports dynamic watchlist loading with filters and thumbnails', async () => {

@@ -131,7 +131,6 @@ import {
   createSettingsPanel
 } from './ui/components.js?v=20261114-clean-1';
 import {
-  createInitialSheetsRetryMetrics,
   initSheetsWriteFeedback as initSheetsWriteFeedbackUi,
   resetSheetsRetryMetrics as resetSheetsRetryMetricsUi,
   renderSheetsRetryReport as renderSheetsRetryReportUi,
@@ -166,208 +165,13 @@ import { sanitizeDisplayText } from './core/display-text.js';
 import { runWithRetry, isRetryableError } from './core/retry.js';
 import { createBootstrapController } from './app/bootstrap-controller.js';
 import { initPwaFeatures } from './app/pwa-init.js';
+import { dom } from './app/dom.js';
+import { state, uiState } from './app/state.js';
 import { isSheetsQuotaError, getImportCooldownMs } from './features/collection/import-rate-limit.js';
 import { isAuthReloginRequiredError, getAuthReloginImportMessage } from './features/collection/import-auth-guard.js';
 // --------------------------------------------------------------------------
 // DOM-REFERENZEN
 // --------------------------------------------------------------------------
-const dom = {
-  // Global
-  auth:             document.getElementById('btn-auth'),
-  btnOpenSettings:  document.getElementById('btn-open-settings'),
-  btnOpenSupportHub: document.getElementById('btn-open-support-hub'),
-  topbar:           document.querySelector('.topbar'),
-  mainNav:          document.getElementById('main-nav'),
-  navSetLink:       document.getElementById('nav-set-link'),
-  navSetSplit:      document.getElementById('nav-set-split'),
-  btnNavSetToggle:  document.getElementById('btn-nav-set-toggle'),
-  loadingOverlay:   document.getElementById('loading-overlay'),
-  loadingText:      document.getElementById('loading-text'),
-  toastContainer:   document.getElementById('toast-container'),
-  globalStatus:     document.getElementById('global-status'),
-  jobPanel:         document.getElementById('job-panel'),
-  jobTitle:         document.getElementById('job-title'),
-  jobStatusText:    document.getElementById('job-status-text'),
-  jobProgressFill:  document.getElementById('job-progress-fill'),
-  jobHistory:       document.getElementById('job-history'),
-  btnJobCancel:     document.getElementById('btn-job-cancel'),
-  // Spreadsheet-Dialog
-  dialog:           document.getElementById('dialog-spreadsheet'),
-  dialogInput:      document.getElementById('input-spreadsheet-id'),
-  dialogExistingSelect: document.getElementById('select-spreadsheet-existing'),
-  dialogNewNameInput: document.getElementById('input-new-spreadsheet-name'),
-  dialogError:      document.getElementById('dialog-error'),
-  btnDialogSave:    document.getElementById('btn-dialog-save'),
-  btnDialogCancel:  document.getElementById('btn-dialog-cancel'),
-  btnSpreadsheetRefresh: document.getElementById('btn-spreadsheet-refresh'),
-  btnSpreadsheetUseSelected: document.getElementById('btn-spreadsheet-use-selected'),
-  btnSpreadsheetCreate: document.getElementById('btn-spreadsheet-create'),
-  batchDialog:      document.getElementById('dialog-batch-import'),
-  batchSearchInput: document.getElementById('batch-search-input'),
-  batchList:        document.getElementById('batch-list'),
-  batchInfo:        document.getElementById('batch-selection-info'),
-  btnBatchSelectVisible: document.getElementById('btn-batch-select-visible'),
-  btnBatchClearSelection: document.getElementById('btn-batch-clear-selection'),
-  btnBatchCancel:   document.getElementById('btn-batch-cancel'),
-  btnBatchImportSelected: document.getElementById('btn-batch-import-selected'),
-  spreadsheetInfo:  document.getElementById('spreadsheet-info'),
-  spreadsheetLink:  document.getElementById('spreadsheet-link'),
-  btnChangeSheet:   document.getElementById('btn-change-spreadsheet'),
-  supportHubDialog: document.getElementById('dialog-support-hub'),
-  // Views
-  viewDashboard:    document.getElementById('view-dashboard'),
-  viewSet:          document.getElementById('view-set'),
-  viewStats:        document.getElementById('view-stats'),
-  viewSearch:       document.getElementById('view-search'),
-  // Dashboard
-  dashFilter:       document.getElementById('dash-filter'),
-  dashSeriesFilter: document.getElementById('dash-series-filter'),
-  dashSort:         document.getElementById('dash-sort'),
-  recentSets:       document.getElementById('recent-sets'),
-  btnOverviewSync:  document.getElementById('btn-overview-sync'),
-  btnOverviewPowerRefresh: document.getElementById('btn-overview-power-refresh'),
-  btnImportBatch:   document.getElementById('btn-import-batch'),
-  btnImportAll:     document.getElementById('btn-import-all-missing'),
-  btnReimportCurrent: document.getElementById('btn-reimport-current'),
-  btnReimportAllImported: document.getElementById('btn-reimport-all-imported'),
-  btnExportSummaryCsv: document.getElementById('btn-export-summary-csv'),
-  btnDataHealthCheck: document.getElementById('btn-data-health-check'),
-  btnDataHealthAutofix: document.getElementById('btn-data-health-autofix'),
-  btnManageImportedSets: document.getElementById('btn-manage-imported-sets'),
-  btnSheetsRetryReport: document.getElementById('btn-sheets-retry-report'),
-  btnQueueAutofixRefresh: document.getElementById('btn-queue-autofix-refresh'),
-  btnQueueBuilder: document.getElementById('btn-queue-builder'),
-  btnQueueRun: document.getElementById('btn-queue-run'),
-  btnQueueClear: document.getElementById('btn-queue-clear'),
-  btnCardmarketReloadPrices: document.getElementById('btn-cardmarket-reload-prices'),
-  btnDashboardCompact: document.getElementById('btn-dashboard-compact'),
-  queueBuilderDialog: document.getElementById('dialog-queue-builder'),
-  queueBuilderList: document.getElementById('queue-builder-list'),
-  queueBuilderSelected: document.getElementById('queue-builder-selected'),
-  queuePresetSelect: document.getElementById('queue-preset-select'),
-  btnQueuePresetSave: document.getElementById('btn-queue-preset-save'),
-  btnQueuePresetRename: document.getElementById('btn-queue-preset-rename'),
-  btnQueuePresetDuplicate: document.getElementById('btn-queue-preset-duplicate'),
-  btnQueuePresetDelete: document.getElementById('btn-queue-preset-delete'),
-  btnQueuePresetExport: document.getElementById('btn-queue-preset-export'),
-  btnQueuePresetImport: document.getElementById('btn-queue-preset-import'),
-  queuePresetFileInput: document.getElementById('input-queue-presets-file'),
-  btnQueueBuilderCancel: document.getElementById('btn-queue-builder-cancel'),
-  btnQueueBuilderAdd: document.getElementById('btn-queue-builder-add'),
-  btnExportBackup: document.getElementById('btn-export-backup'),
-  btnImportBackup: document.getElementById('btn-import-backup'),
-  btnImportLegacyXlsx: document.getElementById('btn-import-legacy-xlsx'),
-  btnImportLegacySheet: document.getElementById('btn-import-legacy-sheet'),
-  backupFileInput: document.getElementById('input-backup-file'),
-  legacyImportFileInput: document.getElementById('input-legacy-import-file'),
-  legacySheetDialog: document.getElementById('dialog-legacy-sheet-import'),
-  legacySheetInput: document.getElementById('input-legacy-sheet-link'),
-  legacySheetError: document.getElementById('legacy-sheet-import-error'),
-  btnLegacySheetCancel: document.getElementById('btn-legacy-sheet-cancel'),
-  btnLegacySheetImportConfirm: document.getElementById('btn-legacy-sheet-import-confirm'),
-  legacySelectionDialog: document.getElementById('dialog-legacy-import-selection'),
-  legacySelectionSearch: document.getElementById('input-legacy-selection-filter'),
-  legacySelectionSummary: document.getElementById('legacy-selection-summary'),
-  legacySelectionInfo: document.getElementById('legacy-selection-info'),
-  legacySelectionTree: document.getElementById('legacy-import-selection-tree'),
-  btnLegacySelectionAll: document.getElementById('btn-legacy-selection-all'),
-  btnLegacySelectionNone: document.getElementById('btn-legacy-selection-none'),
-  btnLegacySelectionCancel: document.getElementById('btn-legacy-selection-cancel'),
-  btnLegacySelectionConfirm: document.getElementById('btn-legacy-selection-confirm'),
-  manageSetsDialog: document.getElementById('dialog-manage-sets'),
-  manageSetsSearch: document.getElementById('manage-sets-search-input'),
-  manageSetsList: document.getElementById('manage-sets-list'),
-  manageSetsInfo: document.getElementById('manage-sets-info'),
-  btnManageSetsSelectVisible: document.getElementById('btn-manage-sets-select-visible'),
-  btnManageSetsClearSelection: document.getElementById('btn-manage-sets-clear-selection'),
-  btnManageSetsReimportSelected: document.getElementById('btn-manage-sets-reimport-selected'),
-  btnManageSetsDeleteSelected: document.getElementById('btn-manage-sets-delete-selected'),
-  btnManageSetsCancel: document.getElementById('btn-manage-sets-cancel'),
-  sheetsRetryDialog: document.getElementById('dialog-sheets-retry-report'),
-  sheetsRetryStats: document.getElementById('sheets-retry-stats'),
-  sheetsRetryHistory: document.getElementById('sheets-retry-history'),
-  btnSheetsRetryReset: document.getElementById('btn-sheets-retry-reset'),
-  btnSheetsRetryClose: document.getElementById('btn-sheets-retry-close'),
-  dashboardGrid:    document.getElementById('dashboard-grid'),
-  // Set detail - sidebar
-  selector:         document.getElementById('set-selector'),
-  load:             document.getElementById('btn-load'),
-  refresh:          document.getElementById('btn-refresh'),
-  refreshSplit:     document.getElementById('refresh-split'),
-  btnRefreshMenu:   document.getElementById('btn-refresh-menu'),
-  refreshMenu:      document.getElementById('refresh-menu'),
-  btnRefreshReimport: document.getElementById('btn-refresh-reimport'),
-  status:           document.getElementById('status'),
-  saveStatePill:    document.getElementById('save-state-pill'),
-  setLogoWrap:      document.getElementById('set-logo-wrap'),
-  setLogo:          document.getElementById('set-logo'),
-  setSymbol:        document.getElementById('set-symbol'),
-  statsSection:     document.getElementById('stats-section'),
-  filterSection:    document.getElementById('filter-section'),
-  sortSection:      document.getElementById('sort-section'),
-  progressFill:     document.getElementById('progress-fill'),
-  progressText:     document.getElementById('progress-text'),
-  statTotal:        document.getElementById('stat-total'),
-  statCollected:    document.getElementById('stat-collected'),
-  statRh:           document.getElementById('stat-rh'),
-  statMissing:      document.getElementById('stat-missing'),
-  cardSort:         document.getElementById('card-sort'),
-  // Set detail - toolbar
-  btnBulkEdit:      document.getElementById('btn-bulk-edit'),
-  btnUndoLast:      document.getElementById('btn-undo-last'),
-  btnAuditPanel:    document.getElementById('btn-audit-panel'),
-  btnMissingExport: document.getElementById('btn-missing-export'),
-  bulkToolbar:      document.getElementById('bulk-toolbar'),
-  bulkCount:        document.getElementById('bulk-count'),
-  btnBulkMarkG:     document.getElementById('btn-bulk-mark-g'),
-  btnBulkMarkRh:    document.getElementById('btn-bulk-mark-rh'),
-  btnBulkUnmark:    document.getElementById('btn-bulk-unmark'),
-  btnBulkCancel:    document.getElementById('btn-bulk-cancel'),
-  auditPanel:       document.getElementById('audit-panel'),
-  auditList:        document.getElementById('audit-list'),
-  btnAuditClear:    document.getElementById('btn-audit-clear'),
-  // Cards
-  cards:            document.getElementById('cards'),
-  emptyState:       document.getElementById('empty-state'),
-  // Lightbox
-  lightboxDialog:   document.getElementById('dialog-lightbox'),
-  lightboxImg:      document.getElementById('lightbox-img'),
-  lightboxTitle:    document.getElementById('lightbox-title'),
-  lightboxSubtitle: document.getElementById('lightbox-subtitle'),
-  lightboxCounter:  document.getElementById('lightbox-counter'),
-  lightboxSet:      document.getElementById('lightbox-set'),
-  lightboxRarity:   document.getElementById('lightbox-rarity'),
-  lightboxHp:       document.getElementById('lightbox-hp'),
-  lightboxTypes:    document.getElementById('lightbox-types'),
-  lightboxSupertype: document.getElementById('lightbox-supertype'),
-  lightboxSubtypes: document.getElementById('lightbox-subtypes'),
-  lightboxEvolvesFrom: document.getElementById('lightbox-evolves-from'),
-  lightboxArtist:   document.getElementById('lightbox-artist'),
-  lightboxRegulationMark: document.getElementById('lightbox-regulation-mark'),
-  lightboxRules:    document.getElementById('lightbox-rules'),
-  lightboxFlavorText: document.getElementById('lightbox-flavor-text'),
-  lightboxPricePanel: document.getElementById('lightbox-price-panel'),
-  lightboxPriceMode: document.getElementById('lightbox-price-mode'),
-  lightboxPriceGrid: document.getElementById('lightbox-price-grid'),
-  lightboxCmLink:   document.getElementById('lightbox-cm-link'),
-  lightboxGCheck:   document.getElementById('lightbox-g-check'),
-  lightboxRhCheck:  document.getElementById('lightbox-rh-check'),
-  btnLightboxClose: document.getElementById('btn-lightbox-close'),
-  btnLightboxPrev:  document.getElementById('btn-lightbox-prev'),
-  btnLightboxNext:  document.getElementById('btn-lightbox-next'),
-  lightboxImageDialog: document.getElementById('dialog-lightbox-image'),
-  lightboxImageStage: document.getElementById('lightbox-image-stage'),
-  lightboxImageFull: document.getElementById('lightbox-image-full'),
-  btnLightboxImageClose: document.getElementById('btn-lightbox-image-close'),
-  // Stats view
-  statsContent:     document.getElementById('stats-content'),
-  // Search view
-  searchInput:      document.getElementById('search-input'),
-  searchSetFilter:  document.getElementById('search-set-filter'),
-  searchScopeMode:  document.getElementById('search-scope-mode'),
-  searchResults:    document.getElementById('search-results'),
-  searchToolbarMeta: document.getElementById('search-toolbar-meta'),
-};
 
 // --------------------------------------------------------------------------
 // APP-STATE
@@ -424,91 +228,9 @@ async function reloadCardmarketPricesManually() {
   }
 }
 
-const state = {
-  loggedIn:     false,
-  sets:         [],
-  allSets:      [],
-  summaryData:  null,
-  // api/v3 meta.json excludedSetIds/excludedSeries (loadSets): blendet Sets nur in der Anzeige aus.
-  isExcludedSet: () => false,
-  excludedSetNames: new Set(),
-  // Alle importierten Sets ungefiltert (inkl. ausgeschlossener): Backup, Restore und Overview-Sync
-  // brauchen die vollstaendigen Sheet-Daten.
-  importedSetsAll: [],
-  summaryOverrides: new Map(),
-  currentSet:   null,
-  dbMap:        new Map(),
-  cards:        [],
-  filter:       'all',
-  sortOrder:    'number',
-  bulkMode:     false,
-  bulkSelected: new Set(),
-  lightboxIndex: 0,
-  searchCache:  new Map(),
-  searchRunId:  0,
-  searchAbortController: null,
-  pendingSearchSetImport: false,
-  pendingSearchCardFocusKey: null,
-  autoImportJobs: new Map(),
-  autoImportQueue: Promise.resolve(),
-  manualImportJobs: new Map(),
-  manualImportQueue: Promise.resolve(),
-  importAuthBlocked: false,
-  autoImportQueuedSetIds: [],
-  autoImportActiveSetId: null,
-  autoImportLastLimitToastAt: 0,
-  autoImportRefreshTimer: null,
-  batchSelection: new Set(),
-  activeJob: null,
-  queuedActions: [],
-  queueRunning: false,
-  queueCancelRequested: false,
-  queueBuilderSelection: [],
-  queueBuilderSequence: [],
-  queuePresets: [],
-  recentSets: [],
-  dashboardView: 'all',
-  dashboardDensity: 'comfortable',
-  quickFilters: {
-    completed: false,
-    inProgress: false,
-  },
-  realtimeClientId: null,
-  realtime: null,
-  pendingWrites: 0,
-  lastSaveError: null,
-  saveStateTimer: null,
-  manageSetsSelection: new Set(),
-  sheetsRetryMetrics: createInitialSheetsRetryMetrics(),
-  undoStack: [],
-  auditEntries: [],
-  devCompletionMode: false,
-  statsPrice: {
-    requestId: '',
-    status: 'idle',
-    totals: null,
-    bySet: [],
-    topCards: [],
-    items: [],
-    activeTab: 'dashboard',
-    loadedCards: 0,
-    totalCards: 0,
-    errors: 0,
-    watchlist: {
-      filters: {},
-      visibleCount: 0,
-      debounceTimers: {},
-      autoLoadBudget: 0,
-      autoLoadInFlight: false,
-    },
-  },
-};
 
-let focusedCardIndex = -1;
-let spreadsheetDialogReturnFocusEl = null;
 
 const LOADING_MAX_BLOCK_MS = 12000;
-let loadingFailsafeTimer = null;
 
 const SEARCH_INPUT_DEBOUNCE_MS = 900;
 // Suche: hoechstens so viele Treffer als Karten zeichnen (z. B. 'pokemon' trifft ~20 000 Indexeintraege).
@@ -2019,7 +1741,7 @@ function resetRuntimeUiForSpreadsheetSwitch() {
 
   Object.assign(state, createSpreadsheetSwitchStatePatch(state));
   cache.clear();
-  focusedCardIndex = -1;
+  uiState.focusedCardIndex = -1;
 
   syncSetNavLink(null);
   dom.cards.innerHTML = '';
@@ -2467,7 +2189,7 @@ function openSpreadsheetDialog(required = false) {
   dom.dialogError.classList.add('hidden');
   dom.dialogInput.value = CONFIG.SPREADSHEET_ID || '';
   if (dom.dialogNewNameInput) dom.dialogNewNameInput.value = '';
-  spreadsheetDialogReturnFocusEl = document.activeElement instanceof HTMLElement
+  uiState.spreadsheetDialogReturnFocusEl = document.activeElement instanceof HTMLElement
     ? document.activeElement
     : null;
   if (dom.dialog) dom.dialog.dataset.required = required ? 'true' : 'false';
@@ -2672,10 +2394,10 @@ function updateSpreadsheetInfoBar() {
 
 function initSpreadsheetDialog() {
   dom.dialog?.addEventListener('close', () => {
-    if (spreadsheetDialogReturnFocusEl && typeof spreadsheetDialogReturnFocusEl.focus === 'function') {
-      spreadsheetDialogReturnFocusEl.focus();
+    if (uiState.spreadsheetDialogReturnFocusEl && typeof uiState.spreadsheetDialogReturnFocusEl.focus === 'function') {
+      uiState.spreadsheetDialogReturnFocusEl.focus();
     }
-    spreadsheetDialogReturnFocusEl = null;
+    uiState.spreadsheetDialogReturnFocusEl = null;
   });
   dom.dialog?.addEventListener('cancel', (e) => {
     const required = dom.dialog?.dataset?.required === 'true';
@@ -7930,14 +7652,14 @@ function makeCheckbox(labelText, type, checked, disabled) {
 }
 
 function syncCollectionCheckboxUi(gInput, rhInput, db, { isEditable = Boolean(state.currentSet?.setName) } = {}) {
-  const uiState = getCollectionUiState(db, { isEditable });
+  const cellUiState = getCollectionUiState(db, { isEditable });
   if (gInput) {
-    gInput.checked = uiState.gChecked;
-    gInput.disabled = uiState.gDisabled;
+    gInput.checked = cellUiState.gChecked;
+    gInput.disabled = cellUiState.gDisabled;
   }
   if (rhInput) {
-    rhInput.checked = uiState.rhChecked;
-    rhInput.disabled = uiState.rhDisabled;
+    rhInput.checked = cellUiState.rhChecked;
+    rhInput.disabled = cellUiState.rhDisabled;
   }
 }
 
@@ -8851,26 +8573,26 @@ function initKeyboardNav() {
     if (!articles.length) return;
 
     const cols = Math.max(1, Math.floor(dom.cards.offsetWidth / 170));
-    let newIndex = focusedCardIndex;
+    let newIndex = uiState.focusedCardIndex;
     
-    if (e.key === 'ArrowRight') { e.preventDefault(); newIndex = Math.min((focusedCardIndex < 0 ? -1 : focusedCardIndex) + 1, articles.length - 1); }
-    else if (e.key === 'ArrowLeft')  { e.preventDefault(); newIndex = Math.max(focusedCardIndex - 1, 0); }
-    else if (e.key === 'ArrowDown')  { e.preventDefault(); newIndex = Math.min(focusedCardIndex + cols, articles.length - 1); }
-    else if (e.key === 'ArrowUp')    { e.preventDefault(); newIndex = Math.max(focusedCardIndex - cols, 0); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); newIndex = Math.min((uiState.focusedCardIndex < 0 ? -1 : uiState.focusedCardIndex) + 1, articles.length - 1); }
+    else if (e.key === 'ArrowLeft')  { e.preventDefault(); newIndex = Math.max(uiState.focusedCardIndex - 1, 0); }
+    else if (e.key === 'ArrowDown')  { e.preventDefault(); newIndex = Math.min(uiState.focusedCardIndex + cols, articles.length - 1); }
+    else if (e.key === 'ArrowUp')    { e.preventDefault(); newIndex = Math.max(uiState.focusedCardIndex - cols, 0); }
     else if (e.key === ' ' || e.key === 'Enter') {
       e.preventDefault();
-      articles[focusedCardIndex]?.querySelector('input[data-type="g"]:not(:disabled)')?.click();
+      articles[uiState.focusedCardIndex]?.querySelector('input[data-type="g"]:not(:disabled)')?.click();
       return;
     } else if (e.key === 'i' || e.key === 'I') {
       e.preventDefault();
-      const idx = parseInt(articles[focusedCardIndex]?.dataset.cardIndex ?? '-1');
+      const idx = parseInt(articles[uiState.focusedCardIndex]?.dataset.cardIndex ?? '-1');
       if (idx >= 0) openLightbox(idx);
       return;
     } else return;
 
     if (newIndex < 0) newIndex = 0;
-    focusedCardIndex = newIndex;
-    const target = articles[focusedCardIndex];
+    uiState.focusedCardIndex = newIndex;
+    const target = articles[uiState.focusedCardIndex];
     if (target) {
       target.focus();
       target.scrollIntoView({ block: 'nearest' });
@@ -8881,7 +8603,7 @@ function initKeyboardNav() {
     const article = e.target.closest('.card');
     if (article) {
       const articles = Array.from(dom.cards.querySelectorAll('.card:not(.hidden)'));
-      focusedCardIndex = articles.indexOf(article);
+      uiState.focusedCardIndex = articles.indexOf(article);
     }
   }, true);
 }
@@ -9030,7 +8752,7 @@ async function loadCurrentSet(forceRefresh = false) {
     state.cards = cards;
     state.dbMap = dbMap;
     state.pendingSearchSetImport = false;
-    focusedCardIndex = -1;
+    uiState.focusedCardIndex = -1;
     if (state.bulkMode) toggleBulkMode(false);
     state.filter = 'all';
     dom.cardSort.value = 'number';
