@@ -2129,20 +2129,17 @@
       "cards": 17,
       "coverage": {
         "bySource": {
-          "matched": 3,
-          "tcgdex": 13
+          "customSet": 17
         },
         "cards": 17,
-        "withId": 16
+        "withId": 17
       },
+      "customSet": 17,
       "expansionId": 1617,
-      "matched": 3,
-      "missing": 1,
-      "missingCards": [
-        "9"
-      ],
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1617&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 13
+      "tcgdex": 0
     },
     "pop6": {
       "ambiguous": 0,
@@ -3428,7 +3425,7 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 6168,
+    "applied": 6185,
     "changed": 816,
     "conflicts": [],
     "dropped": [
@@ -3594,6 +3591,12 @@
         "name": "Infernape E4 LV.X",
         "productId": 278682,
         "productName": "Infernape [4] LV.X [Intimidating Roar | Fire Spin]"
+      },
+      {
+        "cardKey": "pop5/9",
+        "name": "δ Rainbow Energy",
+        "productId": 277491,
+        "productName": "Rainbow Energy Delta"
       },
       {
         "cardKey": "sm10/172",
@@ -6630,14 +6633,14 @@
       }
     ],
     "totals": {
-      "checked": 17191,
+      "checked": 17178,
       "corrected": 1,
       "dropped": 13,
       "droppedShared": 11,
       "foreignNameOk": 1231,
       "keptMismatch": 134,
       "noSetExpansion": 0,
-      "ok": 15809,
+      "ok": 15796,
       "unknownProduct": 3
     }
   },
@@ -8108,19 +8111,6 @@
     {
       "candidates": [
         {
-          "name": "Rainbow Energy Delta",
-          "productId": 277491
-        }
-      ],
-      "cardKey": "pop5/9",
-      "deName": null,
-      "expansionId": 1617,
-      "name": "δ Rainbow Energy",
-      "set": "pop5"
-    },
-    {
-      "candidates": [
-        {
           "hint": "same-name-unnumbered",
           "name": "Eevee [Energy Evolution | Quick Draw]",
           "productId": 366834
@@ -8193,13 +8183,6 @@
     },
     {
       "count": 1,
-      "expansionId": 1617,
-      "sets": [
-        "pop5"
-      ]
-    },
-    {
-      "count": 1,
       "expansionId": 1706,
       "sets": [
         "xy10"
@@ -8230,12 +8213,12 @@
   "totals": {
     "ambiguous": 5,
     "cards": 21577,
-    "customSet": 6168,
-    "matched": 84,
-    "missing": 16,
+    "customSet": 6185,
+    "matched": 81,
+    "missing": 15,
     "override": 8,
     "stabilityKept": 176,
-    "tcgdex": 15125
+    "tcgdex": 15112
   },
   "versionSuffixSkippedByExpansion": {
     "1521": 9,
