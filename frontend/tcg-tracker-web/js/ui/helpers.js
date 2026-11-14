@@ -35,6 +35,15 @@ export function showToast(message, type = 'info', durationMs = 3000) {
   setTimeout(() => el.remove(), durationMs);
 }
 
+export function escapeHtml(value = '') {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export function normalizeUiText(value) {
   let text = String(value ?? '');
   if (!text) return '';

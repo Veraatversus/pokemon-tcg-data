@@ -57,7 +57,7 @@ test('echte api/v3/meta.json: alle 15 Pocket-Sets ausgeschlossen', () => {
 });
 
 test('loadSets blendet ausgeschlossene Sets aus db_sets und Overview aus (Dashboard, Auswahl, Import, Suche, Statistik)', () => {
-  const src = readFileSync(fileURLToPath(new URL('../js/app.js', import.meta.url)), 'utf8');
+  const src = readFileSync(fileURLToPath(new URL('../js/views/dashboard.js', import.meta.url)), 'utf8');
   const start = src.indexOf('async function loadSets()');
   const body = src.slice(start, src.indexOf('\nfunction getSetSeriesGroupInfo', start));
   assert.match(body, /loadExcludedSetPredicate\(\)/);
@@ -69,9 +69,10 @@ test('loadSets blendet ausgeschlossene Sets aus db_sets und Overview aus (Dashbo
 
 test('Statistik/Dashboard-Summary ohne ausgeschlossene Sets (Summary-Zeilen tragen setId)', () => {
   const src = readFileSync(fileURLToPath(new URL('../js/app.js', import.meta.url)), 'utf8');
-  assert.match(src, /async function readVisibleSummary\(\) \{\s*return filterVisibleSummaryRows\(await readSummarySheet\(\), state\.isExcludedSet, state\.excludedSetNames\);/);
+  const dashSrc = readFileSync(fileURLToPath(new URL('../js/views/dashboard.js', import.meta.url)), 'utf8');
+  assert.match(dashSrc, /async function readVisibleSummary\(\) \{\s*return filterVisibleSummaryRows\(await readSummarySheet\(\), state\.isExcludedSet, state\.excludedSetNames\);/);
   assert.match(src, /state\.summaryData = await readVisibleSummary\(\)/);
-  assert.match(src, /state\.isExcludedSet = isExcludedSet;/);
+  assert.match(dashSrc, /state\.isExcludedSet = isExcludedSet;/);
   const rows = [{ setId: 'TCGDEX-A1', setName: 'Unschlagbare Gene' }, { setId: 'sv1', setName: 'Karmesin & Purpur' }];
   assert.deepEqual(filterExcludedSets(rows, buildExcludedSetPredicate(META)).map((r) => r.setId), ['sv1']);
 });
@@ -96,7 +97,8 @@ test('Legacy-Summary ohne setId: Zeilen ausgeschlossener Sets ueber den Setnamen
 
 test('Backup, Restore und Overview-Sync nutzen die ungefilterte Liste importierter Sets (Sheet-Daten vollstaendig)', () => {
   const src = readFileSync(fileURLToPath(new URL('../js/app.js', import.meta.url)), 'utf8');
-  const loadSetsBody = src.slice(src.indexOf('async function loadSets()'), src.indexOf('\nfunction getSetSeriesGroupInfo'));
+  const dashSrc = readFileSync(fileURLToPath(new URL('../js/views/dashboard.js', import.meta.url)), 'utf8');
+  const loadSetsBody = dashSrc.slice(dashSrc.indexOf('async function loadSets()'), dashSrc.indexOf('\nfunction getSetSeriesGroupInfo'));
   // ungefiltert gemerkt, bevor gefiltert wird
   assert.ok(loadSetsBody.indexOf('state.importedSetsAll = importedSets;') >= 0);
   assert.ok(loadSetsBody.indexOf('state.importedSetsAll = importedSets;') < loadSetsBody.indexOf('importedSets = filterExcludedSets(importedSets, isExcludedSet)'));

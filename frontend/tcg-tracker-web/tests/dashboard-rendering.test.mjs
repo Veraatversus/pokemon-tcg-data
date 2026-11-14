@@ -44,6 +44,7 @@ for (const sortBy of ['name', 'series-date']) {
 }
 
 test('app.js has no dashboard virtual paging left', () => {
-  const src = readFileSync(new URL('../js/app.js', import.meta.url), 'utf8');
+  const src = readFileSync(new URL('../js/app.js', import.meta.url), 'utf8')
+    + readFileSync(new URL('../js/views/dashboard.js', import.meta.url), 'utf8');
   assert.doesNotMatch(src, /DASHBOARD_VIRTUAL|dashboardVirtualCount|resetDashboardVirtualization|data-action="more"/);
 });
