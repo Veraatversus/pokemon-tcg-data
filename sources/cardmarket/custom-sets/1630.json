@@ -1,0 +1,251 @@
+{
+  "expansionId": 1630,
+  "name": "BW Trainer Kit",
+  "_note": "280067 (Darkness Energy) steht auf Cardmarket als \"TK5 20E\" (doppelt mit 280100 Fighting Energy); gehoert zum Zoroark-Kit -> 20Z (2026-11-14).",
+  "cards": [
+    {
+      "productId": 280123,
+      "collectorNumber": "1E"
+    },
+    {
+      "productId": 280093,
+      "collectorNumber": "1Z"
+    },
+    {
+      "productId": 280098,
+      "collectorNumber": "2E"
+    },
+    {
+      "productId": 280066,
+      "collectorNumber": "2Z"
+    },
+    {
+      "productId": 280116,
+      "collectorNumber": "3E"
+    },
+    {
+      "productId": 280087,
+      "collectorNumber": "3Z"
+    },
+    {
+      "productId": 280110,
+      "collectorNumber": "4E"
+    },
+    {
+      "productId": 280081,
+      "collectorNumber": "4Z"
+    },
+    {
+      "productId": 280112,
+      "collectorNumber": "5E"
+    },
+    {
+      "productId": 280080,
+      "collectorNumber": "5Z"
+    },
+    {
+      "productId": 280113,
+      "collectorNumber": "6E"
+    },
+    {
+      "productId": 280082,
+      "collectorNumber": "6Z"
+    },
+    {
+      "productId": 280115,
+      "collectorNumber": "7E"
+    },
+    {
+      "productId": 280083,
+      "collectorNumber": "7Z"
+    },
+    {
+      "productId": 280114,
+      "collectorNumber": "8E"
+    },
+    {
+      "productId": 280085,
+      "collectorNumber": "8Z"
+    },
+    {
+      "productId": 280094,
+      "collectorNumber": "9E"
+    },
+    {
+      "productId": 280084,
+      "collectorNumber": "9Z"
+    },
+    {
+      "productId": 280104,
+      "collectorNumber": "10E"
+    },
+    {
+      "productId": 280073,
+      "collectorNumber": "10Z"
+    },
+    {
+      "productId": 280103,
+      "collectorNumber": "11E"
+    },
+    {
+      "productId": 280072,
+      "collectorNumber": "11Z"
+    },
+    {
+      "productId": 280105,
+      "collectorNumber": "12E"
+    },
+    {
+      "productId": 280074,
+      "collectorNumber": "12Z"
+    },
+    {
+      "productId": 280106,
+      "collectorNumber": "13E"
+    },
+    {
+      "productId": 280075,
+      "collectorNumber": "13Z"
+    },
+    {
+      "productId": 280107,
+      "collectorNumber": "14E"
+    },
+    {
+      "productId": 280077,
+      "collectorNumber": "14Z"
+    },
+    {
+      "productId": 280102,
+      "collectorNumber": "15E"
+    },
+    {
+      "productId": 280076,
+      "collectorNumber": "15Z"
+    },
+    {
+      "productId": 280101,
+      "collectorNumber": "16E"
+    },
+    {
+      "productId": 280071,
+      "collectorNumber": "16Z"
+    },
+    {
+      "productId": 280096,
+      "collectorNumber": "17E"
+    },
+    {
+      "productId": 280070,
+      "collectorNumber": "17Z"
+    },
+    {
+      "productId": 280095,
+      "collectorNumber": "18E"
+    },
+    {
+      "productId": 280065,
+      "collectorNumber": "18Z"
+    },
+    {
+      "productId": 280097,
+      "collectorNumber": "19E"
+    },
+    {
+      "productId": 280064,
+      "collectorNumber": "19Z"
+    },
+    {
+      "productId": 280100,
+      "collectorNumber": "20E"
+    },
+    {
+      "productId": 280067,
+      "collectorNumber": "20Z"
+    },
+    {
+      "productId": 280099,
+      "collectorNumber": "21E"
+    },
+    {
+      "productId": 280069,
+      "collectorNumber": "21Z"
+    },
+    {
+      "productId": 280108,
+      "collectorNumber": "22E"
+    },
+    {
+      "productId": 280068,
+      "collectorNumber": "22Z"
+    },
+    {
+      "productId": 280109,
+      "collectorNumber": "23E"
+    },
+    {
+      "productId": 280078,
+      "collectorNumber": "23Z"
+    },
+    {
+      "productId": 280119,
+      "collectorNumber": "24E"
+    },
+    {
+      "productId": 280079,
+      "collectorNumber": "24Z"
+    },
+    {
+      "productId": 280118,
+      "collectorNumber": "25E"
+    },
+    {
+      "productId": 280089,
+      "collectorNumber": "25Z"
+    },
+    {
+      "productId": 280120,
+      "collectorNumber": "26E"
+    },
+    {
+      "productId": 280088,
+      "collectorNumber": "26Z"
+    },
+    {
+      "productId": 280121,
+      "collectorNumber": "27E"
+    },
+    {
+      "productId": 280090,
+      "collectorNumber": "27Z"
+    },
+    {
+      "productId": 280122,
+      "collectorNumber": "28E"
+    },
+    {
+      "productId": 280091,
+      "collectorNumber": "28Z"
+    },
+    {
+      "productId": 280117,
+      "collectorNumber": "29E"
+    },
+    {
+      "productId": 280092,
+      "collectorNumber": "29Z"
+    },
+    {
+      "productId": 280111,
+      "collectorNumber": "30E"
+    },
+    {
+      "productId": 280086,
+      "collectorNumber": "30Z"
+    }
+  ],
+  "setSuffix": {
+    "TCGDEX-tk-bw-e": "E",
+    "TCGDEX-tk-bw-z": "Z"
+  }
+}
