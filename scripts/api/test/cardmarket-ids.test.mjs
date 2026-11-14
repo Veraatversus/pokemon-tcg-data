@@ -1083,3 +1083,18 @@ test('Override mit Expansion nicht im Katalog: problems missing-expansion', () =
   });
   assert.deepEqual(report.overrides.problems, [{ kind: 'missing-expansion', key: 's1', expansionId: 555 }]);
 });
+
+test('geteilte TCGdex-ID: Karte, deren Name nicht passt, verliert sie, wenn das Produkt namentlich einer anderen Karte gehoert', () => {
+  // Trainer-Kit-Paar (tk-bw-e-1 Lillipup / tk-bw-z-1 Purrloin teilen 280093 = Purrloin); Lillipup-Ersatz mehrdeutig
+  const cards = [card('e1', '1', 'Lillipup', [10]), card('z1', '1b', 'Purrloin', [10]), card('x', '2', 'Snivy', [20]), card('y', '3', 'Tepig', [20])];
+  const { cards: out, report } = runCat(cards, {
+    100: [single(10, 'Purrloin [Scratch | Slash]', null), single(11, 'Lillipup [Bite]', null), single(12, 'Lillipup [Bite]', null), single(20, 'Oshawott', null)],
+  });
+  assert.deepEqual(out[0].ids.cardmarket, []);
+  assert.deepEqual(out[1].ids.cardmarket, [10]);
+  // Geteilt, aber keiner passt namentlich -> bleibt (kept-mismatch wie bisher)
+  assert.deepEqual(out[2].ids.cardmarket, [20]);
+  assert.deepEqual(out[3].ids.cardmarket, [20]);
+  assert.equal(report.expansionMismatch.totals.droppedShared, 1);
+  assert.ok(report.expansionMismatch.cards.some((c) => c.cardKey === 's1-e1' && c.reason === 'dropped-shared-mismatch'));
+});
