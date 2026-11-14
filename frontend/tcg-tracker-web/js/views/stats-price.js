@@ -1341,14 +1341,14 @@ function loadMoreStatsPriceWatchlistItems(container, snapshotArgs, { source = 'm
   const total = Number(scrollRegion.dataset.watchlistTotal || 0);
   if (!Number.isFinite(total) || total <= 0) return false;
 
-  ensureWatchlistState();
-  if (source === 'scroll' && state.statsPrice.watchlist.autoLoadInFlight) return false;
-  const visible = Number(state.statsPrice.watchlist.visibleCount || STATS_PRICE_WATCHLIST_BATCH_SIZE);
+  const watchlist = ensureWatchlistState();
+  if (source === 'scroll' && watchlist.autoLoadInFlight) return false;
+  const visible = Number(watchlist.visibleCount || STATS_PRICE_WATCHLIST_BATCH_SIZE);
   if (visible >= total) return false;
 
   if (source === 'scroll') {
-    state.statsPrice.watchlist.autoLoadInFlight = true;
-    state.statsPrice.watchlist.autoLoadBudget = 0;
+    watchlist.autoLoadInFlight = true;
+    watchlist.autoLoadBudget = 0;
   }
 
   const captureCurrentWatchlistScrollSnapshot = () => {
@@ -1358,7 +1358,7 @@ function loadMoreStatsPriceWatchlistItems(container, snapshotArgs, { source = 'm
   };
   const scrollSnapshot = captureCurrentWatchlistScrollSnapshot();
 
-  state.statsPrice.watchlist.visibleCount = Math.min(total, visible + STATS_PRICE_WATCHLIST_BATCH_SIZE);
+  watchlist.visibleCount = Math.min(total, visible + STATS_PRICE_WATCHLIST_BATCH_SIZE);
   renderStatsPriceSnapshot({
     ...snapshotArgs,
     preserveWatchlistScroll: scrollSnapshot,
