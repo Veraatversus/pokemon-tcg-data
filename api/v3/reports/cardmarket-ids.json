@@ -1150,7 +1150,8 @@
       "coverage": {
         "bySource": {
           "customSet": 161,
-          "tcgdex": 2
+          "override": 1,
+          "tcgdex": 1
         },
         "cards": 165,
         "withId": 163
@@ -1163,8 +1164,9 @@
         "47",
         "68"
       ],
+      "override": 1,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1536&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 2
+      "tcgdex": 1
     },
     "ecard2": {
       "ambiguous": 0,
@@ -3910,7 +3912,6 @@
     "ambiguous": [
       "ecard1/1",
       "ecard1/47",
-      "ecard1/66",
       "ecard1/68"
     ],
     "applied": 746,
@@ -3921,11 +3922,6 @@
         "cardKey": "ecard1/47",
         "number": "12",
         "productId": 274887
-      },
-      {
-        "cardKey": "ecard1/66",
-        "number": "29",
-        "productId": 274904
       },
       {
         "cardKey": "ecard1/68",
@@ -9713,13 +9709,13 @@
       }
     ],
     "totals": {
-      "checked": 21938,
+      "checked": 21937,
       "corrected": 35,
       "dropped": 11,
       "foreignNameOk": 1348,
       "keptMismatch": 103,
       "noSetExpansion": 178,
-      "ok": 20260,
+      "ok": 20259,
       "unknownProduct": 3
     }
   },
@@ -9918,7 +9914,7 @@
     }
   ],
   "overrides": {
-    "applied": 7,
+    "applied": 8,
     "problems": [],
     "removed": 0,
     "warnings": []
@@ -9950,7 +9946,7 @@
     "leftRight": 0,
     "ordered": 60,
     "orderedRejected": 16,
-    "override": 7,
+    "override": 8,
     "oversizeExcluded": 4,
     "versionSuffixSkipped": 10
   },
@@ -17133,9 +17129,9 @@
     "customSet": 746,
     "matched": 414,
     "missing": 426,
-    "override": 7,
+    "override": 8,
     "stabilityKept": 394,
-    "tcgdex": 19590
+    "tcgdex": 19589
   },
   "versionSuffixSkippedByExpansion": {
     "1537": 7,
