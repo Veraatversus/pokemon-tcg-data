@@ -357,3 +357,16 @@ test('buildCardmarketLinkPresentation zeigt RH-Preis eines v3-Preiseintrags', ()
   const presentation = buildCardmarketLinkPresentation(summary, { preferReverseHolo: true });
   assert.match(presentation.label, /RH Trend 3,00/);
 });
+
+test('buildCardmarketLinkPresentation: v3-Eintrag zeigt bei "Ø" avg bzw. RH avgHolo', () => {
+  const prices = { productId: 1, avg: 2.5, avg7: 2.2, trend: 3, avgHolo: 6.5, trendHolo: 7 };
+  const summary = makeEntry(prices);
+  assert.match(buildCardmarketLinkPresentation(summary, { basePriceType: 'average' }).label, /^Ø 2,50/);
+  assert.match(buildCardmarketLinkPresentation(summary, { basePriceType: 'average', preferReverseHolo: true }).label, /^RH Ø 6,50/);
+  assert.ok(buildCardmarketLinkPresentation(summary, { basePriceType: 'average' }).title.includes('Ø: 2,50'));
+});
+
+test('buildCardmarketLinkPresentation: v3-Eintrag ohne avg faellt bei "Ø" auf Ø7 zurueck', () => {
+  const summary = makeEntry({ productId: 1, avg7: 2.2, avg30: 2.4 });
+  assert.match(buildCardmarketLinkPresentation(summary, { basePriceType: 'average' }).label, /^Ø7 2,20/);
+});

@@ -1,5 +1,5 @@
 // Cardmarket-Preise aus api/v3/prices (Spec §2.3, §5): eine kompakte Datei je Set
-//   prices/<setId>.json = { "<cardId>": { productId, trend, avg1, avg7, avg30, low, trendHolo, avg1Holo, avg7Holo, avg30Holo, lowHolo } }
+//   prices/<setId>.json = { "<cardId>": { productId, avg, trend, avg1, avg7, avg30, low, trendHolo, avg1Holo, avg7Holo, avg30Holo, lowHolo } }
 // (nur vorhandene Felder). prices/meta.json.generatedAt aendert sich mit jeder Preisdatei und haengt als ?v=<stamp> an
 // jeder Preisdatei-URL: der Service Worker cached diese URLs cache-first, ein neuer Stamp ist eine neue URL.
 // meta.json wird je Sitzung einmal frisch gelesen (offline: zuletzt gespeicherter Stamp).

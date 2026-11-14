@@ -6,7 +6,7 @@
 // (promoteCardmarketUrlsForCards) entfaellt hier: es haette die massgeblichen v3-IDs nur
 // ueberschrieben (Produkt-URLs gelten dort als "generiert") und vergibt fuer Karten ohne URL
 // keine neue.
-import { resolveDisplayCard, resolveDisplaySet, seriesGroupKeyForName } from './schema-contract.js?v=20261114-cm-fixwave';
+import { resolveDisplayCard, resolveDisplaySet, seriesGroupKeyForName } from './schema-contract.js?v=20261114-cm-avg';
 import { loadV3Sets, loadV3Cards, loadRegistrySets } from './v3-api.js';
 import { createCollectionKeyResolver } from './v3-collection-keys.js';
 import { toSetRecord, toCardRecord } from './v3-records.js';
