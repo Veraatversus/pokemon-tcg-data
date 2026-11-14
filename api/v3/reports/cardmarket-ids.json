@@ -3410,35 +3410,21 @@
       "tcgdex": 101
     },
     "xy2": {
-      "ambiguous": 4,
-      "ambiguousCards": [
-        "13",
-        "69",
-        "107",
-        "108"
-      ],
+      "ambiguous": 0,
       "cards": 110,
-      "corrected": 6,
       "coverage": {
         "bySource": {
-          "stabilityKept": 10,
-          "tcgdex": 96
+          "customSet": 110
         },
         "cards": 110,
-        "withId": 106
+        "withId": 110
       },
+      "customSet": 110,
       "expansionId": 1583,
       "matched": 0,
-      "missing": 4,
-      "missingCards": [
-        "13",
-        "69",
-        "107",
-        "108"
-      ],
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1583&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 10,
-      "tcgdex": 96
+      "tcgdex": 0
     },
     "xy3": {
       "ambiguous": 3,
@@ -3656,8 +3642,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 3007,
-    "changed": 501,
+    "applied": 3117,
+    "changed": 515,
     "conflicts": [],
     "dropped": [
       {
@@ -5203,58 +5189,9 @@
       "xy1-146",
       "xy1-96"
     ],
-    "281494": [
-      "xy2-100",
-      "xy2-11",
-      "xy2-12"
-    ],
-    "281501": [
-      "xy2-18",
-      "xy2-19"
-    ],
-    "281518": [
-      "xy2-101",
-      "xy2-35"
-    ],
-    "281524": [
-      "xy2-102",
-      "xy2-41"
-    ],
-    "281533": [
-      "xy2-50",
-      "xy2-51"
-    ],
-    "281536": [
-      "xy2-53",
-      "xy2-54"
-    ],
-    "281545": [
-      "xy2-62",
-      "xy2-63"
-    ],
-    "281547": [
-      "xy2-64",
-      "xy2-65"
-    ],
-    "281561": [
-      "xy2-103",
-      "xy2-78"
-    ],
     "281571": [
       "xy2-88",
       "xy2-88a"
-    ],
-    "281573": [
-      "xy2-104",
-      "xy2-90"
-    ],
-    "281576": [
-      "xy2-105",
-      "xy2-93"
-    ],
-    "281577": [
-      "xy2-106",
-      "xy2-94"
     ],
     "281668": [
       "xy3-105",
@@ -6023,10 +5960,10 @@
     ]
   },
   "duplicates": {
-    "cards": 1058,
-    "corrected": 290,
-    "ids": 516,
-    "kept": 768
+    "cards": 1031,
+    "corrected": 284,
+    "ids": 504,
+    "kept": 747
   },
   "expansionMismatch": {
     "cards": [
@@ -7697,14 +7634,14 @@
       }
     ],
     "totals": {
-      "checked": 20206,
+      "checked": 20102,
       "corrected": 25,
       "dropped": 21,
       "droppedShared": 17,
       "foreignNameOk": 1281,
       "keptMismatch": 135,
       "noSetExpansion": 0,
-      "ok": 18741,
+      "ok": 18637,
       "unknownProduct": 3
     }
   },
@@ -7819,18 +7756,6 @@
     },
     {
       "cards": [
-        "xy2/79",
-        "xy2/109"
-      ],
-      "expansionId": 1583,
-      "name": "M Kangaskhan-EX",
-      "products": [
-        281562,
-        281592
-      ]
-    },
-    {
-      "cards": [
         "xy3/5",
         "xy3/112"
       ],
@@ -7910,10 +7835,10 @@
     "energySymbol": 3,
     "leftRight": 0,
     "ordered": 30,
-    "orderedRejected": 14,
+    "orderedRejected": 13,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 139
+    "versionSuffixSkipped": 151
   },
   "setsWithoutExpansion": [
     {
@@ -9168,76 +9093,6 @@
       "source": "corrected",
       "todayId": 289931,
       "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy2/79",
-      "productId": 281562,
-      "source": "ordered",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "xy2/88a",
-      "productId": 311412,
-      "source": "corrected",
-      "todayId": 281571,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy2/100",
-      "productId": 281583,
-      "source": "corrected",
-      "todayId": 281494,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy2/101",
-      "productId": 281584,
-      "source": "corrected",
-      "todayId": 281518,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy2/102",
-      "productId": 281585,
-      "source": "corrected",
-      "todayId": 281524,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy2/103",
-      "productId": 281586,
-      "source": "corrected",
-      "todayId": 281561,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy2/104",
-      "productId": 281587,
-      "source": "corrected",
-      "todayId": 281573,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy2/105",
-      "productId": 281588,
-      "source": "corrected",
-      "todayId": 281576,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy2/106",
-      "productId": 281589,
-      "source": "corrected",
-      "todayId": 281577,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy2/109",
-      "productId": 281592,
-      "source": "ordered",
-      "todayId": null,
-      "todaySource": null
     },
     {
       "cardKey": "xy3/5",
@@ -10722,142 +10577,6 @@
       "candidates": [
         {
           "hint": "same-name-unnumbered",
-          "name": "MCharizard EX [Crimson Dive]",
-          "productId": 281496
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MCharizard EX [Wild Blaze]",
-          "productId": 281552
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MCharizard EX [Crimson Dive]",
-          "productId": 281590
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MCharizard EX [Wild Blaze]",
-          "productId": 281591
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "MCharizard EX [Crimson Dive]",
-          "productId": 363662
-        }
-      ],
-      "cardKey": "xy2/13",
-      "deName": "M-Glurak EX",
-      "expansionId": 1583,
-      "name": "M Charizard-EX",
-      "set": "xy2"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MCharizard EX [Crimson Dive]",
-          "productId": 281496
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MCharizard EX [Wild Blaze]",
-          "productId": 281552
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MCharizard EX [Crimson Dive]",
-          "productId": 281590
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MCharizard EX [Wild Blaze]",
-          "productId": 281591
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "MCharizard EX [Crimson Dive]",
-          "productId": 363662
-        }
-      ],
-      "cardKey": "xy2/69",
-      "deName": "M-Glurak EX",
-      "expansionId": 1583,
-      "name": "M Charizard-EX",
-      "set": "xy2"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MCharizard EX [Crimson Dive]",
-          "productId": 281496
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MCharizard EX [Wild Blaze]",
-          "productId": 281552
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MCharizard EX [Crimson Dive]",
-          "productId": 281590
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MCharizard EX [Wild Blaze]",
-          "productId": 281591
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "MCharizard EX [Crimson Dive]",
-          "productId": 363662
-        }
-      ],
-      "cardKey": "xy2/107",
-      "deName": "M-Glurak EX",
-      "expansionId": 1583,
-      "name": "M Charizard-EX",
-      "set": "xy2"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MCharizard EX [Crimson Dive]",
-          "productId": 281496
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MCharizard EX [Wild Blaze]",
-          "productId": 281552
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MCharizard EX [Crimson Dive]",
-          "productId": 281590
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MCharizard EX [Wild Blaze]",
-          "productId": 281591
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "MCharizard EX [Crimson Dive]",
-          "productId": 363662
-        }
-      ],
-      "cardKey": "xy2/108",
-      "deName": "M-Glurak EX",
-      "expansionId": 1583,
-      "name": "M Charizard-EX",
-      "set": "xy2"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
           "name": "MLucario EX [Rising Fist]",
           "productId": 281719
         },
@@ -11201,13 +10920,6 @@
   "stillMissingByExpansion": [
     {
       "count": 4,
-      "expansionId": 1583,
-      "sets": [
-        "xy2"
-      ]
-    },
-    {
-      "count": 4,
       "expansionId": 1678,
       "sets": [
         "xy8"
@@ -11404,19 +11116,20 @@
     }
   ],
   "totals": {
-    "ambiguous": 52,
+    "ambiguous": 48,
     "cards": 21577,
-    "customSet": 3007,
+    "customSet": 3117,
     "matched": 231,
-    "missing": 71,
+    "missing": 67,
     "override": 8,
-    "stabilityKept": 258,
-    "tcgdex": 18002
+    "stabilityKept": 248,
+    "tcgdex": 17906
   },
   "versionSuffixSkippedByExpansion": {
     "1537": 7,
     "1538": 3,
     "1563": 4,
+    "1583": 12,
     "1608": 7,
     "1609": 6,
     "1611": 7,
