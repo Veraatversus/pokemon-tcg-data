@@ -738,7 +738,10 @@ export function fillCardmarketIds({
   // liefert heute eine andere ID als gestern (gestern und heute Quelle TCGdex: Upstream-Korrektur gilt).
   // Haelt heute eine andere Karte das Produkt (und hielt es gestern nicht), weicht eine heutige Regel-ID;
   // eine TCGdex-ID dagegen nicht (stabilityConflicts, gestrige ID entfaellt).
-  const STABLE_SOURCES = new Set(['tcgdex', 'matched', 'corrected', 'corrected-expansion', 'ordered', 'energySymbol', 'leftRight']);
+  // custom-set: eine gestrige Stufe-2-ID bleibt auch, wenn das custom-set heute nicht entscheidet (neues Produkt mit
+  // gleicher Nummer -> mehrdeutig, Kartennummer geaendert). Ein heute anders entscheidendes custom-set sperrt die Karte
+  // (locked) und gewinnt; ein verschwundenes Produkt faellt weg (product-gone). Bewusst entfernen: Override null.
+  const STABLE_SOURCES = new Set(['tcgdex', 'custom-set', 'matched', 'corrected', 'corrected-expansion', 'ordered', 'energySymbol', 'leftRight']);
   const stabilityKept = [];
   const stabilityDropped = [];
   const stabilityConflicts = [];

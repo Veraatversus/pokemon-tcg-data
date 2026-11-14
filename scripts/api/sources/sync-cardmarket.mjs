@@ -3,7 +3,8 @@
 // committet, sondern nur fuer den Build-Schritt nach .cache/cardmarket/price-guide.json gelegt.
 // Ausfallschutz: Netzwerk-/HTTP-/Parse-Fehler ('failed') oder unplausible Daten ('defective') lassen
 // sources/cardmarket/ bis auf meta.consecutiveFailures unveraendert und loeschen den Preisguide-Cache;
-// der Lauf endet trotzdem mit Exit 0.
+// der Lauf endet trotzdem mit Exit 0. Defekt sind auch Formatwechsel: < 99 % brauchbare Zeilen (idExpansion bzw.
+// idProduct) oder mehr als max(200, 0,5 %) verschwundene Produkt-IDs des committeten Katalogs.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,10 +13,41 @@ import { extractProductsList, extractPriceGuideList } from './cardmarket-feeds.m
 export const SINGLES_URL = 'https://downloads.s3.cardmarket.com/productCatalog/productList/products_singles_6.json';
 export const PRICE_GUIDE_URL = 'https://downloads.s3.cardmarket.com/productCatalog/priceGuide/price_guide_6.json';
 export const USER_AGENT = 'veraatversus-cardmarket-builder/1.0';
-export const FETCH_TIMEOUT_MS = 30_000;
+// ~14 MB je Datei; 120 s je Versuch (eine Wiederholung)
+export const FETCH_TIMEOUT_MS = 120_000;
 export const SINGLES_CATEGORY = 51;
 // Produktliste oder Preisguide mit weniger als 80 % der Eintraege des letzten erfolgreichen Laufs gilt als defekt.
 export const MIN_RATIO = 0.8;
+// Brauchbare Zeilen (Formatwechsel-Schutz): mindestens 99 % der Kategorie-51-Zeilen mit ganzzahliger idExpansion,
+// mindestens 99 % der Preiszeilen mit numerischer idProduct.
+export const MIN_USABLE_RATIO = 0.99;
+// Hoechstens max(200, 0,5 %) der bisher bekannten Produkt-IDs (committeter Katalog) duerfen verschwinden.
+export const MAX_VANISHED_ABS = 200;
+export const MAX_VANISHED_RATIO = 0.005;
+
+const toId = (v) => { const n = Number(v); return Number.isInteger(n) && n > 0 ? n : null; };
+
+// Anteil brauchbarer Zeilen: { rows, usable }
+export function usableSingles(singlesPayload) {
+  const rows = extractProductsList(singlesPayload).filter((p) => Number(p?.idCategory) === SINGLES_CATEGORY);
+  return { rows: rows.length, usable: rows.filter((p) => toId(p.idProduct) !== null && toId(p.idExpansion) !== null).length };
+}
+
+export function usablePrices(priceGuidePayload) {
+  const rows = extractPriceGuideList(priceGuidePayload);
+  return { rows: rows.length, usable: rows.filter((r) => toId(r?.idProduct) !== null).length };
+}
+
+// IDs des committeten Katalogs (leer, wenn es keinen gibt oder er unlesbar ist)
+function readCatalogIds(file) {
+  if (!fs.existsSync(file)) return [];
+  const ids = [];
+  for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
+    if (!line.trim()) continue;
+    try { const id = toId(JSON.parse(line).id); if (id !== null) ids.push(id); } catch { /* Zeile ignorieren */ }
+  }
+  return ids;
+}
 
 const EMPTY_META = {
   singlesCreatedAt: null,
@@ -121,14 +153,33 @@ export async function syncCardmarket({ repoRoot, fetchJson = defaultFetchJson, n
   }
 
   const catalog = toCatalog(singles);
-  const prices = extractPriceGuideList(priceGuide).length;
+  // Preise = brauchbare Zeilen (numerische idProduct); Grundlage fuer Plausibilitaet und meta.prices
+  const pu = usablePrices(priceGuide);
+  const prices = pu.usable;
   if (catalog.length === 0) return fail('defective', 'keine Einzelkarten in der Produktliste');
+  const su = usableSingles(singles);
+  if (su.usable < su.rows * MIN_USABLE_RATIO) {
+    return fail('defective', `nur ${su.usable} von ${su.rows} Einzelkarten mit ganzzahliger idExpansion/idProduct (< ${MIN_USABLE_RATIO * 100} %)`);
+  }
   if (prev.products > 0 && catalog.length < prev.products * MIN_RATIO) {
     return fail('defective', `Produktliste mit ${catalog.length} statt zuletzt ${prev.products} Einzelkarten (< ${MIN_RATIO * 100} %)`);
   }
   if (prices === 0) return fail('defective', 'Preisguide ohne Eintraege');
+  if (pu.usable < pu.rows * MIN_USABLE_RATIO) {
+    return fail('defective', `nur ${pu.usable} von ${pu.rows} Preiszeilen mit numerischer idProduct (< ${MIN_USABLE_RATIO * 100} %)`);
+  }
   if (prev.prices > 0 && prices < prev.prices * MIN_RATIO) {
     return fail('defective', `Preisguide mit ${prices} statt zuletzt ${prev.prices} Eintraegen (< ${MIN_RATIO * 100} %)`);
+  }
+
+  const known = readCatalogIds(catalogFile);
+  if (known.length) {
+    const current = new Set(catalog.map((p) => p.id));
+    const vanished = known.filter((id) => !current.has(id)).length;
+    const limit = Math.max(MAX_VANISHED_ABS, known.length * MAX_VANISHED_RATIO);
+    if (vanished > limit) {
+      return fail('defective', `${vanished} von ${known.length} bekannten Produkt-IDs fehlen (Grenze ${Math.floor(limit)})`);
+    }
   }
 
   const catalogText = serializeCatalog(catalog);
@@ -136,14 +187,19 @@ export async function syncCardmarket({ repoRoot, fetchJson = defaultFetchJson, n
   writeAtomic(priceGuidePath, JSON.stringify(priceGuide));
   if (catalogChanged) writeAtomic(catalogFile, catalogText);
   writeAtomic(path.join(dir, 'expansions.json'), pretty(toExpansions(catalog)));
-  writeAtomic(metaFile, pretty({
+  const next = {
     singlesCreatedAt: singles?.createdAt ?? null,
     priceGuideCreatedAt: priceGuide?.createdAt ?? null,
     products: catalog.length,
     prices,
     lastSuccess: now().toISOString(),
     consecutiveFailures: 0,
-  }));
+  };
+  // Idempotent: gleicher Datenstand wie der letzte Erfolg (z. B. zweiter Lauf am selben Tag) -> meta.json bleibt
+  // byte-gleich (lastSuccess = erster Erfolg mit diesem Stand), damit kein Commit nur fuer den Zeitstempel entsteht.
+  const unchanged = prev.lastSuccess && prev.consecutiveFailures === 0
+    && ['singlesCreatedAt', 'priceGuideCreatedAt', 'products', 'prices'].every((k) => prev[k] === next[k]);
+  if (!unchanged) writeAtomic(metaFile, pretty(next));
   console.log(`Cardmarket ok: ${catalog.length} Einzelkarten, ${prices} Preise${catalogChanged ? ', Katalog geaendert' : ''}`);
   return { status: 'ok', catalogChanged, priceGuidePath };
 }

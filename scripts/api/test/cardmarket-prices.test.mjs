@@ -113,3 +113,25 @@ test('published price files stay below 8 MB', { skip: !fs.existsSync(path.join(p
   const total = fs.readdirSync(dir).reduce((n, f) => n + fs.statSync(path.join(dir, f)).size, 0);
   assert.ok(total < 8 * 1024 * 1024, `prices ${total} Bytes`);
 });
+
+test('idProduct as numeric string matches like in the catalog', () => {
+  const { files } = buildPriceFiles({ cardsBySet: new Map([['s1', [card('s1', '1', 10), card('s1', '2', 11)]]]), primaryCardmarketId, now: () => NOW, priceGuide: guide({ idProduct: '10', trend: 1 }, { idProduct: 'x11', trend: 2 }) });
+  assert.deepEqual(files.get('s1'), { 1: { productId: 10, trend: 1 } });
+});
+
+test('untouched when cards with price fall below 80 % of the published meta', () => {
+  const out = tmp();
+  const cards = Array.from({ length: 10 }, (_, i) => card('s1', String(i + 1), 100 + i));
+  const cardsBySet = new Map([['s1', cards]]);
+  const rows = (n) => Array.from({ length: n }, (_, i) => ({ idProduct: 100 + i, trend: 1 }));
+  writePriceFiles({ outDir: out, cardsBySet, priceGuide: guide(...rows(10)), primaryCardmarketId, now: () => NOW });
+  const dir = path.join(out, 'prices');
+  const before = Object.fromEntries(fs.readdirSync(dir).map((f) => [f, fs.readFileSync(path.join(dir, f), 'utf8')]));
+  // 7 von 10 (< 80 %): nichts anfassen
+  assert.equal(writePriceFiles({ outDir: out, cardsBySet, priceGuide: guide(...rows(7)), primaryCardmarketId, now: () => new Date('2026-11-14T05:00:00Z') }), null);
+  assert.deepEqual(Object.fromEntries(fs.readdirSync(dir).map((f) => [f, fs.readFileSync(path.join(dir, f), 'utf8')])), before);
+  // 8 von 10 (genau 80 %): wird geschrieben
+  const meta = writePriceFiles({ outDir: out, cardsBySet, priceGuide: guide(...rows(8)), primaryCardmarketId, now: () => new Date('2026-11-14T05:00:00Z') });
+  assert.equal(meta.cardsWithPrice, 8);
+  assert.equal(readJson(path.join(dir, 'meta.json')).cardsWithPrice, 8);
+});

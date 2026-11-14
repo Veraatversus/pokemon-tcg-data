@@ -14,10 +14,17 @@ const FIELDS = {
   trendHolo: 'trend-holo', avg1Holo: 'avg1-holo', avg7Holo: 'avg7-holo', avg30Holo: 'avg30-holo', lowHolo: 'low-holo',
 };
 
+// Mindestanteil Karten mit Preis gegenueber dem veroeffentlichten prices/meta.json
+export const MIN_PRICED_RATIO = 0.8;
+
 /** -> { files: Map<setId, { cardId: entry }>, meta } */
 export function buildPriceFiles({ cardsBySet, priceGuide, primaryCardmarketId, now = () => new Date() }) {
   const byProduct = new Map();
-  for (const row of extractPriceGuideList(priceGuide)) if (Number.isInteger(row?.idProduct)) byProduct.set(row.idProduct, row);
+  // Number() wie im Katalog (sync-cardmarket toCatalog): "123" und 123 sind dasselbe Produkt
+  for (const row of extractPriceGuideList(priceGuide)) {
+    const id = Number(row?.idProduct);
+    if (Number.isInteger(id) && id > 0) byProduct.set(id, row);
+  }
   const files = new Map();
   let cardsWithId = 0;
   let cardsWithPrice = 0;
@@ -51,6 +58,8 @@ function writeIfChanged(file, content) {
 
 /**
  * Schreibt <outDir>/prices/*.json und meta.json (outDir absolut). priceGuide null -> nichts anfassen, Rueckgabe null.
+ * Ebenso null, wenn cardsWithPrice unter MIN_PRICED_RATIO des veroeffentlichten prices/meta.json faellt
+ * (stiller Formatwechsel oder Zuordnungseinbruch darf die Preise nicht leeren).
  * Preisdateien von Sets ohne Preise fallen weg. Rueckgabe: meta.
  */
 export function writePriceFiles({ outDir, cardsBySet, priceGuide, primaryCardmarketId, now }) {
@@ -58,6 +67,13 @@ export function writePriceFiles({ outDir, cardsBySet, priceGuide, primaryCardmar
   if (!priceGuide || extractPriceGuideList(priceGuide).length === 0) return null;
   const { files, meta } = buildPriceFiles({ cardsBySet, priceGuide, primaryCardmarketId, now });
   const dir = path.join(outDir, 'prices');
+  const metaFile = path.join(dir, 'meta.json');
+  let old = null;
+  try { old = JSON.parse(fs.readFileSync(metaFile, 'utf8')); } catch { /* neu */ }
+  if (typeof old?.cardsWithPrice === 'number' && old.cardsWithPrice > 0 && meta.cardsWithPrice < old.cardsWithPrice * MIN_PRICED_RATIO) {
+    console.warn(`WARNUNG Preise: nur ${meta.cardsWithPrice} Karten mit Preis statt zuletzt ${old.cardsWithPrice} (< ${MIN_PRICED_RATIO * 100} %) - api/v3/prices bleibt unveraendert`);
+    return null;
+  }
   fs.mkdirSync(dir, { recursive: true });
   let changed = false;
   const wanted = new Set(['meta.json']);
@@ -69,9 +85,6 @@ export function writePriceFiles({ outDir, cardsBySet, priceGuide, primaryCardmar
   for (const f of fs.readdirSync(dir)) if (f.endsWith('.json') && !wanted.has(f)) { fs.rmSync(path.join(dir, f)); changed = true; }
   // generatedAt dient als Cache-Buster (?v=): neu, sobald sich irgendeine Preisdatei oder die Zaehler aendern,
   // sonst bleibt meta.json byte-gleich (kein taeglicher Diff ohne Preisaenderung)
-  const metaFile = path.join(dir, 'meta.json');
-  let old = null;
-  try { old = JSON.parse(fs.readFileSync(metaFile, 'utf8')); } catch { /* neu */ }
   const same = !changed && old && old.priceGuideCreatedAt === meta.priceGuideCreatedAt && old.cardsWithId === meta.cardsWithId && old.cardsWithPrice === meta.cardsWithPrice;
   if (!same) fs.writeFileSync(metaFile, toJson(meta));
   return same ? old : meta;

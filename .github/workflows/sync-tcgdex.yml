@@ -4,8 +4,12 @@ name: Daily Sync
 
 on:
   schedule:
-    # Run daily at 2 AM UTC
+    # Taeglich 02:00 UTC
     - cron: '0 2 * * *'
+    # Rueckfall 05:30 UTC (geplante Laeufe fallen auf Free-Accounts gelegentlich aus). Die Concurrency
+    # serialisiert; ein zweiter Lauf mit gleichem Stand aendert nichts (TCGdex unveraendert -> kein Spiegel,
+    # Cardmarket-meta bleibt byte-gleich, Build idempotent) und committet daher nicht.
+    - cron: '30 5 * * *'
   workflow_dispatch:
 
 permissions:

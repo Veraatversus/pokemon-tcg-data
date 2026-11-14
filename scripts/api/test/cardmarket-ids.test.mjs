@@ -836,6 +836,25 @@ test('stability keeps yesterday\'s rule id', () => {
 });
 
 
+test('stability keeps yesterday’s custom-set id when the custom-set no longer decides', () => {
+  // gestern custom-set #4 -> 10; heute ein zweites Produkt mit #4 (z. B. neuer HTML-Import) -> custom-set mehrdeutig
+  const previous = new Map([['s1/4', { ids: [10], source: 'custom-set' }]]);
+  const { cards, report } = runCat([card('4', '4', 'Pikachu')], { 100: [csp(10, 'Pikachu', '4'), csp(12, 'Pikachu', '4')] }, { previous });
+  assert.deepEqual(report.customSets.ambiguous, ['s1/4']);
+  assert.deepEqual(cards[0].ids.cardmarket, [10]);
+  assert.equal(cards[0].ids.cardmarketSource, 'custom-set');
+  assert.equal(report.totals.stabilityKept, 1);
+  assert.deepEqual(report.stabilityKept.map((k) => [k.cardKey, k.productId, k.source]), [['s1/4', 10, 'custom-set']]);
+  // custom-set entscheidet heute anders -> custom-set gilt (Karte gesperrt)
+  const other = runCat([card('4', '4', 'Pikachu')], { 100: [csp(11, 'Pikachu', '4'), single(10, 'Pikachu', null)] }, { previous });
+  assert.deepEqual(other.cards[0].ids.cardmarket, [11]);
+  assert.equal(other.report.totals.stabilityKept, 0);
+  // Produkt verschwunden -> faellt weg
+  const gone = runCat([card('4', '4', 'Pikachu')], { 100: [csp(11, 'Pikachu', '4V2')] }, { previous });
+  assert.deepEqual(gone.cards[0].ids.cardmarket, []);
+  assert.deepEqual(gone.report.stabilityDropped, [{ cardKey: 's1/4', productId: 10, source: 'custom-set', reason: 'product-gone' }]);
+});
+
 test('stability drops id whose product vanished', () => {
   const previous = new Map([['s1/5', { ids: [3], source: 'matched' }]]);
   const products = { 100: [single(1, 'Scyther [Slash]', null), single(2, 'Scyther [Agility]', null)] };

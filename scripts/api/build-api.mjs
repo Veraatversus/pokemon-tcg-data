@@ -329,7 +329,7 @@ function main() {
       for (const [setId, n] of Object.entries(mi.bySet).sort((a, b) => b[1] - a[1] || cmp(a[0], b[0]))) console.log(`  ${setId}: ${n}`);
     }
     if (r.prices) console.log(`Preise: ${r.prices.cardsWithPrice} von ${r.prices.cardsWithId} Karten mit Cardmarket-ID haben einen Preis (Preisguide ${r.prices.priceGuideCreatedAt})`);
-    else console.log('Preise: kein Preisguide von heute, api/v3/prices bleibt unveraendert');
+    else console.log('Preise: kein (brauchbarer) Preisguide von heute, api/v3/prices bleibt unveraendert');
     const cm = r.cardmarketIds;
     console.log(`Cardmarket-IDs: ${cm.cards} Karten, ${cm.tcgdex} von TCGdex, ${cm.customSet} aus custom-sets, ${cm.matched} nachgetragen, ${cm.stabilityKept} per Stabilitaetsregel (${cm.stabilityDropped} entfallen, ${cm.stabilityConflicts} Konflikte), ${cm.missing} fehlen (${cm.ambiguous} mehrdeutig); doppelte TCGdex-IDs ${cm.duplicates.ids} (${cm.duplicates.cards} Karten, ${cm.duplicates.corrected} korrigiert, ${cm.duplicates.kept} belassen); Sets ohne Expansion ${cm.setsWithoutExpansion}, custom-set-Produkte nicht im Katalog ${cm.customSetMissingProducts}; Details api/v3/reports/cardmarket-ids.json`);
     const ru = cm.rules;

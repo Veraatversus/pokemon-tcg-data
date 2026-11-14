@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { syncCardmarket, SINGLES_URL, PRICE_GUIDE_URL } from '../sources/sync-cardmarket.mjs';
+import { syncCardmarket, SINGLES_URL, PRICE_GUIDE_URL, FETCH_TIMEOUT_MS } from '../sources/sync-cardmarket.mjs';
 import { extractProductsList, extractPriceGuideList } from '../sources/cardmarket-feeds.mjs';
 
 const NOW = new Date('2026-11-13T05:00:00.000Z');
@@ -202,4 +202,78 @@ test('feed extractors accept object and array payloads', () => {
   assert.deepEqual(extractProductsList({}), []);
   assert.equal(extractPriceGuideList({ priceGuides: [1] }).length, 1);
   assert.deepEqual(extractPriceGuideList(null), []);
+});
+
+// --- Plausibilitaet ueber brauchbare Zeilen (Formatwechsel-Schutz) ---------------------------------
+const many = (n, from = 1, extra = () => ({})) => Array.from({ length: n }, (_, i) => product(from + i, extra(from + i)));
+const runWith = (repo, products, guide, at = NOW) => syncCardmarket({ repoRoot: repo, fetchJson: stubFetch({ [SINGLES_URL]: singles(products), [PRICE_GUIDE_URL]: guide }), now: () => at, retryDelayMs: 0 });
+const guideRows = (rows) => ({ version: 1, createdAt: '2026-11-13T02:44:11+0100', priceGuides: rows });
+
+test('download timeout is 120 s', () => {
+  assert.equal(FETCH_TIMEOUT_MS, 120_000);
+});
+
+test('defective when fewer than 99 % of singles have an integer idExpansion', async () => {
+  const repo = tmpRepo();
+  await seed(repo, 10);
+  const before = snapshot(cmDir(repo));
+  // 2 von 100 ohne idExpansion (98 %) -> defekt, nichts ausser dem Zaehler aendert sich, Cache weg
+  const bad = await runWith(repo, many(100, 1, (id) => (id <= 2 ? { idExpansion: null } : {})), priceGuide(10));
+  assert.deepEqual(bad, { status: 'defective', catalogChanged: false, priceGuidePath: null });
+  assert.equal(snapshot(cmDir(repo))['catalog.jsonl'], before['catalog.jsonl']);
+  assert.equal(readJson(path.join(cmDir(repo), 'meta.json')).consecutiveFailures, 1);
+  assert.equal(fs.existsSync(path.join(repo, '.cache', 'cardmarket', 'price-guide.json')), false);
+  // Format als Text ("10.5") zaehlt ebenfalls nicht
+  assert.equal((await runWith(repo, many(100, 1, (id) => (id <= 2 ? { idExpansion: '10.5' } : {})), priceGuide(10))).status, 'defective');
+  // 1 von 100 (99 %) ist in Ordnung
+  assert.equal((await runWith(repo, many(100, 1, (id) => (id === 1 ? { idExpansion: undefined } : {})), priceGuide(10))).status, 'ok');
+});
+
+test('defective when fewer than 99 % of price rows have a numeric idProduct', async () => {
+  const repo = tmpRepo();
+  await seed(repo, 100);
+  const before = snapshot(cmDir(repo));
+  const rows = (badCount) => Array.from({ length: 100 }, (_, i) => ({ idProduct: i < badCount ? `p${i}` : i + 1, trend: 1 }));
+  const bad = await runWith(repo, [product(1), product(2), product(3)], guideRows(rows(2)));
+  assert.equal(bad.status, 'defective');
+  assert.equal(snapshot(cmDir(repo))['meta.json'], JSON.stringify({ ...JSON.parse(before['meta.json']), consecutiveFailures: 1 }, null, 2) + '\n');
+  // numerische Strings sind brauchbar (Parität mit dem Katalog), 1 % Ausschuss ist in Ordnung
+  const ok = await runWith(repo, [product(1), product(2), product(3)], guideRows(rows(1).map((r, i) => (i === 50 ? { ...r, idProduct: String(r.idProduct) } : r))));
+  assert.equal(ok.status, 'ok');
+  assert.equal(readJson(path.join(cmDir(repo), 'meta.json')).prices, 99, 'meta.prices zaehlt nur brauchbare Zeilen');
+});
+
+test('defective when more than max(200, 0.5 %) of known product ids vanish', async () => {
+  const repo = tmpRepo();
+  assert.equal((await runWith(repo, many(1000), priceGuide(10))).status, 'ok');
+  const before = snapshot(cmDir(repo));
+  // 201 bekannte IDs weg, 201 neue dazu (Anzahl gleich, 80-%-Regel greift nicht) -> defekt
+  const bad = await runWith(repo, many(1000, 202), priceGuide(10));
+  assert.equal(bad.status, 'defective');
+  assert.equal(snapshot(cmDir(repo))['catalog.jsonl'], before['catalog.jsonl']);
+  // genau 200 weg ist noch in Ordnung
+  assert.equal((await runWith(repo, many(1000, 201), priceGuide(10))).status, 'ok');
+
+  // grosser Katalog: 0,5 % von 50 000 = 250
+  const big = tmpRepo();
+  assert.equal((await runWith(big, many(50_000), priceGuide(10))).status, 'ok');
+  assert.equal((await runWith(big, many(50_000, 252), priceGuide(10))).status, 'defective');
+  assert.equal((await runWith(big, many(50_000, 251), priceGuide(10))).status, 'ok');
+});
+
+test('second run with the same data leaves meta.json byte-identical', async () => {
+  const repo = tmpRepo();
+  await seed(repo, 10);
+  const first = snapshot(cmDir(repo));
+  const fetchJson = stubFetch({ [SINGLES_URL]: singles([product(3), product(1), product(2, { idExpansion: 11 })]), [PRICE_GUIDE_URL]: priceGuide(10) });
+  const again = await syncCardmarket({ repoRoot: repo, fetchJson, now: () => new Date('2026-11-13T07:30:00Z'), retryDelayMs: 0 });
+  assert.equal(again.status, 'ok');
+  assert.ok(fs.existsSync(again.priceGuidePath), 'Preisguide-Cache trotzdem geschrieben');
+  assert.deepEqual(snapshot(cmDir(repo)), first);
+  // nach einem Fehlschlag setzt der naechste Erfolg Zaehler und lastSuccess neu
+  await syncCardmarket({ repoRoot: repo, fetchJson: stubFetch({ [SINGLES_URL]: new Error('x') }), now: () => NOW, retryDelayMs: 0 });
+  await syncCardmarket({ repoRoot: repo, fetchJson, now: () => new Date('2026-11-13T08:00:00Z'), retryDelayMs: 0 });
+  const meta = readJson(path.join(cmDir(repo), 'meta.json'));
+  assert.equal(meta.consecutiveFailures, 0);
+  assert.equal(meta.lastSuccess, '2026-11-13T08:00:00.000Z');
 });

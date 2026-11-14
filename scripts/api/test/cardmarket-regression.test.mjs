@@ -52,7 +52,9 @@ test('conversion: custom-set JSON yields exactly the collector numbers of the ol
 //   laut custom-set 780209 (784938 = 190V2, der worlds-2024-Stempel verliert das Basisprodukt); ecard3-149 ebenso
 //   (362907 = 149V2). ecard1-12 behaelt die primaere ID, die Jumbo-Variante verliert 362884 (laut custom-set #47).
 // - custom-set-Widerspruch ohne eigenen Treffer (1536 fuehrt #47/#66/#68 doppelt): ecard1-47 trug 274887 (= #12),
-//   ecard1-68 274905 (= #30) -> ohne ID; ecard1-66 verliert 274904 (= #29), bleibt bei 362890 (#66).
+//   ecard1-68 274905 (= #30) -> ohne ID; ecard1-66 verliert 274904 (= #29).
+// - Override: ecard1-66 (Tyranitar, normaler Druck) -> 274941; custom-set #66 fuehrt 274941 und 362890, 362890 ist
+//   laut TCGdex die Jumbo-Variante (vorher primaere ID).
 // - heutige Korrektur geteilter TCGdex-IDs per Angriffsnamen (Quelle 'corrected'): dp7/58, dp7/59, dp7/80, pl1/6,
 //   pl1/81, pl1/97, pl1/102, pl4/46, pl4/52, pl4/74 trugen die ID der SH-/Lv.X-/Arceus-Variante; xyp/XY93 (zwei
 //   gleichnamige Celebi-Produkte, unklar) folgt konservativ der heutigen Korrektur, keine Stabilitaets-Rueckkehr.
@@ -62,7 +64,7 @@ const CHANGES = {
   'dp7/80': [278296, 278378, 'corrected'],
   'ecard1/12': [274887, 274887, 'custom-set'],
   'ecard1/47': [274887, null, 'tcgdex'],
-  'ecard1/66': [274904, 362890, 'tcgdex'],
+  'ecard1/66': [362890, 274941, 'override'],
   'ecard1/68': [274905, null, 'tcgdex'],
   'ecard2/1': [275052, 275073, 'custom-set'],
   'ecard2/2': [275041, 275074, 'custom-set'],
@@ -266,8 +268,9 @@ describe('real-data regression (CM_REGRESSION=1)', { skip: REGRESSION ? false : 
     assert.deepEqual(report.stabilityConflicts, []);
     assert.deepEqual(report.customSets.conflicts, []);
     assert.deepEqual(report.customSets.nameWarnings, []);
-      assert.deepEqual(report.customSets.dropped.map((d) => d.cardKey), ['ecard1/47', 'ecard1/66', 'ecard1/68']);
-    assert.deepEqual(report.customSets.ambiguous, ['ecard1/1', 'ecard1/47', 'ecard1/66', 'ecard1/68']);
+    // ecard1/66 ist per Override gesperrt (Stufe 1) und erscheint daher nicht mehr in den custom-set-Listen
+    assert.deepEqual(report.customSets.dropped.map((d) => d.cardKey), ['ecard1/47', 'ecard1/68']);
+    assert.deepEqual(report.customSets.ambiguous, ['ecard1/1', 'ecard1/47', 'ecard1/68']);
   });
 
   test('regression: set expansions from catalog, no tracker', () => {
