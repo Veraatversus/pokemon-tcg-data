@@ -2326,38 +2326,21 @@
       "tcgdex": 171
     },
     "sm10": {
-      "ambiguous": 4,
-      "ambiguousCards": [
-        "81",
-        "182a",
-        "182b",
-        "189a"
-      ],
+      "ambiguous": 0,
       "cards": 238,
-      "corrected": 8,
       "coverage": {
         "bySource": {
-          "matched": 6,
-          "stabilityKept": 12,
-          "tcgdex": 215
+          "customSet": 238
         },
         "cards": 238,
-        "withId": 233
+        "withId": 238
       },
+      "customSet": 238,
       "expansionId": 2437,
-      "matched": 6,
-      "missing": 5,
-      "missingCards": [
-        "81",
-        "172",
-        "182a",
-        "182b",
-        "189a"
-      ],
-      "ordered": 4,
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2437&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 12,
-      "tcgdex": 215
+      "tcgdex": 0
     },
     "sm11": {
       "ambiguous": 3,
@@ -3542,37 +3525,21 @@
       "tcgdex": 130
     },
     "xy6": {
-      "ambiguous": 5,
-      "ambiguousCards": [
-        "59",
-        "61",
-        "76",
-        "102",
-        "105"
-      ],
+      "ambiguous": 0,
       "cards": 112,
-      "corrected": 3,
       "coverage": {
         "bySource": {
-          "stabilityKept": 19,
-          "tcgdex": 88
+          "customSet": 112
         },
         "cards": 112,
-        "withId": 107
+        "withId": 112
       },
+      "customSet": 112,
       "expansionId": 1649,
       "matched": 0,
-      "missing": 5,
-      "missingCards": [
-        "59",
-        "61",
-        "76",
-        "102",
-        "105"
-      ],
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1649&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 19,
-      "tcgdex": 88
+      "tcgdex": 0
     },
     "xy7": {
       "ambiguous": 0,
@@ -3695,8 +3662,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 2537,
-    "changed": 453,
+    "applied": 2887,
+    "changed": 493,
     "conflicts": [],
     "dropped": [
       {
@@ -3717,6 +3684,12 @@
         "name": "Lotad",
         "productId": 289730,
         "productName": "Lotad #01"
+      },
+      {
+        "cardKey": "sm10/172",
+        "name": "Fairy Charm Lightning",
+        "productId": 372457,
+        "productName": "Fairy Charm [L]"
       },
       {
         "cardKey": "sm5/137",
@@ -5253,83 +5226,13 @@
       "xy4-110",
       "xy4-119"
     ],
-    "282675": [
-      "xy6-7",
-      "xy6-8"
-    ],
-    "282684": [
-      "xy6-16",
-      "xy6-17"
-    ],
-    "282694": [
-      "xy6-26",
-      "xy6-98"
-    ],
-    "282695": [
-      "xy6-27",
-      "xy6-28"
-    ],
-    "282699": [
-      "xy6-31",
-      "xy6-32"
-    ],
-    "282702": [
-      "xy6-34",
-      "xy6-99"
-    ],
-    "282713": [
-      "xy6-45",
-      "xy6-46"
-    ],
-    "282719": [
-      "xy6-51",
-      "xy6-52"
-    ],
-    "282721": [
-      "xy6-53",
-      "xy6-74"
-    ],
-    "282722": [
-      "xy6-54",
-      "xy6-55"
-    ],
-    "282726": [
-      "xy6-101",
-      "xy6-58"
-    ],
-    "282728": [
-      "xy6-104",
-      "xy6-60",
-      "xy6-75"
-    ],
-    "282730": [
-      "xy6-103",
-      "xy6-62"
-    ],
-    "282739": [
-      "xy6-71",
-      "xy6-72"
-    ],
     "282745": [
-      "xy6-106",
       "xy6-77",
       "xy6-77a"
-    ],
-    "282748": [
-      "xy6-80",
-      "xy6-81"
     ],
     "282760": [
       "xy6-92",
       "xy6-92a"
-    ],
-    "282762": [
-      "xy6-107",
-      "xy6-94"
-    ],
-    "282764": [
-      "xy6-108",
-      "xy6-96"
     ],
     "284188": [
       "xy7-7",
@@ -5688,69 +5591,9 @@
       "smp-SM168",
       "smp-SM248"
     ],
-    "370785": [
-      "sm10-1",
-      "sm10-191",
-      "sm10-192"
-    ],
-    "370786": [
-      "sm10-196",
-      "sm10-197",
-      "sm10-61"
-    ],
-    "370787": [
-      "sm10-81",
-      "sm10-82"
-    ],
-    "370788": [
-      "sm10-107",
-      "sm10-200",
-      "sm10-201"
-    ],
-    "370790": [
-      "sm10-130",
-      "sm10-204",
-      "sm10-205"
-    ],
     "371773": [
       "smp-SM180",
       "smp-SM209"
-    ],
-    "372298": [
-      "sm10-5",
-      "sm10-6"
-    ],
-    "372302": [
-      "sm10-10",
-      "sm10-9"
-    ],
-    "372318": [
-      "sm10-26",
-      "sm10-27"
-    ],
-    "372327": [
-      "sm10-36",
-      "sm10-37"
-    ],
-    "372355": [
-      "sm10-67",
-      "sm10-68"
-    ],
-    "372373": [
-      "sm10-198",
-      "sm10-199"
-    ],
-    "372383": [
-      "sm10-92",
-      "sm10-93"
-    ],
-    "372403": [
-      "sm10-113",
-      "sm10-114"
-    ],
-    "372442": [
-      "sm10-154",
-      "sm10-155"
     ],
     "377496": [
       "sm11-114",
@@ -6074,10 +5917,10 @@
     ]
   },
   "duplicates": {
-    "cards": 1140,
-    "corrected": 302,
-    "ids": 552,
-    "kept": 838
+    "cards": 1068,
+    "corrected": 291,
+    "ids": 521,
+    "kept": 777
   },
   "expansionMismatch": {
     "cards": [
@@ -7363,27 +7206,6 @@
         "reason": "dropped-shared-mismatch"
       },
       {
-        "cardKey": "sm10-81",
-        "newId": null,
-        "oldExpansion": 2437,
-        "oldId": 370787,
-        "reason": "dropped-shared-mismatch"
-      },
-      {
-        "cardKey": "sm10-198",
-        "newId": null,
-        "oldExpansion": 2437,
-        "oldId": 372373,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "sm10-199",
-        "newId": null,
-        "oldExpansion": 2437,
-        "oldId": 372373,
-        "reason": "kept-mismatch"
-      },
-      {
         "cardKey": "sm115-22",
         "newId": 396617,
         "oldExpansion": 2514,
@@ -7955,30 +7777,18 @@
       }
     ],
     "totals": {
-      "checked": 20689,
+      "checked": 20358,
       "corrected": 25,
-      "dropped": 26,
-      "droppedShared": 22,
+      "dropped": 25,
+      "droppedShared": 21,
       "foreignNameOk": 1309,
-      "keptMismatch": 159,
+      "keptMismatch": 157,
       "noSetExpansion": 0,
-      "ok": 19167,
+      "ok": 18839,
       "unknownProduct": 3
     }
   },
   "orderedRejected": [
-    {
-      "cards": [
-        "sm10/175",
-        "sm10/209"
-      ],
-      "expansionId": 2437,
-      "name": "Green's Exploration",
-      "products": [
-        372460,
-        372496
-      ]
-    },
     {
       "cards": [
         "sm11/188",
@@ -8146,18 +7956,6 @@
         273637,
         273687
       ]
-    },
-    {
-      "cards": [
-        "xy6/35",
-        "xy6/100"
-      ],
-      "expansionId": 1649,
-      "name": "M Gallade-EX",
-      "products": [
-        282703,
-        282768
-      ]
     }
   ],
   "overrides": {
@@ -8191,11 +7989,11 @@
   "rules": {
     "energySymbol": 3,
     "leftRight": 0,
-    "ordered": 34,
-    "orderedRejected": 16,
+    "ordered": 30,
+    "orderedRejected": 14,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 131
+    "versionSuffixSkipped": 135
   },
   "setsWithoutExpansion": [
     {
@@ -8932,90 +8730,6 @@
       "source": "corrected",
       "todayId": 295475,
       "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm10/82",
-      "productId": 372480,
-      "source": "corrected",
-      "todayId": 370787,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm10/175",
-      "productId": 372460,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "sm10/191",
-      "productId": 372473,
-      "source": "corrected",
-      "todayId": 370785,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm10/192",
-      "productId": 372474,
-      "source": "corrected",
-      "todayId": 370785,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm10/196",
-      "productId": 372478,
-      "source": "corrected",
-      "todayId": 370786,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm10/197",
-      "productId": 372479,
-      "source": "corrected",
-      "todayId": 370786,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm10/199",
-      "productId": 372481,
-      "source": "corrected",
-      "todayId": 372373,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm10/200",
-      "productId": 372482,
-      "source": "corrected",
-      "todayId": 370788,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm10/201",
-      "productId": 372483,
-      "source": "corrected",
-      "todayId": 370788,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm10/204",
-      "productId": 372486,
-      "source": "corrected",
-      "todayId": 370790,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm10/205",
-      "productId": 372487,
-      "source": "corrected",
-      "todayId": 370790,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm10/209",
-      "productId": 372496,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
     },
     {
       "cardKey": "sm11/28",
@@ -9970,139 +9684,6 @@
       "todaySource": "tcgdex"
     },
     {
-      "cardKey": "xy6/8",
-      "productId": 282676,
-      "source": "corrected",
-      "todayId": 282675,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy6/17",
-      "productId": 282685,
-      "source": "corrected",
-      "todayId": 282684,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy6/28",
-      "productId": 282696,
-      "source": "corrected",
-      "todayId": 282695,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy6/32",
-      "productId": 282700,
-      "source": "corrected",
-      "todayId": 282699,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy6/35",
-      "productId": 282703,
-      "source": "ordered",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "xy6/52",
-      "productId": 282720,
-      "source": "corrected",
-      "todayId": 282719,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy6/72",
-      "productId": 282740,
-      "source": "corrected",
-      "todayId": 282739,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy6/75",
-      "productId": 282743,
-      "source": "corrected",
-      "todayId": 282728,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy6/77a",
-      "productId": 282774,
-      "source": "corrected",
-      "todayId": 282745,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy6/81",
-      "productId": 282749,
-      "source": "corrected",
-      "todayId": 282748,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy6/98",
-      "productId": 282766,
-      "source": "corrected",
-      "todayId": 282694,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy6/99",
-      "productId": 282767,
-      "source": "corrected",
-      "todayId": 282702,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy6/100",
-      "productId": 282768,
-      "source": "ordered",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "xy6/101",
-      "productId": 282769,
-      "source": "corrected",
-      "todayId": 282726,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy6/103",
-      "productId": 282771,
-      "source": "corrected",
-      "todayId": 282730,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy6/104",
-      "productId": 282772,
-      "source": "corrected",
-      "todayId": 282728,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy6/106",
-      "productId": 295202,
-      "source": "corrected",
-      "todayId": 282745,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy6/107",
-      "productId": 282775,
-      "source": "corrected",
-      "todayId": 282762,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy6/108",
-      "productId": 282776,
-      "source": "corrected",
-      "todayId": 282764,
-      "todaySource": "tcgdex"
-    },
-    {
       "cardKey": "xy7/11",
       "productId": 284192,
       "source": "corrected",
@@ -10509,120 +10090,6 @@
       "expansionId": 1745,
       "name": "Eevee",
       "set": "sm1"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Marshadow [Resetting Hole | Red Knuckles]",
-          "productId": 406994
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Marshadow [Resetting Hole | Red Knuckles]",
-          "productId": 407314
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Marshadow & Machamp GX [Revenge | Hundred-Blows Impact | Acme of Heroism GX]",
-          "productId": 370787
-        }
-      ],
-      "cardKey": "sm10/81",
-      "deName": "Marshadow",
-      "expansionId": 2437,
-      "name": "Marshadow",
-      "set": "sm10"
-    },
-    {
-      "candidates": [
-        {
-          "name": "Fairy Charm [L]",
-          "productId": 372457
-        }
-      ],
-      "cardKey": "sm10/172",
-      "deName": "Feenschmuck Lightning",
-      "expansionId": 2437,
-      "name": "Fairy Charm Lightning",
-      "set": "sm10"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Pokégear 3.0",
-          "productId": 407059
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Pokégear 3.0",
-          "productId": 448188
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Pokégear 3.0",
-          "productId": 475144
-        }
-      ],
-      "cardKey": "sm10/182a",
-      "deName": null,
-      "expansionId": 2437,
-      "name": "Pokégear 3.0",
-      "set": "sm10"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Pokégear 3.0",
-          "productId": 407059
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Pokégear 3.0",
-          "productId": 448188
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Pokégear 3.0",
-          "productId": 475144
-        }
-      ],
-      "cardKey": "sm10/182b",
-      "deName": null,
-      "expansionId": 2437,
-      "name": "Pokégear 3.0",
-      "set": "sm10"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Welder",
-          "productId": 407024
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Welder",
-          "productId": 407144
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Welder",
-          "productId": 407239
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Welder",
-          "productId": 448178
-        }
-      ],
-      "cardKey": "sm10/189a",
-      "deName": null,
-      "expansionId": 2437,
-      "name": "Welder",
-      "set": "sm10"
     },
     {
       "candidates": [
@@ -11682,126 +11149,6 @@
       "candidates": [
         {
           "hint": "same-name-unnumbered",
-          "name": "MLatios EX [Sonic Ace]",
-          "productId": 282727
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MLatios EX [Sonic Ace]",
-          "productId": 282770
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "MLatios EX [Sonic Ace]",
-          "productId": 398044
-        }
-      ],
-      "cardKey": "xy6/59",
-      "deName": "M-Latios EX",
-      "expansionId": 1649,
-      "name": "M Latios-EX",
-      "set": "xy6"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MRayquaza EX [Dragon Ascent]",
-          "productId": 282729
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MRayquaza EX [Emerald Break]",
-          "productId": 282744
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MRayquaza EX [Emerald Break]",
-          "productId": 282773
-        }
-      ],
-      "cardKey": "xy6/61",
-      "deName": "M-Rayquaza EX",
-      "expansionId": 1649,
-      "name": "M Rayquaza-EX",
-      "set": "xy6"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MRayquaza EX [Dragon Ascent]",
-          "productId": 282729
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MRayquaza EX [Emerald Break]",
-          "productId": 282744
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MRayquaza EX [Emerald Break]",
-          "productId": 282773
-        }
-      ],
-      "cardKey": "xy6/76",
-      "deName": "M-Rayquaza EX",
-      "expansionId": 1649,
-      "name": "M Rayquaza-EX",
-      "set": "xy6"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MLatios EX [Sonic Ace]",
-          "productId": 282727
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MLatios EX [Sonic Ace]",
-          "productId": 282770
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "MLatios EX [Sonic Ace]",
-          "productId": 398044
-        }
-      ],
-      "cardKey": "xy6/102",
-      "deName": "M-Latios EX",
-      "expansionId": 1649,
-      "name": "M Latios-EX",
-      "set": "xy6"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MRayquaza EX [Dragon Ascent]",
-          "productId": 282729
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MRayquaza EX [Emerald Break]",
-          "productId": 282744
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MRayquaza EX [Emerald Break]",
-          "productId": 282773
-        }
-      ],
-      "cardKey": "xy6/105",
-      "deName": "M-Rayquaza EX",
-      "expansionId": 1649,
-      "name": "M Rayquaza-EX",
-      "set": "xy6"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
           "name": "MMewtwo EX [Vanishing Strike]",
           "productId": 286309
         },
@@ -11984,20 +11331,6 @@
     }
   ],
   "stillMissingByExpansion": [
-    {
-      "count": 5,
-      "expansionId": 1649,
-      "sets": [
-        "xy6"
-      ]
-    },
-    {
-      "count": 5,
-      "expansionId": 2437,
-      "sets": [
-        "sm10"
-      ]
-    },
     {
       "count": 4,
       "expansionId": 1563,
@@ -12210,14 +11543,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 61,
+    "ambiguous": 52,
     "cards": 21577,
-    "customSet": 2537,
-    "matched": 237,
-    "missing": 85,
+    "customSet": 2887,
+    "matched": 231,
+    "missing": 75,
     "override": 8,
-    "stabilityKept": 289,
-    "tcgdex": 18421
+    "stabilityKept": 258,
+    "tcgdex": 18118
   },
   "versionSuffixSkippedByExpansion": {
     "1537": 7,
@@ -12226,10 +11559,12 @@
     "1609": 6,
     "1611": 7,
     "1612": 40,
+    "1649": 3,
     "1758": 12,
     "1800": 13,
     "2065": 14,
     "2075": 11,
-    "2370": 11
+    "2370": 11,
+    "2437": 1
   }
 }
