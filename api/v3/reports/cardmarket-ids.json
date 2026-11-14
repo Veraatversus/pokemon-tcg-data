@@ -1209,23 +1209,19 @@
     "ex13": {
       "ambiguous": 0,
       "cards": 111,
-      "corrected": 6,
       "coverage": {
         "bySource": {
-          "matched": 1,
-          "tcgdex": 109
+          "customSet": 111
         },
         "cards": 111,
-        "withId": 110
+        "withId": 111
       },
+      "customSet": 111,
       "expansionId": 1551,
-      "matched": 1,
-      "missing": 1,
-      "missingCards": [
-        "98"
-      ],
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1551&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 109
+      "tcgdex": 0
     },
     "ex14": {
       "ambiguous": 0,
@@ -3453,8 +3449,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 5687,
-    "changed": 775,
+    "applied": 5798,
+    "changed": 781,
     "conflicts": [],
     "dropped": [
       {
@@ -3475,6 +3471,12 @@
         "name": "Lotad",
         "productId": 289730,
         "productName": "Lotad #01"
+      },
+      {
+        "cardKey": "ex13/98",
+        "name": "δ Rainbow Energy",
+        "productId": 277068,
+        "productName": "Rainbow Energy Delta"
       },
       {
         "cardKey": "pl2/16",
@@ -4567,24 +4569,6 @@
       "ex11-65",
       "ex11-66"
     ],
-    "276973": [
-      "ex13-3",
-      "ex13-4",
-      "ex13-5",
-      "ex13-6"
-    ],
-    "276986": [
-      "ex13-16",
-      "ex13-26"
-    ],
-    "277048": [
-      "ex13-104",
-      "ex13-78"
-    ],
-    "277081": [
-      "ex13-103",
-      "ex13-111"
-    ],
     "277227": [
       "ex15-22",
       "ex15-37"
@@ -5318,10 +5302,10 @@
     ]
   },
   "duplicates": {
-    "cards": 694,
-    "corrected": 141,
-    "ids": 393,
-    "kept": 553
+    "cards": 684,
+    "corrected": 135,
+    "ids": 389,
+    "kept": 549
   },
   "expansionMismatch": {
     "cards": [
@@ -6754,14 +6738,14 @@
       }
     ],
     "totals": {
-      "checked": 17691,
+      "checked": 17582,
       "corrected": 1,
       "dropped": 13,
       "droppedShared": 11,
       "foreignNameOk": 1262,
       "keptMismatch": 134,
       "noSetExpansion": 0,
-      "ok": 16278,
+      "ok": 16169,
       "unknownProduct": 3
     }
   },
@@ -6886,7 +6870,7 @@
     "orderedRejected": 7,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 325
+    "versionSuffixSkipped": 326
   },
   "setsWithoutExpansion": [
     {
@@ -8306,19 +8290,6 @@
       "candidates": [
         {
           "name": "Rainbow Energy Delta",
-          "productId": 277068
-        }
-      ],
-      "cardKey": "ex13/98",
-      "deName": "δ Regenbogen-Energie",
-      "expansionId": 1551,
-      "name": "δ Rainbow Energy",
-      "set": "ex13"
-    },
-    {
-      "candidates": [
-        {
-          "name": "Rainbow Energy Delta",
           "productId": 277293
         }
       ],
@@ -8430,13 +8401,6 @@
     },
     {
       "count": 1,
-      "expansionId": 1551,
-      "sets": [
-        "ex13"
-      ]
-    },
-    {
-      "count": 1,
       "expansionId": 1553,
       "sets": [
         "ex15"
@@ -8495,17 +8459,18 @@
   "totals": {
     "ambiguous": 7,
     "cards": 21577,
-    "customSet": 5687,
-    "matched": 96,
-    "missing": 20,
+    "customSet": 5798,
+    "matched": 95,
+    "missing": 19,
     "override": 8,
     "stabilityKept": 184,
-    "tcgdex": 15582
+    "tcgdex": 15473
   },
   "versionSuffixSkippedByExpansion": {
     "1521": 9,
     "1537": 7,
     "1538": 3,
+    "1551": 1,
     "1563": 4,
     "1583": 12,
     "1584": 11,
