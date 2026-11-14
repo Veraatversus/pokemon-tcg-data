@@ -177,6 +177,8 @@ test('versionOfSlug / numberOfLabel: Links ohne Setcode und Ueberschriften', () 
   assert.equal(numberOfLabel('Alakazam (SK H1)'), 'H1');
   assert.equal(numberOfLabel('Glurak (Flash) (BW 50a)'), '50a');
   assert.equal(numberOfLabel('Ohne Nummer'), null);
+  assert.equal(numberOfLabel('Noivern (TK6 13N)'), '13N');
+
 });
 
 test('parseCardmarketJson: Victory Cup V1/V2/V3 mit eigenen Nummern behalten die Basisnummer, Snivy-V2 bekommt Suffix', () => {
@@ -218,4 +220,10 @@ test('runImport: JSON-Seiten einer Expansion werden gemeinsam gelesen und geschr
 test('BROWSER_SNIPPET ist gueltiges JavaScript und nutzt copy()', () => {
   assert.doesNotThrow(() => new Function('copy', 'document', 'location', BROWSER_SNIPPET));
   assert.match(BROWSER_SNIPPET, /^copy\(JSON\.stringify\(/);
+});
+
+test('parseCardmarketJson: Online-Code-Karten werden uebersprungen, Kit-Nummern gelesen', () => {
+  const r = parseCardmarketJson(bwList([bw(300990, 1, 'Online Code Card (Theme Deck) (TK6)'), bw(281593, 1, 'Spoink (TK6 1N)'), bw(281594, 1, 'Dartiri (TK6 1S)')], { total: 3 }));
+  assert.deepEqual(r.cards.map((c) => [c.productId, c.collectorNumber]), [[281593, '1N'], [281594, '1S']]);
+  assert.equal(r.stats.skipped, 1);
 });

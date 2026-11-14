@@ -100,6 +100,8 @@ export function cmEnergyName(cmName) {
 // Versions-Suffix der Custom-Sets (sources/cardmarket/custom-sets): "4V2", "224a" (normalisiert).
 const VERSION_SUFFIX = /^\d+(v\d+|[a-z])$/;
 // Basisnummer einer normalisierten custom-set-Nummer: "4v2" -> "4", "h25v3" -> "h25", "224a" -> "224".
+// Kit-Expansionen (setSuffix): "1n"/"1s" sind verschiedene Karten, kein Buchstaben-Zusatz zu "1".
+const csBase = (index, n) => (index?.setSuffix ? n : customSetBase(n));
 export function customSetBase(normalized) {
   return String(normalized ?? '').replace(/v\d+$/, '').replace(/^(\d+)[a-z]$/, '$1');
 }
@@ -155,7 +157,8 @@ function indexExpansion(expansion) {
     if (entry.number) byNumber.set(entry.number, [...(byNumber.get(entry.number) ?? []), entry]);
     byName.set(entry.name, [...(byName.get(entry.name) ?? []), entry]);
   }
-  return { byNumber, byName, byId, byEnergy, all, oversized, customSet };
+  const setSuffix = expansion?.setSuffix && typeof expansion.setSuffix === 'object' ? expansion.setSuffix : null;
+  return { byNumber, byName, byId, byEnergy, all, oversized, customSet, setSuffix };
 }
 
 // Angriffs-/Faehigkeitsnamen als reihenfolgefreier Schluessel ("" = keine).
@@ -477,8 +480,12 @@ export function fillCardmarketIds({
       const exp = cardExpansion(set, card);
       const index = exp === null ? null : indexFor(exp);
       if (!index?.customSet.size) continue;
-      const hits = productsByNumber(index.customSet, card);
-      const entry = { set, card, index, hits };
+      // Trainer-Kit-Paar in einer Expansion: Nummer + Kit-Kuerzel ("1" im Noivern-Kit -> "1N"); Sets ohne Kuerzel
+      // nutzen dieses custom-set nicht (ihre Nummer "1" gehoert keinem Kit eindeutig).
+      const kit = index.setSuffix ? index.setSuffix[set.id] : undefined;
+      if (index.setSuffix && !kit) continue;
+      const hits = kit ? index.customSet.get(normalizeCmNumber(`${card.number}${kit}`)) ?? [] : productsByNumber(index.customSet, card);
+      const entry = { set, card, index, hits, kit };
       csCards.push(entry);
       if (hits.length > 1) { customSetReport.ambiguous.push(`${set.id}/${card.cardId}`); continue; }
       if (hits.length) csClaims.set(hits[0].id, [...(csClaims.get(hits[0].id) ?? []), entry]);
@@ -491,11 +498,11 @@ export function fillCardmarketIds({
       continue;
     }
     const [{ set, card, hits: [hit], index }] = claims;
-    const base = customSetBase(hit.number);
+    const base = csBase(index, hit.number);
     // Gehoert laut custom-set zu einer anderen Basisnummer derselben Expansion -> falsch fuer diese Karte
-    const contradicted = (id) => { const n = csNumber(index, id); return id !== productId && n !== null && customSetBase(n) !== base; };
+    const contradicted = (id) => { const n = csNumber(index, id); return id !== productId && n !== null && csBase(index, n) !== base; };
     // Druck derselben Basisnummer mit Zusatz ("149V2" bei Karte 149): Variante, nie die normale Karte
-    const suffixed = (id) => { const n = csNumber(index, id); return id !== productId && n !== null && n !== base && customSetBase(n) === base; };
+    const suffixed = (id) => { const n = csNumber(index, id); return id !== productId && n !== null && n !== base && csBase(index, n) === base; };
     const original = tcgdexIds(card);
     const rejected = new Set([...original, ...(card.variants ?? []).map((v) => v?.cardmarketId)].filter((id) => typeof id === 'number' && contradicted(id)));
     const kept = original.filter((x) => x !== productId && !rejected.has(x));
@@ -533,12 +540,13 @@ export function fillCardmarketIds({
   // aber nur, wenn das custom-set die Nummer der Karte ueberhaupt fuehrt (svp-500 fehlt dort; die
   // Lot-Eintraege "224a-f" sind vergebene Nummern und sagen nichts ueber andere Karten).
   const basesOf = new Map();
-  for (const { set, card, index } of csCards) {
+  for (const { set, card, index, kit } of csCards) {
     if (applied.has(card.id)) continue;
-    if (!basesOf.has(index)) basesOf.set(index, new Set([...index.customSet.keys()].map(customSetBase)));
-    const base = cardCmNumbers(card).map(customSetBase).find((b) => basesOf.get(index).has(b));
+    if (!basesOf.has(index)) basesOf.set(index, new Set([...index.customSet.keys()].map((n) => csBase(index, n))));
+    const own = kit ? [normalizeCmNumber(`${card.number}${kit}`)] : cardCmNumbers(card).map(customSetBase);
+    const base = own.find((b) => basesOf.get(index).has(b));
     if (base === undefined) continue;
-    const contradicted = (id) => { const n = csNumber(index, id); return n !== null && customSetBase(n) !== base; };
+    const contradicted = (id) => { const n = csNumber(index, id); return n !== null && csBase(index, n) !== base; };
     const original = tcgdexIds(card);
     const rejected = new Set([...original, ...(card.variants ?? []).map((v) => v?.cardmarketId)].filter((id) => typeof id === 'number' && contradicted(id)));
     if (!rejected.size) continue;
