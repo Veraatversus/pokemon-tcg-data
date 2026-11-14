@@ -14,31 +14,24 @@ import {
   resolveCardmarketProductId,
   resolveItemCardmarketUrl,
 } from '../js/data/cardmarket-url-utils.js';
-import { buildV3CardmarketIdMap, buildV3ExpansionIdMap } from '../js/data/v3-cardmarket-ids.js';
-import { buildSetCardAssignmentMap, inferCardmarketExpansionIdFromCards } from '../js/data/cardmarket-ui-helpers.js';
+import { buildV3CardmarketIdMap } from '../js/data/v3-cardmarket-ids.js';
 import { resolveDisplayCard } from '../js/data/schema-contract.js';
 import { primaryCardmarketProductId, toCardRecord } from '../js/data/v3-records.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const v3Dir = path.join(repoRoot, 'api', 'v3');
-const cmDir = path.join(repoRoot, 'cardmarket');
-const hasData = existsSync(path.join(v3Dir, 'search-index.json')) && existsSync(path.join(cmDir, 'index', 'tracker.json'));
+const hasData = existsSync(path.join(v3Dir, 'search-index.json'));
 const readJson = (file) => JSON.parse(readFileSync(file, 'utf8'));
-const skip = hasData ? false : 'api/v3 bzw. cardmarket/ fehlt im Checkout';
+const skip = hasData ? false : 'api/v3 fehlt im Checkout';
 
 const POCKET_SERIES = 'Pokémon TCG Pocket';
 
 function loadData() {
   const sets = readJson(path.join(v3Dir, 'sets.json'));
   const index = readJson(path.join(v3Dir, 'search-index.json'));
-  const tracker = readJson(path.join(cmDir, 'index', 'tracker.json'));
-  return { sets, index, tracker };
+  return { sets, index };
 }
 
-function cardmarketPayload(expansionId) {
-  const file = path.join(cmDir, 'sets', `${expansionId}.json`);
-  return existsSync(file) ? readJson(file) : null;
-}
 
 // db_cards-Zeile wie readDbCardsForSet sie liefert (keine setId, gespeicherte URL = falsche ID).
 function staleDbRecord(v3Card, wrongId) {
@@ -54,7 +47,7 @@ function staleDbRecord(v3Card, wrongId) {
 test('Audit: jede Nicht-Pocket-Karte mit v3-ID loest trotz falscher gespeicherter URL auf die v3-ID auf', { skip }, (t) => {
   const { sets, index } = loadData();
   const idMap = buildV3CardmarketIdMap(index);
-  const counts = { sets: 0, cards: 0, withV3Id: 0, indexMismatch: 0, resolved: 0, matcherKeepsV3: 0, matcherChecked: 0 };
+  const counts = { sets: 0, cards: 0, withV3Id: 0, indexMismatch: 0, resolved: 0 };
   const failures = [];
 
   for (const set of sets) {
@@ -99,25 +92,12 @@ test('Audit: jede Nicht-Pocket-Karte mit v3-ID loest trotz falscher gespeicherte
       else if (failures.length < 20) failures.push(`${v3Card.id}: ${record.cardmarketUrl}`);
     });
 
-    // Matcher: v3-Karten behalten ihr Produkt, auch wenn Name/Nummer anders entscheiden wuerden.
-    const expansionId = buildV3ExpansionIdMap(sets).get(String(set.id).toLowerCase());
-    const payload = expansionId ? cardmarketPayload(expansionId) : null;
-    if (payload) {
-      const assignment = buildSetCardAssignmentMap(enriched, payload);
-      const productIds = new Set(payload.cards.map((entry) => String(entry.cardmarketProductId)));
-      enriched.forEach((record, i) => {
-        if (!productIds.has(withId[i].expected)) return;
-        counts.matcherChecked += 1;
-        if (String(assignment.get(record)?.cardmarketProductId) === withId[i].expected) counts.matcherKeepsV3 += 1;
-      });
-    }
   }
 
   t.diagnostic(`Audit Karten: ${JSON.stringify(counts)}`);
   assert.deepEqual(failures, []);
   assert.equal(counts.resolved, counts.withV3Id);
   assert.equal(counts.indexMismatch, 0, 'search-index cm = primaryCardmarketProductId der Kartendatei');
-  assert.equal(counts.matcherKeepsV3, counts.matcherChecked);
   assert.ok(counts.withV3Id > 15000, `zu wenige Karten mit v3-ID: ${counts.withV3Id}`);
 });
 
@@ -135,30 +115,4 @@ test('Audit: me55-150 -> 907757, me55-48 -> 907655 (Reverse-Holo-Suffix bleibt)'
   assert.equal(resolveItemCardmarketUrl({ card: card48, isReverseHolo: true }), 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=907655&isReverseHolo=Y');
   assert.equal(resolveItemCardmarketUrl({ card: card150, isReverseHolo: false }, { language: 'en' }), 'https://www.cardmarket.com/en/Pokemon/Products?idProduct=907757');
 });
-
-test('Audit: Set-Expansion aus v3 ids.cardmarket schlaegt tracker.json', { skip }, (t) => {
-  const { sets, tracker } = loadData();
-  const expansionMap = buildV3ExpansionIdMap(sets);
-  const counts = { sets: 0, withV3Expansion: 0, trackerAgrees: 0, trackerDiffers: 0, trackerMissing: 0, payloadMissing: 0 };
-  const differs = [];
-  for (const set of sets) {
-    if (set.series === POCKET_SERIES) continue;
-    counts.sets += 1;
-    const v3Expansion = expansionMap.get(String(set.id).toLowerCase());
-    if (!v3Expansion) continue;
-    counts.withV3Expansion += 1;
-    if (!existsSync(path.join(cmDir, 'sets', `${v3Expansion}.json`))) counts.payloadMissing += 1;
-    const trackerExpansion = String(tracker.bySetId?.[String(set.id).replace(/^TCGDEX-/i, '').toLowerCase()] || '');
-    if (!trackerExpansion) counts.trackerMissing += 1;
-    else if (trackerExpansion === v3Expansion) counts.trackerAgrees += 1;
-    else {
-      counts.trackerDiffers += 1;
-      if (differs.length < 15) differs.push(`${set.id}: v3 ${v3Expansion} / tracker ${trackerExpansion}`);
-    }
-    const inferred = inferCardmarketExpansionIdFromCards([{ setId: set.id }], {}, { trackerSetIndex: tracker, currentSetId: set.id, v3ExpansionId: v3Expansion });
-    assert.equal(inferred, v3Expansion, set.id);
-  }
-  t.diagnostic(`Audit Sets: ${JSON.stringify(counts)}`);
-  if (differs.length) t.diagnostic(`v3 != tracker: ${differs.join('; ')}`);
-  assert.ok(counts.withV3Expansion > 100);
-});
+

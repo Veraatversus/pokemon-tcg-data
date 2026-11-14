@@ -8,7 +8,7 @@ index.html
       ├── js/app/          bootstrap-controller.js (Startreihenfolge), pwa-init.js (Service Worker, Install-Prompt)
       ├── js/core/         config, auth, cache, utils, storage-keys, collection-state, display-text, retry, …
       ├── js/data/         v3-api, v3-records, pokemon-api, schema-contract (resolveFieldValue),
-      │                    sheets-db, collection-writes, cardmarket-* (Daten, Matcher, URL/ID, Build-Stamp)
+      │                    sheets-db, collection-writes, cardmarket-* (URL/ID, Preis-Anzeige), v3-prices, v3-cardmarket-ids
       ├── js/features/     search (Index-Suche, Query-Helfer, Sammlungs-Maps), collection (Import, Backup,
       │                    Legacy-Schluessel), community, settings
       ├── js/ui/           image-fallback, cardmarket-price, stats-*, components, command-palette, tools
@@ -145,7 +145,7 @@ Bekannte Schlüssel:
 
 ## Import-Specifier und Service-Worker
 
-- Jedes Modul wird ueberall unter demselben Specifier importiert (Test `tests/module-specifier-consistency.test.mjs`), sonst entstehen im Browser zwei Modulinstanzen. `core/config.js`, `core/auth.js`, `core/utils.js`, `data/schema-contract.js` und `data/cardmarket-data.js` sind bewusst unversioniert (Mehrheit des Graphen; Tests importieren unversioniert und teilen so die Modulidentitaet mit der App). `version:sync` aendert nur vorhandene `?v=`.
+- Jedes Modul wird ueberall unter demselben Specifier importiert (Test `tests/module-specifier-consistency.test.mjs`), sonst entstehen im Browser zwei Modulinstanzen. `core/config.js`, `core/auth.js`, `core/utils.js` und `data/schema-contract.js` sind bewusst unversioniert (Mehrheit des Graphen; Tests importieren unversioniert und teilen so die Modulidentitaet mit der App). `version:sync` aendert nur vorhandene `?v=`.
 - Service Worker: JS/CSS und network-first mit `cache: 'no-cache'` (kein veralteter HTTP-Cache nach Deploys); `api/v3`/`api/registry` (aendert sich nur taeglich) cache-first mit 24-h-Frische (Zeitstempel `x-sw-fetched-at`), danach Revalidierung per Netz, veraltete Kopie nur als Offline-Fallback; API-Runtime-Cache auf 60 Kartendateien begrenzt (sets/meta/search-index bleiben).
 - API-Basis (`resolveV3Bases` in `js/data/v3-api.js`): GitHub Pages kopiert die App flach in den Site-Root bzw. `dev/` und `api/` daneben, daher `<App-Verzeichnis>/api/v3/` und `/api/registry/`; endet das App-Verzeichnis auf `/frontend/tcg-tracker-web/` (lokal `start:dev:full`, Repo-Root) `../../api/…`. `CONFIG.APIS.V3_BASE`/`REGISTRY_BASE` ueberschreiben beides.
 
@@ -175,9 +175,9 @@ Bekannte Schlüssel:
 
 ## Cardmarket
 
-- Produkt-ID je Karte: `resolveCardmarketProductId` (`js/data/cardmarket-url-utils.js`) ist die einzige Entscheidung: v3-ID am Record (`cardmarketProductId`, primaere ID nach `primaryCardmarketProductId` bzw. `cm` im Suchindex) -> Legacy-URL mit `idProduct=` -> Treffer des Name-/Nummern-Matchers (`cardmarketMatchedProductId`). Matcher-Treffer landen nie in `cardmarketProductId`. Links baut `resolveItemCardmarketUrl`.
-- Preis-Frische: Die Cardmarket-Daten werden taeglich gebaut; `meta.json.generatedAt` ist der Build-Stamp. `js/data/cardmarket-data.js` haengt ihn als `?v=<stamp>` an jede Daten-URL; der Service Worker cacht diese URLs cache-first, ein neuer Stamp ist eine neue URL und kommt beim ersten Laden aus dem Netz, aeltere Stamps werden entfernt.
-- Stamp-Wechsel beim Start (`applyCardmarketBuildStampCheck`) und "Preise neu laden" (`forceRefreshCardmarketPrices`) leeren ueber `resetAllCardmarketCaches` die Daten-Caches und die Preis-Zusammenfassungen der Kartenlinks/Lightbox (`cardmarketPriceSummaryCache` in `js/ui/cardmarket-price.js`).
+- Produkt-ID je Karte: `resolveCardmarketProductId` (`js/data/cardmarket-url-utils.js`) ist die einzige Entscheidung: v3-ID am Record (`cardmarketProductId`, primaere ID nach `primaryCardmarketProductId` bzw. `cm` im Suchindex) -> Legacy-URL mit `idProduct=` -> `cardmarketMatchedProductId` (Rueckfall-Feld; im Frontend gibt es keinen Matcher mehr, der es setzt). Es landet nie in `cardmarketProductId`. Links baut `resolveItemCardmarketUrl`.
+- Preise: kommen ausschliesslich aus `api/v3/prices/<setId>.json` (`js/data/v3-prices.js`), je Karte nur wenn die `productId` des Eintrags der Produkt-ID des Records entspricht - kein Matching im Browser (der fruehere Name-/Nummern-Matcher und das Lesen von `cardmarket/` sind entfernt; der Ordner `cardmarket/` bleibt als eingefrorener Altbestand im Repo).
+- Preis-Frische: `api/v3/prices/meta.json.generatedAt` ist der Build-Stamp (taeglich). `v3-prices.js` haengt ihn als `?v=<stamp>` an jede Preisdatei-URL; der Service Worker (`handleCardmarketRequest`) cacht diese URLs cache-first, meta.json network-first, aeltere Stamps werden entfernt. "Preise neu laden" (`refreshV3Prices`) liest den Stamp neu und leert die Preis-Zusammenfassungen der Kartenlinks/Lightbox (`cardmarketPriceSummaryCache` in `js/ui/cardmarket-price.js`).
 
 ## Cache-Strategie
 

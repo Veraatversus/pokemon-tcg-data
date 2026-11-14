@@ -4,9 +4,9 @@
 
 const SW_SCOPE_PATH = new URL(self.registration.scope).pathname.toLowerCase();
 const SW_SCOPE = /(^|\/)dev(\/|$)/.test(SW_SCOPE_PATH) ? 'dev' : 'release';
-const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v59`;
-const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v59`;
-const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v59`;
+const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v60`;
+const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v60`;
+const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v60`;
 
 // api/v3 + api/registry JSON in the runtime cache: keep at most API_CACHE_MAX_ENTRIES
 // non-pinned entries (card files); oldest-inserted are evicted first (cache.keys() is insertion-ordered).
@@ -75,20 +75,15 @@ async function handleApiRequest(request) {
 }
 
 // --- cardmarket-data ---
-// Preisdaten api/v3/prices/*.json (js/data/v3-prices.js) und Alt-Daten <base>/cardmarket/*.json werden taeglich
-// neu gebaut; meta.json.generatedAt der jeweiligen Familie ist der Stamp. Die App haengt ihn als ?v=<stamp> an
+// Preisdaten api/v3/prices/*.json (js/data/v3-prices.js) werden taeglich
+// neu gebaut; meta.json.generatedAt ist der Stamp. Die App haengt ihn als ?v=<stamp> an
 // jede Daten-URL.
 //  - meta.json und Daten ohne ?v: Netz zuerst (no-store), offline -> gecachte Kopie.
 //  - Daten mit ?v: cache-first (der Stamp steckt im Schluessel). Ein neuer Stamp ist eine neue URL und
 //    kommt daher beim ersten Laden nach dem Build aus dem Netz; danach werden aeltere Stamps entfernt.
 // Unit-getestet in tests/service-worker-cardmarket.test.mjs.
-const CARDMARKET_DATA_RE = /\/cardmarket\/(?:[^/]+\/)*[^/]+\.json$|\/api\/v3\/prices\/[^/]+\.json$/;
-const CARDMARKET_META_RE = /\/(?:cardmarket|api\/v3\/prices)\/meta\.json$/;
-
-// Familie eines Daten-Pfads: Stamps werden nur innerhalb derselben Familie verglichen.
-function cardmarketFamily(pathname) {
-  return /\/api\/v3\/prices\//.test(String(pathname || '')) ? 'prices' : 'cardmarket';
-}
+const CARDMARKET_DATA_RE = /\/api\/v3\/prices\/[^/]+\.json$/;
+const CARDMARKET_META_RE = /\/api\/v3\/prices\/meta\.json$/;
 
 function isCardmarketDataPath(pathname) {
   return CARDMARKET_DATA_RE.test(String(pathname || ''));
@@ -99,24 +94,15 @@ function stampTime(stamp) {
   return Number.isFinite(time) ? time : -Infinity;
 }
 
-// Entfernt Dateneintraege derselben Familie mit aelterem (oder ohne) Stamp; meta.json bleibt.
-async function pruneCardmarketStamps(cache, keepStamp, family = 'cardmarket') {
+// Entfernt Dateneintraege mit aelterem (oder ohne) Stamp; meta.json bleibt.
+async function pruneCardmarketStamps(cache, keepStamp) {
   const keepTime = stampTime(keepStamp);
   const keys = await cache.keys();
   for (const req of keys) {
     const url = new URL(req.url);
     if (!isCardmarketDataPath(url.pathname) || CARDMARKET_META_RE.test(url.pathname)) continue;
-    if (cardmarketFamily(url.pathname) !== family) continue;
     const stamp = url.searchParams.get('v') || '';
     if (stamp !== keepStamp && stampTime(stamp) < keepTime) await cache.delete(req);
-  }
-}
-
-// Altbestand: vor v3-Polish landeten Cardmarket-Dateien im statischen Cache (cache-first ohne Ablauf).
-async function purgeCardmarketFromCache(cache) {
-  const keys = await cache.keys();
-  for (const req of keys) {
-    if (isCardmarketDataPath(new URL(req.url).pathname)) await cache.delete(req);
   }
 }
 
@@ -134,7 +120,7 @@ async function handleCardmarketRequest(request) {
     if (response && response.status === 200) {
       try {
         await cache.put(request, response.clone());
-        if (versioned) await pruneCardmarketStamps(cache, stamp, cardmarketFamily(url.pathname));
+        if (versioned) await pruneCardmarketStamps(cache, stamp);
       } catch (err) {
         console.warn('[SW] cache.put failed:', err);
       }
@@ -192,9 +178,7 @@ self.addEventListener('activate', (event) => {
             return caches.delete(name);
           })
       );
-    }).then(() => caches.open(CACHE_NAME))
-      .then((cache) => purgeCardmarketFromCache(cache))
-      .catch((err) => console.warn('[SW] cardmarket purge failed:', err))
+    })
   );
   self.clients.claim();
 });
@@ -246,7 +230,7 @@ self.addEventListener('fetch', (event) => {
       return;
     }
 
-    // Preisdaten (api/v3/prices) und Cardmarket-Altdaten (auch vom VERA_BASE-Host): Stamp-basierte Frische,
+    // Preisdaten (api/v3/prices, auch vom VERA_BASE-Host): Stamp-basierte Frische,
     // siehe handleCardmarketRequest. Steht vor der api/v3-Route (24-h-Cache).
     if (request.destination !== 'image' && isCardmarketDataPath(url.pathname)) {
       event.respondWith(handleCardmarketRequest(request));

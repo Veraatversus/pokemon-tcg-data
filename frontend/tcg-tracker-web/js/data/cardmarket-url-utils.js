@@ -97,8 +97,7 @@ function productIdFromUrl(url = '') {
  *   1. v3-Produkt-ID am Record (`cardmarketProductId`, primaere ID nach primaryCardmarketProductId bzw. search-index `cm`;
  *      db_cards-Records bekommen sie ueber attachV3CardmarketIds). Das Feld traegt NUR v3-IDs.
  *   2. Legacy-URL (Sheet) mit `idProduct=`
- *   3. Treffer des Name-/Nummern-Matchers (`matchedEntry`, asynchron vom Aufrufer ermittelt, bzw.
- *      `cardmarketMatchedProductId`, das promoteCardmarketUrlsForCards am Record hinterlegt)
+ *   3. Rueckfall `matchedEntry` bzw. `cardmarketMatchedProductId` (Altfeld; im Frontend setzt es kein Matcher mehr)
  * Kein Treffer -> { productId: '', source: '' }; der Link faellt dann auf eine Such-URL zurueck.
  */
 export function resolveCardmarketProductId(card = {}, { matchedEntry = null } = {}) {

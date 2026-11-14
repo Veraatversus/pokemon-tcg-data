@@ -121,7 +121,7 @@ loadCurrentSet(setId)
 
 ## Statistik: Cardmarket Preisradar
 
-Die Statistikansicht enthält einen zusätzlichen Preisbereich auf Basis der vorhandenen Cardmarket-Resolver.
+Die Statistikansicht enthält einen zusätzlichen Preisbereich auf Basis der Preisdaten aus `api/v3/prices` (kein Matching im Browser; Produkt-IDs stammen aus api/v3).
 
 - Die Kern-Statistik rendert zuerst ohne Blockierung.
 - Preisdaten werden danach chunk-basiert nachgeladen.
@@ -138,7 +138,7 @@ Die Statistikansicht enthält einen zusätzlichen Preisbereich auf Basis der vor
 ```bash
 node --test frontend/tcg-tracker-web/tests/stats-price-analytics.test.mjs
 node --test frontend/tcg-tracker-web/tests/stats-price-lazy-loading-regression.mjs
-node --test frontend/tcg-tracker-web/tests/cardmarket-data.test.mjs
+node --test frontend/tcg-tracker-web/tests/v3-prices.test.mjs
 ```
 
 ---
@@ -157,7 +157,7 @@ node --test frontend/tcg-tracker-web/tests/cardmarket-data.test.mjs
 - Der bestehende Grid-Aufbau der Set-Blätter (5x3, Höhe 4) wird für das Lesen/Schreiben der Checkboxen verwendet.
 - Kartenbilder, Set-Logos und Set-Symbole: zuerst in der gewählten Kartensprache, dann in der anderen Sprache, zuletzt `https://images.pokemontcg.io/…`; danach erscheint der Pokéball-Platzhalter.
 - Die Suche findet Namen (deutsch und englisch), Kartennummer, Künstler, Typ (deutsch oder englisch, z. B. „Feuer“ oder „Fire“), Seltenheit und Set (Name, Kürzel, Serie). Attacken- und Fähigkeitstexte werden nicht durchsucht.
-- Cardmarket-Preise werden täglich neu gebaut; die App holt einen neuen Stand automatisch, „Preise neu laden“ in den Einstellungen leert zusätzlich alle Preis-Caches.
+- Cardmarket-Preise kommen aus `api/v3/prices` und werden täglich neu gebaut; die App holt einen neuen Stand automatisch, „Preise neu laden“ in den Einstellungen leert zusätzlich alle Preis-Caches.
 - Die Kartensprache (Englisch/Deutsch) wird pro Browser gespeichert (localStorage), nicht im Spreadsheet; auf einem anderen Gerät oder in einem anderen Browser gilt wieder die Voreinstellung.
 - Vor der Zuordnung mehrdeutiger Altzeilen wird ein Auto-Snapshot angelegt; eine Rueckgaengig-Funktion fuer diese Migration gibt es in der Oberflaeche noch nicht.
 - Noch nicht zugeordnete Kandidaten mehrdeutiger Altzeilen zeigen den gemeinsamen Altstatus mit dem Hinweis „nicht zugeordnet“; ein Klick auf G oeffnet die Zuordnung.

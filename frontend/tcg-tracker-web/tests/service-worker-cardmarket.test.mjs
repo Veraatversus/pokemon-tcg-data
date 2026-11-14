@@ -1,4 +1,4 @@
-// Task 8c: Cardmarket-Daten im Service Worker - meta.json network-first, Daten mit ?v=<Stamp>
+// Preisdaten (api/v3/prices) im Service Worker - meta.json network-first, Daten mit ?v=<Stamp>
 // cache-first, alte Stamps werden entfernt. Simuliert Tag 1 -> Tag 2.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -41,13 +41,13 @@ function makeSw(server) {
     const body = server.files[path];
     return body === undefined ? new Response('', { status: 404 }) : new Response(JSON.stringify(body), { status: 200 });
   };
-  const api = new Function('caches', 'fetch', 'RUNTIME_CACHE', `${block}; return { handleCardmarketRequest, isCardmarketDataPath, purgeCardmarketFromCache };`)(caches, fetchImpl, 'rt');
+  const api = new Function('caches', 'fetch', 'RUNTIME_CACHE', `${block}; return { handleCardmarketRequest, isCardmarketDataPath };`)(caches, fetchImpl, 'rt');
   return { ...api, cache, network };
 }
 
 const ORIGIN = 'https://veraatversus.github.io/pokemon-tcg-data';
-const META = `${ORIGIN}/cardmarket/meta.json`;
-const setUrl = (stamp) => `${ORIGIN}/cardmarket/sets/9.json?v=${encodeURIComponent(stamp)}`;
+const META = `${ORIGIN}/api/v3/prices/meta.json`;
+const setUrl = (stamp) => `${ORIGIN}/api/v3/prices/sv1.json?v=${encodeURIComponent(stamp)}`;
 const DAY1 = '2026-11-11T03:00:00.000Z';
 const DAY2 = '2026-11-12T03:00:00.000Z';
 
@@ -57,8 +57,8 @@ test('Tag 1 -> Tag 2: meta.json immer aus dem Netz, Preisdatei mit neuem Stamp a
   const server = {
     offline: false,
     files: {
-      '/pokemon-tcg-data/cardmarket/meta.json': { generatedAt: DAY1 },
-      '/pokemon-tcg-data/cardmarket/sets/9.json': { cards: [{ cardmarketProductId: 1, prices: { trend: 1 } }] },
+      '/pokemon-tcg-data/api/v3/prices/meta.json': { generatedAt: DAY1 },
+      '/pokemon-tcg-data/api/v3/prices/sv1.json': { cards: [{ cardmarketProductId: 1, prices: { trend: 1 } }] },
     },
   };
   const sw = makeSw(server);
@@ -70,8 +70,8 @@ test('Tag 1 -> Tag 2: meta.json immer aus dem Netz, Preisdatei mit neuem Stamp a
   assert.equal(sw.network.filter((u) => u === setUrl(DAY1)).length, 1, 'Tag 1: zweiter Abruf aus dem Cache');
 
   // Taeglicher Build
-  server.files['/pokemon-tcg-data/cardmarket/meta.json'] = { generatedAt: DAY2 };
-  server.files['/pokemon-tcg-data/cardmarket/sets/9.json'] = { cards: [{ cardmarketProductId: 1, prices: { trend: 2 } }] };
+  server.files['/pokemon-tcg-data/api/v3/prices/meta.json'] = { generatedAt: DAY2 };
+  server.files['/pokemon-tcg-data/api/v3/prices/sv1.json'] = { cards: [{ cardmarketProductId: 1, prices: { trend: 2 } }] };
 
   // Tag 2, erster Start
   assert.equal((await json(await sw.handleCardmarketRequest(new Request(META)))).generatedAt, DAY2, 'meta.json nicht aus dem Cache');
@@ -87,8 +87,8 @@ test('offline: meta.json und Preisdatei aus dem Cache (auch ohne passenden Stamp
   const server = {
     offline: false,
     files: {
-      '/pokemon-tcg-data/cardmarket/meta.json': { generatedAt: DAY1 },
-      '/pokemon-tcg-data/cardmarket/sets/9.json': { cards: [] },
+      '/pokemon-tcg-data/api/v3/prices/meta.json': { generatedAt: DAY1 },
+      '/pokemon-tcg-data/api/v3/prices/sv1.json': { cards: [] },
     },
   };
   const sw = makeSw(server);
@@ -97,30 +97,25 @@ test('offline: meta.json und Preisdatei aus dem Cache (auch ohne passenden Stamp
   server.offline = true;
   assert.equal((await json(await sw.handleCardmarketRequest(new Request(META)))).generatedAt, DAY1);
   assert.equal((await sw.handleCardmarketRequest(new Request(setUrl(DAY1)))).status, 200);
-  assert.equal((await sw.handleCardmarketRequest(new Request(`${ORIGIN}/cardmarket/sets/9.json`))).status, 200, 'ohne ?v -> Fallback auf gecachte Kopie');
+  assert.equal((await sw.handleCardmarketRequest(new Request(`${ORIGIN}/api/v3/prices/sv1.json`))).status, 200, 'ohne ?v -> Fallback auf gecachte Kopie');
 });
 
 test('aelterer Stamp (alter Tab) loescht den neueren nicht', async () => {
-  const server = { offline: false, files: { '/pokemon-tcg-data/cardmarket/sets/9.json': { cards: [] } } };
+  const server = { offline: false, files: { '/pokemon-tcg-data/api/v3/prices/sv1.json': { cards: [] } } };
   const sw = makeSw(server);
   await sw.handleCardmarketRequest(new Request(setUrl(DAY2)));
   await sw.handleCardmarketRequest(new Request(setUrl(DAY1)));
   assert.ok(sw.cache.map.has(setUrl(DAY2)));
 });
 
-test('Routing und Altlasten: nur cardmarket-JSON, Altbestand im statischen Cache wird entfernt', async () => {
+test('Routing: nur api/v3/prices-JSON; Altpfad /cardmarket/ wird nicht mehr behandelt', () => {
   const sw = makeSw({ files: {} });
-  assert.equal(sw.isCardmarketDataPath('/pokemon-tcg-data/cardmarket/sets/9.json'), true);
-  assert.equal(sw.isCardmarketDataPath('/dev/cardmarket/index/products.json'), true);
-  assert.equal(sw.isCardmarketDataPath('/cardmarket/meta.json'), true);
+  assert.equal(sw.isCardmarketDataPath('/pokemon-tcg-data/api/v3/prices/sv1.json'), true);
+  assert.equal(sw.isCardmarketDataPath('/dev/api/v3/prices/meta.json'), true);
+  assert.equal(sw.isCardmarketDataPath('/dev/api/v3/cards/sv1.json'), false);
+  assert.equal(sw.isCardmarketDataPath('/pokemon-tcg-data/cardmarket/sets/9.json'), false);
   assert.equal(sw.isCardmarketDataPath('/51/SVI/1/1.jpg'), false);
-  assert.equal(sw.isCardmarketDataPath('/js/data/cardmarket-data.js'), false);
-
-  const staticCache = fakeCache();
-  await staticCache.put(`${ORIGIN}/cardmarket/sets/9.json`, new Response('{}'));
-  await staticCache.put(`${ORIGIN}/index.html`, new Response(''));
-  await sw.purgeCardmarketFromCache(staticCache);
-  assert.deepEqual([...staticCache.map.keys()], [`${ORIGIN}/index.html`]);
+  assert.ok(!src.includes('purgeCardmarketFromCache'));
 });
 
 test('Debug-Ausgaben/CM_FETCH entfernt', () => {
@@ -128,49 +123,4 @@ test('Debug-Ausgaben/CM_FETCH entfernt', () => {
   assert.ok(!src.includes("console.log('[SW] cardmarket fetch"));
 });
 
-// Task B1: api/v3/prices (Spec §5) - meta.json network-first, <setId>.json?v=<generatedAt> cache-first.
-const PRICES_META = `${ORIGIN}/api/v3/prices/meta.json`;
-const priceUrl = (stamp, set = 'sv1') => `${ORIGIN}/api/v3/prices/${set}.json?v=${encodeURIComponent(stamp)}`;
 
-test('api/v3/prices: Tag 1 -> Tag 2 (meta.json frisch, neue Preisdatei, alter Stamp entfernt)', async () => {
-  const server = {
-    offline: false,
-    files: {
-      '/pokemon-tcg-data/api/v3/prices/meta.json': { generatedAt: DAY1 },
-      '/pokemon-tcg-data/api/v3/prices/sv1.json': { '1': { productId: 1, trend: 1 } },
-    },
-  };
-  const sw = makeSw(server);
-  assert.equal(sw.isCardmarketDataPath('/pokemon-tcg-data/api/v3/prices/sv1.json'), true);
-  assert.equal(sw.isCardmarketDataPath('/dev/api/v3/prices/meta.json'), true);
-  assert.equal(sw.isCardmarketDataPath('/dev/api/v3/cards/sv1.json'), false);
-
-  assert.equal((await json(await sw.handleCardmarketRequest(new Request(PRICES_META)))).generatedAt, DAY1);
-  assert.equal((await json(await sw.handleCardmarketRequest(new Request(priceUrl(DAY1)))))['1'].trend, 1);
-  await sw.handleCardmarketRequest(new Request(priceUrl(DAY1)));
-  assert.equal(sw.network.filter((u) => u === priceUrl(DAY1)).length, 1, 'Tag 1: zweiter Abruf aus dem Cache');
-
-  server.files['/pokemon-tcg-data/api/v3/prices/meta.json'] = { generatedAt: DAY2 };
-  server.files['/pokemon-tcg-data/api/v3/prices/sv1.json'] = { '1': { productId: 1, trend: 2 } };
-  assert.equal((await json(await sw.handleCardmarketRequest(new Request(PRICES_META)))).generatedAt, DAY2, 'meta.json nicht aus dem Cache');
-  assert.equal((await json(await sw.handleCardmarketRequest(new Request(priceUrl(DAY2)))))['1'].trend, 2);
-  assert.ok(!sw.cache.map.has(priceUrl(DAY1)), 'alter Stamp entfernt');
-  assert.ok(sw.cache.map.has(PRICES_META), 'meta.json bleibt (Offline-Rueckfall)');
-
-  server.offline = true;
-  assert.equal((await json(await sw.handleCardmarketRequest(new Request(PRICES_META)))).generatedAt, DAY2, 'offline: gecachte meta.json');
-  assert.equal((await json(await sw.handleCardmarketRequest(new Request(priceUrl(DAY2)))))['1'].trend, 2, 'offline: gecachte Preisdatei');
-});
-
-test('Stamp-Bereinigung je Familie: Preis-Stamp entfernt keine Altdaten anderer Familie und umgekehrt', async () => {
-  const server = { offline: false, files: {
-    '/pokemon-tcg-data/api/v3/prices/sv1.json': {},
-    '/pokemon-tcg-data/cardmarket/sets/9.json': { cards: [] },
-  } };
-  const sw = makeSw(server);
-  await sw.handleCardmarketRequest(new Request(setUrl(DAY1)));
-  await sw.handleCardmarketRequest(new Request(priceUrl(DAY2)));
-  assert.ok(sw.cache.map.has(setUrl(DAY1)), 'cardmarket/ unberuehrt vom Preis-Stamp');
-  await sw.handleCardmarketRequest(new Request(setUrl(DAY2)));
-  assert.ok(sw.cache.map.has(priceUrl(DAY2)));
-});

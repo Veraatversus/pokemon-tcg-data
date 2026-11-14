@@ -9,12 +9,6 @@ import {
 } from '../js/data/cardmarket-url-utils.js';
 import { resolveDisplayCard } from '../js/data/schema-contract.js';
 import { indexEntryToCard } from '../js/features/search/search-index-prefilter.js';
-import {
-  resolveCardmarketEntryForCard,
-  loadCardmarketSetPayload,
-  resetCardmarketDataCaches,
-  setCardmarketDataVersion,
-} from '../js/data/cardmarket-data.js';
 
 const SEARCH_URL = 'https://www.cardmarket.com/de/Pokemon/Products/Search?searchMode=v2&searchString=SVI+12';
 const legacyUrl = (id) => `https://www.cardmarket.com/de/Pokemon/Products?idProduct=${id}`;
@@ -99,72 +93,4 @@ const SET_PAYLOAD = {
     { cardmarketProductId: 501, name: 'Pikachu [Stamp]', collectorNumber: '25', prices: { trend: 9 } },
   ],
 };
-
-test('resolveCardmarketEntryForCard: v3-ID gewinnt gegen den Matcher (Tracker -> Set-Payload, ohne products.json)', async () => {
-  resetCardmarketDataCaches();
-  setCardmarketDataVersion('2026-11-12T03:00:00.000Z');
-  const calls = installFetch({
-    '/index/tracker.json': { bySetId: { sv1: 9 }, byPtcgoCode: {}, bySetName: {} },
-    '/index/names.json': {},
-    '/index/products.json': { 500: { expansionId: 9 }, 501: { expansionId: 9 } },
-    '/sets/9.json': SET_PAYLOAD,
-  });
-  const card = { setId: 'sv1', number: '25', name: 'Pikachu', vera_name: 'Pikachu', cardmarketProductId: 501 };
-  const entry = await resolveCardmarketEntryForCard(card, { cards: [card], currentSetId: 'sv1' });
-  assert.equal(entry?.cardmarketProductId, 501);
-  assert.ok(!calls.some((u) => u.includes('/index/products.json')), 'products.json (4 MB) wird nicht geladen');
-});
-
-test('resolveCardmarketEntryForCard: v3-ID ohne Preisdaten -> null statt Matcher-Treffer', async () => {
-  resetCardmarketDataCaches();
-  setCardmarketDataVersion('2026-11-12T03:00:00.000Z');
-  installFetch({
-    '/index/tracker.json': { bySetId: { sv1: 9 }, byPtcgoCode: {}, bySetName: {} },
-    '/index/names.json': {},
-    '/index/products.json': {},
-    '/sets/9.json': SET_PAYLOAD,
-  });
-  const card = { setId: 'sv1', number: '25', name: 'Pikachu', vera_name: 'Pikachu', cardmarketProductId: 999 };
-  assert.equal(await resolveCardmarketEntryForCard(card, { cards: [card], currentSetId: 'sv1' }), null);
-});
-
-test('resolveCardmarketEntryForCard: Legacy-URL-ID vor dem Matcher', async () => {
-  resetCardmarketDataCaches();
-  setCardmarketDataVersion('2026-11-12T03:00:00.000Z');
-  installFetch({
-    '/index/tracker.json': { bySetId: { sv1: 9 }, byPtcgoCode: {}, bySetName: {} },
-    '/index/names.json': {},
-    '/index/products.json': { 501: { expansionId: 9 } },
-    '/sets/9.json': SET_PAYLOAD,
-  });
-  const card = { setId: 'sv1', number: '25', name: 'Pikachu', vera_name: 'Pikachu', vera_cardmarket_url: legacyUrl(501) };
-  const entry = await resolveCardmarketEntryForCard(card, { cards: [card], currentSetId: 'sv1' });
-  assert.equal(entry?.cardmarketProductId, 501);
-});
-
-// ── 3. Frische: Build-Stamp als Cache-Buster ─────────────────────────────
-test('Cardmarket-Daten-URLs tragen den Build-Stamp (?v=), neuer Stamp -> neue URL', async () => {
-  resetCardmarketDataCaches();
-  setCardmarketDataVersion('2026-11-11T03:00:00.000Z');
-  const calls = installFetch({ '/sets/9.json': SET_PAYLOAD });
-  await loadCardmarketSetPayload(9);
-  resetCardmarketDataCaches();
-  setCardmarketDataVersion('2026-11-12T03:00:00.000Z');
-  await loadCardmarketSetPayload(9);
-  assert.deepEqual(calls, [
-    `${CM_BASE}/sets/9.json?v=${encodeURIComponent('2026-11-11T03:00:00.000Z')}`,
-    `${CM_BASE}/sets/9.json?v=${encodeURIComponent('2026-11-12T03:00:00.000Z')}`,
-  ]);
-});
-
-test('ohne gesetzten Stamp wird meta.json einmal gelesen und als ?v= verwendet', async () => {
-  resetCardmarketDataCaches();
-  const calls = installFetch({
-    '/meta.json': { generatedAt: '2026-11-12T03:00:00.000Z' },
-    '/sets/9.json': SET_PAYLOAD,
-  });
-  await loadCardmarketSetPayload(9);
-  await loadCardmarketSetPayload(10).catch(() => {});
-  assert.equal(calls.filter((u) => u.includes('/meta.json')).length, 1);
-  assert.ok(calls.includes(`${CM_BASE}/sets/9.json?v=${encodeURIComponent('2026-11-12T03:00:00.000Z')}`), calls.join('\n'));
-});
+

@@ -47,7 +47,7 @@ test('SW-Bild: 200 wird gecacht, Cache-Treffer direkt geliefert', async () => {
   assert.equal(await cachedRun.fn({ url: 'x' }), hit);
 });
 
-test('SW-Cache-Version ist v59 (alte Bild-Platzhalter werden verworfen)', () => {
-  assert.match(src, /poke-tcg-images-\$\{SW_SCOPE\}-v59/);
-  assert.doesNotMatch(src, /-v58`/);
+test('SW-Cache-Version ist v60 (Caches der Vorversion werden verworfen)', () => {
+  assert.match(src, /poke-tcg-images-\$\{SW_SCOPE\}-v60/);
+  assert.doesNotMatch(src, /-v59`/);
 });
