@@ -183,3 +183,24 @@ test('"Preise neu laden": refreshV3Prices leert Preis-Caches und liest meta.json
   assert.deepEqual(changed, { changed: true, previousStamp: DAY1, currentStamp: DAY2 });
   assert.equal((await getCardPrice(card, o)).trend, 2.5);
 });
+
+test('setId in anderer Schreibweise: Preisdatei unter der kanonischen v3-setId (sets.json)', async () => {
+  const server = makeServer({
+    'prices/meta.json': { generatedAt: DAY1 },
+    'prices/TCGDEX-mee.json': { '1': { productId: 77, trend: 0.2 } },
+    'sets.json': [{ id: 'TCGDEX-mee' }, { id: 'sv1' }],
+  });
+  const o = opts(server);
+  const price = await getCardPrice({ setId: 'tcgdex-MEE', collectionKey: '1', cardmarketProductId: 77 }, o);
+  assert.equal(price?.trend, 0.2);
+  assert.ok(server.calls.some((u) => u.includes('/prices/TCGDEX-mee.json?v=')));
+  // gleiche Datei fuer beide Schreibweisen nur einmal
+  await getCardPrice({ setId: 'TCGDEX-mee', collectionKey: '1', cardmarketProductId: 77 }, o);
+  assert.equal(server.calls.filter((u) => u.includes('/prices/TCGDEX-mee.json')).length, 1);
+});
+
+test('ohne sets.json (offline/Fehler): setId unveraendert', async () => {
+  const server = makeServer({ 'prices/meta.json': { generatedAt: DAY1 }, 'prices/sv1.json': SV1_PRICES });
+  const o = opts(server);
+  assert.equal((await getCardPrice({ setId: 'sv1', collectionKey: '1', cardmarketProductId: 1001 }, o))?.trend, 1.5);
+});

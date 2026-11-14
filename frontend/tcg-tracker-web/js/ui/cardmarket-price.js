@@ -49,8 +49,8 @@ export function hasReliableHoloPrices(prices = {}) {
 }
 
 // Preis-Zusammenfassungen je Karte (Kartenlinks + Lightbox in app.js).
-// Liegen hier, damit cardmarket-versioning.js sie bei neuem Build-Stamp und
-// bei "Preise neu laden" leeren kann.
+// "Preise neu laden" (reloadCardmarketPricesManually in app.js) leert sie
+// ueber resetCardmarketPriceSummaryCaches.
 export const cardmarketPriceSummaryCache = new Map();
 export const cardmarketPriceSummaryPending = new Map();
 

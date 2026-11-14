@@ -28,6 +28,26 @@ export function filterExcludedSets(sets, isExcluded) {
   return typeof isExcluded === 'function' ? list.filter((set) => !isExcluded(set)) : list.slice();
 }
 
+/** Setnamen (klein) ausgeschlossener Sets aus ungefilterten Sheet-Zeilen - fuer Summary-Zeilen ohne setId. */
+export function collectExcludedSetNames(sets, isExcluded) {
+  const names = new Set();
+  if (typeof isExcluded !== 'function') return names;
+  for (const set of Array.isArray(sets) ? sets : []) {
+    const name = lower(set?.setName);
+    if (name && isExcluded(set)) names.add(name);
+  }
+  return names;
+}
+
+/** Summary-Zeilen ohne ausgeschlossene Sets: ueber setId, Zeilen ohne setId (Legacy-Summary) ueber den Setnamen. */
+export function filterVisibleSummaryRows(rows, isExcluded, excludedNames = null) {
+  const names = excludedNames instanceof Set ? excludedNames : new Set();
+  return (Array.isArray(rows) ? rows : []).filter((row) => {
+    if (lower(row?.setId)) return typeof isExcluded === 'function' ? !isExcluded(row) : true;
+    return !names.has(lower(row?.setName));
+  });
+}
+
 /**
  * Laedt api/v3/meta.json (Zeitlimit) und liefert das Praedikat. Fehler/Zeitueberschreitung -> nichts ausschliessen,
  * damit die App ohne meta.json nutzbar bleibt.

@@ -53,7 +53,7 @@ import { resolveSeriesGroupInfo, resolveDisplaySet, applyDeSeriesFallback, resol
 import { imageCandidates, bindImageFallback, fallbackImgAttrs } from './ui/image-fallback.js';
 import { renderDashboardSetGrid } from './views/dashboard-grid.js';
 import { getCardPrice, loadPriceStamp, refreshV3Prices } from './data/v3-prices.js?v=20261114-api-prices';
-import { filterExcludedSets, loadExcludedSetPredicate } from './data/excluded-sets.js?v=20261114-api-prices';
+import { collectExcludedSetNames, filterExcludedSets, filterVisibleSummaryRows, loadExcludedSetPredicate } from './data/excluded-sets.js?v=20261114-api-prices';
 import {
   buildCombinedSearchDropdownOptions,
   buildSearchProgressLabel,
@@ -426,15 +426,14 @@ const dom = {
 /**
  * App-Start: liest den Preis-Stamp (api/v3/prices/meta.json generatedAt) vorab, damit die ersten
  * Preisdateien sofort mit ?v=<stamp> geladen werden. Fire-and-forget – blockiert den Bootstrap nicht.
- * (Name bleibt fuer den Bootstrap-Controller.)
+ * @returns {Promise<string>} Stamp ('' ohne Stamp/bei Fehler)
  */
-async function runCardmarketVersioningCheck() {
+async function prefetchPriceStamp() {
   try {
-    const currentStamp = await loadPriceStamp();
-    return { changed: false, reason: 'v3-prices', previousStamp: '', currentStamp, reset: [] };
+    return await loadPriceStamp();
   } catch (err) {
-    console.warn('[v3-prices] stamp check failed', err);
-    return { changed: false, reason: 'error', previousStamp: '', currentStamp: '', reset: [] };
+    console.warn('[v3-prices] stamp prefetch failed', err);
+    return '';
   }
 }
 
@@ -482,6 +481,10 @@ const state = {
   summaryData:  null,
   // api/v3 meta.json excludedSetIds/excludedSeries (loadSets): blendet Sets nur in der Anzeige aus.
   isExcludedSet: () => false,
+  excludedSetNames: new Set(),
+  // Alle importierten Sets ungefiltert (inkl. ausgeschlossener): Backup, Restore und Overview-Sync
+  // brauchen die vollstaendigen Sheet-Daten.
+  importedSetsAll: [],
   summaryOverrides: new Map(),
   currentSet:   null,
   dbMap:        new Map(),
@@ -893,7 +896,8 @@ function syncRecentSetsDropdownAvailability(hasItems) {
 
 function renderRecentSets() {
   if (!dom.recentSets) return;
-  const recent = Array.isArray(state.recentSets) ? state.recentSets : [];
+  const recent = (Array.isArray(state.recentSets) ? state.recentSets : [])
+    .filter((entry) => !state.isExcludedSet(entry));
   if (!state.loggedIn || recent.length === 0) {
     dom.recentSets.classList.add('hidden');
     dom.recentSets.innerHTML = '';
@@ -2764,7 +2768,12 @@ function initSpreadsheetDialog() {
 
 /** Summary-Zeilen (Dashboard-Fortschritt, Statistik, CSV) ohne ausgeschlossene Sets (state.isExcludedSet). */
 async function readVisibleSummary() {
-  return filterExcludedSets(await readSummarySheet(), state.isExcludedSet);
+  return filterVisibleSummaryRows(await readSummarySheet(), state.isExcludedSet, state.excludedSetNames);
+}
+
+/** Alle importierten Sets inkl. ausgeschlossener (Backup/Restore/Overview-Sync), sonst state.sets. */
+function allImportedSets() {
+  return Array.isArray(state.importedSetsAll) && state.importedSetsAll.length ? state.importedSetsAll : (state.sets || []);
 }
 
 async function loadSets() {
@@ -2816,6 +2825,8 @@ async function loadSets() {
     // Anzeige ausblenden: state.sets/state.allSets speisen Dashboard, Set-/Import-Auswahl, Suche und Statistik.
     // Die Sheet-Zeilen bleiben unveraendert.
     state.isExcludedSet = isExcludedSet;
+    state.importedSetsAll = importedSets;
+    state.excludedSetNames = collectExcludedSetNames([...importedSets, ...overviewSets], isExcludedSet);
     importedSets = filterExcludedSets(importedSets, isExcludedSet);
     overviewSets = filterExcludedSets(overviewSets, isExcludedSet);
     state.sets = importedSets;
@@ -3205,6 +3216,7 @@ function mergeImportedSetIntoLocalState(setMeta = {}) {
 
   const allSet = mergeIntoList(state.allSets, { addIfMissing: true }) || mergedSet;
   mergeIntoList(state.sets, { addIfMissing: true });
+  if (state.importedSetsAll !== state.sets) mergeIntoList(state.importedSetsAll, { addIfMissing: true });
 
   if (state.currentSet?.setId === mergedSet.setId) {
     state.currentSet = { ...state.currentSet, ...allSet, imported: true };
@@ -3650,7 +3662,7 @@ async function syncOverviewFromApi() {
   setLoading(true, 'Synchronisiere Overview...');
   try {
     const apiSets = await fetchAllAvailableSets();
-    const importedIds = new Set(state.sets.map((set) => set.setId));
+    const importedIds = new Set(allImportedSets().map((set) => set.setId));
     await syncOverviewWithApiSets(apiSets, importedIds);
     await loadSets();
     showToast(`Overview synchronisiert (${apiSets.length} Sets).`, 'success');
@@ -3717,7 +3729,7 @@ async function powerRefreshOverviewFromApi() {
     ]);
 
     const report = summarizeOverviewChanges(oldOverviewSets, apiSets);
-    const importedIds = new Set(state.sets.map((set) => set.setId));
+    const importedIds = new Set(allImportedSets().map((set) => set.setId));
     await syncOverviewWithApiSets(apiSets, importedIds);
     await loadSets();
 
@@ -4005,9 +4017,8 @@ async function reimportAllImportedSets() {
 }
 
 async function exportCollectionSummaryCsv() {
-  const rows = state.summaryData && Array.isArray(state.summaryData)
-    ? state.summaryData
-    : await readVisibleSummary().catch(() => []);
+  // Export vollstaendig aus dem Sheet (inkl. in der Anzeige ausgeblendeter Sets); state.summaryData ist gefiltert.
+  const rows = await readSummarySheet().catch(() => (Array.isArray(state.summaryData) ? state.summaryData : []));
   if (!rows.length) {
     showToast('Keine Summary-Daten zum Export vorhanden.', 'info');
     return;
@@ -4040,7 +4051,7 @@ async function exportCollectionSummaryCsv() {
 }
 
 async function exportCollectionBackup() {
-  if (!state.sets.length) {
+  if (!allImportedSets().length) {
     showToast('Keine importierten Sets fuer Backup vorhanden.', 'info');
     return;
   }
@@ -4049,7 +4060,7 @@ async function exportCollectionBackup() {
   try {
     // db_collection einmal strikt lesen; Registry-Karten nur fuer Sets mit Haken (lazy). Jeder Lesefehler
     // bricht den Export ab (BackupExportError) – nie ein unvollstaendiges Backup schreiben.
-    const backupSets = await buildCollectionBackupSets(state.sets, {
+    const backupSets = await buildCollectionBackupSets(allImportedSets(), {
       listSetIds: () => listCollectionSetIds({ checkedOnly: true, strict: true }),
       ensureResolver: (setId) => ensureResolverForSet(setId),
       readMap: (set) => readSetCollectionMap(set.setName, { setId: set.setId, strict: true }),
@@ -4197,7 +4208,7 @@ async function applyCollectionBackup(payload) {
   // zusammenfuehren (ODER), damit ein Alias-Backup die Haken des Hauptsets nicht abwaehlt.
   const byLiveSet = new Map();
   for (const backupSet of sets) {
-    const liveSet = findSetByIdOrAlias(state.sets, backupSet?.setId);
+    const liveSet = findSetByIdOrAlias(allImportedSets(), backupSet?.setId);
     if (!liveSet) {
       skipped++;
       continue;
@@ -9120,7 +9131,7 @@ function createBootstrapRuntimeController() {
     loadDashboardPreferences,
     loadRecentSets,
     initSmartEngine,
-    runCardmarketVersioningCheck,
+    prefetchPriceStamp,
     initAutoHideTopbar,
     initGridZoom,
     initCustomSelects,
@@ -9246,7 +9257,7 @@ async function onLoginSuccess() {
 }
 
 function resetToLoggedOut() {
-  state.loggedIn = false; state.sets = []; state.allSets = []; state.currentSet = null;
+  state.loggedIn = false; state.sets = []; state.allSets = []; state.importedSetsAll = []; state.currentSet = null;
   state.dbMap = new Map(); state.cards = []; state.summaryData = null;
   syncSetNavLink(null);
   state.summaryOverrides = new Map();

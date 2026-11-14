@@ -6,13 +6,14 @@
 // Kein Matching im Browser: Preis nur, wenn die productId des Eintrags der Produkt-ID des Records entspricht
 // (resolveCardmarketProductId, v3-ID zuerst) - sonst kein Preis statt eines falschen.
 import { CONFIG, scopedStorageKey } from '../core/config.js';
-import { resolveV3Bases } from './v3-api.js';
+import { loadV3Sets, resolveV3Bases } from './v3-api.js';
 import { resolveCardmarketProductId } from './cardmarket-url-utils.js';
 
 const STAMP_STORAGE_KEY = scopedStorageKey('v3-prices-stamp');
 
 let stampPromise = null;
-const setPricePromises = new Map(); // setId -> Promise<Map<cardId, price>>
+const setPricePromises = new Map(); // setId (klein) -> Promise<Map<cardId, price>>
+const setIdsBySets = new WeakMap(); // sets.json-Array -> Map<setId klein, setId>
 
 const text = (value) => String(value ?? '').trim();
 
@@ -84,12 +85,34 @@ export function loadPriceStamp(options = {}) {
  * Preise eines Sets: Map<cardId, price>. Set ohne Preisdatei (404) -> leere Map. Andere Fehler werfen und
  * werden nicht gemerkt (naechster Aufruf versucht es erneut).
  */
+/**
+ * Kanonische v3-setId (Schreibweise wie in sets.json und im Dateinamen der Preisdatei). sets.json ist ohnehin
+ * geladen (v3-api-Cache); ohne sets.json (offline/Fehler) bleibt die setId unveraendert.
+ */
+async function canonicalPriceSetId(id, options = {}) {
+  try {
+    const loadSets = options.loadSets || ((opts) => loadV3Sets(opts));
+    const sets = await loadSets({ href: options.href, config: options.config, fetchImpl: options.fetchImpl, signal: options.signal });
+    if (!Array.isArray(sets)) return id;
+    let ids = setIdsBySets.get(sets);
+    if (!ids) {
+      ids = new Map(sets.map((set) => [text(set?.id).toLowerCase(), text(set?.id)]).filter(([key]) => key));
+      setIdsBySets.set(sets, ids);
+    }
+    return ids.get(id.toLowerCase()) || id;
+  } catch (err) {
+    if (err?.name === 'AbortError') throw err;
+    return id;
+  }
+}
+
 export function loadSetPrices(setId, options = {}) {
-  const id = text(setId);
-  if (!id) return Promise.resolve(new Map());
-  if (setPricePromises.has(id)) return setPricePromises.get(id);
+  const requested = text(setId);
+  if (!requested) return Promise.resolve(new Map());
+  const key = requested.toLowerCase();
+  if (setPricePromises.has(key)) return setPricePromises.get(key);
   const promise = (async () => {
-    const stamp = await loadPriceStamp(options);
+    const [stamp, id] = await Promise.all([loadPriceStamp(options), canonicalPriceSetId(requested, options)]);
     const url = `${pricesBaseUrl(options)}${encodeURIComponent(id)}.json${stamp ? `?v=${encodeURIComponent(stamp)}` : ''}`;
     const response = await fetchFn(options.fetchImpl)(url, { signal: options.signal });
     if (response?.status === 404) return new Map();
@@ -101,9 +124,9 @@ export function loadSetPrices(setId, options = {}) {
     const json = await response.json();
     return new Map(Object.entries(json && typeof json === 'object' ? json : {}));
   })();
-  setPricePromises.set(id, promise);
+  setPricePromises.set(key, promise);
   promise.catch(() => {
-    if (setPricePromises.get(id) === promise) setPricePromises.delete(id);
+    if (setPricePromises.get(key) === promise) setPricePromises.delete(key);
   });
   return promise;
 }
