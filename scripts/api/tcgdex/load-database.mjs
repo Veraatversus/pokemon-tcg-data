@@ -4,7 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { parseTcgdexModule } from './parse-module.mjs';
-import { sortLocalIds } from '../../cardmarket/tcgdex-helper/generate-tcgdex-helpers.mjs';
+import { sortLocalIds } from '../lib/local-ids.mjs';
 
 function readModule(filePath) {
   return parseTcgdexModule(fs.readFileSync(filePath, 'utf8'), filePath).exports.default;

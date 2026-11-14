@@ -1,4 +1,4 @@
-import { sortLocalIds } from '../../cardmarket/tcgdex-helper/generate-tcgdex-helpers.mjs';
+import { sortLocalIds } from '../lib/local-ids.mjs';
 
 const cmp = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 const key = (setId, localId) => `${setId}\u0000${localId}`;

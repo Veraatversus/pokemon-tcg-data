@@ -1,9 +1,15 @@
-name: Daily Sync TCGdex to Master
+# Ein taeglicher Lauf auf master (Spec docs/superpowers/specs/2026-11-13-cardmarket-api-design.md §4):
+# TCGdex und Cardmarket laden, pruefen, API bauen, ein Commit, Weitergabe an dev/release, Meldungen.
+name: Daily Sync
 
 on:
   schedule:
-    # Run daily at 2 AM UTC
+    # Taeglich 02:00 UTC
     - cron: '0 2 * * *'
+    # Rueckfall 05:30 UTC (geplante Laeufe fallen auf Free-Accounts gelegentlich aus). Die Concurrency
+    # serialisiert; ein zweiter Lauf mit gleichem Stand aendert nichts (TCGdex unveraendert -> kein Spiegel,
+    # Cardmarket-meta bleibt byte-gleich, Build idempotent) und committet daher nicht.
+    - cron: '30 5 * * *'
   workflow_dispatch:
 
 permissions:
@@ -55,6 +61,12 @@ jobs:
         timeout-minutes: 10
         run: node scripts/api/sources/verify-assets.mjs
 
+      # Einzelkarten-Katalog und Preisguide (30 s Timeout, 1 Wiederholung). Endet auch bei Ausfall oder
+      # unplausiblen Daten mit Exit 0: Katalog bleibt, Preise bleiben auf Vortagesstand, meta.json zaehlt
+      # consecutiveFailures hoch (ab 3 meldet das Issue "Cardmarket-Zuordnung pruefen"). Nur Programmfehler brechen ab.
+      - name: Sync Cardmarket
+        run: node scripts/api/sources/sync-cardmarket.mjs
+
       - name: Build matching report
         run: node scripts/api/build-matching.mjs --min-card-match 0.995 --fail-on-pair-drift
 
@@ -67,26 +79,87 @@ jobs:
 
       - name: Commit and push changes
         run: |
-          git add sources/tcgdex sources/SOURCES.json api/v3 api/registry
-          if [ -z "$(git status --porcelain -- sources/tcgdex sources/SOURCES.json api/v3 api/registry)" ]; then
+          paths="sources/tcgdex sources/cardmarket sources/SOURCES.json api/v3 api/registry"
+          git add $paths
+          if [ -z "$(git status --porcelain -- $paths)" ]; then
             echo "Keine Aenderungen - nichts zu committen"
             exit 0
           fi
-          git commit -m "chore: sync TCGdex data"
-          git pull --rebase origin master
-          git push origin master
+          git commit -m "chore: daily sync (TCGdex, Cardmarket)"
+          # master kann sich seit dem Checkout bewegt haben: zwei Versuche mit Rebase.
+          for attempt in 1 2; do
+            if git pull --rebase origin master && git push origin master; then break; fi
+            if [ "$attempt" = 2 ]; then echo "Push nach 2 Versuchen fehlgeschlagen"; exit 1; fi
+            git rebase --abort 2>/dev/null || true
+            sleep 15
+          done
 
-      # Geplante Laeufe verspaeten sich stark und workflow_run feuert nicht zuverlaessig: den
-      # Cardmarket-Build nach jedem erfolgreichen Sync (auch ohne Commit) direkt ausloesen.
-      # workflow_dispatch per GITHUB_TOKEN startet Workflows (braucht actions: write).
-      # source=sync: der Tagesguard dort ueberspringt, wenn heute schon gebaut wurde.
-      # Ein Fehlschlag hier darf den Sync nicht als fehlgeschlagen markieren (Daten sind schon gepusht);
-      # schedule und workflow_run bleiben als Rueckfall.
-      - name: Trigger Cardmarket build
+      # Weitergabe an dev/release nach jedem erfolgreichen Lauf (auch ohne Commit; holt dann eine
+      # fehlgeschlagene Weitergabe nach). workflow_dispatch per GITHUB_TOKEN startet Workflows (actions: write);
+      # die Definition wird von release gelesen. Ein Fehlschlag hier markiert den Sync nicht als fehlgeschlagen.
+      - name: Promote master to dev and release
         continue-on-error: true
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run build-cardmarket-data.yml --repo "$GITHUB_REPOSITORY" --ref release -f source=sync || echo "::warning::Cardmarket-Dispatch fehlgeschlagen - Zeitplan/workflow_run bauen als Rueckfall"
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'propagate-master-to-dev-release.yml',
+                ref: 'release'
+              });
+              core.info('Weitergabe an dev/release ausgeloest');
+            } catch (error) {
+              core.warning(`Weitergabe nicht ausgeloest (manuell "Promote Master to Dev and Release" starten): ${error.message}`);
+            }
+
+      # Ein selbstpflegendes Issue (Label cardmarket-mapping) aus .cache/cardmarket/issue.json (build-api.mjs,
+      # evaluateCardmarketIssue): anlegen, wenn open und keins offen ist; nur den Text aktualisieren, wenn er sich
+      # geaendert hat (kein taeglicher Kommentar); mit kurzem Kommentar schliessen, sobald open=false.
+      # Ein API-Fehler hier markiert den Sync nicht als fehlgeschlagen (und loest kein TCGdex-Issue aus).
+      - name: Update Cardmarket mapping issue
+        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const file = '.cache/cardmarket/issue.json';
+            if (!fs.existsSync(file)) {
+              core.warning(`${file} fehlt - Issue unveraendert`);
+              return;
+            }
+            const result = JSON.parse(fs.readFileSync(file, 'utf8'));
+            const { owner, repo } = context.repo;
+            const label = 'cardmarket-mapping';
+            const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
+            const listed = await github.rest.issues.listForRepo({ owner, repo, state: 'open', labels: label, per_page: 20 });
+            const openIssues = listed.data.filter((i) => !i.pull_request);
+            if (result.open) {
+              const body = result.body.trimEnd();
+              if (!openIssues.length) {
+                const created = await github.rest.issues.create({ owner, repo, title: result.title, body, labels: [label] });
+                core.info(`Issue angelegt: #${created.data.number}`);
+                return;
+              }
+              const issue = openIssues[0];
+              if ((issue.body ?? '').replace(/\r\n/g, '\n').trimEnd() !== body || issue.title !== result.title) {
+                await github.rest.issues.update({ owner, repo, issue_number: issue.number, title: result.title, body });
+                core.info(`Issue aktualisiert: #${issue.number}`);
+              } else {
+                core.info(`Issue #${issue.number} unveraendert`);
+              }
+              return;
+            }
+            if (!openIssues.length) {
+              core.info('Keine Cardmarket-Zuordnungsprobleme, kein offenes Issue');
+              return;
+            }
+            for (const issue of openIssues) {
+              await github.rest.issues.createComment({ owner, repo, issue_number: issue.number, body: `Keine groben Cardmarket-Zuordnungsprobleme mehr (${runUrl}), Issue geschlossen.` });
+              await github.rest.issues.update({ owner, repo, issue_number: issue.number, state: 'closed', state_reason: 'completed' });
+              core.info(`Issue geschlossen: #${issue.number}`);
+            }
 
       - name: Create issue on failure
         if: failure()
@@ -111,13 +184,14 @@ jobs:
               owner,
               repo,
               title: 'TCGdex-Sync fehlgeschlagen - manuelle Pruefung erforderlich',
-              body: `Der automatische TCGdex-Sync auf \`master\` ist fehlgeschlagen. Es wurde nichts committet.
+              body: `Der taegliche Sync (\`Daily Sync\`) auf \`master\` ist fehlgeschlagen. Es wurde nichts committet.
 
               **Lauf:** ${runUrl}
 
               **Moegliche Ursachen:**
               - Tests, Parser oder Plausibilitaetspruefung des Spiegels sind fehlgeschlagen
               - Das Matching hat die Qualitaetsschwelle (0,995) verfehlt, Doppelzuordnungen oder unaufgeloeste Aliase gefunden oder die Set-Paarliste hat sich gegenueber dem letzten Report geaendert
+              - Programmfehler im Cardmarket-Schritt (\`sync-cardmarket.mjs\`; ein Ausfall von Cardmarket selbst bricht den Lauf nicht ab)
               - Die Regressionstests gegen die frisch gespiegelten Quellen sind fehlgeschlagen
               - Der v3-Build (Registry eingefroren/Invariante verletzt, Parserfehler, Pflichtfeld fehlt) ist fehlgeschlagen
               - Netzwerk- oder Push-Fehler

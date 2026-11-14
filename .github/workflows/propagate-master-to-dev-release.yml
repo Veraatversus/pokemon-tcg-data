@@ -1,12 +1,15 @@
 name: Promote Master to Dev and Release
 
+# Ausgeloest vom Schritt "Promote master to dev and release" am Ende von "Daily Sync" (sync-tcgdex.yml,
+# workflow_dispatch auf release, nur nach erfolgreichem Lauf) oder manuell. Kein workflow_run mehr: der
+# alte Ausloeser "Build Cardmarket Data" entfaellt, und workflow_run feuerte nicht zuverlaessig.
 on:
-  workflow_run:
-    workflows:
-      - Build Cardmarket Data
-    types:
-      - completed
   workflow_dispatch:
+
+# Ein manueller Start und der Dispatch des Syncs laufen nacheinander, nie parallel.
+concurrency:
+  group: propagate-master
+  cancel-in-progress: false
 
 permissions:
   actions: write
@@ -15,7 +18,6 @@ permissions:
 
 jobs:
   promote_master_to_dev:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
 
     steps:
@@ -116,7 +118,6 @@ jobs:
             console.log('Created issue:', issue.data.number);
 
   promote_master_to_release:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
 
     steps:

@@ -1,19 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { extractProductsList, extractPriceGuideList } from '../../api/sources/cardmarket-feeds.mjs';
 
-export function extractProductsList(payload) {
-  if (Array.isArray(payload)) return payload;
-  if (Array.isArray(payload?.products)) return payload.products;
-  if (Array.isArray(payload?.productList)) return payload.productList;
-  return [];
-}
-
-export function extractPriceGuideList(payload) {
-  if (Array.isArray(payload)) return payload;
-  if (Array.isArray(payload?.priceGuides)) return payload.priceGuides;
-  if (Array.isArray(payload?.prices)) return payload.prices;
-  return [];
-}
+export { extractProductsList, extractPriceGuideList };
 
 function toNumberOrNull(value) {
   const parsed = Number(value);

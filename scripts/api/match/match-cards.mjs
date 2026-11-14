@@ -1,6 +1,6 @@
 import { cardMatchKey } from '../lib/card-key.mjs';
 import { normalizeName, namesSimilar } from '../lib/names.mjs';
-import { sortLocalIds } from '../../cardmarket/tcgdex-helper/generate-tcgdex-helpers.mjs';
+import { sortLocalIds } from '../lib/local-ids.mjs';
 
 const hasName = (v) => typeof v === 'string' && normalizeName(v) !== '';
 // Fehlende/leere Namen sind nie aehnlich (namesSimilar('', '') waere true).

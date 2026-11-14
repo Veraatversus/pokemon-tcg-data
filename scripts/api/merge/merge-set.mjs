@@ -16,7 +16,9 @@ const anyName = (langs) => (langs ? langs.en ?? Object.values(langs).find((v) =>
 
 // assetsVerified: sources/tcgdex/assets-verified.json; als fehlend verifizierte Logos/Symbole entfallen
 // (oben greift dann die pt-Legacy-URL, i18n.de.images.logo entfaellt).
-export function mergeSet({ canonicalSetId, registrySet, ptSet = null, tcgdexSet = null, cardCount, assetsIndex, assetsVerified = {}, cardmarketTracker }) {
+// ids.cardmarket: Cardmarket-Expansion aus TCGdex (thirdParty.cardmarket) oder null; die endgueltige Expansion
+// (Zuordnungsdatei, Katalogpruefung, Mehrheit der Karten-IDs) bestimmt fillCardmarketIds (Spec §3.1).
+export function mergeSet({ canonicalSetId, registrySet, ptSet = null, tcgdexSet = null, cardCount, assetsIndex, assetsVerified = {} }) {
   const td = tcgdexSet;
   const tdImages = td ? resolveSetImages(assetsIndex, assetsVerified, { lang: 'en', serieId: td.serieId, setId: td.id }) : {};
   const images = compact({
@@ -40,7 +42,6 @@ export function mergeSet({ canonicalSetId, registrySet, ptSet = null, tcgdexSet 
   const tdOfficial = td?.cardCountOfficial > 0 ? td.cardCountOfficial : undefined;
   const ptPrinted = synth ? tdOfficial ?? cardCount : ptSet?.printedTotal;
   const ptId = registrySet?.pokemontcg ?? ptSet?.id ?? null;
-  const trackerId = ptId ? toNumber(cardmarketTracker?.bySetId?.[ptId]) : null;
 
   return compact({
     id: canonicalSetId,
@@ -55,7 +56,7 @@ export function mergeSet({ canonicalSetId, registrySet, ptSet = null, tcgdexSet 
     ids: {
       pokemontcg: ptId,
       tcgdex: registrySet?.tcgdex ?? td?.id ?? null,
-      cardmarket: td?.cardmarketId ?? trackerId ?? null,
+      cardmarket: toNumber(td?.cardmarketId),
       tcgplayer: td?.tcgplayerId ?? null,
     },
     aliases: [...(registrySet?.aliases ?? [])],
