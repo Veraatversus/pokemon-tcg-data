@@ -182,6 +182,8 @@ test('versionOfSlug / numberOfLabel: Links ohne Setcode und Ueberschriften', () 
   assert.equal(numberOfLabel('Suicune (TK9 S-30)'), '30S');
   assert.equal(numberOfLabel('Eneco (TK8 1o)'), '1o');
   assert.equal(numberOfLabel('Rotom (RR RT1)'), 'RT1');
+  assert.equal(numberOfLabel('Tapu Koko (SM SM30a)'), '30a');
+  assert.equal(numberOfLabel('Pikachu (SM SM240)'), '240');
   assert.equal(numberOfLabel('Relicanth (SV SH8)'), 'SH8');
   assert.equal(numberOfLabel('Alakazam (SK H1)'), 'H1');
 

@@ -2635,32 +2635,22 @@
       "tcgdex": 0
     },
     "smp": {
-      "ambiguous": 3,
-      "ambiguousCards": [
-        "SM30a",
-        "SM103a",
-        "SM104a"
-      ],
+      "ambiguous": 0,
       "cards": 251,
       "coverage": {
         "bySource": {
-          "stabilityKept": 17,
-          "tcgdex": 231
+          "customSet": 250,
+          "tcgdex": 1
         },
         "cards": 251,
-        "withId": 248
+        "withId": 251
       },
+      "customSet": 250,
       "expansionId": 1757,
       "matched": 0,
-      "missing": 3,
-      "missingCards": [
-        "SM30a",
-        "SM103a",
-        "SM104a"
-      ],
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1757&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 17,
-      "tcgdex": 231
+      "tcgdex": 1
     },
     "sv1": {
       "ambiguous": 0,
@@ -3558,8 +3548,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 4121,
-    "changed": 603,
+    "applied": 4371,
+    "changed": 621,
     "conflicts": [],
     "dropped": [
       {
@@ -5319,11 +5309,6 @@
       "xy12-59",
       "xy12-60"
     ],
-    "295296": [
-      "smp-SM4",
-      "smp-SM76",
-      "smp-SM81"
-    ],
     "295475": [
       "sm1-162",
       "sm1-168"
@@ -5332,34 +5317,9 @@
       "sm1-163",
       "sm1-171"
     ],
-    "298284": [
-      "smp-SM30",
-      "smp-SM31"
-    ],
-    "298287": [
-      "smp-SM33",
-      "smp-SM50"
-    ],
     "301167": [
       "sm35-39",
       "sm35-78"
-    ],
-    "301978": [
-      "smp-SM57",
-      "smp-SM80"
-    ],
-    "313448": [
-      "smp-SM148",
-      "smp-SM231",
-      "smp-SM78"
-    ],
-    "321166": [
-      "smp-SM106",
-      "smp-SM123"
-    ],
-    "321167": [
-      "smp-SM107",
-      "smp-SM124"
     ],
     "362810": [
       "TCGDEX-2018sm-fr-38",
@@ -5373,32 +5333,9 @@
       "sm75-34",
       "sm75-35"
     ],
-    "368851": [
-      "smp-SM158",
-      "smp-SM226"
-    ],
-    "369353": [
-      "smp-SM174",
-      "smp-SM175",
-      "smp-SM176",
-      "smp-SM233",
-      "smp-SM242"
-    ],
-    "369468": [
-      "smp-SM168",
-      "smp-SM248"
-    ],
-    "371773": [
-      "smp-SM180",
-      "smp-SM209"
-    ],
     "377496": [
       "sm11-114",
       "sm11-146"
-    ],
-    "377529": [
-      "smp-SM205",
-      "smp-SM223"
     ],
     "387862": [
       "sm11-6",
@@ -5455,10 +5392,6 @@
     "394597": [
       "sm115-38",
       "sm115-39"
-    ],
-    "397969": [
-      "smp-SM201",
-      "smp-SM247"
     ],
     "398504": [
       "sm12-239",
@@ -5621,10 +5554,10 @@
     ]
   },
   "duplicates": {
-    "cards": 890,
+    "cards": 859,
     "corrected": 236,
-    "ids": 439,
-    "kept": 654
+    "ids": 426,
+    "kept": 623
   },
   "expansionMismatch": {
     "cards": [
@@ -7267,14 +7200,14 @@
       }
     ],
     "totals": {
-      "checked": 19140,
+      "checked": 18893,
       "corrected": 22,
       "dropped": 20,
       "droppedShared": 16,
       "foreignNameOk": 1281,
       "keptMismatch": 135,
       "noSetExpansion": 0,
-      "ok": 17679,
+      "ok": 17432,
       "unknownProduct": 3
     }
   },
@@ -7435,7 +7368,7 @@
     "orderedRejected": 10,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 216
+    "versionSuffixSkipped": 276
   },
   "setsWithoutExpansion": [
     {
@@ -8398,125 +8331,6 @@
       "todaySource": "tcgdex"
     },
     {
-      "cardKey": "smp/SM31",
-      "productId": 298285,
-      "source": "corrected",
-      "todayId": 298284,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "smp/SM50",
-      "productId": 299580,
-      "source": "corrected",
-      "todayId": 298287,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "smp/SM80",
-      "productId": 311415,
-      "source": "corrected",
-      "todayId": 301978,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "smp/SM81",
-      "productId": 311416,
-      "source": "corrected",
-      "todayId": 295296,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "smp/SM123",
-      "productId": 358428,
-      "source": "corrected",
-      "todayId": 321166,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "smp/SM124",
-      "productId": 358426,
-      "source": "corrected",
-      "todayId": 321167,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "smp/SM148",
-      "productId": 363381,
-      "source": "corrected",
-      "todayId": 313448,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "smp/SM175",
-      "productId": 369354,
-      "source": "corrected",
-      "todayId": 369353,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "smp/SM176",
-      "productId": 369355,
-      "source": "corrected",
-      "todayId": 369353,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "smp/SM209",
-      "productId": 377541,
-      "source": "corrected",
-      "todayId": 371773,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "smp/SM223",
-      "productId": 399669,
-      "source": "corrected",
-      "todayId": 377529,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "smp/SM226",
-      "productId": 412909,
-      "source": "corrected",
-      "todayId": 368851,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "smp/SM231",
-      "productId": 394837,
-      "source": "corrected",
-      "todayId": 313448,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "smp/SM233",
-      "productId": 369362,
-      "source": "corrected",
-      "todayId": 369353,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "smp/SM242",
-      "productId": 369363,
-      "source": "corrected",
-      "todayId": 369353,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "smp/SM247",
-      "productId": 399314,
-      "source": "corrected",
-      "todayId": 397969,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "smp/SM248",
-      "productId": 576720,
-      "source": "corrected",
-      "todayId": 369468,
-      "todaySource": "tcgdex"
-    },
-    {
       "cardKey": "sv3/57",
       "productId": 725137,
       "source": "corrected",
@@ -9473,83 +9287,6 @@
       "candidates": [
         {
           "hint": "same-name-unnumbered",
-          "name": "Tapu Koko [Flying Flip | Electric Ball]",
-          "productId": 312231
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tapu Koko [Flying Flip | Electric Ball]",
-          "productId": 312255
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tapu Koko [Flying Flip | Electric Ball]",
-          "productId": 312280
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tapu Koko [Flying Flip | Electric Ball]",
-          "productId": 358590
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tapu Koko GX [Aero Trail | Sky-High Claws | Tapu Thunder GX]",
-          "productId": 363918
-        }
-      ],
-      "cardKey": "smp/SM30a",
-      "deName": null,
-      "expansionId": 1757,
-      "name": "Tapu Koko",
-      "set": "smp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lunala GX [Glide | Lunar Javelin | Requiem GX]",
-          "productId": 441403
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Lunala GX [Glide | Lunar Javelin | Requiem GX]",
-          "productId": 611224
-        }
-      ],
-      "cardKey": "smp/SM103a",
-      "deName": null,
-      "expansionId": 1757,
-      "name": "Lunala-GX",
-      "set": "smp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Solgaleo GX [Shining Mane | Turbo Strike | Prominence GX]",
-          "productId": 368296
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Solgaleo GX [Shining Mane | Turbo Strike | Prominence GX]",
-          "productId": 407009
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Solgaleo GX [Shining Mane | Turbo Strike | Prominence GX]",
-          "productId": 449203
-        }
-      ],
-      "cardKey": "smp/SM104a",
-      "deName": null,
-      "expansionId": 1757,
-      "name": "Solgaleo-GX",
-      "set": "smp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
           "name": "MAudino EX [Magical Symphony]",
           "productId": 289906
         },
@@ -9695,13 +9432,6 @@
     }
   ],
   "stillMissingByExpansion": [
-    {
-      "count": 3,
-      "expansionId": 1757,
-      "sets": [
-        "smp"
-      ]
-    },
     {
       "count": 3,
       "expansionId": 1842,
@@ -9851,14 +9581,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 28,
+    "ambiguous": 25,
     "cards": 21577,
-    "customSet": 4121,
+    "customSet": 4371,
     "matched": 220,
-    "missing": 45,
+    "missing": 42,
     "override": 8,
-    "stabilityKept": 215,
-    "tcgdex": 16968
+    "stabilityKept": 198,
+    "tcgdex": 16738
   },
   "versionSuffixSkippedByExpansion": {
     "1521": 9,
@@ -9873,6 +9603,7 @@
     "1612": 40,
     "1649": 3,
     "1678": 11,
+    "1757": 60,
     "1758": 12,
     "1800": 13,
     "2065": 14,
