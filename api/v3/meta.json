@@ -2,8 +2,8 @@
   "apiVersion": 3,
   "counts": {
     "cards": 21577,
-    "matched": 20769,
-    "primary_only": 56,
+    "matched": 20770,
+    "primary_only": 55,
     "sets": 202,
     "tcgdex_only": 752
   },
@@ -36,8 +36,8 @@
       "commit": "bc4a5871a2468e9f3fb8aaf0916c72255ed90d99"
     },
     "tcgdex": {
-      "commit": "831a337b23e71419de34045f2b682a4890b5522f",
-      "fetchedAt": "2026-11-13T08:55:38.208Z"
+      "commit": "cff6522d736af05fd7c398607bb32297f14dc62f",
+      "fetchedAt": "2026-11-14T01:26:55.041Z"
     }
   },
   "warnings": {

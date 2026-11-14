@@ -1,6 +1,6 @@
 # Matching-Report
 
-Erzeugt: 2026-11-13T08:55:38.208Z
+Erzeugt: 2026-11-14T01:26:55.041Z
 
 ## Zusammenfassung
 
@@ -8,10 +8,10 @@ Erzeugt: 2026-11-13T08:55:38.208Z
 - TCGdex-Sets: 224
 - Gepaarte Sets: 178
 - pokemontcg-Karten: 20825
-- Zugeordnete Karten: 20768
+- Zugeordnete Karten: 20769
 - cardMatchRatio: 0.9973
 - Verdaechtige Zuordnungen: 9
-- Nur in pokemontcg (primaryOnly): 57
+- Nur in pokemontcg (primaryOnly): 56
 - Nur in TCGdex (in gepaarten Sets): 137
 - Ungepaarte TCGdex-Sets: 46 (3096 Karten)
 - Doppelt zugeordnet: 0
@@ -29,8 +29,8 @@ Erzeugt: 2026-11-13T08:55:38.208Z
     "status": "frozen"
   },
   "tcgdex": {
-    "commit": "831a337b23e71419de34045f2b682a4890b5522f",
-    "fetchedAt": "2026-11-13T08:55:38.208Z",
+    "commit": "cff6522d736af05fd7c398607bb32297f14dc62f",
+    "fetchedAt": "2026-11-14T01:26:55.041Z",
     "ref": "master",
     "repo": "tcgdex/cards-database",
     "status": "active"
@@ -159,7 +159,7 @@ Erzeugt: 2026-11-13T08:55:38.208Z
 | ru1 | Pokémon Rumble | ru1 | Pokémon Rumble | exactId | 1.00 | 16/16 | 0 | 0 |
 | si1 | Southern Islands | si1 | Southern Islands | exactId | 1.00 | 18/18 | 0 | 0 |
 | sm1 | Sun & Moon | sm1 | Sun & Moon | exactId | 0.99 | 172/173 | 0 | 1 |
-| sm10 | Unbroken Bonds | sm10 | Unbroken Bonds | exactId | 0.98 | 234/238 | 0 | 4 |
+| sm10 | Unbroken Bonds | sm10 | Unbroken Bonds | exactId | 0.99 | 235/238 | 0 | 3 |
 | sm11 | Unified Minds | sm11 | Unified Minds | exactId | 0.99 | 258/261 | 0 | 3 |
 | sm115 | Hidden Fates | sm115 | Hidden Fates | exactId | 1.00 | 69/69 | 0 | 0 |
 | sm12 | Cosmic Eclipse | sm12 | Cosmic Eclipse | exactId | 1.00 | 271/272 | 0 | 1 |
@@ -261,7 +261,7 @@ Keine.
 
 ### sm10 <-> sm10
 
-- primaryOnly: 182a, 182b, 189a, 195a
+- primaryOnly: 182a, 182b, 189a
 
 ### sm11 <-> sm11
 
