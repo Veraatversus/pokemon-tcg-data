@@ -3,8 +3,8 @@
 // Die HTML-Ausgabe von buildStatsPriceTabContent, renderStatsPriceSnapshot (inkl. Loading/Partial/
 // Final/Error und der Lazy-Lade-Pipeline) und renderStats wurde VOR dem Umbau (Verschieben aus
 // app.js, Zerlegen der Riesenfunktionen) in tests/fixtures/stats-price-render-parity.json
-// festgehalten. Der Test prueft, dass der aktuelle Code fuer dieselben Eingaben exakt dieselbe
-// Ausgabe liefert.
+// festgehalten (kompakt: sha256 je Szenario plus volle Ausgabe einiger Stichproben). Der Test
+// prueft, dass der aktuelle Code fuer dieselben Eingaben exakt dieselbe Ausgabe liefert.
 //
 // Die Funktionen laufen in einem vm-Kontext: der Quelltext wird ohne import/export-Zeilen
 // ausgewertet, Abhaengigkeiten sind echte Hilfsmodule (Escape, Cardmarket-URL, Bilder, Analytics)
@@ -16,6 +16,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import vm from 'node:vm';
+import { createHash } from 'node:crypto';
 
 import { resolveItemCardmarketUrl } from '../js/data/cardmarket-url-utils.js';
 import { collectionKeyOf } from '../js/data/collection-writes.js';
@@ -662,32 +663,60 @@ statsScenario('mit-preisdaten', {
 // --------------------------------------------------------------------------
 // Ausfuehrung
 // --------------------------------------------------------------------------
-async function runAllScenarios() {
-  const output = {};
-  for (const scenario of scenarios) {
-    assert.ok(!(scenario.name in output), `Szenario doppelt: ${scenario.name}`);
-    output[scenario.name] = JSON.parse(JSON.stringify(await scenario.run()));
+// Die Fixture haelt je Szenario einen sha256 der kanonischen Ausgabe (Objektschluessel sortiert) und
+// fuer wenige Stichproben die volle Ausgabe, damit eine Abweichung als lesbarer Diff erscheint.
+const SAMPLE_SCENARIOS = [
+  'tab-content/watchlist/final-mit-preisen',
+  'tab-content/advanced/final-mit-preisen',
+  'snapshot/final/dashboard',
+  'pipeline/lazy-mit-kandidaten',
+  'stats/mit-preisdaten',
+];
+
+function canonicalize(value) {
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonicalize(value[key])]));
   }
-  return output;
+  return value;
+}
+
+function hashOutput(value) {
+  return createHash('sha256').update(JSON.stringify(canonicalize(value))).digest('hex');
+}
+
+async function runScenario(scenario) {
+  return JSON.parse(JSON.stringify(await scenario.run()));
 }
 
 if (WRITE_FIXTURE) {
   test('stats parity: Fixture schreiben', async () => {
-    const output = await runAllScenarios();
+    const hashes = {};
+    const samples = {};
+    for (const scenario of scenarios) {
+      assert.ok(!(scenario.name in hashes), `Szenario doppelt: ${scenario.name}`);
+      const output = await runScenario(scenario);
+      hashes[scenario.name] = hashOutput(output);
+      if (SAMPLE_SCENARIOS.includes(scenario.name)) samples[scenario.name] = output;
+    }
     mkdirSync(new URL('fixtures/', import.meta.url), { recursive: true });
-    writeFileSync(FIXTURE_URL, `${JSON.stringify(output, null, 1)}\n`, 'utf8');
+    writeFileSync(FIXTURE_URL, `${JSON.stringify({ hashes, samples }, null, 1)}\n`, 'utf8');
   });
 } else {
   const fixture = JSON.parse(readFileSync(FIXTURE_URL, 'utf8'));
 
   test('stats parity: Fixture deckt genau die Szenarien ab', () => {
-    assert.deepEqual(Object.keys(fixture).sort(), scenarios.map((scenario) => scenario.name).sort());
+    assert.deepEqual(Object.keys(fixture.hashes).sort(), scenarios.map((scenario) => scenario.name).sort());
+    assert.deepEqual(Object.keys(fixture.samples).sort(), [...SAMPLE_SCENARIOS].sort());
   });
 
   for (const scenario of scenarios) {
     test(`stats parity: ${scenario.name}`, async () => {
-      const actual = JSON.parse(JSON.stringify(await scenario.run()));
-      assert.deepEqual(actual, fixture[scenario.name]);
+      const actual = await runScenario(scenario);
+      if (scenario.name in fixture.samples) {
+        assert.deepEqual(actual, fixture.samples[scenario.name]);
+      }
+      assert.equal(hashOutput(actual), fixture.hashes[scenario.name], `Ausgabe von ${scenario.name} weicht ab`);
     });
   }
 }
