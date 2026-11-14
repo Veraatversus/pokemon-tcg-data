@@ -1315,27 +1315,21 @@
       "tcgdex": 100
     },
     "ex4": {
-      "ambiguous": 1,
-      "ambiguousCards": [
-        "48"
-      ],
+      "ambiguous": 0,
       "cards": 97,
-      "corrected": 69,
       "coverage": {
         "bySource": {
-          "tcgdex": 96
+          "customSet": 97
         },
         "cards": 97,
-        "withId": 96
+        "withId": 97
       },
+      "customSet": 97,
       "expansionId": 1542,
       "matched": 0,
-      "missing": 1,
-      "missingCards": [
-        "48"
-      ],
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1542&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 96
+      "tcgdex": 0
     },
     "ex5": {
       "ambiguous": 0,
@@ -3459,8 +3453,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 5590,
-    "changed": 684,
+    "applied": 5687,
+    "changed": 775,
     "conflicts": [],
     "dropped": [
       {
@@ -5324,10 +5318,10 @@
     ]
   },
   "duplicates": {
-    "cards": 785,
-    "corrected": 210,
+    "cards": 694,
+    "corrected": 141,
     "ids": 393,
-    "kept": 575
+    "kept": 553
   },
   "expansionMismatch": {
     "cards": [
@@ -6221,160 +6215,6 @@
         "reason": "kept-mismatch"
       },
       {
-        "cardKey": "ex4-24",
-        "newId": null,
-        "oldExpansion": 1540,
-        "oldId": 275801,
-        "reason": "dropped-mismatch"
-      },
-      {
-        "cardKey": "ex4-48",
-        "newId": null,
-        "oldExpansion": 1540,
-        "oldId": 275825,
-        "reason": "dropped-mismatch"
-      },
-      {
-        "cardKey": "ex4-69",
-        "newId": 276046,
-        "oldExpansion": 1540,
-        "oldId": 275846,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-70",
-        "newId": 276047,
-        "oldExpansion": 1540,
-        "oldId": 275847,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-71",
-        "newId": 276048,
-        "oldExpansion": 1540,
-        "oldId": 275848,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-72",
-        "newId": 276049,
-        "oldExpansion": 1540,
-        "oldId": 275849,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-73",
-        "newId": 276050,
-        "oldExpansion": 1540,
-        "oldId": 275850,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-74",
-        "newId": 276051,
-        "oldExpansion": 1540,
-        "oldId": 275851,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-75",
-        "newId": 276052,
-        "oldExpansion": 1540,
-        "oldId": 275852,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-76",
-        "newId": 276053,
-        "oldExpansion": 1540,
-        "oldId": 275853,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-77",
-        "newId": 276054,
-        "oldExpansion": 1540,
-        "oldId": 275854,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-78",
-        "newId": 276055,
-        "oldExpansion": 1540,
-        "oldId": 275855,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-79",
-        "newId": 276056,
-        "oldExpansion": 1540,
-        "oldId": 275856,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-80",
-        "newId": 276057,
-        "oldExpansion": 1540,
-        "oldId": 275857,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-81",
-        "newId": 276058,
-        "oldExpansion": 1540,
-        "oldId": 275858,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-82",
-        "newId": 276059,
-        "oldExpansion": 1540,
-        "oldId": 275859,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-83",
-        "newId": 276060,
-        "oldExpansion": 1540,
-        "oldId": 275860,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-84",
-        "newId": 276061,
-        "oldExpansion": 1540,
-        "oldId": 275861,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-85",
-        "newId": 276062,
-        "oldExpansion": 1540,
-        "oldId": 275862,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-86",
-        "newId": 276063,
-        "oldExpansion": 1540,
-        "oldId": 275863,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-87",
-        "newId": 276064,
-        "oldExpansion": 1540,
-        "oldId": 275864,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-88",
-        "newId": 276065,
-        "oldExpansion": 1540,
-        "oldId": 275865,
-        "reason": "corrected-expansion"
-      },
-      {
         "cardKey": "ex6-98",
         "newId": null,
         "oldExpansion": 1544,
@@ -6551,10 +6391,6 @@
       "ex2": {
         "1753": 11,
         "1754": 5
-      },
-      "ex4": {
-        "1753": 13,
-        "1754": 1
       },
       "ex5": {
         "1753": 10,
@@ -6918,14 +6754,14 @@
       }
     ],
     "totals": {
-      "checked": 17803,
-      "corrected": 21,
-      "dropped": 15,
+      "checked": 17691,
+      "corrected": 1,
+      "dropped": 13,
       "droppedShared": 11,
-      "foreignNameOk": 1276,
+      "foreignNameOk": 1262,
       "keptMismatch": 134,
       "noSetExpansion": 0,
-      "ok": 16354,
+      "ok": 16278,
       "unknownProduct": 3
     }
   },
@@ -8496,25 +8332,6 @@
       "candidates": [
         {
           "hint": "same-name-unnumbered",
-          "name": "Team Aqua's Carvanha [Wave Splash | Water Fin]",
-          "productId": 276025
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Team Aqua's Cacnea [Paralyzing Gaze | Pin Missile]",
-          "productId": 276001
-        }
-      ],
-      "cardKey": "ex4/48",
-      "deName": "Team Aquas Kanivanha",
-      "expansionId": 1542,
-      "name": "Team Aqua's Carvanha",
-      "set": "ex4"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
           "name": "Meganium [Leaf Trans | Solarbeam | Prime]",
           "productId": 279081
         }
@@ -8613,13 +8430,6 @@
     },
     {
       "count": 1,
-      "expansionId": 1542,
-      "sets": [
-        "ex4"
-      ]
-    },
-    {
-      "count": 1,
       "expansionId": 1551,
       "sets": [
         "ex13"
@@ -8683,14 +8493,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 8,
+    "ambiguous": 7,
     "cards": 21577,
-    "customSet": 5590,
+    "customSet": 5687,
     "matched": 96,
-    "missing": 21,
+    "missing": 20,
     "override": 8,
     "stabilityKept": 184,
-    "tcgdex": 15678
+    "tcgdex": 15582
   },
   "versionSuffixSkippedByExpansion": {
     "1521": 9,
