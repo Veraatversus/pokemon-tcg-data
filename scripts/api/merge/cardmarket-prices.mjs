@@ -1,6 +1,6 @@
 // Preisdateien api/v3/prices/<setId>.json aus dem taeglichen Cardmarket-Preisguide (Spec §2.3, §4).
 // Je Karte mit primaerer Cardmarket-ID (primaryCardmarketId) und Preisguide-Eintrag:
-//   "<cardId>": { productId, trend, avg1, avg7, avg30, low, avgHolo, trendHolo, avg1Holo, avg7Holo, avg30Holo, lowHolo }
+//   "<cardId>": { productId, avg, trend, avg1, avg7, avg30, low, avgHolo, trendHolo, avg1Holo, avg7Holo, avg30Holo, lowHolo }
 // Die *Holo-Felder nur, wenn die Karte plausibel einen Reverse-/Foil-Druck hat (hasReversePrint).
 // Nur numerische Felder; Eintraege ohne jeden Preis entfallen. Ohne Preisguide von heute (priceGuide null,
 // A1 hat dann keine .cache-Datei geschrieben) bleiben Preisdateien und meta.json unberuehrt.
@@ -9,9 +9,9 @@ import path from 'node:path';
 import { extractPriceGuideList } from '../sources/cardmarket-feeds.mjs';
 import { toCompactJson, toJson, assertSafeSetId } from '../registry/registry-io.mjs';
 
-// Feld der Preisdatei -> Feld des Preisguides (avg wird nicht ausgeliefert)
+// Feld der Preisdatei -> Feld des Preisguides
 const FIELDS = {
-  trend: 'trend', avg1: 'avg1', avg7: 'avg7', avg30: 'avg30', low: 'low',
+  avg: 'avg', trend: 'trend', avg1: 'avg1', avg7: 'avg7', avg30: 'avg30', low: 'low',
   avgHolo: 'avg-holo', trendHolo: 'trend-holo', avg1Holo: 'avg1-holo', avg7Holo: 'avg7-holo', avg30Holo: 'avg30-holo', lowHolo: 'low-holo',
 };
 

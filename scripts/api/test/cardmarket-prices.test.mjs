@@ -27,7 +27,7 @@ test('writes only priced cards', () => {
     ),
   });
   assert.deepEqual([...files.keys()], ['s1']);
-  assert.deepEqual(files.get('s1'), { 1: { productId: 10, trend: 2.5, avg7: 2, avg30: 3, low: 1 } });
+  assert.deepEqual(files.get('s1'), { 1: { productId: 10, avg: 5, trend: 2.5, avg7: 2, avg30: 3, low: 1 } });
   assert.deepEqual(meta, { generatedAt: NOW.toISOString(), priceGuideCreatedAt: '2026-11-13T02:44:11+0100', cardsWithId: 4, cardsWithPrice: 1 });
 });
 
@@ -44,7 +44,7 @@ test('holo fields mapped', () => {
   };
   const { files } = buildPriceFiles({ cardsBySet: new Map([['s1', [card('s1', '1', 10)]]]), primaryCardmarketId, now: () => NOW, priceGuide: guide(row) });
   assert.deepEqual(files.get('s1')['1'], {
-    productId: 10, trend: 3, avg1: 4, avg7: 5, avg30: 6, low: 2, avgHolo: 11, trendHolo: 13, avg1Holo: 14, avg7Holo: 15, avg30Holo: 16, lowHolo: 12,
+    productId: 10, avg: 1, trend: 3, avg1: 4, avg7: 5, avg30: 6, low: 2, avgHolo: 11, trendHolo: 13, avg1Holo: 14, avg7Holo: 15, avg30Holo: 16, lowHolo: 12,
   });
   // 0 ist ein gueltiger Wert, Nicht-Zahlen fallen weg
   const z = buildPriceFiles({ cardsBySet: new Map([['s1', [card('s1', '1', 10)]]]), primaryCardmarketId, now: () => NOW, priceGuide: guide({ idProduct: 10, trend: 0, low: '3', avg1: Number.NaN }) });
