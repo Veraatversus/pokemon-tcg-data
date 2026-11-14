@@ -3281,29 +3281,21 @@
       "tcgdex": 0
     },
     "xy12": {
-      "ambiguous": 1,
-      "ambiguousCards": [
-        "59"
-      ],
+      "ambiguous": 0,
       "cards": 113,
       "coverage": {
         "bySource": {
-          "matched": 10,
-          "tcgdex": 101
+          "customSet": 113
         },
         "cards": 113,
-        "withId": 111
+        "withId": 113
       },
+      "customSet": 113,
       "expansionId": 1742,
-      "matched": 10,
-      "missing": 2,
-      "missingCards": [
-        "59",
-        "109"
-      ],
-      "ordered": 8,
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1742&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 101
+      "tcgdex": 0
     },
     "xy2": {
       "ambiguous": 0,
@@ -3486,8 +3478,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 5271,
-    "changed": 678,
+    "applied": 5384,
+    "changed": 680,
     "conflicts": [],
     "dropped": [
       {
@@ -3706,6 +3698,12 @@
         "name": "Fairy Charm Dragon",
         "productId": 365813,
         "productName": "Fairy Charm [N]"
+      },
+      {
+        "cardKey": "xy12/109",
+        "name": "ナッシー[Exeggutor]",
+        "productId": 293471,
+        "productName": "Exeggutor [Stomp]"
       }
     ]
   },
@@ -5172,10 +5170,6 @@
       "xyp-XY177",
       "xyp-XY177a"
     ],
-    "293413": [
-      "xy12-59",
-      "xy12-60"
-    ],
     "295475": [
       "sm1-162",
       "sm1-168"
@@ -5357,10 +5351,10 @@
     ]
   },
   "duplicates": {
-    "cards": 791,
+    "cards": 789,
     "corrected": 211,
-    "ids": 396,
-    "kept": 580
+    "ids": 395,
+    "kept": 578
   },
   "expansionMismatch": {
     "cards": [
@@ -6555,13 +6549,6 @@
         "reason": "dropped-shared-mismatch"
       },
       {
-        "cardKey": "xy12-59",
-        "newId": null,
-        "oldExpansion": 1742,
-        "oldId": 293413,
-        "reason": "dropped-shared-mismatch"
-      },
-      {
         "cardKey": "xy5-148",
         "newId": null,
         "oldExpansion": 1585,
@@ -6958,14 +6945,14 @@
       }
     ],
     "totals": {
-      "checked": 18104,
+      "checked": 18002,
       "corrected": 21,
-      "dropped": 16,
-      "droppedShared": 12,
+      "dropped": 15,
+      "droppedShared": 11,
       "foreignNameOk": 1276,
       "keptMismatch": 134,
       "noSetExpansion": 0,
-      "ok": 16654,
+      "ok": 16553,
       "unknownProduct": 3
     }
   },
@@ -7086,11 +7073,11 @@
   "rules": {
     "energySymbol": 3,
     "leftRight": 0,
-    "ordered": 14,
+    "ordered": 6,
     "orderedRejected": 7,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 297
+    "versionSuffixSkipped": 311
   },
   "setsWithoutExpansion": [
     {
@@ -8727,33 +8714,6 @@
       "expansionId": 1706,
       "name": "M Audino-EX",
       "set": "xy10"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Machamp [Counterattack | Seismic Toss]",
-          "productId": 293427
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Machamp [Counterattack | Seismic Toss]",
-          "productId": 671275
-        }
-      ],
-      "cardKey": "xy12/59",
-      "deName": "Machomei",
-      "expansionId": 1742,
-      "name": "Machamp",
-      "set": "xy12"
-    },
-    {
-      "candidates": [],
-      "cardKey": "xy12/109",
-      "deName": "Kokowei",
-      "expansionId": 1742,
-      "name": "ナッシー[Exeggutor]",
-      "set": "xy12"
     }
   ],
   "stillMissingByExpansion": [
@@ -8769,13 +8729,6 @@
       "expansionId": 1611,
       "sets": [
         "bwp"
-      ]
-    },
-    {
-      "count": 2,
-      "expansionId": 1742,
-      "sets": [
-        "xy12"
       ]
     },
     {
@@ -8864,14 +8817,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 13,
+    "ambiguous": 12,
     "cards": 21577,
-    "customSet": 5271,
-    "matched": 109,
-    "missing": 27,
+    "customSet": 5384,
+    "matched": 99,
+    "missing": 25,
     "override": 8,
     "stabilityKept": 185,
-    "tcgdex": 15977
+    "tcgdex": 15876
   },
   "versionSuffixSkippedByExpansion": {
     "1521": 9,
@@ -8888,6 +8841,7 @@
     "1678": 11,
     "1687": 11,
     "1716": 9,
+    "1742": 14,
     "1757": 60,
     "1758": 12,
     "1800": 13,
