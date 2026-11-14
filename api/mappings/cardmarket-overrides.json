@@ -1,5 +1,5 @@
 {
-  "_comment": "Manuelle Cardmarket-Zuordnungen: \"<setId>/<cardId>\": <cardmarketProductId> | null (gewinnt vor custom-sets, TCGdex und allen Regeln; null entfernt die ID) und \"<setId>\": <expansionId> (Cardmarket-Expansion des Sets). Produkt bzw. Expansion muss im Katalog sources/cardmarket/catalog.jsonl stehen, sonst Build-Warnung. Kandidaten: stillMissing in api/v3/reports/cardmarket-ids.json. Siehe scripts/api/README.md. Notizen: ecard1/66 (Tyranitar, normaler Druck) -> 274941, die niedrigere der beiden Produkt-IDs zur custom-set-Nummer #66 (regulaerer Druck); 362890 ist laut TCGdex die Jumbo-Variante. Set-Zuordnungen der Trainer Kits und McDonald-s-Sets aus Cardmarkets Erweiterungsliste (2026-11-14); Cardmarket fuehrt je zwei Kits als eine Erweiterung.",
+  "_comment": "Manuelle Cardmarket-Zuordnungen: \"<setId>/<cardId>\": <cardmarketProductId> | null (gewinnt vor custom-sets, TCGdex und allen Regeln; null entfernt die ID) und \"<setId>\": <expansionId> (Cardmarket-Expansion des Sets). Produkt bzw. Expansion muss im Katalog sources/cardmarket/catalog.jsonl stehen, sonst Build-Warnung. Kandidaten: stillMissing in api/v3/reports/cardmarket-ids.json. Siehe scripts/api/README.md. Notizen: ecard1/66 (Tyranitar, normaler Druck) -> 274941, die niedrigere der beiden Produkt-IDs zur custom-set-Nummer #66 (regulaerer Druck); 362890 ist laut TCGdex die Jumbo-Variante. Set-Zuordnungen der Trainer Kits und McDonald-s-Sets aus Cardmarkets Erweiterungsliste (2026-11-14); Cardmarket fuehrt je zwei Kits als eine Erweiterung. xyp/XY69, XY122, XY123, XY183: Cardmarket fuehrt je zwei Produkte gleicher Version zur Nummer; Originalprodukt (2016/17), das zweite kam 2018 dazu (vermutlich Jumbo).",
   "TCGDEX-2013bw": 2352,
   "TCGDEX-2019sm-fr": 3354,
   "TCGDEX-tk-bw-e": 1630,
@@ -21,5 +21,9 @@
   "me6/94": 918923,
   "me6/95": 918924,
   "me6/98": 918928,
-  "me6/99": 918929
+  "me6/99": 918929,
+  "xyp/XY122": 290099,
+  "xyp/XY123": 291579,
+  "xyp/XY183": 295172,
+  "xyp/XY69": 289780
 }
