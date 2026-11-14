@@ -46,3 +46,16 @@ test('runtime cache stays <= 60 after (parallel) puts, pinned bleiben', async ()
   for (const p of ['v3/sets.json', 'v3/meta.json', 'v3/search-index.json', 'registry/sets.json']) assert.ok(cache.map.has(base + p));
   assert.ok(cache.map.has(`${base}v3/cards/c69.json`), 'neuester Eintrag bleibt');
 });
+
+test('api/v3/prices zaehlen nicht zur Obergrenze und werden nicht verdraengt (eigene Stamp-Bereinigung)', async () => {
+  const cache = fakeCache();
+  const base = 'https://x.test/api/';
+  for (let i = 0; i < 30; i += 1) cache.map.set(`${base}v3/prices/s${i}.json?v=1`, true);
+  await Promise.all(Array.from({ length: 70 }, async (_, i) => {
+    await cache.put(`${base}v3/cards/c${i}.json`);
+    await enqueueApiTrim(cache);
+  }));
+  for (let i = 0; i < 30; i += 1) assert.ok(cache.map.has(`${base}v3/prices/s${i}.json?v=1`), `Preisdatei s${i} bleibt`);
+  const cards = [...cache.map.keys()].filter((u) => u.includes('/v3/cards/'));
+  assert.equal(cards.length, 60, 'Kartendateien weiter auf 60 begrenzt');
+});

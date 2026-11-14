@@ -258,3 +258,9 @@ test('computePriceAnalyticsFromSummaries exposes advanced detail metrics for dee
   assert.ok(Math.abs((analytics.details?.madValue || 0) - 5) < 1e-9);
   assert.ok(Math.abs((analytics.details?.setHhi || 0) - 0.8702001081665764) < 1e-9);
 });
+
+test('pickCardPriceFromSummary: v3-Preiseintrag (ohne avgHolo-Feld) liefert RH-Preis', () => {
+  const summary = { entry: { prices: { productId: 1, trend: 1, trendHolo: 3 } } };
+  assert.equal(pickCardPriceFromSummary(summary, { preferReverseHolo: true }), 3);
+  assert.equal(pickCardPriceFromSummary({ entry: { prices: { productId: 1, trend: 1 } } }, { preferReverseHolo: true }), 1);
+});

@@ -344,3 +344,16 @@ test('applyCardmarketPriceSummary emits no label when presentation is null', () 
   assert.equal(linkEl.href, 'stale');
 });
 
+
+// api/v3/prices liefert kein avg/avg-holo (Spec §2.3): dort gelten vorhandene Holo-Felder als Holo-Preise.
+test('hasReliableHoloPrices: v3-Preiseintrag (ohne avgHolo-Feld) mit Holo-Feldern ist verlaesslich', () => {
+  assert.equal(hasReliableHoloPrices({ productId: 1, trend: 1, trendHolo: 3, avg30Holo: 2.5 }), true);
+  assert.equal(hasReliableHoloPrices({ productId: 1, trend: 1 }), false);
+  assert.equal(hasReliableHoloPrices({ productId: 1, trend: 1, trendHolo: 0 }), false);
+});
+
+test('buildCardmarketLinkPresentation zeigt RH-Preis eines v3-Preiseintrags', () => {
+  const summary = { entry: { cardmarketProductId: 1, prices: { productId: 1, trend: 1, trendHolo: 3 } }, url: 'https://www.cardmarket.com/de/Pokemon/Products?idProduct=1' };
+  const presentation = buildCardmarketLinkPresentation(summary, { preferReverseHolo: true });
+  assert.match(presentation.label, /RH Trend 3,00/);
+});

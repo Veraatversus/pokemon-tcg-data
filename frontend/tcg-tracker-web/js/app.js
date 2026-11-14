@@ -52,12 +52,7 @@ import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, f
 import { resolveSeriesGroupInfo, resolveDisplaySet, applyDeSeriesFallback, resolveSetTotalCards, setV3SetMeta, getCardLanguage } from './data/schema-contract.js?v=20261114-api-images';
 import { imageCandidates, bindImageFallback, fallbackImgAttrs } from './ui/image-fallback.js';
 import { renderDashboardSetGrid } from './views/dashboard-grid.js';
-import {
-  resolveCardmarketEntryForCard,
-  formatCardmarketEntryLabel,
-  formatCardmarketEntryTitle
-} from './data/cardmarket-data.js';
-import { applyCardmarketBuildStampCheck, forceRefreshCardmarketPrices } from './data/cardmarket-versioning.js?v=20261114-api-images';
+import { getCardPrice, loadPriceStamp, refreshV3Prices } from './data/v3-prices.js?v=20261114-api-images';
 import {
   buildCombinedSearchDropdownOptions,
   buildSearchProgressLabel,
@@ -120,6 +115,7 @@ import {
   applyCardmarketPriceSummary as applyCardmarketPriceSummaryUi,
   cardmarketPriceSummaryCache,
   cardmarketPriceSummaryPending,
+  resetCardmarketPriceSummaryCaches,
   getCardmarketPriceCacheKey,
   normalizeCardmarketBasePriceType,
   renderLightboxCardmarketPrices as renderLightboxCardmarketPricesUi,
@@ -427,36 +423,24 @@ const dom = {
 // --------------------------------------------------------------------------
 
 /**
- * Prüft beim App-Start, ob die täglich generierten Cardmarket-Artefakte
- * seit dem letzten Aufruf erneuert wurden, und invalidiert ggf. die
- * In-Memory-Caches. Fire-and-forget – blockiert den Bootstrap nicht.
- *
- * @returns {Promise<{ changed: boolean, reason: string, previousStamp: string, currentStamp: string, reset: string[] }>}
+ * App-Start: liest den Preis-Stamp (api/v3/prices/meta.json generatedAt) vorab, damit die ersten
+ * Preisdateien sofort mit ?v=<stamp> geladen werden. Fire-and-forget – blockiert den Bootstrap nicht.
+ * (Name bleibt fuer den Bootstrap-Controller.)
  */
 async function runCardmarketVersioningCheck() {
   try {
-    const result = await applyCardmarketBuildStampCheck();
-    if (result.changed) {
-      console.info(
-        `[cardmarket-versioning] Caches invalidiert (reason=${result.reason}, `
-        + `previous=${result.previousStamp || '∅'}, current=${result.currentStamp}, `
-        + `subsysteme=${(result.reset || []).join(',') || '∅'}).`
-      );
-    }
-    return result;
+    const currentStamp = await loadPriceStamp();
+    return { changed: false, reason: 'v3-prices', previousStamp: '', currentStamp, reset: [] };
   } catch (err) {
-    console.warn('[cardmarket-versioning] check failed', err);
+    console.warn('[v3-prices] stamp check failed', err);
     return { changed: false, reason: 'error', previousStamp: '', currentStamp: '', reset: [] };
   }
 }
 
 /**
- * Manueller Cardmarket-Preis-Refresh, ausgeloest vom
- * Settings-Button 'Preise neu laden'. Prueft den aktuellen Build-Stamp,
- * informiert den User ueber Aenderungen und leert IMMER die In-Memory-
- * Caches (damit auch Faelle abgedeckt sind, in denen der User weiss,
- * dass die Vera-Daten aktualisiert wurden, der Build-Stamp aber noch
- * nicht neu geschrieben wurde).
+ * Manueller Cardmarket-Preis-Refresh, ausgeloest vom Settings-Button 'Preise neu laden'.
+ * Leert immer die Preis-Caches (Preisdateien + Preis-Zusammenfassungen je Karte) und liest
+ * api/v3/prices/meta.json neu; ein neuer Stamp laedt neue Preisdateien.
  */
 async function reloadCardmarketPricesManually() {
   const btn = dom.btnCardmarketReloadPrices;
@@ -465,31 +449,19 @@ async function reloadCardmarketPricesManually() {
   setLoading(true, 'Pruefe Cardmarket-Preise...');
   btn.disabled = true;
   try {
-    const result = await forceRefreshCardmarketPrices();
+    const result = await refreshV3Prices();
+    resetCardmarketPriceSummaryCaches();
     const stampLabel = result.currentStamp
       ? new Date(result.currentStamp).toLocaleString('de-DE')
       : '(unbekannt)';
 
     if (result.changed) {
-      showToast(
-        `Cardmarket-Preise aktualisiert (${result.previousStamp || '∅'} → ${stampLabel}). Caches: ${(result.reset || []).join(', ') || '∅'}.`,
-        'success',
-        5000
-      );
-      console.info(
-        `[cardmarket-manual-refresh] Stamps differ – Caches invalidiert `
-        + `(reason=${result.reason}, current=${result.currentStamp}).`
-      );
+      showToast(`Cardmarket-Preise aktualisiert (Stand ${stampLabel}).`, 'success', 5000);
     } else {
-      // Stamp gleich, aber Caches wurden trotzdem geleert (force).
       showToast(
-        `Cardmarket-Stamp ist aktuell (${stampLabel}). In-Memory-Caches wurden geleert – der naechste Karten-Preis-Lookup holt frische Daten.`,
+        `Cardmarket-Preise sind aktuell (Stand ${stampLabel}). Preis-Caches wurden geleert.`,
         'info',
         4000
-      );
-      console.info(
-        `[cardmarket-manual-refresh] Stamp unchanged (${result.currentStamp}) `
-        + `– Caches zwangsweise geleert: ${(result.reset || []).join(', ') || '∅'}.`
       );
     }
   } catch (err) {
@@ -7028,10 +7000,7 @@ async function loadStatsPriceAnalyticsLazy({ requestId } = {}) {
 
     const chunkResults = await mapWithConcurrency(chunk, STATS_PRICE_CONCURRENCY, async (candidate) => {
       try {
-        const summary = await loadCardmarketPriceSummary(candidate.card, {
-          cards: candidate.sourceCards,
-          resolverCard: candidate.sourceCard
-        });
+        const summary = await loadCardmarketPriceSummary(candidate.card);
         const value = pickCardPriceFromSummary(summary, {
           preferReverseHolo: candidate.isReverseHolo,
           basePriceType
@@ -7882,7 +7851,7 @@ function createCardElement(card, key, db, index) {
 }
 
 // cardmarketPriceSummaryCache/-Pending kommen aus js/ui/cardmarket-price.js;
-// cardmarket-versioning.js leert sie bei neuem Build-Stamp und "Preise neu laden".
+// "Preise neu laden" (reloadCardmarketPricesManually) leert sie.
 
 // Aktueller Basis-Preistyp aus den User-Settings. Wird an den kanonischen
 // Picker in `js/ui/cardmarket-price.js` durchgereicht.
@@ -7913,7 +7882,7 @@ function renderLightboxCardmarketPrices(summary, opts = {}) {
 }
 
 
-async function loadCardmarketPriceSummary(card = {}, { cards = null, resolverCard = null } = {}) {
+async function loadCardmarketPriceSummary(card = {}) {
   const cacheKey = getCardmarketPriceCacheKey(card);
   if (!cacheKey.trim()) return null;
 
@@ -7925,42 +7894,16 @@ async function loadCardmarketPriceSummary(card = {}, { cards = null, resolverCar
     return cardmarketPriceSummaryPending.get(cacheKey);
   }
 
-  const sourceCards = Array.isArray(cards)
-    ? cards
-    : (Array.isArray(state?.cards) ? state.cards : []);
-  // Prefer the card's own setId (set in buildCollectedCardCandidates) so the
-  // resolver picks the correct expansionId for cross-set lists like the
-  // watchlist. Fall back to state.currentSet.setId only when the card has no
-  // own setId (e.g. lightbox/search lookups).
+  // Preis aus api/v3/prices/<setId>.json (js/data/v3-prices.js): Set der Karte zuerst (Watchlist/Statistik
+  // ueber mehrere Sets), sonst das aktuelle Set (Lightbox). Preis nur bei gleicher Produkt-ID wie der Link.
   const cardSetId = String(card?.setId || '').trim();
   const currentSetId = cardSetId || state?.currentSet?.setId || '';
 
-  // Build a set resolver from getSetById (state.sets / state.allSets).
-  // The tracker index needs ptcgoCode + name to map a set → cardmarket expansionId.
-  const resolveSetById = typeof getSetById === 'function'
-    ? (setId) => {
-        const set = getSetById(setId);
-        if (!set) return null;
-        return {
-          setId: set.setId || set.id || '',
-          name: set.setName || set.name || '',
-          ptcgoCode: set.ptcgoCode || set.code || '',
-          series: set.series || ''
-        };
-      }
-    : null;
-
-  const pending = resolveCardmarketEntryForCard(
-    resolverCard && typeof resolverCard === 'object' ? resolverCard : card,
-    {
-      cards: sourceCards,
-      resolveSetById,
-      currentSetId
-    }
-  )
+  const pending = getCardPrice(card, { setId: currentSetId })
+    .then((price) => (price ? { cardmarketProductId: price.productId, prices: price } : null))
     .then((entry) => {
-      // Produkt der Karte (v3/Legacy-URL) vor Matcher-Treffer, Link in Kartensprache.
-      const directUrl = resolveCardmarketLink(card, { language: getCardLanguage(), matchedEntry: entry });
+      // Produkt der Karte (v3/Legacy-URL), Link in Kartensprache.
+      const directUrl = resolveCardmarketLink(card, { language: getCardLanguage() });
       const summary = entry ? { entry, url: directUrl } : null;
       cardmarketPriceSummaryCache.set(cacheKey, summary);
       cardmarketPriceSummaryPending.delete(cacheKey);

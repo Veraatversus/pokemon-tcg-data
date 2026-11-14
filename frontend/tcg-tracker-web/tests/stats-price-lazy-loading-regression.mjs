@@ -38,11 +38,11 @@ test('request guard protects against stale async updates', async () => {
   assert.match(source, /if \(!isActiveStatsPriceRequest\(normalizedRequestId\)\) return;/);
 });
 
-test('stats lazy loading resolves prices with set-scoped sourceCards context', async () => {
+test('stats lazy loading resolves prices from the set price file of the candidate (card carries its setId)', async () => {
   const source = await readAppSource();
 
-  assert.match(
-    source,
-    /loadCardmarketPriceSummary\(candidate\.card,\s*\{\s*cards:\s*candidate\.sourceCards,\s*resolverCard:\s*candidate\.sourceCard,?\s*\}\)/
-  );
+  // api/v3/prices: Preis ueber setId + collectionKey der Karte, kein Matcher-Kontext mehr noetig.
+  assert.match(source, /card:\s*\{\s*\.\.\.card,\s*setId\s*\}/);
+  assert.match(source, /loadCardmarketPriceSummary\(candidate\.card\)/);
+  assert.match(source, /getCardPrice\(card,\s*\{\s*setId:\s*currentSetId\s*\}\)/);
 });

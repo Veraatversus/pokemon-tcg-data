@@ -14,10 +14,15 @@ const API_CACHE_MAX_ENTRIES = 60;
 const API_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 const API_PINNED_RE = /\/api\/(v3\/(sets|meta|search-index)\.json|registry\/sets\.json)$/;
 const API_ENTRY_RE = /\/api\/(v3|registry)\//;
+// Preisdateien (api/v3/prices) laufen ueber handleCardmarketRequest (Stamp-Bereinigung) und zaehlen hier nicht mit.
+const API_PRICES_RE = /\/api\/v3\/prices\//;
 
 async function trimApiCache(cache) {
   const keys = await cache.keys();
-  const apiKeys = keys.filter((req) => API_ENTRY_RE.test(new URL(req.url).pathname));
+  const apiKeys = keys.filter((req) => {
+    const { pathname } = new URL(req.url);
+    return API_ENTRY_RE.test(pathname) && !API_PRICES_RE.test(pathname);
+  });
   const evictable = apiKeys.filter((req) => !API_PINNED_RE.test(new URL(req.url).pathname));
   const excess = apiKeys.length - API_CACHE_MAX_ENTRIES;
   for (let i = 0; i < excess && i < evictable.length; i += 1) {
@@ -70,14 +75,20 @@ async function handleApiRequest(request) {
 }
 
 // --- cardmarket-data ---
-// Cardmarket-Daten (<base>/cardmarket/*.json) werden taeglich neu gebaut; meta.json.generatedAt ist der
-// Build-Stamp. Die App haengt ihn als ?v=<stamp> an jede Daten-URL (js/data/cardmarket-data.js).
+// Preisdaten api/v3/prices/*.json (js/data/v3-prices.js) und Alt-Daten <base>/cardmarket/*.json werden taeglich
+// neu gebaut; meta.json.generatedAt der jeweiligen Familie ist der Stamp. Die App haengt ihn als ?v=<stamp> an
+// jede Daten-URL.
 //  - meta.json und Daten ohne ?v: Netz zuerst (no-store), offline -> gecachte Kopie.
 //  - Daten mit ?v: cache-first (der Stamp steckt im Schluessel). Ein neuer Stamp ist eine neue URL und
 //    kommt daher beim ersten Laden nach dem Build aus dem Netz; danach werden aeltere Stamps entfernt.
 // Unit-getestet in tests/service-worker-cardmarket.test.mjs.
-const CARDMARKET_DATA_RE = /\/cardmarket\/(?:[^/]+\/)*[^/]+\.json$/;
-const CARDMARKET_META_RE = /\/cardmarket\/meta\.json$/;
+const CARDMARKET_DATA_RE = /\/cardmarket\/(?:[^/]+\/)*[^/]+\.json$|\/api\/v3\/prices\/[^/]+\.json$/;
+const CARDMARKET_META_RE = /\/(?:cardmarket|api\/v3\/prices)\/meta\.json$/;
+
+// Familie eines Daten-Pfads: Stamps werden nur innerhalb derselben Familie verglichen.
+function cardmarketFamily(pathname) {
+  return /\/api\/v3\/prices\//.test(String(pathname || '')) ? 'prices' : 'cardmarket';
+}
 
 function isCardmarketDataPath(pathname) {
   return CARDMARKET_DATA_RE.test(String(pathname || ''));
@@ -88,13 +99,14 @@ function stampTime(stamp) {
   return Number.isFinite(time) ? time : -Infinity;
 }
 
-// Entfernt Cardmarket-Dateneintraege mit aelterem (oder ohne) Stamp; meta.json bleibt.
-async function pruneCardmarketStamps(cache, keepStamp) {
+// Entfernt Dateneintraege derselben Familie mit aelterem (oder ohne) Stamp; meta.json bleibt.
+async function pruneCardmarketStamps(cache, keepStamp, family = 'cardmarket') {
   const keepTime = stampTime(keepStamp);
   const keys = await cache.keys();
   for (const req of keys) {
     const url = new URL(req.url);
     if (!isCardmarketDataPath(url.pathname) || CARDMARKET_META_RE.test(url.pathname)) continue;
+    if (cardmarketFamily(url.pathname) !== family) continue;
     const stamp = url.searchParams.get('v') || '';
     if (stamp !== keepStamp && stampTime(stamp) < keepTime) await cache.delete(req);
   }
@@ -122,7 +134,7 @@ async function handleCardmarketRequest(request) {
     if (response && response.status === 200) {
       try {
         await cache.put(request, response.clone());
-        if (versioned) await pruneCardmarketStamps(cache, stamp);
+        if (versioned) await pruneCardmarketStamps(cache, stamp, cardmarketFamily(url.pathname));
       } catch (err) {
         console.warn('[SW] cache.put failed:', err);
       }
@@ -234,7 +246,8 @@ self.addEventListener('fetch', (event) => {
       return;
     }
 
-    // Cardmarket-Daten (auch vom VERA_BASE-Host): Stamp-basierte Frische, siehe handleCardmarketRequest.
+    // Preisdaten (api/v3/prices) und Cardmarket-Altdaten (auch vom VERA_BASE-Host): Stamp-basierte Frische,
+    // siehe handleCardmarketRequest. Steht vor der api/v3-Route (24-h-Cache).
     if (request.destination !== 'image' && isCardmarketDataPath(url.pathname)) {
       event.respondWith(handleCardmarketRequest(request));
       return;
