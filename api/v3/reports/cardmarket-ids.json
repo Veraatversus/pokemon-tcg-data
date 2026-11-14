@@ -3264,31 +3264,21 @@
       "tcgdex": 119
     },
     "xy11": {
-      "ambiguous": 2,
-      "ambiguousCards": [
-        "65",
-        "81"
-      ],
+      "ambiguous": 0,
       "cards": 116,
-      "corrected": 3,
       "coverage": {
         "bySource": {
-          "matched": 5,
-          "tcgdex": 109
+          "customSet": 116
         },
         "cards": 116,
-        "withId": 114
+        "withId": 116
       },
+      "customSet": 116,
       "expansionId": 1716,
-      "matched": 5,
-      "missing": 2,
-      "missingCards": [
-        "65",
-        "81"
-      ],
-      "ordered": 4,
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1716&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 109
+      "tcgdex": 0
     },
     "xy12": {
       "ambiguous": 1,
@@ -3496,8 +3486,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 5155,
-    "changed": 671,
+    "applied": 5271,
+    "changed": 678,
     "conflicts": [],
     "dropped": [
       {
@@ -5178,26 +5168,6 @@
       "xy10-45",
       "xy10-46"
     ],
-    "291480": [
-      "xy11-65",
-      "xy11-66"
-    ],
-    "291527": [
-      "xy11-23",
-      "xy11-24"
-    ],
-    "291531": [
-      "xy11-34",
-      "xy11-35"
-    ],
-    "291546": [
-      "xy11-81",
-      "xy11-82"
-    ],
-    "291547": [
-      "xy11-86",
-      "xy11-87"
-    ],
     "293006": [
       "xyp-XY177",
       "xyp-XY177a"
@@ -5387,10 +5357,10 @@
     ]
   },
   "duplicates": {
-    "cards": 801,
-    "corrected": 214,
-    "ids": 401,
-    "kept": 587
+    "cards": 791,
+    "corrected": 211,
+    "ids": 396,
+    "kept": 580
   },
   "expansionMismatch": {
     "cards": [
@@ -6585,27 +6555,6 @@
         "reason": "dropped-shared-mismatch"
       },
       {
-        "cardKey": "xy11-25",
-        "newId": null,
-        "oldExpansion": 1716,
-        "oldId": 290990,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "xy11-65",
-        "newId": null,
-        "oldExpansion": 1716,
-        "oldId": 291480,
-        "reason": "dropped-shared-mismatch"
-      },
-      {
-        "cardKey": "xy11-81",
-        "newId": null,
-        "oldExpansion": 1716,
-        "oldId": 291546,
-        "reason": "dropped-shared-mismatch"
-      },
-      {
         "cardKey": "xy12-59",
         "newId": null,
         "oldExpansion": 1742,
@@ -7009,14 +6958,14 @@
       }
     ],
     "totals": {
-      "checked": 18215,
+      "checked": 18104,
       "corrected": 21,
-      "dropped": 18,
-      "droppedShared": 14,
+      "dropped": 16,
+      "droppedShared": 12,
       "foreignNameOk": 1276,
-      "keptMismatch": 135,
+      "keptMismatch": 134,
       "noSetExpansion": 0,
-      "ok": 16762,
+      "ok": 16654,
       "unknownProduct": 3
     }
   },
@@ -7137,11 +7086,11 @@
   "rules": {
     "energySymbol": 3,
     "leftRight": 0,
-    "ordered": 18,
+    "ordered": 14,
     "orderedRejected": 7,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 288
+    "versionSuffixSkipped": 297
   },
   "setsWithoutExpansion": [
     {
@@ -8783,49 +8732,6 @@
       "candidates": [
         {
           "hint": "same-name-unnumbered",
-          "name": "Yveltal [Oblivion Wing | Darkness Blade]",
-          "productId": 291634
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Yveltal [Oblivion Wing | Darkness Blade]",
-          "productId": 295222
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Yveltal [Oblivion Wing | Darkness Blade]",
-          "productId": 450543
-        }
-      ],
-      "cardKey": "xy11/65",
-      "deName": "Yveltal",
-      "expansionId": 1716,
-      "name": "Yveltal",
-      "set": "xy11"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Xerneas [Geomancy | Rainbow Spear]",
-          "productId": 291643
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Xerneas [Geomancy | Rainbow Spear]",
-          "productId": 450538
-        }
-      ],
-      "cardKey": "xy11/81",
-      "deName": "Xerneas",
-      "expansionId": 1716,
-      "name": "Xerneas",
-      "set": "xy11"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
           "name": "Machamp [Counterattack | Seismic Toss]",
           "productId": 293427
         },
@@ -8863,13 +8769,6 @@
       "expansionId": 1611,
       "sets": [
         "bwp"
-      ]
-    },
-    {
-      "count": 2,
-      "expansionId": 1716,
-      "sets": [
-        "xy11"
       ]
     },
     {
@@ -8965,14 +8864,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 15,
+    "ambiguous": 13,
     "cards": 21577,
-    "customSet": 5155,
-    "matched": 114,
-    "missing": 29,
+    "customSet": 5271,
+    "matched": 109,
+    "missing": 27,
     "override": 8,
     "stabilityKept": 185,
-    "tcgdex": 16086
+    "tcgdex": 15977
   },
   "versionSuffixSkippedByExpansion": {
     "1521": 9,
@@ -8988,6 +8887,7 @@
     "1649": 3,
     "1678": 11,
     "1687": 11,
+    "1716": 9,
     "1757": 60,
     "1758": 12,
     "1800": 13,
