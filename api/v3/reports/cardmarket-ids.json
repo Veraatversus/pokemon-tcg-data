@@ -2530,37 +2530,21 @@
       "tcgdex": 0
     },
     "sm7": {
-      "ambiguous": 4,
-      "ambiguousCards": [
-        "10a",
-        "123a",
-        "148a",
-        "177a"
-      ],
+      "ambiguous": 0,
       "cards": 187,
-      "corrected": 8,
       "coverage": {
         "bySource": {
-          "matched": 2,
-          "stabilityKept": 3,
-          "tcgdex": 178
+          "customSet": 187
         },
         "cards": 187,
-        "withId": 183
+        "withId": 187
       },
+      "customSet": 187,
       "expansionId": 2320,
-      "matched": 2,
-      "missing": 4,
-      "missingCards": [
-        "10a",
-        "123a",
-        "148a",
-        "177a"
-      ],
-      "ordered": 2,
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2320&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 3,
-      "tcgdex": 178
+      "tcgdex": 0
     },
     "sm75": {
       "ambiguous": 2,
@@ -3626,8 +3610,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 3282,
-    "changed": 530,
+    "applied": 3469,
+    "changed": 543,
     "conflicts": [],
     "dropped": [
       {
@@ -5489,39 +5473,6 @@
       "smp-SM107",
       "smp-SM124"
     ],
-    "361254": [
-      "sm7-7",
-      "sm7-8"
-    ],
-    "361258": [
-      "sm7-11",
-      "sm7-12"
-    ],
-    "361277": [
-      "sm7-30",
-      "sm7-55"
-    ],
-    "361279": [
-      "sm7-32",
-      "sm7-33"
-    ],
-    "361312": [
-      "sm7-67",
-      "sm7-68",
-      "sm7-69"
-    ],
-    "361336": [
-      "sm7-92",
-      "sm7-93"
-    ],
-    "361344": [
-      "sm7-103",
-      "sm7-104"
-    ],
-    "361355": [
-      "sm7-116",
-      "sm7-117"
-    ],
     "362810": [
       "TCGDEX-2018sm-fr-38",
       "TCGDEX-2018sm-fr-39"
@@ -5903,10 +5854,10 @@
     ]
   },
   "duplicates": {
-    "cards": 1006,
-    "corrected": 276,
-    "ids": 495,
-    "kept": 730
+    "cards": 989,
+    "corrected": 268,
+    "ids": 487,
+    "kept": 721
   },
   "expansionMismatch": {
     "cards": [
@@ -7577,14 +7528,14 @@
       }
     ],
     "totals": {
-      "checked": 19945,
+      "checked": 19766,
       "corrected": 25,
       "dropped": 21,
       "droppedShared": 17,
       "foreignNameOk": 1281,
       "keptMismatch": 135,
       "noSetExpansion": 0,
-      "ok": 18480,
+      "ok": 18301,
       "unknownProduct": 3
     }
   },
@@ -7777,11 +7728,11 @@
   "rules": {
     "energySymbol": 3,
     "leftRight": 0,
-    "ordered": 26,
+    "ordered": 24,
     "orderedRejected": 13,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 162
+    "versionSuffixSkipped": 172
   },
   "setsWithoutExpansion": [
     {
@@ -8735,27 +8686,6 @@
       "source": "corrected",
       "todayId": 301167,
       "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm7/8",
-      "productId": 361255,
-      "source": "corrected",
-      "todayId": 361254,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm7/145",
-      "productId": 360407,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "sm7/165",
-      "productId": 361402,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
     },
     {
       "cardKey": "sm75/35",
@@ -9924,87 +9854,6 @@
     {
       "candidates": [
         {
-          "hint": "same-name-unnumbered",
-          "name": "Sceptile [Power of Nature | Powerful Storm]",
-          "productId": 370821
-        }
-      ],
-      "cardKey": "sm7/10a",
-      "deName": null,
-      "expansionId": 2320,
-      "name": "Sceptile",
-      "set": "sm7"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Acro Bike",
-          "productId": 368762
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Acro Bike",
-          "productId": 407044
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Acro Bike",
-          "productId": 407254
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Acro Bike",
-          "productId": 441433
-        }
-      ],
-      "cardKey": "sm7/123a",
-      "deName": null,
-      "expansionId": 2320,
-      "name": "Acro Bike",
-      "set": "sm7"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Tate & Liza",
-          "productId": 562701
-        }
-      ],
-      "cardKey": "sm7/148a",
-      "deName": null,
-      "expansionId": 2320,
-      "name": "Tate & Liza",
-      "set": "sm7"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Rayquaza GX [Stormy Winds | Dragon Break | Tempest GX]",
-          "productId": 368772
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Rayquaza GX [Stormy Winds | Dragon Break | Tempest GX]",
-          "productId": 450883
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Rayquaza GX [Stormy Winds | Dragon Break | Tempest GX]",
-          "productId": 465979
-        }
-      ],
-      "cardKey": "sm7/177a",
-      "deName": null,
-      "expansionId": 2320,
-      "name": "Rayquaza-GX",
-      "set": "sm7"
-    },
-    {
-      "candidates": [
-        {
           "hint": "same-name-unnumbered, id-outlier",
           "name": "Altaria [Fight Song | Pierce]",
           "productId": 364324
@@ -10685,13 +10534,6 @@
   "stillMissingByExpansion": [
     {
       "count": 4,
-      "expansionId": 2320,
-      "sets": [
-        "sm7"
-      ]
-    },
-    {
-      "count": 4,
       "expansionId": 2407,
       "sets": [
         "sm9"
@@ -10874,14 +10716,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 44,
+    "ambiguous": 40,
     "cards": 21577,
-    "customSet": 3282,
-    "matched": 227,
-    "missing": 63,
+    "customSet": 3469,
+    "matched": 225,
+    "missing": 59,
     "override": 8,
-    "stabilityKept": 242,
-    "tcgdex": 17755
+    "stabilityKept": 239,
+    "tcgdex": 17577
   },
   "versionSuffixSkippedByExpansion": {
     "1537": 7,
@@ -10898,6 +10740,7 @@
     "1800": 13,
     "2065": 14,
     "2075": 11,
+    "2320": 10,
     "2370": 11,
     "2437": 1
   }
