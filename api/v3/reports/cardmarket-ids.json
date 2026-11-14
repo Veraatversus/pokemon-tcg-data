@@ -2433,85 +2433,38 @@
       "tcgdex": 249
     },
     "sm2": {
-      "ambiguous": 11,
-      "ambiguousCards": [
-        "19a",
-        "21a",
-        "51a",
-        "60a",
-        "92a",
-        "121a",
-        "124a",
-        "125a",
-        "128a",
-        "130a",
-        "157a"
-      ],
+      "ambiguous": 0,
       "cards": 180,
-      "corrected": 1,
       "coverage": {
         "bySource": {
-          "stabilityKept": 4,
-          "tcgdex": 165
+          "customSet": 180
         },
         "cards": 180,
-        "withId": 169
+        "withId": 180
       },
+      "customSet": 180,
       "expansionId": 1800,
       "matched": 0,
-      "missing": 11,
-      "missingCards": [
-        "19a",
-        "21a",
-        "51a",
-        "60a",
-        "92a",
-        "121a",
-        "124a",
-        "125a",
-        "128a",
-        "130a",
-        "157a"
-      ],
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1800&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 4,
-      "tcgdex": 165
+      "tcgdex": 0
     },
     "sm3": {
-      "ambiguous": 8,
-      "ambiguousCards": [
-        "18a",
-        "39a",
-        "88a",
-        "92a",
-        "105a",
-        "112a",
-        "115a",
-        "116a"
-      ],
+      "ambiguous": 0,
       "cards": 177,
       "coverage": {
         "bySource": {
-          "tcgdex": 169
+          "customSet": 177
         },
         "cards": 177,
-        "withId": 169
+        "withId": 177
       },
+      "customSet": 177,
       "expansionId": 1824,
       "matched": 0,
-      "missing": 8,
-      "missingCards": [
-        "18a",
-        "39a",
-        "88a",
-        "92a",
-        "105a",
-        "112a",
-        "115a",
-        "116a"
-      ],
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1824&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 169
+      "tcgdex": 0
     },
     "sm35": {
       "ambiguous": 3,
@@ -2566,42 +2519,21 @@
       "tcgdex": 124
     },
     "sm5": {
-      "ambiguous": 5,
-      "ambiguousCards": [
-        "119a",
-        "122a",
-        "125a",
-        "135a",
-        "153a"
-      ],
+      "ambiguous": 0,
       "cards": 178,
-      "corrected": 7,
       "coverage": {
         "bySource": {
-          "matched": 1,
-          "stabilityKept": 12,
-          "tcgdex": 156
+          "customSet": 178
         },
         "cards": 178,
-        "withId": 169
+        "withId": 178
       },
+      "customSet": 178,
       "expansionId": 2065,
-      "matched": 1,
-      "missing": 9,
-      "missingCards": [
-        "119a",
-        "122a",
-        "125a",
-        "135a",
-        "137",
-        "138",
-        "153a",
-        "170",
-        "171"
-      ],
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2065&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 12,
-      "tcgdex": 156
+      "tcgdex": 0
     },
     "sm6": {
       "ambiguous": 5,
@@ -3765,17 +3697,15 @@
       "cards": 216,
       "coverage": {
         "bySource": {
-          "customSet": 212,
-          "override": 4
+          "customSet": 216
         },
         "cards": 216,
         "withId": 216
       },
-      "customSet": 212,
+      "customSet": 216,
       "expansionId": 1612,
       "matched": 0,
       "missing": 0,
-      "override": 4,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1612&sortBy=collectorsnumber_asc&perSite=100&site=1",
       "tcgdex": 0
     },
@@ -3802,8 +3732,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 1608,
-    "changed": 401,
+    "applied": 2147,
+    "changed": 428,
     "conflicts": [],
     "dropped": [
       {
@@ -3824,6 +3754,30 @@
         "name": "Lotad",
         "productId": 289730,
         "productName": "Lotad #01"
+      },
+      {
+        "cardKey": "sm5/137",
+        "name": "Unit Energy GrassFireWater",
+        "productId": 316061,
+        "productName": "Unit Energy [GRW]"
+      },
+      {
+        "cardKey": "sm5/138",
+        "name": "Unit Energy LightningPsychicMetal",
+        "productId": 316062,
+        "productName": "Unit Energy [LPM]"
+      },
+      {
+        "cardKey": "sm5/170",
+        "name": "Unit Energy GrassFireWater",
+        "productId": 316094,
+        "productName": "Unit Energy [GRW]"
+      },
+      {
+        "cardKey": "sm5/171",
+        "name": "Unit Energy LightningPsychicMetal",
+        "productId": 316095,
+        "productName": "Unit Energy [LPM]"
       }
     ]
   },
@@ -5618,20 +5572,6 @@
       "sm1-163",
       "sm1-171"
     ],
-    "296848": [
-      "sm2-126",
-      "sm2-143"
-    ],
-    "297478": [
-      "sm2-14",
-      "sm2-46",
-      "sm2-55",
-      "sm2-56"
-    ],
-    "297523": [
-      "sm2-62",
-      "sm2-63"
-    ],
     "298284": [
       "smp-SM30",
       "smp-SM31"
@@ -5652,82 +5592,6 @@
       "smp-SM148",
       "smp-SM231",
       "smp-SM78"
-    ],
-    "315503": [
-      "sm5-13",
-      "sm5-157"
-    ],
-    "315504": [
-      "sm5-159",
-      "sm5-39"
-    ],
-    "315828": [
-      "sm5-161",
-      "sm5-63"
-    ],
-    "315829": [
-      "sm5-163",
-      "sm5-90"
-    ],
-    "315938": [
-      "sm5-6",
-      "sm5-7"
-    ],
-    "315946": [
-      "sm5-111",
-      "sm5-15"
-    ],
-    "315951": [
-      "sm5-20",
-      "sm5-21"
-    ],
-    "315962": [
-      "sm5-31",
-      "sm5-32"
-    ],
-    "315975": [
-      "sm5-45",
-      "sm5-46"
-    ],
-    "316007": [
-      "sm5-80",
-      "sm5-81"
-    ],
-    "316022": [
-      "sm5-96",
-      "sm5-97"
-    ],
-    "316026": [
-      "sm5-100",
-      "sm5-164"
-    ],
-    "316027": [
-      "sm5-101",
-      "sm5-165"
-    ],
-    "316030": [
-      "sm5-104",
-      "sm5-105"
-    ],
-    "316047": [
-      "sm5-122",
-      "sm5-167"
-    ],
-    "316054": [
-      "sm5-129",
-      "sm5-168"
-    ],
-    "316064": [
-      "sm5-140",
-      "sm5-158"
-    ],
-    "316066": [
-      "sm5-142",
-      "sm5-160"
-    ],
-    "316068": [
-      "sm5-144",
-      "sm5-162"
     ],
     "321166": [
       "smp-SM106",
@@ -6296,10 +6160,10 @@
     ]
   },
   "duplicates": {
-    "cards": 1229,
-    "corrected": 329,
-    "ids": 595,
-    "kept": 900
+    "cards": 1183,
+    "corrected": 321,
+    "ids": 573,
+    "kept": 862
   },
   "expansionMismatch": {
     "cards": [
@@ -8184,14 +8048,14 @@
       }
     ],
     "totals": {
-      "checked": 21579,
+      "checked": 21062,
       "corrected": 25,
       "dropped": 27,
       "droppedShared": 23,
       "foreignNameOk": 1309,
       "keptMismatch": 159,
       "noSetExpansion": 0,
-      "ok": 20056,
+      "ok": 19539,
       "unknownProduct": 3
     }
   },
@@ -8390,7 +8254,7 @@
     }
   ],
   "overrides": {
-    "applied": 12,
+    "applied": 8,
     "problems": [],
     "removed": 0,
     "warnings": []
@@ -8422,9 +8286,9 @@
     "leftRight": 0,
     "ordered": 34,
     "orderedRejected": 16,
-    "override": 12,
+    "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 78
+    "versionSuffixSkipped": 109
   },
   "setsWithoutExpansion": [
     {
@@ -9457,122 +9321,10 @@
       "todaySource": null
     },
     {
-      "cardKey": "sm2/46",
-      "productId": 297508,
-      "source": "corrected",
-      "todayId": 297478,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm2/55",
-      "productId": 297517,
-      "source": "corrected",
-      "todayId": 297478,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm2/56",
-      "productId": 297518,
-      "source": "corrected",
-      "todayId": 297478,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm2/143",
-      "productId": 297578,
-      "source": "corrected",
-      "todayId": 296848,
-      "todaySource": "tcgdex"
-    },
-    {
       "cardKey": "sm35/78",
       "productId": 302215,
       "source": "corrected",
       "todayId": 301167,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm5/32",
-      "productId": 315963,
-      "source": "corrected",
-      "todayId": 315962,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm5/157",
-      "productId": 316081,
-      "source": "corrected",
-      "todayId": 315503,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm5/158",
-      "productId": 316082,
-      "source": "corrected",
-      "todayId": 316064,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm5/159",
-      "productId": 316083,
-      "source": "corrected",
-      "todayId": 315504,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm5/160",
-      "productId": 316084,
-      "source": "corrected",
-      "todayId": 316066,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm5/161",
-      "productId": 316085,
-      "source": "corrected",
-      "todayId": 315828,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm5/162",
-      "productId": 316086,
-      "source": "corrected",
-      "todayId": 316068,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm5/163",
-      "productId": 316087,
-      "source": "corrected",
-      "todayId": 315829,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm5/164",
-      "productId": 316088,
-      "source": "corrected",
-      "todayId": 316026,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm5/165",
-      "productId": 316089,
-      "source": "corrected",
-      "todayId": 316027,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm5/167",
-      "productId": 316091,
-      "source": "corrected",
-      "todayId": 316047,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm5/168",
-      "productId": 316092,
-      "source": "corrected",
-      "todayId": 316054,
       "todaySource": "tcgdex"
     },
     {
@@ -11088,467 +10840,6 @@
       "candidates": [
         {
           "hint": "same-name-unnumbered",
-          "name": "Alolan Sandshrew [Defense Curl | Ice Ball]",
-          "productId": 366837
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Alolan Vulpix [Beacon | Icy Snow]",
-          "productId": 312206
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Alolan Vulpix [Beacon | Icy Snow]",
-          "productId": 312250
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Alolan Ninetales GX [Ice Blade | Blizzard Edge | Ice Path GX]",
-          "productId": 312251
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Alolan Vulpix [Beacon | Icy Snow]",
-          "productId": 319255
-        }
-      ],
-      "cardKey": "sm2/19a",
-      "deName": null,
-      "expansionId": 1800,
-      "name": "Alolan Sandshrew",
-      "set": "sm2"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Alolan Vulpix [Beacon | Icy Snow]",
-          "productId": 312206
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Alolan Vulpix [Beacon | Icy Snow]",
-          "productId": 312250
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Alolan Vulpix [Beacon | Icy Snow]",
-          "productId": 319255
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Alolan Vulpix [Beacon | Icy Snow]",
-          "productId": 468924
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Alolan Vulpix [Beacon | Icy Snow]",
-          "productId": 886902
-        }
-      ],
-      "cardKey": "sm2/21a",
-      "deName": null,
-      "expansionId": 1800,
-      "name": "Alolan Vulpix",
-      "set": "sm2"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Garbodor [Trashalanche | Acid Spray]",
-          "productId": 312229
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Garbodor [Trashalanche | Acid Spray]",
-          "productId": 321171
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Garbodor [Trashalanche | Acid Spray]",
-          "productId": 368706
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Garbodor [Trashalanche | Acid Spray]",
-          "productId": 368739
-        }
-      ],
-      "cardKey": "sm2/51a",
-      "deName": null,
-      "expansionId": 1800,
-      "name": "Garbodor",
-      "set": "sm2"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tapu Lele GX [Wonder Tag | Energy Drive | Tapu Cure GX]",
-          "productId": 312205
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tapu Lele GX [Wonder Tag | Energy Drive | Tapu Cure GX]",
-          "productId": 312232
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tapu Lele GX [Wonder Tag | Energy Drive | Tapu Cure GX]",
-          "productId": 312254
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tapu Lele GX [Wonder Tag | Energy Drive | Tapu Cure GX]",
-          "productId": 312279
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tapu Lele GX [Wonder Tag | Energy Drive | Tapu Cure GX]",
-          "productId": 366835
-        }
-      ],
-      "cardKey": "sm2/60a",
-      "deName": null,
-      "expansionId": 1800,
-      "name": "Tapu Lele-GX",
-      "set": "sm2"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Sylveon GX [Magical Ribbon | Fairy Wind | Plea GX]",
-          "productId": 365544
-        }
-      ],
-      "cardKey": "sm2/92a",
-      "deName": null,
-      "expansionId": 1800,
-      "name": "Sylveon-GX",
-      "set": "sm2"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Choice Band",
-          "productId": 312225
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Choice Band",
-          "productId": 312244
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Choice Band",
-          "productId": 312271
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Choice Band",
-          "productId": 312294
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Choice Band",
-          "productId": 368675
-        }
-      ],
-      "cardKey": "sm2/121a",
-      "deName": null,
-      "expansionId": 1800,
-      "name": "Choice Band",
-      "set": "sm2"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Enhanced Hammer",
-          "productId": 368753
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Enhanced Hammer",
-          "productId": 371640
-        }
-      ],
-      "cardKey": "sm2/124a",
-      "deName": null,
-      "expansionId": 1800,
-      "name": "Enhanced Hammer",
-      "set": "sm2"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Field Blower",
-          "productId": 312221
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Field Blower",
-          "productId": 312246
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Field Blower",
-          "productId": 312273
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Field Blower",
-          "productId": 312295
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Field Blower",
-          "productId": 368668
-        }
-      ],
-      "cardKey": "sm2/125a",
-      "deName": null,
-      "expansionId": 1800,
-      "name": "Field Blower",
-      "set": "sm2"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Max Potion",
-          "productId": 371641
-        }
-      ],
-      "cardKey": "sm2/128a",
-      "deName": null,
-      "expansionId": 1800,
-      "name": "Max Potion",
-      "set": "sm2"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Rescue Stretcher",
-          "productId": 312224
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Rescue Stretcher",
-          "productId": 312247
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Rescue Stretcher",
-          "productId": 368692
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Rescue Stretcher",
-          "productId": 368745
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Rescue Stretcher",
-          "productId": 368757
-        }
-      ],
-      "cardKey": "sm2/130a",
-      "deName": null,
-      "expansionId": 1800,
-      "name": "Rescue Stretcher",
-      "set": "sm2"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Metagross GX [Geotech System | Giga Hammer | Algorithm GX]",
-          "productId": 450878
-        }
-      ],
-      "cardKey": "sm2/157a",
-      "deName": null,
-      "expansionId": 1800,
-      "name": "Metagross-GX",
-      "set": "sm2"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Charmander [Scratch | Flame Tail]",
-          "productId": 367771
-        }
-      ],
-      "cardKey": "sm3/18a",
-      "deName": null,
-      "expansionId": 1824,
-      "name": "Charmander",
-      "set": "sm3"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tapu Fini GX [Aqua Ring | Hydro Shot | Tapu Storm GX]",
-          "productId": 366836
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Tapu Fini GX [Aqua Ring | Hydro Shot | Tapu Storm GX]",
-          "productId": 604983
-        }
-      ],
-      "cardKey": "sm3/39a",
-      "deName": null,
-      "expansionId": 1824,
-      "name": "Tapu Fini-GX",
-      "set": "sm3"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Darkrai GX [Restoration | Dark Cleave | Dead End GX]",
-          "productId": 363945
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Darkrai GX [Restoration | Dark Cleave | Dead End GX]",
-          "productId": 657889
-        }
-      ],
-      "cardKey": "sm3/88a",
-      "deName": null,
-      "expansionId": 1824,
-      "name": "Darkrai-GX",
-      "set": "sm3"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Kirlia [Smack | Magical Shot]",
-          "productId": 312202
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Kirlia [Smack | Magical Shot]",
-          "productId": 665136
-        }
-      ],
-      "cardKey": "sm3/92a",
-      "deName": null,
-      "expansionId": 1824,
-      "name": "Kirlia",
-      "set": "sm3"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Porygon-Z [Initialize | Zap Cannon]",
-          "productId": 361591
-        }
-      ],
-      "cardKey": "sm3/105a",
-      "deName": null,
-      "expansionId": 1824,
-      "name": "Porygon-Z",
-      "set": "sm3"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Acerola",
-          "productId": 312216
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Acerola",
-          "productId": 312241
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Acerola",
-          "productId": 312288
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Acerola",
-          "productId": 371642
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Acerola",
-          "productId": 449243
-        }
-      ],
-      "cardKey": "sm3/112a",
-      "deName": null,
-      "expansionId": 1824,
-      "name": "Acerola",
-      "set": "sm3"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Guzma",
-          "productId": 312218
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Guzma",
-          "productId": 312240
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Guzma",
-          "productId": 312262
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Guzma",
-          "productId": 312287
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Guzma",
-          "productId": 368673
-        }
-      ],
-      "cardKey": "sm3/115a",
-      "deName": null,
-      "expansionId": 1824,
-      "name": "Guzma",
-      "set": "sm3"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Kiawe",
-          "productId": 448148
-        }
-      ],
-      "cardKey": "sm3/116a",
-      "deName": null,
-      "expansionId": 1824,
-      "name": "Kiawe",
-      "set": "sm3"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
           "name": "Entei GX [Combustion | Fire Fang | Brave Burn GX]",
           "productId": 321006
         }
@@ -11659,282 +10950,6 @@
       "expansionId": 1843,
       "name": "Regigigas",
       "set": "sm4"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Cynthia",
-          "productId": 368674
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Cynthia",
-          "productId": 368700
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Cynthia",
-          "productId": 368738
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Cynthia",
-          "productId": 407139
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Cynthia",
-          "productId": 407349
-        }
-      ],
-      "cardKey": "sm5/119a",
-      "deName": null,
-      "expansionId": 2065,
-      "name": "Cynthia",
-      "set": "sm5"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Escape Board",
-          "productId": 407274
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Escape Board",
-          "productId": 448138
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Escape Board",
-          "productId": 449483
-        }
-      ],
-      "cardKey": "sm5/122a",
-      "deName": null,
-      "expansionId": 2065,
-      "name": "Escape Board",
-      "set": "sm5"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lillie",
-          "productId": 368774
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lillie",
-          "productId": 449158
-        }
-      ],
-      "cardKey": "sm5/125a",
-      "deName": null,
-      "expansionId": 2065,
-      "name": "Lillie",
-      "set": "sm5"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Volkner",
-          "productId": 407344
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Volkner",
-          "productId": 450488
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Volkner",
-          "productId": 450493
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Volkner",
-          "productId": 450498
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Volkner",
-          "productId": 450503
-        }
-      ],
-      "cardKey": "sm5/135a",
-      "deName": null,
-      "expansionId": 2065,
-      "name": "Volkner",
-      "set": "sm5"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Unit Energy [GRW]",
-          "productId": 316061
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Unit Energy [LPM]",
-          "productId": 316062
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Unit Energy [GRW]",
-          "productId": 316094
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Unit Energy [LPM]",
-          "productId": 316095
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Unit Energy [LPM]",
-          "productId": 368742
-        }
-      ],
-      "cardKey": "sm5/137",
-      "deName": "Aggregat-Energie GrassFireWater",
-      "expansionId": 2065,
-      "name": "Unit Energy GrassFireWater",
-      "set": "sm5"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Unit Energy [GRW]",
-          "productId": 316061
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Unit Energy [LPM]",
-          "productId": 316062
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Unit Energy [GRW]",
-          "productId": 316094
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Unit Energy [LPM]",
-          "productId": 316095
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Unit Energy [LPM]",
-          "productId": 368742
-        }
-      ],
-      "cardKey": "sm5/138",
-      "deName": "Aggregat-Energie LightningPsychicMetal",
-      "expansionId": 2065,
-      "name": "Unit Energy LightningPsychicMetal",
-      "set": "sm5"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lusamine",
-          "productId": 448153
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lusamine",
-          "productId": 449878
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lusamine",
-          "productId": 449883
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lusamine",
-          "productId": 449888
-        }
-      ],
-      "cardKey": "sm5/153a",
-      "deName": null,
-      "expansionId": 2065,
-      "name": "Lusamine",
-      "set": "sm5"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Unit Energy [GRW]",
-          "productId": 316061
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Unit Energy [LPM]",
-          "productId": 316062
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Unit Energy [GRW]",
-          "productId": 316094
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Unit Energy [LPM]",
-          "productId": 316095
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Unit Energy [LPM]",
-          "productId": 368742
-        }
-      ],
-      "cardKey": "sm5/170",
-      "deName": "Aggregat-Energie GrassFireWater",
-      "expansionId": 2065,
-      "name": "Unit Energy GrassFireWater",
-      "set": "sm5"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Unit Energy [GRW]",
-          "productId": 316061
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Unit Energy [LPM]",
-          "productId": 316062
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Unit Energy [GRW]",
-          "productId": 316094
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Unit Energy [LPM]",
-          "productId": 316095
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Unit Energy [LPM]",
-          "productId": 368742
-        }
-      ],
-      "cardKey": "sm5/171",
-      "deName": "Aggregat-Energie LightningPsychicMetal",
-      "expansionId": 2065,
-      "name": "Unit Energy LightningPsychicMetal",
-      "set": "sm5"
     },
     {
       "candidates": [
@@ -13461,27 +12476,6 @@
   ],
   "stillMissingByExpansion": [
     {
-      "count": 11,
-      "expansionId": 1800,
-      "sets": [
-        "sm2"
-      ]
-    },
-    {
-      "count": 9,
-      "expansionId": 2065,
-      "sets": [
-        "sm5"
-      ]
-    },
-    {
-      "count": 8,
-      "expansionId": 1824,
-      "sets": [
-        "sm3"
-      ]
-    },
-    {
       "count": 8,
       "expansionId": 2370,
       "sets": [
@@ -13721,14 +12715,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 94,
+    "ambiguous": 70,
     "cards": 21577,
-    "customSet": 1608,
-    "matched": 239,
-    "missing": 128,
-    "override": 12,
-    "stabilityKept": 309,
-    "tcgdex": 19281
+    "customSet": 2147,
+    "matched": 238,
+    "missing": 100,
+    "override": 8,
+    "stabilityKept": 293,
+    "tcgdex": 18791
   },
   "versionSuffixSkippedByExpansion": {
     "1537": 7,
@@ -13736,7 +12730,9 @@
     "1608": 7,
     "1609": 6,
     "1611": 7,
-    "1612": 36,
-    "1758": 12
+    "1612": 40,
+    "1758": 12,
+    "1800": 13,
+    "2065": 14
   }
 }
