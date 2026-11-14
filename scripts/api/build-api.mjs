@@ -19,7 +19,7 @@ import { writePriceFiles } from './merge/cardmarket-prices.mjs';
 import { loadCardmarketCatalog } from './sources/cardmarket-catalog.mjs';
 import { evaluateCardmarketIssue } from './report/cardmarket-issue.mjs';
 import { renderCardmarketReportMd } from './report/cardmarket-report.mjs';
-import { setAssetCandidates, withSampledCardImages } from './merge/images.mjs';
+import { setAssetCandidates, withSampledCardImages, applyScrydexImages } from './merge/images.mjs';
 import { countGroups } from './sources/verify-assets.mjs';
 import { sortLocalIds } from './lib/local-ids.mjs';
 
@@ -121,7 +121,7 @@ export function runBuild({
   // Pruefstand der Set-Logos/-Symbole (verify-assets.mjs); fehlt die Datei, wird alles ausgegeben.
   const assetsVerified = readJsonOr(p('sources', 'tcgdex', 'assets-verified.json'), {});
   const assets = countGroups(assetsVerified, setAssetCandidates(assetsIndex));
-  // Kartenbilder: Index plus Sets, die er noch nicht fuehrt, deren Stichprobe aber besteht (images.mjs).
+  // Kartenbilder: Index plus einzeln verifizierte Karten aus Sets, die er noch nicht fuehrt (images.mjs).
   const cardAssetsIndex = withSampledCardImages(assetsIndex, db.sets, assetsVerified);
   const sources = readJson(p('sources', 'SOURCES.json'));
   const sourceCommits = { pokemontcg: short(sources.pokemontcg?.commit), tcgdex: short(sources.tcgdex?.commit) };
@@ -138,6 +138,7 @@ export function runBuild({
   const subsetExpansion = new Map(); // Unterset-Karte -> Cardmarket-Expansion ihres TCGdex-Untersets
   const lostSource = [];
   const matchStatus = Object.fromEntries(STATUSES.map((s) => [s, 0]));
+  let scrydexImageCount = 0;
   for (const setId of Object.keys(registry.sets).sort(cmp)) {
     const registrySet = registry.sets[setId];
     const tcgdexSet = registrySet.tcgdex ? tdById.get(registrySet.tcgdex) ?? null : null;
@@ -169,6 +170,8 @@ export function runBuild({
       if (primarySet && tcgdexSet && primarySet.id !== tcgdexSet.id) subsetExpansion.set(card.id, primarySet.cardmarketId ?? null);
       cards.push(card);
     }
+    // Rueckfall fuer Karten ganz ohne Bild (weder EN noch DE): verifiziertes Scrydex-Bild (images.mjs).
+    scrydexImageCount += applyScrydexImages(cards, assetsVerified);
     cards.sort((a, b) => sortLocalIds(a.cardId, b.cardId) || cmp(a.cardId, b.cardId));
     cardsBySet.set(setId, cards);
     sets.push(mergeSet({
@@ -282,7 +285,7 @@ export function runBuild({
 
   return {
     prices, cardmarketIssue,
-    sets: sets.length, cards: cardTotal, matchStatus, cardmarketIds: { ...cardmarketIds.totals, rules: cardmarketIds.rules, overrideWarnings: cardmarketIds.overrides.warnings, stillMissing: cardmarketIds.stillMissing.length, duplicates: cardmarketIds.duplicates, expansion: { ...cardmarketIds.expansionMismatch.totals, sets: cardmarketIds.expansionMismatch.sets }, setsWithoutExpansion: cardmarketIds.setsWithoutExpansion.length, customSetMissingProducts: cardmarketIds.customSets.missingProducts.length, stabilityDropped: cardmarketIds.stabilityDropped.length, stabilityConflicts: cardmarketIds.stabilityConflicts.length }, registryChanges: changes, skippedNoSource, missingImages, assets,
+    sets: sets.length, cards: cardTotal, matchStatus, cardmarketIds: { ...cardmarketIds.totals, rules: cardmarketIds.rules, overrideWarnings: cardmarketIds.overrides.warnings, stillMissing: cardmarketIds.stillMissing.length, duplicates: cardmarketIds.duplicates, expansion: { ...cardmarketIds.expansionMismatch.totals, sets: cardmarketIds.expansionMismatch.sets }, setsWithoutExpansion: cardmarketIds.setsWithoutExpansion.length, customSetMissingProducts: cardmarketIds.customSets.missingProducts.length, stabilityDropped: cardmarketIds.stabilityDropped.length, stabilityConflicts: cardmarketIds.stabilityConflicts.length }, registryChanges: changes, skippedNoSource, missingImages, scrydexImages: scrydexImageCount, assets,
     tables: Object.fromEntries(Object.entries(tables).map(([k, v]) => [k, Object.keys(v).length])),
     warnings: db.warnings.length,
   };
@@ -325,6 +328,7 @@ function main() {
     const ms = r.matchStatus;
     console.log(`Sets ${r.sets}, Karten ${r.cards} (matched ${ms.matched}, primary_only ${ms.primary_only}, tcgdex_only ${ms.tcgdex_only})`);
     if (r.skippedNoSource.length) console.log(`Ohne Quelle uebersprungen: ${r.skippedNoSource.length} (${r.skippedNoSource.slice(0, 10).join(', ')}${r.skippedNoSource.length > 10 ? ', ...' : ''})`);
+    if (r.scrydexImages) console.log(`Scrydex-Bilder (Karten ohne TCGdex- und pokemontcg-Bild): ${r.scrydexImages}`);
     const mi = r.missingImages;
     if (mi.total) {
       console.log(`WARNUNG: ${mi.total} Karten ohne Bild (images fehlt):`);
