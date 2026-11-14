@@ -3440,33 +3440,21 @@
       "tcgdex": 0
     },
     "xy9": {
-      "ambiguous": 2,
-      "ambiguousCards": [
-        "27",
-        "115"
-      ],
+      "ambiguous": 0,
       "cards": 126,
-      "corrected": 1,
       "coverage": {
         "bySource": {
-          "matched": 2,
-          "stabilityKept": 3,
-          "tcgdex": 119
+          "customSet": 126
         },
         "cards": 126,
-        "withId": 124
+        "withId": 126
       },
+      "customSet": 126,
       "expansionId": 1687,
-      "matched": 2,
-      "missing": 2,
-      "missingCards": [
-        "27",
-        "115"
-      ],
-      "ordered": 2,
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1687&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 3,
-      "tcgdex": 119
+      "tcgdex": 0
     },
     "xyp": {
       "ambiguous": 0,
@@ -3508,8 +3496,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 5029,
-    "changed": 667,
+    "applied": 5155,
+    "changed": 671,
     "conflicts": [],
     "dropped": [
       {
@@ -5104,10 +5092,6 @@
       "xy8-146",
       "xy8-146a"
     ],
-    "288197": [
-      "xy9-22",
-      "xy9-23"
-    ],
     "288273": [
       "xy9-98",
       "xy9-98a",
@@ -5403,10 +5387,10 @@
     ]
   },
   "duplicates": {
-    "cards": 808,
-    "corrected": 215,
-    "ids": 402,
-    "kept": 593
+    "cards": 801,
+    "corrected": 214,
+    "ids": 401,
+    "kept": 587
   },
   "expansionMismatch": {
     "cards": [
@@ -7025,14 +7009,14 @@
       }
     ],
     "totals": {
-      "checked": 18337,
+      "checked": 18215,
       "corrected": 21,
       "dropped": 18,
       "droppedShared": 14,
       "foreignNameOk": 1276,
       "keptMismatch": 135,
       "noSetExpansion": 0,
-      "ok": 16884,
+      "ok": 16762,
       "unknownProduct": 3
     }
   },
@@ -7153,11 +7137,11 @@
   "rules": {
     "energySymbol": 3,
     "leftRight": 0,
-    "ordered": 20,
+    "ordered": 18,
     "orderedRejected": 7,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 277
+    "versionSuffixSkipped": 288
   },
   "setsWithoutExpansion": [
     {
@@ -8503,27 +8487,6 @@
       "source": "corrected",
       "todayId": 284249,
       "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy9/98a",
-      "productId": 311410,
-      "source": "corrected",
-      "todayId": 288273,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy9/98b",
-      "productId": 782672,
-      "source": "corrected",
-      "todayId": 288273,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy9/107a",
-      "productId": 297896,
-      "source": "corrected",
-      "todayId": 288282,
-      "todaySource": "tcgdex"
     }
   ],
   "stillMissing": [
@@ -8885,54 +8848,6 @@
       "expansionId": 1742,
       "name": "ナッシー[Exeggutor]",
       "set": "xy12"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MGyarados EX [Blast Geyser]",
-          "productId": 288202
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MGyarados EX [Blast Geyser]",
-          "productId": 288290
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MGyarados EX [Blast Geyser]",
-          "productId": 363687
-        }
-      ],
-      "cardKey": "xy9/27",
-      "deName": "M-Garados EX",
-      "expansionId": 1687,
-      "name": "M Gyarados-EX",
-      "set": "xy9"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MGyarados EX [Blast Geyser]",
-          "productId": 288202
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MGyarados EX [Blast Geyser]",
-          "productId": 288290
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MGyarados EX [Blast Geyser]",
-          "productId": 363687
-        }
-      ],
-      "cardKey": "xy9/115",
-      "deName": "M-Garados EX",
-      "expansionId": 1687,
-      "name": "M Gyarados-EX",
-      "set": "xy9"
     }
   ],
   "stillMissingByExpansion": [
@@ -8948,13 +8863,6 @@
       "expansionId": 1611,
       "sets": [
         "bwp"
-      ]
-    },
-    {
-      "count": 2,
-      "expansionId": 1687,
-      "sets": [
-        "xy9"
       ]
     },
     {
@@ -9057,14 +8965,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 17,
+    "ambiguous": 15,
     "cards": 21577,
-    "customSet": 5029,
-    "matched": 116,
-    "missing": 31,
+    "customSet": 5155,
+    "matched": 114,
+    "missing": 29,
     "override": 8,
-    "stabilityKept": 188,
-    "tcgdex": 16205
+    "stabilityKept": 185,
+    "tcgdex": 16086
   },
   "versionSuffixSkippedByExpansion": {
     "1521": 9,
@@ -9079,6 +8987,7 @@
     "1612": 40,
     "1649": 3,
     "1678": 11,
+    "1687": 11,
     "1757": 60,
     "1758": 12,
     "1800": 13,
