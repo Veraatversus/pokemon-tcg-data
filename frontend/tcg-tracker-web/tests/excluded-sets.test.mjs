@@ -68,7 +68,7 @@ test('loadSets blendet ausgeschlossene Sets aus db_sets und Overview aus (Dashbo
 });
 
 test('Statistik/Dashboard-Summary ohne ausgeschlossene Sets (Summary-Zeilen tragen setId)', () => {
-  const src = readFileSync(fileURLToPath(new URL('../js/app.js', import.meta.url)), 'utf8');
+  const src = readFileSync(fileURLToPath(new URL('../js/views/stats.js', import.meta.url)), 'utf8');
   const dashSrc = readFileSync(fileURLToPath(new URL('../js/views/dashboard.js', import.meta.url)), 'utf8');
   assert.match(dashSrc, /async function readVisibleSummary\(\) \{\s*return filterVisibleSummaryRows\(await readSummarySheet\(\), state\.isExcludedSet, state\.excludedSetNames\);/);
   assert.match(src, /state\.summaryData = await readVisibleSummary\(\)/);

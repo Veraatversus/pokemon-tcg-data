@@ -52,17 +52,12 @@ function stripModuleSyntax(source) {
     .replace(/^export\s+(?=(?:async\s+)?function|const\s|let\s|class\s)/gm, '');
 }
 
-// Quelltext der Statistik-Funktionen (Stand vor dem Umbau: Abschnitt STATISTIKEN in app.js).
+// Quelltext der Statistik-Funktionen: js/views/stats-price.js und js/views/stats.js (frueher Abschnitt
+// STATISTIKEN in app.js; die Fixture stammt aus diesem alten Stand).
 function loadStatsSource() {
-  const app = readSource('js/app.js');
-  const start = app.indexOf('// STATISTIKEN');
-  const end = app.indexOf('// SET-DETAIL: STATS & FILTER');
-  assert.ok(start >= 0 && end > start, 'Abschnitt STATISTIKEN nicht gefunden');
-  const constants = app.match(/^const STATS_PRICE_\w+ = .*;$/gm) || [];
   return [
-    constants.join('\n'),
-    app.slice(start, end),
-    extractTopLevelFunction(app, 'statsPriceCardKey'),
+    readSource('js/views/stats-price.js'),
+    readSource('js/views/stats.js'),
     extractTopLevelFunction(readSource('js/ui/helpers.js'), 'escapeHtml'),
   ].map(stripModuleSyntax).join('\n');
 }
