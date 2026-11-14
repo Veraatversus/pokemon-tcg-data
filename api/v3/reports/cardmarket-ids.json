@@ -2356,22 +2356,19 @@
     "sm115": {
       "ambiguous": 0,
       "cards": 69,
-      "corrected": 1,
       "coverage": {
         "bySource": {
-          "matched": 13,
-          "stabilityKept": 2,
-          "tcgdex": 54
+          "customSet": 69
         },
         "cards": 69,
         "withId": 69
       },
+      "customSet": 69,
       "expansionId": 2514,
-      "matched": 13,
+      "matched": 0,
       "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2514&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 2,
-      "tcgdex": 54
+      "tcgdex": 0
     },
     "sm12": {
       "ambiguous": 1,
@@ -2587,27 +2584,19 @@
       "tcgdex": 0
     },
     "sma": {
-      "ambiguous": 2,
-      "ambiguousCards": [
-        "SV49",
-        "SV67"
-      ],
+      "ambiguous": 0,
       "cards": 94,
       "coverage": {
         "bySource": {
-          "matched": 91
+          "customSet": 94
         },
         "cards": 94,
-        "withId": 91
+        "withId": 94
       },
+      "customSet": 94,
       "expansionId": 2514,
-      "matched": 91,
-      "missing": 3,
-      "missingCards": [
-        "SV49",
-        "SV57",
-        "SV67"
-      ],
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2514&sortBy=collectorsnumber_asc&perSite=100&site=1",
       "tcgdex": 0
     },
@@ -3525,8 +3514,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 4713,
-    "changed": 637,
+    "applied": 4876,
+    "changed": 644,
     "conflicts": [],
     "dropped": [
       {
@@ -5306,10 +5295,6 @@
       "sm75-34",
       "sm75-35"
     ],
-    "394597": [
-      "sm115-38",
-      "sm115-39"
-    ],
     "398504": [
       "sm12-239",
       "sm12-54"
@@ -5471,10 +5456,10 @@
     ]
   },
   "duplicates": {
-    "cards": 829,
-    "corrected": 224,
-    "ids": 411,
-    "kept": 605
+    "cards": 827,
+    "corrected": 223,
+    "ids": 410,
+    "kept": 604
   },
   "expansionMismatch": {
     "cards": [
@@ -6578,13 +6563,6 @@
         "reason": "dropped-shared-mismatch"
       },
       {
-        "cardKey": "sm115-22",
-        "newId": 396617,
-        "oldExpansion": 2514,
-        "oldId": 394782,
-        "reason": "corrected-expansion"
-      },
-      {
         "cardKey": "sv10-24",
         "newId": null,
         "oldExpansion": 6140,
@@ -7117,30 +7095,18 @@
       }
     ],
     "totals": {
-      "checked": 18561,
-      "corrected": 22,
+      "checked": 18507,
+      "corrected": 21,
       "dropped": 20,
       "droppedShared": 16,
       "foreignNameOk": 1281,
       "keptMismatch": 135,
       "noSetExpansion": 0,
-      "ok": 17100,
+      "ok": 17047,
       "unknownProduct": 3
     }
   },
   "orderedRejected": [
-    {
-      "cards": [
-        "sm115/57",
-        "sm115/67"
-      ],
-      "expansionId": 2514,
-      "name": "Giovanni's Exile",
-      "products": [
-        394717,
-        396677
-      ]
-    },
     {
       "cards": [
         "sm12/195",
@@ -7258,7 +7224,7 @@
     "energySymbol": 3,
     "leftRight": 0,
     "ordered": 20,
-    "orderedRejected": 8,
+    "orderedRejected": 7,
     "override": 8,
     "oversizeExcluded": 4,
     "versionSuffixSkipped": 277
@@ -7998,20 +7964,6 @@
       "source": "corrected",
       "todayId": 295475,
       "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm115/57",
-      "productId": 394717,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "sm115/67",
-      "productId": 396677,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
     },
     {
       "cardKey": "sm12/195",
@@ -8942,56 +8894,6 @@
       "candidates": [
         {
           "hint": "same-name-unnumbered",
-          "name": "Charizard GX [Flamethrower | Flare Blitz GX]",
-          "productId": 394737
-        },
-        {
-          "name": "Online Code Card (Hidden Fates: Charizard GX Tin)",
-          "productId": 394022
-        },
-        {
-          "hint": "id-outlier",
-          "name": "Online Code Card (Hidden Fates: Charizard GX Collection)",
-          "productId": 560794
-        }
-      ],
-      "cardKey": "sma/SV49",
-      "deName": "Glurak-GX",
-      "expansionId": 2514,
-      "name": "Charizard-GX",
-      "set": "sma"
-    },
-    {
-      "candidates": [
-        {
-          "name": "Electrode GX [Extra Energy Bomb | Electro Ball | Crush and Burn GX]",
-          "productId": 394782
-        }
-      ],
-      "cardKey": "sma/SV57",
-      "deName": "Lektrobal-GX",
-      "expansionId": 2514,
-      "name": "Electrode-GX",
-      "set": "sma"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lycanroc GX [Twilight Eyes | Accelerock | Splintered Shard GX]",
-          "productId": 396972
-        }
-      ],
-      "cardKey": "sma/SV67",
-      "deName": "Wolwerock-GX",
-      "expansionId": 2514,
-      "name": "Lycanroc-GX",
-      "set": "sma"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
           "name": "MAudino EX [Magical Symphony]",
           "productId": 289906
         },
@@ -9138,13 +9040,6 @@
   ],
   "stillMissingByExpansion": [
     {
-      "count": 3,
-      "expansionId": 2514,
-      "sets": [
-        "sma"
-      ]
-    },
-    {
       "count": 2,
       "expansionId": 1536,
       "sets": [
@@ -9272,14 +9167,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 19,
+    "ambiguous": 17,
     "cards": 21577,
-    "customSet": 4713,
-    "matched": 220,
-    "missing": 36,
+    "customSet": 4876,
+    "matched": 116,
+    "missing": 33,
     "override": 8,
-    "stabilityKept": 191,
-    "tcgdex": 16409
+    "stabilityKept": 189,
+    "tcgdex": 16355
   },
   "versionSuffixSkippedByExpansion": {
     "1521": 9,

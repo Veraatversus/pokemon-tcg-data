@@ -63,11 +63,16 @@ export function registerSetNumbers(cards) {
 export function cardCmNumber(card) {
   return cardNumberKeys.get(card) ?? normalizeCmNumber(card?.number);
 }
-// Beide Schreibweisen (ohne/mit Praefix): Produkte alter Quellen fuehren das Kuerzel teils in der Nummer ("XY20").
+// Beide Schreibweisen, exakte zuerst: Produkte alter Quellen fuehren das Kuerzel teils in der Nummer ("XY20"), und
+// Erweiterungen mit Haupt- und Unterset (Hidden Fates: 1-69 und SV1-SV94) brauchen die exakte Nummer.
 export function cardCmNumbers(card) {
-  return [...new Set([cardCmNumber(card), normalizeCmNumber(card?.number)].filter(Boolean))];
+  return [...new Set([normalizeCmNumber(card?.number), cardCmNumber(card)].filter(Boolean))];
 }
-const productsByNumber = (map, card) => [...new Set(cardCmNumbers(card).flatMap((n) => map.get(n) ?? []))];
+// Treffer der ersten Schreibweise, die etwas findet (exakt vor "ohne Praefix").
+const productsByNumber = (map, card) => {
+  for (const n of cardCmNumbers(card)) if (map.get(n)?.length) return [...map.get(n)];
+  return [];
+};
 
 // Klammerzusaetze ([Angriffe], [F], [A]) und Cardmarkets Level-Angabe "Lv.44" (nicht "LV.X") fallen weg,
 // "★" entspricht "Gold Star", "Delta Species" ist bei Cardmarket nur ein Zusatz zu "δ".
