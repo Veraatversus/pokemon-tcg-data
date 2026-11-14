@@ -1,13 +1,15 @@
 #!/usr/bin/env node
-// Reparaturwerkzeug (Spec §6): liest manuell gespeicherte Cardmarket-Suchseiten (Seitenquelltext, nie
-// automatisch geladen) und traegt Produkt-IDs mit Kartennummern in sources/cardmarket/custom-sets/<expansionId>.json
-// ein. Danach laeuft die echte Zuordnung (fillCardmarketIds) fuer die betroffenen v3-Sets im Speicher (nichts
-// wird nach api/v3 geschrieben) und zeigt Vorher/Nachher.
+// Reparaturwerkzeug (Spec §6): liest Kartenlisten von Cardmarket-Setseiten (nie automatisch geladen) und traegt
+// Produkt-IDs mit Kartennummern in sources/cardmarket/custom-sets/<expansionId>.json ein. Danach laeuft die echte
+// Zuordnung (fillCardmarketIds) fuer die betroffenen v3-Sets im Speicher (nichts wird nach api/v3 geschrieben) und
+// zeigt Vorher/Nachher.
 //
-//   node scripts/api/cardmarket/import-html.mjs <seite.html …> [--dry-run] [--force] [--set <setId>]
+//   node scripts/api/cardmarket/import-html.mjs <liste.json|seite.html …> [--dry-run] [--force] [--set <setId>]
+//   node scripts/api/cardmarket/import-html.mjs --snippet
 //
-// HTML-Eingaben liegen in .local/cardmarket-html/ (gitignored, nie committen). Parsing portiert aus
-// scripts/cardmarket/custom-sets/generate-custom-set.mjs (dort unveraendert).
+// Eingabe bevorzugt JSON: --snippet gibt ein Skript fuer die Browser-Konsole aus, das auf der geoeffneten
+// Setseite die Kartenliste in die Zwischenablage kopiert (Format: parseCardmarketJson). Gespeicherter
+// Seitenquelltext (.html) geht weiterhin. Eingaben liegen in .local/cardmarket-html/ (gitignored, nie committen).
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -33,36 +35,62 @@ function setNameOf(html) {
 }
 
 function parseBlock(block) {
-  const img = block.match(/data-echo="https:\/\/product-images\.s3\.cardmarket\.com\/\d+\/\w+\/(\d+)\/\d+\.(?:jpg|png)"/i);
+  const img = block.match(/(?:data-echo|src)="https:\/\/product-images\.s3\.cardmarket\.com\/\d+\/\w+\/(\d+)\/\d+\.(?:jpg|png)"/i);
   if (!img) return null;
-  const href = block.match(/href="\/[^"]*\/Products\/Singles\/[^"]+\/([^"]+)"/i);
+  const href = block.match(/href="\/[^"]*\/Products\/Singles\/[^"]+\/([^"?]+)[^"]*"/i);
   if (!href) return null;
-  // <Name>[-V<n>]-<Setcode><Nummer>[<Buchstabe>], z. B. "Magneton-V2-SVP159"
-  const slug = href[1].match(/^(.+?)(?:-V(\d+))?(-[A-Z]+)(\d+)([a-z]?)$/);
-  if (!slug) return null;
-  const h2 = block.match(/<h2[^>]*>[\s\S]*?<\/h2>/i);
+  const h2 = block.match(/<h2[^>]*>([\s\S]*?)<\/h2>/i);
   if (!h2) return null;
-  const paren = h2[0].match(/\(([A-Z]+(?:en)?[ ]?[A-Z]?\s*\d+[a-z]?)\)/i);
-  if (!paren) return null;
-  // "SK 1" -> "1", "SK H1" -> "H1", "AQ 50a" -> "50a", "SVP 001" -> "1"
-  const number = paren[1].trim().replace(/^[A-Z]+(?:en)?\s*/, '').replace(/^0+/, '') || '0';
-  return { productId: Number(img[1]), name: slug[1], version: slug[2] ? Number(slug[2]) : 1, number };
+  return entryOf({ productId: Number(img[1]), version: versionOfSlug(href[1]), label: h2[1].replace(/<[^>]*>/g, ' ') });
 }
+
+// Version aus dem Produktlink: "Magneton-V2-SVP159", "Snivy-V2", "Zoroark-V2-OS" -> 2; ohne -V<n> -> 1.
+export function versionOfSlug(slug) {
+  const m = String(slug).match(/-V(\d+)(?=-|$)/);
+  return m ? Number(m[1]) : 1;
+}
+
+// Nummer aus Ueberschrift oder Klammerinhalt: "Serpifeu (BW 01)" / "BW 01" -> "1", "SK H1" -> "H1",
+// "AQ 50a" -> "50a", "SVP 001" -> "1". null ohne erkennbare Nummer.
+export function numberOfLabel(label) {
+  const text = String(label ?? '').replace(/\s+/g, ' ').trim();
+  const inParens = [...text.matchAll(/\(([^()]*)\)/g)].map((m) => m[1]).reverse();
+  for (const candidate of [...inParens, text]) {
+    const m = candidate.trim().match(/^([A-Z]+(?:en)?[ ]?[A-Z]?\s*\d+[a-z]?)$/i);
+    if (m) return m[1].trim().replace(/^[A-Z]+(?:en)?\s*/, '').replace(/^0+/, '') || '0';
+  }
+  return null;
+}
+
+function entryOf({ productId, version, label }) {
+  const number = numberOfLabel(label);
+  if (!Number.isInteger(productId) || productId <= 0 || number === null) return null;
+  return { productId, version: Number.isInteger(version) && version > 0 ? version : 1, number };
+}
+
+// Versionsregel: Ein Suffix "V<n>" bekommt nur ein Produkt, dessen Nummer auch ein Produkt mit kleinerer Version
+// traegt ("146" + "146V2"). Allein stehende Versionen behalten die Basisnummer (BW-Promos: Victory Cup V1/V2/V3 =
+// BW 29/30/31). Fehlt ein Teil der Liste, faellt das beim Merge als Widerspruch zu bestehenden Eintraegen auf;
+// JSON mit total prueft zusaetzlich die Vollstaendigkeit.
+function collectorNumbers(entries) {
+  const minVersion = new Map();
+  for (const e of entries) minVersion.set(e.number, Math.min(minVersion.get(e.number) ?? Infinity, e.version));
+  return entries.map((e) => ({ productId: e.productId, collectorNumber: e.version > minVersion.get(e.number) ? `${e.number}V${e.version}` : e.number }));
+}
+
+const sortCards = (cards) => cards.sort((a, b) => naturalCompare(a.collectorNumber, b.collectorNumber) || a.productId - b.productId);
 
 /**
  * Parst eine oder mehrere gespeicherte Suchseiten (HTML-Strings).
  * -> { expansionId, name, cards: [{ productId, collectorNumber }] } (Produkte einmalig, natuerlich sortiert).
- * Version V2+ im Link ergibt das Suffix "V<n>" ("146V2"); V1/ohne Version behaelt die Basisnummer.
- * Bewusste Regel (anders als das alte Skript, das je Seite die kleinste Version einer (Name, Nummer)-Gruppe zur
- * Basis machte): V2+ bekommt IMMER das Suffix. Eine unvollstaendig gespeicherte Seite aendert so nie still eine
- * Nummer, sondern erscheint beim Merge als gemeldeter Widerspruch.
- * stats: { blocks, parsed, skipped } = gefundene Kartenbloecke, gelesene, uebersprungene (Markup unbekannt).
+ * Versionen siehe collectorNumbers. stats: { blocks, parsed, skipped } = gefundene Kartenbloecke, gelesene,
+ * uebersprungene (Markup unbekannt).
  */
 export function parseCardmarketHtml(...pages) {
   let expansionId = null;
   let name = null;
   const seen = new Set();
-  const cards = [];
+  const entries = [];
   const stats = { blocks: 0, parsed: 0, skipped: 0 };
   for (const html of pages) {
     expansionId ??= expansionIdOf(html);
@@ -75,13 +103,70 @@ export function parseCardmarketHtml(...pages) {
       stats.parsed++;
       if (seen.has(c.productId)) continue;
       seen.add(c.productId);
-      cards.push({ productId: c.productId, collectorNumber: c.version > 1 ? `${c.number}V${c.version}` : c.number });
+      entries.push(c);
     }
   }
   if (expansionId === null) throw new Error('Expansion nicht erkannt (kein idExpansion in der Seite)');
-  cards.sort((a, b) => naturalCompare(a.collectorNumber, b.collectorNumber) || a.productId - b.productId);
-  return { expansionId, name, cards, stats };
+  return { expansionId, name, cards: sortCards(collectorNumbers(entries)), stats };
 }
+
+/**
+ * Parst eine oder mehrere JSON-Listen (je Seite eine, z. B. aus --snippet; eine Datei darf auch ein Array davon sein):
+ *   { expansionId, name?, total?, page?, cards: [{ productId, version?, label }] }
+ * label = Nummer wie auf Cardmarket ("BW 01") oder ganze Ueberschrift ("Serpifeu (BW 01)"); total = Trefferzahl
+ * der Suche. Fehlen Produkte (z. B. Seite 2 vergessen), bricht der Import ab. Ergebnis wie parseCardmarketHtml.
+ */
+export function parseCardmarketJson(...lists) {
+  let expansionId = null;
+  let name = null;
+  let total = null;
+  const seen = new Set();
+  const entries = [];
+  const stats = { blocks: 0, parsed: 0, skipped: 0 };
+  for (const list of lists) {
+    if (!list || !Array.isArray(list.cards)) throw new Error('JSON ohne cards-Liste');
+    const id = Number(list.expansionId);
+    if (!Number.isInteger(id) || id <= 0) throw new Error('Expansion nicht erkannt (expansionId fehlt)');
+    if (expansionId !== null && id !== expansionId) throw new Error(`verschiedene Expansionen in einer Datei: ${expansionId} und ${id}`);
+    expansionId = id;
+    name ??= typeof list.name === 'string' && list.name.trim() ? list.name.trim() : null;
+    if (Number.isInteger(list.total) && list.total > 0) total = Math.max(total ?? 0, list.total);
+    for (const raw of list.cards) {
+      stats.blocks++;
+      const c = entryOf({ productId: Number(raw?.productId), version: Number(raw?.version ?? 1), label: raw?.label });
+      if (!c) { stats.skipped++; continue; }
+      stats.parsed++;
+      if (seen.has(c.productId)) continue;
+      seen.add(c.productId);
+      entries.push(c);
+    }
+  }
+  if (expansionId === null) throw new Error('Expansion nicht erkannt (keine Liste)');
+  if (total !== null && seen.size + stats.skipped < total) {
+    throw new Error(`unvollstaendig: ${seen.size} von ${total} Produkten (weitere Seiten mit site=2 … auslesen)`);
+  }
+  return { expansionId, name, cards: sortCards(collectorNumbers(entries)), stats };
+}
+
+// Skript fuer die Browser-Konsole (F12 -> Konsole) auf einer Cardmarket-Setseite (nach Nummer sortiert, 100 je Seite).
+// copy() ist eine Konsolenfunktion von Chrome/Firefox: die Liste liegt danach in der Zwischenablage und wird als
+// .local/cardmarket-html/<expansionId>-<seite>.json gespeichert.
+export const BROWSER_SNIPPET = String.raw`copy(JSON.stringify({
+  expansionId: +((document.documentElement.innerHTML.match(/idExpansion=(\d+)/) || [])[1] || 0),
+  name: document.title.replace(/\s*(Einzelkarten|Singles)?\s*\|.*$/, '').trim(),
+  total: +(((document.body.innerText.match(/([\d.]+)\s+(Treffer|Hits|Results)/) || [])[1] || '0').replace(/\./g, '')),
+  page: +(new URLSearchParams(location.search).get('site') || 1),
+  cards: [...document.querySelectorAll('a.galleryBox')].map((a) => {
+    const img = a.querySelector('img');
+    const src = (img && (img.getAttribute('data-echo') || img.getAttribute('src'))) || '';
+    const slug = a.getAttribute('href').split('?')[0].split('/').pop();
+    return {
+      productId: +((src.match(/\/(\d+)\/\d+\.(?:jpg|png)/) || [])[1] || 0),
+      version: +((slug.match(/-V(\d+)(?=-|$)/) || [])[1] || 1),
+      label: a.querySelector('h2').textContent.replace(/\s+/g, ' ').trim(),
+    };
+  }),
+}, null, 1));`;
 
 // ---------- Merge ----------
 
@@ -223,19 +308,39 @@ function readJsonOr(file, fallback) {
  * written, preview }] }
  */
 export function runImport({ files, root, dryRun = false, force = false, setIds = [] }) {
-  const byExpansion = new Map();
+  // Alle Seiten einer Expansion werden gemeinsam geparst (Versionsregel und Vollstaendigkeit gelten je Expansion).
+  const groups = new Map(); // "<art>:<expansionId>" -> { isJson, inputs: [], files: [] }
   for (const file of files) {
-    let html;
-    try { html = fs.readFileSync(file, 'utf8'); } catch (e) { throw new Error(`HTML-Datei ${file} nicht lesbar: ${e.message}`); }
+    const isJson = /\.json$/i.test(file);
+    let text;
+    try { text = fs.readFileSync(file, 'utf8'); } catch (e) { throw new Error(`${isJson ? 'JSON' : 'HTML'}-Datei ${file} nicht lesbar: ${e.message}`); }
+    let inputs;
+    let expansion;
+    if (isJson) {
+      let data;
+      try { data = JSON.parse(text); } catch (e) { throw new Error(`${file}: kein gueltiges JSON: ${e.message}`); }
+      inputs = Array.isArray(data) ? data : [data];
+      expansion = inputs[0]?.expansionId;
+    } else {
+      inputs = [text];
+      expansion = expansionIdOf(text);
+    }
+    if (!Number.isInteger(Number(expansion)) || Number(expansion) <= 0) throw new Error(`${file}: Expansion nicht erkannt`);
+    const key = `${isJson ? 'json' : 'html'}:${Number(expansion)}`;
+    const g = groups.get(key) ?? { isJson, inputs: [], files: [] };
+    g.inputs.push(...inputs);
+    g.files.push(file);
+    groups.set(key, g);
+  }
+  const byExpansion = new Map();
+  for (const g of groups.values()) {
+    const label = g.files.join(', ');
     let parsed;
-    try { parsed = parseCardmarketHtml(html); } catch (e) { throw new Error(`${file}: ${e.message}`); }
+    try { parsed = g.isJson ? parseCardmarketJson(...g.inputs) : parseCardmarketHtml(...g.inputs); } catch (e) { throw new Error(`${label}: ${e.message}`); }
     const st = parsed.stats;
-    if (!parsed.cards.length) throw new Error(`${file}: ${st.blocks} Bloecke gefunden, ${st.parsed} gelesen, ${st.skipped} uebersprungen - keine Karte erkannt (hat sich das Cardmarket-Markup geaendert?)`);
-    const e = byExpansion.get(parsed.expansionId) ?? { expansionId: parsed.expansionId, name: parsed.name, cards: [], stats: { blocks: 0, parsed: 0, skipped: 0 } };
-    for (const k of Object.keys(st)) e.stats[k] += st[k];
-    e.name ??= parsed.name;
-    e.cards.push(...parsed.cards.filter((c) => !e.cards.some((x) => x.productId === c.productId)));
-    byExpansion.set(parsed.expansionId, e);
+    if (!parsed.cards.length) throw new Error(`${label}: ${st.blocks} Bloecke gefunden, ${st.parsed} gelesen, ${st.skipped} uebersprungen - keine Karte erkannt (hat sich das Cardmarket-Markup geaendert?)`);
+    if (byExpansion.has(parsed.expansionId)) throw new Error(`Expansion ${parsed.expansionId} kommt als HTML und als JSON - bitte nur eine Art je Expansion`);
+    byExpansion.set(parsed.expansionId, parsed);
   }
   const csDir = path.join(root, 'sources', 'cardmarket', 'custom-sets');
   const catalog = loadCardmarketCatalog(path.join(root, 'sources', 'cardmarket'));
@@ -268,11 +373,15 @@ export function runImport({ files, root, dryRun = false, force = false, setIds =
 
 function main() {
   const { values, positionals } = parseArgs({
-    options: { 'dry-run': { type: 'boolean' }, force: { type: 'boolean' }, set: { type: 'string', multiple: true }, help: { type: 'boolean', short: 'h' } },
+    options: { 'dry-run': { type: 'boolean' }, force: { type: 'boolean' }, set: { type: 'string', multiple: true }, snippet: { type: 'boolean' }, help: { type: 'boolean', short: 'h' } },
     allowPositionals: true,
   });
+  if (values.snippet) {
+    console.log(BROWSER_SNIPPET);
+    process.exit(0);
+  }
   if (values.help || !positionals.length) {
-    console.log('Usage: node scripts/api/cardmarket/import-html.mjs <seite.html …> [--dry-run] [--force] [--set <setId>]\nHTML-Dateien liegen in .local/cardmarket-html/ (ignoriert).');
+    console.log('Usage: node scripts/api/cardmarket/import-html.mjs <liste.json|seite.html …> [--dry-run] [--force] [--set <setId>]\n       node scripts/api/cardmarket/import-html.mjs --snippet   (Skript fuer die Browser-Konsole)\nEingaben liegen in .local/cardmarket-html/ (ignoriert).');
     process.exit(values.help ? 0 : 1);
   }
   const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..');

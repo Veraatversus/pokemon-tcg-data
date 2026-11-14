@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { parseCardmarketHtml, mergeCustomSet, previewImport, formatSummary, runImport } from '../cardmarket/import-html.mjs';
+import { parseCardmarketHtml, parseCardmarketJson, versionOfSlug, numberOfLabel, BROWSER_SNIPPET, mergeCustomSet, previewImport, formatSummary, runImport } from '../cardmarket/import-html.mjs';
 
 const fixture = fs.readFileSync(new URL('./fixtures/cardmarket-search-page.html', import.meta.url), 'utf8');
 
@@ -151,13 +151,71 @@ test('mergeCustomSet: unbekannte Schluessel der bestehenden Datei bleiben', () =
   assert.equal(mergeCustomSet(existing, parseCardmarketHtml(fixture)).set.note, 'handgepflegt');
 });
 
-test('Versionsregel: V2+ immer mit Suffix; unvollstaendige Seite gibt sichtbaren Widerspruch statt stiller Aenderung', () => {
-  // Seite mit nur dem V2-Produkt (V1 fehlt): altes Skript haette "146" vergeben.
+test('Versionsregel: Suffix nur bei gleicher Nummer; unvollstaendige Seite gibt sichtbaren Widerspruch statt stiller Aenderung', () => {
+  // Seite mit nur dem V2-Produkt (V1 fehlt): V2 steht allein -> Basisnummer; das bestehende "146V2" bleibt, Widerspruch.
   const onlyV2 = fixture.replace(/<div class="col-6">\s*<a href="[^"]*Charizard-SK146"[\s\S]*?<\/a>\s*<\/div>/, '');
   const parsed = parseCardmarketHtml(onlyV2);
-  assert.equal(parsed.cards.find((c) => c.productId === 275501).collectorNumber, '146V2');
-  const existing = { expansionId: 1538, name: 'Skyridge', cards: [{ productId: 275501, collectorNumber: '146' }] };
+  assert.equal(parsed.cards.find((c) => c.productId === 275501).collectorNumber, '146');
+  const existing = { expansionId: 1538, name: 'Skyridge', cards: [{ productId: 275501, collectorNumber: '146V2' }] };
   const m = mergeCustomSet(existing, parsed);
-  assert.deepEqual(m.conflicts, [{ productId: 275501, existing: '146', incoming: '146V2' }]);
-  assert.equal(m.set.cards[0].collectorNumber, '146');
+  assert.deepEqual(m.conflicts, [{ productId: 275501, existing: '146V2', incoming: '146' }]);
+  assert.equal(m.set.cards[0].collectorNumber, '146V2');
+});
+
+// --- JSON-Eingabe (Browser-Konsole, --snippet) ---
+const bwList = (cards, extra = {}) => ({ expansionId: 1611, name: 'BW Black Star Promos', ...extra, cards });
+const bw = (productId, version, label) => ({ productId, version, label });
+
+test('versionOfSlug / numberOfLabel: Links ohne Setcode und Ueberschriften', () => {
+  assert.equal(versionOfSlug('Snivy-V2'), 2);
+  assert.equal(versionOfSlug('Zoroark-V2-OS'), 2);
+  assert.equal(versionOfSlug('Magneton-V2-SVP159'), 2);
+  assert.equal(versionOfSlug('Reshiram-BWBW04'), 1);
+  assert.equal(versionOfSlug('Mewtwo-V-SWSH123'), 1);
+  assert.equal(numberOfLabel('Serpifeu (BW 01)'), '1');
+  assert.equal(numberOfLabel('BW 01'), '1');
+  assert.equal(numberOfLabel('Alakazam (SK H1)'), 'H1');
+  assert.equal(numberOfLabel('Glurak (Flash) (BW 50a)'), '50a');
+  assert.equal(numberOfLabel('Ohne Nummer'), null);
+});
+
+test('parseCardmarketJson: Victory Cup V1/V2/V3 mit eigenen Nummern behalten die Basisnummer, Snivy-V2 bekommt Suffix', () => {
+  const r = parseCardmarketJson(bwList([
+    bw(279925, 1, 'Serpifeu (BW 01)'), bw(547296, 2, 'Serpifeu (BW 01)'),
+    bw(279952, 1, 'Siegerpokal (BW 29)'), bw(279947, 2, 'Siegerpokal (BW 30)'), bw(279943, 3, 'Siegerpokal (BW 31)'),
+    bw(279936, 1, 'Victini (BW 32)'), bw(398039, 2, 'Victini (BW 32)'),
+  ], { total: 7 }));
+  assert.equal(r.expansionId, 1611);
+  assert.equal(r.name, 'BW Black Star Promos');
+  assert.deepEqual(r.cards.map((c) => [c.productId, c.collectorNumber]), [
+    [279925, '1'], [547296, '1V2'], [279952, '29'], [279947, '30'], [279943, '31'], [279936, '32'], [398039, '32V2'],
+  ]);
+});
+
+test('parseCardmarketJson: mehrere Seiten zusammen; fehlende Seite -> Abbruch', () => {
+  const p1 = bwList([bw(1, 1, 'BW 01'), bw(2, 1, 'BW 02')], { total: 3, page: 1 });
+  const p2 = bwList([bw(3, 2, 'BW 01')], { total: 3, page: 2 });
+  assert.deepEqual(parseCardmarketJson(p1, p2).cards.map((c) => c.collectorNumber), ['1', '1V2', '2']);
+  assert.throws(() => parseCardmarketJson(p1), /unvollstaendig: 2 von 3/);
+  assert.throws(() => parseCardmarketJson(p1, { ...p2, expansionId: 9 }), /verschiedene Expansionen/);
+  assert.throws(() => parseCardmarketJson({ cards: [] }), /Expansion/);
+});
+
+test('runImport: JSON-Seiten einer Expansion werden gemeinsam gelesen und geschrieben', () => {
+  const root = tmpRoot();
+  const f1 = path.join(root, '1611-1.json');
+  const f2 = path.join(root, '1611-2.json');
+  fs.writeFileSync(f1, JSON.stringify(bwList([bw(1, 1, 'BW 01'), bw(2, 1, 'BW 02')], { total: 3 })));
+  fs.writeFileSync(f2, JSON.stringify(bwList([bw(3, 2, 'BW 01')], { total: 3 })));
+  assert.throws(() => runImport({ files: [f1], root }), /unvollstaendig/);
+  const r = runImport({ files: [f1, f2], root });
+  assert.equal(r.merged[0].added.length, 3);
+  const out = JSON.parse(fs.readFileSync(path.join(root, 'sources/cardmarket/custom-sets/1611.json'), 'utf8'));
+  assert.deepEqual(out.cards.map((c) => [c.productId, c.collectorNumber]), [[1, '1'], [3, '1V2'], [2, '2']]);
+  assert.equal(out.name, 'BW Black Star Promos');
+});
+
+test('BROWSER_SNIPPET ist gueltiges JavaScript und nutzt copy()', () => {
+  assert.doesNotThrow(() => new Function('copy', 'document', 'location', BROWSER_SNIPPET));
+  assert.match(BROWSER_SNIPPET, /^copy\(JSON\.stringify\(/);
 });
