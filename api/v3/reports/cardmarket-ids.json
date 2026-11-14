@@ -298,51 +298,34 @@
       "cards": 18,
       "coverage": {
         "bySource": {
-          "tcgdex": 18
+          "customSet": 18
         },
         "cards": 18,
         "withId": 18
       },
+      "customSet": 18,
       "expansionId": 1758,
       "matched": 0,
       "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1758&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 18
+      "tcgdex": 0
     },
     "TCGDEX-tk-sm-r": {
-      "ambiguous": 7,
-      "ambiguousCards": [
-        "1",
-        "5",
-        "12",
-        "14",
-        "27",
-        "29",
-        "30"
-      ],
+      "ambiguous": 0,
       "cards": 30,
-      "corrected": 6,
       "coverage": {
         "bySource": {
-          "tcgdex": 23
+          "customSet": 30
         },
         "cards": 30,
-        "withId": 23
+        "withId": 30
       },
+      "customSet": 30,
       "expansionId": 1758,
       "matched": 0,
-      "missing": 7,
-      "missingCards": [
-        "1",
-        "5",
-        "12",
-        "14",
-        "27",
-        "29",
-        "30"
-      ],
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1758&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 23
+      "tcgdex": 0
     },
     "TCGDEX-tk-xy-b": {
       "ambiguous": 0,
@@ -3891,8 +3874,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 1245,
-    "changed": 267,
+    "applied": 1293,
+    "changed": 297,
     "conflicts": [],
     "dropped": [
       {
@@ -5793,78 +5776,6 @@
       "sm2-126",
       "sm2-143"
     ],
-    "297232": [
-      "TCGDEX-tk-sm-l-1",
-      "TCGDEX-tk-sm-r-1"
-    ],
-    "297235": [
-      "TCGDEX-tk-sm-l-5",
-      "TCGDEX-tk-sm-r-5"
-    ],
-    "297241": [
-      "TCGDEX-tk-sm-l-4",
-      "TCGDEX-tk-sm-r-4"
-    ],
-    "297242": [
-      "TCGDEX-tk-sm-l-11",
-      "TCGDEX-tk-sm-r-11"
-    ],
-    "297243": [
-      "TCGDEX-tk-sm-l-12",
-      "TCGDEX-tk-sm-r-12"
-    ],
-    "297244": [
-      "TCGDEX-tk-sm-l-13",
-      "TCGDEX-tk-sm-r-13"
-    ],
-    "297245": [
-      "TCGDEX-tk-sm-l-14",
-      "TCGDEX-tk-sm-r-14"
-    ],
-    "297246": [
-      "TCGDEX-tk-sm-l-15",
-      "TCGDEX-tk-sm-r-15"
-    ],
-    "297247": [
-      "TCGDEX-tk-sm-l-16",
-      "TCGDEX-tk-sm-r-16"
-    ],
-    "297253": [
-      "TCGDEX-tk-sm-l-18",
-      "TCGDEX-tk-sm-r-18"
-    ],
-    "297254": [
-      "TCGDEX-tk-sm-l-19",
-      "TCGDEX-tk-sm-r-19"
-    ],
-    "297255": [
-      "TCGDEX-tk-sm-l-21",
-      "TCGDEX-tk-sm-r-21"
-    ],
-    "297256": [
-      "TCGDEX-tk-sm-l-22",
-      "TCGDEX-tk-sm-r-22"
-    ],
-    "297257": [
-      "TCGDEX-tk-sm-l-23",
-      "TCGDEX-tk-sm-r-23"
-    ],
-    "297258": [
-      "TCGDEX-tk-sm-l-25",
-      "TCGDEX-tk-sm-r-25"
-    ],
-    "297259": [
-      "TCGDEX-tk-sm-l-27",
-      "TCGDEX-tk-sm-r-27"
-    ],
-    "297260": [
-      "TCGDEX-tk-sm-l-29",
-      "TCGDEX-tk-sm-r-29"
-    ],
-    "297261": [
-      "TCGDEX-tk-sm-l-30",
-      "TCGDEX-tk-sm-r-30"
-    ],
     "297478": [
       "sm2-14",
       "sm2-46",
@@ -6539,10 +6450,10 @@
     ]
   },
   "duplicates": {
-    "cards": 1354,
-    "corrected": 358,
-    "ids": 633,
-    "kept": 996
+    "cards": 1318,
+    "corrected": 352,
+    "ids": 615,
+    "kept": 966
   },
   "expansionMismatch": {
     "cards": [
@@ -7420,146 +7331,6 @@
         "oldExpansion": 1628,
         "oldId": 278029,
         "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "TCGDEX-tk-sm-r-1",
-        "newId": null,
-        "oldExpansion": 1758,
-        "oldId": 297232,
-        "reason": "dropped-shared-mismatch"
-      },
-      {
-        "cardKey": "TCGDEX-tk-sm-r-2",
-        "newId": null,
-        "oldExpansion": 1758,
-        "oldId": 297233,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "TCGDEX-tk-sm-r-3",
-        "newId": null,
-        "oldExpansion": 1758,
-        "oldId": 297234,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "TCGDEX-tk-sm-r-5",
-        "newId": null,
-        "oldExpansion": 1758,
-        "oldId": 297235,
-        "reason": "dropped-shared-mismatch"
-      },
-      {
-        "cardKey": "TCGDEX-tk-sm-r-6",
-        "newId": 297272,
-        "oldExpansion": 1758,
-        "oldId": 297236,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "TCGDEX-tk-sm-r-7",
-        "newId": null,
-        "oldExpansion": 1758,
-        "oldId": 297237,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "TCGDEX-tk-sm-r-8",
-        "newId": null,
-        "oldExpansion": 1758,
-        "oldId": 297238,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "TCGDEX-tk-sm-r-9",
-        "newId": null,
-        "oldExpansion": 1758,
-        "oldId": 297239,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "TCGDEX-tk-sm-r-10",
-        "newId": null,
-        "oldExpansion": 1758,
-        "oldId": 297240,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "TCGDEX-tk-sm-r-12",
-        "newId": null,
-        "oldExpansion": 1758,
-        "oldId": 297243,
-        "reason": "dropped-shared-mismatch"
-      },
-      {
-        "cardKey": "TCGDEX-tk-sm-r-14",
-        "newId": null,
-        "oldExpansion": 1758,
-        "oldId": 297245,
-        "reason": "dropped-shared-mismatch"
-      },
-      {
-        "cardKey": "TCGDEX-tk-sm-r-15",
-        "newId": 297277,
-        "oldExpansion": 1758,
-        "oldId": 297246,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "TCGDEX-tk-sm-r-17",
-        "newId": null,
-        "oldExpansion": 1758,
-        "oldId": 297248,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "TCGDEX-tk-sm-r-20",
-        "newId": null,
-        "oldExpansion": 1758,
-        "oldId": 297249,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "TCGDEX-tk-sm-r-24",
-        "newId": null,
-        "oldExpansion": 1758,
-        "oldId": 297250,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "TCGDEX-tk-sm-r-26",
-        "newId": 297291,
-        "oldExpansion": 1758,
-        "oldId": 297251,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "TCGDEX-tk-sm-r-27",
-        "newId": null,
-        "oldExpansion": 1758,
-        "oldId": 297259,
-        "reason": "dropped-shared-mismatch"
-      },
-      {
-        "cardKey": "TCGDEX-tk-sm-r-28",
-        "newId": null,
-        "oldExpansion": 1758,
-        "oldId": 297252,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "TCGDEX-tk-sm-r-29",
-        "newId": null,
-        "oldExpansion": 1758,
-        "oldId": 297260,
-        "reason": "dropped-shared-mismatch"
-      },
-      {
-        "cardKey": "TCGDEX-tk-sm-r-30",
-        "newId": null,
-        "oldExpansion": 1758,
-        "oldId": 297261,
-        "reason": "dropped-shared-mismatch"
       },
       {
         "cardKey": "base1-73",
@@ -8731,30 +8502,18 @@
       }
     ],
     "totals": {
-      "checked": 21864,
-      "corrected": 39,
-      "dropped": 43,
-      "droppedShared": 32,
+      "checked": 21816,
+      "corrected": 36,
+      "dropped": 36,
+      "droppedShared": 25,
       "foreignNameOk": 1348,
-      "keptMismatch": 172,
+      "keptMismatch": 162,
       "noSetExpansion": 0,
-      "ok": 20259,
+      "ok": 20231,
       "unknownProduct": 3
     }
   },
   "orderedRejected": [
-    {
-      "cards": [
-        "TCGDEX-tk-sm-r/14",
-        "TCGDEX-tk-sm-r/29"
-      ],
-      "expansionId": 1758,
-      "name": "Pikachu",
-      "products": [
-        297275,
-        297276
-      ]
-    },
     {
       "cards": [
         "sm10/175",
@@ -8980,10 +8739,10 @@
     "energySymbol": 3,
     "leftRight": 0,
     "ordered": 34,
-    "orderedRejected": 17,
+    "orderedRejected": 16,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 24
+    "versionSuffixSkipped": 36
   },
   "setsWithoutExpansion": [
     {
@@ -11556,204 +11315,6 @@
       "expansionId": 1628,
       "name": "Potion",
       "set": "TCGDEX-tk-dp-l"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 297262
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 297263
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 297264
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 297265
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 297266
-        }
-      ],
-      "cardKey": "TCGDEX-tk-sm-r/1",
-      "deName": "Elektro-Energie",
-      "expansionId": 1758,
-      "name": "Lightning Energy",
-      "set": "TCGDEX-tk-sm-r"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 297262
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 297263
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 297264
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 297265
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 297266
-        }
-      ],
-      "cardKey": "TCGDEX-tk-sm-r/5",
-      "deName": "Elektro-Energie",
-      "expansionId": 1758,
-      "name": "Lightning Energy",
-      "set": "TCGDEX-tk-sm-r"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 297262
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 297263
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 297264
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 297265
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 297266
-        }
-      ],
-      "cardKey": "TCGDEX-tk-sm-r/12",
-      "deName": "Elektro-Energie",
-      "expansionId": 1758,
-      "name": "Lightning Energy",
-      "set": "TCGDEX-tk-sm-r"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Pikachu [Tail Whap | Spark]",
-          "productId": 297275
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Pikachu [Tail Whap | Spark]",
-          "productId": 297276
-        }
-      ],
-      "cardKey": "TCGDEX-tk-sm-r/14",
-      "deName": "Pikachu",
-      "expansionId": 1758,
-      "name": "Pikachu",
-      "set": "TCGDEX-tk-sm-r"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Psychic Energy",
-          "productId": 297284
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Psychic Energy",
-          "productId": 297285
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Psychic Energy",
-          "productId": 297286
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Psychic Energy",
-          "productId": 297287
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Fighting Energy",
-          "productId": 297236
-        }
-      ],
-      "cardKey": "TCGDEX-tk-sm-r/27",
-      "deName": "Psycho-Energie",
-      "expansionId": 1758,
-      "name": "Psychic Energy",
-      "set": "TCGDEX-tk-sm-r"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Pikachu [Tail Whap | Spark]",
-          "productId": 297275
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Pikachu [Tail Whap | Spark]",
-          "productId": 297276
-        }
-      ],
-      "cardKey": "TCGDEX-tk-sm-r/29",
-      "deName": "Pikachu",
-      "expansionId": 1758,
-      "name": "Pikachu",
-      "set": "TCGDEX-tk-sm-r"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Alolan Raichu [Quick Attack | Electric Surfer]",
-          "productId": 297279
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Alolan Raichu [Quick Attack | Electric Surfer]",
-          "productId": 297280
-        },
-        {
-          "hint": "id-outlier",
-          "name": "Online Code Card (SM Trainer Kit: Lycanroc & Alolan Raichu)",
-          "productId": 561341
-        }
-      ],
-      "cardKey": "TCGDEX-tk-sm-r/30",
-      "deName": "Alola-Raichu",
-      "expansionId": 1758,
-      "name": "Alolan Raichu",
-      "set": "TCGDEX-tk-sm-r"
     },
     {
       "candidates": [],
@@ -15169,13 +14730,6 @@
     },
     {
       "count": 7,
-      "expansionId": 1758,
-      "sets": [
-        "TCGDEX-tk-sm-r"
-      ]
-    },
-    {
-      "count": 7,
       "expansionId": 2075,
       "sets": [
         "sm6"
@@ -15421,19 +14975,20 @@
     }
   ],
   "totals": {
-    "ambiguous": 125,
+    "ambiguous": 118,
     "cards": 21577,
-    "customSet": 1245,
+    "customSet": 1293,
     "matched": 283,
-    "missing": 165,
+    "missing": 158,
     "override": 8,
     "stabilityKept": 356,
-    "tcgdex": 19520
+    "tcgdex": 19479
   },
   "versionSuffixSkippedByExpansion": {
     "1537": 7,
     "1538": 3,
     "1608": 7,
-    "1611": 7
+    "1611": 7,
+    "1758": 12
   }
 }
