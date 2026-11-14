@@ -3541,37 +3541,21 @@
       "tcgdex": 86
     },
     "xy8": {
-      "ambiguous": 4,
-      "ambiguousCards": [
-        "63",
-        "64",
-        "159",
-        "160"
-      ],
+      "ambiguous": 0,
       "cards": 165,
-      "corrected": 8,
       "coverage": {
         "bySource": {
-          "matched": 4,
-          "stabilityKept": 6,
-          "tcgdex": 151
+          "customSet": 165
         },
         "cards": 165,
-        "withId": 161
+        "withId": 165
       },
+      "customSet": 165,
       "expansionId": 1678,
-      "matched": 4,
-      "missing": 4,
-      "missingCards": [
-        "63",
-        "64",
-        "159",
-        "160"
-      ],
-      "ordered": 4,
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1678&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 6,
-      "tcgdex": 151
+      "tcgdex": 0
     },
     "xy9": {
       "ambiguous": 2,
@@ -3642,8 +3626,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 3117,
-    "changed": 515,
+    "applied": 3282,
+    "changed": 530,
     "conflicts": [],
     "dropped": [
       {
@@ -5341,47 +5325,6 @@
       "xy7-75",
       "xy7-75a"
     ],
-    "286253": [
-      "xy8-7",
-      "xy8-8",
-      "xy8-9"
-    ],
-    "286277": [
-      "xy8-31",
-      "xy8-32"
-    ],
-    "286297": [
-      "xy8-51",
-      "xy8-52"
-    ],
-    "286307": [
-      "xy8-157",
-      "xy8-158",
-      "xy8-163",
-      "xy8-164",
-      "xy8-61",
-      "xy8-62"
-    ],
-    "286314": [
-      "xy8-100",
-      "xy8-68"
-    ],
-    "286335": [
-      "xy8-89",
-      "xy8-90"
-    ],
-    "286354": [
-      "xy8-108",
-      "xy8-109"
-    ],
-    "286361": [
-      "xy8-115",
-      "xy8-116"
-    ],
-    "286377": [
-      "xy8-131",
-      "xy8-132"
-    ],
     "286392": [
       "xy8-146",
       "xy8-146a"
@@ -5960,10 +5903,10 @@
     ]
   },
   "duplicates": {
-    "cards": 1031,
-    "corrected": 284,
-    "ids": 504,
-    "kept": 747
+    "cards": 1006,
+    "corrected": 276,
+    "ids": 495,
+    "kept": 730
   },
   "expansionMismatch": {
     "cards": [
@@ -7634,14 +7577,14 @@
       }
     ],
     "totals": {
-      "checked": 20102,
+      "checked": 19945,
       "corrected": 25,
       "dropped": 21,
       "droppedShared": 17,
       "foreignNameOk": 1281,
       "keptMismatch": 135,
       "noSetExpansion": 0,
-      "ok": 18637,
+      "ok": 18480,
       "unknownProduct": 3
     }
   },
@@ -7834,11 +7777,11 @@
   "rules": {
     "energySymbol": 3,
     "leftRight": 0,
-    "ordered": 30,
+    "ordered": 26,
     "orderedRejected": 13,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 151
+    "versionSuffixSkipped": 162
   },
   "setsWithoutExpansion": [
     {
@@ -9564,48 +9507,6 @@
       "todaySource": "tcgdex"
     },
     {
-      "cardKey": "xy8/32",
-      "productId": 286278,
-      "source": "corrected",
-      "todayId": 286277,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy8/62",
-      "productId": 286308,
-      "source": "corrected",
-      "todayId": 286307,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy8/157",
-      "productId": 286403,
-      "source": "corrected",
-      "todayId": 286307,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy8/158",
-      "productId": 286404,
-      "source": "corrected",
-      "todayId": 286307,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy8/163",
-      "productId": 286409,
-      "source": "corrected",
-      "todayId": 286307,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy8/164",
-      "productId": 286410,
-      "source": "corrected",
-      "todayId": 286307,
-      "todaySource": "tcgdex"
-    },
-    {
       "cardKey": "xy9/98a",
       "productId": 311410,
       "source": "corrected",
@@ -10736,142 +10637,6 @@
       "candidates": [
         {
           "hint": "same-name-unnumbered",
-          "name": "MMewtwo EX [Vanishing Strike]",
-          "productId": 286309
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MMewtwo EX [Psychic Infinity]",
-          "productId": 286310
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MMewtwo EX [Vanishing Strike]",
-          "productId": 286405
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MMewtwo EX [Psychic Infinity]",
-          "productId": 286406
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MMewtwo EX [Vanishing Strike]",
-          "productId": 363682
-        }
-      ],
-      "cardKey": "xy8/63",
-      "deName": "M-Mewtu EX",
-      "expansionId": 1678,
-      "name": "M Mewtwo-EX",
-      "set": "xy8"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MMewtwo EX [Vanishing Strike]",
-          "productId": 286309
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MMewtwo EX [Psychic Infinity]",
-          "productId": 286310
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MMewtwo EX [Vanishing Strike]",
-          "productId": 286405
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MMewtwo EX [Psychic Infinity]",
-          "productId": 286406
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MMewtwo EX [Vanishing Strike]",
-          "productId": 363682
-        }
-      ],
-      "cardKey": "xy8/64",
-      "deName": "M-Mewtu EX",
-      "expansionId": 1678,
-      "name": "M Mewtwo-EX",
-      "set": "xy8"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MMewtwo EX [Vanishing Strike]",
-          "productId": 286309
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MMewtwo EX [Psychic Infinity]",
-          "productId": 286310
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MMewtwo EX [Vanishing Strike]",
-          "productId": 286405
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MMewtwo EX [Psychic Infinity]",
-          "productId": 286406
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MMewtwo EX [Vanishing Strike]",
-          "productId": 363682
-        }
-      ],
-      "cardKey": "xy8/159",
-      "deName": "M-Mewtu EX",
-      "expansionId": 1678,
-      "name": "M Mewtwo-EX",
-      "set": "xy8"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MMewtwo EX [Vanishing Strike]",
-          "productId": 286309
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MMewtwo EX [Psychic Infinity]",
-          "productId": 286310
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MMewtwo EX [Vanishing Strike]",
-          "productId": 286405
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MMewtwo EX [Psychic Infinity]",
-          "productId": 286406
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MMewtwo EX [Vanishing Strike]",
-          "productId": 363682
-        }
-      ],
-      "cardKey": "xy8/160",
-      "deName": "M-Mewtu EX",
-      "expansionId": 1678,
-      "name": "M Mewtwo-EX",
-      "set": "xy8"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
           "name": "MGyarados EX [Blast Geyser]",
           "productId": 288202
         },
@@ -10918,13 +10683,6 @@
     }
   ],
   "stillMissingByExpansion": [
-    {
-      "count": 4,
-      "expansionId": 1678,
-      "sets": [
-        "xy8"
-      ]
-    },
     {
       "count": 4,
       "expansionId": 2320,
@@ -11116,14 +10874,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 48,
+    "ambiguous": 44,
     "cards": 21577,
-    "customSet": 3117,
-    "matched": 231,
-    "missing": 67,
+    "customSet": 3282,
+    "matched": 227,
+    "missing": 63,
     "override": 8,
-    "stabilityKept": 248,
-    "tcgdex": 17906
+    "stabilityKept": 242,
+    "tcgdex": 17755
   },
   "versionSuffixSkippedByExpansion": {
     "1537": 7,
@@ -11135,6 +10893,7 @@
     "1611": 7,
     "1612": 40,
     "1649": 3,
+    "1678": 11,
     "1758": 12,
     "1800": 13,
     "2065": 14,
