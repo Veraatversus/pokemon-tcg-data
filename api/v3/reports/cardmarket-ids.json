@@ -1066,32 +1066,21 @@
       "tcgdex": 21
     },
     "ecard1": {
-      "ambiguous": 2,
-      "ambiguousCards": [
-        "47",
-        "68"
-      ],
+      "ambiguous": 0,
       "cards": 165,
       "coverage": {
         "bySource": {
-          "customSet": 161,
-          "override": 1,
-          "tcgdex": 1
+          "customSet": 165
         },
         "cards": 165,
-        "withId": 163
+        "withId": 165
       },
-      "customSet": 161,
+      "customSet": 165,
       "expansionId": 1536,
       "matched": 0,
-      "missing": 2,
-      "missingCards": [
-        "47",
-        "68"
-      ],
-      "override": 1,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1536&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 1
+      "tcgdex": 0
     },
     "ecard2": {
       "ambiguous": 0,
@@ -3400,26 +3389,11 @@
     }
   },
   "customSets": {
-    "ambiguous": [
-      "ecard1/1",
-      "ecard1/47",
-      "ecard1/68"
-    ],
-    "applied": 6768,
-    "changed": 846,
+    "ambiguous": [],
+    "applied": 6772,
+    "changed": 849,
     "conflicts": [],
-    "dropped": [
-      {
-        "cardKey": "ecard1/47",
-        "number": "12",
-        "productId": 274887
-      },
-      {
-        "cardKey": "ecard1/68",
-        "number": "30",
-        "productId": 274905
-      }
-    ],
+    "dropped": [],
     "missingProducts": [],
     "nameWarnings": [
       {
@@ -6536,14 +6510,14 @@
       }
     ],
     "totals": {
-      "checked": 16612,
+      "checked": 16610,
       "corrected": 1,
       "dropped": 13,
       "droppedShared": 11,
       "foreignNameOk": 1231,
       "keptMismatch": 134,
       "noSetExpansion": 0,
-      "ok": 15230,
+      "ok": 15228,
       "unknownProduct": 3
     }
   },
@@ -6574,7 +6548,7 @@
     }
   ],
   "overrides": {
-    "applied": 8,
+    "applied": 7,
     "problems": [],
     "removed": 0,
     "warnings": []
@@ -6606,9 +6580,9 @@
     "leftRight": 0,
     "ordered": 0,
     "orderedRejected": 2,
-    "override": 8,
+    "override": 7,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 386
+    "versionSuffixSkipped": 388
   },
   "setsWithoutExpansion": [
     {
@@ -7725,52 +7699,9 @@
       "expansionId": 2438,
       "name": "Lt. Yoshida",
       "set": "det1"
-    },
-    {
-      "candidates": [
-        {
-          "name": "Feraligatr [Major Tsunami | Rending Jaws]",
-          "productId": 274922
-        },
-        {
-          "hint": "id-outlier",
-          "name": "Feraligatr [Major Tsunami | Rending Jaws]",
-          "productId": 362884
-        }
-      ],
-      "cardKey": "ecard1/47",
-      "deName": "Impergator",
-      "expansionId": 1536,
-      "name": "Feraligatr",
-      "set": "ecard1"
-    },
-    {
-      "candidates": [
-        {
-          "name": "Venusaur [Harvest Bounty | Body Slam]",
-          "productId": 274943
-        },
-        {
-          "hint": "id-outlier",
-          "name": "Venusaur [Harvest Bounty | Body Slam]",
-          "productId": 362896
-        }
-      ],
-      "cardKey": "ecard1/68",
-      "deName": "Bisaflor",
-      "expansionId": 1536,
-      "name": "Venusaur",
-      "set": "ecard1"
     }
   ],
   "stillMissingByExpansion": [
-    {
-      "count": 2,
-      "expansionId": 1536,
-      "sets": [
-        "ecard1"
-      ]
-    },
     {
       "count": 2,
       "expansionId": 1611,
@@ -7787,17 +7718,18 @@
     }
   ],
   "totals": {
-    "ambiguous": 2,
+    "ambiguous": 0,
     "cards": 21577,
-    "customSet": 6768,
+    "customSet": 6772,
     "matched": 77,
-    "missing": 12,
-    "override": 8,
+    "missing": 10,
+    "override": 7,
     "stabilityKept": 149,
-    "tcgdex": 14563
+    "tcgdex": 14562
   },
   "versionSuffixSkippedByExpansion": {
     "1521": 9,
+    "1536": 2,
     "1537": 7,
     "1538": 3,
     "1551": 1,
