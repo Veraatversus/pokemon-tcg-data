@@ -1,47 +1,53 @@
 # Cardmarket-Zuordnung
 
-21577 Karten, 399 ohne Cardmarket-ID (Sets nach fehlenden Karten absteigend; Details in cardmarket-ids.json).
+21577 Karten, 393 ohne Cardmarket-ID (Sets nach fehlenden Karten absteigend; Details in cardmarket-ids.json).
 
 | Set | Erweiterung | Karten | mit ID | fehlen | Abdeckung | Herkunft | Suche |
 | --- | --- | ---: | ---: | ---: | ---: | --- | --- |
-| TCGDEX-tk-xy-b | - | 30 | 0 | 30 | 0 % | - | - |
-| TCGDEX-tk-xy-latia | - | 30 | 0 | 30 | 0 % | - | - |
-| TCGDEX-tk-xy-latio | - | 30 | 0 | 30 | 0 % | - | - |
-| TCGDEX-tk-xy-n | - | 30 | 0 | 30 | 0 % | - | - |
-| TCGDEX-tk-xy-p | - | 30 | 0 | 30 | 0 % | - | - |
-| TCGDEX-tk-xy-su | - | 30 | 0 | 30 | 0 % | - | - |
-| TCGDEX-tk-xy-sy | - | 30 | 0 | 30 | 0 % | - | - |
-| TCGDEX-tk-xy-w | - | 30 | 0 | 30 | 0 % | - | - |
+| TCGDEX-tk-xy-latio | 1683 | 30 | 0 | 30 | 0 % | - | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1683&sortBy=collectorsnumber_asc&perSite=100&site=1) |
+| TCGDEX-tk-hs-g | 1629 | 30 | 1 | 29 | 3.3 % | tcgdex 1 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1629&sortBy=collectorsnumber_asc&perSite=100&site=1) |
+| TCGDEX-tk-xy-sy | 1631 | 30 | 2 | 28 | 6.7 % | matched 2 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1631&sortBy=collectorsnumber_asc&perSite=100&site=1) |
+| TCGDEX-tk-bw-e | 1630 | 30 | 3 | 27 | 10 % | tcgdex 3 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1630&sortBy=collectorsnumber_asc&perSite=100&site=1) |
+| TCGDEX-tk-xy-b | 1632 | 30 | 3 | 27 | 10 % | matched 3 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1632&sortBy=collectorsnumber_asc&perSite=100&site=1) |
+| TCGDEX-tk-xy-n | 1631 | 30 | 5 | 25 | 16.7 % | matched 5 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1631&sortBy=collectorsnumber_asc&perSite=100&site=1) |
+| TCGDEX-tk-xy-w | 1632 | 30 | 5 | 25 | 16.7 % | matched 5 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1632&sortBy=collectorsnumber_asc&perSite=100&site=1) |
+| TCGDEX-tk-xy-latia | 1683 | 30 | 14 | 16 | 46.7 % | matched 14 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1683&sortBy=collectorsnumber_asc&perSite=100&site=1) |
+| TCGDEX-tk-xy-p | 1707 | 30 | 14 | 16 | 46.7 % | matched 14 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1707&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | dpp | 1609 | 56 | 42 | 14 | 75 % | tcgdex 1, matched 38, stabilityKept 3 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1609&sortBy=collectorsnumber_asc&perSite=100&site=1) |
-| np | 1608 | 40 | 26 | 14 | 65 % | matched 26 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1608&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | sm2 | 1800 | 180 | 169 | 11 | 93.9 % | tcgdex 165, stabilityKept 4 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1800&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | xyp | 1612 | 216 | 205 | 11 | 94.9 % | tcgdex 157, matched 4, stabilityKept 44 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1612&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | sm5 | 2065 | 178 | 169 | 9 | 94.9 % | tcgdex 156, matched 1, stabilityKept 12 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2065&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | sm3 | 1824 | 177 | 169 | 8 | 95.5 % | tcgdex 169 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1824&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | sm8 | 2370 | 240 | 232 | 8 | 96.7 % | tcgdex 230, stabilityKept 2 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2370&sortBy=collectorsnumber_asc&perSite=100&site=1) |
+| TCGDEX-tk-sm-r | 1758 | 30 | 23 | 7 | 76.7 % | tcgdex 23 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1758&sortBy=collectorsnumber_asc&perSite=100&site=1) |
+| sm6 | 2075 | 150 | 143 | 7 | 95.3 % | tcgdex 140, matched 1, stabilityKept 2 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2075&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | TCGDEX-xya | - | 6 | 0 | 6 | 0 % | - | - |
-| sm6 | 2075 | 150 | 144 | 6 | 96 % | tcgdex 141, matched 1, stabilityKept 2 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2075&sortBy=collectorsnumber_asc&perSite=100&site=1) |
+| TCGDEX-tk-xy-su | 1707 | 30 | 25 | 5 | 83.3 % | matched 25 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1707&sortBy=collectorsnumber_asc&perSite=100&site=1) |
+| sm10 | 2437 | 238 | 233 | 5 | 97.9 % | tcgdex 215, matched 6, stabilityKept 12 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2437&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | xy6 | 1649 | 112 | 107 | 5 | 95.5 % | tcgdex 88, stabilityKept 19 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1649&sortBy=collectorsnumber_asc&perSite=100&site=1) |
-| sm10 | 2437 | 238 | 234 | 4 | 98.3 % | tcgdex 216, matched 6, stabilityKept 12 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2437&sortBy=collectorsnumber_asc&perSite=100&site=1) |
+| pl2 | 1563 | 120 | 116 | 4 | 96.7 % | tcgdex 116 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1563&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | sm7 | 2320 | 187 | 183 | 4 | 97.9 % | tcgdex 178, matched 2, stabilityKept 3 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2320&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | sm9 | 2407 | 198 | 194 | 4 | 98 % | tcgdex 185, matched 5, stabilityKept 4 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2407&sortBy=collectorsnumber_asc&perSite=100&site=1) |
+| swsh1 | 2921 | 216 | 212 | 4 | 98.1 % | tcgdex 211, stabilityKept 1 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2921&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | xy2 | 1583 | 110 | 106 | 4 | 96.4 % | tcgdex 96, stabilityKept 10 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1583&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | xy8 | 1678 | 165 | 161 | 4 | 97.6 % | tcgdex 151, matched 4, stabilityKept 6 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1678&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | sm11 | 2487 | 261 | 258 | 3 | 98.9 % | tcgdex 252, stabilityKept 6 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2487&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | sm35 | 1842 | 81 | 78 | 3 | 96.3 % | tcgdex 77, stabilityKept 1 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1842&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | sma | 2514 | 94 | 91 | 3 | 96.8 % | matched 91 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2514&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | smp | 1757 | 251 | 248 | 3 | 98.8 % | tcgdex 231, stabilityKept 17 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1757&sortBy=collectorsnumber_asc&perSite=100&site=1) |
-| swsh1 | 2921 | 216 | 213 | 3 | 98.6 % | tcgdex 212, stabilityKept 1 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2921&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | tk2a | 1627 | 12 | 9 | 3 | 75 % | tcgdex 8, matched 1 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1627&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | xy3 | 1584 | 114 | 111 | 3 | 97.4 % | tcgdex 102, stabilityKept 9 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1584&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | xy4 | 1521 | 124 | 121 | 3 | 97.6 % | tcgdex 111, stabilityKept 10 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1521&sortBy=collectorsnumber_asc&perSite=100&site=1) |
+| TCGDEX-tk-dp-l | 1628 | 11 | 9 | 2 | 81.8 % | tcgdex 9 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1628&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | bwp | 1611 | 101 | 99 | 2 | 98 % | customSet 99 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1611&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | ecard1 | 1536 | 165 | 163 | 2 | 98.8 % | tcgdex 1, customSet 161, override 1 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1536&sortBy=collectorsnumber_asc&perSite=100&site=1) |
+| pl3 | 1564 | 153 | 151 | 2 | 98.7 % | tcgdex 150, stabilityKept 1 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1564&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | sm4 | 1843 | 126 | 124 | 2 | 98.4 % | tcgdex 124 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1843&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | sm75 | 2351 | 80 | 78 | 2 | 97.5 % | tcgdex 74, matched 3, stabilityKept 1 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2351&sortBy=collectorsnumber_asc&perSite=100&site=1) |
+| xy11 | 1716 | 116 | 114 | 2 | 98.3 % | tcgdex 109, matched 5 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1716&sortBy=collectorsnumber_asc&perSite=100&site=1) |
+| xy12 | 1742 | 113 | 111 | 2 | 98.2 % | tcgdex 101, matched 10 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1742&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | xy9 | 1687 | 126 | 124 | 2 | 98.4 % | tcgdex 119, matched 2, stabilityKept 3 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1687&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | TCGDEX-miscp | - | 1 | 0 | 1 | 0 % | - | - |
-| TCGDEX-tk-hs-g | - | 30 | 29 | 1 | 96.7 % | tcgdex 29 | - |
 | det1 | 2438 | 19 | 18 | 1 | 94.7 % | tcgdex 18 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2438&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | dp6 | 1560 | 146 | 145 | 1 | 99.3 % | tcgdex 137, matched 6, stabilityKept 2 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1560&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | ex13 | 1551 | 111 | 110 | 1 | 99.1 % | tcgdex 109, matched 1 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1551&sortBy=collectorsnumber_asc&perSite=100&site=1) |
@@ -52,10 +58,9 @@
 | sm1 | 1745 | 173 | 172 | 1 | 99.4 % | tcgdex 171, stabilityKept 1 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1745&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | sm12 | 2644 | 272 | 271 | 1 | 99.6 % | tcgdex 249, stabilityKept 22 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2644&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | xy10 | 1706 | 129 | 128 | 1 | 99.2 % | tcgdex 119, matched 4, stabilityKept 5 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1706&sortBy=collectorsnumber_asc&perSite=100&site=1) |
-| xy12 | 1742 | 113 | 112 | 1 | 99.1 % | tcgdex 102, matched 10 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1742&sortBy=collectorsnumber_asc&perSite=100&site=1) |
-| TCGDEX-2013bw | - | 12 | 12 | 0 | 100 % | tcgdex 12 | - |
+| TCGDEX-2013bw | 2352 | 12 | 12 | 0 | 100 % | tcgdex 12 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2352&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | TCGDEX-2018sm-fr | 2361 | 40 | 40 | 0 | 100 % | tcgdex 40 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2361&sortBy=collectorsnumber_asc&perSite=100&site=1) |
-| TCGDEX-2019sm-fr | - | 41 | 41 | 0 | 100 % | tcgdex 41 | - |
+| TCGDEX-2019sm-fr | 3354 | 41 | 41 | 0 | 100 % | tcgdex 41 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=3354&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | TCGDEX-2023sv | 5430 | 15 | 15 | 0 | 100 % | tcgdex 15 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=5430&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | TCGDEX-2024sv | 5978 | 15 | 15 | 0 | 100 % | tcgdex 15 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=5978&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | TCGDEX-ex5.5 | 4505 | 5 | 5 | 0 | 100 % | tcgdex 5 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=4505&sortBy=collectorsnumber_asc&perSite=100&site=1) |
@@ -64,13 +69,10 @@
 | TCGDEX-mfb | 5526 | 34 | 34 | 0 | 100 % | tcgdex 34 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=5526&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | TCGDEX-rc | - | 0 | 0 | 0 | - | - | - |
 | TCGDEX-sp | - | 0 | 0 | 0 | - | - | - |
-| TCGDEX-tk-bw-e | - | 30 | 30 | 0 | 100 % | tcgdex 30 | - |
 | TCGDEX-tk-bw-z | 1630 | 30 | 30 | 0 | 100 % | tcgdex 30 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1630&sortBy=collectorsnumber_asc&perSite=100&site=1) |
-| TCGDEX-tk-dp-l | - | 11 | 11 | 0 | 100 % | tcgdex 11 | - |
 | TCGDEX-tk-dp-m | 1628 | 12 | 12 | 0 | 100 % | tcgdex 12 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1628&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | TCGDEX-tk-hs-r | 1629 | 30 | 30 | 0 | 100 % | tcgdex 30 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1629&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | TCGDEX-tk-sm-l | 1758 | 18 | 18 | 0 | 100 % | tcgdex 18 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1758&sortBy=collectorsnumber_asc&perSite=100&site=1) |
-| TCGDEX-tk-sm-r | - | 30 | 30 | 0 | 100 % | tcgdex 30 | - |
 | TCGDEX-wp | - | 0 | 0 | 0 | - | - | - |
 | base1 | 1523 | 102 | 102 | 0 | 100 % | tcgdex 102 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1523&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | base2 | 1525 | 64 | 64 | 0 | 100 % | tcgdex 48, stabilityKept 16 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1525&sortBy=collectorsnumber_asc&perSite=100&site=1) |
@@ -149,10 +151,9 @@
 | neo2 | 1532 | 75 | 75 | 0 | 100 % | tcgdex 61, stabilityKept 14 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1532&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | neo3 | 1533 | 66 | 66 | 0 | 100 % | tcgdex 66 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1533&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | neo4 | 1534 | 113 | 113 | 0 | 100 % | tcgdex 112, matched 1 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1534&sortBy=collectorsnumber_asc&perSite=100&site=1) |
+| np | 1608 | 40 | 40 | 0 | 100 % | customSet 40 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1608&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | pgo | 4786 | 88 | 88 | 0 | 100 % | tcgdex 88 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=4786&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | pl1 | 1562 | 133 | 133 | 0 | 100 % | tcgdex 133 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1562&sortBy=collectorsnumber_asc&perSite=100&site=1) |
-| pl2 | 1563 | 120 | 120 | 0 | 100 % | tcgdex 120 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1563&sortBy=collectorsnumber_asc&perSite=100&site=1) |
-| pl3 | 1564 | 153 | 153 | 0 | 100 % | tcgdex 152, stabilityKept 1 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1564&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | pl4 | 1565 | 111 | 111 | 0 | 100 % | tcgdex 105, matched 5, stabilityKept 1 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1565&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | pop1 | 1613 | 17 | 17 | 0 | 100 % | tcgdex 17 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1613&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | pop2 | 1614 | 17 | 17 | 0 | 100 % | tcgdex 16, matched 1 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1614&sortBy=collectorsnumber_asc&perSite=100&site=1) |
@@ -202,7 +203,6 @@
 | tk2b | 1627 | 12 | 12 | 0 | 100 % | tcgdex 11, matched 1 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1627&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | xy0 | 1637 | 39 | 39 | 0 | 100 % | tcgdex 38, stabilityKept 1 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1637&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | xy1 | 1582 | 146 | 146 | 0 | 100 % | tcgdex 138, matched 2, stabilityKept 6 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1582&sortBy=collectorsnumber_asc&perSite=100&site=1) |
-| xy11 | 1716 | 116 | 116 | 0 | 100 % | tcgdex 111, matched 5 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1716&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | xy5 | 1585 | 164 | 164 | 0 | 100 % | tcgdex 130, matched 1, stabilityKept 33 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1585&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | xy7 | 1660 | 101 | 101 | 0 | 100 % | tcgdex 86, stabilityKept 15 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1660&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | zsv10pt5 | 6134 | 172 | 172 | 0 | 100 % | tcgdex 172 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=6134&sortBy=collectorsnumber_asc&perSite=100&site=1) |
