@@ -3383,33 +3383,21 @@
       "tcgdex": 0
     },
     "xy3": {
-      "ambiguous": 3,
-      "ambiguousCards": [
-        "55",
-        "55a",
-        "113"
-      ],
+      "ambiguous": 0,
       "cards": 114,
-      "corrected": 2,
       "coverage": {
         "bySource": {
-          "stabilityKept": 9,
-          "tcgdex": 102
+          "customSet": 114
         },
         "cards": 114,
-        "withId": 111
+        "withId": 114
       },
+      "customSet": 114,
       "expansionId": 1584,
       "matched": 0,
-      "missing": 3,
-      "missingCards": [
-        "55",
-        "55a",
-        "113"
-      ],
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1584&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 9,
-      "tcgdex": 102
+      "tcgdex": 0
     },
     "xy4": {
       "ambiguous": 0,
@@ -3570,8 +3558,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 4007,
-    "changed": 594,
+    "applied": 4121,
+    "changed": 603,
     "conflicts": [],
     "dropped": [
       {
@@ -5133,42 +5121,6 @@
       "xy2-88",
       "xy2-88a"
     ],
-    "281668": [
-      "xy3-105",
-      "xy3-4"
-    ],
-    "281684": [
-      "xy3-106",
-      "xy3-20"
-    ],
-    "281718": [
-      "xy3-107",
-      "xy3-54"
-    ],
-    "281723": [
-      "xy3-59",
-      "xy3-60"
-    ],
-    "281733": [
-      "xy3-69",
-      "xy3-70"
-    ],
-    "281738": [
-      "xy3-108",
-      "xy3-74"
-    ],
-    "281752": [
-      "xy3-109",
-      "xy3-88"
-    ],
-    "281756": [
-      "xy3-110",
-      "xy3-92"
-    ],
-    "281759": [
-      "xy3-111",
-      "xy3-95"
-    ],
     "281871": [
       "xy4-65",
       "xy4-65a"
@@ -5669,10 +5621,10 @@
     ]
   },
   "duplicates": {
-    "cards": 908,
-    "corrected": 238,
-    "ids": 448,
-    "kept": 670
+    "cards": 890,
+    "corrected": 236,
+    "ids": 439,
+    "kept": 654
   },
   "expansionMismatch": {
     "cards": [
@@ -7315,14 +7267,14 @@
       }
     ],
     "totals": {
-      "checked": 19249,
+      "checked": 19140,
       "corrected": 22,
       "dropped": 20,
       "droppedShared": 16,
       "foreignNameOk": 1281,
       "keptMismatch": 135,
       "noSetExpansion": 0,
-      "ok": 17788,
+      "ok": 17679,
       "unknownProduct": 3
     }
   },
@@ -7425,18 +7377,6 @@
     },
     {
       "cards": [
-        "xy3/5",
-        "xy3/112"
-      ],
-      "expansionId": 1584,
-      "name": "M Heracross-EX",
-      "products": [
-        281669,
-        281776
-      ]
-    },
-    {
-      "cards": [
         "xy5/94",
         "xy5/154"
       ],
@@ -7492,10 +7432,10 @@
     "energySymbol": 3,
     "leftRight": 0,
     "ordered": 20,
-    "orderedRejected": 11,
+    "orderedRejected": 10,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 205
+    "versionSuffixSkipped": 216
   },
   "setsWithoutExpansion": [
     {
@@ -8696,69 +8636,6 @@
       "todaySource": "tcgdex"
     },
     {
-      "cardKey": "xy3/5",
-      "productId": 281669,
-      "source": "ordered",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "xy3/105",
-      "productId": 281769,
-      "source": "corrected",
-      "todayId": 281668,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy3/106",
-      "productId": 281770,
-      "source": "corrected",
-      "todayId": 281684,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy3/107",
-      "productId": 281771,
-      "source": "corrected",
-      "todayId": 281718,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy3/108",
-      "productId": 281772,
-      "source": "corrected",
-      "todayId": 281738,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy3/109",
-      "productId": 281773,
-      "source": "corrected",
-      "todayId": 281752,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy3/110",
-      "productId": 281774,
-      "source": "corrected",
-      "todayId": 281756,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy3/111",
-      "productId": 281775,
-      "source": "corrected",
-      "todayId": 281759,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy3/112",
-      "productId": 281776,
-      "source": "ordered",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
       "cardKey": "xy5/9",
       "productId": 273540,
       "source": "corrected",
@@ -9772,93 +9649,6 @@
       "candidates": [
         {
           "hint": "same-name-unnumbered",
-          "name": "MLucario EX [Rising Fist]",
-          "productId": 281719
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MLucario EX [Rising Fist]",
-          "productId": 281777
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MLucario EX [Rising Fist]",
-          "productId": 297891
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "MLucario EX [Rising Fist]",
-          "productId": 363917
-        }
-      ],
-      "cardKey": "xy3/55",
-      "deName": "M Lucario EX",
-      "expansionId": 1584,
-      "name": "M Lucario-EX",
-      "set": "xy3"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MLucario EX [Rising Fist]",
-          "productId": 281719
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MLucario EX [Rising Fist]",
-          "productId": 281777
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MLucario EX [Rising Fist]",
-          "productId": 297891
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "MLucario EX [Rising Fist]",
-          "productId": 363917
-        }
-      ],
-      "cardKey": "xy3/55a",
-      "deName": "M Lucario EX",
-      "expansionId": 1584,
-      "name": "M Lucario-EX",
-      "set": "xy3"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MLucario EX [Rising Fist]",
-          "productId": 281719
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MLucario EX [Rising Fist]",
-          "productId": 281777
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MLucario EX [Rising Fist]",
-          "productId": 297891
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "MLucario EX [Rising Fist]",
-          "productId": 363917
-        }
-      ],
-      "cardKey": "xy3/113",
-      "deName": "M Lucario EX",
-      "expansionId": 1584,
-      "name": "M Lucario-EX",
-      "set": "xy3"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
           "name": "MGyarados EX [Blast Geyser]",
           "productId": 288202
         },
@@ -9905,13 +9695,6 @@
     }
   ],
   "stillMissingByExpansion": [
-    {
-      "count": 3,
-      "expansionId": 1584,
-      "sets": [
-        "xy3"
-      ]
-    },
     {
       "count": 3,
       "expansionId": 1757,
@@ -10068,14 +9851,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 31,
+    "ambiguous": 28,
     "cards": 21577,
-    "customSet": 4007,
+    "customSet": 4121,
     "matched": 220,
-    "missing": 48,
+    "missing": 45,
     "override": 8,
-    "stabilityKept": 224,
-    "tcgdex": 17070
+    "stabilityKept": 215,
+    "tcgdex": 16968
   },
   "versionSuffixSkippedByExpansion": {
     "1521": 9,
@@ -10083,6 +9866,7 @@
     "1538": 3,
     "1563": 4,
     "1583": 12,
+    "1584": 11,
     "1608": 7,
     "1609": 6,
     "1611": 7,
