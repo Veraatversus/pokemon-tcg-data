@@ -2256,28 +2256,24 @@
       "tcgdex": 18
     },
     "sm1": {
-      "ambiguous": 1,
-      "ambiguousCards": [
-        "101a"
-      ],
+      "ambiguous": 0,
       "cards": 173,
       "coverage": {
         "bySource": {
+          "customSet": 164,
           "stabilityKept": 1,
-          "tcgdex": 171
+          "tcgdex": 8
         },
         "cards": 173,
-        "withId": 172
+        "withId": 173
       },
+      "customSet": 164,
       "expansionId": 1745,
       "matched": 0,
-      "missing": 1,
-      "missingCards": [
-        "101a"
-      ],
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1745&sortBy=collectorsnumber_asc&perSite=100&site=1",
       "stabilityKept": 1,
-      "tcgdex": 171
+      "tcgdex": 8
     },
     "sm10": {
       "ambiguous": 0,
@@ -3184,31 +3180,21 @@
       "tcgdex": 138
     },
     "xy10": {
-      "ambiguous": 1,
-      "ambiguousCards": [
-        "85"
-      ],
+      "ambiguous": 0,
       "cards": 129,
-      "corrected": 7,
       "coverage": {
         "bySource": {
-          "matched": 4,
-          "stabilityKept": 5,
-          "tcgdex": 119
+          "customSet": 129
         },
         "cards": 129,
-        "withId": 128
+        "withId": 129
       },
+      "customSet": 129,
       "expansionId": 1706,
-      "matched": 4,
-      "missing": 1,
-      "missingCards": [
-        "85"
-      ],
-      "ordered": 4,
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1706&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 5,
-      "tcgdex": 119
+      "tcgdex": 0
     },
     "xy11": {
       "ambiguous": 0,
@@ -3425,8 +3411,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 6185,
-    "changed": 816,
+    "applied": 6478,
+    "changed": 832,
     "conflicts": [],
     "dropped": [
       {
@@ -4980,34 +4966,13 @@
       "xyp-XY67",
       "xyp-XY67a"
     ],
-    "289829": [
-      "xy10-3",
-      "xy10-44",
-      "xy10-59"
-    ],
-    "289836": [
-      "xy10-10",
-      "xy10-11"
-    ],
     "289867": [
       "xy10-43",
       "xy10-43a"
     ],
-    "289869": [
-      "xy10-47",
-      "xy10-63"
-    ],
-    "289873": [
-      "xy10-52",
-      "xy10-53"
-    ],
     "289875": [
       "xy10-54",
       "xy10-54a"
-    ],
-    "289907": [
-      "xy10-86",
-      "xy10-87"
     ],
     "289925": [
       "xy10-105",
@@ -5016,14 +4981,6 @@
     "289931": [
       "xy10-111",
       "xy10-111a"
-    ],
-    "290534": [
-      "xy10-40",
-      "xy10-41"
-    ],
-    "290536": [
-      "xy10-45",
-      "xy10-46"
     ],
     "293006": [
       "xyp-XY177",
@@ -5202,10 +5159,10 @@
     ]
   },
   "duplicates": {
-    "cards": 640,
-    "corrected": 121,
-    "ids": 367,
-    "kept": 519
+    "cards": 615,
+    "corrected": 114,
+    "ids": 360,
+    "kept": 501
   },
   "expansionMismatch": {
     "cards": [
@@ -6633,14 +6590,14 @@
       }
     ],
     "totals": {
-      "checked": 17178,
+      "checked": 16891,
       "corrected": 1,
       "dropped": 13,
       "droppedShared": 11,
       "foreignNameOk": 1231,
       "keptMismatch": 134,
       "noSetExpansion": 0,
-      "ok": 15796,
+      "ok": 15509,
       "unknownProduct": 3
     }
   },
@@ -6761,11 +6718,11 @@
   "rules": {
     "energySymbol": 3,
     "leftRight": 0,
-    "ordered": 4,
+    "ordered": 0,
     "orderedRejected": 7,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 353
+    "versionSuffixSkipped": 383
   },
   "setsWithoutExpansion": [
     {
@@ -7676,41 +7633,6 @@
       "todaySource": null
     },
     {
-      "cardKey": "xy10/43a",
-      "productId": 311406,
-      "source": "corrected",
-      "todayId": 289867,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy10/54a",
-      "productId": 297893,
-      "source": "corrected",
-      "todayId": 289875,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy10/63",
-      "productId": 289884,
-      "source": "corrected",
-      "todayId": 289869,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy10/105a",
-      "productId": 295213,
-      "source": "corrected",
-      "todayId": 289925,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy10/111a",
-      "productId": 311411,
-      "source": "corrected",
-      "todayId": 289931,
-      "todaySource": "tcgdex"
-    },
-    {
       "cardKey": "xy5/9",
       "productId": 273540,
       "source": "corrected",
@@ -8111,20 +8033,6 @@
     {
       "candidates": [
         {
-          "hint": "same-name-unnumbered",
-          "name": "Eevee [Energy Evolution | Quick Draw]",
-          "productId": 366834
-        }
-      ],
-      "cardKey": "sm1/101a",
-      "deName": null,
-      "expansionId": 1745,
-      "name": "Eevee",
-      "set": "sm1"
-    },
-    {
-      "candidates": [
-        {
           "hint": "same-name-unnumbered, id-outlier",
           "name": "Togepi & Cleffa & Igglybuff GX [Rolling Panic | Supreme Puff GX]",
           "productId": 582672
@@ -8135,35 +8043,6 @@
       "expansionId": 2644,
       "name": "Togepi & Cleffa & Igglybuff-GX",
       "set": "sm12"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MAudino EX [Magical Symphony]",
-          "productId": 289906
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MAudino EX [Magical Symphony]",
-          "productId": 295246
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Audino EX [Drain Slap | Do the Wave]",
-          "productId": 295247
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Audino Spirit Link",
-          "productId": 295265
-        }
-      ],
-      "cardKey": "xy10/85",
-      "deName": "M-Ohrdoch EX",
-      "expansionId": 1706,
-      "name": "M Audino-EX",
-      "set": "xy10"
     }
   ],
   "stillMissingByExpansion": [
@@ -8183,20 +8062,6 @@
     },
     {
       "count": 1,
-      "expansionId": 1706,
-      "sets": [
-        "xy10"
-      ]
-    },
-    {
-      "count": 1,
-      "expansionId": 1745,
-      "sets": [
-        "sm1"
-      ]
-    },
-    {
-      "count": 1,
       "expansionId": 2438,
       "sets": [
         "det1"
@@ -8211,14 +8076,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 5,
+    "ambiguous": 3,
     "cards": 21577,
-    "customSet": 6185,
-    "matched": 81,
-    "missing": 15,
+    "customSet": 6478,
+    "matched": 77,
+    "missing": 13,
     "override": 8,
-    "stabilityKept": 176,
-    "tcgdex": 15112
+    "stabilityKept": 171,
+    "tcgdex": 14830
   },
   "versionSuffixSkippedByExpansion": {
     "1521": 9,
@@ -8238,8 +8103,10 @@
     "1649": 3,
     "1678": 11,
     "1687": 11,
+    "1706": 9,
     "1716": 9,
     "1742": 14,
+    "1745": 21,
     "1757": 60,
     "1758": 12,
     "1800": 13,
