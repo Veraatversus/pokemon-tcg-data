@@ -62,6 +62,9 @@ export function numberOfLabel(label) {
     // Setcode mit Ziffer und Kit-Kuerzel: "TK6 1N" -> "1N" (Trainer-Kit-Paare, siehe setSuffix im custom-set)
     const kit = c.match(/^[A-Z]+\d+\s+(\d+[A-Z]?)$/i);
     if (kit) return kit[1].replace(/^0+(?=\d)/, '');
+    // Kuerzel vor der Nummer: "TK9 P-1" -> "1P" (gleiche Form wie "TK6 1N")
+    const pre = c.match(/^[A-Z]+\d+\s+([A-Z])-?(\d+)$/i);
+    if (pre) return `${pre[2].replace(/^0+(?=\d)/, '')}${pre[1]}`;
   }
   return null;
 }
