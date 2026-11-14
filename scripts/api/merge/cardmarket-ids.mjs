@@ -387,7 +387,7 @@ export function fillCardmarketIds({
   // 0. Set-Ebene: Expansion pruefen, notfalls aus den Karten ableiten
   const expansionDropped = new Map(); // card.id -> Set der heute per Expansionspruefung entfernten IDs (nie ueber previous zurueck)
   const expansionMismatch = {
-    totals: { checked: 0, ok: 0, foreignNameOk: 0, corrected: 0, dropped: 0, keptMismatch: 0, noSetExpansion: 0, unknownProduct: 0 },
+    totals: { checked: 0, ok: 0, foreignNameOk: 0, corrected: 0, dropped: 0, droppedShared: 0, keptMismatch: 0, noSetExpansion: 0, unknownProduct: 0 },
     sets: [], cards: [], foreignNameOkBySet: {},
   };
   // Reihenfolge (Spec §3.1): Zuordnungsdatei ("<setId>": expansionId) -> ids.cardmarket aus TCGdex/pokemontcg,
@@ -565,6 +565,14 @@ export function fillCardmarketIds({
 
   const sharedId = (id) => (owners.get(id)?.length ?? 0) > 1;
   const isShared = (card) => tcgdexIds(card).some(sharedId);
+  const cardById = new Map();
+  for (const cards of cardsBySet.values()) for (const c of cards) cardById.set(c.id, c);
+  // Geteilte ID, deren Produkt laut Name einer ANDEREN Karte gehoert (die eigene passt nicht, siehe Expansionspruefung).
+  const heldByNamesake = (id, card) => {
+    if (!sharedId(id)) return false;
+    const name = productOf(id)?.name;
+    return Boolean(name) && owners.get(id).some((k) => k !== card.id && cmNameMatches(name, cardById.get(k)?.name));
+  };
 
   const bySet = {};
   const walk = (fn) => {
@@ -659,7 +667,11 @@ export function fillCardmarketIds({
       for (const b of bad) {
         if (newId !== null) { replaced.add(b.id); T.corrected++; report(card, b.id, b.expansion, newId, 'corrected-expansion'); }
         else if (b.foreign) { dropped.add(b.id); T.dropped++; report(card, b.id, b.expansion, null, 'dropped-mismatch'); }
-        else { T.keptMismatch++; report(card, b.id, b.expansion, null, 'kept-mismatch'); }
+        else if (heldByNamesake(b.id, card)) {
+          // Geteilte TCGdex-ID, deren Produkt namentlich zu einer anderen Karte passt (Trainer-Kit-Paare, pl2-2
+          // "Bastiodon GL" -> "Frost Rotom" von pl2-RT2): fuer diese Karte sicher falsch.
+          dropped.add(b.id); T.dropped++; T.droppedShared++; report(card, b.id, b.expansion, null, 'dropped-shared-mismatch');
+        } else { T.keptMismatch++; report(card, b.id, b.expansion, null, 'kept-mismatch'); }
       }
       if (!replaced.size && !dropped.size) continue;
       if (dropped.size) expansionDropped.set(card.id, new Set([...(expansionDropped.get(card.id) ?? []), ...dropped]));
