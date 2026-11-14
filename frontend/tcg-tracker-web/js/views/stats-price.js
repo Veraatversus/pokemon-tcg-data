@@ -30,7 +30,7 @@ function formatStatsPriceEuro(value) {
   return `${numeric.toFixed(2).replace('.', ',')} EUR`;
 }
 
-function formatStatsPriceNumber(value) {
+export function formatStatsPriceNumber(value) {
   return Number(value || 0).toLocaleString('de-DE');
 }
 
@@ -422,127 +422,91 @@ function computeWatchlistWorkspace(items = [], filters = {}, analytics = null) {
   };
 }
 
-function buildStatsPriceTabContent({
-  activeTab = 'dashboard',
-  analytics = null,
-  status = 'loading',
-  loadedCards = 0,
-  totalCards = 0,
-  errors = 0,
-  message = '',
-} = {}) {
-  const safeItems = Array.isArray(state.statsPrice.items) ? state.statsPrice.items : [];
+/** Frischer Watchlist-Zustand (Filter, sichtbare Anzahl, Debounce-Timer, Auto-Nachladen). */
+function createWatchlistState(filters = normalizeWatchlistFilters()) {
+  return {
+    filters,
+    visibleCount: STATS_PRICE_WATCHLIST_BATCH_SIZE,
+    debounceTimers: {},
+    autoLoadBudget: 0,
+    autoLoadInFlight: false,
+  };
+}
+
+/** Liefert state.statsPrice.watchlist und legt ihn bei Bedarf an. */
+function ensureWatchlistState() {
+  state.statsPrice.watchlist = state.statsPrice.watchlist || createWatchlistState();
+  return state.statsPrice.watchlist;
+}
+
+/** Liefert state.statsPrice.advanced (Advanced-Tab) und legt ihn bei Bedarf an. */
+function ensureAdvancedState() {
+  state.statsPrice.advanced = state.statsPrice.advanced || { filters: {}, selectedGroupKey: '', detailMode: 'top' };
+  return state.statsPrice.advanced;
+}
+
+/** Normalisiert den Advanced- und Watchlist-Zustand vor dem Rendern der Tabs. */
+function ensureStatsPriceViewState() {
   const advancedState = state.statsPrice.advanced || (state.statsPrice.advanced = {
     filters: normalizeAdvancedFilters(),
     selectedGroupKey: '',
     detailMode: 'top',
   });
-  const watchlistState = state.statsPrice.watchlist || (state.statsPrice.watchlist = {
-    filters: normalizeWatchlistFilters(),
-    visibleCount: STATS_PRICE_WATCHLIST_BATCH_SIZE,
-    debounceTimers: {},
-    autoLoadBudget: 0,
-    autoLoadInFlight: false,
-  });
+  const watchlistState = ensureWatchlistState();
   advancedState.filters = normalizeAdvancedFilters(advancedState.filters);
   advancedState.detailMode = String(advancedState.detailMode || 'top');
   watchlistState.filters = normalizeWatchlistFilters(watchlistState.filters);
   watchlistState.visibleCount = Math.max(STATS_PRICE_WATCHLIST_BATCH_SIZE, Number(watchlistState.visibleCount || STATS_PRICE_WATCHLIST_BATCH_SIZE));
   watchlistState.autoLoadBudget = Math.max(0, Number(watchlistState.autoLoadBudget || 0));
   watchlistState.autoLoadInFlight = Boolean(watchlistState.autoLoadInFlight);
+  return { advancedState, watchlistState };
+}
 
-  const pricedItems = safeItems.filter((item) => Number(item?.value) > 0);
-  const missingItems = safeItems.filter((item) => item?.value == null);
-  const bySet = Array.isArray(analytics?.setBreakdown) ? analytics.setBreakdown : [];
-  const topCards = Array.isArray(analytics?.topCards) ? analytics.topCards : [];
-  const coverage = Number(analytics?.priceCoverage || 0);
-  const avgValue = Number(analytics?.avgCollectedCardValue || 0);
+/** Abgeleitete Daten aller Preis-Tabs (Kennzahlen, Watchlist- und Advanced-Arbeitsbereich). */
+function buildStatsPriceTabContext(analytics, advancedState, watchlistState) {
+  const safeItems = Array.isArray(state.statsPrice.items) ? state.statsPrice.items : [];
   const detailStats = analytics?.details || {};
-  const medianValue = Number(detailStats?.medianValue || 0);
-  const p90Value = Number(detailStats?.p90Value || 0);
-  const topFiveShare = Number(detailStats?.topFiveValueShare || 0);
-  const pricedSetCoverage = Number(detailStats?.pricedSetCoverage || 0);
-  const spreadRatio = Number(detailStats?.priceSpreadRatio || 0);
   const watchlistWorkspace = computeWatchlistWorkspace(safeItems, watchlistState.filters, analytics);
   const watchlistItems = watchlistWorkspace.items;
   const watchlistVisibleItems = watchlistItems.slice(0, watchlistState.visibleCount);
-  const watchlistRemaining = Math.max(0, watchlistItems.length - watchlistVisibleItems.length);
   const advancedWorkspace = computeAdvancedWorkspace(safeItems, advancedState.filters);
   const advancedGroups = advancedWorkspace.groups;
   if (!advancedGroups.some((group) => group.key === advancedState.selectedGroupKey)) {
     advancedState.selectedGroupKey = advancedGroups[0]?.key || '';
   }
-  const activeAdvancedGroup = advancedGroups.find((group) => group.key === advancedState.selectedGroupKey) || null;
 
-  const tabsMarkup = STATS_PRICE_TABS.map((tab) => `
+  return {
+    pricedItems: safeItems.filter((item) => Number(item?.value) > 0),
+    missingItems: safeItems.filter((item) => item?.value == null),
+    bySet: Array.isArray(analytics?.setBreakdown) ? analytics.setBreakdown : [],
+    topCards: Array.isArray(analytics?.topCards) ? analytics.topCards : [],
+    coverage: Number(analytics?.priceCoverage || 0),
+    avgValue: Number(analytics?.avgCollectedCardValue || 0),
+    detailStats,
+    medianValue: Number(detailStats?.medianValue || 0),
+    p90Value: Number(detailStats?.p90Value || 0),
+    topFiveShare: Number(detailStats?.topFiveValueShare || 0),
+    pricedSetCoverage: Number(detailStats?.pricedSetCoverage || 0),
+    spreadRatio: Number(detailStats?.priceSpreadRatio || 0),
+    watchlistWorkspace,
+    watchlistItems,
+    watchlistVisibleItems,
+    watchlistRemaining: Math.max(0, watchlistItems.length - watchlistVisibleItems.length),
+    advancedWorkspace,
+    advancedGroups,
+    activeAdvancedGroup: advancedGroups.find((group) => group.key === advancedState.selectedGroupKey) || null,
+  };
+}
+
+function renderStatsPriceTabs(activeTab) {
+  return STATS_PRICE_TABS.map((tab) => `
     <button class="stats-price-tab-btn ${tab.id === activeTab ? 'is-active' : ''}" type="button" data-stats-price-tab="${tab.id}">
       ${escapeHtml(tab.label)}
     </button>`).join('');
+}
 
-  const chartRows = bySet.slice().map((entry, index) => {
-    const setId = String(entry?.setId || '').trim();
-    const pct = Math.max(2, Math.round((Number(entry?.value || 0) / Math.max(1, Number(analytics?.totalValue || 1))) * 100));
-    return `
-      <li class="stats-price-compare-row" data-set-id="${escapeHtml(setId)}">
-        <span class="stats-price-compare-rank">${index + 1}</span>
-        <div class="stats-price-compare-main">
-          <strong>${escapeHtml(entry?.setName || 'Unbekanntes Set')}</strong>
-          <small>${formatStatsPriceNumber(entry?.pricedCards)} bewertet</small>
-        </div>
-        <div class="stats-price-compare-bar"><span style="width:${pct}%"></span></div>
-        <strong class="stats-price-compare-value">${formatStatsPriceEuro(entry?.value)}</strong>
-      </li>`;
-  }).join('');
-
-  const drilldownBySet = missingItems.reduce((acc, item) => {
-    const key = String(item?.setId || '').trim() || 'unknown';
-    if (!acc.has(key)) {
-      acc.set(key, {
-        setId: key,
-        setName: String(item?.setName || 'Unbekanntes Set').trim(),
-        items: [],
-      });
-    }
-    acc.get(key).items.push(item);
-    return acc;
-  }, new Map());
-
-  const drilldownMarkup = Array.from(drilldownBySet.values())
-    .sort((a, b) => b.items.length - a.items.length)
-    .map((group) => `
-      <details class="stats-price-drill-group">
-        <summary>
-          <strong>${escapeHtml(group.setName)}</strong>
-          <small>${formatStatsPriceNumber(group.items.length)} ohne Preis</small>
-        </summary>
-        <ul class="stats-price-drill-list stats-price-scroll-region">
-          ${group.items
-            .map((item) => `
-              <li class="stats-price-drill-item" data-set-id="${escapeHtml(item?.setId || '')}">
-                <span class="stats-price-drill-number">${escapeHtml(item?.card?.number || item?.cardName || item?.cardKey || '')}</span>
-                <strong>${escapeHtml(item?.cardName || item?.card?.name || 'Unbekannte Karte')}</strong>
-                <small>${item?.failed ? 'Lookup-Fehler' : 'Kein Mapping-Eintrag'}</small>
-              </li>
-            `)
-            .join('')}
-        </ul>
-      </details>
-    `)
-    .join('');
-
-  const timelineMarkup = getStatsPriceTimeline(analytics, { loadedCards, totalCards, errors })
-    .map((step, index) => `
-      <li class="stats-price-story-item tone-${escapeHtml(step.tone)}">
-        <span class="stats-price-story-dot">${index + 1}</span>
-        <div>
-          <strong>${escapeHtml(step.title)}</strong>
-          <p>${escapeHtml(step.detail)}</p>
-        </div>
-      </li>
-    `)
-    .join('');
-
-  const dashboardHighlights = `
+function renderStatsPriceDashboardPanel({ coverage, missingItems, pricedItems, medianValue, p90Value, topFiveShare }, analytics, errors) {
+  return `
     <section class="stats-price-tab-panel is-visible" data-tab-panel="dashboard">
       <div class="stats-price-panel-grid">
         <article class="stats-price-surface-card">
@@ -561,8 +525,10 @@ function buildStatsPriceTabContent({
         </article>
       </div>
     </section>`;
+}
 
-  const topValuesMarkup = `
+function renderStatsPriceTopValuesPanel(topCards) {
+  return `
     <section class="stats-price-tab-panel" data-tab-panel="top-values">
       <ol class="stats-price-rich-list stats-price-scroll-region">
         ${topCards
@@ -588,8 +554,10 @@ function buildStatsPriceTabContent({
           .join('') || '<li class="stats-price-empty">Noch keine Top-Werte verfügbar.</li>'}
       </ol>
     </section>`;
+}
 
-  const trendsMarkup = `
+function renderStatsPriceTrendsPanel({ coverage, avgValue, topCards, detailStats, spreadRatio, pricedSetCoverage }) {
+  return `
     <section class="stats-price-tab-panel" data-tab-panel="trends">
       <div class="stats-price-trend-grid">
         <article class="stats-price-surface-card">
@@ -610,105 +578,120 @@ function buildStatsPriceTabContent({
         </article>
       </div>
     </section>`;
+}
 
-  const comparisonsMarkup = `
+function renderStatsPriceComparisonsPanel(bySet, analytics) {
+  const chartRows = bySet.slice().map((entry, index) => {
+    const setId = String(entry?.setId || '').trim();
+    const pct = Math.max(2, Math.round((Number(entry?.value || 0) / Math.max(1, Number(analytics?.totalValue || 1))) * 100));
+    return `
+      <li class="stats-price-compare-row" data-set-id="${escapeHtml(setId)}">
+        <span class="stats-price-compare-rank">${index + 1}</span>
+        <div class="stats-price-compare-main">
+          <strong>${escapeHtml(entry?.setName || 'Unbekanntes Set')}</strong>
+          <small>${formatStatsPriceNumber(entry?.pricedCards)} bewertet</small>
+        </div>
+        <div class="stats-price-compare-bar"><span style="width:${pct}%"></span></div>
+        <strong class="stats-price-compare-value">${formatStatsPriceEuro(entry?.value)}</strong>
+      </li>`;
+  }).join('');
+
+  return `
     <section class="stats-price-tab-panel" data-tab-panel="comparisons">
       <ul class="stats-price-compare-list stats-price-scroll-region">
         ${chartRows || '<li class="stats-price-empty">Noch keine Set-Vergleiche verfügbar.</li>'}
       </ul>
     </section>`;
+}
 
-  const watchlistMarkup = `
-    <section class="stats-price-tab-panel" data-tab-panel="watchlist">
+/** Set-Optionen fuer die Filter von Watchlist und Advanced (eindeutig je setId). */
+function renderStatsPriceSetOptions(bySet, selectedSetId) {
+  return Array.from(new Map(bySet.map((entry) => [String(entry?.setId || '').trim(), entry])).values())
+    .filter((entry) => String(entry?.setId || '').trim())
+    .map((entry) => `<option value="${escapeHtml(entry.setId)}" ${selectedSetId === String(entry.setId) ? 'selected' : ''}>${escapeHtml(entry.setName || entry.setId)}</option>`)
+    .join('');
+}
+
+function renderStatsPriceWatchlistToolbar(filters, bySet) {
+  return `
       <div class="stats-price-watchlist-toolbar">
         <label>Suche
-          <input type="search" value="${escapeHtml(watchlistWorkspace.filters.search)}" data-watchlist-filter="search" placeholder="Karte, Set, Nummer" autocomplete="off" />
+          <input type="search" value="${escapeHtml(filters.search)}" data-watchlist-filter="search" placeholder="Karte, Set, Nummer" autocomplete="off" />
         </label>
         <label>Set
           <select data-watchlist-filter="setId">
-            <option value="all" ${watchlistWorkspace.filters.setId === 'all' ? 'selected' : ''}>Alle Sets</option>
-            ${Array.from(new Map(bySet.map((entry) => [String(entry?.setId || '').trim(), entry])).values())
-      .filter((entry) => String(entry?.setId || '').trim())
-      .map((entry) => `<option value="${escapeHtml(entry.setId)}" ${watchlistWorkspace.filters.setId === String(entry.setId) ? 'selected' : ''}>${escapeHtml(entry.setName || entry.setId)}</option>`)
-      .join('')}
+            <option value="all" ${filters.setId === 'all' ? 'selected' : ''}>Alle Sets</option>
+            ${renderStatsPriceSetOptions(bySet, filters.setId)}
           </select>
         </label>
         <label>Variante
           <select data-watchlist-filter="variant">
-            <option value="all" ${watchlistWorkspace.filters.variant === 'all' ? 'selected' : ''}>Alle</option>
-            <option value="holo-only" ${watchlistWorkspace.filters.variant === 'holo-only' ? 'selected' : ''}>Holo</option>
-            <option value="reverse-holo-only" ${watchlistWorkspace.filters.variant === 'reverse-holo-only' ? 'selected' : ''}>Reverse Holo</option>
+            <option value="all" ${filters.variant === 'all' ? 'selected' : ''}>Alle</option>
+            <option value="holo-only" ${filters.variant === 'holo-only' ? 'selected' : ''}>Holo</option>
+            <option value="reverse-holo-only" ${filters.variant === 'reverse-holo-only' ? 'selected' : ''}>Reverse Holo</option>
           </select>
         </label>
         <label>Preisband
           <select data-watchlist-filter="valueBand">
-            <option value="all" ${watchlistWorkspace.filters.valueBand === 'all' ? 'selected' : ''}>Alle</option>
-            <option value="under1" ${watchlistWorkspace.filters.valueBand === 'under1' ? 'selected' : ''}>&lt; 1 EUR</option>
-            <option value="from1to5" ${watchlistWorkspace.filters.valueBand === 'from1to5' ? 'selected' : ''}>1-5 EUR</option>
-            <option value="from5to20" ${watchlistWorkspace.filters.valueBand === 'from5to20' ? 'selected' : ''}>5-20 EUR</option>
-            <option value="over20" ${watchlistWorkspace.filters.valueBand === 'over20' ? 'selected' : ''}>&gt; 20 EUR</option>
-            <option value="missing" ${watchlistWorkspace.filters.valueBand === 'missing' ? 'selected' : ''}>Ohne Preis</option>
+            <option value="all" ${filters.valueBand === 'all' ? 'selected' : ''}>Alle</option>
+            <option value="under1" ${filters.valueBand === 'under1' ? 'selected' : ''}>&lt; 1 EUR</option>
+            <option value="from1to5" ${filters.valueBand === 'from1to5' ? 'selected' : ''}>1-5 EUR</option>
+            <option value="from5to20" ${filters.valueBand === 'from5to20' ? 'selected' : ''}>5-20 EUR</option>
+            <option value="over20" ${filters.valueBand === 'over20' ? 'selected' : ''}>&gt; 20 EUR</option>
+            <option value="missing" ${filters.valueBand === 'missing' ? 'selected' : ''}>Ohne Preis</option>
           </select>
         </label>
         <label>Quantil
           <select data-watchlist-filter="quantile">
-            <option value="all" ${watchlistWorkspace.filters.quantile === 'all' ? 'selected' : ''}>Alle</option>
-            <option value="top1" ${watchlistWorkspace.filters.quantile === 'top1' ? 'selected' : ''}>Top 1%</option>
-            <option value="top5" ${watchlistWorkspace.filters.quantile === 'top5' ? 'selected' : ''}>Top 5%</option>
-            <option value="top10" ${watchlistWorkspace.filters.quantile === 'top10' ? 'selected' : ''}>Top 10%</option>
-            <option value="bottom20" ${watchlistWorkspace.filters.quantile === 'bottom20' ? 'selected' : ''}>Bottom 20%</option>
+            <option value="all" ${filters.quantile === 'all' ? 'selected' : ''}>Alle</option>
+            <option value="top1" ${filters.quantile === 'top1' ? 'selected' : ''}>Top 1%</option>
+            <option value="top5" ${filters.quantile === 'top5' ? 'selected' : ''}>Top 5%</option>
+            <option value="top10" ${filters.quantile === 'top10' ? 'selected' : ''}>Top 10%</option>
+            <option value="bottom20" ${filters.quantile === 'bottom20' ? 'selected' : ''}>Bottom 20%</option>
           </select>
         </label>
         <label>Qualität
           <select data-watchlist-filter="quality">
-            <option value="all" ${watchlistWorkspace.filters.quality === 'all' ? 'selected' : ''}>Alles</option>
-            <option value="priced-only" ${watchlistWorkspace.filters.quality === 'priced-only' ? 'selected' : ''}>Nur bepreist</option>
-            <option value="missing-only" ${watchlistWorkspace.filters.quality === 'missing-only' ? 'selected' : ''}>Nur fehlend</option>
-            <option value="failed-only" ${watchlistWorkspace.filters.quality === 'failed-only' ? 'selected' : ''}>Nur Fehler</option>
+            <option value="all" ${filters.quality === 'all' ? 'selected' : ''}>Alles</option>
+            <option value="priced-only" ${filters.quality === 'priced-only' ? 'selected' : ''}>Nur bepreist</option>
+            <option value="missing-only" ${filters.quality === 'missing-only' ? 'selected' : ''}>Nur fehlend</option>
+            <option value="failed-only" ${filters.quality === 'failed-only' ? 'selected' : ''}>Nur Fehler</option>
           </select>
         </label>
         <label>Cardmarket
           <select data-watchlist-filter="cardmarket">
-            <option value="all" ${watchlistWorkspace.filters.cardmarket === 'all' ? 'selected' : ''}>Alle</option>
-            <option value="with-link" ${watchlistWorkspace.filters.cardmarket === 'with-link' ? 'selected' : ''}>Mit Link</option>
-            <option value="without-link" ${watchlistWorkspace.filters.cardmarket === 'without-link' ? 'selected' : ''}>Ohne Link</option>
+            <option value="all" ${filters.cardmarket === 'all' ? 'selected' : ''}>Alle</option>
+            <option value="with-link" ${filters.cardmarket === 'with-link' ? 'selected' : ''}>Mit Link</option>
+            <option value="without-link" ${filters.cardmarket === 'without-link' ? 'selected' : ''}>Ohne Link</option>
           </select>
         </label>
         <label>Min EUR
-          <input type="text" inputmode="decimal" value="${escapeHtml(watchlistWorkspace.filters.minValue)}" data-watchlist-filter="minValue" placeholder="z. B. 10" />
+          <input type="text" inputmode="decimal" value="${escapeHtml(filters.minValue)}" data-watchlist-filter="minValue" placeholder="z. B. 10" />
         </label>
         <label>Max EUR
-          <input type="text" inputmode="decimal" value="${escapeHtml(watchlistWorkspace.filters.maxValue)}" data-watchlist-filter="maxValue" placeholder="z. B. 250" />
+          <input type="text" inputmode="decimal" value="${escapeHtml(filters.maxValue)}" data-watchlist-filter="maxValue" placeholder="z. B. 250" />
         </label>
         <label>Sortierung
           <select data-watchlist-filter="sortBy">
-            <option value="value-desc" ${watchlistWorkspace.filters.sortBy === 'value-desc' ? 'selected' : ''}>Wert absteigend</option>
-            <option value="value-asc" ${watchlistWorkspace.filters.sortBy === 'value-asc' ? 'selected' : ''}>Wert aufsteigend</option>
-            <option value="watch-score-desc" ${watchlistWorkspace.filters.sortBy === 'watch-score-desc' ? 'selected' : ''}>Watch-Score</option>
-            <option value="card-asc" ${watchlistWorkspace.filters.sortBy === 'card-asc' ? 'selected' : ''}>Karte A-Z</option>
-            <option value="set-asc" ${watchlistWorkspace.filters.sortBy === 'set-asc' ? 'selected' : ''}>Set A-Z</option>
-            <option value="number-asc" ${watchlistWorkspace.filters.sortBy === 'number-asc' ? 'selected' : ''}>Nummer</option>
+            <option value="value-desc" ${filters.sortBy === 'value-desc' ? 'selected' : ''}>Wert absteigend</option>
+            <option value="value-asc" ${filters.sortBy === 'value-asc' ? 'selected' : ''}>Wert aufsteigend</option>
+            <option value="watch-score-desc" ${filters.sortBy === 'watch-score-desc' ? 'selected' : ''}>Watch-Score</option>
+            <option value="card-asc" ${filters.sortBy === 'card-asc' ? 'selected' : ''}>Karte A-Z</option>
+            <option value="set-asc" ${filters.sortBy === 'set-asc' ? 'selected' : ''}>Set A-Z</option>
+            <option value="number-asc" ${filters.sortBy === 'number-asc' ? 'selected' : ''}>Nummer</option>
           </select>
         </label>
         <button type="button" class="stats-price-watchlist-reset" data-watchlist-reset="1">Filter zurücksetzen</button>
-      </div>
+      </div>`;
+}
 
-      <div class="stats-price-watchlist-summary">
-        <article class="stats-price-card"><span>Treffer</span><strong>${formatStatsPriceNumber(watchlistWorkspace.summary.cards)}</strong></article>
-        <article class="stats-price-card"><span>Bepreist</span><strong>${formatStatsPriceNumber(watchlistWorkspace.summary.pricedCards)}</strong></article>
-        <article class="stats-price-card"><span>Mit Link</span><strong>${formatStatsPriceNumber(watchlistWorkspace.summary.linkedCards)}</strong></article>
-        <article class="stats-price-card"><span>Sets</span><strong>${formatStatsPriceNumber(watchlistWorkspace.summary.setCount)}</strong></article>
-      </div>
-
-      <ol class="stats-price-rich-list stats-price-scroll-region stats-price-watchlist-scroll" data-watchlist-scroll-region="1" data-watchlist-total="${watchlistItems.length}">
-        ${watchlistVisibleItems
-          .map((item, index) => {
-            const globalRank = index + 1;
-            const watchlistCardNumber = String(item?.card?.number || item?.cardKey || '').trim();
-            const isReverse = Boolean(item?.isReverseHolo);
-            const reverseClass = isReverse ? ' is-reverse' : '';
-            const cardmarketUrl = getItemCardmarketUrl(item);
-            return `
+function renderStatsPriceWatchlistItem(item, index) {
+  const globalRank = index + 1;
+  const watchlistCardNumber = String(item?.card?.number || item?.cardKey || '').trim();
+  const isReverse = Boolean(item?.isReverseHolo);
+  const reverseClass = isReverse ? ' is-reverse' : '';
+  const cardmarketUrl = getItemCardmarketUrl(item);
+  return `
             <li class="stats-price-rich-item stats-price-rich-item--thumb${reverseClass}" data-set-id="${escapeHtml(item?.setId || '')}" data-stats-card-key="${escapeHtml(statsPriceCardKey(item))}" data-watchlist-card="1" data-watchlist-card-key="${escapeHtml(collectionKeyOf(item?.card))}" data-watchlist-card-number="${escapeHtml(watchlistCardNumber)}">
               <span class="stats-price-rich-rank">${globalRank}</span>
               <span class="stats-price-thumb" aria-hidden="true">
@@ -724,7 +707,22 @@ function buildStatsPriceTabContent({
       : ''}
               <strong class="stats-price-rich-value">${formatStatsPriceEuro(item?.value)}</strong>
             </li>`;
-          })
+}
+
+function renderStatsPriceWatchlistPanel({ watchlistWorkspace, watchlistItems, watchlistVisibleItems, watchlistRemaining, bySet }) {
+  return `
+    <section class="stats-price-tab-panel" data-tab-panel="watchlist">${renderStatsPriceWatchlistToolbar(watchlistWorkspace.filters, bySet)}
+
+      <div class="stats-price-watchlist-summary">
+        <article class="stats-price-card"><span>Treffer</span><strong>${formatStatsPriceNumber(watchlistWorkspace.summary.cards)}</strong></article>
+        <article class="stats-price-card"><span>Bepreist</span><strong>${formatStatsPriceNumber(watchlistWorkspace.summary.pricedCards)}</strong></article>
+        <article class="stats-price-card"><span>Mit Link</span><strong>${formatStatsPriceNumber(watchlistWorkspace.summary.linkedCards)}</strong></article>
+        <article class="stats-price-card"><span>Sets</span><strong>${formatStatsPriceNumber(watchlistWorkspace.summary.setCount)}</strong></article>
+      </div>
+
+      <ol class="stats-price-rich-list stats-price-scroll-region stats-price-watchlist-scroll" data-watchlist-scroll-region="1" data-watchlist-total="${watchlistItems.length}">
+        ${watchlistVisibleItems
+          .map(renderStatsPriceWatchlistItem)
           .join('') || '<li class="stats-price-empty">Keine Treffer ür aktuelle Filter.</li>'}
         ${watchlistRemaining > 0 ? '<li class="stats-price-watchlist-sentinel" data-watchlist-sentinel="1" aria-hidden="true"></li>' : ''}
       </ol>
@@ -736,10 +734,12 @@ function buildStatsPriceTabContent({
       : '<span class="stats-price-watchlist-end">Ende der Liste erreicht</span>'}
       </div>
     </section>`;
+}
 
-  const advancedGroupsMarkup = advancedGroups
+function renderStatsPriceAdvancedGroups(advancedGroups, selectedGroupKey) {
+  return advancedGroups
     .map((group) => {
-      const isActive = group.key === advancedState.selectedGroupKey;
+      const isActive = group.key === selectedGroupKey;
       return `
           <li class="stats-price-advanced-group ${isActive ? 'is-active' : ''}" data-advanced-group-key="${escapeHtml(group.key)}" ${group.setId ? `data-set-id="${escapeHtml(group.setId)}"` : ''}>
             <div class="stats-price-advanced-group-main">
@@ -750,13 +750,10 @@ function buildStatsPriceTabContent({
           </li>`;
     })
     .join('');
+}
 
-  const advancedDetailMode = advancedState.detailMode;
-  const activeGroupItems = Array.isArray(activeAdvancedGroup?.items) ? activeAdvancedGroup.items : [];
-  const activeGroupPriced = activeGroupItems.filter((item) => toFinitePositive(item?.value) != null);
-  const activeGroupMissing = activeGroupItems.filter((item) => toFinitePositive(item?.value) == null);
-
-  const advancedDetailSummaryMarkup = `
+function renderStatsPriceAdvancedSummaryDetail(activeAdvancedGroup, activeGroupItems) {
+  return `
       <div class="stats-price-advanced-summary-grid">
         <article class="stats-price-surface-card">
           <h4>Gruppe</h4>
@@ -771,8 +768,10 @@ function buildStatsPriceTabContent({
           <p>${activeAdvancedGroup ? `${formatStatsPriceNumber(activeAdvancedGroup.missingCount)} unbewertete Karten, ${formatStatsPriceNumber(activeAdvancedGroup.failedCount)} technische Fehler.` : 'n/a'}</p>
         </article>
       </div>`;
+}
 
-  const advancedDetailTopMarkup = `
+function renderStatsPriceAdvancedTopDetail(activeGroupPriced) {
+  return `
       <ol class="stats-price-rich-list stats-price-scroll-region">
         ${activeGroupPriced
       .slice()
@@ -797,7 +796,9 @@ function buildStatsPriceTabContent({
       })
       .join('') || '<li class="stats-price-empty">Keine bepreisten Karten in dieser Auswahl.</li>'}
       </ol>`;
+}
 
+function renderStatsPriceAdvancedMissingDetail(activeGroupMissing) {
   const advancedDetailMissingMarkup = `
       <ul class="stats-price-drill-list stats-price-scroll-region">
         ${activeGroupMissing
@@ -811,13 +812,16 @@ function buildStatsPriceTabContent({
           `)
       .join('') || '<li class="stats-price-empty">Keine Missing-Items in dieser Auswahl.</li>'}
       </ul>`;
+  return advancedDetailMissingMarkup;
+}
 
+function renderStatsPriceAdvancedDistributionDetail(activeGroupItems) {
   const advancedDistributionByBand = activeGroupItems.reduce((acc, item) => {
     const band = getValueBandKey(item?.value);
     acc.set(band, (acc.get(band) || 0) + 1);
     return acc;
   }, new Map());
-  const advancedDetailDistributionMarkup = `
+  return `
       <ul class="stats-price-advanced-distribution">
         ${['under1', 'from1to5', 'from5to20', 'over20', 'missing'].map((band) => `
           <li>
@@ -826,67 +830,80 @@ function buildStatsPriceTabContent({
           </li>
         `).join('')}
       </ul>`;
+}
 
-  let advancedDetailContent = advancedDetailSummaryMarkup;
-  if (advancedDetailMode === 'top') advancedDetailContent = advancedDetailTopMarkup;
-  if (advancedDetailMode === 'missing') advancedDetailContent = advancedDetailMissingMarkup;
-  if (advancedDetailMode === 'distribution') advancedDetailContent = advancedDetailDistributionMarkup;
+/** Detailbereich der gewaehlten Advanced-Gruppe; unbekannter Modus zeigt die Summary. */
+function renderStatsPriceAdvancedDetail(advancedDetailMode, activeAdvancedGroup) {
+  const activeGroupItems = Array.isArray(activeAdvancedGroup?.items) ? activeAdvancedGroup.items : [];
+  if (advancedDetailMode === 'top') {
+    return renderStatsPriceAdvancedTopDetail(activeGroupItems.filter((item) => toFinitePositive(item?.value) != null));
+  }
+  if (advancedDetailMode === 'missing') {
+    return renderStatsPriceAdvancedMissingDetail(activeGroupItems.filter((item) => toFinitePositive(item?.value) == null));
+  }
+  if (advancedDetailMode === 'distribution') return renderStatsPriceAdvancedDistributionDetail(activeGroupItems);
+  return renderStatsPriceAdvancedSummaryDetail(activeAdvancedGroup, activeGroupItems);
+}
 
-  const advancedMarkup = `
-    <section class="stats-price-tab-panel" data-tab-panel="advanced">
+function renderStatsPriceAdvancedToolbar(filters, bySet) {
+  return `
       <div class="stats-price-advanced-toolbar">
         <label>Set
           <select data-advanced-filter="setId">
-            <option value="all" ${advancedWorkspace.filters.setId === 'all' ? 'selected' : ''}>Alle Sets</option>
-            ${Array.from(new Map(bySet.map((entry) => [String(entry?.setId || '').trim(), entry])).values())
-      .filter((entry) => String(entry?.setId || '').trim())
-      .map((entry) => `<option value="${escapeHtml(entry.setId)}" ${advancedWorkspace.filters.setId === String(entry.setId) ? 'selected' : ''}>${escapeHtml(entry.setName || entry.setId)}</option>`)
-      .join('')}
+            <option value="all" ${filters.setId === 'all' ? 'selected' : ''}>Alle Sets</option>
+            ${renderStatsPriceSetOptions(bySet, filters.setId)}
           </select>
         </label>
         <label>Preisband
           <select data-advanced-filter="valueBand">
-            <option value="all" ${advancedWorkspace.filters.valueBand === 'all' ? 'selected' : ''}>Alle</option>
-            <option value="under1" ${advancedWorkspace.filters.valueBand === 'under1' ? 'selected' : ''}>&lt; 1 EUR</option>
-            <option value="from1to5" ${advancedWorkspace.filters.valueBand === 'from1to5' ? 'selected' : ''}>1-5 EUR</option>
-            <option value="from5to20" ${advancedWorkspace.filters.valueBand === 'from5to20' ? 'selected' : ''}>5-20 EUR</option>
-            <option value="over20" ${advancedWorkspace.filters.valueBand === 'over20' ? 'selected' : ''}>&gt; 20 EUR</option>
-            <option value="missing" ${advancedWorkspace.filters.valueBand === 'missing' ? 'selected' : ''}>Ohne Preis</option>
+            <option value="all" ${filters.valueBand === 'all' ? 'selected' : ''}>Alle</option>
+            <option value="under1" ${filters.valueBand === 'under1' ? 'selected' : ''}>&lt; 1 EUR</option>
+            <option value="from1to5" ${filters.valueBand === 'from1to5' ? 'selected' : ''}>1-5 EUR</option>
+            <option value="from5to20" ${filters.valueBand === 'from5to20' ? 'selected' : ''}>5-20 EUR</option>
+            <option value="over20" ${filters.valueBand === 'over20' ? 'selected' : ''}>&gt; 20 EUR</option>
+            <option value="missing" ${filters.valueBand === 'missing' ? 'selected' : ''}>Ohne Preis</option>
           </select>
         </label>
         <label>Quantil
           <select data-advanced-filter="quantile">
-            <option value="all" ${advancedWorkspace.filters.quantile === 'all' ? 'selected' : ''}>Alle</option>
-            <option value="top1" ${advancedWorkspace.filters.quantile === 'top1' ? 'selected' : ''}>Top 1%</option>
-            <option value="top5" ${advancedWorkspace.filters.quantile === 'top5' ? 'selected' : ''}>Top 5%</option>
-            <option value="top10" ${advancedWorkspace.filters.quantile === 'top10' ? 'selected' : ''}>Top 10%</option>
-            <option value="bottom20" ${advancedWorkspace.filters.quantile === 'bottom20' ? 'selected' : ''}>Bottom 20%</option>
+            <option value="all" ${filters.quantile === 'all' ? 'selected' : ''}>Alle</option>
+            <option value="top1" ${filters.quantile === 'top1' ? 'selected' : ''}>Top 1%</option>
+            <option value="top5" ${filters.quantile === 'top5' ? 'selected' : ''}>Top 5%</option>
+            <option value="top10" ${filters.quantile === 'top10' ? 'selected' : ''}>Top 10%</option>
+            <option value="bottom20" ${filters.quantile === 'bottom20' ? 'selected' : ''}>Bottom 20%</option>
           </select>
         </label>
         <label>Qualität
           <select data-advanced-filter="quality">
-            <option value="all" ${advancedWorkspace.filters.quality === 'all' ? 'selected' : ''}>Alles</option>
-            <option value="priced-only" ${advancedWorkspace.filters.quality === 'priced-only' ? 'selected' : ''}>Nur bepreist</option>
-            <option value="missing-only" ${advancedWorkspace.filters.quality === 'missing-only' ? 'selected' : ''}>Nur fehlende Preise</option>
-            <option value="failed-only" ${advancedWorkspace.filters.quality === 'failed-only' ? 'selected' : ''}>Nur Lookup-Fehler</option>
+            <option value="all" ${filters.quality === 'all' ? 'selected' : ''}>Alles</option>
+            <option value="priced-only" ${filters.quality === 'priced-only' ? 'selected' : ''}>Nur bepreist</option>
+            <option value="missing-only" ${filters.quality === 'missing-only' ? 'selected' : ''}>Nur fehlende Preise</option>
+            <option value="failed-only" ${filters.quality === 'failed-only' ? 'selected' : ''}>Nur Lookup-Fehler</option>
           </select>
         </label>
         <label>Gruppierung
           <select data-advanced-filter="groupBy">
-            <option value="set" ${advancedWorkspace.filters.groupBy === 'set' ? 'selected' : ''}>Nach Set</option>
-            <option value="value-band" ${advancedWorkspace.filters.groupBy === 'value-band' ? 'selected' : ''}>Nach Preisband</option>
-            <option value="quantile" ${advancedWorkspace.filters.groupBy === 'quantile' ? 'selected' : ''}>Nach Quantil</option>
+            <option value="set" ${filters.groupBy === 'set' ? 'selected' : ''}>Nach Set</option>
+            <option value="value-band" ${filters.groupBy === 'value-band' ? 'selected' : ''}>Nach Preisband</option>
+            <option value="quantile" ${filters.groupBy === 'quantile' ? 'selected' : ''}>Nach Quantil</option>
           </select>
         </label>
         <label>Sortierung
           <select data-advanced-filter="sortBy">
-            <option value="value-desc" ${advancedWorkspace.filters.sortBy === 'value-desc' ? 'selected' : ''}>Wert absteigend</option>
-            <option value="value-asc" ${advancedWorkspace.filters.sortBy === 'value-asc' ? 'selected' : ''}>Wert aufsteigend</option>
-            <option value="count-desc" ${advancedWorkspace.filters.sortBy === 'count-desc' ? 'selected' : ''}>Kartenanzahl</option>
-            <option value="gap-desc" ${advancedWorkspace.filters.sortBy === 'gap-desc' ? 'selected' : ''}>Coverage Gap</option>
+            <option value="value-desc" ${filters.sortBy === 'value-desc' ? 'selected' : ''}>Wert absteigend</option>
+            <option value="value-asc" ${filters.sortBy === 'value-asc' ? 'selected' : ''}>Wert aufsteigend</option>
+            <option value="count-desc" ${filters.sortBy === 'count-desc' ? 'selected' : ''}>Kartenanzahl</option>
+            <option value="gap-desc" ${filters.sortBy === 'gap-desc' ? 'selected' : ''}>Coverage Gap</option>
           </select>
         </label>
-      </div>
+      </div>`;
+}
+
+function renderStatsPriceAdvancedPanel({ advancedWorkspace, advancedGroups, activeAdvancedGroup, bySet }, advancedState) {
+  const advancedGroupsMarkup = renderStatsPriceAdvancedGroups(advancedGroups, advancedState.selectedGroupKey);
+  const advancedDetailMode = advancedState.detailMode;
+  return `
+    <section class="stats-price-tab-panel" data-tab-panel="advanced">${renderStatsPriceAdvancedToolbar(advancedWorkspace.filters, bySet)}
 
       <div class="stats-price-advanced-summary">
         <article class="stats-price-card"><span>Treffer</span><strong>${formatStatsPriceNumber(advancedWorkspace.summary.cards)}</strong></article>
@@ -908,40 +925,108 @@ function buildStatsPriceTabContent({
             <button type="button" data-advanced-detail-mode="missing" class="${advancedDetailMode === 'missing' ? 'is-active' : ''}">Missing</button>
             <button type="button" data-advanced-detail-mode="distribution" class="${advancedDetailMode === 'distribution' ? 'is-active' : ''}">Distribution</button>
           </div>
-          ${advancedDetailContent}
+          ${renderStatsPriceAdvancedDetail(advancedDetailMode, activeAdvancedGroup)}
         </section>
       </div>
     </section>`;
+}
 
-  const timelinePanelMarkup = `
+function renderStatsPriceTimelinePanel(analytics, { loadedCards, totalCards, errors }) {
+  const timelineMarkup = getStatsPriceTimeline(analytics, { loadedCards, totalCards, errors })
+    .map((step, index) => `
+      <li class="stats-price-story-item tone-${escapeHtml(step.tone)}">
+        <span class="stats-price-story-dot">${index + 1}</span>
+        <div>
+          <strong>${escapeHtml(step.title)}</strong>
+          <p>${escapeHtml(step.detail)}</p>
+        </div>
+      </li>
+    `)
+    .join('');
+
+  return `
     <section class="stats-price-tab-panel" data-tab-panel="timeline">
       <ol class="stats-price-story-list">${timelineMarkup}</ol>
     </section>`;
+}
 
-  const drilldownPanelMarkup = `
+/** Karten ohne Preis, gruppiert nach Set (meiste Luecken zuerst). */
+function renderStatsPriceDrilldownGroups(missingItems) {
+  const drilldownBySet = missingItems.reduce((acc, item) => {
+    const key = String(item?.setId || '').trim() || 'unknown';
+    if (!acc.has(key)) {
+      acc.set(key, {
+        setId: key,
+        setName: String(item?.setName || 'Unbekanntes Set').trim(),
+        items: [],
+      });
+    }
+    acc.get(key).items.push(item);
+    return acc;
+  }, new Map());
+
+  return Array.from(drilldownBySet.values())
+    .sort((a, b) => b.items.length - a.items.length)
+    .map((group) => `
+      <details class="stats-price-drill-group">
+        <summary>
+          <strong>${escapeHtml(group.setName)}</strong>
+          <small>${formatStatsPriceNumber(group.items.length)} ohne Preis</small>
+        </summary>
+        <ul class="stats-price-drill-list stats-price-scroll-region">
+          ${group.items
+            .map((item) => `
+              <li class="stats-price-drill-item" data-set-id="${escapeHtml(item?.setId || '')}">
+                <span class="stats-price-drill-number">${escapeHtml(item?.card?.number || item?.cardName || item?.cardKey || '')}</span>
+                <strong>${escapeHtml(item?.cardName || item?.card?.name || 'Unbekannte Karte')}</strong>
+                <small>${item?.failed ? 'Lookup-Fehler' : 'Kein Mapping-Eintrag'}</small>
+              </li>
+            `)
+            .join('')}
+        </ul>
+      </details>
+    `)
+    .join('');
+}
+
+function renderStatsPriceDrilldownPanel(missingItems, errors) {
+  return `
     <section class="stats-price-tab-panel" data-tab-panel="drilldown">
       <div class="stats-price-drill-headline">
         <strong>${formatStatsPriceNumber(missingItems.length)} Karten ohne Preis</strong>
         <small>${errors > 0 ? `${formatStatsPriceNumber(errors)} technische Fehler` : 'Keine technischen Fehler gemeldet'}</small>
       </div>
       <div class="stats-price-drill-groups">
-        ${drilldownMarkup || '<p class="stats-price-empty">Keine Drilldown-Lcken vorhanden.</p>'}
+        ${renderStatsPriceDrilldownGroups(missingItems) || '<p class="stats-price-empty">Keine Drilldown-Lcken vorhanden.</p>'}
       </div>
     </section>`;
+}
+
+function buildStatsPriceTabContent({
+  activeTab = 'dashboard',
+  analytics = null,
+  status = 'loading',
+  loadedCards = 0,
+  totalCards = 0,
+  errors = 0,
+  message = '',
+} = {}) {
+  const { advancedState, watchlistState } = ensureStatsPriceViewState();
+  const context = buildStatsPriceTabContext(analytics, advancedState, watchlistState);
 
   const panelMap = {
-    dashboard: dashboardHighlights,
-    'top-values': topValuesMarkup,
-    trends: trendsMarkup,
-    comparisons: comparisonsMarkup,
-    advanced: advancedMarkup,
-    watchlist: watchlistMarkup,
-    timeline: timelinePanelMarkup,
-    drilldown: drilldownPanelMarkup,
+    dashboard: renderStatsPriceDashboardPanel(context, analytics, errors),
+    'top-values': renderStatsPriceTopValuesPanel(context.topCards),
+    trends: renderStatsPriceTrendsPanel(context),
+    comparisons: renderStatsPriceComparisonsPanel(context.bySet, analytics),
+    advanced: renderStatsPriceAdvancedPanel(context, advancedState),
+    watchlist: renderStatsPriceWatchlistPanel(context),
+    timeline: renderStatsPriceTimelinePanel(analytics, { loadedCards, totalCards, errors }),
+    drilldown: renderStatsPriceDrilldownPanel(context.missingItems, errors),
   };
 
   return {
-    tabsMarkup,
+    tabsMarkup: renderStatsPriceTabs(activeTab),
     contentMarkup: panelMap[activeTab] || panelMap.dashboard,
     completionLabel: message || (status === 'final' ? 'Preisradar abgeschlossen.' : `${formatStatsPriceNumber(loadedCards)} / ${formatStatsPriceNumber(totalCards)} Karten geladen`),
   };
@@ -995,61 +1080,36 @@ function updateStatsPriceKpiDom(container, { progress, totalValue, averageValue,
   }
 }
 
-function renderStatsPriceSnapshot({
-  status = 'loading',
-  analytics = null,
-  loadedCards = 0,
-  totalCards = 0,
-  errors = 0,
-  message = '',
-  preserveWatchlistScroll = undefined,
-} = {}) {
-  const container = getStatsPriceContainer();
-  if (!container) return;
-
-  const captureWatchlistScrollSnapshot = () => {
-    const scrollRegion = container.querySelector('[data-watchlist-scroll-region]');
-    if (!scrollRegion) return null;
-    return {
-      scrollTop: Math.max(0, Number(scrollRegion.scrollTop || 0)),
-    };
-  };
-
-  const progress = totalCards > 0 ? Math.round((loadedCards / totalCards) * 100) : 0;
-  const totalValue = analytics?.totalValue || 0;
-  const averageValue = analytics?.avgCollectedCardValue || 0;
-  const collectedCards = analytics?.collectedCards || 0;
-  const pricedCollectedCards = analytics?.pricedCollectedCards || 0;
-  const priceCoverage = analytics?.priceCoverage || 0;
-  const activeTab = STATS_PRICE_TABS.some((tab) => tab.id === state.statsPrice.activeTab)
+function getActiveStatsPriceTab() {
+  return STATS_PRICE_TABS.some((tab) => tab.id === state.statsPrice.activeTab)
     ? state.statsPrice.activeTab
     : 'dashboard';
-  const effectiveWatchlistScrollSnapshot = preserveWatchlistScroll === false
-    ? null
-    : (preserveWatchlistScroll && typeof preserveWatchlistScroll === 'object'
-      ? preserveWatchlistScroll
-      : (activeTab === 'watchlist' ? captureWatchlistScrollSnapshot() : null));
-  const tabContent = buildStatsPriceTabContent({
-    activeTab,
-    analytics,
-    status,
-    loadedCards,
-    totalCards,
-    errors,
-    message,
-  });
+}
 
-  container.dataset.state = status;
-  // Performance: bei 'partial' nur die Progress-/KPI-Werte im bestehenden
-  // DOM aktualisieren — KEIN kompletter innerHTML-Rebuild. Der wäre bei
-  // 7000+ Karten pro Chunk teuer und würde den Browser einfrieren lassen.
-  // Beim 'loading' (erster Aufruf) und 'final' rendern wir die Shell neu.
-  const partialLiveUpdate = status === 'partial'
-    && container.querySelector('[data-stats-progress-pct]') !== null;
-  if (partialLiveUpdate) {
-    updateStatsPriceKpiDom(container, { progress, totalValue, averageValue, collectedCards, pricedCollectedCards, priceCoverage, errors, message, tabContent });
-  } else {
-  container.innerHTML = `
+function captureWatchlistScrollSnapshot(container) {
+  const scrollRegion = container.querySelector('[data-watchlist-scroll-region]');
+  if (!scrollRegion) return null;
+  return {
+    scrollTop: Math.max(0, Number(scrollRegion.scrollTop || 0)),
+  };
+}
+
+/** Kennzahlen fuer Fortschritt und KPI-Karten. */
+function computeStatsPriceKpis(analytics, loadedCards, totalCards) {
+  return {
+    progress: totalCards > 0 ? Math.round((loadedCards / totalCards) * 100) : 0,
+    totalValue: analytics?.totalValue || 0,
+    averageValue: analytics?.avgCollectedCardValue || 0,
+    collectedCards: analytics?.collectedCards || 0,
+    pricedCollectedCards: analytics?.pricedCollectedCards || 0,
+    priceCoverage: analytics?.priceCoverage || 0,
+  };
+}
+
+/** Komplettes Markup des Preis-Panels (Kopf, KPI-Karten, Tabs, Tab-Inhalt). */
+function renderStatsPriceShell({ status, tabContent, kpis, errors }) {
+  const { progress, totalValue, averageValue, collectedCards, pricedCollectedCards, priceCoverage } = kpis;
+  return `
     <article class="stats-price-panel ${status === 'final' ? 'stats-price-enter' : ''}">
       <header class="stats-price-head">
         <div>
@@ -1094,7 +1154,51 @@ function renderStatsPriceSnapshot({
         ${tabContent.contentMarkup}
       </section>
     </article>`;
-  } // end if (!partialLiveUpdate)
+}
+
+function renderStatsPriceSnapshot({
+  status = 'loading',
+  analytics = null,
+  loadedCards = 0,
+  totalCards = 0,
+  errors = 0,
+  message = '',
+  preserveWatchlistScroll = undefined,
+} = {}) {
+  const container = getStatsPriceContainer();
+  if (!container) return;
+
+  // Argumente fuer das erneute Rendern aus den Event-Handlern.
+  const snapshotArgs = { status, analytics, loadedCards, totalCards, errors, message };
+  const kpis = computeStatsPriceKpis(analytics, loadedCards, totalCards);
+  const activeTab = getActiveStatsPriceTab();
+  const effectiveWatchlistScrollSnapshot = preserveWatchlistScroll === false
+    ? null
+    : (preserveWatchlistScroll && typeof preserveWatchlistScroll === 'object'
+      ? preserveWatchlistScroll
+      : (activeTab === 'watchlist' ? captureWatchlistScrollSnapshot(container) : null));
+  const tabContent = buildStatsPriceTabContent({
+    activeTab,
+    analytics,
+    status,
+    loadedCards,
+    totalCards,
+    errors,
+    message,
+  });
+
+  container.dataset.state = status;
+  // Performance: bei 'partial' nur die Progress-/KPI-Werte im bestehenden
+  // DOM aktualisieren — KEIN kompletter innerHTML-Rebuild. Der wäre bei
+  // 7000+ Karten pro Chunk teuer und würde den Browser einfrieren lassen.
+  // Beim 'loading' (erster Aufruf) und 'final' rendern wir die Shell neu.
+  const partialLiveUpdate = status === 'partial'
+    && container.querySelector('[data-stats-progress-pct]') !== null;
+  if (partialLiveUpdate) {
+    updateStatsPriceKpiDom(container, { ...kpis, errors, message, tabContent });
+  } else {
+    container.innerHTML = renderStatsPriceShell({ status, tabContent, kpis, errors });
+  }
 
   const restoreWatchlistScrollSnapshot = (snapshot) => {
     if (!snapshot || activeTab !== 'watchlist') return;
@@ -1117,39 +1221,37 @@ function renderStatsPriceSnapshot({
 
   restoreWatchlistScrollSnapshot(effectiveWatchlistScrollSnapshot);
 
+  const loadMoreWatchlistItems = (options) => loadMoreStatsPriceWatchlistItems(container, snapshotArgs, options);
+  bindStatsPriceTabButtons(container, snapshotArgs);
+  bindStatsPriceAdvancedControls(container, snapshotArgs);
+  bindStatsPriceWatchlistFilters(container, snapshotArgs);
+  bindStatsPriceWatchlistButtons(container, snapshotArgs, loadMoreWatchlistItems);
+  bindStatsPriceWatchlistScrollRegions(container, loadMoreWatchlistItems);
+  bindStatsPriceNavigation(container);
+}
+
+function bindStatsPriceTabButtons(container, snapshotArgs) {
   container.querySelectorAll('.stats-price-tab-btn[data-stats-price-tab]').forEach((tabButton) => {
     tabButton.addEventListener('click', () => {
       const nextTab = String(tabButton.dataset.statsPriceTab || '').trim();
       if (!nextTab || nextTab === state.statsPrice.activeTab) return;
       state.statsPrice.activeTab = nextTab;
-      renderStatsPriceSnapshot({
-        status,
-        analytics,
-        loadedCards,
-        totalCards,
-        errors,
-        message,
-      });
+      renderStatsPriceSnapshot({ ...snapshotArgs });
     });
   });
+}
 
+function bindStatsPriceAdvancedControls(container, snapshotArgs) {
   container.querySelectorAll('select[data-advanced-filter]').forEach((select) => {
     select.addEventListener('change', () => {
       const filterKey = String(select.dataset.advancedFilter || '').trim();
       if (!filterKey) return;
-      state.statsPrice.advanced = state.statsPrice.advanced || { filters: {}, selectedGroupKey: '', detailMode: 'top' };
-      const nextFilters = normalizeAdvancedFilters(state.statsPrice.advanced.filters);
+      const advanced = ensureAdvancedState();
+      const nextFilters = normalizeAdvancedFilters(advanced.filters);
       nextFilters[filterKey] = String(select.value || 'all');
-      state.statsPrice.advanced.filters = nextFilters;
-      state.statsPrice.advanced.selectedGroupKey = '';
-      renderStatsPriceSnapshot({
-        status,
-        analytics,
-        loadedCards,
-        totalCards,
-        errors,
-        message,
-      });
+      advanced.filters = nextFilters;
+      advanced.selectedGroupKey = '';
+      renderStatsPriceSnapshot({ ...snapshotArgs });
     });
   });
 
@@ -1157,16 +1259,8 @@ function renderStatsPriceSnapshot({
     groupButton.addEventListener('click', () => {
       const nextGroupKey = String(groupButton.dataset.advancedGroupKey || '').trim();
       if (!nextGroupKey) return;
-      state.statsPrice.advanced = state.statsPrice.advanced || { filters: {}, selectedGroupKey: '', detailMode: 'top' };
-      state.statsPrice.advanced.selectedGroupKey = nextGroupKey;
-      renderStatsPriceSnapshot({
-        status,
-        analytics,
-        loadedCards,
-        totalCards,
-        errors,
-        message,
-      });
+      ensureAdvancedState().selectedGroupKey = nextGroupKey;
+      renderStatsPriceSnapshot({ ...snapshotArgs });
     });
   });
 
@@ -1174,159 +1268,114 @@ function renderStatsPriceSnapshot({
     detailButton.addEventListener('click', () => {
       const nextMode = String(detailButton.dataset.advancedDetailMode || '').trim();
       if (!nextMode) return;
-      state.statsPrice.advanced = state.statsPrice.advanced || { filters: {}, selectedGroupKey: '', detailMode: 'top' };
-      state.statsPrice.advanced.detailMode = nextMode;
-      renderStatsPriceSnapshot({
-        status,
-        analytics,
-        loadedCards,
-        totalCards,
-        errors,
-        message,
-      });
+      ensureAdvancedState().detailMode = nextMode;
+      renderStatsPriceSnapshot({ ...snapshotArgs });
     });
   });
+}
 
+function bindStatsPriceWatchlistFilters(container, snapshotArgs) {
   container.querySelectorAll('[data-watchlist-filter]').forEach((control) => {
-    const applyWatchlistFilter = () => {
-      const filterKey = String(control.dataset.watchlistFilter || '').trim();
-      if (!filterKey) return;
-      state.statsPrice.watchlist = state.statsPrice.watchlist || {
-        filters: normalizeWatchlistFilters(),
-        visibleCount: STATS_PRICE_WATCHLIST_BATCH_SIZE,
-        debounceTimers: {},
-        autoLoadBudget: 0,
-        autoLoadInFlight: false,
-      };
-      const nextFilters = normalizeWatchlistFilters(state.statsPrice.watchlist.filters);
-      nextFilters[filterKey] = String(control.value || '').trim();
-      state.statsPrice.watchlist.filters = nextFilters;
-      state.statsPrice.watchlist.visibleCount = STATS_PRICE_WATCHLIST_BATCH_SIZE;
-      renderStatsPriceSnapshot({
-        status,
-        analytics,
-        loadedCards,
-        totalCards,
-        errors,
-        message,
-        preserveWatchlistScroll: false,
-      });
-    };
-
-    const debounceable = control.tagName === 'INPUT';
-    const scheduleWatchlistFilter = () => {
-      const filterKey = String(control.dataset.watchlistFilter || '').trim();
-      if (!filterKey) return;
-      state.statsPrice.watchlist = state.statsPrice.watchlist || {
-        filters: normalizeWatchlistFilters(),
-        visibleCount: STATS_PRICE_WATCHLIST_BATCH_SIZE,
-        debounceTimers: {},
-        autoLoadBudget: 0,
-        autoLoadInFlight: false,
-      };
-      const timers = state.statsPrice.watchlist.debounceTimers || (state.statsPrice.watchlist.debounceTimers = {});
-      if (timers[filterKey]) {
-        window.clearTimeout(timers[filterKey]);
-      }
-      timers[filterKey] = window.setTimeout(() => {
-        timers[filterKey] = 0;
-        applyWatchlistFilter();
-      }, STATS_PRICE_WATCHLIST_INPUT_DEBOUNCE_MS);
-    };
-
-    if (control.tagName === 'INPUT') {
-      control.addEventListener('input', scheduleWatchlistFilter);
-      control.addEventListener('change', () => {
-        const filterKey = String(control.dataset.watchlistFilter || '').trim();
-        if (filterKey && state.statsPrice.watchlist?.debounceTimers?.[filterKey]) {
-          window.clearTimeout(state.statsPrice.watchlist.debounceTimers[filterKey]);
-          state.statsPrice.watchlist.debounceTimers[filterKey] = 0;
-        }
-        applyWatchlistFilter();
-      });
-    } else {
-      control.addEventListener('change', applyWatchlistFilter);
-    }
-
-    if (debounceable) {
-      control.addEventListener('keydown', (event) => {
-        if (event.key !== 'Enter') return;
-        const filterKey = String(control.dataset.watchlistFilter || '').trim();
-        if (filterKey && state.statsPrice.watchlist?.debounceTimers?.[filterKey]) {
-          window.clearTimeout(state.statsPrice.watchlist.debounceTimers[filterKey]);
-          state.statsPrice.watchlist.debounceTimers[filterKey] = 0;
-        }
-        applyWatchlistFilter();
-      });
-    }
+    bindWatchlistFilterControl(control, snapshotArgs);
   });
+}
 
-  const loadMoreWatchlistItems = ({ source = 'manual' } = {}) => {
-    const scrollRegion = container.querySelector('[data-watchlist-scroll-region]');
-    if (!scrollRegion) return false;
-
-    const total = Number(scrollRegion.dataset.watchlistTotal || 0);
-    if (!Number.isFinite(total) || total <= 0) return false;
-
-    state.statsPrice.watchlist = state.statsPrice.watchlist || {
-      filters: normalizeWatchlistFilters(),
-      visibleCount: STATS_PRICE_WATCHLIST_BATCH_SIZE,
-      debounceTimers: {},
-      autoLoadBudget: 0,
-      autoLoadInFlight: false,
-    };
-    if (source === 'scroll' && state.statsPrice.watchlist.autoLoadInFlight) return false;
-    const visible = Number(state.statsPrice.watchlist.visibleCount || STATS_PRICE_WATCHLIST_BATCH_SIZE);
-    if (visible >= total) return false;
-
-    if (source === 'scroll') {
-      state.statsPrice.watchlist.autoLoadInFlight = true;
-      state.statsPrice.watchlist.autoLoadBudget = 0;
-    }
-
-    const captureCurrentWatchlistScrollSnapshot = () => {
-      return {
-        scrollTop: Math.max(0, Number(scrollRegion.scrollTop || 0)),
-      };
-    };
-    const scrollSnapshot = captureCurrentWatchlistScrollSnapshot();
-
-    state.statsPrice.watchlist.visibleCount = Math.min(total, visible + STATS_PRICE_WATCHLIST_BATCH_SIZE);
-    renderStatsPriceSnapshot({
-      status,
-      analytics,
-      loadedCards,
-      totalCards,
-      errors,
-      message,
-      preserveWatchlistScroll: scrollSnapshot,
-    });
-    if (source === 'scroll' && state.statsPrice.watchlist) {
-      state.statsPrice.watchlist.autoLoadInFlight = false;
-      state.statsPrice.watchlist.autoLoadBudget = 0;
-    }
-    return true;
+/** Ein Filter-Feld der Watchlist: Textfelder entprellt, Auswahllisten sofort. */
+function bindWatchlistFilterControl(control, snapshotArgs) {
+  const readFilterKey = () => String(control.dataset.watchlistFilter || '').trim();
+  const applyWatchlistFilter = () => {
+    const filterKey = readFilterKey();
+    if (!filterKey) return;
+    const watchlist = ensureWatchlistState();
+    const nextFilters = normalizeWatchlistFilters(watchlist.filters);
+    nextFilters[filterKey] = String(control.value || '').trim();
+    watchlist.filters = nextFilters;
+    watchlist.visibleCount = STATS_PRICE_WATCHLIST_BATCH_SIZE;
+    renderStatsPriceSnapshot({ ...snapshotArgs, preserveWatchlistScroll: false });
   };
 
+  const debounceable = control.tagName === 'INPUT';
+  const scheduleWatchlistFilter = () => {
+    const filterKey = readFilterKey();
+    if (!filterKey) return;
+    const watchlist = ensureWatchlistState();
+    const timers = watchlist.debounceTimers || (watchlist.debounceTimers = {});
+    if (timers[filterKey]) {
+      window.clearTimeout(timers[filterKey]);
+    }
+    timers[filterKey] = window.setTimeout(() => {
+      timers[filterKey] = 0;
+      applyWatchlistFilter();
+    }, STATS_PRICE_WATCHLIST_INPUT_DEBOUNCE_MS);
+  };
+  // Change/Enter: laufenden Debounce-Timer verwerfen und sofort filtern.
+  const applyWatchlistFilterNow = () => {
+    const filterKey = readFilterKey();
+    if (filterKey && state.statsPrice.watchlist?.debounceTimers?.[filterKey]) {
+      window.clearTimeout(state.statsPrice.watchlist.debounceTimers[filterKey]);
+      state.statsPrice.watchlist.debounceTimers[filterKey] = 0;
+    }
+    applyWatchlistFilter();
+  };
+
+  if (control.tagName === 'INPUT') {
+    control.addEventListener('input', scheduleWatchlistFilter);
+    control.addEventListener('change', applyWatchlistFilterNow);
+  } else {
+    control.addEventListener('change', applyWatchlistFilter);
+  }
+
+  if (debounceable) {
+    control.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter') return;
+      applyWatchlistFilterNow();
+    });
+  }
+}
+
+/** Zeigt den naechsten Block Watchlist-Karten; Quelle 'scroll' sperrt parallele Auto-Nachlader. */
+function loadMoreStatsPriceWatchlistItems(container, snapshotArgs, { source = 'manual' } = {}) {
+  const scrollRegion = container.querySelector('[data-watchlist-scroll-region]');
+  if (!scrollRegion) return false;
+
+  const total = Number(scrollRegion.dataset.watchlistTotal || 0);
+  if (!Number.isFinite(total) || total <= 0) return false;
+
+  ensureWatchlistState();
+  if (source === 'scroll' && state.statsPrice.watchlist.autoLoadInFlight) return false;
+  const visible = Number(state.statsPrice.watchlist.visibleCount || STATS_PRICE_WATCHLIST_BATCH_SIZE);
+  if (visible >= total) return false;
+
+  if (source === 'scroll') {
+    state.statsPrice.watchlist.autoLoadInFlight = true;
+    state.statsPrice.watchlist.autoLoadBudget = 0;
+  }
+
+  const captureCurrentWatchlistScrollSnapshot = () => {
+    return {
+      scrollTop: Math.max(0, Number(scrollRegion.scrollTop || 0)),
+    };
+  };
+  const scrollSnapshot = captureCurrentWatchlistScrollSnapshot();
+
+  state.statsPrice.watchlist.visibleCount = Math.min(total, visible + STATS_PRICE_WATCHLIST_BATCH_SIZE);
+  renderStatsPriceSnapshot({
+    ...snapshotArgs,
+    preserveWatchlistScroll: scrollSnapshot,
+  });
+  if (source === 'scroll' && state.statsPrice.watchlist) {
+    state.statsPrice.watchlist.autoLoadInFlight = false;
+    state.statsPrice.watchlist.autoLoadBudget = 0;
+  }
+  return true;
+}
+
+function bindStatsPriceWatchlistButtons(container, snapshotArgs, loadMoreWatchlistItems) {
   container.querySelectorAll('[data-watchlist-reset]').forEach((button) => {
     button.addEventListener('click', () => {
       const nextFilters = normalizeWatchlistFilters();
-      state.statsPrice.watchlist = {
-        filters: nextFilters,
-        visibleCount: STATS_PRICE_WATCHLIST_BATCH_SIZE,
-        debounceTimers: {},
-        autoLoadBudget: 0,
-        autoLoadInFlight: false,
-      };
-      renderStatsPriceSnapshot({
-        status,
-        analytics,
-        loadedCards,
-        totalCards,
-        errors,
-        message,
-        preserveWatchlistScroll: false,
-      });
+      state.statsPrice.watchlist = createWatchlistState(nextFilters);
+      renderStatsPriceSnapshot({ ...snapshotArgs, preserveWatchlistScroll: false });
     });
   });
 
@@ -1335,16 +1384,13 @@ function renderStatsPriceSnapshot({
       loadMoreWatchlistItems({ source: 'button' });
     });
   });
+}
 
+/** Auto-Nachladen: erst nach einer Nutzer-Scrollgeste (Budget) und beim Erreichen des Listenendes. */
+function bindStatsPriceWatchlistScrollRegions(container, loadMoreWatchlistItems) {
   container.querySelectorAll('[data-watchlist-scroll-region]').forEach((scrollRegion) => {
     const armWatchlistAutoLoad = () => {
-      state.statsPrice.watchlist = state.statsPrice.watchlist || {
-        filters: normalizeWatchlistFilters(),
-        visibleCount: STATS_PRICE_WATCHLIST_BATCH_SIZE,
-        debounceTimers: {},
-        autoLoadBudget: 0,
-        autoLoadInFlight: false,
-      };
+      ensureWatchlistState();
       if (state.statsPrice.watchlist.autoLoadInFlight) return;
       state.statsPrice.watchlist.autoLoadBudget = 1;
     };
@@ -1362,13 +1408,7 @@ function renderStatsPriceSnapshot({
     scrollRegion.addEventListener('scroll', () => {
       const nearBottom = scrollRegion.scrollTop + scrollRegion.clientHeight >= scrollRegion.scrollHeight - 72;
       if (nearBottom && !wasNearBottom) {
-        const watchlist = state.statsPrice.watchlist || {
-          filters: normalizeWatchlistFilters(),
-          visibleCount: STATS_PRICE_WATCHLIST_BATCH_SIZE,
-          debounceTimers: {},
-          autoLoadBudget: 0,
-          autoLoadInFlight: false,
-        };
+        const watchlist = state.statsPrice.watchlist || createWatchlistState();
         const budget = Math.max(0, Number(watchlist.autoLoadBudget || 0));
         if (budget > 0 && !watchlist.autoLoadInFlight) {
           loadMoreWatchlistItems({ source: 'scroll' });
@@ -1377,45 +1417,49 @@ function renderStatsPriceSnapshot({
       wasNearBottom = nearBottom;
     });
   });
+}
 
-  const resolveWatchlistSetAndCard = (sourceEl) => {
-    const watchlistRow = sourceEl instanceof Element ? sourceEl.closest('[data-watchlist-card="1"]') : null;
-    if (!watchlistRow) return null;
+/** Set und Karte zu einer Watchlist-Zeile (collectionKey zuerst, Nummer als Fallback). */
+function resolveWatchlistSetAndCard(sourceEl) {
+  const watchlistRow = sourceEl instanceof Element ? sourceEl.closest('[data-watchlist-card="1"]') : null;
+  if (!watchlistRow) return null;
 
-    const setId = String(watchlistRow.dataset.setId || '').trim();
-    if (!setId) return null;
+  const setId = String(watchlistRow.dataset.setId || '').trim();
+  if (!setId) return null;
 
-    const cardNumberRaw = String(watchlistRow.dataset.watchlistCardNumber || '').trim();
-    // collectionKey zuerst (eindeutig); Nummer nur als Fallback fuer Zeilen ohne data-watchlist-card-key.
-    const targetCollectionKey = String(watchlistRow.dataset.watchlistCardKey || '').trim();
-    const targetCardKey = normalizeCardNumber(cardNumberRaw);
-    if (!targetCollectionKey && !targetCardKey) return null;
+  const cardNumberRaw = String(watchlistRow.dataset.watchlistCardNumber || '').trim();
+  // collectionKey zuerst (eindeutig); Nummer nur als Fallback fuer Zeilen ohne data-watchlist-card-key.
+  const targetCollectionKey = String(watchlistRow.dataset.watchlistCardKey || '').trim();
+  const targetCardKey = normalizeCardNumber(cardNumberRaw);
+  if (!targetCollectionKey && !targetCardKey) return null;
 
-    const sourceItems = Array.isArray(state.statsPrice.items) ? state.statsPrice.items : [];
-    const inSet = sourceItems.filter((item) => String(item?.setId || '').trim() === setId);
-    const matched = (targetCollectionKey && inSet.find((item) => collectionKeyOf(item?.card) === targetCollectionKey))
-      || inSet.find((item) => normalizeCardNumber(item?.card?.number || item?.cardKey || '') === targetCardKey)
-      || null;
+  const sourceItems = Array.isArray(state.statsPrice.items) ? state.statsPrice.items : [];
+  const inSet = sourceItems.filter((item) => String(item?.setId || '').trim() === setId);
+  const matched = (targetCollectionKey && inSet.find((item) => collectionKeyOf(item?.card) === targetCollectionKey))
+    || inSet.find((item) => normalizeCardNumber(item?.card?.number || item?.cardKey || '') === targetCardKey)
+    || null;
 
-    const setMeta = getSetById(setId) || {
-      setId,
-      setName: matched?.setName || setId,
-      imported: false,
-    };
-    const cardMeta = {
-      ...(matched?.card || {}),
-      number: matched?.card?.number || cardNumberRaw,
-      name: matched?.cardName || matched?.card?.name || cardNumberRaw,
-      image: getStatsPriceItemImageUrl(matched || {}),
-      cardmarketUrl: getItemCardmarketUrl(matched || null),
-    };
-
-    return {
-      set: setMeta,
-      card: cardMeta,
-    };
+  const setMeta = getSetById(setId) || {
+    setId,
+    setName: matched?.setName || setId,
+    imported: false,
+  };
+  const cardMeta = {
+    ...(matched?.card || {}),
+    number: matched?.card?.number || cardNumberRaw,
+    name: matched?.cardName || matched?.card?.name || cardNumberRaw,
+    image: getStatsPriceItemImageUrl(matched || {}),
+    cardmarketUrl: getItemCardmarketUrl(matched || null),
   };
 
+  return {
+    set: setMeta,
+    card: cardMeta,
+  };
+}
+
+/** Klicks: Watchlist-Karte -> Lightbox, Set-Zeilen -> Set-Ansicht, Cardmarket-Links ohne Navigation. */
+function bindStatsPriceNavigation(container) {
   container.querySelectorAll('[data-watchlist-open-set]').forEach((button) => {
     button.addEventListener('click', (event) => {
       event.stopPropagation();
@@ -1456,13 +1500,7 @@ export function renderStatsPriceLoading({ requestId, loadedCards = 0, totalCards
   state.statsPrice.requestId = String(requestId || '');
   state.statsPrice.status = 'loading';
   state.statsPrice.items = [];
-  state.statsPrice.watchlist = {
-    filters: normalizeWatchlistFilters(state.statsPrice.watchlist?.filters),
-    visibleCount: STATS_PRICE_WATCHLIST_BATCH_SIZE,
-    debounceTimers: {},
-    autoLoadBudget: 0,
-    autoLoadInFlight: false,
-  };
+  state.statsPrice.watchlist = createWatchlistState(normalizeWatchlistFilters(state.statsPrice.watchlist?.filters));
   state.statsPrice.loadedCards = Number(loadedCards || 0);
   state.statsPrice.totalCards = Number(totalCards || 0);
   state.statsPrice.errors = 0;
@@ -1481,13 +1519,7 @@ function renderStatsPricePartial(analytics, { requestId, loadedCards = 0, totalC
   state.statsPrice.totals = analytics;
   state.statsPrice.bySet = analytics?.setBreakdown || [];
   state.statsPrice.items = Array.isArray(items) ? items : [];
-  state.statsPrice.watchlist = state.statsPrice.watchlist || {
-    filters: normalizeWatchlistFilters(),
-    visibleCount: STATS_PRICE_WATCHLIST_BATCH_SIZE,
-    debounceTimers: {},
-    autoLoadBudget: 0,
-    autoLoadInFlight: false,
-  };
+  ensureWatchlistState();
   state.statsPrice.loadedCards = Number(loadedCards || 0);
   state.statsPrice.totalCards = Number(totalCards || 0);
   state.statsPrice.errors = Number(errors || 0);
@@ -1508,13 +1540,7 @@ function renderStatsPriceFinal(analytics, { requestId, loadedCards = 0, totalCar
   state.statsPrice.bySet = analytics?.setBreakdown || [];
   state.statsPrice.topCards = analytics?.topCard ? [analytics.topCard] : [];
   state.statsPrice.items = Array.isArray(items) ? items : [];
-  state.statsPrice.watchlist = state.statsPrice.watchlist || {
-    filters: normalizeWatchlistFilters(),
-    visibleCount: STATS_PRICE_WATCHLIST_BATCH_SIZE,
-    debounceTimers: {},
-    autoLoadBudget: 0,
-    autoLoadInFlight: false,
-  };
+  ensureWatchlistState();
   state.statsPrice.loadedCards = Number(loadedCards || 0);
   state.statsPrice.totalCards = Number(totalCards || 0);
   state.statsPrice.errors = Number(errors || 0);
@@ -1689,6 +1715,13 @@ export async function loadStatsPriceAnalyticsLazy({ requestId } = {}) {
   });
 }
 
+/** Schluessel eines Preisstatistik-Eintrags: `setId::collectionKey` (eindeutig auch bei gleicher Nummer). */
+function statsPriceCardKey(entry) {
+  const setId = String(entry?.setId || '').trim();
+  const key = collectionKeyOf(entry?.card) || normalizeCardNumber(entry?.cardNumber || '');
+  return key ? `${setId}::${key}` : String(entry?.cardKey || '');
+}
+
 /**
  * Live-Update eines Eintrags in `state.statsPrice.items`, wenn der
  * Sammelstatus einer Karte in der Set-Ansicht umgeschaltet wird. Findet
@@ -1698,13 +1731,6 @@ export async function loadStatsPriceAnalyticsLazy({ requestId } = {}) {
  * Element (mit neuem `?isReverseHolo=Y`-Suffix) sowie die
  * `is-reverse`-Klasse und den RH-Badge.
  */
-/** Schluessel eines Preisstatistik-Eintrags: `setId::collectionKey` (eindeutig auch bei gleicher Nummer). */
-function statsPriceCardKey(entry) {
-  const setId = String(entry?.setId || '').trim();
-  const key = collectionKeyOf(entry?.card) || normalizeCardNumber(entry?.cardNumber || '');
-  return key ? `${setId}::${key}` : String(entry?.cardKey || '');
-}
-
 export function refreshStatsPriceItem({ setId, collectionKey = '', number, rh = false } = {}) {
   if (!state.statsPrice?.items?.length) return;
   if (!setId) return;
