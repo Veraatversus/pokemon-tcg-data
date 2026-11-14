@@ -1,0 +1,123 @@
+# Manuell: holt Nachtraege aus den (auslaufenden) pokemontcg-Upstreams in den eingefrorenen Stand
+# sources/pokemontcg. Wie der fruehere Upstream-Sync: Basis ist der Commit aus sources/SOURCES.json, darauf
+# werden PokemonTCG/pokemon-tcg-data und danach JulienGitHub/pokemon-tcg-data mit -X theirs gemergt. Der
+# gemergte Commit liegt auf dem Branch pokemontcg-merged (Basis des naechsten Laufs), eingefroren werden nur
+# cards/en, sets/en.json und decks/en. Danach dieselben Pruefungen und derselbe Build wie im Daily Sync;
+# scheitert etwas, wird nichts committet. Ohne Neuerungen endet der Lauf ohne Commit.
+name: Update pokemontcg (manuell)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: write
+
+concurrency:
+  group: sync-tcgdex
+  cancel-in-progress: false
+
+jobs:
+  update_pokemontcg:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        working-directory: scripts/api
+        run: npm ci
+
+      - name: Merge upstreams
+        id: merge
+        run: |
+          base=$(node -p "require('./sources/SOURCES.json').pokemontcg.commit")
+          git fetch -q origin pokemontcg-merged 2>/dev/null || true
+          git cat-file -e "$base^{commit}" || { echo "Basis-Commit $base fehlt (Branch pokemontcg-merged?)"; exit 1; }
+          git fetch -q --no-tags https://github.com/PokemonTCG/pokemon-tcg-data.git master:refs/upstream/pokemontcg
+          git fetch -q --no-tags https://github.com/JulienGitHub/pokemon-tcg-data.git master:refs/upstream/julien
+          git checkout -q --detach "$base"
+          git merge -q -X theirs --no-edit -m "Merge PokemonTCG/pokemon-tcg-data" refs/upstream/pokemontcg
+          git merge -q -X theirs --no-edit -m "Merge JulienGitHub/pokemon-tcg-data" refs/upstream/julien
+          merged=$(git rev-parse HEAD)
+          git checkout -q master
+          if [ "$merged" = "$base" ]; then
+            echo "Keine neuen Upstream-Commits seit $base"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "Neu gemergt: $merged"
+          git log --oneline "$base..$merged" -- cards/en sets/en.json decks/en | head -50
+          echo "commit=$merged" >> "$GITHUB_OUTPUT"
+          node scripts/api/sources/freeze-pokemontcg.mjs --commit "$merged"
+          if [ -z "$(git status --porcelain -- sources/pokemontcg)" ]; then
+            echo "Upstream-Commits ohne Aenderung an cards/en, sets/en.json, decks/en - nichts zu tun"
+            git checkout -- sources/SOURCES.json
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git status --short -- sources/pokemontcg | head -50
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Run tests
+        if: steps.merge.outputs.changed == 'true'
+        working-directory: scripts/api
+        run: npm test
+
+      - name: Build matching report
+        if: steps.merge.outputs.changed == 'true'
+        run: node scripts/api/build-matching.mjs --min-card-match 0.995 --fail-on-pair-drift
+
+      - name: Regression tests against synced sources
+        if: steps.merge.outputs.changed == 'true'
+        working-directory: scripts/api
+        run: node --test test/matching-regression.test.mjs
+
+      - name: Build API v3 and registry
+        if: steps.merge.outputs.changed == 'true'
+        run: node scripts/api/build-api.mjs
+
+      - name: Commit and push changes
+        if: steps.merge.outputs.changed == 'true'
+        env:
+          MERGED: ${{ steps.merge.outputs.commit }}
+        run: |
+          # Zuerst den gemergten Stand sichern (Basis des naechsten Laufs, Herkunft der eingefrorenen Dateien).
+          git push origin "$MERGED:refs/heads/pokemontcg-merged"
+          paths="sources/pokemontcg sources/SOURCES.json api/v3 api/registry"
+          git add $paths
+          git commit -m "chore: pokemontcg-Stand aktualisiert (${MERGED:0:8})"
+          for attempt in 1 2; do
+            if git pull --rebase origin master && git push origin master; then break; fi
+            if [ "$attempt" = 2 ]; then echo "Push nach 2 Versuchen fehlgeschlagen"; exit 1; fi
+            git rebase --abort 2>/dev/null || true
+            sleep 15
+          done
+
+      - name: Promote master to dev and release
+        if: steps.merge.outputs.changed == 'true'
+        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'propagate-master-to-dev-release.yml',
+              ref: 'release'
+            });
