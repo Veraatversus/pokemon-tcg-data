@@ -3734,18 +3734,6 @@
         "name": "Fairy Charm Dragon",
         "productId": 365813,
         "productName": "Fairy Charm [N]"
-      },
-      {
-        "cardKey": "sm9/54",
-        "name": "Nidoran ♀",
-        "productId": 368984,
-        "productName": "Nidoran &female; [Call for Family | Scratch]"
-      },
-      {
-        "cardKey": "sm9/57",
-        "name": "Nidoran ♂",
-        "productId": 368987,
-        "productName": "Nidoran &male; [Peck | Horn Attack]"
       }
     ]
   },
@@ -7038,7 +7026,7 @@
         "setId": "np"
       },
       {
-        "evidence": "91/91",
+        "evidence": "94/94",
         "evidenceSource": "previous",
         "newId": 2514,
         "oldId": null,

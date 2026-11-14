@@ -79,6 +79,8 @@ const productsByNumber = (map, card) => {
 // Danach ohne Diakritika, klein, nur Buchstaben und Ziffern.
 export function normalizeCmName(value) {
   return String(value ?? '')
+    // HTML-Kuerzel aus Cardmarkets Katalog ("Nidoran &female;"): wie die Zeichen selbst (♀) bleiben sie aussen vor
+    .replace(/&#?\w+;/g, ' ')
     .replace(/\[[^\]]*\]/g, ' ')
     .replace(/\bLv\.\s*\d+/gi, ' ')
     .replace(/★/g, ' gold star ')
