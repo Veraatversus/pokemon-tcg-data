@@ -530,86 +530,36 @@
       "tcgdex": 0
     },
     "TCGDEX-tk-xy-p": {
-      "ambiguous": 16,
-      "ambiguousCards": [
-        "1",
-        "2",
-        "3",
-        "5",
-        "6",
-        "8",
-        "9",
-        "10",
-        "14",
-        "17",
-        "18",
-        "20",
-        "21",
-        "27",
-        "29",
-        "30"
-      ],
+      "ambiguous": 0,
       "cards": 30,
       "coverage": {
         "bySource": {
-          "matched": 14
+          "customSet": 30
         },
         "cards": 30,
-        "withId": 14
+        "withId": 30
       },
+      "customSet": 30,
       "expansionId": 1707,
-      "matched": 14,
-      "missing": 16,
-      "missingCards": [
-        "1",
-        "2",
-        "3",
-        "5",
-        "6",
-        "8",
-        "9",
-        "10",
-        "14",
-        "17",
-        "18",
-        "20",
-        "21",
-        "27",
-        "29",
-        "30"
-      ],
-      "ordered": 12,
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1707&sortBy=collectorsnumber_asc&perSite=100&site=1",
       "tcgdex": 0
     },
     "TCGDEX-tk-xy-su": {
-      "ambiguous": 5,
-      "ambiguousCards": [
-        "14",
-        "15",
-        "20",
-        "29",
-        "30"
-      ],
+      "ambiguous": 0,
       "cards": 30,
       "coverage": {
         "bySource": {
-          "matched": 25
+          "customSet": 30
         },
         "cards": 30,
-        "withId": 25
+        "withId": 30
       },
+      "customSet": 30,
       "expansionId": 1707,
-      "matched": 25,
-      "missing": 5,
-      "missingCards": [
-        "14",
-        "15",
-        "20",
-        "29",
-        "30"
-      ],
-      "ordered": 23,
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1707&sortBy=collectorsnumber_asc&perSite=100&site=1",
       "tcgdex": 0
     },
@@ -4058,7 +4008,7 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 1065,
+    "applied": 1125,
     "changed": 208,
     "conflicts": [],
     "dropped": [
@@ -9767,82 +9717,6 @@
     },
     {
       "cards": [
-        "TCGDEX-tk-xy-p/1",
-        "TCGDEX-tk-xy-p/27"
-      ],
-      "expansionId": 1707,
-      "name": "Glameow",
-      "products": [
-        290265,
-        290290
-      ]
-    },
-    {
-      "cards": [
-        "TCGDEX-tk-xy-p/2",
-        "TCGDEX-tk-xy-p/3",
-        "TCGDEX-tk-xy-p/5",
-        "TCGDEX-tk-xy-p/6",
-        "TCGDEX-tk-xy-p/8",
-        "TCGDEX-tk-xy-p/9",
-        "TCGDEX-tk-xy-p/10",
-        "TCGDEX-tk-xy-p/17",
-        "TCGDEX-tk-xy-p/18",
-        "TCGDEX-tk-xy-p/29"
-      ],
-      "expansionId": 1707,
-      "name": "Lightning Energy",
-      "products": [
-        290266,
-        290267,
-        290269,
-        290270,
-        290272,
-        290273,
-        290274,
-        290280,
-        290281,
-        290292
-      ]
-    },
-    {
-      "cards": [
-        "TCGDEX-tk-xy-p/14",
-        "TCGDEX-tk-xy-p/30"
-      ],
-      "expansionId": 1707,
-      "name": "Pikachu Libre",
-      "products": [
-        290263,
-        576490
-      ]
-    },
-    {
-      "cards": [
-        "TCGDEX-tk-xy-su/15",
-        "TCGDEX-tk-xy-p/21"
-      ],
-      "expansionId": 1707,
-      "name": "Potion",
-      "products": [
-        290284,
-        290306
-      ]
-    },
-    {
-      "cards": [
-        "TCGDEX-tk-xy-su/14",
-        "TCGDEX-tk-xy-su/30"
-      ],
-      "expansionId": 1707,
-      "name": "Suicune",
-      "products": [
-        290264,
-        576491
-      ]
-    },
-    {
-      "cards": [
         "sm10/175",
         "sm10/209"
       ],
@@ -10065,8 +9939,8 @@
   "rules": {
     "energySymbol": 3,
     "leftRight": 0,
-    "ordered": 69,
-    "orderedRejected": 36,
+    "ordered": 34,
+    "orderedRejected": 31,
     "override": 8,
     "oversizeExcluded": 4,
     "versionSuffixSkipped": 24
@@ -14281,570 +14155,6 @@
       "set": "TCGDEX-tk-sm-r"
     },
     {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Glameow [Act Cute | Scratch]",
-          "productId": 290265
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Glameow [Act Cute | Scratch]",
-          "productId": 290290
-        }
-      ],
-      "cardKey": "TCGDEX-tk-xy-p/1",
-      "deName": "Charmian",
-      "expansionId": 1707,
-      "name": "Glameow",
-      "set": "TCGDEX-tk-xy-p"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290266
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290267
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290269
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290270
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290272
-        }
-      ],
-      "cardKey": "TCGDEX-tk-xy-p/2",
-      "deName": "Elektro-Energie",
-      "expansionId": 1707,
-      "name": "Lightning Energy",
-      "set": "TCGDEX-tk-xy-p"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290266
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290267
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290269
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290270
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290272
-        }
-      ],
-      "cardKey": "TCGDEX-tk-xy-p/3",
-      "deName": "Elektro-Energie",
-      "expansionId": 1707,
-      "name": "Lightning Energy",
-      "set": "TCGDEX-tk-xy-p"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290266
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290267
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290269
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290270
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290272
-        }
-      ],
-      "cardKey": "TCGDEX-tk-xy-p/5",
-      "deName": "Elektro-Energie",
-      "expansionId": 1707,
-      "name": "Lightning Energy",
-      "set": "TCGDEX-tk-xy-p"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290266
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290267
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290269
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290270
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290272
-        }
-      ],
-      "cardKey": "TCGDEX-tk-xy-p/6",
-      "deName": "Elektro-Energie",
-      "expansionId": 1707,
-      "name": "Lightning Energy",
-      "set": "TCGDEX-tk-xy-p"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290266
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290267
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290269
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290270
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290272
-        }
-      ],
-      "cardKey": "TCGDEX-tk-xy-p/8",
-      "deName": "Elektro-Energie",
-      "expansionId": 1707,
-      "name": "Lightning Energy",
-      "set": "TCGDEX-tk-xy-p"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290266
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290267
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290269
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290270
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290272
-        }
-      ],
-      "cardKey": "TCGDEX-tk-xy-p/9",
-      "deName": "Elektro-Energie",
-      "expansionId": 1707,
-      "name": "Lightning Energy",
-      "set": "TCGDEX-tk-xy-p"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290266
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290267
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290269
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290270
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290272
-        }
-      ],
-      "cardKey": "TCGDEX-tk-xy-p/10",
-      "deName": "Elektro-Energie",
-      "expansionId": 1707,
-      "name": "Lightning Energy",
-      "set": "TCGDEX-tk-xy-p"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Pikachu Libre [Quick Attack | Flying Elekick]",
-          "productId": 290263
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Pikachu Libre [Quick Attack | Flying Elekick]",
-          "productId": 576490
-        }
-      ],
-      "cardKey": "TCGDEX-tk-xy-p/14",
-      "deName": "Wrestler-Pikachu",
-      "expansionId": 1707,
-      "name": "Pikachu Libre",
-      "set": "TCGDEX-tk-xy-p"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290266
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290267
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290269
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290270
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290272
-        }
-      ],
-      "cardKey": "TCGDEX-tk-xy-p/17",
-      "deName": "Elektro-Energie",
-      "expansionId": 1707,
-      "name": "Lightning Energy",
-      "set": "TCGDEX-tk-xy-p"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290266
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290267
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290269
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290270
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290272
-        }
-      ],
-      "cardKey": "TCGDEX-tk-xy-p/18",
-      "deName": "Elektro-Energie",
-      "expansionId": 1707,
-      "name": "Lightning Energy",
-      "set": "TCGDEX-tk-xy-p"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tierno",
-          "productId": 290283
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tierno",
-          "productId": 290311
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tierno",
-          "productId": 290320
-        }
-      ],
-      "cardKey": "TCGDEX-tk-xy-p/20",
-      "deName": "Tierno",
-      "expansionId": 1707,
-      "name": "Tierno",
-      "set": "TCGDEX-tk-xy-p"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Potion",
-          "productId": 290284
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Potion",
-          "productId": 290306
-        }
-      ],
-      "cardKey": "TCGDEX-tk-xy-p/21",
-      "deName": "Trank",
-      "expansionId": 1707,
-      "name": "Potion",
-      "set": "TCGDEX-tk-xy-p"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Glameow [Act Cute | Scratch]",
-          "productId": 290265
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Glameow [Act Cute | Scratch]",
-          "productId": 290290
-        }
-      ],
-      "cardKey": "TCGDEX-tk-xy-p/27",
-      "deName": "Charmian",
-      "expansionId": 1707,
-      "name": "Glameow",
-      "set": "TCGDEX-tk-xy-p"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290266
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290267
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290269
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290270
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 290272
-        }
-      ],
-      "cardKey": "TCGDEX-tk-xy-p/29",
-      "deName": "Elektro-Energie",
-      "expansionId": 1707,
-      "name": "Lightning Energy",
-      "set": "TCGDEX-tk-xy-p"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Pikachu Libre [Quick Attack | Flying Elekick]",
-          "productId": 290263
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Pikachu Libre [Quick Attack | Flying Elekick]",
-          "productId": 576490
-        }
-      ],
-      "cardKey": "TCGDEX-tk-xy-p/30",
-      "deName": "Wrestler-Pikachu",
-      "expansionId": 1707,
-      "name": "Pikachu Libre",
-      "set": "TCGDEX-tk-xy-p"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Suicune [Spiral Drain | Aurora Beam]",
-          "productId": 290264
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Suicune [Spiral Drain | Aurora Beam]",
-          "productId": 576491
-        }
-      ],
-      "cardKey": "TCGDEX-tk-xy-su/14",
-      "deName": "Suicune",
-      "expansionId": 1707,
-      "name": "Suicune",
-      "set": "TCGDEX-tk-xy-su"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Potion",
-          "productId": 290284
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Potion",
-          "productId": 290306
-        }
-      ],
-      "cardKey": "TCGDEX-tk-xy-su/15",
-      "deName": "Trank",
-      "expansionId": 1707,
-      "name": "Potion",
-      "set": "TCGDEX-tk-xy-su"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tierno",
-          "productId": 290283
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tierno",
-          "productId": 290311
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tierno",
-          "productId": 290320
-        }
-      ],
-      "cardKey": "TCGDEX-tk-xy-su/20",
-      "deName": "Tierno",
-      "expansionId": 1707,
-      "name": "Tierno",
-      "set": "TCGDEX-tk-xy-su"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tierno",
-          "productId": 290283
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tierno",
-          "productId": 290311
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tierno",
-          "productId": 290320
-        }
-      ],
-      "cardKey": "TCGDEX-tk-xy-su/29",
-      "deName": "Tierno",
-      "expansionId": 1707,
-      "name": "Tierno",
-      "set": "TCGDEX-tk-xy-su"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Suicune [Spiral Drain | Aurora Beam]",
-          "productId": 290264
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Suicune [Spiral Drain | Aurora Beam]",
-          "productId": 576491
-        }
-      ],
-      "cardKey": "TCGDEX-tk-xy-su/30",
-      "deName": "Suicune",
-      "expansionId": 1707,
-      "name": "Suicune",
-      "set": "TCGDEX-tk-xy-su"
-    },
-    {
       "candidates": [],
       "cardKey": "bwp/BW77",
       "deName": null,
@@ -18229,14 +17539,6 @@
       ]
     },
     {
-      "count": 21,
-      "expansionId": 1707,
-      "sets": [
-        "TCGDEX-tk-xy-p",
-        "TCGDEX-tk-xy-su"
-      ]
-    },
-    {
       "count": 14,
       "expansionId": 1609,
       "sets": [
@@ -18532,11 +17834,11 @@
     }
   ],
   "totals": {
-    "ambiguous": 202,
+    "ambiguous": 181,
     "cards": 21577,
-    "customSet": 1065,
-    "matched": 322,
-    "missing": 242,
+    "customSet": 1125,
+    "matched": 283,
+    "missing": 221,
     "override": 8,
     "stabilityKept": 356,
     "tcgdex": 19584
