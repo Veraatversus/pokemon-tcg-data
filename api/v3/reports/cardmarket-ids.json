@@ -2256,28 +2256,24 @@
       "tcgdex": 18
     },
     "sm1": {
-      "ambiguous": 1,
-      "ambiguousCards": [
-        "101a"
-      ],
+      "ambiguous": 0,
       "cards": 173,
       "coverage": {
         "bySource": {
+          "customSet": 164,
           "stabilityKept": 1,
-          "tcgdex": 171
+          "tcgdex": 8
         },
         "cards": 173,
-        "withId": 172
+        "withId": 173
       },
+      "customSet": 164,
       "expansionId": 1745,
       "matched": 0,
-      "missing": 1,
-      "missingCards": [
-        "101a"
-      ],
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1745&sortBy=collectorsnumber_asc&perSite=100&site=1",
       "stabilityKept": 1,
-      "tcgdex": 171
+      "tcgdex": 8
     },
     "sm10": {
       "ambiguous": 0,
@@ -3415,7 +3411,7 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 6314,
+    "applied": 6478,
     "changed": 832,
     "conflicts": [],
     "dropped": [
@@ -5163,10 +5159,10 @@
     ]
   },
   "duplicates": {
-    "cards": 617,
+    "cards": 615,
     "corrected": 114,
     "ids": 360,
-    "kept": 503
+    "kept": 501
   },
   "expansionMismatch": {
     "cards": [
@@ -6594,14 +6590,14 @@
       }
     ],
     "totals": {
-      "checked": 17054,
+      "checked": 16891,
       "corrected": 1,
       "dropped": 13,
       "droppedShared": 11,
       "foreignNameOk": 1231,
       "keptMismatch": 134,
       "noSetExpansion": 0,
-      "ok": 15672,
+      "ok": 15509,
       "unknownProduct": 3
     }
   },
@@ -6726,7 +6722,7 @@
     "orderedRejected": 7,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 362
+    "versionSuffixSkipped": 383
   },
   "setsWithoutExpansion": [
     {
@@ -8037,20 +8033,6 @@
     {
       "candidates": [
         {
-          "hint": "same-name-unnumbered",
-          "name": "Eevee [Energy Evolution | Quick Draw]",
-          "productId": 366834
-        }
-      ],
-      "cardKey": "sm1/101a",
-      "deName": null,
-      "expansionId": 1745,
-      "name": "Eevee",
-      "set": "sm1"
-    },
-    {
-      "candidates": [
-        {
           "hint": "same-name-unnumbered, id-outlier",
           "name": "Togepi & Cleffa & Igglybuff GX [Rolling Panic | Supreme Puff GX]",
           "productId": 582672
@@ -8080,13 +8062,6 @@
     },
     {
       "count": 1,
-      "expansionId": 1745,
-      "sets": [
-        "sm1"
-      ]
-    },
-    {
-      "count": 1,
       "expansionId": 2438,
       "sets": [
         "det1"
@@ -8101,14 +8076,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 4,
+    "ambiguous": 3,
     "cards": 21577,
-    "customSet": 6314,
+    "customSet": 6478,
     "matched": 77,
-    "missing": 14,
+    "missing": 13,
     "override": 8,
     "stabilityKept": 171,
-    "tcgdex": 14993
+    "tcgdex": 14830
   },
   "versionSuffixSkippedByExpansion": {
     "1521": 9,
@@ -8131,6 +8106,7 @@
     "1706": 9,
     "1716": 9,
     "1742": 14,
+    "1745": 21,
     "1757": 60,
     "1758": 12,
     "1800": 13,
