@@ -2,12 +2,14 @@
 // wirklich ausliefert, und fuehrt das Ergebnis in sources/tcgdex/assets-verified.json.
 // `ok` wird nie erneut geprueft, `missing` nach recheckMissingDays, Unbekanntes einmal.
 // Netzwerkfehler/Timeouts aendern nichts: ein bekannter Status bleibt, Unbekanntes bleibt unbekannt.
-// Kartenbilder werden bewusst nicht geprueft (Last im Workflow; Fallback im Frontend).
+// Kartenbilder werden nicht einzeln geprueft (Last im Workflow; Fallback im Frontend). Nur fuer Sets, die der
+// Index noch nicht fuehrt, je Sprache eine Stichprobe (erste/letzte Karte, cardSampleCandidates in images.mjs).
 // CLI: node scripts/api/sources/verify-assets.mjs
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { setAssetCandidates } from '../merge/images.mjs';
+import { setAssetCandidates, cardSampleCandidates } from '../merge/images.mjs';
+import { loadTcgdexDatabase } from '../tcgdex/load-database.mjs';
 import { toJson } from '../registry/registry-io.mjs';
 
 const DAY_MS = 86400000;
@@ -108,16 +110,22 @@ async function main() {
   const index = JSON.parse(fs.readFileSync(path.join(dir, 'assets-index.json'), 'utf8'));
   const previous = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : {};
   const groups = setAssetCandidates(index);
+  const excluded = JSON.parse(fs.readFileSync(path.join(repoRoot, 'api', 'mappings', 'excluded-series.json'), 'utf8')).series ?? [];
+  const samples = cardSampleCandidates(index, loadTcgdexDatabase(dir, { excludeSerieIds: excluded }).sets);
   const started = Date.now();
   let probes = 0;
   const probe = (url) => {
     probes++;
     return httpProbe(url);
   };
-  const verified = await verifySetAssets({ groups, previous, probe });
+  const verified = {
+    ...await verifySetAssets({ groups, previous, probe }),
+    ...await verifyAssets({ urls: samples.flatMap((s) => s.urls), previous, probe }),
+  };
+  const sampledOk = samples.filter((s) => s.urls.every((u) => verified[u]?.status === 'ok'));
   const written = updateVerifiedFile(file, verified);
   const c = countGroups(verified, groups);
-  console.log(`Set-Assets: ${groups.length} Kandidaten, ${probes} Anfragen, ${c.ok} ok, ${c.missing} fehlen (${((Date.now() - started) / 1000).toFixed(1)} s)${written ? '' : ', unveraendert'}`);
+  console.log(`Set-Assets: ${groups.length} Kandidaten, ${probes} Anfragen, ${c.ok} ok, ${c.missing} fehlen; Kartenbilder ohne Index-Eintrag: ${samples.length} Sets/Sprachen geprueft, ${sampledOk.length} vorhanden${sampledOk.length ? ` (${sampledOk.map((s) => `${s.lang}/${s.setId}`).join(', ')})` : ''} (${((Date.now() - started) / 1000).toFixed(1)} s)${written ? '' : ', unveraendert'}`);
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

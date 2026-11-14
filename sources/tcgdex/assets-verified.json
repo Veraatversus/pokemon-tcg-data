@@ -1,4 +1,468 @@
 {
+  "https://assets.tcgdex.net/de/base/base1/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/base/base1/102/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/base/base2/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "ok"
+  },
+  "https://assets.tcgdex.net/de/base/base2/64/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "ok"
+  },
+  "https://assets.tcgdex.net/de/base/base3/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "ok"
+  },
+  "https://assets.tcgdex.net/de/base/base3/62/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "ok"
+  },
+  "https://assets.tcgdex.net/de/base/base4/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/base/base4/130/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/base/base5/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "ok"
+  },
+  "https://assets.tcgdex.net/de/base/base5/83/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "ok"
+  },
+  "https://assets.tcgdex.net/de/base/basep/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "ok"
+  },
+  "https://assets.tcgdex.net/de/base/basep/53/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/bw/bwp/BW01/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/bw/bwp/BW101/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/dp/dp1/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/dp/dp1/130/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/dp/dp2/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/dp/dp2/124/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/dp/dp3/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/dp/dp3/132/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/dp/dp4/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/dp/dp4/106/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/dp/dp5/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/dp/dp5/100/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/dp/dp6/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/dp/dp6/146/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/dp/dp7/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/dp/dp7/103/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/dp/dpp/DP01/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/dp/dpp/DP56/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ecard/bog/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ecard/bog/9/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ecard/ecard1/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ecard/ecard1/165/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ecard/ecard2/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ecard/ecard2/150/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ecard/ecard3/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ecard/ecard3/150/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex1/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex1/109/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex10/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex10/117/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex11/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex11/114/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex12/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex12/93/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex13/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex13/111/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex14/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex14/100/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex15/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex15/101/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex16/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex16/108/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex2/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex2/100/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex3/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex3/100/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex4/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex4/97/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex5.5/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex5.5/5/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex5/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex5/102/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex6/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex6/116/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex7/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex7/111/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex8/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex8/108/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex9/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/ex9/107/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/exu/!/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/ex/exu/Z/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/gym/gym1/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/gym/gym1/132/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/gym/gym2/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/gym/gym2/132/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/hgss/hgssp/HGSS01/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/hgss/hgssp/HGSS25/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/lc/lc/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/lc/lc/110/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2011bw/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2011bw/12/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2012bw/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2012bw/12/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2013bw/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2013bw/12/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2014xy/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2014xy/12/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2015xy/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2015xy/12/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2016xy/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2016xy/12/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2017sm/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2017sm/12/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2018sm-fr/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2018sm-fr/40/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2018sm/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2018sm/12/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2019sm-fr/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2019sm-fr/40/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2019sm/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2019sm/12/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2021swsh/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2021swsh/25/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2022swsh/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2022swsh/15/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2023sv/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2023sv/15/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2024sv/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/mc/2024sv/15/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/me/30th-c/001/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/me/30th-c/030/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/me/30th/001/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "ok"
+  },
+  "https://assets.tcgdex.net/de/me/30th/158/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "ok"
+  },
   "https://assets.tcgdex.net/de/me/me01/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
@@ -25,6 +489,226 @@
   },
   "https://assets.tcgdex.net/de/me/me05/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/me/me06/001/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "ok"
+  },
+  "https://assets.tcgdex.net/de/me/me06/141/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "ok"
+  },
+  "https://assets.tcgdex.net/de/me/mee/001/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/me/mee/016/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/me/mep/001/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "ok"
+  },
+  "https://assets.tcgdex.net/de/me/mep/120/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/misc/miscp/001/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/neo/neo1/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/neo/neo1/111/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/neo/neo2/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/neo/neo2/75/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/neo/neo3/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/neo/neo3/66/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/neo/neo4/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/neo/neo4/113/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/neo/si1/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/neo/si1/18/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pl/pl1/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pl/pl1/130/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pl/pl2/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pl/pl2/114/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pl/pl3/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pl/pl3/150/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pl/pl4/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pl/pl4/99/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pl/ru1/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pl/ru1/16/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pop/np/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pop/np/40/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pop/pop1/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pop/pop1/17/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pop/pop2/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pop/pop2/17/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pop/pop3/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pop/pop3/17/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pop/pop4/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pop/pop4/17/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pop/pop5/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pop/pop5/17/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pop/pop6/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pop/pop6/17/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pop/pop7/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pop/pop7/17/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pop/pop8/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pop/pop8/17/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pop/pop9/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/pop/pop9/17/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/sm/sm7.5/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/sm/sm7.5/78/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/sm/sma/SV1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/sm/sma/SV94/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/sm/smp/SM01/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/sm/smp/SM248/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/sv/mfb/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/sv/mfb/34/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
     "status": "missing"
   },
   "https://assets.tcgdex.net/de/sv/sv01/logo.webp": {
@@ -83,9 +767,33 @@
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
   },
+  "https://assets.tcgdex.net/de/sv/sve/001/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/sv/sve/024/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
   "https://assets.tcgdex.net/de/swsh/cel25/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
+  },
+  "https://assets.tcgdex.net/de/swsh/cel25cc/CC001/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/swsh/cel25cc/CC025/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/swsh/fut2020/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/swsh/fut2020/5/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
   },
   "https://assets.tcgdex.net/de/swsh/swsh1/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
@@ -99,17 +807,49 @@
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
   },
+  "https://assets.tcgdex.net/de/swsh/swsh10tg/TG01/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/swsh/swsh10tg/TG30/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
   "https://assets.tcgdex.net/de/swsh/swsh11/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
+  },
+  "https://assets.tcgdex.net/de/swsh/swsh11tg/TG01/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/swsh/swsh11tg/TG30/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
   },
   "https://assets.tcgdex.net/de/swsh/swsh12.5/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
   },
+  "https://assets.tcgdex.net/de/swsh/swsh12.5gg/GG01/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/swsh/swsh12.5gg/GG70/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
   "https://assets.tcgdex.net/de/swsh/swsh12/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
+  },
+  "https://assets.tcgdex.net/de/swsh/swsh12tg/TG01/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/swsh/swsh12tg/TG30/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
   },
   "https://assets.tcgdex.net/de/swsh/swsh2/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
@@ -126,6 +866,14 @@
   "https://assets.tcgdex.net/de/swsh/swsh4.5/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
+  },
+  "https://assets.tcgdex.net/de/swsh/swsh4.5sv/SV001/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/swsh/swsh4.5sv/SV122/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
   },
   "https://assets.tcgdex.net/de/swsh/swsh4/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
@@ -151,9 +899,89 @@
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
   },
+  "https://assets.tcgdex.net/de/swsh/swsh9tg/TG01/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/swsh/swsh9tg/TG30/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
   "https://assets.tcgdex.net/de/swsh/swshp/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
+  },
+  "https://assets.tcgdex.net/de/tk/tk-dp-l/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/tk/tk-dp-l/11/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/tk/tk-dp-m/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/tk/tk-dp-m/12/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/tk/tk-ex-latia/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/tk/tk-ex-latia/10/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/tk/tk-ex-latio/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/tk/tk-ex-latio/10/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/tk/tk-ex-m/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/tk/tk-ex-m/12/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/tk/tk-ex-p/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/tk/tk-ex-p/12/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/tk/tk-hs-g/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/tk/tk-hs-g/30/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/tk/tk-hs-r/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/tk/tk-hs-r/30/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/xy/xya/107a/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/de/xy/xya/24a/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
   },
   "https://assets.tcgdex.net/en/base/base1/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
@@ -415,6 +1243,14 @@
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
   },
+  "https://assets.tcgdex.net/en/ecard/bog/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/ecard/bog/9/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
   "https://assets.tcgdex.net/en/ecard/bog/symbol.png": {
     "checkedAt": "2026-11-12T15:59:00.986Z",
     "status": "missing"
@@ -543,6 +1379,14 @@
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
   },
+  "https://assets.tcgdex.net/en/ex/ex5.5/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/ex/ex5.5/5/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
   "https://assets.tcgdex.net/en/ex/ex5/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
@@ -582,6 +1426,14 @@
   "https://assets.tcgdex.net/en/ex/ex9/symbol.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
+  },
+  "https://assets.tcgdex.net/en/ex/exu/!/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/ex/exu/Z/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
   },
   "https://assets.tcgdex.net/en/gym/gym1/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
@@ -651,6 +1503,102 @@
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
   },
+  "https://assets.tcgdex.net/en/mc/2011bw/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2011bw/12/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2012bw/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2012bw/12/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2013bw/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2013bw/12/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2014xy/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2014xy/12/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2015xy/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2015xy/12/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2016xy/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2016xy/12/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2017sm/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2017sm/12/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2018sm-fr/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2018sm-fr/40/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2018sm/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2018sm/12/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2019sm-fr/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2019sm-fr/40/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2019sm/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2019sm/12/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2021swsh/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2021swsh/25/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
   "https://assets.tcgdex.net/en/mc/2021swsh/symbol.png": {
     "checkedAt": "2026-11-12T15:59:00.986Z",
     "status": "missing"
@@ -658,6 +1606,46 @@
   "https://assets.tcgdex.net/en/mc/2021swsh/symbol.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2022swsh/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2022swsh/15/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2023sv/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2023sv/15/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2024sv/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/mc/2024sv/15/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/me/30th-c/001/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/me/30th-c/030/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/me/30th/001/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "ok"
+  },
+  "https://assets.tcgdex.net/en/me/30th/158/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "ok"
   },
   "https://assets.tcgdex.net/en/me/me01/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
@@ -709,6 +1697,34 @@
   },
   "https://assets.tcgdex.net/en/me/me05/symbol.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/me/me06/001/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "ok"
+  },
+  "https://assets.tcgdex.net/en/me/me06/141/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "ok"
+  },
+  "https://assets.tcgdex.net/en/me/mee/001/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/me/mee/016/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/me/mep/001/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "ok"
+  },
+  "https://assets.tcgdex.net/en/me/mep/120/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/misc/miscp/001/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
     "status": "missing"
   },
   "https://assets.tcgdex.net/en/neo/neo1/logo.webp": {
@@ -947,6 +1963,14 @@
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
   },
+  "https://assets.tcgdex.net/en/sm/sm3.5/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/sm/sm3.5/78/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
   "https://assets.tcgdex.net/en/sm/sm3/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
@@ -991,6 +2015,14 @@
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
   },
+  "https://assets.tcgdex.net/en/sm/sm7.5/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/sm/sm7.5/78/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
   "https://assets.tcgdex.net/en/sm/sm7/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
@@ -1034,6 +2066,14 @@
   "https://assets.tcgdex.net/en/sm/smp/symbol.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
+  },
+  "https://assets.tcgdex.net/en/sv/mfb/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/sv/mfb/34/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
   },
   "https://assets.tcgdex.net/en/sv/sv01/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
@@ -1155,6 +2195,14 @@
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
   },
+  "https://assets.tcgdex.net/en/sv/sve/001/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/sv/sve/024/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
   "https://assets.tcgdex.net/en/swsh/cel25/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
@@ -1162,6 +2210,14 @@
   "https://assets.tcgdex.net/en/swsh/cel25/symbol.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
+  },
+  "https://assets.tcgdex.net/en/swsh/cel25cc/CC001/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/swsh/cel25cc/CC025/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
   },
   "https://assets.tcgdex.net/en/swsh/fut2020/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
@@ -1195,6 +2251,14 @@
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
   },
+  "https://assets.tcgdex.net/en/swsh/swsh10tg/TG01/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/swsh/swsh10tg/TG30/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
   "https://assets.tcgdex.net/en/swsh/swsh11/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
@@ -1207,6 +2271,14 @@
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "missing"
   },
+  "https://assets.tcgdex.net/en/swsh/swsh11tg/TG01/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/swsh/swsh11tg/TG30/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
   "https://assets.tcgdex.net/en/swsh/swsh12.5/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
@@ -1215,6 +2287,14 @@
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
   },
+  "https://assets.tcgdex.net/en/swsh/swsh12.5gg/GG01/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/swsh/swsh12.5gg/GG70/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
   "https://assets.tcgdex.net/en/swsh/swsh12/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
@@ -1222,6 +2302,14 @@
   "https://assets.tcgdex.net/en/swsh/swsh12/symbol.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
+  },
+  "https://assets.tcgdex.net/en/swsh/swsh12tg/TG01/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/swsh/swsh12tg/TG30/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
   },
   "https://assets.tcgdex.net/en/swsh/swsh2/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
@@ -1254,6 +2342,14 @@
   "https://assets.tcgdex.net/en/swsh/swsh4.5/symbol.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
+  },
+  "https://assets.tcgdex.net/en/swsh/swsh4.5sv/SV001/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/swsh/swsh4.5sv/SV122/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
   },
   "https://assets.tcgdex.net/en/swsh/swsh4/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
@@ -1306,6 +2402,14 @@
   "https://assets.tcgdex.net/en/swsh/swsh9/symbol.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
+  },
+  "https://assets.tcgdex.net/en/swsh/swsh9tg/TG01/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/swsh/swsh9tg/TG30/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
   },
   "https://assets.tcgdex.net/en/swsh/swshp/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
@@ -1391,12 +2495,44 @@
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
   },
+  "https://assets.tcgdex.net/en/tk/tk-bw-e/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-bw-e/30/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-bw-z/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-bw-z/30/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-dp-l/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-dp-l/11/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
   "https://assets.tcgdex.net/en/tk/tk-dp-l/symbol.png": {
     "checkedAt": "2026-11-12T15:59:00.986Z",
     "status": "missing"
   },
   "https://assets.tcgdex.net/en/tk/tk-dp-l/symbol.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-dp-m/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-dp-m/12/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
     "status": "missing"
   },
   "https://assets.tcgdex.net/en/tk/tk-dp-m/symbol.png": {
@@ -1407,12 +2543,28 @@
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "missing"
   },
+  "https://assets.tcgdex.net/en/tk/tk-ex-latia/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-ex-latia/10/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
   "https://assets.tcgdex.net/en/tk/tk-ex-latia/symbol.png": {
     "checkedAt": "2026-11-12T15:59:00.986Z",
     "status": "missing"
   },
   "https://assets.tcgdex.net/en/tk/tk-ex-latia/symbol.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-ex-latio/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-ex-latio/10/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
     "status": "missing"
   },
   "https://assets.tcgdex.net/en/tk/tk-ex-latio/symbol.png": {
@@ -1423,12 +2575,28 @@
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "missing"
   },
+  "https://assets.tcgdex.net/en/tk/tk-ex-m/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-ex-m/12/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
   "https://assets.tcgdex.net/en/tk/tk-ex-n/symbol.png": {
     "checkedAt": "2026-11-12T15:59:00.986Z",
     "status": "missing"
   },
   "https://assets.tcgdex.net/en/tk/tk-ex-n/symbol.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-ex-p/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-ex-p/12/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
     "status": "missing"
   },
   "https://assets.tcgdex.net/en/tk/tk-ex-p/symbol.png": {
@@ -1439,12 +2607,28 @@
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "missing"
   },
+  "https://assets.tcgdex.net/en/tk/tk-hs-g/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-hs-g/30/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
   "https://assets.tcgdex.net/en/tk/tk-hs-g/symbol.png": {
     "checkedAt": "2026-11-12T15:59:00.986Z",
     "status": "missing"
   },
   "https://assets.tcgdex.net/en/tk/tk-hs-g/symbol.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-hs-r/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-hs-r/30/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
     "status": "missing"
   },
   "https://assets.tcgdex.net/en/tk/tk-hs-r/symbol.png": {
@@ -1455,6 +2639,14 @@
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "missing"
   },
+  "https://assets.tcgdex.net/en/tk/tk-sm-l/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-sm-l/30/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
   "https://assets.tcgdex.net/en/tk/tk-sm-l/symbol.png": {
     "checkedAt": "2026-11-12T15:59:00.986Z",
     "status": "missing"
@@ -1463,12 +2655,28 @@
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "missing"
   },
+  "https://assets.tcgdex.net/en/tk/tk-sm-r/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-sm-r/30/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
   "https://assets.tcgdex.net/en/tk/tk-sm-r/symbol.png": {
     "checkedAt": "2026-11-12T15:59:00.986Z",
     "status": "missing"
   },
   "https://assets.tcgdex.net/en/tk/tk-sm-r/symbol.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-xy-b/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-xy-b/30/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
     "status": "missing"
   },
   "https://assets.tcgdex.net/en/tk/tk-xy-b/symbol.png": {
@@ -1487,12 +2695,28 @@
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "missing"
   },
+  "https://assets.tcgdex.net/en/tk/tk-xy-latia/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-xy-latia/30/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
   "https://assets.tcgdex.net/en/tk/tk-xy-latia/symbol.png": {
     "checkedAt": "2026-11-12T15:59:00.986Z",
     "status": "missing"
   },
   "https://assets.tcgdex.net/en/tk/tk-xy-latia/symbol.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-xy-latio/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-xy-latio/30/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
     "status": "missing"
   },
   "https://assets.tcgdex.net/en/tk/tk-xy-latio/symbol.png": {
@@ -1503,12 +2727,28 @@
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "missing"
   },
+  "https://assets.tcgdex.net/en/tk/tk-xy-n/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-xy-n/30/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
   "https://assets.tcgdex.net/en/tk/tk-xy-n/symbol.png": {
     "checkedAt": "2026-11-12T15:59:00.986Z",
     "status": "missing"
   },
   "https://assets.tcgdex.net/en/tk/tk-xy-n/symbol.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-xy-p/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-xy-p/30/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
     "status": "missing"
   },
   "https://assets.tcgdex.net/en/tk/tk-xy-p/symbol.png": {
@@ -1519,6 +2759,14 @@
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "missing"
   },
+  "https://assets.tcgdex.net/en/tk/tk-xy-su/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-xy-su/30/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
   "https://assets.tcgdex.net/en/tk/tk-xy-su/symbol.png": {
     "checkedAt": "2026-11-12T15:59:00.986Z",
     "status": "missing"
@@ -1527,12 +2775,28 @@
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "missing"
   },
+  "https://assets.tcgdex.net/en/tk/tk-xy-sy/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-xy-sy/30/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
   "https://assets.tcgdex.net/en/tk/tk-xy-sy/symbol.png": {
     "checkedAt": "2026-11-12T15:59:00.986Z",
     "status": "missing"
   },
   "https://assets.tcgdex.net/en/tk/tk-xy-sy/symbol.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-xy-w/1/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/tk/tk-xy-w/30/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
     "status": "missing"
   },
   "https://assets.tcgdex.net/en/tk/tk-xy-w/symbol.png": {
@@ -1686,6 +2950,14 @@
   "https://assets.tcgdex.net/en/xy/xy9/symbol.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",
     "status": "ok"
+  },
+  "https://assets.tcgdex.net/en/xy/xya/107a/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
+  },
+  "https://assets.tcgdex.net/en/xy/xya/24a/low.webp": {
+    "checkedAt": "2026-11-14T10:49:21.816Z",
+    "status": "missing"
   },
   "https://assets.tcgdex.net/en/xy/xyp/logo.webp": {
     "checkedAt": "2026-11-12T15:58:56.013Z",

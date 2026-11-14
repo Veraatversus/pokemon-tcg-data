@@ -19,7 +19,7 @@ import { writePriceFiles } from './merge/cardmarket-prices.mjs';
 import { loadCardmarketCatalog } from './sources/cardmarket-catalog.mjs';
 import { evaluateCardmarketIssue } from './report/cardmarket-issue.mjs';
 import { renderCardmarketReportMd } from './report/cardmarket-report.mjs';
-import { setAssetCandidates } from './merge/images.mjs';
+import { setAssetCandidates, withSampledCardImages } from './merge/images.mjs';
 import { countGroups } from './sources/verify-assets.mjs';
 import { sortLocalIds } from './lib/local-ids.mjs';
 
@@ -121,6 +121,8 @@ export function runBuild({
   // Pruefstand der Set-Logos/-Symbole (verify-assets.mjs); fehlt die Datei, wird alles ausgegeben.
   const assetsVerified = readJsonOr(p('sources', 'tcgdex', 'assets-verified.json'), {});
   const assets = countGroups(assetsVerified, setAssetCandidates(assetsIndex));
+  // Kartenbilder: Index plus Sets, die er noch nicht fuehrt, deren Stichprobe aber besteht (images.mjs).
+  const cardAssetsIndex = withSampledCardImages(assetsIndex, db.sets, assetsVerified);
   const sources = readJson(p('sources', 'SOURCES.json'));
   const sourceCommits = { pokemontcg: short(sources.pokemontcg?.commit), tcgdex: short(sources.tcgdex?.commit) };
   const ptSetById = new Map(ptSets.map((s) => [s.id, s]));
@@ -160,7 +162,7 @@ export function runBuild({
       }
       const card = mergeCard({
         canonicalSetId: setId, canonicalCardId: cardId, registryCard: rc, ptCard, tcgdexCards, tcgdexSet,
-        tables, legals, assetsIndex, sourceCommits,
+        tables, legals, assetsIndex: cardAssetsIndex, sourceCommits,
       });
       matchStatus[card.matchStatus]++;
       const primarySet = tcgdexCards[0]?.set;
