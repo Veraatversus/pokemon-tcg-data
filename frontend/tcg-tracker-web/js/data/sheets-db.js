@@ -19,7 +19,7 @@ import {
   resolveDisplaySet,
   resolveDisplayCard,
   getCardLanguage
-} from './schema-contract.js?v=20261114-series-date-order';
+} from './schema-contract.js?v=20261114-cm-fixwave';
 import { withV3CardmarketIds } from './v3-cardmarket-ids.js';
 import {
   planSetScopedUpsert,

@@ -98,7 +98,7 @@ function productIdFromUrl(url = '') {
  *      db_cards-Records bekommen sie ueber attachV3CardmarketIds). Das Feld traegt NUR v3-IDs.
  *   2. Legacy-URL (Sheet) mit `idProduct=`
  *   3. Rueckfall `matchedEntry` bzw. `cardmarketMatchedProductId` (Altfeld; im Frontend setzt es kein Matcher mehr)
- * Kein Treffer -> { productId: '', source: '' }; der Link faellt dann auf eine Such-URL zurueck.
+ * Kein Treffer -> { productId: '', source: '' }; der Link bleibt dann leer (keine Suchseite).
  */
 export function resolveCardmarketProductId(card = {}, { matchedEntry = null } = {}) {
   const v3Id = normalizeCardmarketProductId(card?.cardmarketProductId);
@@ -180,11 +180,11 @@ export function resolveItemCardmarketUrl(item = {}, { language = 'de' } = {}) {
 
 /**
  * Cardmarket-Link einer Karte: Produkt-URL in der Kartensprache, sobald eine ID bekannt ist;
- * sonst eine vorhandene (generierte) Such-URL; sonst ''.
+ * sonst eine vorhandene, nicht generierte URL; sonst '' (nie eine generierte Such-URL, Spec §5).
  */
 export function resolveCardmarketLink(card = {}, { language = 'de', matchedEntry = null } = {}) {
   const { productId } = resolveCardmarketProductId(card, { matchedEntry });
   if (productId) return buildCardmarketProductUrl(productId, { language });
   const urls = legacyCardmarketUrls(card).filter((url) => /^https?:\/\//i.test(url));
-  return urls.find((url) => !isGeneratedCardmarketSearchUrl(url)) || urls[0] || '';
+  return urls.find((url) => !isGeneratedCardmarketSearchUrl(url)) || '';
 }

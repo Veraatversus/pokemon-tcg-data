@@ -47,8 +47,8 @@ test('resolveCardmarketLink: Produkt-URL in Kartensprache, nie Such-URL wenn ein
     resolveCardmarketLink({ cardmarketUrl: SEARCH_URL }, { language: 'de', matchedEntry: { cardmarketProductId: 333 } }),
     legacyUrl(333)
   );
-  // ohne ID: Such-URL als letzter Ausweg
-  assert.equal(resolveCardmarketLink({ cardmarketUrl: SEARCH_URL }, { language: 'de' }), SEARCH_URL);
+  // ohne ID: nie eine generierte Such-URL
+  assert.equal(resolveCardmarketLink({ cardmarketUrl: SEARCH_URL }, { language: 'de' }), '');
   assert.equal(resolveCardmarketLink({}, { language: 'de' }), '');
   assert.equal(buildCardmarketProductUrl(5, { language: 'en' }), 'https://www.cardmarket.com/en/Pokemon/Products?idProduct=5');
 });

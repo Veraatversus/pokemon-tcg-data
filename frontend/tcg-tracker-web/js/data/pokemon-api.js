@@ -6,7 +6,7 @@
 // (promoteCardmarketUrlsForCards) entfaellt hier: es haette die massgeblichen v3-IDs nur
 // ueberschrieben (Produkt-URLs gelten dort als "generiert") und vergibt fuer Karten ohne URL
 // keine neue.
-import { resolveDisplayCard, resolveDisplaySet, seriesGroupKeyForName } from './schema-contract.js?v=20261114-series-date-order';
+import { resolveDisplayCard, resolveDisplaySet, seriesGroupKeyForName } from './schema-contract.js?v=20261114-cm-fixwave';
 import { loadV3Sets, loadV3Cards, loadRegistrySets } from './v3-api.js';
 import { createCollectionKeyResolver } from './v3-collection-keys.js';
 import { toSetRecord, toCardRecord } from './v3-records.js';
@@ -145,7 +145,7 @@ export async function fetchV3SetMeta({ signal, timeoutMs = DE_SERIES_TIMEOUT_MS,
         symbol: text(set?.images?.symbol)
       };
       const hasImages = Object.values(images).some(Boolean);
-      if (set?.id && (deName || deSeries || enSeriesKey || hasImages)) {
+      if (set?.id && (deName || deSeries || enSeriesKey || hasImages || text(set?.releaseDate))) {
         map.set(String(set.id), { deName, deSeries, seriesKey, enSeriesKey, images, releaseDate: text(set?.releaseDate) });
       }
     }

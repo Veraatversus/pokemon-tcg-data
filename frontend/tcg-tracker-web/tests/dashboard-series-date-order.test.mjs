@@ -60,3 +60,11 @@ test('fetchV3SetMeta liefert releaseDate', async () => {
   const m = await fetchV3SetMeta({ loadSets: async () => [{ id: 's', series: 'S', releaseDate: '2023/03/03' }] });
   assert.equal(m.get('s').releaseDate, '2023/03/03');
 });
+
+test('fetchV3SetMeta nimmt auch Sets nur mit releaseDate auf', async () => {
+  const m = await fetchV3SetMeta({ loadSets: async () => [{ id: 'r', releaseDate: '2021/01/02' }] });
+  assert.equal(m.get('r')?.releaseDate, '2021/01/02');
+  setV3SetMeta(m);
+  assert.equal(resolveSetReleaseTime({ setId: 'r' }), Date.parse('2021-01-02'));
+  setV3SetMeta(new Map());
+});

@@ -1,4 +1,4 @@
-import { formatCardmarketEntryLabel, formatCardmarketEntryTitle } from '../data/cardmarket-ui-helpers.js?v=20261114-series-date-order';
+import { formatCardmarketEntryLabel, formatCardmarketEntryTitle } from '../data/cardmarket-ui-helpers.js?v=20261114-cm-fixwave';
 import { isGeneratedCardmarketSearchUrl, applyReverseHoloQueryParam } from '../data/cardmarket-url-utils.js';
 
 // ============================================================================
@@ -37,8 +37,8 @@ export function getCardmarketPriceValue(prices = {}, ...keys) {
 // Wird eine Karte dennoch als "Reverse Holo" gesammelt, soll das Frontend
 // auf die normalen Kartenpreise zurueckfallen.
 //
-// api/v3/prices-Eintraege (erkennbar an `productId`) liefern kein avg-holo
-// (Spec §2.3): dort gelten vorhandene Holo-Felder als Holo-Preise.
+// api/v3/prices-Eintraege (erkennbar an `productId`) tragen avgHolo und die *Holo-Felder nur fuer
+// Karten mit Reverse-Print (master A8); avgHolo kann fehlen, dort gelten vorhandene Holo-Felder als Holo-Preise.
 const V3_HOLO_FIELDS = ['trendHolo', 'avg1Holo', 'avg7Holo', 'avg30Holo', 'lowHolo'];
 
 export function hasReliableHoloPrices(prices = {}) {

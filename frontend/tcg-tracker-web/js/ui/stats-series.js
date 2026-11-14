@@ -1,4 +1,4 @@
-import { resolveSeriesGroupInfo } from '../data/schema-contract.js?v=20261114-series-date-order';
+import { resolveSeriesGroupInfo } from '../data/schema-contract.js?v=20261114-cm-fixwave';
 
 export function getStatsSeriesLabel(seriesKey = '', group = {}) {
   const label = String(group?.label || group?.canonicalName || '').trim();

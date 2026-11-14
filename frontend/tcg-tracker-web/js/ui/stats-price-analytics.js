@@ -102,8 +102,8 @@ function pickFirstFiniteFromCandidates(prices = {}, candidates = []) {
 // eigene Holo-Variante haben typischerweise `avgHolo == null`. Andere Holo-
 // Felder koennen in dem Fall trotzdem befuellt sein, gehoeren dann aber zu
 // einer anderen Variante und sind im Stats-Wert nicht verwendbar.
-// api/v3/prices-Eintraege (erkennbar an `productId`) liefern kein avg-holo
-// (Spec §2.3): dort gelten vorhandene Holo-Felder als Holo-Preise.
+// api/v3/prices-Eintraege (erkennbar an `productId`) tragen avgHolo und die *Holo-Felder nur fuer
+// Karten mit Reverse-Print (master A8); avgHolo kann fehlen, dort gelten vorhandene Holo-Felder als Holo-Preise.
 const V3_HOLO_FIELDS = ['trendHolo', 'avg1Holo', 'avg7Holo', 'avg30Holo', 'lowHolo'];
 
 function hasReliableHoloPrices(prices = {}) {

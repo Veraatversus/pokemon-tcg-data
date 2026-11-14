@@ -14,7 +14,7 @@ const API_CACHE_MAX_ENTRIES = 60;
 const API_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 const API_PINNED_RE = /\/api\/(v3\/(sets|meta|search-index)\.json|registry\/sets\.json)$/;
 const API_ENTRY_RE = /\/api\/(v3|registry)\//;
-// Preisdateien (api/v3/prices) laufen ueber handleCardmarketRequest (Stamp-Bereinigung) und zaehlen hier nicht mit.
+// Preisdateien (api/v3/prices) laufen ueber handlePricesRequest (Stamp-Bereinigung) und zaehlen hier nicht mit.
 const API_PRICES_RE = /\/api\/v3\/prices\//;
 
 async function trimApiCache(cache) {
@@ -74,7 +74,7 @@ async function handleApiRequest(request) {
   }
 }
 
-// --- cardmarket-data ---
+// --- prices-data ---
 // Preisdaten api/v3/prices/*.json (js/data/v3-prices.js) werden taeglich
 // neu gebaut; meta.json.generatedAt ist der Stamp. Die App haengt ihn als ?v=<stamp> an
 // jede Daten-URL.
@@ -85,7 +85,7 @@ async function handleApiRequest(request) {
 const CARDMARKET_DATA_RE = /\/api\/v3\/prices\/[^/]+\.json$/;
 const CARDMARKET_META_RE = /\/api\/v3\/prices\/meta\.json$/;
 
-function isCardmarketDataPath(pathname) {
+function isPricesDataPath(pathname) {
   return CARDMARKET_DATA_RE.test(String(pathname || ''));
 }
 
@@ -100,13 +100,13 @@ async function pruneCardmarketStamps(cache, keepStamp) {
   const keys = await cache.keys();
   for (const req of keys) {
     const url = new URL(req.url);
-    if (!isCardmarketDataPath(url.pathname) || CARDMARKET_META_RE.test(url.pathname)) continue;
+    if (!isPricesDataPath(url.pathname) || CARDMARKET_META_RE.test(url.pathname)) continue;
     const stamp = url.searchParams.get('v') || '';
     if (stamp !== keepStamp && stampTime(stamp) < keepTime) await cache.delete(req);
   }
 }
 
-async function handleCardmarketRequest(request) {
+async function handlePricesRequest(request) {
   const cache = await caches.open(RUNTIME_CACHE);
   const url = new URL(request.url);
   const stamp = url.searchParams.get('v') || '';
@@ -132,7 +132,7 @@ async function handleCardmarketRequest(request) {
       || Response.error();
   }
 }
-// --- /cardmarket-data ---
+// --- /prices-data ---
 
 const SW_DEBUG = false;
 
@@ -231,9 +231,9 @@ self.addEventListener('fetch', (event) => {
     }
 
     // Preisdaten (api/v3/prices, auch vom VERA_BASE-Host): Stamp-basierte Frische,
-    // siehe handleCardmarketRequest. Steht vor der api/v3-Route (24-h-Cache).
-    if (request.destination !== 'image' && isCardmarketDataPath(url.pathname)) {
-      event.respondWith(handleCardmarketRequest(request));
+    // siehe handlePricesRequest. Steht vor der api/v3-Route (24-h-Cache).
+    if (request.destination !== 'image' && isPricesDataPath(url.pathname)) {
+      event.respondWith(handlePricesRequest(request));
       return;
     }
 
