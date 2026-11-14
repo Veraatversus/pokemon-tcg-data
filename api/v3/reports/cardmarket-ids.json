@@ -2328,28 +2328,21 @@
       "tcgdex": 0
     },
     "sm12": {
-      "ambiguous": 1,
-      "ambiguousCards": [
-        "143a"
-      ],
+      "ambiguous": 0,
       "cards": 272,
       "coverage": {
         "bySource": {
-          "stabilityKept": 22,
-          "tcgdex": 249
+          "customSet": 272
         },
         "cards": 272,
-        "withId": 271
+        "withId": 272
       },
+      "customSet": 272,
       "expansionId": 2644,
       "matched": 0,
-      "missing": 1,
-      "missingCards": [
-        "143a"
-      ],
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2644&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 22,
-      "tcgdex": 249
+      "tcgdex": 0
     },
     "sm2": {
       "ambiguous": 0,
@@ -3412,8 +3405,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 6496,
-    "changed": 832,
+    "applied": 6768,
+    "changed": 846,
     "conflicts": [],
     "dropped": [
       {
@@ -4999,54 +4992,6 @@
       "TCGDEX-2018sm-fr-38",
       "TCGDEX-2018sm-fr-39"
     ],
-    "398504": [
-      "sm12-239",
-      "sm12-54"
-    ],
-    "398509": [
-      "sm12-240",
-      "sm12-62"
-    ],
-    "398514": [
-      "sm12-245",
-      "sm12-96"
-    ],
-    "398519": [
-      "sm12-176",
-      "sm12-248"
-    ],
-    "398524": [
-      "sm12-237",
-      "sm12-29"
-    ],
-    "398529": [
-      "sm12-238",
-      "sm12-44"
-    ],
-    "398534": [
-      "sm12-241",
-      "sm12-66"
-    ],
-    "398539": [
-      "sm12-242",
-      "sm12-68"
-    ],
-    "398544": [
-      "sm12-243",
-      "sm12-76"
-    ],
-    "398549": [
-      "sm12-244",
-      "sm12-82"
-    ],
-    "398554": [
-      "sm12-115",
-      "sm12-246"
-    ],
-    "398559": [
-      "sm12-139",
-      "sm12-247"
-    ],
     "538808": [
       "mcd21-4",
       "mcd21-5"
@@ -5160,10 +5105,10 @@
     ]
   },
   "duplicates": {
-    "cards": 615,
+    "cards": 591,
     "corrected": 114,
-    "ids": 360,
-    "kept": 501
+    "ids": 348,
+    "kept": 477
   },
   "expansionMismatch": {
     "cards": [
@@ -6591,78 +6536,18 @@
       }
     ],
     "totals": {
-      "checked": 16873,
+      "checked": 16612,
       "corrected": 1,
       "dropped": 13,
       "droppedShared": 11,
       "foreignNameOk": 1231,
       "keptMismatch": 134,
       "noSetExpansion": 0,
-      "ok": 15491,
+      "ok": 15230,
       "unknownProduct": 3
     }
   },
   "orderedRejected": [
-    {
-      "cards": [
-        "sm12/195",
-        "sm12/266"
-      ],
-      "expansionId": 2644,
-      "name": "Lana's Fishing Rod",
-      "products": [
-        408584,
-        410659
-      ]
-    },
-    {
-      "cards": [
-        "sm12/196",
-        "sm12/230"
-      ],
-      "expansionId": 2644,
-      "name": "Lillie's Full Force",
-      "products": [
-        408589,
-        408744
-      ]
-    },
-    {
-      "cards": [
-        "sm12/197",
-        "sm12/267"
-      ],
-      "expansionId": 2644,
-      "name": "Lillie's Poké Doll",
-      "products": [
-        408594,
-        410664
-      ]
-    },
-    {
-      "cards": [
-        "sm12/200",
-        "sm12/232"
-      ],
-      "expansionId": 2644,
-      "name": "N's Resolve",
-      "products": [
-        408599,
-        408754
-      ]
-    },
-    {
-      "cards": [
-        "sm12/201",
-        "sm12/233"
-      ],
-      "expansionId": 2644,
-      "name": "Professor Oak's Setup",
-      "products": [
-        408604,
-        408759
-      ]
-    },
     {
       "cards": [
         "xy5/94",
@@ -6720,10 +6605,10 @@
     "energySymbol": 3,
     "leftRight": 0,
     "ordered": 0,
-    "orderedRejected": 7,
+    "orderedRejected": 2,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 383
+    "versionSuffixSkipped": 386
   },
   "setsWithoutExpansion": [
     {
@@ -7396,160 +7281,6 @@
       "todaySource": "tcgdex"
     },
     {
-      "cardKey": "sm12/195",
-      "productId": 408584,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "sm12/196",
-      "productId": 408589,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "sm12/197",
-      "productId": 408594,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "sm12/200",
-      "productId": 408599,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "sm12/201",
-      "productId": 408604,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "sm12/230",
-      "productId": 408744,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "sm12/232",
-      "productId": 408754,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "sm12/233",
-      "productId": 408759,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "sm12/237",
-      "productId": 407794,
-      "source": "corrected",
-      "todayId": 398524,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm12/238",
-      "productId": 407869,
-      "source": "corrected",
-      "todayId": 398529,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm12/239",
-      "productId": 407919,
-      "source": "corrected",
-      "todayId": 398504,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm12/240",
-      "productId": 407959,
-      "source": "corrected",
-      "todayId": 398509,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm12/241",
-      "productId": 407979,
-      "source": "corrected",
-      "todayId": 398534,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm12/242",
-      "productId": 407989,
-      "source": "corrected",
-      "todayId": 398539,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm12/243",
-      "productId": 408024,
-      "source": "corrected",
-      "todayId": 398544,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm12/244",
-      "productId": 408054,
-      "source": "corrected",
-      "todayId": 398549,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm12/245",
-      "productId": 408129,
-      "source": "corrected",
-      "todayId": 398514,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm12/246",
-      "productId": 408224,
-      "source": "corrected",
-      "todayId": 398554,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm12/247",
-      "productId": 408344,
-      "source": "corrected",
-      "todayId": 398559,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm12/248",
-      "productId": 408504,
-      "source": "corrected",
-      "todayId": 398519,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm12/266",
-      "productId": 410659,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "sm12/267",
-      "productId": 410664,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
       "cardKey": "sv3/57",
       "productId": 725137,
       "source": "corrected",
@@ -8030,20 +7761,6 @@
       "expansionId": 1536,
       "name": "Venusaur",
       "set": "ecard1"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Togepi & Cleffa & Igglybuff GX [Rolling Panic | Supreme Puff GX]",
-          "productId": 582672
-        }
-      ],
-      "cardKey": "sm12/143a",
-      "deName": null,
-      "expansionId": 2644,
-      "name": "Togepi & Cleffa & Igglybuff-GX",
-      "set": "sm12"
     }
   ],
   "stillMissingByExpansion": [
@@ -8067,24 +7784,17 @@
       "sets": [
         "det1"
       ]
-    },
-    {
-      "count": 1,
-      "expansionId": 2644,
-      "sets": [
-        "sm12"
-      ]
     }
   ],
   "totals": {
-    "ambiguous": 3,
+    "ambiguous": 2,
     "cards": 21577,
-    "customSet": 6496,
+    "customSet": 6768,
     "matched": 77,
-    "missing": 13,
+    "missing": 12,
     "override": 8,
-    "stabilityKept": 171,
-    "tcgdex": 14812
+    "stabilityKept": 149,
+    "tcgdex": 14563
   },
   "versionSuffixSkippedByExpansion": {
     "1521": 9,
@@ -8120,6 +7830,7 @@
     "2370": 11,
     "2407": 2,
     "2437": 1,
+    "2644": 3,
     "2921": 22
   }
 }
