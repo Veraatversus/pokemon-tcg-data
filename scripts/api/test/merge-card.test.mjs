@@ -162,13 +162,12 @@ test('mergeCard: Trainer ohne pt -> Effekt als Regeltext, DE-Regeltext', () => {
   assert.deepEqual(c.i18n.de.rules, ['Heile 30.']);
 });
 
-const tracker = { bySetId: { sv3pt5: '5402', base1: '1523' } };
 
 test('mergeSet: pt-Set mit TCGdex-Gegenstueck', () => {
   const s = mergeSet({
     canonicalSetId: 'sv3pt5', registrySet: { pokemontcg: 'sv3pt5', tcgdex: 'sv03.5', mergedSubsets: [], aliases: ['TCGDEX-sv03.5'] },
     ptSet: { id: 'sv3pt5', name: '151', series: 'Scarlet & Violet', printedTotal: 165, total: 207, ptcgoCode: 'MEW', releaseDate: '2023/09/22', images: { symbol: 'pt-s', logo: 'pt-l' } },
-    tcgdexSet: sv035, cardCount: 207, assetsIndex, cardmarketTracker: tracker,
+    tcgdexSet: sv035, cardCount: 207, assetsIndex,
   });
   assert.equal(s.id, 'sv3pt5');
   assert.equal(s.name, '151');
@@ -186,11 +185,11 @@ test('mergeSet: pt-Set mit TCGdex-Gegenstueck', () => {
 
 test('merge-set adds DE series and cardCount', () => {
   const me6 = { id: 'me06', serieId: 'me', serieName: { en: 'Mega Evolution', de: 'Mega-Entwicklung' }, name: { en: 'X', de: 'X' }, cardCountOfficial: 103, cardCountTotal: 141, releaseDate: '2026-01-01', cardmarketId: null, tcgplayerId: null };
-  const s = mergeSet({ canonicalSetId: 'me6', registrySet: { pokemontcg: null, tcgdex: 'me06', aliases: [] }, ptSet: null, tcgdexSet: me6, cardCount: 141, assetsIndex, cardmarketTracker: tracker });
+  const s = mergeSet({ canonicalSetId: 'me6', registrySet: { pokemontcg: null, tcgdex: 'me06', aliases: [] }, ptSet: null, tcgdexSet: me6, cardCount: 141, assetsIndex });
   assert.equal(s.series, 'Mega Evolution');
   assert.equal(s.i18n.de.series, 'Mega-Entwicklung');
   assert.deepEqual(s.i18n.de.cardCount, { official: 103, total: 141 });
-  const partial = mergeSet({ canonicalSetId: 'me6', registrySet: { tcgdex: 'me06', aliases: [] }, tcgdexSet: { ...me6, cardCountTotal: null, serieName: { en: 'Mega Evolution' } }, cardCount: 141, assetsIndex, cardmarketTracker: tracker });
+  const partial = mergeSet({ canonicalSetId: 'me6', registrySet: { tcgdex: 'me06', aliases: [] }, tcgdexSet: { ...me6, cardCountTotal: null, serieName: { en: 'Mega Evolution' } }, cardCount: 141, assetsIndex });
   assert.deepEqual(partial.i18n.de.cardCount, { official: 103 });
   assert.equal(partial.i18n.de.series, undefined);
 });
@@ -204,20 +203,20 @@ test('mergeSet: verifiziert fehlende TCGdex-Assets -> pt-Fallback oben, kein DE-
   const s = mergeSet({
     canonicalSetId: 'sv3pt5', registrySet: { pokemontcg: 'sv3pt5', tcgdex: 'sv03.5', mergedSubsets: [], aliases: [] },
     ptSet: { id: 'sv3pt5', name: '151', images: { symbol: 'pt-s', logo: 'pt-l' } },
-    tcgdexSet: sv035, cardCount: 207, assetsIndex, assetsVerified, cardmarketTracker: tracker,
+    tcgdexSet: sv035, cardCount: 207, assetsIndex, assetsVerified,
   });
   assert.deepEqual(s.images, { logo: `${A}/en/sv/sv03.5/logo.webp`, symbol: 'pt-s' });
   assert.deepEqual(s.i18n.de, { name: '151', series: 'Karmesin & Purpur', cardCount: { official: 165 } });
 });
 
-test('mergeSet: pt-Set ohne TCGdex -> Legacy-Bilder, Cardmarket aus Tracker', () => {
+test('mergeSet: pt-Set ohne TCGdex -> Legacy-Bilder, keine Cardmarket-Expansion (kein Tracker mehr)', () => {
   const s = mergeSet({
     canonicalSetId: 'base1', registrySet: { pokemontcg: 'base1', tcgdex: null, mergedSubsets: [], aliases: [] },
     ptSet: { id: 'base1', name: 'Base', series: 'Base', printedTotal: 102, total: 102, ptcgoCode: 'BS', releaseDate: '1999/01/09', images: { symbol: 'pt-s', logo: 'pt-l' } },
-    tcgdexSet: null, cardCount: 102, assetsIndex, cardmarketTracker: tracker,
+    tcgdexSet: null, cardCount: 102, assetsIndex,
   });
   assert.deepEqual(s.images, { logo: 'pt-l', symbol: 'pt-s' });
-  assert.deepEqual(s.ids, { pokemontcg: 'base1', tcgdex: null, cardmarket: 1523, tcgplayer: null });
+  assert.deepEqual(s.ids, { pokemontcg: 'base1', tcgdex: null, cardmarket: null, tcgplayer: null }); // Expansion bestimmt fillCardmarketIds
   assert.equal(s.i18n, undefined);
 });
 
@@ -225,7 +224,7 @@ test('mergeSet: TCGDEX-Set und Pocket-Set', () => {
   const svp = { id: 'P-A', serieId: 'tcgp', serieName: { en: 'Pokémon TCG Pocket' }, name: { en: 'Promo-A', de: 'Promo-A' }, abbreviationOfficial: 'P-A', cardCountOfficial: 100, releaseDate: '2024-10-30', cardmarketId: null, tcgplayerId: null };
   const s = mergeSet({
     canonicalSetId: 'TCGDEX-P-A', registrySet: { pokemontcg: null, tcgdex: 'P-A', mergedSubsets: [], aliases: [] },
-    ptSet: null, tcgdexSet: svp, cardCount: 7, assetsIndex, cardmarketTracker: tracker,
+    ptSet: null, tcgdexSet: svp, cardCount: 7, assetsIndex,
   });
   assert.equal(s.id, 'TCGDEX-P-A');
   assert.equal(s.name, 'Promo-A');
@@ -237,7 +236,7 @@ test('mergeSet: TCGDEX-Set und Pocket-Set', () => {
   assert.deepEqual(s.ids, { pokemontcg: null, tcgdex: 'P-A', cardmarket: null, tcgplayer: null });
   const a1 = mergeSet({
     canonicalSetId: 'TCGDEX-A1', registrySet: { pokemontcg: null, tcgdex: 'A1', mergedSubsets: [], aliases: [] },
-    ptSet: null, tcgdexSet: { ...svp, id: 'A1', name: { en: 'Genetic Apex', de: 'Unschlagbare Gene' }, cardmarketId: 7 }, cardCount: 286, assetsIndex, cardmarketTracker: tracker,
+    ptSet: null, tcgdexSet: { ...svp, id: 'A1', name: { en: 'Genetic Apex', de: 'Unschlagbare Gene' }, cardmarketId: 7 }, cardCount: 286, assetsIndex,
   });
   assert.deepEqual(a1.images, { logo: 'https://assets.tcgdex.net/en/tcgp/A1/logo.webp' });
   assert.deepEqual(a1.i18n.de, { name: 'Unschlagbare Gene', cardCount: { official: 100 }, images: { logo: 'https://assets.tcgdex.net/de/tcgp/A1/logo.webp' } });
@@ -246,7 +245,7 @@ test('mergeSet: TCGDEX-Set und Pocket-Set', () => {
 
 test('mergeSet: Set nur mit nicht-englischem Namen -> erster vorhandener Name', () => {
   const fr = { id: '2013bw', serieId: 'mc', serieName: { en: "McDonald's Collection" }, name: { fr: "Collection McDonald's 2013" }, cardCountOfficial: 12, releaseDate: '2013-01-01', cardmarketId: null, tcgplayerId: null };
-  const s = mergeSet({ canonicalSetId: 'TCGDEX-2013bw', registrySet: { pokemontcg: null, tcgdex: '2013bw', mergedSubsets: [], aliases: [] }, ptSet: null, tcgdexSet: fr, cardCount: 12, assetsIndex: {}, cardmarketTracker: {} });
+  const s = mergeSet({ canonicalSetId: 'TCGDEX-2013bw', registrySet: { pokemontcg: null, tcgdex: '2013bw', mergedSubsets: [], aliases: [] }, ptSet: null, tcgdexSet: fr, cardCount: 12, assetsIndex: {} });
   assert.equal(s.name, "Collection McDonald's 2013");
   assert.equal(s.images, undefined);
 });

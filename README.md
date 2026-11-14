@@ -14,15 +14,15 @@ Die Pokémon TCG API (pokemontcg.io) wird am 1. März 2027 abgeschaltet. Dieses 
 | `sources/pokemontcg/` | Eingefrorener pokemontcg-Snapshot (`cards/`, `sets/`, `decks/`) |
 | `sources/tcgdex/` | Täglicher TCGdex-Spiegel (nur Daten-/Textdateien), dazu `assets-index.json` (Asset-Liste von assets.tcgdex.net) und `assets-verified.json` (Prüfstand der Set-Logos und -Symbole) |
 | `sources/SOURCES.json` | Quell-Commits und Abrufzeitpunkte |
-| `cardmarket/` | Generierte Cardmarket-Daten (`index/`, `sets/`, `meta.json`) |
+| `sources/cardmarket/` | Täglich geladener Cardmarket-Katalog (`catalog.jsonl`, `expansions.json`, `meta.json`) und handgepflegte `custom-sets/` |
+| `cardmarket/` | Altformat der Cardmarket-Daten (`index/`, `sets/`, `meta.json`), eingefroren und nicht mehr neu erzeugt |
 | `scripts/api/` | Build-Toolchain der v3-API (Node, Tests) |
 | `cards/`, `sets/`, `decks/`, `v2_to_v1.rb` | Alte pokemontcg-Struktur im Wurzelverzeichnis. Bleibt aus Kompatibilitätsgründen bis zu einer späteren Umstrukturierung erhalten. |
 
 ## Automatisierung
 
-- **Daily Sync TCGdex to Master** (`sync-tcgdex.yml`, täglich 02:00 UTC, auf `master`): Tests → TCGdex spiegeln → Set-Assets prüfen (inkrementell, darf fehlschlagen) → Matching mit Qualitätsschwelle → Regressionstests → v3-API und Registry bauen → committen. Bei einem Fehler wird nichts committet, und es entsteht ein Issue mit dem Label `upstream-sync`.
-- **Build Cardmarket Data** startet nach dem Sync und zusätzlich täglich um 03:30 UTC (falls der Auslöser über den Sync ausbleibt; zwei Läufe am Tag laufen nacheinander) und erzeugt `cardmarket/` mit den Tagespreisen. Der v3-Build liest daraus fehlende Cardmarket-IDs nach (`api/v3/reports/cardmarket-ids.json`).
-- **Promote Master to Dev and Release** startet danach und führt `master` in `dev` und `release` zusammen. Die App-Dateien dieser Branches bleiben dabei erhalten.
+- **Daily Sync** (`sync-tcgdex.yml`, täglich 02:00 UTC und manuell, auf `master`, der einzige tägliche Workflow): Tests → TCGdex spiegeln → Set-Assets prüfen (inkrementell, darf fehlschlagen) → Cardmarket laden (Einzelkarten-Katalog und Preisguide nach `sources/cardmarket/`; ein Ausfall bricht nicht ab, die Preise bleiben dann auf Vortagesstand) → Matching mit Qualitätsschwelle → Regressionstests → v3-API bauen (Karten, Registry, Cardmarket-IDs, `api/v3/prices`, Reports) → ein Commit mit Push → Weitergabe an `dev`/`release` → Meldungen. Scheitert der Lauf, wird nichts committet, und es entsteht ein Issue mit dem Label `upstream-sync`. Grobe Cardmarket-Zuordnungsprobleme (oder 3 Cardmarket-Ausfälle in Folge) stehen in einem selbstpflegenden Issue „Cardmarket-Zuordnung prüfen“ (Label `cardmarket-mapping`), das sich schließt, sobald nichts mehr auffällt. Details: [scripts/api/README.md](scripts/api/README.md#taeglicher-workflow-daily-sync).
+- **Promote Master to Dev and Release** wird am Ende jedes erfolgreichen Daily Sync ausgelöst (oder manuell) und führt `master` in `dev` und `release` zusammen. Die App-Dateien dieser Branches bleiben dabei erhalten.
 - **Promote Dev to Release** / **Manual Merge Dev to Release** (manuell) übernehmen `dev` nach `release`.
 - **Deploy Pages** veröffentlicht `release` im Wurzelverzeichnis und `dev` als Vorschau unter `/dev`.
 

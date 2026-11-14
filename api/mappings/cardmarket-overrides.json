@@ -1,5 +1,6 @@
 {
-  "_comment": "Manuelle Cardmarket-Produkt-IDs je Karte: \"<setId>/<cardId>\": <cardmarketProductId> | null. Gewinnt vor TCGdex und allen Regeln; null entfernt die ID. Die ID muss in cardmarket/index/products.json stehen, sonst Build-Warnung. Kandidaten: stillMissing in api/v3/reports/cardmarket-ids.json. Siehe scripts/api/README.md.",
+  "_comment": "Manuelle Cardmarket-Zuordnungen: \"<setId>/<cardId>\": <cardmarketProductId> | null (gewinnt vor custom-sets, TCGdex und allen Regeln; null entfernt die ID) und \"<setId>\": <expansionId> (Cardmarket-Expansion des Sets). Produkt bzw. Expansion muss im Katalog sources/cardmarket/catalog.jsonl stehen, sonst Build-Warnung. Kandidaten: stillMissing in api/v3/reports/cardmarket-ids.json. Siehe scripts/api/README.md. Notizen: ecard1/66 (Tyranitar, normaler Druck) -> 274941, die niedrigere der beiden Produkt-IDs zur custom-set-Nummer #66 (regulaerer Druck); 362890 ist laut TCGdex die Jumbo-Variante.",
+  "ecard1/66": 274941,
   "me6/101": 918932,
   "me6/126": 918965,
   "me6/90": 918918,
