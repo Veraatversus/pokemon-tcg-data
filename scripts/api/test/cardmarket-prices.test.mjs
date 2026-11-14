@@ -44,11 +44,29 @@ test('holo fields mapped', () => {
   };
   const { files } = buildPriceFiles({ cardsBySet: new Map([['s1', [card('s1', '1', 10)]]]), primaryCardmarketId, now: () => NOW, priceGuide: guide(row) });
   assert.deepEqual(files.get('s1')['1'], {
-    productId: 10, trend: 3, avg1: 4, avg7: 5, avg30: 6, low: 2, trendHolo: 13, avg1Holo: 14, avg7Holo: 15, avg30Holo: 16, lowHolo: 12,
+    productId: 10, trend: 3, avg1: 4, avg7: 5, avg30: 6, low: 2, avgHolo: 11, trendHolo: 13, avg1Holo: 14, avg7Holo: 15, avg30Holo: 16, lowHolo: 12,
   });
   // 0 ist ein gueltiger Wert, Nicht-Zahlen fallen weg
   const z = buildPriceFiles({ cardsBySet: new Map([['s1', [card('s1', '1', 10)]]]), primaryCardmarketId, now: () => NOW, priceGuide: guide({ idProduct: 10, trend: 0, low: '3', avg1: Number.NaN }) });
   assert.deepEqual(z.files.get('s1')['1'], { productId: 10, trend: 0 });
+});
+
+test('holo fields only for cards with a plausible reverse print', () => {
+  const row = { idProduct: 10, trend: 3, low: 2, 'avg-holo': 11, 'trend-holo': 13, 'avg1-holo': 14, 'avg7-holo': 15, 'avg30-holo': 16, 'low-holo': 12 };
+  const plain = { productId: 10, trend: 3, low: 2 };
+  const build = (c, r = row) => buildPriceFiles({ cardsBySet: new Map([['s1', [c]]]), primaryCardmarketId, now: () => NOW, priceGuide: guide(r) }).files.get('s1')['1'];
+  // Reverse-Variante: Holo-Felder bleiben
+  assert.equal(build(card('s1', '1', 10, [{ type: 'normal' }, { type: 'reverse' }])).avgHolo, 11);
+  assert.equal(build(card('s1', '1', 10, [{ type: 'normal' }, { type: 'reverse' }])).lowHolo, 12);
+  // Variantenangaben ohne reverse (base1-Stil: holo/normal): Holo-Felder fallen weg
+  assert.deepEqual(build(card('s1', '1', 10, [{ type: 'normal' }])), plain);
+  assert.deepEqual(build(card('s1', '1', 10, [{ type: 'holo', subtype: 'unlimited' }])), plain);
+  // keine Variantenangaben: avg-holo > 0 entscheidet
+  assert.equal(build(card('s1', '1', 10)).avgHolo, 11);
+  assert.equal(build(card('s1', '1', 10, [])).avgHolo, 11);
+  assert.deepEqual(build(card('s1', '1', 10), { ...row, 'avg-holo': 0 }), plain);
+  const noAvg = { ...row }; delete noAvg['avg-holo'];
+  assert.deepEqual(build(card('s1', '1', 10), noAvg), plain);
 });
 
 test('untouched when no price guide', () => {
