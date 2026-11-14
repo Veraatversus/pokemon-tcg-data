@@ -1,10 +1,9 @@
 # Cardmarket-Zuordnung
 
-21577 Karten, 221 ohne Cardmarket-ID (Sets nach fehlenden Karten absteigend; Details in cardmarket-ids.json).
+21577 Karten, 192 ohne Cardmarket-ID (Sets nach fehlenden Karten absteigend; Details in cardmarket-ids.json).
 
 | Set | Erweiterung | Karten | mit ID | fehlen | Abdeckung | Herkunft | Suche |
 | --- | --- | ---: | ---: | ---: | ---: | --- | --- |
-| TCGDEX-tk-hs-g | 1629 | 30 | 1 | 29 | 3.3 % | tcgdex 1 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1629&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | TCGDEX-tk-bw-e | 1630 | 30 | 3 | 27 | 10 % | tcgdex 3 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1630&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | dpp | 1609 | 56 | 42 | 14 | 75 % | tcgdex 1, matched 38, stabilityKept 3 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1609&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | sm2 | 1800 | 180 | 169 | 11 | 93.9 % | tcgdex 165, stabilityKept 4 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1800&sortBy=collectorsnumber_asc&perSite=100&site=1) |
@@ -63,7 +62,8 @@
 | TCGDEX-sp | - | 0 | 0 | 0 | - | - | - |
 | TCGDEX-tk-bw-z | 1630 | 30 | 30 | 0 | 100 % | tcgdex 30 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1630&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | TCGDEX-tk-dp-m | 1628 | 12 | 12 | 0 | 100 % | tcgdex 12 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1628&sortBy=collectorsnumber_asc&perSite=100&site=1) |
-| TCGDEX-tk-hs-r | 1629 | 30 | 30 | 0 | 100 % | tcgdex 30 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1629&sortBy=collectorsnumber_asc&perSite=100&site=1) |
+| TCGDEX-tk-hs-g | 1629 | 30 | 30 | 0 | 100 % | customSet 30 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1629&sortBy=collectorsnumber_asc&perSite=100&site=1) |
+| TCGDEX-tk-hs-r | 1629 | 30 | 30 | 0 | 100 % | customSet 30 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1629&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | TCGDEX-tk-sm-l | 1758 | 18 | 18 | 0 | 100 % | tcgdex 18 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1758&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | TCGDEX-tk-xy-b | 1632 | 30 | 30 | 0 | 100 % | customSet 30 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1632&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | TCGDEX-tk-xy-latia | 1683 | 30 | 30 | 0 | 100 % | customSet 30 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1683&sortBy=collectorsnumber_asc&perSite=100&site=1) |

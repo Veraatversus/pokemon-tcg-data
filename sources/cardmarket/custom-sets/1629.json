@@ -1,0 +1,250 @@
+{
+  "expansionId": 1629,
+  "name": "HS Trainer Kit",
+  "cards": [
+    {
+      "productId": 279155,
+      "collectorNumber": "1G"
+    },
+    {
+      "productId": 279125,
+      "collectorNumber": "1R"
+    },
+    {
+      "productId": 279130,
+      "collectorNumber": "2G"
+    },
+    {
+      "productId": 279098,
+      "collectorNumber": "2R"
+    },
+    {
+      "productId": 279148,
+      "collectorNumber": "3G"
+    },
+    {
+      "productId": 279119,
+      "collectorNumber": "3R"
+    },
+    {
+      "productId": 279142,
+      "collectorNumber": "4G"
+    },
+    {
+      "productId": 279113,
+      "collectorNumber": "4R"
+    },
+    {
+      "productId": 279144,
+      "collectorNumber": "5G"
+    },
+    {
+      "productId": 279112,
+      "collectorNumber": "5R"
+    },
+    {
+      "productId": 279145,
+      "collectorNumber": "6G"
+    },
+    {
+      "productId": 279114,
+      "collectorNumber": "6R"
+    },
+    {
+      "productId": 279147,
+      "collectorNumber": "7G"
+    },
+    {
+      "productId": 279115,
+      "collectorNumber": "7R"
+    },
+    {
+      "productId": 279146,
+      "collectorNumber": "8G"
+    },
+    {
+      "productId": 279117,
+      "collectorNumber": "8R"
+    },
+    {
+      "productId": 279126,
+      "collectorNumber": "9G"
+    },
+    {
+      "productId": 279116,
+      "collectorNumber": "9R"
+    },
+    {
+      "productId": 279136,
+      "collectorNumber": "10G"
+    },
+    {
+      "productId": 279105,
+      "collectorNumber": "10R"
+    },
+    {
+      "productId": 279135,
+      "collectorNumber": "11G"
+    },
+    {
+      "productId": 279104,
+      "collectorNumber": "11R"
+    },
+    {
+      "productId": 279137,
+      "collectorNumber": "12G"
+    },
+    {
+      "productId": 279106,
+      "collectorNumber": "12R"
+    },
+    {
+      "productId": 279138,
+      "collectorNumber": "13G"
+    },
+    {
+      "productId": 279107,
+      "collectorNumber": "13R"
+    },
+    {
+      "productId": 279139,
+      "collectorNumber": "14G"
+    },
+    {
+      "productId": 279109,
+      "collectorNumber": "14R"
+    },
+    {
+      "productId": 279134,
+      "collectorNumber": "15G"
+    },
+    {
+      "productId": 279108,
+      "collectorNumber": "15R"
+    },
+    {
+      "productId": 279133,
+      "collectorNumber": "16G"
+    },
+    {
+      "productId": 279103,
+      "collectorNumber": "16R"
+    },
+    {
+      "productId": 279128,
+      "collectorNumber": "17G"
+    },
+    {
+      "productId": 279102,
+      "collectorNumber": "17R"
+    },
+    {
+      "productId": 279127,
+      "collectorNumber": "18G"
+    },
+    {
+      "productId": 279097,
+      "collectorNumber": "18R"
+    },
+    {
+      "productId": 279129,
+      "collectorNumber": "19G"
+    },
+    {
+      "productId": 279096,
+      "collectorNumber": "19R"
+    },
+    {
+      "productId": 279132,
+      "collectorNumber": "20G"
+    },
+    {
+      "productId": 279099,
+      "collectorNumber": "20R"
+    },
+    {
+      "productId": 279131,
+      "collectorNumber": "21G"
+    },
+    {
+      "productId": 279101,
+      "collectorNumber": "21R"
+    },
+    {
+      "productId": 279140,
+      "collectorNumber": "22G"
+    },
+    {
+      "productId": 279100,
+      "collectorNumber": "22R"
+    },
+    {
+      "productId": 279141,
+      "collectorNumber": "23G"
+    },
+    {
+      "productId": 279110,
+      "collectorNumber": "23R"
+    },
+    {
+      "productId": 279151,
+      "collectorNumber": "24G"
+    },
+    {
+      "productId": 279111,
+      "collectorNumber": "24R"
+    },
+    {
+      "productId": 279150,
+      "collectorNumber": "25G"
+    },
+    {
+      "productId": 279121,
+      "collectorNumber": "25R"
+    },
+    {
+      "productId": 279152,
+      "collectorNumber": "26G"
+    },
+    {
+      "productId": 279120,
+      "collectorNumber": "26R"
+    },
+    {
+      "productId": 279153,
+      "collectorNumber": "27G"
+    },
+    {
+      "productId": 279122,
+      "collectorNumber": "27R"
+    },
+    {
+      "productId": 279154,
+      "collectorNumber": "28G"
+    },
+    {
+      "productId": 279123,
+      "collectorNumber": "28R"
+    },
+    {
+      "productId": 279149,
+      "collectorNumber": "29G"
+    },
+    {
+      "productId": 279124,
+      "collectorNumber": "29R"
+    },
+    {
+      "productId": 279143,
+      "collectorNumber": "30G"
+    },
+    {
+      "productId": 279118,
+      "collectorNumber": "30R"
+    }
+  ],
+  "setSuffix": {
+    "TCGDEX-tk-hs-g": "G",
+    "TCGDEX-tk-hs-r": "R"
+  }
+}
