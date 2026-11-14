@@ -20,7 +20,7 @@ import {
   listCollectionSetIds,
   invalidateCollectionRowCache,
   prefetchSetsOverviewRows,
-} from './data/sheets-db.js?v=20261114-cm-legacy-removed';
+} from './data/sheets-db.js?v=20261114-series-date-order';
 import {
   collectionKeyOf,
   emptyCollectionEntry,
@@ -48,12 +48,12 @@ import {
   collectSearchStrings,
   matchesTokensInValues,
 } from './features/search/query-utils.js';
-import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, fetchV3SetMeta } from './data/pokemon-api.js?v=20261114-cm-legacy-removed';
-import { resolveSeriesGroupInfo, resolveDisplaySet, applyDeSeriesFallback, resolveSetTotalCards, setV3SetMeta, getCardLanguage } from './data/schema-contract.js?v=20261114-cm-legacy-removed';
+import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, fetchV3SetMeta } from './data/pokemon-api.js?v=20261114-series-date-order';
+import { resolveSeriesGroupInfo, resolveDisplaySet, applyDeSeriesFallback, resolveSetTotalCards, resolveSetReleaseTime, setV3SetMeta, getCardLanguage } from './data/schema-contract.js?v=20261114-series-date-order';
 import { imageCandidates, bindImageFallback, fallbackImgAttrs } from './ui/image-fallback.js';
 import { renderDashboardSetGrid } from './views/dashboard-grid.js';
-import { getCardPrice, loadPriceStamp, refreshV3Prices } from './data/v3-prices.js?v=20261114-cm-legacy-removed';
-import { collectExcludedSetNames, filterExcludedSets, filterVisibleSummaryRows, loadExcludedSetPredicate } from './data/excluded-sets.js?v=20261114-cm-legacy-removed';
+import { getCardPrice, loadPriceStamp, refreshV3Prices } from './data/v3-prices.js?v=20261114-series-date-order';
+import { collectExcludedSetNames, filterExcludedSets, filterVisibleSummaryRows, loadExcludedSetPredicate } from './data/excluded-sets.js?v=20261114-series-date-order';
 import {
   buildCombinedSearchDropdownOptions,
   buildSearchProgressLabel,
@@ -62,7 +62,7 @@ import {
   resolveCombinedSearchSelection,
   toBoolean
 } from './core/utils.js';
-import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle, effectiveCollectionStatus } from './core/collection-state.js?v=20261114-cm-legacy-removed';
+import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle, effectiveCollectionStatus } from './core/collection-state.js?v=20261114-series-date-order';
 import * as cache from './core/cache.js';
 import { CONFIG, scopedStorageKey } from './core/config.js';
 import {
@@ -97,7 +97,7 @@ import {
   filterLegacyImportPlanBySelection,
   summarizeLegacyImportPlan,
   extractLegacySpreadsheetId
-} from './features/collection/legacy-import.js?v=20261114-cm-legacy-removed';
+} from './features/collection/legacy-import.js?v=20261114-series-date-order';
 import { ensureResolverForSet } from './data/collection-aliases.js';
 import { buildCollectionBackupSets } from './features/collection/backup-export.js';
 import { buildBackupRestoreSnapshot, planBackupRestore, pickSourceSetKey, resolveSourceCardKey } from './features/collection/legacy-key-resolution.js';
@@ -107,11 +107,11 @@ import {
   showAmbiguousMigrationDialog
 } from './features/collection/ambiguous-key-migration.js';
 import { initCommandPalette } from './ui/command-palette.js';
-import { filterSetsBySeriesKey, getStatsSeriesLabel } from './ui/stats-series.js?v=20261114-cm-legacy-removed';
+import { filterSetsBySeriesKey, getStatsSeriesLabel } from './ui/stats-series.js?v=20261114-series-date-order';
 import {
   computePriceAnalyticsFromSummaries,
   pickCardPriceFromSummary,
-} from './ui/stats-price-analytics.js?v=20261114-cm-legacy-removed';
+} from './ui/stats-price-analytics.js?v=20261114-series-date-order';
 import {
   applyCardmarketPriceSummary as applyCardmarketPriceSummaryUi,
   cardmarketPriceSummaryCache,
@@ -121,7 +121,7 @@ import {
   normalizeCardmarketBasePriceType,
   renderLightboxCardmarketPrices as renderLightboxCardmarketPricesUi,
   CARDMARKET_BASE_PRICE_DEFAULT,
-} from './ui/cardmarket-price.js?v=20261114-cm-legacy-removed';
+} from './ui/cardmarket-price.js?v=20261114-series-date-order';
 import {
   loadFavorites, saveFavorites, toggleFavorite, isFavorite,
   loadSearchHistory, addSearchHistory, clearSearchHistory,
@@ -129,13 +129,13 @@ import {
   loadSettings, saveSettings, updateSetting,
   applyQuickFilters, calculateCollectionStats,
   getSyncStatus, setSyncStatus
-} from './enhanced-features.js?v=20261114-cm-legacy-removed';
+} from './enhanced-features.js?v=20261114-series-date-order';
 
 import {
   initQuickFiltersUI, createSearchHistoryWidget, createStatisticsPanel,
   createExportDialog, createSettingsPanel,
   createBulkActionsToolbar
-} from './ui/components.js?v=20261114-cm-legacy-removed';
+} from './ui/components.js?v=20261114-series-date-order';
 import {
   createInitialSheetsRetryMetrics,
   initSheetsWriteFeedback as initSheetsWriteFeedbackUi,
@@ -3043,6 +3043,7 @@ async function renderDashboard() {
       sets,
       sortBy,
       buildSeriesMap,
+      getReleaseTime: resolveSetReleaseTime,
       createCard: (set) => createDashSetCard(set, summaryByName.get(set.setName) || summaryByName.get(set.setId))
     });
 

@@ -616,6 +616,19 @@ export function buildCardRecordFromSources({
 let sharedDeSeriesBySetId = null;
 // Gemeinsame v3-Set-Meta (setId -> { deName, deSeries }); eine Quelle fuer DE-Setnamen und DE-Serien.
 let sharedV3SetMeta = null;
+/**
+ * Veroeffentlichungszeit (ms) eines Sets fuer die Dashboard-Sortierung: v3-Datum (sets.json, "YYYY/MM/DD"),
+ * sonst Sheet-Spalten, sonst null (sortiert ans Ende).
+ */
+export function resolveSetReleaseTime(set = {}) {
+  const v3 = sharedV3SetMeta?.get?.(String(set?.setId ?? '').trim())?.releaseDate;
+  const parse = (raw) => Date.parse(String(raw ?? '').trim().replaceAll('/', '-'));
+  if (Number.isFinite(parse(v3))) return parse(v3);
+  for (const raw of [set?.vera_releaseDate, set?.tcgdex_releaseDate, set?.releaseDate]) {
+    if (Number.isFinite(parse(raw))) return parse(raw);
+  }
+  return null;
+}
 export function setV3SetMeta(meta) {
   sharedV3SetMeta = meta instanceof Map ? meta : null;
   sharedDeSeriesBySetId = null;
