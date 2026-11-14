@@ -1,4 +1,4 @@
-import { resolveSeriesGroupInfo } from '../data/schema-contract.js?v=20261114-api-images';
+import { resolveSeriesGroupInfo } from '../data/schema-contract.js?v=20261114-api-prices';
 
 export function getStatsSeriesLabel(seriesKey = '', group = {}) {
   const label = String(group?.label || group?.canonicalName || '').trim();

@@ -20,7 +20,7 @@ import {
   listCollectionSetIds,
   invalidateCollectionRowCache,
   prefetchSetsOverviewRows,
-} from './data/sheets-db.js?v=20261114-api-images';
+} from './data/sheets-db.js?v=20261114-api-prices';
 import {
   collectionKeyOf,
   emptyCollectionEntry,
@@ -48,12 +48,12 @@ import {
   collectSearchStrings,
   matchesTokensInValues,
 } from './features/search/query-utils.js';
-import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, fetchV3SetMeta } from './data/pokemon-api.js?v=20261114-api-images';
-import { resolveSeriesGroupInfo, resolveDisplaySet, applyDeSeriesFallback, resolveSetTotalCards, setV3SetMeta, getCardLanguage } from './data/schema-contract.js?v=20261114-api-images';
+import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, fetchV3SetMeta } from './data/pokemon-api.js?v=20261114-api-prices';
+import { resolveSeriesGroupInfo, resolveDisplaySet, applyDeSeriesFallback, resolveSetTotalCards, setV3SetMeta, getCardLanguage } from './data/schema-contract.js?v=20261114-api-prices';
 import { imageCandidates, bindImageFallback, fallbackImgAttrs } from './ui/image-fallback.js';
 import { renderDashboardSetGrid } from './views/dashboard-grid.js';
-import { getCardPrice, loadPriceStamp, refreshV3Prices } from './data/v3-prices.js?v=20261114-api-images';
-import { filterExcludedSets, loadExcludedSetPredicate } from './data/excluded-sets.js?v=20261114-api-images';
+import { getCardPrice, loadPriceStamp, refreshV3Prices } from './data/v3-prices.js?v=20261114-api-prices';
+import { filterExcludedSets, loadExcludedSetPredicate } from './data/excluded-sets.js?v=20261114-api-prices';
 import {
   buildCombinedSearchDropdownOptions,
   buildSearchProgressLabel,
@@ -62,7 +62,7 @@ import {
   resolveCombinedSearchSelection,
   toBoolean
 } from './core/utils.js';
-import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle, effectiveCollectionStatus } from './core/collection-state.js?v=20261114-api-images';
+import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle, effectiveCollectionStatus } from './core/collection-state.js?v=20261114-api-prices';
 import * as cache from './core/cache.js';
 import { CONFIG, scopedStorageKey } from './core/config.js';
 import {
@@ -97,7 +97,7 @@ import {
   filterLegacyImportPlanBySelection,
   summarizeLegacyImportPlan,
   extractLegacySpreadsheetId
-} from './features/collection/legacy-import.js?v=20261114-api-images';
+} from './features/collection/legacy-import.js?v=20261114-api-prices';
 import { ensureResolverForSet } from './data/collection-aliases.js';
 import { buildCollectionBackupSets } from './features/collection/backup-export.js';
 import { buildBackupRestoreSnapshot, planBackupRestore, pickSourceSetKey, resolveSourceCardKey } from './features/collection/legacy-key-resolution.js';
@@ -107,11 +107,11 @@ import {
   showAmbiguousMigrationDialog
 } from './features/collection/ambiguous-key-migration.js';
 import { initCommandPalette } from './ui/command-palette.js';
-import { filterSetsBySeriesKey, getStatsSeriesLabel } from './ui/stats-series.js?v=20261114-api-images';
+import { filterSetsBySeriesKey, getStatsSeriesLabel } from './ui/stats-series.js?v=20261114-api-prices';
 import {
   computePriceAnalyticsFromSummaries,
   pickCardPriceFromSummary,
-} from './ui/stats-price-analytics.js?v=20261114-api-images';
+} from './ui/stats-price-analytics.js?v=20261114-api-prices';
 import {
   applyCardmarketPriceSummary as applyCardmarketPriceSummaryUi,
   cardmarketPriceSummaryCache,
@@ -121,7 +121,7 @@ import {
   normalizeCardmarketBasePriceType,
   renderLightboxCardmarketPrices as renderLightboxCardmarketPricesUi,
   CARDMARKET_BASE_PRICE_DEFAULT,
-} from './ui/cardmarket-price.js?v=20261114-api-images';
+} from './ui/cardmarket-price.js?v=20261114-api-prices';
 import {
   loadFavorites, saveFavorites, toggleFavorite, isFavorite,
   loadSearchHistory, addSearchHistory, clearSearchHistory,
@@ -129,13 +129,13 @@ import {
   loadSettings, saveSettings, updateSetting,
   applyQuickFilters, calculateCollectionStats,
   getSyncStatus, setSyncStatus
-} from './enhanced-features.js?v=20261114-api-images';
+} from './enhanced-features.js?v=20261114-api-prices';
 
 import {
   initQuickFiltersUI, createSearchHistoryWidget, createStatisticsPanel,
   createExportDialog, createSettingsPanel,
   createBulkActionsToolbar
-} from './ui/components.js?v=20261114-api-images';
+} from './ui/components.js?v=20261114-api-prices';
 import {
   createInitialSheetsRetryMetrics,
   initSheetsWriteFeedback as initSheetsWriteFeedbackUi,
