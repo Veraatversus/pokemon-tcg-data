@@ -2508,33 +2508,21 @@
       "tcgdex": 0
     },
     "sm75": {
-      "ambiguous": 2,
-      "ambiguousCards": [
-        "40a",
-        "60a"
-      ],
+      "ambiguous": 0,
       "cards": 80,
-      "corrected": 1,
       "coverage": {
         "bySource": {
-          "matched": 3,
-          "stabilityKept": 1,
-          "tcgdex": 74
+          "customSet": 80
         },
         "cards": 80,
-        "withId": 78
+        "withId": 80
       },
+      "customSet": 80,
       "expansionId": 2351,
-      "matched": 3,
-      "missing": 2,
-      "missingCards": [
-        "40a",
-        "60a"
-      ],
-      "ordered": 2,
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2351&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 1,
-      "tcgdex": 74
+      "tcgdex": 0
     },
     "sm8": {
       "ambiguous": 0,
@@ -3471,8 +3459,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 5510,
-    "changed": 680,
+    "applied": 5590,
+    "changed": 684,
     "conflicts": [],
     "dropped": [
       {
@@ -5175,14 +5163,6 @@
       "TCGDEX-2018sm-fr-38",
       "TCGDEX-2018sm-fr-39"
     ],
-    "363487": [
-      "sm75-15",
-      "sm75-16"
-    ],
-    "363506": [
-      "sm75-34",
-      "sm75-35"
-    ],
     "398504": [
       "sm12-239",
       "sm12-54"
@@ -5344,10 +5324,10 @@
     ]
   },
   "duplicates": {
-    "cards": 789,
-    "corrected": 211,
-    "ids": 395,
-    "kept": 578
+    "cards": 785,
+    "corrected": 210,
+    "ids": 393,
+    "kept": 575
   },
   "expansionMismatch": {
     "cards": [
@@ -6938,14 +6918,14 @@
       }
     ],
     "totals": {
-      "checked": 17878,
+      "checked": 17803,
       "corrected": 21,
       "dropped": 15,
       "droppedShared": 11,
       "foreignNameOk": 1276,
       "keptMismatch": 134,
       "noSetExpansion": 0,
-      "ok": 16429,
+      "ok": 16354,
       "unknownProduct": 3
     }
   },
@@ -7066,11 +7046,11 @@
   "rules": {
     "energySymbol": 3,
     "leftRight": 0,
-    "ordered": 6,
+    "ordered": 4,
     "orderedRejected": 7,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 324
+    "versionSuffixSkipped": 325
   },
   "setsWithoutExpansion": [
     {
@@ -7956,13 +7936,6 @@
       "todaySource": null
     },
     {
-      "cardKey": "sm75/35",
-      "productId": 363507,
-      "source": "corrected",
-      "todayId": 363506,
-      "todaySource": "tcgdex"
-    },
-    {
       "cardKey": "sv3/57",
       "productId": 725137,
       "source": "corrected",
@@ -8596,39 +8569,6 @@
     {
       "candidates": [
         {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Altaria [Fight Song | Pierce]",
-          "productId": 364324
-        }
-      ],
-      "cardKey": "sm75/40a",
-      "deName": null,
-      "expansionId": 2351,
-      "name": "Altaria",
-      "set": "sm75"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Fiery Flint",
-          "productId": 407279
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Fiery Flint",
-          "productId": 448143
-        }
-      ],
-      "cardKey": "sm75/60a",
-      "deName": null,
-      "expansionId": 2351,
-      "name": "Fiery Flint",
-      "set": "sm75"
-    },
-    {
-      "candidates": [
-        {
           "hint": "same-name-unnumbered",
           "name": "MAudino EX [Magical Symphony]",
           "productId": 289906
@@ -8669,13 +8609,6 @@
       "expansionId": 1611,
       "sets": [
         "bwp"
-      ]
-    },
-    {
-      "count": 2,
-      "expansionId": 2351,
-      "sets": [
-        "sm75"
       ]
     },
     {
@@ -8750,14 +8683,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 10,
+    "ambiguous": 8,
     "cards": 21577,
-    "customSet": 5510,
-    "matched": 99,
-    "missing": 23,
+    "customSet": 5590,
+    "matched": 96,
+    "missing": 21,
     "override": 8,
-    "stabilityKept": 185,
-    "tcgdex": 15752
+    "stabilityKept": 184,
+    "tcgdex": 15678
   },
   "versionSuffixSkippedByExpansion": {
     "1521": 9,
@@ -8783,6 +8716,7 @@
     "2065": 14,
     "2075": 11,
     "2320": 10,
+    "2351": 1,
     "2370": 11,
     "2407": 2,
     "2437": 1,

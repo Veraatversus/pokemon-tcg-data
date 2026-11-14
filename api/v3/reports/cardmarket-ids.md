@@ -1,13 +1,12 @@
 # Cardmarket-Zuordnung
 
-21577 Karten, 23 ohne Cardmarket-ID (Sets nach fehlenden Karten absteigend; Details in cardmarket-ids.json).
+21577 Karten, 21 ohne Cardmarket-ID (Sets nach fehlenden Karten absteigend; Details in cardmarket-ids.json).
 
 | Set | Erweiterung | Karten | mit ID | fehlen | Abdeckung | Herkunft | Suche |
 | --- | --- | ---: | ---: | ---: | ---: | --- | --- |
 | TCGDEX-xya | - | 6 | 0 | 6 | 0 % | - | - |
 | bwp | 1611 | 101 | 99 | 2 | 98 % | customSet 99 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1611&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | ecard1 | 1536 | 165 | 163 | 2 | 98.8 % | tcgdex 1, customSet 161, override 1 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1536&sortBy=collectorsnumber_asc&perSite=100&site=1) |
-| sm75 | 2351 | 80 | 78 | 2 | 97.5 % | tcgdex 74, matched 3, stabilityKept 1 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2351&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | TCGDEX-miscp | - | 1 | 0 | 1 | 0 % | - | - |
 | det1 | 2438 | 19 | 18 | 1 | 94.7 % | tcgdex 18 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2438&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | dp6 | 1560 | 146 | 145 | 1 | 99.3 % | tcgdex 137, matched 6, stabilityKept 2 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1560&sortBy=collectorsnumber_asc&perSite=100&site=1) |
@@ -152,6 +151,7 @@
 | sm5 | 2065 | 178 | 178 | 0 | 100 % | customSet 178 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2065&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | sm6 | 2075 | 150 | 150 | 0 | 100 % | customSet 150 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2075&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | sm7 | 2320 | 187 | 187 | 0 | 100 % | customSet 187 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2320&sortBy=collectorsnumber_asc&perSite=100&site=1) |
+| sm75 | 2351 | 80 | 80 | 0 | 100 % | customSet 80 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2351&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | sm8 | 2370 | 240 | 240 | 0 | 100 % | customSet 240 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2370&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | sm9 | 2407 | 198 | 198 | 0 | 100 % | customSet 198 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2407&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | sma | 2514 | 94 | 94 | 0 | 100 % | customSet 94 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2514&sortBy=collectorsnumber_asc&perSite=100&site=1) |
