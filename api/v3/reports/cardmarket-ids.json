@@ -2450,40 +2450,21 @@
       "tcgdex": 0
     },
     "sm3": {
-      "ambiguous": 8,
-      "ambiguousCards": [
-        "18a",
-        "39a",
-        "88a",
-        "92a",
-        "105a",
-        "112a",
-        "115a",
-        "116a"
-      ],
+      "ambiguous": 0,
       "cards": 177,
       "coverage": {
         "bySource": {
-          "tcgdex": 169
+          "customSet": 177
         },
         "cards": 177,
-        "withId": 169
+        "withId": 177
       },
+      "customSet": 177,
       "expansionId": 1824,
       "matched": 0,
-      "missing": 8,
-      "missingCards": [
-        "18a",
-        "39a",
-        "88a",
-        "92a",
-        "105a",
-        "112a",
-        "115a",
-        "116a"
-      ],
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1824&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 169
+      "tcgdex": 0
     },
     "sm35": {
       "ambiguous": 3,
@@ -3716,17 +3697,15 @@
       "cards": 216,
       "coverage": {
         "bySource": {
-          "customSet": 212,
-          "override": 4
+          "customSet": 216
         },
         "cards": 216,
         "withId": 216
       },
-      "customSet": 212,
+      "customSet": 216,
       "expansionId": 1612,
       "matched": 0,
       "missing": 0,
-      "override": 4,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1612&sortBy=collectorsnumber_asc&perSite=100&site=1",
       "tcgdex": 0
     },
@@ -3753,8 +3732,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 1966,
-    "changed": 425,
+    "applied": 2147,
+    "changed": 428,
     "conflicts": [],
     "dropped": [
       {
@@ -8069,14 +8048,14 @@
       }
     ],
     "totals": {
-      "checked": 21242,
+      "checked": 21062,
       "corrected": 25,
       "dropped": 27,
       "droppedShared": 23,
       "foreignNameOk": 1309,
       "keptMismatch": 159,
       "noSetExpansion": 0,
-      "ok": 19719,
+      "ok": 19539,
       "unknownProduct": 3
     }
   },
@@ -8275,7 +8254,7 @@
     }
   ],
   "overrides": {
-    "applied": 12,
+    "applied": 8,
     "problems": [],
     "removed": 0,
     "warnings": []
@@ -8307,9 +8286,9 @@
     "leftRight": 0,
     "ordered": 34,
     "orderedRejected": 16,
-    "override": 12,
+    "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 105
+    "versionSuffixSkipped": 109
   },
   "setsWithoutExpansion": [
     {
@@ -10861,173 +10840,6 @@
       "candidates": [
         {
           "hint": "same-name-unnumbered",
-          "name": "Charmander [Scratch | Flame Tail]",
-          "productId": 367771
-        }
-      ],
-      "cardKey": "sm3/18a",
-      "deName": null,
-      "expansionId": 1824,
-      "name": "Charmander",
-      "set": "sm3"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tapu Fini GX [Aqua Ring | Hydro Shot | Tapu Storm GX]",
-          "productId": 366836
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Tapu Fini GX [Aqua Ring | Hydro Shot | Tapu Storm GX]",
-          "productId": 604983
-        }
-      ],
-      "cardKey": "sm3/39a",
-      "deName": null,
-      "expansionId": 1824,
-      "name": "Tapu Fini-GX",
-      "set": "sm3"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Darkrai GX [Restoration | Dark Cleave | Dead End GX]",
-          "productId": 363945
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Darkrai GX [Restoration | Dark Cleave | Dead End GX]",
-          "productId": 657889
-        }
-      ],
-      "cardKey": "sm3/88a",
-      "deName": null,
-      "expansionId": 1824,
-      "name": "Darkrai-GX",
-      "set": "sm3"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Kirlia [Smack | Magical Shot]",
-          "productId": 312202
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Kirlia [Smack | Magical Shot]",
-          "productId": 665136
-        }
-      ],
-      "cardKey": "sm3/92a",
-      "deName": null,
-      "expansionId": 1824,
-      "name": "Kirlia",
-      "set": "sm3"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Porygon-Z [Initialize | Zap Cannon]",
-          "productId": 361591
-        }
-      ],
-      "cardKey": "sm3/105a",
-      "deName": null,
-      "expansionId": 1824,
-      "name": "Porygon-Z",
-      "set": "sm3"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Acerola",
-          "productId": 312216
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Acerola",
-          "productId": 312241
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Acerola",
-          "productId": 312288
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Acerola",
-          "productId": 371642
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Acerola",
-          "productId": 449243
-        }
-      ],
-      "cardKey": "sm3/112a",
-      "deName": null,
-      "expansionId": 1824,
-      "name": "Acerola",
-      "set": "sm3"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Guzma",
-          "productId": 312218
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Guzma",
-          "productId": 312240
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Guzma",
-          "productId": 312262
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Guzma",
-          "productId": 312287
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Guzma",
-          "productId": 368673
-        }
-      ],
-      "cardKey": "sm3/115a",
-      "deName": null,
-      "expansionId": 1824,
-      "name": "Guzma",
-      "set": "sm3"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Kiawe",
-          "productId": 448148
-        }
-      ],
-      "cardKey": "sm3/116a",
-      "deName": null,
-      "expansionId": 1824,
-      "name": "Kiawe",
-      "set": "sm3"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
           "name": "Entei GX [Combustion | Fire Fang | Brave Burn GX]",
           "productId": 321006
         }
@@ -12665,13 +12477,6 @@
   "stillMissingByExpansion": [
     {
       "count": 8,
-      "expansionId": 1824,
-      "sets": [
-        "sm3"
-      ]
-    },
-    {
-      "count": 8,
       "expansionId": 2370,
       "sets": [
         "sm8"
@@ -12910,14 +12715,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 78,
+    "ambiguous": 70,
     "cards": 21577,
-    "customSet": 1966,
+    "customSet": 2147,
     "matched": 238,
-    "missing": 108,
-    "override": 12,
+    "missing": 100,
+    "override": 8,
     "stabilityKept": 293,
-    "tcgdex": 18960
+    "tcgdex": 18791
   },
   "versionSuffixSkippedByExpansion": {
     "1537": 7,
@@ -12925,7 +12730,7 @@
     "1608": 7,
     "1609": 6,
     "1611": 7,
-    "1612": 36,
+    "1612": 40,
     "1758": 12,
     "1800": 13,
     "2065": 14

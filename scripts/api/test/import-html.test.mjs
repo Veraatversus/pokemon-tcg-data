@@ -230,3 +230,13 @@ test('parseCardmarketJson: Online-Code-Karten werden uebersprungen, Kit-Nummern 
   assert.deepEqual(r.cards.map((c) => [c.productId, c.collectorNumber]), [[281593, '1N'], [281594, '1S']]);
   assert.equal(r.stats.skipped, 1);
 });
+
+test('Nummernregel: kleinste Produkt-ID ist die Basis, nicht die kleinste Version (sm3 88a, xyp 69)', () => {
+  const r = parseCardmarketJson(bwList([
+    bw(363945, 5, 'Darkrai GX (BUS 88a)'), bw(657889, 4, 'Darkrai GX (BUS 88a)'),
+    bw(289780, 2, 'Rayquaza EX (XYPR 69)'), bw(363674, 2, 'Rayquaza EX (XYPR 69)'), bw(363675, 3, 'Rayquaza EX (XYPR 69)'),
+  ], { total: 5 }));
+  assert.deepEqual(Object.fromEntries(r.cards.map((c) => [c.productId, c.collectorNumber])), {
+    363945: '88a', 657889: '88aV4', 289780: '69', 363674: '69V2', 363675: '69V3',
+  });
+});

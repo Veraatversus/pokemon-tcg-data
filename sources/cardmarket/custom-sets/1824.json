@@ -1,0 +1,778 @@
+{
+  "expansionId": 1824,
+  "name": "Nacht in Flammen",
+  "cards": [
+    {
+      "productId": 299408,
+      "collectorNumber": "1"
+    },
+    {
+      "productId": 299409,
+      "collectorNumber": "2"
+    },
+    {
+      "productId": 299410,
+      "collectorNumber": "3"
+    },
+    {
+      "productId": 299411,
+      "collectorNumber": "4"
+    },
+    {
+      "productId": 299412,
+      "collectorNumber": "5"
+    },
+    {
+      "productId": 299413,
+      "collectorNumber": "6"
+    },
+    {
+      "productId": 299414,
+      "collectorNumber": "7"
+    },
+    {
+      "productId": 299415,
+      "collectorNumber": "8"
+    },
+    {
+      "productId": 299416,
+      "collectorNumber": "9"
+    },
+    {
+      "productId": 299417,
+      "collectorNumber": "10"
+    },
+    {
+      "productId": 299418,
+      "collectorNumber": "11"
+    },
+    {
+      "productId": 299419,
+      "collectorNumber": "12"
+    },
+    {
+      "productId": 299420,
+      "collectorNumber": "13"
+    },
+    {
+      "productId": 299421,
+      "collectorNumber": "14"
+    },
+    {
+      "productId": 299422,
+      "collectorNumber": "15"
+    },
+    {
+      "productId": 299423,
+      "collectorNumber": "16"
+    },
+    {
+      "productId": 298779,
+      "collectorNumber": "17"
+    },
+    {
+      "productId": 299424,
+      "collectorNumber": "18"
+    },
+    {
+      "productId": 367771,
+      "collectorNumber": "18a"
+    },
+    {
+      "productId": 299425,
+      "collectorNumber": "19"
+    },
+    {
+      "productId": 299426,
+      "collectorNumber": "20"
+    },
+    {
+      "productId": 299427,
+      "collectorNumber": "21"
+    },
+    {
+      "productId": 299428,
+      "collectorNumber": "22"
+    },
+    {
+      "productId": 299429,
+      "collectorNumber": "23"
+    },
+    {
+      "productId": 299430,
+      "collectorNumber": "24"
+    },
+    {
+      "productId": 299431,
+      "collectorNumber": "25"
+    },
+    {
+      "productId": 299432,
+      "collectorNumber": "26"
+    },
+    {
+      "productId": 299433,
+      "collectorNumber": "27"
+    },
+    {
+      "productId": 299434,
+      "collectorNumber": "28"
+    },
+    {
+      "productId": 299435,
+      "collectorNumber": "29"
+    },
+    {
+      "productId": 299436,
+      "collectorNumber": "30"
+    },
+    {
+      "productId": 299568,
+      "collectorNumber": "31"
+    },
+    {
+      "productId": 299437,
+      "collectorNumber": "32"
+    },
+    {
+      "productId": 299438,
+      "collectorNumber": "33"
+    },
+    {
+      "productId": 299439,
+      "collectorNumber": "34"
+    },
+    {
+      "productId": 299440,
+      "collectorNumber": "35"
+    },
+    {
+      "productId": 299441,
+      "collectorNumber": "36"
+    },
+    {
+      "productId": 299442,
+      "collectorNumber": "37"
+    },
+    {
+      "productId": 299443,
+      "collectorNumber": "38"
+    },
+    {
+      "productId": 298780,
+      "collectorNumber": "39"
+    },
+    {
+      "productId": 366836,
+      "collectorNumber": "39a"
+    },
+    {
+      "productId": 604983,
+      "collectorNumber": "39aV5"
+    },
+    {
+      "productId": 299444,
+      "collectorNumber": "40"
+    },
+    {
+      "productId": 299445,
+      "collectorNumber": "41"
+    },
+    {
+      "productId": 450203,
+      "collectorNumber": "41V2"
+    },
+    {
+      "productId": 450208,
+      "collectorNumber": "41V3"
+    },
+    {
+      "productId": 450213,
+      "collectorNumber": "41V4"
+    },
+    {
+      "productId": 450218,
+      "collectorNumber": "41V5"
+    },
+    {
+      "productId": 299446,
+      "collectorNumber": "42"
+    },
+    {
+      "productId": 299447,
+      "collectorNumber": "43"
+    },
+    {
+      "productId": 299448,
+      "collectorNumber": "44"
+    },
+    {
+      "productId": 299449,
+      "collectorNumber": "45"
+    },
+    {
+      "productId": 299450,
+      "collectorNumber": "46"
+    },
+    {
+      "productId": 299451,
+      "collectorNumber": "47"
+    },
+    {
+      "productId": 299452,
+      "collectorNumber": "48"
+    },
+    {
+      "productId": 299453,
+      "collectorNumber": "49"
+    },
+    {
+      "productId": 299454,
+      "collectorNumber": "50"
+    },
+    {
+      "productId": 299455,
+      "collectorNumber": "51"
+    },
+    {
+      "productId": 299456,
+      "collectorNumber": "52"
+    },
+    {
+      "productId": 299457,
+      "collectorNumber": "53"
+    },
+    {
+      "productId": 299458,
+      "collectorNumber": "54"
+    },
+    {
+      "productId": 299459,
+      "collectorNumber": "55"
+    },
+    {
+      "productId": 299460,
+      "collectorNumber": "56"
+    },
+    {
+      "productId": 299461,
+      "collectorNumber": "57"
+    },
+    {
+      "productId": 299462,
+      "collectorNumber": "58"
+    },
+    {
+      "productId": 299463,
+      "collectorNumber": "59"
+    },
+    {
+      "productId": 299464,
+      "collectorNumber": "60"
+    },
+    {
+      "productId": 299465,
+      "collectorNumber": "61"
+    },
+    {
+      "productId": 299466,
+      "collectorNumber": "62"
+    },
+    {
+      "productId": 298781,
+      "collectorNumber": "63"
+    },
+    {
+      "productId": 299467,
+      "collectorNumber": "64"
+    },
+    {
+      "productId": 299468,
+      "collectorNumber": "65"
+    },
+    {
+      "productId": 299569,
+      "collectorNumber": "66"
+    },
+    {
+      "productId": 299469,
+      "collectorNumber": "67"
+    },
+    {
+      "productId": 299470,
+      "collectorNumber": "68"
+    },
+    {
+      "productId": 299471,
+      "collectorNumber": "69"
+    },
+    {
+      "productId": 299472,
+      "collectorNumber": "70"
+    },
+    {
+      "productId": 299473,
+      "collectorNumber": "71"
+    },
+    {
+      "productId": 299474,
+      "collectorNumber": "72"
+    },
+    {
+      "productId": 299475,
+      "collectorNumber": "73"
+    },
+    {
+      "productId": 299476,
+      "collectorNumber": "74"
+    },
+    {
+      "productId": 299477,
+      "collectorNumber": "75"
+    },
+    {
+      "productId": 299478,
+      "collectorNumber": "76"
+    },
+    {
+      "productId": 299479,
+      "collectorNumber": "77"
+    },
+    {
+      "productId": 299480,
+      "collectorNumber": "78"
+    },
+    {
+      "productId": 299481,
+      "collectorNumber": "79"
+    },
+    {
+      "productId": 299482,
+      "collectorNumber": "80"
+    },
+    {
+      "productId": 363942,
+      "collectorNumber": "80V2"
+    },
+    {
+      "productId": 299483,
+      "collectorNumber": "81"
+    },
+    {
+      "productId": 299484,
+      "collectorNumber": "82"
+    },
+    {
+      "productId": 299485,
+      "collectorNumber": "83"
+    },
+    {
+      "productId": 299486,
+      "collectorNumber": "84"
+    },
+    {
+      "productId": 299487,
+      "collectorNumber": "85"
+    },
+    {
+      "productId": 299488,
+      "collectorNumber": "86"
+    },
+    {
+      "productId": 299489,
+      "collectorNumber": "87"
+    },
+    {
+      "productId": 371621,
+      "collectorNumber": "87V2"
+    },
+    {
+      "productId": 299490,
+      "collectorNumber": "88"
+    },
+    {
+      "productId": 363945,
+      "collectorNumber": "88a"
+    },
+    {
+      "productId": 657889,
+      "collectorNumber": "88aV4"
+    },
+    {
+      "productId": 299491,
+      "collectorNumber": "89"
+    },
+    {
+      "productId": 299492,
+      "collectorNumber": "90"
+    },
+    {
+      "productId": 299493,
+      "collectorNumber": "91"
+    },
+    {
+      "productId": 299494,
+      "collectorNumber": "92"
+    },
+    {
+      "productId": 665136,
+      "collectorNumber": "92a"
+    },
+    {
+      "productId": 298802,
+      "collectorNumber": "93"
+    },
+    {
+      "productId": 299495,
+      "collectorNumber": "94"
+    },
+    {
+      "productId": 371622,
+      "collectorNumber": "94V2"
+    },
+    {
+      "productId": 299496,
+      "collectorNumber": "95"
+    },
+    {
+      "productId": 299497,
+      "collectorNumber": "96"
+    },
+    {
+      "productId": 299498,
+      "collectorNumber": "97"
+    },
+    {
+      "productId": 299499,
+      "collectorNumber": "98"
+    },
+    {
+      "productId": 299500,
+      "collectorNumber": "99"
+    },
+    {
+      "productId": 299501,
+      "collectorNumber": "100"
+    },
+    {
+      "productId": 371623,
+      "collectorNumber": "100V2"
+    },
+    {
+      "productId": 299502,
+      "collectorNumber": "101"
+    },
+    {
+      "productId": 299503,
+      "collectorNumber": "102"
+    },
+    {
+      "productId": 299504,
+      "collectorNumber": "103"
+    },
+    {
+      "productId": 299505,
+      "collectorNumber": "104"
+    },
+    {
+      "productId": 299506,
+      "collectorNumber": "105"
+    },
+    {
+      "productId": 361591,
+      "collectorNumber": "105a"
+    },
+    {
+      "productId": 299507,
+      "collectorNumber": "106"
+    },
+    {
+      "productId": 299508,
+      "collectorNumber": "107"
+    },
+    {
+      "productId": 299509,
+      "collectorNumber": "108"
+    },
+    {
+      "productId": 299510,
+      "collectorNumber": "109"
+    },
+    {
+      "productId": 299511,
+      "collectorNumber": "110"
+    },
+    {
+      "productId": 359285,
+      "collectorNumber": "110V2"
+    },
+    {
+      "productId": 299512,
+      "collectorNumber": "111"
+    },
+    {
+      "productId": 299513,
+      "collectorNumber": "112"
+    },
+    {
+      "productId": 371642,
+      "collectorNumber": "112a"
+    },
+    {
+      "productId": 449243,
+      "collectorNumber": "112aV3"
+    },
+    {
+      "productId": 449248,
+      "collectorNumber": "112aV5"
+    },
+    {
+      "productId": 449253,
+      "collectorNumber": "112aV6"
+    },
+    {
+      "productId": 299514,
+      "collectorNumber": "113"
+    },
+    {
+      "productId": 371654,
+      "collectorNumber": "113V3"
+    },
+    {
+      "productId": 299515,
+      "collectorNumber": "114"
+    },
+    {
+      "productId": 298778,
+      "collectorNumber": "115"
+    },
+    {
+      "productId": 449623,
+      "collectorNumber": "115a"
+    },
+    {
+      "productId": 449618,
+      "collectorNumber": "115V3"
+    },
+    {
+      "productId": 299516,
+      "collectorNumber": "116"
+    },
+    {
+      "productId": 448148,
+      "collectorNumber": "116a"
+    },
+    {
+      "productId": 299517,
+      "collectorNumber": "117"
+    },
+    {
+      "productId": 299518,
+      "collectorNumber": "118"
+    },
+    {
+      "productId": 299519,
+      "collectorNumber": "119"
+    },
+    {
+      "productId": 299520,
+      "collectorNumber": "120"
+    },
+    {
+      "productId": 299521,
+      "collectorNumber": "121"
+    },
+    {
+      "productId": 299522,
+      "collectorNumber": "122"
+    },
+    {
+      "productId": 299523,
+      "collectorNumber": "123"
+    },
+    {
+      "productId": 299524,
+      "collectorNumber": "124"
+    },
+    {
+      "productId": 299525,
+      "collectorNumber": "125"
+    },
+    {
+      "productId": 299526,
+      "collectorNumber": "126"
+    },
+    {
+      "productId": 299527,
+      "collectorNumber": "127"
+    },
+    {
+      "productId": 299528,
+      "collectorNumber": "128"
+    },
+    {
+      "productId": 299529,
+      "collectorNumber": "129"
+    },
+    {
+      "productId": 299530,
+      "collectorNumber": "130"
+    },
+    {
+      "productId": 299531,
+      "collectorNumber": "131"
+    },
+    {
+      "productId": 299532,
+      "collectorNumber": "132"
+    },
+    {
+      "productId": 299533,
+      "collectorNumber": "133"
+    },
+    {
+      "productId": 299534,
+      "collectorNumber": "134"
+    },
+    {
+      "productId": 299535,
+      "collectorNumber": "135"
+    },
+    {
+      "productId": 299537,
+      "collectorNumber": "136"
+    },
+    {
+      "productId": 299570,
+      "collectorNumber": "137"
+    },
+    {
+      "productId": 299536,
+      "collectorNumber": "138"
+    },
+    {
+      "productId": 299571,
+      "collectorNumber": "139"
+    },
+    {
+      "productId": 299538,
+      "collectorNumber": "140"
+    },
+    {
+      "productId": 299539,
+      "collectorNumber": "141"
+    },
+    {
+      "productId": 299540,
+      "collectorNumber": "142"
+    },
+    {
+      "productId": 299541,
+      "collectorNumber": "143"
+    },
+    {
+      "productId": 299542,
+      "collectorNumber": "144"
+    },
+    {
+      "productId": 299543,
+      "collectorNumber": "145"
+    },
+    {
+      "productId": 299544,
+      "collectorNumber": "146"
+    },
+    {
+      "productId": 299545,
+      "collectorNumber": "147"
+    },
+    {
+      "productId": 299546,
+      "collectorNumber": "148"
+    },
+    {
+      "productId": 299547,
+      "collectorNumber": "149"
+    },
+    {
+      "productId": 299548,
+      "collectorNumber": "150"
+    },
+    {
+      "productId": 299549,
+      "collectorNumber": "151"
+    },
+    {
+      "productId": 299550,
+      "collectorNumber": "152"
+    },
+    {
+      "productId": 299551,
+      "collectorNumber": "153"
+    },
+    {
+      "productId": 299552,
+      "collectorNumber": "154"
+    },
+    {
+      "productId": 299553,
+      "collectorNumber": "155"
+    },
+    {
+      "productId": 299554,
+      "collectorNumber": "156"
+    },
+    {
+      "productId": 299555,
+      "collectorNumber": "157"
+    },
+    {
+      "productId": 299556,
+      "collectorNumber": "158"
+    },
+    {
+      "productId": 299557,
+      "collectorNumber": "159"
+    },
+    {
+      "productId": 299558,
+      "collectorNumber": "160"
+    },
+    {
+      "productId": 299559,
+      "collectorNumber": "161"
+    },
+    {
+      "productId": 299560,
+      "collectorNumber": "162"
+    },
+    {
+      "productId": 299561,
+      "collectorNumber": "163"
+    },
+    {
+      "productId": 299562,
+      "collectorNumber": "164"
+    },
+    {
+      "productId": 299563,
+      "collectorNumber": "165"
+    },
+    {
+      "productId": 299564,
+      "collectorNumber": "166"
+    },
+    {
+      "productId": 299565,
+      "collectorNumber": "167"
+    },
+    {
+      "productId": 299566,
+      "collectorNumber": "168"
+    },
+    {
+      "productId": 299567,
+      "collectorNumber": "169"
+    }
+  ]
+}
