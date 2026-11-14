@@ -2923,35 +2923,21 @@
       "tcgdex": 1
     },
     "swsh1": {
-      "ambiguous": 4,
-      "ambiguousCards": [
-        "48",
-        "178",
-        "201",
-        "209"
-      ],
+      "ambiguous": 0,
       "cards": 216,
-      "corrected": 22,
       "coverage": {
         "bySource": {
-          "stabilityKept": 1,
-          "tcgdex": 211
+          "customSet": 216
         },
         "cards": 216,
-        "withId": 212
+        "withId": 216
       },
+      "customSet": 216,
       "expansionId": 2921,
       "matched": 0,
-      "missing": 4,
-      "missingCards": [
-        "48",
-        "178",
-        "201",
-        "209"
-      ],
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2921&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 1,
-      "tcgdex": 211
+      "tcgdex": 0
     },
     "swsh10": {
       "ambiguous": 0,
@@ -3596,8 +3582,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 3667,
-    "changed": 550,
+    "applied": 3883,
+    "changed": 582,
     "conflicts": [],
     "dropped": [
       {
@@ -5618,99 +5604,6 @@
       "sm12-139",
       "sm12-247"
     ],
-    "427191": [
-      "swsh1-114",
-      "swsh1-115"
-    ],
-    "427196": [
-      "swsh1-14",
-      "swsh1-15"
-    ],
-    "427216": [
-      "swsh1-58",
-      "swsh1-59"
-    ],
-    "427226": [
-      "swsh1-34",
-      "swsh1-35",
-      "swsh1-36"
-    ],
-    "427241": [
-      "swsh1-48",
-      "swsh1-50"
-    ],
-    "436189": [
-      "swsh1-2",
-      "swsh1-3"
-    ],
-    "436234": [
-      "swsh1-12",
-      "swsh1-13"
-    ],
-    "436249": [
-      "swsh1-16",
-      "swsh1-17"
-    ],
-    "436319": [
-      "swsh1-32",
-      "swsh1-33"
-    ],
-    "436339": [
-      "swsh1-37",
-      "swsh1-38"
-    ],
-    "436364": [
-      "swsh1-42",
-      "swsh1-43"
-    ],
-    "436379": [
-      "swsh1-45",
-      "swsh1-46"
-    ],
-    "436419": [
-      "swsh1-56",
-      "swsh1-57"
-    ],
-    "436469": [
-      "swsh1-67",
-      "swsh1-68"
-    ],
-    "436494": [
-      "swsh1-73",
-      "swsh1-74"
-    ],
-    "436504": [
-      "swsh1-75",
-      "swsh1-76"
-    ],
-    "436599": [
-      "swsh1-96",
-      "swsh1-97"
-    ],
-    "436624": [
-      "swsh1-101",
-      "swsh1-102"
-    ],
-    "436654": [
-      "swsh1-107",
-      "swsh1-108"
-    ],
-    "436664": [
-      "swsh1-109",
-      "swsh1-110"
-    ],
-    "436674": [
-      "swsh1-111",
-      "swsh1-112"
-    ],
-    "436819": [
-      "swsh1-145",
-      "swsh1-146"
-    ],
-    "436854": [
-      "swsh1-152",
-      "swsh1-153"
-    ],
     "538808": [
       "mcd21-4",
       "mcd21-5"
@@ -5824,10 +5717,10 @@
     ]
   },
   "duplicates": {
-    "cards": 975,
-    "corrected": 261,
-    "ids": 480,
-    "kept": 714
+    "cards": 928,
+    "corrected": 239,
+    "ids": 457,
+    "kept": 689
   },
   "expansionMismatch": {
     "cards": [
@@ -6959,20 +6852,6 @@
         "reason": "dropped-mismatch"
       },
       {
-        "cardKey": "swsh1-48",
-        "newId": null,
-        "oldExpansion": 2921,
-        "oldId": 427241,
-        "reason": "dropped-shared-mismatch"
-      },
-      {
-        "cardKey": "swsh1-140",
-        "newId": 436799,
-        "oldExpansion": 2921,
-        "oldId": 427236,
-        "reason": "corrected-expansion"
-      },
-      {
         "cardKey": "swsh11-201",
         "newId": null,
         "oldExpansion": 5093,
@@ -7498,14 +7377,14 @@
       }
     ],
     "totals": {
-      "checked": 19581,
-      "corrected": 25,
-      "dropped": 21,
-      "droppedShared": 17,
+      "checked": 19368,
+      "corrected": 24,
+      "dropped": 20,
+      "droppedShared": 16,
       "foreignNameOk": 1281,
       "keptMismatch": 135,
       "noSetExpansion": 0,
-      "ok": 18116,
+      "ok": 17905,
       "unknownProduct": 3
     }
   },
@@ -7690,7 +7569,7 @@
     "orderedRejected": 12,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 174
+    "versionSuffixSkipped": 196
   },
   "setsWithoutExpansion": [
     {
@@ -8797,13 +8676,6 @@
       "productId": 725276,
       "source": "corrected",
       "todayId": 725276,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "swsh1/76",
-      "productId": 436509,
-      "source": "corrected",
-      "todayId": 436504,
       "todaySource": "tcgdex"
     },
     {
@@ -9945,127 +9817,6 @@
       "candidates": [
         {
           "hint": "same-name-unnumbered",
-          "name": "Lapras [Aqua Wash]",
-          "productId": 436394
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Lapras [Aqua Wash]",
-          "productId": 672381
-        }
-      ],
-      "cardKey": "swsh1/48",
-      "deName": "Lapras",
-      "expansionId": 2921,
-      "name": "Lapras",
-      "set": "swsh1"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Professor's Research - Professor Magnolia",
-          "productId": 433949
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Professor's Research - Professor Magnolia",
-          "productId": 436984
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Professor's Research - Professor Magnolia",
-          "productId": 437134
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Professor's Research - Professor Magnolia",
-          "productId": 448168
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Professor's Research - Professor Magnolia",
-          "productId": 701504
-        }
-      ],
-      "cardKey": "swsh1/178",
-      "deName": "Forschung des Professors",
-      "expansionId": 2921,
-      "name": "Professor's Research (Professor Magnolia)",
-      "set": "swsh1"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Professor's Research - Professor Magnolia",
-          "productId": 433949
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Professor's Research - Professor Magnolia",
-          "productId": 436984
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Professor's Research - Professor Magnolia",
-          "productId": 437134
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Professor's Research - Professor Magnolia",
-          "productId": 448168
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Professor's Research - Professor Magnolia",
-          "productId": 701504
-        }
-      ],
-      "cardKey": "swsh1/201",
-      "deName": "Forschung des Professors",
-      "expansionId": 2921,
-      "name": "Professor's Research (Professor Magnolia)",
-      "set": "swsh1"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Professor's Research - Professor Magnolia",
-          "productId": 433949
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Professor's Research - Professor Magnolia",
-          "productId": 436984
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Professor's Research - Professor Magnolia",
-          "productId": 437134
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Professor's Research - Professor Magnolia",
-          "productId": 448168
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Professor's Research - Professor Magnolia",
-          "productId": 701504
-        }
-      ],
-      "cardKey": "swsh1/209",
-      "deName": "Forschung des Professors",
-      "expansionId": 2921,
-      "name": "Professor's Research (Professor Magnolia)",
-      "set": "swsh1"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
           "name": "MAudino EX [Magical Symphony]",
           "productId": 289906
         },
@@ -10371,13 +10122,6 @@
   ],
   "stillMissingByExpansion": [
     {
-      "count": 4,
-      "expansionId": 2921,
-      "sets": [
-        "swsh1"
-      ]
-    },
-    {
       "count": 3,
       "expansionId": 1521,
       "sets": [
@@ -10547,14 +10291,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 38,
+    "ambiguous": 34,
     "cards": 21577,
-    "customSet": 3667,
+    "customSet": 3883,
     "matched": 220,
-    "missing": 55,
+    "missing": 51,
     "override": 8,
-    "stabilityKept": 235,
-    "tcgdex": 17392
+    "stabilityKept": 234,
+    "tcgdex": 17181
   },
   "versionSuffixSkippedByExpansion": {
     "1537": 7,
@@ -10574,6 +10318,7 @@
     "2320": 10,
     "2370": 11,
     "2407": 2,
-    "2437": 1
+    "2437": 1,
+    "2921": 22
   }
 }
