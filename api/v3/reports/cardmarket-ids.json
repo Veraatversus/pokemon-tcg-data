@@ -2440,28 +2440,21 @@
       "tcgdex": 0
     },
     "sm4": {
-      "ambiguous": 2,
-      "ambiguousCards": [
-        "63a",
-        "84a"
-      ],
+      "ambiguous": 0,
       "cards": 126,
       "coverage": {
         "bySource": {
-          "tcgdex": 124
+          "customSet": 126
         },
         "cards": 126,
-        "withId": 124
+        "withId": 126
       },
+      "customSet": 126,
       "expansionId": 1843,
       "matched": 0,
-      "missing": 2,
-      "missingCards": [
-        "63a",
-        "84a"
-      ],
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1843&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 124
+      "tcgdex": 0
     },
     "sm5": {
       "ambiguous": 0,
@@ -3478,7 +3471,7 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 5384,
+    "applied": 5510,
     "changed": 680,
     "conflicts": [],
     "dropped": [
@@ -6945,14 +6938,14 @@
       }
     ],
     "totals": {
-      "checked": 18002,
+      "checked": 17878,
       "corrected": 21,
       "dropped": 15,
       "droppedShared": 11,
       "foreignNameOk": 1276,
       "keptMismatch": 134,
       "noSetExpansion": 0,
-      "ok": 16553,
+      "ok": 16429,
       "unknownProduct": 3
     }
   },
@@ -7077,7 +7070,7 @@
     "orderedRejected": 7,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 311
+    "versionSuffixSkipped": 324
   },
   "setsWithoutExpansion": [
     {
@@ -8603,59 +8596,6 @@
     {
       "candidates": [
         {
-          "hint": "same-name-unnumbered",
-          "name": "Guzzlord GX [Eat Sloppily | Tyrannical Hole | Glutton GX]",
-          "productId": 316307
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Guzzlord GX [Eat Sloppily | Tyrannical Hole | Glutton GX]",
-          "productId": 363944
-        }
-      ],
-      "cardKey": "sm4/63a",
-      "deName": "Schlingking-GX",
-      "expansionId": 1843,
-      "name": "Guzzlord-GX",
-      "set": "sm4"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Regigigas [Seal of Antiquity | Giant Stomp]",
-          "productId": 321170
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Regigigas [Seal of Antiquity | Giant Stomp]",
-          "productId": 450288
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Regigigas [Seal of Antiquity | Giant Stomp]",
-          "productId": 450293
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Regigigas [Seal of Antiquity | Giant Stomp]",
-          "productId": 450298
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Regigigas [Seal of Antiquity | Giant Stomp]",
-          "productId": 450303
-        }
-      ],
-      "cardKey": "sm4/84a",
-      "deName": null,
-      "expansionId": 1843,
-      "name": "Regigigas",
-      "set": "sm4"
-    },
-    {
-      "candidates": [
-        {
           "hint": "same-name-unnumbered, id-outlier",
           "name": "Altaria [Fight Song | Pierce]",
           "productId": 364324
@@ -8729,13 +8669,6 @@
       "expansionId": 1611,
       "sets": [
         "bwp"
-      ]
-    },
-    {
-      "count": 2,
-      "expansionId": 1843,
-      "sets": [
-        "sm4"
       ]
     },
     {
@@ -8817,14 +8750,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 12,
+    "ambiguous": 10,
     "cards": 21577,
-    "customSet": 5384,
+    "customSet": 5510,
     "matched": 99,
-    "missing": 25,
+    "missing": 23,
     "override": 8,
     "stabilityKept": 185,
-    "tcgdex": 15876
+    "tcgdex": 15752
   },
   "versionSuffixSkippedByExpansion": {
     "1521": 9,
@@ -8846,6 +8779,7 @@
     "1758": 12,
     "1800": 13,
     "1842": 1,
+    "1843": 13,
     "2065": 14,
     "2075": 11,
     "2320": 10,
