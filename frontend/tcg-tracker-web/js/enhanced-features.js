@@ -3,8 +3,7 @@ import { scopedStorageKey } from './core/config.js';
 const STORAGE_KEYS = {
   favorites: scopedStorageKey('favorites-sets'),
   searchHistory: scopedStorageKey('search-history'),
-  settings: scopedStorageKey('user-settings'),
-  syncStatus: scopedStorageKey('sync-status')
+  settings: scopedStorageKey('user-settings')
 };
 
 const MAX_SEARCH_HISTORY = 20;
@@ -52,11 +51,11 @@ function writeJson(key, value) {
 }
 
 // Favorites
-export function loadFavorites() {
+function loadFavorites() {
   return new Set(readJson(STORAGE_KEYS.favorites, []));
 }
 
-export function saveFavorites(favorites) {
+function saveFavorites(favorites) {
   const list = Array.isArray(favorites) ? favorites : Array.from(favorites || []);
   return writeJson(STORAGE_KEYS.favorites, list);
 }
@@ -93,16 +92,6 @@ export function clearSearchHistory() {
   return true;
 }
 
-// Collection reporting helpers
-export function createCollectionSnapshot(collection = {}, sets = []) {
-  return {
-    createdAt: new Date().toISOString(),
-    collection,
-    sets,
-    setCount: Array.isArray(sets) ? sets.length : 0
-  };
-}
-
 export function generateCollectionReport(collection = {}, sets = []) {
   const totalSets = Array.isArray(sets) ? sets.length : 0;
   const importedSets = Array.isArray(sets) ? sets.filter((s) => s && s.imported).length : 0;
@@ -136,38 +125,4 @@ export function loadSettings() {
 
 export function saveSettings(settings) {
   return writeJson(STORAGE_KEYS.settings, sanitizeSettings(settings));
-}
-
-export function updateSetting(key, value) {
-  const settings = loadSettings();
-  settings[key] = value;
-  saveSettings(settings);
-  return settings;
-}
-
-// Filters and stats
-export function applyQuickFilters(sets = [], filterState = {}) {
-  const list = Array.isArray(sets) ? sets : [];
-  if (!filterState || Object.keys(filterState).length === 0) return list;
-
-  return list.filter((set) => {
-    if (filterState.importedOnly && !set.imported) return false;
-    if (filterState.favoritesOnly && !isFavorite(set.setId)) return false;
-    if (filterState.series && String(set.series || '') !== String(filterState.series)) return false;
-    return true;
-  });
-}
-
-// Sync status
-export function getSyncStatus() {
-  return readJson(STORAGE_KEYS.syncStatus, { state: 'idle', updatedAt: null });
-}
-
-export function setSyncStatus(status) {
-  const payload = {
-    ...(status || {}),
-    updatedAt: new Date().toISOString()
-  };
-  writeJson(STORAGE_KEYS.syncStatus, payload);
-  return payload;
 }

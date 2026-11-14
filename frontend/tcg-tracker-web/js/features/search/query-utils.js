@@ -12,18 +12,18 @@ export function normalizeSearchText(value) {
     .replace(/[\u0300-\u036f]/g, '');
 }
 
-export function sanitizeSearchToken(token) {
+function sanitizeSearchToken(token) {
   return normalizeSearchText(token).replace(/^[^a-z0-9]+|[^a-z0-9]+$/g, '');
 }
 
-export function extractMeaningfulNameTokens(tokens = []) {
+function extractMeaningfulNameTokens(tokens = []) {
   return tokens
     .map((token) => sanitizeSearchToken(token))
     .filter((token) => token && token.length >= 2)
     .filter((token) => !SEARCH_NOISE_TOKENS.has(token));
 }
 
-export function normalizeCardNumberForSearch(value) {
+function normalizeCardNumberForSearch(value) {
   const raw = String(value || '').trim().toLowerCase();
   if (!raw) return '';
   const withoutTotal = raw.split('/')[0];
@@ -108,30 +108,5 @@ export function parseStructuredSearchQuery(rawQuery, availableSets = []) {
     setId: String(matchingSet.setId),
     cardNumber,
     namePart: meaningfulNameTokens.length ? meaningfulNameTokens : null
-  };
-}
-
-export function parseMixedQuery(rawQuery) {
-  const normalized = normalizeSearchText(rawQuery).trim();
-  if (!normalized) return null;
-
-  const parts = normalized
-    .split(/\s+/)
-    .map((part) => sanitizeSearchToken(part))
-    .filter(Boolean);
-  if (parts.length < 2) return null;
-
-  const hasSetLikeMarker = parts.some((token) => token === 'set' || token === 'series' || token === 'serie');
-  if (hasSetLikeMarker) return null;
-
-  const numberTokens = parts.filter((p) => /^[a-z._-]*\d+[a-z._-]*$/.test(p));
-  const nameTokensRaw = parts.filter((p) => !/^[a-z._-]*\d+[a-z._-]*$/.test(p));
-  const nameTokens = extractMeaningfulNameTokens(nameTokensRaw);
-
-  if (!nameTokens.length || !numberTokens.length) return null;
-
-  return {
-    cardNumber: normalizeCardNumberForSearch(numberTokens[0]),
-    nameTokens
   };
 }

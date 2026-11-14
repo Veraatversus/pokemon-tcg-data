@@ -20,7 +20,7 @@ import {
   listCollectionSetIds,
   invalidateCollectionRowCache,
   prefetchSetsOverviewRows,
-} from './data/sheets-db.js?v=20261114-cm-avg';
+} from './data/sheets-db.js?v=20261114-clean-1';
 import {
   collectionKeyOf,
   emptyCollectionEntry,
@@ -39,21 +39,18 @@ import { findSetByIdOrAlias } from './data/set-aliases.js';
 import { searchFromIndex, searchResultsForDisplay } from './features/search/search-index-prefilter.js';
 import { readCollectionMapCached } from './features/search/search-collection-maps.js';
 import {
-  sanitizeSearchToken,
-  extractMeaningfulNameTokens,
   parseStructuredSearchQuery,
   normalizeSearchText,
-  normalizeCardNumberForSearch,
   cardNumberMatchesQuery,
   collectSearchStrings,
-  matchesTokensInValues,
+  matchesTokensInValues
 } from './features/search/query-utils.js';
-import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, fetchV3SetMeta } from './data/pokemon-api.js?v=20261114-cm-avg';
-import { resolveSeriesGroupInfo, resolveDisplaySet, applyDeSeriesFallback, resolveSetTotalCards, resolveSetReleaseTime, setV3SetMeta, getCardLanguage } from './data/schema-contract.js?v=20261114-cm-avg';
+import { fetchMergedCards, fetchMergedCardsWithSetMeta, fetchAllAvailableSets, fetchV3SetMeta } from './data/pokemon-api.js?v=20261114-clean-1';
+import { resolveSeriesGroupInfo, resolveDisplaySet, applyDeSeriesFallback, resolveSetTotalCards, resolveSetReleaseTime, setV3SetMeta, getCardLanguage } from './data/schema-contract.js?v=20261114-clean-1';
 import { imageCandidates, bindImageFallback, fallbackImgAttrs } from './ui/image-fallback.js';
 import { renderDashboardSetGrid } from './views/dashboard-grid.js';
-import { getCardPrice, loadPriceStamp, refreshV3Prices } from './data/v3-prices.js?v=20261114-cm-avg';
-import { collectExcludedSetNames, filterExcludedSets, filterVisibleSummaryRows, loadExcludedSetPredicate } from './data/excluded-sets.js?v=20261114-cm-avg';
+import { getCardPrice, loadPriceStamp, refreshV3Prices } from './data/v3-prices.js?v=20261114-clean-1';
+import { collectExcludedSetNames, filterExcludedSets, filterVisibleSummaryRows, loadExcludedSetPredicate } from './data/excluded-sets.js?v=20261114-clean-1';
 import {
   buildCombinedSearchDropdownOptions,
   buildSearchProgressLabel,
@@ -62,7 +59,7 @@ import {
   resolveCombinedSearchSelection,
   toBoolean
 } from './core/utils.js';
-import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle, effectiveCollectionStatus } from './core/collection-state.js?v=20261114-cm-avg';
+import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle, effectiveCollectionStatus } from './core/collection-state.js?v=20261114-clean-1';
 import * as cache from './core/cache.js';
 import { CONFIG, scopedStorageKey } from './core/config.js';
 import {
@@ -75,11 +72,7 @@ import {
 } from './core/storage-keys.js';
 import {
   initSmartEngine,
-  startAutoHealing,
-  fuzzySearch,
-  getEngineMetrics,
-  cacheCardsOffline,
-  getCachedCardsOffline
+  getEngineMetrics
 } from './features/search/index.js';
 import {
   createAutoSnapshot,
@@ -96,7 +89,7 @@ import {
   filterLegacyImportPlanBySelection,
   summarizeLegacyImportPlan,
   extractLegacySpreadsheetId
-} from './features/collection/legacy-import.js?v=20261114-cm-avg';
+} from './features/collection/legacy-import.js?v=20261114-clean-1';
 import { ensureResolverForSet } from './data/collection-aliases.js';
 import { buildCollectionBackupSets } from './features/collection/backup-export.js';
 import { buildBackupRestoreSnapshot, planBackupRestore, pickSourceSetKey, resolveSourceCardKey } from './features/collection/legacy-key-resolution.js';
@@ -106,11 +99,11 @@ import {
   showAmbiguousMigrationDialog
 } from './features/collection/ambiguous-key-migration.js';
 import { initCommandPalette } from './ui/command-palette.js';
-import { filterSetsBySeriesKey, getStatsSeriesLabel } from './ui/stats-series.js?v=20261114-cm-avg';
+import { filterSetsBySeriesKey, getStatsSeriesLabel } from './ui/stats-series.js?v=20261114-clean-1';
 import {
   computePriceAnalyticsFromSummaries,
   pickCardPriceFromSummary,
-} from './ui/stats-price-analytics.js?v=20261114-cm-avg';
+} from './ui/stats-price-analytics.js?v=20261114-clean-1';
 import {
   applyCardmarketPriceSummary as applyCardmarketPriceSummaryUi,
   cardmarketPriceSummaryCache,
@@ -120,21 +113,23 @@ import {
   normalizeCardmarketBasePriceType,
   renderLightboxCardmarketPrices as renderLightboxCardmarketPricesUi,
   CARDMARKET_BASE_PRICE_DEFAULT,
-} from './ui/cardmarket-price.js?v=20261114-cm-avg';
+} from './ui/cardmarket-price.js?v=20261114-clean-1';
 import {
-  loadFavorites, saveFavorites, toggleFavorite, isFavorite,
-  loadSearchHistory, addSearchHistory, clearSearchHistory,
-  createCollectionSnapshot, generateCollectionReport,
-  loadSettings, saveSettings, updateSetting,
-  applyQuickFilters,
-  getSyncStatus, setSyncStatus
-} from './enhanced-features.js?v=20261114-cm-avg';
+  toggleFavorite,
+  isFavorite,
+  loadSearchHistory,
+  addSearchHistory,
+  clearSearchHistory,
+  generateCollectionReport,
+  loadSettings,
+  saveSettings
+} from './enhanced-features.js?v=20261114-clean-1';
 
 import {
-  initQuickFiltersUI, createSearchHistoryWidget, createStatisticsPanel,
-  createExportDialog, createSettingsPanel,
-  createBulkActionsToolbar
-} from './ui/components.js?v=20261114-cm-avg';
+  initQuickFiltersUI,
+  createExportDialog,
+  createSettingsPanel
+} from './ui/components.js?v=20261114-clean-1';
 import {
   createInitialSheetsRetryMetrics,
   initSheetsWriteFeedback as initSheetsWriteFeedbackUi,
@@ -142,15 +137,11 @@ import {
   renderSheetsRetryReport as renderSheetsRetryReportUi,
   openSheetsRetryReportDialog as openSheetsRetryReportDialogUi
 } from './ui/sheets-retry-report.js';
+
 import {
-  AdvancedSearch, SyncIndicator, CardCollectionTools,
-  generateCollectionInsights, generateSetComparison,
-  NotificationManager, PerformanceTracker
-} from './ui/tools.js';
-import {
-  downloadJson, downloadCsv,
-  createLocalBackup, getLocalBackups, restoreLocalBackup, deleteLocalBackup,
-  generateAdvancedStatistics
+  downloadJson,
+  createLocalBackup,
+  getLocalBackups
 } from './advanced-features.js';
 import {
   initRealtimeSync,
