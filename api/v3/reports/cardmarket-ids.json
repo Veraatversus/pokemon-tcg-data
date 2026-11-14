@@ -1041,49 +1041,21 @@
       "tcgdex": 106
     },
     "dpp": {
-      "ambiguous": 8,
-      "ambiguousCards": [
-        "DP16",
-        "DP17",
-        "DP26",
-        "DP27",
-        "DP37",
-        "DP40",
-        "DP50",
-        "DP53"
-      ],
+      "ambiguous": 0,
       "cards": 56,
       "coverage": {
         "bySource": {
-          "matched": 38,
-          "stabilityKept": 3,
-          "tcgdex": 1
+          "customSet": 56
         },
         "cards": 56,
-        "withId": 42
+        "withId": 56
       },
+      "customSet": 56,
       "expansionId": 1609,
-      "matched": 38,
-      "missing": 14,
-      "missingCards": [
-        "DP16",
-        "DP17",
-        "DP26",
-        "DP27",
-        "DP37",
-        "DP40",
-        "DP41",
-        "DP42",
-        "DP43",
-        "DP45",
-        "DP46",
-        "DP47",
-        "DP50",
-        "DP53"
-      ],
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1609&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 3,
-      "tcgdex": 1
+      "tcgdex": 0
     },
     "dv1": {
       "ambiguous": 0,
@@ -3857,7 +3829,7 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 1340,
+    "applied": 1396,
     "changed": 308,
     "conflicts": [],
     "dropped": [
@@ -8396,7 +8368,7 @@
         "setId": "tk1b"
       },
       {
-        "evidence": "9/9",
+        "evidence": "12/12",
         "evidenceSource": "mixed",
         "newId": 1627,
         "oldId": null,
@@ -8413,14 +8385,14 @@
       }
     ],
     "totals": {
-      "checked": 21774,
+      "checked": 21773,
       "corrected": 34,
       "dropped": 34,
       "droppedShared": 23,
       "foreignNameOk": 1348,
       "keptMismatch": 162,
       "noSetExpansion": 0,
-      "ok": 20193,
+      "ok": 20192,
       "unknownProduct": 3
     }
   },
@@ -8653,7 +8625,7 @@
     "orderedRejected": 16,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 36
+    "versionSuffixSkipped": 42
   },
   "setsWithoutExpansion": [
     {
@@ -9023,27 +8995,6 @@
         "dp6/76"
       ],
       "productId": 278225,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "dpp/DP5",
-      "productId": 275534,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "dpp/DP25",
-      "productId": 275552,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "dpp/DP48",
-      "productId": 275559,
       "source": "matched",
       "todayId": null,
       "todaySource": null
@@ -11236,276 +11187,6 @@
       "expansionId": 1560,
       "name": "Unown [J]",
       "set": "dp6"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Pikachu Lv.15 [Electro Recycle | BikaBika]",
-          "productId": 275563
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Pikachu Lv.15 [Electro Recycle | BikaBika]",
-          "productId": 787789
-        }
-      ],
-      "cardKey": "dpp/DP16",
-      "deName": "Pikachu",
-      "expansionId": 1609,
-      "name": "Pikachu",
-      "set": "dpp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Dialga LV.X [Time Skip | Metal Flash]",
-          "productId": 275514
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Dialga LV.X [Time Skip | Metal Flash]",
-          "productId": 275564
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Dialga Lv.68 [Time Bellow | Flash Cannon]",
-          "productId": 275560
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Dialga Lv.68 [Time Bellow | Flash Cannon]",
-          "productId": 362913
-        }
-      ],
-      "cardKey": "dpp/DP17",
-      "deName": "Dialga",
-      "expansionId": 1609,
-      "name": "Dialga LV.X",
-      "set": "dpp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Dialga Lv.68 [Time Bellow | Flash Cannon]",
-          "productId": 275560
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Dialga Lv.68 [Time Bellow | Flash Cannon]",
-          "productId": 362913
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Dialga LV.X [Time Skip | Metal Flash]",
-          "productId": 275514
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Dialga LV.X [Time Skip | Metal Flash]",
-          "productId": 275564
-        }
-      ],
-      "cardKey": "dpp/DP26",
-      "deName": "Dialga",
-      "expansionId": 1609,
-      "name": "Dialga",
-      "set": "dpp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Palkia Lv.67 [Spacial Rend | Transback]",
-          "productId": 275541
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Palkia Lv.67 [Spacial Rend | Transback]",
-          "productId": 362914
-        }
-      ],
-      "cardKey": "dpp/DP27",
-      "deName": "Palkia",
-      "expansionId": 1609,
-      "name": "Palkia",
-      "set": "dpp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Dialga LV.X [Time Skip | Metal Flash]",
-          "productId": 275514
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Dialga LV.X [Time Skip | Metal Flash]",
-          "productId": 275564
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Dialga Lv.68 [Time Bellow | Flash Cannon]",
-          "productId": 275560
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Dialga Lv.68 [Time Bellow | Flash Cannon]",
-          "productId": 362913
-        }
-      ],
-      "cardKey": "dpp/DP37",
-      "deName": "Dialga",
-      "expansionId": 1609,
-      "name": "Dialga LV.X",
-      "set": "dpp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Regigigas Lv.46 [Drag Off | Giga Hammer]",
-          "productId": 275518
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Regigigas Lv.46 [Drag Off | Giga Hammer]",
-          "productId": 362915
-        }
-      ],
-      "cardKey": "dpp/DP40",
-      "deName": "Regigigas",
-      "expansionId": 1609,
-      "name": "Regigigas",
-      "set": "dpp"
-    },
-    {
-      "candidates": [
-        {
-          "name": "Toxicroak [G] Lv.45 [Leap Away | Poison Revenge]",
-          "productId": 275526
-        }
-      ],
-      "cardKey": "dpp/DP41",
-      "deName": "Toxiquak G",
-      "expansionId": 1609,
-      "name": "Toxicroak G",
-      "set": "dpp"
-    },
-    {
-      "candidates": [
-        {
-          "name": "Carnivine [G] Lv.43 [Power Whip | Grass Knot]",
-          "productId": 275527
-        }
-      ],
-      "cardKey": "dpp/DP42",
-      "deName": "Venuflibis G",
-      "expansionId": 1609,
-      "name": "Carnivine G",
-      "set": "dpp"
-    },
-    {
-      "candidates": [
-        {
-          "name": "Probopass [G] Lv.53 [Nose Unit | Loud Snort]",
-          "productId": 275536
-        }
-      ],
-      "cardKey": "dpp/DP43",
-      "deName": "Voluminas G",
-      "expansionId": 1609,
-      "name": "Probopass G",
-      "set": "dpp"
-    },
-    {
-      "candidates": [
-        {
-          "name": "Charizard [G] LV.X [Call for Power | Malevolent Fire]",
-          "productId": 275537
-        }
-      ],
-      "cardKey": "dpp/DP45",
-      "deName": "Glurak G",
-      "expansionId": 1609,
-      "name": "Charizard G LV.X",
-      "set": "dpp"
-    },
-    {
-      "candidates": [
-        {
-          "name": "Garchomp [C] LV.X [Healing Breath | Dragon Rush]",
-          "productId": 275538
-        }
-      ],
-      "cardKey": "dpp/DP46",
-      "deName": "Knakrack C",
-      "expansionId": 1609,
-      "name": "Garchomp C LV.X",
-      "set": "dpp"
-    },
-    {
-      "candidates": [
-        {
-          "name": "Rayquaza [C] LV.X [Dragon Spirit | Final Blowup]",
-          "productId": 275539
-        }
-      ],
-      "cardKey": "dpp/DP47",
-      "deName": "Rayquaza C",
-      "expansionId": 1609,
-      "name": "Rayquaza C LV.X",
-      "set": "dpp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Arceus Lv.100 [Judgment]",
-          "productId": 275529
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Arceus Lv.100 [Judgment]",
-          "productId": 362916
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Arceus LV.X [Multitype | Ominiscient]",
-          "productId": 275531
-        }
-      ],
-      "cardKey": "dpp/DP50",
-      "deName": "Arceus",
-      "expansionId": 1609,
-      "name": "Arceus",
-      "set": "dpp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Arceus LV.X [Multitype | Ominiscient]",
-          "productId": 275531
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Arceus Lv.100 [Judgment]",
-          "productId": 275529
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Arceus Lv.100 [Judgment]",
-          "productId": 362916
-        }
-      ],
-      "cardKey": "dpp/DP53",
-      "deName": "Arceus",
-      "expansionId": 1609,
-      "name": "Arceus LV.X",
-      "set": "dpp"
     },
     {
       "candidates": [
@@ -14518,13 +14199,6 @@
   ],
   "stillMissingByExpansion": [
     {
-      "count": 14,
-      "expansionId": 1609,
-      "sets": [
-        "dpp"
-      ]
-    },
-    {
       "count": 11,
       "expansionId": 1612,
       "sets": [
@@ -14792,19 +14466,20 @@
     }
   ],
   "totals": {
-    "ambiguous": 113,
+    "ambiguous": 105,
     "cards": 21577,
-    "customSet": 1340,
-    "matched": 281,
-    "missing": 153,
+    "customSet": 1396,
+    "matched": 243,
+    "missing": 139,
     "override": 8,
-    "stabilityKept": 356,
-    "tcgdex": 19439
+    "stabilityKept": 353,
+    "tcgdex": 19438
   },
   "versionSuffixSkippedByExpansion": {
     "1537": 7,
     "1538": 3,
     "1608": 7,
+    "1609": 6,
     "1611": 7,
     "1758": 12
   }
