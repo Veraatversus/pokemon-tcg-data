@@ -60,14 +60,15 @@ test('Set sv3pt5: matched, EN vera, DE tcgdex', () => {
   assert.ok(!Number.isNaN(Date.parse(r.updatedAt)));
 });
 
-test('Set TCGDEX-A1: tcgdex_only, kein vera_id', () => {
-  const r = toSetRecord(setById('TCGDEX-A1'));
+// Frueher TCGDEX-A1 (TCG Pocket, seit api/v3 meta.excludedSetIds nicht mehr in der API).
+test('Set TCGDEX-mee: tcgdex_only, kein vera_id', () => {
+  const r = toSetRecord(setById('TCGDEX-mee'));
   assert.equal(r.matchStatus, 'tcgdex_only');
   assert.equal(r.isTcgdexOnly, true);
   assert.equal(r.vera_id, '');
-  assert.equal(r.vera_name, 'Genetic Apex');
-  assert.equal(r.tcgdex_id, 'A1');
-  assert.equal(r.tcgdex_name, 'Unschlagbare Gene');
+  assert.equal(r.vera_name, 'Mega Evolution Energy');
+  assert.equal(r.tcgdex_id, 'mee');
+  assert.equal(r.tcgdex_name, 'Mega-Entwicklung Energie');
   assert.equal(r.tcgdex_logo, '');
   assert.equal(r.imported, false);
 });
@@ -152,15 +153,16 @@ test('localId: Teil nach letztem Bindestrich, URL-dekodiert', () => {
   assert.equal(toCardRecord({ ...base, ids: { tcgdex: null } }, { id: 'x' }).tcgdex_localId, '');
 });
 
-test('TCGDEX-A1 Karte 1: Pocket', () => {
-  const v3 = card('TCGDEX-A1', 'TCGDEX-A1-1');
-  const r = toCardRecord(v3, setById('TCGDEX-A1'));
-  assert.equal(r.setId, 'TCGDEX-A1');
-  assert.equal(r.cardId, 'TCGDEX-A1-1');
+// Frueher TCGDEX-A1-1 (TCG Pocket): TCGdex-only-Karte mit Nummer "001", collectionKey "1".
+test('TCGDEX-mee Karte 1: TCGdex-only, Nummer mit fuehrenden Nullen', () => {
+  const v3 = card('TCGDEX-mee', 'TCGDEX-mee-1');
+  const r = toCardRecord(v3, setById('TCGDEX-mee'));
+  assert.equal(r.setId, 'TCGDEX-mee');
+  assert.equal(r.cardId, 'TCGDEX-mee-1');
   assert.equal(r.collectionKey, '1');
   assert.equal(r.number, '001');
   assert.equal(r.matchStatus, 'tcgdex_only');
-  assert.equal(r.vera_name, 'Bulbasaur');
+  assert.equal(r.vera_name, 'Grass Energy');
   assert.equal(r.tcgdex_localId, '001');
   assert.ok(r.tcgdex_name);
   assert.notEqual(r.tcgdex_name, r.vera_name);
