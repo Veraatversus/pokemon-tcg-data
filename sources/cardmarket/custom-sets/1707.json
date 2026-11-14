@@ -1,0 +1,250 @@
+{
+  "expansionId": 1707,
+  "name": "XY Trainer Kit: Pikachu Libre & Suicune",
+  "cards": [
+    {
+      "productId": 290265,
+      "collectorNumber": "1P"
+    },
+    {
+      "productId": 290293,
+      "collectorNumber": "1S"
+    },
+    {
+      "productId": 290266,
+      "collectorNumber": "2P"
+    },
+    {
+      "productId": 290294,
+      "collectorNumber": "2S"
+    },
+    {
+      "productId": 290267,
+      "collectorNumber": "3P"
+    },
+    {
+      "productId": 290295,
+      "collectorNumber": "3S"
+    },
+    {
+      "productId": 290268,
+      "collectorNumber": "4P"
+    },
+    {
+      "productId": 290296,
+      "collectorNumber": "4S"
+    },
+    {
+      "productId": 290269,
+      "collectorNumber": "5P"
+    },
+    {
+      "productId": 290297,
+      "collectorNumber": "5S"
+    },
+    {
+      "productId": 290270,
+      "collectorNumber": "6P"
+    },
+    {
+      "productId": 290298,
+      "collectorNumber": "6S"
+    },
+    {
+      "productId": 290271,
+      "collectorNumber": "7P"
+    },
+    {
+      "productId": 290299,
+      "collectorNumber": "7S"
+    },
+    {
+      "productId": 290272,
+      "collectorNumber": "8P"
+    },
+    {
+      "productId": 290300,
+      "collectorNumber": "8S"
+    },
+    {
+      "productId": 290273,
+      "collectorNumber": "9P"
+    },
+    {
+      "productId": 290301,
+      "collectorNumber": "9S"
+    },
+    {
+      "productId": 290274,
+      "collectorNumber": "10P"
+    },
+    {
+      "productId": 290302,
+      "collectorNumber": "10S"
+    },
+    {
+      "productId": 290275,
+      "collectorNumber": "11P"
+    },
+    {
+      "productId": 290303,
+      "collectorNumber": "11S"
+    },
+    {
+      "productId": 290276,
+      "collectorNumber": "12P"
+    },
+    {
+      "productId": 290304,
+      "collectorNumber": "12S"
+    },
+    {
+      "productId": 290277,
+      "collectorNumber": "13P"
+    },
+    {
+      "productId": 290305,
+      "collectorNumber": "13S"
+    },
+    {
+      "productId": 576490,
+      "collectorNumber": "14P"
+    },
+    {
+      "productId": 576491,
+      "collectorNumber": "14S"
+    },
+    {
+      "productId": 290278,
+      "collectorNumber": "15P"
+    },
+    {
+      "productId": 290306,
+      "collectorNumber": "15S"
+    },
+    {
+      "productId": 290279,
+      "collectorNumber": "16P"
+    },
+    {
+      "productId": 290307,
+      "collectorNumber": "16S"
+    },
+    {
+      "productId": 290280,
+      "collectorNumber": "17P"
+    },
+    {
+      "productId": 290308,
+      "collectorNumber": "17S"
+    },
+    {
+      "productId": 290281,
+      "collectorNumber": "18P"
+    },
+    {
+      "productId": 290309,
+      "collectorNumber": "18S"
+    },
+    {
+      "productId": 290282,
+      "collectorNumber": "19P"
+    },
+    {
+      "productId": 290310,
+      "collectorNumber": "19S"
+    },
+    {
+      "productId": 290283,
+      "collectorNumber": "20P"
+    },
+    {
+      "productId": 290311,
+      "collectorNumber": "20S"
+    },
+    {
+      "productId": 290284,
+      "collectorNumber": "21P"
+    },
+    {
+      "productId": 290312,
+      "collectorNumber": "21S"
+    },
+    {
+      "productId": 290285,
+      "collectorNumber": "22P"
+    },
+    {
+      "productId": 290313,
+      "collectorNumber": "22S"
+    },
+    {
+      "productId": 290286,
+      "collectorNumber": "23P"
+    },
+    {
+      "productId": 290314,
+      "collectorNumber": "23S"
+    },
+    {
+      "productId": 290287,
+      "collectorNumber": "24P"
+    },
+    {
+      "productId": 290315,
+      "collectorNumber": "24S"
+    },
+    {
+      "productId": 290288,
+      "collectorNumber": "25P"
+    },
+    {
+      "productId": 290316,
+      "collectorNumber": "25S"
+    },
+    {
+      "productId": 290289,
+      "collectorNumber": "26P"
+    },
+    {
+      "productId": 290317,
+      "collectorNumber": "26S"
+    },
+    {
+      "productId": 290290,
+      "collectorNumber": "27P"
+    },
+    {
+      "productId": 290318,
+      "collectorNumber": "27S"
+    },
+    {
+      "productId": 290291,
+      "collectorNumber": "28P"
+    },
+    {
+      "productId": 290319,
+      "collectorNumber": "28S"
+    },
+    {
+      "productId": 290292,
+      "collectorNumber": "29P"
+    },
+    {
+      "productId": 290320,
+      "collectorNumber": "29S"
+    },
+    {
+      "productId": 290263,
+      "collectorNumber": "30P"
+    },
+    {
+      "productId": 290264,
+      "collectorNumber": "30S"
+    }
+  ],
+  "setSuffix": {
+    "TCGDEX-tk-xy-p": "P",
+    "TCGDEX-tk-xy-su": "S"
+  }
+}

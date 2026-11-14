@@ -178,6 +178,9 @@ test('versionOfSlug / numberOfLabel: Links ohne Setcode und Ueberschriften', () 
   assert.equal(numberOfLabel('Glurak (Flash) (BW 50a)'), '50a');
   assert.equal(numberOfLabel('Ohne Nummer'), null);
   assert.equal(numberOfLabel('Noivern (TK6 13N)'), '13N');
+  assert.equal(numberOfLabel('Charmian (TK9 P-1)'), '1P');
+  assert.equal(numberOfLabel('Suicune (TK9 S-30)'), '30S');
+  assert.equal(numberOfLabel('Eneco (TK8 1o)'), '1o');
 
 });
 
