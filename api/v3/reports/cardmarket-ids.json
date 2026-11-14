@@ -3412,33 +3412,21 @@
       "tcgdex": 102
     },
     "xy4": {
-      "ambiguous": 3,
-      "ambiguousCards": [
-        "24",
-        "24a",
-        "120"
-      ],
+      "ambiguous": 0,
       "cards": 124,
-      "corrected": 1,
       "coverage": {
         "bySource": {
-          "stabilityKept": 10,
-          "tcgdex": 111
+          "customSet": 124
         },
         "cards": 124,
-        "withId": 121
+        "withId": 124
       },
+      "customSet": 124,
       "expansionId": 1521,
       "matched": 0,
-      "missing": 3,
-      "missingCards": [
-        "24",
-        "24a",
-        "120"
-      ],
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1521&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 10,
-      "tcgdex": 111
+      "tcgdex": 0
     },
     "xy5": {
       "ambiguous": 0,
@@ -3582,8 +3570,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 3883,
-    "changed": 582,
+    "applied": 4007,
+    "changed": 594,
     "conflicts": [],
     "dropped": [
       {
@@ -5181,45 +5169,9 @@
       "xy3-111",
       "xy3-95"
     ],
-    "281827": [
-      "xy4-113",
-      "xy4-23"
-    ],
-    "281833": [
-      "xy4-28",
-      "xy4-29"
-    ],
-    "281840": [
-      "xy4-114",
-      "xy4-34"
-    ],
-    "281864": [
-      "xy4-115",
-      "xy4-58"
-    ],
-    "281868": [
-      "xy4-122",
-      "xy4-62"
-    ],
     "281871": [
       "xy4-65",
       "xy4-65a"
-    ],
-    "281873": [
-      "xy4-116",
-      "xy4-67"
-    ],
-    "281897": [
-      "xy4-117",
-      "xy4-91"
-    ],
-    "281906": [
-      "xy4-118",
-      "xy4-99"
-    ],
-    "281917": [
-      "xy4-110",
-      "xy4-119"
     ],
     "282745": [
       "xy6-77",
@@ -5717,10 +5669,10 @@
     ]
   },
   "duplicates": {
-    "cards": 928,
-    "corrected": 239,
-    "ids": 457,
-    "kept": 689
+    "cards": 908,
+    "corrected": 238,
+    "ids": 448,
+    "kept": 670
   },
   "expansionMismatch": {
     "cards": [
@@ -6964,20 +6916,6 @@
         "reason": "dropped-shared-mismatch"
       },
       {
-        "cardKey": "xy4-12",
-        "newId": 281815,
-        "oldExpansion": 1521,
-        "oldId": 281814,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "xy4-95",
-        "newId": 281902,
-        "oldExpansion": 1521,
-        "oldId": 281901,
-        "reason": "corrected-expansion"
-      },
-      {
         "cardKey": "xy5-148",
         "newId": null,
         "oldExpansion": 1585,
@@ -7377,14 +7315,14 @@
       }
     ],
     "totals": {
-      "checked": 19368,
-      "corrected": 24,
+      "checked": 19249,
+      "corrected": 22,
       "dropped": 20,
       "droppedShared": 16,
       "foreignNameOk": 1281,
       "keptMismatch": 135,
       "noSetExpansion": 0,
-      "ok": 17905,
+      "ok": 17788,
       "unknownProduct": 3
     }
   },
@@ -7499,18 +7437,6 @@
     },
     {
       "cards": [
-        "xy4/35",
-        "xy4/121"
-      ],
-      "expansionId": 1521,
-      "name": "M Gengar-EX",
-      "products": [
-        281841,
-        281928
-      ]
-    },
-    {
-      "cards": [
         "xy5/94",
         "xy5/154"
       ],
@@ -7566,10 +7492,10 @@
     "energySymbol": 3,
     "leftRight": 0,
     "ordered": 20,
-    "orderedRejected": 12,
+    "orderedRejected": 11,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 196
+    "versionSuffixSkipped": 205
   },
   "setsWithoutExpansion": [
     {
@@ -8833,76 +8759,6 @@
       "todaySource": null
     },
     {
-      "cardKey": "xy4/35",
-      "productId": 281841,
-      "source": "ordered",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "xy4/65a",
-      "productId": 311407,
-      "source": "corrected",
-      "todayId": 281871,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy4/113",
-      "productId": 281920,
-      "source": "corrected",
-      "todayId": 281827,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy4/114",
-      "productId": 281921,
-      "source": "corrected",
-      "todayId": 281840,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy4/115",
-      "productId": 281922,
-      "source": "corrected",
-      "todayId": 281864,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy4/116",
-      "productId": 281923,
-      "source": "corrected",
-      "todayId": 281873,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy4/117",
-      "productId": 281924,
-      "source": "corrected",
-      "todayId": 281897,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy4/119",
-      "productId": 281926,
-      "source": "corrected",
-      "todayId": 281917,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy4/121",
-      "productId": 281928,
-      "source": "ordered",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "xy4/122",
-      "productId": 281929,
-      "source": "corrected",
-      "todayId": 281868,
-      "todaySource": "tcgdex"
-    },
-    {
       "cardKey": "xy5/9",
       "productId": 273540,
       "source": "corrected",
@@ -10003,78 +9859,6 @@
       "candidates": [
         {
           "hint": "same-name-unnumbered",
-          "name": "MManectric EX [Turbo Bolt]",
-          "productId": 281828
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MManectric EX [Turbo Bolt]",
-          "productId": 281927
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MManectric EX [Turbo Bolt]",
-          "productId": 297894
-        }
-      ],
-      "cardKey": "xy4/24",
-      "deName": "M Voltenso EX",
-      "expansionId": 1521,
-      "name": "M Manectric-EX",
-      "set": "xy4"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MManectric EX [Turbo Bolt]",
-          "productId": 281828
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MManectric EX [Turbo Bolt]",
-          "productId": 281927
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MManectric EX [Turbo Bolt]",
-          "productId": 297894
-        }
-      ],
-      "cardKey": "xy4/24a",
-      "deName": "M Voltenso EX",
-      "expansionId": 1521,
-      "name": "M Manectric-EX",
-      "set": "xy4"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MManectric EX [Turbo Bolt]",
-          "productId": 281828
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MManectric EX [Turbo Bolt]",
-          "productId": 281927
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MManectric EX [Turbo Bolt]",
-          "productId": 297894
-        }
-      ],
-      "cardKey": "xy4/120",
-      "deName": "M Voltenso EX",
-      "expansionId": 1521,
-      "name": "M Manectric-EX",
-      "set": "xy4"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
           "name": "MGyarados EX [Blast Geyser]",
           "productId": 288202
         },
@@ -10121,13 +9905,6 @@
     }
   ],
   "stillMissingByExpansion": [
-    {
-      "count": 3,
-      "expansionId": 1521,
-      "sets": [
-        "xy4"
-      ]
-    },
     {
       "count": 3,
       "expansionId": 1584,
@@ -10291,16 +10068,17 @@
     }
   ],
   "totals": {
-    "ambiguous": 34,
+    "ambiguous": 31,
     "cards": 21577,
-    "customSet": 3883,
+    "customSet": 4007,
     "matched": 220,
-    "missing": 51,
+    "missing": 48,
     "override": 8,
-    "stabilityKept": 234,
-    "tcgdex": 17181
+    "stabilityKept": 224,
+    "tcgdex": 17070
   },
   "versionSuffixSkippedByExpansion": {
+    "1521": 9,
     "1537": 7,
     "1538": 3,
     "1563": 4,
