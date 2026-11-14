@@ -998,30 +998,21 @@
       "tcgdex": 98
     },
     "dp6": {
-      "ambiguous": 1,
-      "ambiguousCards": [
-        "76"
-      ],
+      "ambiguous": 0,
       "cards": 146,
-      "corrected": 8,
       "coverage": {
         "bySource": {
-          "matched": 6,
-          "stabilityKept": 2,
-          "tcgdex": 137
+          "customSet": 146
         },
         "cards": 146,
-        "withId": 145
+        "withId": 146
       },
+      "customSet": 146,
       "expansionId": 1560,
-      "matched": 6,
-      "missing": 1,
-      "missingCards": [
-        "76"
-      ],
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1560&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 2,
-      "tcgdex": 137
+      "tcgdex": 0
     },
     "dp7": {
       "ambiguous": 0,
@@ -1209,23 +1200,19 @@
     "ex13": {
       "ambiguous": 0,
       "cards": 111,
-      "corrected": 6,
       "coverage": {
         "bySource": {
-          "matched": 1,
-          "tcgdex": 109
+          "customSet": 111
         },
         "cards": 111,
-        "withId": 110
+        "withId": 111
       },
+      "customSet": 111,
       "expansionId": 1551,
-      "matched": 1,
-      "missing": 1,
-      "missingCards": [
-        "98"
-      ],
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1551&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 109
+      "tcgdex": 0
     },
     "ex14": {
       "ambiguous": 0,
@@ -1247,23 +1234,19 @@
     "ex15": {
       "ambiguous": 0,
       "cards": 101,
-      "corrected": 4,
       "coverage": {
         "bySource": {
-          "matched": 4,
-          "tcgdex": 96
+          "customSet": 101
         },
         "cards": 101,
-        "withId": 100
+        "withId": 101
       },
+      "customSet": 101,
       "expansionId": 1553,
-      "matched": 4,
-      "missing": 1,
-      "missingCards": [
-        "88"
-      ],
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1553&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 96
+      "tcgdex": 0
     },
     "ex16": {
       "ambiguous": 0,
@@ -3453,8 +3436,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 5687,
-    "changed": 775,
+    "applied": 6045,
+    "changed": 795,
     "conflicts": [],
     "dropped": [
       {
@@ -3475,6 +3458,18 @@
         "name": "Lotad",
         "productId": 289730,
         "productName": "Lotad #01"
+      },
+      {
+        "cardKey": "ex13/98",
+        "name": "δ Rainbow Energy",
+        "productId": 277068,
+        "productName": "Rainbow Energy Delta"
+      },
+      {
+        "cardKey": "ex15/88",
+        "name": "δ Rainbow Energy",
+        "productId": 277293,
+        "productName": "Rainbow Energy Delta"
       },
       {
         "cardKey": "pl2/16",
@@ -4567,40 +4562,6 @@
       "ex11-65",
       "ex11-66"
     ],
-    "276973": [
-      "ex13-3",
-      "ex13-4",
-      "ex13-5",
-      "ex13-6"
-    ],
-    "276986": [
-      "ex13-16",
-      "ex13-26"
-    ],
-    "277048": [
-      "ex13-104",
-      "ex13-78"
-    ],
-    "277081": [
-      "ex13-103",
-      "ex13-111"
-    ],
-    "277227": [
-      "ex15-22",
-      "ex15-37"
-    ],
-    "277229": [
-      "ex15-24",
-      "ex15-42"
-    ],
-    "277236": [
-      "ex15-31",
-      "ex15-50"
-    ],
-    "277273": [
-      "ex15-68",
-      "ex15-69"
-    ],
     "277687": [
       "dp2-58",
       "dp2-92"
@@ -4648,46 +4609,6 @@
     "278126": [
       "dp5-77",
       "dp5-78"
-    ],
-    "278154": [
-      "dp6-5",
-      "dp6-55"
-    ],
-    "278155": [
-      "dp6-30",
-      "dp6-6"
-    ],
-    "278164": [
-      "dp6-15",
-      "dp6-37"
-    ],
-    "278207": [
-      "dp6-58",
-      "dp6-59"
-    ],
-    "278213": [
-      "dp6-64",
-      "dp6-65"
-    ],
-    "278232": [
-      "dp6-83",
-      "dp6-84"
-    ],
-    "278236": [
-      "dp6-87",
-      "dp6-88"
-    ],
-    "278243": [
-      "dp6-94",
-      "dp6-95"
-    ],
-    "278245": [
-      "dp6-96",
-      "dp6-97"
-    ],
-    "278260": [
-      "dp6-111",
-      "dp6-112"
     ],
     "278296": [
       "dp7-80",
@@ -5318,10 +5239,10 @@
     ]
   },
   "duplicates": {
-    "cards": 694,
-    "corrected": 141,
-    "ids": 393,
-    "kept": 553
+    "cards": 656,
+    "corrected": 123,
+    "ids": 375,
+    "kept": 533
   },
   "expansionMismatch": {
     "cards": [
@@ -6754,14 +6675,14 @@
       }
     ],
     "totals": {
-      "checked": 17691,
+      "checked": 17349,
       "corrected": 1,
       "dropped": 13,
       "droppedShared": 11,
       "foreignNameOk": 1262,
       "keptMismatch": 134,
       "noSetExpansion": 0,
-      "ok": 16278,
+      "ok": 15936,
       "unknownProduct": 3
     }
   },
@@ -6886,7 +6807,7 @@
     "orderedRejected": 7,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 325
+    "versionSuffixSkipped": 334
   },
   "setsWithoutExpansion": [
     {
@@ -7242,23 +7163,6 @@
       "source": "corrected",
       "todayId": 279730,
       "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "dp6/42",
-      "productId": 278191,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "dp6/82",
-      "displaced": [
-        "dp6/76"
-      ],
-      "productId": 278225,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
     },
     {
       "cardKey": "ex11/36",
@@ -8255,20 +8159,6 @@
     {
       "candidates": [
         {
-          "hint": "same-name-unnumbered",
-          "name": "Unown [?] Lv.18 [? | Hidden Power]",
-          "productId": 278231
-        }
-      ],
-      "cardKey": "dp6/76",
-      "deName": "Icognito J",
-      "expansionId": 1560,
-      "name": "Unown [J]",
-      "set": "dp6"
-    },
-    {
-      "candidates": [
-        {
           "name": "Feraligatr [Major Tsunami | Rending Jaws]",
           "productId": 274922
         },
@@ -8301,32 +8191,6 @@
       "expansionId": 1536,
       "name": "Venusaur",
       "set": "ecard1"
-    },
-    {
-      "candidates": [
-        {
-          "name": "Rainbow Energy Delta",
-          "productId": 277068
-        }
-      ],
-      "cardKey": "ex13/98",
-      "deName": "δ Regenbogen-Energie",
-      "expansionId": 1551,
-      "name": "δ Rainbow Energy",
-      "set": "ex13"
-    },
-    {
-      "candidates": [
-        {
-          "name": "Rainbow Energy Delta",
-          "productId": 277293
-        }
-      ],
-      "cardKey": "ex15/88",
-      "deName": "δ Regenbogen-Energie",
-      "expansionId": 1553,
-      "name": "δ Rainbow Energy",
-      "set": "ex15"
     },
     {
       "candidates": [
@@ -8430,27 +8294,6 @@
     },
     {
       "count": 1,
-      "expansionId": 1551,
-      "sets": [
-        "ex13"
-      ]
-    },
-    {
-      "count": 1,
-      "expansionId": 1553,
-      "sets": [
-        "ex15"
-      ]
-    },
-    {
-      "count": 1,
-      "expansionId": 1560,
-      "sets": [
-        "dp6"
-      ]
-    },
-    {
-      "count": 1,
       "expansionId": 1566,
       "sets": [
         "hgss1"
@@ -8493,19 +8336,22 @@
     }
   ],
   "totals": {
-    "ambiguous": 7,
+    "ambiguous": 6,
     "cards": 21577,
-    "customSet": 5687,
-    "matched": 96,
-    "missing": 20,
+    "customSet": 6045,
+    "matched": 85,
+    "missing": 17,
     "override": 8,
-    "stabilityKept": 184,
-    "tcgdex": 15582
+    "stabilityKept": 182,
+    "tcgdex": 15240
   },
   "versionSuffixSkippedByExpansion": {
     "1521": 9,
     "1537": 7,
     "1538": 3,
+    "1551": 1,
+    "1553": 1,
+    "1560": 7,
     "1563": 4,
     "1583": 12,
     "1584": 11,
