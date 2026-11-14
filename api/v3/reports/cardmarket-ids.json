@@ -1473,30 +1473,22 @@
       "tcgdex": 129
     },
     "hgss1": {
-      "ambiguous": 1,
-      "ambiguousCards": [
-        "26"
-      ],
+      "ambiguous": 0,
       "cards": 124,
-      "corrected": 2,
       "coverage": {
         "bySource": {
-          "matched": 1,
-          "stabilityKept": 6,
-          "tcgdex": 116
+          "customSet": 123,
+          "tcgdex": 1
         },
         "cards": 124,
-        "withId": 123
+        "withId": 124
       },
+      "customSet": 123,
       "expansionId": 1566,
-      "matched": 1,
-      "missing": 1,
-      "missingCards": [
-        "26"
-      ],
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1566&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 6,
-      "tcgdex": 116
+      "tcgdex": 1
     },
     "hgss2": {
       "ambiguous": 0,
@@ -3436,8 +3428,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 6045,
-    "changed": 795,
+    "applied": 6168,
+    "changed": 816,
     "conflicts": [],
     "dropped": [
       {
@@ -4780,38 +4772,6 @@
       "pl4-80",
       "pl4-81"
     ],
-    "278976": [
-      "hgss1-123",
-      "hgss1-4"
-    ],
-    "278986": [
-      "hgss1-105",
-      "hgss1-14"
-    ],
-    "278992": [
-      "hgss1-108",
-      "hgss1-20"
-    ],
-    "279004": [
-      "hgss1-110",
-      "hgss1-32"
-    ],
-    "279008": [
-      "hgss1-106",
-      "hgss1-36"
-    ],
-    "279026": [
-      "hgss1-54",
-      "hgss1-55"
-    ],
-    "279083": [
-      "hgss1-111",
-      "hgss1-112"
-    ],
-    "279085": [
-      "hgss1-113",
-      "hgss1-114"
-    ],
     "279533": [
       "hgss4-3",
       "hgss4-92"
@@ -5239,10 +5199,10 @@
     ]
   },
   "duplicates": {
-    "cards": 656,
-    "corrected": 123,
-    "ids": 375,
-    "kept": 533
+    "cards": 640,
+    "corrected": 121,
+    "ids": 367,
+    "kept": 519
   },
   "expansionMismatch": {
     "cards": [
@@ -6334,11 +6294,6 @@
         "1754": 13,
         "1755": 3
       },
-      "hgss1": {
-        "2026": 6,
-        "2395": 17,
-        "2749": 8
-      },
       "hgss2": {
         "2026": 6,
         "2395": 11,
@@ -6675,14 +6630,14 @@
       }
     ],
     "totals": {
-      "checked": 17349,
+      "checked": 17191,
       "corrected": 1,
       "dropped": 13,
       "droppedShared": 11,
-      "foreignNameOk": 1262,
+      "foreignNameOk": 1231,
       "keptMismatch": 134,
       "noSetExpansion": 0,
-      "ok": 15936,
+      "ok": 15809,
       "unknownProduct": 3
     }
   },
@@ -6807,7 +6762,7 @@
     "orderedRejected": 7,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 334
+    "versionSuffixSkipped": 353
   },
   "setsWithoutExpansion": [
     {
@@ -7281,48 +7236,6 @@
       "productId": 274378,
       "source": "corrected",
       "todayId": 274288,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "hgss1/105",
-      "productId": 279077,
-      "source": "corrected",
-      "todayId": 278986,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "hgss1/106",
-      "productId": 279078,
-      "source": "corrected",
-      "todayId": 279008,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "hgss1/108",
-      "productId": 279080,
-      "source": "corrected",
-      "todayId": 278992,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "hgss1/110",
-      "productId": 279082,
-      "source": "corrected",
-      "todayId": 279004,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "hgss1/112",
-      "productId": 279084,
-      "source": "corrected",
-      "todayId": 279083,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "hgss1/114",
-      "productId": 279086,
-      "source": "corrected",
-      "todayId": 279085,
       "todaySource": "tcgdex"
     },
     {
@@ -8195,20 +8108,6 @@
     {
       "candidates": [
         {
-          "hint": "same-name-unnumbered",
-          "name": "Meganium [Leaf Trans | Solarbeam | Prime]",
-          "productId": 279081
-        }
-      ],
-      "cardKey": "hgss1/26",
-      "deName": "Meganie",
-      "expansionId": 1566,
-      "name": "Meganium",
-      "set": "hgss1"
-    },
-    {
-      "candidates": [
-        {
           "name": "Rainbow Energy Delta",
           "productId": 277491
         }
@@ -8294,13 +8193,6 @@
     },
     {
       "count": 1,
-      "expansionId": 1566,
-      "sets": [
-        "hgss1"
-      ]
-    },
-    {
-      "count": 1,
       "expansionId": 1617,
       "sets": [
         "pop5"
@@ -8336,14 +8228,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 6,
+    "ambiguous": 5,
     "cards": 21577,
-    "customSet": 6045,
-    "matched": 85,
-    "missing": 17,
+    "customSet": 6168,
+    "matched": 84,
+    "missing": 16,
     "override": 8,
-    "stabilityKept": 182,
-    "tcgdex": 15240
+    "stabilityKept": 176,
+    "tcgdex": 15125
   },
   "versionSuffixSkippedByExpansion": {
     "1521": 9,
@@ -8353,6 +8245,7 @@
     "1553": 1,
     "1560": 7,
     "1563": 4,
+    "1566": 19,
     "1583": 12,
     "1584": 11,
     "1608": 7,
