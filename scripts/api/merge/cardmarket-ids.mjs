@@ -41,6 +41,34 @@ export function normalizeCmNumber(value) {
   return m ? `${m[1]}${m[2]}${m[3]}` : s;
 }
 
+// Kartennummer fuer den Vergleich mit Cardmarket-Nummern (custom-sets). Promo-Sets fuehren das Kuerzel in jeder
+// Nummer ("BW01", "SM30a", "XY35"), Cardmarket schreibt es als Setcode davor ("BW 01" -> custom-set "1"). Haben
+// ALLE Karten eines Sets dasselbe Buchstaben-Praefix, wird es entfernt; gemischte Sets (Skyridge 1-144 + H1-H32,
+// Galerien TG01 neben 001) bleiben exakt. registerSetNumbers setzt das je Set, cardCmNumber liest es.
+const cardNumberKeys = new WeakMap();
+export function commonNumberPrefix(cards) {
+  let prefix = null;
+  for (const c of cards ?? []) {
+    const m = /^([a-z]+)\d/.exec(normalizeCmNumber(c?.number) ?? '');
+    if (!m || (prefix !== null && m[1] !== prefix)) return null;
+    prefix = m[1];
+  }
+  return prefix;
+}
+export function registerSetNumbers(cards) {
+  const prefix = commonNumberPrefix(cards);
+  if (!prefix) return;
+  for (const c of cards) cardNumberKeys.set(c, normalizeCmNumber(c.number).slice(prefix.length));
+}
+export function cardCmNumber(card) {
+  return cardNumberKeys.get(card) ?? normalizeCmNumber(card?.number);
+}
+// Beide Schreibweisen (ohne/mit Praefix): Produkte alter Quellen fuehren das Kuerzel teils in der Nummer ("XY20").
+export function cardCmNumbers(card) {
+  return [...new Set([cardCmNumber(card), normalizeCmNumber(card?.number)].filter(Boolean))];
+}
+const productsByNumber = (map, card) => [...new Set(cardCmNumbers(card).flatMap((n) => map.get(n) ?? []))];
+
 // Klammerzusaetze ([Angriffe], [F], [A]) und Cardmarkets Level-Angabe "Lv.44" (nicht "LV.X") fallen weg,
 // "★" entspricht "Gold Star", "Delta Species" ist bei Cardmarket nur ein Zusatz zu "δ".
 // Danach ohne Diakritika, klein, nur Buchstaben und Ziffern.
@@ -154,8 +182,7 @@ function byAttacks(card, sameName) {
 function matchOne(card, index, taken) {
   const name = normalizeCmName(card.name);
   if (!name) return null;
-  const number = normalizeCmNumber(card.number);
-  const byNumber = (index.byNumber.get(number) ?? []).filter((p) => p.name === name && !taken.has(p.id));
+  const byNumber = productsByNumber(index.byNumber, card).filter((p) => p.name === name && !taken.has(p.id));
   if (byNumber.length === 1) return { id: byNumber[0].id };
   if (byNumber.length > 1) return { ambiguous: true };
   const sameName = index.byName.get(name) ?? [];
@@ -175,8 +202,8 @@ function matchEnergy(card, index, taken) {
   const name = normalizeCmName(card.name);
   const all = name ? index.byEnergy.get(name) ?? [] : [];
   if (!all.length) return null;
-  const number = normalizeCmNumber(card.number);
-  const byNumber = all.filter((p) => p.number !== null && p.number === number && !taken.has(p.id));
+  const numbers = cardCmNumbers(card);
+  const byNumber = all.filter((p) => p.number !== null && numbers.includes(p.number) && !taken.has(p.id));
   if (byNumber.length === 1) return { id: byNumber[0].id, source: 'energySymbol' };
   if (byNumber.length > 1) return { ambiguous: true };
   const free = all.filter((p) => p.number === null && !taken.has(p.id));
@@ -222,9 +249,8 @@ const wordsOf = (s) => String(s ?? '').replace(/\[[^\]]*\]/g, ' ').normalize('NF
 // denselben Angriffs-/Faehigkeitsnamen (nie nur per Name).
 function strictMatch(card, index) {
   const name = normalizeCmName(card.name);
-  const number = normalizeCmNumber(card.number);
-  if (!name || !number) return null;
-  const hits = (index.byNumber.get(number) ?? []).filter((p) => p.name === name);
+  if (!name || !cardCmNumber(card)) return null;
+  const hits = productsByNumber(index.byNumber, card).filter((p) => p.name === name);
   if (hits.length === 1) return hits[0].id;
   if (hits.length > 1) return null;
   return byAttacks(card, index.byName.get(name) ?? [])?.id ?? null;
@@ -273,7 +299,10 @@ export function fillCardmarketIds({
 }) {
   // Vor allen Schritten: TCGdex-IDs je Karte (fuer cardmarketTcgdex bei der Stabilitaetsregel)
   const tcgdexBefore = new Map();
-  for (const cards of cardsBySet.values()) for (const c of cards) tcgdexBefore.set(c.id, [...tcgdexIds(c)]);
+  for (const cards of cardsBySet.values()) {
+    registerSetNumbers(cards);
+    for (const c of cards) tcgdexBefore.set(c.id, [...tcgdexIds(c)]);
+  }
   const indexes = new Map();
   const indexFor = (expansionId) => {
     if (!indexes.has(expansionId)) {
@@ -448,7 +477,7 @@ export function fillCardmarketIds({
       const exp = cardExpansion(set, card);
       const index = exp === null ? null : indexFor(exp);
       if (!index?.customSet.size) continue;
-      const hits = index.customSet.get(normalizeCmNumber(card.number)) ?? [];
+      const hits = productsByNumber(index.customSet, card);
       const entry = { set, card, index, hits };
       csCards.push(entry);
       if (hits.length > 1) { customSetReport.ambiguous.push(`${set.id}/${card.cardId}`); continue; }
@@ -506,9 +535,9 @@ export function fillCardmarketIds({
   const basesOf = new Map();
   for (const { set, card, index } of csCards) {
     if (applied.has(card.id)) continue;
-    const base = customSetBase(normalizeCmNumber(card.number));
     if (!basesOf.has(index)) basesOf.set(index, new Set([...index.customSet.keys()].map(customSetBase)));
-    if (!basesOf.get(index).has(base)) continue;
+    const base = cardCmNumbers(card).map(customSetBase).find((b) => basesOf.get(index).has(b));
+    if (base === undefined) continue;
     const contradicted = (id) => { const n = csNumber(index, id); return n !== null && customSetBase(n) !== base; };
     const original = tcgdexIds(card);
     const rejected = new Set([...original, ...(card.variants ?? []).map((v) => v?.cardmarketId)].filter((id) => typeof id === 'number' && contradicted(id)));
@@ -897,11 +926,11 @@ export function fillCardmarketIds({
   const candidatesFor = (card, index) => {
     if (!index) return [];
     const name = normalizeCmName(card.name);
-    const number = normalizeCmNumber(card.number);
+    const numbers = cardCmNumbers(card);
     const words = new Set(wordsOf(card.name));
     const free = index.all.filter((p) => !held.has(p.id));
     const scored = free.map((p) => {
-      let score = (p.name === name || p.energy === name ? 100 : 0) + (number && p.number === number ? 50 : 0);
+      let score = (p.name === name || p.energy === name ? 100 : 0) + (p.number !== null && numbers.includes(p.number) ? 50 : 0);
       for (const w of new Set(wordsOf(p.raw))) if (words.has(w)) score += 10;
       return { p, score };
     });
