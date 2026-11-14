@@ -216,6 +216,7 @@ test('readSummarySheet: Alias-Zeilen zaehlen zum Hauptset, eine Karte unter zwei
   const summary = await readSummarySheet();
   const crz = summary.find((row) => row.setName === 'Crown Zenith');
   assert.deepEqual([crz.total, crz.collected, crz.rh], [2, 2, 1]);
+  assert.equal(crz.setId, 'swsh12pt5', 'kanonische setId (Statistik blendet ausgeschlossene Sets darueber aus)');
   assert.equal(summary.some((row) => row.setName === 'Crown Zenith Galarian Gallery'), false);
   const me5 = summary.find((row) => row.setName === 'Mega Evolution 5');
   assert.deepEqual([me5.total, me5.collected], [1, 1]);

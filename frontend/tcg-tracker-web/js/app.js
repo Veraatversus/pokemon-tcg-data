@@ -53,6 +53,7 @@ import { resolveSeriesGroupInfo, resolveDisplaySet, applyDeSeriesFallback, resol
 import { imageCandidates, bindImageFallback, fallbackImgAttrs } from './ui/image-fallback.js';
 import { renderDashboardSetGrid } from './views/dashboard-grid.js';
 import { getCardPrice, loadPriceStamp, refreshV3Prices } from './data/v3-prices.js?v=20261114-api-images';
+import { filterExcludedSets, loadExcludedSetPredicate } from './data/excluded-sets.js?v=20261114-api-images';
 import {
   buildCombinedSearchDropdownOptions,
   buildSearchProgressLabel,
@@ -479,6 +480,8 @@ const state = {
   sets:         [],
   allSets:      [],
   summaryData:  null,
+  // api/v3 meta.json excludedSetIds/excludedSeries (loadSets): blendet Sets nur in der Anzeige aus.
+  isExcludedSet: () => false,
   summaryOverrides: new Map(),
   currentSet:   null,
   dbMap:        new Map(),
@@ -2758,13 +2761,20 @@ function initSpreadsheetDialog() {
 // --------------------------------------------------------------------------
 // SETS LADEN
 // --------------------------------------------------------------------------
+
+/** Summary-Zeilen (Dashboard-Fortschritt, Statistik, CSV) ohne ausgeschlossene Sets (state.isExcludedSet). */
+async function readVisibleSummary() {
+  return filterExcludedSets(await readSummarySheet(), state.isExcludedSet);
+}
+
 async function loadSets() {
   setLoading(true, 'Lade Sets\u2026');
   try {
     // DE-Serien-Map (api/v3, mit Zeitlimit) parallel zum Sheets-Read von db_sets laden; registriert wird sie
     // vor jeder Gruppierung: Dashboard, Import-Selector und Suche teilen sich dieselbe Map.
-    const [v3SetMeta] = await Promise.all([
+    const [v3SetMeta, isExcludedSet] = await Promise.all([
       fetchV3SetMeta(),
+      loadExcludedSetPredicate(),
       prefetchSetsOverviewRows().catch(() => {})
     ]);
     setV3SetMeta(v3SetMeta);
@@ -2801,6 +2811,14 @@ async function loadSets() {
         console.warn('[loadSets] Migration fehlgeschlagen:', err);
       }
     }
+
+    // Von api/v3 ausgeschlossene Sets (meta.json excludedSetIds/excludedSeries, z. B. TCG Pocket) nur in der
+    // Anzeige ausblenden: state.sets/state.allSets speisen Dashboard, Set-/Import-Auswahl, Suche und Statistik.
+    // Die Sheet-Zeilen bleiben unveraendert.
+    state.isExcludedSet = isExcludedSet;
+    importedSets = filterExcludedSets(importedSets, isExcludedSet);
+    overviewSets = filterExcludedSets(overviewSets, isExcludedSet);
+    state.sets = importedSets;
 
     const importedById = new Map(importedSets.map((set) => [set.setId, set]));
     const mergedMap = new Map();
@@ -2924,7 +2942,7 @@ async function renderDashboard() {
     }
 
     if (!state.summaryData) {
-      state.summaryData = await readSummarySheet().catch(() => []);
+      state.summaryData = await readVisibleSummary().catch(() => []);
     }
     const summaryByName = new Map();
     (state.summaryData || []).forEach((row) => summaryByName.set(row.setName, row));
@@ -3989,7 +4007,7 @@ async function reimportAllImportedSets() {
 async function exportCollectionSummaryCsv() {
   const rows = state.summaryData && Array.isArray(state.summaryData)
     ? state.summaryData
-    : await readSummarySheet().catch(() => []);
+    : await readVisibleSummary().catch(() => []);
   if (!rows.length) {
     showToast('Keine Summary-Daten zum Export vorhanden.', 'info');
     return;
@@ -5073,7 +5091,7 @@ async function renderStats() {
   dom.statsContent.innerHTML = '<p class="loading-placeholder">Lade Statistiken\u2026</p>';
   try {
     if (!state.summaryData) {
-      state.summaryData = await readSummarySheet().catch((err) => {
+      state.summaryData = await readVisibleSummary().catch((err) => {
         console.warn('[renderStats] readSummarySheet error:', err.message);
         return [];
       });

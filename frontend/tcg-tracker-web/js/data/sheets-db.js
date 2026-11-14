@@ -1525,13 +1525,14 @@ export async function readSummarySheet() {
     for (const [setId, meta] of setsById.entries()) {
       const key = canonicalKey(setId);
       const isCanonicalRow = key === setId.toLowerCase();
+      const canonicalSetId = setsResolver?.resolveSetKey?.(setId) || setId;
       const current = canonicalMeta.get(key);
       if (!current) {
-        canonicalMeta.set(key, { ...meta, isCanonicalRow });
+        canonicalMeta.set(key, { ...meta, isCanonicalRow, canonicalSetId });
       } else {
         const imported = current.imported || meta.imported;
         canonicalMeta.set(key, isCanonicalRow && !current.isCanonicalRow
-          ? { ...meta, imported, isCanonicalRow }
+          ? { ...meta, imported, isCanonicalRow, canonicalSetId }
           : { ...current, imported });
       }
     }
@@ -1544,6 +1545,7 @@ export async function readSummarySheet() {
       const collected = counts.collected || 0;
       const rh = counts.rh || 0;
       result.push({
+        setId: meta.canonicalSetId,
         setName: meta.setName,
         total,
         collected,
