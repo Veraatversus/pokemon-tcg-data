@@ -59,6 +59,9 @@ export function numberOfLabel(label) {
     const c = candidate.trim();
     const m = c.match(/^([A-Z]+(?:en)?[ ]?[A-Z]?\s*\d+[a-z]?)$/i);
     if (m) return m[1].trim().replace(/^[A-Z]+(?:en)?\s*/, '').replace(/^0+/, '') || '0';
+    // Unterset-Praefix aus mehreren Buchstaben: "RR RT1" -> "RT1", "SV SH8" -> "SH8" (TCGdex-Nummer gleich)
+    const sub = c.match(/^[A-Z]+\s+([A-Z]{2,3}\d+[a-z]?)$/i);
+    if (sub) return sub[1].replace(/^([A-Z]+)0+(?=\d)/i, '$1');
     // Setcode mit Ziffer und Kit-Kuerzel: "TK6 1N" -> "1N" (Trainer-Kit-Paare, siehe setSuffix im custom-set)
     const kit = c.match(/^[A-Z]+\d+\s+(\d+[A-Z]?)$/i);
     if (kit) return kit[1].replace(/^0+(?=\d)/, '');

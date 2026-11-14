@@ -2039,25 +2039,19 @@
     "pl2": {
       "ambiguous": 0,
       "cards": 120,
-      "corrected": 1,
       "coverage": {
         "bySource": {
-          "tcgdex": 116
+          "customSet": 120
         },
         "cards": 120,
-        "withId": 116
+        "withId": 120
       },
+      "customSet": 120,
       "expansionId": 1563,
       "matched": 0,
-      "missing": 4,
-      "missingCards": [
-        "2",
-        "3",
-        "4",
-        "6"
-      ],
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1563&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 116
+      "tcgdex": 0
     },
     "pl3": {
       "ambiguous": 0,
@@ -3662,8 +3656,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 2887,
-    "changed": 493,
+    "applied": 3007,
+    "changed": 501,
     "conflicts": [],
     "dropped": [
       {
@@ -3684,6 +3678,138 @@
         "name": "Lotad",
         "productId": 289730,
         "productName": "Lotad #01"
+      },
+      {
+        "cardKey": "pl2/16",
+        "name": "Bronzong E4",
+        "productId": 278590,
+        "productName": "Bronzong [4] Lv.54 [Hand Refresh | Payback]"
+      },
+      {
+        "cardKey": "pl2/17",
+        "name": "Drapion E4",
+        "productId": 278591,
+        "productName": "Drapion [4] Lv.53 [Body Slam | Mega Impact]"
+      },
+      {
+        "cardKey": "pl2/18",
+        "name": "Espeon E4",
+        "productId": 278592,
+        "productName": "Espeon [4] Lv.55 [Hypnosis | Psywave]"
+      },
+      {
+        "cardKey": "pl2/20",
+        "name": "Gallade E4",
+        "productId": 278594,
+        "productName": "Gallade [4] Lv.59 [Chop Up | Feint]"
+      },
+      {
+        "cardKey": "pl2/23",
+        "name": "Golem E4",
+        "productId": 278597,
+        "productName": "Golem [4] Lv.52 [Rage | Double-edge]"
+      },
+      {
+        "cardKey": "pl2/24",
+        "name": "Heracross E4",
+        "productId": 278598,
+        "productName": "Heracross [4] Lv.51 [Focus Energy | Megahorn]"
+      },
+      {
+        "cardKey": "pl2/28",
+        "name": "Mr. Mime E4",
+        "productId": 278602,
+        "productName": "Mr. Mime [4] Lv.53 [Magic Heal | Barrier Attack]"
+      },
+      {
+        "cardKey": "pl2/32",
+        "name": "Rhyperior E4",
+        "productId": 278606,
+        "productName": "Rhyperior [4] Lv. 55 [Double Lariat | Rock Tumble]"
+      },
+      {
+        "cardKey": "pl2/35",
+        "name": "Vespiquen E4",
+        "productId": 278609,
+        "productName": "Vespiquen [4] Lv.50 [Royal Gain | Leaf Needle]"
+      },
+      {
+        "cardKey": "pl2/37",
+        "name": "Yanmega E4",
+        "productId": 278611,
+        "productName": "Yanmega [4] Lv.49 [Skill Dive | Whirlwind]"
+      },
+      {
+        "cardKey": "pl2/38",
+        "name": "Alakazam E4",
+        "productId": 278612,
+        "productName": "Alakazam [4] Lv.56 [Recover | Mysterious Beam]"
+      },
+      {
+        "cardKey": "pl2/42",
+        "name": "Hippowdon E4",
+        "productId": 278616,
+        "productName": "Hippowdon [4] Lv.52 [Sand Armor | Bite and Crush]"
+      },
+      {
+        "cardKey": "pl2/43",
+        "name": "Infernape E4",
+        "productId": 278617,
+        "productName": "Infernape [4] Lv.55 [Split Bomb | High Jump Kick]"
+      },
+      {
+        "cardKey": "pl2/47",
+        "name": "Rapidash E4",
+        "productId": 278621,
+        "productName": "Rapidash [4] Lv.53 [Pickup Power | Fire Mane]"
+      },
+      {
+        "cardKey": "pl2/48",
+        "name": "Scizor E4",
+        "productId": 278622,
+        "productName": "Scizor [4] Lv.49 [Cut | Crushing Blow]"
+      },
+      {
+        "cardKey": "pl2/54",
+        "name": "Whiscash E4",
+        "productId": 278628,
+        "productName": "Whiscash [4] Lv.50 [Sleep Pulse | Earthquake]"
+      },
+      {
+        "cardKey": "pl2/60",
+        "name": "Flareon E4",
+        "productId": 278634,
+        "productName": "Flareon [4] Lv.55 [Tackle | Fire Tail Slap]"
+      },
+      {
+        "cardKey": "pl2/62",
+        "name": "Gliscor E4",
+        "productId": 278636,
+        "productName": "Gliscor [4] Lv.53 [Irongrip | Loaded Needle]"
+      },
+      {
+        "cardKey": "pl2/65",
+        "name": "Houndoom E4",
+        "productId": 278639,
+        "productName": "Houndoom [4] Lv.52 [Corner | Fire Fang]"
+      },
+      {
+        "cardKey": "pl2/103",
+        "name": "Alakazam E4 LV.X",
+        "productId": 278677,
+        "productName": "Alakazam [4] LV.X [Damage Switch | Mind Shock]"
+      },
+      {
+        "cardKey": "pl2/106",
+        "name": "Gallade E4 LV.X",
+        "productId": 278680,
+        "productName": "Gallade [4] LV.X [Blade Storm | Aimed Cut]"
+      },
+      {
+        "cardKey": "pl2/108",
+        "name": "Infernape E4 LV.X",
+        "productId": 278682,
+        "productName": "Infernape [4] LV.X [Intimidating Roar | Fire Spin]"
       },
       {
         "cardKey": "sm10/172",
@@ -4838,26 +4964,6 @@
       "pl1-126",
       "pl1-127"
     ],
-    "278569": [
-      "pl2-2",
-      "pl2-RT2"
-    ],
-    "278570": [
-      "pl2-1",
-      "pl2-RT1"
-    ],
-    "278571": [
-      "pl2-4",
-      "pl2-RT4"
-    ],
-    "278572": [
-      "pl2-3",
-      "pl2-RT3"
-    ],
-    "278574": [
-      "pl2-6",
-      "pl2-RT6"
-    ],
     "278689": [
       "pl3-7",
       "pl3-70",
@@ -5917,10 +6023,10 @@
     ]
   },
   "duplicates": {
-    "cards": 1068,
-    "corrected": 291,
-    "ids": 521,
-    "kept": 777
+    "cards": 1058,
+    "corrected": 290,
+    "ids": 516,
+    "kept": 768
   },
   "expansionMismatch": {
     "cards": [
@@ -7010,188 +7116,6 @@
         "reason": "corrected-expansion"
       },
       {
-        "cardKey": "pl2-2",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278569,
-        "reason": "dropped-shared-mismatch"
-      },
-      {
-        "cardKey": "pl2-3",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278572,
-        "reason": "dropped-shared-mismatch"
-      },
-      {
-        "cardKey": "pl2-4",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278571,
-        "reason": "dropped-shared-mismatch"
-      },
-      {
-        "cardKey": "pl2-6",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278574,
-        "reason": "dropped-shared-mismatch"
-      },
-      {
-        "cardKey": "pl2-16",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278590,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "pl2-17",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278591,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "pl2-18",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278592,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "pl2-20",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278594,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "pl2-23",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278597,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "pl2-24",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278598,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "pl2-28",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278602,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "pl2-32",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278606,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "pl2-35",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278609,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "pl2-37",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278611,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "pl2-38",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278612,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "pl2-42",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278616,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "pl2-43",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278617,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "pl2-47",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278621,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "pl2-48",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278622,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "pl2-54",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278628,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "pl2-60",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278634,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "pl2-62",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278636,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "pl2-65",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278639,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "pl2-103",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278677,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "pl2-106",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278680,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "pl2-108",
-        "newId": null,
-        "oldExpansion": 1563,
-        "oldId": 278682,
-        "reason": "kept-mismatch"
-      },
-      {
         "cardKey": "pl3-8",
         "newId": null,
         "oldExpansion": 1564,
@@ -7468,10 +7392,6 @@
         "5431": 1,
         "5992": 2,
         "6194": 2
-      },
-      "pl2": {
-        "2026": 8,
-        "2028": 20
       },
       "pl3": {
         "2026": 5
@@ -7777,14 +7697,14 @@
       }
     ],
     "totals": {
-      "checked": 20358,
+      "checked": 20206,
       "corrected": 25,
-      "dropped": 25,
-      "droppedShared": 21,
-      "foreignNameOk": 1309,
-      "keptMismatch": 157,
+      "dropped": 21,
+      "droppedShared": 17,
+      "foreignNameOk": 1281,
+      "keptMismatch": 135,
       "noSetExpansion": 0,
-      "ok": 18839,
+      "ok": 18741,
       "unknownProduct": 3
     }
   },
@@ -7993,7 +7913,7 @@
     "orderedRejected": 14,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 135
+    "versionSuffixSkipped": 139
   },
   "setsWithoutExpansion": [
     {
@@ -9989,58 +9909,6 @@
     {
       "candidates": [
         {
-          "name": "Bastiodon [GL] Lv.41 [Bounce Back | Smack Attack]",
-          "productId": 278576
-        }
-      ],
-      "cardKey": "pl2/2",
-      "deName": "Bollterus GL",
-      "expansionId": 1563,
-      "name": "Bastiodon GL",
-      "set": "pl2"
-    },
-    {
-      "candidates": [
-        {
-          "name": "Darkrai [G] Lv.58 [Eerie Aura | Darkness Sleep]",
-          "productId": 278577
-        }
-      ],
-      "cardKey": "pl2/3",
-      "deName": "Darkrai G",
-      "expansionId": 1563,
-      "name": "Darkrai G",
-      "set": "pl2"
-    },
-    {
-      "candidates": [
-        {
-          "name": "Floatzel [GL] Lv.37 [Incite | Giant Wave]",
-          "productId": 278578
-        }
-      ],
-      "cardKey": "pl2/4",
-      "deName": "Bojelin GL",
-      "expansionId": 1563,
-      "name": "Floatzel GL",
-      "set": "pl2"
-    },
-    {
-      "candidates": [
-        {
-          "name": "Froslass [GL] Lv.44 [Sleep Inducer | Wake-Up Slap]",
-          "productId": 278580
-        }
-      ],
-      "cardKey": "pl2/6",
-      "deName": "Frosdeje GL",
-      "expansionId": 1563,
-      "name": "Froslass GL",
-      "set": "pl2"
-    },
-    {
-      "candidates": [
-        {
           "name": "Rayquaza [C] Lv.73 [Trash Burst | Twister]",
           "productId": 278699
         }
@@ -11333,13 +11201,6 @@
   "stillMissingByExpansion": [
     {
       "count": 4,
-      "expansionId": 1563,
-      "sets": [
-        "pl2"
-      ]
-    },
-    {
-      "count": 4,
       "expansionId": 1583,
       "sets": [
         "xy2"
@@ -11545,16 +11406,17 @@
   "totals": {
     "ambiguous": 52,
     "cards": 21577,
-    "customSet": 2887,
+    "customSet": 3007,
     "matched": 231,
-    "missing": 75,
+    "missing": 71,
     "override": 8,
     "stabilityKept": 258,
-    "tcgdex": 18118
+    "tcgdex": 18002
   },
   "versionSuffixSkippedByExpansion": {
     "1537": 7,
     "1538": 3,
+    "1563": 4,
     "1608": 7,
     "1609": 6,
     "1611": 7,
