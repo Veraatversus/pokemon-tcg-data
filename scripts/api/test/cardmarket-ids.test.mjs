@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeCmNumber, normalizeCmName, fillCardmarketIds, primaryCardmarketId, cardmarketSearchUrl } from '../merge/cardmarket-ids.mjs';
+import { normalizeCmNumber, commonNumberPrefix, normalizeCmName, fillCardmarketIds, primaryCardmarketId, cardmarketSearchUrl } from '../merge/cardmarket-ids.mjs';
 
 const single = (cardmarketProductId, name, collectorNumber) => ({
   cardmarketProductId, name, collectorNumber, categoryId: 51, categoryName: 'Pokémon Single',
@@ -732,6 +732,8 @@ test('stillMissing candidates carry oversize/special hints', () => {
   assert.deepEqual(report.stillMissing[0].candidates, [
     { productId: 279925, name: 'Snivy [Slam]', hint: 'same-name-unnumbered' },
     { productId: 547296, name: 'Snivy [Slam]', hint: 'same-name-unnumbered, id-outlier' },
+    // BW1 ohne Praefix = "1": Produkt #1 ist als Nummerntreffer Kandidat
+    { productId: 279920, name: 'Oshawott' },
   ]);
 });
 
@@ -775,6 +777,23 @@ test('custom-set suffix never matches base card', () => {
   assert.deepEqual(dup.cards[0].ids.cardmarket, [20]);
   assert.equal(dup.cards[0].ids.cardmarketSource, undefined);
   assert.deepEqual(dup.report.customSets.ambiguous, ['s1/1']);
+});
+
+test('Promo-Sets: einheitliches Praefix ("BW01") passt zur custom-set-Nummer ohne Setcode ("1"); gemischte Sets bleiben exakt', () => {
+  assert.equal(commonNumberPrefix([{ number: 'BW01' }, { number: 'BW101' }]), 'bw');
+  assert.equal(commonNumberPrefix([{ number: '1' }, { number: 'H1' }]), null);
+  assert.equal(commonNumberPrefix([{ number: 'TG01' }, { number: '001' }]), null);
+  const promo = [card('BW29', 'BW29', 'Victory Cup'), card('BW30', 'BW30', 'Victory Cup'), card('BW1', 'BW01', 'Snivy')];
+  const { cards: out } = runCat(promo, {
+    100: [csp(52, 'Victory Cup', '29'), csp(47, 'Victory Cup', '30'), csp(25, 'Snivy', '1'), csp(296, 'Snivy', '1V2')],
+  });
+  assert.deepEqual(out.map((c) => [c.cardId, c.ids.cardmarket, c.ids.cardmarketSource]), [
+    ['BW29', [52], 'custom-set'], ['BW30', [47], 'custom-set'], ['BW1', [25], 'custom-set'],
+  ]);
+  // Skyridge-Form: "H1" darf nicht auf Produkt "1" fallen
+  const mixed = [card('1', '1', 'Alakazam'), card('H1', 'H1', 'Alakazam')];
+  const { cards: m } = runCat(mixed, { 100: [csp(1, 'Alakazam', '1'), csp(2, 'Alakazam', 'H1')] });
+  assert.deepEqual(m.map((c) => c.ids.cardmarket), [[1], [2]]);
 });
 
 test('custom-set beats tcgdex id', () => {

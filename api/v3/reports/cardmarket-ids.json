@@ -769,74 +769,22 @@
       "tcgdex": 121
     },
     "bwp": {
-      "ambiguous": 26,
-      "ambiguousCards": [
-        "BW1",
-        "BW2",
-        "BW3",
-        "BW4",
-        "BW5",
-        "BW10",
-        "BW11",
-        "BW14",
-        "BW16",
-        "BW19",
-        "BW23",
-        "BW24",
-        "BW28",
-        "BW29",
-        "BW30",
-        "BW31",
-        "BW32",
-        "BW50",
-        "BW54",
-        "BW73",
-        "BW77",
-        "BW94",
-        "BW97",
-        "BW99",
-        "BW100",
-        "BW101"
-      ],
+      "ambiguous": 0,
       "cards": 101,
       "coverage": {
         "bySource": {
-          "matched": 74
+          "customSet": 99
         },
         "cards": 101,
-        "withId": 74
+        "withId": 99
       },
+      "customSet": 99,
       "expansionId": 1611,
-      "matched": 74,
-      "missing": 27,
+      "matched": 0,
+      "missing": 2,
       "missingCards": [
-        "BW1",
-        "BW2",
-        "BW3",
-        "BW4",
-        "BW5",
-        "BW10",
-        "BW11",
-        "BW14",
-        "BW16",
-        "BW19",
-        "BW23",
-        "BW24",
-        "BW28",
-        "BW29",
-        "BW30",
-        "BW31",
-        "BW32",
-        "BW50",
-        "BW54",
-        "BW73",
         "BW77",
-        "BW78",
-        "BW94",
-        "BW97",
-        "BW99",
-        "BW100",
-        "BW101"
+        "BW78"
       ],
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1611&sortBy=collectorsnumber_asc&perSite=100&site=1",
       "tcgdex": 0
@@ -3891,7 +3839,7 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 746,
+    "applied": 845,
     "changed": 208,
     "conflicts": [],
     "dropped": [
@@ -9703,7 +9651,7 @@
     "orderedRejected": 16,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 10
+    "versionSuffixSkipped": 17
   },
   "setsWithoutExpansion": [
     {
@@ -12348,401 +12296,7 @@
   ],
   "stillMissing": [
     {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Snivy [Slam]",
-          "productId": 279925
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Snivy [Slam]",
-          "productId": 547296
-        }
-      ],
-      "cardKey": "bwp/BW1",
-      "deName": null,
-      "expansionId": 1611,
-      "name": "Snivy",
-      "set": "bwp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tepig [Ember]",
-          "productId": 279924
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Tepig [Ember]",
-          "productId": 547301
-        }
-      ],
-      "cardKey": "bwp/BW2",
-      "deName": null,
-      "expansionId": 1611,
-      "name": "Tepig",
-      "set": "bwp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Oshawott [Water Pulse]",
-          "productId": 279923
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Oshawott [Water Pulse]",
-          "productId": 547306
-        }
-      ],
-      "cardKey": "bwp/BW3",
-      "deName": null,
-      "expansionId": 1611,
-      "name": "Oshawott",
-      "set": "bwp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Reshiram [Outrage | Blue Flare]",
-          "productId": 279922
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Reshiram [Outrage | Blue Flare]",
-          "productId": 279949
-        }
-      ],
-      "cardKey": "bwp/BW4",
-      "deName": null,
-      "expansionId": 1611,
-      "name": "Reshiram",
-      "set": "bwp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Zekrom [Outrage | Bolt Strike]",
-          "productId": 279926
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Zekrom [Outrage | Bolt Strike]",
-          "productId": 279945
-        }
-      ],
-      "cardKey": "bwp/BW5",
-      "deName": null,
-      "expansionId": 1611,
-      "name": "Zekrom",
-      "set": "bwp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Axew [Dragon Rage]",
-          "productId": 279916
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Axew [Dragon Rage]",
-          "productId": 279921
-        }
-      ],
-      "cardKey": "bwp/BW10",
-      "deName": null,
-      "expansionId": 1611,
-      "name": "Axew",
-      "set": "bwp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Pansage [Bullet Seed]",
-          "productId": 279913
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Pansage [Bullet Seed]",
-          "productId": 279915
-        }
-      ],
-      "cardKey": "bwp/BW11",
-      "deName": null,
-      "expansionId": 1611,
-      "name": "Pansage",
-      "set": "bwp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Pansage [Bullet Seed]",
-          "productId": 279913
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Pansage [Bullet Seed]",
-          "productId": 279915
-        }
-      ],
-      "cardKey": "bwp/BW14",
-      "deName": null,
-      "expansionId": 1611,
-      "name": "Pansage",
-      "set": "bwp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Axew [Dragon Rage]",
-          "productId": 279916
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Axew [Dragon Rage]",
-          "productId": 279921
-        }
-      ],
-      "cardKey": "bwp/BW16",
-      "deName": null,
-      "expansionId": 1611,
-      "name": "Axew",
-      "set": "bwp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Zoroark [Punishment | Snarl]",
-          "productId": 279917
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Zoroark [Punishment | Snarl]",
-          "productId": 363651
-        }
-      ],
-      "cardKey": "bwp/BW19",
-      "deName": null,
-      "expansionId": 1611,
-      "name": "Zoroark",
-      "set": "bwp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Reshiram [Outrage | Blue Flare]",
-          "productId": 279922
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Reshiram [Outrage | Blue Flare]",
-          "productId": 279949
-        }
-      ],
-      "cardKey": "bwp/BW23",
-      "deName": null,
-      "expansionId": 1611,
-      "name": "Reshiram",
-      "set": "bwp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Zekrom [Outrage | Bolt Strike]",
-          "productId": 279926
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Zekrom [Outrage | Bolt Strike]",
-          "productId": 279945
-        }
-      ],
-      "cardKey": "bwp/BW24",
-      "deName": null,
-      "expansionId": 1611,
-      "name": "Zekrom",
-      "set": "bwp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tropical Beach",
-          "productId": 279875
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tropical Beach",
-          "productId": 279950
-        }
-      ],
-      "cardKey": "bwp/BW28",
-      "deName": null,
-      "expansionId": 1611,
-      "name": "Tropical Beach",
-      "set": "bwp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Victory Cup",
-          "productId": 279943
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Victory Cup",
-          "productId": 279947
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Victory Cup",
-          "productId": 279952
-        }
-      ],
-      "cardKey": "bwp/BW29",
-      "deName": null,
-      "expansionId": 1611,
-      "name": "Victory Cup",
-      "set": "bwp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Victory Cup",
-          "productId": 279943
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Victory Cup",
-          "productId": 279947
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Victory Cup",
-          "productId": 279952
-        }
-      ],
-      "cardKey": "bwp/BW30",
-      "deName": null,
-      "expansionId": 1611,
-      "name": "Victory Cup",
-      "set": "bwp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Victory Cup",
-          "productId": 279943
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Victory Cup",
-          "productId": 279947
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Victory Cup",
-          "productId": 279952
-        }
-      ],
-      "cardKey": "bwp/BW31",
-      "deName": null,
-      "expansionId": 1611,
-      "name": "Victory Cup",
-      "set": "bwp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Victini [Victory Star | Stored Power]",
-          "productId": 279936
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Victini [Victory Star | Stored Power]",
-          "productId": 398039
-        }
-      ],
-      "cardKey": "bwp/BW32",
-      "deName": null,
-      "expansionId": 1611,
-      "name": "Victini",
-      "set": "bwp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tropical Beach",
-          "productId": 279875
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Tropical Beach",
-          "productId": 279950
-        }
-      ],
-      "cardKey": "bwp/BW50",
-      "deName": null,
-      "expansionId": 1611,
-      "name": "Tropical Beach",
-      "set": "bwp"
-    },
-    {
-      "candidates": [
-        {
-          "name": "Pikachu [Quick Attack | Electro Ball | BW]",
-          "productId": 279876
-        }
-      ],
-      "cardKey": "bwp/BW54",
-      "deName": null,
-      "expansionId": 1611,
-      "name": "Pikachu",
-      "set": "bwp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Darkrai [Hide in Shadows | Dark Hole]",
-          "productId": 279901
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Darkrai [Hide in Shadows | Dark Hole]",
-          "productId": 363655
-        }
-      ],
-      "cardKey": "bwp/BW73",
-      "deName": null,
-      "expansionId": 1611,
-      "name": "Darkrai",
-      "set": "bwp"
-    },
-    {
-      "candidates": [
-        {
-          "name": "Pikachu [Quick Attack | Electro Ball | BW]",
-          "productId": 279876
-        }
-      ],
+      "candidates": [],
       "cardKey": "bwp/BW77",
       "deName": null,
       "expansionId": 1611,
@@ -12755,101 +12309,6 @@
       "deName": null,
       "expansionId": 1611,
       "name": "Raichu",
-      "set": "bwp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Eevee [Growl | Quick Attack]",
-          "productId": 279888
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Eevee [Growl | Quick Attack]",
-          "productId": 279893
-        }
-      ],
-      "cardKey": "bwp/BW94",
-      "deName": null,
-      "expansionId": 1611,
-      "name": "Eevee",
-      "set": "bwp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Eevee [Growl | Quick Attack]",
-          "productId": 279888
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Eevee [Growl | Quick Attack]",
-          "productId": 279893
-        }
-      ],
-      "cardKey": "bwp/BW97",
-      "deName": null,
-      "expansionId": 1611,
-      "name": "Eevee",
-      "set": "bwp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Genesect [Hyper Beam | Breaker Bazooka]",
-          "productId": 279890
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Genesect [Hyper Beam | Breaker Bazooka]",
-          "productId": 279914
-        }
-      ],
-      "cardKey": "bwp/BW99",
-      "deName": null,
-      "expansionId": 1611,
-      "name": "Genesect",
-      "set": "bwp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "N",
-          "productId": 279920
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "N",
-          "productId": 371592
-        }
-      ],
-      "cardKey": "bwp/BW100",
-      "deName": null,
-      "expansionId": 1611,
-      "name": "N",
-      "set": "bwp"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Genesect [Hyper Beam | Breaker Bazooka]",
-          "productId": 279890
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Genesect [Hyper Beam | Breaker Bazooka]",
-          "productId": 279914
-        }
-      ],
-      "cardKey": "bwp/BW101",
-      "deName": null,
-      "expansionId": 1611,
-      "name": "Genesect",
       "set": "bwp"
     },
     {
@@ -16291,13 +15750,6 @@
   ],
   "stillMissingByExpansion": [
     {
-      "count": 27,
-      "expansionId": 1611,
-      "sets": [
-        "bwp"
-      ]
-    },
-    {
       "count": 14,
       "expansionId": 1608,
       "sets": [
@@ -16460,6 +15912,13 @@
     },
     {
       "count": 2,
+      "expansionId": 1611,
+      "sets": [
+        "bwp"
+      ]
+    },
+    {
+      "count": 2,
       "expansionId": 1687,
       "sets": [
         "xy9"
@@ -16558,17 +16017,18 @@
     }
   ],
   "totals": {
-    "ambiguous": 150,
+    "ambiguous": 124,
     "cards": 21577,
-    "customSet": 746,
-    "matched": 383,
-    "missing": 424,
+    "customSet": 845,
+    "matched": 309,
+    "missing": 399,
     "override": 8,
     "stabilityKept": 356,
     "tcgdex": 19660
   },
   "versionSuffixSkippedByExpansion": {
     "1537": 7,
-    "1538": 3
+    "1538": 3,
+    "1611": 7
   }
 }
