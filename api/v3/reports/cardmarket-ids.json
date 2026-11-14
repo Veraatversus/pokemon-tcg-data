@@ -1243,23 +1243,19 @@
     "ex15": {
       "ambiguous": 0,
       "cards": 101,
-      "corrected": 4,
       "coverage": {
         "bySource": {
-          "matched": 4,
-          "tcgdex": 96
+          "customSet": 101
         },
         "cards": 101,
-        "withId": 100
+        "withId": 101
       },
+      "customSet": 101,
       "expansionId": 1553,
-      "matched": 4,
-      "missing": 1,
-      "missingCards": [
-        "88"
-      ],
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1553&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 96
+      "tcgdex": 0
     },
     "ex16": {
       "ambiguous": 0,
@@ -3449,8 +3445,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 5798,
-    "changed": 781,
+    "applied": 5899,
+    "changed": 785,
     "conflicts": [],
     "dropped": [
       {
@@ -3476,6 +3472,12 @@
         "cardKey": "ex13/98",
         "name": "δ Rainbow Energy",
         "productId": 277068,
+        "productName": "Rainbow Energy Delta"
+      },
+      {
+        "cardKey": "ex15/88",
+        "name": "δ Rainbow Energy",
+        "productId": 277293,
         "productName": "Rainbow Energy Delta"
       },
       {
@@ -4569,22 +4571,6 @@
       "ex11-65",
       "ex11-66"
     ],
-    "277227": [
-      "ex15-22",
-      "ex15-37"
-    ],
-    "277229": [
-      "ex15-24",
-      "ex15-42"
-    ],
-    "277236": [
-      "ex15-31",
-      "ex15-50"
-    ],
-    "277273": [
-      "ex15-68",
-      "ex15-69"
-    ],
     "277687": [
       "dp2-58",
       "dp2-92"
@@ -5302,10 +5288,10 @@
     ]
   },
   "duplicates": {
-    "cards": 684,
-    "corrected": 135,
-    "ids": 389,
-    "kept": 549
+    "cards": 676,
+    "corrected": 131,
+    "ids": 385,
+    "kept": 545
   },
   "expansionMismatch": {
     "cards": [
@@ -6738,14 +6724,14 @@
       }
     ],
     "totals": {
-      "checked": 17582,
+      "checked": 17486,
       "corrected": 1,
       "dropped": 13,
       "droppedShared": 11,
       "foreignNameOk": 1262,
       "keptMismatch": 134,
       "noSetExpansion": 0,
-      "ok": 16169,
+      "ok": 16073,
       "unknownProduct": 3
     }
   },
@@ -6870,7 +6856,7 @@
     "orderedRejected": 7,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 326
+    "versionSuffixSkipped": 327
   },
   "setsWithoutExpansion": [
     {
@@ -8289,19 +8275,6 @@
     {
       "candidates": [
         {
-          "name": "Rainbow Energy Delta",
-          "productId": 277293
-        }
-      ],
-      "cardKey": "ex15/88",
-      "deName": "δ Regenbogen-Energie",
-      "expansionId": 1553,
-      "name": "δ Rainbow Energy",
-      "set": "ex15"
-    },
-    {
-      "candidates": [
-        {
           "hint": "same-name-unnumbered",
           "name": "Meganium [Leaf Trans | Solarbeam | Prime]",
           "productId": 279081
@@ -8401,13 +8374,6 @@
     },
     {
       "count": 1,
-      "expansionId": 1553,
-      "sets": [
-        "ex15"
-      ]
-    },
-    {
-      "count": 1,
       "expansionId": 1560,
       "sets": [
         "dp6"
@@ -8459,18 +8425,19 @@
   "totals": {
     "ambiguous": 7,
     "cards": 21577,
-    "customSet": 5798,
-    "matched": 95,
-    "missing": 19,
+    "customSet": 5899,
+    "matched": 91,
+    "missing": 18,
     "override": 8,
     "stabilityKept": 184,
-    "tcgdex": 15473
+    "tcgdex": 15377
   },
   "versionSuffixSkippedByExpansion": {
     "1521": 9,
     "1537": 7,
     "1538": 3,
     "1551": 1,
+    "1553": 1,
     "1563": 4,
     "1583": 12,
     "1584": 11,
