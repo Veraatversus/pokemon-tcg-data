@@ -1,0 +1,102 @@
+{
+  "expansionId": 1628,
+  "name": "DP Trainer Kit",
+  "cards": [
+    {
+      "productId": 278009,
+      "collectorNumber": "1L"
+    },
+    {
+      "productId": 278010,
+      "collectorNumber": "1M"
+    },
+    {
+      "productId": 278011,
+      "collectorNumber": "2L"
+    },
+    {
+      "productId": 278012,
+      "collectorNumber": "2M"
+    },
+    {
+      "productId": 278014,
+      "collectorNumber": "3L"
+    },
+    {
+      "productId": 278013,
+      "collectorNumber": "3M"
+    },
+    {
+      "productId": 278015,
+      "collectorNumber": "4L"
+    },
+    {
+      "productId": 278016,
+      "collectorNumber": "4M"
+    },
+    {
+      "productId": 278018,
+      "collectorNumber": "5L"
+    },
+    {
+      "productId": 278017,
+      "collectorNumber": "5M"
+    },
+    {
+      "productId": 278019,
+      "collectorNumber": "6L"
+    },
+    {
+      "productId": 278020,
+      "collectorNumber": "6M"
+    },
+    {
+      "productId": 278021,
+      "collectorNumber": "7L"
+    },
+    {
+      "productId": 278022,
+      "collectorNumber": "7M"
+    },
+    {
+      "productId": 278024,
+      "collectorNumber": "8L"
+    },
+    {
+      "productId": 278023,
+      "collectorNumber": "8M"
+    },
+    {
+      "productId": 278025,
+      "collectorNumber": "9L"
+    },
+    {
+      "productId": 278026,
+      "collectorNumber": "9M"
+    },
+    {
+      "productId": 278027,
+      "collectorNumber": "10L"
+    },
+    {
+      "productId": 278028,
+      "collectorNumber": "10M"
+    },
+    {
+      "productId": 278030,
+      "collectorNumber": "11L"
+    },
+    {
+      "productId": 278029,
+      "collectorNumber": "11M"
+    },
+    {
+      "productId": 278031,
+      "collectorNumber": "12M"
+    }
+  ],
+  "setSuffix": {
+    "TCGDEX-tk-dp-l": "L",
+    "TCGDEX-tk-dp-m": "M"
+  }
+}

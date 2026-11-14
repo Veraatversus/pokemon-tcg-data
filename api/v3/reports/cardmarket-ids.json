@@ -219,45 +219,38 @@
       "tcgdex": 0
     },
     "TCGDEX-tk-dp-l": {
-      "ambiguous": 2,
-      "ambiguousCards": [
-        "8",
-        "9"
-      ],
+      "ambiguous": 0,
       "cards": 11,
-      "corrected": 7,
       "coverage": {
         "bySource": {
-          "tcgdex": 9
+          "customSet": 11
         },
         "cards": 11,
-        "withId": 9
+        "withId": 11
       },
+      "customSet": 11,
       "expansionId": 1628,
       "matched": 0,
-      "missing": 2,
-      "missingCards": [
-        "8",
-        "9"
-      ],
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1628&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 9
+      "tcgdex": 0
     },
     "TCGDEX-tk-dp-m": {
       "ambiguous": 0,
       "cards": 12,
       "coverage": {
         "bySource": {
-          "tcgdex": 12
+          "customSet": 12
         },
         "cards": 12,
         "withId": 12
       },
+      "customSet": 12,
       "expansionId": 1628,
       "matched": 0,
       "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1628&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 12
+      "tcgdex": 0
     },
     "TCGDEX-tk-hs-g": {
       "ambiguous": 0,
@@ -3422,48 +3415,38 @@
       "tcgdex": 10
     },
     "tk2a": {
-      "ambiguous": 3,
-      "ambiguousCards": [
-        "8",
-        "9",
-        "11"
-      ],
+      "ambiguous": 0,
       "cards": 12,
       "coverage": {
         "bySource": {
-          "matched": 1,
-          "tcgdex": 8
+          "customSet": 12
         },
         "cards": 12,
-        "withId": 9
+        "withId": 12
       },
+      "customSet": 12,
       "expansionId": 1627,
-      "matched": 1,
-      "missing": 3,
-      "missingCards": [
-        "8",
-        "9",
-        "11"
-      ],
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1627&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 8
+      "tcgdex": 0
     },
     "tk2b": {
       "ambiguous": 0,
       "cards": 12,
       "coverage": {
         "bySource": {
-          "matched": 1,
-          "tcgdex": 11
+          "customSet": 12
         },
         "cards": 12,
         "withId": 12
       },
+      "customSet": 12,
       "expansionId": 1627,
-      "matched": 1,
+      "matched": 0,
       "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1627&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 11
+      "tcgdex": 0
     },
     "xy0": {
       "ambiguous": 0,
@@ -3874,8 +3857,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 1293,
-    "changed": 297,
+    "applied": 1340,
+    "changed": 308,
     "conflicts": [],
     "dropped": [
       {
@@ -4829,50 +4812,6 @@
     "277908": [
       "dp4-6",
       "dp4-81"
-    ],
-    "278010": [
-      "TCGDEX-tk-dp-l-1",
-      "TCGDEX-tk-dp-m-1"
-    ],
-    "278012": [
-      "TCGDEX-tk-dp-l-2",
-      "TCGDEX-tk-dp-m-2"
-    ],
-    "278013": [
-      "TCGDEX-tk-dp-l-3",
-      "TCGDEX-tk-dp-m-3"
-    ],
-    "278016": [
-      "TCGDEX-tk-dp-l-4",
-      "TCGDEX-tk-dp-m-4"
-    ],
-    "278017": [
-      "TCGDEX-tk-dp-l-5",
-      "TCGDEX-tk-dp-m-5"
-    ],
-    "278020": [
-      "TCGDEX-tk-dp-l-6",
-      "TCGDEX-tk-dp-m-6"
-    ],
-    "278022": [
-      "TCGDEX-tk-dp-l-7",
-      "TCGDEX-tk-dp-m-7"
-    ],
-    "278023": [
-      "TCGDEX-tk-dp-l-8",
-      "TCGDEX-tk-dp-m-8"
-    ],
-    "278026": [
-      "TCGDEX-tk-dp-l-9",
-      "TCGDEX-tk-dp-m-9"
-    ],
-    "278028": [
-      "TCGDEX-tk-dp-l-10",
-      "TCGDEX-tk-dp-m-10"
-    ],
-    "278029": [
-      "TCGDEX-tk-dp-l-11",
-      "TCGDEX-tk-dp-m-11"
     ],
     "278054": [
       "dp5-20",
@@ -6450,10 +6389,10 @@
     ]
   },
   "duplicates": {
-    "cards": 1318,
-    "corrected": 352,
-    "ids": 615,
-    "kept": 966
+    "cards": 1296,
+    "corrected": 345,
+    "ids": 604,
+    "kept": 951
   },
   "expansionMismatch": {
     "cards": [
@@ -7303,34 +7242,6 @@
         "oldExpansion": 5526,
         "oldId": 741976,
         "reason": "dropped-shared-mismatch"
-      },
-      {
-        "cardKey": "TCGDEX-tk-dp-l-8",
-        "newId": null,
-        "oldExpansion": 1628,
-        "oldId": 278023,
-        "reason": "dropped-shared-mismatch"
-      },
-      {
-        "cardKey": "TCGDEX-tk-dp-l-9",
-        "newId": null,
-        "oldExpansion": 1628,
-        "oldId": 278026,
-        "reason": "dropped-shared-mismatch"
-      },
-      {
-        "cardKey": "TCGDEX-tk-dp-l-10",
-        "newId": 278027,
-        "oldExpansion": 1628,
-        "oldId": 278028,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "TCGDEX-tk-dp-l-11",
-        "newId": 278030,
-        "oldExpansion": 1628,
-        "oldId": 278029,
-        "reason": "corrected-expansion"
       },
       {
         "cardKey": "base1-73",
@@ -8502,14 +8413,14 @@
       }
     ],
     "totals": {
-      "checked": 21816,
-      "corrected": 36,
-      "dropped": 36,
-      "droppedShared": 25,
+      "checked": 21774,
+      "corrected": 34,
+      "dropped": 34,
+      "droppedShared": 23,
       "foreignNameOk": 1348,
       "keptMismatch": 162,
       "noSetExpansion": 0,
-      "ok": 20231,
+      "ok": 20193,
       "unknownProduct": 3
     }
   },
@@ -11289,34 +11200,6 @@
   ],
   "stillMissing": [
     {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Energy Search",
-          "productId": 278024
-        }
-      ],
-      "cardKey": "TCGDEX-tk-dp-l/8",
-      "deName": null,
-      "expansionId": 1628,
-      "name": "Energy Search",
-      "set": "TCGDEX-tk-dp-l"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Potion",
-          "productId": 278025
-        }
-      ],
-      "cardKey": "TCGDEX-tk-dp-l/9",
-      "deName": null,
-      "expansionId": 1628,
-      "name": "Potion",
-      "set": "TCGDEX-tk-dp-l"
-    },
-    {
       "candidates": [],
       "cardKey": "bwp/BW77",
       "deName": null,
@@ -13709,58 +13592,6 @@
       "candidates": [
         {
           "hint": "same-name-unnumbered",
-          "name": "Energy Search",
-          "productId": 277190
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 277185
-        }
-      ],
-      "cardKey": "tk2a/8",
-      "deName": "Energiesuche",
-      "expansionId": 1627,
-      "name": "Energy Search",
-      "set": "tk2a"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Potion",
-          "productId": 277189
-        }
-      ],
-      "cardKey": "tk2a/9",
-      "deName": "Trank",
-      "expansionId": 1627,
-      "name": "Potion",
-      "set": "tk2a"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Lightning Energy",
-          "productId": 277185
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Energy Search",
-          "productId": 277190
-        }
-      ],
-      "cardKey": "tk2a/11",
-      "deName": "Elektro-Energie",
-      "expansionId": 1627,
-      "name": "Lightning Energy",
-      "set": "tk2a"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
           "name": "MAudino EX [Magical Symphony]",
           "productId": 289906
         },
@@ -14807,13 +14638,6 @@
     },
     {
       "count": 3,
-      "expansionId": 1627,
-      "sets": [
-        "tk2a"
-      ]
-    },
-    {
-      "count": 3,
       "expansionId": 1757,
       "sets": [
         "smp"
@@ -14859,13 +14683,6 @@
       "expansionId": 1611,
       "sets": [
         "bwp"
-      ]
-    },
-    {
-      "count": 2,
-      "expansionId": 1628,
-      "sets": [
-        "TCGDEX-tk-dp-l"
       ]
     },
     {
@@ -14975,14 +14792,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 118,
+    "ambiguous": 113,
     "cards": 21577,
-    "customSet": 1293,
-    "matched": 283,
-    "missing": 158,
+    "customSet": 1340,
+    "matched": 281,
+    "missing": 153,
     "override": 8,
     "stabilityKept": 356,
-    "tcgdex": 19479
+    "tcgdex": 19439
   },
   "versionSuffixSkippedByExpansion": {
     "1537": 7,
