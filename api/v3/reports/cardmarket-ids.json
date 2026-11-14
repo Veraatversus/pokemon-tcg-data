@@ -2326,38 +2326,21 @@
       "tcgdex": 171
     },
     "sm10": {
-      "ambiguous": 4,
-      "ambiguousCards": [
-        "81",
-        "182a",
-        "182b",
-        "189a"
-      ],
+      "ambiguous": 0,
       "cards": 238,
-      "corrected": 8,
       "coverage": {
         "bySource": {
-          "matched": 6,
-          "stabilityKept": 12,
-          "tcgdex": 215
+          "customSet": 238
         },
         "cards": 238,
-        "withId": 233
+        "withId": 238
       },
+      "customSet": 238,
       "expansionId": 2437,
-      "matched": 6,
-      "missing": 5,
-      "missingCards": [
-        "81",
-        "172",
-        "182a",
-        "182b",
-        "189a"
-      ],
-      "ordered": 4,
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2437&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 12,
-      "tcgdex": 215
+      "tcgdex": 0
     },
     "sm11": {
       "ambiguous": 3,
@@ -3679,8 +3662,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 2649,
-    "changed": 474,
+    "applied": 2887,
+    "changed": 493,
     "conflicts": [],
     "dropped": [
       {
@@ -3701,6 +3684,12 @@
         "name": "Lotad",
         "productId": 289730,
         "productName": "Lotad #01"
+      },
+      {
+        "cardKey": "sm10/172",
+        "name": "Fairy Charm Lightning",
+        "productId": 372457,
+        "productName": "Fairy Charm [L]"
       },
       {
         "cardKey": "sm5/137",
@@ -5602,69 +5591,9 @@
       "smp-SM168",
       "smp-SM248"
     ],
-    "370785": [
-      "sm10-1",
-      "sm10-191",
-      "sm10-192"
-    ],
-    "370786": [
-      "sm10-196",
-      "sm10-197",
-      "sm10-61"
-    ],
-    "370787": [
-      "sm10-81",
-      "sm10-82"
-    ],
-    "370788": [
-      "sm10-107",
-      "sm10-200",
-      "sm10-201"
-    ],
-    "370790": [
-      "sm10-130",
-      "sm10-204",
-      "sm10-205"
-    ],
     "371773": [
       "smp-SM180",
       "smp-SM209"
-    ],
-    "372298": [
-      "sm10-5",
-      "sm10-6"
-    ],
-    "372302": [
-      "sm10-10",
-      "sm10-9"
-    ],
-    "372318": [
-      "sm10-26",
-      "sm10-27"
-    ],
-    "372327": [
-      "sm10-36",
-      "sm10-37"
-    ],
-    "372355": [
-      "sm10-67",
-      "sm10-68"
-    ],
-    "372373": [
-      "sm10-198",
-      "sm10-199"
-    ],
-    "372383": [
-      "sm10-92",
-      "sm10-93"
-    ],
-    "372403": [
-      "sm10-113",
-      "sm10-114"
-    ],
-    "372442": [
-      "sm10-154",
-      "sm10-155"
     ],
     "377496": [
       "sm11-114",
@@ -5988,10 +5917,10 @@
     ]
   },
   "duplicates": {
-    "cards": 1100,
-    "corrected": 299,
-    "ids": 535,
-    "kept": 801
+    "cards": 1068,
+    "corrected": 291,
+    "ids": 521,
+    "kept": 777
   },
   "expansionMismatch": {
     "cards": [
@@ -7277,27 +7206,6 @@
         "reason": "dropped-shared-mismatch"
       },
       {
-        "cardKey": "sm10-81",
-        "newId": null,
-        "oldExpansion": 2437,
-        "oldId": 370787,
-        "reason": "dropped-shared-mismatch"
-      },
-      {
-        "cardKey": "sm10-198",
-        "newId": null,
-        "oldExpansion": 2437,
-        "oldId": 372373,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "sm10-199",
-        "newId": null,
-        "oldExpansion": 2437,
-        "oldId": 372373,
-        "reason": "kept-mismatch"
-      },
-      {
         "cardKey": "sm115-22",
         "newId": 396617,
         "oldExpansion": 2514,
@@ -7869,30 +7777,18 @@
       }
     ],
     "totals": {
-      "checked": 20584,
+      "checked": 20358,
       "corrected": 25,
-      "dropped": 26,
-      "droppedShared": 22,
+      "dropped": 25,
+      "droppedShared": 21,
       "foreignNameOk": 1309,
-      "keptMismatch": 159,
+      "keptMismatch": 157,
       "noSetExpansion": 0,
-      "ok": 19062,
+      "ok": 18839,
       "unknownProduct": 3
     }
   },
   "orderedRejected": [
-    {
-      "cards": [
-        "sm10/175",
-        "sm10/209"
-      ],
-      "expansionId": 2437,
-      "name": "Green's Exploration",
-      "products": [
-        372460,
-        372496
-      ]
-    },
     {
       "cards": [
         "sm11/188",
@@ -8093,11 +7989,11 @@
   "rules": {
     "energySymbol": 3,
     "leftRight": 0,
-    "ordered": 34,
-    "orderedRejected": 15,
+    "ordered": 30,
+    "orderedRejected": 14,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 134
+    "versionSuffixSkipped": 135
   },
   "setsWithoutExpansion": [
     {
@@ -8834,90 +8730,6 @@
       "source": "corrected",
       "todayId": 295475,
       "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm10/82",
-      "productId": 372480,
-      "source": "corrected",
-      "todayId": 370787,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm10/175",
-      "productId": 372460,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "sm10/191",
-      "productId": 372473,
-      "source": "corrected",
-      "todayId": 370785,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm10/192",
-      "productId": 372474,
-      "source": "corrected",
-      "todayId": 370785,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm10/196",
-      "productId": 372478,
-      "source": "corrected",
-      "todayId": 370786,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm10/197",
-      "productId": 372479,
-      "source": "corrected",
-      "todayId": 370786,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm10/199",
-      "productId": 372481,
-      "source": "corrected",
-      "todayId": 372373,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm10/200",
-      "productId": 372482,
-      "source": "corrected",
-      "todayId": 370788,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm10/201",
-      "productId": 372483,
-      "source": "corrected",
-      "todayId": 370788,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm10/204",
-      "productId": 372486,
-      "source": "corrected",
-      "todayId": 370790,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm10/205",
-      "productId": 372487,
-      "source": "corrected",
-      "todayId": 370790,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm10/209",
-      "productId": 372496,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
     },
     {
       "cardKey": "sm11/28",
@@ -10283,120 +10095,6 @@
       "candidates": [
         {
           "hint": "same-name-unnumbered, id-outlier",
-          "name": "Marshadow [Resetting Hole | Red Knuckles]",
-          "productId": 406994
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Marshadow [Resetting Hole | Red Knuckles]",
-          "productId": 407314
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Marshadow & Machamp GX [Revenge | Hundred-Blows Impact | Acme of Heroism GX]",
-          "productId": 370787
-        }
-      ],
-      "cardKey": "sm10/81",
-      "deName": "Marshadow",
-      "expansionId": 2437,
-      "name": "Marshadow",
-      "set": "sm10"
-    },
-    {
-      "candidates": [
-        {
-          "name": "Fairy Charm [L]",
-          "productId": 372457
-        }
-      ],
-      "cardKey": "sm10/172",
-      "deName": "Feenschmuck Lightning",
-      "expansionId": 2437,
-      "name": "Fairy Charm Lightning",
-      "set": "sm10"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Pokégear 3.0",
-          "productId": 407059
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Pokégear 3.0",
-          "productId": 448188
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Pokégear 3.0",
-          "productId": 475144
-        }
-      ],
-      "cardKey": "sm10/182a",
-      "deName": null,
-      "expansionId": 2437,
-      "name": "Pokégear 3.0",
-      "set": "sm10"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Pokégear 3.0",
-          "productId": 407059
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Pokégear 3.0",
-          "productId": 448188
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Pokégear 3.0",
-          "productId": 475144
-        }
-      ],
-      "cardKey": "sm10/182b",
-      "deName": null,
-      "expansionId": 2437,
-      "name": "Pokégear 3.0",
-      "set": "sm10"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Welder",
-          "productId": 407024
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Welder",
-          "productId": 407144
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Welder",
-          "productId": 407239
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Welder",
-          "productId": 448178
-        }
-      ],
-      "cardKey": "sm10/189a",
-      "deName": null,
-      "expansionId": 2437,
-      "name": "Welder",
-      "set": "sm10"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered, id-outlier",
           "name": "Jirachi GX [Psychic Zone | Star Search | Star Shield GX]",
           "productId": 406979
         },
@@ -11634,13 +11332,6 @@
   ],
   "stillMissingByExpansion": [
     {
-      "count": 5,
-      "expansionId": 2437,
-      "sets": [
-        "sm10"
-      ]
-    },
-    {
       "count": 4,
       "expansionId": 1563,
       "sets": [
@@ -11852,14 +11543,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 56,
+    "ambiguous": 52,
     "cards": 21577,
-    "customSet": 2649,
-    "matched": 237,
-    "missing": 80,
+    "customSet": 2887,
+    "matched": 231,
+    "missing": 75,
     "override": 8,
-    "stabilityKept": 270,
-    "tcgdex": 18333
+    "stabilityKept": 258,
+    "tcgdex": 18118
   },
   "versionSuffixSkippedByExpansion": {
     "1537": 7,
@@ -11873,6 +11564,7 @@
     "1800": 13,
     "2065": 14,
     "2075": 11,
-    "2370": 11
+    "2370": 11,
+    "2437": 1
   }
 }
