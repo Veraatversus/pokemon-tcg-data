@@ -2,13 +2,14 @@
 // wirklich ausliefert, und fuehrt das Ergebnis in sources/tcgdex/assets-verified.json.
 // `ok` wird nie erneut geprueft, `missing` nach recheckMissingDays, Unbekanntes einmal.
 // Netzwerkfehler/Timeouts aendern nichts: ein bekannter Status bleibt, Unbekanntes bleibt unbekannt.
-// Kartenbilder werden nicht einzeln geprueft (Last im Workflow; Fallback im Frontend). Nur fuer Sets, die der
-// Index noch nicht fuehrt, je Sprache eine Stichprobe (erste/letzte Karte, cardSampleCandidates in images.mjs).
+// Kartenbilder aus dem Index werden nicht einzeln geprueft (Last im Workflow; Fallback im Frontend). Fuer Sets, die
+// der Index noch nicht fuehrt, je Sprache erst eine Stichprobe (erste/letzte Karte); besteht eine davon, jede Karte
+// einzeln (cardImageCandidates in images.mjs). Dazu Scrydex fuer Karten ohne jedes Bild (scrydexCandidates).
 // CLI: node scripts/api/sources/verify-assets.mjs
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { setAssetCandidates, cardSampleCandidates } from '../merge/images.mjs';
+import { setAssetCandidates, cardSampleCandidates, cardImageCandidates, scrydexCandidates, SCRYDEX_BASE } from '../merge/images.mjs';
 import { loadTcgdexDatabase } from '../tcgdex/load-database.mjs';
 import { toJson } from '../registry/registry-io.mjs';
 
@@ -83,6 +84,38 @@ export async function httpProbe(url, { timeoutMs = 10000 } = {}) {
   }
 }
 
+// Scrydex liefert fehlende Karten mit 200 und Kartenrueckseite aus (immer dieselbe ETag). Die ETag des Platzhalters
+// kommt von einer sicher nicht vorhandenen Karte; ein Treffer gilt als 404. Ohne bekannte Platzhalter-ETag (Fehler
+// beim Abruf) ist jedes Ergebnis voruebergehend (null), damit kein Platzhalter als 'ok' gespeichert wird.
+export async function scrydexPlaceholderEtag({ head = httpHead } = {}) {
+  const res = await head(`${SCRYDEX_BASE}/__none__-0/small`);
+  return res && res.status >= 200 && res.status < 300 && res.etag ? res.etag : null;
+}
+export function scrydexStatus(res, placeholderEtag) {
+  if (!res || !placeholderEtag) return null;
+  if (res.status >= 200 && res.status < 300 && (!res.etag || res.etag === placeholderEtag)) return 404;
+  return res.status;
+}
+export async function httpHead(url, { timeoutMs = 10000 } = {}) {
+  try {
+    const res = await fetch(url, { method: 'HEAD', headers: { 'User-Agent': USER_AGENT }, redirect: 'follow', signal: AbortSignal.timeout(timeoutMs) });
+    await res.body?.cancel();
+    return { status: res.status, etag: res.headers.get('etag') };
+  } catch {
+    return null;
+  }
+}
+
+// Zuletzt veroeffentlichte Karten (api/v3/cards/*.json), fuer die Scrydex-Kandidaten.
+function loadPublishedCards(dir) {
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir).filter((f) => f.endsWith('.json')).sort()
+    .flatMap((f) => {
+      const data = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
+      return Array.isArray(data) ? data : data.cards ?? [];
+    });
+}
+
 // Schreibt sortiert und nur bei Aenderung; liefert true, wenn geschrieben wurde.
 export function updateVerifiedFile(file, verified) {
   const content = toJson(verified);
@@ -111,21 +144,33 @@ async function main() {
   const previous = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : {};
   const groups = setAssetCandidates(index);
   const excluded = JSON.parse(fs.readFileSync(path.join(repoRoot, 'api', 'mappings', 'excluded-series.json'), 'utf8')).series ?? [];
-  const samples = cardSampleCandidates(index, loadTcgdexDatabase(dir, { excludeSerieIds: excluded }).sets);
+  const sets = loadTcgdexDatabase(dir, { excludeSerieIds: excluded }).sets;
+  const samples = cardSampleCandidates(index, sets);
+  const scrydexUrls = scrydexCandidates(loadPublishedCards(path.join(repoRoot, 'api', 'v3', 'cards')));
   const started = Date.now();
   let probes = 0;
   const probe = (url) => {
     probes++;
     return httpProbe(url);
   };
+  const sampled = await verifyAssets({ urls: samples.flatMap((s) => s.urls), previous, probe });
+  const perCard = cardImageCandidates(index, sets, sampled);
+  const placeholder = scrydexUrls.length ? await scrydexPlaceholderEtag() : null;
+  const scrydexProbe = async (url) => {
+    probes++;
+    return scrydexStatus(await httpHead(url), placeholder);
+  };
   const verified = {
     ...await verifySetAssets({ groups, previous, probe }),
-    ...await verifyAssets({ urls: samples.flatMap((s) => s.urls), previous, probe }),
+    ...sampled,
+    ...await verifyAssets({ urls: perCard.flatMap((c) => c.urls), previous: { ...previous, ...sampled }, probe }),
+    ...await verifyAssets({ urls: scrydexUrls, previous, probe: scrydexProbe, concurrency: 8 }),
   };
-  const sampledOk = samples.filter((s) => s.urls.every((u) => verified[u]?.status === 'ok'));
+  const okCount = (urls) => urls.filter((u) => verified[u]?.status === 'ok').length;
+  const cardOk = perCard.map((c) => `${c.lang}/${c.setId} ${okCount(c.urls)}/${c.urls.length}`);
   const written = updateVerifiedFile(file, verified);
   const c = countGroups(verified, groups);
-  console.log(`Set-Assets: ${groups.length} Kandidaten, ${probes} Anfragen, ${c.ok} ok, ${c.missing} fehlen; Kartenbilder ohne Index-Eintrag: ${samples.length} Sets/Sprachen geprueft, ${sampledOk.length} vorhanden${sampledOk.length ? ` (${sampledOk.map((s) => `${s.lang}/${s.setId}`).join(', ')})` : ''} (${((Date.now() - started) / 1000).toFixed(1)} s)${written ? '' : ', unveraendert'}`);
+  console.log(`Set-Assets: ${groups.length} Kandidaten, ${probes} Anfragen, ${c.ok} ok, ${c.missing} fehlen; Kartenbilder ohne Index-Eintrag: ${samples.length} Sets/Sprachen geprueft, ${perCard.length} mit Bildern${cardOk.length ? ` (${cardOk.join(', ')})` : ''}; Scrydex: ${okCount(scrydexUrls)}/${scrydexUrls.length} Karten ohne Bild vorhanden${scrydexUrls.length && !placeholder ? ' (Platzhalter unbekannt, nicht geprueft)' : ''} (${((Date.now() - started) / 1000).toFixed(1)} s)${written ? '' : ', unveraendert'}`);
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

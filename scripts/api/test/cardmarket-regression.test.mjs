@@ -21,6 +21,9 @@ import { loadCardmarketCatalog } from '../sources/cardmarket-catalog.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 const readJson = (p) => JSON.parse(fs.readFileSync(p, 'utf8'));
 const CUSTOM_SETS = [1536, 1537, 1538, 5241];
+// 1536 (Expedition) wurde am 2026-11-14 aus der Cardmarket-Liste neu eingelesen (Basis = kleinste Produkt-ID je
+// Nummer, weitere Drucke <n>V<version>): gleiche Produkte, nur die vier Jumbo-Drucke tragen jetzt ihre Version.
+const RENUMBERED = { 1536: { 362878: '1V3', 362884: '47V3', 362890: '66V3', 362896: '68V3' } };
 
 test('conversion: custom-set JSON yields exactly the collector numbers of the old scripts', () => {
   const legacy = readJson(path.join(root, 'scripts', 'api', 'test', 'fixtures', 'cardmarket-custom-sets-legacy.json'));
@@ -28,7 +31,7 @@ test('conversion: custom-set JSON yields exactly the collector numbers of the ol
   for (const id of CUSTOM_SETS) {
     const json = readJson(path.join(root, 'sources', 'cardmarket', 'custom-sets', `${id}.json`));
     assert.equal(json.expansionId, id);
-    assert.deepEqual(json.cards.map(({ lot, ...c }) => c), legacy[id].map(([productId, collectorNumber]) => ({ productId, collectorNumber })), `custom-set ${id}`);
+    assert.deepEqual(json.cards.map(({ lot, ...c }) => c), legacy[id].map(([productId, collectorNumber]) => ({ productId, collectorNumber: RENUMBERED[id]?.[productId] ?? collectorNumber })), `custom-set ${id}`);
   }
   // Loader: Nummern genau aus den JSON-Dateien; die fuenf 5241-Lot-Produkte (224a-d, f; nicht im Katalog) sind als lot markiert
   const catalog = loadCardmarketCatalog(path.join(root, 'sources', 'cardmarket'));
