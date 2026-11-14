@@ -2634,39 +2634,21 @@
       "tcgdex": 74
     },
     "sm8": {
-      "ambiguous": 4,
-      "ambiguousCards": [
-        "172a",
-        "187a",
-        "188a",
-        "189a"
-      ],
+      "ambiguous": 0,
       "cards": 240,
-      "corrected": 14,
       "coverage": {
         "bySource": {
-          "stabilityKept": 2,
-          "tcgdex": 230
+          "customSet": 240
         },
         "cards": 240,
-        "withId": 232
+        "withId": 240
       },
+      "customSet": 240,
       "expansionId": 2370,
       "matched": 0,
-      "missing": 8,
-      "missingCards": [
-        "172a",
-        "174",
-        "175",
-        "176",
-        "177",
-        "187a",
-        "188a",
-        "189a"
-      ],
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2370&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 2,
-      "tcgdex": 230
+      "tcgdex": 0
     },
     "sm9": {
       "ambiguous": 2,
@@ -3732,8 +3714,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 2147,
-    "changed": 428,
+    "applied": 2387,
+    "changed": 444,
     "conflicts": [],
     "dropped": [
       {
@@ -3778,6 +3760,30 @@
         "name": "Unit Energy LightningPsychicMetal",
         "productId": 316095,
         "productName": "Unit Energy [LPM]"
+      },
+      {
+        "cardKey": "sm8/174",
+        "name": "Fairy Charm Grass",
+        "productId": 365810,
+        "productName": "Fairy Charm [G]"
+      },
+      {
+        "cardKey": "sm8/175",
+        "name": "Fairy Charm Psychic",
+        "productId": 365811,
+        "productName": "Fairy Charm [P]"
+      },
+      {
+        "cardKey": "sm8/176",
+        "name": "Fairy Charm Fighting",
+        "productId": 365812,
+        "productName": "Fairy Charm [F]"
+      },
+      {
+        "cardKey": "sm8/177",
+        "name": "Fairy Charm Dragon",
+        "productId": 365813,
+        "productName": "Fairy Charm [N]"
       }
     ]
   },
@@ -5678,59 +5684,6 @@
       "sm75-34",
       "sm75-35"
     ],
-    "364940": [
-      "sm8-59",
-      "sm8-60"
-    ],
-    "365573": [
-      "sm8-5",
-      "sm8-6"
-    ],
-    "365578": [
-      "sm8-11",
-      "sm8-12"
-    ],
-    "365679": [
-      "sm8-39",
-      "sm8-40"
-    ],
-    "365702": [
-      "sm8-64",
-      "sm8-65"
-    ],
-    "365706": [
-      "sm8-105",
-      "sm8-68"
-    ],
-    "365713": [
-      "sm8-75",
-      "sm8-76"
-    ],
-    "365722": [
-      "sm8-142",
-      "sm8-84"
-    ],
-    "365727": [
-      "sm8-90",
-      "sm8-91",
-      "sm8-92"
-    ],
-    "365751": [
-      "sm8-114",
-      "sm8-115"
-    ],
-    "365754": [
-      "sm8-117",
-      "sm8-143"
-    ],
-    "365797": [
-      "sm8-161",
-      "sm8-162"
-    ],
-    "365799": [
-      "sm8-163",
-      "sm8-164"
-    ],
     "368851": [
       "smp-SM158",
       "smp-SM226"
@@ -6160,10 +6113,10 @@
     ]
   },
   "duplicates": {
-    "cards": 1183,
-    "corrected": 321,
-    "ids": 573,
-    "kept": 862
+    "cards": 1156,
+    "corrected": 307,
+    "ids": 560,
+    "kept": 849
   },
   "expansionMismatch": {
     "cards": [
@@ -8048,14 +8001,14 @@
       }
     ],
     "totals": {
-      "checked": 21062,
+      "checked": 20832,
       "corrected": 25,
       "dropped": 27,
       "droppedShared": 23,
       "foreignNameOk": 1309,
       "keptMismatch": 159,
       "noSetExpansion": 0,
-      "ok": 19539,
+      "ok": 19309,
       "unknownProduct": 3
     }
   },
@@ -8288,7 +8241,7 @@
     "orderedRejected": 16,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 109
+    "versionSuffixSkipped": 120
   },
   "setsWithoutExpansion": [
     {
@@ -9368,20 +9321,6 @@
       "source": "corrected",
       "todayId": 363506,
       "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm8/188",
-      "productId": 365822,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "sm8/213",
-      "productId": 365846,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
     },
     {
       "cardKey": "sm9/51",
@@ -11236,208 +11175,6 @@
     {
       "candidates": [
         {
-          "hint": "same-name-unnumbered",
-          "name": "Electropower",
-          "productId": 371659
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Electropower",
-          "productId": 407379
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Electropower",
-          "productId": 449478
-        }
-      ],
-      "cardKey": "sm8/172a",
-      "deName": null,
-      "expansionId": 2370,
-      "name": "Electropower",
-      "set": "sm8"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Fairy Charm [G]",
-          "productId": 365810
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Fairy Charm [P]",
-          "productId": 365811
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Fairy Charm [F]",
-          "productId": 365812
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Fairy Charm [N]",
-          "productId": 365813
-        }
-      ],
-      "cardKey": "sm8/174",
-      "deName": "Feenschmuck Grass",
-      "expansionId": 2370,
-      "name": "Fairy Charm Grass",
-      "set": "sm8"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Fairy Charm [G]",
-          "productId": 365810
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Fairy Charm [P]",
-          "productId": 365811
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Fairy Charm [F]",
-          "productId": 365812
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Fairy Charm [N]",
-          "productId": 365813
-        }
-      ],
-      "cardKey": "sm8/175",
-      "deName": "Feenschmuck Psychic",
-      "expansionId": 2370,
-      "name": "Fairy Charm Psychic",
-      "set": "sm8"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Fairy Charm [G]",
-          "productId": 365810
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Fairy Charm [P]",
-          "productId": 365811
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Fairy Charm [F]",
-          "productId": 365812
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Fairy Charm [N]",
-          "productId": 365813
-        }
-      ],
-      "cardKey": "sm8/176",
-      "deName": "Feenschmuck Fighting",
-      "expansionId": 2370,
-      "name": "Fairy Charm Fighting",
-      "set": "sm8"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Fairy Charm [G]",
-          "productId": 365810
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Fairy Charm [P]",
-          "productId": 365811
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Fairy Charm [F]",
-          "productId": 365812
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Fairy Charm [N]",
-          "productId": 365813
-        }
-      ],
-      "cardKey": "sm8/177",
-      "deName": "Feenschmuck Dragon",
-      "expansionId": 2370,
-      "name": "Fairy Charm Dragon",
-      "set": "sm8"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Net Ball",
-          "productId": 450048
-        }
-      ],
-      "cardKey": "sm8/187a",
-      "deName": null,
-      "expansionId": 2370,
-      "name": "Net Ball",
-      "set": "sm8"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Professor Elm's Lecture",
-          "productId": 426051
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Professor Elm's Lecture",
-          "productId": 451213
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Professor Elm's Lecture",
-          "productId": 451218
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Professor Elm's Lecture",
-          "productId": 451223
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Professor Elm's Lecture",
-          "productId": 451233
-        }
-      ],
-      "cardKey": "sm8/188a",
-      "deName": null,
-      "expansionId": 2370,
-      "name": "Professor Elm's Lecture",
-      "set": "sm8"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Sightseer",
-          "productId": 562700
-        }
-      ],
-      "cardKey": "sm8/189a",
-      "deName": null,
-      "expansionId": 2370,
-      "name": "Sightseer",
-      "set": "sm8"
-    },
-    {
-      "candidates": [
-        {
           "name": "Nidoran &female; [Call for Family | Scratch]",
           "productId": 368984
         },
@@ -12476,13 +12213,6 @@
   ],
   "stillMissingByExpansion": [
     {
-      "count": 8,
-      "expansionId": 2370,
-      "sets": [
-        "sm8"
-      ]
-    },
-    {
       "count": 7,
       "expansionId": 2075,
       "sets": [
@@ -12715,14 +12445,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 70,
+    "ambiguous": 66,
     "cards": 21577,
-    "customSet": 2147,
+    "customSet": 2387,
     "matched": 238,
-    "missing": 100,
+    "missing": 92,
     "override": 8,
-    "stabilityKept": 293,
-    "tcgdex": 18791
+    "stabilityKept": 291,
+    "tcgdex": 18561
   },
   "versionSuffixSkippedByExpansion": {
     "1537": 7,
@@ -12733,6 +12463,7 @@
     "1612": 40,
     "1758": 12,
     "1800": 13,
-    "2065": 14
+    "2065": 14,
+    "2370": 11
   }
 }
