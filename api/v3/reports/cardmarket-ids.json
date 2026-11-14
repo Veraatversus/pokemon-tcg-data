@@ -2056,25 +2056,19 @@
     "pl3": {
       "ambiguous": 0,
       "cards": 153,
-      "corrected": 8,
       "coverage": {
         "bySource": {
-          "stabilityKept": 1,
-          "tcgdex": 150
+          "customSet": 153
         },
         "cards": 153,
-        "withId": 151
+        "withId": 153
       },
+      "customSet": 153,
       "expansionId": 1564,
       "matched": 0,
-      "missing": 2,
-      "missingCards": [
-        "8",
-        "9"
-      ],
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1564&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 1,
-      "tcgdex": 150
+      "tcgdex": 0
     },
     "pl4": {
       "ambiguous": 0,
@@ -3270,31 +3264,21 @@
       "tcgdex": 119
     },
     "xy11": {
-      "ambiguous": 2,
-      "ambiguousCards": [
-        "65",
-        "81"
-      ],
+      "ambiguous": 0,
       "cards": 116,
-      "corrected": 3,
       "coverage": {
         "bySource": {
-          "matched": 5,
-          "tcgdex": 109
+          "customSet": 116
         },
         "cards": 116,
-        "withId": 114
+        "withId": 116
       },
+      "customSet": 116,
       "expansionId": 1716,
-      "matched": 5,
-      "missing": 2,
-      "missingCards": [
-        "65",
-        "81"
-      ],
-      "ordered": 4,
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1716&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 109
+      "tcgdex": 0
     },
     "xy12": {
       "ambiguous": 1,
@@ -3446,33 +3430,21 @@
       "tcgdex": 0
     },
     "xy9": {
-      "ambiguous": 2,
-      "ambiguousCards": [
-        "27",
-        "115"
-      ],
+      "ambiguous": 0,
       "cards": 126,
-      "corrected": 1,
       "coverage": {
         "bySource": {
-          "matched": 2,
-          "stabilityKept": 3,
-          "tcgdex": 119
+          "customSet": 126
         },
         "cards": 126,
-        "withId": 124
+        "withId": 126
       },
+      "customSet": 126,
       "expansionId": 1687,
-      "matched": 2,
-      "missing": 2,
-      "missingCards": [
-        "27",
-        "115"
-      ],
-      "ordered": 2,
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1687&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 3,
-      "tcgdex": 119
+      "tcgdex": 0
     },
     "xyp": {
       "ambiguous": 0,
@@ -3514,8 +3486,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 4876,
-    "changed": 644,
+    "applied": 5271,
+    "changed": 678,
     "conflicts": [],
     "dropped": [
       {
@@ -3734,18 +3706,6 @@
         "name": "Fairy Charm Dragon",
         "productId": 365813,
         "productName": "Fairy Charm [N]"
-      },
-      {
-        "cardKey": "sm9/54",
-        "name": "Nidoran ♀",
-        "productId": 368984,
-        "productName": "Nidoran &female; [Call for Family | Scratch]"
-      },
-      {
-        "cardKey": "sm9/57",
-        "name": "Nidoran ♂",
-        "productId": 368987,
-        "productName": "Nidoran &male; [Peck | Horn Attack]"
       }
     ]
   },
@@ -4834,41 +4794,6 @@
       "pl1-126",
       "pl1-127"
     ],
-    "278689": [
-      "pl3-7",
-      "pl3-70",
-      "pl3-SH7"
-    ],
-    "278690": [
-      "pl3-79",
-      "pl3-8",
-      "pl3-SH8"
-    ],
-    "278691": [
-      "pl3-88",
-      "pl3-9",
-      "pl3-SH9"
-    ],
-    "278694": [
-      "pl3-3",
-      "pl3-57"
-    ],
-    "278706": [
-      "pl3-15",
-      "pl3-50"
-    ],
-    "278729": [
-      "pl3-119",
-      "pl3-38"
-    ],
-    "278731": [
-      "pl3-40",
-      "pl3-81"
-    ],
-    "278745": [
-      "pl3-54",
-      "pl3-95"
-    ],
     "278850": [
       "ru1-10",
       "ru1-9"
@@ -5157,10 +5082,6 @@
       "xy8-146",
       "xy8-146a"
     ],
-    "288197": [
-      "xy9-22",
-      "xy9-23"
-    ],
     "288273": [
       "xy9-98",
       "xy9-98a",
@@ -5246,26 +5167,6 @@
     "290536": [
       "xy10-45",
       "xy10-46"
-    ],
-    "291480": [
-      "xy11-65",
-      "xy11-66"
-    ],
-    "291527": [
-      "xy11-23",
-      "xy11-24"
-    ],
-    "291531": [
-      "xy11-34",
-      "xy11-35"
-    ],
-    "291546": [
-      "xy11-81",
-      "xy11-82"
-    ],
-    "291547": [
-      "xy11-86",
-      "xy11-87"
     ],
     "293006": [
       "xyp-XY177",
@@ -5456,10 +5357,10 @@
     ]
   },
   "duplicates": {
-    "cards": 827,
-    "corrected": 223,
-    "ids": 410,
-    "kept": 604
+    "cards": 791,
+    "corrected": 211,
+    "ids": 396,
+    "kept": 580
   },
   "expansionMismatch": {
     "cards": [
@@ -6549,20 +6450,6 @@
         "reason": "corrected-expansion"
       },
       {
-        "cardKey": "pl3-8",
-        "newId": null,
-        "oldExpansion": 1564,
-        "oldId": 278690,
-        "reason": "dropped-shared-mismatch"
-      },
-      {
-        "cardKey": "pl3-9",
-        "newId": null,
-        "oldExpansion": 1564,
-        "oldId": 278691,
-        "reason": "dropped-shared-mismatch"
-      },
-      {
         "cardKey": "sv10-24",
         "newId": null,
         "oldExpansion": 6140,
@@ -6668,27 +6555,6 @@
         "reason": "dropped-shared-mismatch"
       },
       {
-        "cardKey": "xy11-25",
-        "newId": null,
-        "oldExpansion": 1716,
-        "oldId": 290990,
-        "reason": "kept-mismatch"
-      },
-      {
-        "cardKey": "xy11-65",
-        "newId": null,
-        "oldExpansion": 1716,
-        "oldId": 291480,
-        "reason": "dropped-shared-mismatch"
-      },
-      {
-        "cardKey": "xy11-81",
-        "newId": null,
-        "oldExpansion": 1716,
-        "oldId": 291546,
-        "reason": "dropped-shared-mismatch"
-      },
-      {
         "cardKey": "xy12-59",
         "newId": null,
         "oldExpansion": 1742,
@@ -6790,9 +6656,6 @@
         "5431": 1,
         "5992": 2,
         "6194": 2
-      },
-      "pl3": {
-        "2026": 5
       },
       "pop7": {
         "2026": 1,
@@ -7038,7 +6901,7 @@
         "setId": "np"
       },
       {
-        "evidence": "91/91",
+        "evidence": "94/94",
         "evidenceSource": "previous",
         "newId": 2514,
         "oldId": null,
@@ -7095,14 +6958,14 @@
       }
     ],
     "totals": {
-      "checked": 18507,
+      "checked": 18104,
       "corrected": 21,
-      "dropped": 20,
-      "droppedShared": 16,
-      "foreignNameOk": 1281,
-      "keptMismatch": 135,
+      "dropped": 16,
+      "droppedShared": 12,
+      "foreignNameOk": 1276,
+      "keptMismatch": 134,
       "noSetExpansion": 0,
-      "ok": 17047,
+      "ok": 16654,
       "unknownProduct": 3
     }
   },
@@ -7223,11 +7086,11 @@
   "rules": {
     "energySymbol": 3,
     "leftRight": 0,
-    "ordered": 20,
+    "ordered": 14,
     "orderedRejected": 7,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 277
+    "versionSuffixSkipped": 297
   },
   "setsWithoutExpansion": [
     {
@@ -7945,13 +7808,6 @@
       "todaySource": "tcgdex"
     },
     {
-      "cardKey": "pl3/70",
-      "productId": 882910,
-      "source": "corrected",
-      "todayId": 882910,
-      "todaySource": "tcgdex"
-    },
-    {
       "cardKey": "pl4/94",
       "productId": 278966,
       "source": "matched",
@@ -8580,27 +8436,6 @@
       "source": "corrected",
       "todayId": 284249,
       "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy9/98a",
-      "productId": 311410,
-      "source": "corrected",
-      "todayId": 288273,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy9/98b",
-      "productId": 782672,
-      "source": "corrected",
-      "todayId": 288273,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "xy9/107a",
-      "productId": 297896,
-      "source": "corrected",
-      "todayId": 288282,
-      "todaySource": "tcgdex"
     }
   ],
   "stillMissing": [
@@ -8736,32 +8571,6 @@
       "expansionId": 1566,
       "name": "Meganium",
       "set": "hgss1"
-    },
-    {
-      "candidates": [
-        {
-          "name": "Rayquaza [C] Lv.73 [Trash Burst | Twister]",
-          "productId": 278699
-        }
-      ],
-      "cardKey": "pl3/8",
-      "deName": "Rayquaza C",
-      "expansionId": 1564,
-      "name": "Rayquaza C",
-      "set": "pl3"
-    },
-    {
-      "candidates": [
-        {
-          "name": "Regigigas [FB] Lv.50 [Drain Punch | Rainbow Lariat]",
-          "productId": 278700
-        }
-      ],
-      "cardKey": "pl3/9",
-      "deName": "Regigigas FB",
-      "expansionId": 1564,
-      "name": "Regigigas FB",
-      "set": "pl3"
     },
     {
       "candidates": [
@@ -8923,49 +8732,6 @@
       "candidates": [
         {
           "hint": "same-name-unnumbered",
-          "name": "Yveltal [Oblivion Wing | Darkness Blade]",
-          "productId": 291634
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Yveltal [Oblivion Wing | Darkness Blade]",
-          "productId": 295222
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Yveltal [Oblivion Wing | Darkness Blade]",
-          "productId": 450543
-        }
-      ],
-      "cardKey": "xy11/65",
-      "deName": "Yveltal",
-      "expansionId": 1716,
-      "name": "Yveltal",
-      "set": "xy11"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Xerneas [Geomancy | Rainbow Spear]",
-          "productId": 291643
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Xerneas [Geomancy | Rainbow Spear]",
-          "productId": 450538
-        }
-      ],
-      "cardKey": "xy11/81",
-      "deName": "Xerneas",
-      "expansionId": 1716,
-      "name": "Xerneas",
-      "set": "xy11"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
           "name": "Machamp [Counterattack | Seismic Toss]",
           "productId": 293427
         },
@@ -8988,54 +8754,6 @@
       "expansionId": 1742,
       "name": "ナッシー[Exeggutor]",
       "set": "xy12"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MGyarados EX [Blast Geyser]",
-          "productId": 288202
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MGyarados EX [Blast Geyser]",
-          "productId": 288290
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MGyarados EX [Blast Geyser]",
-          "productId": 363687
-        }
-      ],
-      "cardKey": "xy9/27",
-      "deName": "M-Garados EX",
-      "expansionId": 1687,
-      "name": "M Gyarados-EX",
-      "set": "xy9"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MGyarados EX [Blast Geyser]",
-          "productId": 288202
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MGyarados EX [Blast Geyser]",
-          "productId": 288290
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "MGyarados EX [Blast Geyser]",
-          "productId": 363687
-        }
-      ],
-      "cardKey": "xy9/115",
-      "deName": "M-Garados EX",
-      "expansionId": 1687,
-      "name": "M Gyarados-EX",
-      "set": "xy9"
     }
   ],
   "stillMissingByExpansion": [
@@ -9048,30 +8766,9 @@
     },
     {
       "count": 2,
-      "expansionId": 1564,
-      "sets": [
-        "pl3"
-      ]
-    },
-    {
-      "count": 2,
       "expansionId": 1611,
       "sets": [
         "bwp"
-      ]
-    },
-    {
-      "count": 2,
-      "expansionId": 1687,
-      "sets": [
-        "xy9"
-      ]
-    },
-    {
-      "count": 2,
-      "expansionId": 1716,
-      "sets": [
-        "xy11"
       ]
     },
     {
@@ -9167,14 +8864,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 17,
+    "ambiguous": 13,
     "cards": 21577,
-    "customSet": 4876,
-    "matched": 116,
-    "missing": 33,
+    "customSet": 5271,
+    "matched": 109,
+    "missing": 27,
     "override": 8,
-    "stabilityKept": 189,
-    "tcgdex": 16355
+    "stabilityKept": 185,
+    "tcgdex": 15977
   },
   "versionSuffixSkippedByExpansion": {
     "1521": 9,
@@ -9189,6 +8886,8 @@
     "1612": 40,
     "1649": 3,
     "1678": 11,
+    "1687": 11,
+    "1716": 9,
     "1757": 60,
     "1758": 12,
     "1800": 13,

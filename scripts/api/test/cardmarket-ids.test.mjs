@@ -1120,3 +1120,8 @@ test('Haupt- und Unterset in einer Erweiterung (Hidden Fates): "SV1" nimmt das e
   const { cards: out } = runCat(sv, { 100: [csp(1, 'Caterpie', '1'), csp(2, 'Metapod', '2'), csp(101, 'Shinx', 'SV1'), csp(102, 'Luxio', 'SV2')] });
   assert.deepEqual(out.map((c) => c.ids.cardmarket), [[101], [102]]);
 });
+
+test('normalizeCmName: HTML-Kuerzel im Katalog wie das Zeichen selbst', () => {
+  assert.equal(normalizeCmName('Nidoran &female; [Call for Family | Scratch]'), normalizeCmName('Nidoran ♀'));
+  assert.equal(normalizeCmName('Nidoran &male;'), normalizeCmName('Nidoran ♂'));
+});
