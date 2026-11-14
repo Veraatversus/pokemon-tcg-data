@@ -1,6 +1,7 @@
 // Preisdateien api/v3/prices/<setId>.json aus dem taeglichen Cardmarket-Preisguide (Spec §2.3, §4).
 // Je Karte mit primaerer Cardmarket-ID (primaryCardmarketId) und Preisguide-Eintrag:
-//   "<cardId>": { productId, trend, avg1, avg7, avg30, low, trendHolo, avg1Holo, avg7Holo, avg30Holo, lowHolo }
+//   "<cardId>": { productId, trend, avg1, avg7, avg30, low, avgHolo, trendHolo, avg1Holo, avg7Holo, avg30Holo, lowHolo }
+// Die *Holo-Felder nur, wenn die Karte plausibel einen Reverse-/Foil-Druck hat (hasReversePrint).
 // Nur numerische Felder; Eintraege ohne jeden Preis entfallen. Ohne Preisguide von heute (priceGuide null,
 // A1 hat dann keine .cache-Datei geschrieben) bleiben Preisdateien und meta.json unberuehrt.
 import fs from 'node:fs';
@@ -8,11 +9,18 @@ import path from 'node:path';
 import { extractPriceGuideList } from '../sources/cardmarket-feeds.mjs';
 import { toCompactJson, toJson, assertSafeSetId } from '../registry/registry-io.mjs';
 
-// Feld der Preisdatei -> Feld des Preisguides (avg/avg-holo werden nicht ausgeliefert)
+// Feld der Preisdatei -> Feld des Preisguides (avg wird nicht ausgeliefert)
 const FIELDS = {
   trend: 'trend', avg1: 'avg1', avg7: 'avg7', avg30: 'avg30', low: 'low',
-  trendHolo: 'trend-holo', avg1Holo: 'avg1-holo', avg7Holo: 'avg7-holo', avg30Holo: 'avg30-holo', lowHolo: 'low-holo',
+  avgHolo: 'avg-holo', trendHolo: 'trend-holo', avg1Holo: 'avg1-holo', avg7Holo: 'avg7-holo', avg30Holo: 'avg30-holo', lowHolo: 'low-holo',
 };
+
+// Cardmarket fuehrt -holo-Felder auch fuer Produkte ohne Reverse-Druck (z. B. base1). Regel: Hat die Karte
+// Variantenangaben (TCGdex), zaehlt nur eine Variante vom Typ "reverse"; ohne Variantenangaben entscheidet avg-holo > 0.
+export function hasReversePrint(card, row) {
+  if (Array.isArray(card?.variants) && card.variants.length) return card.variants.some((v) => v?.type === 'reverse');
+  return typeof row['avg-holo'] === 'number' && row['avg-holo'] > 0;
+}
 
 // Mindestanteil Karten mit Preis gegenueber dem veroeffentlichten prices/meta.json
 export const MIN_PRICED_RATIO = 0.8;
@@ -37,7 +45,8 @@ export function buildPriceFiles({ cardsBySet, priceGuide, primaryCardmarketId, n
       const row = byProduct.get(productId);
       if (!row) continue;
       const entry = { productId };
-      for (const [field, source] of Object.entries(FIELDS)) if (typeof row[source] === 'number' && Number.isFinite(row[source])) entry[field] = row[source];
+      const holo = hasReversePrint(card, row);
+      for (const [field, source] of Object.entries(FIELDS)) if ((holo || !field.endsWith('Holo')) && typeof row[source] === 'number' && Number.isFinite(row[source])) entry[field] = row[source];
       if (Object.keys(entry).length === 1) continue;
       entries[card.cardId] = entry;
       cardsWithPrice++;
