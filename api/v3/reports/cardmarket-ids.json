@@ -2593,35 +2593,21 @@
       "tcgdex": 0
     },
     "sm9": {
-      "ambiguous": 2,
-      "ambiguousCards": [
-        "152a",
-        "152b"
-      ],
+      "ambiguous": 0,
       "cards": 198,
-      "corrected": 7,
       "coverage": {
         "bySource": {
-          "matched": 5,
-          "stabilityKept": 4,
-          "tcgdex": 185
+          "customSet": 198
         },
         "cards": 198,
-        "withId": 194
+        "withId": 198
       },
+      "customSet": 198,
       "expansionId": 2407,
-      "matched": 5,
-      "missing": 4,
-      "missingCards": [
-        "54",
-        "57",
-        "152a",
-        "152b"
-      ],
-      "ordered": 4,
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2407&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 4,
-      "tcgdex": 185
+      "tcgdex": 0
     },
     "sma": {
       "ambiguous": 2,
@@ -3610,8 +3596,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 3469,
-    "changed": 543,
+    "applied": 3667,
+    "changed": 550,
     "conflicts": [],
     "dropped": [
       {
@@ -3830,6 +3816,18 @@
         "name": "Fairy Charm Dragon",
         "productId": 365813,
         "productName": "Fairy Charm [N]"
+      },
+      {
+        "cardKey": "sm9/54",
+        "name": "Nidoran ♀",
+        "productId": 368984,
+        "productName": "Nidoran &female; [Call for Family | Scratch]"
+      },
+      {
+        "cardKey": "sm9/57",
+        "name": "Nidoran ♂",
+        "productId": 368987,
+        "productName": "Nidoran &male; [Peck | Horn Attack]"
       }
     ]
   },
@@ -5489,34 +5487,6 @@
       "smp-SM158",
       "smp-SM226"
     ],
-    "368935": [
-      "sm9-2",
-      "sm9-3"
-    ],
-    "368944": [
-      "sm9-11",
-      "sm9-12"
-    ],
-    "368954": [
-      "sm9-22",
-      "sm9-23"
-    ],
-    "368965": [
-      "sm9-34",
-      "sm9-35"
-    ],
-    "369042": [
-      "sm9-114",
-      "sm9-115"
-    ],
-    "369044": [
-      "sm9-116",
-      "sm9-117"
-    ],
-    "369048": [
-      "sm9-121",
-      "sm9-122"
-    ],
     "369353": [
       "smp-SM174",
       "smp-SM175",
@@ -5854,10 +5824,10 @@
     ]
   },
   "duplicates": {
-    "cards": 989,
-    "corrected": 268,
-    "ids": 487,
-    "kept": 721
+    "cards": 975,
+    "corrected": 261,
+    "ids": 480,
+    "kept": 714
   },
   "expansionMismatch": {
     "cards": [
@@ -7528,14 +7498,14 @@
       }
     ],
     "totals": {
-      "checked": 19766,
+      "checked": 19581,
       "corrected": 25,
       "dropped": 21,
       "droppedShared": 17,
       "foreignNameOk": 1281,
       "keptMismatch": 135,
       "noSetExpansion": 0,
-      "ok": 18301,
+      "ok": 18116,
       "unknownProduct": 3
     }
   },
@@ -7638,18 +7608,6 @@
     },
     {
       "cards": [
-        "sm9/140",
-        "sm9/174"
-      ],
-      "expansionId": 2407,
-      "name": "Erika's Hospitality",
-      "products": [
-        368074,
-        369099
-      ]
-    },
-    {
-      "cards": [
         "xy3/5",
         "xy3/112"
       ],
@@ -7728,11 +7686,11 @@
   "rules": {
     "energySymbol": 3,
     "leftRight": 0,
-    "ordered": 24,
-    "orderedRejected": 13,
+    "ordered": 20,
+    "orderedRejected": 12,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 172
+    "versionSuffixSkipped": 174
   },
   "setsWithoutExpansion": [
     {
@@ -8693,34 +8651,6 @@
       "source": "corrected",
       "todayId": 363506,
       "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm9/51",
-      "productId": 368982,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "sm9/133",
-      "productId": 369060,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "sm9/140",
-      "productId": 368074,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
-    },
-    {
-      "cardKey": "sm9/174",
-      "productId": 369099,
-      "source": "matched",
-      "todayId": null,
-      "todaySource": null
     },
     {
       "cardKey": "smp/SM31",
@@ -9887,98 +9817,6 @@
     {
       "candidates": [
         {
-          "name": "Nidoran &female; [Call for Family | Scratch]",
-          "productId": 368984
-        },
-        {
-          "name": "Nidoran &male; [Peck | Horn Attack]",
-          "productId": 368987
-        }
-      ],
-      "cardKey": "sm9/54",
-      "deName": "Nidoran♀",
-      "expansionId": 2407,
-      "name": "Nidoran ♀",
-      "set": "sm9"
-    },
-    {
-      "candidates": [
-        {
-          "name": "Nidoran &female; [Call for Family | Scratch]",
-          "productId": 368984
-        },
-        {
-          "name": "Nidoran &male; [Peck | Horn Attack]",
-          "productId": 368987
-        }
-      ],
-      "cardKey": "sm9/57",
-      "deName": "Nidoran♂",
-      "expansionId": 2407,
-      "name": "Nidoran ♂",
-      "set": "sm9"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Pokémon Communication",
-          "productId": 407264
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Pokémon Communication",
-          "productId": 407389
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Pokémon Communication",
-          "productId": 451568
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Pokémon Communication",
-          "productId": 475139
-        }
-      ],
-      "cardKey": "sm9/152a",
-      "deName": null,
-      "expansionId": 2407,
-      "name": "Pokémon Communication",
-      "set": "sm9"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Pokémon Communication",
-          "productId": 407264
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Pokémon Communication",
-          "productId": 407389
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Pokémon Communication",
-          "productId": 451568
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Pokémon Communication",
-          "productId": 475139
-        }
-      ],
-      "cardKey": "sm9/152b",
-      "deName": null,
-      "expansionId": 2407,
-      "name": "Pokémon Communication",
-      "set": "sm9"
-    },
-    {
-      "candidates": [
-        {
           "hint": "same-name-unnumbered",
           "name": "Charizard GX [Flamethrower | Flare Blitz GX]",
           "productId": 394737
@@ -10534,13 +10372,6 @@
   "stillMissingByExpansion": [
     {
       "count": 4,
-      "expansionId": 2407,
-      "sets": [
-        "sm9"
-      ]
-    },
-    {
-      "count": 4,
       "expansionId": 2921,
       "sets": [
         "swsh1"
@@ -10716,14 +10547,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 40,
+    "ambiguous": 38,
     "cards": 21577,
-    "customSet": 3469,
-    "matched": 225,
-    "missing": 59,
+    "customSet": 3667,
+    "matched": 220,
+    "missing": 55,
     "override": 8,
-    "stabilityKept": 239,
-    "tcgdex": 17577
+    "stabilityKept": 235,
+    "tcgdex": 17392
   },
   "versionSuffixSkippedByExpansion": {
     "1537": 7,
@@ -10742,6 +10573,7 @@
     "2075": 11,
     "2320": 10,
     "2370": 11,
+    "2407": 2,
     "2437": 1
   }
 }
