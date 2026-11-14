@@ -2056,25 +2056,19 @@
     "pl3": {
       "ambiguous": 0,
       "cards": 153,
-      "corrected": 8,
       "coverage": {
         "bySource": {
-          "stabilityKept": 1,
-          "tcgdex": 150
+          "customSet": 153
         },
         "cards": 153,
-        "withId": 151
+        "withId": 153
       },
+      "customSet": 153,
       "expansionId": 1564,
       "matched": 0,
-      "missing": 2,
-      "missingCards": [
-        "8",
-        "9"
-      ],
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1564&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 1,
-      "tcgdex": 150
+      "tcgdex": 0
     },
     "pl4": {
       "ambiguous": 0,
@@ -3514,8 +3508,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 4876,
-    "changed": 644,
+    "applied": 5029,
+    "changed": 667,
     "conflicts": [],
     "dropped": [
       {
@@ -4822,41 +4816,6 @@
       "pl1-126",
       "pl1-127"
     ],
-    "278689": [
-      "pl3-7",
-      "pl3-70",
-      "pl3-SH7"
-    ],
-    "278690": [
-      "pl3-79",
-      "pl3-8",
-      "pl3-SH8"
-    ],
-    "278691": [
-      "pl3-88",
-      "pl3-9",
-      "pl3-SH9"
-    ],
-    "278694": [
-      "pl3-3",
-      "pl3-57"
-    ],
-    "278706": [
-      "pl3-15",
-      "pl3-50"
-    ],
-    "278729": [
-      "pl3-119",
-      "pl3-38"
-    ],
-    "278731": [
-      "pl3-40",
-      "pl3-81"
-    ],
-    "278745": [
-      "pl3-54",
-      "pl3-95"
-    ],
     "278850": [
       "ru1-10",
       "ru1-9"
@@ -5444,10 +5403,10 @@
     ]
   },
   "duplicates": {
-    "cards": 827,
-    "corrected": 223,
-    "ids": 410,
-    "kept": 604
+    "cards": 808,
+    "corrected": 215,
+    "ids": 402,
+    "kept": 593
   },
   "expansionMismatch": {
     "cards": [
@@ -6537,20 +6496,6 @@
         "reason": "corrected-expansion"
       },
       {
-        "cardKey": "pl3-8",
-        "newId": null,
-        "oldExpansion": 1564,
-        "oldId": 278690,
-        "reason": "dropped-shared-mismatch"
-      },
-      {
-        "cardKey": "pl3-9",
-        "newId": null,
-        "oldExpansion": 1564,
-        "oldId": 278691,
-        "reason": "dropped-shared-mismatch"
-      },
-      {
         "cardKey": "sv10-24",
         "newId": null,
         "oldExpansion": 6140,
@@ -6778,9 +6723,6 @@
         "5431": 1,
         "5992": 2,
         "6194": 2
-      },
-      "pl3": {
-        "2026": 5
       },
       "pop7": {
         "2026": 1,
@@ -7083,14 +7025,14 @@
       }
     ],
     "totals": {
-      "checked": 18507,
+      "checked": 18337,
       "corrected": 21,
-      "dropped": 20,
-      "droppedShared": 16,
-      "foreignNameOk": 1281,
+      "dropped": 18,
+      "droppedShared": 14,
+      "foreignNameOk": 1276,
       "keptMismatch": 135,
       "noSetExpansion": 0,
-      "ok": 17047,
+      "ok": 16884,
       "unknownProduct": 3
     }
   },
@@ -7933,13 +7875,6 @@
       "todaySource": "tcgdex"
     },
     {
-      "cardKey": "pl3/70",
-      "productId": 882910,
-      "source": "corrected",
-      "todayId": 882910,
-      "todaySource": "tcgdex"
-    },
-    {
       "cardKey": "pl4/94",
       "productId": 278966,
       "source": "matched",
@@ -8728,32 +8663,6 @@
     {
       "candidates": [
         {
-          "name": "Rayquaza [C] Lv.73 [Trash Burst | Twister]",
-          "productId": 278699
-        }
-      ],
-      "cardKey": "pl3/8",
-      "deName": "Rayquaza C",
-      "expansionId": 1564,
-      "name": "Rayquaza C",
-      "set": "pl3"
-    },
-    {
-      "candidates": [
-        {
-          "name": "Regigigas [FB] Lv.50 [Drain Punch | Rainbow Lariat]",
-          "productId": 278700
-        }
-      ],
-      "cardKey": "pl3/9",
-      "deName": "Regigigas FB",
-      "expansionId": 1564,
-      "name": "Regigigas FB",
-      "set": "pl3"
-    },
-    {
-      "candidates": [
-        {
           "name": "Rainbow Energy Delta",
           "productId": 277491
         }
@@ -9036,13 +8945,6 @@
     },
     {
       "count": 2,
-      "expansionId": 1564,
-      "sets": [
-        "pl3"
-      ]
-    },
-    {
-      "count": 2,
       "expansionId": 1611,
       "sets": [
         "bwp"
@@ -9157,12 +9059,12 @@
   "totals": {
     "ambiguous": 17,
     "cards": 21577,
-    "customSet": 4876,
+    "customSet": 5029,
     "matched": 116,
-    "missing": 33,
+    "missing": 31,
     "override": 8,
-    "stabilityKept": 189,
-    "tcgdex": 16355
+    "stabilityKept": 188,
+    "tcgdex": 16205
   },
   "versionSuffixSkippedByExpansion": {
     "1521": 9,
