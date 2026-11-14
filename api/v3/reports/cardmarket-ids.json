@@ -2536,40 +2536,21 @@
       "tcgdex": 0
     },
     "sm6": {
-      "ambiguous": 5,
-      "ambiguousCards": [
-        "2a",
-        "71",
-        "102a",
-        "112a",
-        "113a"
-      ],
+      "ambiguous": 0,
       "cards": 150,
-      "corrected": 5,
       "coverage": {
         "bySource": {
-          "matched": 1,
-          "stabilityKept": 2,
-          "tcgdex": 140
+          "customSet": 150
         },
         "cards": 150,
-        "withId": 143
+        "withId": 150
       },
+      "customSet": 150,
       "expansionId": 2075,
-      "matched": 1,
-      "missing": 7,
-      "missingCards": [
-        "2a",
-        "71",
-        "102a",
-        "112a",
-        "113a",
-        "118",
-        "146"
-      ],
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2075&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 2,
-      "tcgdex": 140
+      "tcgdex": 0
     },
     "sm7": {
       "ambiguous": 4,
@@ -3714,8 +3695,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 2387,
-    "changed": 444,
+    "applied": 2537,
+    "changed": 453,
     "conflicts": [],
     "dropped": [
       {
@@ -3760,6 +3741,18 @@
         "name": "Unit Energy LightningPsychicMetal",
         "productId": 316095,
         "productName": "Unit Energy [LPM]"
+      },
+      {
+        "cardKey": "sm6/118",
+        "name": "Unit Energy FightingDarknessFairy",
+        "productId": 355629,
+        "productName": "Unit Energy [FDY]"
+      },
+      {
+        "cardKey": "sm6/146",
+        "name": "Unit Energy FightingDarknessFairy",
+        "productId": 355657,
+        "productName": "Unit Energy [FDY]"
       },
       {
         "cardKey": "sm8/174",
@@ -5607,38 +5600,6 @@
       "smp-SM107",
       "smp-SM124"
     ],
-    "327207": [
-      "sm6-71",
-      "sm6-73"
-    ],
-    "327209": [
-      "sm6-103",
-      "sm6-128"
-    ],
-    "355526": [
-      "sm6-5",
-      "sm6-6"
-    ],
-    "355534": [
-      "sm6-14",
-      "sm6-15"
-    ],
-    "355541": [
-      "sm6-21",
-      "sm6-22"
-    ],
-    "355565": [
-      "sm6-46",
-      "sm6-47"
-    ],
-    "355597": [
-      "sm6-83",
-      "sm6-84"
-    ],
-    "355605": [
-      "sm6-91",
-      "sm6-92"
-    ],
     "361254": [
       "sm7-7",
       "sm7-8"
@@ -6113,10 +6074,10 @@
     ]
   },
   "duplicates": {
-    "cards": 1156,
-    "corrected": 307,
-    "ids": 560,
-    "kept": 849
+    "cards": 1140,
+    "corrected": 302,
+    "ids": 552,
+    "kept": 838
   },
   "expansionMismatch": {
     "cards": [
@@ -7430,13 +7391,6 @@
         "reason": "corrected-expansion"
       },
       {
-        "cardKey": "sm6-71",
-        "newId": null,
-        "oldExpansion": 2075,
-        "oldId": 327207,
-        "reason": "dropped-shared-mismatch"
-      },
-      {
         "cardKey": "sv10-24",
         "newId": null,
         "oldExpansion": 6140,
@@ -8001,14 +7955,14 @@
       }
     ],
     "totals": {
-      "checked": 20832,
+      "checked": 20689,
       "corrected": 25,
-      "dropped": 27,
-      "droppedShared": 23,
+      "dropped": 26,
+      "droppedShared": 22,
       "foreignNameOk": 1309,
       "keptMismatch": 159,
       "noSetExpansion": 0,
-      "ok": 19309,
+      "ok": 19167,
       "unknownProduct": 3
     }
   },
@@ -8241,7 +8195,7 @@
     "orderedRejected": 16,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 120
+    "versionSuffixSkipped": 131
   },
   "setsWithoutExpansion": [
     {
@@ -9278,20 +9232,6 @@
       "productId": 302215,
       "source": "corrected",
       "todayId": 301167,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm6/15",
-      "productId": 355535,
-      "source": "corrected",
-      "todayId": 355534,
-      "todaySource": "tcgdex"
-    },
-    {
-      "cardKey": "sm6/128",
-      "productId": 355616,
-      "source": "corrected",
-      "todayId": 327209,
       "todaySource": "tcgdex"
     },
     {
@@ -10894,174 +10834,6 @@
       "candidates": [
         {
           "hint": "same-name-unnumbered",
-          "name": "Alolan Exeggutor [Tropical Shake]",
-          "productId": 364325
-        }
-      ],
-      "cardKey": "sm6/2a",
-      "deName": null,
-      "expansionId": 2075,
-      "name": "Alolan Exeggutor",
-      "set": "sm6"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Zygarde [Glare | Calm Strike]",
-          "productId": 355589
-        }
-      ],
-      "cardKey": "sm6/71",
-      "deName": "Zygarde",
-      "expansionId": 2075,
-      "name": "Zygarde",
-      "set": "sm6"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Beast Ring",
-          "productId": 368676
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Beast Ring",
-          "productId": 371632
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Beast Ring",
-          "productId": 407179
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Beast Ring",
-          "productId": 449288
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Beast Energy ◇ [Prism]",
-          "productId": 368669
-        }
-      ],
-      "cardKey": "sm6/102a",
-      "deName": null,
-      "expansionId": 2075,
-      "name": "Beast Ring",
-      "set": "sm6"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Metal Frying Pan",
-          "productId": 448158
-        }
-      ],
-      "cardKey": "sm6/112a",
-      "deName": null,
-      "expansionId": 2075,
-      "name": "Metal Frying Pan",
-      "set": "sm6"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Mysterious Treasure",
-          "productId": 368695
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Mysterious Treasure",
-          "productId": 368750
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Mysterious Treasure",
-          "productId": 368767
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Mysterious Treasure",
-          "productId": 407064
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Mysterious Treasure",
-          "productId": 407174
-        }
-      ],
-      "cardKey": "sm6/113a",
-      "deName": null,
-      "expansionId": 2075,
-      "name": "Mysterious Treasure",
-      "set": "sm6"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Unit Energy [FDY]",
-          "productId": 355629
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Unit Energy [FDY]",
-          "productId": 355657
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Beast Energy ◇ [Prism]",
-          "productId": 368669
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Beast Energy ◇ [Prism]",
-          "productId": 407129
-        }
-      ],
-      "cardKey": "sm6/118",
-      "deName": "Aggregat-Energie FightingDarknessFairy",
-      "expansionId": 2075,
-      "name": "Unit Energy FightingDarknessFairy",
-      "set": "sm6"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Unit Energy [FDY]",
-          "productId": 355629
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Unit Energy [FDY]",
-          "productId": 355657
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Beast Energy ◇ [Prism]",
-          "productId": 368669
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Beast Energy ◇ [Prism]",
-          "productId": 407129
-        }
-      ],
-      "cardKey": "sm6/146",
-      "deName": "Aggregat-Energie FightingDarknessFairy",
-      "expansionId": 2075,
-      "name": "Unit Energy FightingDarknessFairy",
-      "set": "sm6"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
           "name": "Sceptile [Power of Nature | Powerful Storm]",
           "productId": 370821
         }
@@ -12213,13 +11985,6 @@
   ],
   "stillMissingByExpansion": [
     {
-      "count": 7,
-      "expansionId": 2075,
-      "sets": [
-        "sm6"
-      ]
-    },
-    {
       "count": 5,
       "expansionId": 1649,
       "sets": [
@@ -12445,14 +12210,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 66,
+    "ambiguous": 61,
     "cards": 21577,
-    "customSet": 2387,
-    "matched": 238,
-    "missing": 92,
+    "customSet": 2537,
+    "matched": 237,
+    "missing": 85,
     "override": 8,
-    "stabilityKept": 291,
-    "tcgdex": 18561
+    "stabilityKept": 289,
+    "tcgdex": 18421
   },
   "versionSuffixSkippedByExpansion": {
     "1537": 7,
@@ -12464,6 +12229,7 @@
     "1758": 12,
     "1800": 13,
     "2065": 14,
+    "2075": 11,
     "2370": 11
   }
 }
