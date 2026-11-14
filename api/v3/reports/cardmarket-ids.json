@@ -2444,32 +2444,21 @@
       "tcgdex": 0
     },
     "sm35": {
-      "ambiguous": 3,
-      "ambiguousCards": [
-        "10a",
-        "68a",
-        "77a"
-      ],
+      "ambiguous": 0,
       "cards": 81,
       "coverage": {
         "bySource": {
-          "stabilityKept": 1,
-          "tcgdex": 77
+          "customSet": 81
         },
         "cards": 81,
-        "withId": 78
+        "withId": 81
       },
+      "customSet": 81,
       "expansionId": 1842,
       "matched": 0,
-      "missing": 3,
-      "missingCards": [
-        "10a",
-        "68a",
-        "77a"
-      ],
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1842&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 1,
-      "tcgdex": 77
+      "tcgdex": 0
     },
     "sm4": {
       "ambiguous": 2,
@@ -3548,8 +3537,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 4371,
-    "changed": 621,
+    "applied": 4452,
+    "changed": 622,
     "conflicts": [],
     "dropped": [
       {
@@ -5317,10 +5306,6 @@
       "sm1-163",
       "sm1-171"
     ],
-    "301167": [
-      "sm35-39",
-      "sm35-78"
-    ],
     "362810": [
       "TCGDEX-2018sm-fr-38",
       "TCGDEX-2018sm-fr-39"
@@ -5554,10 +5539,10 @@
     ]
   },
   "duplicates": {
-    "cards": 859,
+    "cards": 857,
     "corrected": 236,
-    "ids": 426,
-    "kept": 623
+    "ids": 425,
+    "kept": 621
   },
   "expansionMismatch": {
     "cards": [
@@ -7200,14 +7185,14 @@
       }
     ],
     "totals": {
-      "checked": 18893,
+      "checked": 18815,
       "corrected": 22,
       "dropped": 20,
       "droppedShared": 16,
       "foreignNameOk": 1281,
       "keptMismatch": 135,
       "noSetExpansion": 0,
-      "ok": 17432,
+      "ok": 17354,
       "unknownProduct": 3
     }
   },
@@ -7368,7 +7353,7 @@
     "orderedRejected": 10,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 276
+    "versionSuffixSkipped": 277
   },
   "setsWithoutExpansion": [
     {
@@ -8317,13 +8302,6 @@
       "todaySource": null
     },
     {
-      "cardKey": "sm35/78",
-      "productId": 302215,
-      "source": "corrected",
-      "todayId": 301167,
-      "todaySource": "tcgdex"
-    },
-    {
       "cardKey": "sm75/35",
       "productId": 363507,
       "source": "corrected",
@@ -9089,68 +9067,6 @@
       "candidates": [
         {
           "hint": "same-name-unnumbered",
-          "name": "Entei GX [Combustion | Fire Fang | Brave Burn GX]",
-          "productId": 321006
-        }
-      ],
-      "cardKey": "sm35/10a",
-      "deName": null,
-      "expansionId": 1842,
-      "name": "Entei-GX",
-      "set": "sm35"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Ultra Ball",
-          "productId": 368667
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Ultra Ball",
-          "productId": 368689
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Ultra Ball",
-          "productId": 368773
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Ultra Ball",
-          "productId": 371643
-        }
-      ],
-      "cardKey": "sm35/68a",
-      "deName": null,
-      "expansionId": 1842,
-      "name": "Ultra Ball",
-      "set": "sm35"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Zoroark GX [Trade | Riotous Beating | Trickster GX]",
-          "productId": 368748
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Zoroark GX [Trade | Riotous Beating | Trickster GX]",
-          "productId": 450888
-        }
-      ],
-      "cardKey": "sm35/77a",
-      "deName": null,
-      "expansionId": 1842,
-      "name": "Zoroark-GX",
-      "set": "sm35"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
           "name": "Guzzlord GX [Eat Sloppily | Tyrannical Hole | Glutton GX]",
           "productId": 316307
         },
@@ -9434,13 +9350,6 @@
   "stillMissingByExpansion": [
     {
       "count": 3,
-      "expansionId": 1842,
-      "sets": [
-        "sm35"
-      ]
-    },
-    {
-      "count": 3,
       "expansionId": 2487,
       "sets": [
         "sm11"
@@ -9581,14 +9490,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 25,
+    "ambiguous": 22,
     "cards": 21577,
-    "customSet": 4371,
+    "customSet": 4452,
     "matched": 220,
-    "missing": 42,
+    "missing": 39,
     "override": 8,
-    "stabilityKept": 198,
-    "tcgdex": 16738
+    "stabilityKept": 197,
+    "tcgdex": 16661
   },
   "versionSuffixSkippedByExpansion": {
     "1521": 9,
@@ -9606,6 +9515,7 @@
     "1757": 60,
     "1758": 12,
     "1800": 13,
+    "1842": 1,
     "2065": 14,
     "2075": 11,
     "2320": 10,
