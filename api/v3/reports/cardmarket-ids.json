@@ -1315,27 +1315,21 @@
       "tcgdex": 100
     },
     "ex4": {
-      "ambiguous": 1,
-      "ambiguousCards": [
-        "48"
-      ],
+      "ambiguous": 0,
       "cards": 97,
-      "corrected": 69,
       "coverage": {
         "bySource": {
-          "tcgdex": 96
+          "customSet": 97
         },
         "cards": 97,
-        "withId": 96
+        "withId": 97
       },
+      "customSet": 97,
       "expansionId": 1542,
       "matched": 0,
-      "missing": 1,
-      "missingCards": [
-        "48"
-      ],
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1542&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 96
+      "tcgdex": 0
     },
     "ex5": {
       "ambiguous": 0,
@@ -2508,33 +2502,21 @@
       "tcgdex": 0
     },
     "sm75": {
-      "ambiguous": 2,
-      "ambiguousCards": [
-        "40a",
-        "60a"
-      ],
+      "ambiguous": 0,
       "cards": 80,
-      "corrected": 1,
       "coverage": {
         "bySource": {
-          "matched": 3,
-          "stabilityKept": 1,
-          "tcgdex": 74
+          "customSet": 80
         },
         "cards": 80,
-        "withId": 78
+        "withId": 80
       },
+      "customSet": 80,
       "expansionId": 2351,
-      "matched": 3,
-      "missing": 2,
-      "missingCards": [
-        "40a",
-        "60a"
-      ],
-      "ordered": 2,
+      "matched": 0,
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2351&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "stabilityKept": 1,
-      "tcgdex": 74
+      "tcgdex": 0
     },
     "sm8": {
       "ambiguous": 0,
@@ -3471,8 +3453,8 @@
       "ecard1/47",
       "ecard1/68"
     ],
-    "applied": 5510,
-    "changed": 680,
+    "applied": 5687,
+    "changed": 775,
     "conflicts": [],
     "dropped": [
       {
@@ -5175,14 +5157,6 @@
       "TCGDEX-2018sm-fr-38",
       "TCGDEX-2018sm-fr-39"
     ],
-    "363487": [
-      "sm75-15",
-      "sm75-16"
-    ],
-    "363506": [
-      "sm75-34",
-      "sm75-35"
-    ],
     "398504": [
       "sm12-239",
       "sm12-54"
@@ -5344,10 +5318,10 @@
     ]
   },
   "duplicates": {
-    "cards": 789,
-    "corrected": 211,
-    "ids": 395,
-    "kept": 578
+    "cards": 694,
+    "corrected": 141,
+    "ids": 393,
+    "kept": 553
   },
   "expansionMismatch": {
     "cards": [
@@ -6241,160 +6215,6 @@
         "reason": "kept-mismatch"
       },
       {
-        "cardKey": "ex4-24",
-        "newId": null,
-        "oldExpansion": 1540,
-        "oldId": 275801,
-        "reason": "dropped-mismatch"
-      },
-      {
-        "cardKey": "ex4-48",
-        "newId": null,
-        "oldExpansion": 1540,
-        "oldId": 275825,
-        "reason": "dropped-mismatch"
-      },
-      {
-        "cardKey": "ex4-69",
-        "newId": 276046,
-        "oldExpansion": 1540,
-        "oldId": 275846,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-70",
-        "newId": 276047,
-        "oldExpansion": 1540,
-        "oldId": 275847,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-71",
-        "newId": 276048,
-        "oldExpansion": 1540,
-        "oldId": 275848,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-72",
-        "newId": 276049,
-        "oldExpansion": 1540,
-        "oldId": 275849,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-73",
-        "newId": 276050,
-        "oldExpansion": 1540,
-        "oldId": 275850,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-74",
-        "newId": 276051,
-        "oldExpansion": 1540,
-        "oldId": 275851,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-75",
-        "newId": 276052,
-        "oldExpansion": 1540,
-        "oldId": 275852,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-76",
-        "newId": 276053,
-        "oldExpansion": 1540,
-        "oldId": 275853,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-77",
-        "newId": 276054,
-        "oldExpansion": 1540,
-        "oldId": 275854,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-78",
-        "newId": 276055,
-        "oldExpansion": 1540,
-        "oldId": 275855,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-79",
-        "newId": 276056,
-        "oldExpansion": 1540,
-        "oldId": 275856,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-80",
-        "newId": 276057,
-        "oldExpansion": 1540,
-        "oldId": 275857,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-81",
-        "newId": 276058,
-        "oldExpansion": 1540,
-        "oldId": 275858,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-82",
-        "newId": 276059,
-        "oldExpansion": 1540,
-        "oldId": 275859,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-83",
-        "newId": 276060,
-        "oldExpansion": 1540,
-        "oldId": 275860,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-84",
-        "newId": 276061,
-        "oldExpansion": 1540,
-        "oldId": 275861,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-85",
-        "newId": 276062,
-        "oldExpansion": 1540,
-        "oldId": 275862,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-86",
-        "newId": 276063,
-        "oldExpansion": 1540,
-        "oldId": 275863,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-87",
-        "newId": 276064,
-        "oldExpansion": 1540,
-        "oldId": 275864,
-        "reason": "corrected-expansion"
-      },
-      {
-        "cardKey": "ex4-88",
-        "newId": 276065,
-        "oldExpansion": 1540,
-        "oldId": 275865,
-        "reason": "corrected-expansion"
-      },
-      {
         "cardKey": "ex6-98",
         "newId": null,
         "oldExpansion": 1544,
@@ -6571,10 +6391,6 @@
       "ex2": {
         "1753": 11,
         "1754": 5
-      },
-      "ex4": {
-        "1753": 13,
-        "1754": 1
       },
       "ex5": {
         "1753": 10,
@@ -6938,14 +6754,14 @@
       }
     ],
     "totals": {
-      "checked": 17878,
-      "corrected": 21,
-      "dropped": 15,
+      "checked": 17691,
+      "corrected": 1,
+      "dropped": 13,
       "droppedShared": 11,
-      "foreignNameOk": 1276,
+      "foreignNameOk": 1262,
       "keptMismatch": 134,
       "noSetExpansion": 0,
-      "ok": 16429,
+      "ok": 16278,
       "unknownProduct": 3
     }
   },
@@ -7066,11 +6882,11 @@
   "rules": {
     "energySymbol": 3,
     "leftRight": 0,
-    "ordered": 6,
+    "ordered": 4,
     "orderedRejected": 7,
     "override": 8,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 324
+    "versionSuffixSkipped": 325
   },
   "setsWithoutExpansion": [
     {
@@ -7956,13 +7772,6 @@
       "todaySource": null
     },
     {
-      "cardKey": "sm75/35",
-      "productId": 363507,
-      "source": "corrected",
-      "todayId": 363506,
-      "todaySource": "tcgdex"
-    },
-    {
       "cardKey": "sv3/57",
       "productId": 725137,
       "source": "corrected",
@@ -8523,25 +8332,6 @@
       "candidates": [
         {
           "hint": "same-name-unnumbered",
-          "name": "Team Aqua's Carvanha [Wave Splash | Water Fin]",
-          "productId": 276025
-        },
-        {
-          "hint": "same-name-unnumbered",
-          "name": "Team Aqua's Cacnea [Paralyzing Gaze | Pin Missile]",
-          "productId": 276001
-        }
-      ],
-      "cardKey": "ex4/48",
-      "deName": "Team Aquas Kanivanha",
-      "expansionId": 1542,
-      "name": "Team Aqua's Carvanha",
-      "set": "ex4"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered",
           "name": "Meganium [Leaf Trans | Solarbeam | Prime]",
           "productId": 279081
         }
@@ -8596,39 +8386,6 @@
     {
       "candidates": [
         {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Altaria [Fight Song | Pierce]",
-          "productId": 364324
-        }
-      ],
-      "cardKey": "sm75/40a",
-      "deName": null,
-      "expansionId": 2351,
-      "name": "Altaria",
-      "set": "sm75"
-    },
-    {
-      "candidates": [
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Fiery Flint",
-          "productId": 407279
-        },
-        {
-          "hint": "same-name-unnumbered, id-outlier",
-          "name": "Fiery Flint",
-          "productId": 448143
-        }
-      ],
-      "cardKey": "sm75/60a",
-      "deName": null,
-      "expansionId": 2351,
-      "name": "Fiery Flint",
-      "set": "sm75"
-    },
-    {
-      "candidates": [
-        {
           "hint": "same-name-unnumbered",
           "name": "MAudino EX [Magical Symphony]",
           "productId": 289906
@@ -8669,20 +8426,6 @@
       "expansionId": 1611,
       "sets": [
         "bwp"
-      ]
-    },
-    {
-      "count": 2,
-      "expansionId": 2351,
-      "sets": [
-        "sm75"
-      ]
-    },
-    {
-      "count": 1,
-      "expansionId": 1542,
-      "sets": [
-        "ex4"
       ]
     },
     {
@@ -8750,14 +8493,14 @@
     }
   ],
   "totals": {
-    "ambiguous": 10,
+    "ambiguous": 7,
     "cards": 21577,
-    "customSet": 5510,
-    "matched": 99,
-    "missing": 23,
+    "customSet": 5687,
+    "matched": 96,
+    "missing": 20,
     "override": 8,
-    "stabilityKept": 185,
-    "tcgdex": 15752
+    "stabilityKept": 184,
+    "tcgdex": 15582
   },
   "versionSuffixSkippedByExpansion": {
     "1521": 9,
@@ -8783,6 +8526,7 @@
     "2065": 14,
     "2075": 11,
     "2320": 10,
+    "2351": 1,
     "2370": 11,
     "2407": 2,
     "2437": 1,
