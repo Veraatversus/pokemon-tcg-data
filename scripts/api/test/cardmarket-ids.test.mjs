@@ -1098,3 +1098,19 @@ test('geteilte TCGdex-ID: Karte, deren Name nicht passt, verliert sie, wenn das 
   assert.equal(report.expansionMismatch.totals.droppedShared, 1);
   assert.ok(report.expansionMismatch.cards.some((c) => c.cardKey === 's1-e1' && c.reason === 'dropped-shared-mismatch'));
 });
+
+test('Trainer-Kit-Paar: setSuffix ordnet "1N"/"1S" den Kits zu, "1n" ist kein Buchstaben-Zusatz zu "1"', () => {
+  const n = [card('1', '1', 'Spoink'), card('13', '13', 'Noivern')];
+  const cardsBySet = new Map([['kn', n.map((c) => ({ ...c, id: `kn-${c.cardId}`, setId: 'kn' }))], ['ks', [{ ...card('1', '1', 'Fletchling'), id: 'ks-1', setId: 'ks' }]], ['kx', [{ ...card('1', '1', 'Spoink'), id: 'kx-1', setId: 'kx' }]]]);
+  const products = [csp(593, 'Spoink', '1N'), csp(594, 'Fletchling', '1S'), csp(617, 'Noivern', '13N')];
+  fillCardmarketIds({
+    sets: [{ id: 'kn', ids: { cardmarket: 100 } }, { id: 'ks', ids: { cardmarket: 100 } }, { id: 'kx', ids: { cardmarket: 100 } }],
+    cardsBySet,
+    knownExpansions: new Set([100]),
+    productExpansion: () => 100,
+    loadExpansion: (id) => (id === 100 ? { expansionId: 100, setSuffix: { kn: 'N', ks: 'S' }, cards: products } : null),
+  });
+  assert.deepEqual(cardsBySet.get('kn').map((c) => c.ids.cardmarket), [[593], [617]]);
+  assert.deepEqual(cardsBySet.get('ks')[0].ids.cardmarket, [594]);
+  assert.deepEqual(cardsBySet.get('kx')[0].ids.cardmarket, [], 'Set ohne Kuerzel nutzt das Kit-custom-set nicht');
+});

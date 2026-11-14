@@ -56,13 +56,19 @@ export function numberOfLabel(label) {
   const text = String(label ?? '').replace(/\s+/g, ' ').trim();
   const inParens = [...text.matchAll(/\(([^()]*)\)/g)].map((m) => m[1]).reverse();
   for (const candidate of [...inParens, text]) {
-    const m = candidate.trim().match(/^([A-Z]+(?:en)?[ ]?[A-Z]?\s*\d+[a-z]?)$/i);
+    const c = candidate.trim();
+    const m = c.match(/^([A-Z]+(?:en)?[ ]?[A-Z]?\s*\d+[a-z]?)$/i);
     if (m) return m[1].trim().replace(/^[A-Z]+(?:en)?\s*/, '').replace(/^0+/, '') || '0';
+    // Setcode mit Ziffer und Kit-Kuerzel: "TK6 1N" -> "1N" (Trainer-Kit-Paare, siehe setSuffix im custom-set)
+    const kit = c.match(/^[A-Z]+\d+\s+(\d+[A-Z]?)$/i);
+    if (kit) return kit[1].replace(/^0+(?=\d)/, '');
   }
   return null;
 }
 
 function entryOf({ productId, version, label }) {
+  // Online-Code-Karten sind keine Sammelkarten ("Online Code Card (Theme Deck) (TK6)" sähe sonst wie Nummer 6 aus)
+  if (/\bcode\s*card\b/i.test(String(label ?? ''))) return null;
   const number = numberOfLabel(label);
   if (!Number.isInteger(productId) || productId <= 0 || number === null) return null;
   return { productId, version: Number.isInteger(version) && version > 0 ? version : 1, number };
@@ -307,7 +313,7 @@ function readJsonOr(file, fallback) {
  * und schreibt (ausser bei dryRun). -> { merged: [{ expansionId, file, added, unchanged, conflicts, replaced,
  * written, preview }] }
  */
-export function runImport({ files, root, dryRun = false, force = false, setIds = [] }) {
+export function runImport({ files, root, dryRun = false, force = false, setIds = [], setSuffix = {} }) {
   // Alle Seiten einer Expansion werden gemeinsam geparst (Versionsregel und Vollstaendigkeit gelten je Expansion).
   const groups = new Map(); // "<art>:<expansionId>" -> { isJson, inputs: [], files: [] }
   for (const file of files) {
@@ -349,7 +355,10 @@ export function runImport({ files, root, dryRun = false, force = false, setIds =
     const file = path.join(csDir, `${parsed.expansionId}.json`);
     const existing = readJsonOr(file, null);
     const m = mergeCustomSet(existing, parsed, { force });
-    const changed = m.added.length > 0 || m.replaced.length > 0;
+    // Kit-Kuerzel je v3-Set (--kit TCGDEX-tk-xy-n=N): Trainer-Kit-Paare in einer Expansion ("TK6 1N" / "TK6 1S")
+    const suffixBefore = JSON.stringify(m.set.setSuffix ?? null);
+    if (Object.keys(setSuffix).length) m.set.setSuffix = { ...(m.set.setSuffix ?? {}), ...setSuffix };
+    const changed = m.added.length > 0 || m.replaced.length > 0 || JSON.stringify(m.set.setSuffix ?? null) !== suffixBefore;
     if (changed && !dryRun) {
       fs.mkdirSync(csDir, { recursive: true });
       fs.writeFileSync(file, `${JSON.stringify(m.set, null, 2)}\n`);
@@ -373,7 +382,7 @@ export function runImport({ files, root, dryRun = false, force = false, setIds =
 
 function main() {
   const { values, positionals } = parseArgs({
-    options: { 'dry-run': { type: 'boolean' }, force: { type: 'boolean' }, set: { type: 'string', multiple: true }, snippet: { type: 'boolean' }, help: { type: 'boolean', short: 'h' } },
+    options: { 'dry-run': { type: 'boolean' }, force: { type: 'boolean' }, set: { type: 'string', multiple: true }, kit: { type: 'string', multiple: true }, snippet: { type: 'boolean' }, help: { type: 'boolean', short: 'h' } },
     allowPositionals: true,
   });
   if (values.snippet) {
@@ -381,13 +390,19 @@ function main() {
     process.exit(0);
   }
   if (values.help || !positionals.length) {
-    console.log('Usage: node scripts/api/cardmarket/import-html.mjs <liste.json|seite.html …> [--dry-run] [--force] [--set <setId>]\n       node scripts/api/cardmarket/import-html.mjs --snippet   (Skript fuer die Browser-Konsole)\nEingaben liegen in .local/cardmarket-html/ (ignoriert).');
+    console.log('Usage: node scripts/api/cardmarket/import-html.mjs <liste.json|seite.html …> [--dry-run] [--force] [--set <setId>] [--kit <setId>=<Kuerzel> …]\n       node scripts/api/cardmarket/import-html.mjs --snippet   (Skript fuer die Browser-Konsole)\nEingaben liegen in .local/cardmarket-html/ (ignoriert).');
     process.exit(values.help ? 0 : 1);
   }
   const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
   let merged;
   try {
-    ({ merged } = runImport({ files: positionals, root, dryRun: values['dry-run'], force: values.force, setIds: values.set ?? [] }));
+    const setSuffix = {};
+    for (const k of values.kit ?? []) {
+      const m = /^([^=]+)=([A-Za-z]+)$/.exec(k);
+      if (!m) throw new Error(`--kit erwartet <setId>=<Kuerzel>, z. B. TCGDEX-tk-xy-n=N (war: ${k})`);
+      setSuffix[m[1]] = m[2].toUpperCase();
+    }
+    ({ merged } = runImport({ files: positionals, root, dryRun: values['dry-run'], force: values.force, setIds: values.set ?? [], setSuffix }));
   } catch (e) {
     console.error(`Fehler: ${e.message}`);
     process.exit(1);
