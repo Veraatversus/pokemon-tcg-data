@@ -77,14 +77,16 @@ function entryOf({ productId, version, label }) {
   return { productId, version: Number.isInteger(version) && version > 0 ? version : 1, number };
 }
 
-// Versionsregel: Ein Suffix "V<n>" bekommt nur ein Produkt, dessen Nummer auch ein Produkt mit kleinerer Version
-// traegt ("146" + "146V2"). Allein stehende Versionen behalten die Basisnummer (BW-Promos: Victory Cup V1/V2/V3 =
-// BW 29/30/31). Fehlt ein Teil der Liste, faellt das beim Merge als Widerspruch zu bestehenden Eintraegen auf;
-// JSON mit total prueft zusaetzlich die Vollstaendigkeit.
+// Nummernregel: Fuehren mehrere Produkte dieselbe Nummer, bekommt das zuerst angelegte (kleinste Produkt-ID) die
+// Basisnummer, die anderen "<nummer>V<version>" ("146" + "146V2"). Cardmarkets V-Nummern zaehlen je Kartenname,
+// nicht je Druck; sie sagen nichts darueber, welches Produkt der normale Druck ist (sm3 88a: V5 von 2018, V4 von
+// 2022; xyp 69/122/123/183: zwei Produkte mit V2, das zweite 2018 nachgetragen, vermutlich Jumbo). Allein stehende
+// Versionen behalten die Basisnummer (BW-Promos: Victory Cup V1/V2/V3 = BW 29/30/31). Fehlt ein Teil der Liste,
+// faellt das beim Merge als Widerspruch zu bestehenden Eintraegen auf; JSON mit total prueft die Vollstaendigkeit.
 function collectorNumbers(entries) {
-  const minVersion = new Map();
-  for (const e of entries) minVersion.set(e.number, Math.min(minVersion.get(e.number) ?? Infinity, e.version));
-  return entries.map((e) => ({ productId: e.productId, collectorNumber: e.version > minVersion.get(e.number) ? `${e.number}V${e.version}` : e.number }));
+  const first = new Map();
+  for (const e of entries) if (!first.has(e.number) || e.productId < first.get(e.number)) first.set(e.number, e.productId);
+  return entries.map((e) => ({ productId: e.productId, collectorNumber: e.productId === first.get(e.number) ? e.number : `${e.number}V${e.version}` }));
 }
 
 const sortCards = (cards) => cards.sort((a, b) => naturalCompare(a.collectorNumber, b.collectorNumber) || a.productId - b.productId);
