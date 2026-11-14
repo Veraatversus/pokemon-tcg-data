@@ -55,8 +55,11 @@ export function buildCatalog(products, customSets = []) {
   const loadExpansion = (expansionId) => {
     if (!byExpansion.has(expansionId)) return null;
     if (!payloads.has(expansionId)) {
+      const setSuffix = customSetByExpansion.get(expansionId)?.setSuffix;
       payloads.set(expansionId, {
         expansionId,
+        // Trainer-Kit-Paare: Kit-Kuerzel je v3-Set ({ "TCGDEX-tk-xy-n": "N" } -> Karte 1 = custom-set "1N")
+        ...(setSuffix && typeof setSuffix === 'object' ? { setSuffix } : {}),
         cards: byExpansion.get(expansionId).map((p) => ({
           cardmarketProductId: p.id,
           name: p.name,
