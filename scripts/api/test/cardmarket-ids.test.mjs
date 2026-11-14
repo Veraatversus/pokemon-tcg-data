@@ -1114,3 +1114,9 @@ test('Trainer-Kit-Paar: setSuffix ordnet "1N"/"1S" den Kits zu, "1n" ist kein Bu
   assert.deepEqual(cardsBySet.get('ks')[0].ids.cardmarket, [594]);
   assert.deepEqual(cardsBySet.get('kx')[0].ids.cardmarket, [], 'Set ohne Kuerzel nutzt das Kit-custom-set nicht');
 });
+
+test('Haupt- und Unterset in einer Erweiterung (Hidden Fates): "SV1" nimmt das exakte Produkt, nicht #1', () => {
+  const sv = [card('SV1', 'SV1', 'Shinx'), card('SV2', 'SV2', 'Luxio')];
+  const { cards: out } = runCat(sv, { 100: [csp(1, 'Caterpie', '1'), csp(2, 'Metapod', '2'), csp(101, 'Shinx', 'SV1'), csp(102, 'Luxio', 'SV2')] });
+  assert.deepEqual(out.map((c) => c.ids.cardmarket), [[101], [102]]);
+});
