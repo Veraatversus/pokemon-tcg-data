@@ -96,7 +96,9 @@ test('Legacy-Summary ohne setId: Zeilen ausgeschlossener Sets ueber den Setnamen
 });
 
 test('Backup, Restore und Overview-Sync nutzen die ungefilterte Liste importierter Sets (Sheet-Daten vollstaendig)', () => {
-  const src = readFileSync(fileURLToPath(new URL('../js/app.js', import.meta.url)), 'utf8');
+  // Backup/Restore/CSV-Export und Import liegen seit dem Auslagern aus app.js in js/features/collection/.
+  const src = ['../js/app.js', '../js/features/collection/import-jobs.js']
+    .map((rel) => readFileSync(fileURLToPath(new URL(rel, import.meta.url)), 'utf8')).join('\n');
   const dashSrc = readFileSync(fileURLToPath(new URL('../js/views/dashboard.js', import.meta.url)), 'utf8');
   const loadSetsBody = dashSrc.slice(dashSrc.indexOf('async function loadSets()'), dashSrc.indexOf('\nfunction getSetSeriesGroupInfo'));
   // ungefiltert gemerkt, bevor gefiltert wird
