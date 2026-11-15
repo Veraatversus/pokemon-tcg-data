@@ -158,7 +158,6 @@ body.dark select option {
 }
 
 /* Reusable brand gradient template for primary app controls */
-.brand-gradient-control,
 .dashboard-view-tab.active,
 .dashboard-view-tab[aria-selected="true"],
 #btn-dashboard-compact[aria-pressed="true"],
@@ -1650,7 +1649,6 @@ dialog h2 {
   }
   .stats-series-row:hover { background: var(--color-bg-secondary, #1e293b); }
   .stats-series-row.expanded { background: var(--color-bg-secondary, #1e293b); border-radius: 6px 6px 0 0; }
-  .stats-series-row-toggle { float: right; font-size: 11px; color: var(--color-muted, #94a3b8); margin-left: 8px; }
   .stats-drilldown {
     background: linear-gradient(180deg, rgba(14, 20, 36, 0.96), rgba(9, 14, 28, 0.98));
     border: 1px solid color-mix(in srgb, var(--color-primary, #a855f7) 28%, var(--color-border, #334155));

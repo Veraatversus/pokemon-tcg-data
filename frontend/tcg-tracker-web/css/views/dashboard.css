@@ -1,7 +1,6 @@
 /* Dashboard view extraction */
 
-.dash-set-name,
-.dash-set-name-fallback {
+.dash-set-name {
   color: var(--color-text-primary) !important;
 }
 
@@ -357,42 +356,6 @@
 }
 
 .dash-hover-tip.hidden { display: none; }
-
-.dhp-name {
-  font-weight: 700;
-  margin: 0 0 8px;
-  font-size: 13px;
-  color: #f8fafc;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.dhp-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin: 3px 0;
-}
-
-.dhp-row span { color: #94a3b8; font-size: 11px; }
-.dhp-row strong { color: #f8fafc; font-size: 11px; }
-
-.dhp-pct-bar {
-  height: 4px;
-  background: #1e293b;
-  border-radius: 2px;
-  margin: 8px 0 4px;
-}
-
-.dhp-pct-fill {
-  height: 100%;
-  border-radius: 2px;
-  background: linear-gradient(90deg, #22c55e, #86efac);
-  transition: width 0.3s;
-}
-
-.dhp-hint { color: #475569; margin: 4px 0 0; font-size: 11px; }
 
 @media (hover: none) {
   .dash-hover-tip { display: none !important; }

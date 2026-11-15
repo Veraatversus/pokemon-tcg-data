@@ -1258,13 +1258,6 @@ label:active {
   font-weight: 800;
   line-height: 1;
 }
-.dash-set-name-fallback {
-  font-weight: bold;
-  font-size: 11px;
-  line-height: 1.3;
-  text-align: center;
-  color: var(--color-text);
-}
 .dash-set-name   { margin: 0 0 2px; font-weight: bold; font-size: 12px; line-height: 1.3; }
 .dash-set-series { margin: 0 0 6px; font-size: 11px; color: var(--color-muted); }
 .dash-rh-text    { margin: 2px 0 0; font-size: 11px; color: var(--color-muted); }
@@ -1418,46 +1411,11 @@ body.dark .dash-progress-bar { background: #334155; }
   min-width: 0;
 }
 
-.dashboard-filter-group--view {
-  flex: 1 1 auto;
-  flex-wrap: wrap;
-}
-
 .dashboard-filter-group--status {
   flex: 0 1 auto;
   margin-left: auto;
   padding-left: 6px;
   border-left: 1px solid rgba(106, 160, 255, 0.16);
-}
-
-.quick-filters-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 4px;
-  flex-wrap: nowrap;
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
-
-.quick-filters-label {
-  display: none;
-}
-
-.quick-filters-buttons {
-  display: flex;
-  flex: 0 1 auto;
-  gap: 4px;
-  flex-wrap: nowrap;
-  min-width: 0;
-  max-width: 100%;
-  overflow: visible;
-  scrollbar-width: none;
-}
-
-.quick-filters-buttons::-webkit-scrollbar {
-  display: none;
 }
 
 .quick-filter-btn {
@@ -1534,13 +1492,8 @@ body.dark .dash-progress-bar { background: #334155; }
 }
 
 @media (max-width: 640px) {
-  .dashboard-filter-group--view,
   .dashboard-filter-group--status {
     width: 100%;
-  }
-
-  .quick-filters-buttons {
-    flex-wrap: wrap;
   }
 
   .quick-filter-btn,
@@ -1789,9 +1742,6 @@ body.dark .dash-progress-bar { background: #334155; }
     gap: 4px;
   }
 
-  .search-api-fallback-toggle {
-    margin: 8px 10px 0;
-  }
 }
 
 /* DEPRECATED: Old dark theme removed â€“ using Legendary Elemental system. */
@@ -1948,92 +1898,8 @@ body.dark .dash-progress-bar { background: #334155; }
 }
 
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   Collection Versioning
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-.snapshots-widget {
-  grid-column: 1 / -1;
-  padding: 16px;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background: var(--color-bg);
-  margin-bottom: 16px;
-}
-
-.snapshots-header {
-  font-weight: 600;
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.snapshots-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.snapshot-item {
-  padding: 8px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 12px;
-}
-
-.snapshot-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.snapshot-name {
-  font-weight: 500;
-  color: var(--color-text);
-}
-
-.snapshot-meta {
-  font-size: 11px;
-  color: var(--color-muted);
-}
-
-.snapshot-actions {
-  display: flex;
-  gap: 6px;
-}
-
-.snapshot-actions button {
-  padding: 4px 8px;
-  font-size: 11px;
-  border: 1px solid var(--color-border);
-  background: var(--color-bg);
-  border-radius: 3px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.snapshot-actions button:hover {
-  background: var(--color-primary);
-  color: white;
-  border-color: var(--color-primary);
-}
-
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    Auto-Backup Status
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-.auto-backup-indicator {
-  font-size: 11px;
-  color: var(--color-success);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
 .auto-backup-indicator.active::before {
   content: 'âœ…';
 }
@@ -2460,9 +2326,7 @@ dialog.ss-dialog::backdrop {
   }
 
   .card-number,
-  .command-palette-hint,
-  .snapshot-meta,
-  .snapshot-actions button {
+  .command-palette-hint {
     font-size: 11px;
   }
 
@@ -2527,13 +2391,9 @@ dialog.ss-dialog,
 .lightbox-dialog,
 .command-palette-box,
 .settings-panel,
-.statistics-panel,
-.snapshots-widget,
-.search-history-dropdown,
 .batch-dialog,
 .batch-list,
 .batch-item,
-.quick-filters-toolbar,
 .dashboard-tools,
 .dashboard-tools-group {
   background: var(--window-bg) !important;

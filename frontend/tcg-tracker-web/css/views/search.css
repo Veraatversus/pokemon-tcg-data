@@ -3,19 +3,6 @@
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .search-main-input { min-width: 280px; flex: 1; padding: 9px 14px; font-size: 15px; }
 .search-hint { margin: 8px 16px; font-size: 12px; color: var(--color-muted); }
-.search-api-fallback-toggle {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 8px 16px 0;
-  font-size: 12px;
-  color: var(--color-muted);
-  flex-wrap: wrap;
-}
-.search-api-fallback-toggle select {
-  min-width: 220px;
-  max-width: 100%;
-}
 .search-result-count { padding: 6px 12px; font-size: 13px; color: var(--color-muted); grid-column: 1 / -1; }
 .search-results-head {
   grid-column: 1 / -1;
