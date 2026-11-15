@@ -1,4 +1,4 @@
-import { formatCardmarketEntryLabel, formatCardmarketEntryTitle } from '../data/cardmarket-ui-helpers.js?v=20261115-price-range-2';
+import { formatCardmarketEntryLabel, formatCardmarketEntryTitle } from '../data/cardmarket-ui-helpers.js?v=20261115-umlaute';
 import { isGeneratedCardmarketSearchUrl, applyReverseHoloQueryParam } from '../data/cardmarket-url-utils.js';
 
 // ============================================================================

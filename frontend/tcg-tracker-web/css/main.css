@@ -631,7 +631,7 @@ body::after {
   max-width: 100% !important;
 }
 
-/* DEPRECATED: Old brand-logo 40px round version removed â€“ using FINAL HARDENED 34px version */
+/* DEPRECATED: Old brand-logo 40px round version removed – using FINAL HARDENED 34px version */
 
 .brand-copy {
   display: flex;
@@ -1639,9 +1639,9 @@ dialog h2 {
 
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    NEUE FEATURES
-     F1 Bild-Fallback Â· F2 Charts Â· F3 Offline Â· F4 Hover-Preview
-     F5 Completion-Anim Â· F6 Autocomplete Â· F7 Drill-Down
-     F8 Shortcuts Â· F9 Share
+     F1 Bild-Fallback · F2 Charts · F3 Offline · F4 Hover-Preview
+     F5 Completion-Anim · F6 Autocomplete · F7 Drill-Down
+     F8 Shortcuts · F9 Share
      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
   /* F1/F2/F3 moved to modular CSS files:

@@ -1744,7 +1744,7 @@ body.dark .dash-progress-bar { background: #334155; }
 
 }
 
-/* DEPRECATED: Old dark theme removed â€“ using Legendary Elemental system. */
+/* DEPRECATED: Old dark theme removed – using Legendary Elemental system. */
 
 @media (max-width: 480px) {
   .topbar { padding: 4px; }
@@ -1928,7 +1928,7 @@ dialog.ss-dialog::backdrop {
   }
 }
 
-/* DEPRECATED: 2026 NEON-EDITORIAL redesign removed â€“ using Legendary Elemental system. */
+/* DEPRECATED: 2026 NEON-EDITORIAL redesign removed – using Legendary Elemental system. */
 
 @media (max-width: 1024px) {
   .topbar {
