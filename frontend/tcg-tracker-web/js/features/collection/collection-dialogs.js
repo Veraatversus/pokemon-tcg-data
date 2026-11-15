@@ -8,10 +8,10 @@ import {
   markAliasSetRowsNotImported,
   listCollectionSetIds,
   invalidateCollectionRowCache
-} from '../../data/sheets-db.js?v=20261115-clean-4';
+} from '../../data/sheets-db.js?v=20261115-clean-5';
 import { hasEntryCells, stateCellUpdates, applyEntryState, compareSetCollection } from '../../data/collection-writes.js';
 import { findSetByIdOrAlias } from '../../data/set-aliases.js';
-import { fetchMergedCards } from '../../data/pokemon-api.js?v=20261115-clean-4';
+import { fetchMergedCards } from '../../data/pokemon-api.js?v=20261115-clean-5';
 import { toBoolean } from '../../core/utils.js';
 import * as cache from '../../core/cache.js';
 import { CONFIG } from '../../core/config.js';
