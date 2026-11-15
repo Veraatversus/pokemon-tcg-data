@@ -3391,7 +3391,7 @@
   "customSets": {
     "ambiguous": [],
     "applied": 6772,
-    "changed": 849,
+    "changed": 840,
     "conflicts": [],
     "dropped": [],
     "missingProducts": [],
@@ -4813,10 +4813,6 @@
       "xy2-88",
       "xy2-88a"
     ],
-    "281871": [
-      "xy4-65",
-      "xy4-65a"
-    ],
     "282745": [
       "xy6-77",
       "xy6-77a"
@@ -5081,7 +5077,7 @@
   "duplicates": {
     "cards": 591,
     "corrected": 114,
-    "ids": 348,
+    "ids": 347,
     "kept": 477
   },
   "expansionMismatch": {
