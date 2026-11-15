@@ -15,9 +15,8 @@ Die Pokémon TCG API (pokemontcg.io) wird am 1. März 2027 abgeschaltet. Dieses 
 | `sources/tcgdex/` | Täglicher TCGdex-Spiegel (nur Daten-/Textdateien), dazu `assets-index.json` (Asset-Liste von assets.tcgdex.net) und `assets-verified.json` (Prüfstand der Set-Logos und -Symbole) |
 | `sources/SOURCES.json` | Quell-Commits und Abrufzeitpunkte |
 | `sources/cardmarket/` | Täglich geladener Cardmarket-Katalog (`catalog.jsonl`, `expansions.json`, `meta.json`) und handgepflegte `custom-sets/` |
-| `cardmarket/` | Altformat der Cardmarket-Daten (`index/`, `sets/`, `meta.json`), eingefroren und nicht mehr neu erzeugt |
 | `scripts/api/` | Build-Toolchain der v3-API (Node, Tests) |
-| `cards/`, `sets/`, `decks/`, `v2_to_v1.rb` | Alte pokemontcg-Struktur im Wurzelverzeichnis. Bleibt aus Kompatibilitätsgründen bis zu einer späteren Umstrukturierung erhalten. |
+| `decks/`, `v2_to_v1.rb` | Reste der alten pokemontcg-Struktur im Wurzelverzeichnis (Karten und Sets liegen eingefroren in `sources/pokemontcg/`). |
 
 ## Automatisierung
 
