@@ -89,14 +89,6 @@
   position: relative;
 }
 
-#view-dashboard .dashboard-discovery-controls {
-  z-index: 2;
-}
-
-#view-dashboard .dashboard-filter-strip {
-  z-index: 1;
-}
-
 #view-dashboard .dashboard-discovery-controls:has(.custom-select.is-open) {
   z-index: 120;
   isolation: isolate;
@@ -111,6 +103,7 @@
 }
 
 #view-dashboard .dashboard-discovery-controls {
+  z-index: 2;
   display: flex !important;
   align-items: center;
   gap: 8px;
@@ -145,6 +138,7 @@
 }
 
 #view-dashboard .dashboard-filter-strip {
+  z-index: 1;
   display: flex !important;
   align-items: flex-start;
   gap: 8px;

@@ -1657,15 +1657,6 @@ body.dark .dash-progress-bar { background: #334155; }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    Utils
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
@@ -1685,7 +1676,6 @@ body.dark .dash-progress-bar { background: #334155; }
 
 @media (max-width: 768px) {
   .topbar { flex-wrap: wrap; padding: 8px 10px; gap: 8px; }
-  .topbar h1 { font-size: 15px; flex: 1; min-width: 0; }
   .main-nav {
     order: 2;
     flex-wrap: nowrap;
@@ -1711,13 +1701,16 @@ body.dark .dash-progress-bar { background: #334155; }
 }
 
 @media (max-width: 640px) {
-  body { font-size: 14px; }
+  body {
+    font-size: 14px;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    -webkit-text-size-adjust: 100%;
+  }
   .topbar { padding: 6px; }
   .topbar h1 { font-size: 14px; }
   .status-bar { font-size: 12px; padding: 6px 8px; flex-wrap: wrap; }
   .global-status { flex: 1; min-width: 100%; }
   
-  .view { padding: 6px; }
   .view-header { flex-wrap: wrap; gap: 6px; }
   .view-controls { display: flex; gap: 4px; flex-wrap: wrap; width: 100%; }
   .view-controls input,
@@ -1741,7 +1734,6 @@ body.dark .dash-progress-bar { background: #334155; }
 
   .cards { gap: 8px; padding: 8px; }
   .search-results { padding: 8px; }
-  .dash-sets-row { gap: 6px; }
   .dash-set-card { border-radius: 4px; }
   .dash-set-logo-wrap { height: 80px; }
   .dash-set-info { padding: 6px; gap: 3px; }
@@ -1772,7 +1764,6 @@ body.dark .dash-progress-bar { background: #334155; }
     padding: 5px 6px;
   }
 
-  .lightbox-content { grid-template-columns: 1fr; }
   .lightbox-meta { border-left: none; border-top: 1px solid var(--color-border); padding: 14px; }
   .lightbox-prev { left: 8px; }
   .lightbox-next { right: 8px; }
@@ -1799,8 +1790,6 @@ body.dark .dash-progress-bar { background: #334155; }
     max-height: 80vh !important;
   }
   
-  .command-palette-input { font-size: 16px; }
-
   .search-results-head {
     align-items: flex-start;
     flex-direction: column;
@@ -2114,6 +2103,8 @@ dialog.ss-dialog::backdrop {
   }
 
   .topbar h1 {
+    flex: 1;
+    min-width: 0;
     font-size: 14px;
   }
 
@@ -2153,11 +2144,6 @@ dialog.ss-dialog::backdrop {
 }
 
 @media (max-width: 640px) {
-  body {
-    padding-bottom: env(safe-area-inset-bottom, 0);
-    -webkit-text-size-adjust: 100%;
-  }
-
   a,
   button,
   input,

@@ -98,13 +98,6 @@ body.dark select option {
   cursor: pointer;
   border: none;
 }
-@media (max-width: 640px) {
-  .zoom-slider {
-    width: 46px;
-    opacity: 0.78;
-  }
-}
-
 .cards,
 .dash-sets-row,
 .compact-dashboard .dash-sets-row,
@@ -494,6 +487,7 @@ body.topbar-collapsed .status-bar {
   }
 
   .zoom-slider {
+    opacity: 0.78;
     width: clamp(110px, 36vw, 180px);
     min-height: 24px !important;
   }
@@ -518,21 +512,6 @@ body.topbar-collapsed .status-bar {
 @media (max-width: 420px) {
   .topbar {
     padding: 6px 8px calc(6px + env(safe-area-inset-top, 0));
-  }
-
-  .topbar h1 {
-    font-size: 12px;
-  }
-
-  .header-actions {
-    gap: 6px;
-  }
-
-  .header-actions button,
-  .header-actions .btn-icon {
-    min-height: 44px;
-    padding: 8px 10px;
-    font-size: 12px;
   }
 
   .zoom-slider {
@@ -863,6 +842,7 @@ body::after {
 
 @media (max-width: 420px) {
   .topbar h1 {
+    font-size: 12px;
     flex: 0 1 auto !important;
     width: auto !important;
     max-width: calc(100% - 184px);
