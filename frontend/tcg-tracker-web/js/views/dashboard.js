@@ -109,7 +109,7 @@ export async function loadSets() {
       return resolveDisplaySet(applyDeSeriesFallback(set, deSeriesBySetId));
     });
     actions.renderRecentSets();
-    actions.renderSetSelectorOptions();
+    renderSetSelectorOptions();
 
     dom.selector.disabled = false;
     dom.load.disabled     = false;
@@ -478,6 +478,60 @@ export function ensureSetSelectorOption(set) {
     option.dataset.source = 'search-api';
   }
   group.appendChild(option);
+}
+
+export function renderSetSelectorOptions(preferredValue = '') {
+  if (!dom.selector) return;
+
+  const desiredValue = String(preferredValue || dom.selector.value || '').trim();
+  const importedSets = Array.isArray(state.sets) ? state.sets.filter((set) => set?.setId) : [];
+  const knownSets = Array.isArray(state.allSets) && state.allSets.length
+    ? state.allSets.filter((set) => set?.setId)
+    : importedSets;
+  const notImportedSets = [...knownSets]
+    .filter((set) => !toBoolean(set.imported))
+    .sort((a, b) => String(a.setName || a.setId).localeCompare(String(b.setName || b.setId), undefined, {
+      numeric: true,
+      sensitivity: 'base'
+    }));
+
+  dom.selector.innerHTML = '<option value="">Bitte wählen...</option>';
+
+  const seriesMap = buildSeriesMap(importedSets);
+  seriesMap.forEach((groupInfo) => {
+    const group = document.createElement('optgroup');
+    group.label = groupInfo.label;
+    group.dataset.seriesKey = groupInfo.key;
+    groupInfo.sets.forEach((set) => {
+      const opt = document.createElement('option');
+      opt.value = set.setId;
+      opt.textContent = set.setName;
+      opt.dataset.imported = 'true';
+      group.appendChild(opt);
+    });
+    dom.selector.appendChild(group);
+  });
+
+  if (notImportedSets.length) {
+    const extraGroup = document.createElement('optgroup');
+    extraGroup.label = 'Weitere Sets (noch nicht importiert)';
+    extraGroup.dataset.seriesKey = 'not-imported';
+
+    notImportedSets.forEach((set) => {
+      const opt = document.createElement('option');
+      opt.value = set.setId;
+      opt.textContent = set.setName || set.setId;
+      opt.dataset.imported = 'false';
+      opt.classList.add('option-not-imported');
+      extraGroup.appendChild(opt);
+    });
+
+    dom.selector.appendChild(extraGroup);
+  }
+
+  if (desiredValue && Array.from(dom.selector.options).some((option) => option.value === desiredValue)) {
+    dom.selector.value = desiredValue;
+  }
 }
 
 function buildSetSearchContext(set = null) {

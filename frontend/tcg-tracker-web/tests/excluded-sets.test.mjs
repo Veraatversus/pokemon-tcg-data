@@ -120,7 +120,7 @@ test('Backup, Restore und Overview-Sync nutzen die ungefilterte Liste importiert
 });
 
 test('Zuletzt-geoeffnet-Chips ohne ausgeschlossene Sets', () => {
-  const src = readFileSync(fileURLToPath(new URL('../js/app.js', import.meta.url)), 'utf8');
+  const src = readFileSync(fileURLToPath(new URL('../js/app/recent-sets.js', import.meta.url)), 'utf8');
   const body = src.slice(src.indexOf('function renderRecentSets()'), src.indexOf('function renderRecentSets()') + 600);
   assert.match(body, /\.filter\(\(entry\) => !state\.isExcludedSet\(entry\)\)/);
 });

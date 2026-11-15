@@ -132,8 +132,8 @@ import {
   syncRefreshControls
 } from './ui/helpers.js';
 import {
-  allImportedSets, loadSets, buildSeriesMap, renderDashboard,
-  syncDashboardCardForSet, getSetById, ensureSetSelectorOption
+  allImportedSets, loadSets, renderDashboard,
+  syncDashboardCardForSet, getSetById, ensureSetSelectorOption, renderSetSelectorOptions
 } from './views/dashboard.js';
 import {
   renderSearchSetFilterOptions, runSearch, initSearch, initSearchAutocomplete
@@ -147,6 +147,9 @@ import {
   broadcastRealtimeCardUpdate, applyIncomingRealtimeUpdate
 } from './views/set-cards.js';
 import { openLightbox, renderLightbox, initLightbox } from './views/lightbox.js';
+import {
+  loadRecentSets, syncSetNavLink, positionRecentSetsDropdown, setRecentSetsDropdownOpen, renderRecentSets, markSetAsRecent
+} from './app/recent-sets.js';
 import {
   initOfflineIndicator, initDashboardHoverPreview, checkSetCompletion, initShortcutsOverlay, initShareButton,
   initCustomSelects, initAutoHideTopbar
@@ -171,7 +174,6 @@ registerActions({
   loadCurrentSet,
   loadSets,
   renderRecentSets,
-  renderSetSelectorOptions,
   importSetFromOverview,
   deleteSetFromCollection,
   checkSetCompletion,
@@ -340,185 +342,6 @@ function updateAutoImportQueueUi() {
   const waitingLabel = queuedIds.length ? ` - ${queuedIds.length} wartend` : '';
   dom.jobStatusText.textContent = `${activeLabel}${waitingLabel}`;
   if (dom.btnJobCancel) dom.btnJobCancel.disabled = true;
-}
-
-function renderSetSelectorOptions(preferredValue = '') {
-  if (!dom.selector) return;
-
-  const desiredValue = String(preferredValue || dom.selector.value || '').trim();
-  const importedSets = Array.isArray(state.sets) ? state.sets.filter((set) => set?.setId) : [];
-  const knownSets = Array.isArray(state.allSets) && state.allSets.length
-    ? state.allSets.filter((set) => set?.setId)
-    : importedSets;
-  const notImportedSets = [...knownSets]
-    .filter((set) => !toBoolean(set.imported))
-    .sort((a, b) => String(a.setName || a.setId).localeCompare(String(b.setName || b.setId), undefined, {
-      numeric: true,
-      sensitivity: 'base'
-    }));
-
-  dom.selector.innerHTML = '<option value="">Bitte wählen...</option>';
-
-  const seriesMap = buildSeriesMap(importedSets);
-  seriesMap.forEach((groupInfo) => {
-    const group = document.createElement('optgroup');
-    group.label = groupInfo.label;
-    group.dataset.seriesKey = groupInfo.key;
-    groupInfo.sets.forEach((set) => {
-      const opt = document.createElement('option');
-      opt.value = set.setId;
-      opt.textContent = set.setName;
-      opt.dataset.imported = 'true';
-      group.appendChild(opt);
-    });
-    dom.selector.appendChild(group);
-  });
-
-  if (notImportedSets.length) {
-    const extraGroup = document.createElement('optgroup');
-    extraGroup.label = 'Weitere Sets (noch nicht importiert)';
-    extraGroup.dataset.seriesKey = 'not-imported';
-
-    notImportedSets.forEach((set) => {
-      const opt = document.createElement('option');
-      opt.value = set.setId;
-      opt.textContent = set.setName || set.setId;
-      opt.dataset.imported = 'false';
-      opt.classList.add('option-not-imported');
-      extraGroup.appendChild(opt);
-    });
-
-    dom.selector.appendChild(extraGroup);
-  }
-
-  if (desiredValue && Array.from(dom.selector.options).some((option) => option.value === desiredValue)) {
-    dom.selector.value = desiredValue;
-  }
-}
-
-function loadRecentSets() {
-  try {
-    const raw = localStorage.getItem(RECENT_SETS_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed
-      .filter((item) => item && item.setId)
-      .map((item) => ({
-        setId: String(item.setId),
-        setName: String(item.setName || item.setId),
-        at: Number(item.at) || Date.now()
-      }))
-      .slice(0, 8);
-  } catch (err) {
-    console.warn('[loadRecentSets]', err);
-    return [];
-  }
-}
-
-function saveRecentSets() {
-  try {
-    localStorage.setItem(RECENT_SETS_STORAGE_KEY, JSON.stringify(state.recentSets || []));
-  } catch (err) {
-    console.warn('[saveRecentSets]', err);
-  }
-}
-
-function syncSetNavLink(setMeta = state.currentSet) {
-  if (!dom.navSetLink) return;
-  const label = String(setMeta?.setName || 'Set-Ansicht');
-  dom.navSetLink.textContent = label;
-  dom.navSetLink.title = label;
-  dom.navSetLink.href = setMeta?.setId ? `#set/${setMeta.setId}` : '#set';
-}
-
-function positionRecentSetsDropdown() {
-  if (!dom.navSetSplit || !dom.recentSets || !dom.navSetSplit.classList.contains('open')) return;
-
-  const anchorRect = dom.navSetSplit.getBoundingClientRect();
-  const viewportPadding = 12;
-  const maxWidth = Math.min(340, window.innerWidth - (viewportPadding * 2));
-  const menuWidth = Math.min(dom.recentSets.offsetWidth || maxWidth, maxWidth);
-  let left = anchorRect.left;
-
-  if ((left + menuWidth) > (window.innerWidth - viewportPadding)) {
-    left = window.innerWidth - viewportPadding - menuWidth;
-  }
-  if (left < viewportPadding) {
-    left = viewportPadding;
-  }
-
-  dom.recentSets.style.setProperty('--recent-sets-left', `${Math.round(left)}px`);
-  dom.recentSets.style.setProperty('--recent-sets-top', `${Math.round(anchorRect.bottom + 8)}px`);
-}
-
-function setRecentSetsDropdownOpen(isOpen) {
-  if (!dom.navSetSplit || !dom.btnNavSetToggle || !dom.recentSets) return;
-  const hasItems = !dom.recentSets.classList.contains('hidden') && dom.recentSets.childElementCount > 0;
-  const shouldOpen = Boolean(isOpen) && hasItems;
-  dom.navSetSplit.classList.toggle('open', shouldOpen);
-  dom.btnNavSetToggle.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
-  if (shouldOpen) {
-    window.requestAnimationFrame(positionRecentSetsDropdown);
-  }
-}
-
-function syncRecentSetsDropdownAvailability(hasItems) {
-  if (!dom.btnNavSetToggle) return;
-  dom.btnNavSetToggle.disabled = !hasItems;
-  dom.btnNavSetToggle.setAttribute('aria-disabled', hasItems ? 'false' : 'true');
-  if (!hasItems) {
-    setRecentSetsDropdownOpen(false);
-  }
-}
-
-function renderRecentSets() {
-  if (!dom.recentSets) return;
-  const recent = (Array.isArray(state.recentSets) ? state.recentSets : [])
-    .filter((entry) => !state.isExcludedSet(entry));
-  if (!state.loggedIn || recent.length === 0) {
-    dom.recentSets.classList.add('hidden');
-    dom.recentSets.innerHTML = '';
-    syncRecentSetsDropdownAvailability(false);
-    return;
-  }
-
-  const labelsById = new Map((state.allSets || []).map((set) => [set.setId, set.setName || set.setId]));
-  dom.recentSets.innerHTML = recent
-    .map((entry) => {
-      const label = labelsById.get(entry.setId) || entry.setName || entry.setId;
-      return `<button class="recent-set-chip" type="button" role="menuitem" data-set-id="${entry.setId}" title="${label}">${label}</button>`;
-    })
-    .join('');
-  dom.recentSets.classList.remove('hidden');
-  syncRecentSetsDropdownAvailability(true);
-  if (dom.navSetSplit?.classList.contains('open')) {
-    window.requestAnimationFrame(positionRecentSetsDropdown);
-  }
-
-  dom.recentSets.querySelectorAll('.recent-set-chip').forEach((chip) => {
-    chip.addEventListener('click', () => {
-      const setId = chip.dataset.setId;
-      if (!setId) return;
-      dom.selector.value = setId;
-      setRecentSetsDropdownOpen(false);
-      navigate(`set/${setId}`);
-    });
-  });
-}
-
-function markSetAsRecent(setMeta) {
-  if (!setMeta?.setId) return;
-  const normalizedId = String(setMeta.setId);
-  const normalizedName = String(setMeta.setName || normalizedId);
-  const next = [
-    { setId: normalizedId, setName: normalizedName, at: Date.now() },
-    ...(state.recentSets || []).filter((entry) => String(entry.setId) !== normalizedId)
-  ].slice(0, 8);
-
-  state.recentSets = next;
-  saveRecentSets();
-  renderRecentSets();
 }
 
 function initSheetsWriteFeedback() {
