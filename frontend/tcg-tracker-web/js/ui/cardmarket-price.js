@@ -1,4 +1,4 @@
-import { formatCardmarketEntryLabel, formatCardmarketEntryTitle } from '../data/cardmarket-ui-helpers.js?v=20261115-rh-1';
+import { formatCardmarketEntryLabel, formatCardmarketEntryTitle } from '../data/cardmarket-ui-helpers.js?v=20261115-price-range';
 import { isGeneratedCardmarketSearchUrl, applyReverseHoloQueryParam } from '../data/cardmarket-url-utils.js';
 
 // ============================================================================
@@ -203,6 +203,20 @@ export function getCardmarketPriceDetails(prices = {}, { reverseHolo = false } =
     .filter(Boolean);
 }
 
+/** "low – groesster Durchschnitt" (avg, avg1, avg7, avg30); eine Seite fehlt oder beide gleich -> ein Preis. */
+function formatLowToAverageRange(prices = {}, { reverseHolo = false } = {}) {
+  const h = reverseHolo ? 'Holo' : '';
+  const low = getCardmarketPriceValue(prices, `low${h}`);
+  const averages = [['average', 'avg'], ['average1', 'avg1'], ['average7', 'avg7'], ['average30', 'avg30']]
+    .map((keys) => getCardmarketPriceValue(prices, ...keys.map((k) => `${k}${h}`)))
+    .filter((v) => v != null);
+  const high = averages.length ? Math.max(...averages) : null;
+  if (low == null && high == null) return '';
+  const prefix = reverseHolo ? 'RH ' : '';
+  if (low == null || high == null || low === high) return `${prefix}${formatEuroPrice(low ?? high)}`;
+  return `${prefix}${formatEuroPrice(Math.min(low, high))} – ${formatEuroPrice(Math.max(low, high))}`;
+}
+
 export function buildCardmarketLinkPresentation(summary, { preferReverseHolo = false, basePriceType = CARDMARKET_BASE_PRICE_DEFAULT } = {}) {
   if (!summary?.entry) return null;
 
@@ -232,9 +246,15 @@ export function buildCardmarketLinkPresentation(summary, { preferReverseHolo = f
   const activePick = (effectivePreferReverseHolo && reversePick) || normalPick || reversePick;
   const activeMode = effectivePreferReverseHolo && reversePick ? 'Reverse Holo' : 'Normal';
 
-  const label = activePick
+  // Grundpreis "Durchschnitt": Spanne vom guenstigsten Angebot (low) bis zum groessten Durchschnittswert
+  // (Cardmarket liefert keinen Hoechstpreis); Reverse Holo mit den Holo-Werten.
+  const averageRange = normalizeCardmarketBasePriceType(basePriceType) === 'average'
+    ? formatLowToAverageRange(prices, { reverseHolo: activeMode === 'Reverse Holo' })
+    : '';
+
+  const label = averageRange || (activePick
     ? `${activePick.label} ${activePick.value}`
-    : formatCardmarketEntryLabel(entry);
+    : formatCardmarketEntryLabel(entry));
 
   const reverseDetails = getCardmarketPriceDetails(prices, { reverseHolo: true });
   const normalDetails = getCardmarketPriceDetails(prices, { reverseHolo: false });

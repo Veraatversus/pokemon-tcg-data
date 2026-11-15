@@ -17,12 +17,12 @@ import {
   loadSearchHistory,
   clearSearchHistory,
   generateCollectionReport
-} from './enhanced-features.js?v=20261115-rh-1';
+} from './enhanced-features.js?v=20261115-price-range';
 
 import {
   initQuickFiltersUI,
   createExportDialog
-} from './ui/components.js?v=20261115-rh-1';
+} from './ui/components.js?v=20261115-price-range';
 
 import {
   downloadJson,
