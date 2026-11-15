@@ -8,8 +8,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const appPath = path.join(__dirname, '..', 'js', 'app.js');
 
-// Statistik und Preis-Tab liegen seit der Auslagerung in js/views/; geprueft wird app.js plus diese Module.
-const viewPaths = [path.join(__dirname, '..', 'js', 'views', 'stats-price.js')];
+// Statistik, Preis-Tab, Lightbox und Kartenraster liegen seit der Auslagerung in js/views/; geprueft wird app.js plus diese Module.
+const viewPaths = ['stats-price.js', 'lightbox.js', 'set-cards.js'].map((name) => path.join(__dirname, '..', 'js', 'views', name));
 
 async function readAppSource() {
   const sources = await Promise.all([appPath, ...viewPaths].map((file) => readFile(file, 'utf8')));

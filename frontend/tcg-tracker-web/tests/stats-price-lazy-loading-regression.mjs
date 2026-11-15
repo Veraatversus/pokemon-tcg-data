@@ -7,9 +7,9 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const appPath = path.join(__dirname, '..', 'js', 'app.js');
-
+// Statistik, Preis-Tab und Kartenraster liegen seit der Auslagerung in js/views/; geprueft wird app.js plus diese Module.
 // Statistik und Preis-Tab liegen seit der Auslagerung in js/views/; geprueft wird app.js plus diese Module.
-const viewPaths = [path.join(__dirname, '..', 'js', 'views', 'stats.js'), path.join(__dirname, '..', 'js', 'views', 'stats-price.js')];
+const viewPaths = ['stats.js', 'stats-price.js', 'set-cards.js'].map((name) => path.join(__dirname, '..', 'js', 'views', name));
 
 async function readAppSource() {
   const sources = await Promise.all([appPath, ...viewPaths].map((file) => readFile(file, 'utf8')));
