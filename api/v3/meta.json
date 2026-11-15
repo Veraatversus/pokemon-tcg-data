@@ -4,9 +4,15 @@
     "cards": 21577,
     "matched": 20770,
     "primary_only": 55,
-    "sets": 202,
+    "sets": 198,
     "tcgdex_only": 752
   },
+  "emptySetIds": [
+    "TCGDEX-jumbo",
+    "TCGDEX-rc",
+    "TCGDEX-sp",
+    "TCGDEX-wp"
+  ],
   "excludedSeries": [
     "tcgp"
   ],

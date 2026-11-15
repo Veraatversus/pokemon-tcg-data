@@ -132,6 +132,8 @@ export function runBuild({
   // Mirror und Registry bleiben vollstaendig.
   const excludedSeries = readJsonOr(p('api', 'mappings', 'excluded-series.json'), { series: [] }).series ?? [];
   const excludedSetIds = [];
+  // Sets ohne Karten (TCGdex fuehrt nur die Set-Definition, z. B. wp, jumbo): nicht veroeffentlichen, Registry bleibt.
+  const emptySetIds = [];
   const sets = [];
   const cardsBySet = new Map();
   const skippedNoSource = [];
@@ -172,6 +174,7 @@ export function runBuild({
     }
     // Rueckfall fuer Karten ganz ohne Bild (weder EN noch DE): verifiziertes Scrydex-Bild (images.mjs).
     scrydexImageCount += applyScrydexImages(cards, assetsVerified);
+    if (!cards.length) { emptySetIds.push(setId); continue; }
     cards.sort((a, b) => sortLocalIds(a.cardId, b.cardId) || cmp(a.cardId, b.cardId));
     cardsBySet.set(setId, cards);
     sets.push(mergeSet({
@@ -237,6 +240,7 @@ export function runBuild({
     counts: { sets: sets.length, cards: cardTotal, ...matchStatus },
     excludedSeries: [...excludedSeries].sort(cmp),
     excludedSetIds,
+    emptySetIds,
     warnings: { missingImages },
     sources: {
       pokemontcg: tcgdexOnly ? null : { commit: sources.pokemontcg?.commit ?? null },
@@ -268,7 +272,7 @@ export function runBuild({
   writeIfChanged(path.join(outAbs, 'reports', 'cardmarket-ids.md'), renderCardmarketReportMd(cardmarketIds));
   // Meldung "Cardmarket-Zuordnung pruefen": nur das Ergebnis, der Workflow legt das Issue an/aktualisiert/schliesst es.
   const cardmarketIssue = evaluateCardmarketIssue({
-    report: cardmarketIds, meta: readJsonOr(p('sources', 'cardmarket', 'meta.json'), {}), previousSetIds, excludedSetIds, sets, now: new Date(),
+    report: cardmarketIds, meta: readJsonOr(p('sources', 'cardmarket', 'meta.json'), {}), previousSetIds, excludedSetIds: [...excludedSetIds, ...emptySetIds], sets, now: new Date(),
   });
   fs.mkdirSync(p('.cache', 'cardmarket'), { recursive: true });
   fs.writeFileSync(p('.cache', 'cardmarket', 'issue.json'), `${JSON.stringify(cardmarketIssue, null, 2)}
@@ -279,7 +283,7 @@ export function runBuild({
   let priceGuide = null;
   try { if (fs.existsSync(priceGuideFile)) priceGuide = readJson(priceGuideFile); } catch { priceGuide = null; } // unlesbar = kein Preisguide
   // Preisdateien ausgeschlossener Sets entfallen auch ohne Preisguide.
-  for (const id of excludedSetIds) fs.rmSync(path.join(outAbs, 'prices', `${id}.json`), { force: true });
+  for (const id of [...excludedSetIds, ...emptySetIds]) fs.rmSync(path.join(outAbs, 'prices', `${id}.json`), { force: true });
   const prices = writePriceFiles({ outDir: outAbs, cardsBySet, primaryCardmarketId, priceGuide });
   if (doWriteRegistry && !tcgdexOnly) writeRegistry(registryAbs, registry);
 
