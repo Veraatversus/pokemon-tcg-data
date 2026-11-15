@@ -358,9 +358,32 @@ async function testLoadsSpreadsheetAfterDiscoveryBecomesReady() {
   }
 }
 
+function testMatchesSetIdViaV3Aliases() {
+  const workbook = (setIdText, sheetName) => ({
+    SheetNames: [sheetName],
+    Sheets: { [sheetName]: { A1: { v: sheetName, c: [{ t: `Set ID: ${setIdText}` }] }, A3: { v: '001' }, A5: { v: true } } }
+  });
+  const allSets = [
+    { setId: 'swsh12pt5', setName: 'Crown Zenith', aliases: ['TCGDEX-swsh12.5', 'TCGDEX-swsh12.5gg', 'swsh12pt5gg'], imported: true },
+    { setId: 'me5', setName: 'Pitch Black', aliases: ['TCGDEX-me05'], imported: true },
+    { setId: 'sv3pt5', setName: '151', imported: true }
+  ];
+  const resolve = (setIdText, sheetName = 'Altes Blatt') => {
+    const plan = buildLegacyImportPlan({ parsedWorkbook: parseLegacyWorkbook(workbook(setIdText, sheetName)), allSets, cardsBySetId: {} });
+    return plan.unresolvedSheets.length ? null : plan.matchedSets[0].setId;
+  };
+  assert.equal(resolve('swsh12pt5gg'), 'swsh12pt5', 'Subset-ID aus Alias-Liste -> Hauptset');
+  assert.equal(resolve('swsh12.5gg'), 'swsh12pt5', 'TCGdex-ID eines Alias (ohne Praefix, normalisiert)');
+  assert.equal(resolve('TCGDEX-me05'), 'me5', 'TCGDEX-Alias -> kanonisches Set');
+  assert.equal(resolve('me05'), 'me5', 'TCGdex-ID ohne Praefix');
+  assert.equal(resolve('sv3.5'), 'sv3pt5', 'normalizeSetId: 3.5 -> 3pt5 (ohne aliases-Feld)');
+  assert.equal(resolve('unknown1'), null);
+}
+
 async function run() {
   testParsesLegacyGridFromWorkbook();
   testBuildsStrictImportPlanForKnownSet();
+  testMatchesSetIdViaV3Aliases();
   testExtractsSetIdFromHeaderTextFallback();
   testStopsOnUnknownCardMappings();
   testExtractsSpreadsheetIdFromUrl();

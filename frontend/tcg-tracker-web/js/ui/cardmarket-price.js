@@ -1,4 +1,4 @@
-import { formatCardmarketEntryLabel, formatCardmarketEntryTitle } from '../data/cardmarket-data.js?v=20260613-tcgdex-merge-fix-v2';
+import { formatCardmarketEntryLabel, formatCardmarketEntryTitle } from '../data/cardmarket-ui-helpers.js?v=20261115-clean-4';
 import { isGeneratedCardmarketSearchUrl, applyReverseHoloQueryParam } from '../data/cardmarket-url-utils.js';
 
 // ============================================================================
@@ -36,16 +36,31 @@ export function getCardmarketPriceValue(prices = {}, ...keys) {
 //
 // Wird eine Karte dennoch als "Reverse Holo" gesammelt, soll das Frontend
 // auf die normalen Kartenpreise zurueckfallen.
+//
+// api/v3/prices-Eintraege (erkennbar an `productId`) tragen avgHolo und die *Holo-Felder nur fuer
+// Karten mit Reverse-Print (master A8); avgHolo kann fehlen, dort gelten vorhandene Holo-Felder als Holo-Preise.
+const V3_HOLO_FIELDS = ['trendHolo', 'avg1Holo', 'avg7Holo', 'avg30Holo', 'lowHolo'];
+
 export function hasReliableHoloPrices(prices = {}) {
   if (toFinitePrice(prices?.avgHolo) != null) return true;
   if (toFinitePrice(prices?.averageHolo) != null) return true;
+  if (prices?.productId != null) return V3_HOLO_FIELDS.some((key) => toFinitePrice(prices?.[key]) != null);
   return false;
+}
+
+// Preis-Zusammenfassungen je Karte (Kartenlinks + Lightbox in app.js).
+// "Preise neu laden" (reloadCardmarketPricesManually in app.js) leert sie
+// ueber resetCardmarketPriceSummaryCaches.
+export const cardmarketPriceSummaryCache = new Map();
+export const cardmarketPriceSummaryPending = new Map();
+
+export function resetCardmarketPriceSummaryCaches() {
+  cardmarketPriceSummaryCache.clear();
+  cardmarketPriceSummaryPending.clear();
 }
 
 // Stable cache key for a card's price summary. Uses setId/number/name when
 // available, falls back to the cardmarket URL for purely-URL-keyed lookups.
-// Imported by app.js and views/set-view-controller.js for the price summary
-// Map caches.
 export function getCardmarketPriceCacheKey(card = {}) {
   const setId = String(card?.setId || '').trim();
   const number = String(card?.number || '').trim();

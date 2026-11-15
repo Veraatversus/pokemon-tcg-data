@@ -77,7 +77,6 @@ Historische bzw. Übergangs-Module, die noch nicht vollständig in die Zielarchi
 | [modules/legacy/advanced-features.md](modules/legacy/advanced-features.md) | Backup/Export/Gesten/Statistik (Legacy) |
 | [modules/legacy/enhanced-features.md](modules/legacy/enhanced-features.md) | Favoriten/Settings/Bulk/Reports (Legacy) |
 | [modules/legacy/card-filters.md](modules/legacy/card-filters.md) | Kartenfilter- und Wertlogik (Legacy) |
-| [modules/legacy/pokecode-compat.md](modules/legacy/pokecode-compat.md) | Kompatibilitätsadapter für API-Migration |
 | [modules/legacy/community-features.md](modules/legacy/community-features.md) | Community-Domainlogik (Legacy) |
 | [modules/legacy/community-ui.md](modules/legacy/community-ui.md) | Community-UI-Bausteine (Legacy) |
 | [modules/legacy/social-features.md](modules/legacy/social-features.md) | Social/Wishlist/Achievement-Funktionen (Legacy) |

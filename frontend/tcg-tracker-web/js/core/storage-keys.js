@@ -6,7 +6,7 @@
  * Scope can be: user, app, cache, preferences, sync.
  */
 
-import { scopedStorageKey } from './config.js?v=20260613-tcgdex-merge-fix-v2';
+import { scopedStorageKey } from './config.js';
 
 // ============================================================================
 // User & Identity Keys
@@ -18,12 +18,6 @@ import { scopedStorageKey } from './config.js?v=20260613-tcgdex-merge-fix-v2';
  * Format: `client_<timestamp>` or `client_<uuid>`
  */
 export const REALTIME_CLIENT_STORAGE_KEY = scopedStorageKey('realtime_client_id');
-
-/**
- * User ID from Google authentication or local fallback.
- * Synced from profile.userId or generated as `user_<timestamp>`.
- */
-export const USER_ID_STORAGE_KEY = scopedStorageKey('user_id');
 
 // ============================================================================
 // UI Preferences Keys

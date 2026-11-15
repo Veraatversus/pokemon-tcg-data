@@ -258,3 +258,21 @@ test('computePriceAnalyticsFromSummaries exposes advanced detail metrics for dee
   assert.ok(Math.abs((analytics.details?.madValue || 0) - 5) < 1e-9);
   assert.ok(Math.abs((analytics.details?.setHhi || 0) - 0.8702001081665764) < 1e-9);
 });
+
+test('pickCardPriceFromSummary: v3-Preiseintrag (ohne avgHolo-Feld) liefert RH-Preis', () => {
+  const summary = { entry: { prices: { productId: 1, trend: 1, trendHolo: 3 } } };
+  assert.equal(pickCardPriceFromSummary(summary, { preferReverseHolo: true }), 3);
+  assert.equal(pickCardPriceFromSummary({ entry: { prices: { productId: 1, trend: 1 } } }, { preferReverseHolo: true }), 1);
+});
+
+test('pickCardPriceFromSummary: v3-Eintrag nutzt avg bzw. avgHolo fuer "Ø" (average)', () => {
+  const prices = { productId: 1, avg: 2.5, avg30: 2.1, trend: 3, avgHolo: 6.5, avg30Holo: 5, trendHolo: 7 };
+  assert.equal(pickCardPriceFromSummary({ entry: { prices } }, { basePriceType: 'average' }), 2.5);
+  assert.equal(pickCardPriceFromSummary({ entry: { prices } }, { basePriceType: 'average', preferReverseHolo: true }), 6.5);
+  assert.equal(pickCardPriceFromSummary({ entry: { prices } }, { basePriceType: 'trend' }), 3);
+});
+
+test('pickCardPriceFromSummary: v3-Eintrag ohne avg (alte Preisdatei) faellt wie bisher zurueck', () => {
+  const prices = { productId: 1, avg7: 1.8, avg30: 2.1 };
+  assert.equal(pickCardPriceFromSummary({ entry: { prices } }, { basePriceType: 'average' }), 1.8);
+});

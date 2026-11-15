@@ -4,9 +4,135 @@
 
 const SW_SCOPE_PATH = new URL(self.registration.scope).pathname.toLowerCase();
 const SW_SCOPE = /(^|\/)dev(\/|$)/.test(SW_SCOPE_PATH) ? 'dev' : 'release';
-const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v55`;
-const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v55`;
-const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v55`;
+const CACHE_NAME = `poke-tcg-${SW_SCOPE}-v60`;
+const RUNTIME_CACHE = `poke-tcg-runtime-${SW_SCOPE}-v60`;
+const IMAGE_CACHE = `poke-tcg-images-${SW_SCOPE}-v60`;
+
+// api/v3 + api/registry JSON in the runtime cache: keep at most API_CACHE_MAX_ENTRIES
+// non-pinned entries (card files); oldest-inserted are evicted first (cache.keys() is insertion-ordered).
+const API_CACHE_MAX_ENTRIES = 60;
+const API_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+const API_PINNED_RE = /\/api\/(v3\/(sets|meta|search-index)\.json|registry\/sets\.json)$/;
+const API_ENTRY_RE = /\/api\/(v3|registry)\//;
+// Preisdateien (api/v3/prices) laufen ueber handlePricesRequest (Stamp-Bereinigung) und zaehlen hier nicht mit.
+const API_PRICES_RE = /\/api\/v3\/prices\//;
+
+async function trimApiCache(cache) {
+  const keys = await cache.keys();
+  const apiKeys = keys.filter((req) => {
+    const { pathname } = new URL(req.url);
+    return API_ENTRY_RE.test(pathname) && !API_PRICES_RE.test(pathname);
+  });
+  const evictable = apiKeys.filter((req) => !API_PINNED_RE.test(new URL(req.url).pathname));
+  const excess = apiKeys.length - API_CACHE_MAX_ENTRIES;
+  for (let i = 0; i < excess && i < evictable.length; i += 1) {
+    await cache.delete(evictable[i]);
+  }
+}
+
+// Serialisiert: parallele puts zaehlen sonst jeweils vor den anderen und lassen den Cache ueber der Grenze.
+let apiTrimQueue = Promise.resolve();
+function enqueueApiTrim(cache) {
+  const run = apiTrimQueue.then(() => trimApiCache(cache));
+  apiTrimQueue = run.catch(() => {});
+  return run;
+}
+
+// Freshness decision for cached API responses (pure; unit-tested in tests/service-worker-api-cache.test.mjs).
+function isFresh(fetchedAtMs, nowMs, maxAgeMs) {
+  if (!Number.isFinite(fetchedAtMs) || !Number.isFinite(nowMs)) return false;
+  const age = nowMs - fetchedAtMs;
+  return age >= 0 && age < maxAgeMs;
+}
+
+async function handleApiRequest(request) {
+  const cache = await caches.open(RUNTIME_CACHE);
+  const cached = await cache.match(request);
+  if (cached && isFresh(Number(cached.headers.get('x-sw-fetched-at')), Date.now(), API_MAX_AGE_MS)) {
+    return cached;
+  }
+  try {
+    const response = await fetch(request, { cache: 'no-cache' });
+    if (response && response.status === 200) {
+      const headers = new Headers(response.headers);
+      headers.set('x-sw-fetched-at', String(Date.now()));
+      const stored = new Response(await response.clone().blob(), {
+        status: response.status,
+        statusText: response.statusText,
+        headers
+      });
+      try {
+        await cache.put(request, stored);
+        await enqueueApiTrim(cache);
+      } catch (err) {
+        console.warn('[SW] cache.put failed:', err);
+      }
+    }
+    return response;
+  } catch (err) {
+    return cached || Response.error();
+  }
+}
+
+// --- prices-data ---
+// Preisdaten api/v3/prices/*.json (js/data/v3-prices.js) werden taeglich
+// neu gebaut; meta.json.generatedAt ist der Stamp. Die App haengt ihn als ?v=<stamp> an
+// jede Daten-URL.
+//  - meta.json und Daten ohne ?v: Netz zuerst (no-store), offline -> gecachte Kopie.
+//  - Daten mit ?v: cache-first (der Stamp steckt im Schluessel). Ein neuer Stamp ist eine neue URL und
+//    kommt daher beim ersten Laden nach dem Build aus dem Netz; danach werden aeltere Stamps entfernt.
+// Unit-getestet in tests/service-worker-cardmarket.test.mjs.
+const CARDMARKET_DATA_RE = /\/api\/v3\/prices\/[^/]+\.json$/;
+const CARDMARKET_META_RE = /\/api\/v3\/prices\/meta\.json$/;
+
+function isPricesDataPath(pathname) {
+  return CARDMARKET_DATA_RE.test(String(pathname || ''));
+}
+
+function stampTime(stamp) {
+  const time = Date.parse(stamp);
+  return Number.isFinite(time) ? time : -Infinity;
+}
+
+// Entfernt Dateneintraege mit aelterem (oder ohne) Stamp; meta.json bleibt.
+async function pruneCardmarketStamps(cache, keepStamp) {
+  const keepTime = stampTime(keepStamp);
+  const keys = await cache.keys();
+  for (const req of keys) {
+    const url = new URL(req.url);
+    if (!isPricesDataPath(url.pathname) || CARDMARKET_META_RE.test(url.pathname)) continue;
+    const stamp = url.searchParams.get('v') || '';
+    if (stamp !== keepStamp && stampTime(stamp) < keepTime) await cache.delete(req);
+  }
+}
+
+async function handlePricesRequest(request) {
+  const cache = await caches.open(RUNTIME_CACHE);
+  const url = new URL(request.url);
+  const stamp = url.searchParams.get('v') || '';
+  const versioned = Boolean(stamp) && !CARDMARKET_META_RE.test(url.pathname);
+  if (versioned) {
+    const cached = await cache.match(request);
+    if (cached) return cached;
+  }
+  try {
+    const response = versioned ? await fetch(request) : await fetch(request, { cache: 'no-store' });
+    if (response && response.status === 200) {
+      try {
+        await cache.put(request, response.clone());
+        if (versioned) await pruneCardmarketStamps(cache, stamp);
+      } catch (err) {
+        console.warn('[SW] cache.put failed:', err);
+      }
+    }
+    return response;
+  } catch (err) {
+    return (await cache.match(request))
+      || (await cache.match(request, { ignoreSearch: true }))
+      || Response.error();
+  }
+}
+// --- /prices-data ---
 
 const SW_DEBUG = false;
 
@@ -57,16 +183,24 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Images: cache first, then network. Netzwerkfehler (DNS, Host down, Reset) als Response.error(),
+// damit das <img> ein error-Event bekommt und die Fallback-Kette (js/ui/image-fallback.js)
+// zum naechsten Kandidaten weiterrueckt. Echte Antworten (auch 404) gehen unveraendert durch.
+function handleImageRequest(request) {
+  return caches.open(IMAGE_CACHE).then((cache) => cache.match(request).then((cached) => {
+    if (cached) return cached;
+    return fetch(request).then((response) => {
+      if (response && response.status === 200) {
+        cache.put(request, response.clone());
+      }
+      return response;
+    }).catch(() => Response.error());
+  }));
+}
+
 // Fetch event: serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
   const { request } = event;
-  if (request.url.includes('cardmarket')) {
-    console.log('[SW] cardmarket fetch:', request.destination, request.url.slice(0, 80));
-    event.waitUntil((async () => {
-      const clients = await self.clients.matchAll();
-      clients.forEach(c => c.postMessage({ type: 'CM_FETCH', url: request.url, destination: request.destination }));
-    })());
-  }
   const url = new URL(request.url);
 
   // Skip non-HTTP requests
@@ -96,30 +230,16 @@ self.addEventListener('fetch', (event) => {
       return;
     }
 
+    // Preisdaten (api/v3/prices, auch vom VERA_BASE-Host): Stamp-basierte Frische,
+    // siehe handlePricesRequest. Steht vor der api/v3-Route (24-h-Cache).
+    if (request.destination !== 'image' && isPricesDataPath(url.pathname)) {
+      event.respondWith(handlePricesRequest(request));
+      return;
+    }
+
     // Images: cache first, then network
     if (request.destination === 'image') {
-      event.respondWith(
-        caches.open(IMAGE_CACHE).then((cache) => {
-          return cache.match(request).then((response) => {
-            if (response) return response;
-
-            return fetch(request).then((response) => {
-              if (response && response.status === 200) {
-                cache.put(request, response.clone());
-              }
-              return response;
-            }).catch(() => {
-              // Return placeholder for failed images
-              return new Response(
-                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 280"><rect fill="#ccc" width="200" height="280"/><text x="100" y="140" text-anchor="middle" dominant-baseline="middle" font-size="18" fill="#999">No Image</text></svg>',
-                {
-                  headers: { 'Content-Type': 'image/svg+xml' }
-                }
-              );
-            });
-          });
-        })
-      );
+      event.respondWith(handleImageRequest(request));
       return;
     }
 
@@ -158,6 +278,13 @@ self.addEventListener('fetch', (event) => {
       return;
     }
 
+    // Same-origin API data (api/v3, api/registry): changes at most once a day, so cache-first
+    // with a 24 h freshness window (fetch time stored in x-sw-fetched-at); stale copy = offline fallback.
+    if (API_ENTRY_RE.test(url.pathname)) {
+      event.respondWith(handleApiRequest(request));
+      return;
+    }
+
     // JS/CSS: network-first to avoid stale app modules after deploys
     const isCodeAsset = request.destination === 'script'
       || request.destination === 'style'
@@ -165,7 +292,7 @@ self.addEventListener('fetch', (event) => {
       || url.pathname.endsWith('.css');
     if (isCodeAsset) {
       event.respondWith(
-        fetch(request)
+        fetch(request, { cache: 'no-cache' })
           .then((response) => {
             if (response && response.status === 200) {
               const responseToCache = response.clone();

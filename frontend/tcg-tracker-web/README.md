@@ -25,6 +25,7 @@ Kein Server, kein Build-Schritt – direkt auf GitHub Pages deploybar.
 | Lade-Overlay mit Spinner | ✅ |
 | Responsive Layout (Mobile ≤ 768 px) | ✅ |
 | Cardmarket-Links | ✅ |
+| Kartensuche über alle Sets (Suchindex, ohne Laden der Kartendateien) | ✅ |
 
 ---
 
@@ -48,13 +49,13 @@ Das Spreadsheet braucht folgende Sheets (exakte Namen):
 | `WebApp Settings` | Key-Value-Paare; wird automatisch angelegt |
 | `{Set-Name}` | Karten-Grid für jedes importierte Set |
 
-> Die Set-Sheets folgen dem Grid-Layout aus `pokecode.js`:  
+> Die Set-Sheets folgen dem Grid-Layout aus dem frueheren Sheets-Skript (`frontend/tcg-tracker-google-sheets/script/pokecode.js`):  
 > 5 Karten/Zeile × 3 Spalten/Block × 4 Zeilen/Block, 2 Header-Zeilen.
 
 ### 3. config.js befüllen
 
 ```js
-// frontend/tcg-tracker-web/js/config.js
+// frontend/tcg-tracker-web/js/core/config.js
 GOOGLE_CLIENT_ID: 'DEINE_CLIENT_ID.apps.googleusercontent.com',
 SPREADSHEET_ID:   'AUS_DER_SHEETS-URL',
 ```
@@ -75,15 +76,18 @@ cd frontend/tcg-tracker-web && python -m http.server 8080
 
 ## Modulübersicht
 
-| Datei | Verantwortung |
+Details und Regeln: `ARCHITECTURE.md`.
+
+| Verzeichnis / Datei | Verantwortung |
 |---|---|
-| `js/utils.js` | Shared-Utilities: `normalizeCardNumber`, `naturalSort`, `toBoolean`, `colToA1`, `extractDisplayTextFromHyperlink` |
-| `js/cache.js` | In-Memory TTL-Cache (RAM only, kein localStorage) |
-| `js/config.js` | Alle Konstanten: Credentials, Grid, API-URLs, Farben, ID-Mappings |
-| `js/auth.js` | Google OAuth 2.0 mit Auto-Login & Token-Persistenz |
-| `js/sheets-db.js` | Sheets-Zugriff: Sets lesen, Karten-Grid lesen, Checkboxen schreiben |
-| `js/pokemon-api.js` | Karten-Daten: Vera-API/pokemontcg.io + TCGDex DE merge/union |
-| `js/app.js` | Hauptlogik: Bootstrap, UI-Events, Rendering, Stats, Filter, Toast |
+| `js/app.js` | Einstiegspunkt und Verdrahtung (`registerActions`) |
+| `js/app/` | Zustand, DOM-Referenzen, Aktionsregister, Router, Bootstrap, PWA |
+| `js/views/` | Ansichten: Dashboard, Set, Lightbox, Suche, Statistik (inkl. Preis-Tab) |
+| `js/features/` | Sammlung (Import, Backup, Altbestand), Suche, Einstellungen |
+| `js/ui/` | Gemeinsame UI-Helfer, Bild-Fallback, Cardmarket-Preisanzeige |
+| `js/data/sheets-client.js`, `js/data/sheets-db.js` | Sheets-API-Zugriff und Fachlogik (Sets lesen, Karten-Grid lesen, Checkboxen schreiben) |
+| `js/data/v3-*.js`, `js/data/pokemon-api.js` | Karten-/Set-Daten aus `api/v3` |
+| `js/core/` | Konfiguration, Auth, Cache, Utilities |
 
 ---
 
@@ -109,20 +113,18 @@ Absolute Sheet-Zeile für Karte i (0-basiert):
 
 ```
 loadCurrentSet(setId)
-  ├─ fetchMergedCards(setId)           pokemon-api.js
-  │    ├─ fetchVeraCards()             → Vera GitHub Pages (schnell)
-  │    │    └── Fallback: fetchPokemontcgCards()
-  │    ├─ fetchTcgdexSet(tcgdexId)     → api.tcgdex.net/v2/de
-  │    └─ merge + union → [{number, name, image, cardmarketUrl}]
+  ├─ fetchMergedCards(setId)           js/data/pokemon-api.js
+  │    └── js/data/v3-api.js → api/v3 (vorberechnet, EN + i18n.de) + api/registry (Set-Aliase)
+  │        → [{number, name, image, cardmarketUrl}]
   │
-  └─ readSetCollectionMap(sheetName)   sheets-db.js
+  └─ readSetCollectionMap(sheetName)   js/data/sheets-db.js
        └─ gapi.client.sheets → Grid-Werte lesen
             → Map<normalizedNumber, {g, rh, gCell, rhCell}>
 ```
 
 ## Statistik: Cardmarket Preisradar
 
-Die Statistikansicht enthält einen zusätzlichen Preisbereich auf Basis der vorhandenen Cardmarket-Resolver.
+Die Statistikansicht enthält einen zusätzlichen Preisbereich auf Basis der Preisdaten aus `api/v3/prices` (kein Matching im Browser; Produkt-IDs stammen aus api/v3).
 
 - Die Kern-Statistik rendert zuerst ohne Blockierung.
 - Preisdaten werden danach chunk-basiert nachgeladen.
@@ -139,7 +141,7 @@ Die Statistikansicht enthält einen zusätzlichen Preisbereich auf Basis der vor
 ```bash
 node --test frontend/tcg-tracker-web/tests/stats-price-analytics.test.mjs
 node --test frontend/tcg-tracker-web/tests/stats-price-lazy-loading-regression.mjs
-node --test frontend/tcg-tracker-web/tests/cardmarket-data.test.mjs
+node --test frontend/tcg-tracker-web/tests/v3-prices.test.mjs
 ```
 
 ---
@@ -147,9 +149,7 @@ node --test frontend/tcg-tracker-web/tests/cardmarket-data.test.mjs
 ## Bekannte Einschränkungen
 
 - OAuth-Token läuft nach 1h ab; auto-refresh via GIS beim nächsten Request
-- pokemontcg.io Rate-Limit: 1000/Tag → mit `USE_VERA_API: true` umgehen
-- TCGDex-Bilder fehlen für ältere Sets → Fallback auf pokemontcg.io CDN
-- TCGDex-ID-Mappings (`CUSTOM_SET_ID_MAPPINGS`) ggf. bei neuen Sets ergänzen
+- Karten-/Setdaten kommen aus `api/v3`; ist es nicht erreichbar, werden bereits importierte Sets aus `db_cards` angezeigt
 
 3. Lokal testen:
    - z. B. `python -m http.server 8000`
@@ -158,4 +158,9 @@ node --test frontend/tcg-tracker-web/tests/cardmarket-data.test.mjs
 ## Hinweise
 - Diese Version ist ein MVP-Startpunkt.
 - Der bestehende Grid-Aufbau der Set-Blätter (5x3, Höhe 4) wird für das Lesen/Schreiben der Checkboxen verwendet.
-- Für Karten ohne TCGDex-Bild wird auf `https://images.pokemontcg.io/{setId}/{cardNumber}.png` zurückgefallen.
+- Kartenbilder, Set-Logos und Set-Symbole: zuerst in der gewählten Kartensprache, dann in der anderen Sprache, zuletzt `https://images.pokemontcg.io/…`; danach erscheint der Pokéball-Platzhalter.
+- Die Suche findet Namen (deutsch und englisch), Kartennummer, Künstler, Typ (deutsch oder englisch, z. B. „Feuer“ oder „Fire“), Seltenheit und Set (Name, Kürzel, Serie). Attacken- und Fähigkeitstexte werden nicht durchsucht.
+- Cardmarket-Preise kommen aus `api/v3/prices` und werden täglich neu gebaut; die App holt einen neuen Stand automatisch, „Preise neu laden“ in den Einstellungen leert zusätzlich alle Preis-Caches.
+- Die Kartensprache (Englisch/Deutsch) wird pro Browser gespeichert (localStorage), nicht im Spreadsheet; auf einem anderen Gerät oder in einem anderen Browser gilt wieder die Voreinstellung.
+- Vor der Zuordnung mehrdeutiger Altzeilen wird ein Auto-Snapshot angelegt; eine Rueckgaengig-Funktion fuer diese Migration gibt es in der Oberflaeche noch nicht.
+- Noch nicht zugeordnete Kandidaten mehrdeutiger Altzeilen zeigen den gemeinsamen Altstatus mit dem Hinweis „nicht zugeordnet“; ein Klick auf G oeffnet die Zuordnung.

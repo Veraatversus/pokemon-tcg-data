@@ -28,7 +28,3 @@
   letter-spacing: 0.04em;
 }
 
-.stats-chart-wrap canvas {
-  display: block;
-  max-width: 100%;
-}

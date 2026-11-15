@@ -8,7 +8,7 @@ export function createBootstrapController({
   loadDashboardPreferences,
   loadRecentSets,
   initSmartEngine,
-  runCardmarketVersioningCheck,
+  prefetchPriceStamp,
   initAutoHideTopbar,
   initGridZoom,
   initCustomSelects,
@@ -18,18 +18,6 @@ export function createBootstrapController({
   initManageImportedSetsDialog,
   initBackupImportExport,
   initQueueBuilderDialog,
-  initSetViewController,
-  createSetViewInjections,
-  createDashboardRenderer,
-  createStatsRenderer,
-  createSettingsController,
-  createStatsPriceViewController,
-  dashboardRendererDeps,
-  statsRendererDeps,
-  settingsControllerDeps,
-  assignDashboardRenderer,
-  assignStatsRenderer,
-  assignSettingsController,
   initDashboardControls,
   initSheetsWriteFeedback,
   initAuditAndSaveUi,
@@ -44,7 +32,6 @@ export function createBootstrapController({
   realtimeClientStorageKey,
   applyIncomingRealtimeUpdate,
   initQuickFiltersUI,
-  resetDashboardVirtualization,
   saveDashboardPreferences,
   renderDashboard,
   loadSearchHistory,
@@ -53,36 +40,12 @@ export function createBootstrapController({
   openBatchImportDialog,
   runDataHealthCheck,
   downloadJson,
-  runPokecodeParityTest,
   loadSnapshots,
   openSettingsDialog,
   generateCollectionReport,
   createExportDialog,
-  createWishlistPanel,
-  createSharingDialog,
-  createTradingLogPanel,
-  calculateCollectionStats,
-  createAchievementsPanel,
-  createCSVExportPanel,
   createLocalBackup,
   getLocalBackups,
-  createCommunityStatsBanner,
-  createCommunityTrendingPanel,
-  createCommunitySearchPanel,
-  createPublicShare,
-  getTrendingCollections,
-  createSharedCollectionCard,
-  createTradeStatsCard,
-  createTradeMarketplacePanel,
-  createTradeSuggestionsPanel,
-  createWantedCardsPanel,
-  getAvailableRarities,
-  getCollectionValueStats,
-  getTradePlaceSummary,
-  userIdStorageKey,
-  getUserProfile,
-  createUserProfile,
-  createUserProfileCard,
   initCommandPalette,
   getEngineMetrics,
   navigate,
@@ -120,13 +83,12 @@ export function createBootstrapController({
       console.warn('Smart Engine init:', error);
     }
 
-    // Cardmarket-Build-Stamp-Check: lädt meta.json, vergleicht mit
-    // dem letzten bekannten generatedAt und invalidiert bei einem
-    // Versionswechsel die In-Memory-Preiscaches. Fire-and-forget, damit
+    // Preis-Stamp vorab laden (api/v3/prices/meta.json generatedAt, ?v= der
+    // Preisdateien). Fire-and-forget, damit
     // der Bootstrap nicht blockiert, falls der Server nicht erreichbar
     // ist (z. B. beim Offline-Start).
-    runCardmarketVersioningCheck()?.catch?.((err) => {
-      console.warn('Cardmarket versioning check failed:', err);
+    prefetchPriceStamp()?.catch?.((err) => {
+      console.warn('Preis-Stamp (api/v3/prices) nicht ladbar:', err);
     });
 
     initAutoHideTopbar();
@@ -138,35 +100,6 @@ export function createBootstrapController({
     initManageImportedSetsDialog();
     initBackupImportExport();
     initQueueBuilderDialog();
-
-    try {
-      initSetViewController(createSetViewInjections());
-    } catch (error) {
-      console.warn('Set-View-Controller init failed:', error);
-    }
-
-    try {
-      assignDashboardRenderer(createDashboardRenderer({
-        ...dashboardRendererDeps,
-      }));
-    } catch (error) {
-      console.warn('Dashboard-Renderer init failed:', error);
-    }
-
-    try {
-      assignStatsRenderer(createStatsRenderer({
-        ...statsRendererDeps,
-        createStatsPriceViewController,
-      }));
-    } catch (error) {
-      console.warn('Stats-Renderer init failed:', error);
-    }
-
-    try {
-      assignSettingsController(createSettingsController(settingsControllerDeps));
-    } catch (error) {
-      console.warn('Settings-Controller init failed:', error);
-    }
 
     initDashboardControls();
     initSheetsWriteFeedback();
@@ -197,7 +130,6 @@ export function createBootstrapController({
           ...state.quickFilters,
           ...(detail || {}),
         };
-        resetDashboardVirtualization();
         saveDashboardPreferences();
         renderDashboard();
       });
@@ -244,15 +176,6 @@ export function createBootstrapController({
         downloadJson(`poke_backup_${stamp}.json`, payload);
         showToast(`Backup exportiert (${sets.length} Sets).`, 'success', 4000);
       },
-      'parity-test': async () => {
-        showToast('Parity-Test wird ausgeführt...', 'info');
-        try {
-          await runPokecodeParityTest({ skipPrompt: true, maxSets: 10 });
-          showToast('Parity-Test abgeschlossen.', 'success', 4000);
-        } catch (error) {
-          showToast(`Parity-Test fehlgeschlagen: ${error.message}`, 'error', 5000);
-        }
-      },
       search: () => {
         dom.search?.focus();
         showToast('Suchfeld aktiviert', 'info', 2000);
@@ -273,68 +196,7 @@ export function createBootstrapController({
         dialog.addEventListener('close', () => dialog.remove());
       },
       help: () => {
-        showToast('Verfügbare Befehle: import, health-check, backup, parity, search, snapshots, settings, export', 'info', 5000);
-      },
-      wishlists: () => {
-        const panel = createWishlistPanel();
-        const dialog = documentRef.createElement('dialog');
-        dialog.className = 'ss-dialog';
-        dialog.style.cssText = 'width: 90vw; max-width: 600px;';
-        dialog.appendChild(panel);
-        documentRef.body.appendChild(dialog);
-        dialog.showModal();
-        dialog.addEventListener('close', () => dialog.remove());
-      },
-      'share-collection': () => {
-        if (!state.allSets || state.allSets.length === 0) {
-          showToast('Keine Collection zum Teilen', 'error');
-          return;
-        }
-        const collectionData = {};
-        const panel = createSharingDialog(collectionData, state.allSets);
-        const dialog = documentRef.createElement('dialog');
-        dialog.className = 'ss-dialog';
-        dialog.style.cssText = 'width: 90vw; max-width: 600px;';
-        dialog.appendChild(panel);
-        documentRef.body.appendChild(dialog);
-        dialog.showModal();
-        dialog.addEventListener('close', () => dialog.remove());
-      },
-      'trading-log': () => {
-        const panel = createTradingLogPanel();
-        const dialog = documentRef.createElement('dialog');
-        dialog.className = 'ss-dialog';
-        dialog.style.cssText = 'width: 90vw; max-width: 700px;';
-        dialog.appendChild(panel);
-        documentRef.body.appendChild(dialog);
-        dialog.showModal();
-        dialog.addEventListener('close', () => dialog.remove());
-      },
-      achievements: async () => {
-        const stats = calculateCollectionStats(state.summaryData || []);
-        const panel = createAchievementsPanel(stats);
-        const dialog = documentRef.createElement('dialog');
-        dialog.className = 'ss-dialog';
-        dialog.style.cssText = 'width: 90vw; max-width: 600px;';
-        dialog.appendChild(panel);
-        documentRef.body.appendChild(dialog);
-        dialog.showModal();
-        dialog.addEventListener('close', () => dialog.remove());
-      },
-      'csv-export': () => {
-        if (!state.allSets || state.allSets.length === 0) {
-          showToast('Keine Sets zum Exportieren', 'error');
-          return;
-        }
-        const collectionData = {};
-        const panel = createCSVExportPanel(collectionData, state.allSets);
-        const dialog = documentRef.createElement('dialog');
-        dialog.className = 'ss-dialog';
-        dialog.style.cssText = 'width: 90vw; max-width: 600px;';
-        dialog.appendChild(panel);
-        documentRef.body.appendChild(dialog);
-        dialog.showModal();
-        dialog.addEventListener('close', () => dialog.remove());
+        showToast('Verfügbare Befehle: import, health-check, backup, search, snapshots, settings, export', 'info', 5000);
       },
       'local-backup': () => {
         try {
@@ -387,231 +249,6 @@ export function createBootstrapController({
         dialog.showModal();
         dialog.addEventListener('close', () => dialog.remove());
       },
-      community: () => {
-        const container = documentRef.createElement('div');
-        container.style.cssText = 'max-height: 80vh; overflow-y: auto; padding: 20px;';
-
-        const banner = createCommunityStatsBanner();
-        const trending = createCommunityTrendingPanel();
-        const search = createCommunitySearchPanel();
-
-        container.appendChild(banner);
-        container.appendChild(trending);
-        container.appendChild(search);
-
-        const dialog = documentRef.createElement('dialog');
-        dialog.className = 'ss-dialog';
-        dialog.style.cssText = 'width: 90vw; max-width: 900px;';
-        dialog.appendChild(container);
-        documentRef.body.appendChild(dialog);
-        dialog.showModal();
-        dialog.addEventListener('close', () => dialog.remove());
-      },
-      profile: () => {
-        const userId = localStorageRef.getItem(userIdStorageKey) || `user_${Date.now()}`;
-        localStorageRef.setItem(userIdStorageKey, userId);
-
-        let profile = getUserProfile(userId);
-        if (!profile) {
-          profile = createUserProfile('collector', 'Pokémon Sammler', 'Meine Pokémon TCG Collection');
-          localStorageRef.setItem(userIdStorageKey, profile.userId);
-        }
-
-        const card = createUserProfileCard(profile.userId, profile.userId);
-
-        const dialog = documentRef.createElement('dialog');
-        dialog.className = 'ss-dialog';
-        dialog.style.cssText = 'width: 90vw; max-width: 500px;';
-        dialog.appendChild(card);
-        documentRef.body.appendChild(dialog);
-        dialog.showModal();
-        dialog.addEventListener('close', () => dialog.remove());
-      },
-      'publish-collection': () => {
-        if (!state.allSets || state.allSets.length === 0) {
-          showToast('Keine Sets zum Veröffentlichen', 'error');
-          return;
-        }
-        const userId = localStorageRef.getItem(userIdStorageKey) || `user_${Date.now()}`;
-        const collectionData = {};
-
-        const form = documentRef.createElement('div');
-        form.style.cssText = 'padding: 20px;';
-
-        const titleEl = documentRef.createElement('input');
-        titleEl.type = 'text';
-        titleEl.placeholder = 'Collection-Titel';
-        titleEl.value = 'Meine Pokémon Collection';
-        titleEl.style.cssText = 'width: 100%; padding: 10px; border: 1px solid var(--color-border); border-radius: 6px; margin-bottom: 12px;';
-
-        const descEl = documentRef.createElement('textarea');
-        descEl.placeholder = 'Beschreibung...';
-        descEl.style.cssText = 'width: 100%; padding: 10px; border: 1px solid var(--color-border); border-radius: 6px; margin-bottom: 12px; min-height: 100px;';
-
-        const publishBtn = documentRef.createElement('button');
-        publishBtn.textContent = '🌍 Veröffentlichen';
-        publishBtn.style.cssText = `
-          width: 100%;
-          padding: 12px;
-          background: var(--color-primary);
-          color: white;
-          border: none;
-          border-radius: 6px;
-          cursor: pointer;
-          font-weight: bold;
-        `;
-
-        let dialog;
-        publishBtn.addEventListener('click', () => {
-          const share = createPublicShare(userId, collectionData, state.allSets, titleEl.value, descEl.value);
-          if (share) {
-            showToast('✅ Collection veröffentlicht!', 'success', 3000);
-            publishBtn.textContent = '✅ Veröffentlicht!';
-            setTimeout(() => dialog?.close(), 1500);
-          } else {
-            showToast('Fehler beim Veröffentlichen', 'error');
-          }
-        });
-
-        form.appendChild(titleEl);
-        form.appendChild(descEl);
-        form.appendChild(publishBtn);
-
-        dialog = documentRef.createElement('dialog');
-        dialog.className = 'ss-dialog';
-        dialog.style.cssText = 'width: 90vw; max-width: 500px;';
-        dialog.innerHTML = '<h3>🌍 Collection veröffentlichen</h3>';
-        dialog.appendChild(form);
-        documentRef.body.appendChild(dialog);
-        dialog.showModal();
-        dialog.addEventListener('close', () => dialog.remove());
-      },
-      trending: () => {
-        const trending = getTrendingCollections(20);
-
-        const container = documentRef.createElement('div');
-        container.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; padding: 20px;';
-
-        if (trending.length === 0) {
-          container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--color-muted);">Noch keine Collections veröffentlicht</p>';
-        } else {
-          trending.forEach((share) => {
-            const card = createSharedCollectionCard(share);
-            container.appendChild(card);
-          });
-        }
-
-        const dialog = documentRef.createElement('dialog');
-        dialog.className = 'ss-dialog';
-        dialog.style.cssText = 'width: 90vw; max-width: 1000px; max-height: 80vh; overflow-y: auto;';
-        dialog.innerHTML = '<h3 style="padding: 20px; margin: 0; border-bottom: 1px solid var(--color-border);">🔥 Trending Collections</h3>';
-        dialog.appendChild(container);
-        documentRef.body.appendChild(dialog);
-        dialog.showModal();
-        dialog.addEventListener('close', () => dialog.remove());
-      },
-      marketplace: () => {
-        const dialog = documentRef.createElement('dialog');
-        dialog.className = 'ss-dialog';
-        dialog.style.cssText = 'width: 90vw; max-width: 1200px; max-height: 80vh; overflow-y: auto;';
-
-        const container = documentRef.createElement('div');
-        container.style.cssText = 'padding: 20px;';
-
-        const statsCard = createTradeStatsCard('current-user');
-        const marketplace = createTradeMarketplacePanel();
-        const suggestions = createTradeSuggestionsPanel('current-user', []);
-
-        container.appendChild(statsCard);
-        container.appendChild(marketplace);
-        container.appendChild(suggestions);
-
-        dialog.innerHTML = '<h3 style="padding: 20px 20px 0 20px; margin: 0; border-bottom: 1px solid var(--color-border);">💱 Trading Marketplace</h3>';
-        dialog.appendChild(container);
-        documentRef.body.appendChild(dialog);
-        dialog.showModal();
-        dialog.addEventListener('close', () => dialog.remove());
-      },
-      wanted: () => {
-        const dialog = documentRef.createElement('dialog');
-        dialog.className = 'ss-dialog';
-
-        const container = documentRef.createElement('div');
-        container.style.cssText = 'padding: 20px;';
-        container.appendChild(createWantedCardsPanel());
-
-        dialog.innerHTML = '<h3 style="padding: 20px 20px 0 20px; margin: 0; border-bottom: 1px solid var(--color-border);">🎯 Gesuchte Karten</h3>';
-        dialog.appendChild(container);
-        documentRef.body.appendChild(dialog);
-        dialog.showModal();
-        dialog.addEventListener('close', () => dialog.remove());
-      },
-      rarity: () => {
-        const dialog = documentRef.createElement('dialog');
-        dialog.className = 'ss-dialog';
-
-        const availableRarities = getAvailableRarities();
-
-        const container = documentRef.createElement('div');
-        container.style.cssText = 'padding: 20px;';
-
-        const header = documentRef.createElement('div');
-        header.style.cssText = 'margin-bottom: 20px;';
-        header.innerHTML = '<h4>Verfügbare Raritäten</h4>';
-        container.appendChild(header);
-
-        const grid = documentRef.createElement('div');
-        grid.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px;';
-
-        availableRarities.forEach((rarity) => {
-          const button = documentRef.createElement('button');
-          button.className = 'btn-secondary';
-          button.style.cssText = 'padding: 12px; cursor: pointer;';
-          button.textContent = `${rarity.emoji} ${rarity.name}`;
-          button.addEventListener('click', () => {
-            showToast(`Raritätsfilter ausgewählt: ${rarity.name}`, 'info', 2000);
-          });
-          grid.appendChild(button);
-        });
-
-        container.appendChild(grid);
-
-        dialog.innerHTML = '<h3 style="padding: 20px 20px 0 20px; margin: 0; border-bottom: 1px solid var(--color-border);">✨ Raritätsfilter</h3>';
-        dialog.appendChild(container);
-        documentRef.body.appendChild(dialog);
-        dialog.showModal();
-        dialog.addEventListener('close', () => dialog.remove());
-      },
-      'collection-value': () => {
-        const dialog = documentRef.createElement('dialog');
-        dialog.className = 'ss-dialog';
-
-        const container = documentRef.createElement('div');
-        container.style.cssText = 'padding: 20px;';
-
-        const stats = getCollectionValueStats([]);
-
-        const info = documentRef.createElement('div');
-        info.style.cssText = 'background: var(--bg-secondary); padding: 16px; border-radius: 8px; text-align: center;';
-        info.innerHTML = `
-          <h3>Kollektionswert</h3>
-          <div style="font-size: 2em; font-weight: bold; color: var(--color-success); margin: 10px 0;">
-            €${stats.totalValue?.toFixed(2) || '0.00'}
-          </div>
-          <div style="color: var(--text-secondary);">
-            <p>Karten: ${stats.cardCount || 0}</p>
-            <p>Durchschnittswert: €${stats.averageValue?.toFixed(2) || '0.00'}</p>
-          </div>
-        `;
-
-        container.appendChild(info);
-
-        dialog.innerHTML = '<h3 style="padding: 20px 20px 0 20px; margin: 0; border-bottom: 1px solid var(--color-border);">💰 Kollektionswert</h3>';
-        dialog.appendChild(container);
-        documentRef.body.appendChild(dialog);
-        dialog.showModal();
-        dialog.addEventListener('close', () => dialog.remove());
-      },
       'live-dashboard': () => {
         const dialog = documentRef.createElement('dialog');
         dialog.className = 'ss-dialog';
@@ -630,7 +267,6 @@ export function createBootstrapController({
 
         const refreshUI = () => {
           const metrics = getEngineMetrics();
-          const market = getTradePlaceSummary();
           const summaryRows = state.summaryData || [];
           const totals = summaryRows.reduce((accumulator, row) => {
             accumulator.total += Number(row.total || 0);
@@ -652,8 +288,6 @@ export function createBootstrapController({
             ['Gesamtfortschritt', `${progress}%`],
             ['Gesammelt', `${totals.collected} / ${totals.total}`],
             ['Reverse Holos', `${totals.rh}`],
-            ['Aktive Angebote', `${market.activeOffers || 0}`],
-            ['Gesuchte Karten', `${market.totalWantedCards || 0}`],
             ['Queue', `${(metrics.syncQueue || []).length}`],
           ];
 

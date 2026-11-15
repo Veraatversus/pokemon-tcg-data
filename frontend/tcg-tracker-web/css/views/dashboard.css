@@ -1,7 +1,6 @@
 /* Dashboard view extraction */
 
-.dash-set-name,
-.dash-set-name-fallback {
+.dash-set-name {
   color: var(--color-text-primary) !important;
 }
 
@@ -89,14 +88,6 @@
   position: relative;
 }
 
-#view-dashboard .dashboard-discovery-controls {
-  z-index: 2;
-}
-
-#view-dashboard .dashboard-filter-strip {
-  z-index: 1;
-}
-
 #view-dashboard .dashboard-discovery-controls:has(.custom-select.is-open) {
   z-index: 120;
   isolation: isolate;
@@ -111,6 +102,7 @@
 }
 
 #view-dashboard .dashboard-discovery-controls {
+  z-index: 2;
   display: flex !important;
   align-items: center;
   gap: 8px;
@@ -145,6 +137,7 @@
 }
 
 #view-dashboard .dashboard-filter-strip {
+  z-index: 1;
   display: flex !important;
   align-items: flex-start;
   gap: 8px;
@@ -364,42 +357,6 @@
 
 .dash-hover-tip.hidden { display: none; }
 
-.dhp-name {
-  font-weight: 700;
-  margin: 0 0 8px;
-  font-size: 13px;
-  color: #f8fafc;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.dhp-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin: 3px 0;
-}
-
-.dhp-row span { color: #94a3b8; font-size: 11px; }
-.dhp-row strong { color: #f8fafc; font-size: 11px; }
-
-.dhp-pct-bar {
-  height: 4px;
-  background: #1e293b;
-  border-radius: 2px;
-  margin: 8px 0 4px;
-}
-
-.dhp-pct-fill {
-  height: 100%;
-  border-radius: 2px;
-  background: linear-gradient(90deg, #22c55e, #86efac);
-  transition: width 0.3s;
-}
-
-.dhp-hint { color: #475569; margin: 4px 0 0; font-size: 11px; }
-
 @media (hover: none) {
   .dash-hover-tip { display: none !important; }
 }
@@ -410,3 +367,11 @@
 }
 
 .dash-set-card.complete-celebrate { animation: complete-flash 0.7s ease 4; }
+
+/* Leere Zustaende: Abstaende und Schriftgroesse, zuletzt geladen (frueher in trading-marketplace.css) */
+.empty-state {
+  text-align: center;
+  padding: 30px 20px;
+  color: var(--text-secondary);
+  font-size: 0.95em;
+}

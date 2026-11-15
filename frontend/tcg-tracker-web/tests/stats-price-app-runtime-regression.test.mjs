@@ -8,8 +8,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const appPath = path.join(__dirname, '..', 'js', 'app.js');
 
+// Statistik, Preis-Tab, Lightbox und Kartenraster liegen seit der Auslagerung in js/views/; geprueft wird app.js plus diese Module.
+const viewPaths = ['stats-price.js', 'lightbox.js', 'set-cards.js'].map((name) => path.join(__dirname, '..', 'js', 'views', name));
+
 async function readAppSource() {
-  return readFile(appPath, 'utf8');
+  const sources = await Promise.all([appPath, ...viewPaths].map((file) => readFile(file, 'utf8')));
+  return sources.join('\n');
 }
 
 test('app runtime keeps advanced tab enabled and defaults advanced detail to top cards', async () => {
@@ -44,7 +48,9 @@ test('app runtime renders the card set in the lightbox facts', async () => {
   const source = await readAppSource();
 
   assert.match(source, /setFact\(dom\.lightboxSet,/);
-  assert.match(source, /lightbox-set/);
+  // Die DOM-Referenz liegt seit der Auslagerung in js/app/dom.js.
+  const domSource = await readFile(path.join(__dirname, '..', 'js', 'app', 'dom.js'), 'utf8');
+  assert.match(domSource, /lightbox-set/);
 });
 
 test('app runtime supports dynamic watchlist loading with filters and thumbnails', async () => {

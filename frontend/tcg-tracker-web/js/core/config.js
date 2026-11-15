@@ -64,12 +64,19 @@ export const CONFIG = {
   },
 
   // ── API-Endpunkte ────────────────────────────────────────────
+  // Karten-/Setdaten kommen nur aus api/v3 (+ api/registry). VERA_BASE dient nur noch
+  // als Basis der Cardmarket-Daten (<VERA_BASE>/cardmarket, Build-Stamp).
   APIS: {
-    POKEMONTCG: 'https://api.pokemontcg.io/v2',
-    TCGDEX_DE: 'https://api.tcgdex.net/v2/de',  // kein trailing slash!
-    TCGDEX_EN: 'https://api.tcgdex.net/v2/en',
-    VERA_BASE: 'https://veraatversus.github.io/pokemon-tcg-data'
+    VERA_BASE: 'https://veraatversus.github.io/pokemon-tcg-data',
+    // leer = relativ zum App-Verzeichnis: ./api/v3/ bzw. ./api/registry/ (GitHub Pages: App flach im
+    // Site-Root bzw. dev/, api/ daneben); endet das App-Verzeichnis auf /frontend/tcg-tracker-web/
+    // (lokal start:dev:full, Repo-Root) stattdessen ../../api/v3/ bzw. ../../api/registry/.
+    V3_BASE: '',
+    REGISTRY_BASE: ''
   },
+
+  // db_cards-Schreiben (Legacy-Sheet), gekapselt
+  WRITE_DB_CARDS: true,
 
   // ── Support & Kontakt ───────────────────────────────────────
   SUPPORT: {
@@ -86,10 +93,6 @@ export const CONFIG = {
     }
   },
 
-  // ── Vera-API-Einstellungen ───────────────────────────────────
-  USE_VERA_API: true,
-  VERA_API_LANGUAGE: 'en',
-
   // ── Cache-Dauer ──────────────────────────────────────────────
   CACHE_TTL_MS: 10 * 60 * 1000,  // 10 Minuten
 
@@ -97,28 +100,6 @@ export const CONFIG = {
   COLORS: {
     COLLECTED: '#D9EAD3',
     REVERSE: '#D0E0F0'
-  },
-
-  // ── TCGDex-ID-Übersetzungstabelle ───────────────────────────
-  // Pokemontcg.io-ID → TCGDex-ID, wenn sie sich unterscheiden
-  // Aktuelle Einträge sind bewusst deaktiviert und können gezielt wieder aktiviert werden.
-  CUSTOM_SET_ID_MAPPINGS: {
-    // 'swsh3.5': 'swsh35',
-    // 'sm2.5': 'sm25',
-    // 'sm3.5': 'sm35',
-    // 'sm7.5': 'sm75',
-    // 'swsh4.5': 'swsh45',
-    // 'sm35': 'sm3.5',
-    // 'sm75': 'sm7.5',
-    // 'swsh35': 'swsh3.5',
-    // 'swsh45': 'swsh4.5',
-    // 'swsh45.sv': 'swsh45sv',
-    // 'zsv10pt5': 'sv10.5b',
-    // 'rsv10pt5': 'sv10.5w',
-    // 'sv3.5': 'sv3pt5',
-    // 'sv4.5': 'sv4pt5',
-    // 'sv6.5': 'sv6pt5',
-    // 'sv8.5': 'sv8pt5'
   }
 };
 

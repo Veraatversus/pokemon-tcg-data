@@ -7,9 +7,13 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const appPath = path.join(__dirname, '..', 'js', 'app.js');
+// Statistik, Preis-Tab und Kartenraster liegen seit der Auslagerung in js/views/; geprueft wird app.js plus diese Module.
+// Statistik und Preis-Tab liegen seit der Auslagerung in js/views/; geprueft wird app.js plus diese Module.
+const viewPaths = ['stats.js', 'stats-price.js', 'set-cards.js'].map((name) => path.join(__dirname, '..', 'js', 'views', name));
 
 async function readAppSource() {
-  return readFile(appPath, 'utf8');
+  const sources = await Promise.all([appPath, ...viewPaths].map((file) => readFile(file, 'utf8')));
+  return sources.join('\n');
 }
 
 test('stats view keeps a dedicated lazy-loading container for price analytics', async () => {
@@ -38,11 +42,11 @@ test('request guard protects against stale async updates', async () => {
   assert.match(source, /if \(!isActiveStatsPriceRequest\(normalizedRequestId\)\) return;/);
 });
 
-test('stats lazy loading resolves prices with set-scoped sourceCards context', async () => {
+test('stats lazy loading resolves prices from the set price file of the candidate (card carries its setId)', async () => {
   const source = await readAppSource();
 
-  assert.match(
-    source,
-    /loadCardmarketPriceSummary\(candidate\.card,\s*\{\s*cards:\s*candidate\.sourceCards,\s*resolverCard:\s*candidate\.sourceCard,?\s*\}\)/
-  );
+  // api/v3/prices: Preis ueber setId + collectionKey der Karte, kein Matcher-Kontext mehr noetig.
+  assert.match(source, /card:\s*\{\s*\.\.\.card,\s*setId\s*\}/);
+  assert.match(source, /loadCardmarketPriceSummary\(candidate\.card\)/);
+  assert.match(source, /getCardPrice\(card,\s*\{\s*setId:\s*currentSetId\s*\}\)/);
 });

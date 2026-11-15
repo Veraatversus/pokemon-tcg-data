@@ -27,7 +27,7 @@ Zentrale Registry fuer alle runtime-relevanten localStorage-Keys und App-Events.
 | Konstante | Eventname | Produzent(en) | Konsument(en) |
 |---|---|---|---|
 | EVENT_QUICK_FILTERS_CHANGED | quick-filters-changed | ui/components.js | app.js |
-| EVENT_SPREADSHEET_SWITCHED | spreadsheet-switched | features/settings/spreadsheet-dialog.js | app.js + Legacy-Bridge |
+| EVENT_SPREADSHEET_SWITCHED | spreadsheet-switched | - (Produzent features/settings/spreadsheet-dialog.js am 2026-11-13 entfernt, ohne Importer) | derzeit ungenutzt |
 | EVENT_COLLECTION_UPDATED | collection-updated | Collection-Writer | Views/Stats |
 | EVENT_CLEAR_SEARCH_HISTORY | clear-search-history | ui/components.js | app.js |
 | EVENT_SHEETS_WRITE_RETRY | sheets-write-retry | data/sheets-db.js | ui/sheets-retry-report.js |

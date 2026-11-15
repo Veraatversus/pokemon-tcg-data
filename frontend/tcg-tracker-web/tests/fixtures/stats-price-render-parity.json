@@ -1,0 +1,898 @@
+{
+ "hashes": {
+  "tab-content/dashboard/final-mit-preisen": "d38cbc5ec0a461b0ac65b5f54f005420e87a4beed7a03dea02c6dd57def97315",
+  "tab-content/dashboard/leer-ohne-analytics": "cbd0b6942e3e1afaf6a391733866584853bbbee7bd29eeea4946135323dd9a17",
+  "tab-content/top-values/final-mit-preisen": "e5a5a1c8f9cb9937f581508e26064a9e2309777ff67e7ccd709400d15e263edb",
+  "tab-content/top-values/leer-ohne-analytics": "c17e78993067c846825ab93d3774c7769729096c425515f8bf561b845948a539",
+  "tab-content/trends/final-mit-preisen": "9a2ead70655c1d9dc8ab332a74a42414027c5756be8329865343033c973f95b6",
+  "tab-content/trends/leer-ohne-analytics": "4092bb018af924a9f83d26506557234eeb0a6fc6c7a1ac1ed06dca01287bd996",
+  "tab-content/comparisons/final-mit-preisen": "b4622e6bad8cda9ecb10b9bbca774b545bc9869e50ad42f486f1289e046d7be9",
+  "tab-content/comparisons/leer-ohne-analytics": "3502e3d1ef38fda1294237cbe6ffbed9eece8fc6a3e09e9b2dc6582e945194ff",
+  "tab-content/advanced/final-mit-preisen": "fd9637dd313f6cf816ff2188d30516c4bcd6b2057ba15cf00c3de0e114cd3246",
+  "tab-content/advanced/leer-ohne-analytics": "024d9395c9af0b5a8420ce0235b9090538ab763c98a27440407259c01fc844d0",
+  "tab-content/watchlist/final-mit-preisen": "d2a0f18734672b3f5b976546d76c867a52f8d715fa9b2ba3047129dd7f097421",
+  "tab-content/watchlist/leer-ohne-analytics": "599c7298de8ad240c9ac3c524ec57b121ec5454fec84a9a567f8cdc639557805",
+  "tab-content/timeline/final-mit-preisen": "d2635de3bbeee4ebf5a83c6e1dd4d634ff81d9be232f589caeb3bb9ffb5a1674",
+  "tab-content/timeline/leer-ohne-analytics": "56aaab4276f55bcbad01ffe2d6dfacf869a8e7381b9ae9a8b64a7fad794290ea",
+  "tab-content/drilldown/final-mit-preisen": "aba9f3e548726068d17cfdab501071f50a2880d3ed7d05d93b0ebc683c7444e3",
+  "tab-content/drilldown/leer-ohne-analytics": "00540a23f62293b1eaa14a113502eec71466ca24139c5b450e09459880304b2a",
+  "tab-content/gibt-es-nicht/final-mit-preisen": "ce07b3367353beeec1ea8176dca005ea28b8851bfd3c6c5830dd17870e5c6d3f",
+  "tab-content/gibt-es-nicht/leer-ohne-analytics": "43eba86fde4b4dfc0dde48464d4aa52fa8817b9a12b1d9a29a490b3ad2f99531",
+  "tab-content/default-args": "cbd0b6942e3e1afaf6a391733866584853bbbee7bd29eeea4946135323dd9a17",
+  "tab-content/dashboard/partial-mit-message": "52a72714e77bd33c67e49ca0ce7a76fdd84f922988bf5d207b1f1389f79629f2",
+  "tab-content/timeline/fertig-ohne-fehler": "e8fed138dd804558d7a41e53fcbf5c1b0aac1b80df6195f40f40fcd20a31d891",
+  "tab-content/timeline/hohe-abdeckung": "e6e12dc4dbf887cb3c5309b467d93c241c5536ce753f2ce020c99f8370fef61a",
+  "tab-content/advanced/detail-summary": "e0feb9cb35227c7514d1c015914c69fc0ee4f634b6e63a3f416dada0c34c789a",
+  "tab-content/advanced/detail-top": "fd9637dd313f6cf816ff2188d30516c4bcd6b2057ba15cf00c3de0e114cd3246",
+  "tab-content/advanced/detail-missing": "ca7cb24ed0cfd5406e8b618b3543c0f5429e4c6f14dd29ba2b821d2a2ff7dc50",
+  "tab-content/advanced/detail-distribution": "be49513d63030285c8aaeea5f2db063db68f11a19c0c261873be9be786fb5cdf",
+  "tab-content/advanced/detail-unbekannt": "c16b685078ef3b6bc712c0c3d6703848d2c5b903d927f493d8f740d1420dfb8e",
+  "tab-content/advanced/set-sv2-gruppe-gewaehlt": "078e0d04cb194b53f451b9f24533b5ac82324a6eb53296727f0db4bb87de03ab",
+  "tab-content/advanced/preisband-nach-wert-aufsteigend": "59247f4b1f2c870e4a8ea1454972599db7f371658566c01b956d2698afee7aea",
+  "tab-content/advanced/quantil-nur-bepreist": "e97817817cf0fff839744b01b6184cb4d91d59e48fafde2a025b819318f74114",
+  "tab-content/advanced/ohne-preis-top10-anzahl": "2b0af6cff475c03c623653684f45803a5ad137c765adce423b3f492eeb951efc",
+  "tab-content/advanced/nur-fehler-gap": "336c45ae91f2f34dce83501377e53b15aaefe04e05e22cbd272e647018d059cc",
+  "tab-content/advanced/nur-fehlende-bottom20": "d91235a66e628160b7a9ba227d449ecca7cac4e5d70c0ea2a2cc55206ebc85df",
+  "tab-content/advanced/top1-ueber20": "f9a78f69ed5210eb24c23876cb0a41a9ee41c62effc895253fc25fbd6773f4a2",
+  "tab-content/advanced/top5-unter1": "066917c78e238d8d5c815028fe8192c3545bd77456bdb398bedf464462c57ed4",
+  "tab-content/watchlist/suche-mew": "e46020e43f6d8d93c7534d97626c3630d1cb4f2eb8d7344eb4dc814744a596a4",
+  "tab-content/watchlist/suche-ohne-treffer": "0eaa1bf86d7fd741d65c98bbe1665d556d109abffb04dfa4bf9bd73c1c4bc2f4",
+  "tab-content/watchlist/nur-reverse-holo": "f658169fe4183514e7ec32589289ec89d654dbf594c04d956adb708297e40e60",
+  "tab-content/watchlist/nur-holo": "286fb3b852a9c4da3b5cb6df6781465097d77598a306836bd14d1488af96c2ad",
+  "tab-content/watchlist/min-max-komma": "a800e18aeeb91ff27927e58631650441f45e383375928c85682f4c9cef47f4f4",
+  "tab-content/watchlist/mit-link": "5c7c752d2fda9d7827109d3f74bec3e8c17130ec5f16ed3d2a977c2c6111c06d",
+  "tab-content/watchlist/ohne-link": "5cb56698c41a5ad45cc66eb74fb9ea44a99f669a0a9332f5df2c8b70e8f9d02b",
+  "tab-content/watchlist/wert-aufsteigend": "14a8e23edb563894b0f8f707965511523bf741a44db760ed30c8b84c6313d9bb",
+  "tab-content/watchlist/karte-a-z": "af4d3f7a7004458611f225757cbd17d2d8291e195e06edd3d7d60f35076a6fbe",
+  "tab-content/watchlist/set-a-z": "220534c997a78ba5f5732ad62343b057f9a09a23f3f943fa86f5c1c5c4e92d54",
+  "tab-content/watchlist/nummer": "ed335f84cf075189d8d31d9e86f83b9dd3ebed500ea30df4a834bbfad2d17647",
+  "tab-content/watchlist/watch-score": "88750796e81197cb1c864be6ffbafbfe14ab7c0ba1a9fcdd0fa9cc92a79fffb3",
+  "tab-content/watchlist/nur-fehler": "124acd58ef77f88a213ee9f51b7b82cf203a879700d230fb2598ff574139f924",
+  "tab-content/watchlist/nur-fehlend": "c8f94fe12c7b2ebc1e89d9c6044cdab7fbca1f214aed9d5a24fc92a3267c1d53",
+  "tab-content/watchlist/nur-bepreist-ueber20": "2ebf9f90123c85016730baff5402b4ebc1ab64b85646c54ea316a195d8ae26c7",
+  "tab-content/watchlist/top1-set-sv3": "255cf39e21b598230bb4c4c92f9d3b3103bda161b36b945dd7a544e8ef5a1db0",
+  "tab-content/watchlist/ungueltige-zahl": "6af3be33e3f966e23aa90605d33f9da8c2ef75a121012927c7c5b8acf6ef1efb",
+  "tab-content/watchlist/viele-karten-mehr-laden": "e3a98b01db6d049aa35e1877de9deeae8f9d7d8e43f3489cd8f4be358bcc15f1",
+  "tab-content/watchlist/viele-karten-alles-sichtbar": "1398a1505361fdee77753959b10e792755e18f0838d991efd12951433d937f03",
+  "tab-content/advanced/viele-karten-nach-quantil": "04a0e192f82a93e57659377d9d78b450d66b53986d840736f6f4e75440ff114a",
+  "snapshot/loading-ohne-analytics": "337dd2ffed015dd97a08fb7f8aca677c125567daa9c3d0ed8d1a045313b870f2",
+  "snapshot/default-args": "55aa5a1eb22de775502f77f9ea0f638024f3853482aec5f456318d5784efb46f",
+  "snapshot/final/dashboard": "5a7a3294b630e19662835a55ce83321e1969008dcd5c53e0ba0c269b02c1af0e",
+  "snapshot/final/top-values": "b291c84d66ed3f6685947eecd6bac1c0c26c6ae5a26091c8d31323fd72877307",
+  "snapshot/final/trends": "82efc2d72aa58584e811ccb6a73bb559474d1591377dfa64447152f78a66236d",
+  "snapshot/final/comparisons": "e62236f4259a528fa7627cffc8baecaa428ad399585c16c465fdf099858d6f5f",
+  "snapshot/final/advanced": "6293ba3dd29d7c79b45b08cfd59f6f4fbc81436e709ee58db04be61c79e89426",
+  "snapshot/final/watchlist": "387b83cbc0cebb85789b4357d1feeda900565d1a4cc18ed2c26ad96d2c0887e5",
+  "snapshot/final/timeline": "9b41335de3f2a125dd4e2ccd351ffcb6c95aeccdce1cff484ca5ec825863132a",
+  "snapshot/final/drilldown": "79e8244041dff62a93e5b25d8d217ff3366434531893accb15ca52200d1f61ff",
+  "snapshot/final/gibt-es-nicht": "1cf858cc1672150a0ba55793ee6cb8816e2d355489fe019d791f8cf75d77b144",
+  "snapshot/final/watchlist-mit-scrollbereich": "560bf292f98e4ebad7b96bf90bad254db674e19271c246dba1c68cbe938e6d68",
+  "snapshot/final/watchlist-scroll-snapshot-objekt": "27a086cf4e205163902cf0d6c0142fdd507d4c1c1ff89498ff1b119b243510f0",
+  "snapshot/final/watchlist-scroll-false": "147db3a54e1c85d78a4d6b3fec56471622c534b3aeacbcdfae1772667cc4cfea",
+  "snapshot/final/dashboard-scroll-snapshot-ignoriert": "ba484b400f3ee1f82612402fd9f0b077a52d825f791fe37c63c2dd1e004b7edc",
+  "snapshot/partial/live-update-ohne-fehler": "debb59f5eb006a9e5f78b8eb23fdc94e651fa43684075ea31190286b522a3d20",
+  "snapshot/partial/live-update-mit-fehlern-und-kpi": "1a7c9994593e4a9529f2ee9c2f49164850295b8011e518ef95ee2a20d920a082",
+  "snapshot/partial/ohne-shell-voller-aufbau": "7b865fd6ac67e4deed866f423476013280edd0006e4aa1d60137eb87f631ba92",
+  "snapshot/ohne-container": "a89b1a9bf3837a97183ee5389ac72643a76dbe29ee3b8cf0b586c1e8b5f9d0f6",
+  "snapshot/error-status": "0594e70b60353d2959a44b1d1d82bb3e83dc475570d76a30a21f3139a71d51fd",
+  "pipeline/loading-partial-final-error": "24f7340903d5a469680957d0717c3610d52af6981876bed33f2231641dbe2a8e",
+  "pipeline/lazy-mit-kandidaten": "ed4571840a1bfa6c0dbf1146702c67c83c6c9d846b4edcef0e344d785fe3ee9b",
+  "pipeline/lazy-ohne-kandidaten-und-ohne-request": "95425b15a810db090f05a607fcdc4b62d8ca416641193b5f9f68b44d9fa59a5f",
+  "pipeline/mapWithConcurrency": "37cbd0f676f67b10e5c39a18620403687e081e0fe256111261862377672ec06b",
+  "stats/gemischt-aufbauphase": "97beede16e5ff3ded66593604ea79492e0799764b608ccca59a9cf176670068c",
+  "stats/fortschritt-50": "72f0e28d1f64d008fc58c8631a0cade258c1fe2dc070eb7392b1bbd53444bc1c",
+  "stats/fortschritt-75": "53c1ab5ec1c44d36e1e7af5490c400662a5fe90f7a37b90aaa3f487a86015581",
+  "stats/fortschritt-90": "6df9945b20ba54e4e243e0aec7d9f634454e84ddfa34f96b20f8a3797feb390c",
+  "stats/alles-komplett": "cb50ac90846b9d01dc5e04d930032a2f3aed2906c4ffe5241f9b150564a3b19a",
+  "stats/ein-set-komplett": "22755657a433b88f3f01ea6192a268d1fa6874b24bc9f9727fe5c2f24219fd31",
+  "stats/leer": "06e34ccc77dfde95c1e4df9c1636dd2c845630b2580f0f9f918e9a2d30dc1f7f",
+  "stats/summary-kein-array": "06e34ccc77dfde95c1e4df9c1636dd2c845630b2580f0f9f918e9a2d30dc1f7f",
+  "stats/summary-wird-geladen": "023b8d704644478bb4b82262f34e4e60889c8a468f0ece5572918e76bef58e9c",
+  "stats/fehler-in-serien-info": "55f0429fe0864509b99b4af1757d1e81f3dd03812e9aef494a95670c16364174",
+  "stats/mit-preisdaten": "fc69ac261aa30960dca6e7285d295de14615091cfe4728f578451c9f258b637b"
+ },
+ "samples": {
+  "tab-content/advanced/final-mit-preisen": {
+   "result": {
+    "tabsMarkup": "\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"dashboard\">\n      Dashboard\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"top-values\">\n      Top-Werte\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"trends\">\n      Trends\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"comparisons\">\n      Vergleiche\n    </button>\n    <button class=\"stats-price-tab-btn is-active\" type=\"button\" data-stats-price-tab=\"advanced\">\n      Advanced\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"watchlist\">\n      Watchlist\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"timeline\">\n      Timeline/Story\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"drilldown\">\n      Fehler-Drilldown\n    </button>",
+    "contentMarkup": "\n    <section class=\"stats-price-tab-panel\" data-tab-panel=\"advanced\">\n      <div class=\"stats-price-advanced-toolbar\">\n        <label>Set\n          <select data-advanced-filter=\"setId\">\n            <option value=\"all\" selected>Alle Sets</option>\n            <option value=\"sv3\" >Obsidian &#39;Flammen&#39;</option><option value=\"sv2\" >Paldea Evolved</option><option value=\"sv1\" >Scarlet &amp; Violet</option>\n          </select>\n        </label>\n        <label>Preisband\n          <select data-advanced-filter=\"valueBand\">\n            <option value=\"all\" selected>Alle</option>\n            <option value=\"under1\" >&lt; 1 EUR</option>\n            <option value=\"from1to5\" >1-5 EUR</option>\n            <option value=\"from5to20\" >5-20 EUR</option>\n            <option value=\"over20\" >&gt; 20 EUR</option>\n            <option value=\"missing\" >Ohne Preis</option>\n          </select>\n        </label>\n        <label>Quantil\n          <select data-advanced-filter=\"quantile\">\n            <option value=\"all\" selected>Alle</option>\n            <option value=\"top1\" >Top 1%</option>\n            <option value=\"top5\" >Top 5%</option>\n            <option value=\"top10\" >Top 10%</option>\n            <option value=\"bottom20\" >Bottom 20%</option>\n          </select>\n        </label>\n        <label>Qualität\n          <select data-advanced-filter=\"quality\">\n            <option value=\"all\" selected>Alles</option>\n            <option value=\"priced-only\" >Nur bepreist</option>\n            <option value=\"missing-only\" >Nur fehlende Preise</option>\n            <option value=\"failed-only\" >Nur Lookup-Fehler</option>\n          </select>\n        </label>\n        <label>Gruppierung\n          <select data-advanced-filter=\"groupBy\">\n            <option value=\"set\" selected>Nach Set</option>\n            <option value=\"value-band\" >Nach Preisband</option>\n            <option value=\"quantile\" >Nach Quantil</option>\n          </select>\n        </label>\n        <label>Sortierung\n          <select data-advanced-filter=\"sortBy\">\n            <option value=\"value-desc\" selected>Wert absteigend</option>\n            <option value=\"value-asc\" >Wert aufsteigend</option>\n            <option value=\"count-desc\" >Kartenanzahl</option>\n            <option value=\"gap-desc\" >Coverage Gap</option>\n          </select>\n        </label>\n      </div>\n\n      <div class=\"stats-price-advanced-summary\">\n        <article class=\"stats-price-card\"><span>Treffer</span><strong>8</strong></article>\n        <article class=\"stats-price-card\"><span>Bepreist</span><strong>6</strong></article>\n        <article class=\"stats-price-card\"><span>Fehlend</span><strong>2</strong></article>\n        <article class=\"stats-price-card\"><span>Set-Abdeckung</span><strong>3</strong></article>\n      </div>\n\n      <div class=\"stats-price-advanced-layout\">\n        <aside>\n          <ul class=\"stats-price-advanced-groups stats-price-scroll-region\">\n            \n          <li class=\"stats-price-advanced-group is-active\" data-advanced-group-key=\"set:sv3\" data-set-id=\"sv3\">\n            <div class=\"stats-price-advanced-group-main\">\n              <strong>Obsidian &#39;Flammen&#39;</strong>\n              <small>2 Karten · 2 bepreist · 0 ohne Preis</small>\n            </div>\n            <strong class=\"stats-price-advanced-group-value\">26,15 EUR</strong>\n          </li>\n          <li class=\"stats-price-advanced-group \" data-advanced-group-key=\"set:sv2\" data-set-id=\"sv2\">\n            <div class=\"stats-price-advanced-group-main\">\n              <strong>Paldea Evolved</strong>\n              <small>3 Karten · 1 bepreist · 2 ohne Preis</small>\n            </div>\n            <strong class=\"stats-price-advanced-group-value\">9,00 EUR</strong>\n          </li>\n          <li class=\"stats-price-advanced-group \" data-advanced-group-key=\"set:sv1\" data-set-id=\"sv1\">\n            <div class=\"stats-price-advanced-group-main\">\n              <strong>Scarlet &amp; Violet</strong>\n              <small>2 Karten · 2 bepreist · 0 ohne Preis</small>\n            </div>\n            <strong class=\"stats-price-advanced-group-value\">6,00 EUR</strong>\n          </li>\n          <li class=\"stats-price-advanced-group \" data-advanced-group-key=\"set:Unbekanntes Set\" >\n            <div class=\"stats-price-advanced-group-main\">\n              <strong>Unbekanntes Set</strong>\n              <small>1 Karten · 1 bepreist · 0 ohne Preis</small>\n            </div>\n            <strong class=\"stats-price-advanced-group-value\">1,20 EUR</strong>\n          </li>\n          </ul>\n        </aside>\n        <section class=\"stats-price-advanced-detail\">\n          <div class=\"stats-price-advanced-detail-tabs\">\n            <button type=\"button\" data-advanced-detail-mode=\"summary\" class=\"\">Summary</button>\n            <button type=\"button\" data-advanced-detail-mode=\"top\" class=\"is-active\">Top Cards</button>\n            <button type=\"button\" data-advanced-detail-mode=\"missing\" class=\"\">Missing</button>\n            <button type=\"button\" data-advanced-detail-mode=\"distribution\" class=\"\">Distribution</button>\n          </div>\n          \n      <ol class=\"stats-price-rich-list stats-price-scroll-region\">\n        \n            <li class=\"stats-price-rich-item is-reverse\" data-set-id=\"sv3\" data-stats-card-key=\"sv3::TG1\">\n              <span class=\"stats-price-rich-rank\">1</span>\n              <div class=\"stats-price-rich-main\">\n                <strong>Glurak &lt;ex&gt; &amp; &quot;Co&quot; <span class=\"stats-price-rh-badge\" title=\"Als Reverse Holo gesammelt\">RH</span></strong>\n                <small>Obsidian &#39;Flammen&#39; · #TG01</small>\n              </div>\n              <a class=\"stats-price-cardmarket-link\" href=\"https://www.cardmarket.com/de/Pokemon/Products?idProduct=777&amp;isReverseHolo=Y\" target=\"_blank\" rel=\"noopener noreferrer\" data-cardmarket-link=\"1\">Cardmarket</a>\n              <strong class=\"stats-price-rich-value\">25,75 EUR</strong>\n            </li>\n          \n            <li class=\"stats-price-rich-item\" data-set-id=\"sv3\" data-stats-card-key=\"sv3::5\">\n              <span class=\"stats-price-rich-rank\">2</span>\n              <div class=\"stats-price-rich-main\">\n                <strong>Magikarp</strong>\n                <small>Obsidian &#39;Flammen&#39; · #005</small>\n              </div>\n              \n              <strong class=\"stats-price-rich-value\">0,40 EUR</strong>\n            </li>\n          \n      </ol>\n        </section>\n      </div>\n    </section>",
+    "completionLabel": "Preisradar abgeschlossen."
+   },
+   "statsPrice": {
+    "requestId": "",
+    "status": "idle",
+    "activeTab": "dashboard",
+    "loadedCards": 0,
+    "totalCards": 0,
+    "errors": 0,
+    "advanced": {
+     "filters": {
+      "setId": "all",
+      "valueBand": "all",
+      "quantile": "all",
+      "quality": "all",
+      "sortBy": "value-desc",
+      "groupBy": "set"
+     },
+     "selectedGroupKey": "set:sv3",
+     "detailMode": "top"
+    },
+    "watchlist": {
+     "filters": {
+      "search": "",
+      "setId": "all",
+      "variant": "all",
+      "valueBand": "all",
+      "quantile": "all",
+      "quality": "all",
+      "cardmarket": "all",
+      "minValue": "",
+      "maxValue": "",
+      "sortBy": "value-desc"
+     },
+     "visibleCount": 60,
+     "autoLoadBudget": 0,
+     "autoLoadInFlight": false
+    },
+    "itemKeys": [
+     "sv1::001=2.5",
+     "sv1::002=3.5",
+     "sv2::010=9",
+     "sv2::011=null",
+     "sv2::012=null!",
+     "sv3::TG01=25.75",
+     "sv3::005=0.4",
+     "::x=1.2"
+    ],
+    "bySet": [],
+    "topCards": []
+   }
+  },
+  "tab-content/watchlist/final-mit-preisen": {
+   "result": {
+    "tabsMarkup": "\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"dashboard\">\n      Dashboard\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"top-values\">\n      Top-Werte\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"trends\">\n      Trends\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"comparisons\">\n      Vergleiche\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"advanced\">\n      Advanced\n    </button>\n    <button class=\"stats-price-tab-btn is-active\" type=\"button\" data-stats-price-tab=\"watchlist\">\n      Watchlist\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"timeline\">\n      Timeline/Story\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"drilldown\">\n      Fehler-Drilldown\n    </button>",
+    "contentMarkup": "\n    <section class=\"stats-price-tab-panel\" data-tab-panel=\"watchlist\">\n      <div class=\"stats-price-watchlist-toolbar\">\n        <label>Suche\n          <input type=\"search\" value=\"\" data-watchlist-filter=\"search\" placeholder=\"Karte, Set, Nummer\" autocomplete=\"off\" />\n        </label>\n        <label>Set\n          <select data-watchlist-filter=\"setId\">\n            <option value=\"all\" selected>Alle Sets</option>\n            <option value=\"sv3\" >Obsidian &#39;Flammen&#39;</option><option value=\"sv2\" >Paldea Evolved</option><option value=\"sv1\" >Scarlet &amp; Violet</option>\n          </select>\n        </label>\n        <label>Variante\n          <select data-watchlist-filter=\"variant\">\n            <option value=\"all\" selected>Alle</option>\n            <option value=\"holo-only\" >Holo</option>\n            <option value=\"reverse-holo-only\" >Reverse Holo</option>\n          </select>\n        </label>\n        <label>Preisband\n          <select data-watchlist-filter=\"valueBand\">\n            <option value=\"all\" selected>Alle</option>\n            <option value=\"under1\" >&lt; 1 EUR</option>\n            <option value=\"from1to5\" >1-5 EUR</option>\n            <option value=\"from5to20\" >5-20 EUR</option>\n            <option value=\"over20\" >&gt; 20 EUR</option>\n            <option value=\"missing\" >Ohne Preis</option>\n          </select>\n        </label>\n        <label>Quantil\n          <select data-watchlist-filter=\"quantile\">\n            <option value=\"all\" selected>Alle</option>\n            <option value=\"top1\" >Top 1%</option>\n            <option value=\"top5\" >Top 5%</option>\n            <option value=\"top10\" >Top 10%</option>\n            <option value=\"bottom20\" >Bottom 20%</option>\n          </select>\n        </label>\n        <label>Qualität\n          <select data-watchlist-filter=\"quality\">\n            <option value=\"all\" selected>Alles</option>\n            <option value=\"priced-only\" >Nur bepreist</option>\n            <option value=\"missing-only\" >Nur fehlend</option>\n            <option value=\"failed-only\" >Nur Fehler</option>\n          </select>\n        </label>\n        <label>Cardmarket\n          <select data-watchlist-filter=\"cardmarket\">\n            <option value=\"all\" selected>Alle</option>\n            <option value=\"with-link\" >Mit Link</option>\n            <option value=\"without-link\" >Ohne Link</option>\n          </select>\n        </label>\n        <label>Min EUR\n          <input type=\"text\" inputmode=\"decimal\" value=\"\" data-watchlist-filter=\"minValue\" placeholder=\"z. B. 10\" />\n        </label>\n        <label>Max EUR\n          <input type=\"text\" inputmode=\"decimal\" value=\"\" data-watchlist-filter=\"maxValue\" placeholder=\"z. B. 250\" />\n        </label>\n        <label>Sortierung\n          <select data-watchlist-filter=\"sortBy\">\n            <option value=\"value-desc\" selected>Wert absteigend</option>\n            <option value=\"value-asc\" >Wert aufsteigend</option>\n            <option value=\"watch-score-desc\" >Watch-Score</option>\n            <option value=\"card-asc\" >Karte A-Z</option>\n            <option value=\"set-asc\" >Set A-Z</option>\n            <option value=\"number-asc\" >Nummer</option>\n          </select>\n        </label>\n        <button type=\"button\" class=\"stats-price-watchlist-reset\" data-watchlist-reset=\"1\">Filter zurücksetzen</button>\n      </div>\n\n      <div class=\"stats-price-watchlist-summary\">\n        <article class=\"stats-price-card\"><span>Treffer</span><strong>8</strong></article>\n        <article class=\"stats-price-card\"><span>Bepreist</span><strong>6</strong></article>\n        <article class=\"stats-price-card\"><span>Mit Link</span><strong>3</strong></article>\n        <article class=\"stats-price-card\"><span>Sets</span><strong>3</strong></article>\n      </div>\n\n      <ol class=\"stats-price-rich-list stats-price-scroll-region stats-price-watchlist-scroll\" data-watchlist-scroll-region=\"1\" data-watchlist-total=\"8\">\n        \n            <li class=\"stats-price-rich-item stats-price-rich-item--thumb is-reverse\" data-set-id=\"sv3\" data-stats-card-key=\"sv3::TG1\" data-watchlist-card=\"1\" data-watchlist-card-key=\"TG1\" data-watchlist-card-number=\"TG01\">\n              <span class=\"stats-price-rich-rank\">1</span>\n              <span class=\"stats-price-thumb\" aria-hidden=\"true\">\n                <span class=\"stats-price-thumb-fallback\" aria-hidden=\"true\">?</span>\n              </span>\n              <div class=\"stats-price-rich-main\">\n                <strong>Glurak &lt;ex&gt; &amp; &quot;Co&quot; <span class=\"stats-price-rh-badge\" title=\"Als Reverse Holo gesammelt\">RH</span></strong>\n                <small>Obsidian &#39;Flammen&#39; · #TG01</small>\n              </div>\n              <button type=\"button\" class=\"btn-goto-set stats-price-open-set-btn\" data-watchlist-open-set=\"1\" title=\"Setansicht oeffnen\">↗</button>\n              <a class=\"stats-price-cardmarket-link\" href=\"https://www.cardmarket.com/de/Pokemon/Products?idProduct=777&amp;isReverseHolo=Y\" target=\"_blank\" rel=\"noopener noreferrer\" data-cardmarket-link=\"1\">Cardmarket</a>\n              <strong class=\"stats-price-rich-value\">25,75 EUR</strong>\n            </li>\n            <li class=\"stats-price-rich-item stats-price-rich-item--thumb\" data-set-id=\"sv2\" data-stats-card-key=\"sv2::010-a\" data-watchlist-card=\"1\" data-watchlist-card-key=\"010-a\" data-watchlist-card-number=\"010\">\n              <span class=\"stats-price-rich-rank\">2</span>\n              <span class=\"stats-price-thumb\" aria-hidden=\"true\">\n                <img class=\"stats-price-thumb-img\" src=\"https://img.example/de/mew.png\" data-fallbacks=\"[&quot;https://img.example/en/mew.png&quot;]\" data-placeholder=\"./assets/pokeball-fallback.svg\" alt=\"Mew\" loading=\"lazy\" decoding=\"async\" />\n              </span>\n              <div class=\"stats-price-rich-main\">\n                <strong>Mew</strong>\n                <small>Paldea Evolved · #010</small>\n              </div>\n              <button type=\"button\" class=\"btn-goto-set stats-price-open-set-btn\" data-watchlist-open-set=\"1\" title=\"Setansicht oeffnen\">↗</button>\n              \n              <strong class=\"stats-price-rich-value\">9,00 EUR</strong>\n            </li>\n            <li class=\"stats-price-rich-item stats-price-rich-item--thumb is-reverse\" data-set-id=\"sv1\" data-stats-card-key=\"sv1::2\" data-watchlist-card=\"1\" data-watchlist-card-key=\"2\" data-watchlist-card-number=\"002\">\n              <span class=\"stats-price-rich-rank\">3</span>\n              <span class=\"stats-price-thumb\" aria-hidden=\"true\">\n                <span class=\"stats-price-thumb-fallback\" aria-hidden=\"true\">?</span>\n              </span>\n              <div class=\"stats-price-rich-main\">\n                <strong>Ivysaur <span class=\"stats-price-rh-badge\" title=\"Als Reverse Holo gesammelt\">RH</span></strong>\n                <small>Scarlet &amp; Violet · #002</small>\n              </div>\n              <button type=\"button\" class=\"btn-goto-set stats-price-open-set-btn\" data-watchlist-open-set=\"1\" title=\"Setansicht oeffnen\">↗</button>\n              <a class=\"stats-price-cardmarket-link\" href=\"https://www.cardmarket.com/de/Pokemon/Products/Singles/Scarlet-Violet/Ivysaur?isReverseHolo=Y\" target=\"_blank\" rel=\"noopener noreferrer\" data-cardmarket-link=\"1\">Cardmarket</a>\n              <strong class=\"stats-price-rich-value\">3,50 EUR</strong>\n            </li>\n            <li class=\"stats-price-rich-item stats-price-rich-item--thumb\" data-set-id=\"sv1\" data-stats-card-key=\"sv1::1\" data-watchlist-card=\"1\" data-watchlist-card-key=\"1\" data-watchlist-card-number=\"001\">\n              <span class=\"stats-price-rich-rank\">4</span>\n              <span class=\"stats-price-thumb\" aria-hidden=\"true\">\n                <img class=\"stats-price-thumb-img\" src=\"https://img.example/sv1/001.png\" data-fallbacks=\"[]\" data-placeholder=\"./assets/pokeball-fallback.svg\" alt=\"Bulbasaur\" loading=\"lazy\" decoding=\"async\" />\n              </span>\n              <div class=\"stats-price-rich-main\">\n                <strong>Bulbasaur</strong>\n                <small>Scarlet &amp; Violet · #001</small>\n              </div>\n              <button type=\"button\" class=\"btn-goto-set stats-price-open-set-btn\" data-watchlist-open-set=\"1\" title=\"Setansicht oeffnen\">↗</button>\n              <a class=\"stats-price-cardmarket-link\" href=\"https://www.cardmarket.com/de/Pokemon/Products?idProduct=12345\" target=\"_blank\" rel=\"noopener noreferrer\" data-cardmarket-link=\"1\">Cardmarket</a>\n              <strong class=\"stats-price-rich-value\">2,50 EUR</strong>\n            </li>\n            <li class=\"stats-price-rich-item stats-price-rich-item--thumb\" data-set-id=\"\" data-stats-card-key=\"::x\" data-watchlist-card=\"1\" data-watchlist-card-key=\"\" data-watchlist-card-number=\"::x\">\n              <span class=\"stats-price-rich-rank\">5</span>\n              <span class=\"stats-price-thumb\" aria-hidden=\"true\">\n                <span class=\"stats-price-thumb-fallback\" aria-hidden=\"true\">?</span>\n              </span>\n              <div class=\"stats-price-rich-main\">\n                <strong>Unbekannte Karte</strong>\n                <small>Unbekanntes Set · #::x</small>\n              </div>\n              <button type=\"button\" class=\"btn-goto-set stats-price-open-set-btn\" data-watchlist-open-set=\"1\" title=\"Setansicht oeffnen\">↗</button>\n              \n              <strong class=\"stats-price-rich-value\">1,20 EUR</strong>\n            </li>\n            <li class=\"stats-price-rich-item stats-price-rich-item--thumb\" data-set-id=\"sv3\" data-stats-card-key=\"sv3::5\" data-watchlist-card=\"1\" data-watchlist-card-key=\"5\" data-watchlist-card-number=\"005\">\n              <span class=\"stats-price-rich-rank\">6</span>\n              <span class=\"stats-price-thumb\" aria-hidden=\"true\">\n                <img class=\"stats-price-thumb-img\" src=\"https://img.example/fallback/magikarp.png\" data-fallbacks=\"[]\" data-placeholder=\"./assets/pokeball-fallback.svg\" alt=\"Magikarp\" loading=\"lazy\" decoding=\"async\" />\n              </span>\n              <div class=\"stats-price-rich-main\">\n                <strong>Magikarp</strong>\n                <small>Obsidian &#39;Flammen&#39; · #005</small>\n              </div>\n              <button type=\"button\" class=\"btn-goto-set stats-price-open-set-btn\" data-watchlist-open-set=\"1\" title=\"Setansicht oeffnen\">↗</button>\n              \n              <strong class=\"stats-price-rich-value\">0,40 EUR</strong>\n            </li>\n            <li class=\"stats-price-rich-item stats-price-rich-item--thumb\" data-set-id=\"sv2\" data-stats-card-key=\"sv2::11\" data-watchlist-card=\"1\" data-watchlist-card-key=\"11\" data-watchlist-card-number=\"011\">\n              <span class=\"stats-price-rich-rank\">7</span>\n              <span class=\"stats-price-thumb\" aria-hidden=\"true\">\n                <span class=\"stats-price-thumb-fallback\" aria-hidden=\"true\">?</span>\n              </span>\n              <div class=\"stats-price-rich-main\">\n                <strong>NoPriceCard</strong>\n                <small>Paldea Evolved · #011</small>\n              </div>\n              <button type=\"button\" class=\"btn-goto-set stats-price-open-set-btn\" data-watchlist-open-set=\"1\" title=\"Setansicht oeffnen\">↗</button>\n              \n              <strong class=\"stats-price-rich-value\">n/a</strong>\n            </li>\n            <li class=\"stats-price-rich-item stats-price-rich-item--thumb\" data-set-id=\"sv2\" data-stats-card-key=\"sv2::12\" data-watchlist-card=\"1\" data-watchlist-card-key=\"12\" data-watchlist-card-number=\"012\">\n              <span class=\"stats-price-rich-rank\">8</span>\n              <span class=\"stats-price-thumb\" aria-hidden=\"true\">\n                <span class=\"stats-price-thumb-fallback\" aria-hidden=\"true\">?</span>\n              </span>\n              <div class=\"stats-price-rich-main\">\n                <strong>Kaputt</strong>\n                <small>Paldea Evolved · #012</small>\n              </div>\n              <button type=\"button\" class=\"btn-goto-set stats-price-open-set-btn\" data-watchlist-open-set=\"1\" title=\"Setansicht oeffnen\">↗</button>\n              \n              <strong class=\"stats-price-rich-value\">n/a</strong>\n            </li>\n        \n      </ol>\n\n      <div class=\"stats-price-watchlist-footer\">\n        <small>8 von 8 Karten geladen</small>\n        <span class=\"stats-price-watchlist-end\">Ende der Liste erreicht</span>\n      </div>\n    </section>",
+    "completionLabel": "Preisradar abgeschlossen."
+   },
+   "statsPrice": {
+    "requestId": "",
+    "status": "idle",
+    "activeTab": "dashboard",
+    "loadedCards": 0,
+    "totalCards": 0,
+    "errors": 0,
+    "advanced": {
+     "filters": {
+      "setId": "all",
+      "valueBand": "all",
+      "quantile": "all",
+      "quality": "all",
+      "sortBy": "value-desc",
+      "groupBy": "set"
+     },
+     "selectedGroupKey": "set:sv3",
+     "detailMode": "top"
+    },
+    "watchlist": {
+     "filters": {
+      "search": "",
+      "setId": "all",
+      "variant": "all",
+      "valueBand": "all",
+      "quantile": "all",
+      "quality": "all",
+      "cardmarket": "all",
+      "minValue": "",
+      "maxValue": "",
+      "sortBy": "value-desc"
+     },
+     "visibleCount": 60,
+     "autoLoadBudget": 0,
+     "autoLoadInFlight": false
+    },
+    "itemKeys": [
+     "sv1::001=2.5",
+     "sv1::002=3.5",
+     "sv2::010=9",
+     "sv2::011=null",
+     "sv2::012=null!",
+     "sv3::TG01=25.75",
+     "sv3::005=0.4",
+     "::x=1.2"
+    ],
+    "bySet": [],
+    "topCards": []
+   }
+  },
+  "snapshot/final/dashboard": {
+   "returned": "undefined",
+   "log": [
+    {
+     "write": "price.dataset.state",
+     "value": "final"
+    },
+    {
+     "write": "price.innerHTML",
+     "value": "\n    <article class=\"stats-price-panel stats-price-enter\">\n      <header class=\"stats-price-head\">\n        <div>\n          <span class=\"stats-price-kicker\">Cardmarket Analyse</span>\n          <h3>Preisradar f&#xfc;r deine Sammlung</h3>\n          <p>Preisradar abgeschlossen.</p>\n        </div>\n        <div class=\"stats-price-progress-wrap\">\n          <strong data-stats-progress-pct>100%</strong>\n          <div class=\"stats-price-progress\"><span data-stats-progress-bar style=\"width:100%\"></span></div>\n        </div>\n      </header>\n\n      <div class=\"stats-price-grid\">\n        <section class=\"stats-price-kpi-cluster\">\n          <article class=\"stats-price-card\">\n            <span>Gesamtwert</span>\n            <strong>42,35 EUR</strong>\n          </article>\n          <article class=\"stats-price-card\">\n            <span>&#216; Preis / bewertet</span>\n            <strong>7,06 EUR</strong>\n          </article>\n          <article class=\"stats-price-card\">\n            <span>Bewertet</span>\n            <strong>75%</strong>\n            <small>6 von 8</small>\n          </article>\n          <article class=\"stats-price-card\">\n            <span>Ohne Preis</span>\n            <strong>2</strong>\n            <small>1 Fehler</small>\n          </article>\n        </section>\n      </div>\n\n      <section class=\"stats-price-tabs\" aria-label=\"Preis-Insights Tabs\">\n        \n    <button class=\"stats-price-tab-btn is-active\" type=\"button\" data-stats-price-tab=\"dashboard\">\n      Dashboard\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"top-values\">\n      Top-Werte\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"trends\">\n      Trends\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"comparisons\">\n      Vergleiche\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"advanced\">\n      Advanced\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"watchlist\">\n      Watchlist\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"timeline\">\n      Timeline/Story\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"drilldown\">\n      Fehler-Drilldown\n    </button>\n      </section>\n\n      <section class=\"stats-price-tab-content\" data-stats-tab-content>\n        \n    <section class=\"stats-price-tab-panel is-visible\" data-tab-panel=\"dashboard\">\n      <div class=\"stats-price-panel-grid\">\n        <article class=\"stats-price-surface-card\">\n          <h4>Werttreiber</h4>\n          <p>Obsidian &#39;Flammen&#39; bleibt mit 26,15 EUR dein stärkster Block.</p>\n        </article>\n        <article class=\"stats-price-surface-card\">\n          <h4>Momentum</h4>\n          <p>75% Preisabdeckung, 2 offene Lücken und 1 technische Fehler.</p>\n        </article>\n        <article class=\"stats-price-surface-card\">\n          <h4>Detail-Signal</h4>\n          <p>Median 3,00 EUR · P90 17,38 EUR · Top-5 tragen 99% vom Wert.</p>\n        </article>\n      </div>\n    </section>\n      </section>\n    </article>"
+    },
+    {
+     "queryAll": "price .stats-price-tab-btn[data-stats-price-tab]"
+    },
+    {
+     "queryAll": "price select[data-advanced-filter]"
+    },
+    {
+     "queryAll": "price [data-advanced-group-key]"
+    },
+    {
+     "queryAll": "price [data-advanced-detail-mode]"
+    },
+    {
+     "queryAll": "price [data-watchlist-filter]"
+    },
+    {
+     "queryAll": "price [data-watchlist-reset]"
+    },
+    {
+     "queryAll": "price [data-watchlist-load-more]"
+    },
+    {
+     "queryAll": "price [data-watchlist-scroll-region]"
+    },
+    {
+     "queryAll": "price [data-watchlist-open-set]"
+    },
+    {
+     "queryAll": "price [data-set-id]"
+    },
+    {
+     "queryAll": "price [data-cardmarket-link]"
+    }
+   ],
+   "statsPrice": {
+    "requestId": "",
+    "status": "idle",
+    "activeTab": "dashboard",
+    "loadedCards": 0,
+    "totalCards": 0,
+    "errors": 0,
+    "advanced": {
+     "filters": {
+      "setId": "all",
+      "valueBand": "all",
+      "quantile": "all",
+      "quality": "all",
+      "sortBy": "value-desc",
+      "groupBy": "set"
+     },
+     "selectedGroupKey": "set:sv3",
+     "detailMode": "top"
+    },
+    "watchlist": {
+     "filters": {
+      "search": "",
+      "setId": "all",
+      "variant": "all",
+      "valueBand": "all",
+      "quantile": "all",
+      "quality": "all",
+      "cardmarket": "all",
+      "minValue": "",
+      "maxValue": "",
+      "sortBy": "value-desc"
+     },
+     "visibleCount": 60,
+     "autoLoadBudget": 0,
+     "autoLoadInFlight": false
+    },
+    "itemKeys": [
+     "sv1::001=2.5",
+     "sv1::002=3.5",
+     "sv2::010=9",
+     "sv2::011=null",
+     "sv2::012=null!",
+     "sv3::TG01=25.75",
+     "sv3::005=0.4",
+     "::x=1.2"
+    ],
+    "bySet": [],
+    "topCards": []
+   }
+  },
+  "pipeline/lazy-mit-kandidaten": {
+   "log": [
+    {
+     "write": "price.dataset.state",
+     "value": "loading"
+    },
+    {
+     "write": "price.innerHTML",
+     "value": "\n    <article class=\"stats-price-panel \">\n      <header class=\"stats-price-head\">\n        <div>\n          <span class=\"stats-price-kicker\">Cardmarket Analyse</span>\n          <h3>Preisradar f&#xfc;r deine Sammlung</h3>\n          <p>Preiswerte werden schrittweise geladen...</p>\n        </div>\n        <div class=\"stats-price-progress-wrap\">\n          <strong data-stats-progress-pct>0%</strong>\n          <div class=\"stats-price-progress\"><span data-stats-progress-bar style=\"width:0%\"></span></div>\n        </div>\n      </header>\n\n      <div class=\"stats-price-grid\">\n        <section class=\"stats-price-kpi-cluster\">\n          <article class=\"stats-price-card\">\n            <span>Gesamtwert</span>\n            <strong>n/a</strong>\n          </article>\n          <article class=\"stats-price-card\">\n            <span>&#216; Preis / bewertet</span>\n            <strong>n/a</strong>\n          </article>\n          <article class=\"stats-price-card\">\n            <span>Bewertet</span>\n            <strong>0%</strong>\n            <small>0 von 0</small>\n          </article>\n          <article class=\"stats-price-card\">\n            <span>Ohne Preis</span>\n            <strong>0</strong>\n            <small>keine Fehler</small>\n          </article>\n        </section>\n      </div>\n\n      <section class=\"stats-price-tabs\" aria-label=\"Preis-Insights Tabs\">\n        \n    <button class=\"stats-price-tab-btn is-active\" type=\"button\" data-stats-price-tab=\"dashboard\">\n      Dashboard\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"top-values\">\n      Top-Werte\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"trends\">\n      Trends\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"comparisons\">\n      Vergleiche\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"advanced\">\n      Advanced\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"watchlist\">\n      Watchlist\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"timeline\">\n      Timeline/Story\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"drilldown\">\n      Fehler-Drilldown\n    </button>\n      </section>\n\n      <section class=\"stats-price-tab-content\" data-stats-tab-content>\n        \n    <section class=\"stats-price-tab-panel is-visible\" data-tab-panel=\"dashboard\">\n      <div class=\"stats-price-panel-grid\">\n        <article class=\"stats-price-surface-card\">\n          <h4>Werttreiber</h4>\n          <p>Noch kein Werttreiber erkannt.</p>\n        </article>\n        <article class=\"stats-price-surface-card\">\n          <h4>Momentum</h4>\n          <p>0% Preisabdeckung, 0 offene Lücken und 0 technische Fehler.</p>\n        </article>\n        <article class=\"stats-price-surface-card\">\n          <h4>Detail-Signal</h4>\n          <p>Sobald High-Value-Karten erkannt werden, erscheint hier eine Prioritätenliste.</p>\n        </article>\n      </div>\n    </section>\n      </section>\n    </article>"
+    },
+    {
+     "queryAll": "price .stats-price-tab-btn[data-stats-price-tab]"
+    },
+    {
+     "queryAll": "price select[data-advanced-filter]"
+    },
+    {
+     "queryAll": "price [data-advanced-group-key]"
+    },
+    {
+     "queryAll": "price [data-advanced-detail-mode]"
+    },
+    {
+     "queryAll": "price [data-watchlist-filter]"
+    },
+    {
+     "queryAll": "price [data-watchlist-reset]"
+    },
+    {
+     "queryAll": "price [data-watchlist-load-more]"
+    },
+    {
+     "queryAll": "price [data-watchlist-scroll-region]"
+    },
+    {
+     "queryAll": "price [data-watchlist-open-set]"
+    },
+    {
+     "queryAll": "price [data-set-id]"
+    },
+    {
+     "queryAll": "price [data-cardmarket-link]"
+    },
+    {
+     "write": "price.dataset.state",
+     "value": "partial"
+    },
+    {
+     "write": "price [data-stats-progress-pct].textContent",
+     "value": "71%"
+    },
+    {
+     "write": "price [data-stats-progress-bar].style.width",
+     "value": "71%"
+    },
+    {
+     "write": "price .stats-price-head p.textContent",
+     "value": "Teilresultate werden laufend aktualisiert."
+    },
+    {
+     "write": "price [data-stats-tab-content].innerHTML",
+     "value": "\n    <section class=\"stats-price-tab-panel is-visible\" data-tab-panel=\"dashboard\">\n      <div class=\"stats-price-panel-grid\">\n        <article class=\"stats-price-surface-card\">\n          <h4>Werttreiber</h4>\n          <p>Scarlet &amp; Violet bleibt mit 49,38 EUR dein stärkster Block.</p>\n        </article>\n        <article class=\"stats-price-surface-card\">\n          <h4>Momentum</h4>\n          <p>72% Preisabdeckung, 7 offene Lücken und 0 technische Fehler.</p>\n        </article>\n        <article class=\"stats-price-surface-card\">\n          <h4>Detail-Signal</h4>\n          <p>Median 2,76 EUR · P90 2,98 EUR · Top-5 tragen 30% vom Wert.</p>\n        </article>\n      </div>\n    </section>"
+    },
+    {
+     "queryAll": "price .stats-price-tab-btn[data-stats-price-tab]"
+    },
+    {
+     "queryAll": "price select[data-advanced-filter]"
+    },
+    {
+     "queryAll": "price [data-advanced-group-key]"
+    },
+    {
+     "queryAll": "price [data-advanced-detail-mode]"
+    },
+    {
+     "queryAll": "price [data-watchlist-filter]"
+    },
+    {
+     "queryAll": "price [data-watchlist-reset]"
+    },
+    {
+     "queryAll": "price [data-watchlist-load-more]"
+    },
+    {
+     "queryAll": "price [data-watchlist-scroll-region]"
+    },
+    {
+     "queryAll": "price [data-watchlist-open-set]"
+    },
+    {
+     "queryAll": "price [data-set-id]"
+    },
+    {
+     "queryAll": "price [data-cardmarket-link]"
+    },
+    {
+     "write": "price.dataset.state",
+     "value": "partial"
+    },
+    {
+     "write": "price [data-stats-progress-pct].textContent",
+     "value": "100%"
+    },
+    {
+     "write": "price [data-stats-progress-bar].style.width",
+     "value": "100%"
+    },
+    {
+     "write": "price .stats-price-head p.textContent",
+     "value": "Teilresultate werden laufend aktualisiert."
+    },
+    {
+     "write": "price [data-stats-tab-content].innerHTML",
+     "value": "\n    <section class=\"stats-price-tab-panel is-visible\" data-tab-panel=\"dashboard\">\n      <div class=\"stats-price-panel-grid\">\n        <article class=\"stats-price-surface-card\">\n          <h4>Werttreiber</h4>\n          <p>Scarlet &amp; Violet bleibt mit 68,17 EUR dein stärkster Block.</p>\n        </article>\n        <article class=\"stats-price-surface-card\">\n          <h4>Momentum</h4>\n          <p>71% Preisabdeckung, 10 offene Lücken und 1 technische Fehler.</p>\n        </article>\n        <article class=\"stats-price-surface-card\">\n          <h4>Detail-Signal</h4>\n          <p>Median 2,88 EUR · P90 3,17 EUR · Top-5 tragen 28% vom Wert.</p>\n        </article>\n      </div>\n    </section>"
+    },
+    {
+     "queryAll": "price .stats-price-tab-btn[data-stats-price-tab]"
+    },
+    {
+     "queryAll": "price select[data-advanced-filter]"
+    },
+    {
+     "queryAll": "price [data-advanced-group-key]"
+    },
+    {
+     "queryAll": "price [data-advanced-detail-mode]"
+    },
+    {
+     "queryAll": "price [data-watchlist-filter]"
+    },
+    {
+     "queryAll": "price [data-watchlist-reset]"
+    },
+    {
+     "queryAll": "price [data-watchlist-load-more]"
+    },
+    {
+     "queryAll": "price [data-watchlist-scroll-region]"
+    },
+    {
+     "queryAll": "price [data-watchlist-open-set]"
+    },
+    {
+     "queryAll": "price [data-set-id]"
+    },
+    {
+     "queryAll": "price [data-cardmarket-link]"
+    },
+    {
+     "write": "price.dataset.state",
+     "value": "final"
+    },
+    {
+     "write": "price.innerHTML",
+     "value": "\n    <article class=\"stats-price-panel stats-price-enter\">\n      <header class=\"stats-price-head\">\n        <div>\n          <span class=\"stats-price-kicker\">Cardmarket Analyse</span>\n          <h3>Preisradar f&#xfc;r deine Sammlung</h3>\n          <p>Preisradar abgeschlossen.</p>\n        </div>\n        <div class=\"stats-price-progress-wrap\">\n          <strong data-stats-progress-pct>100%</strong>\n          <div class=\"stats-price-progress\"><span data-stats-progress-bar style=\"width:100%\"></span></div>\n        </div>\n      </header>\n\n      <div class=\"stats-price-grid\">\n        <section class=\"stats-price-kpi-cluster\">\n          <article class=\"stats-price-card\">\n            <span>Gesamtwert</span>\n            <strong>77,17 EUR</strong>\n          </article>\n          <article class=\"stats-price-card\">\n            <span>&#216; Preis / bewertet</span>\n            <strong>3,09 EUR</strong>\n          </article>\n          <article class=\"stats-price-card\">\n            <span>Bewertet</span>\n            <strong>71%</strong>\n            <small>25 von 35</small>\n          </article>\n          <article class=\"stats-price-card\">\n            <span>Ohne Preis</span>\n            <strong>10</strong>\n            <small>1 Fehler</small>\n          </article>\n        </section>\n      </div>\n\n      <section class=\"stats-price-tabs\" aria-label=\"Preis-Insights Tabs\">\n        \n    <button class=\"stats-price-tab-btn is-active\" type=\"button\" data-stats-price-tab=\"dashboard\">\n      Dashboard\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"top-values\">\n      Top-Werte\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"trends\">\n      Trends\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"comparisons\">\n      Vergleiche\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"advanced\">\n      Advanced\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"watchlist\">\n      Watchlist\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"timeline\">\n      Timeline/Story\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"drilldown\">\n      Fehler-Drilldown\n    </button>\n      </section>\n\n      <section class=\"stats-price-tab-content\" data-stats-tab-content>\n        \n    <section class=\"stats-price-tab-panel is-visible\" data-tab-panel=\"dashboard\">\n      <div class=\"stats-price-panel-grid\">\n        <article class=\"stats-price-surface-card\">\n          <h4>Werttreiber</h4>\n          <p>Scarlet &amp; Violet bleibt mit 68,17 EUR dein stärkster Block.</p>\n        </article>\n        <article class=\"stats-price-surface-card\">\n          <h4>Momentum</h4>\n          <p>71% Preisabdeckung, 10 offene Lücken und 1 technische Fehler.</p>\n        </article>\n        <article class=\"stats-price-surface-card\">\n          <h4>Detail-Signal</h4>\n          <p>Median 2,88 EUR · P90 3,17 EUR · Top-5 tragen 28% vom Wert.</p>\n        </article>\n      </div>\n    </section>\n      </section>\n    </article>"
+    },
+    {
+     "queryAll": "price .stats-price-tab-btn[data-stats-price-tab]"
+    },
+    {
+     "queryAll": "price select[data-advanced-filter]"
+    },
+    {
+     "queryAll": "price [data-advanced-group-key]"
+    },
+    {
+     "queryAll": "price [data-advanced-detail-mode]"
+    },
+    {
+     "queryAll": "price [data-watchlist-filter]"
+    },
+    {
+     "queryAll": "price [data-watchlist-reset]"
+    },
+    {
+     "queryAll": "price [data-watchlist-load-more]"
+    },
+    {
+     "queryAll": "price [data-watchlist-scroll-region]"
+    },
+    {
+     "queryAll": "price [data-watchlist-open-set]"
+    },
+    {
+     "queryAll": "price [data-set-id]"
+    },
+    {
+     "queryAll": "price [data-cardmarket-link]"
+    }
+   ],
+   "statsPrice": {
+    "requestId": "lazy-1",
+    "status": "final",
+    "activeTab": "dashboard",
+    "loadedCards": 35,
+    "totalCards": 35,
+    "errors": 1,
+    "advanced": {
+     "filters": {
+      "setId": "all",
+      "valueBand": "all",
+      "quantile": "all",
+      "quality": "all",
+      "sortBy": "value-desc",
+      "groupBy": "set"
+     },
+     "selectedGroupKey": "set:sv1",
+     "detailMode": "top"
+    },
+    "watchlist": {
+     "filters": {
+      "search": "",
+      "setId": "all",
+      "variant": "all",
+      "valueBand": "all",
+      "quantile": "all",
+      "quality": "all",
+      "cardmarket": "all",
+      "minValue": "",
+      "maxValue": "",
+      "sortBy": "value-desc"
+     },
+     "visibleCount": 60,
+     "autoLoadBudget": 0,
+     "autoLoadInFlight": false
+    },
+    "itemKeys": [
+     "sv1::1=2.1",
+     "sv1::2=3",
+     "sv1::4=null",
+     "sv1::100=null",
+     "sv1::101=2.525",
+     "sv1::102=2.55",
+     "sv1::103=2.575",
+     "sv1::104=null",
+     "sv1::105=2.625",
+     "sv1::106=2.65",
+     "sv1::107=2.675",
+     "sv1::108=null",
+     "sv1::109=2.725",
+     "sv1::110=2.75",
+     "sv1::111=2.775",
+     "sv1::112=null",
+     "sv1::113=2.825",
+     "sv1::114=2.85",
+     "sv1::115=2.875",
+     "sv1::116=null",
+     "sv1::117=2.925",
+     "sv1::118=2.95",
+     "sv1::119=2.975",
+     "sv1::120=null",
+     "sv1::121=3.025",
+     "sv1::122=3.05",
+     "sv1::123=3.075",
+     "sv1::124=null",
+     "sv1::125=3.125",
+     "sv1::126=3.15",
+     "sv1::127=3.175",
+     "sv1::128=null",
+     "sv1::129=3.225",
+     "sv2::010-a=9",
+     "sv2::11=null!"
+    ],
+    "bySet": [
+     "sv1",
+     "sv2"
+    ],
+    "topCards": [
+     "sv2::010-a"
+    ]
+   }
+  },
+  "stats/mit-preisdaten": {
+   "log": [
+    {
+     "write": "stats.innerHTML",
+     "value": "<p class=\"loading-placeholder\">Lade Statistiken…</p>"
+    },
+    {
+     "write": "stats.innerHTML",
+     "value": "\n      <section class=\"stats-hero\" style=\"--stats-progress:67;\">\n        <div class=\"stats-hero-copy\">\n          <span class=\"stats-eyebrow\">SAMMLUNGSPULS</span>\n          <span class=\"stats-hero-badge\">📈 Spürbarer Fortschritt</span>\n          <h3>Deine Collection wirkt jetzt wie ein echtes Langzeitprojekt - <strong>4</strong> von <strong>6</strong> Karten sind bereits gesichert.</h3>\n          <p>67% Gesamtfortschritt, 1 komplettes Set, 0 Reverse Holos und 2 aktive Sets machen aus der Statistik endlich eine richtige Trophäenwand.</p>\n          <div class=\"stats-pill-row\">\n            <span class=\"stats-pill primary\">2 importierte Sets</span>\n            <span class=\"stats-pill success\">1 komplett</span>\n            <span class=\"stats-pill\">Ø 75% pro Set</span>\n            <span class=\"stats-pill warning\">Noch 1 Karten bis 80%</span>\n          </div>\n        </div>\n        <div class=\"stats-hero-meter\">\n          <div class=\"stats-hero-ring\">\n            <div class=\"stats-hero-ring-core\">\n              <strong>67%</strong>\n              <span>Fortschritt</span>\n            </div>\n          </div>\n          <div class=\"stats-hero-meter-detail\">\n            <strong>2 Karten fehlen noch</strong>\n            <span>1 bis zum nächsten Meilenstein</span>\n          </div>\n        </div>\n      </section>\n\n      <div class=\"stats-overview-cards\">\n        <article class=\"stat-card accent\">\n          <span class=\"stat-card-value\">6</span>\n          <span class=\"stat-card-label\">Slots im Tracker</span>\n          <span class=\"stat-card-meta\">1 Serien im Blick</span>\n        </article>\n        <article class=\"stat-card collected\">\n          <span class=\"stat-card-value\">4</span>\n          <span class=\"stat-card-label\">Normals gesammelt</span>\n          <span class=\"stat-card-meta\">67% der Gesamtmenge</span>\n        </article>\n        <article class=\"stat-card reverse\">\n          <span class=\"stat-card-value\">0</span>\n          <span class=\"stat-card-label\">Reverse Holos</span>\n          <span class=\"stat-card-meta\">0% bezogen auf alle Karten</span>\n        </article>\n        <article class=\"stat-card success\">\n          <span class=\"stat-card-value\">1</span>\n          <span class=\"stat-card-label\">Sets komplett</span>\n          <span class=\"stat-card-meta\">2/2 Sets mit Fortschritt</span>\n        </article>\n        <article class=\"stat-card\">\n          <span class=\"stat-card-value\">75%</span>\n          <span class=\"stat-card-label\">Set-Fortschritt</span>\n          <span class=\"stat-card-meta\">2 Karten bis 100%</span>\n        </article>\n        <article class=\"stat-card\">\n          <span class=\"stat-card-value\">2</span>\n          <span class=\"stat-card-label\">Aktive Sets</span>\n          <span class=\"stat-card-meta\">2 importiert</span>\n        </article>\n      </div>\n\n      <div class=\"stats-story-grid\">\n        <section class=\"stats-spotlight-card\">\n          <div class=\"stats-section-kicker\">Highlights</div>\n          <h3>Was gerade am meisten glänzt</h3>\n          <ul class=\"stats-insight-list\">\n            <li><span>Bestes Set</span><strong>Paldea Evolved - 100%</strong></li>\n            <li><span>Stärkste Serie</span><strong>Karmesin & Purpur - 67%</strong></li>\n            <li><span>Größter Kartenblock</span><strong>Karmesin & Purpur - 4 Karten</strong></li>\n          </ul>\n        </section>\n\n        <section class=\"stats-spotlight-card emphasis\">\n          <div class=\"stats-section-kicker\">Nächste Abschlüsse</div>\n          <h3>Diese Sets lohnen sich jetzt besonders</h3>\n          <div class=\"stats-goal-list\">\n            \n              <article class=\"stats-target-card\">\n                <div class=\"stats-target-top\">\n                  <strong>Scarlet & Violet</strong>\n                  <span>2 fehlen</span>\n                </div>\n                <div class=\"stats-mini-track\"><div class=\"stats-mini-fill\" style=\"width:50%\"></div></div>\n                <small>2/4 - 50%</small>\n              </article>\n            \n          </div>\n        </section>\n\n        <section class=\"stats-spotlight-card\">\n          <div class=\"stats-section-kicker\">Fokus</div>\n          <h3>Was den nächsten Sprung bringt</h3>\n          <ul class=\"stats-insight-list compact\">\n            <li><span>Bis 100%</span><strong>2 Karten</strong></li>\n            <li><span>Bis 80%</span><strong>1 Karten</strong></li>\n            <li><span>Größte Baustelle</span><strong>Scarlet & Violet - 2 fehlend</strong></li>\n          </ul>\n        </section>\n      </div>\n\n      <section class=\"stats-series-section\">\n        <div class=\"stats-section-head\">\n          <div>\n            <div class=\"stats-section-kicker\">Serienvergleich</div>\n            <h3>Wie sich dein Fortschritt verteilt</h3>\n          </div>\n          <span class=\"stats-section-note\">Klicke eine Reihe für die Set-Details.</span>\n        </div>\n        <div class=\"stats-series-table\">\n          \n          <div class=\"stats-series-row\" data-series=\"sv\" data-series-label=\"Karmesin & Purpur\">\n            <div class=\"stats-series-name-wrap\">\n              <div class=\"stats-series-name\">Karmesin & Purpur</div>\n              <div class=\"stats-series-meta\">1/2 Sets komplett</div>\n            </div>\n            <div class=\"stats-series-bar\"><div class=\"dash-progress-fill\" style=\"width:67%\"></div></div>\n            <div class=\"stats-series-numbers\"><strong>67%</strong><span>4/6</span></div>\n          </div>\n        </div>\n      </section>\n\n      <section id=\"stats-price-analytics\" class=\"stats-price-panel-shell\" data-state=\"loading\" aria-live=\"polite\"></section>\n\n      <div class=\"stats-charts-row\">\n        <div class=\"stats-chart-wrap\">\n          <div class=\"stats-section-kicker\">Visualisierung</div>\n          <h3>Gesamtfortschritt</h3>\n          <p>Gesammelt gegen fehlend - als schneller Blick auf den gesamten Binder.</p>\n          <canvas id=\"chart-overall\" height=\"220\"></canvas>\n        </div>\n        <div class=\"stats-chart-wrap\">\n          <div class=\"stats-section-kicker\">Visualisierung</div>\n          <h3>Top-Serien im Vergleich</h3>\n          <p>Die stärksten Reihen nach Abschlussquote auf einen Blick.</p>\n          <canvas id=\"chart-series\" height=\"220\"></canvas>\n        </div>\n      </div>\n\n      <div class=\"stats-two-col\">\n        <section class=\"stats-list-card\">\n          <div class=\"stats-section-kicker\">Trophy Board</div>\n          <h3>Top 5 vollständigste Sets</h3>\n          <ol class=\"stats-top-list\">\n            \n              <li>\n                <div class=\"stats-top-main\">\n                  <strong>Paldea Evolved</strong>\n                  <span>100%</span>\n                </div>\n                <small>2/2 Karten</small>\n              </li>\n            \n              <li>\n                <div class=\"stats-top-main\">\n                  <strong>Scarlet & Violet</strong>\n                  <span>50%</span>\n                </div>\n                <small>2/4 Karten</small>\n              </li>\n            \n          </ol>\n        </section>\n        <section class=\"stats-list-card\">\n          <div class=\"stats-section-kicker\">Baustellen</div>\n          <h3>Top 5 mit den meisten fehlenden Karten</h3>\n          <ol class=\"stats-top-list\">\n            \n              <li>\n                <div class=\"stats-top-main\">\n                  <strong>Scarlet & Violet</strong>\n                  <span>2 offen</span>\n                </div>\n                <small>2/4 Karten</small>\n              </li>\n            \n          </ol>\n        </section>\n      </div>"
+    },
+    {
+     "write": "price.dataset.state",
+     "value": "loading"
+    },
+    {
+     "write": "price.innerHTML",
+     "value": "\n    <article class=\"stats-price-panel \">\n      <header class=\"stats-price-head\">\n        <div>\n          <span class=\"stats-price-kicker\">Cardmarket Analyse</span>\n          <h3>Preisradar f&#xfc;r deine Sammlung</h3>\n          <p>Preiswerte werden schrittweise geladen...</p>\n        </div>\n        <div class=\"stats-price-progress-wrap\">\n          <strong data-stats-progress-pct>0%</strong>\n          <div class=\"stats-price-progress\"><span data-stats-progress-bar style=\"width:0%\"></span></div>\n        </div>\n      </header>\n\n      <div class=\"stats-price-grid\">\n        <section class=\"stats-price-kpi-cluster\">\n          <article class=\"stats-price-card\">\n            <span>Gesamtwert</span>\n            <strong>n/a</strong>\n          </article>\n          <article class=\"stats-price-card\">\n            <span>&#216; Preis / bewertet</span>\n            <strong>n/a</strong>\n          </article>\n          <article class=\"stats-price-card\">\n            <span>Bewertet</span>\n            <strong>0%</strong>\n            <small>0 von 0</small>\n          </article>\n          <article class=\"stats-price-card\">\n            <span>Ohne Preis</span>\n            <strong>0</strong>\n            <small>keine Fehler</small>\n          </article>\n        </section>\n      </div>\n\n      <section class=\"stats-price-tabs\" aria-label=\"Preis-Insights Tabs\">\n        \n    <button class=\"stats-price-tab-btn is-active\" type=\"button\" data-stats-price-tab=\"dashboard\">\n      Dashboard\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"top-values\">\n      Top-Werte\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"trends\">\n      Trends\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"comparisons\">\n      Vergleiche\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"advanced\">\n      Advanced\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"watchlist\">\n      Watchlist\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"timeline\">\n      Timeline/Story\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"drilldown\">\n      Fehler-Drilldown\n    </button>\n      </section>\n\n      <section class=\"stats-price-tab-content\" data-stats-tab-content>\n        \n    <section class=\"stats-price-tab-panel is-visible\" data-tab-panel=\"dashboard\">\n      <div class=\"stats-price-panel-grid\">\n        <article class=\"stats-price-surface-card\">\n          <h4>Werttreiber</h4>\n          <p>Noch kein Werttreiber erkannt.</p>\n        </article>\n        <article class=\"stats-price-surface-card\">\n          <h4>Momentum</h4>\n          <p>0% Preisabdeckung, 0 offene Lücken und 0 technische Fehler.</p>\n        </article>\n        <article class=\"stats-price-surface-card\">\n          <h4>Detail-Signal</h4>\n          <p>Sobald High-Value-Karten erkannt werden, erscheint hier eine Prioritätenliste.</p>\n        </article>\n      </div>\n    </section>\n      </section>\n    </article>"
+    },
+    {
+     "queryAll": "price .stats-price-tab-btn[data-stats-price-tab]"
+    },
+    {
+     "queryAll": "price select[data-advanced-filter]"
+    },
+    {
+     "queryAll": "price [data-advanced-group-key]"
+    },
+    {
+     "queryAll": "price [data-advanced-detail-mode]"
+    },
+    {
+     "queryAll": "price [data-watchlist-filter]"
+    },
+    {
+     "queryAll": "price [data-watchlist-reset]"
+    },
+    {
+     "queryAll": "price [data-watchlist-load-more]"
+    },
+    {
+     "queryAll": "price [data-watchlist-scroll-region]"
+    },
+    {
+     "queryAll": "price [data-watchlist-open-set]"
+    },
+    {
+     "queryAll": "price [data-set-id]"
+    },
+    {
+     "queryAll": "price [data-cardmarket-link]"
+    },
+    {
+     "write": "price.dataset.state",
+     "value": "loading"
+    },
+    {
+     "write": "price.innerHTML",
+     "value": "\n    <article class=\"stats-price-panel \">\n      <header class=\"stats-price-head\">\n        <div>\n          <span class=\"stats-price-kicker\">Cardmarket Analyse</span>\n          <h3>Preisradar f&#xfc;r deine Sammlung</h3>\n          <p>Preiswerte werden schrittweise geladen...</p>\n        </div>\n        <div class=\"stats-price-progress-wrap\">\n          <strong data-stats-progress-pct>0%</strong>\n          <div class=\"stats-price-progress\"><span data-stats-progress-bar style=\"width:0%\"></span></div>\n        </div>\n      </header>\n\n      <div class=\"stats-price-grid\">\n        <section class=\"stats-price-kpi-cluster\">\n          <article class=\"stats-price-card\">\n            <span>Gesamtwert</span>\n            <strong>n/a</strong>\n          </article>\n          <article class=\"stats-price-card\">\n            <span>&#216; Preis / bewertet</span>\n            <strong>n/a</strong>\n          </article>\n          <article class=\"stats-price-card\">\n            <span>Bewertet</span>\n            <strong>0%</strong>\n            <small>0 von 0</small>\n          </article>\n          <article class=\"stats-price-card\">\n            <span>Ohne Preis</span>\n            <strong>0</strong>\n            <small>keine Fehler</small>\n          </article>\n        </section>\n      </div>\n\n      <section class=\"stats-price-tabs\" aria-label=\"Preis-Insights Tabs\">\n        \n    <button class=\"stats-price-tab-btn is-active\" type=\"button\" data-stats-price-tab=\"dashboard\">\n      Dashboard\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"top-values\">\n      Top-Werte\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"trends\">\n      Trends\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"comparisons\">\n      Vergleiche\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"advanced\">\n      Advanced\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"watchlist\">\n      Watchlist\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"timeline\">\n      Timeline/Story\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"drilldown\">\n      Fehler-Drilldown\n    </button>\n      </section>\n\n      <section class=\"stats-price-tab-content\" data-stats-tab-content>\n        \n    <section class=\"stats-price-tab-panel is-visible\" data-tab-panel=\"dashboard\">\n      <div class=\"stats-price-panel-grid\">\n        <article class=\"stats-price-surface-card\">\n          <h4>Werttreiber</h4>\n          <p>Noch kein Werttreiber erkannt.</p>\n        </article>\n        <article class=\"stats-price-surface-card\">\n          <h4>Momentum</h4>\n          <p>0% Preisabdeckung, 0 offene Lücken und 0 technische Fehler.</p>\n        </article>\n        <article class=\"stats-price-surface-card\">\n          <h4>Detail-Signal</h4>\n          <p>Sobald High-Value-Karten erkannt werden, erscheint hier eine Prioritätenliste.</p>\n        </article>\n      </div>\n    </section>\n      </section>\n    </article>"
+    },
+    {
+     "queryAll": "price .stats-price-tab-btn[data-stats-price-tab]"
+    },
+    {
+     "queryAll": "price select[data-advanced-filter]"
+    },
+    {
+     "queryAll": "price [data-advanced-group-key]"
+    },
+    {
+     "queryAll": "price [data-advanced-detail-mode]"
+    },
+    {
+     "queryAll": "price [data-watchlist-filter]"
+    },
+    {
+     "queryAll": "price [data-watchlist-reset]"
+    },
+    {
+     "queryAll": "price [data-watchlist-load-more]"
+    },
+    {
+     "queryAll": "price [data-watchlist-scroll-region]"
+    },
+    {
+     "queryAll": "price [data-watchlist-open-set]"
+    },
+    {
+     "queryAll": "price [data-set-id]"
+    },
+    {
+     "queryAll": "price [data-cardmarket-link]"
+    },
+    {
+     "write": "price.dataset.state",
+     "value": "partial"
+    },
+    {
+     "write": "price [data-stats-progress-pct].textContent",
+     "value": "71%"
+    },
+    {
+     "write": "price [data-stats-progress-bar].style.width",
+     "value": "71%"
+    },
+    {
+     "write": "price .stats-price-head p.textContent",
+     "value": "Teilresultate werden laufend aktualisiert."
+    },
+    {
+     "write": "price [data-stats-tab-content].innerHTML",
+     "value": "\n    <section class=\"stats-price-tab-panel is-visible\" data-tab-panel=\"dashboard\">\n      <div class=\"stats-price-panel-grid\">\n        <article class=\"stats-price-surface-card\">\n          <h4>Werttreiber</h4>\n          <p>Scarlet &amp; Violet bleibt mit 49,38 EUR dein stärkster Block.</p>\n        </article>\n        <article class=\"stats-price-surface-card\">\n          <h4>Momentum</h4>\n          <p>72% Preisabdeckung, 7 offene Lücken und 0 technische Fehler.</p>\n        </article>\n        <article class=\"stats-price-surface-card\">\n          <h4>Detail-Signal</h4>\n          <p>Median 2,76 EUR · P90 2,98 EUR · Top-5 tragen 30% vom Wert.</p>\n        </article>\n      </div>\n    </section>"
+    },
+    {
+     "queryAll": "price .stats-price-tab-btn[data-stats-price-tab]"
+    },
+    {
+     "queryAll": "price select[data-advanced-filter]"
+    },
+    {
+     "queryAll": "price [data-advanced-group-key]"
+    },
+    {
+     "queryAll": "price [data-advanced-detail-mode]"
+    },
+    {
+     "queryAll": "price [data-watchlist-filter]"
+    },
+    {
+     "queryAll": "price [data-watchlist-reset]"
+    },
+    {
+     "queryAll": "price [data-watchlist-load-more]"
+    },
+    {
+     "queryAll": "price [data-watchlist-scroll-region]"
+    },
+    {
+     "queryAll": "price [data-watchlist-open-set]"
+    },
+    {
+     "queryAll": "price [data-set-id]"
+    },
+    {
+     "queryAll": "price [data-cardmarket-link]"
+    },
+    {
+     "write": "price.dataset.state",
+     "value": "partial"
+    },
+    {
+     "write": "price [data-stats-progress-pct].textContent",
+     "value": "100%"
+    },
+    {
+     "write": "price [data-stats-progress-bar].style.width",
+     "value": "100%"
+    },
+    {
+     "write": "price .stats-price-head p.textContent",
+     "value": "Teilresultate werden laufend aktualisiert."
+    },
+    {
+     "write": "price [data-stats-tab-content].innerHTML",
+     "value": "\n    <section class=\"stats-price-tab-panel is-visible\" data-tab-panel=\"dashboard\">\n      <div class=\"stats-price-panel-grid\">\n        <article class=\"stats-price-surface-card\">\n          <h4>Werttreiber</h4>\n          <p>Scarlet &amp; Violet bleibt mit 68,17 EUR dein stärkster Block.</p>\n        </article>\n        <article class=\"stats-price-surface-card\">\n          <h4>Momentum</h4>\n          <p>71% Preisabdeckung, 10 offene Lücken und 1 technische Fehler.</p>\n        </article>\n        <article class=\"stats-price-surface-card\">\n          <h4>Detail-Signal</h4>\n          <p>Median 2,88 EUR · P90 3,17 EUR · Top-5 tragen 28% vom Wert.</p>\n        </article>\n      </div>\n    </section>"
+    },
+    {
+     "queryAll": "price .stats-price-tab-btn[data-stats-price-tab]"
+    },
+    {
+     "queryAll": "price select[data-advanced-filter]"
+    },
+    {
+     "queryAll": "price [data-advanced-group-key]"
+    },
+    {
+     "queryAll": "price [data-advanced-detail-mode]"
+    },
+    {
+     "queryAll": "price [data-watchlist-filter]"
+    },
+    {
+     "queryAll": "price [data-watchlist-reset]"
+    },
+    {
+     "queryAll": "price [data-watchlist-load-more]"
+    },
+    {
+     "queryAll": "price [data-watchlist-scroll-region]"
+    },
+    {
+     "queryAll": "price [data-watchlist-open-set]"
+    },
+    {
+     "queryAll": "price [data-set-id]"
+    },
+    {
+     "queryAll": "price [data-cardmarket-link]"
+    },
+    {
+     "write": "price.dataset.state",
+     "value": "final"
+    },
+    {
+     "write": "price.innerHTML",
+     "value": "\n    <article class=\"stats-price-panel stats-price-enter\">\n      <header class=\"stats-price-head\">\n        <div>\n          <span class=\"stats-price-kicker\">Cardmarket Analyse</span>\n          <h3>Preisradar f&#xfc;r deine Sammlung</h3>\n          <p>Preisradar abgeschlossen.</p>\n        </div>\n        <div class=\"stats-price-progress-wrap\">\n          <strong data-stats-progress-pct>100%</strong>\n          <div class=\"stats-price-progress\"><span data-stats-progress-bar style=\"width:100%\"></span></div>\n        </div>\n      </header>\n\n      <div class=\"stats-price-grid\">\n        <section class=\"stats-price-kpi-cluster\">\n          <article class=\"stats-price-card\">\n            <span>Gesamtwert</span>\n            <strong>77,17 EUR</strong>\n          </article>\n          <article class=\"stats-price-card\">\n            <span>&#216; Preis / bewertet</span>\n            <strong>3,09 EUR</strong>\n          </article>\n          <article class=\"stats-price-card\">\n            <span>Bewertet</span>\n            <strong>71%</strong>\n            <small>25 von 35</small>\n          </article>\n          <article class=\"stats-price-card\">\n            <span>Ohne Preis</span>\n            <strong>10</strong>\n            <small>1 Fehler</small>\n          </article>\n        </section>\n      </div>\n\n      <section class=\"stats-price-tabs\" aria-label=\"Preis-Insights Tabs\">\n        \n    <button class=\"stats-price-tab-btn is-active\" type=\"button\" data-stats-price-tab=\"dashboard\">\n      Dashboard\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"top-values\">\n      Top-Werte\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"trends\">\n      Trends\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"comparisons\">\n      Vergleiche\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"advanced\">\n      Advanced\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"watchlist\">\n      Watchlist\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"timeline\">\n      Timeline/Story\n    </button>\n    <button class=\"stats-price-tab-btn \" type=\"button\" data-stats-price-tab=\"drilldown\">\n      Fehler-Drilldown\n    </button>\n      </section>\n\n      <section class=\"stats-price-tab-content\" data-stats-tab-content>\n        \n    <section class=\"stats-price-tab-panel is-visible\" data-tab-panel=\"dashboard\">\n      <div class=\"stats-price-panel-grid\">\n        <article class=\"stats-price-surface-card\">\n          <h4>Werttreiber</h4>\n          <p>Scarlet &amp; Violet bleibt mit 68,17 EUR dein stärkster Block.</p>\n        </article>\n        <article class=\"stats-price-surface-card\">\n          <h4>Momentum</h4>\n          <p>71% Preisabdeckung, 10 offene Lücken und 1 technische Fehler.</p>\n        </article>\n        <article class=\"stats-price-surface-card\">\n          <h4>Detail-Signal</h4>\n          <p>Median 2,88 EUR · P90 3,17 EUR · Top-5 tragen 28% vom Wert.</p>\n        </article>\n      </div>\n    </section>\n      </section>\n    </article>"
+    },
+    {
+     "queryAll": "price .stats-price-tab-btn[data-stats-price-tab]"
+    },
+    {
+     "queryAll": "price select[data-advanced-filter]"
+    },
+    {
+     "queryAll": "price [data-advanced-group-key]"
+    },
+    {
+     "queryAll": "price [data-advanced-detail-mode]"
+    },
+    {
+     "queryAll": "price [data-watchlist-filter]"
+    },
+    {
+     "queryAll": "price [data-watchlist-reset]"
+    },
+    {
+     "queryAll": "price [data-watchlist-load-more]"
+    },
+    {
+     "queryAll": "price [data-watchlist-scroll-region]"
+    },
+    {
+     "queryAll": "price [data-watchlist-open-set]"
+    },
+    {
+     "queryAll": "price [data-set-id]"
+    },
+    {
+     "queryAll": "price [data-cardmarket-link]"
+    }
+   ],
+   "statsPrice": {
+    "requestId": "<generated>",
+    "status": "final",
+    "activeTab": "dashboard",
+    "loadedCards": 35,
+    "totalCards": 35,
+    "errors": 1,
+    "advanced": {
+     "filters": {
+      "setId": "all",
+      "valueBand": "all",
+      "quantile": "all",
+      "quality": "all",
+      "sortBy": "value-desc",
+      "groupBy": "set"
+     },
+     "selectedGroupKey": "set:sv1",
+     "detailMode": "top"
+    },
+    "watchlist": {
+     "filters": {
+      "search": "",
+      "setId": "all",
+      "variant": "all",
+      "valueBand": "all",
+      "quantile": "all",
+      "quality": "all",
+      "cardmarket": "all",
+      "minValue": "",
+      "maxValue": "",
+      "sortBy": "value-desc"
+     },
+     "visibleCount": 60,
+     "autoLoadBudget": 0,
+     "autoLoadInFlight": false
+    },
+    "itemKeys": [
+     "sv1::1=2.1",
+     "sv1::2=3",
+     "sv1::4=null",
+     "sv1::100=null",
+     "sv1::101=2.525",
+     "sv1::102=2.55",
+     "sv1::103=2.575",
+     "sv1::104=null",
+     "sv1::105=2.625",
+     "sv1::106=2.65",
+     "sv1::107=2.675",
+     "sv1::108=null",
+     "sv1::109=2.725",
+     "sv1::110=2.75",
+     "sv1::111=2.775",
+     "sv1::112=null",
+     "sv1::113=2.825",
+     "sv1::114=2.85",
+     "sv1::115=2.875",
+     "sv1::116=null",
+     "sv1::117=2.925",
+     "sv1::118=2.95",
+     "sv1::119=2.975",
+     "sv1::120=null",
+     "sv1::121=3.025",
+     "sv1::122=3.05",
+     "sv1::123=3.075",
+     "sv1::124=null",
+     "sv1::125=3.125",
+     "sv1::126=3.15",
+     "sv1::127=3.175",
+     "sv1::128=null",
+     "sv1::129=3.225",
+     "sv2::010-a=9",
+     "sv2::11=null!"
+    ],
+    "bySet": [
+     "sv1",
+     "sv2"
+    ],
+    "topCards": [
+     "sv2::010-a"
+    ]
+   }
+  }
+ }
+}

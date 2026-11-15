@@ -17,7 +17,7 @@ Dokumentiert entfernte oder in Quarantäne verschobene Dateien/Funktionsblöcke 
 
 | Modul | Status | Grund | Remove-by |
 |------|--------|-------|-----------|
-| `js/pokecode-compat.js` | candidate | laut Spec als Dead-Code-Kandidat | N+1 |
+| `js/pokecode-compat.js` | removed | API-v3-Umstellung (Phase 3): kein Laufzeit-Merging mehr; `normalizeSetId` nach `js/core/set-id-helpers.js` | – |
 | `js/trading-system.js` | candidate | nicht Teil der Zielarchitektur, geringe aktive Nutzung | N+1 |
 | `js/community-ui.js` | candidate | überlappende UI-Verantwortung | N+1 |
 | Teile aus `social-*`, `advanced-features`, `card-filters` | candidate | werden in Feature-Slices aufgeteilt oder entfernt | N+1 |

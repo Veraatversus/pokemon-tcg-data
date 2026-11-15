@@ -8,7 +8,16 @@ function resolveErrorStatus(error) {
   );
 }
 
-export function isRetryableError(error) {
+// Wrapper-Fehler (z. B. v3-Client: code 'V3_UNREACHABLE' mit `cause`) sind retry-faehig, wenn ihre
+// Ursache es ist (5xx/429/Netzwerk). Die Kette wird begrenzt verfolgt (Schutz vor Zyklen).
+export function isRetryableError(error, depth = 0) {
+  if (isRetryableErrorSelf(error)) return true;
+  const cause = error?.cause;
+  if (cause && cause !== error && depth < 5) return isRetryableError(cause, depth + 1);
+  return false;
+}
+
+function isRetryableErrorSelf(error) {
   const status = resolveErrorStatus(error);
   if (Number.isFinite(status)) {
     if (status === 429) return true;

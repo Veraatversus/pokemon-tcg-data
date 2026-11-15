@@ -1,10 +1,19 @@
 ﻿import { CONFIG } from '../core/config.js';
-import { signIn } from '../core/auth.js';
 import {
-  EVENT_SHEETS_WRITE_FAILED,
-  EVENT_SHEETS_WRITE_RETRY,
-  EVENT_SHEETS_WRITE_SUCCESS,
-} from '../core/storage-keys.js';
+  buildRange,
+  isInvalidRangeError,
+  enqueueSheetsMutation,
+  resetSheetsWriteQueue,
+  getValues,
+  getFormulas,
+  putValues,
+  batchPutValues,
+  clearValues,
+  clearRangeStrict,
+  hasSpreadsheetMetaApi,
+  getSpreadsheetMeta,
+  batchUpdateSpreadsheet
+} from './sheets-client.js';
 import {
   normalizeCardNumber,
   toBoolean,
@@ -17,21 +26,24 @@ import {
   SET_MATCH_STATUS,
   CARD_MATCH_STATUS,
   resolveDisplaySet,
-  resolveDisplayCard
-} from './schema-contract.js?v=20260613-tcgdex-merge-fix-v2';
+  resolveDisplayCard,
+  getCardLanguage
+} from './schema-contract.js?v=20261115-clean-4';
+import { withV3CardmarketIds } from './v3-cardmarket-ids.js';
 import {
   planSetScopedUpsert,
   planSetScopedDedup
 } from './set-scoped-upsert.js';
+import {
+  ensureResolverForSet,
+  ensureSetResolver,
+  collectCollectionSetIds,
+  buildCollectionMap,
+  cellsForUpdate
+} from './collection-aliases.js';
+import { mergeAliasOverviewSets } from './set-aliases.js';
 
-function quoteSheetName(sheetName) {
-  const name = String(sheetName ?? '').replace(/'/g, "''");
-  return `'${name}'`;
-}
-
-function buildRange(sheetName, a1Range) {
-  return `${quoteSheetName(sheetName)}!${a1Range}`;
-}
+export { cellsForUpdate };
 
 function isDbSheetTitle(title) {
   const normalized = normalizeName(title);
@@ -44,8 +56,7 @@ let resolvedSheetsCache = null;
 let schemaEnsuredPromise = null;
 const dbRowsCache = new Map();
 const sheetCapacityCache = new Map();
-let sheetsWriteQueue = Promise.resolve();
-const SHEETS_WRITE_GAP_MS = 90;
+const legacyMigrationLocks = new Map();
 
 const DB_SHEETS = {
   sets: 'db_sets',
@@ -59,6 +70,8 @@ const DB_HEADERS = {
   collection: ['setId', 'cardId', 'g', 'rh', 'updatedAt']
 };
 
+const SHEET_PROPS_FIELDS = 'sheets(properties(sheetId,title,gridProperties(rowCount,columnCount)))';
+
 function normalizeName(value) {
   return String(value ?? '').trim().toLowerCase();
 }
@@ -68,7 +81,9 @@ export function resetSheetsDataCaches() {
   schemaEnsuredPromise = null;
   dbRowsCache.clear();
   sheetCapacityCache.clear();
-  sheetsWriteQueue = Promise.resolve();
+  // Sperren (legacyMigrationLocks, sheetAppendLocks) bleiben bewusst erhalten: Ein Reset waehrend eines
+  // laufenden Writes darf keinen parallelen Anhaenge-Vorgang zulassen. Sie raeumen sich selbst auf.
+  resetSheetsWriteQueue();
 }
 
 function invalidateSheetRowCache(sheetName) {
@@ -91,24 +106,6 @@ function primeSheetCapacityCache(sheets = []) {
       columnCount: Number(sheet?.properties?.gridProperties?.columnCount) || 0,
     });
   });
-}
-
-function waitForDelay(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function enqueueSheetsMutation(task, { gapMs = SHEETS_WRITE_GAP_MS } = {}) {
-  const runTask = async () => {
-    const result = await task();
-    if (gapMs > 0) {
-      await waitForDelay(gapMs);
-    }
-    return result;
-  };
-
-  const scheduled = sheetsWriteQueue.then(runTask, runTask);
-  sheetsWriteQueue = scheduled.catch(() => undefined);
-  return scheduled;
 }
 
 function pickSheetTitle(titles, preferred, aliases, matcher) {
@@ -164,14 +161,11 @@ async function detectOverviewByContent(titles) {
 async function resolveSheetNames() {
   if (resolvedSheetsCache) return resolvedSheetsCache;
 
-  if (!gapi?.client?.sheets?.spreadsheets?.get) {
+  if (!hasSpreadsheetMetaApi()) {
     throw new Error('Sheets API nicht initialisiert â€“ bitte zuerst anmelden.');
   }
 
-  const meta = await gapi.client.sheets.spreadsheets.get({
-    spreadsheetId: CONFIG.SPREADSHEET_ID,
-    fields: 'sheets(properties(sheetId,title,gridProperties(rowCount,columnCount)))'
-  });
+  const meta = await getSpreadsheetMeta(SHEET_PROPS_FIELDS);
 
   const metaSheets = meta.result.sheets || [];
   primeSheetCapacityCache(metaSheets);
@@ -219,9 +213,10 @@ async function resolveSheetNames() {
   return resolvedSheetsCache;
 }
 
-function isInvalidRangeError(err) {
-  const message = String(err?.result?.error?.message || err?.message || '').toLowerCase();
-  return err?.status === 400 || message.includes('invalid_argument') || message.includes('unable to parse range');
+// Fuer Lesungen, die Zielzeilen bestimmen: nur ein fehlendes Blatt/Range gilt als leer, alles andere wirft.
+function rowsOrThrowUnlessMissing(err) {
+  if (isInvalidRangeError(err)) return [];
+  throw err;
 }
 
 async function getOverviewRows(sheets) {
@@ -250,215 +245,8 @@ async function getOverviewRows(sheets) {
   }
 }
 
-async function getValues(range, renderOption = 'UNFORMATTED_VALUE', suppressErrorLog = false) {
-  const maxRetries = 6;
-  try {
-    if (!gapi?.client?.sheets?.spreadsheets?.values?.get) {
-      throw new Error('Sheets API nicht initialisiert â€“ bitte melden Sie sich an');
-    }
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
-      try {
-        const response = await gapi.client.sheets.spreadsheets.values.get({
-          spreadsheetId: CONFIG.SPREADSHEET_ID,
-          range,
-          valueRenderOption: renderOption
-        });
-        return response.result.values || [];
-      } catch (err) {
-        if (err?.status !== 429 || attempt >= maxRetries) throw err;
-        const delay = Math.min(10000, 400 * Math.pow(2, attempt)) + Math.floor(Math.random() * 120);
-        await new Promise((resolve) => setTimeout(resolve, delay));
-      }
-    }
-    return [];
-  } catch (err) {
-    if (!suppressErrorLog) {
-      console.error('[getValues]', err);
-    }
-    throw err;
-  }
-}
-
-// Formeln mÃ¼ssen mit FORMULA gelesen werden (z.B. HYPERLINK in Overview)
-async function getFormulas(range) {
-  return getValues(range, 'FORMULA');
-}
-
-function isRetryableWriteError(err) {
-  const status = Number(err?.status || err?.result?.error?.code || 0);
-  if ([429, 500, 502, 503, 504].includes(status)) return true;
-  const message = String(err?.result?.error?.message || err?.message || '').toLowerCase();
-  return message.includes('timeout') || message.includes('temporar') || message.includes('rate limit');
-}
-
-function isAuthWriteError(err) {
-  const status = Number(err?.status || err?.result?.error?.code || 0);
-  if (status === 401 || status === 403) return true;
-  const message = String(err?.result?.error?.message || err?.message || '').toLowerCase();
-  return message.includes('unauthenticated')
-    || message.includes('unauthorized')
-    || message.includes('permission denied')
-    || message.includes('auth');
-}
-
-function buildAuthWriteRecoveryError(err) {
-  const wrapped = new Error('Google-Anmeldung abgelaufen. Bitte oben erneut anmelden und die Aktion wiederholen.');
-  wrapped.cause = err;
-  wrapped.code = 'AUTH_RELOGIN_REQUIRED';
-  wrapped.status = Number(err?.status || err?.result?.error?.code || 0) || 401;
-  return wrapped;
-}
-
-function emitWriteEvent(type, detail) {
-  if (typeof window === 'undefined' || !window.dispatchEvent || typeof CustomEvent === 'undefined') return;
-  window.dispatchEvent(new CustomEvent(type, { detail }));
-}
-
-async function putValues(range, values) {
-  const maxRetries = 6;
-  let reauthedOnce = false;
-  try {
-    if (!gapi?.client?.sheets?.spreadsheets?.values?.update) {
-      throw new Error('Sheets API nicht initialisiert â€“ bitte melden Sie sich an');
-    }
-    return await enqueueSheetsMutation(async () => {
-      for (let attempt = 0; attempt <= maxRetries; attempt++) {
-        try {
-          await gapi.client.sheets.spreadsheets.values.update({
-            spreadsheetId: CONFIG.SPREADSHEET_ID,
-            range,
-            valueInputOption: 'USER_ENTERED',
-            resource: { values }
-          });
-          emitWriteEvent(EVENT_SHEETS_WRITE_SUCCESS, {
-            range,
-            attemptsUsed: attempt + 1,
-            maxRetries
-          });
-          return;
-        } catch (err) {
-          if (isAuthWriteError(err) && !reauthedOnce) {
-            reauthedOnce = true;
-            const canAttemptInteractiveReauth = typeof document === 'undefined' || document.visibilityState === 'visible';
-            const reauthed = canAttemptInteractiveReauth
-              ? await signIn({ forceConsent: false }).catch(() => false)
-              : false;
-            if (reauthed) {
-              emitWriteEvent(EVENT_SHEETS_WRITE_RETRY, {
-                range,
-                attempt: attempt + 1,
-                maxRetries,
-                delayMs: 0,
-                status: Number(err?.status || err?.result?.error?.code || 0) || null
-              });
-              continue;
-            }
-            throw buildAuthWriteRecoveryError(err);
-          }
-          if (!isRetryableWriteError(err) || attempt >= maxRetries) throw err;
-          const delay = Math.min(10000, 500 * Math.pow(2, attempt)) + Math.floor(Math.random() * 150);
-          emitWriteEvent(EVENT_SHEETS_WRITE_RETRY, {
-            range,
-            attempt: attempt + 1,
-            maxRetries,
-            delayMs: delay,
-            status: Number(err?.status || err?.result?.error?.code || 0) || null
-          });
-          await waitForDelay(delay);
-        }
-      }
-    });
-  } catch (err) {
-    emitWriteEvent(EVENT_SHEETS_WRITE_FAILED, {
-      range,
-      status: Number(err?.status || err?.result?.error?.code || 0) || null,
-      message: String(err?.result?.error?.message || err?.message || 'Unbekannter Fehler')
-    });
-    console.error('[putValues]', err);
-    throw err;
-  }
-}
-
-async function batchPutValues(updates = []) {
-  const normalizedUpdates = (updates || []).filter((entry) => entry?.range && Array.isArray(entry?.values) && entry.values.length > 0);
-  if (!normalizedUpdates.length) return;
-
-  const maxRetries = 6;
-  let reauthedOnce = false;
-  const rangeLabel = normalizedUpdates.length === 1 ? normalizedUpdates[0].range : `${normalizedUpdates.length} ranges`;
-
-  try {
-    if (!gapi?.client?.sheets?.spreadsheets?.values?.batchUpdate) {
-      for (const entry of normalizedUpdates) {
-        await putValues(entry.range, entry.values);
-      }
-      return;
-    }
-
-    return await enqueueSheetsMutation(async () => {
-      for (let attempt = 0; attempt <= maxRetries; attempt++) {
-        try {
-          await gapi.client.sheets.spreadsheets.values.batchUpdate({
-            spreadsheetId: CONFIG.SPREADSHEET_ID,
-            resource: {
-              valueInputOption: 'USER_ENTERED',
-              data: normalizedUpdates.map((entry) => ({ range: entry.range, values: entry.values }))
-            }
-          });
-          emitWriteEvent(EVENT_SHEETS_WRITE_SUCCESS, {
-            range: rangeLabel,
-            attemptsUsed: attempt + 1,
-            maxRetries
-          });
-          return;
-        } catch (err) {
-          if (isAuthWriteError(err) && !reauthedOnce) {
-            reauthedOnce = true;
-            const canAttemptInteractiveReauth = typeof document === 'undefined' || document.visibilityState === 'visible';
-            const reauthed = canAttemptInteractiveReauth
-              ? await signIn({ forceConsent: false }).catch(() => false)
-              : false;
-            if (reauthed) {
-              emitWriteEvent(EVENT_SHEETS_WRITE_RETRY, {
-                range: rangeLabel,
-                attempt: attempt + 1,
-                maxRetries,
-                delayMs: 0,
-                status: Number(err?.status || err?.result?.error?.code || 0) || null
-              });
-              continue;
-            }
-            throw buildAuthWriteRecoveryError(err);
-          }
-          if (!isRetryableWriteError(err) || attempt >= maxRetries) throw err;
-          const delay = Math.min(10000, 500 * Math.pow(2, attempt)) + Math.floor(Math.random() * 150);
-          emitWriteEvent(EVENT_SHEETS_WRITE_RETRY, {
-            range: rangeLabel,
-            attempt: attempt + 1,
-            maxRetries,
-            delayMs: delay,
-            status: Number(err?.status || err?.result?.error?.code || 0) || null
-          });
-          await waitForDelay(delay);
-        }
-      }
-    });
-  } catch (err) {
-    emitWriteEvent(EVENT_SHEETS_WRITE_FAILED, {
-      range: rangeLabel,
-      status: Number(err?.status || err?.result?.error?.code || 0) || null,
-      message: String(err?.result?.error?.message || err?.message || 'Unbekannter Fehler')
-    });
-    console.error('[batchPutValues]', err);
-    throw err;
-  }
-}
-
 async function listSheetTitles() {
-  const meta = await gapi.client.sheets.spreadsheets.get({
-    spreadsheetId: CONFIG.SPREADSHEET_ID,
-    fields: 'sheets(properties(sheetId,title,gridProperties(rowCount,columnCount)))'
-  });
+  const meta = await getSpreadsheetMeta(SHEET_PROPS_FIELDS);
   const metaSheets = meta.result.sheets || [];
   primeSheetCapacityCache(metaSheets);
   return metaSheets
@@ -468,12 +256,7 @@ async function listSheetTitles() {
 
 async function addSheet(title) {
   await enqueueSheetsMutation(async () => {
-    await gapi.client.sheets.spreadsheets.batchUpdate({
-      spreadsheetId: CONFIG.SPREADSHEET_ID,
-      resource: {
-        requests: [{ addSheet: { properties: { title } } }]
-      }
-    });
+    await batchUpdateSpreadsheet([{ addSheet: { properties: { title } } }]);
   }, { gapMs: 0 });
   resolvedSheetsCache = null;
   dbRowsCache.clear();
@@ -516,13 +299,7 @@ async function ensureSheetWithHeader(sheetName, header) {
 }
 
 async function clearSheetDataRows(sheetName) {
-  if (!gapi?.client?.sheets?.spreadsheets?.values?.clear) {
-    throw new Error('Sheets API nicht initialisiert â€“ bitte melden Sie sich an');
-  }
-  await gapi.client.sheets.spreadsheets.values.clear({
-    spreadsheetId: CONFIG.SPREADSHEET_ID,
-    range: buildRange(sheetName, 'A2:ZZ')
-  });
+  await clearRangeStrict(buildRange(sheetName, 'A2:ZZ'));
   dbRowsCache.delete(sheetName);
 }
 
@@ -582,12 +359,22 @@ async function ensureNormalizedSchema() {
   await schemaEnsuredPromise;
 }
 
-async function readDbRows(sheetName, columnCount, force = false) {
+// Lesefehler werden nie gecacht. strict: Lesungen, die eine Anhaenge-Startzeile oder ein Update-Ziel
+// bestimmen, werfen bei jedem Fehler ausser "Blatt/Range existiert nicht" (dann leer, ungecacht) -
+// sonst wuerde ab Zeile 2 ueberschrieben. Nicht-strict (Anzeige) liefert bei Fehlern [] (ungecacht).
+async function readDbRows(sheetName, columnCount, force = false, { strict = false } = {}) {
   const key = `${sheetName}:${columnCount}`;
   if (!force && dbRowsCache.has(key)) {
     return dbRowsCache.get(key);
   }
-  const rows = await getValues(buildDataRange(sheetName, columnCount, 2, 200000)).catch(() => []);
+  let rows;
+  try {
+    rows = await getValues(buildDataRange(sheetName, columnCount, 2, 200000));
+  } catch (err) {
+    if (isInvalidRangeError(err)) return [];
+    if (strict) throw err;
+    return [];
+  }
   dbRowsCache.set(key, rows);
   return rows;
 }
@@ -602,15 +389,48 @@ async function rewriteDbRows(sheetName, columnCount, rows) {
   dbRowsCache.set(`${sheetName}:${columnCount}`, rows);
 }
 
-async function appendDbRows(sheetName, columnCount, rows) {
-  if (!Array.isArray(rows) || rows.length === 0) return;
-  const existing = await readDbRows(sheetName, columnCount);
+// Anhaengen wird pro Blatt serialisiert: Die Startzeile ergibt sich aus der tatsaechlichen Zeilenzahl,
+// nachdem alle vorherigen Anhaenge-Writes gelandet sind. Ohne Sperre lasen parallele Aufrufer dieselbe
+// Zeilenzahl und ueberschrieben sich gegenseitig. (enqueueSheetsMutation ist nicht nutzbar: putValues und
+// ensureSheetCapacity reihen sich selbst dort ein -> Verschachtelung wuerde blockieren.)
+const sheetAppendLocks = new Map();
+
+function withSheetAppendLock(sheetName, task) {
+  const key = normalizeName(sheetName);
+  const previous = sheetAppendLocks.get(key) || Promise.resolve();
+  const run = previous.catch(() => undefined).then(task);
+  const tail = run.catch(() => undefined);
+  sheetAppendLocks.set(key, tail);
+  tail.then(() => {
+    if (sheetAppendLocks.get(key) === tail) sheetAppendLocks.delete(key);
+  });
+  return run;
+}
+
+// Nur innerhalb von withSheetAppendLock aufrufen; `existing` = frisch gelesene Zeilen. Liefert die neuen Zeilen.
+async function appendRowsUnlocked(sheetName, columnCount, existing, rows) {
   const start = existing.length + 2;
   const end = start + rows.length - 1;
   const endCol = colToA1(columnCount);
   await ensureSheetCapacity(sheetName, end, columnCount);
   await putValues(buildRange(sheetName, `A${start}:${endCol}${end}`), rows);
-  dbRowsCache.set(`${sheetName}:${columnCount}`, [...existing, ...rows]);
+  const next = [...existing, ...rows];
+  dbRowsCache.set(`${sheetName}:${columnCount}`, next);
+  return next;
+}
+
+async function appendDbRows(sheetName, columnCount, rows) {
+  if (!Array.isArray(rows) || rows.length === 0) return;
+  await withSheetAppendLock(sheetName, async () => {
+    const existing = await readDbRows(sheetName, columnCount, true, { strict: true });
+    await appendRowsUnlocked(sheetName, columnCount, existing, rows);
+  });
+}
+
+/** Haengt db_collection-Zeilen an (serialisiert ueber die Blatt-Sperre), z. B. fuer die Altschluessel-Migration. */
+export async function appendCollectionRows(rows) {
+  await ensureNormalizedSchema();
+  await appendDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, rows);
 }
 
 async function ensureSheetCapacity(sheetName, requiredRows, requiredCols) {
@@ -623,10 +443,7 @@ async function ensureSheetCapacity(sheetName, requiredRows, requiredCols) {
     return;
   }
 
-  const meta = await gapi.client.sheets.spreadsheets.get({
-    spreadsheetId: CONFIG.SPREADSHEET_ID,
-    fields: 'sheets(properties(sheetId,title,gridProperties(rowCount,columnCount)))'
-  });
+  const meta = await getSpreadsheetMeta(SHEET_PROPS_FIELDS);
   primeSheetCapacityCache(meta.result.sheets || []);
   sheetInfo = sheetCapacityCache.get(normalizedSheetName) || null;
 
@@ -663,10 +480,7 @@ async function ensureSheetCapacity(sheetName, requiredRows, requiredCols) {
   }
 
   await enqueueSheetsMutation(async () => {
-    await gapi.client.sheets.spreadsheets.batchUpdate({
-      spreadsheetId: CONFIG.SPREADSHEET_ID,
-      resource: { requests }
-    });
+    await batchUpdateSpreadsheet(requests);
   }, { gapMs: 0 });
 
   sheetCapacityCache.set(normalizedSheetName, {
@@ -719,14 +533,9 @@ function buildEmptyRow(columnCount) {
   return Array.from({ length: columnCount }, () => '');
 }
 
-function findLastRowIndex(rows, predicate) {
-  for (let index = rows.length - 1; index >= 0; index -= 1) {
-    if (predicate(rows[index], index)) return index;
-  }
-  return -1;
-}
-
-async function applySetScopedPlan(sheetName, columnCount, plan) {
+// lockedRows: Aufrufer haelt bereits withSheetAppendLock(sheetName) und hat diese Zeilen frisch gelesen;
+// dann wird ohne erneute Sperre angehaengt (appendDbRows wuerde auf die eigene Sperre warten).
+async function applySetScopedPlan(sheetName, columnCount, plan, { lockedRows = null } = {}) {
   if (!plan) return;
   const updates = Array.isArray(plan.updates) ? plan.updates : [];
   const clearIndices = Array.isArray(plan.clearIndices) ? plan.clearIndices : [];
@@ -748,7 +557,8 @@ async function applySetScopedPlan(sheetName, columnCount, plan) {
   }
 
   if (appendRows.length > 0) {
-    await appendDbRows(sheetName, columnCount, appendRows);
+    if (lockedRows) await appendRowsUnlocked(sheetName, columnCount, lockedRows, appendRows);
+    else await appendDbRows(sheetName, columnCount, appendRows);
   }
 
   if (updates.length > 0 || clearIndices.length > 0 || appendRows.length > 0) {
@@ -781,83 +591,88 @@ function isCardImageSplitFormat(row) {
 }
 
 async function upsertDbSet(setMeta, imported = false) {
+  // db_sets ist ein Cache (Spec §7.1); die Overview-Zeile schreibt upsertOverviewEntry unabhaengig davon.
+  if (!CONFIG.WRITE_DB_CARDS) return;
   await ensureNormalizedSchema();
   const setId = toSafeCellString(setMeta?.setId);
   if (!setId) return;
 
-  const rows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length);
-  // Neues SET_DB_HEADERS-Format
-  const target = [
-    setId,                                                                   // [0]  setId
-    Boolean(imported),                                                       // [1]  imported
-    nowIso(),                                                                // [2]  updatedAt
-    toSafeCellString(setMeta?.matchStatus ?? ''),                            // [3]  matchStatus
-    Boolean(setMeta?.isTcgdexOnly),                                          // [4]  isTcgdexOnly
-    toSafeCellString(setMeta?.vera_id ?? ''),                                // [5]  vera_id
-    toSafeCellString(setMeta?.tcgdex_id ?? setMeta?.tcgdexId ?? ''),         // [6]  tcgdex_id
-    toSafeCellString(setMeta?.vera_name ?? ''),                              // [7]  vera_name
-    toSafeCellString(setMeta?.tcgdex_name ?? setMeta?.tcgdexName ?? ''),     // [8]  tcgdex_name
-    toSafeCellString(setMeta?.vera_series ?? ''),                            // [9]  vera_series
-    toSafeCellString(setMeta?.tcgdex_serie_name ?? ''),                      // [10] tcgdex_serie_name
-    toSafeCellString(setMeta?.tcgdex_serie_id ?? ''),                        // [11] tcgdex_serie_id
-    Number(setMeta?.vera_printedTotal) || 0,                                 // [12] vera_printedTotal
-    Number(setMeta?.tcgdex_cardCount_official) || 0,                         // [13] tcgdex_cardCount_official
-    Number(setMeta?.vera_total) || 0,                                        // [14] vera_total
-    Number(setMeta?.tcgdex_cardCount_total) || 0,                            // [15] tcgdex_cardCount_total
-    Number(setMeta?.tcgdex_cardCount_holo) || 0,                             // [16] tcgdex_cardCount_holo
-    Number(setMeta?.tcgdex_cardCount_reverse) || 0,                          // [17] tcgdex_cardCount_reverse
-    Number(setMeta?.tcgdex_cardCount_firstEdition) || 0,                     // [18] tcgdex_cardCount_firstEdition
-    Number(setMeta?.tcgdex_cardCount_normal) || 0,                           // [19] tcgdex_cardCount_normal
-    toSafeCellString(setMeta?.vera_ptcgoCode ?? ''),                         // [20] vera_ptcgoCode
-    toSafeCellString(setMeta?.tcgdex_abbreviation_official ?? ''),           // [21] tcgdex_abbreviation_official
-    toSafeCellString(setMeta?.vera_releaseDate ?? ''),                       // [22] vera_releaseDate
-    toSafeCellString(setMeta?.tcgdex_releaseDate ?? ''),                     // [23] tcgdex_releaseDate
-    toSafeJsonString(setMeta?.vera_legalities),                              // [24] vera_legalities
-    toSafeJsonString(setMeta?.tcgdex_legal),                                 // [25] tcgdex_legal
-    toPersistableMediaString(setMeta?.vera_images_logo ?? ''),               // [26] vera_images_logo
-    toPersistableMediaString(setMeta?.tcgdex_logo ?? ''),                    // [27] tcgdex_logo
-    toPersistableMediaString(setMeta?.vera_images_symbol ?? ''),             // [28] vera_images_symbol
-    toPersistableMediaString(setMeta?.tcgdex_symbol ?? '')                   // [29] tcgdex_symbol
-  ];
+  // Pro Blatt serialisiert: neue Zeile ans tatsaechliche Ende (frisch gelesen), kein Ueberschreiben paralleler Upserts.
+  await withSheetAppendLock(DB_SHEETS.sets, async () => {
+    const rows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length, true, { strict: true });
+    // Neues SET_DB_HEADERS-Format
+    const target = [
+      setId,                                                                   // [0]  setId
+      Boolean(imported),                                                       // [1]  imported
+      nowIso(),                                                                // [2]  updatedAt
+      toSafeCellString(setMeta?.matchStatus ?? ''),                            // [3]  matchStatus
+      Boolean(setMeta?.isTcgdexOnly),                                          // [4]  isTcgdexOnly
+      toSafeCellString(setMeta?.vera_id ?? ''),                                // [5]  vera_id
+      toSafeCellString(setMeta?.tcgdex_id ?? setMeta?.tcgdexId ?? ''),         // [6]  tcgdex_id
+      toSafeCellString(setMeta?.vera_name ?? ''),                              // [7]  vera_name
+      toSafeCellString(setMeta?.tcgdex_name ?? setMeta?.tcgdexName ?? ''),     // [8]  tcgdex_name
+      toSafeCellString(setMeta?.vera_series ?? ''),                            // [9]  vera_series
+      toSafeCellString(setMeta?.tcgdex_serie_name ?? ''),                      // [10] tcgdex_serie_name
+      toSafeCellString(setMeta?.tcgdex_serie_id ?? ''),                        // [11] tcgdex_serie_id
+      Number(setMeta?.vera_printedTotal) || 0,                                 // [12] vera_printedTotal
+      Number(setMeta?.tcgdex_cardCount_official) || 0,                         // [13] tcgdex_cardCount_official
+      Number(setMeta?.vera_total) || 0,                                        // [14] vera_total
+      Number(setMeta?.tcgdex_cardCount_total) || 0,                            // [15] tcgdex_cardCount_total
+      Number(setMeta?.tcgdex_cardCount_holo) || 0,                             // [16] tcgdex_cardCount_holo
+      Number(setMeta?.tcgdex_cardCount_reverse) || 0,                          // [17] tcgdex_cardCount_reverse
+      Number(setMeta?.tcgdex_cardCount_firstEdition) || 0,                     // [18] tcgdex_cardCount_firstEdition
+      Number(setMeta?.tcgdex_cardCount_normal) || 0,                           // [19] tcgdex_cardCount_normal
+      toSafeCellString(setMeta?.vera_ptcgoCode ?? ''),                         // [20] vera_ptcgoCode
+      toSafeCellString(setMeta?.tcgdex_abbreviation_official ?? ''),           // [21] tcgdex_abbreviation_official
+      toSafeCellString(setMeta?.vera_releaseDate ?? ''),                       // [22] vera_releaseDate
+      toSafeCellString(setMeta?.tcgdex_releaseDate ?? ''),                     // [23] tcgdex_releaseDate
+      toSafeJsonString(setMeta?.vera_legalities),                              // [24] vera_legalities
+      toSafeJsonString(setMeta?.tcgdex_legal),                                 // [25] tcgdex_legal
+      toPersistableMediaString(setMeta?.vera_images_logo ?? ''),               // [26] vera_images_logo
+      toPersistableMediaString(setMeta?.tcgdex_logo ?? ''),                    // [27] tcgdex_logo
+      toPersistableMediaString(setMeta?.vera_images_symbol ?? ''),             // [28] vera_images_symbol
+      toPersistableMediaString(setMeta?.tcgdex_symbol ?? '')                   // [29] tcgdex_symbol
+    ];
 
-  const existingIndices = [];
-  rows.forEach((row, rowIndex) => {
-    if (toSafeCellString(row[0]).toLowerCase() === setId.toLowerCase()) {
-      existingIndices.push(rowIndex);
+    const existingIndices = [];
+    rows.forEach((row, rowIndex) => {
+      if (toSafeCellString(row[0]).toLowerCase() === setId.toLowerCase()) {
+        existingIndices.push(rowIndex);
+      }
+    });
+
+    if (existingIndices.length > 0) {
+      const keepIndex = existingIndices[existingIndices.length - 1];
+      const rowNo = keepIndex + 2;
+      const existingRow = rows[keepIndex];
+      // imported-Status erhalten: altes Format hat imported bei [8], neues bei [1]
+      const existingImported = isNewSetFormat(existingRow)
+        ? toBoolean(existingRow[1])
+        : toBoolean(existingRow[8]);
+      target[1] = imported === false ? false : Boolean(imported || existingImported);
+      await putValues(buildRange(DB_SHEETS.sets, `A${rowNo}:${colToA1(DB_HEADERS.sets.length)}${rowNo}`), [target]);
+      rows[keepIndex] = target;
+
+      if (existingIndices.length > 1) {
+        const emptyRow = buildEmptyRow(DB_HEADERS.sets.length);
+        const duplicateRanges = existingIndices
+          .slice(0, -1)
+          .map((index) => ({
+            range: buildRange(DB_SHEETS.sets, `A${index + 2}:${colToA1(DB_HEADERS.sets.length)}${index + 2}`),
+            values: [emptyRow]
+          }));
+        await batchPutValues(duplicateRanges);
+        existingIndices.slice(0, -1).forEach((index) => {
+          rows[index] = emptyRow.slice();
+        });
+      }
+    } else {
+      const rowNo = rows.length + 2;
+      await putValues(buildRange(DB_SHEETS.sets, `A${rowNo}:${colToA1(DB_HEADERS.sets.length)}${rowNo}`), [target]);
+      rows.push(target);
     }
+    dbRowsCache.set(`${DB_SHEETS.sets}:${DB_HEADERS.sets.length}`, rows);
   });
-
-  if (existingIndices.length > 0) {
-    const keepIndex = existingIndices[existingIndices.length - 1];
-    const rowNo = keepIndex + 2;
-    const existingRow = rows[keepIndex];
-    // imported-Status erhalten: altes Format hat imported bei [8], neues bei [1]
-    const existingImported = isNewSetFormat(existingRow)
-      ? toBoolean(existingRow[1])
-      : toBoolean(existingRow[8]);
-    target[1] = imported === false ? false : Boolean(imported || existingImported);
-    await putValues(buildRange(DB_SHEETS.sets, `A${rowNo}:${colToA1(DB_HEADERS.sets.length)}${rowNo}`), [target]);
-    rows[keepIndex] = target;
-
-    if (existingIndices.length > 1) {
-      const emptyRow = buildEmptyRow(DB_HEADERS.sets.length);
-      const duplicateRanges = existingIndices
-        .slice(0, -1)
-        .map((index) => ({
-          range: buildRange(DB_SHEETS.sets, `A${index + 2}:${colToA1(DB_HEADERS.sets.length)}${index + 2}`),
-          values: [emptyRow]
-        }));
-      await batchPutValues(duplicateRanges);
-      existingIndices.slice(0, -1).forEach((index) => {
-        rows[index] = emptyRow.slice();
-      });
-    }
-  } else {
-    const rowNo = rows.length + 2;
-    await putValues(buildRange(DB_SHEETS.sets, `A${rowNo}:${colToA1(DB_HEADERS.sets.length)}${rowNo}`), [target]);
-    rows.push(target);
-  }
-  dbRowsCache.set(`${DB_SHEETS.sets}:${DB_HEADERS.sets.length}`, rows);
 }
 
 async function resolveSetIdFromName(setSheetName) {
@@ -882,6 +697,7 @@ async function resolveSetIdFromName(setSheetName) {
 }
 
 async function writeDbCardsForSet(setId, cards) {
+  if (!CONFIG.WRITE_DB_CARDS) return;
   await ensureNormalizedSchema();
   const setRows = cards.map((card) => [
     setId,                                                                     // [0]  setId
@@ -920,7 +736,7 @@ async function writeDbCardsForSet(setId, cards) {
     toSafeJsonString(card.vera_resistances),                                   // [33] vera_resistances
     toSafeJsonString(card.vera_rules)                                          // [34] vera_rules
   ]);
-  const currentRows = await readDbRows(DB_SHEETS.cards, DB_HEADERS.cards.length, true);
+  const currentRows = await readDbRows(DB_SHEETS.cards, DB_HEADERS.cards.length, true, { strict: true });
   const upsertPlan = planSetScopedUpsert({
     rows: currentRows,
     setId,
@@ -929,36 +745,143 @@ async function writeDbCardsForSet(setId, cards) {
   });
   await applySetScopedPlan(DB_SHEETS.cards, DB_HEADERS.cards.length, upsertPlan);
 
-  const refreshedRows = await readDbRows(DB_SHEETS.cards, DB_HEADERS.cards.length, true);
+  const refreshedRows = await readDbRows(DB_SHEETS.cards, DB_HEADERS.cards.length, true, { strict: true });
   const dedupPlan = planSetScopedDedup({ rows: refreshedRows, setId });
   if (dedupPlan.clearIndices.length > 0) {
     await applySetScopedPlan(DB_SHEETS.cards, DB_HEADERS.cards.length, dedupPlan);
   }
 }
 
-async function writeDbCollectionForSet(setId, cards, existingMap = new Map()) {
-  await ensureNormalizedSchema();
-  const setRows = cards.map((card) => {
-    const key = normalizeCardNumber(card.number);
-    const existing = existingMap.get(key);
-    const g = Boolean(existing?.g);
-    const rh = Boolean(existing?.rh && g);
-    return [setId, toSafeCellString(card.number), g, rh, nowIso()];
-  });
-  const currentRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
-  const upsertPlan = planSetScopedUpsert({
-    rows: currentRows,
-    setId,
-    incomingRows: setRows,
-    clearMissing: true
-  });
-  await applySetScopedPlan(DB_SHEETS.collection, DB_HEADERS.collection.length, upsertPlan);
-
-  const refreshedRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
-  const dedupPlan = planSetScopedDedup({ rows: refreshedRows, setId });
-  if (dedupPlan.clearIndices.length > 0) {
-    await applySetScopedPlan(DB_SHEETS.collection, DB_HEADERS.collection.length, dedupPlan);
+/**
+ * Kanonische Set-ID + Resolver fuer einen (evtl. Alias-)Set-Schluessel. null, wenn die Registry nicht
+ * erreichbar ist oder das Set dort fehlt -> Aufrufer nutzen den exakten Set-ID-Pfad (keine leere Sammlung).
+ * Ein uebergebener Resolver ohne geladene Karten (CARDS_NOT_LOADED) wird durch ensureResolverForSet ersetzt.
+ */
+async function resolveCollectionContext(setKey, resolver = null) {
+  const key = toSafeCellString(setKey);
+  if (!key) return null;
+  const probe = (candidate) => {
+    const canonicalSetId = candidate?.resolveSetKey?.(key);
+    if (!canonicalSetId) return null;
+    // Wirft CARDS_NOT_LOADED, falls die Karten des Sets fehlen.
+    candidate.resolve(canonicalSetId, '0');
+    return { resolver: candidate, canonicalSetId };
+  };
+  if (resolver) {
+    try {
+      const ctx = probe(resolver);
+      if (ctx) return ctx;
+    } catch (err) {
+      if (err?.code !== 'CARDS_NOT_LOADED') throw err;
+    }
   }
+  try {
+    return probe(await ensureResolverForSet(key));
+  } catch (err) {
+    console.warn('[sheets-db] Registry nicht verfuegbar, Sammlung ohne Aliase:', err?.message || err);
+    return null;
+  }
+}
+
+function collectionKeyOfCard(card, ctx) {
+  const explicit = toSafeCellString(card?.collectionKey);
+  if (explicit) return explicit;
+  const number = toSafeCellString(card?.number);
+  if (!number) return '';
+  const hit = ctx ? ctx.resolver.resolve(ctx.canonicalSetId, number) : null;
+  return hit?.collectionKey || normalizeCardNumber(number);
+}
+
+/**
+ * Schreibt db_collection-Zeilen fuer die Karten eines Sets (Schluessel: card.collectionKey).
+ * - Zeilen unter Alias-Set-IDs bleiben unangetastet; nichts wird umbenannt.
+ * - Bestehende Zeilen unter der kanonischen Set-ID werden mit dem ODER-Status der Karte synchronisiert
+ *   (nur bei Abweichung, eigener Zeilenschluessel bleibt).
+ * - Karten ohne jede Zeile bekommen eine neue Zeile [kanonischeSetId, collectionKey, ...].
+ *   Karten, die nur unter Aliasen Zeilen haben, bekommen keine Doppelzeile.
+ * - clearMissing nur fuer Zeilen unter der kanonischen Set-ID, deren cardId ein kanonischer
+ *   collectionKey ist, der nicht importiert wird, und nur ohne Haken (kein Haken geht verloren).
+ */
+// Plan und Schreiben unter der Blatt-Sperre von db_collection mit frischem strict-Read: Zellen-Writes
+// (updateCellBooleansBatch) laufen ueber dieselbe Sperre, ein paralleles Abwaehlen kann also nicht von
+// einer Vollzeilen-Aktualisierung aus einem frueheren Lesestand ueberschrieben werden.
+// Status: Hat die Karte frische Zeilen, gilt deren Stand (db_collection ist massgeblich, Legacy-Grids sind
+// beim Lesen von existingMap bereits migriert). existingMap (frueher gelesen, evtl. veraltet) zaehlt nur fuer
+// Karten ohne frische Zeile; so loescht ein Cache keinen Haken und setzt keinen veralteten.
+async function writeDbCollectionForSet(setId, cards, existingMap = new Map(), { resolver = null } = {}) {
+  await ensureNormalizedSchema();
+  const ctx = await resolveCollectionContext(setId, resolver);
+  const C = DB_SHEETS.collection;
+  const N = DB_HEADERS.collection.length;
+
+  await withSheetAppendLock(C, async () => {
+    const currentRows = await readDbRows(C, N, true, { strict: true });
+
+    if (!ctx) {
+      // Ohne Registry: exakter Set-ID-Pfad, ohne Leeren/Deduplizieren (nichts loeschen).
+      // Wie bisher die rohe Kartennummer schreiben (z. B. 'GG01'), damit bestehende Zeilen exakt getroffen
+      // und keine Doppelzeilen angehaengt werden.
+      const currentExact = buildExactSetCollectionMap(currentRows, setId);
+      const setRows = cards.map((card) => {
+        const rawText = toSafeCellString(card?.number) || toSafeCellString(card?.collectionKey);
+        const lookup = normalizeCardNumber(rawText);
+        const current = currentExact.get(lookup);
+        const source = current || existingMap?.get?.(lookup) || existingMap?.get?.(toSafeCellString(card?.collectionKey));
+        const g = Boolean(source?.g);
+        const rh = Boolean(source?.rh && g);
+        return [setId, rawText, g, rh, nowIso()];
+      }).filter((row) => row[1]);
+      const upsertPlan = planSetScopedUpsert({ rows: currentRows, setId, incomingRows: setRows, clearMissing: false });
+      upsertPlan.clearIndices = [];
+      await applySetScopedPlan(C, N, upsertPlan, { lockedRows: currentRows });
+      return;
+    }
+
+    const canonicalSetId = ctx.canonicalSetId;
+    const canonicalLower = canonicalSetId.toLowerCase();
+    const { map: currentMap } = buildCollectionMap(currentRows, ctx);
+    const isCanonicalCell = (cell) => cell.setKey.toLowerCase() === canonicalLower;
+
+    const incomingKeys = new Set();
+    const updates = [];
+    const appendRows = [];
+    for (const card of cards || []) {
+      const key = collectionKeyOfCard(card, ctx);
+      if (!key || incomingKeys.has(key)) continue;
+      incomingKeys.add(key);
+      const current = currentMap.get(key);
+      const cells = current?.cells || [];
+      if (cells.length === 0) {
+        const existing = existingMap?.get?.(key);
+        const g = Boolean(existing?.g);
+        appendRows.push([canonicalSetId, key, g, Boolean(existing?.rh && g), nowIso()]);
+        continue;
+      }
+      // Frischer Stand (ODER ueber alle Zeilen der Karte) wird in die kanonischen Zeilen uebernommen.
+      const g = Boolean(current.g);
+      const rh = Boolean(current.rh && g);
+      cells.filter(isCanonicalCell).forEach((cell) => {
+        if (cell.g === g && cell.rhRaw === rh) return;
+        updates.push({ rowIndex: cell.rowNo - 2, rowValues: [cell.setKey, cell.cardKey, g, rh, nowIso()] });
+      });
+    }
+
+    const clearIndices = [];
+    for (const [key, entry] of currentMap) {
+      if (incomingKeys.has(key) || entry.orphan) continue;
+      entry.cells.forEach((cell) => {
+        if (!isCanonicalCell(cell) || cell.cardKey !== key) return;
+        if (cell.g || cell.rhRaw) return;
+        clearIndices.push(cell.rowNo - 2);
+      });
+    }
+
+    await applySetScopedPlan(C, N, {
+      updates,
+      appendRows,
+      clearIndices: clearIndices.sort((a, b) => a - b)
+    }, { lockedRows: currentRows });
+  });
 }
 
 /**
@@ -991,7 +914,7 @@ export async function readDbCardsForSet(setId) {
     latestPerCard.set(cardId, row);
   });
 
-  return Array.from(latestPerCard.values())
+  const cards = Array.from(latestPerCard.values())
     .map((row) => {
       if (isNewCardFormat(row)) {
         // CARD_DB_HEADERS format; unterstÃ¼tzt altes Bild-Schema (ohne tcgdex_image_large) rÃ¼ckwÃ¤rtskompatibel.
@@ -1082,15 +1005,55 @@ export async function readDbCardsForSet(setId) {
         // tcgdex_* not available in legacy format (were never written)
       });
     })
-    .filter((card) => card.number);
+    .filter((card) => card.number)
+    .map((card) => ({ ...card, collectionKey: dbCardCollectionKey(card, normalizedSetId) }));
+  // Gespeicherte URLs stammen teils vom alten Namens-Matcher (z. B. me55-150 -> "Pikachu [Store Up]"):
+  // die v3-ID aus search-index.json gewinnt fuer Link und Preis. Das Sheet wird dabei nicht geschrieben.
+  return withV3CardmarketIds(cards, { setId: normalizedSetId, language: getCardLanguage() });
+}
+
+// db_cards ist nur noch Offline-Fallback. Ab v3 ist cardId = v3-id `<setId>-<collectionKey>`; aeltere Zeilen
+// (pokemontcg-IDs, z. B. `swsh12pt5gg-GG01`) fallen auf die normalisierte Nummer zurueck – denselben
+// Schluessel nutzt die Sammlungs-Map ohne Registry.
+function dbCardCollectionKey(card, normalizedSetId) {
+  const cardId = toSafeCellString(card?.cardId);
+  const prefix = `${normalizedSetId}-`;
+  if (cardId.toLowerCase().startsWith(prefix) && cardId.length > prefix.length) {
+    // Alle Registry-collectionKeys sind Fixpunkte von normalizeCardNumber (geprueft ueber api/registry).
+    return normalizeCardNumber(cardId.slice(prefix.length));
+  }
+  return normalizeCardNumber(card?.number);
 }
 
 /**
  * Gibt ALLE Sets (auch nicht importierte) mit vollstÃ¤ndigen Metadaten zurÃ¼ck.
  * NÃ¼tzlich zum Anzeigen einer vollstÃ¤ndigen Set-Liste.
- * @returns {Promise<Array<{setId, setName, series, releaseDate, totalCards, ptcgoCode, imported}>>}
+ * Overview-/db_sets-Zeilen unter Alias-Set-IDs (z. B. `swsh12pt5gg`, `TCGDEX-me05`) werden dem kanonischen
+ * Set zugeordnet (`imported` per ODER) und nicht als eigenes Set geliefert; jedes Set traegt `aliases`.
+ * Im Sheet wird dabei nichts geaendert. Registry nicht erreichbar -> Zeilen unveraendert.
+ * @returns {Promise<Array<{setId, setName, series, releaseDate, totalCards, ptcgoCode, imported, aliases}>>}
  */
 export async function listSetsOverviewData() {
+  const rawSets = await readRawSetsOverviewData();
+  let resolver = null;
+  try {
+    resolver = await ensureSetResolver();
+  } catch (err) {
+    console.warn('[sheets-db] Registry nicht verfuegbar, Overview ohne Alias-Zuordnung:', err?.message || err);
+  }
+  return mergeAliasOverviewSets(rawSets, resolver);
+}
+
+/**
+ * Liest db_sets in den Zeilen-Cache, ohne Serien zu gruppieren. loadSets ruft das parallel zum Laden der
+ * DE-Serien-Map auf; die Gruppierung (resolveDisplaySet) folgt erst, wenn die Map registriert ist.
+ */
+export async function prefetchSetsOverviewRows() {
+  await ensureNormalizedSchema();
+  await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length);
+}
+
+async function readRawSetsOverviewData() {
   await ensureNormalizedSchema();
   const dbRows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length);
   const dbSets = dbRows
@@ -1192,6 +1155,80 @@ export async function listSetsOverviewData() {
  * Liest den aktuellen Stand der Collection Summary.
  * @returns {Promise<Array<{setName, total, collected, rh, percent, ptcgoCode}>>}
  */
+/**
+ * Zaehler je kanonischem Set (kleingeschrieben) aus db_collection.
+ * - Sets, deren Zeilen nur unter einem Set-Schluessel liegen: Dedupe per normalizeCardNumber(cardId) –
+ *   ohne Registry-Karten (lazy).
+ * - Sets mit Zeilen unter mehreren Aliasen: Registry-Karten nur dieses Sets laden und per collectionKey
+ *   deduplizieren (buildCollectionMap; g = ODER ueber alle Zeilen). Mehrdeutige Altzeilen zaehlen als eine Karte.
+ * Registry nicht erreichbar -> rohe Set-IDs wie bisher.
+ */
+async function aggregateCollectionCounts(collectionRows, setsResolver) {
+  const groups = new Map(); // canonicalLower -> { canonical, setKeys:Set, rows: [] }
+  const memo = new Map();
+  (collectionRows || []).forEach((row) => {
+    const setKey = toSafeCellString(row?.[0]);
+    if (!setKey || !toSafeCellString(row?.[1])) return;
+    const lowerKey = setKey.toLowerCase();
+    let canonical = memo.get(lowerKey);
+    if (canonical === undefined) {
+      canonical = setsResolver?.resolveSetKey?.(setKey) || setKey;
+      memo.set(lowerKey, canonical);
+    }
+    const key = canonical.toLowerCase();
+    if (!groups.has(key)) groups.set(key, { canonical, setKeys: new Set(), rows: [] });
+    const group = groups.get(key);
+    group.setKeys.add(lowerKey);
+    group.rows.push(row);
+  });
+
+  const agg = new Map();
+  for (const [key, group] of groups) {
+    const counts = { total: 0, collected: 0, rh: 0 };
+    let counted = false;
+    if (setsResolver && group.setKeys.size > 1) {
+      try {
+        const resolver = await ensureResolverForSet(group.canonical);
+        // Zeilenindizes spielen fuer die Zaehlung keine Rolle.
+        const { map } = buildCollectionMap(group.rows, { canonicalSetId: group.canonical, resolver });
+        const seenAmbiguous = new Set();
+        for (const entry of map.values()) {
+          if (entry.cells?.length) {
+            counts.total += 1;
+            if (entry.g) counts.collected += 1;
+            if (entry.rh) counts.rh += 1;
+          } else if (entry.ambiguous && !seenAmbiguous.has(entry.ambiguous)) {
+            seenAmbiguous.add(entry.ambiguous);
+            counts.total += 1;
+            if (entry.ambiguous.g) counts.collected += 1;
+            if (entry.ambiguous.rh) counts.rh += 1;
+          }
+        }
+        counted = true;
+      } catch (err) {
+        console.warn('[readSummarySheet] Registry-Karten nicht verfuegbar, Zaehlung ohne Alias-Dedupe:', group.canonical, err?.message || err);
+      }
+    }
+    if (!counted) {
+      const perCard = new Map();
+      group.rows.forEach((row) => {
+        const cardKey = `${toSafeCellString(row[0]).toLowerCase()}::${normalizeCardNumber(toSafeCellString(row[1]))}`;
+        const g = toBoolean(row[2]);
+        const rh = toBoolean(row[3]) && g;
+        const previous = perCard.get(cardKey) || { g: false, rh: false };
+        perCard.set(cardKey, { g: previous.g || g, rh: previous.rh || rh });
+      });
+      perCard.forEach(({ g, rh }) => {
+        counts.total += 1;
+        if (g) counts.collected += 1;
+        if (rh) counts.rh += 1;
+      });
+    }
+    agg.set(key, counts);
+  }
+  return agg;
+}
+
 export async function readSummarySheet() {
   await ensureNormalizedSchema();
   const setRows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length);
@@ -1227,34 +1264,37 @@ export async function readSummarySheet() {
       }
     });
 
-    const latestPerCard = new Map();
-    collectionRows.forEach((row) => {
-      const setId = toSafeCellString(row[0]);
-      const cardId = toSafeCellString(row[1]);
-      if (!setId || !cardId) return;
-      latestPerCard.set(`${setId}::${cardId}`, row);
-    });
+    // Alias-faehig: Zeilen und db_sets-Zeilen unter Alias-IDs (z. B. swsh12pt5gg) zaehlen zum kanonischen Set;
+    // eine Karte mit Zeilen unter mehreren Aliasen zaehlt einmal (gesammelt, wenn irgendeine Zeile g hat).
+    const setsResolver = await ensureSetResolver().catch(() => null);
+    const canonicalKey = (setId) => (setsResolver?.resolveSetKey?.(setId) || setId).toLowerCase();
+    const agg = await aggregateCollectionCounts(collectionRows, setsResolver);
 
-    const agg = new Map();
-    latestPerCard.forEach((row) => {
-      const setId = toSafeCellString(row[0]);
-      if (!agg.has(setId)) agg.set(setId, { total: 0, collected: 0, rh: 0 });
-      const bucket = agg.get(setId);
-      const g = toBoolean(row[2]);
-      const rh = toBoolean(row[3]) && g;
-      bucket.total += 1;
-      if (g) bucket.collected += 1;
-      if (rh) bucket.rh += 1;
-    });
+    const canonicalMeta = new Map();
+    for (const [setId, meta] of setsById.entries()) {
+      const key = canonicalKey(setId);
+      const isCanonicalRow = key === setId.toLowerCase();
+      const canonicalSetId = setsResolver?.resolveSetKey?.(setId) || setId;
+      const current = canonicalMeta.get(key);
+      if (!current) {
+        canonicalMeta.set(key, { ...meta, isCanonicalRow, canonicalSetId });
+      } else {
+        const imported = current.imported || meta.imported;
+        canonicalMeta.set(key, isCanonicalRow && !current.isCanonicalRow
+          ? { ...meta, imported, isCanonicalRow, canonicalSetId }
+          : { ...current, imported });
+      }
+    }
 
     const result = [];
-    for (const [setId, meta] of setsById.entries()) {
+    for (const [key, meta] of canonicalMeta.entries()) {
       if (!meta.imported) continue;
-      const counts = agg.get(setId) || { total: 0, collected: 0, rh: 0 };
+      const counts = agg.get(key) || { total: 0, collected: 0, rh: 0 };
       const total = counts.total || meta.totalMeta || 0;
       const collected = counts.collected || 0;
       const rh = counts.rh || 0;
       result.push({
+        setId: meta.canonicalSetId,
         setName: meta.setName,
         total,
         collected,
@@ -1321,142 +1361,218 @@ function buildOverviewRowValues(setMeta, imported = false) {
   ]];
 }
 
-async function clearValues(range) {
-  if (!gapi?.client?.sheets?.spreadsheets?.values?.clear) return;
-  await enqueueSheetsMutation(async () => {
-    await gapi.client.sheets.spreadsheets.values.clear({
-      spreadsheetId: CONFIG.SPREADSHEET_ID,
-      range
-    });
-  });
-}
-
 async function upsertOverviewEntry(setMeta, imported = true) {
   await upsertDbSet(setMeta, imported);
 
   const sheets = await resolveSheetNames();
   if (!sheets.overview) return;
-  const overviewRange = buildRange(sheets.overview, 'A3:J');
-  const rows = await getFormulas(overviewRange).catch(() => []);
-  const normalizedTargetId = toSafeCellString(setMeta.setId).toLowerCase();
+  // Pro Blatt serialisiert: Zielzeile aus dem aktuellen Stand nach vorherigen Writes.
+  await withSheetAppendLock(sheets.overview, async () => {
+    const overviewRange = buildRange(sheets.overview, 'A3:J');
+    const rows = await getFormulas(overviewRange).catch(rowsOrThrowUnlessMissing);
+    const normalizedTargetId = toSafeCellString(setMeta.setId).toLowerCase();
 
-  let targetRow = -1;
-  for (let index = 0; index < rows.length; index++) {
-    const rowSetId = extractDisplayTextFromHyperlink(rows[index]?.[0]);
-    if (toSafeCellString(rowSetId).toLowerCase() === normalizedTargetId) {
-      targetRow = 3 + index;
-      break;
+    let targetRow = -1;
+    for (let index = 0; index < rows.length; index++) {
+      const rowSetId = extractDisplayTextFromHyperlink(rows[index]?.[0]);
+      if (toSafeCellString(rowSetId).toLowerCase() === normalizedTargetId) {
+        targetRow = 3 + index;
+        break;
+      }
     }
-  }
 
-  if (targetRow < 0) {
-    targetRow = Math.max(4, 3 + rows.length);
-  }
+    if (targetRow < 0) {
+      targetRow = Math.max(4, 3 + rows.length);
+    }
 
-  await putValues(buildRange(sheets.overview, `A${targetRow}:J${targetRow}`), buildOverviewRowValues(setMeta, imported));
+    await putValues(buildRange(sheets.overview, `A${targetRow}:J${targetRow}`), buildOverviewRowValues(setMeta, imported));
+  });
 }
 
 export async function upsertOverviewSet(setMeta, imported = false) {
   await upsertOverviewEntry(setMeta, imported);
 }
 
+/**
+ * Nach dem Loeschen eines Sets: bestehende Alias-Zeilen (db_sets und Overview, z. B. `swsh12pt5gg`,
+ * `TCGDEX-me05`) mit imported=true auf false setzen, sonst ODERn mergeAliasOverviewSets/syncOverviewWithApiSets
+ * den Status wieder aufs kanonische Set. Nur die imported-Zelle wird geschrieben; keine Zeile wird geloescht
+ * oder angelegt. Aliase: setMeta.aliases + mergedAliasIds + Registry (falls erreichbar).
+ * @returns {Promise<{ dbSets: number, overview: number }>} Anzahl geaenderter Zeilen
+ */
+export async function markAliasSetRowsNotImported(setMeta) {
+  const own = toSafeCellString(setMeta?.setId).toLowerCase();
+  const result = { dbSets: 0, overview: 0 };
+  if (!own) return result;
+  const aliasKeys = new Set([
+    ...setAliasKeys(setMeta),
+    ...(Array.isArray(setMeta?.mergedAliasIds) ? setMeta.mergedAliasIds : []).map((id) => toSafeCellString(id).toLowerCase())
+  ]);
+  try {
+    const resolver = await ensureSetResolver();
+    const canonical = resolver.resolveSetKey(setMeta.setId) || setMeta.setId;
+    // Kanonisches Set samt Aliasen nur, wenn das geloeschte Set das kanonische (gemergte) ist; ein ungemergt
+    // unter eigener Alias-ID gezeigtes Set darf den Status des kanonischen Sets nicht loeschen.
+    if (toSafeCellString(canonical).toLowerCase() === own) {
+      (resolver.aliasesOf(canonical) || []).forEach((alias) => aliasKeys.add(toSafeCellString(alias).toLowerCase()));
+    }
+  } catch (err) {
+    console.warn('[sheets-db] Registry nicht verfuegbar, Alias-Zeilen nur aus Set-Metadaten:', err?.message || err);
+  }
+  aliasKeys.delete(own);
+  aliasKeys.delete('');
+  if (!aliasKeys.size) return result;
+
+  await ensureNormalizedSchema();
+  await withSheetAppendLock(DB_SHEETS.sets, async () => {
+    const rows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length, true, { strict: true });
+    const updates = [];
+    rows.forEach((row, index) => {
+      if (!aliasKeys.has(toSafeCellString(row?.[0]).toLowerCase())) return;
+      const col = isNewSetFormat(row) ? 1 : 8; // imported: neues Format [1], altes Format [8]
+      if (!toBoolean(row[col])) return;
+      updates.push({ range: buildRange(DB_SHEETS.sets, `${colToA1(col + 1)}${index + 2}`), values: [[false]] });
+      row[col] = false;
+    });
+    if (updates.length) await batchPutValues(updates);
+    dbRowsCache.set(`${DB_SHEETS.sets}:${DB_HEADERS.sets.length}`, rows);
+    result.dbSets = updates.length;
+  });
+
+  const sheets = await resolveSheetNames();
+  if (!sheets.overview) return result;
+  await withSheetAppendLock(sheets.overview, async () => {
+    const rows = await getOverviewRows(sheets).catch(rowsOrThrowUnlessMissing);
+    const col = CONFIG.GRID.IMPORTED_COL_INDEX;
+    const updates = [];
+    rows.forEach((row, index) => {
+      const setId = toSafeCellString(extractDisplayTextFromHyperlink(row?.[0])).toLowerCase();
+      if (!aliasKeys.has(setId) || !toBoolean(row?.[col - 1])) return;
+      updates.push({ range: buildRange(sheets.overview, `${colToA1(col)}${3 + index}`), values: [[false]] });
+    });
+    if (updates.length) await batchPutValues(updates);
+    result.overview = updates.length;
+  });
+  return result;
+}
+
+// Kleingeschriebene Alias-IDs eines API-Sets (fetchAllAvailableSets liefert `aliases`), ohne die eigene ID.
+function setAliasKeys(set) {
+  const own = toSafeCellString(set?.setId).toLowerCase();
+  return (Array.isArray(set?.aliases) ? set.aliases : [])
+    .map((alias) => toSafeCellString(alias).toLowerCase())
+    .filter((alias) => alias && alias !== own);
+}
+
+/**
+ * Schreibt API-Sets nach db_sets und in die Overview. Bestehende Zeilen (auch unter Alias-IDs) bleiben
+ * erhalten; ein `imported` einer Alias-Zeile wird per ODER auf das kanonische Set uebertragen.
+ */
 export async function syncOverviewWithApiSets(sets, importedSetIds = []) {
   await ensureNormalizedSchema();
   const normalizedImported = new Set(Array.from(importedSetIds).map((id) => toSafeCellString(id).toLowerCase()));
 
-  const dbRows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length);
-  const mergedById = new Map();
-  dbRows.forEach((row) => {
-    const key = toSafeCellString(row[0]).toLowerCase();
-    if (!key) return;
-    mergedById.set(key, row);
+  await withSheetAppendLock(DB_SHEETS.sets, async () => {
+    const dbRows = await readDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length, false, { strict: true });
+    const mergedById = new Map();
+    dbRows.forEach((row) => {
+      const key = toSafeCellString(row[0]).toLowerCase();
+      if (!key) return;
+      mergedById.set(key, row);
+    });
+
+    const rowImported = (row) => Boolean(row?.length) && (isNewSetFormat(row) ? toBoolean(row[1]) : toBoolean(row[8]));
+    for (const set of (sets || [])) {
+      const key = toSafeCellString(set?.setId).toLowerCase();
+      if (!key) continue;
+      const existing = mergedById.get(key) || [];
+      // Alias-Zeilen (z. B. swsh12pt5gg) bleiben stehen; ihr imported geht per ODER auf das kanonische Set.
+      const aliasImported = setAliasKeys(set).some((alias) => rowImported(mergedById.get(alias)));
+      mergedById.set(key, [
+        toSafeCellString(set.setId),                                                                                                                     // [0]  setId
+        Boolean(normalizedImported.has(key) || rowImported(existing) || aliasImported),                                                                // [1]  imported
+        nowIso(),                                                                                                                                         // [2]  updatedAt
+        toSafeCellString(set.matchStatus ?? ''),                                                                                                          // [3]  matchStatus
+        Boolean(set.isTcgdexOnly),                                                                                                                        // [4]  isTcgdexOnly
+        toSafeCellString(set.vera_id ?? ''),                                                                                                              // [5]  vera_id
+        toSafeCellString(set.tcgdex_id ?? set.tcgdexId ?? ''),                                                                                           // [6]  tcgdex_id
+        toSafeCellString(set.vera_name ?? ''),                                                                                                            // [7]  vera_name
+        toSafeCellString(set.tcgdex_name ?? set.tcgdexName ?? ''),                                                                                       // [8]  tcgdex_name
+        toSafeCellString(set.vera_series ?? ''),                                                                                                          // [9]  vera_series
+        toSafeCellString(set.tcgdex_serie_name ?? '') || toSafeCellString(existing[10] ?? ''),                                                           // [10] tcgdex_serie_name       (bewahre bestehenden Wert wenn neu leer)
+        toSafeCellString(set.tcgdex_serie_id ?? '') || toSafeCellString(existing[11] ?? ''),                                                             // [11] tcgdex_serie_id         (bewahre bestehenden Wert wenn neu leer)
+        Number(set.vera_printedTotal) || 0,                                                                                                              // [12] vera_printedTotal
+        Number(set.tcgdex_cardCount_official) || 0,                                                                                                      // [13] tcgdex_cardCount_official
+        Number(set.vera_total) || 0,                                                                                                                      // [14] vera_total
+        Number(set.tcgdex_cardCount_total) || 0,                                                                                                         // [15] tcgdex_cardCount_total
+        Number(set.tcgdex_cardCount_holo) || 0,                                                                                                          // [16] tcgdex_cardCount_holo
+        Number(set.tcgdex_cardCount_reverse) || 0,                                                                                                       // [17] tcgdex_cardCount_reverse
+        Number(set.tcgdex_cardCount_firstEdition) || 0,                                                                                                  // [18] tcgdex_cardCount_firstEdition
+        Number(set.tcgdex_cardCount_normal) || 0,                                                                                                        // [19] tcgdex_cardCount_normal
+        toSafeCellString(set.vera_ptcgoCode ?? ''),                                                                                                       // [20] vera_ptcgoCode
+        toSafeCellString(set.tcgdex_abbreviation_official ?? '') || toSafeCellString(existing[21] ?? ''),                                                // [21] tcgdex_abbreviation_official (bewahre bestehenden Wert wenn neu leer)
+        toSafeCellString(set.vera_releaseDate ?? ''),                                                                                                     // [22] vera_releaseDate
+        toSafeCellString(set.tcgdex_releaseDate ?? '') || toSafeCellString(existing[23] ?? ''),                                                          // [23] tcgdex_releaseDate      (bewahre bestehenden Wert wenn neu leer)
+        toSafeJsonString(set.vera_legalities),                                                                                                            // [24] vera_legalities
+        toSafeJsonString(set.tcgdex_legal) || toSafeJsonString(existing[25]),                                                                            // [25] tcgdex_legal            (bewahre bestehenden Wert wenn neu leer/null)
+        toSafeCellString(set.vera_images_logo ?? ''),                                                                                                     // [26] vera_images_logo
+        toSafeCellString(set.tcgdex_logo ?? '') || toSafeCellString(existing[27] ?? ''),                                                                 // [27] tcgdex_logo             (bewahre bestehenden Wert wenn neu leer)
+        toSafeCellString(set.vera_images_symbol ?? '')                                                                                                    // [28] vera_images_symbol
+      ]);
+    }
+
+    await rewriteDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length, Array.from(mergedById.values()));
   });
-
-  for (const set of (sets || [])) {
-    const key = toSafeCellString(set?.setId).toLowerCase();
-    if (!key) continue;
-    const existing = mergedById.get(key) || [];
-    mergedById.set(key, [
-      toSafeCellString(set.setId),                                                                                                                     // [0]  setId
-      Boolean(normalizedImported.has(key) || (isNewSetFormat(existing) ? toBoolean(existing[1]) : toBoolean(existing[8]))),                            // [1]  imported
-      nowIso(),                                                                                                                                         // [2]  updatedAt
-      toSafeCellString(set.matchStatus ?? ''),                                                                                                          // [3]  matchStatus
-      Boolean(set.isTcgdexOnly),                                                                                                                        // [4]  isTcgdexOnly
-      toSafeCellString(set.vera_id ?? ''),                                                                                                              // [5]  vera_id
-      toSafeCellString(set.tcgdex_id ?? set.tcgdexId ?? ''),                                                                                           // [6]  tcgdex_id
-      toSafeCellString(set.vera_name ?? ''),                                                                                                            // [7]  vera_name
-      toSafeCellString(set.tcgdex_name ?? set.tcgdexName ?? ''),                                                                                       // [8]  tcgdex_name
-      toSafeCellString(set.vera_series ?? ''),                                                                                                          // [9]  vera_series
-      toSafeCellString(set.tcgdex_serie_name ?? '') || toSafeCellString(existing[10] ?? ''),                                                           // [10] tcgdex_serie_name       (bewahre bestehenden Wert wenn neu leer)
-      toSafeCellString(set.tcgdex_serie_id ?? '') || toSafeCellString(existing[11] ?? ''),                                                             // [11] tcgdex_serie_id         (bewahre bestehenden Wert wenn neu leer)
-      Number(set.vera_printedTotal) || 0,                                                                                                              // [12] vera_printedTotal
-      Number(set.tcgdex_cardCount_official) || 0,                                                                                                      // [13] tcgdex_cardCount_official
-      Number(set.vera_total) || 0,                                                                                                                      // [14] vera_total
-      Number(set.tcgdex_cardCount_total) || 0,                                                                                                         // [15] tcgdex_cardCount_total
-      Number(set.tcgdex_cardCount_holo) || 0,                                                                                                          // [16] tcgdex_cardCount_holo
-      Number(set.tcgdex_cardCount_reverse) || 0,                                                                                                       // [17] tcgdex_cardCount_reverse
-      Number(set.tcgdex_cardCount_firstEdition) || 0,                                                                                                  // [18] tcgdex_cardCount_firstEdition
-      Number(set.tcgdex_cardCount_normal) || 0,                                                                                                        // [19] tcgdex_cardCount_normal
-      toSafeCellString(set.vera_ptcgoCode ?? ''),                                                                                                       // [20] vera_ptcgoCode
-      toSafeCellString(set.tcgdex_abbreviation_official ?? '') || toSafeCellString(existing[21] ?? ''),                                                // [21] tcgdex_abbreviation_official (bewahre bestehenden Wert wenn neu leer)
-      toSafeCellString(set.vera_releaseDate ?? ''),                                                                                                     // [22] vera_releaseDate
-      toSafeCellString(set.tcgdex_releaseDate ?? '') || toSafeCellString(existing[23] ?? ''),                                                          // [23] tcgdex_releaseDate      (bewahre bestehenden Wert wenn neu leer)
-      toSafeJsonString(set.vera_legalities),                                                                                                            // [24] vera_legalities
-      toSafeJsonString(set.tcgdex_legal) || toSafeJsonString(existing[25]),                                                                            // [25] tcgdex_legal            (bewahre bestehenden Wert wenn neu leer/null)
-      toSafeCellString(set.vera_images_logo ?? ''),                                                                                                     // [26] vera_images_logo
-      toSafeCellString(set.tcgdex_logo ?? '') || toSafeCellString(existing[27] ?? ''),                                                                 // [27] tcgdex_logo             (bewahre bestehenden Wert wenn neu leer)
-      toSafeCellString(set.vera_images_symbol ?? '')                                                                                                    // [28] vera_images_symbol
-    ]);
-  }
-
-  await rewriteDbRows(DB_SHEETS.sets, DB_HEADERS.sets.length, Array.from(mergedById.values()));
 
   const sheets = await resolveSheetNames();
   if (!sheets.overview) return;
-  const rows = await getOverviewRows(sheets).catch(() => []);
+  await withSheetAppendLock(sheets.overview, async () => {
+    const rows = await getOverviewRows(sheets).catch(rowsOrThrowUnlessMissing);
 
-  const rowBySetId = new Map();
-  rows.forEach((row, index) => {
-    const setId = toSafeCellString(extractDisplayTextFromHyperlink(row[0])).toLowerCase();
-    if (!setId) return;
-    rowBySetId.set(setId, {
-      rowIndex: 3 + index,
-      imported: toBoolean(row[CONFIG.GRID.IMPORTED_COL_INDEX - 1])
+    const rowBySetId = new Map();
+    rows.forEach((row, index) => {
+      const setId = toSafeCellString(extractDisplayTextFromHyperlink(row[0])).toLowerCase();
+      if (!setId) return;
+      rowBySetId.set(setId, {
+        rowIndex: 3 + index,
+        imported: toBoolean(row[CONFIG.GRID.IMPORTED_COL_INDEX - 1])
+      });
     });
-  });
 
-  const appendValues = [];
-  const updates = [];
-  const uniqueSets = new Map();
-  (sets || []).forEach((set) => {
-    const key = toSafeCellString(set?.setId).toLowerCase();
-    if (key) uniqueSets.set(key, set);
-  });
+    const appendValues = [];
+    const updates = [];
+    const uniqueSets = new Map();
+    (sets || []).forEach((set) => {
+      const key = toSafeCellString(set?.setId).toLowerCase();
+      if (key) uniqueSets.set(key, set);
+    });
 
-  uniqueSets.forEach((set, key) => {
-    const existing = rowBySetId.get(key);
-    const imported = normalizedImported.has(key) || Boolean(existing?.imported);
-    const rowValues = buildOverviewRowValues(set, imported)[0];
+    uniqueSets.forEach((set, key) => {
+      const existing = rowBySetId.get(key);
+      const imported = normalizedImported.has(key) || Boolean(existing?.imported)
+        || setAliasKeys(set).some((alias) => Boolean(rowBySetId.get(alias)?.imported));
+      const rowValues = buildOverviewRowValues(set, imported)[0];
 
-    if (existing) {
-      updates.push({ rowIndex: existing.rowIndex, rowValues });
-    } else {
-      appendValues.push(rowValues);
+      if (existing) {
+        updates.push({ rowIndex: existing.rowIndex, rowValues });
+      } else {
+        appendValues.push(rowValues);
+      }
+    });
+
+    if (updates.length) {
+      await batchPutValues(updates.map((update) => ({
+        range: buildRange(sheets.overview, `A${update.rowIndex}:J${update.rowIndex}`),
+        values: [update.rowValues]
+      })));
+    }
+
+    if (appendValues.length) {
+      const start = Math.max(4, 3 + rows.length);
+      const end = start + appendValues.length - 1;
+      await putValues(buildRange(sheets.overview, `A${start}:J${end}`), appendValues);
     }
   });
-
-  if (updates.length) {
-    await batchPutValues(updates.map((update) => ({
-      range: buildRange(sheets.overview, `A${update.rowIndex}:J${update.rowIndex}`),
-      values: [update.rowValues]
-    })));
-  }
-
-  if (appendValues.length) {
-    const start = Math.max(4, 3 + rows.length);
-    const end = start + appendValues.length - 1;
-    await putValues(buildRange(sheets.overview, `A${start}:J${end}`), appendValues);
-  }
 }
 
 /**
@@ -1476,7 +1592,14 @@ export async function importSetIntoCollection(setMeta, cards) {
   const setId = toSafeCellString(setMeta.setId);
   const setName = toSafeCellString(setMeta.setName);
 
-  const existingMap = await readSetCollectionMap(setName).catch(() => new Map());
+  // setId explizit: Zeilen unter allen Aliasen zaehlen, auch wenn db_sets das Set (noch) nicht kennt.
+  // Legacy-Grid-Blatt: zuerst unter dem bisherigen Overview-Namen suchen (v3 kann den Anzeigenamen aendern,
+  // das alte Blatt heisst weiter wie bisher), dann unter dem neuen Namen.
+  let existingMap = new Map();
+  for (const name of await legacyGridSheetNames(setId, setName)) {
+    existingMap = await readSetCollectionMap(name, { setId }).catch(() => new Map());
+    if (existingMap.size > 0) break;
+  }
   await upsertDbSet({ ...setMeta, setId, setName }, true);
   await writeDbCardsForSet(setId, cards);
   await writeDbCollectionForSet(setId, cards, existingMap);
@@ -1486,6 +1609,23 @@ export async function importSetIntoCollection(setMeta, cards) {
     setName,
     totalCards: Number(setMeta.totalCards) || cards.length
   });
+}
+
+/**
+ * Blattnamen fuer den Legacy-Grid-Fallback eines Imports: bestehender Overview-Name des Sets (falls vorhanden)
+ * vor dem neuen Anzeigenamen. Fehlende Overview -> nur der neue Name; andere Lesefehler brechen den Import
+ * vor jedem Write ab (wie die uebrigen strikten Lesungen des Imports).
+ */
+async function legacyGridSheetNames(setId, newName) {
+  const names = [];
+  const sheets = await resolveSheetNames();
+  const rows = sheets?.overview ? await getOverviewRows(sheets).catch(rowsOrThrowUnlessMissing) : [];
+  const wanted = toSafeCellString(setId).toLowerCase();
+  const row = rows.find((r) => toSafeCellString(extractDisplayTextFromHyperlink(r?.[0])).toLowerCase() === wanted);
+  const existingName = toSafeCellString(row?.[1]);
+  if (existingName) names.push(existingName);
+  if (!names.includes(newName)) names.push(newName);
+  return names;
 }
 
 async function readLegacySetCollectionMap(setSheetName) {
@@ -1530,122 +1670,268 @@ async function readLegacySetCollectionMap(setSheetName) {
   return map;
 }
 
-export async function readSetCollectionMap(setSheetName) {
-  await ensureNormalizedSchema();
-  const setId = await resolveSetIdFromName(setSheetName);
-  if (!setId) return new Map();
-
-  const values = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length);
-
+// Alter Pfad ohne Registry: nur Zeilen mit exakt dieser Set-ID, Schluessel normalizeCardNumber(cardId).
+function buildExactSetCollectionMap(rows, setId) {
   const map = new Map();
-  values.forEach((row, index) => {
-    if (toSafeCellString(row[0]).toLowerCase() !== setId.toLowerCase()) return;
-    const displayId = toSafeCellString(row[1]);
+  const setLower = toSafeCellString(setId).toLowerCase();
+  (rows || []).forEach((row, index) => {
+    if (toSafeCellString(row?.[0]).toLowerCase() !== setLower) return;
+    const displayId = toSafeCellString(row?.[1]);
     if (!displayId) return;
     const normalizedId = normalizeCardNumber(displayId);
     const g = toBoolean(row[2]);
-    const rh = toBoolean(row[3]) && g;
+    const rhRaw = toBoolean(row[3]);
+    const rh = rhRaw && g;
     const rowNo = index + 2;
+    const cell = {
+      setKey: toSafeCellString(row[0]),
+      cardKey: displayId,
+      rowNo,
+      g,
+      rh,
+      rhRaw,
+      gCell: { row: rowNo, col: 3 },
+      rhCell: { row: rowNo, col: 4 }
+    };
+    // Wie bisher gewinnt die letzte Zeile; alle Zeilen bleiben als Zellen erhalten.
+    const cells = [...(map.get(normalizedId)?.cells || []), cell];
     map.set(normalizedId, {
+      collectionKey: normalizedId,
       displayId,
       g,
       rh,
-      gCell: { row: rowNo, col: 3 },
-      rhCell: { row: rowNo, col: 4 }
+      cells,
+      gCell: cell.gCell,
+      rhCell: cell.rhCell
     });
   });
+  return map;
+}
 
-  if (map.size > 0) return map;
+async function resolveCollectionSetKey(setSheetName, options) {
+  const explicit = toSafeCellString(options?.setId);
+  if (explicit) return explicit;
+  return resolveSetIdFromName(setSheetName);
+}
+
+// none=true nur, wenn sicher feststeht: keine db_collection-Zeile unter irgendeinem Alias des Sets und kein
+// Legacy-Set-Blatt. Bei jedem Zweifel (Registry/Sheets-Metadaten nicht lesbar) false -> normaler Pfad.
+// rows: die dabei gelesenen db_collection-Zeilen (null, wenn nicht gelesen), damit der Aufrufer nicht
+// ein zweites Mal liest (bei fresh waere das ein zweiter voller Sheets-Read).
+async function hasNoCollectionSource(setSheetName, setKey, { strict = false, fresh = false } = {}) {
+  let setsOnly = null;
+  try {
+    setsOnly = await ensureSetResolver();
+  } catch {
+    return { none: false, rows: null };
+  }
+  const canonical = setsOnly?.resolveSetKey?.(setKey);
+  if (!canonical) return { none: false, rows: null };
+  const readRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, fresh, { strict });
+  // Nur eine erfolgreiche Lesung (landet im Cache) weiterreichen; ein nicht-strikter Fehler liefert [].
+  const rows = dbRowsCache.get(`${DB_SHEETS.collection}:${DB_HEADERS.collection.length}`) === readRows ? readRows : null;
+  if (collectCollectionSetIds(readRows, setsOnly).has(canonical.toLowerCase())) return { none: false, rows };
+  const sheets = await resolveSheetNames().catch(() => null);
+  if (!Array.isArray(sheets?.titles)) return { none: false, rows };
+  return { none: !sheets.titles.includes(setSheetName), rows };
+}
+
+/**
+ * Verwirft die gecachten db_collection-Zeilen; die naechste Lesung holt den aktuellen Stand.
+ * Fuer Gesamt-Leser wie den Backup-Restore: einmal invalidieren, dann ohne `fresh` je Set lesen
+ * (ein voller Sheets-Read statt einem je Set).
+ */
+export function invalidateCollectionRowCache() {
+  invalidateSheetRowCache(DB_SHEETS.collection);
+}
+
+/**
+ * Kanonische Set-IDs (kleingeschrieben), unter denen db_collection-Zeilen existieren – ueber alle Aliase,
+ * ohne Registry-Karten zu laden. `checkedOnly`: nur Zeilen mit g=true. Fuer Gesamt-Leser (Backup,
+ * Sammelkandidaten), damit sie readSetCollectionMap nur fuer Sets mit Zeilen aufrufen.
+ * Registry nicht erreichbar -> rohe Set-IDs.
+ */
+export async function listCollectionSetIds({ checkedOnly = false, strict = false } = {}) {
+  await ensureNormalizedSchema();
+  // strict: Lesefehler werfen statt [] (z. B. Backup-Export: nie ein unvollstaendiges Backup schreiben).
+  const rows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, false, { strict });
+  // strict: ein Registry-Fehler wird durchgereicht (rohe IDs wuerden Alias-Zeilen dem falschen Set zuordnen).
+  const resolver = strict ? await ensureSetResolver() : await ensureSetResolver().catch(() => null);
+  return collectCollectionSetIds(rows, resolver, { checkedOnly });
+}
+
+/**
+ * Sammlungs-Map eines Sets: Map<collectionKey, { collectionKey, displayId, g, rh, cells, gCell, rhCell, ambiguous? }>.
+ * Beruecksichtigt db_collection-Zeilen unter allen Registry-Aliasen des kanonischen Sets (Spec §5.2/§7.1);
+ * g/rh = ODER ueber alle Zeilen der Karte. Mehrdeutige Altzeilen (§5.3) stehen nur unter `ambiguous`.
+ * Ohne Zeilen greift der Legacy-Grid-Fallback; migrierte Zeilen werden unter der kanonischen Set-ID
+ * mit collectionKey angehaengt.
+ * @param {string} setSheetName Set-Name (Set-Blatt / db_sets / Overview)
+ * @param {{ setId?: string, resolver?: object, strict?: boolean }} [options] setId darf ein Alias sein;
+ *   strict: Lesefehler von db_collection werfen statt einer leeren Map (Backup-Export);
+ *   fresh: db_collection neu lesen statt aus dem Cache (Backup-Restore plant gegen den aktuellen Stand)
+ */
+export async function readSetCollectionMap(setSheetName, options = {}) {
+  await ensureNormalizedSchema();
+  const setKey = await resolveCollectionSetKey(setSheetName, options);
+  if (!setKey) return new Map();
+
+  // Lazy: Registry-Karten (~27 KB/Set) nur fuer Sets laden, die Zeilen (unter irgendeinem Alias) oder ein
+  // Legacy-Set-Blatt haben. Gesamt-Leser (Backup, Datencheck, Sammelkandidaten) laden so nur, was noetig ist.
+  const strict = Boolean(options?.strict);
+  const fresh = Boolean(options?.fresh);
+  let sourceRows = null;
+  if (!options?.resolver) {
+    const source = await hasNoCollectionSource(setSheetName, setKey, { strict, fresh });
+    if (source.none) return new Map();
+    sourceRows = source.rows;
+  }
+
+  const ctx = await resolveCollectionContext(setKey, options?.resolver || null);
+  const values = sourceRows || await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, fresh, { strict });
+
+  if (!ctx) {
+    const map = buildExactSetCollectionMap(values, setKey);
+    if (map.size > 0) return map;
+    // Pro Set gesperrt: parallele Erst-Lesungen duerfen das Legacy-Grid nicht doppelt migrieren.
+    return withLegacyMigrationLock(setKey.toLowerCase(), async () => {
+      const again = buildExactSetCollectionMap(await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true, { strict: true }), setKey);
+      if (again.size > 0) return again;
+      const legacy = await readLegacySetCollectionMap(setSheetName).catch(() => new Map());
+      if (legacy.size === 0) return again;
+      await appendDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, Array.from(legacy.values()).map((entry) => [
+        setKey,
+        toSafeCellString(entry.displayId),
+        Boolean(entry.g),
+        Boolean(entry.rh && entry.g),
+        nowIso()
+      ]));
+      const refreshed = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
+      return buildExactSetCollectionMap(refreshed, setKey);
+    });
+  }
+
+  const { map, stats } = buildCollectionMap(values, ctx);
+  if (stats.matchedRows > 0) return map;
+  return withLegacyMigrationLock(ctx.canonicalSetId.toLowerCase(), () => migrateLegacyGrid(setSheetName, setKey, ctx));
+}
+
+async function migrateLegacyGrid(setSheetName, setKey, ctx) {
+  // Unter der Sperre erneut pruefen: eine parallele Lesung kann schon migriert haben (Cache wird beim Anhaengen fortgeschrieben).
+  const current = buildCollectionMap(await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true, { strict: true }), ctx);
+  if (current.stats.matchedRows > 0) return current.map;
+  const map = current.map;
 
   const legacy = await readLegacySetCollectionMap(setSheetName).catch(() => new Map());
   if (legacy.size === 0) return map;
 
-  const legacyRows = Array.from(legacy.values()).map((entry) => [
-    setId,
-    toSafeCellString(entry.displayId),
-    Boolean(entry.g),
-    Boolean(entry.rh && entry.g),
-    nowIso()
-  ]);
+  // Alte Grid-Nummern: zuerst im Namensraum des kanonischen Sets, dann im Namensraum des Set-Schluessels.
+  const legacyKey = (displayId) => {
+    const hit = ctx.resolver.resolve(ctx.canonicalSetId, displayId)
+      || (setKey.toLowerCase() !== ctx.canonicalSetId.toLowerCase() ? ctx.resolver.resolve(setKey, displayId) : null);
+    return hit?.collectionKey || normalizeCardNumber(displayId);
+  };
+  const legacyRows = [];
+  const seen = new Set();
+  for (const entry of legacy.values()) {
+    const key = legacyKey(toSafeCellString(entry.displayId));
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    legacyRows.push([ctx.canonicalSetId, key, Boolean(entry.g), Boolean(entry.rh && entry.g), nowIso()]);
+  }
 
   await appendDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, legacyRows);
-
-  const migrated = new Map();
   const refreshed = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
-  refreshed.forEach((row, index) => {
-    if (toSafeCellString(row[0]).toLowerCase() !== setId.toLowerCase()) return;
-    const displayId = toSafeCellString(row[1]);
-    if (!displayId) return;
-    const normalizedId = normalizeCardNumber(displayId);
-    const g = toBoolean(row[2]);
-    const rh = toBoolean(row[3]) && g;
-    const rowNo = index + 2;
-    migrated.set(normalizedId, {
-      displayId,
-      g,
-      rh,
-      gCell: { row: rowNo, col: 3 },
-      rhCell: { row: rowNo, col: 4 }
-    });
-  });
-
-  return migrated;
+  return buildCollectionMap(refreshed, ctx).map;
 }
 
-export async function ensureCollectionEntry(setSheetName, cardNumber) {
+/**
+ * Liefert den Sammlungs-Eintrag einer Karte (mit allen Zellen, ueber Aliase). Fehlt jede Zeile, wird
+ * [kanonischeSetId, collectionKey, false, false, now] angehaengt. Mehrdeutige Altzeilen zaehlen nicht als
+ * Zeile der Karte (sie bleiben unveraendert).
+ * @param {string} setSheetName
+ * @param {string} collectionKey kanonischer Schluessel (alte Kartennummern werden ueber die Registry aufgeloest)
+ * @param {{ setId?: string, resolver?: object }} [options]
+ */
+export async function ensureCollectionEntry(setSheetName, collectionKey, options = {}) {
   await ensureNormalizedSchema();
-  const setId = await resolveSetIdFromName(setSheetName);
-  if (!setId) {
-    throw new Error(`Set-ID fÃ¼r â€ž${setSheetName}â€œ konnte nicht aufgelÃ¶st werden.`);
+  const setKey = await resolveCollectionSetKey(setSheetName, options);
+  if (!setKey) {
+    throw new Error(`Set-ID für „${setSheetName}“ konnte nicht aufgelöst werden.`);
   }
 
-  const normalizedCard = normalizeCardNumber(cardNumber);
-  const currentRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
+  const ctx = await resolveCollectionContext(setKey, options?.resolver || null);
+  const rawKey = toSafeCellString(collectionKey);
+  const C = DB_SHEETS.collection;
+  const N = DB_HEADERS.collection.length;
 
-  const existingIndex = findLastRowIndex(currentRows, (row) => {
-    const rowSetId = toSafeCellString(row[0]).toLowerCase();
-    const rowCard = normalizeCardNumber(toSafeCellString(row[1]));
-    return rowSetId === setId.toLowerCase() && rowCard === normalizedCard;
-  });
-
-  if (existingIndex >= 0) {
-    const rowNo = existingIndex + 2;
-    return {
-      displayId: toSafeCellString(currentRows[existingIndex][1]) || toSafeCellString(cardNumber),
-      g: toBoolean(currentRows[existingIndex][2]),
-      rh: toBoolean(currentRows[existingIndex][3]),
-      gCell: { row: rowNo, col: 3 },
-      rhCell: { row: rowNo, col: 4 }
-    };
+  if (!ctx) {
+    const normalizedCard = normalizeCardNumber(rawKey);
+    // Pruefen und Anhaengen unter der Blatt-Sperre: frische Zeilen, keine parallelen Doppel-/Ueberschreib-Zeilen.
+    return withSheetAppendLock(C, async () => {
+      const currentRows = await readDbRows(C, N, true, { strict: true });
+      const existing = buildExactSetCollectionMap(currentRows, setKey).get(normalizedCard);
+      if (existing) return existing;
+      const next = await appendRowsUnlocked(C, N, currentRows, [[setKey, rawKey, false, false, nowIso()]]);
+      const created = buildExactSetCollectionMap(next, setKey).get(normalizedCard);
+      if (!created) throw new Error(`Collection-Eintrag für Karte ${collectionKey} konnte nicht erstellt werden.`);
+      return created;
+    });
   }
 
-  const upsertPlan = planSetScopedUpsert({
-    rows: currentRows,
-    setId,
-    incomingRows: [[setId, toSafeCellString(cardNumber), false, false, nowIso()]],
-    clearMissing: false
-  });
-  await applySetScopedPlan(DB_SHEETS.collection, DB_HEADERS.collection.length, upsertPlan);
-
-  const refreshedRows = await readDbRows(DB_SHEETS.collection, DB_HEADERS.collection.length, true);
-  const newIndex = findLastRowIndex(refreshedRows, (row) => {
-    const rowSetId = toSafeCellString(row[0]).toLowerCase();
-    const rowCard = normalizeCardNumber(toSafeCellString(row[1]));
-    return rowSetId === setId.toLowerCase() && rowCard === normalizedCard;
-  });
-
-  if (newIndex < 0) {
-    throw new Error(`Collection-Eintrag fÃ¼r Karte ${cardNumber} konnte nicht erstellt werden.`);
+  const hit = rawKey ? ctx.resolver.resolve(ctx.canonicalSetId, rawKey) : null;
+  if (!hit && rawKey) {
+    // Alter mehrdeutiger Schluessel (§5.3): nie eine weitere mehrdeutige Zeile anhaengen, sondern die
+    // Migration (Task 7) ausloesen lassen.
+    const amb = ctx.resolver.ambiguous(ctx.canonicalSetId, rawKey);
+    if (amb) {
+      const err = new Error(`Kartenschlüssel „${rawKey}“ ist mehrdeutig (${amb.collectionKeys.join(', ')}).`);
+      err.code = 'AMBIGUOUS_LEGACY_KEY';
+      err.setId = amb.setId;
+      err.legacyKey = amb.legacyKey;
+      err.collectionKeys = [...amb.collectionKeys];
+      throw err;
+    }
   }
+  const writeKey = hit?.collectionKey || rawKey;
+  const lookupKey = hit?.collectionKey || normalizeCardNumber(rawKey);
+  if (!writeKey) throw new Error('Collection-Eintrag ohne Kartenschlüssel.');
 
-  const rowNo = newIndex + 2;
-  return {
-    displayId: toSafeCellString(refreshedRows[newIndex][1]) || toSafeCellString(cardNumber),
-    g: toBoolean(refreshedRows[newIndex][2]),
-    rh: toBoolean(refreshedRows[newIndex][3]),
-    gCell: { row: rowNo, col: 3 },
-    rhCell: { row: rowNo, col: 4 }
-  };
+  return withSheetAppendLock(C, async () => {
+    const currentRows = await readDbRows(C, N, true, { strict: true });
+    const existing = buildCollectionMap(currentRows, ctx).map.get(lookupKey);
+    if (existing?.cells?.length) return existing;
+    const next = await appendRowsUnlocked(C, N, currentRows, [[ctx.canonicalSetId, writeKey, false, false, nowIso()]]);
+    const created = buildCollectionMap(next, ctx).map.get(lookupKey);
+    if (!created?.cells?.length) {
+      throw new Error(`Collection-Eintrag für Karte ${collectionKey} konnte nicht erstellt werden.`);
+    }
+    return created;
+  });
+}
+
+function withLegacyMigrationLock(key, task) {
+  const previous = legacyMigrationLocks.get(key) || Promise.resolve();
+  const run = previous.catch(() => undefined).then(task);
+  const tail = run.catch(() => undefined);
+  legacyMigrationLocks.set(key, tail);
+  tail.then(() => {
+    if (legacyMigrationLocks.get(key) === tail) legacyMigrationLocks.delete(key);
+  });
+  return run;
+}
+
+// Gecachte db_collection-Zeilen nach Zell-Writes mitfuehren, damit ein erneutes Lesen nicht den alten
+// Stand liefert (z. B. Abwaehlen ueber mehrere Zeilen einer Karte).
+function patchCollectionRowCache(updates) {
+  const rows = dbRowsCache.get(`${DB_SHEETS.collection}:${DB_HEADERS.collection.length}`);
+  if (!Array.isArray(rows)) return;
+  for (const { row, col, value } of updates) {
+    const target = rows[row - 2];
+    if (!Array.isArray(target)) continue;
+    while (target.length < col) target.push('');
+    target[col - 1] = Boolean(value);
+  }
 }
 
 export async function updateCellBoolean(sheetName, row, col, value) {
@@ -1655,6 +1941,7 @@ export async function updateCellBoolean(sheetName, row, col, value) {
   await ensureSheetCapacity(targetSheet, Number(row), Number(col));
   const a1 = buildRange(targetSheet, `${colToA1(col)}${row}`);
   await putValues(a1, [[Boolean(value)]]);
+  if (useNormalizedCollection) patchCollectionRowCache([{ row: Number(row), col: Number(col), value }]);
 }
 
 export async function updateCellBooleansBatch(sheetName, updates = [], { chunkSize = 250 } = {}) {
@@ -1678,17 +1965,24 @@ export async function updateCellBooleansBatch(sheetName, updates = [], { chunkSi
   });
 
   for (const [targetSheet, targetUpdates] of groupedByTargetSheet.entries()) {
-    const maxRow = Math.max(...targetUpdates.map((entry) => entry.row));
-    const maxCol = Math.max(...targetUpdates.map((entry) => entry.col));
-    await ensureSheetCapacity(targetSheet, maxRow, maxCol);
+    const writeTarget = async () => {
+      const maxRow = Math.max(...targetUpdates.map((entry) => entry.row));
+      const maxCol = Math.max(...targetUpdates.map((entry) => entry.col));
+      await ensureSheetCapacity(targetSheet, maxRow, maxCol);
 
-    for (let start = 0; start < targetUpdates.length; start += chunkSize) {
-      const chunk = targetUpdates.slice(start, start + chunkSize);
-      await batchPutValues(chunk.map((entry) => ({
-        range: buildRange(targetSheet, `${colToA1(entry.col)}${entry.row}`),
-        values: [[Boolean(entry.value)]]
-      })));
-    }
+      for (let start = 0; start < targetUpdates.length; start += chunkSize) {
+        const chunk = targetUpdates.slice(start, start + chunkSize);
+        await batchPutValues(chunk.map((entry) => ({
+          range: buildRange(targetSheet, `${colToA1(entry.col)}${entry.row}`),
+          values: [[Boolean(entry.value)]]
+        })));
+        if (targetSheet === DB_SHEETS.collection) patchCollectionRowCache(chunk);
+      }
+    };
+    // db_collection-Zellen ueber dieselbe Sperre wie Anhaengen/Import (writeDbCollectionForSet): kein Import-Plan
+    // aus einem aelteren Lesestand kann ein paralleles Abwaehlen ueberschreiben. Nie innerhalb dieser Sperre aufrufen.
+    if (targetSheet === DB_SHEETS.collection) await withSheetAppendLock(targetSheet, writeTarget);
+    else await writeTarget();
   }
 
   return normalizedUpdates.length;
@@ -1696,20 +1990,13 @@ export async function updateCellBooleansBatch(sheetName, updates = [], { chunkSi
 
 export async function ensureSettingsSheet() {
   const sheets = await resolveSheetNames();
-  const sheetMeta = await gapi.client.sheets.spreadsheets.get({
-    spreadsheetId: CONFIG.SPREADSHEET_ID
-  });
+  const sheetMeta = await getSpreadsheetMeta();
   const exists = (sheetMeta.result.sheets || []).some(
     (s) => s.properties?.title === sheets.settings
   );
 
   if (!exists) {
-    await gapi.client.sheets.spreadsheets.batchUpdate({
-      spreadsheetId: CONFIG.SPREADSHEET_ID,
-      resource: {
-        requests: [{ addSheet: { properties: { title: CONFIG.SHEETS.SETTINGS } } }]
-      }
-    });
+    await batchUpdateSpreadsheet([{ addSheet: { properties: { title: CONFIG.SHEETS.SETTINGS } } }]);
     resolvedSheetsCache = null;
     const refreshed = await resolveSheetNames();
     await putValues(buildRange(refreshed.settings, 'A1:B1'), [['key', 'value']]);
@@ -1759,4 +2046,3 @@ export async function recoverImportedIdsFromOverview() {
   );
   return ids;
 }
-

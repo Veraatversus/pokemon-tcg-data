@@ -16,7 +16,7 @@ Nutzer-Browser
   │     ├── Lesen:  db_sets, db_cards, db_collection → JS-Objekte
   │     └── Schreiben: Collection-Updates → Sheets
   │
-  ├── Pokémon TCG API / Vera-API (pokemon-api.js)
+  ├── api/v3 + api/registry (pokemon-api.js → v3-api.js)
   │     └── Set-/Karten-Metadaten → In-Memory Cache (cache.js)
   │
   └── IndexedDB Offline Store (features/search/engine.js)
@@ -39,8 +39,8 @@ Nutzer-Browser
 app.js
   → sheets-db.js: listSetsOverviewData()
       → Google Sheets API: 'Sets Overview'
-  → pokemon-api.js: fetchAllSets()
-      → Vera-API (USE_VERA_API=true) oder PokemonTCG-API
+  → pokemon-api.js: fetchAllAvailableSets()
+      → api/v3/sets.json (vorberechnet, relativ zur App)
   → cache.js: set('sets', ...)       ← TTL 10 min
 ```
 

@@ -49,66 +49,6 @@ async function initOfflineDb() {
   });
 }
 
-/** Caches a set of cards with metadata */
-async function cacheCardsOffline(setId, cards, metadata = {}) {
-  if (!dbInstance) return;
-  const tx = dbInstance.transaction([STORES.cards, STORES.metadata], 'readwrite');
-  const cardsStore = tx.objectStore(STORES.cards);
-  const metaStore = tx.objectStore(STORES.metadata);
-
-  cards.forEach((card) => {
-    cardsStore.put({ id: `${setId}__${card.number}`, setId, ...card });
-  });
-
-  metaStore.put({
-    id: `cards_${setId}`,
-    setId,
-    cardCount: cards.length,
-    cachedAt: new Date().toISOString(),
-    hash: simpleHash(JSON.stringify(cards)),
-    ...metadata
-  });
-
-  return new Promise((resolve, reject) => {
-    tx.oncomplete = resolve;
-    tx.onerror = reject;
-  });
-}
-
-/** Retrieves cached cards if offline or as fallback */
-async function getCachedCardsOffline(setId) {
-  if (!dbInstance) return null;
-  const tx = dbInstance.transaction(STORES.cards, 'readonly');
-  const store = tx.objectStore(STORES.cards);
-  const index = store.index ? store.getAll() : null;
-
-  return new Promise((resolve) => {
-    const request = store.getAll();
-    request.onsuccess = () => {
-      const results = request.result.filter((card) => card.setId === setId);
-      if (results.length) {
-        engineMetrics.cacheHits++;
-        resolve(results);
-      } else {
-        engineMetrics.cacheMisses++;
-        resolve(null);
-      }
-    };
-    request.onerror = () => resolve(null);
-  });
-}
-
-/** Simple hash for cache validation */
-function simpleHash(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
-  }
-  return Math.abs(hash).toString(36);
-}
-
 /** Monitors online/offline and queues sync operations */
 function initSyncQueue() {
   window.addEventListener('online', () => {
@@ -135,72 +75,6 @@ async function processSyncQueue() {
       engineMetrics.syncQueue.push(operation);
     }
   }
-}
-
-/** Auto-healing: Detects and fixes data mismatches in background */
-export async function startAutoHealing(apiCollectionMap, sheetCollectionMap) {
-  const mismatches = [];
-  const fixes = [];
-
-  for (const [cardId, apiData] of apiCollectionMap.entries()) {
-    const sheetData = sheetCollectionMap.get(cardId);
-    if (!sheetData) {
-      mismatches.push({ cardId, type: 'missing-in-sheet', apiData });
-      fixes.push({ cardId, action: 'add-to-sheet', data: apiData });
-    } else if (JSON.stringify(apiData) !== JSON.stringify(sheetData)) {
-      mismatches.push({ cardId, type: 'mismatch', apiData, sheetData });
-      fixes.push({ cardId, action: 'sync-from-api', data: apiData });
-    }
-  }
-
-  engineMetrics.healedMismatches += fixes.length;
-  return { mismatches, autoFixCount: fixes.length, shouldApplyFixes: fixes.length > 0 };
-}
-
-/** Fuzzy search for sets and cards */
-export function fuzzySearch(query, haystack, fields = ['name', 'setName']) {
-  const normalizeForSearch = (str) => String(str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-  const queryNorm = normalizeForSearch(query);
-  const threshold = 0.6;
-
-  return haystack
-    .map((item) => {
-      const searchableText = fields.map((field) => normalizeForSearch(item[field])).join(' ');
-      const similarity = calculateSimilarity(queryNorm, searchableText);
-      return { item, similarity };
-    })
-    .filter((result) => result.similarity >= threshold)
-    .sort((a, b) => b.similarity - a.similarity)
-    .map((result) => result.item);
-}
-
-/** Levenshtein-based similarity for fuzzy matching */
-function calculateSimilarity(a, b) {
-  const longer = a.length > b.length ? a : b;
-  const shorter = a.length > b.length ? b : a;
-  if (longer.length === 0) return 1;
-  const editDistance = computeLevenshteinDistance(longer, shorter);
-  return (longer.length - editDistance) / longer.length;
-}
-
-function computeLevenshteinDistance(a, b) {
-  const costs = [[]];
-  for (let i = 0; i <= a.length; i++) {
-    let lastValue = i;
-    for (let j = 0; j <= b.length; j++) {
-      if (i === 0) {
-        costs[0][j] = j;
-      } else if (j > 0) {
-        let newValue = costs[i - 1][j - 1];
-        if (a.charAt(i - 1) !== b.charAt(j - 1)) {
-          newValue = Math.min(Math.min(newValue, lastValue), costs[i - 1][j]) + 1;
-        }
-        costs[i][j] = newValue;
-        lastValue = newValue;
-      }
-    }
-  }
-  return costs[a.length][b.length];
 }
 
 /** Exports metrics dashboard data */
@@ -232,5 +106,3 @@ export async function initSmartEngine() {
     return false;
   }
 }
-
-export { cacheCardsOffline, getCachedCardsOffline, processSyncQueue };

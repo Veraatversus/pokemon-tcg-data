@@ -34,11 +34,10 @@ Zentrale Konfigurationsdatei der App. Stellt Konstanten, API-Schlüssel, Sheet-N
 | `GRID.BLOCK_HEIGHT` | `number` | 4 |
 | `GRID.HEADER_ROWS` | `number` | 2 |
 | `GRID.IMPORTED_COL_INDEX` | `number` | 9 (1-basiert, Spalte I) |
-| `APIS.POKEMONTCG` | `string` | `https://api.pokemontcg.io/v2` |
-| `APIS.TCGDEX_DE` | `string` | `https://api.tcgdex.net/v2/de` |
-| `APIS.VERA_BASE` | `string` | `https://veraatversus.github.io/pokemon-tcg-data` |
-| `USE_VERA_API` | `boolean` | Vera-API bevorzugen (default: `true`) |
-| `VERA_API_LANGUAGE` | `string` | `'en'` |
+| `APIS.VERA_BASE` | `string` | `https://veraatversus.github.io/pokemon-tcg-data` (nur Cardmarket-Daten) |
+| `APIS.V3_BASE` | `string` | leer = relativ zur App `../../api/v3/` |
+| `APIS.REGISTRY_BASE` | `string` | leer = relativ zur App `../../api/registry/` |
+| `WRITE_DB_CARDS` | `boolean` | `db_cards` weiter schreiben (default: `true`) |
 | `CACHE_TTL_MS` | `number` | 10 Min (600 000 ms) |
 
 ## Abhängigkeiten

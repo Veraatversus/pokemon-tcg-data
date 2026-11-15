@@ -34,7 +34,7 @@ button:not(.btn-secondary):not(.btn-danger):not(.btn-icon):not(.nav-set-toggle):
   gap: 0;
   border: 1px solid var(--gradient-brand-border);
   border-radius: 10px;
-  background: var(--gradient-brand-primary) !important;
+  background: var(--gradient-brand-primary);
   box-shadow: var(--shadow-brand-control);
 }
 
@@ -114,20 +114,6 @@ textarea::placeholder {
   color: var(--color-text-muted) !important;
 }
 
-.custom-select {
-  position: relative;
-  width: 100%;
-  display: inline-block;
-}
-
-.custom-select .cs-native {
-  position: absolute !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  width: 0 !important;
-  height: 0 !important;
-}
-
 .custom-select-trigger {
   position: relative;
   display: block;
@@ -142,21 +128,6 @@ textarea::placeholder {
   font-weight: 500;
   text-align: left;
   box-shadow: var(--shadow-sm) !important;
-}
-
-.custom-select-trigger::after {
-  content: '\25be';
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--color-gold);
-  font-size: 11px;
-}
-
-.custom-select.is-open .custom-select-trigger {
-  border-color: rgba(168, 85, 247, 0.72) !important;
-  box-shadow: 0 0 16px rgba(168, 85, 247, 0.24) !important;
 }
 
 .custom-select-list {
@@ -176,11 +147,6 @@ textarea::placeholder {
     0 12px 32px rgba(0, 0, 0, 0.4),
     0 0 18px rgba(168, 85, 247, 0.18) !important;
   padding: 6px !important;
-}
-
-.custom-select.is-open .custom-select-list {
-  display: block !important;
-  visibility: visible !important;
 }
 
 .custom-select-option {

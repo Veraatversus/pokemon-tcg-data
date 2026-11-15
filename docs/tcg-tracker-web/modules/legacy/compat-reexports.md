@@ -8,24 +8,10 @@
 
 Dokumentiert die Übergangs-Re-Export-Dateien auf Top-Level, die alte Importpfade stabil halten.
 
-## Aktuelle Re-Export-Wrapper
+## Stand
 
-- `js/auth.js` -> `core/auth.js`
-- `js/cache.js` -> `core/cache.js`
-- `js/config.js` -> `core/config.js`
-- `js/utils.js` -> `core/utils.js`
-- `js/sheets-db.js` -> `data/sheets-db.js`
-- `js/pokemon-api.js` -> `data/pokemon-api.js`
-- `js/command-palette.js` -> `ui/command-palette.js`
-- `js/ui-components.js` -> `ui/components.js`
-- `js/advanced-tools.js` -> `ui/tools.js`
-- `js/smart-engine.js` -> `features/search/engine.js`
-- `js/collection-versioning.js` -> `features/collection/versioning.js`
-- `js/realtime-sync.js` -> `features/community/sync.js`
-
-## Ziel
-
-Schrittweise Entfernen dieser Wrapper nach Umstellung aller Imports.
+Alle Re-Export-Wrapper sind entfernt; Importe zeigen direkt auf `core/`, `data/`, `ui/` und `features/`.
+Zuletzt entfernt (2026-11-13): `js/smart-engine.js` (-> `features/search/engine.js`) und `js/realtime-sync.js` (-> `features/community/sync.js`).
 
 ## Verwandte Seiten
 

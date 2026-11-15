@@ -1,63 +1,8 @@
 ﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   Statistics Panel
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-.statistics-panel {
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 16px;
-  margin: 16px 0;
-}
-
-.stat-item {
-  text-align: center;
-  padding: 8px;
-}
-
-.stat-item > div:first-child {
-  font-size: 24px;
-  margin-bottom: 4px;
-}
-
-.stat-item > div:nth-child(2) {
-  font-size: 12px;
-  color: var(--color-muted);
-  margin-bottom: 4px;
-}
-
-.stat-item > div:last-child {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--color-primary);
-}
-
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    Search History
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-.search-history-dropdown {
-  position: absolute;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 100;
-}
-
 .search-history-dropdown.hidden {
   display: none;
-}
-
-.search-history-item {
-  padding: 8px 12px;
-  cursor: pointer;
-  border-bottom: 1px solid var(--color-bg);
-  transition: background 0.2s;
-}
-
-.search-history-item:hover {
-  background: var(--color-primary);
-  color: white;
 }
 
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -98,21 +43,6 @@
 .bulk-toolbar > div {
   width: 1px;
   height: 24px;
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.bulk-action-btn {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  color: white;
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-  transition: background 0.2s;
-}
-
-.bulk-action-btn:hover {
   background: rgba(255, 255, 255, 0.3);
 }
 

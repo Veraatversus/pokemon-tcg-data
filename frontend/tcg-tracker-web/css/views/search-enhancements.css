@@ -117,27 +117,9 @@ body.topbar-collapsed #view-search {
   --search-sticky-top: calc(env(safe-area-inset-top, 0px) + 8px);
 }
 
-#view-search .view-header {
-  position: sticky;
-  top: var(--search-sticky-top);
-  z-index: 1100;
-  margin: 10px 12px 0;
-  padding: 14px 16px;
-  border: 1px solid rgba(255, 209, 102, 0.30);
-  border-radius: 18px;
-  background: linear-gradient(180deg, rgba(15, 22, 39, 0.96), rgba(26, 31, 53, 0.94)) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.26), 0 0 0 1px rgba(112, 164, 255, 0.08);
-  backdrop-filter: blur(14px);
-  color: #fff;
-}
-
 #view-search .view-header h2 {
   color: #fff;
   text-shadow: 0 1px 10px rgba(7, 16, 31, 0.28);
-}
-
-#view-search .view-controls {
-  gap: 10px;
 }
 
 #view-search .search-ac-wrap {
@@ -172,8 +154,8 @@ body.topbar-collapsed #view-search {
 }
 
 #view-search .view-controls .custom-select-trigger::after {
-  font-size: 11px !important;
-  color: var(--color-gold) !important;
+  font-size: 11px;
+  color: var(--color-gold);
 }
 
 #view-search .search-toolbar-meta {
@@ -264,17 +246,9 @@ body.topbar-collapsed #view-search {
     width: 100%;
   }
 
-  #view-search .view-controls .custom-select,
-  #view-search .view-controls select {
-    grid-column: 2;
-  }
 }
 
 @media (max-width: 380px) {
-  #view-search .view-controls {
-    grid-template-columns: 1fr;
-  }
-
   #view-search .search-ac-wrap,
   #view-search .view-controls .custom-select,
   #view-search .view-controls select {
