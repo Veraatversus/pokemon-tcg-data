@@ -21,7 +21,9 @@ export function getCollectionUiState(db = {}, { isEditable = true } = {}) {
     rhChecked: status.rh,
     // Geteilter Altstatus: G bleibt klickbar (oeffnet den Migrationsdialog, schreibt nichts).
     gDisabled: !isEditable,
-    rhDisabled: !isEditable || !Boolean(db?.rhCell),
+    // RH auch ohne eigene Zeile klickbar (Set nicht importiert / Karte neu): der Klick legt die Zeile an und setzt G
+    // mit. Nur der geteilte Altstatus einer mehrdeutigen Altzeile bleibt lesend (Zuordnung ueber den Dialog an G).
+    rhDisabled: !isEditable || status.shared,
     sharedLegacy: status.shared
   };
 }
