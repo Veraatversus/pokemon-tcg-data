@@ -31,4 +31,4 @@ Stand nach dem Clean-Code-Umbau. Die Geschichte steht in git; Modulstruktur sieh
 - `escapeAutocompleteHtml` (`js/views/search.js`) ist eine Variante von `escapeHtml` ohne Apostroph.
 
 ## API (master)
-- `scripts/api/merge/cardmarket-ids.mjs`: Die Override-Stufe (ca. 100 Zeilen) steht noch inline in `fillCardmarketIds`, und alle Stufen teilen sich ein gemeinsames `ctx`-Objekt. Das ist der verbleibende Aufteilungskandidat. `scripts/` gehört dem master-Zweig.
+- `scripts/api/merge/cardmarket-ids.mjs`: Die Override-Stufe (ca. 65–90 Zeilen) steht noch inline in `fillCardmarketIds`, und alle Stufen teilen sich ein gemeinsames `ctx`-Objekt. Das ist der verbleibende Aufteilungskandidat. `scripts/` gehört dem master-Zweig.

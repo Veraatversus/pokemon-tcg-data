@@ -28,7 +28,7 @@ import {
   resolveDisplaySet,
   resolveDisplayCard,
   getCardLanguage
-} from './schema-contract.js?v=20261115-clean-3';
+} from './schema-contract.js?v=20261115-clean-4';
 import { withV3CardmarketIds } from './v3-cardmarket-ids.js';
 import {
   planSetScopedUpsert,

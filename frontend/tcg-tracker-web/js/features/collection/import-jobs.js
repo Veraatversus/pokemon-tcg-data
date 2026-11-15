@@ -1,8 +1,8 @@
 // Import-Jobs: Job-Anzeige, Aktions-Warteschlange, Import-Backoff und -Preflight, Auto-Import-Warteschlange,
 // Import ueber die Uebersicht, Sequenz-Import und Overview-Abgleich mit der API.
 import { isSignedIn } from '../../core/auth.js';
-import { writeSetting, importSetIntoCollection, listSetsOverviewData, syncOverviewWithApiSets } from '../../data/sheets-db.js?v=20261115-clean-3';
-import { fetchMergedCardsWithSetMeta, fetchAllAvailableSets } from '../../data/pokemon-api.js?v=20261115-clean-3';
+import { writeSetting, importSetIntoCollection, listSetsOverviewData, syncOverviewWithApiSets } from '../../data/sheets-db.js?v=20261115-clean-4';
+import { fetchMergedCardsWithSetMeta, fetchAllAvailableSets } from '../../data/pokemon-api.js?v=20261115-clean-4';
 import { toBoolean } from '../../core/utils.js';
 import * as cache from '../../core/cache.js';
 import { runWithRetry, isRetryableError } from '../../core/retry.js';

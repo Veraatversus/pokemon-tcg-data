@@ -1,15 +1,15 @@
 // Dashboard-Ansicht: Sets laden, Serien-Uebersicht, Set-Karten und Set-Suchfilter.
 // Funktionen anderer Ansichten, die noch in app.js liegen, werden ueber actions.<name>() aufgerufen.
-import { listImportedSets, listSetsOverviewData, readSummarySheet, readSettings, syncOverviewWithApiSets, recoverImportedIdsFromOverview, prefetchSetsOverviewRows } from '../data/sheets-db.js?v=20261115-clean-3';
+import { listImportedSets, listSetsOverviewData, readSummarySheet, readSettings, syncOverviewWithApiSets, recoverImportedIdsFromOverview, prefetchSetsOverviewRows } from '../data/sheets-db.js?v=20261115-clean-4';
 import { findSetByIdOrAlias } from '../data/set-aliases.js';
 import { normalizeSearchText, collectSearchStrings, matchesTokensInValues } from '../features/search/query-utils.js';
-import { fetchAllAvailableSets, fetchV3SetMeta } from '../data/pokemon-api.js?v=20261115-clean-3';
-import { resolveSeriesGroupInfo, resolveDisplaySet, applyDeSeriesFallback, resolveSetTotalCards, resolveSetReleaseTime, setV3SetMeta } from '../data/schema-contract.js?v=20261115-clean-3';
+import { fetchAllAvailableSets, fetchV3SetMeta } from '../data/pokemon-api.js?v=20261115-clean-4';
+import { resolveSeriesGroupInfo, resolveDisplaySet, applyDeSeriesFallback, resolveSetTotalCards, resolveSetReleaseTime, setV3SetMeta } from '../data/schema-contract.js?v=20261115-clean-4';
 import { fallbackImgAttrs } from '../ui/image-fallback.js';
 import { renderDashboardSetGrid } from '../views/dashboard-grid.js';
-import { collectExcludedSetNames, filterExcludedSets, filterVisibleSummaryRows, loadExcludedSetPredicate } from '../data/excluded-sets.js?v=20261115-clean-3';
+import { collectExcludedSetNames, filterExcludedSets, filterVisibleSummaryRows, loadExcludedSetPredicate } from '../data/excluded-sets.js?v=20261115-clean-4';
 import { toBoolean } from '../core/utils.js';
-import { toggleFavorite, isFavorite } from '../enhanced-features.js?v=20261115-clean-3';
+import { toggleFavorite, isFavorite } from '../enhanced-features.js?v=20261115-clean-4';
 import { dom } from '../app/dom.js';
 import { state } from '../app/state.js';
 import { navigate, handleRouteChange } from '../app/router.js';

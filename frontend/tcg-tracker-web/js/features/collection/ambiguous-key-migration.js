@@ -7,7 +7,7 @@
 //   aktualisiert statt dupliziert.
 // - showAmbiguousMigrationDialog (DOM): Kartenbilder, Mehrfachauswahl, "Uebernehmen"/"Spaeter".
 import { cellsForUpdate } from '../../data/collection-aliases.js';
-import { getCardLanguage } from '../../data/schema-contract.js?v=20261115-clean-3';
+import { getCardLanguage } from '../../data/schema-contract.js?v=20261115-clean-4';
 import { imageCandidates, bindImageFallback } from '../../ui/image-fallback.js';
 
 const str = (value) => String(value ?? '').trim();
