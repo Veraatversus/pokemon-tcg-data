@@ -53,7 +53,7 @@ export async function getValues(range, renderOption = 'UNFORMATTED_VALUE', suppr
   const maxRetries = 6;
   try {
     if (!gapi?.client?.sheets?.spreadsheets?.values?.get) {
-      throw new Error('Sheets API nicht initialisiert â€“ bitte melden Sie sich an');
+      throw new Error('Sheets API nicht initialisiert – bitte melden Sie sich an');
     }
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
@@ -78,7 +78,7 @@ export async function getValues(range, renderOption = 'UNFORMATTED_VALUE', suppr
   }
 }
 
-// Formeln mÃ¼ssen mit FORMULA gelesen werden (z.B. HYPERLINK in Overview)
+// Formeln müssen mit FORMULA gelesen werden (z.B. HYPERLINK in Overview)
 export async function getFormulas(range) {
   return getValues(range, 'FORMULA');
 }
@@ -118,7 +118,7 @@ export async function putValues(range, values) {
   let reauthedOnce = false;
   try {
     if (!gapi?.client?.sheets?.spreadsheets?.values?.update) {
-      throw new Error('Sheets API nicht initialisiert â€“ bitte melden Sie sich an');
+      throw new Error('Sheets API nicht initialisiert – bitte melden Sie sich an');
     }
     return await enqueueSheetsMutation(async () => {
       for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -286,7 +286,7 @@ export async function batchUpdateSpreadsheet(requests) {
 // Range leeren und werfen, wenn die API fehlt (im Gegensatz zum stillen clearValues). Ohne Queue.
 export async function clearRangeStrict(range) {
   if (!gapi?.client?.sheets?.spreadsheets?.values?.clear) {
-    throw new Error('Sheets API nicht initialisiert â€“ bitte melden Sie sich an');
+    throw new Error('Sheets API nicht initialisiert – bitte melden Sie sich an');
   }
   return gapi.client.sheets.spreadsheets.values.clear({
     spreadsheetId: CONFIG.SPREADSHEET_ID,

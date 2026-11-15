@@ -5,9 +5,6 @@ Stand nach dem Clean-Code-Umbau. Die Geschichte steht in git; Modulstruktur sieh
 ## CSS
 - 40 doppelte Selektorlisten und ca. 478 `!important` bleiben. Jede ist durch einen gleich spezifischen Konkurrenten auf JS-erzeugten Klassen blockiert und braucht eine Prüfung am Live-DOM. Details: Commit-Nachricht von `ead630595` (git-Historie von Task 9). Messung: `node scripts/css-audit.mjs`.
 
-## Text
-- Kaputte Umlaute (Mojibake) in `js/data/sheets-db.js` und `js/data/sheets-client.js`, auch in Kandidaten für Blatttitel wie `'PokÃ©mon TCG Sets Ãœbersicht'`. Die Korrektur braucht eine sorgfältige, getestete Änderung, weil diese Strings die Blatt-Erkennung steuern.
-
 ## Modul-Laden
 - Viele lokale Module werden an etlichen Stellen ohne `?v=` importiert. Nach einem Deploy können Browser bis zu 10 Minuten alte und neue Module mischen (Pages `max-age` 600; der Service Worker ist für JS network-first).
 

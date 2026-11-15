@@ -28,7 +28,7 @@ import {
   resolveDisplaySet,
   resolveDisplayCard,
   getCardLanguage
-} from './schema-contract.js?v=20261115-price-range-2';
+} from './schema-contract.js?v=20261115-umlaute';
 import { withV3CardmarketIds } from './v3-cardmarket-ids.js';
 import {
   planSetScopedUpsert,
@@ -152,7 +152,7 @@ async function detectOverviewByContent(titles) {
       const score = scoreOverviewRows(rows.slice(0, 80));
       if (score > best.score) best = { title, score };
     } catch {
-      // Blatt passt nicht fÃ¼r dieses Schema â€“ ignorieren
+      // Blatt passt nicht für dieses Schema – ignorieren
     }
   }
   return best.score > 0 ? best.title : null;
@@ -162,7 +162,7 @@ async function resolveSheetNames() {
   if (resolvedSheetsCache) return resolvedSheetsCache;
 
   if (!hasSpreadsheetMetaApi()) {
-    throw new Error('Sheets API nicht initialisiert â€“ bitte zuerst anmelden.');
+    throw new Error('Sheets API nicht initialisiert – bitte zuerst anmelden.');
   }
 
   const meta = await getSpreadsheetMeta(SHEET_PROPS_FIELDS);
@@ -186,13 +186,15 @@ async function resolveSheetNames() {
   let overview = pickSheetTitle(
     nonDbTitles,
     CONFIG.SHEETS.OVERVIEW,
-    ['Set Overview', 'PokÃ©mon TCG Sets Ãœbersicht', 'Pokemon TCG Sets Ãœbersicht', 'Sets Ãœbersicht'],
-    (name) => (name.includes('set') || name.includes('sets')) && (name.includes('overview') || name.includes('Ã¼bersicht'))
+    // Korrekte Schreibung zuerst; die frueher doppelt kodierten Namen bleiben als Rueckfall fuer aeltere Tabellen.
+    ['Set Overview', 'Pokémon TCG Sets Übersicht', 'Pokemon TCG Sets Übersicht', 'Sets Übersicht',
+      'PokÃ©mon TCG Sets Ãœbersicht', 'Pokemon TCG Sets Ãœbersicht', 'Sets Ãœbersicht'],
+    (name) => (name.includes('set') || name.includes('sets')) && (name.includes('overview') || name.includes('übersicht') || name.includes('Ã¼bersicht'))
   );
   if (!overview) {
     overview = await detectOverviewByContent(nonDbTitles);
   }
-  // Last resort: exactly one non-DB, non-settings sheet â†’ use it as overview
+  // Last resort: exactly one non-DB, non-settings sheet → use it as overview
   if (!overview && nonDbTitles.length === 1) {
     overview = nonDbTitles[0];
   }
@@ -200,7 +202,7 @@ async function resolveSheetNames() {
   const summary = pickSheetTitle(
     nonDbTitles,
     CONFIG.SHEETS.SUMMARY,
-    ['Summary', 'Collection', 'SammlungsÃ¼bersicht'],
+    ['Summary', 'Collection', 'Sammlungsübersicht', 'SammlungsÃ¼bersicht'],
     (name) => name.includes('summary') || name.includes('zusammenfassung') || name.includes('sammlung')
   );
 
@@ -237,7 +239,7 @@ async function getOverviewRows(sheets) {
         resolvedSheetsCache = sheets;
         return rows;
       } catch {
-        // nÃ¤chstes Blatt probieren
+        // nächstes Blatt probieren
       }
     }
 
@@ -566,10 +568,10 @@ async function applySetScopedPlan(sheetName, columnCount, plan, { lockedRows = n
   }
 }
 
-// Format-Erkennung fÃ¼r RÃ¼ckwÃ¤rtskompatibilitÃ¤t mit Pre-Schema-Zeilen
+// Format-Erkennung für Rückwärtskompatibilität mit Pre-Schema-Zeilen
 function isNewSetFormat(row) {
   // Altes Format: row[1] = setName (kein Boolean)
-  // Neues Format: row[1] = imported (Boolean â†’ 'true'/'false')
+  // Neues Format: row[1] = imported (Boolean → 'true'/'false')
   const v = String(row?.[1] ?? '').toLowerCase().trim();
   return v === 'true' || v === 'false';
 }
@@ -885,8 +887,8 @@ async function writeDbCollectionForSet(setId, cards, existingMap = new Map(), { 
 }
 
 /**
- * Gibt alle importierten Sets aus dem "Sets Overview"-Sheet zurÃ¼ck.
- * Liest Spalten Aâ€“J (Formeln fÃ¼r HYPERLINK-IDs nÃ¶tig).
+ * Gibt alle importierten Sets aus dem "Sets Overview"-Sheet zurück.
+ * Liest Spalten A–J (Formeln für HYPERLINK-IDs nötig).
  * @returns {Promise<Array<{setId, setName, series, releaseDate, totalCards, ptcgoCode, imported}>>}
  */
 export async function listImportedSets() {
@@ -895,8 +897,8 @@ export async function listImportedSets() {
 }
 
 /**
- * Liest Karten fÃ¼r ein Set direkt aus db_cards.
- * Wird fÃ¼r performante, API-arme SuchlÃ¤ufe verwendet.
+ * Liest Karten für ein Set direkt aus db_cards.
+ * Wird für performante, API-arme Suchläufe verwendet.
  * @param {string} setId
  * @returns {Promise<Array<{number, name, image, cardmarketUrl, rarity}>>}
  */
@@ -917,7 +919,7 @@ export async function readDbCardsForSet(setId) {
   const cards = Array.from(latestPerCard.values())
     .map((row) => {
       if (isNewCardFormat(row)) {
-        // CARD_DB_HEADERS format; unterstÃ¼tzt altes Bild-Schema (ohne tcgdex_image_large) rÃ¼ckwÃ¤rtskompatibel.
+        // CARD_DB_HEADERS format; unterstützt altes Bild-Schema (ohne tcgdex_image_large) rückwärtskompatibel.
         const hasSplitImageSchema = isCardImageSplitFormat(row);
         const offset = hasSplitImageSchema ? 1 : 0;
         return resolveDisplayCard({
@@ -1026,8 +1028,8 @@ function dbCardCollectionKey(card, normalizedSetId) {
 }
 
 /**
- * Gibt ALLE Sets (auch nicht importierte) mit vollstÃ¤ndigen Metadaten zurÃ¼ck.
- * NÃ¼tzlich zum Anzeigen einer vollstÃ¤ndigen Set-Liste.
+ * Gibt ALLE Sets (auch nicht importierte) mit vollständigen Metadaten zurück.
+ * Nützlich zum Anzeigen einer vollständigen Set-Liste.
  * Overview-/db_sets-Zeilen unter Alias-Set-IDs (z. B. `swsh12pt5gg`, `TCGDEX-me05`) werden dem kanonischen
  * Set zugeordnet (`imported` per ODER) und nicht als eigenes Set geliefert; jedes Set traegt `aliases`.
  * Im Sheet wird dabei nichts geaendert. Registry nicht erreichbar -> Zeilen unveraendert.
@@ -1577,16 +1579,16 @@ export async function syncOverviewWithApiSets(sets, importedSetIds = []) {
 
 /**
  * Importiert ein Set in die Sammlung:
- * - trÃ¤gt/aktualisiert das Set in der Overview
- * - erstellt (falls nÃ¶tig) das Set-Blatt
- * - schreibt das Karten-Grid gemÃ¤ÃŸ pokecode-Schema
+ * - trägt/aktualisiert das Set in der Overview
+ * - erstellt (falls nötig) das Set-Blatt
+ * - schreibt das Karten-Grid gemäß pokecode-Schema
  */
 export async function importSetIntoCollection(setMeta, cards) {
   if (!setMeta?.setId || !setMeta?.setName) {
-    throw new Error('Set-Metadaten unvollstÃ¤ndig (setId/setName fehlen).');
+    throw new Error('Set-Metadaten unvollständig (setId/setName fehlen).');
   }
   if (!Array.isArray(cards) || cards.length === 0) {
-    throw new Error(`Keine Karten fÃ¼r Set ${setMeta.setId} gefunden.`);
+    throw new Error(`Keine Karten für Set ${setMeta.setId} gefunden.`);
   }
 
   const setId = toSafeCellString(setMeta.setId);
