@@ -55,7 +55,7 @@
 
 #loading-text {
   font-family: var(--font-display);
-  font-weight: 700 !important;
+  font-weight: 700;
   letter-spacing: 0.10em;
   text-transform: uppercase;
   color: var(--color-gold) !important;
