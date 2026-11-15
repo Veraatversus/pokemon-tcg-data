@@ -1,7 +1,7 @@
 // Altbestand-Import (XLSX oder Google-Sheets-Link): Analyse, Auswahl-Dialog und Anwenden des Plans.
 // Die reine Parse-/Planungslogik liegt in ./legacy-import.js; hier nur Oberflaeche und Schreiben.
 import { signIn } from '../../core/auth.js';
-import { readSetCollectionMap, ensureCollectionEntry, updateCellBooleansBatch } from '../../data/sheets-db.js?v=20261115-clean-2';
+import { readSetCollectionMap, ensureCollectionEntry, updateCellBooleansBatch } from '../../data/sheets-db.js?v=20261115-clean-3';
 import {
   emptyCollectionEntry,
   hasEntryCells,
@@ -11,7 +11,7 @@ import {
   pendingAmbiguityError,
   isAmbiguousLegacyKeyError
 } from '../../data/collection-writes.js';
-import { fetchMergedCards } from '../../data/pokemon-api.js?v=20261115-clean-2';
+import { fetchMergedCards } from '../../data/pokemon-api.js?v=20261115-clean-3';
 import { createAutoSnapshot } from './index.js';
 import {
   loadLegacyWorkbookFromFile,
@@ -22,7 +22,7 @@ import {
   filterLegacyImportPlanBySelection,
   summarizeLegacyImportPlan,
   extractLegacySpreadsheetId
-} from './legacy-import.js?v=20261115-clean-2';
+} from './legacy-import.js?v=20261115-clean-3';
 import { ensureResolverForSet } from '../../data/collection-aliases.js';
 import { pickSourceSetKey, resolveSourceCardKey } from './legacy-key-resolution.js';
 import { importSetsSequential } from './import-jobs.js';
