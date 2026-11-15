@@ -8,7 +8,7 @@
 js/
 ├── app.js                 Einstieg, Verdrahtung, registerActions
 ├── enhanced-features.js   Favoriten, Suchverlauf, Einstellungen (localStorage)
-├── advanced-features.js   Sprachbefehle, Gesten, downloadJson
+├── advanced-features.js   Export/Backup: downloadJson, createLocalBackup, getLocalBackups
 ├── app/                   Anwendungsgerüst
 │   ├── state.js             zentraler App-Zustand (state, uiState)
 │   ├── dom.js               DOM-Referenzen
@@ -59,50 +59,47 @@ Ein Modul ruft Funktionen einer anderen Ansicht nur über `actions.<name>(…)` 
 | `tests/style-fingerprint.mjs` | Stil-Fingerabdruck (berechnete Stile je Ansicht, Breite, Theme) vor/nach CSS-Änderungen vergleichen; Playwright-CLI, kein Unit-Test |
 | `scripts/css-audit.mjs` | doppelte Selektoren, `!important` je Datei, ungenutzte Selektoren in `css/**` |
 
-Versionierung: Module und Assets tragen `?v=<appVersion>`; `npm run version:sync` setzt den Wert aus `version.config.json` in allen vorhandenen `?v=`. Bei jedem Deploy erhöhen.
+Versionierung: `npm run version:sync` setzt den Wert aus `version.config.json` in allen *vorhandenen* `?v=`-Queries (Module und Assets). Viele lokale Module werden ohne `?v=` importiert und sind davon nicht erfasst (siehe `REFACTOR_TODO.md`, Abschnitt Modul-Laden). Bei jedem Deploy erhöhen.
 Module ohne Importer werden gelöscht statt als Kopie gepflegt.
 
 ## Datenfluss: Startup → Karten laden → Checkbox ändern
 
 ```
-bootstrap()
-  ↓
-initAuth()        ─── localStorage-Token prüfen
-  ↓ (auto-login oder manueller Login)
-onLoginSuccess()
-  ↓
-loadSets()
-  ↓  gapi.client.sheets → "Sets Overview"!A3:J
-listImportedSets()
-  ↓  filter: imported=true
-sets[] → <select> befüllen
-  ↓
-[Nutzer wählt Set + klickt "Laden"]
-  ↓
-loadCurrentSet(setId)
-  ├── cache.get("cards_" + setId)  →  Hit: sofort weiter
-  │     Miss: fetchMergedCards(setId)
-  │             └── v3-api.js: api/v3/sets/<id>.json (+ api/registry für Set-Aliase)
-  │           cache.set(...)
-  │
-  └── cache.get("db_" + setId)     →  Hit: sofort weiter
-        Miss: readSetCollectionMap(sheetName)
-                ↓  gapi.client.sheets → "SetName"!A3:O2000
-              Map<normalizedNumber, {g, rh, gCell, rhCell}>
-              cache.set(...)
+app.js: bootstrap()
+  ├── bootstrapCore()                     app/bootstrap-controller.js
+  └── bootstrapPostCore()                 app/bootstrap-controller.js
+        ↓  initAuth()                     core/auth.js  (localStorage-Token prüfen)
+        ↓  Auto-Login → onLoginSuccess()  app.js  (auch nach manuellem Login-Klick)
+        ↓
+      loadSets()                          views/dashboard.js
+        ├── fetchV3SetMeta()              data/pokemon-api.js  (api/v3-Set-Meta, DE-Serien)
+        ├── listImportedSets()            data/sheets-db.js    (Blatt db_sets, imported=true)
+        ├── listSetsOverviewData()        data/sheets-db.js
+        └── state.sets / state.allSets füllen, Set-Auswahl + Dashboard rendern
+        ↓  navigate('dashboard') bzw. handleRouteChange()   app/router.js
+        ↓
+[Route set/<id> oder Klick auf "Laden"]
+      loadCurrentSet(forceRefresh)        views/set-view.js
+        ├── loadSetCardsWithHydration(setId, { preferV3: true })   views/set-view.js
+        │     ├── Cache-Treffer `cards_<setId>` → sofort
+        │     └── loadSetCardsV3First()   views/set-view.js
+        │           ├── fetchMergedCardsWithSetMeta(setId)   data/pokemon-api.js
+        │           │     (api/v3 Sets + Karten, Registry für Aliase)
+        │           └── Fehler → db_cards-Fallback (readDbCardsForSet, data/sheets-db.js)
+        └── readSetCollectionMap(setName, { setId })   data/sheets-db.js
+              Map<collectionKey, {g, rh, gCell, rhCell}>, Cache `db_<setId>`
+      → state.cards / state.dbMap setzen
+      → renderCards()                     views/set-cards.js  (Raster aufbauen, ruft applyFilter() + updateStats())
 
-→ renderCards()   DOM-Fragment aufbauen → einfügen
-→ updateStats()   Zähler & Progress-Bar aktualisieren
-→ applyFilter()   Karten ein-/ausblenden
-
-[Nutzer klickt Checkbox]
-  ↓
-updateCellBoolean(sheetName, row, col, value)
-  ↓  gapi.client.sheets.spreadsheets.values.update
-updateCardState(article, db)   ← nur CSS-Klassen, kein Re-Render
-updateStats()
-applyFilter()
+[Nutzer klickt Checkbox]                  views/set-cards.js  (attachCheckboxListeners)
+  ↓  ensureDbEntry()                      legt bei Bedarf Set-Import/Sammlungszeile an
+  ↓  writeCollectionEntryState()          views/set-cards.js
+  ↓  updateCellBooleansBatch()            data/sheets-db.js   (gebündelter Sheets-Write)
+  ↓  updateCardState(article, db)         views/set-cards.js  (nur CSS-Klassen, kein Re-Render)
+  ↓  updateStats(); applyFilter()         views/set-cards.js
 ```
+
+`fetchMergedCardsWithSetMeta` ist in `js/data/pokemon-api.js` definiert und wird von `views/set-view.js` und `views/set-cards.js` importiert. Das einzelne `updateCellBoolean` (`js/data/sheets-db.js`) ist nur noch Rückfall in `writeEntryStateWith` (`js/data/collection-writes.js`), wenn kein Batch-Write verfügbar ist.
 
 ## Google Sheets Datenbank-Struktur
 
@@ -189,7 +186,7 @@ Bekannte Schlüssel:
 
 ## Import-Specifier und Service-Worker
 
-- Jedes Modul wird ueberall unter demselben Specifier importiert (Test `tests/module-specifier-consistency.test.mjs`), sonst entstehen im Browser zwei Modulinstanzen. `core/config.js`, `core/auth.js`, `core/utils.js` und `data/schema-contract.js` sind bewusst unversioniert (Mehrheit des Graphen; Tests importieren unversioniert und teilen so die Modulidentitaet mit der App). `version:sync` aendert nur vorhandene `?v=`.
+- Jedes Modul wird ueberall unter demselben Specifier importiert (Test `tests/module-specifier-consistency.test.mjs`), sonst entstehen im Browser zwei Modulinstanzen. `core/config.js`, `core/auth.js` und `core/utils.js` sind bewusst unversioniert (Mehrheit des Graphen; Tests importieren unversioniert und teilen so die Modulidentitaet mit der App). `data/schema-contract.js` dagegen wird in `js/` ausschliesslich mit `?v=<appVersion>` importiert (haelt den geteilten Serien-/Set-Meta-Zustand; Test `tests/version-query-consistency.test.mjs`). `version:sync` aendert nur vorhandene `?v=`.
 - Service Worker: JS/CSS und network-first mit `cache: 'no-cache'` (kein veralteter HTTP-Cache nach Deploys); `api/v3`/`api/registry` (aendert sich nur taeglich) cache-first mit 24-h-Frische (Zeitstempel `x-sw-fetched-at`), danach Revalidierung per Netz, veraltete Kopie nur als Offline-Fallback; API-Runtime-Cache auf 60 Kartendateien begrenzt (sets/meta/search-index bleiben).
 - API-Basis (`resolveV3Bases` in `js/data/v3-api.js`): GitHub Pages kopiert die App flach in den Site-Root bzw. `dev/` und `api/` daneben, daher `<App-Verzeichnis>/api/v3/` und `/api/registry/`; endet das App-Verzeichnis auf `/frontend/tcg-tracker-web/` (lokal `start:dev:full`, Repo-Root) `../../api/…`. `CONFIG.APIS.V3_BASE`/`REGISTRY_BASE` ueberschreiben beides.
 
