@@ -181,7 +181,7 @@ function initDashboardControls() {
   dom.btnQueueAutofixRefresh?.addEventListener('click', () => {
     enqueueAction('Datencheck + Auto-Fix', () => runDataHealthCheck({ autoFix: true }));
     enqueueAction('Power-Refresh Overview', () => powerRefreshOverviewFromApi());
-    showToast('Queue-Preset hinzugefuegt (Auto-Fix ? Refresh).', 'info', 3000);
+    showToast('Queue-Preset hinzugefuegt (Auto-Fix → Refresh).', 'info', 3000);
   });
   dom.btnQueueRun?.addEventListener('click', runQueuedActions);
   dom.btnQueueClear?.addEventListener('click', clearQueuedActions);
