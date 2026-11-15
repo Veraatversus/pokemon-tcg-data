@@ -416,6 +416,25 @@ test('excluded-series: Pocket-Set erscheint nicht in api/v3, Registry behaelt ih
   }
 });
 
+test('leere Sets (TCGdex fuehrt das Set, aber keine Karten, z. B. wp/jumbo) erscheinen nicht in api/v3', () => {
+  const root = makeRepo();
+  try {
+    const d = 'sources/tcgdex/data';
+    write(root, `${d}/Scarlet & Violet/Leeres Set.ts`, setTs('Scarlet & Violet', 'svx', 'Leeres Set'));
+    const r = runBuild({ repoRoot: root });
+    const v3 = path.join(root, 'api', 'v3');
+    assert.equal(r.sets, 2);
+    assert.deepEqual(readJson(path.join(v3, 'sets.json')).map((s) => s.id).sort(), ['TCGDEX-A1', 'sv1']);
+    assert.ok(!fs.existsSync(path.join(v3, 'cards', 'TCGDEX-svx.json')));
+    const meta = readJson(path.join(v3, 'meta.json'));
+    assert.deepEqual(meta.emptySetIds, ['TCGDEX-svx']);
+    assert.equal(meta.counts.sets, 2);
+    assert.ok(readJson(path.join(root, 'api', 'registry', 'sets.json'))['TCGDEX-svx'], 'Registry behaelt den Schluessel');
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test('runBuild: cardmarket-ids.md, Issue-Ergebnis in .cache; vorherige sets.json liefert die bekannten Sets', () => {
   const root = makeRepo();
   try {
