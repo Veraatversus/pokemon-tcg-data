@@ -1,22 +1,66 @@
 # try4 – Architektur
 
-## Modulabhängigkeiten
+## Modulstruktur
+
+`index.html` lädt `js/app.js` (ES-Modul). `app.js` (~380 Zeilen) ist nur Einstiegspunkt und Verdrahtung: es importiert die Module, registriert die Ansichtsfunktionen mit `registerActions` und startet den Bootstrap. Fachlogik steht in den Modulen darunter.
 
 ```
-index.html
-└── js/app.js (ES-Modul, Einstiegspunkt; Set-Ansicht, Lightbox, Suche, Statistik, Dialoge)
-      ├── js/app/          bootstrap-controller.js (Startreihenfolge), pwa-init.js (Service Worker, Install-Prompt)
-      ├── js/core/         config, auth, cache, utils, storage-keys, collection-state, display-text, retry, …
-      ├── js/data/         v3-api, v3-records, pokemon-api, schema-contract (resolveFieldValue),
-      │                    sheets-db, collection-writes, cardmarket-* (URL/ID, Preis-Anzeige), v3-prices, v3-cardmarket-ids
-      ├── js/features/     search (Index-Suche, Query-Helfer, Sammlungs-Maps), collection (Import, Backup,
-      │                    Legacy-Schluessel), community, settings
-      ├── js/ui/           image-fallback, cardmarket-price, stats-*, components, command-palette, tools
-      └── js/views/        dashboard-grid.js (Set-Raster des Dashboards)
+js/
+├── app.js                 Einstieg, Verdrahtung, registerActions
+├── enhanced-features.js   Favoriten, Suchverlauf, Einstellungen (localStorage)
+├── advanced-features.js   Sprachbefehle, Gesten, downloadJson
+├── app/                   Anwendungsgerüst
+│   ├── state.js             zentraler App-Zustand (state, uiState)
+│   ├── dom.js               DOM-Referenzen
+│   ├── actions.js           Aktionsregister (actions, registerActions)
+│   ├── router.js            Hash-Router, View-Wechsel
+│   ├── recent-sets.js       zuletzt geöffnete Sets, Nav-Chips
+│   ├── bootstrap-controller.js  Startreihenfolge, Login/Logout-Ablauf
+│   └── pwa-init.js          Service Worker, Install-Prompt
+├── views/                 eine Datei je Ansicht (bzw. Teilansicht)
+│   ├── dashboard.js, dashboard-grid.js   Set-Übersicht, Serien, Set-Raster
+│   ├── set-view.js, set-cards.js         Set-Ansicht: Laden, Zoom, Auswahl; Kartenraster, Checkboxen
+│   ├── lightbox.js                       Kartendetail, Wischgesten
+│   ├── search.js                         Suche über alle Sets, Autocomplete
+│   └── stats.js, stats-price.js          Statistik; Preis-Tab (Cardmarket-Preisradar)
+├── features/              fachliche Abläufe
+│   ├── collection/          import-jobs, queue-presets, collection-dialogs, legacy-import(-dialog),
+│   │                        backup-export, ambiguous-key-migration, delete-set-cells, versioning, …
+│   ├── search/              Suchindex-Vorfilter, Query-Helfer, Sammlungs-Maps, engine
+│   ├── settings/            settings-actions, spreadsheet-dialog(-helpers), runtime-reset
+│   └── community/           sync (BroadcastChannel)
+├── ui/                    gemeinsame Oberfläche
+│   ├── helpers.js           Status, Toast, Undo, Dialoge, Bild-Helfer
+│   ├── sheets-feedback.js, sheets-retry-report.js   Schreib-Feedback, Retry-Report
+│   ├── app-extras.js        Offline-Anzeige, Hover-Preview, Teilen, Auswahl-Dropdowns
+│   ├── components.js, command-palette.js, image-fallback.js, cardmarket-price.js
+│   └── stats-price-analytics.js, stats-series.js
+├── data/                  Datenzugriff
+│   ├── sheets-client.js     roher Sheets-API-Zugriff (Lesen/Schreiben, Retry, Schreibwarteschlange)
+│   ├── sheets-db.js         Fachlogik auf Sheets (Sets, Karten-Grid, Caches); baut auf sheets-client auf
+│   ├── v3-api.js, v3-records.js, v3-prices.js, v3-cardmarket-ids.js, v3-collection-keys.js   api/v3
+│   ├── pokemon-api.js, schema-contract.js (resolveFieldValue), collection-writes.js, set-aliases.js, …
+│   └── cardmarket-url-utils.js, cardmarket-ui-helpers.js
+└── core/                  config, auth, cache, utils, storage-keys, event-bus, retry, display-text, …
 ```
 
-Pruefungen: `npm run check:imports` (tote Imports, Zyklen) und `tests/module-specifier-consistency.test.mjs`.
-Module ohne Importer werden geloescht statt als Kopie neben `app.js` gepflegt.
+### Regel: Querverweise über `actions`
+
+Ein Modul ruft Funktionen einer anderen Ansicht nur über `actions.<name>(…)` (`js/app/actions.js`) auf. `app.js` registriert diese Funktionen beim Start mit `registerActions`. Kein Modul importiert `app.js`. Direkte Imports sind erlaubt, wo sie zyklenfrei bleiben (z. B. `views/*` → `ui/helpers.js`, `app/state.js`, `app/dom.js`).
+
+### Prüfungen
+
+| Prüfung | Zweck |
+|---|---|
+| `npm run check:imports` (`scripts/check-import-health.mjs`) | tote Imports, Zyklen |
+| `tests/no-unused-imports.test.mjs` | ungenutzte Importe |
+| `tests/module-specifier-consistency.test.mjs` | ein Modul überall derselbe Specifier |
+| `tests/static-asset-references.test.mjs` | Verweise in den HTML-Dateien |
+| `tests/style-fingerprint.mjs` | Stil-Fingerabdruck (berechnete Stile je Ansicht, Breite, Theme) vor/nach CSS-Änderungen vergleichen; Playwright-CLI, kein Unit-Test |
+| `scripts/css-audit.mjs` | doppelte Selektoren, `!important` je Datei, ungenutzte Selektoren in `css/**` |
+
+Versionierung: Module und Assets tragen `?v=<appVersion>`; `npm run version:sync` setzt den Wert aus `version.config.json` in allen vorhandenen `?v=`. Bei jedem Deploy erhöhen.
+Module ohne Importer werden gelöscht statt als Kopie gepflegt.
 
 ## Datenfluss: Startup → Karten laden → Checkbox ändern
 
@@ -118,8 +162,8 @@ Für Karte i (0-basiert):
   blockStartRow + 0, col+0:  Karten-ID (z.B. "1")
   blockStartRow + 0, col+1:  Karten-Name (merged col+1..col+2)
   blockStartRow + 1, col+0:  Karten-Bild =IMAGE(...) (merged über 3 Spalten)
-  blockStartRow + 2, col+0:  G-Checkbox   ← wird von app.js gelesen/geschrieben
-  blockStartRow + 2, col+1:  RH-Checkbox  ← wird von app.js gelesen/geschrieben
+  blockStartRow + 2, col+0:  G-Checkbox   ← wird von der App gelesen/geschrieben
+  blockStartRow + 2, col+1:  RH-Checkbox  ← wird von der App gelesen/geschrieben
   blockStartRow + 2, col+2:  Cardmarket-Hyperlink
   blockStartRow + 3:         Spacer (leer)
 

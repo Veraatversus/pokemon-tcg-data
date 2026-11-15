@@ -49,13 +49,13 @@ Das Spreadsheet braucht folgende Sheets (exakte Namen):
 | `WebApp Settings` | Key-Value-Paare; wird automatisch angelegt |
 | `{Set-Name}` | Karten-Grid für jedes importierte Set |
 
-> Die Set-Sheets folgen dem Grid-Layout aus `pokecode.js`:  
+> Die Set-Sheets folgen dem Grid-Layout aus dem frueheren Sheets-Skript (`frontend/tcg-tracker-google-sheets/script/pokecode.js`):  
 > 5 Karten/Zeile × 3 Spalten/Block × 4 Zeilen/Block, 2 Header-Zeilen.
 
 ### 3. config.js befüllen
 
 ```js
-// frontend/tcg-tracker-web/js/config.js
+// frontend/tcg-tracker-web/js/core/config.js
 GOOGLE_CLIENT_ID: 'DEINE_CLIENT_ID.apps.googleusercontent.com',
 SPREADSHEET_ID:   'AUS_DER_SHEETS-URL',
 ```
@@ -76,15 +76,18 @@ cd frontend/tcg-tracker-web && python -m http.server 8080
 
 ## Modulübersicht
 
-| Datei | Verantwortung |
+Details und Regeln: `ARCHITECTURE.md`.
+
+| Verzeichnis / Datei | Verantwortung |
 |---|---|
-| `js/utils.js` | Shared-Utilities: `normalizeCardNumber`, `naturalSort`, `toBoolean`, `colToA1`, `extractDisplayTextFromHyperlink` |
-| `js/cache.js` | In-Memory TTL-Cache (RAM only, kein localStorage) |
-| `js/config.js` | Alle Konstanten: Credentials, Grid, API-URLs, Farben, ID-Mappings |
-| `js/auth.js` | Google OAuth 2.0 mit Auto-Login & Token-Persistenz |
-| `js/sheets-db.js` | Sheets-Zugriff: Sets lesen, Karten-Grid lesen, Checkboxen schreiben |
-| `js/pokemon-api.js` | Karten-Daten: Vera-API/pokemontcg.io + TCGDex DE merge/union |
-| `js/app.js` | Hauptlogik: Bootstrap, UI-Events, Rendering, Stats, Filter, Toast |
+| `js/app.js` | Einstiegspunkt und Verdrahtung (`registerActions`) |
+| `js/app/` | Zustand, DOM-Referenzen, Aktionsregister, Router, Bootstrap, PWA |
+| `js/views/` | Ansichten: Dashboard, Set, Lightbox, Suche, Statistik (inkl. Preis-Tab) |
+| `js/features/` | Sammlung (Import, Backup, Altbestand), Suche, Einstellungen |
+| `js/ui/` | Gemeinsame UI-Helfer, Bild-Fallback, Cardmarket-Preisanzeige |
+| `js/data/sheets-client.js`, `js/data/sheets-db.js` | Sheets-API-Zugriff und Fachlogik (Sets lesen, Karten-Grid lesen, Checkboxen schreiben) |
+| `js/data/v3-*.js`, `js/data/pokemon-api.js` | Karten-/Set-Daten aus `api/v3` |
+| `js/core/` | Konfiguration, Auth, Cache, Utilities |
 
 ---
 
@@ -110,11 +113,11 @@ Absolute Sheet-Zeile für Karte i (0-basiert):
 
 ```
 loadCurrentSet(setId)
-  ├─ fetchMergedCards(setId)           pokemon-api.js
-  │    └── v3-api.js → api/v3 (vorberechnet, EN + i18n.de) + api/registry (Set-Aliase)
+  ├─ fetchMergedCards(setId)           js/data/pokemon-api.js
+  │    └── js/data/v3-api.js → api/v3 (vorberechnet, EN + i18n.de) + api/registry (Set-Aliase)
   │        → [{number, name, image, cardmarketUrl}]
   │
-  └─ readSetCollectionMap(sheetName)   sheets-db.js
+  └─ readSetCollectionMap(sheetName)   js/data/sheets-db.js
        └─ gapi.client.sheets → Grid-Werte lesen
             → Map<normalizedNumber, {g, rh, gCell, rhCell}>
 ```
