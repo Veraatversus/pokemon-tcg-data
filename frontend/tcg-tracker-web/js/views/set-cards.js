@@ -5,7 +5,7 @@ import {
   ensureCollectionEntry,
   updateCellBooleansBatch,
   appendCollectionRows
-} from '../data/sheets-db.js?v=20261115-empty-sets';
+} from '../data/sheets-db.js?v=20261115-price-range-2';
 import {
   collectionKeyOf,
   emptyCollectionEntry,
@@ -17,10 +17,10 @@ import {
   isAmbiguousLegacyKeyError,
   describeAmbiguousLegacyKey
 } from '../data/collection-writes.js';
-import { fetchMergedCardsWithSetMeta } from '../data/pokemon-api.js?v=20261115-empty-sets';
-import { getCardLanguage } from '../data/schema-contract.js?v=20261115-empty-sets';
-import { getCardPrice } from '../data/v3-prices.js?v=20261115-empty-sets';
-import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle, effectiveCollectionStatus } from '../core/collection-state.js?v=20261115-empty-sets';
+import { fetchMergedCardsWithSetMeta } from '../data/pokemon-api.js?v=20261115-price-range-2';
+import { getCardLanguage } from '../data/schema-contract.js?v=20261115-price-range-2';
+import { getCardPrice } from '../data/v3-prices.js?v=20261115-price-range-2';
+import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle, effectiveCollectionStatus } from '../core/collection-state.js?v=20261115-price-range-2';
 import * as cache from '../core/cache.js';
 import { CONFIG } from '../core/config.js';
 import { createAutoSnapshot } from '../features/collection/index.js';
@@ -38,8 +38,8 @@ import {
   normalizeCardmarketBasePriceType,
   renderLightboxCardmarketPrices as renderLightboxCardmarketPricesUi,
   CARDMARKET_BASE_PRICE_DEFAULT,
-} from '../ui/cardmarket-price.js?v=20261115-empty-sets';
-import { loadSettings } from '../enhanced-features.js?v=20261115-empty-sets';
+} from '../ui/cardmarket-price.js?v=20261115-price-range-2';
+import { loadSettings } from '../enhanced-features.js?v=20261115-price-range-2';
 import { buildCollectionUpdateEvent } from '../features/community/index.js';
 import { dom } from '../app/dom.js';
 import { state } from '../app/state.js';
@@ -283,8 +283,19 @@ export function getCurrentCardmarketBasePriceType() {
 function applyCardmarketPriceSummary(linkEl, summary, opts = {}) {
   return applyCardmarketPriceSummaryUi(linkEl, summary, {
     ...opts,
-    basePriceType: opts.basePriceType || getCurrentCardmarketBasePriceType()
+    basePriceType: opts.basePriceType || getCurrentCardmarketBasePriceType(),
+    showPriceRange: opts.showPriceRange ?? readPriceRangeSetting('cardmarketPriceRange'),
+    showPriceRangeBase: opts.showPriceRangeBase ?? readPriceRangeSetting('cardmarketPriceRangeShowBase')
   });
+}
+
+// Einstellungen "Preisspanne unter den Karten" / "... mit Grundpreis" (nur Anzeige; Berechnungen nutzen den Grundpreis).
+function readPriceRangeSetting(key) {
+  try {
+    return loadSettings()?.[key] === true;
+  } catch {
+    return false;
+  }
 }
 
 export function renderLightboxCardmarketPrices(summary, opts = {}) {

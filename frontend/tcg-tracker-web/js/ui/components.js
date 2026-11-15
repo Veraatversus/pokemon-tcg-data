@@ -245,6 +245,14 @@ export function createSettingsPanel(currentSettings = {}, onSave, options = {}) 
           ${cardmarketBasePriceOptions.map((opt) => `<option value="${opt.value}" ${opt.value === String(currentSettings.cardmarketBasePriceType || 'trend') ? 'selected' : ''}>${opt.label}</option>`).join('')}
         </select>
       </label>
+      <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+        <input type="checkbox" data-key="cardmarketPriceRange" ${currentSettings.cardmarketPriceRange ? 'checked' : ''} />
+        <span>Preisspanne unter den Karten anzeigen (günstigstes Angebot bis höchster Ø 1/7/30 Tage)</span>
+      </label>
+      <label style="display:flex; align-items:center; gap:8px; cursor:pointer; padding-left:24px;">
+        <input type="checkbox" data-key="cardmarketPriceRangeShowBase" ${currentSettings.cardmarketPriceRangeShowBase ? 'checked' : ''} />
+        <span>… mit dem Standard-Grundpreis in der Mitte</span>
+      </label>
       <p style="font-size:12px; color:var(--color-muted); margin:0; line-height:1.45;">
         Namen, Bilder und Kartentexte folgen der Kartensprache (fehlt ein Wert, wird die andere Sprache gezeigt). Der Grundpreis steuert Cardmarket-Buttons/Links sowie die Preisstatistik; fehlt der gewählte Wert, greifen automatische Fallbacks.
       </p>
