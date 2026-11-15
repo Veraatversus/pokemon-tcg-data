@@ -1,18 +1,18 @@
 // Suche-Ansicht: Suche ueber alle Sets, Ergebnisliste und Autocomplete.
 // Funktionen anderer Ansichten, die noch in app.js liegen, werden ueber actions.<name>() aufgerufen.
 import { isGeneratedCardmarketSearchUrl } from '../data/cardmarket-url-utils.js';
-import { readSetCollectionMap } from '../data/sheets-db.js?v=20261115-price-range';
+import { readSetCollectionMap } from '../data/sheets-db.js?v=20261115-empty-sets';
 import { collectionKeyOf, emptyCollectionEntry } from '../data/collection-writes.js';
 import { describeCardDataFailure } from '../core/card-enrichment.js';
 import { searchFromIndex, searchResultsForDisplay } from '../features/search/search-index-prefilter.js';
 import { readCollectionMapCached } from '../features/search/search-collection-maps.js';
 import { parseStructuredSearchQuery, normalizeSearchText, cardNumberMatchesQuery, collectSearchStrings } from '../features/search/query-utils.js';
-import { getCardLanguage } from '../data/schema-contract.js?v=20261115-price-range';
+import { getCardLanguage } from '../data/schema-contract.js?v=20261115-empty-sets';
 import { buildCombinedSearchDropdownOptions, buildSearchProgressLabel, normalizeCardNumber, resolveCombinedSearchSelection, toBoolean } from '../core/utils.js';
-import { getCollectionUiState, resolveCollectionToggleState, effectiveCollectionStatus } from '../core/collection-state.js?v=20261115-price-range';
+import { getCollectionUiState, resolveCollectionToggleState, effectiveCollectionStatus } from '../core/collection-state.js?v=20261115-empty-sets';
 import * as cache from '../core/cache.js';
 import { CONFIG } from '../core/config.js';
-import { loadSearchHistory, addSearchHistory } from '../enhanced-features.js?v=20261115-price-range';
+import { loadSearchHistory, addSearchHistory } from '../enhanced-features.js?v=20261115-empty-sets';
 import { sanitizeDisplayText } from '../core/display-text.js';
 import { dom } from '../app/dom.js';
 import { state } from '../app/state.js';

@@ -1,9 +1,9 @@
 // Set-Ansicht: Raster-Zoom, Mehrfach-Auswahl, CSV-Export, Tastaturnavigation, Set laden.
 import { signOut } from '../core/auth.js';
-import { readSetCollectionMap, readDbCardsForSet, updateCellBooleansBatch, writeSetting } from '../data/sheets-db.js?v=20261115-price-range';
+import { readSetCollectionMap, readDbCardsForSet, updateCellBooleansBatch, writeSetting } from '../data/sheets-db.js?v=20261115-empty-sets';
 import { collectionKeyOf, hasEntryCells, stateCellUpdates, applyEntryState, chunkCardUpdates } from '../data/collection-writes.js';
 import { needsApiCardEnrichment, describeCardDataFailure, NO_CARD_DATA_MESSAGE } from '../core/card-enrichment.js';
-import { fetchMergedCardsWithSetMeta } from '../data/pokemon-api.js?v=20261115-price-range';
+import { fetchMergedCardsWithSetMeta } from '../data/pokemon-api.js?v=20261115-empty-sets';
 import { bindImageFallback } from '../ui/image-fallback.js';
 import * as cache from '../core/cache.js';
 import { CONFIG } from '../core/config.js';
