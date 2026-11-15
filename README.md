@@ -16,7 +16,6 @@ Die Pokémon TCG API (pokemontcg.io) wird am 1. März 2027 abgeschaltet. Dieses 
 | `sources/SOURCES.json` | Quell-Commits und Abrufzeitpunkte |
 | `sources/cardmarket/` | Täglich geladener Cardmarket-Katalog (`catalog.jsonl`, `expansions.json`, `meta.json`) und handgepflegte `custom-sets/` |
 | `scripts/api/` | Build-Toolchain der v3-API (Node, Tests) |
-| `decks/`, `v2_to_v1.rb` | Reste der alten pokemontcg-Struktur im Wurzelverzeichnis (Karten und Sets liegen eingefroren in `sources/pokemontcg/`). |
 
 ## Automatisierung
 
