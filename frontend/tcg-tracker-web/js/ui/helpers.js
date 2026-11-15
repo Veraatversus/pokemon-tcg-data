@@ -1,8 +1,8 @@
 // UI-Helfer: Status, Toast, Undo, Dialoge, Mojibake-Bereinigung und kleine Anzeige-Helfer.
 import { isSignedIn } from '../core/auth.js';
-import { updateCellBooleansBatch } from '../data/sheets-db.js?v=20261115-rh-1';
+import { updateCellBooleansBatch } from '../data/sheets-db.js?v=20261115-price-range';
 import { hasEntryCells, stateCellUpdates, applyEntryState } from '../data/collection-writes.js';
-import { getCardLanguage } from '../data/schema-contract.js?v=20261115-rh-1';
+import { getCardLanguage } from '../data/schema-contract.js?v=20261115-price-range';
 import { imageCandidates, bindImageFallback } from '../ui/image-fallback.js';
 import { createSpreadsheetSwitchStatePatch } from '../core/utils.js';
 import * as cache from '../core/cache.js';
