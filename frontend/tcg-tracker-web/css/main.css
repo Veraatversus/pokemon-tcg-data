@@ -524,6 +524,7 @@ body.topbar-collapsed .status-bar {
   min-width: 0;
   justify-content: flex-start;
   align-items: stretch;
+  gap: 10px;
 }
 
 #view-search .search-main-input {
