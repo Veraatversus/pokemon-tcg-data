@@ -1082,17 +1082,19 @@
       "cards": 145,
       "coverage": {
         "bySource": {
-          "matched": 3,
-          "tcgdex": 142
+          "customSet": 117,
+          "override": 28
         },
         "cards": 145,
         "withId": 145
       },
+      "customSet": 117,
       "expansionId": 1548,
-      "matched": 3,
+      "matched": 0,
       "missing": 0,
+      "override": 28,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1548&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 142
+      "tcgdex": 0
     },
     "ex11": {
       "ambiguous": 0,
@@ -3334,8 +3336,8 @@
   },
   "customSets": {
     "ambiguous": [],
-    "applied": 6772,
-    "changed": 840,
+    "applied": 6889,
+    "changed": 940,
     "conflicts": [],
     "dropped": [],
     "missingProducts": [],
@@ -4035,30 +4037,6 @@
       "ex8-107",
       "ex8-22"
     ],
-    "276635": [
-      "ex10-L",
-      "ex10-W"
-    ],
-    "276636": [
-      "ex10-M",
-      "ex10-V"
-    ],
-    "276637": [
-      "ex10-N",
-      "ex10-X"
-    ],
-    "276638": [
-      "ex10-!",
-      "ex10-O"
-    ],
-    "276639": [
-      "ex10-P",
-      "ex10-Z"
-    ],
-    "276640": [
-      "ex10-Q",
-      "ex10-Y"
-    ],
     "276778": [
       "ex11-15",
       "ex11-30"
@@ -4618,10 +4596,10 @@
     ]
   },
   "duplicates": {
-    "cards": 500,
+    "cards": 488,
     "corrected": 114,
-    "ids": 248,
-    "kept": 386
+    "ids": 242,
+    "kept": 374
   },
   "expansionMismatch": {
     "cards": [
@@ -5684,10 +5662,6 @@
       }
     ],
     "foreignNameOkBySet": {
-      "ex10": {
-        "1755": 14,
-        "1756": 4
-      },
       "ex2": {
         "1753": 11,
         "1754": 5
@@ -6049,14 +6023,14 @@
       }
     ],
     "totals": {
-      "checked": 16610,
+      "checked": 16449,
       "corrected": 1,
       "dropped": 13,
       "droppedShared": 11,
-      "foreignNameOk": 1231,
+      "foreignNameOk": 1213,
       "keptMismatch": 134,
       "noSetExpansion": 0,
-      "ok": 15228,
+      "ok": 15085,
       "unknownProduct": 3
     }
   },
@@ -6087,10 +6061,24 @@
     }
   ],
   "overrides": {
-    "applied": 7,
+    "applied": 35,
     "problems": [],
     "removed": 0,
-    "warnings": []
+    "warnings": [
+      "ex10/!: Produkt 276638 gehoert per TCGdex schon zu ex10-O (Warnung, uebernommen)",
+      "ex10/H: Produkt 276632 gehoert per TCGdex schon zu ex10-I (Warnung, uebernommen)",
+      "ex10/I: Produkt 276631 gehoert per TCGdex schon zu ex10-H (Warnung, uebernommen)",
+      "ex10/L: Produkt 276634 gehoert per TCGdex schon zu ex10-K (Warnung, uebernommen)",
+      "ex10/Q: Produkt 276641 gehoert per TCGdex schon zu ex10-R (Warnung, uebernommen)",
+      "ex10/R: Produkt 276643 gehoert per TCGdex schon zu ex10-T (Warnung, uebernommen)",
+      "ex10/S: Produkt 276644 gehoert per TCGdex schon zu ex10-U (Warnung, uebernommen)",
+      "ex10/U: Produkt 276642 gehoert per TCGdex schon zu ex10-S (Warnung, uebernommen)",
+      "ex10/V: Produkt 276636 gehoert per TCGdex schon zu ex10-M (Warnung, uebernommen)",
+      "ex10/W: Produkt 276635 gehoert per TCGdex schon zu ex10-L (Warnung, uebernommen)",
+      "ex10/X: Produkt 276637 gehoert per TCGdex schon zu ex10-N (Warnung, uebernommen)",
+      "ex10/Y: Produkt 276640 gehoert per TCGdex schon zu ex10-Q (Warnung, uebernommen)",
+      "ex10/Z: Produkt 276639 gehoert per TCGdex schon zu ex10-P (Warnung, uebernommen)"
+    ]
   },
   "oversizeExcludedProducts": [
     {
@@ -6119,9 +6107,9 @@
     "leftRight": 0,
     "ordered": 0,
     "orderedRejected": 2,
-    "override": 7,
+    "override": 35,
     "oversizeExcluded": 4,
-    "versionSuffixSkipped": 388
+    "versionSuffixSkipped": 390
   },
   "setsWithoutExpansion": [
     {
@@ -7231,18 +7219,19 @@
   "totals": {
     "ambiguous": 0,
     "cards": 21577,
-    "customSet": 6772,
-    "matched": 77,
+    "customSet": 6889,
+    "matched": 74,
     "missing": 10,
-    "override": 7,
+    "override": 35,
     "stabilityKept": 149,
-    "tcgdex": 14562
+    "tcgdex": 14420
   },
   "versionSuffixSkippedByExpansion": {
     "1521": 9,
     "1536": 2,
     "1537": 7,
     "1538": 3,
+    "1548": 2,
     "1551": 1,
     "1553": 1,
     "1560": 7,
