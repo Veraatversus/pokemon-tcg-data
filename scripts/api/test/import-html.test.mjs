@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { parseCardmarketHtml, parseCardmarketJson, versionOfSlug, numberOfLabel, BROWSER_SNIPPET, mergeCustomSet, previewImport, formatSummary, runImport } from '../cardmarket/import-html.mjs';
+import { parseCardmarketHtml, parseCardmarketJson, versionOfSlug, numberOfLabel, NUMBER_RULES, BROWSER_SNIPPET, mergeCustomSet, previewImport, formatSummary, runImport } from '../cardmarket/import-html.mjs';
 
 const fixture = fs.readFileSync(new URL('./fixtures/cardmarket-search-page.html', import.meta.url), 'utf8');
 
@@ -186,7 +186,26 @@ test('versionOfSlug / numberOfLabel: Links ohne Setcode und Ueberschriften', () 
   assert.equal(numberOfLabel('Pikachu (SM SM240)'), '240');
   assert.equal(numberOfLabel('Relicanth (SV SH8)'), 'SH8');
   assert.equal(numberOfLabel('Alakazam (SK H1)'), 'H1');
+  assert.equal(numberOfLabel('AQ 50a'), '50a');
+  assert.equal(numberOfLabel('RR RT1'), 'RT1');
+  assert.equal(numberOfLabel('SM SM30a'), '30a');
+  assert.equal(numberOfLabel('SM SM240'), '240');
+  assert.equal(numberOfLabel('TK6 13N'), '13N');
+  assert.equal(numberOfLabel('TK9 P-1'), '1P');
+  assert.equal(numberOfLabel('TK8 1o'), '1o');
+  assert.equal(numberOfLabel(null), null);
+});
 
+test('NUMBER_RULES: jede Regel erfuellt ihr eigenes Beispiel, keine fruehere Regel kommt ihr zuvor', () => {
+  assert.ok(NUMBER_RULES.length > 0);
+  NUMBER_RULES.forEach((rule, i) => {
+    const [label, expected] = rule.example;
+    const m = label.match(rule.pattern);
+    assert.ok(m, `${rule.name}: Beispiel passt nicht auf das eigene Muster`);
+    assert.equal(rule.number(m), expected, rule.name);
+    assert.equal(numberOfLabel(label), expected, rule.name);
+    for (const earlier of NUMBER_RULES.slice(0, i)) assert.ok(!earlier.pattern.test(label), `${earlier.name} nimmt das Beispiel von ${rule.name} vorweg`);
+  });
 });
 
 test('parseCardmarketJson: Victory Cup V1/V2/V3 mit eigenen Nummern behalten die Basisnummer, Snivy-V2 bekommt Suffix', () => {
