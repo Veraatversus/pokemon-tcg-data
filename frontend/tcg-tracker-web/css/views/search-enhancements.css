@@ -154,8 +154,8 @@ body.topbar-collapsed #view-search {
 }
 
 #view-search .view-controls .custom-select-trigger::after {
-  font-size: 11px !important;
-  color: var(--color-gold) !important;
+  font-size: 11px;
+  color: var(--color-gold);
 }
 
 #view-search .search-toolbar-meta {

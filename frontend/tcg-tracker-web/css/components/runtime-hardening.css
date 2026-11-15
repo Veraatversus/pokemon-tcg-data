@@ -54,13 +54,13 @@
 }
 
 #loading-text {
-  font-family: var(--font-display) !important;
+  font-family: var(--font-display);
   font-weight: 700 !important;
-  letter-spacing: 0.10em !important;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
   color: var(--color-gold) !important;
   animation: feuer-flicker 0.8s steps(2, end) infinite;
-  margin: 0 !important;
+  margin: 0;
   font-size: 14px !important;
   opacity: 1 !important;
   z-index: 2 !important;

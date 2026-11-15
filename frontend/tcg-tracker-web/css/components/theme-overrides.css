@@ -34,7 +34,7 @@ button:not(.btn-secondary):not(.btn-danger):not(.btn-icon):not(.nav-set-toggle):
   gap: 0;
   border: 1px solid var(--gradient-brand-border);
   border-radius: 10px;
-  background: var(--gradient-brand-primary) !important;
+  background: var(--gradient-brand-primary);
   box-shadow: var(--shadow-brand-control);
 }
 

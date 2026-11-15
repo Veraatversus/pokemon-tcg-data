@@ -618,7 +618,7 @@ body::after {
   font-family: var(--font-display) !important;
   font-size: clamp(16px, 2vw, 18px) !important;
   font-weight: 700 !important;
-  letter-spacing: 0.01em !important;
+  letter-spacing: 0.01em;
   text-transform: none !important;
   text-shadow: 0 0 18px rgba(168, 85, 247, 0.18);
 }
@@ -961,7 +961,7 @@ body::after {
 
 .recent-sets {
   width: auto !important;
-  order: initial !important;
+  order: initial;
 }
 
 .status-bar,
@@ -1619,8 +1619,8 @@ dialog h2 {
   .cards .search-result-card .card-img-wrap > img {
     min-height: 0 !important;
     max-height: 100% !important;
-    object-fit: contain !important;
-    object-position: center center !important;
+    object-fit: contain;
+    object-position: center center;
   }
 }
 
