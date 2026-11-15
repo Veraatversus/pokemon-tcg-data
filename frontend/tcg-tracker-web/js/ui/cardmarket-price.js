@@ -1,4 +1,4 @@
-import { formatCardmarketEntryLabel, formatCardmarketEntryTitle } from '../data/cardmarket-ui-helpers.js?v=20261115-empty-sets';
+import { formatCardmarketEntryLabel, formatCardmarketEntryTitle } from '../data/cardmarket-ui-helpers.js?v=20261115-price-range-2';
 import { isGeneratedCardmarketSearchUrl, applyReverseHoloQueryParam } from '../data/cardmarket-url-utils.js';
 
 // ============================================================================
@@ -203,21 +203,27 @@ export function getCardmarketPriceDetails(prices = {}, { reverseHolo = false } =
     .filter(Boolean);
 }
 
-/** "low – groesster Durchschnitt" (avg, avg1, avg7, avg30); eine Seite fehlt oder beide gleich -> ein Preis. */
-function formatLowToAverageRange(prices = {}, { reverseHolo = false } = {}) {
+/**
+ * Preisspanne "low – groesster juengerer Durchschnitt" (avg1, avg7, avg30). Der Gesamt-Durchschnitt avg zaehlt
+ * nicht mit, weil alte Verkaufsspitzen (z. B. kurz nach Erscheinen) ihn weit ueber den heutigen Markt heben.
+ * Eine Seite fehlt oder beide gleich -> ein Preis; gar keine Werte -> ''.
+ */
+function formatLowToAverageRange(prices = {}, { reverseHolo = false, middle = '' } = {}) {
   const h = reverseHolo ? 'Holo' : '';
   const low = getCardmarketPriceValue(prices, `low${h}`);
-  const averages = [['average', 'avg'], ['average1', 'avg1'], ['average7', 'avg7'], ['average30', 'avg30']]
+  const averages = [['average1', 'avg1'], ['average7', 'avg7'], ['average30', 'avg30']]
     .map((keys) => getCardmarketPriceValue(prices, ...keys.map((k) => `${k}${h}`)))
     .filter((v) => v != null);
   const high = averages.length ? Math.max(...averages) : null;
   if (low == null && high == null) return '';
   const prefix = reverseHolo ? 'RH ' : '';
   if (low == null || high == null || low === high) return `${prefix}${formatEuroPrice(low ?? high)}`;
-  return `${prefix}${formatEuroPrice(Math.min(low, high))} – ${formatEuroPrice(Math.max(low, high))}`;
+  // Optional der eingestellte Grundpreis zwischen den Grenzen ("2,50 € – Trend 8,20 € – 8,47 €").
+  const mid = middle ? ` – ${middle}` : '';
+  return `${prefix}${formatEuroPrice(Math.min(low, high))}${mid} – ${formatEuroPrice(Math.max(low, high))}`;
 }
 
-export function buildCardmarketLinkPresentation(summary, { preferReverseHolo = false, basePriceType = CARDMARKET_BASE_PRICE_DEFAULT } = {}) {
+export function buildCardmarketLinkPresentation(summary, { preferReverseHolo = false, basePriceType = CARDMARKET_BASE_PRICE_DEFAULT, showPriceRange = false, showPriceRangeBase = false } = {}) {
   if (!summary?.entry) return null;
 
   const entry = summary.entry;
@@ -246,13 +252,16 @@ export function buildCardmarketLinkPresentation(summary, { preferReverseHolo = f
   const activePick = (effectivePreferReverseHolo && reversePick) || normalPick || reversePick;
   const activeMode = effectivePreferReverseHolo && reversePick ? 'Reverse Holo' : 'Normal';
 
-  // Grundpreis "Durchschnitt": Spanne vom guenstigsten Angebot (low) bis zum groessten Durchschnittswert
-  // (Cardmarket liefert keinen Hoechstpreis); Reverse Holo mit den Holo-Werten.
-  const averageRange = normalizeCardmarketBasePriceType(basePriceType) === 'average'
-    ? formatLowToAverageRange(prices, { reverseHolo: activeMode === 'Reverse Holo' })
+  // Einstellung "Preisspanne unter den Karten" (unabhaengig vom Grundpreis, der weiter fuer Berechnungen gilt):
+  // guenstigstes Angebot bis groesster juengerer Durchschnitt; Reverse Holo mit den Holo-Werten.
+  const middle = showPriceRangeBase && activePick
+    ? `${String(activePick.label).replace(/^RH\s+/, '')} ${activePick.value}`
+    : '';
+  const priceRange = showPriceRange
+    ? formatLowToAverageRange(prices, { reverseHolo: activeMode === 'Reverse Holo', middle })
     : '';
 
-  const label = averageRange || (activePick
+  const label = priceRange || (activePick
     ? `${activePick.label} ${activePick.value}`
     : formatCardmarketEntryLabel(entry));
 
@@ -398,6 +407,8 @@ export function renderLightboxCardmarketPrices(targets, summary, { preferReverse
  * @param {boolean} [opts.compact=false] - Kompakte Variante (CM statt Cardmarket).
  * @param {boolean} [opts.preferReverseHolo=false] - Wirkt sich auf Picker + URL-Suffix aus.
  * @param {string}  [opts.basePriceType='trend'] - Basis-Preistyp fuer den Picker.
+ * @param {boolean} [opts.showPriceRange=false] - Spanne low bis groesster juengerer Durchschnitt statt eines Werts.
+ * @param {boolean} [opts.showPriceRangeBase=false] - In der Spanne zusaetzlich den Grundpreis in der Mitte zeigen.
  * @param {string}  [opts.labelPrefix=''] - Optionales Prefix vor "CM"/"Cardmarket"
  *        (z.B. Emoji fuer die Set-View).
  * @param {string}  [opts.labelSeparator=' - '] - Trenner zwischen Prefix+Name und Preis.
@@ -406,6 +417,8 @@ export function applyCardmarketPriceSummary(linkEl, summary, {
   compact = false,
   preferReverseHolo = false,
   basePriceType = CARDMARKET_BASE_PRICE_DEFAULT,
+  showPriceRange = false,
+  showPriceRangeBase = false,
   labelPrefix = '',
   labelSeparator = ' - '
 } = {}) {
@@ -413,7 +426,7 @@ export function applyCardmarketPriceSummary(linkEl, summary, {
   // Node-Tests ohne DOM aufgerufen werden kann und mit jedem objektartigen
   // Link-Element funktioniert.
   if (!linkEl || typeof linkEl.href !== 'string' || !summary) return;
-  const presentation = buildCardmarketLinkPresentation(summary, { preferReverseHolo, basePriceType });
+  const presentation = buildCardmarketLinkPresentation(summary, { preferReverseHolo, basePriceType, showPriceRange, showPriceRangeBase });
   if (!presentation) return;
 
   if (summary.url) {

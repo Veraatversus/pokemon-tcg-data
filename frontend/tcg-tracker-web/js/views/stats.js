@@ -1,6 +1,6 @@
 // Statistik-Ansicht: Sammlungs-Kennzahlen, Serienvergleich, Charts und Serien-Drilldown.
 // Der Preis-Tab liegt in ./stats-price.js.
-import { filterSetsBySeriesKey, getStatsSeriesLabel } from '../ui/stats-series.js?v=20261115-empty-sets';
+import { filterSetsBySeriesKey, getStatsSeriesLabel } from '../ui/stats-series.js?v=20261115-price-range-2';
 import { dom } from '../app/dom.js';
 import { state } from '../app/state.js';
 import { readVisibleSummary, getSetSeriesGroupInfo } from './dashboard.js';

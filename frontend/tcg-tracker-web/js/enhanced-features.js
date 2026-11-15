@@ -29,7 +29,11 @@ const DEFAULT_SETTINGS = {
   autoBackup: false,
   notificationsEnabled: false,
   cardLanguage: 'de',
-  cardmarketBasePriceType: CARDMARKET_BASE_PRICE_DEFAULT
+  cardmarketBasePriceType: CARDMARKET_BASE_PRICE_DEFAULT,
+  // Unter den Karten Spanne low bis groesster juengerer Durchschnitt statt eines Werts (Berechnungen nutzen den Grundpreis).
+  cardmarketPriceRange: false,
+  // In der Spanne zusaetzlich den Grundpreis in der Mitte zeigen.
+  cardmarketPriceRangeShowBase: false
 };
 
 function readJson(key, fallback) {
@@ -112,6 +116,8 @@ function sanitizeSettings(settings = {}) {
   delete normalized.expertResolverMode;
   normalized.cardLanguage = String(normalized.cardLanguage || '').toLowerCase() === 'en' ? 'en' : 'de';
   normalized.cardmarketBasePriceType = normalizeCardmarketBasePriceType(normalized.cardmarketBasePriceType);
+  normalized.cardmarketPriceRange = normalized.cardmarketPriceRange === true;
+  normalized.cardmarketPriceRangeShowBase = normalized.cardmarketPriceRangeShowBase === true;
   return normalized;
 }
 
