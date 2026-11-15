@@ -22,9 +22,11 @@ export function navigate(path) {
 }
 
 export function handleRouteChange() {
-  if (!state.loggedIn) return;
+  if (!state.loggedIn && !state.browseMode) return;
   const hash = window.location.hash.replace(/^#\/?/, '') || 'dashboard';
-  const [view, ...params] = hash.split('/');
+  let [view, ...params] = hash.split('/');
+  // Stoebermodus ohne Login: keine Statistik (besteht aus der eigenen Sammlung)
+  if (state.browseMode && view === 'stats') view = 'dashboard';
   switch (view) {
     case 'set':
       showView('set');

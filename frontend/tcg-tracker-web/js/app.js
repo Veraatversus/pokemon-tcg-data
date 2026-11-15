@@ -60,7 +60,7 @@ import { renderStats } from './views/stats.js';
 import { prefetchPriceStamp, reloadCardmarketPricesManually } from './views/stats-price.js';
 import {
   updateStats, applyFilter, initFilterButtons, initSortControl, getCurrentCardmarketBasePriceType, loadCardmarketPriceSummary,
-  hydrateCardmarketLink, makeCheckbox, syncCollectionCheckboxUi, syncSharedLegacyBadge,
+  hydrateCardmarketLink, makeCheckbox, makeBrowseLoginHint, syncCollectionCheckboxUi, syncSharedLegacyBadge,
   reportCollectionWriteError, ensureWritableCollectionEntry, writeCollectionEntryState, updateCardState,
   broadcastRealtimeCardUpdate, applyIncomingRealtimeUpdate
 } from './views/set-cards.js';
@@ -109,6 +109,7 @@ registerActions({
   deleteSetFromCollection,
   checkSetCompletion,
   makeCheckbox,
+  makeBrowseLoginHint,
   syncSharedLegacyBadge,
   hydrateCardmarketLink,
   ensureWritableCollectionEntry,
@@ -370,6 +371,7 @@ async function startBrowseModeUi() {
   return startBrowseMode({
     onEnter: (sets) => {
       dom.mainNav.classList.remove('hidden');
+      document.body.classList.add('browse-mode');
       setStatsNavHidden(true);
       renderSetSelectorOptions();
       dom.selector.disabled = false;
@@ -383,6 +385,7 @@ async function startBrowseModeUi() {
 
 function stopBrowseModeUi() {
   stopBrowseMode();
+  document.body.classList.remove('browse-mode');
   setStatsNavHidden(false);
 }
 

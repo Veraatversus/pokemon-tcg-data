@@ -352,9 +352,12 @@ export async function loadCurrentSet(forceRefresh = false) {
     // api/v3 zuerst, db_cards nur Offline-Fallback; ohne beides die v3-Meldung (describeCardDataFailure).
     const [cards, dbMap] = await Promise.all([
       loadSetCardsWithHydration(setId, { preferV3: true, forceRefresh }),
-      cache.has(dbCacheKey)
-        ? cache.get(dbCacheKey)
-        : readSetCollectionMap(selected.setName, { setId: selected.setId }).then((m) => { cache.set(dbCacheKey, m, CONFIG.CACHE_TTL_MS); return m; }),
+      // Stoebermodus ohne Login: keine Sammlung (kein Sheet-Zugriff)
+      state.browseMode
+        ? new Map()
+        : cache.has(dbCacheKey)
+          ? cache.get(dbCacheKey)
+          : readSetCollectionMap(selected.setName, { setId: selected.setId }).then((m) => { cache.set(dbCacheKey, m, CONFIG.CACHE_TTL_MS); return m; }),
     ]);
 
     if (!Array.isArray(cards) || cards.length === 0) {
@@ -373,8 +376,10 @@ export async function loadCurrentSet(forceRefresh = false) {
     document.querySelector('.filter-btn[data-filter="all"]')?.classList.add('active');
 
     renderCards();
-    void runAmbiguousMigrationFlow(selected);
-    await writeSetting('lastSetId', setId);
+    if (!state.browseMode) {
+      void runAmbiguousMigrationFlow(selected);
+      await writeSetting('lastSetId', setId);
+    }
     actions.markSetAsRecent(selected);
     setGlobalStatus(`${selected.setName}: ${cards.length} Karten.`);
     if (!forceRefresh) showToast(`${selected.setName} geladen`, 'success', 2000);

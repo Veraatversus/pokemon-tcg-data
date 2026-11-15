@@ -2736,3 +2736,35 @@ dialog h2 {
 .ambiguous-migration-dialog fieldset { margin: 12px 0; display: flex; flex-wrap: wrap; gap: 12px; }
 .ambiguous-candidate { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; font-size: 0.85rem; }
 .ambiguous-candidate img { border-radius: 4px; }
+
+/* ── Stöbermodus ohne Login (body.browse-mode, js/app/browse-mode.js) ─────────
+   Sammel- und Tabellen-Bedienelemente ausblenden; Karten zeigen den Hinweis
+   "Zum Sammeln anmelden" statt der Häkchen. */
+body.browse-mode #set-toolbar,
+body.browse-mode #refresh-split,
+body.browse-mode #stats-section,
+body.browse-mode #filter-section,
+body.browse-mode #save-state-pill,
+body.browse-mode .lightbox-status-panel,
+body.browse-mode [data-dashboard-view="imported"],
+body.browse-mode [data-dashboard-view="not-imported"],
+body.browse-mode #dialog-settings details {
+  display: none !important;
+}
+
+.browse-login-hint {
+  font: inherit;
+  font-size: 0.8em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px dashed var(--color-border, rgba(255, 255, 255, 0.25));
+  background: transparent;
+  color: var(--color-muted, inherit);
+  cursor: pointer;
+}
+
+.browse-login-hint:hover,
+.browse-login-hint:focus-visible {
+  color: inherit;
+  border-style: solid;
+}

@@ -399,11 +399,16 @@ function createSearchResultCard(card, key, db, set, apiOnly = false, { collectio
 
   const isEditable = Boolean(set?.setName && set?.imported) && !collectionPending;
   const checksDiv = document.createElement('div'); checksDiv.className = 'checks search-checks-bar';
-  checksDiv.append(
-    actions.makeCheckbox('G', 'g', shownStatus.g, !isEditable),
-    actions.makeCheckbox('RH', 'rh', shownStatus.rh, getCollectionUiState(db, { isEditable }).rhDisabled)
-  );
-  actions.syncSharedLegacyBadge(checksDiv, db);
+  if (state.browseMode) {
+    // Stoebermodus ohne Login: kein Sammelstatus, nur der Hinweis zum Anmelden.
+    checksDiv.append(actions.makeBrowseLoginHint());
+  } else {
+    checksDiv.append(
+      actions.makeCheckbox('G', 'g', shownStatus.g, !isEditable),
+      actions.makeCheckbox('RH', 'rh', shownStatus.rh, getCollectionUiState(db, { isEditable }).rhDisabled)
+    );
+    actions.syncSharedLegacyBadge(checksDiv, db);
+  }
 
   const goToSetBtn = document.createElement('button');
   goToSetBtn.type = 'button';

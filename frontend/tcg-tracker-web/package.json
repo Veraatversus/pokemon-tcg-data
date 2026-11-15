@@ -24,7 +24,8 @@
     "test:search": "node tests/search-smoke.mjs",
     "test:search:headed": "node tests/search-smoke.mjs --headed --slowmo=125",
     "test:dashboard-search": "node tests/dashboard-set-search-smoke.mjs",
-    "test:dashboard-search:headed": "node tests/dashboard-set-search-smoke.mjs --headed --slowmo=125"
+    "test:dashboard-search:headed": "node tests/dashboard-set-search-smoke.mjs --headed --slowmo=125",
+    "test:browse": "node tests/browse-smoke.mjs"
   },
   "devDependencies": {
     "playwright": "^1.59.1"

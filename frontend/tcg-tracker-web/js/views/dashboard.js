@@ -341,10 +341,12 @@ function createDashSetCard(set, summary) {
       <p class="dash-set-name">${set.setName}</p>
       <p class="dash-set-series">${set.series || ''}</p>
       <div class="dash-progress-bar"><div class="dash-progress-fill" style="width:${set.imported ? percent : 0}%"></div></div>
-      <p class="dash-progress-text">${set.imported ? `${collected}\u202f/\u202f${total || '?'} (${percent}%)` : `Noch nicht importiert (${resolveSetTotalCards(set) || '?'} Karten)`}</p>
+      <p class="dash-progress-text">${set.imported ? `${collected}\u202f/\u202f${total || '?'} (${percent}%)` : state.browseMode ? `${resolveSetTotalCards(set) || '?'} Karten` : `Noch nicht importiert (${resolveSetTotalCards(set) || '?'} Karten)`}</p>
       ${rh > 0 ? `<p class="dash-rh-text">RH: ${rh}</p>` : ''}
       <div class="dash-card-actions">
-        ${set.imported 
+        ${state.browseMode
+         ? `<button class="btn-secondary dash-view-btn" type="button" title="Ansehen">👁️ Ansehen</button>`
+         : set.imported
          ? `<button class="btn-secondary dash-view-btn" type="button" title="Ansehen">👁️</button>
            <button class="btn-secondary dash-favorite-btn" type="button" title="Favorit">${isFavorite(set.setId) ? '★' : '☆'}</button>
            <button class="btn-secondary dash-delete-btn" type="button" title="Löschen">🗑️</button>`

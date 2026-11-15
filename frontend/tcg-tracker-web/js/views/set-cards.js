@@ -226,11 +226,16 @@ function createCardElement(card, key, db, index) {
   titleDiv.textContent = `${card.number} \u2013 ${card.name || 'Unbekannt'}`;
 
   const checksDiv = document.createElement('div'); checksDiv.className = 'checks';
-  checksDiv.append(
-    makeCheckbox('G', 'g', shownStatus.g, !isEditable),
-    makeCheckbox('RH', 'rh', shownStatus.rh, getCollectionUiState(dbEntry, { isEditable }).rhDisabled)
-  );
-  syncSharedLegacyBadge(checksDiv, dbEntry);
+  if (state.browseMode) {
+    // Stoebermodus ohne Login: kein Sammelstatus, nur der Hinweis zum Anmelden.
+    checksDiv.append(makeBrowseLoginHint());
+  } else {
+    checksDiv.append(
+      makeCheckbox('G', 'g', shownStatus.g, !isEditable),
+      makeCheckbox('RH', 'rh', shownStatus.rh, getCollectionUiState(dbEntry, { isEditable }).rhDisabled)
+    );
+    syncSharedLegacyBadge(checksDiv, dbEntry);
+  }
   meta.append(titleDiv, checksDiv);
 
   if (card.cardmarketUrl) {
@@ -245,7 +250,7 @@ function createCardElement(card, key, db, index) {
   }
 
   article.append(imgWrap, meta);
-  if (isEditable) attachCheckboxListeners(article, dbEntry, key);
+  if (isEditable && !state.browseMode) attachCheckboxListeners(article, dbEntry, key);
 
   // Bulk-Klick auf Artikel
   article.addEventListener('click', (e) => {
@@ -363,6 +368,19 @@ export function hydrateCardmarketLink(linkEl, card, { compact = false, preferRev
     .catch((error) => {
       console.warn('[cardmarket] price lookup failed', error);
     });
+}
+
+/** Stoebermodus: Knopf statt Sammel-Haekchen; Klick startet den Google-Login. */
+export function makeBrowseLoginHint() {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'browse-login-hint';
+  button.textContent = 'Zum Sammeln anmelden';
+  button.addEventListener('click', (event) => {
+    event.stopPropagation();
+    dom.auth?.click();
+  });
+  return button;
 }
 
 export function makeCheckbox(labelText, type, checked, disabled) {
