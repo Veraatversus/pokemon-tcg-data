@@ -517,6 +517,17 @@ body.topbar-collapsed .status-bar {
 #view-search .view-header {
   align-items: flex-start;
   row-gap: 10px;
+  position: sticky;
+  top: var(--search-sticky-top);
+  z-index: 1100;
+  margin: 10px 12px 0;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 209, 102, 0.30);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(15, 22, 39, 0.96), rgba(26, 31, 53, 0.94)) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.26), 0 0 0 1px rgba(112, 164, 255, 0.08);
+  backdrop-filter: blur(14px);
+  color: #fff;
 }
 
 #view-search .view-controls {
