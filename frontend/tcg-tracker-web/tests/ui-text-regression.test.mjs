@@ -19,6 +19,8 @@ async function listUiSourceFiles() {
     path.join(jsRoot, 'app.js'),
     ...(await inDir('views')),
     ...(await inDir('app')),
+    path.join(jsRoot, 'data', 'sheets-db.js'),
+    path.join(jsRoot, 'data', 'sheets-client.js'),
     path.join(jsRoot, 'ui', 'helpers.js'),
     path.join(jsRoot, 'ui', 'app-extras.js'),
     path.join(jsRoot, 'ui', 'sheets-feedback.js'),

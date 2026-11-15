@@ -1,10 +1,15 @@
 ﻿import { CONFIG } from '../core/config.js';
-import { signIn } from '../core/auth.js';
 import {
-  EVENT_SHEETS_WRITE_FAILED,
-  EVENT_SHEETS_WRITE_RETRY,
-  EVENT_SHEETS_WRITE_SUCCESS,
-} from '../core/storage-keys.js';
+  buildRange,
+  isInvalidRangeError,
+  enqueueSheetsMutation,
+  resetSheetsWriteQueue,
+  getValues,
+  getFormulas,
+  putValues,
+  batchPutValues,
+  clearValues
+} from './sheets-client.js';
 import {
   normalizeCardNumber,
   toBoolean,
@@ -36,15 +41,6 @@ import { mergeAliasOverviewSets } from './set-aliases.js';
 
 export { cellsForUpdate };
 
-function quoteSheetName(sheetName) {
-  const name = String(sheetName ?? '').replace(/'/g, "''");
-  return `'${name}'`;
-}
-
-function buildRange(sheetName, a1Range) {
-  return `${quoteSheetName(sheetName)}!${a1Range}`;
-}
-
 function isDbSheetTitle(title) {
   const normalized = normalizeName(title);
   return normalized === normalizeName(DB_SHEETS.sets)
@@ -57,8 +53,6 @@ let schemaEnsuredPromise = null;
 const dbRowsCache = new Map();
 const sheetCapacityCache = new Map();
 const legacyMigrationLocks = new Map();
-let sheetsWriteQueue = Promise.resolve();
-const SHEETS_WRITE_GAP_MS = 90;
 
 const DB_SHEETS = {
   sets: 'db_sets',
@@ -83,7 +77,7 @@ export function resetSheetsDataCaches() {
   sheetCapacityCache.clear();
   // Sperren (legacyMigrationLocks, sheetAppendLocks) bleiben bewusst erhalten: Ein Reset waehrend eines
   // laufenden Writes darf keinen parallelen Anhaenge-Vorgang zulassen. Sie raeumen sich selbst auf.
-  sheetsWriteQueue = Promise.resolve();
+  resetSheetsWriteQueue();
 }
 
 function invalidateSheetRowCache(sheetName) {
@@ -106,24 +100,6 @@ function primeSheetCapacityCache(sheets = []) {
       columnCount: Number(sheet?.properties?.gridProperties?.columnCount) || 0,
     });
   });
-}
-
-function waitForDelay(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function enqueueSheetsMutation(task, { gapMs = SHEETS_WRITE_GAP_MS } = {}) {
-  const runTask = async () => {
-    const result = await task();
-    if (gapMs > 0) {
-      await waitForDelay(gapMs);
-    }
-    return result;
-  };
-
-  const scheduled = sheetsWriteQueue.then(runTask, runTask);
-  sheetsWriteQueue = scheduled.catch(() => undefined);
-  return scheduled;
 }
 
 function pickSheetTitle(titles, preferred, aliases, matcher) {
@@ -234,11 +210,6 @@ async function resolveSheetNames() {
   return resolvedSheetsCache;
 }
 
-function isInvalidRangeError(err) {
-  const message = String(err?.result?.error?.message || err?.message || '').toLowerCase();
-  return err?.status === 400 || message.includes('invalid_argument') || message.includes('unable to parse range');
-}
-
 // Fuer Lesungen, die Zielzeilen bestimmen: nur ein fehlendes Blatt/Range gilt als leer, alles andere wirft.
 function rowsOrThrowUnlessMissing(err) {
   if (isInvalidRangeError(err)) return [];
@@ -267,210 +238,6 @@ async function getOverviewRows(sheets) {
       }
     }
 
-    throw err;
-  }
-}
-
-async function getValues(range, renderOption = 'UNFORMATTED_VALUE', suppressErrorLog = false) {
-  const maxRetries = 6;
-  try {
-    if (!gapi?.client?.sheets?.spreadsheets?.values?.get) {
-      throw new Error('Sheets API nicht initialisiert â€“ bitte melden Sie sich an');
-    }
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
-      try {
-        const response = await gapi.client.sheets.spreadsheets.values.get({
-          spreadsheetId: CONFIG.SPREADSHEET_ID,
-          range,
-          valueRenderOption: renderOption
-        });
-        return response.result.values || [];
-      } catch (err) {
-        if (err?.status !== 429 || attempt >= maxRetries) throw err;
-        const delay = Math.min(10000, 400 * Math.pow(2, attempt)) + Math.floor(Math.random() * 120);
-        await new Promise((resolve) => setTimeout(resolve, delay));
-      }
-    }
-    return [];
-  } catch (err) {
-    if (!suppressErrorLog) {
-      console.error('[getValues]', err);
-    }
-    throw err;
-  }
-}
-
-// Formeln mÃ¼ssen mit FORMULA gelesen werden (z.B. HYPERLINK in Overview)
-async function getFormulas(range) {
-  return getValues(range, 'FORMULA');
-}
-
-function isRetryableWriteError(err) {
-  const status = Number(err?.status || err?.result?.error?.code || 0);
-  if ([429, 500, 502, 503, 504].includes(status)) return true;
-  const message = String(err?.result?.error?.message || err?.message || '').toLowerCase();
-  return message.includes('timeout') || message.includes('temporar') || message.includes('rate limit');
-}
-
-function isAuthWriteError(err) {
-  const status = Number(err?.status || err?.result?.error?.code || 0);
-  if (status === 401 || status === 403) return true;
-  const message = String(err?.result?.error?.message || err?.message || '').toLowerCase();
-  return message.includes('unauthenticated')
-    || message.includes('unauthorized')
-    || message.includes('permission denied')
-    || message.includes('auth');
-}
-
-function buildAuthWriteRecoveryError(err) {
-  const wrapped = new Error('Google-Anmeldung abgelaufen. Bitte oben erneut anmelden und die Aktion wiederholen.');
-  wrapped.cause = err;
-  wrapped.code = 'AUTH_RELOGIN_REQUIRED';
-  wrapped.status = Number(err?.status || err?.result?.error?.code || 0) || 401;
-  return wrapped;
-}
-
-function emitWriteEvent(type, detail) {
-  if (typeof window === 'undefined' || !window.dispatchEvent || typeof CustomEvent === 'undefined') return;
-  window.dispatchEvent(new CustomEvent(type, { detail }));
-}
-
-async function putValues(range, values) {
-  const maxRetries = 6;
-  let reauthedOnce = false;
-  try {
-    if (!gapi?.client?.sheets?.spreadsheets?.values?.update) {
-      throw new Error('Sheets API nicht initialisiert â€“ bitte melden Sie sich an');
-    }
-    return await enqueueSheetsMutation(async () => {
-      for (let attempt = 0; attempt <= maxRetries; attempt++) {
-        try {
-          await gapi.client.sheets.spreadsheets.values.update({
-            spreadsheetId: CONFIG.SPREADSHEET_ID,
-            range,
-            valueInputOption: 'USER_ENTERED',
-            resource: { values }
-          });
-          emitWriteEvent(EVENT_SHEETS_WRITE_SUCCESS, {
-            range,
-            attemptsUsed: attempt + 1,
-            maxRetries
-          });
-          return;
-        } catch (err) {
-          if (isAuthWriteError(err) && !reauthedOnce) {
-            reauthedOnce = true;
-            const canAttemptInteractiveReauth = typeof document === 'undefined' || document.visibilityState === 'visible';
-            const reauthed = canAttemptInteractiveReauth
-              ? await signIn({ forceConsent: false }).catch(() => false)
-              : false;
-            if (reauthed) {
-              emitWriteEvent(EVENT_SHEETS_WRITE_RETRY, {
-                range,
-                attempt: attempt + 1,
-                maxRetries,
-                delayMs: 0,
-                status: Number(err?.status || err?.result?.error?.code || 0) || null
-              });
-              continue;
-            }
-            throw buildAuthWriteRecoveryError(err);
-          }
-          if (!isRetryableWriteError(err) || attempt >= maxRetries) throw err;
-          const delay = Math.min(10000, 500 * Math.pow(2, attempt)) + Math.floor(Math.random() * 150);
-          emitWriteEvent(EVENT_SHEETS_WRITE_RETRY, {
-            range,
-            attempt: attempt + 1,
-            maxRetries,
-            delayMs: delay,
-            status: Number(err?.status || err?.result?.error?.code || 0) || null
-          });
-          await waitForDelay(delay);
-        }
-      }
-    });
-  } catch (err) {
-    emitWriteEvent(EVENT_SHEETS_WRITE_FAILED, {
-      range,
-      status: Number(err?.status || err?.result?.error?.code || 0) || null,
-      message: String(err?.result?.error?.message || err?.message || 'Unbekannter Fehler')
-    });
-    console.error('[putValues]', err);
-    throw err;
-  }
-}
-
-async function batchPutValues(updates = []) {
-  const normalizedUpdates = (updates || []).filter((entry) => entry?.range && Array.isArray(entry?.values) && entry.values.length > 0);
-  if (!normalizedUpdates.length) return;
-
-  const maxRetries = 6;
-  let reauthedOnce = false;
-  const rangeLabel = normalizedUpdates.length === 1 ? normalizedUpdates[0].range : `${normalizedUpdates.length} ranges`;
-
-  try {
-    if (!gapi?.client?.sheets?.spreadsheets?.values?.batchUpdate) {
-      for (const entry of normalizedUpdates) {
-        await putValues(entry.range, entry.values);
-      }
-      return;
-    }
-
-    return await enqueueSheetsMutation(async () => {
-      for (let attempt = 0; attempt <= maxRetries; attempt++) {
-        try {
-          await gapi.client.sheets.spreadsheets.values.batchUpdate({
-            spreadsheetId: CONFIG.SPREADSHEET_ID,
-            resource: {
-              valueInputOption: 'USER_ENTERED',
-              data: normalizedUpdates.map((entry) => ({ range: entry.range, values: entry.values }))
-            }
-          });
-          emitWriteEvent(EVENT_SHEETS_WRITE_SUCCESS, {
-            range: rangeLabel,
-            attemptsUsed: attempt + 1,
-            maxRetries
-          });
-          return;
-        } catch (err) {
-          if (isAuthWriteError(err) && !reauthedOnce) {
-            reauthedOnce = true;
-            const canAttemptInteractiveReauth = typeof document === 'undefined' || document.visibilityState === 'visible';
-            const reauthed = canAttemptInteractiveReauth
-              ? await signIn({ forceConsent: false }).catch(() => false)
-              : false;
-            if (reauthed) {
-              emitWriteEvent(EVENT_SHEETS_WRITE_RETRY, {
-                range: rangeLabel,
-                attempt: attempt + 1,
-                maxRetries,
-                delayMs: 0,
-                status: Number(err?.status || err?.result?.error?.code || 0) || null
-              });
-              continue;
-            }
-            throw buildAuthWriteRecoveryError(err);
-          }
-          if (!isRetryableWriteError(err) || attempt >= maxRetries) throw err;
-          const delay = Math.min(10000, 500 * Math.pow(2, attempt)) + Math.floor(Math.random() * 150);
-          emitWriteEvent(EVENT_SHEETS_WRITE_RETRY, {
-            range: rangeLabel,
-            attempt: attempt + 1,
-            maxRetries,
-            delayMs: delay,
-            status: Number(err?.status || err?.result?.error?.code || 0) || null
-          });
-          await waitForDelay(delay);
-        }
-      }
-    });
-  } catch (err) {
-    emitWriteEvent(EVENT_SHEETS_WRITE_FAILED, {
-      range: rangeLabel,
-      status: Number(err?.status || err?.result?.error?.code || 0) || null,
-      message: String(err?.result?.error?.message || err?.message || 'Unbekannter Fehler')
-    });
-    console.error('[batchPutValues]', err);
     throw err;
   }
 }
@@ -782,7 +549,6 @@ function nowIso() {
 function buildEmptyRow(columnCount) {
   return Array.from({ length: columnCount }, () => '');
 }
-
 
 // lockedRows: Aufrufer haelt bereits withSheetAppendLock(sheetName) und hat diese Zeilen frisch gelesen;
 // dann wird ohne erneute Sperre angehaengt (appendDbRows wuerde auf die eigene Sperre warten).
@@ -1612,16 +1378,6 @@ function buildOverviewRowValues(setMeta, imported = false) {
   ]];
 }
 
-async function clearValues(range) {
-  if (!gapi?.client?.sheets?.spreadsheets?.values?.clear) return;
-  await enqueueSheetsMutation(async () => {
-    await gapi.client.sheets.spreadsheets.values.clear({
-      spreadsheetId: CONFIG.SPREADSHEET_ID,
-      range
-    });
-  });
-}
-
 async function upsertOverviewEntry(setMeta, imported = true) {
   await upsertDbSet(setMeta, imported);
 
@@ -2314,4 +2070,3 @@ export async function recoverImportedIdsFromOverview() {
   );
   return ids;
 }
-
