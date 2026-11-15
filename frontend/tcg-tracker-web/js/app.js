@@ -21,7 +21,6 @@ import {
 } from './data/collection-writes.js';
 import { findSetByIdOrAlias } from './data/set-aliases.js';
 import { fetchMergedCards } from './data/pokemon-api.js?v=20261114-clean-1';
-import { loadPriceStamp, refreshV3Prices } from './data/v3-prices.js?v=20261114-clean-1';
 import {
   toBoolean
 } from './core/utils.js';
@@ -55,9 +54,6 @@ import { ensureResolverForSet } from './data/collection-aliases.js';
 import { buildCollectionBackupSets } from './features/collection/backup-export.js';
 import { buildBackupRestoreSnapshot, planBackupRestore, pickSourceSetKey, resolveSourceCardKey } from './features/collection/legacy-key-resolution.js';
 import { initCommandPalette } from './ui/command-palette.js';
-import {
-  resetCardmarketPriceSummaryCaches
-} from './ui/cardmarket-price.js?v=20261114-clean-1';
 import {
   loadSearchHistory,
   clearSearchHistory,
@@ -104,6 +100,7 @@ import {
 import { runSearch, initSearch, initSearchAutocomplete } from './views/search.js';
 import { openSpreadsheetDialog, updateSpreadsheetInfoBar, initSpreadsheetDialog } from './features/settings/spreadsheet-dialog.js';
 import { renderStats } from './views/stats.js';
+import { prefetchPriceStamp, reloadCardmarketPricesManually } from './views/stats-price.js';
 import {
   updateStats, applyFilter, initFilterButtons, initSortControl, getCurrentCardmarketBasePriceType, loadCardmarketPriceSummary,
   hydrateCardmarketLink, makeCheckbox, syncCollectionCheckboxUi, syncSharedLegacyBadge, onAmbiguousLegacyKey,
@@ -170,57 +167,6 @@ registerActions({
   resetToLoggedOut,
   ensureSetImportedFromApi,
 });
-
-/**
- * App-Start: liest den Preis-Stamp (api/v3/prices/meta.json generatedAt) vorab, damit die ersten
- * Preisdateien sofort mit ?v=<stamp> geladen werden. Fire-and-forget – blockiert den Bootstrap nicht.
- * @returns {Promise<string>} Stamp ('' ohne Stamp/bei Fehler)
- */
-async function prefetchPriceStamp() {
-  try {
-    return await loadPriceStamp();
-  } catch (err) {
-    console.warn('[v3-prices] stamp prefetch failed', err);
-    return '';
-  }
-}
-
-/**
- * Manueller Cardmarket-Preis-Refresh, ausgeloest vom Settings-Button 'Preise neu laden'.
- * Leert immer die Preis-Caches (Preisdateien + Preis-Zusammenfassungen je Karte) und liest
- * api/v3/prices/meta.json neu; ein neuer Stamp laedt neue Preisdateien.
- */
-async function reloadCardmarketPricesManually() {
-  const btn = dom.btnCardmarketReloadPrices;
-  if (!btn) return;
-
-  setLoading(true, 'Pruefe Cardmarket-Preise...');
-  btn.disabled = true;
-  try {
-    const result = await refreshV3Prices();
-    resetCardmarketPriceSummaryCaches();
-    const stampLabel = result.currentStamp
-      ? new Date(result.currentStamp).toLocaleString('de-DE')
-      : '(unbekannt)';
-
-    if (result.changed) {
-      showToast(`Cardmarket-Preise aktualisiert (Stand ${stampLabel}).`, 'success', 5000);
-    } else {
-      showToast(
-        `Cardmarket-Preise sind aktuell (Stand ${stampLabel}). Preis-Caches wurden geleert.`,
-        'info',
-        4000
-      );
-    }
-  } catch (err) {
-    const message = getErrorMessage(err, 'Unbekannter Fehler');
-    showToast(`Preis-Refresh fehlgeschlagen: ${message}`, 'error', 6000);
-    console.warn('[cardmarket-manual-refresh] failed', err);
-  } finally {
-    setLoading(false);
-    btn.disabled = false;
-  }
-}
 
 function getQueueBuilderActionsCatalog() {
   return [
