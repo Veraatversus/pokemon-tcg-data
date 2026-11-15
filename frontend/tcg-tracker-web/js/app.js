@@ -1,3 +1,4 @@
+// Einstieg der App: Importe, Aktionsregister, Verdrahtung der Dashboard-Steuerung und Bootstrap.
 import { initAuth, signIn, signOut, isSignedIn } from './core/auth.js';
 import { CONFIG } from './core/config.js';
 import {
@@ -51,8 +52,7 @@ import {
   setRefreshMenuOpen,
   syncRefreshControls
 } from './ui/helpers.js';
-import { loadSets, renderDashboard, getSetById, ensureSetSelectorOption
-} from './views/dashboard.js';
+import { loadSets, renderDashboard, getSetById, ensureSetSelectorOption } from './views/dashboard.js';
 import { runSearch, initSearch, initSearchAutocomplete } from './views/search.js';
 import { openSpreadsheetDialog, updateSpreadsheetInfoBar, initSpreadsheetDialog } from './features/settings/spreadsheet-dialog.js';
 import { renderStats } from './views/stats.js';
@@ -67,18 +67,16 @@ import { openLightbox, renderLightbox, initLightbox } from './views/lightbox.js'
 import {
   loadRecentSets, syncSetNavLink, positionRecentSetsDropdown, setRecentSetsDropdownOpen, renderRecentSets, markSetAsRecent
 } from './app/recent-sets.js';
-import { updateQueueUiState, enqueueAction, clearQueuedActions,
-  runQueuedActions, ensureSetImportedFromApi, importSetFromOverview, syncOverviewFromApi,
-  powerRefreshOverviewFromApi, importAllMissingSets
+import {
+  updateQueueUiState, enqueueAction, clearQueuedActions, runQueuedActions, ensureSetImportedFromApi, importSetFromOverview,
+  syncOverviewFromApi, powerRefreshOverviewFromApi, importAllMissingSets
 } from './features/collection/import-jobs.js';
 import {
   deleteSetFromCollection, openBatchImportDialog, initBatchImportDialog, initManageImportedSetsDialog, reimportAllImportedSets,
   exportCollectionSummaryCsv, runDataHealthCheck, initBackupImportExport, reimportCurrentSetFromApi
 } from './features/collection/collection-dialogs.js';
 import { initQueueBuilderDialog } from './features/collection/queue-presets.js';
-import {
-  initSheetsWriteFeedback, initAuditAndSaveUi
-} from './ui/sheets-feedback.js';
+import { initSheetsWriteFeedback, initAuditAndSaveUi } from './ui/sheets-feedback.js';
 import {
   initDevCompletionMode, loadDashboardPreferences, saveDashboardPreferences, openSettingsDialog
 } from './features/settings/settings-actions.js';
@@ -129,7 +127,7 @@ registerActions({
 });
 
 // --------------------------------------------------------------------------
-// DASHBOARD
+// DASHBOARD-STEUERUNG (nur Verdrahtung der Knoepfe mit den Feature-Modulen)
 // --------------------------------------------------------------------------
 
 function initDashboardControls() {
