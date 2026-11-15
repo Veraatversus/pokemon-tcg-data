@@ -75,35 +75,37 @@
   font-family: var(--font-body);
   font-size: 14px;
   --grid-min-width:   165px;
+  --topbar-height: 72px;
 }
 
-/* â”€â”€ Dark Mode â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-body.dark {
-  --color-bg:         var(--bg-base);
-  --color-surface:    var(--surface-primary);
-  --color-surface-elevated: var(--surface-secondary);
-  --color-surface-alt: var(--surface-tertiary);
-  --color-border:     #334155;
-  --color-text:       var(--color-text-primary);
-  --color-muted:      var(--color-text-muted);
-  --color-topbar:     #070b18;
-  --color-primary:    var(--color-violet);
-  --color-primary-h:  var(--color-magenta);
-  --color-primary-rgb: 168, 85, 247;
-  --color-collected:  rgba(255, 107, 53, 0.18);
-  --color-reverse:    rgba(0, 212, 255, 0.18);
-  --color-complete:   rgba(255, 209, 102, 0.18);
-}
-
+/* Dark-Mode-Variablen (body.dark): siehe css/views/set.css, Abschnitt Final Theme Harmonizer */
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
-  background: var(--color-bg);
-  color: var(--color-text);
   font-family: var(--font-body);
   line-height: 1.45;
   transition: background 0.25s, color 0.25s;
+  --window-bg: var(--color-surface);
+  --window-bg-elevated: var(--color-surface-elevated);
+  --window-border: var(--color-border);
+  --window-muted: var(--color-muted);
+  --card-collected-bg: #d8f3dc;
+  --card-collected-bg-2: #c7ebcf;
+  --card-collected-border: #2f855a;
+  --card-collected-border-soft: rgba(47, 133, 90, 0.45);
+  --card-collected-accent: #2f855a;
+  --card-reverse-bg: #dbeafe;
+  --card-reverse-bg-2: #cde3ff;
+  --card-reverse-border: #2563eb;
+  --card-reverse-border-soft: rgba(37, 99, 235, 0.45);
+  --card-reverse-accent: #2563eb;
+  background:
+    radial-gradient(900px 520px at 18% 16%, rgba(255, 107, 53, 0.22), transparent 55%),
+    radial-gradient(820px 500px at 82% 20%, rgba(0, 212, 255, 0.18), transparent 58%),
+    radial-gradient(960px 620px at 50% 10%, rgba(168, 85, 247, 0.28), transparent 52%),
+    linear-gradient(180deg, var(--bg-space) 0%, var(--bg-base) 55%, #050914 100%);
+  color: var(--color-text-primary);
 }
 
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -151,17 +153,10 @@ body {
   transition: background 0.15s, color 0.15s;
 }
 .nav-link:hover  { background: rgba(255,255,255,.12); color: #fff; }
-.nav-link.active { background: var(--color-primary); color: #fff; }
 .nav-link:focus-visible {
   outline: 2px solid #fff;
   outline-offset: 2px;
   color: #fff;
-}
-
-.nav-set-split {
-  position: relative;
-  display: inline-flex;
-  align-items: stretch;
 }
 
 .nav-set-split > #nav-set-link {
@@ -395,7 +390,6 @@ input[type="search"]:focus, input[type="text"]:focus {
   border-color: transparent;
 }
 
-select { background: var(--color-surface); color: var(--color-text); }
 .full-width-select { width: 100%; }
 
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -532,9 +526,14 @@ select { background: var(--color-surface); color: var(--color-text); }
   background: var(--color-surface-elevated);
   flex-wrap: wrap;
 }
-.view-header h2 { margin: 0; font-size: 17px; white-space: nowrap; }
-.view-header h2 { font-family: var(--font-display); font-weight: 700; }
-
+.view-header h2 {
+  margin: 0;
+  font-size: 17px;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--color-text-primary) !important;
+}
 .view-controls {
   display: flex;
   gap: 8px;

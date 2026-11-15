@@ -1611,12 +1611,6 @@ body.dark .dash-progress-bar { background: #334155; }
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 /* DEPRECATED: Loading overlay and spinner moved to FINAL HARDENED RULES */
 
-.empty-state {
-  padding: 48px 24px;
-  text-align: center;
-  color: var(--color-muted);
-  font-size: 14px;
-}
 .empty-hint { font-size: 12px; margin-top: 8px; }
 
 .loading-placeholder {
@@ -1707,7 +1701,6 @@ body.dark .dash-progress-bar { background: #334155; }
     -webkit-text-size-adjust: 100%;
   }
   .topbar { padding: 6px; }
-  .topbar h1 { font-size: 14px; }
   .status-bar { font-size: 12px; padding: 6px 8px; flex-wrap: wrap; }
   .global-status { flex: 1; min-width: 100%; }
   
@@ -1804,10 +1797,7 @@ body.dark .dash-progress-bar { background: #334155; }
 /* DEPRECATED: Old dark theme removed â€“ using Legendary Elemental system. */
 
 @media (max-width: 480px) {
-  body { font-size: 13px; }
   .topbar { padding: 4px; }
-  .topbar h1 { font-size: 13px; }
-  
   .view { padding: 6px; }
   .view-header { gap: 4px; }
   .view-controls { gap: 3px; }
@@ -2162,12 +2152,6 @@ dialog.ss-dialog::backdrop {
     padding: 8px 10px calc(8px + env(safe-area-inset-top, 0));
   }
 
-  .topbar h1 {
-    width: 100%;
-    font-size: 13px;
-    text-align: left;
-  }
-
   .main-nav {
     width: 100%;
     justify-content: flex-start;
@@ -2498,24 +2482,21 @@ dialog.ss-dialog::backdrop {
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    Final Theme Harmonizer Override (must stay last)
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-body {
-  --window-bg: var(--color-surface);
-  --window-bg-elevated: var(--color-surface-elevated);
-  --window-border: var(--color-border);
-  --window-muted: var(--color-muted);
-  --card-collected-bg: #d8f3dc;
-  --card-collected-bg-2: #c7ebcf;
-  --card-collected-border: #2f855a;
-  --card-collected-border-soft: rgba(47, 133, 90, 0.45);
-  --card-collected-accent: #2f855a;
-  --card-reverse-bg: #dbeafe;
-  --card-reverse-bg-2: #cde3ff;
-  --card-reverse-border: #2563eb;
-  --card-reverse-border-soft: rgba(37, 99, 235, 0.45);
-  --card-reverse-accent: #2563eb;
-}
-
 body.dark {
+  --color-bg:         var(--bg-base);
+  --color-surface:    var(--surface-primary);
+  --color-surface-elevated: var(--surface-secondary);
+  --color-surface-alt: var(--surface-tertiary);
+  --color-border:     #334155;
+  --color-text:       var(--color-text-primary);
+  --color-muted:      var(--color-text-muted);
+  --color-topbar:     #070b18;
+  --color-primary:    var(--color-violet);
+  --color-primary-h:  var(--color-magenta);
+  --color-primary-rgb: 168, 85, 247;
+  --color-collected:  rgba(255, 107, 53, 0.18);
+  --color-reverse:    rgba(0, 212, 255, 0.18);
+  --color-complete:   rgba(255, 209, 102, 0.18);
   --window-bg: color-mix(in srgb, var(--color-surface) 90%, #000 10%);
   --window-bg-elevated: color-mix(in srgb, var(--color-surface-elevated) 90%, #000 10%);
   --window-border: color-mix(in srgb, var(--color-border) 85%, #93c5fd 15%);
@@ -2648,48 +2629,11 @@ body.dark .lightbox-check-label input[type="checkbox"] {
   accent-color: #60a5fa;
 }
 
-.brand-lockup {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-width: 0;
-}
-
-.brand-logo {
-  width: 52px;
-  height: 52px;
-  border-radius: 16px;
-  object-fit: cover;
-  border: 1px solid rgba(139, 165, 255, 0.24);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.05),
-    0 10px 30px rgba(8, 16, 31, 0.55),
-    0 0 24px rgba(143, 103, 255, 0.22);
-}
-
 .brand-copy {
   display: flex;
   flex-direction: column;
   min-width: 0;
   line-height: 1;
-}
-
-.brand-kicker {
-  font-family: var(--font-body);
-  font-size: 11px;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: #d9e9ff;
-  opacity: 0.9;
-}
-
-.brand-title {
-  font-family: var(--font-display);
-  font-size: clamp(1.1rem, 1vw + 0.95rem, 1.5rem);
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  color: #ffffff;
-  text-shadow: var(--brand-glow);
 }
 
 @media (max-width: 640px) {

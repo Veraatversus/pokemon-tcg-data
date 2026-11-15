@@ -271,10 +271,6 @@ body.topbar-collapsed #view-search {
 }
 
 @media (max-width: 380px) {
-  #view-search .view-controls {
-    grid-template-columns: 1fr;
-  }
-
   #view-search .search-ac-wrap,
   #view-search .view-controls .custom-select,
   #view-search .view-controls select {
