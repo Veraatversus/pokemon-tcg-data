@@ -8,7 +8,11 @@ import {
   getFormulas,
   putValues,
   batchPutValues,
-  clearValues
+  clearValues,
+  clearRangeStrict,
+  hasSpreadsheetMetaApi,
+  getSpreadsheetMeta,
+  batchUpdateSpreadsheet
 } from './sheets-client.js';
 import {
   normalizeCardNumber,
@@ -65,6 +69,8 @@ const DB_HEADERS = {
   cards: CARD_DB_HEADERS,
   collection: ['setId', 'cardId', 'g', 'rh', 'updatedAt']
 };
+
+const SHEET_PROPS_FIELDS = 'sheets(properties(sheetId,title,gridProperties(rowCount,columnCount)))';
 
 function normalizeName(value) {
   return String(value ?? '').trim().toLowerCase();
@@ -155,14 +161,11 @@ async function detectOverviewByContent(titles) {
 async function resolveSheetNames() {
   if (resolvedSheetsCache) return resolvedSheetsCache;
 
-  if (!gapi?.client?.sheets?.spreadsheets?.get) {
+  if (!hasSpreadsheetMetaApi()) {
     throw new Error('Sheets API nicht initialisiert â€“ bitte zuerst anmelden.');
   }
 
-  const meta = await gapi.client.sheets.spreadsheets.get({
-    spreadsheetId: CONFIG.SPREADSHEET_ID,
-    fields: 'sheets(properties(sheetId,title,gridProperties(rowCount,columnCount)))'
-  });
+  const meta = await getSpreadsheetMeta(SHEET_PROPS_FIELDS);
 
   const metaSheets = meta.result.sheets || [];
   primeSheetCapacityCache(metaSheets);
@@ -243,10 +246,7 @@ async function getOverviewRows(sheets) {
 }
 
 async function listSheetTitles() {
-  const meta = await gapi.client.sheets.spreadsheets.get({
-    spreadsheetId: CONFIG.SPREADSHEET_ID,
-    fields: 'sheets(properties(sheetId,title,gridProperties(rowCount,columnCount)))'
-  });
+  const meta = await getSpreadsheetMeta(SHEET_PROPS_FIELDS);
   const metaSheets = meta.result.sheets || [];
   primeSheetCapacityCache(metaSheets);
   return metaSheets
@@ -256,12 +256,7 @@ async function listSheetTitles() {
 
 async function addSheet(title) {
   await enqueueSheetsMutation(async () => {
-    await gapi.client.sheets.spreadsheets.batchUpdate({
-      spreadsheetId: CONFIG.SPREADSHEET_ID,
-      resource: {
-        requests: [{ addSheet: { properties: { title } } }]
-      }
-    });
+    await batchUpdateSpreadsheet([{ addSheet: { properties: { title } } }]);
   }, { gapMs: 0 });
   resolvedSheetsCache = null;
   dbRowsCache.clear();
@@ -304,13 +299,7 @@ async function ensureSheetWithHeader(sheetName, header) {
 }
 
 async function clearSheetDataRows(sheetName) {
-  if (!gapi?.client?.sheets?.spreadsheets?.values?.clear) {
-    throw new Error('Sheets API nicht initialisiert â€“ bitte melden Sie sich an');
-  }
-  await gapi.client.sheets.spreadsheets.values.clear({
-    spreadsheetId: CONFIG.SPREADSHEET_ID,
-    range: buildRange(sheetName, 'A2:ZZ')
-  });
+  await clearRangeStrict(buildRange(sheetName, 'A2:ZZ'));
   dbRowsCache.delete(sheetName);
 }
 
@@ -454,10 +443,7 @@ async function ensureSheetCapacity(sheetName, requiredRows, requiredCols) {
     return;
   }
 
-  const meta = await gapi.client.sheets.spreadsheets.get({
-    spreadsheetId: CONFIG.SPREADSHEET_ID,
-    fields: 'sheets(properties(sheetId,title,gridProperties(rowCount,columnCount)))'
-  });
+  const meta = await getSpreadsheetMeta(SHEET_PROPS_FIELDS);
   primeSheetCapacityCache(meta.result.sheets || []);
   sheetInfo = sheetCapacityCache.get(normalizedSheetName) || null;
 
@@ -494,10 +480,7 @@ async function ensureSheetCapacity(sheetName, requiredRows, requiredCols) {
   }
 
   await enqueueSheetsMutation(async () => {
-    await gapi.client.sheets.spreadsheets.batchUpdate({
-      spreadsheetId: CONFIG.SPREADSHEET_ID,
-      resource: { requests }
-    });
+    await batchUpdateSpreadsheet(requests);
   }, { gapMs: 0 });
 
   sheetCapacityCache.set(normalizedSheetName, {
@@ -2007,20 +1990,13 @@ export async function updateCellBooleansBatch(sheetName, updates = [], { chunkSi
 
 export async function ensureSettingsSheet() {
   const sheets = await resolveSheetNames();
-  const sheetMeta = await gapi.client.sheets.spreadsheets.get({
-    spreadsheetId: CONFIG.SPREADSHEET_ID
-  });
+  const sheetMeta = await getSpreadsheetMeta();
   const exists = (sheetMeta.result.sheets || []).some(
     (s) => s.properties?.title === sheets.settings
   );
 
   if (!exists) {
-    await gapi.client.sheets.spreadsheets.batchUpdate({
-      spreadsheetId: CONFIG.SPREADSHEET_ID,
-      resource: {
-        requests: [{ addSheet: { properties: { title: CONFIG.SHEETS.SETTINGS } } }]
-      }
-    });
+    await batchUpdateSpreadsheet([{ addSheet: { properties: { title: CONFIG.SHEETS.SETTINGS } } }]);
     resolvedSheetsCache = null;
     const refreshed = await resolveSheetNames();
     await putValues(buildRange(refreshed.settings, 'A1:B1'), [['key', 'value']]);

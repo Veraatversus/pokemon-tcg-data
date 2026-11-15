@@ -262,3 +262,34 @@ export async function clearValues(range) {
     });
   });
 }
+
+// Metadaten-API (spreadsheets.get) vorhanden? Fuer Aufrufer mit eigener Fehlermeldung.
+export function hasSpreadsheetMetaApi() {
+  return Boolean(gapi?.client?.sheets?.spreadsheets?.get);
+}
+
+// Tabellen-Metadaten lesen; fields ist optional (ohne fields: komplette Metadaten). Ohne Retry/Queue.
+export async function getSpreadsheetMeta(fields) {
+  const params = { spreadsheetId: CONFIG.SPREADSHEET_ID };
+  if (fields !== undefined) params.fields = fields;
+  return gapi.client.sheets.spreadsheets.get(params);
+}
+
+// Strukturaenderung (spreadsheets.batchUpdate) mit Requests. Ohne Retry/Queue; Aufrufer entscheiden.
+export async function batchUpdateSpreadsheet(requests) {
+  return gapi.client.sheets.spreadsheets.batchUpdate({
+    spreadsheetId: CONFIG.SPREADSHEET_ID,
+    resource: { requests }
+  });
+}
+
+// Range leeren und werfen, wenn die API fehlt (im Gegensatz zum stillen clearValues). Ohne Queue.
+export async function clearRangeStrict(range) {
+  if (!gapi?.client?.sheets?.spreadsheets?.values?.clear) {
+    throw new Error('Sheets API nicht initialisiert â€“ bitte melden Sie sich an');
+  }
+  return gapi.client.sheets.spreadsheets.values.clear({
+    spreadsheetId: CONFIG.SPREADSHEET_ID,
+    range
+  });
+}
