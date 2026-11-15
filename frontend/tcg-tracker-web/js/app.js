@@ -75,12 +75,6 @@ import {
   createExportDialog,
   createSettingsPanel
 } from './ui/components.js?v=20261114-clean-1';
-import {
-  initSheetsWriteFeedback as initSheetsWriteFeedbackUi,
-  resetSheetsRetryMetrics as resetSheetsRetryMetricsUi,
-  renderSheetsRetryReport as renderSheetsRetryReportUi,
-  openSheetsRetryReportDialog as openSheetsRetryReportDialogUi
-} from './ui/sheets-retry-report.js';
 
 import {
   downloadJson,
@@ -117,7 +111,6 @@ import {
   renderAuditPanel,
   updateSaveStatePill,
   updateUndoUi,
-  undoLastChange,
   getErrorMessage,
   setEmptyState,
   setRefreshMenuOpen,
@@ -144,6 +137,9 @@ import {
   runQueuedActions, ensureSetImportedFromApi, importSetFromOverview, importSetsSequential, syncOverviewFromApi,
   powerRefreshOverviewFromApi, importAllMissingSets
 } from './features/collection/import-jobs.js';
+import {
+  initSheetsWriteFeedback, resetSheetsRetryMetrics, openSheetsRetryReportDialog, initAuditAndSaveUi
+} from './ui/sheets-feedback.js';
 import {
   initOfflineIndicator, initDashboardHoverPreview, checkSetCompletion, initShortcutsOverlay, initShareButton,
   initCustomSelects, initAutoHideTopbar
@@ -239,55 +235,6 @@ async function reloadCardmarketPricesManually() {
     setLoading(false);
     btn.disabled = false;
   }
-}
-
-function initSheetsWriteFeedback() {
-  initSheetsWriteFeedbackUi({
-    state,
-    renderSheetsRetryReport,
-    setGlobalStatus,
-    updateJob,
-  });
-}
-
-function resetSheetsRetryMetrics() {
-  resetSheetsRetryMetricsUi(state, renderSheetsRetryReport);
-}
-
-function renderSheetsRetryReport() {
-  renderSheetsRetryReportUi({ dom, state });
-}
-
-function openSheetsRetryReportDialog() {
-  openSheetsRetryReportDialogUi(dom, renderSheetsRetryReport);
-}
-
-function initAuditAndSaveUi() {
-  updateSaveStatePill();
-  renderAuditPanel();
-  updateUndoUi();
-
-  dom.btnAuditPanel?.addEventListener('click', () => {
-    if (!dom.auditPanel) return;
-    dom.auditPanel.classList.toggle('hidden');
-    const expanded = !dom.auditPanel.classList.contains('hidden');
-    dom.btnAuditPanel.setAttribute('aria-expanded', String(expanded));
-  });
-
-  dom.btnAuditClear?.addEventListener('click', () => {
-    state.auditEntries = [];
-    renderAuditPanel();
-  });
-
-  dom.btnUndoLast?.addEventListener('click', () => undoLastChange());
-
-  window.addEventListener('keydown', (event) => {
-    const isUndo = (event.ctrlKey || event.metaKey) && String(event.key).toLowerCase() === 'z';
-    if (!isUndo) return;
-    if (event.target?.matches?.('input, textarea, [contenteditable="true"]')) return;
-    event.preventDefault();
-    undoLastChange();
-  });
 }
 
 function initDevCompletionMode() {

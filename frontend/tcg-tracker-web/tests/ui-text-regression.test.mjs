@@ -21,6 +21,7 @@ async function listUiSourceFiles() {
     ...(await inDir('app')),
     path.join(jsRoot, 'ui', 'helpers.js'),
     path.join(jsRoot, 'ui', 'app-extras.js'),
+    path.join(jsRoot, 'ui', 'sheets-feedback.js'),
     ...(await inDir('features', { recursive: true })),
   ];
 }
