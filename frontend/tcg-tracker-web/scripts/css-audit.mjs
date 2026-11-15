@@ -70,33 +70,38 @@ function normalizeSelectorList(text) {
   return text.split(',').map((s) => s.trim().replace(/\s+/g, ' ').replace(/\s*([>+~])\s*/g, ' $1 ')).join(', ');
 }
 
-function splitDeclarations(body) {
-  const out = [];
-  let buf = '';
+// Zerlegt einen Regelrumpf in Deklarationen; start/end sind Offsets in der Quelle (end inkl. ';').
+function splitDeclarations(src, from, to) {
+  const spans = [];
+  let begin = from;
   let depth = 0;
   let quote = null;
-  for (let i = 0; i < body.length; i++) {
-    const c = body[i];
-    if (quote) { buf += c; if (c === '\\') { buf += body[++i] ?? ''; } else if (c === quote) quote = null; continue; }
+  for (let i = from; i < to; i++) {
+    const c = src[i];
+    if (quote) { if (c === '\\') i++; else if (c === quote) quote = null; continue; }
     if (c === '"' || c === "'") quote = c;
     else if (c === '(') depth++;
     else if (c === ')') depth--;
-    else if (c === ';' && depth === 0) { if (buf.trim()) out.push(buf.trim()); buf = ''; continue; }
-    buf += c;
+    else if (c === ';' && depth === 0) { spans.push([begin, i + 1]); begin = i + 1; }
   }
-  if (buf.trim()) out.push(buf.trim());
-  return out.map((d) => {
-    const idx = d.indexOf(':');
-    const prop = d.slice(0, idx).trim().toLowerCase();
-    const value = d.slice(idx + 1).trim();
-    return { prop, value, important: /!\s*important\s*$/i.test(value) };
-  });
+  spans.push([begin, to]);
+  const out = [];
+  for (const [a, b] of spans) {
+    const text = src.slice(a, b).replace(/;$/, '');
+    if (!text.trim()) continue;
+    const lead = text.length - text.trimStart().length;
+    const idx = text.indexOf(':');
+    const prop = text.slice(0, idx).trim().toLowerCase();
+    const value = text.slice(idx + 1).trim();
+    out.push({ prop, value, important: /!\s*important\s*$/i.test(value), start: a + lead, end: b });
+  }
+  return out;
 }
 
 // Liefert flache Liste aller Stilregeln mit Kontext (z. B. "@media (max-width: 600px)").
 export function parseCss(source, file) {
   // BOM durch Leerzeichen ersetzen, damit Offsets zur Originalquelle passen.
-  const src = stripComments(source.replace(/^﻿/, ' '));
+  const src = stripComments(source.replace(/^\uFEFF/, ' '));
   const rules = [];
   const parseBlock = (from, to, context, groups = []) => {
     let i = from;
