@@ -126,3 +126,11 @@ test('Zuletzt-geoeffnet-Chips ohne ausgeschlossene Sets', () => {
   const body = src.slice(src.indexOf('function renderRecentSets()'), src.indexOf('function renderRecentSets()') + 600);
   assert.match(body, /\.filter\(\(entry\) => !state\.isExcludedSet\(entry\)\)/);
 });
+
+test('buildExcludedSetPredicate: leere Sets aus meta.emptySetIds (TCGdex ohne Karten, z. B. wp/jumbo) werden ausgeblendet', async () => {
+  const { buildExcludedSetPredicate } = await import('../js/data/excluded-sets.js');
+  const isExcluded = buildExcludedSetPredicate({ excludedSetIds: [], excludedSeries: [], emptySetIds: ['TCGDEX-wp', 'TCGDEX-jumbo'] });
+  assert.equal(isExcluded({ setId: 'TCGDEX-wp' }), true);
+  assert.equal(isExcluded({ setId: 'tcgdex-jumbo' }), true);
+  assert.equal(isExcluded({ setId: 'sv1' }), false);
+});

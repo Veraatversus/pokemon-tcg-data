@@ -7,9 +7,14 @@ const lower = (value) => String(value ?? '').trim().toLowerCase();
 
 export const EXCLUDED_SETS_TIMEOUT_MS = 8_000;
 
-/** Praedikat (set) => true, wenn das Set ausgeschlossen ist: setId/Alias-Zeilen in excludedSetIds oder Serie in excludedSeries. */
+/** Praedikat (set) => true, wenn das Set ausgeschlossen ist: setId/Alias-Zeilen in excludedSetIds/emptySetIds oder Serie in excludedSeries. */
 export function buildExcludedSetPredicate(meta = null) {
-  const ids = new Set((Array.isArray(meta?.excludedSetIds) ? meta.excludedSetIds : []).map(lower).filter(Boolean));
+  // emptySetIds: Sets ohne Karten (TCGdex fuehrt nur die Set-Definition, z. B. wp/jumbo) - in api/v3 nicht
+  // veroeffentlicht, stehen aber evtl. noch als Zeile in der Overview des Sheets.
+  const ids = new Set([
+    ...(Array.isArray(meta?.excludedSetIds) ? meta.excludedSetIds : []),
+    ...(Array.isArray(meta?.emptySetIds) ? meta.emptySetIds : []),
+  ].map(lower).filter(Boolean));
   const series = new Set((Array.isArray(meta?.excludedSeries) ? meta.excludedSeries : []).map(lower).filter(Boolean));
   if (!ids.size && !series.size) return () => false;
   return (set) => {
