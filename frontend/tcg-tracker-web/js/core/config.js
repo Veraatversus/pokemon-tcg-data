@@ -64,8 +64,8 @@ export const CONFIG = {
   },
 
   // ── API-Endpunkte ────────────────────────────────────────────
-  // Karten-/Setdaten kommen nur aus api/v3 (+ api/registry). VERA_BASE dient nur noch
-  // als Basis der Cardmarket-Daten (<VERA_BASE>/cardmarket, Build-Stamp).
+  // Karten-/Setdaten kommen nur aus api/v3 (+ api/registry). VERA_BASE wird nicht mehr
+  // gelesen (frueher Basis der Cardmarket-Altdaten unter <VERA_BASE>/cardmarket, entfernt in Phase 4).
   APIS: {
     VERA_BASE: 'https://veraatversus.github.io/pokemon-tcg-data',
     // leer = relativ zum App-Verzeichnis: ./api/v3/ bzw. ./api/registry/ (GitHub Pages: App flach im

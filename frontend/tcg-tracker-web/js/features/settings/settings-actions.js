@@ -2,7 +2,7 @@
 // und dessen Aktionen (Suchverlauf, Favoriten, Caches, Cookies, Reset).
 // resetToLoggedOut liegt im Bootstrap von app.js und wird ueber actions.resetToLoggedOut() aufgerufen.
 import { signOut } from '../../core/auth.js';
-import { resetSheetsDataCaches } from '../../data/sheets-db.js?v=20261115-clean-4';
+import { resetSheetsDataCaches } from '../../data/sheets-db.js?v=20261115-clean-5';
 import * as cache from '../../core/cache.js';
 import { scopedStorageKey } from '../../core/config.js';
 import {
@@ -11,8 +11,8 @@ import {
   RECENT_SETS_STORAGE_KEY,
   DEV_COMPLETION_STORAGE_KEY
 } from '../../core/storage-keys.js';
-import { clearSearchHistory, loadSettings, saveSettings } from '../../enhanced-features.js?v=20261115-clean-4';
-import { createSettingsPanel } from '../../ui/components.js?v=20261115-clean-4';
+import { clearSearchHistory, loadSettings, saveSettings } from '../../enhanced-features.js?v=20261115-clean-5';
+import { createSettingsPanel } from '../../ui/components.js?v=20261115-clean-5';
 import {
   SETTINGS_RESET_ACTIONS,
   clearCookiesBestEffort,
