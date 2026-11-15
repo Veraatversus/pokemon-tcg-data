@@ -208,6 +208,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Schalterdatei des Stoebermodus nie cachen (Umschalten muss sofort wirken)
+  if (url.pathname.endsWith('/app-flags.json')) {
+    return;
+  }
+
   // Handle API requests
   if (request.method === 'GET') {
     // HTML/Navigations: network-first, damit neue index.html/app-Versionen sofort aktiv werden
