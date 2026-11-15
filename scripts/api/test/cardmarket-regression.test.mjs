@@ -279,7 +279,7 @@ describe('real-data regression (CM_REGRESSION=1)', { skip: REGRESSION ? false : 
 
   test('regression: set expansions from catalog, no tracker', () => {
     const sets = readJson(path.join(root, 'api', 'v3', 'sets.json'));
-    assert.ok(sets.length > 200);
+    assert.ok(sets.length > 190); // 198 seit 2026-11-15: Sets ohne Karten (wp, jumbo, sp, rc) werden nicht veroeffentlicht
     // fruehere Tracker-Sets ohne TCGdex-Expansion: per Mehrheit (auch aus veroeffentlichten IDs) abgeleitet
     const derived = Object.fromEntries(report.expansionMismatch.sets.filter((s) => s.reason === 'derived').map((s) => [s.setId, s.newId]));
     assert.equal(derived.np, 1608);
