@@ -21,8 +21,6 @@ import {
 import { renderSearchSetFilterOptions, runSearch } from '../../views/search.js';
 import { renderStats } from '../../views/stats.js';
 
-const LOADING_MAX_BLOCK_MS = 12000;
-
 const AUTO_IMPORT_QUEUE_LIMIT = 3;
 const IMPORT_BASE_GAP_MS = 1200;
 const IMPORT_QUOTA_BASE_DELAY_MS = 12000;

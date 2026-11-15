@@ -85,5 +85,4 @@ export const state = {
 export const uiState = {
   focusedCardIndex: -1,
   spreadsheetDialogReturnFocusEl: null,
-  loadingFailsafeTimer: null,
 };
