@@ -5,7 +5,7 @@ import { tcgdexIds } from './ids.mjs';
 
 /** -> { customSetReport, csLocked, csRejected }; sperrt Treffer-Karten in ctx.locked. */
 export function applyCustomSets(ctx) {
-  const { sets, cardsBySet, locked, indexFor, overrides, cardOverrideKeys, cardByKey, subsetExpansion, validExpansion } = ctx;
+  const { sets, cardsBySet, locked, indexFor, overrides, cardOverrideKeys, cardByKey, subsetExpansion, validExpansion, productOf } = ctx;
   // Expansion einer Karte: eigene des TCGdex-Untersets (Galerie-Subsets), sonst die des Sets.
   const setExpansionOf = (set) => (typeof set.ids?.cardmarket === 'number' ? set.ids.cardmarket : null);
   const cardExpansion = (set, card) => {
@@ -60,7 +60,15 @@ export function applyCustomSets(ctx) {
     const [{ set, card, hits: [hit], index }] = claims;
     const base = csBase(index, hit.number);
     // Gehoert laut custom-set zu einer anderen Basisnummer derselben Expansion -> falsch fuer diese Karte
-    const contradicted = (id) => { const n = csNumber(index, id); return id !== productId && n !== null && csBase(index, n) !== base; };
+    // Produkt einer anderen Expansion, das anders heisst als die Karte (ex4: TCGdex fuehrt Sandstorm-IDs) -> ebenso falsch;
+    // gleichnamige Produkte fremder Expansionen (Nachdrucke, Jumbo) bleiben als Zusatz-IDs.
+    const csExpansion = productOf?.(productId)?.expansion ?? null;
+    const foreignMismatch = (id) => {
+      if (id === productId || csExpansion === null) return false;
+      const p = productOf(id);
+      return Boolean(p?.name) && validExpansion(p.expansion) && p.expansion !== csExpansion && !cmNameMatches(p.name, card.name);
+    };
+    const contradicted = (id) => { const n = csNumber(index, id); return id !== productId && ((n !== null && csBase(index, n) !== base) || foreignMismatch(id)); };
     // Druck derselben Basisnummer mit Zusatz ("149V2" bei Karte 149): Variante, nie die normale Karte
     const suffixed = (id) => { const n = csNumber(index, id); return id !== productId && n !== null && n !== base && csBase(index, n) === base; };
     const original = tcgdexIds(card);
