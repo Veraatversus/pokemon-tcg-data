@@ -96,20 +96,6 @@
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=4505&sortBy=collectorsnumber_asc&perSite=100&site=1",
       "tcgdex": 5
     },
-    "TCGDEX-jumbo": {
-      "ambiguous": 0,
-      "cards": 0,
-      "coverage": {
-        "bySource": {},
-        "cards": 0,
-        "withId": 0
-      },
-      "expansionId": null,
-      "matched": 0,
-      "missing": 0,
-      "searchUrl": null,
-      "tcgdex": 0
-    },
     "TCGDEX-mee": {
       "ambiguous": 0,
       "cards": 16,
@@ -153,34 +139,6 @@
       "expansionId": null,
       "matched": 0,
       "missing": 1,
-      "searchUrl": null,
-      "tcgdex": 0
-    },
-    "TCGDEX-rc": {
-      "ambiguous": 0,
-      "cards": 0,
-      "coverage": {
-        "bySource": {},
-        "cards": 0,
-        "withId": 0
-      },
-      "expansionId": null,
-      "matched": 0,
-      "missing": 0,
-      "searchUrl": null,
-      "tcgdex": 0
-    },
-    "TCGDEX-sp": {
-      "ambiguous": 0,
-      "cards": 0,
-      "coverage": {
-        "bySource": {},
-        "cards": 0,
-        "withId": 0
-      },
-      "expansionId": null,
-      "matched": 0,
-      "missing": 0,
       "searchUrl": null,
       "tcgdex": 0
     },
@@ -454,20 +412,6 @@
       "matched": 0,
       "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1632&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 0
-    },
-    "TCGDEX-wp": {
-      "ambiguous": 0,
-      "cards": 0,
-      "coverage": {
-        "bySource": {},
-        "cards": 0,
-        "withId": 0
-      },
-      "expansionId": null,
-      "matched": 0,
-      "missing": 0,
-      "searchUrl": null,
       "tcgdex": 0
     },
     "TCGDEX-xya": {
@@ -6582,38 +6526,10 @@
   },
   "setsWithoutExpansion": [
     {
-      "cards": 0,
-      "evidence": "0/0",
-      "evidenceSource": null,
-      "setId": "TCGDEX-jumbo",
-      "tcgdexExpansion": null
-    },
-    {
       "cards": 1,
       "evidence": "0/0",
       "evidenceSource": null,
       "setId": "TCGDEX-miscp",
-      "tcgdexExpansion": null
-    },
-    {
-      "cards": 0,
-      "evidence": "0/0",
-      "evidenceSource": null,
-      "setId": "TCGDEX-rc",
-      "tcgdexExpansion": null
-    },
-    {
-      "cards": 0,
-      "evidence": "0/0",
-      "evidenceSource": null,
-      "setId": "TCGDEX-sp",
-      "tcgdexExpansion": null
-    },
-    {
-      "cards": 0,
-      "evidence": "0/0",
-      "evidenceSource": null,
-      "setId": "TCGDEX-wp",
       "tcgdexExpansion": null
     },
     {
