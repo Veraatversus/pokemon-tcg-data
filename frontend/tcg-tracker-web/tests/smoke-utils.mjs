@@ -18,6 +18,14 @@ const STORAGE_STATE = String(process.env.PLAYWRIGHT_STORAGE_STATE || '').trim();
 
 export const BASE_URL = process.env.TCG_TRACKER_BASE_URL || 'http://localhost:8080';
 
+// Die bestehenden Smoke-Tests pruefen die App ohne Stoebermodus; der Schalter (app-flags.json) wird daher
+// unabhaengig vom Dateiwert auf "aus" gesetzt. Den Stoebermodus prueft tests/browse-smoke.mjs.
+async function forceBrowseModeOff(context) {
+  await context.route('**/app-flags.json*', (route) => route.fulfill({
+    status: 200, contentType: 'application/json', body: JSON.stringify({ browseWithoutLogin: false }),
+  }));
+}
+
 export async function withBrowser(testFn) {
   if (PROFILE_DIR) {
     const context = await chromium.launchPersistentContext(PROFILE_DIR, {
@@ -25,6 +33,7 @@ export async function withBrowser(testFn) {
       slowMo: SLOW_MO,
       viewport: { width: 1366, height: 900 },
     });
+    await forceBrowseModeOff(context);
     const page = context.pages()[0] || await context.newPage();
     try {
       await testFn(page);
@@ -39,6 +48,7 @@ export async function withBrowser(testFn) {
     viewport: { width: 1366, height: 900 },
     ...(STORAGE_STATE ? { storageState: STORAGE_STATE } : {}),
   });
+  await forceBrowseModeOff(context);
   const page = await context.newPage();
   try {
     await testFn(page);

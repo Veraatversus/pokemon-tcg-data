@@ -1,8 +1,8 @@
 // Import-Jobs: Job-Anzeige, Aktions-Warteschlange, Import-Backoff und -Preflight, Auto-Import-Warteschlange,
 // Import ueber die Uebersicht, Sequenz-Import und Overview-Abgleich mit der API.
 import { isSignedIn } from '../../core/auth.js';
-import { writeSetting, importSetIntoCollection, listSetsOverviewData, syncOverviewWithApiSets } from '../../data/sheets-db.js?v=20261115-umlaute';
-import { fetchMergedCardsWithSetMeta, fetchAllAvailableSets } from '../../data/pokemon-api.js?v=20261115-umlaute';
+import { writeSetting, importSetIntoCollection, listSetsOverviewData, syncOverviewWithApiSets } from '../../data/sheets-db.js?v=20261115-browse-2';
+import { fetchMergedCardsWithSetMeta, fetchAllAvailableSets } from '../../data/pokemon-api.js?v=20261115-browse-2';
 import { toBoolean } from '../../core/utils.js';
 import * as cache from '../../core/cache.js';
 import { runWithRetry, isRetryableError } from '../../core/retry.js';
@@ -290,6 +290,8 @@ function scheduleAutoImportUiRefresh() {
 }
 
 export async function ensureSetImportedFromApi(setMeta, cards, options = {}) {
+  // Stoebermodus ohne Login: nie in eine Tabelle schreiben
+  if (state.browseMode) return null;
   const { setMetaPatch = null, showSuccessToast = false, successMessage = '', source = 'search' } = options;
   const setId = String(setMeta?.setId || '').trim();
   const safeCards = Array.isArray(cards) ? cards : [];

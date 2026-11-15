@@ -17,12 +17,12 @@ import {
   loadSearchHistory,
   clearSearchHistory,
   generateCollectionReport
-} from './enhanced-features.js?v=20261115-umlaute';
+} from './enhanced-features.js?v=20261115-browse-2';
 
 import {
   initQuickFiltersUI,
   createExportDialog
-} from './ui/components.js?v=20261115-umlaute';
+} from './ui/components.js?v=20261115-browse-2';
 
 import {
   downloadJson,
@@ -52,14 +52,16 @@ import {
   setRefreshMenuOpen,
   syncRefreshControls
 } from './ui/helpers.js';
-import { loadSets, renderDashboard, getSetById, ensureSetSelectorOption } from './views/dashboard.js';
+import { loadSets, renderDashboard, getSetById, ensureSetSelectorOption, renderSetSelectorOptions } from './views/dashboard.js';
+import { startBrowseMode, stopBrowseMode } from './app/browse-mode.js';
+import { resetSheetsDataCaches } from './data/sheets-db.js?v=20261115-browse-2';
 import { runSearch, initSearch, initSearchAutocomplete } from './views/search.js';
 import { openSpreadsheetDialog, updateSpreadsheetInfoBar, initSpreadsheetDialog } from './features/settings/spreadsheet-dialog.js';
 import { renderStats } from './views/stats.js';
 import { prefetchPriceStamp, reloadCardmarketPricesManually } from './views/stats-price.js';
 import {
   updateStats, applyFilter, initFilterButtons, initSortControl, getCurrentCardmarketBasePriceType, loadCardmarketPriceSummary,
-  hydrateCardmarketLink, makeCheckbox, syncCollectionCheckboxUi, syncSharedLegacyBadge,
+  hydrateCardmarketLink, makeCheckbox, makeBrowseLoginHint, syncCollectionCheckboxUi, syncSharedLegacyBadge,
   reportCollectionWriteError, ensureWritableCollectionEntry, writeCollectionEntryState, updateCardState,
   broadcastRealtimeCardUpdate, applyIncomingRealtimeUpdate
 } from './views/set-cards.js';
@@ -108,6 +110,7 @@ registerActions({
   deleteSetFromCollection,
   checkSetCompletion,
   makeCheckbox,
+  makeBrowseLoginHint,
   syncSharedLegacyBadge,
   hydrateCardmarketLink,
   ensureWritableCollectionEntry,
@@ -276,6 +279,7 @@ function createBootstrapRuntimeController() {
     signIn,
     signOut,
     resetToLoggedOut,
+    startBrowseModeUi,
     isSignedIn,
     loadCurrentSet,
     reimportCurrentSetFromApi,
@@ -302,6 +306,7 @@ async function bootstrap() {
 }
 
 async function onLoginSuccess() {
+  stopBrowseModeUi();
   state.loggedIn = true;
   dom.auth.dataset.state = 'out'; dom.auth.disabled = false; syncAuthButtonLabel();
   renderRecentSets();
@@ -354,6 +359,44 @@ function resetToLoggedOut() {
   setGlobalStatus('Abgemeldet.');
   showView('dashboard');
   dom.dashboardGrid.innerHTML = '<p class="empty-state">Bitte anmelden.</p>';
+  // Schalter an: statt der leeren Seite in den Stoebermodus (alle Sets aus api/v3, ohne Sammlung).
+  startBrowseModeUi().catch((err) => console.warn('[browse-mode]', err));
+}
+
+function setStatsNavHidden(hidden) {
+  dom.mainNav?.querySelector('[data-view="stats"]')?.classList.toggle('hidden', hidden);
+}
+
+/** Stoebermodus ohne Login starten (app-flags.json); false = Schalter aus, Seite bleibt bei "Bitte anmelden". */
+async function startBrowseModeUi() {
+  return startBrowseMode({
+    onEnter: (sets) => {
+      dom.mainNav.classList.remove('hidden');
+      document.body.classList.add('browse-mode');
+      setStatsNavHidden(true);
+      // Gespeicherte Ansicht "Importiert"/"Nicht importiert" waere im Stoebermodus leer bzw. ohne Reiter
+      if (state.dashboardView === 'imported' || state.dashboardView === 'not-imported') state.dashboardView = 'all';
+      renderSetSelectorOptions();
+      dom.selector.disabled = false;
+      dom.load.disabled = false;
+      setGlobalStatus(`Stöbermodus – ${sets.length} Sets`);
+      if (!window.location.hash || window.location.hash === '#') navigate('dashboard');
+      else handleRouteChange();
+    },
+  });
+}
+
+function stopBrowseModeUi() {
+  const wasBrowsing = state.browseMode;
+  stopBrowseMode();
+  if (wasBrowsing) {
+    // Im Stoebermodus gerenderte Karten/Treffer tragen Anmelde-Hinweise statt Haekchen; Sheet-Caches frisch.
+    dom.cards.innerHTML = '';
+    if (dom.searchResults) dom.searchResults.innerHTML = '';
+    resetSheetsDataCaches();
+  }
+  document.body.classList.remove('browse-mode');
+  setStatsNavHidden(false);
 }
 
 function getAuthButtonLabel() {

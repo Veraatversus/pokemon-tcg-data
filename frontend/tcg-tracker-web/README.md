@@ -27,6 +27,15 @@ Kein Server, kein Build-Schritt – direkt auf GitHub Pages deploybar.
 | Cardmarket-Links | ✅ |
 | Kartensuche über alle Sets (Suchindex, ohne Laden der Kartendateien) | ✅ |
 
+## Stöbermodus ohne Login
+
+Ist der Schalter an, sehen nicht angemeldete Besucher alle Sets, Karten, Bilder und Cardmarket-Preise. Statt der Sammel-Häkchen steht „Zum Sammeln anmelden“; Statistik und Tabellen-Werkzeuge sind ausgeblendet. Nach dem Login läuft alles wie gewohnt.
+
+- Schalter: `app-flags.json` mit `{ "browseWithoutLogin": true }` oder `false`, bei jedem Start frisch geladen (`js/core/app-flags.js`). Fehlt die Datei oder ist sie ungültig, ist der Modus aus.
+- Umschalten: GitHub → Actions → **Stoebermodus an/aus** → *Run workflow* (an/aus, Ziel release, dev oder beide). Der Workflow setzt die Datei, committet und stößt den Pages-Deploy an; nach 1–2 Minuten wirkt es.
+- „Promote Dev to Release“ behält den Schalter von release (fehlt er dort, gilt aus).
+- Test: `npm run test:browse` (Schalter an und aus, ohne Login).
+
 ---
 
 ## Schnellstart

@@ -115,7 +115,8 @@ function scoreDashboardSetMatch(set, rawQuery = '') {
 }
 
 async function verifyDatasetQueries() {
-  const setsPath = resolve(process.cwd(), '..', '..', 'sets', 'en.json');
+  // Seit Phase 4 liegt der eingefrorene pokemontcg-Stand nur noch unter sources/pokemontcg.
+  const setsPath = resolve(process.cwd(), '..', '..', 'sources', 'pokemontcg', 'sets', 'en.json');
   const raw = await readFile(setsPath, 'utf8');
   const sets = JSON.parse(raw);
 

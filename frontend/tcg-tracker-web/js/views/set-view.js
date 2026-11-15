@@ -1,9 +1,9 @@
 // Set-Ansicht: Raster-Zoom, Mehrfach-Auswahl, CSV-Export, Tastaturnavigation, Set laden.
 import { signOut } from '../core/auth.js';
-import { readSetCollectionMap, readDbCardsForSet, updateCellBooleansBatch, writeSetting } from '../data/sheets-db.js?v=20261115-umlaute';
+import { readSetCollectionMap, readDbCardsForSet, updateCellBooleansBatch, writeSetting } from '../data/sheets-db.js?v=20261115-browse-2';
 import { collectionKeyOf, hasEntryCells, stateCellUpdates, applyEntryState, chunkCardUpdates } from '../data/collection-writes.js';
 import { needsApiCardEnrichment, describeCardDataFailure, NO_CARD_DATA_MESSAGE } from '../core/card-enrichment.js';
-import { fetchMergedCardsWithSetMeta } from '../data/pokemon-api.js?v=20261115-umlaute';
+import { fetchMergedCardsWithSetMeta } from '../data/pokemon-api.js?v=20261115-browse-2';
 import { bindImageFallback } from '../ui/image-fallback.js';
 import * as cache from '../core/cache.js';
 import { CONFIG } from '../core/config.js';
@@ -250,7 +250,8 @@ export async function loadSetCardsV3First(setId, { signal, forceRefresh = false 
     console.warn('[cards] api/v3 nicht verfuegbar, db_cards als Offline-Fallback:', normalizedSetId, error?.message || error);
     let dbCards = cache.has(dbCardsCacheKey) ? cache.get(dbCardsCacheKey) : null;
     if (!Array.isArray(dbCards)) {
-      dbCards = await readDbCardsForSet(normalizedSetId).catch(() => []);
+      // Stoebermodus ohne Login: kein Sheet-Fallback
+      dbCards = state.browseMode ? [] : await readDbCardsForSet(normalizedSetId).catch(() => []);
       if (dbCards.length > 0) cache.set(dbCardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
     }
     return dbCards.length > 0
@@ -292,7 +293,7 @@ export async function loadSetCardsWithHydration(setId, { allowApiFallback = fals
   }
 
   if (cache.has(dbCardsCacheKey)) return cache.get(dbCardsCacheKey);
-  const dbCards = await readDbCardsForSet(normalizedSetId).catch(() => []);
+  const dbCards = state.browseMode ? [] : await readDbCardsForSet(normalizedSetId).catch(() => []);
   const hasDbCards = Array.isArray(dbCards) && dbCards.length > 0;
   if (hasDbCards && !needsApiCardEnrichment(dbCards)) {
     cache.set(dbCardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
@@ -352,9 +353,12 @@ export async function loadCurrentSet(forceRefresh = false) {
     // api/v3 zuerst, db_cards nur Offline-Fallback; ohne beides die v3-Meldung (describeCardDataFailure).
     const [cards, dbMap] = await Promise.all([
       loadSetCardsWithHydration(setId, { preferV3: true, forceRefresh }),
-      cache.has(dbCacheKey)
-        ? cache.get(dbCacheKey)
-        : readSetCollectionMap(selected.setName, { setId: selected.setId }).then((m) => { cache.set(dbCacheKey, m, CONFIG.CACHE_TTL_MS); return m; }),
+      // Stoebermodus ohne Login: keine Sammlung (kein Sheet-Zugriff)
+      state.browseMode
+        ? new Map()
+        : cache.has(dbCacheKey)
+          ? cache.get(dbCacheKey)
+          : readSetCollectionMap(selected.setName, { setId: selected.setId }).then((m) => { cache.set(dbCacheKey, m, CONFIG.CACHE_TTL_MS); return m; }),
     ]);
 
     if (!Array.isArray(cards) || cards.length === 0) {
@@ -373,8 +377,10 @@ export async function loadCurrentSet(forceRefresh = false) {
     document.querySelector('.filter-btn[data-filter="all"]')?.classList.add('active');
 
     renderCards();
-    void runAmbiguousMigrationFlow(selected);
-    await writeSetting('lastSetId', setId);
+    if (!state.browseMode) {
+      void runAmbiguousMigrationFlow(selected);
+      await writeSetting('lastSetId', setId);
+    }
     actions.markSetAsRecent(selected);
     setGlobalStatus(`${selected.setName}: ${cards.length} Karten.`);
     if (!forceRefresh) showToast(`${selected.setName} geladen`, 'success', 2000);

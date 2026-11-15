@@ -1,9 +1,9 @@
 // Lightbox: Kartendetail, Wischgesten, Vollbildansicht und Haken-Schalter.
 import { isGeneratedCardmarketSearchUrl } from '../data/cardmarket-url-utils.js';
-import { readSetCollectionMap } from '../data/sheets-db.js?v=20261115-umlaute';
+import { readSetCollectionMap } from '../data/sheets-db.js?v=20261115-browse-2';
 import { collectionKeyOf, emptyCollectionEntry } from '../data/collection-writes.js';
-import { fetchMergedCardsWithSetMeta } from '../data/pokemon-api.js?v=20261115-umlaute';
-import { resolveCollectionToggleState } from '../core/collection-state.js?v=20261115-umlaute';
+import { fetchMergedCardsWithSetMeta } from '../data/pokemon-api.js?v=20261115-browse-2';
+import { resolveCollectionToggleState } from '../core/collection-state.js?v=20261115-browse-2';
 import * as cache from '../core/cache.js';
 import { CONFIG } from '../core/config.js';
 import { dom } from '../app/dom.js';
@@ -120,7 +120,7 @@ export function renderLightbox(index) {
     renderLightboxCardmarketPrices({ entry: null }, { preferReverseHolo: Boolean(db?.rh) });
   }
   syncCollectionCheckboxUi(dom.lightboxGCheck, dom.lightboxRhCheck, db, {
-    isEditable: Boolean(state.currentSet?.setName)
+    isEditable: Boolean(state.currentSet?.setName) && !state.browseMode
   });
   dom.btnLightboxPrev.disabled  = index === 0;
   dom.btnLightboxNext.disabled  = index === state.cards.length - 1;
@@ -168,7 +168,7 @@ function bindLightboxKeyboard() {
     if (e.key === 'Escape')     closeLightbox();
     if (e.key === 'ArrowLeft')  goPrevLightboxCard();
     if (e.key === 'ArrowRight') goNextLightboxCard();
-    if (e.key === ' ')          { e.preventDefault(); dom.lightboxGCheck.click(); }
+    if (e.key === ' ')          { e.preventDefault(); if (!state.browseMode) dom.lightboxGCheck.click(); }
   });
 }
 
@@ -408,6 +408,8 @@ function initLightboxFullscreen() {
 
 // G-/RH-Haken der Lightbox schreiben ueber denselben Pfad wie das Kartenraster (inkl. Auto-Import des Sets).
 async function lightboxToggle(isG, checked) {
+  // Stoebermodus ohne Login: kein Sammelstatus, kein Schreiben
+  if (state.browseMode) return;
   const card = state.cards[state.lightboxIndex];
   if (!card) return;
   const key = collectionKeyOf(card);

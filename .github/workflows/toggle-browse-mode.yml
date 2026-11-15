@@ -1,0 +1,77 @@
+# Schalter fuer den Stoebermodus ohne Login (frontend/tcg-tracker-web/app-flags.json).
+# An: nicht angemeldete Besucher sehen Sets, Karten, Bilder und Preise. Aus: wieder nur "Bitte anmelden"
+# (z. B. wenn der Datenverkehr zu gross wird). Der Push loest den Pages-Deploy aus; nach 1-2 Minuten wirkt es.
+# "Promote Dev to Release" behaelt den release-Wert, release und dev werden also getrennt geschaltet.
+name: Stoebermodus an/aus
+
+on:
+  workflow_dispatch:
+    inputs:
+      enabled:
+        description: 'Stoebermodus ohne Login einschalten?'
+        type: boolean
+        required: true
+        default: false
+      target:
+        description: 'Fuer welche Seite?'
+        type: choice
+        options:
+          - release
+          - dev
+          - both
+        default: release
+
+permissions:
+  actions: write
+  contents: write
+
+jobs:
+  toggle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Schalter setzen
+        env:
+          ENABLED: ${{ inputs.enabled }}
+          TARGET: ${{ inputs.target }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          FLAGS=frontend/tcg-tracker-web/app-flags.json
+          VALUE=false; [ "$ENABLED" = "true" ] && VALUE=true
+          LABEL=aus; [ "$VALUE" = "true" ] && LABEL=an
+          case "$TARGET" in both) BRANCHES="release dev" ;; *) BRANCHES="$TARGET" ;; esac
+          for BRANCH in $BRANCHES; do
+            git fetch -q origin "$BRANCH"
+            git checkout -q -B "$BRANCH" "origin/$BRANCH"
+            printf '{\n  "browseWithoutLogin": %s\n}\n' "$VALUE" > "$FLAGS"
+            git add "$FLAGS"
+            if git diff --cached --quiet; then
+              echo "$BRANCH: Stoebermodus ist bereits $LABEL"
+              continue
+            fi
+            git commit -q -m "chore: Stoebermodus $LABEL ($BRANCH)"
+            git push -q origin "$BRANCH"
+            echo "$BRANCH: Stoebermodus $LABEL"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          done
+        id: toggle
+
+      # Pushes mit GITHUB_TOKEN starten keine weiteren Workflows; der Deploy (baut release und dev) wird daher
+      # ausdruecklich angestossen - wie in "Promote Dev to Release".
+      - name: Pages-Deploy anstossen
+        if: steps.toggle.outputs.changed == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'deploy-pages.yml',
+              ref: 'release'
+            });

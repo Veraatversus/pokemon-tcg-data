@@ -5,7 +5,7 @@ import {
   ensureCollectionEntry,
   updateCellBooleansBatch,
   appendCollectionRows
-} from '../data/sheets-db.js?v=20261115-umlaute';
+} from '../data/sheets-db.js?v=20261115-browse-2';
 import {
   collectionKeyOf,
   emptyCollectionEntry,
@@ -17,10 +17,10 @@ import {
   isAmbiguousLegacyKeyError,
   describeAmbiguousLegacyKey
 } from '../data/collection-writes.js';
-import { fetchMergedCardsWithSetMeta } from '../data/pokemon-api.js?v=20261115-umlaute';
-import { getCardLanguage } from '../data/schema-contract.js?v=20261115-umlaute';
-import { getCardPrice } from '../data/v3-prices.js?v=20261115-umlaute';
-import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle, effectiveCollectionStatus } from '../core/collection-state.js?v=20261115-umlaute';
+import { fetchMergedCardsWithSetMeta } from '../data/pokemon-api.js?v=20261115-browse-2';
+import { getCardLanguage } from '../data/schema-contract.js?v=20261115-browse-2';
+import { getCardPrice } from '../data/v3-prices.js?v=20261115-browse-2';
+import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle, effectiveCollectionStatus } from '../core/collection-state.js?v=20261115-browse-2';
 import * as cache from '../core/cache.js';
 import { CONFIG } from '../core/config.js';
 import { createAutoSnapshot } from '../features/collection/index.js';
@@ -38,8 +38,8 @@ import {
   normalizeCardmarketBasePriceType,
   renderLightboxCardmarketPrices as renderLightboxCardmarketPricesUi,
   CARDMARKET_BASE_PRICE_DEFAULT,
-} from '../ui/cardmarket-price.js?v=20261115-umlaute';
-import { loadSettings } from '../enhanced-features.js?v=20261115-umlaute';
+} from '../ui/cardmarket-price.js?v=20261115-browse-2';
+import { loadSettings } from '../enhanced-features.js?v=20261115-browse-2';
 import { buildCollectionUpdateEvent } from '../features/community/index.js';
 import { dom } from '../app/dom.js';
 import { state } from '../app/state.js';
@@ -226,11 +226,16 @@ function createCardElement(card, key, db, index) {
   titleDiv.textContent = `${card.number} \u2013 ${card.name || 'Unbekannt'}`;
 
   const checksDiv = document.createElement('div'); checksDiv.className = 'checks';
-  checksDiv.append(
-    makeCheckbox('G', 'g', shownStatus.g, !isEditable),
-    makeCheckbox('RH', 'rh', shownStatus.rh, getCollectionUiState(dbEntry, { isEditable }).rhDisabled)
-  );
-  syncSharedLegacyBadge(checksDiv, dbEntry);
+  if (state.browseMode) {
+    // Stoebermodus ohne Login: kein Sammelstatus, nur der Hinweis zum Anmelden.
+    checksDiv.append(makeBrowseLoginHint());
+  } else {
+    checksDiv.append(
+      makeCheckbox('G', 'g', shownStatus.g, !isEditable),
+      makeCheckbox('RH', 'rh', shownStatus.rh, getCollectionUiState(dbEntry, { isEditable }).rhDisabled)
+    );
+    syncSharedLegacyBadge(checksDiv, dbEntry);
+  }
   meta.append(titleDiv, checksDiv);
 
   if (card.cardmarketUrl) {
@@ -245,7 +250,7 @@ function createCardElement(card, key, db, index) {
   }
 
   article.append(imgWrap, meta);
-  if (isEditable) attachCheckboxListeners(article, dbEntry, key);
+  if (isEditable && !state.browseMode) attachCheckboxListeners(article, dbEntry, key);
 
   // Bulk-Klick auf Artikel
   article.addEventListener('click', (e) => {
@@ -363,6 +368,19 @@ export function hydrateCardmarketLink(linkEl, card, { compact = false, preferRev
     .catch((error) => {
       console.warn('[cardmarket] price lookup failed', error);
     });
+}
+
+/** Stoebermodus: Knopf statt Sammel-Haekchen; Klick startet den Google-Login. */
+export function makeBrowseLoginHint() {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'browse-login-hint';
+  button.textContent = 'Zum Sammeln anmelden';
+  button.addEventListener('click', (event) => {
+    event.stopPropagation();
+    dom.auth?.click();
+  });
+  return button;
 }
 
 export function makeCheckbox(labelText, type, checked, disabled) {
