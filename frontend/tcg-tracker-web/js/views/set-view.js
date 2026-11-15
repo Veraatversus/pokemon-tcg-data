@@ -1,9 +1,9 @@
 // Set-Ansicht: Raster-Zoom, Mehrfach-Auswahl, CSV-Export, Tastaturnavigation, Set laden.
 import { signOut } from '../core/auth.js';
-import { readSetCollectionMap, readDbCardsForSet, updateCellBooleansBatch, writeSetting } from '../data/sheets-db.js?v=20261115-browse';
+import { readSetCollectionMap, readDbCardsForSet, updateCellBooleansBatch, writeSetting } from '../data/sheets-db.js?v=20261115-browse-2';
 import { collectionKeyOf, hasEntryCells, stateCellUpdates, applyEntryState, chunkCardUpdates } from '../data/collection-writes.js';
 import { needsApiCardEnrichment, describeCardDataFailure, NO_CARD_DATA_MESSAGE } from '../core/card-enrichment.js';
-import { fetchMergedCardsWithSetMeta } from '../data/pokemon-api.js?v=20261115-browse';
+import { fetchMergedCardsWithSetMeta } from '../data/pokemon-api.js?v=20261115-browse-2';
 import { bindImageFallback } from '../ui/image-fallback.js';
 import * as cache from '../core/cache.js';
 import { CONFIG } from '../core/config.js';
@@ -250,7 +250,8 @@ export async function loadSetCardsV3First(setId, { signal, forceRefresh = false 
     console.warn('[cards] api/v3 nicht verfuegbar, db_cards als Offline-Fallback:', normalizedSetId, error?.message || error);
     let dbCards = cache.has(dbCardsCacheKey) ? cache.get(dbCardsCacheKey) : null;
     if (!Array.isArray(dbCards)) {
-      dbCards = await readDbCardsForSet(normalizedSetId).catch(() => []);
+      // Stoebermodus ohne Login: kein Sheet-Fallback
+      dbCards = state.browseMode ? [] : await readDbCardsForSet(normalizedSetId).catch(() => []);
       if (dbCards.length > 0) cache.set(dbCardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);
     }
     return dbCards.length > 0
@@ -292,7 +293,7 @@ export async function loadSetCardsWithHydration(setId, { allowApiFallback = fals
   }
 
   if (cache.has(dbCardsCacheKey)) return cache.get(dbCardsCacheKey);
-  const dbCards = await readDbCardsForSet(normalizedSetId).catch(() => []);
+  const dbCards = state.browseMode ? [] : await readDbCardsForSet(normalizedSetId).catch(() => []);
   const hasDbCards = Array.isArray(dbCards) && dbCards.length > 0;
   if (hasDbCards && !needsApiCardEnrichment(dbCards)) {
     cache.set(dbCardsCacheKey, dbCards, CONFIG.CACHE_TTL_MS);

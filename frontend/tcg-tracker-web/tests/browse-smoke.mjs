@@ -17,11 +17,13 @@ async function withFlags(enabled, fn) {
   const page = await context.newPage();
   const errors = [];
   const cardRequests = [];
+  const sheetRequests = [];
+  page.on('request', (r) => { if (/sheets\.googleapis\.com/.test(r.url())) sheetRequests.push(r.url()); });
   page.on('pageerror', (e) => errors.push(String(e.message || e)));
   page.on('console', (m) => { if (m.type() === 'error' && !/favicon|Failed to load resource/i.test(m.text())) errors.push(m.text()); });
   page.on('request', (r) => { if (/\/api\/v3\/cards\//.test(r.url())) cardRequests.push(r.url()); });
   try {
-    await fn(page, { errors, cardRequests });
+    await fn(page, { errors, cardRequests, sheetRequests });
   } finally {
     await context.close();
     await browser.close();
@@ -30,7 +32,7 @@ async function withFlags(enabled, fn) {
 
 const base = BASE_URL.replace(/#.*$/, '');
 
-await withFlags(true, async (page, { errors }) => {
+await withFlags(true, async (page, { errors, sheetRequests }) => {
   await page.goto(`${base}#dashboard`, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => document.querySelectorAll('.dash-set-card').length > 150, null, { timeout: 30000 });
   if (!(await page.evaluate(() => document.body.classList.contains('browse-mode')))) fail('body.browse-mode fehlt');
@@ -52,6 +54,15 @@ await withFlags(true, async (page, { errors }) => {
   await page.press('#search-input', 'Enter');
   await page.waitForFunction(() => document.querySelectorAll('#view-search .browse-login-hint').length > 0, null, { timeout: 30000 });
   if (await page.locator('#view-search input[data-type="g"]').count()) fail('Suche zeigt Haekchen');
+
+  // Suchtreffer in der Lightbox oeffnen, Leertaste (setzt sonst den Sammelstatus): kein Schreibversuch, kein Fehler-Toast
+  await page.locator('#view-search .card-img-wrap').first().click();
+  await page.waitForSelector('#dialog-lightbox[open]', { timeout: 15000 });
+  await page.keyboard.press(' ');
+  await page.waitForTimeout(1500);
+  if (await page.locator('.toast-error, .toast.error').count()) fail('Fehler-Toast nach Leertaste in der Lightbox');
+  await page.keyboard.press('Escape');
+  if (sheetRequests.length) fail(`Sheets-Zugriffe im Stoebermodus: ${sheetRequests.length}`);
 
   if (errors.length) fail(`Konsolenfehler: ${errors.slice(0, 3).join(' | ')}`);
   console.log('Stoebermodus an: ok');

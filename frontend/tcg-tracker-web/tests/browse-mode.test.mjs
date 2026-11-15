@@ -65,3 +65,52 @@ test('stopBrowseMode beendet den Stoebermodus', () => {
   stopBrowseMode();
   assert.equal(state.browseMode, false);
 });
+
+test('stopBrowseMode setzt Stoeber-Zustand zurueck (Summary, Set, Karten, Sammlung)', () => {
+  state.browseMode = true;
+  state.summaryData = [];
+  state.currentSet = { setId: 'sv1' };
+  state.cards = [{ id: 1 }];
+  state.dbMap = new Map([['1', {}]]);
+  stopBrowseMode();
+  assert.equal(state.browseMode, false);
+  assert.equal(state.summaryData, null);
+  assert.equal(state.currentSet, null);
+  assert.deepEqual(state.cards, []);
+  assert.equal(state.dbMap.size, 0);
+});
+
+test('Login waehrend des Starts gewinnt: kein Stoebermodus, Zustand unangetastet', async () => {
+  stopBrowseMode();
+  state.loggedIn = false;
+  let release;
+  const gate = new Promise((r) => { release = r; });
+  const pending = startBrowseMode({
+    loadFlags: async () => ({ browseWithoutLogin: true }),
+    loadSets: async () => { await gate; return apiSets; },
+    loadPredicate: async () => isExcluded,
+    onEnter: () => { throw new Error('onEnter darf nicht laufen'); },
+  });
+  state.loggedIn = true; // Login abgeschlossen, waehrend die Sets noch laden
+  state.allSets = [{ setId: 'mine' }];
+  release();
+  assert.equal(await pending, false);
+  assert.equal(state.browseMode, false);
+  assert.deepEqual(state.allSets, [{ setId: 'mine' }]);
+  state.loggedIn = false;
+});
+
+test('stopBrowseMode waehrend des Starts bricht den Start ab', async () => {
+  let release;
+  const gate = new Promise((r) => { release = r; });
+  const pending = startBrowseMode({
+    loadFlags: async () => ({ browseWithoutLogin: true }),
+    loadSets: async () => { await gate; return apiSets; },
+    loadPredicate: async () => isExcluded,
+    onEnter: () => { throw new Error('onEnter darf nicht laufen'); },
+  });
+  stopBrowseMode();
+  release();
+  assert.equal(await pending, false);
+  assert.equal(state.browseMode, false);
+});

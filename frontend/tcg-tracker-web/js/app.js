@@ -17,12 +17,12 @@ import {
   loadSearchHistory,
   clearSearchHistory,
   generateCollectionReport
-} from './enhanced-features.js?v=20261115-browse';
+} from './enhanced-features.js?v=20261115-browse-2';
 
 import {
   initQuickFiltersUI,
   createExportDialog
-} from './ui/components.js?v=20261115-browse';
+} from './ui/components.js?v=20261115-browse-2';
 
 import {
   downloadJson,
@@ -54,6 +54,7 @@ import {
 } from './ui/helpers.js';
 import { loadSets, renderDashboard, getSetById, ensureSetSelectorOption, renderSetSelectorOptions } from './views/dashboard.js';
 import { startBrowseMode, stopBrowseMode } from './app/browse-mode.js';
+import { resetSheetsDataCaches } from './data/sheets-db.js?v=20261115-browse-2';
 import { runSearch, initSearch, initSearchAutocomplete } from './views/search.js';
 import { openSpreadsheetDialog, updateSpreadsheetInfoBar, initSpreadsheetDialog } from './features/settings/spreadsheet-dialog.js';
 import { renderStats } from './views/stats.js';
@@ -373,6 +374,8 @@ async function startBrowseModeUi() {
       dom.mainNav.classList.remove('hidden');
       document.body.classList.add('browse-mode');
       setStatsNavHidden(true);
+      // Gespeicherte Ansicht "Importiert"/"Nicht importiert" waere im Stoebermodus leer bzw. ohne Reiter
+      if (state.dashboardView === 'imported' || state.dashboardView === 'not-imported') state.dashboardView = 'all';
       renderSetSelectorOptions();
       dom.selector.disabled = false;
       dom.load.disabled = false;
@@ -384,7 +387,14 @@ async function startBrowseModeUi() {
 }
 
 function stopBrowseModeUi() {
+  const wasBrowsing = state.browseMode;
   stopBrowseMode();
+  if (wasBrowsing) {
+    // Im Stoebermodus gerenderte Karten/Treffer tragen Anmelde-Hinweise statt Haekchen; Sheet-Caches frisch.
+    dom.cards.innerHTML = '';
+    if (dom.searchResults) dom.searchResults.innerHTML = '';
+    resetSheetsDataCaches();
+  }
   document.body.classList.remove('browse-mode');
   setStatsNavHidden(false);
 }

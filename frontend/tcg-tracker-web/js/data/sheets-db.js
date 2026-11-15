@@ -28,7 +28,7 @@ import {
   resolveDisplaySet,
   resolveDisplayCard,
   getCardLanguage
-} from './schema-contract.js?v=20261115-browse';
+} from './schema-contract.js?v=20261115-browse-2';
 import { withV3CardmarketIds } from './v3-cardmarket-ids.js';
 import {
   planSetScopedUpsert,
@@ -356,7 +356,11 @@ async function ensureNormalizedSchema() {
       await ensureSheetWithHeader(DB_SHEETS.collection, DB_HEADERS.collection);
       await ensureStrictDataRows(DB_SHEETS.sets, DB_HEADERS.sets.length, isLikelyValidSetRow);
       await ensureStrictDataRows(DB_SHEETS.cards, DB_HEADERS.cards.length, isLikelyValidCardRow);
-    })();
+    })().catch((err) => {
+      // Fehlschlag (z. B. noch nicht angemeldet) nicht cachen: der naechste Zugriff prueft erneut.
+      schemaEnsuredPromise = null;
+      throw err;
+    });
   }
   await schemaEnsuredPromise;
 }

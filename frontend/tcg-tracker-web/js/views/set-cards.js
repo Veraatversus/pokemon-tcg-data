@@ -5,7 +5,7 @@ import {
   ensureCollectionEntry,
   updateCellBooleansBatch,
   appendCollectionRows
-} from '../data/sheets-db.js?v=20261115-browse';
+} from '../data/sheets-db.js?v=20261115-browse-2';
 import {
   collectionKeyOf,
   emptyCollectionEntry,
@@ -17,10 +17,10 @@ import {
   isAmbiguousLegacyKeyError,
   describeAmbiguousLegacyKey
 } from '../data/collection-writes.js';
-import { fetchMergedCardsWithSetMeta } from '../data/pokemon-api.js?v=20261115-browse';
-import { getCardLanguage } from '../data/schema-contract.js?v=20261115-browse';
-import { getCardPrice } from '../data/v3-prices.js?v=20261115-browse';
-import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle, effectiveCollectionStatus } from '../core/collection-state.js?v=20261115-browse';
+import { fetchMergedCardsWithSetMeta } from '../data/pokemon-api.js?v=20261115-browse-2';
+import { getCardLanguage } from '../data/schema-contract.js?v=20261115-browse-2';
+import { getCardPrice } from '../data/v3-prices.js?v=20261115-browse-2';
+import { getCollectionUiState, resolveCollectionToggleState, shouldAutoImportForCollectionToggle, effectiveCollectionStatus } from '../core/collection-state.js?v=20261115-browse-2';
 import * as cache from '../core/cache.js';
 import { CONFIG } from '../core/config.js';
 import { createAutoSnapshot } from '../features/collection/index.js';
@@ -38,8 +38,8 @@ import {
   normalizeCardmarketBasePriceType,
   renderLightboxCardmarketPrices as renderLightboxCardmarketPricesUi,
   CARDMARKET_BASE_PRICE_DEFAULT,
-} from '../ui/cardmarket-price.js?v=20261115-browse';
-import { loadSettings } from '../enhanced-features.js?v=20261115-browse';
+} from '../ui/cardmarket-price.js?v=20261115-browse-2';
+import { loadSettings } from '../enhanced-features.js?v=20261115-browse-2';
 import { buildCollectionUpdateEvent } from '../features/community/index.js';
 import { dom } from '../app/dom.js';
 import { state } from '../app/state.js';

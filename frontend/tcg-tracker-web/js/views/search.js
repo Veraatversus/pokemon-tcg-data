@@ -1,18 +1,18 @@
 // Suche-Ansicht: Suche ueber alle Sets, Ergebnisliste und Autocomplete.
 // Funktionen anderer Ansichten, die noch in app.js liegen, werden ueber actions.<name>() aufgerufen.
 import { isGeneratedCardmarketSearchUrl } from '../data/cardmarket-url-utils.js';
-import { readSetCollectionMap } from '../data/sheets-db.js?v=20261115-browse';
+import { readSetCollectionMap } from '../data/sheets-db.js?v=20261115-browse-2';
 import { collectionKeyOf, emptyCollectionEntry } from '../data/collection-writes.js';
 import { describeCardDataFailure } from '../core/card-enrichment.js';
 import { searchFromIndex, searchResultsForDisplay } from '../features/search/search-index-prefilter.js';
 import { readCollectionMapCached } from '../features/search/search-collection-maps.js';
 import { parseStructuredSearchQuery, normalizeSearchText, cardNumberMatchesQuery, collectSearchStrings } from '../features/search/query-utils.js';
-import { getCardLanguage } from '../data/schema-contract.js?v=20261115-browse';
+import { getCardLanguage } from '../data/schema-contract.js?v=20261115-browse-2';
 import { buildCombinedSearchDropdownOptions, buildSearchProgressLabel, normalizeCardNumber, resolveCombinedSearchSelection, toBoolean } from '../core/utils.js';
-import { getCollectionUiState, resolveCollectionToggleState, effectiveCollectionStatus } from '../core/collection-state.js?v=20261115-browse';
+import { getCollectionUiState, resolveCollectionToggleState, effectiveCollectionStatus } from '../core/collection-state.js?v=20261115-browse-2';
 import * as cache from '../core/cache.js';
 import { CONFIG } from '../core/config.js';
-import { loadSearchHistory, addSearchHistory } from '../enhanced-features.js?v=20261115-browse';
+import { loadSearchHistory, addSearchHistory } from '../enhanced-features.js?v=20261115-browse-2';
 import { sanitizeDisplayText } from '../core/display-text.js';
 import { dom } from '../app/dom.js';
 import { state } from '../app/state.js';
@@ -569,7 +569,8 @@ export async function openSearchResultLightbox(card, set, { apiOnly = false } = 
         return loadedCards;
       }),
     // Lesefehler: leere Map nur fuer diese Ansicht, nicht im Cache (wie bei den Suchergebnissen).
-    readCollectionMapCached(set, {
+    // Stoebermodus ohne Login: keine Sammlung, kein Sheet-Zugriff.
+    state.browseMode ? Promise.resolve(new Map()) : readCollectionMapCached(set, {
       cache,
       read: readSetCollectionMap,
       ttlMs: CONFIG.CACHE_TTL_MS,
