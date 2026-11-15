@@ -1125,3 +1125,23 @@ test('normalizeCmName: HTML-Kuerzel im Katalog wie das Zeichen selbst', () => {
   assert.equal(normalizeCmName('Nidoran &female; [Call for Family | Scratch]'), normalizeCmName('Nidoran ♀'));
   assert.equal(normalizeCmName('Nidoran &male;'), normalizeCmName('Nidoran ♂'));
 });
+
+test('custom-set: fremde TCGdex-ID aus anderer Expansion mit anderem Namen faellt weg (ex4 -> Sandstorm)', () => {
+  // ex4-Form: TCGdex fuehrt fuer "Team Aqua's Cacturne" das Sandstorm-Produkt 275778 ("Armaldo"); custom-set 1542 hat #1
+  const c = { ...card('1', '1', "Team Aqua's Cacturne", [275778]), variants: [{ type: 'holo', cardmarketId: 275778 }, { type: 'reverse', cardmarketId: 275778 }] };
+  const { cards: out } = runCat([c], {
+    100: [csp(275978, "Team Aqua's Cacturne [Dark Bind | Poison Barb]", '1')],
+    200: [single(275778, 'Armaldo [Primal Veil | Blade Arms]', null)],
+  });
+  assert.deepEqual(out[0].ids.cardmarket, [275978]);
+  assert.deepEqual(out[0].ids.cardmarketTcgdex, [275778]);
+  assert.deepEqual(out[0].variants.map((v) => v.cardmarketId), [275978, 275978]);
+  // gleichnamiges Produkt einer fremden Expansion (z. B. Nachdruck) bleibt als Zusatz-ID erhalten
+  const same = { ...card('1', '1', "Team Aqua's Cacturne", [871807]), variants: [{ type: 'holo', cardmarketId: 871807 }] };
+  const r2 = runCat([same], {
+    100: [csp(275978, "Team Aqua's Cacturne [Dark Bind | Poison Barb]", '1')],
+    200: [single(871807, "Team Aqua's Cacturne [Dark Bind | Poison Barb]", null)],
+  });
+  assert.deepEqual(r2.cards[0].ids.cardmarket, [275978, 871807]);
+  assert.deepEqual(r2.cards[0].variants.map((v) => v.cardmarketId), [871807]);
+});
