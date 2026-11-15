@@ -14,6 +14,7 @@ js/
 │   ├── dom.js               DOM-Referenzen
 │   ├── actions.js           Aktionsregister (actions, registerActions)
 │   ├── router.js            Hash-Router, View-Wechsel
+│   ├── browse-mode.js       Stöbermodus ohne Login (Sets aus api/v3, keine Sammlung)
 │   ├── recent-sets.js       zuletzt geöffnete Sets, Nav-Chips
 │   ├── bootstrap-controller.js  Startreihenfolge, Login/Logout-Ablauf
 │   └── pwa-init.js          Service Worker, Install-Prompt

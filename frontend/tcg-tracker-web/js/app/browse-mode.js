@@ -4,8 +4,8 @@
 // Bewusst DOM-frei: die Anzeige (Navigation, Set-Auswahl, Dashboard) uebernimmt der onEnter-Callback aus app.js.
 import { state } from './state.js';
 import { loadAppFlags } from '../core/app-flags.js';
-import { fetchAllAvailableSets } from '../data/pokemon-api.js?v=20261115-umlaute';
-import { loadExcludedSetPredicate, filterExcludedSets } from '../data/excluded-sets.js?v=20261115-umlaute';
+import { fetchAllAvailableSets } from '../data/pokemon-api.js?v=20261115-browse';
+import { loadExcludedSetPredicate, filterExcludedSets } from '../data/excluded-sets.js?v=20261115-browse';
 
 /** API-Sets ohne ausgeschlossene/leere Sets, alle als nicht importiert; Reihenfolge wie geliefert. */
 export function buildBrowseSets(apiSets, isExcluded) {

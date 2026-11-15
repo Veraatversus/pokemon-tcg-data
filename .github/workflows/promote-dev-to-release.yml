@@ -37,8 +37,16 @@ jobs:
             AFTER_COMMIT=$(git rev-parse HEAD)
             if [ "$BEFORE_COMMIT" != "$AFTER_COMMIT" ]; then
               git restore --source="$BEFORE_COMMIT" --staged --worktree -- .github/workflows/deploy-pages.yml .github/workflows/merge-to-release.yml || true
+              # Schalter des Stoebermodus gehoert dem Branch (Workflow "Stoebermodus an/aus"): release behaelt seinen
+              # Wert; hatte release noch keinen, gilt "aus".
+              FLAGS=frontend/tcg-tracker-web/app-flags.json
+              if git cat-file -e "$BEFORE_COMMIT:$FLAGS" 2>/dev/null; then
+                git restore --source="$BEFORE_COMMIT" --staged --worktree -- "$FLAGS"
+              else
+                printf '{\n  "browseWithoutLogin": false\n}\n' > "$FLAGS"
+              fi
               if ! git diff --quiet || ! git diff --cached --quiet; then
-                git add .github/workflows/deploy-pages.yml .github/workflows/merge-to-release.yml
+                git add .github/workflows/deploy-pages.yml .github/workflows/merge-to-release.yml "$FLAGS"
                 git commit --amend --no-edit
               fi
               git push origin release
