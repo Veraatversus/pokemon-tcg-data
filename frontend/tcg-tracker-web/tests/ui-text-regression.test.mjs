@@ -8,9 +8,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const jsRoot = path.resolve(__dirname, '../js');
 
-// app.js und die daraus ausgelagerten Module (Ansichten, App-Kern, UI-Helfer, Spreadsheet-Dialog).
+// app.js und die daraus ausgelagerten Module (Ansichten, App-Kern, UI-Helfer, Zusatzfunktionen,
+// Sheets-Feedback und alle Feature-Module unter js/features/**).
 async function listUiSourceFiles() {
-  const inDir = async (dir) => (await readdir(path.join(jsRoot, dir)))
+  const inDir = async (dir, { recursive = false } = {}) => (await readdir(path.join(jsRoot, dir), { recursive }))
     .filter((name) => name.endsWith('.js'))
     .sort()
     .map((name) => path.join(jsRoot, dir, name));
@@ -19,7 +20,8 @@ async function listUiSourceFiles() {
     ...(await inDir('views')),
     ...(await inDir('app')),
     path.join(jsRoot, 'ui', 'helpers.js'),
-    path.join(jsRoot, 'features', 'settings', 'spreadsheet-dialog.js'),
+    path.join(jsRoot, 'ui', 'app-extras.js'),
+    ...(await inDir('features', { recursive: true })),
   ];
 }
 
