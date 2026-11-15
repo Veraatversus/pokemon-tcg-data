@@ -19,7 +19,7 @@ import {
   resolveDisplaySet,
   resolveDisplayCard,
   getCardLanguage
-} from './schema-contract.js?v=20261114-clean-1';
+} from './schema-contract.js?v=20261115-clean-2';
 import { withV3CardmarketIds } from './v3-cardmarket-ids.js';
 import {
   planSetScopedUpsert,

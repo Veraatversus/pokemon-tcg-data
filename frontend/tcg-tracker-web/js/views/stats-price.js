@@ -1,14 +1,14 @@
 // Preis-Tab der Statistik (Cardmarket-Preisradar): Tabs, Watchlist, Advanced-Analyse und Lazy-Lade-Pipeline.
 // Funktionen, die noch in app.js liegen, werden ueber actions.<name>() aufgerufen.
 import { resolveItemCardmarketUrl } from '../data/cardmarket-url-utils.js';
-import { readSetCollectionMap, listCollectionSetIds } from '../data/sheets-db.js?v=20261114-clean-1';
+import { readSetCollectionMap, listCollectionSetIds } from '../data/sheets-db.js?v=20261115-clean-2';
 import { collectionKeyOf } from '../data/collection-writes.js';
-import { getCardLanguage } from '../data/schema-contract.js?v=20261114-clean-1';
+import { getCardLanguage } from '../data/schema-contract.js?v=20261115-clean-2';
 import { imageCandidates, fallbackImgAttrs } from '../ui/image-fallback.js';
 import { normalizeCardNumber, toBoolean } from '../core/utils.js';
-import { loadPriceStamp, refreshV3Prices } from '../data/v3-prices.js?v=20261114-clean-1';
-import { resetCardmarketPriceSummaryCaches } from '../ui/cardmarket-price.js?v=20261114-clean-1';
-import { computePriceAnalyticsFromSummaries, pickCardPriceFromSummary } from '../ui/stats-price-analytics.js?v=20261114-clean-1';
+import { loadPriceStamp, refreshV3Prices } from '../data/v3-prices.js?v=20261115-clean-2';
+import { resetCardmarketPriceSummaryCaches } from '../ui/cardmarket-price.js?v=20261115-clean-2';
+import { computePriceAnalyticsFromSummaries, pickCardPriceFromSummary } from '../ui/stats-price-analytics.js?v=20261115-clean-2';
 import { dom } from '../app/dom.js';
 import { state } from '../app/state.js';
 import { navigate } from '../app/router.js';

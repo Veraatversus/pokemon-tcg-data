@@ -1,6 +1,6 @@
 // Spreadsheet-Dialog: Auswahl, Anlegen und Wechsel des Google-Spreadsheets.
 import { signIn } from '../../core/auth.js';
-import { resetSheetsDataCaches } from '../../data/sheets-db.js?v=20261114-clean-1';
+import { resetSheetsDataCaches } from '../../data/sheets-db.js?v=20261115-clean-2';
 import { CONFIG } from '../../core/config.js';
 import { formatSpreadsheetOptionLabel, isSpreadsheetAccessDeniedError, normalizeSpreadsheetDisplayText, resolveSpreadsheetSelectionErrorMessage } from './spreadsheet-dialog-helpers.js';
 import { showToast, normalizeUiText, closeOtherOpenDialogs, resetRuntimeUiForSpreadsheetSwitch } from '../../ui/helpers.js';

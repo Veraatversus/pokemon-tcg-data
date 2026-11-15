@@ -1,9 +1,9 @@
 // Lightbox: Kartendetail, Wischgesten, Vollbildansicht und Haken-Schalter.
 import { isGeneratedCardmarketSearchUrl } from '../data/cardmarket-url-utils.js';
-import { readSetCollectionMap } from '../data/sheets-db.js?v=20261114-clean-1';
+import { readSetCollectionMap } from '../data/sheets-db.js?v=20261115-clean-2';
 import { collectionKeyOf, emptyCollectionEntry } from '../data/collection-writes.js';
-import { fetchMergedCardsWithSetMeta } from '../data/pokemon-api.js?v=20261114-clean-1';
-import { resolveCollectionToggleState } from '../core/collection-state.js?v=20261114-clean-1';
+import { fetchMergedCardsWithSetMeta } from '../data/pokemon-api.js?v=20261115-clean-2';
+import { resolveCollectionToggleState } from '../core/collection-state.js?v=20261115-clean-2';
 import * as cache from '../core/cache.js';
 import { CONFIG } from '../core/config.js';
 import { dom } from '../app/dom.js';
