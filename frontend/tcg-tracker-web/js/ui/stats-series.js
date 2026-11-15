@@ -1,4 +1,4 @@
-import { resolveSeriesGroupInfo } from '../data/schema-contract.js?v=20261115-clean-5';
+import { resolveSeriesGroupInfo } from '../data/schema-contract.js?v=20261115-rh-1';
 
 export function getStatsSeriesLabel(seriesKey = '', group = {}) {
   const label = String(group?.label || group?.canonicalName || '').trim();
