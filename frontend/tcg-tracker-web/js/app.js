@@ -52,7 +52,8 @@ import {
   setRefreshMenuOpen,
   syncRefreshControls
 } from './ui/helpers.js';
-import { loadSets, renderDashboard, getSetById, ensureSetSelectorOption } from './views/dashboard.js';
+import { loadSets, renderDashboard, getSetById, ensureSetSelectorOption, renderSetSelectorOptions } from './views/dashboard.js';
+import { startBrowseMode, stopBrowseMode } from './app/browse-mode.js';
 import { runSearch, initSearch, initSearchAutocomplete } from './views/search.js';
 import { openSpreadsheetDialog, updateSpreadsheetInfoBar, initSpreadsheetDialog } from './features/settings/spreadsheet-dialog.js';
 import { renderStats } from './views/stats.js';
@@ -276,6 +277,7 @@ function createBootstrapRuntimeController() {
     signIn,
     signOut,
     resetToLoggedOut,
+    startBrowseModeUi,
     isSignedIn,
     loadCurrentSet,
     reimportCurrentSetFromApi,
@@ -302,6 +304,7 @@ async function bootstrap() {
 }
 
 async function onLoginSuccess() {
+  stopBrowseModeUi();
   state.loggedIn = true;
   dom.auth.dataset.state = 'out'; dom.auth.disabled = false; syncAuthButtonLabel();
   renderRecentSets();
@@ -354,6 +357,33 @@ function resetToLoggedOut() {
   setGlobalStatus('Abgemeldet.');
   showView('dashboard');
   dom.dashboardGrid.innerHTML = '<p class="empty-state">Bitte anmelden.</p>';
+  // Schalter an: statt der leeren Seite in den Stoebermodus (alle Sets aus api/v3, ohne Sammlung).
+  startBrowseModeUi().catch((err) => console.warn('[browse-mode]', err));
+}
+
+function setStatsNavHidden(hidden) {
+  dom.mainNav?.querySelector('[data-view="stats"]')?.classList.toggle('hidden', hidden);
+}
+
+/** Stoebermodus ohne Login starten (app-flags.json); false = Schalter aus, Seite bleibt bei "Bitte anmelden". */
+async function startBrowseModeUi() {
+  return startBrowseMode({
+    onEnter: (sets) => {
+      dom.mainNav.classList.remove('hidden');
+      setStatsNavHidden(true);
+      renderSetSelectorOptions();
+      dom.selector.disabled = false;
+      dom.load.disabled = false;
+      setGlobalStatus(`Stöbermodus – ${sets.length} Sets`);
+      if (!window.location.hash || window.location.hash === '#') navigate('dashboard');
+      else handleRouteChange();
+    },
+  });
+}
+
+function stopBrowseModeUi() {
+  stopBrowseMode();
+  setStatsNavHidden(false);
 }
 
 function getAuthButtonLabel() {

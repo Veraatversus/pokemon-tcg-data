@@ -60,6 +60,7 @@ export function createBootstrapController({
   signIn,
   signOut,
   resetToLoggedOut,
+  startBrowseModeUi = async () => false,
   isSignedIn,
   loadCurrentSet,
   reimportCurrentSetFromApi,
@@ -452,6 +453,8 @@ export function createBootstrapController({
         setLoading(false);
         setGlobalStatus('Bereit. Bitte anmelden.');
         showView('dashboard');
+        // Schalter an (app-flags.json): Stoebermodus ohne Login statt der leeren Seite.
+        await startBrowseModeUi();
       }
     } catch (error) {
       setLoading(false);

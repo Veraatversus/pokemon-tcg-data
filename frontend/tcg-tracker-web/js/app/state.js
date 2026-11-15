@@ -3,6 +3,8 @@ import { createInitialSheetsRetryMetrics } from '../ui/sheets-retry-report.js';
 // Zentraler App-Zustand.
 export const state = {
   loggedIn:     false,
+  // Stoebermodus ohne Login (app-flags.json): Sets aus api/v3, keine Sammlung (js/app/browse-mode.js).
+  browseMode:   false,
   sets:         [],
   allSets:      [],
   summaryData:  null,
