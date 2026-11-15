@@ -50,25 +50,53 @@ export function versionOfSlug(slug) {
   return m ? Number(m[1]) : 1;
 }
 
-// Nummer aus Ueberschrift oder Klammerinhalt: "Serpifeu (BW 01)" / "BW 01" -> "1", "SK H1" -> "H1",
-// "AQ 50a" -> "50a", "SVP 001" -> "1". null ohne erkennbare Nummer.
+// Nummernregeln fuer Ueberschrift oder Klammerinhalt, in Reihenfolge: die erste passende Regel gewinnt. Geprueft wird je
+// Kandidat (Klammerinhalte, letzter zuerst; danach der ganze Text) gegen alle Regeln, bevor der naechste Kandidat drankommt.
+// example = [Beschriftung, erwartete Nummer]; der Test prueft, dass jede Regel ihr Beispiel als erste Regel erfuellt.
+const stripZeros = (n) => n.replace(/^0+(?=\d)/, '');
+export const NUMBER_RULES = [
+  {
+    // Setcode (auch mit Leerzeichen/Buchstabe) + Nummer: "BW 01" -> "1", "SK H1" -> "H1", "AQ 50a" -> "50a", "SVP 001" -> "1"
+    name: 'setcode-nummer',
+    pattern: /^([A-Z]+(?:en)?[ ]?[A-Z]?\s*\d+[a-z]?)$/i,
+    number: (m) => m[1].trim().replace(/^[A-Z]+(?:en)?\s*/, '').replace(/^0+/, '') || '0',
+    example: ['BW 01', '1'],
+  },
+  {
+    // Unterset-Praefix aus mehreren Buchstaben: "RR RT1" -> "RT1", "SV SH8" -> "SH8" (TCGdex-Nummer gleich).
+    // Wiederholt sich der Setcode in der Nummer ("SM SM30a"), faellt er weg -> "30a".
+    name: 'unterset-praefix',
+    pattern: /^([A-Z]+)\s+([A-Z]{2,3})(\d+[a-z]?)$/i,
+    number: (m) => (m[2].toUpperCase() === m[1].toUpperCase() ? stripZeros(m[3]) : `${m[2]}${stripZeros(m[3])}`),
+    example: ['RR RT1', 'RT1'],
+  },
+  {
+    // Setcode mit Ziffer und Kit-Kuerzel: "TK6 1N" -> "1N" (Trainer-Kit-Paare, siehe setSuffix im custom-set)
+    name: 'kit-nummer',
+    pattern: /^[A-Z]+\d+\s+(\d+[A-Z]?)$/i,
+    number: (m) => stripZeros(m[1]),
+    example: ['TK6 13N', '13N'],
+  },
+  {
+    // Kuerzel vor der Nummer: "TK9 P-1" -> "1P" (gleiche Form wie "TK6 1N")
+    name: 'kit-kuerzel-vorn',
+    pattern: /^[A-Z]+\d+\s+([A-Z])-?(\d+)$/i,
+    number: (m) => `${stripZeros(m[2])}${m[1]}`,
+    example: ['TK9 P-1', '1P'],
+  },
+];
+
+// Nummer aus Ueberschrift oder Klammerinhalt nach NUMBER_RULES: "Serpifeu (BW 01)" / "BW 01" -> "1". null ohne
+// erkennbare Nummer.
 export function numberOfLabel(label) {
   const text = String(label ?? '').replace(/\s+/g, ' ').trim();
   const inParens = [...text.matchAll(/\(([^()]*)\)/g)].map((m) => m[1]).reverse();
   for (const candidate of [...inParens, text]) {
     const c = candidate.trim();
-    const m = c.match(/^([A-Z]+(?:en)?[ ]?[A-Z]?\s*\d+[a-z]?)$/i);
-    if (m) return m[1].trim().replace(/^[A-Z]+(?:en)?\s*/, '').replace(/^0+/, '') || '0';
-    // Unterset-Praefix aus mehreren Buchstaben: "RR RT1" -> "RT1", "SV SH8" -> "SH8" (TCGdex-Nummer gleich)
-    // Wiederholt sich der Setcode in der Nummer ("SM SM30a"), faellt er weg -> "30a".
-    const sub = c.match(/^([A-Z]+)\s+([A-Z]{2,3})(\d+[a-z]?)$/i);
-    if (sub) return sub[2].toUpperCase() === sub[1].toUpperCase() ? sub[3].replace(/^0+(?=\d)/, '') : `${sub[2]}${sub[3].replace(/^0+(?=\d)/, '')}`;
-    // Setcode mit Ziffer und Kit-Kuerzel: "TK6 1N" -> "1N" (Trainer-Kit-Paare, siehe setSuffix im custom-set)
-    const kit = c.match(/^[A-Z]+\d+\s+(\d+[A-Z]?)$/i);
-    if (kit) return kit[1].replace(/^0+(?=\d)/, '');
-    // Kuerzel vor der Nummer: "TK9 P-1" -> "1P" (gleiche Form wie "TK6 1N")
-    const pre = c.match(/^[A-Z]+\d+\s+([A-Z])-?(\d+)$/i);
-    if (pre) return `${pre[2].replace(/^0+(?=\d)/, '')}${pre[1]}`;
+    for (const rule of NUMBER_RULES) {
+      const m = c.match(rule.pattern);
+      if (m) return rule.number(m);
+    }
   }
   return null;
 }

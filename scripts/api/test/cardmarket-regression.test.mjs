@@ -61,14 +61,16 @@ test('conversion: custom-set JSON yields exactly the collector numbers of the ol
 // - heutige Korrektur geteilter TCGdex-IDs per Angriffsnamen (Quelle 'corrected'): dp7/58, dp7/59, dp7/80, pl1/6,
 //   pl1/81, pl1/97, pl1/102, pl4/46, pl4/52, pl4/74 trugen die ID der SH-/Lv.X-/Arceus-Variante; xyp/XY93 (zwei
 //   gleichnamige Celebi-Produkte, unklar) folgt konservativ der heutigen Korrektur, keine Stabilitaets-Rueckkehr.
+// - 2026-11-14: custom-set 1536 aus der Cardmarket-Liste neu eingelesen (Basis = kleinste Produkt-ID je Nummer):
+//   ecard1-47 -> 274922, ecard1-68 -> 274943 (vorher ohne ID); ecard1-66 kommt jetzt aus dem custom-set (Override entfernt).
 const CHANGES = {
   'dp7/58': [278297, 278356, 'corrected'],
   'dp7/59': [278298, 278357, 'corrected'],
   'dp7/80': [278296, 278378, 'corrected'],
   'ecard1/12': [274887, 274887, 'custom-set'],
-  'ecard1/47': [274887, null, 'tcgdex'],
-  'ecard1/66': [362890, 274941, 'override'],
-  'ecard1/68': [274905, null, 'tcgdex'],
+  'ecard1/47': [274887, 274922, 'custom-set'],
+  'ecard1/66': [362890, 274941, 'custom-set'],
+  'ecard1/68': [274905, 274943, 'custom-set'],
   'ecard2/1': [275052, 275073, 'custom-set'],
   'ecard2/2': [275041, 275074, 'custom-set'],
   'ecard2/3': [275072, 275075, 'custom-set'],
@@ -216,7 +218,7 @@ const CHANGES = {
   'pl4/52': [278870, 278924, 'corrected'],
   'pl4/74': [278872, 278946, 'corrected'],
   'svp/190': [784938, 780209, 'custom-set'],
-  'xyp/XY93': [553429, 289795, 'corrected'],
+  'xyp/XY93': [553429, 289795, 'custom-set'],
 };
 
 const state = (c) => JSON.stringify([c.ids?.cardmarket ?? [], (c.variants ?? []).map((v) => v.cardmarketId ?? null)]);
@@ -265,15 +267,14 @@ describe('real-data regression (CM_REGRESSION=1)', { skip: REGRESSION ? false : 
     assert.deepEqual(unexpected, []);
     assert.equal(withId, published - expectedLost, 'Abdeckung sinkt nur um gelistete falsche IDs');
     assert.ok(published > 21000, `${published} Karten mit ID`);
-    // nur am Umstellungstag (danach stehen die IDs nicht mehr in previous)
-    const dropped = new Set(['ecard1/47:custom-set', 'ecard1/66:custom-set', 'ecard1/68:custom-set']);
-    assert.deepEqual(report.stabilityDropped.filter((d) => !dropped.has(`${d.cardKey}:${d.reason}`)), []);
+    // Stand nach dem Cardmarket-Durchgang vom 2026-11-14 (custom-sets aus den Cardmarket-Listen): keine verworfenen,
+    // mehrdeutigen oder widerspruechlichen Zuordnungen mehr. nameWarnings (Produktname weicht vom Kartennamen ab, z. B.
+    // "Bronzong E4" <-> "Bronzong [4] Lv.54", "Delta"-Energien, Trainer-Kit-Nummern) sind Hinweise im Report, kein Fehler.
+    assert.deepEqual(report.stabilityDropped, []);
     assert.deepEqual(report.stabilityConflicts, []);
     assert.deepEqual(report.customSets.conflicts, []);
-    assert.deepEqual(report.customSets.nameWarnings, []);
-    // ecard1/66 ist per Override gesperrt (Stufe 1) und erscheint daher nicht mehr in den custom-set-Listen
-    assert.deepEqual(report.customSets.dropped.map((d) => d.cardKey), ['ecard1/47', 'ecard1/68']);
-    assert.deepEqual(report.customSets.ambiguous, ['ecard1/1', 'ecard1/47', 'ecard1/68']);
+    assert.deepEqual(report.customSets.dropped, []);
+    assert.deepEqual(report.customSets.ambiguous, []);
   });
 
   test('regression: set expansions from catalog, no tracker', () => {
