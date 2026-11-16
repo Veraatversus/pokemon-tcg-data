@@ -1788,20 +1788,18 @@
       "cards": 141,
       "coverage": {
         "bySource": {
-          "matched": 4,
           "override": 7,
-          "tcgdex": 130
+          "tcgdex": 134
         },
         "cards": 141,
         "withId": 141
       },
-      "energySymbol": 3,
       "expansionId": 6704,
-      "matched": 4,
+      "matched": 0,
       "missing": 0,
       "override": 7,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=6704&sortBy=collectorsnumber_asc&perSite=100&site=1",
-      "tcgdex": 130
+      "tcgdex": 134
     },
     "mep": {
       "ambiguous": 0,
@@ -5528,6 +5526,27 @@
         "reason": "kept-mismatch"
       },
       {
+        "cardKey": "me6-132",
+        "newId": null,
+        "oldExpansion": 6704,
+        "oldId": 918974,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "me6-133",
+        "newId": null,
+        "oldExpansion": 6704,
+        "oldId": 918976,
+        "reason": "kept-mismatch"
+      },
+      {
+        "cardKey": "me6-134",
+        "newId": null,
+        "oldExpansion": 6704,
+        "oldId": 918977,
+        "reason": "kept-mismatch"
+      },
+      {
         "cardKey": "pgo-52",
         "newId": 664600,
         "oldExpansion": 5051,
@@ -6023,14 +6042,14 @@
       }
     ],
     "totals": {
-      "checked": 16449,
+      "checked": 16453,
       "corrected": 1,
       "dropped": 13,
       "droppedShared": 11,
       "foreignNameOk": 1213,
-      "keptMismatch": 134,
+      "keptMismatch": 137,
       "noSetExpansion": 0,
-      "ok": 15085,
+      "ok": 15086,
       "unknownProduct": 3
     }
   },
@@ -6103,7 +6122,7 @@
     }
   ],
   "rules": {
-    "energySymbol": 3,
+    "energySymbol": 0,
     "leftRight": 0,
     "ordered": 0,
     "orderedRejected": 2,
@@ -7220,11 +7239,11 @@
     "ambiguous": 0,
     "cards": 21577,
     "customSet": 6889,
-    "matched": 74,
+    "matched": 70,
     "missing": 10,
     "override": 35,
     "stabilityKept": 149,
-    "tcgdex": 14420
+    "tcgdex": 14424
   },
   "versionSuffixSkippedByExpansion": {
     "1521": 9,
