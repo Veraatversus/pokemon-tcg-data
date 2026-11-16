@@ -110,7 +110,7 @@
 | me5 | 6569 | 120 | 120 | 0 | 100 % | tcgdex 120 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=6569&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | me55 | 6601 | 161 | 161 | 0 | 100 % | tcgdex 161 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=6601&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | me55c | 6601 | 30 | 30 | 0 | 100 % | tcgdex 30 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=6601&sortBy=collectorsnumber_asc&perSite=100&site=1) |
-| me6 | 6704 | 141 | 141 | 0 | 100 % | tcgdex 130, override 7, matched 4 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=6704&sortBy=collectorsnumber_asc&perSite=100&site=1) |
+| me6 | 6704 | 141 | 141 | 0 | 100 % | tcgdex 134, override 7 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=6704&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | mep | 6232 | 112 | 112 | 0 | 100 % | tcgdex 112 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=6232&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | neo1 | 1531 | 111 | 111 | 0 | 100 % | tcgdex 108, stabilityKept 3 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1531&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | neo2 | 1532 | 75 | 75 | 0 | 100 % | tcgdex 61, stabilityKept 14 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1532&sortBy=collectorsnumber_asc&perSite=100&site=1) |

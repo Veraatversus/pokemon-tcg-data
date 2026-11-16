@@ -1,6 +1,6 @@
 # Matching-Report
 
-Erzeugt: 2026-11-15T08:39:10.990Z
+Erzeugt: 2026-11-16T08:47:52.942Z
 
 ## Zusammenfassung
 
@@ -29,8 +29,8 @@ Erzeugt: 2026-11-15T08:39:10.990Z
     "status": "frozen"
   },
   "tcgdex": {
-    "commit": "4a124e6075624ed3c34587cfeae31547f3fddc43",
-    "fetchedAt": "2026-11-15T08:39:10.990Z",
+    "commit": "4218f64dcbf3de6e7b7548530f938fb0b9ebbe2a",
+    "fetchedAt": "2026-11-16T08:47:52.942Z",
     "ref": "master",
     "repo": "tcgdex/cards-database",
     "status": "active"
