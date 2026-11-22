@@ -125,6 +125,15 @@ Rollout nach dem Merge (einmalig): 1. "Promote Master to Dev and Release" einmal
 
 Beide Fehler stehen in der CLI-Ausgabe von `node scripts/api/build-api.mjs` (`FEHLER: ...`), im CI-Log des Sync-Laufs und im automatisch angelegten Issue (Label `upstream-sync`). Es wird nichts committet, `api/` bleibt unveraendert.
 
+### Automatisch behandelt (seit 2026-11-22)
+
+Eindeutige Faelle loest der Build selbst (`registry/resolve-vanished.mjs`), protokolliert sie in `.cache/registry-auto-changes.json` und der Daily Sync meldet sie in einem Info-Issue (Label `registry-auto`, nur lesen und schliessen):
+
+- **Karte von TCGdex geloescht**, im Set keine gleichnamige unbelegte Karte: Verweis entfernt; hat die Karte sonst keine Quelle, ist sie stillgelegt (`tcgdex: []`, Schluessel reserviert, fehlt in api/v3).
+- **Eindeutig umnummeriert**: genau eine unbelegte Karte gleichen Namens im selben TCGdex-Set -> Verweis umgehaengt, neue Nummer zusaetzlich als Schluessel.
+
+Manuell (Abbruch wie bisher, Issue `upstream-sync`): TCGdex-Set ganz verschwunden (umbenannt), mehrere gleichnamige Kandidaten, ein Kandidat fuer mehrere Karten, mehr als 5 verschwundene Karten in einem Set.
+
 ### Korrigieren (reviewte manuelle Aenderung)
 
 Die Registry ist die Wahrheit; ein Build aendert eingefrorene Werte nie selbst. Korrekturen sind bewusste, im PR reviewte Handedits:
