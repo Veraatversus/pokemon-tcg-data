@@ -275,7 +275,9 @@ test('runBuild: eingefrorene Registry-Abweichung bricht ab', () => {
     runBuild({ repoRoot: root });
     const f = path.join(root, 'api', 'registry', 'cards', 'TCGDEX-A1.json');
     const cards = readJson(f);
-    cards['1'].tcgdex = [{ set: 'A1', localId: '999' }];
+    // Verweis in ein TCGdex-Set, das es nicht gibt (wie ein umbenanntes Set): nicht eindeutig -> bleibt manuell.
+    // (Eine verschwundene Karte im vorhandenen Set loest resolveVanishedRefs dagegen selbst auf.)
+    cards['1'].tcgdex = [{ set: 'ZZ-gone', localId: '1' }];
     fs.writeFileSync(f, `${JSON.stringify(cards, null, 2)}\n`);
     assert.throws(() => runBuild({ repoRoot: root }), RegistryFrozenError);
   } finally {
@@ -379,6 +381,28 @@ test('runBuild: unsichere Set-IDs werden nie zu Dateinamen', () => {
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
     }
+  }
+});
+
+test('TCGdex loescht eine Karte: Build legt sie selbst still und protokolliert es in .cache/registry-auto-changes.json', () => {
+  const root = makeRepo();
+  try {
+    runBuild({ repoRoot: root });
+    const regFile = path.join(root, 'api', 'registry', 'cards', 'TCGDEX-A1.json');
+    const key = Object.keys(readJson(regFile))[0];
+    const localId = readJson(regFile)[key].tcgdex[0].localId;
+    fs.rmSync(path.join(root, 'sources', 'tcgdex', 'data', 'Pokémon TCG Pocket', 'Genetic Apex', `${localId}.ts`));
+    const r = runBuild({ repoRoot: root });
+    assert.deepEqual(readJson(regFile)[key].tcgdex, [], 'stillgelegt');
+    assert.ok(!readJson(path.join(root, 'api', 'v3', 'cards', 'TCGDEX-A1.json')).some((c) => c.cardId === key));
+    const auto = readJson(path.join(root, '.cache', 'registry-auto-changes.json'));
+    assert.deepEqual(auto.map((c) => [c.kind, c.card]), [['retired', `TCGDEX-A1/${key}`]]);
+    assert.equal(r.registryAutoChanges.length, 1);
+    // naechster Lauf: nichts mehr zu tun, Protokoll leer
+    runBuild({ repoRoot: root });
+    assert.deepEqual(readJson(path.join(root, '.cache', 'registry-auto-changes.json')), []);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
   }
 });
 
