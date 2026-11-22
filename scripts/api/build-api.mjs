@@ -9,6 +9,7 @@ import { runMatching } from './match/run-matching.mjs';
 import {
   buildRegistry, assertFrozen, registryChanges, RegistryFrozenError, RegistryInvariantError,
 } from './registry/build-registry.mjs';
+import { resolveVanishedRefs } from './registry/resolve-vanished.mjs';
 import { readRegistry, writeRegistry, toJson, toCompactJson, assertSafeSetId } from './registry/registry-io.mjs';
 import { learnTables } from './merge/learn-tables.mjs';
 import { loadLegals } from './merge/legalities.mjs';
@@ -26,6 +27,18 @@ import { sortLocalIds } from './lib/local-ids.mjs';
 const cmp = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 const readJson = (p) => JSON.parse(fs.readFileSync(p, 'utf8'));
 const readJsonOr = (p, fallback) => (fs.existsSync(p) ? readJson(p) : fallback);
+
+// Kartennamen aus dem zuletzt veroeffentlichten api/v3 ("<setId>/<cardId>" -> name), fuer resolveVanishedRefs.
+function readPreviousCardNames(cardsDir) {
+  const names = new Map();
+  if (!fs.existsSync(cardsDir)) return names;
+  for (const f of fs.readdirSync(cardsDir).filter((x) => x.endsWith('.json'))) {
+    let cards;
+    try { cards = readJson(path.join(cardsDir, f)); } catch { continue; }
+    for (const c of Array.isArray(cards) ? cards : []) if (c?.setId && c?.cardId && c?.name) names.set(`${c.setId}/${c.cardId}`, c.name);
+  }
+  return names;
+}
 const short = (commit) => (commit ? String(commit).slice(0, 8) : undefined);
 const STATUSES = ['matched', 'primary_only', 'tcgdex_only'];
 
@@ -87,8 +100,18 @@ export function runBuild({
   }
 
   const registryAbs = path.resolve(repoRoot, registryDir);
-  const previous = readRegistry(registryAbs);
-  if (tcgdexOnly && !previous) throw new Error(`--tcgdex-only braucht eine vorhandene Registry (${registryAbs})`);
+  const frozen = readRegistry(registryAbs);
+  if (tcgdexOnly && !frozen) throw new Error(`--tcgdex-only braucht eine vorhandene Registry (${registryAbs})`);
+  // Von TCGdex geloeschte/umnummerierte Karten: eindeutige Faelle automatisch aufloesen (registry/resolve-vanished.mjs),
+  // der Rest bleibt Drift (RegistryFrozenError). Protokoll fuer den Sync: .cache/registry-auto-changes.json.
+  const vanished = resolveVanishedRefs({
+    previous: frozen,
+    tcgdexSets: db.sets,
+    previousNames: readPreviousCardNames(path.resolve(repoRoot, previousDir ?? path.join(outDir, 'cards'))),
+  });
+  const previous = vanished.registry;
+  fs.mkdirSync(p('.cache'), { recursive: true });
+  fs.writeFileSync(p('.cache', 'registry-auto-changes.json'), `${JSON.stringify(vanished.changes, null, 2)}\n`);
   const registry = buildRegistry({
     ptSets, ptCardsBySet, tcgdexSets: db.sets, setPairs: setResult.pairs, cardResults,
     subsetMerge: readJson(p('api', 'mappings', 'subset-merge.json')),
@@ -295,7 +318,7 @@ export function runBuild({
 
   return {
     prices, cardmarketIssue,
-    sets: sets.length, cards: cardTotal, matchStatus, cardmarketIds: { ...cardmarketIds.totals, rules: cardmarketIds.rules, overrideWarnings: cardmarketIds.overrides.warnings, stillMissing: cardmarketIds.stillMissing.length, duplicates: cardmarketIds.duplicates, expansion: { ...cardmarketIds.expansionMismatch.totals, sets: cardmarketIds.expansionMismatch.sets }, setsWithoutExpansion: cardmarketIds.setsWithoutExpansion.length, customSetMissingProducts: cardmarketIds.customSets.missingProducts.length, stabilityDropped: cardmarketIds.stabilityDropped.length, stabilityConflicts: cardmarketIds.stabilityConflicts.length }, registryChanges: changes, skippedNoSource, missingImages, scrydexImages: scrydexImageCount, assets,
+    sets: sets.length, cards: cardTotal, matchStatus, cardmarketIds: { ...cardmarketIds.totals, rules: cardmarketIds.rules, overrideWarnings: cardmarketIds.overrides.warnings, stillMissing: cardmarketIds.stillMissing.length, duplicates: cardmarketIds.duplicates, expansion: { ...cardmarketIds.expansionMismatch.totals, sets: cardmarketIds.expansionMismatch.sets }, setsWithoutExpansion: cardmarketIds.setsWithoutExpansion.length, customSetMissingProducts: cardmarketIds.customSets.missingProducts.length, stabilityDropped: cardmarketIds.stabilityDropped.length, stabilityConflicts: cardmarketIds.stabilityConflicts.length }, registryChanges: changes, registryAutoChanges: vanished.changes, skippedNoSource, missingImages, scrydexImages: scrydexImageCount, assets,
     tables: Object.fromEntries(Object.entries(tables).map(([k, v]) => [k, Object.keys(v).length])),
     warnings: db.warnings.length,
   };
@@ -361,6 +384,10 @@ function main() {
       counts.set(kind, (counts.get(kind) ?? 0) + 1);
     }
     console.log(`Registry-Aenderungen: ${r.registryChanges.length}${counts.size ? ` (${[...counts].map(([k, n]) => `${k} ${n}`).join(', ')})` : ''}${opts.tcgdexOnly ? ' (nicht geschrieben)' : ''}`);
+    const labels = { retired: 'stillgelegt', 'ref-removed': 'Verweis entfernt', repointed: 'umgehaengt' };
+    for (const c of r.registryAutoChanges ?? []) {
+      console.log(`  automatisch ${labels[c.kind] ?? c.kind}: ${c.card} (${c.ref}${c.to ? ` -> ${c.to}` : ''}${c.name ? `, ${c.name}` : ''})`);
+    }
     const size = dirSize(path.resolve(repoRoot, opts.outDir));
     console.log(`Groesse ${opts.outDir}: ${(size.total / 1048576).toFixed(1)} MB, groesste Datei ${size.largest.file} (${(size.largest.size / 1048576).toFixed(2)} MB)`);
     console.log(`Dauer ${((Date.now() - started) / 1000).toFixed(1)} s`);
