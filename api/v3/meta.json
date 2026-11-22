@@ -1,11 +1,11 @@
 {
   "apiVersion": 3,
   "counts": {
-    "cards": 21577,
+    "cards": 21583,
     "matched": 20770,
     "primary_only": 55,
     "sets": 198,
-    "tcgdex_only": 752
+    "tcgdex_only": 758
   },
   "emptySetIds": [
     "TCGDEX-jumbo",
@@ -42,8 +42,8 @@
       "commit": "bc4a5871a2468e9f3fb8aaf0916c72255ed90d99"
     },
     "tcgdex": {
-      "commit": "4218f64dcbf3de6e7b7548530f938fb0b9ebbe2a",
-      "fetchedAt": "2026-11-16T08:47:52.942Z"
+      "commit": "36e2f1af67b2b37d1bbf3d6eb8211e223caaf352",
+      "fetchedAt": "2026-11-22T18:23:24.043Z"
     }
   },
   "warnings": {
@@ -64,11 +64,10 @@
         "TCGDEX-tk-hs-r": 30,
         "TCGDEX-tk-sm-r": 11,
         "TCGDEX-xya": 6,
-        "det1": 1,
-        "mep": 1,
+        "mep": 8,
         "svp": 1
       },
-      "total": 282
+      "total": 288
     }
   }
 }
