@@ -153,6 +153,12 @@ export function runBuild({
         if (!c) throw new Error(`TCGdex-Karte ${r.set}/${r.localId} fehlt (Registry ${setId}/${cardId})`);
         return { ...c, set: tdById.get(r.set) };
       });
+      // Bewusst stillgelegt (README "Registry-Drift beheben", Schritt 2): keine Verweise mehr -> nicht in api/v3,
+      // der Schluessel bleibt in der Registry reserviert. Kein Fehler.
+      if (rc.pokemontcg == null && !(rc.tcgdex ?? []).length) {
+        skippedNoSource.push(`${setId}/${cardId}`);
+        continue;
+      }
       if (!ptCard && !tcgdexCards.length) {
         // Ohne pokemontcg-Quelle (--tcgdex-only) ist eine reine pt-Karte erwartbar; im Vollbuild
         // heisst das: Quelle verschwunden -> Abbruch statt stillem Auslassen.
