@@ -382,6 +382,29 @@ test('runBuild: unsichere Set-IDs werden nie zu Dateinamen', () => {
   }
 });
 
+test('stillgelegte Registry-Karte (pokemontcg null, tcgdex []) fehlt in api/v3, Build laeuft durch, Schluessel bleibt', () => {
+  const root = makeRepo();
+  try {
+    runBuild({ repoRoot: root });
+    const regFile = path.join(root, 'api', 'registry', 'cards', 'TCGDEX-A1.json');
+    const reg = readJson(regFile);
+    const key = Object.keys(reg)[0];
+    // wie det1/25: TCGdex hat die Karte entfernt, die Registry legt sie still
+    const localId = reg[key].tcgdex[0].localId;
+    fs.rmSync(path.join(root, 'sources', 'tcgdex', 'data', 'Pokémon TCG Pocket', 'Genetic Apex', `${localId}.ts`));
+    reg[key] = { ...reg[key], pokemontcg: null, tcgdex: [] };
+    write(root, 'api/registry/cards/TCGDEX-A1.json', reg);
+    const r = runBuild({ repoRoot: root });
+    const cards = readJson(path.join(root, 'api', 'v3', 'cards', 'TCGDEX-A1.json'));
+    assert.ok(!cards.some((c) => c.cardId === key), 'stillgelegte Karte nicht in api/v3');
+    assert.equal(cards.length, 2);
+    assert.ok(r.skippedNoSource.includes(`TCGDEX-A1/${key}`));
+    assert.ok(readJson(regFile)[key], 'Registry behaelt den Schluessel');
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test('excluded-series: Pocket-Set erscheint nicht in api/v3, Registry behaelt ihn, leere Konfig stellt wieder her', () => {
   const root = makeRepo();
   try {

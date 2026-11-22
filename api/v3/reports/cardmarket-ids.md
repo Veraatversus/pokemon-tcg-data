@@ -1,13 +1,13 @@
 # Cardmarket-Zuordnung
 
-21577 Karten, 10 ohne Cardmarket-ID (Sets nach fehlenden Karten absteigend; Details in cardmarket-ids.json).
+21583 Karten, 14 ohne Cardmarket-ID (Sets nach fehlenden Karten absteigend; Details in cardmarket-ids.json).
 
 | Set | Erweiterung | Karten | mit ID | fehlen | Abdeckung | Herkunft | Suche |
 | --- | --- | ---: | ---: | ---: | ---: | --- | --- |
 | TCGDEX-xya | - | 6 | 0 | 6 | 0 % | - | - |
+| mep | 6232 | 119 | 114 | 5 | 95.8 % | tcgdex 112, matched 2 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=6232&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | bwp | 1611 | 101 | 99 | 2 | 98 % | customSet 99 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1611&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | TCGDEX-miscp | - | 1 | 0 | 1 | 0 % | - | - |
-| det1 | 2438 | 19 | 18 | 1 | 94.7 % | customSet 18 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2438&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | TCGDEX-2013bw | 2352 | 12 | 12 | 0 | 100 % | tcgdex 12 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2352&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | TCGDEX-2018sm-fr | 2361 | 40 | 40 | 0 | 100 % | tcgdex 40 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2361&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | TCGDEX-2019sm-fr | 3354 | 41 | 41 | 0 | 100 % | tcgdex 41 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=3354&sortBy=collectorsnumber_asc&perSite=100&site=1) |
@@ -55,6 +55,7 @@
 | cel25c | 4347 | 25 | 25 | 0 | 100 % | tcgdex 23, stabilityKept 2 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=4347&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | col1 | 1570 | 106 | 106 | 0 | 100 % | tcgdex 104, stabilityKept 2 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1570&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | dc1 | 1648 | 34 | 34 | 0 | 100 % | tcgdex 34 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1648&sortBy=collectorsnumber_asc&perSite=100&site=1) |
+| det1 | 2438 | 18 | 18 | 0 | 100 % | customSet 18 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2438&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | dp1 | 1555 | 130 | 130 | 0 | 100 % | tcgdex 126, matched 4 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1555&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | dp2 | 1556 | 124 | 124 | 0 | 100 % | tcgdex 119, matched 5 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1556&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | dp3 | 1557 | 132 | 132 | 0 | 100 % | tcgdex 125, matched 7 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1557&sortBy=collectorsnumber_asc&perSite=100&site=1) |
@@ -111,7 +112,6 @@
 | me55 | 6601 | 161 | 161 | 0 | 100 % | tcgdex 161 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=6601&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | me55c | 6601 | 30 | 30 | 0 | 100 % | tcgdex 30 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=6601&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | me6 | 6704 | 141 | 141 | 0 | 100 % | tcgdex 134, override 7 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=6704&sortBy=collectorsnumber_asc&perSite=100&site=1) |
-| mep | 6232 | 112 | 112 | 0 | 100 % | tcgdex 112 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=6232&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | neo1 | 1531 | 111 | 111 | 0 | 100 % | tcgdex 108, stabilityKept 3 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1531&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | neo2 | 1532 | 75 | 75 | 0 | 100 % | tcgdex 61, stabilityKept 14 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1532&sortBy=collectorsnumber_asc&perSite=100&site=1) |
 | neo3 | 1533 | 66 | 66 | 0 | 100 % | tcgdex 66 | [Suche](https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=1533&sortBy=collectorsnumber_asc&perSite=100&site=1) |

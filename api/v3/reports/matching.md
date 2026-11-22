@@ -1,6 +1,6 @@
 # Matching-Report
 
-Erzeugt: 2026-11-16T08:47:52.942Z
+Erzeugt: 2026-11-22T18:23:24.043Z
 
 ## Zusammenfassung
 
@@ -12,7 +12,7 @@ Erzeugt: 2026-11-16T08:47:52.942Z
 - cardMatchRatio: 0.9973
 - Verdaechtige Zuordnungen: 9
 - Nur in pokemontcg (primaryOnly): 56
-- Nur in TCGdex (in gepaarten Sets): 137
+- Nur in TCGdex (in gepaarten Sets): 143
 - Ungepaarte TCGdex-Sets: 46 (3096 Karten)
 - Doppelt zugeordnet: 0
 - Unaufgeloeste Aliase: 0
@@ -29,8 +29,8 @@ Erzeugt: 2026-11-16T08:47:52.942Z
     "status": "frozen"
   },
   "tcgdex": {
-    "commit": "4218f64dcbf3de6e7b7548530f938fb0b9ebbe2a",
-    "fetchedAt": "2026-11-16T08:47:52.942Z",
+    "commit": "36e2f1af67b2b37d1bbf3d6eb8211e223caaf352",
+    "fetchedAt": "2026-11-22T18:23:24.043Z",
     "ref": "master",
     "repo": "tcgdex/cards-database",
     "status": "active"

@@ -836,21 +836,18 @@
     },
     "det1": {
       "ambiguous": 0,
-      "cards": 19,
+      "cards": 18,
       "coverage": {
         "bySource": {
           "customSet": 18
         },
-        "cards": 19,
+        "cards": 18,
         "withId": 18
       },
       "customSet": 18,
       "expansionId": 2438,
       "matched": 0,
-      "missing": 1,
-      "missingCards": [
-        "25"
-      ],
+      "missing": 0,
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=2438&sortBy=collectorsnumber_asc&perSite=100&site=1",
       "tcgdex": 0
     },
@@ -1802,18 +1799,33 @@
       "tcgdex": 134
     },
     "mep": {
-      "ambiguous": 0,
-      "cards": 112,
+      "ambiguous": 5,
+      "ambiguousCards": [
+        "111",
+        "112",
+        "113",
+        "114",
+        "117"
+      ],
+      "cards": 119,
       "coverage": {
         "bySource": {
+          "matched": 2,
           "tcgdex": 112
         },
-        "cards": 112,
-        "withId": 112
+        "cards": 119,
+        "withId": 114
       },
       "expansionId": 6232,
-      "matched": 0,
-      "missing": 0,
+      "matched": 2,
+      "missing": 5,
+      "missingCards": [
+        "111",
+        "112",
+        "113",
+        "114",
+        "117"
+      ],
       "searchUrl": "https://www.cardmarket.com/en/Pokemon/Products/Search?searchMode=v2&idCategory=51&idExpansion=6232&sortBy=collectorsnumber_asc&perSite=100&site=1",
       "tcgdex": 112
     },
@@ -6042,14 +6054,14 @@
       }
     ],
     "totals": {
-      "checked": 16453,
+      "checked": 16454,
       "corrected": 1,
       "dropped": 13,
       "droppedShared": 11,
       "foreignNameOk": 1213,
       "keptMismatch": 137,
       "noSetExpansion": 0,
-      "ok": 15086,
+      "ok": 15087,
       "unknownProduct": 3
     }
   },
@@ -7211,36 +7223,123 @@
       "set": "bwp"
     },
     {
-      "candidates": [],
-      "cardKey": "det1/25",
-      "deName": null,
-      "expansionId": 2438,
-      "name": "Lt. Yoshida",
-      "set": "det1"
+      "candidates": [
+        {
+          "hint": "same-name-unnumbered",
+          "name": "Masquerain [Frightening Pattern | Bug Out]",
+          "productId": 921287
+        },
+        {
+          "hint": "same-name-unnumbered",
+          "name": "Masquerain [Frightening Pattern | Bug Out]",
+          "productId": 921288
+        }
+      ],
+      "cardKey": "mep/111",
+      "deName": "Maskeregen",
+      "expansionId": 6232,
+      "name": "Masquerain",
+      "set": "mep"
+    },
+    {
+      "candidates": [
+        {
+          "hint": "same-name-unnumbered",
+          "name": "Magmortar [Buddy Boost | Heat Crash]",
+          "productId": 921289
+        },
+        {
+          "hint": "same-name-unnumbered",
+          "name": "Magmortar [Buddy Boost | Heat Crash]",
+          "productId": 921290
+        }
+      ],
+      "cardKey": "mep/112",
+      "deName": "Magbrant",
+      "expansionId": 6232,
+      "name": "Magmortar",
+      "set": "mep"
+    },
+    {
+      "candidates": [
+        {
+          "hint": "same-name-unnumbered",
+          "name": "Enamorus [Incarnate Union | Rising Heart]",
+          "productId": 921291
+        },
+        {
+          "hint": "same-name-unnumbered",
+          "name": "Enamorus [Incarnate Union | Rising Heart]",
+          "productId": 921292
+        }
+      ],
+      "cardKey": "mep/113",
+      "deName": "Cupidos",
+      "expansionId": 6232,
+      "name": "Enamorus",
+      "set": "mep"
+    },
+    {
+      "candidates": [
+        {
+          "hint": "same-name-unnumbered",
+          "name": "Kommo-o [Scale Beat | Hammer In]",
+          "productId": 921293
+        },
+        {
+          "hint": "same-name-unnumbered",
+          "name": "Kommo-o [Scale Beat | Hammer In]",
+          "productId": 921294
+        }
+      ],
+      "cardKey": "mep/114",
+      "deName": "Grandiras",
+      "expansionId": 6232,
+      "name": "Kommo-o",
+      "set": "mep"
+    },
+    {
+      "candidates": [
+        {
+          "hint": "same-name-unnumbered",
+          "name": "Kyogre [Waterfall | Brutal Whirlpool]",
+          "productId": 922655
+        },
+        {
+          "hint": "same-name-unnumbered",
+          "name": "Kyogre [Waterfall | Brutal Whirlpool]",
+          "productId": 922656
+        }
+      ],
+      "cardKey": "mep/117",
+      "deName": "Kyogre",
+      "expansionId": 6232,
+      "name": "Kyogre",
+      "set": "mep"
     }
   ],
   "stillMissingByExpansion": [
+    {
+      "count": 5,
+      "expansionId": 6232,
+      "sets": [
+        "mep"
+      ]
+    },
     {
       "count": 2,
       "expansionId": 1611,
       "sets": [
         "bwp"
       ]
-    },
-    {
-      "count": 1,
-      "expansionId": 2438,
-      "sets": [
-        "det1"
-      ]
     }
   ],
   "totals": {
-    "ambiguous": 0,
-    "cards": 21577,
+    "ambiguous": 5,
+    "cards": 21583,
     "customSet": 6889,
-    "matched": 70,
-    "missing": 10,
+    "matched": 72,
+    "missing": 14,
     "override": 35,
     "stabilityKept": 149,
     "tcgdex": 14424
